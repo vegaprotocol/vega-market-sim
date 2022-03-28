@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+vega-api-client = "*"
+toml = "*"
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+pytest = "*"
+requests-mock = "*"
+
+[requires]
+python_version = "3.9"

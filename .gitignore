@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+extern/*
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -127,3 +128,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+.DS_Store
+.vscode/*
+vega_sim/bin/*
