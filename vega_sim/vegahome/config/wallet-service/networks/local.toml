@@ -1,0 +1,21 @@
+Name = "local"
+Level = "Debug"
+TokenExpiry = "168h0m0s"
+Port = 1789
+Host = "0.0.0.0"
+
+[API]
+  [API.GRPC]
+    Hosts = ["localhost:3007"]
+    Retries = 5
+  [API.REST]
+    Hosts = ["localhost:3009"]
+  [API.GraphQL]
+    Hosts = ["localhost:3008"]
+
+[Console]
+  URL = ""
+  LocalPort = 0
+
+[Nodes]
+  Retries = 0
