@@ -27,11 +27,6 @@ jobs:
         run: |
           command -v black 1>/dev/null || pip install black
           make blackcheck
-      - name: Type-check with mypy
-        run: |
-          sudo apt update
-          sudo env DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends python3-virtualenv
-          make mypy
       - name: Test with pytest
         run: |
           command -v pipenv 1>/dev/null || pip install pipenv
