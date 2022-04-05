@@ -11,6 +11,5 @@ def mint(pub_key: str, asset: str, amount: int, faucet_url: str) -> None:
         # "asset": "VOTE",
         "asset": asset,
     }
-
-    r = requests.post(url, json=payload)
-    r.raise_for_status()
+    req = requests.post(url, json=payload)
+    req.raise_for_status()

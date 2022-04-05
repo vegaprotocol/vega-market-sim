@@ -1,7 +1,11 @@
+import requests
+
 import vega_sim.api.wallet as wallet
 import vega_sim.api.faucet as faucet
 
 from abc import ABC
+
+TIME_FORWARD_URL = "{base_url}/api/v1/forwardtime"
 
 
 class LoginError(Exception):
@@ -20,6 +24,9 @@ class VegaService(ABC):
         pass
 
     def faucet_url(self) -> str:
+        pass
+
+    def vega_node_url(self) -> str:
         pass
 
     # def node_rest_url(self):
@@ -84,3 +91,17 @@ class VegaService(ABC):
         faucet.mint(
             self.pub_keys[wallet_name], asset, amount, faucet_url=self.faucet_url()
         )
+
+    def forward(self, time: str) -> None:
+        """Steps chain forward a given amount of time, either with an amount of time or until a specified time.
+
+        Args:
+            time:
+                str, time argument to use when stepping forwards. Either an increment (e.g. 1s, 10hr etc) or
+                an ISO datetime (e.g. 2021-11-25T14:14:00Z)
+        """
+        payload = {"forward": time}
+
+        requests.post(
+            TIME_FORWARD_URL.format(base_url=self.vega_node_url()), json=payload
+        ).raise_for_status()

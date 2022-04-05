@@ -3,9 +3,17 @@ import sys
 import requests
 import time
 
+from vega_sim.service import VegaService
+
 
 def propose_market(
-    wallet_name, wallet_passphrase, pubkey, node_url_rest, wallet_server_url
+    wallet_name,
+    wallet_passphrase,
+    pubkey,
+    term_pubkey,
+    node_url_rest,
+    wallet_server_url,
+    vega_service: VegaService,
 ):
 
     """
@@ -101,9 +109,7 @@ def propose_market(
                             "code": "CRYPTO:BTCDAI/DEC22",
                             "future": {
                                 "oracleSpecForSettlementPrice": {
-                                    "pubKeys": [
-                                        "af71ba303d0bad4b22f50f5e964510d2aef2212d60111c20a5aaefc1e254f860"
-                                    ],
+                                    "pubKeys": [term_pubkey],
                                     "filters": [
                                         {
                                             "key": {
@@ -115,9 +121,7 @@ def propose_market(
                                     ],
                                 },
                                 "oracleSpecForTradingTermination": {
-                                    "pubKeys": [
-                                        "af71ba303d0bad4b22f50f5e964510d2aef2212d60111c20a5aaefc1e254f860"
-                                    ],
+                                    "pubKeys": [term_pubkey],
                                     "filters": [
                                         {
                                             "key": {
@@ -187,10 +191,14 @@ def propose_market(
     response = requests.post(url, headers=headers, json=proposal)
     print("Signed market proposal and sent to Vega", "\n")
 
+    response.raise_for_status()
+
     # Wait for proposal to be included in a block and to be accepted by Vega network
     proposal_id = ""
     done = False
     while not done:
+        vega_service.forward("1s")
+
         time.sleep(0.5)
         print(".", end="", flush=True)
         my_proposals = requests.get(node_url_rest + "/parties/" + pubkey + "/proposals")
@@ -223,7 +231,7 @@ def propose_market(
     print("Signed vote on proposal and sent to Vega", "\n")
 
     # Put timeforward by hand in Null blockchain.
-    os.system("python pv-timeforward -d 480s")
+    vega_service.forward("480s")
 
     print("The market has been set up.", "\n")
 

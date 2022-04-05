@@ -23,6 +23,7 @@ from vega_sim.constants import (
     DATA_NODE_REST_PORT,
     FAUCET_PORT,
     WALLET_DEFAULT_PORT,
+    VEGA_NODE_PORT,
 )
 from vega_sim.service import VegaService
 
@@ -50,6 +51,8 @@ def manage_vega_processes(
     vega_path: str,
     data_node_path: str,
     vega_wallet_path: str,
+    run_wallet_with_console: bool = False,
+    run_wallet_with_token_dapp: bool = False,
 ) -> None:
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
 
@@ -75,7 +78,6 @@ def manage_vega_processes(
                 "--home=" + tmp_vega_home,
             ]
         )
-
         vegaNodeProcess = _popen_process(
             [
                 vega_path,
@@ -85,16 +87,23 @@ def manage_vega_processes(
             ]
         )
 
-        vegaWalletProcess = _popen_process(
-            [
-                vega_wallet_path,
-                "service",
-                "run",
-                "--network",
-                "local",
-                "--home=" + tmp_vega_home,
-            ]
-        )
+        wallet_args = [
+            vega_wallet_path,
+            "service",
+            "run",
+            "--network",
+            "local",
+            "--home=" + tmp_vega_home,
+            "--automatic-consent",
+        ]
+        if run_wallet_with_console:
+            wallet_args += ["--with-console"]
+        if run_wallet_with_token_dapp:
+            wallet_args += ["--with-token-dapp"]
+        if run_wallet_with_token_dapp or run_wallet_with_console:
+            wallet_args += ["--no-browser"]
+
+        vegaWalletProcess = _popen_process(wallet_args)
 
         signal.sigwait([signal.SIGKILL, signal.SIGTERM])
         processes = [
@@ -132,8 +141,11 @@ class VegaServiceNull(VegaService):
         wallet_port: int = WALLET_DEFAULT_PORT,
         data_node_rest_port: int = DATA_NODE_REST_PORT,
         data_node_grpc_port: int = DATA_NODE_GRPC_PORT,
+        vega_node_port: int = VEGA_NODE_PORT,
         faucet_port: Optional[int] = FAUCET_PORT,
         start_immediately: bool = False,
+        run_wallet_with_console: bool = False,
+        run_wallet_with_token_dapp: bool = False,
     ):
         super().__init__()
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
@@ -145,7 +157,10 @@ class VegaServiceNull(VegaService):
         self.data_node_rest_port = data_node_rest_port
         self.data_node_grpc_port = data_node_grpc_port
         self.faucet_port = faucet_port
+        self.vega_node_port = vega_node_port
         self.proc = None
+        self.run_wallet_with_console = run_wallet_with_console
+        self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
 
         if start_immediately:
             self.start()
@@ -162,12 +177,14 @@ class VegaServiceNull(VegaService):
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
+                "run_wallet_with_token_dapp": self.run_wallet_with_token_dapp,
+                "run_wallet_with_console": self.run_wallet_with_console,
             },
             daemon=True,
         )
         self.proc.start()
         # Wait for startup
-        for _ in range(30):
+        for _ in range(300):
             try:
                 requests.get(
                     f"http://localhost:{self.wallet_port}/api/v1/status"
@@ -212,3 +229,6 @@ class VegaServiceNull(VegaService):
 
     def faucet_url(self) -> str:
         return self._build_url(self.faucet_port)
+
+    def vega_node_url(self) -> str:
+        return self._build_url(self.vega_node_port)

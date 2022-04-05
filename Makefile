@@ -1,5 +1,5 @@
-VEGA_TAG := tags/v0.49.6
-WALLET_TAG := tags/v0.13.1
+VEGA_TAG := tags/v0.49.9-pre3
+WALLET_TAG := tags/v0.13.2
 DATA_NODE_TAG := tags/v0.49.3
 EXTERN_DIR := "./extern"
 
