@@ -13,7 +13,6 @@ black = "*"
 pytest = "*"
 requests-mock = "*"
 jupyterlab = "*"
-grpcio-testing = "*"
 
 [requires]
 python_version = "3"
