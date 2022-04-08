@@ -3,7 +3,6 @@ from collections import namedtuple
 
 from vega_sim.null_service import VegaServiceNull
 
-# from vega_sim.api.test_fns import propose_market
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
