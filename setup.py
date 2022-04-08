@@ -31,7 +31,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    install_requires=[],
+    install_requires=["requests", "vega-api-client", "toml"],
     setup_requires=["wheel"],
     zip_safe=True,
 )

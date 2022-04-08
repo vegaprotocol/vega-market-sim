@@ -10,9 +10,12 @@ toml = "*"
 
 [dev-packages]
 black = "*"
-flake8 = "*"
 pytest = "*"
 requests-mock = "*"
+jupyterlab = "*"
 
 [requires]
 python_version = "3"
+
+[pipenv]
+allow_prereleases = true

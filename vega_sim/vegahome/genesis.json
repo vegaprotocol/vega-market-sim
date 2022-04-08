@@ -158,6 +158,8 @@
       "reward.staking.delegation.payoutDelay": "24h0m0s",
       "reward.staking.delegation.payoutFraction": "1.0",
       "snapshot.interval.length": "100000",
+      "spam.pow.numberOfTxPerBlock": "1000",
+      "spam.pow.difficulty": "1",
       "spam.protection.delegation.min.tokens": "1000000000000000000",
       "spam.protection.max.delegations": "390",
       "spam.protection.max.proposals": "3",

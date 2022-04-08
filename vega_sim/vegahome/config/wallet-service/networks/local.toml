@@ -14,8 +14,8 @@ Host = "0.0.0.0"
     Hosts = ["localhost:3008"]
 
 [Console]
-  URL = ""
-  LocalPort = 0
+  URL = "console.fairground.wtf"
+  LocalPort = 3000
 
 [Nodes]
   Retries = 0

@@ -1,19 +1,34 @@
-VEGA_TAG := tags/v0.49.6
-WALLET_TAG := tags/v0.13.1
-DATA_NODE_TAG := tags/v0.49.3
+VEGA_TAG := develop
+WALLET_TAG := develop
+DATA_NODE_TAG := develop
 EXTERN_DIR := "./extern"
 
 all: pull_deps build_deps
 
 pull_deps:
-	@mkdir -p ./extern/{vega,vegawallet,data-node}
+	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
 	@echo "Downloading Vega"
-	@git clone https://github.com/vegaprotocol/vega ${EXTERN_DIR}/vega && git -C ${EXTERN_DIR}/vega checkout -b ${VEGA_TAG}
+	@if [ ! -d ./extern/vega ]; then mkdir ./extern/vega; git clone https://github.com/vegaprotocol/vega ${EXTERN_DIR}/vega; fi
+ifneq (${VEGA_TAG},develop)
+	@git -C ${EXTERN_DIR}/vega checkout -b ${VEGA_TAG}
+else
+	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
+endif
 	@echo "Downloading data-node"
-	@git clone https://github.com/vegaprotocol/data-node ${EXTERN_DIR}/data-node && git -C ${EXTERN_DIR}/data-node checkout -b ${DATA_NODE_TAG}
+	@if [ ! -d ./extern/data-node ]; then mkdir ./extern/data-node; git clone https://github.com/vegaprotocol/data-node ${EXTERN_DIR}/data-node; fi
+ifneq (${DATA_NODE_TAG},develop)
+	@git -C ${EXTERN_DIR}/data-node checkout -b ${DATA_NODE_TAG}
+else
+	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
+endif
 	@echo "Downloading Vegawallet"
-	@git clone https://github.com/vegaprotocol/vegawallet ${EXTERN_DIR}/vegawallet && git -C ${EXTERN_DIR}/vegawallet checkout -b ${WALLET_TAG}
+	@if [ ! -d ./extern/vegawallet ]; then mkdir ./extern/vegawallet; git clone https://github.com/vegaprotocol/vegawallet ${EXTERN_DIR}/vegawallet; fi
+ifneq (${WALLET_TAG},develop)
+	@git -C ${EXTERN_DIR}/vegawallet checkout -b ${WALLET_TAG}
+else
+	@git -C ${EXTERN_DIR}/vegawallet checkout develop; git -C ${EXTERN_DIR}/vegawallet pull
+endif
 
 build_deps:
 	@mkdir -p ./vega_sim/bin
