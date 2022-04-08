@@ -13,11 +13,7 @@ import requests
 import toml
 from urllib3.exceptions import MaxRetryError
 
-# import vegaapiclient as vac
-
-import vega_sim.constants as constants
 from vega_sim import vega_home_path, vega_bin_path
-from vega_sim.api.test_fns import propose_market
 from vega_sim.constants import (
     DATA_NODE_GRPC_PORT,
     DATA_NODE_REST_PORT,
@@ -30,8 +26,13 @@ from vega_sim.service import VegaService
 logger = logging.getLogger(__name__)
 
 
-def _popen_process(popen_args: List[str]) -> subprocess.Popen[bytes]:
-    sub_proc = subprocess.Popen(popen_args)
+def _popen_process(
+    popen_args: List[str], dir_root: str, log_name: str
+) -> subprocess.Popen[bytes]:
+    with open(path.join(dir_root, f"{log_name}.out"), "wb") as out, open(
+        path.join(dir_root, f"{log_name}.err"), "wb"
+    ) as err:
+        sub_proc = subprocess.Popen(popen_args, stdout=out, stderr=err)
     atexit.register(lambda: sub_proc.terminate())
     return sub_proc
 
@@ -62,11 +63,9 @@ def manage_vega_processes(
         _update_node_config(tmp_vega_home)
 
         dataNodeProcess = _popen_process(
-            [
-                data_node_path,
-                "node",
-                "--home=" + tmp_vega_home,
-            ]
+            [data_node_path, "node", "--home=" + tmp_vega_home],
+            dir_root=tmp_vega_dir,
+            log_name="data_node",
         )
 
         vegaFaucetProcess = _popen_process(
@@ -76,7 +75,9 @@ def manage_vega_processes(
                 "run",
                 "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
                 "--home=" + tmp_vega_home,
-            ]
+            ],
+            dir_root=tmp_vega_dir,
+            log_name="faucet",
         )
         vegaNodeProcess = _popen_process(
             [
@@ -84,7 +85,9 @@ def manage_vega_processes(
                 "node",
                 "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
                 "--home=" + tmp_vega_home,
-            ]
+            ],
+            dir_root=tmp_vega_dir,
+            log_name="node",
         )
 
         wallet_args = [
@@ -103,7 +106,11 @@ def manage_vega_processes(
         if run_wallet_with_token_dapp or run_wallet_with_console:
             wallet_args += ["--no-browser"]
 
-        vegaWalletProcess = _popen_process(wallet_args)
+        vegaWalletProcess = _popen_process(
+            wallet_args,
+            dir_root=tmp_vega_dir,
+            log_name="vegawallet",
+        )
 
         signal.sigwait([signal.SIGKILL, signal.SIGTERM])
         processes = [
@@ -164,7 +171,6 @@ class VegaServiceNull(VegaService):
 
         if start_immediately:
             self.start()
-        # self.core_client = vac.VegaCoreClient(self.data_node_grpc_port)
 
     def _check_started(self) -> None:
         if self.proc is None:
@@ -202,8 +208,8 @@ class VegaServiceNull(VegaService):
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod
-    def _build_url(port: int):
-        return f"http://localhost:{port}"
+    def _build_url(port: int, prefix: str = "http://"):
+        return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
         if self.proc is None:
@@ -211,21 +217,14 @@ class VegaServiceNull(VegaService):
         else:
             self.proc.terminate()
 
-    def propose_market(self):
-        self._check_started()
-        propose_market(
-            wallet_name=constants.WALLET_NAME_MM,
-            wallet_passphrase=constants.WALLET_PASSPHRASE_MM,
-            pubkey=constants.PUBKEY_LP,
-            node_url_rest=self.data_node_rest_url(),
-            wallet_server_url=self.wallet_url(),
-        )
-
     def wallet_url(self) -> str:
         return self._build_url(self.wallet_port)
 
     def data_node_rest_url(self) -> str:
         return self._build_url(self.data_node_rest_port)
+
+    def data_node_grpc_url(self) -> str:
+        return self._build_url(self.data_node_grpc_port, prefix="")
 
     def faucet_url(self) -> str:
         return self._build_url(self.faucet_port)

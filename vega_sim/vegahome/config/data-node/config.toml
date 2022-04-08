@@ -3,7 +3,7 @@ GatewayEnabled = true
 UlimitNOFile = 8192
 
 [API]
-  Level = "Debug"
+  Level = "Warning"
   Timeout = "5s"
   Port = 3007
   IP = "0.0.0.0"
@@ -12,10 +12,10 @@ UlimitNOFile = 8192
   CoreNodeGRPCPort = 3002
 
 [Accounts]
-  Level = "Debug"
+  Level = "Warning"
 
 [Candles]
-  Level = "Debug"
+  Level = "Warning"
 
 [Logging]
   Environment = "dev"
@@ -41,22 +41,22 @@ UlimitNOFile = 8192
       TimeKey = "T"
 
 [Markets]
-  Level = "Debug"
+  Level = "Warning"
 
 [Oracles]
-  Level = "Debug"
+  Level = "Warning"
 
 [Orders]
-  Level = "Debug"
+  Level = "Warning"
 
 [Liquidity]
-  Level = "Debug"
+  Level = "Warning"
 
 [Parties]
-  Level = "Debug"
+  Level = "Warning"
 
 [Risk]
-  Level = "Debug"
+  Level = "Warning"
 
 [Storage]
   Level = "Warning"
@@ -232,15 +232,15 @@ UlimitNOFile = 8192
     ChecksumVerificationMode = 0
 
 [Trades]
-  Level = "Debug"
+  Level = "Warning"
   PageSizeDefault = 200
   PageSizeMaximum = 200
 
 [Time]
-  Level = "Debug"
+  Level = "Warning"
 
 [Gateway]
-  Level = "Debug"
+  Level = "Warning"
   Timeout = "5s"
   SubscriptionRetries = 3
   GraphQLPlaygroundEnabled = true
@@ -259,33 +259,33 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Metrics]
-  Level = "Debug"
+  Level = "Warning"
   Timeout = "5s"
   Port = 2112
   Path = "/metrics"
   Enabled = false
 
 [Transfers]
-  Level = "Debug"
+  Level = "Warning"
 
 [Governance]
-  Level = "Debug"
+  Level = "Warning"
 
 [Assets]
-  Level = "Debug"
+  Level = "Warning"
 
 [Notary]
-  Level = "Debug"
+  Level = "Warning"
 
 [Subscribers]
-  OrderEventLogLevel = "Debug"
-  MarketEventLogLevel = "Debug"
+  OrderEventLogLevel = "Warning"
+  MarketEventLogLevel = "Warning"
 
 [Fee]
-  Level = "Debug"
+  Level = "Warning"
 
 [Broker]
-  Level = "Debug"
+  Level = "Warning"
   [Broker.SocketConfig]
     IP = "0.0.0.0"
     Port = 3005
@@ -293,22 +293,22 @@ UlimitNOFile = 8192
     TransportType = "tcp"
 
 [Nodes]
-  Level = "Debug"
+  Level = "Warning"
 
 [Epochs]
-  Level = "Debug"
+  Level = "Warning"
 
 [Delegations]
-  Level = "Debug"
+  Level = "Warning"
 
 [Checkpoint]
-  Level = "Debug"
+  Level = "Warning"
 
 [NetworkParameters]
-  Level = "Debug"
+  Level = "Warning"
 
 [Pprof]
-  Level = "Debug"
+  Level = "Warning"
   Enabled = false
   Port = 6060
   ProfilesDir = "/tmp"

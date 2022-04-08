@@ -1,5 +1,5 @@
 Name = "local"
-Level = "Debug"
+Level = "Info"
 TokenExpiry = "168h0m0s"
 Port = 1789
 Host = "0.0.0.0"

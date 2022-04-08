@@ -1,8 +1,8 @@
+import logging
 from collections import namedtuple
 
 from vega_sim.null_service import VegaServiceNull
 
-from vega_sim.api.test_fns import propose_market
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -21,6 +21,8 @@ TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 wallets = [MM_WALLET, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     vega = VegaServiceNull(run_wallet_with_console=True)
     vega.start()
 
@@ -41,16 +43,11 @@ if __name__ == "__main__":
         amount=10000000000,
     )
 
-    vega.forward("10s")
-    propose_market(
-        wallet_name=MM_WALLET.name,
-        wallet_passphrase=MM_WALLET.passphrase,
-        pubkey=vega.pub_keys[MM_WALLET.name],
-        term_pubkey=vega.pub_keys[TERMINATE_WALLET.name],
-        node_url_rest=vega.data_node_rest_url(),
-        wallet_server_url=vega.wallet_url(),
-        vega_service=vega,
-    )
-    import pdb
+    vega.forward("600s")
 
-    pdb.set_trace()
+    vega.create_simple_market(
+        market_name="BTC:DAI_Mar22",
+        proposal_wallet=MM_WALLET.name,
+        settlement_asset="tDAI",
+        termination_wallet=TERMINATE_WALLET.name,
+    )
