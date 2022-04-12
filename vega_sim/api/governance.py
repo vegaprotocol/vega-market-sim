@@ -9,7 +9,7 @@ import vegaapiclient.generated.data_node.api.v1 as data_node_protos
 import vegaapiclient.generated.vega as vega_protos
 import vegaapiclient.generated.vega.oracles.v1 as oracles_protos
 import vegaapiclient.generated.vega.commands.v1 as commands_protos
-from vega_sim.api.helpers import generate_id
+from vega_sim.api.helpers import generate_id, wait_for_acceptance
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +21,6 @@ class MissingAssetError(Exception):
 
 
 class LowBalanceError(Exception):
-    pass
-
-
-class ProposalNotAcceptedError(Exception):
     pass
 
 
@@ -100,9 +96,11 @@ def propose_future_market(
         governance_asset:
             str, the governance asset on the market
         position_decimals:
-            int, the decimal place precision to use for positions (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+            int, the decimal place precision to use for positions
+            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
         market_decimals:
-            int, the decimal place precision to use for market prices (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+            int, the decimal place precision to use for market prices
+            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
     Returns:
         str, the ID of the future market proposal on chain
     """
@@ -163,6 +161,31 @@ def propose_future_market(
         else _default_initial_liquidity_commitment()
     )
 
+    oracle_spec_for_settlement_price = oracles_protos.spec.OracleSpecConfiguration(
+        pub_keys=[termination_pub_key],
+        filters=[
+            oracles_protos.spec.Filter(
+                key=oracles_protos.spec.PropertyKey(
+                    name=f"price.{future_asset}.value",
+                    type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                ),
+                conditions=[],
+            )
+        ],
+    )
+    oracle_spec_for_trading_termination = oracles_protos.spec.OracleSpecConfiguration(
+        pub_keys=[termination_pub_key],
+        filters=[
+            oracles_protos.spec.Filter(
+                key=oracles_protos.spec.PropertyKey(
+                    name="trading.terminated",
+                    type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
+                ),
+                conditions=[],
+            )
+        ],
+    )
+
     market_proposal = vega_protos.governance.NewMarket(
         changes=vega_protos.governance.NewMarketConfiguration(
             instrument=vega_protos.governance.InstrumentConfiguration(
@@ -171,30 +194,8 @@ def propose_future_market(
                 future=vega_protos.governance.FutureProduct(
                     settlement_asset=settlement_asset_id,
                     quote_name=future_asset,
-                    oracle_spec_for_settlement_price=oracles_protos.spec.OracleSpecConfiguration(
-                        pub_keys=[termination_pub_key],
-                        filters=[
-                            oracles_protos.spec.Filter(
-                                key=oracles_protos.spec.PropertyKey(
-                                    name=f"price.{future_asset}.value",
-                                    type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                                ),
-                                conditions=[],
-                            )
-                        ],
-                    ),
-                    oracle_spec_for_trading_termination=oracles_protos.spec.OracleSpecConfiguration(
-                        pub_keys=[termination_pub_key],
-                        filters=[
-                            oracles_protos.spec.Filter(
-                                key=oracles_protos.spec.PropertyKey(
-                                    name="trading.terminated",
-                                    type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                                ),
-                                conditions=[],
-                            )
-                        ],
-                    ),
+                    oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
+                    oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
                     oracle_spec_binding=vega_protos.markets.OracleSpecToFutureBinding(
                         settlement_price_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
@@ -249,23 +250,17 @@ def propose_future_market(
     response.raise_for_status()
 
     # Wait for proposal to be included in a block and to be accepted by Vega network
-    proposal_accepted = False
-    for _ in range(100):
-        time.sleep(0.5)
-        print(".", end="", flush=True)
-        request = data_node_protos.trading_data.GetProposalByReferenceRequest(
-            reference=proposal_ref
-        )
-        proposal = data_client.GetProposalByReference(request).data
-        if proposal:
-            logger.debug("Your proposal has been accepted by the network")
-            proposal_accepted = True
-            break
 
-    if not proposal_accepted:
-        raise ProposalNotAcceptedError(
-            "The market did not accept the proposal within the specified time"
+    def _proposal_loader(order_ref: str) -> bool:
+        request = data_node_protos.trading_data.GetProposalByReferenceRequest(
+            reference=order_ref
         )
+        return bool(data_client.GetProposalByReference(request).data)
+
+    # Wait for proposal to be included in a block and to be accepted by Vega network
+    logger.debug("Waiting for proposal acceptance")
+    wait_for_acceptance(proposal_ref, _proposal_loader)
+
     return proposal_ref
 
 
