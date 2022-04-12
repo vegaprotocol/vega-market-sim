@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+from abc import ABC
 from typing import Optional, Union
-import requests
 
+import requests
 import vegaapiclient as vac
 import vegaapiclient.generated.vega as vega_protos
-import vega_sim.api.wallet as wallet
+
 import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
-
-
-from abc import ABC
+import vega_sim.api.wallet as wallet
 
 TIME_FORWARD_URL = "{base_url}/api/v1/forwardtime"
 
