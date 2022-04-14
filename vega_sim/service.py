@@ -20,10 +20,11 @@ class LoginError(Exception):
 
 
 class VegaService(ABC):
-    def __init__(self):
+    def __init__(self, can_control_time: bool = False):
         self.login_tokens = {}
         self.pub_keys = {}
         self._trading_data_client = None
+        self.can_control_time = can_control_time
 
     def wallet_url(self) -> str:
         pass
@@ -116,6 +117,8 @@ class VegaService(ABC):
                 str, time argument to use when stepping forwards. Either an increment
                 (e.g. 1s, 10hr etc) or an ISO datetime (e.g. 2021-11-25T14:14:00Z)
         """
+        if not self.can_control_time:
+            return
         payload = {"forward": time}
 
         requests.post(
@@ -349,4 +352,60 @@ class VegaService(ABC):
             pub_key=self.pub_keys[trading_wallet],
             market_id=market_id,
             order_id=order_id,
+        )
+
+    def update_network_parameter(
+        self, proposal_wallet: str, parameter: str, new_value: str
+    ):
+        """Updates a network parameter by first proposing and then voting to approve
+        the change, followed by advancing the network time period forwards.
+
+        If the genesis setup of the market is such that this meets requirements then
+        the proposal will be approved. Otherwise others may need to vote too.
+
+        Args:
+            proposal_wallet:
+                str, the wallet proposing the change
+            parameter:
+                str, the parameter to change
+            new_value:
+                str, the new value to set
+        Returns:
+            str, the ID of the proposal
+        """
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+
+        proposal_id = gov.propose_network_parameter_change(
+            parameter=parameter,
+            value=new_value,
+            pub_key=self.pub_keys[proposal_wallet],
+            login_token=self.login_tokens[proposal_wallet],
+            wallet_server_url=self.wallet_url(),
+            data_client=self.trading_data_client(),
+            closing_time=blockchain_time_seconds + 30,
+            enactment_time=blockchain_time_seconds + 360,
+            validation_time=blockchain_time_seconds + 1,
+        )
+        gov.approve_network_parameter_change(
+            proposal_id=proposal_id,
+            pub_key=self.pub_keys[proposal_wallet],
+            login_token=self.login_tokens[proposal_wallet],
+            wallet_server_url=self.wallet_url(),
+        )
+        self.forward("360s")
+
+    def settle_market(
+        self,
+        settlement_wallet: str,
+        settlement_price: float,
+        settlement_asset: str,
+        decimal_place: int = 0,
+    ):
+        gov.settle_market(
+            login_token=self.login_tokens[settlement_wallet],
+            pub_key=self.pub_keys[settlement_wallet],
+            wallet_server_url=self.wallet_url(),
+            settlement_price=settlement_price,
+            settlement_asset=settlement_asset,
+            decimal_place=decimal_place,
         )
