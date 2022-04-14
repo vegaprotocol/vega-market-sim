@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 import vegaapiclient as vac
 import vegaapiclient.generated.vega as vega_protos
 
+import vega_sim.api.data as data
 import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
@@ -408,4 +409,93 @@ class VegaService(ABC):
             settlement_price=settlement_price,
             settlement_asset=settlement_asset,
             decimal_place=decimal_place,
+        )
+
+    def party_account(
+        self,
+        wallet_name: str,
+        asset_id: str,
+        market_id: str,
+    ) -> data.AccountData:
+        """Output money in general accounts/margin accounts/bond accounts (if exists)
+        of a party."""
+        return data.party_account(
+            self.pub_keys[wallet_name],
+            asset_id=asset_id,
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
+
+    def positions_by_market(
+        self,
+        wallet_name: str,
+        market_id: str,
+    ) -> Dict[str, List[vega_protos.vega.Position]]:
+        """Output positions of a party."""
+        return data.positions_by_market(
+            self.pub_keys[wallet_name],
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
+
+    def market_info(
+        self,
+        market_id: str,
+    ) -> vega_protos.markets.Market:
+        """
+        Output market info.
+        """
+        return data.market_info(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def market_data(
+        self,
+        market_id: str,
+    ) -> vega_protos.markets.MarketData:
+        """
+        Output market info.
+        """
+        return data.market_data(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def infrastructure_fee_accounts(
+        self,
+        asset_id: str,
+    ) -> List[vega_protos.vega.Account]:
+        """
+        Output infrastructure fee accounts
+        """
+        return data.infrastructure_fee_accounts(
+            asset_id=asset_id, data_client=self.trading_data_client()
+        )
+
+    def market_accounts(
+        self,
+        asset_id: str,
+        market_id: str,
+    ) -> data.MarketAccount:
+        """
+        Output liquidity fee account/ insurance pool in the market
+        """
+        return data.market_accounts(asset_id=asset_id, market_id=market_id)
+
+    def best_prices(
+        self,
+        market_id: str,
+    ) -> Tuple[int, int]:
+        """
+        Output the best static bid price and best static ask price in current market.
+        """
+        return data.best_prices(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def open_orders_by_market(
+        self,
+        market_id: str,
+    ) -> data.OrderBook:
+        return data.open_orders_by_market(
+            market_id=market_id, data_client=self.trading_data_client()
         )
