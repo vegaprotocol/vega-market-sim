@@ -1,3 +1,4 @@
+import numpy as np
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
@@ -24,9 +25,7 @@ def party_account(
         market_id=market_id,
     )
     accounts = data_client.PartyAccounts(account_req).accounts
-    general, margin, bond = None, None, None
-    # TODO: Convert back to nan when internet is available!
-    # general, margin, bond = np.nan, np.nan, np.nan
+    general, margin, bond = np.nan, np.nan, np.nan
     for account in accounts:
         if account.type == vega_protos.vega.ACCOUNT_TYPE_GENERAL:
             general = float(account.balance)
@@ -53,6 +52,16 @@ def positions_by_market(
     for position in positions:
         pos_by_mkt.setdefault(position.market_id, []).append(position)
     return pos_by_mkt
+
+
+def all_markets(
+    data_client: vac.VegaTradingDataClient,
+) -> List[vega_protos.markets.Market]:
+    """
+    Output market info.
+    """
+    market_req = data_node_protos.trading_data.MarketsRequest()
+    return data_client.Markets(market_req).markets
 
 
 def market_info(

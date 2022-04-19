@@ -438,6 +438,14 @@ class VegaService(ABC):
             data_client=self.trading_data_client(),
         )
 
+    def all_markets(
+        self,
+    ) -> List[vega_protos.markets.Market]:
+        """
+        Output market info.
+        """
+        return data.all_markets(data_client=self.trading_data_client())
+
     def market_info(
         self,
         market_id: str,

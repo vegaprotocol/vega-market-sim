@@ -7,6 +7,7 @@ name = "pypi"
 requests = "*"
 vega-api-client = "*"
 toml = "*"
+numpy = "*"
 
 [dev-packages]
 black = "*"

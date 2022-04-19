@@ -267,3 +267,56 @@ def cancel_order(
     response = requests.post(url, headers=headers, json=cancellation)
     response.raise_for_status()
     logger.info(f"Cancelled order {order_id} on market {market_id}")
+
+
+def submit_simple_liquidity(
+    market_id: str,
+    commitment_amount: int,
+    fee: float,
+    reference_buy: str,
+    reference_sell: str,
+    delta_buy: int,
+    delta_sell: int,
+    login_token: str,
+    wallet_server_url: str,
+    pub_key: str,
+    is_amendment: bool = False,
+):
+    headers = {"Authorization": f"Bearer {login_token}"}
+
+    submission_name = (
+        "liquidityProvisionSubmission"
+        if not is_amendment
+        else "liquidityProvisionAmendment"
+    )
+
+    submission = {
+        submission_name: MessageToDict(
+            vac.vega.commands.v1.commands.LiquidityProvisionSubmission(
+                market_id=market_id,
+                commitment_amount=str(commitment_amount),
+                fee=str(fee),
+                buys=[
+                    vega_protos.vega.LiquidityOrder(
+                        reference=reference_buy,
+                        offset=str(delta_buy),
+                        proportion="1",
+                    )
+                ],
+                sells=[
+                    vega_protos.vega.LiquidityOrder(
+                        reference=reference_sell,
+                        offset=str(delta_sell),
+                        proportion="1",
+                    )
+                ],
+            )
+        ),
+        "pubKey": pub_key,
+        "propagate": True,
+    }
+
+    url = f"{wallet_server_url}/api/v1/command/sync"
+    response = requests.post(url, headers=headers, json=submission)
+    response.raise_for_status()
+    logger.info(f"Submitted liquidity on market {market_id}")
