@@ -168,17 +168,21 @@ def amend_order(
             str, pub key of the account placing the order
         market_id:
             str, the ID of the required market on vega
-        order_type:
-            vega.Order.Type or str, The type of order required (market/limit etc).
-                See API documentation for full list of options
-        side:
-            vega.Side or str, Side of the order (BUY or SELL)
-        volume_delta:
-            int, change in volume of the order in market position decimals
-                (e.g. if position decimals is 2 then 1.0 should be passed as 100)
+        order_id:
+            str, the ID of the order to update
         price:
             int, price of the order in market price decimals
                 (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
+        expires_at:
+            int, Optional timestamp for when the order will expire, in nanoseconds since the epoch,
+                required field only for [`Order.TimeInForce`].
+        pegged_offset:
+            str, Change the distance at which the order is pegged
+        pegged_reference:
+            vega.PeggedReference, Change which attribute the order is pegged against
+        volume_delta:
+            int, change in volume of the order in market position decimals
+                (e.g. if position decimals is 2 then 1.0 should be passed as 100)
         time_in_force:
             vega.Order.TimeInForce or str, The time in force setting for the order
                 (Only valid options for market are TIME_IN_FORCE_IOC and
