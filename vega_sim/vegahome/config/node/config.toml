@@ -37,7 +37,7 @@ UlimitNOFile = 8192
     TransactionsPerBlock = 1
     GenesisFile = "./null-blockchain/node-startup/vegahome/genesis.json"
     IP = "0.0.0.0"
-    Port = 3101
+    Port = "TO_BE_SET"
 
 [Collateral]
   Level = "Warning"

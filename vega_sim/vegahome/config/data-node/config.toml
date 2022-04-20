@@ -5,7 +5,7 @@ UlimitNOFile = 8192
 [API]
   Level = "Warning"
   Timeout = "5s"
-  Port = 3007
+  Port = "TO_BE_SET"
   IP = "0.0.0.0"
   StreamRetries = 3
   CoreNodeIP = "localhost"
@@ -245,15 +245,15 @@ UlimitNOFile = 8192
   SubscriptionRetries = 3
   GraphQLPlaygroundEnabled = true
   [Gateway.Node]
-    Port = 3007
+    Port = "TO_BE_SET"
     IP = "0.0.0.0"
   [Gateway.GraphQL]
-    Port = 3008
+    Port = "TO_BE_SET"
     IP = "0.0.0.0"
     Enabled = true
     ComplexityLimit = 0
   [Gateway.REST]
-    Port = 3009
+    Port = "TO_BE_SET"
     IP = "0.0.0.0"
     Enabled = true
     APMEnabled = true

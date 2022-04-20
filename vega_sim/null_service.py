@@ -5,9 +5,11 @@ import signal
 import subprocess
 import tempfile
 import time
+from collections import namedtuple
+from enum import Enum, auto
 from multiprocessing import Process
 from os import path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import requests
 import toml
@@ -24,6 +26,92 @@ from vega_sim.constants import (
 from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
+
+PortUpdateConfig = namedtuple(
+    "PortUpdateConfig", ["file_path", "config_path", "key", "val_func"]
+)
+
+
+class Ports(Enum):
+    DATA_NODE_GRPC = auto()
+    DATA_NODE_REST = auto()
+    DATA_NODE_GRAPHQL = auto()
+    FAUCET = auto()
+    WALLET = auto()
+    VEGA_NODE = auto()
+
+
+PORT_UPDATERS = {
+    Ports.DATA_NODE_GRPC: [
+        PortUpdateConfig(
+            ("config", "data-node", "config.toml"),
+            ["API"],
+            "Port",
+            lambda port: port,
+        ),
+        PortUpdateConfig(
+            ("config", "data-node", "config.toml"),
+            ["Gateway", "Node"],
+            "Port",
+            lambda port: port,
+        ),
+        PortUpdateConfig(
+            ("config", "wallet-service", "networks", "local.toml"),
+            ["API", "GRPC"],
+            "Hosts",
+            lambda port: [f"localhost:{port}"],
+        ),
+    ],
+    Ports.DATA_NODE_REST: [
+        PortUpdateConfig(
+            ("config", "data-node", "config.toml"),
+            ["Gateway", "REST"],
+            "Port",
+            lambda port: port,
+        ),
+        PortUpdateConfig(
+            ("config", "wallet-service", "networks", "local.toml"),
+            ["API", "REST"],
+            "Hosts",
+            lambda port: [f"localhost:{port}"],
+        ),
+    ],
+    Ports.FAUCET: [
+        PortUpdateConfig(
+            ("config", "faucet", "config.toml"), [], "Port", lambda port: port
+        ),
+    ],
+    Ports.WALLET: [
+        PortUpdateConfig(
+            ("config", "wallet-service", "networks", "local.toml"),
+            [],
+            "Port",
+            lambda port: port,
+        ),
+    ],
+    Ports.VEGA_NODE: [
+        PortUpdateConfig(
+            ("config", "node", "config.toml"),
+            ["Blockchain", "Null"],
+            "Port",
+            lambda port: port,
+        ),
+    ],
+    Ports.DATA_NODE_GRAPHQL: [
+        PortUpdateConfig(
+            ("config", "data-node", "config.toml"),
+            ["Gateway", "GraphQL"],
+            "Port",
+            lambda port: port,
+        ),
+        PortUpdateConfig(
+            ("config", "wallet-service", "networks", "local.toml"),
+            ["API", "GraphQL"],
+            "Hosts",
+            lambda port: [f"localhost:{port}"],
+        ),
+    ],
+}
 
 
 def _popen_process(
@@ -44,8 +132,28 @@ def _update_node_config(vega_home: str) -> None:
         vega_home, "genesis.json"
     )
 
+    ports = {
+        Ports.DATA_NODE_GRPC: DATA_NODE_GRPC_PORT,
+        Ports.DATA_NODE_REST: DATA_NODE_REST_PORT,
+        Ports.FAUCET: FAUCET_PORT,
+        Ports.WALLET: WALLET_DEFAULT_PORT,
+        Ports.VEGA_NODE: VEGA_NODE_PORT,
+        Ports.DATA_NODE_GRAPHQL: 3007,
+    }
     with open(config_path, "w") as f:
         toml.dump(config_toml, f)
+
+    for port_key, update_configs in PORT_UPDATERS.items():
+        for config in update_configs:
+            file_path = path.join(vega_home, *config.file_path)
+            config_toml = toml.load(file_path)
+            elem = config_toml
+            for k in config.config_path:
+                elem = elem[k]
+            elem[config.key] = config.val_func(ports[port_key])
+
+            with open(file_path, "w") as f:
+                toml.dump(config_toml, f)
 
 
 def manage_vega_processes(
@@ -56,8 +164,7 @@ def manage_vega_processes(
     run_wallet_with_token_dapp: bool = False,
 ) -> None:
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
-        print(tmp_vega_dir)
-        logger.debug(f"Running NullChain from vegahome of {tmp_vega_dir}")
+        logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
         tmp_vega_home = tmp_vega_dir + "/vegahome"
@@ -190,6 +297,7 @@ class VegaServiceNull(VegaService):
             daemon=True,
         )
         self.proc.start()
+
         # Wait for startup
         for _ in range(300):
             try:

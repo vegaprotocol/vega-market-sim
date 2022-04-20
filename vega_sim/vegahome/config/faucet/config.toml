@@ -1,6 +1,6 @@
 Level = "Warning"
 WalletName = "vega.1643100690865690276"
-Port = 1790
+Port = "TO_BE_SET"
 IP = "0.0.0.0"
 
 [RateLimit]
