@@ -41,17 +41,13 @@ def positions_by_market(
     pub_key: str,
     market_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> Dict[str, List[vega_protos.vega.Position]]:
+) -> List[vega_protos.vega.Position]:
     """Output positions of a party."""
     positions_req = data_node_protos.trading_data.PositionsByPartyRequest(
         party_id=pub_key,
         market_id=market_id,
     )
-    positions = data_client.PositionsByParty(positions_req).positions
-    pos_by_mkt = {}
-    for position in positions:
-        pos_by_mkt.setdefault(position.market_id, []).append(position)
-    return pos_by_mkt
+    return data_client.PositionsByParty(positions_req).positions
 
 
 def all_markets(
@@ -96,9 +92,7 @@ def infrastructure_fee_accounts(
     Output infrastructure fee accounts
     """
     return data_client.FeeInfrastructureAccounts(
-        data_node_protos.trading_data.FeeInfrastructureAccountsRequest(
-            asset_id=asset_id
-        )
+        data_node_protos.trading_data.FeeInfrastructureAccountsRequest(asset=asset_id)
     ).accounts
 
 
@@ -112,7 +106,7 @@ def market_accounts(
     """
     accounts = data_client.MarketAccounts(
         data_node_protos.trading_data.MarketAccountsRequest(
-            asset_id=asset_id, market_id=market_id
+            asset=asset_id, market_id=market_id
         )
     ).accounts
 

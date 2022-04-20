@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
+from time import time
 from typing import Dict, List, Optional, Tuple, Union
 
 import requests
@@ -41,6 +42,9 @@ class VegaService(ABC):
 
     def data_node_grpc_url(self) -> str:
         pass
+
+    def _default_wait_fn(self) -> None:
+        time.sleep(1)
 
     def trading_data_client(self) -> vac.VegaTradingDataClient:
         if self._trading_data_client is None:
@@ -186,6 +190,7 @@ class VegaService(ABC):
         side: Union[vega_protos.vega.Side, str],
         volume: int,
         fill_or_kill: bool = True,
+        wait: bool = True,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -198,6 +203,9 @@ class VegaService(ABC):
                 vega.Side or str, Side of the order (BUY or SELL)
             volume:
                 int, The volume to trade in market position decimal places.
+            wait:
+                bool, whether to wait for order acceptance.
+                    If true, will raise an error if order is not accepted
 
         Returns:
             str, The ID of the order
@@ -209,6 +217,7 @@ class VegaService(ABC):
             order_type="TYPE_MARKET",
             side=side,
             volume=volume,
+            wait=wait,
         )
 
     def submit_order(
@@ -276,6 +285,7 @@ class VegaService(ABC):
             expires_at=expires_at,
             pegged_order=pegged_order,
             wait=wait,
+            time_forward_fn=self._default_wait_fn,
         )
 
     def amend_order(
@@ -430,7 +440,7 @@ class VegaService(ABC):
         self,
         wallet_name: str,
         market_id: str,
-    ) -> Dict[str, List[vega_protos.vega.Position]]:
+    ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data.positions_by_market(
             self.pub_keys[wallet_name],
@@ -487,7 +497,11 @@ class VegaService(ABC):
         """
         Output liquidity fee account/ insurance pool in the market
         """
-        return data.market_accounts(asset_id=asset_id, market_id=market_id)
+        return data.market_accounts(
+            asset_id=asset_id,
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
 
     def best_prices(
         self,
@@ -506,4 +520,52 @@ class VegaService(ABC):
     ) -> data.OrderBook:
         return data.open_orders_by_market(
             market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def submit_simple_liquidity(
+        self,
+        wallet_name: str,
+        market_id: str,
+        commitment_amount: int,
+        fee: float,
+        reference_buy: str,
+        reference_sell: str,
+        delta_buy: int,
+        delta_sell: int,
+        is_amendment: bool = False,
+    ):
+        """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
+
+        Args:
+            wallet_name:
+                str, The name of the wallet which is placing the order
+            market_id:
+                str, The ID of the market to place the commitment on
+            commitment_amount:
+                int, The amount in asset decimals of market asset to commit to
+                 liquidity provision
+            fee:
+                float, The fee level at which to set the LP fee
+                 (in %, e.g. 0.01 == 1% and 1 == 100%)
+            reference_buy:
+                str, the reference point to use for the buy side of LP
+            reference_sell:
+                str, the reference point to use for the sell side of LP
+            delta_buy:
+                int, the offset from reference point for the buy side of LP
+            delta_sell:
+                int, the offset from reference point for the sell side of LP
+        """
+        return trading.submit_simple_liquidity(
+            market_id=market_id,
+            commitment_amount=commitment_amount,
+            fee=fee,
+            reference_buy=reference_buy,
+            reference_sell=reference_sell,
+            delta_buy=delta_buy,
+            delta_sell=delta_sell,
+            login_token=self.login_tokens[wallet_name],
+            pub_key=self.pub_keys[wallet_name],
+            is_amendment=is_amendment,
+            wallet_server_url=self.wallet_url(),
         )

@@ -212,6 +212,9 @@ class VegaServiceNull(VegaService):
     def _build_url(port: int, prefix: str = "http://"):
         return f"{prefix}localhost:{port}"
 
+    def _default_wait_fn(self) -> None:
+        self.forward("2s")
+
     def stop(self) -> None:
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
