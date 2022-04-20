@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
+from time import time
 import requests
 import uuid
 from google.protobuf.json_format import MessageToDict
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 import vegaapiclient as vac
 import vegaapiclient.generated.data_node.api.v1 as data_node_protos
@@ -32,6 +33,7 @@ def submit_order(
     expires_at: Optional[int] = None,
     pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
     wait: bool = True,
+    time_forward_fn: Optional[Callable[[], None]] = None,
 ):
     """
     Submit orders as specified to required pre-existing market.
@@ -64,7 +66,8 @@ def submit_order(
             str, price of the order in market price decimals
                 (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
         expires_at:
-            int, Optional timestamp for when the order will expire, in nanoseconds since the epoch,
+            int, Optional timestamp for when the order will expire, in
+            nanoseconds since the epoch,
                 required field only for [`Order.TimeInForce`].
                 Defaults to 2 minutes
         pegged_order:
@@ -72,6 +75,9 @@ def submit_order(
         wait:
             bool, whether to wait for order acceptance.
                 If true, will raise an error if order is not accepted
+        time_forward_fn:
+            optional function, Function which takes no arguments and
+            waits or manually forwards the chain when waiting for order acceptance
     """
     # Login wallet
     time_in_force = get_enum(time_in_force, vega_protos.vega.Order)
@@ -115,7 +121,7 @@ def submit_order(
 
     response = requests.post(url, headers=headers, json=submission)
     response.raise_for_status()
-    logger.info(f"Submitted Order on {side} at price {price}.")
+    logger.debug(f"Submitted Order on {side} at price {price}.")
 
     if wait:
 
@@ -127,18 +133,31 @@ def submit_order(
 
         # Wait for proposal to be included in a block and to be accepted by Vega network
         logger.debug("Waiting for proposal acceptance")
-        response = wait_for_acceptance(order_ref, _proposal_loader)
+        try:
+            response = wait_for_acceptance(order_ref, _proposal_loader)
+        except Exception as e:
+            logger.debug(
+                "Order wasn't immediately valid, waiting before trying again,"
+                f" raised {e}"
+            )
+            wait_fn = (
+                time_forward_fn
+                if time_forward_fn is not None
+                else lambda: time.sleep(1)
+            )
+            wait_fn()
+            response = wait_for_acceptance(order_ref, _proposal_loader)
 
         order_status = enum_to_str(vac.vega.vega.Order.Status, response.status)
 
-        logger.info(
+        logger.debug(
             f"Order processed, ID: {response.id}, Status: {order_status}, Version:"
             f" {response.version}"
         )
         if order_status == "STATUS_REJECTED":
             raise OrderRejectedError(
                 "Rejection reason:"
-                f" {enum_to_str(vac.vega.vega.Order.Error, response.reason)}"
+                f" {enum_to_str(vac.vega.vega.OrderError, response.reason)}"
             )
         return response.id
 
@@ -168,21 +187,17 @@ def amend_order(
             str, pub key of the account placing the order
         market_id:
             str, the ID of the required market on vega
-        order_id:
-            str, the ID of the order to update
-        price:
-            int, price of the order in market price decimals
-                (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
-        expires_at:
-            int, Optional timestamp for when the order will expire, in nanoseconds since the epoch,
-                required field only for [`Order.TimeInForce`].
-        pegged_offset:
-            str, Change the distance at which the order is pegged
-        pegged_reference:
-            vega.PeggedReference, Change which attribute the order is pegged against
+        order_type:
+            vega.Order.Type or str, The type of order required (market/limit etc).
+                See API documentation for full list of options
+        side:
+            vega.Side or str, Side of the order (BUY or SELL)
         volume_delta:
             int, change in volume of the order in market position decimals
                 (e.g. if position decimals is 2 then 1.0 should be passed as 100)
+        price:
+            int, price of the order in market price decimals
+                (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
         time_in_force:
             vega.Order.TimeInForce or str, The time in force setting for the order
                 (Only valid options for market are TIME_IN_FORCE_IOC and
@@ -229,7 +244,7 @@ def amend_order(
     url = f"{wallet_server_url}/api/v1/command/sync"
     response = requests.post(url, headers=headers, json=amendment)
     response.raise_for_status()
-    logger.info(f"Submitted Order amendment for {order_id}.")
+    logger.debug(f"Submitted Order amendment for {order_id}.")
 
 
 def cancel_order(
@@ -270,4 +285,81 @@ def cancel_order(
     url = f"{wallet_server_url}/api/v1/command/sync"
     response = requests.post(url, headers=headers, json=cancellation)
     response.raise_for_status()
-    logger.info(f"Cancelled order {order_id} on market {market_id}")
+    logger.debug(f"Cancelled order {order_id} on market {market_id}")
+
+
+def submit_simple_liquidity(
+    login_token: str,
+    wallet_server_url: str,
+    pub_key: str,
+    market_id: str,
+    commitment_amount: int,
+    fee: float,
+    reference_buy: str,
+    reference_sell: str,
+    delta_buy: int,
+    delta_sell: int,
+    is_amendment: bool = False,
+):
+    """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
+
+    Args:
+        login_token:
+            str, the login token returned from logging in to wallet
+        wallet_server_url:
+            str, URL path of the required wallet server
+        pub_key:
+            str, pub key of the account placing the order
+        market_id:
+            str, The ID of the market to place the commitment on
+        commitment_amount:
+            int, The amount in asset decimals of market asset to commit to liquidity provision
+        fee:
+            float, The fee level at which to set the LP fee (in %, e.g. 0.01 == 1% and 1 == 100%)
+        reference_buy:
+            str, the reference point to use for the buy side of LP
+        reference_sell:
+            str, the reference point to use for the sell side of LP
+        delta_buy:
+            int, the offset from reference point for the buy side of LP
+        delta_sell:
+            int, the offset from reference point for the sell side of LP
+    """
+    headers = {"Authorization": f"Bearer {login_token}"}
+
+    submission_name = (
+        "liquidityProvisionSubmission"
+        if not is_amendment
+        else "liquidityProvisionAmendment"
+    )
+
+    submission = {
+        submission_name: MessageToDict(
+            vac.vega.commands.v1.commands.LiquidityProvisionSubmission(
+                market_id=market_id,
+                commitment_amount=str(commitment_amount),
+                fee=str(fee),
+                buys=[
+                    vega_protos.vega.LiquidityOrder(
+                        reference=reference_buy,
+                        offset=str(delta_buy),
+                        proportion=1,
+                    )
+                ],
+                sells=[
+                    vega_protos.vega.LiquidityOrder(
+                        reference=reference_sell,
+                        offset=str(delta_sell),
+                        proportion=1,
+                    )
+                ],
+            )
+        ),
+        "pubKey": pub_key,
+        "propagate": True,
+    }
+
+    url = f"{wallet_server_url}/api/v1/command/sync"
+    response = requests.post(url, headers=headers, json=submission)
+    response.raise_for_status()
+    logger.debug(f"Submitted liquidity on market {market_id}")

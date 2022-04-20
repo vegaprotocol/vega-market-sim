@@ -56,7 +56,8 @@ def manage_vega_processes(
     run_wallet_with_token_dapp: bool = False,
 ) -> None:
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
-
+        print(tmp_vega_dir)
+        logger.debug(f"Running NullChain from vegahome of {tmp_vega_dir}")
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
         tmp_vega_home = tmp_vega_dir + "/vegahome"
@@ -154,7 +155,7 @@ class VegaServiceNull(VegaService):
         run_wallet_with_console: bool = False,
         run_wallet_with_token_dapp: bool = False,
     ):
-        super().__init__()
+        super().__init__(can_control_time=True)
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
         self.vega_wallet_path = vega_wallet_path or path.join(
@@ -210,6 +211,9 @@ class VegaServiceNull(VegaService):
     @staticmethod
     def _build_url(port: int, prefix: str = "http://"):
         return f"{prefix}localhost:{port}"
+
+    def _default_wait_fn(self) -> None:
+        self.forward("2s")
 
     def stop(self) -> None:
         if self.proc is None:

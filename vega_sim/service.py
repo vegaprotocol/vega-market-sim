@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Optional, Union
+from time import time
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 import vegaapiclient as vac
 import vegaapiclient.generated.vega as vega_protos
 
+import vega_sim.api.data as data
 import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
@@ -20,10 +22,11 @@ class LoginError(Exception):
 
 
 class VegaService(ABC):
-    def __init__(self):
+    def __init__(self, can_control_time: bool = False):
         self.login_tokens = {}
         self.pub_keys = {}
         self._trading_data_client = None
+        self.can_control_time = can_control_time
 
     def wallet_url(self) -> str:
         pass
@@ -39,6 +42,9 @@ class VegaService(ABC):
 
     def data_node_grpc_url(self) -> str:
         pass
+
+    def _default_wait_fn(self) -> None:
+        time.sleep(1)
 
     def trading_data_client(self) -> vac.VegaTradingDataClient:
         if self._trading_data_client is None:
@@ -116,6 +122,8 @@ class VegaService(ABC):
                 str, time argument to use when stepping forwards. Either an increment
                 (e.g. 1s, 10hr etc) or an ISO datetime (e.g. 2021-11-25T14:14:00Z)
         """
+        if not self.can_control_time:
+            return
         payload = {"forward": time}
 
         requests.post(
@@ -182,6 +190,7 @@ class VegaService(ABC):
         side: Union[vega_protos.vega.Side, str],
         volume: int,
         fill_or_kill: bool = True,
+        wait: bool = True,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -194,6 +203,9 @@ class VegaService(ABC):
                 vega.Side or str, Side of the order (BUY or SELL)
             volume:
                 int, The volume to trade in market position decimal places.
+            wait:
+                bool, whether to wait for order acceptance.
+                    If true, will raise an error if order is not accepted
 
         Returns:
             str, The ID of the order
@@ -205,6 +217,7 @@ class VegaService(ABC):
             order_type="TYPE_MARKET",
             side=side,
             volume=volume,
+            wait=wait,
         )
 
     def submit_order(
@@ -272,6 +285,7 @@ class VegaService(ABC):
             expires_at=expires_at,
             pegged_order=pegged_order,
             wait=wait,
+            time_forward_fn=self._default_wait_fn,
         )
 
     def amend_order(
@@ -349,4 +363,209 @@ class VegaService(ABC):
             pub_key=self.pub_keys[trading_wallet],
             market_id=market_id,
             order_id=order_id,
+        )
+
+    def update_network_parameter(
+        self, proposal_wallet: str, parameter: str, new_value: str
+    ):
+        """Updates a network parameter by first proposing and then voting to approve
+        the change, followed by advancing the network time period forwards.
+
+        If the genesis setup of the market is such that this meets requirements then
+        the proposal will be approved. Otherwise others may need to vote too.
+
+        Args:
+            proposal_wallet:
+                str, the wallet proposing the change
+            parameter:
+                str, the parameter to change
+            new_value:
+                str, the new value to set
+        Returns:
+            str, the ID of the proposal
+        """
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+
+        proposal_id = gov.propose_network_parameter_change(
+            parameter=parameter,
+            value=new_value,
+            pub_key=self.pub_keys[proposal_wallet],
+            login_token=self.login_tokens[proposal_wallet],
+            wallet_server_url=self.wallet_url(),
+            data_client=self.trading_data_client(),
+            closing_time=blockchain_time_seconds + 30,
+            enactment_time=blockchain_time_seconds + 360,
+            validation_time=blockchain_time_seconds + 1,
+        )
+        gov.approve_network_parameter_change(
+            proposal_id=proposal_id,
+            pub_key=self.pub_keys[proposal_wallet],
+            login_token=self.login_tokens[proposal_wallet],
+            wallet_server_url=self.wallet_url(),
+        )
+        self.forward("360s")
+
+    def settle_market(
+        self,
+        settlement_wallet: str,
+        settlement_price: float,
+        settlement_asset: str,
+        decimal_place: int = 0,
+    ):
+        gov.settle_market(
+            login_token=self.login_tokens[settlement_wallet],
+            pub_key=self.pub_keys[settlement_wallet],
+            wallet_server_url=self.wallet_url(),
+            settlement_price=settlement_price,
+            settlement_asset=settlement_asset,
+            decimal_place=decimal_place,
+        )
+
+    def party_account(
+        self,
+        wallet_name: str,
+        asset_id: str,
+        market_id: str,
+    ) -> data.AccountData:
+        """Output money in general accounts/margin accounts/bond accounts (if exists)
+        of a party."""
+        return data.party_account(
+            self.pub_keys[wallet_name],
+            asset_id=asset_id,
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
+
+    def positions_by_market(
+        self,
+        wallet_name: str,
+        market_id: str,
+    ) -> List[vega_protos.vega.Position]:
+        """Output positions of a party."""
+        return data.positions_by_market(
+            self.pub_keys[wallet_name],
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
+
+    def all_markets(
+        self,
+    ) -> List[vega_protos.markets.Market]:
+        """
+        Output market info.
+        """
+        return data.all_markets(data_client=self.trading_data_client())
+
+    def market_info(
+        self,
+        market_id: str,
+    ) -> vega_protos.markets.Market:
+        """
+        Output market info.
+        """
+        return data.market_info(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def market_data(
+        self,
+        market_id: str,
+    ) -> vega_protos.markets.MarketData:
+        """
+        Output market info.
+        """
+        return data.market_data(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def infrastructure_fee_accounts(
+        self,
+        asset_id: str,
+    ) -> List[vega_protos.vega.Account]:
+        """
+        Output infrastructure fee accounts
+        """
+        return data.infrastructure_fee_accounts(
+            asset_id=asset_id, data_client=self.trading_data_client()
+        )
+
+    def market_accounts(
+        self,
+        asset_id: str,
+        market_id: str,
+    ) -> data.MarketAccount:
+        """
+        Output liquidity fee account/ insurance pool in the market
+        """
+        return data.market_accounts(
+            asset_id=asset_id,
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
+
+    def best_prices(
+        self,
+        market_id: str,
+    ) -> Tuple[int, int]:
+        """
+        Output the best static bid price and best static ask price in current market.
+        """
+        return data.best_prices(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def open_orders_by_market(
+        self,
+        market_id: str,
+    ) -> data.OrderBook:
+        return data.open_orders_by_market(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
+    def submit_simple_liquidity(
+        self,
+        wallet_name: str,
+        market_id: str,
+        commitment_amount: int,
+        fee: float,
+        reference_buy: str,
+        reference_sell: str,
+        delta_buy: int,
+        delta_sell: int,
+        is_amendment: bool = False,
+    ):
+        """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
+
+        Args:
+            wallet_name:
+                str, The name of the wallet which is placing the order
+            market_id:
+                str, The ID of the market to place the commitment on
+            commitment_amount:
+                int, The amount in asset decimals of market asset to commit to
+                 liquidity provision
+            fee:
+                float, The fee level at which to set the LP fee
+                 (in %, e.g. 0.01 == 1% and 1 == 100%)
+            reference_buy:
+                str, the reference point to use for the buy side of LP
+            reference_sell:
+                str, the reference point to use for the sell side of LP
+            delta_buy:
+                int, the offset from reference point for the buy side of LP
+            delta_sell:
+                int, the offset from reference point for the sell side of LP
+        """
+        return trading.submit_simple_liquidity(
+            market_id=market_id,
+            commitment_amount=commitment_amount,
+            fee=fee,
+            reference_buy=reference_buy,
+            reference_sell=reference_sell,
+            delta_buy=delta_buy,
+            delta_sell=delta_sell,
+            login_token=self.login_tokens[wallet_name],
+            pub_key=self.pub_keys[wallet_name],
+            is_amendment=is_amendment,
+            wallet_server_url=self.wallet_url(),
         )
