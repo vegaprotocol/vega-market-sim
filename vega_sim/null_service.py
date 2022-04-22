@@ -164,7 +164,8 @@ def manage_vega_processes(
     run_wallet_with_token_dapp: bool = False,
 ) -> None:
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
-        logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
+        print(tmp_vega_dir)
+        logger.debug(f"Running NullChain from vegahome of {tmp_vega_dir}")
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
         tmp_vega_home = tmp_vega_dir + "/vegahome"
