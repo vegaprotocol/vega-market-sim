@@ -24,9 +24,14 @@ def party_account(
         asset=asset_id,
         market_id=market_id,
     )
+    general_account_req = data_node_protos.trading_data.PartyAccountsRequest(
+        party_id=pub_key,
+        asset_id=asset_id,
+    )
     accounts = data_client.PartyAccounts(account_req).accounts
+    general_accounts = data_client.PartyAccounts(general_account_req).accounts
     general, margin, bond = np.nan, np.nan, np.nan
-    for account in accounts:
+    for account in accounts + general_accounts:
         if account.type == vega_protos.vega.ACCOUNT_TYPE_GENERAL:
             general = float(account.balance)
         if account.type == vega_protos.vega.ACCOUNT_TYPE_MARGIN:
