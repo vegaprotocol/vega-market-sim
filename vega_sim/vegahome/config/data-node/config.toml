@@ -9,7 +9,7 @@ UlimitNOFile = 8192
   IP = "0.0.0.0"
   StreamRetries = 3
   CoreNodeIP = "localhost"
-  CoreNodeGRPCPort = 3002
+  CoreNodeGRPCPort = "TO_BE_SET"
 
 [Accounts]
   Level = "Warning"
@@ -261,7 +261,7 @@ UlimitNOFile = 8192
 [Metrics]
   Level = "Warning"
   Timeout = "5s"
-  Port = 2112
+  Port = "TO_BE_SET"
   Path = "/metrics"
   Enabled = false
 
@@ -288,7 +288,7 @@ UlimitNOFile = 8192
   Level = "Warning"
   [Broker.SocketConfig]
     IP = "0.0.0.0"
-    Port = 3005
+    Port = "TO_BE_SET"
     MaxReceiveTimeouts = 3
     TransportType = "tcp"
 
@@ -310,7 +310,7 @@ UlimitNOFile = 8192
 [Pprof]
   Level = "Warning"
   Enabled = false
-  Port = 6060
+  Port = "TO_BE_SET"
   ProfilesDir = "/tmp"
   BlockProfileRate = 0
   MutexProfileFraction = 0

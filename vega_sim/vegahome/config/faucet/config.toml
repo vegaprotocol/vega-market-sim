@@ -8,6 +8,6 @@ IP = "0.0.0.0"
   AllowList = ["10.0.0.0/8", "127.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fe80::/10"]
 
 [Node]
-  Port = 3002
+  Port = "TO_BE_SET"
   IP = "localhost"
   Retries = 5
