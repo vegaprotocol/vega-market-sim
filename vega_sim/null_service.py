@@ -353,6 +353,17 @@ def manage_vega_processes(
 
 
 class VegaServiceNull(VegaService):
+
+    PORT_TO_FIELD_MAP = {
+        Ports.WALLET: "wallet_port",
+        Ports.DATA_NODE_GRPC: "data_node_grpc_port",
+        Ports.DATA_NODE_REST: "data_node_rest_port",
+        Ports.DATA_NODE_GRAPHQL: "data_node_graphql_port",
+        Ports.FAUCET: "faucet_port",
+        Ports.VEGA_NODE: "vega_node_port",
+        Ports.CONSOLE: "console_port",
+    }
+
     def __init__(
         self,
         vega_path: Optional[str] = None,
@@ -376,13 +387,8 @@ class VegaServiceNull(VegaService):
         if port_config is None:
             self._assign_ports()
         else:
-            self.wallet_port = port_config[Ports.WALLET]
-            self.data_node_rest_port = port_config[Ports.DATA_NODE_REST]
-            self.data_node_grpc_port = port_config[Ports.DATA_NODE_GRPC]
-            self.data_node_graphql_port = port_config[Ports.DATA_NODE_GRAPHQL]
-            self.faucet_port = port_config[Ports.FAUCET]
-            self.vega_node_port = port_config[Ports.VEGA_NODE]
-            self.console_port = port_config[Ports.CONSOLE]
+            for key, name in self.PORT_TO_FIELD_MAP.items():
+                setattr(self, name, port_config[key])
 
         if start_immediately:
             self.start()
@@ -395,25 +401,9 @@ class VegaServiceNull(VegaService):
         self.faucet_port = 0
         self.vega_node_port = 0
         self.console_port = 0
-        for port_opt in [
-            "wallet_port",
-            "data_node_grpc_port",
-            "data_node_rest_port",
-            "data_node_graphql_port",
-            "faucet_port",
-            "vega_node_port",
-            "console_port",
-        ]:
+        for port_opt in self.PORT_TO_FIELD_MAP.values():
             curr_ports = set(
-                [
-                    self.wallet_port,
-                    self.data_node_grpc_port,
-                    self.data_node_rest_port,
-                    self.data_node_graphql_port,
-                    self.faucet_port,
-                    self.vega_node_port,
-                    self.console_port,
-                ]
+                [getattr(self, port) for port in self.PORT_TO_FIELD_MAP.values()]
             )
             setattr(self, port_opt, _find_free_port(curr_ports))
 
