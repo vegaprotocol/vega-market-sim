@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import atexit
 import logging
 import shutil
@@ -359,6 +361,7 @@ class VegaServiceNull(VegaService):
         start_immediately: bool = False,
         run_wallet_with_console: bool = False,
         run_wallet_with_token_dapp: bool = False,
+        port_config: Optional[Dict[Ports, int]] = None,
     ):
         super().__init__(can_control_time=True)
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
@@ -366,6 +369,25 @@ class VegaServiceNull(VegaService):
         self.vega_wallet_path = vega_wallet_path or path.join(
             vega_bin_path, "vegawallet"
         )
+        self.proc = None
+        self.run_wallet_with_console = run_wallet_with_console
+        self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
+
+        if port_config is None:
+            self._assign_ports()
+        else:
+            self.wallet_port = port_config[Ports.WALLET]
+            self.data_node_rest_port = port_config[Ports.DATA_NODE_REST]
+            self.data_node_grpc_port = port_config[Ports.DATA_NODE_GRPC]
+            self.data_node_graphql_port = port_config[Ports.DATA_NODE_GRAPHQL]
+            self.faucet_port = port_config[Ports.FAUCET]
+            self.vega_node_port = port_config[Ports.VEGA_NODE]
+            self.console_port = port_config[Ports.CONSOLE]
+
+        if start_immediately:
+            self.start()
+
+    def _assign_ports(self):
         self.wallet_port = 0
         self.data_node_rest_port = 0
         self.data_node_grpc_port = 0
@@ -395,16 +417,20 @@ class VegaServiceNull(VegaService):
             )
             setattr(self, port_opt, _find_free_port(curr_ports))
 
-        self.proc = None
-        self.run_wallet_with_console = run_wallet_with_console
-        self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
-
-        if start_immediately:
-            self.start()
-
     def _check_started(self) -> None:
         if self.proc is None:
             raise ServiceNotStartedError("NullChain Vega accessed without starting")
+
+    def _generate_port_config(self) -> Dict[Ports, int]:
+        return {
+            Ports.WALLET: self.wallet_port,
+            Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
+            Ports.DATA_NODE_REST: self.data_node_rest_port,
+            Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
+            Ports.FAUCET: self.faucet_port,
+            Ports.VEGA_NODE: self.vega_node_port,
+            Ports.CONSOLE: self.console_port,
+        }
 
     def start(self) -> None:
         self.proc = Process(
@@ -414,15 +440,7 @@ class VegaServiceNull(VegaService):
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
                 "run_wallet_with_console": self.run_wallet_with_console,
-                "port_config": {
-                    Ports.WALLET: self.wallet_port,
-                    Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
-                    Ports.DATA_NODE_REST: self.data_node_rest_port,
-                    Ports.FAUCET: self.faucet_port,
-                    Ports.VEGA_NODE: self.vega_node_port,
-                    Ports.CONSOLE: self.console_port,
-                    Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
-                },
+                "port_config": self._generate_port_config(),
             },
             daemon=True,
         )
@@ -478,3 +496,19 @@ class VegaServiceNull(VegaService):
 
     def vega_node_url(self) -> str:
         return self._build_url(self.vega_node_port)
+
+    def clone(self) -> VegaServiceNull:
+        """Creates a clone of the service without the handle to other processes.
+
+        This is required as when spinning a Nullchain service out into
+        separate processes we need to start the various components in the main
+        thread (as daemon processes cannot spawn daemon processes), however want
+        to maintain a handle to these in the child.
+        """
+        return VegaServiceNull(
+            self.vega_path,
+            self.data_node_path,
+            self.vega_wallet_path,
+            start_immediately=False,
+            port_config=self._generate_port_config(),
+        )

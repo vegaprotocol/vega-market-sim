@@ -34,17 +34,14 @@ if __name__ == "__main__":
 
     vega.mint(
         MM_WALLET.name,
-        asset="6d9d35f657589e40ddfb448b7ad4a7463b66efb307527fedd2aa7df1bbd5ea61",
+        asset="VOTE",
         amount=10000000000,
     )
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset="6d9d35f657589e40ddfb448b7ad4a7463b66efb307527fedd2aa7df1bbd5ea61",
         amount=10000000000,
     )
-
-    vega.forward("600s")
-
     vega.create_simple_market(
         market_name="BTC:DAI_Mar22",
         proposal_wallet=MM_WALLET.name,
