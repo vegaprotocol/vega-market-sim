@@ -255,8 +255,6 @@ def _update_node_config(vega_home: str, port_config: Dict[Ports, int]) -> None:
         new_port = _find_free_port(existing_ports)
         existing_ports.add(new_port)
         port_config[port] = new_port
-
-    print(port_config)
     with open(config_path, "w") as f:
         toml.dump(config_toml, f)
 
@@ -278,7 +276,6 @@ def manage_vega_processes(
     data_node_path: str,
     vega_wallet_path: str,
     run_wallet_with_console: bool = False,
-    run_wallet_with_token_dapp: bool = False,
     port_config: Optional[Dict[Ports, int]] = None,
 ) -> None:
     port_config = port_config if port_config is not None else {}
@@ -327,12 +324,6 @@ def manage_vega_processes(
             "--home=" + tmp_vega_home,
             "--automatic-consent",
         ]
-        if run_wallet_with_console:
-            wallet_args += ["--with-console"]
-        if run_wallet_with_token_dapp:
-            wallet_args += ["--with-token-dapp"]
-        if run_wallet_with_token_dapp or run_wallet_with_console:
-            wallet_args += ["--no-browser"]
 
         vegaWalletProcess = _popen_process(
             wallet_args,
@@ -378,6 +369,7 @@ class VegaServiceNull(VegaService):
         self.wallet_port = 0
         self.data_node_rest_port = 0
         self.data_node_grpc_port = 0
+        self.data_node_graphql_port = 0
         self.faucet_port = 0
         self.vega_node_port = 0
         self.console_port = 0
@@ -385,6 +377,7 @@ class VegaServiceNull(VegaService):
             "wallet_port",
             "data_node_grpc_port",
             "data_node_rest_port",
+            "data_node_graphql_port",
             "faucet_port",
             "vega_node_port",
             "console_port",
@@ -394,6 +387,7 @@ class VegaServiceNull(VegaService):
                     self.wallet_port,
                     self.data_node_grpc_port,
                     self.data_node_rest_port,
+                    self.data_node_graphql_port,
                     self.faucet_port,
                     self.vega_node_port,
                     self.console_port,
@@ -419,7 +413,6 @@ class VegaServiceNull(VegaService):
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
-                "run_wallet_with_token_dapp": self.run_wallet_with_token_dapp,
                 "run_wallet_with_console": self.run_wallet_with_console,
                 "port_config": {
                     Ports.WALLET: self.wallet_port,
@@ -428,6 +421,7 @@ class VegaServiceNull(VegaService):
                     Ports.FAUCET: self.faucet_port,
                     Ports.VEGA_NODE: self.vega_node_port,
                     Ports.CONSOLE: self.console_port,
+                    Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
                 },
             },
             daemon=True,
@@ -442,7 +436,8 @@ class VegaServiceNull(VegaService):
                 ).raise_for_status()
                 if self.run_wallet_with_console:
                     logger.info(
-                        f"Console running at http://localhost:{self.console_port}"
+                        "Vega Running. Launch console vs"
+                        f" {self.data_node_graphql_port} for GUI"
                     )
                 return
             except (

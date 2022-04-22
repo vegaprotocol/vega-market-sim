@@ -51,6 +51,3 @@ if __name__ == "__main__":
         settlement_asset="tDAI",
         termination_wallet=TERMINATE_WALLET.name,
     )
-    import pdb
-
-    pdb.set_trace()
