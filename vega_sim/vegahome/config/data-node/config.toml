@@ -5,11 +5,11 @@ UlimitNOFile = 8192
 [API]
   Level = "Warning"
   Timeout = "5s"
-  Port = 3007
+  Port = "TO_BE_SET"
   IP = "0.0.0.0"
   StreamRetries = 3
   CoreNodeIP = "localhost"
-  CoreNodeGRPCPort = 3002
+  CoreNodeGRPCPort = "TO_BE_SET"
 
 [Accounts]
   Level = "Warning"
@@ -245,15 +245,15 @@ UlimitNOFile = 8192
   SubscriptionRetries = 3
   GraphQLPlaygroundEnabled = true
   [Gateway.Node]
-    Port = 3007
+    Port = "TO_BE_SET"
     IP = "0.0.0.0"
   [Gateway.GraphQL]
-    Port = 3008
+    Port = "TO_BE_SET"
     IP = "0.0.0.0"
     Enabled = true
     ComplexityLimit = 0
   [Gateway.REST]
-    Port = 3009
+    Port = "TO_BE_SET"
     IP = "0.0.0.0"
     Enabled = true
     APMEnabled = true
@@ -261,7 +261,7 @@ UlimitNOFile = 8192
 [Metrics]
   Level = "Warning"
   Timeout = "5s"
-  Port = 2112
+  Port = "TO_BE_SET"
   Path = "/metrics"
   Enabled = false
 
@@ -288,7 +288,7 @@ UlimitNOFile = 8192
   Level = "Warning"
   [Broker.SocketConfig]
     IP = "0.0.0.0"
-    Port = 3005
+    Port = "TO_BE_SET"
     MaxReceiveTimeouts = 3
     TransportType = "tcp"
 
@@ -310,7 +310,7 @@ UlimitNOFile = 8192
 [Pprof]
   Level = "Warning"
   Enabled = false
-  Port = 6060
+  Port = "TO_BE_SET"
   ProfilesDir = "/tmp"
   BlockProfileRate = 0
   MutexProfileFraction = 0

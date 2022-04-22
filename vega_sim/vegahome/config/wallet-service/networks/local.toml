@@ -1,21 +1,21 @@
 Name = "local"
 Level = "Info"
 TokenExpiry = "168h0m0s"
-Port = 1789
+Port = "TO_BE_SET"
 Host = "0.0.0.0"
 
 [API]
   [API.GRPC]
-    Hosts = ["localhost:3007"]
+    Hosts = "TO_BE_SET"
     Retries = 5
   [API.REST]
-    Hosts = ["localhost:3009"]
+    Hosts = "TO_BE_SET"
   [API.GraphQL]
-    Hosts = ["localhost:3008"]
+    Hosts = "TO_BE_SET"
 
 [Console]
   URL = "console.fairground.wtf"
-  LocalPort = 3000
+  LocalPort = "TO_BE_SET"
 
 [Nodes]
   Retries = 0
