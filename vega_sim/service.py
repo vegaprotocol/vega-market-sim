@@ -4,6 +4,7 @@ from abc import ABC
 from time import time
 from typing import Dict, List, Optional, Tuple, Union
 
+import grpc
 import requests
 import vegaapiclient as vac
 import vegaapiclient.generated.vega as vega_protos
@@ -48,8 +49,13 @@ class VegaService(ABC):
 
     def trading_data_client(self) -> vac.VegaTradingDataClient:
         if self._trading_data_client is None:
+            channel = grpc.insecure_channel(
+                self.data_node_grpc_url(), options=(("grpc.enable_http_proxy", 0),)
+            )
+            grpc.channel_ready_future(channel).result(timeout=10)
             self._trading_data_client = vac.VegaTradingDataClient(
-                self.data_node_grpc_url()
+                self.data_node_grpc_url(),
+                channel=channel,
             )
         return self._trading_data_client
 
