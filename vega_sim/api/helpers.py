@@ -32,7 +32,10 @@ def wait_for_acceptance(
     logger.debug("Waiting for proposal acceptance")
     submission_accepted = False
     for _ in range(100):
-        proposal = submission_load_func(submission_ref)
+        try:
+            proposal = submission_load_func(submission_ref)
+        except:
+            continue
         if proposal:
             logger.debug("Your proposal has been accepted by the network")
             submission_accepted = True
