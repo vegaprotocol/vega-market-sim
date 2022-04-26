@@ -1,9 +1,7 @@
 import base64
-from cmath import log
 import json
 import logging
-from turtle import pu
-from typing import List, Optional
+from typing import Optional
 from google.protobuf.json_format import MessageToDict
 
 import requests
