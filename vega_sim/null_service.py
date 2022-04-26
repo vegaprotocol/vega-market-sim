@@ -3,7 +3,6 @@ from __future__ import annotations
 import atexit
 import logging
 import os
-from re import M
 import shutil
 import signal
 import socket
@@ -22,7 +21,6 @@ import toml
 from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
-
 from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
