@@ -7,7 +7,7 @@ from vega_sim.null_service import VegaServiceNull
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
 # Set up parties in the market/ Submit liquidity provision/ Control midprice
-MM_WALLET = WalletConfig("wwestgarth", "pin")
+MM_WALLET = WalletConfig("mm", "pin")
 
 # The party to send selling/buying MOs to hit LP orders
 TRADER_WALLET = WalletConfig("Zl3pLs6Xk6SwIK7Jlp2x", "bJQDDVGAhKkj3PVCc7Rr")
@@ -58,3 +58,7 @@ if __name__ == "__main__":
         settlement_asset_id=tdai_id,
         termination_wallet=TERMINATE_WALLET.name,
     )
+
+    import pdb
+
+    pdb.set_trace()

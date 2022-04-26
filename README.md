@@ -22,6 +22,13 @@ For the most part the package is fairly self-contained Python, however there are
     -  `pipenv install /path/from/pipenv/to/vega-market-sim`
  -  Then run your environment
 
+### UI
+
+Building the console UI is not a necessary component, but can be useful for visualising the state of the Vega service. In order to do this:
+  - Ensure you have `yarn` installed
+  - Ensure you are running node v14. If you use other versions in general, `nvm` can be useful to switch to v14 without wiping your other version
+  - Run `make ui`, which will download the requisite repository and install it into the `/extern` directory
+  - Set the `run_wallet_with_console` flag to `True` when creating the `VegaServiceNull` class
 
 ## Basic use
 
