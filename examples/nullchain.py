@@ -31,20 +31,30 @@ if __name__ == "__main__":
 
     # for wallet in wallets:
     #     vega.login(wallet.name, wallet.passphrase)
-
     vega.mint(
         MM_WALLET.name,
         asset="VOTE",
         amount=10000000000,
     )
+
+    vega.create_asset(
+        MM_WALLET.name,
+        name="tDAI",
+        symbol="tDAI",
+        decimals=5,
+        max_faucet_amount=1e10,
+    )
+
+    tdai_id = vega.find_asset_id(symbol="tDAI")
     vega.mint(
         MM_WALLET.name,
-        asset="6d9d35f657589e40ddfb448b7ad4a7463b66efb307527fedd2aa7df1bbd5ea61",
+        asset=tdai_id,
         amount=10000000000,
     )
+
     vega.create_simple_market(
         market_name="BTC:DAI_Mar22",
         proposal_wallet=MM_WALLET.name,
-        settlement_asset="tDAI",
+        settlement_asset_id=tdai_id,
         termination_wallet=TERMINATE_WALLET.name,
     )

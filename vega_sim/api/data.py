@@ -11,6 +11,10 @@ MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
 OrderBook = namedtuple("OrderBook", ["bids", "offers"])
 
 
+class MissingAssetError(Exception):
+    pass
+
+
 def party_account(
     pub_key: str,
     asset_id: str,
@@ -39,6 +43,35 @@ def party_account(
             bond = float(account.balance)
 
     return AccountData(general, margin, bond)
+
+
+def find_asset_id(
+    symbol: str, data_client: vac.VegaTradingDataClient, raise_on_missing: bool = False
+) -> str:
+    """Looks up the Asset ID of a given asset name
+
+    Args:
+        symbol:
+            str, The symbol of the asset to look up
+        data_client:
+            VegaTradingDataClient, the gRPC data client
+        raise_on_missing:
+            bool, whether to raise an Error or silently return if the asset does not exist
+
+    Returns:
+        str, the ID of the asset
+    """
+    asset_request = data_node_protos.trading_data.AssetsRequest()
+    assets = data_client.Assets(asset_request).assets
+    # Find settlement asset
+    for asset in assets:
+        if asset.details.symbol == symbol:
+            return asset.id
+    if raise_on_missing:
+        raise MissingAssetError(
+            f"{symbol} asset not found on specified Vega network, "
+            + "please propose and create this asset first"
+        )
 
 
 def positions_by_market(

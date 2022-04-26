@@ -3,7 +3,7 @@ GatewayEnabled = true
 UlimitNOFile = 8192
 
 [API]
-  Level = "Warning"
+  Level = "Info"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -12,10 +12,10 @@ UlimitNOFile = 8192
   CoreNodeGRPCPort = "TO_BE_SET"
 
 [Accounts]
-  Level = "Warning"
+  Level = "Info"
 
 [Candles]
-  Level = "Warning"
+  Level = "Info"
 
 [Logging]
   Environment = "dev"
@@ -41,25 +41,25 @@ UlimitNOFile = 8192
       TimeKey = "T"
 
 [Markets]
-  Level = "Warning"
+  Level = "Info"
 
 [Oracles]
-  Level = "Warning"
+  Level = "Info"
 
 [Orders]
-  Level = "Warning"
+  Level = "Info"
 
 [Liquidity]
-  Level = "Warning"
+  Level = "Info"
 
 [Parties]
-  Level = "Warning"
+  Level = "Info"
 
 [Risk]
-  Level = "Warning"
+  Level = "Info"
 
 [Storage]
-  Level = "Warning"
+  Level = "Info"
   Timeout = "5s"
   LogPositionStoreDebug = false
   [Storage.Accounts]
@@ -232,15 +232,15 @@ UlimitNOFile = 8192
     ChecksumVerificationMode = 0
 
 [Trades]
-  Level = "Warning"
+  Level = "Info"
   PageSizeDefault = 200
   PageSizeMaximum = 200
 
 [Time]
-  Level = "Warning"
+  Level = "Info"
 
 [Gateway]
-  Level = "Warning"
+  Level = "Info"
   Timeout = "5s"
   SubscriptionRetries = 3
   GraphQLPlaygroundEnabled = true
@@ -259,33 +259,33 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Metrics]
-  Level = "Warning"
+  Level = "Info"
   Timeout = "5s"
   Port = "TO_BE_SET"
   Path = "/metrics"
   Enabled = false
 
 [Transfers]
-  Level = "Warning"
+  Level = "Info"
 
 [Governance]
-  Level = "Warning"
+  Level = "Info"
 
 [Assets]
-  Level = "Warning"
+  Level = "Info"
 
 [Notary]
-  Level = "Warning"
+  Level = "Info"
 
 [Subscribers]
-  OrderEventLogLevel = "Warning"
-  MarketEventLogLevel = "Warning"
+  OrderEventLogLevel = "Info"
+  MarketEventLogLevel = "Info"
 
 [Fee]
-  Level = "Warning"
+  Level = "Info"
 
 [Broker]
-  Level = "Warning"
+  Level = "Info"
   [Broker.SocketConfig]
     IP = "0.0.0.0"
     Port = "TO_BE_SET"
@@ -293,22 +293,22 @@ UlimitNOFile = 8192
     TransportType = "tcp"
 
 [Nodes]
-  Level = "Warning"
+  Level = "Info"
 
 [Epochs]
-  Level = "Warning"
+  Level = "Info"
 
 [Delegations]
-  Level = "Warning"
+  Level = "Info"
 
 [Checkpoint]
-  Level = "Warning"
+  Level = "Info"
 
 [NetworkParameters]
-  Level = "Warning"
+  Level = "Info"
 
 [Pprof]
-  Level = "Warning"
+  Level = "Info"
   Enabled = false
   Port = "TO_BE_SET"
   ProfilesDir = "/tmp"

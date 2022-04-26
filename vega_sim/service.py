@@ -136,11 +136,63 @@ class VegaService(ABC):
             TIME_FORWARD_URL.format(base_url=self.vega_node_url()), json=payload
         ).raise_for_status()
 
+    def create_asset(
+        self,
+        wallet_name: str,
+        name: str,
+        symbol: str,
+        total_supply: int = 1,
+        decimals: int = 0,
+        quantum: int = 1,
+        max_faucet_amount: int = 10e9,
+    ):
+        """Creates a simple asset and automatically approves the proposal (assuming the proposing wallet has sufficient governance tokens).
+
+        Args:
+            wallet_name:
+                str, The name of the wallet proposing the asset
+            name:
+                str, The name of the asset
+            symbol:
+                str, The symbol to use for the asset
+            total_supply:
+                int, The initial total supply of the asset (will increase when fauceted)
+            decimals:
+                int, The number of decimals in which to represent the asset. (e.g with 2 then integer value 101 is really 1.01)
+            quantum:
+                int, The smallest unit of currency it makes sense to talk about
+            max_faucet_amount:
+                int, The maximum number of tokens which can be fauceted (in asset decimal precision)
+        """
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+        proposal_id = gov.propose_asset(
+            self.login_tokens[wallet_name],
+            pub_key=self.pub_keys[wallet_name],
+            name=name,
+            symbol=symbol,
+            total_supply=total_supply,
+            decimals=decimals,
+            max_faucet_amount=max_faucet_amount,
+            quantum=quantum,
+            data_client=self.trading_data_client(),
+            wallet_server_url=self.wallet_url(),
+            closing_time=blockchain_time_seconds + 30,
+            enactment_time=blockchain_time_seconds + 360,
+            validation_time=blockchain_time_seconds + 10,
+        )
+        gov.approve_proposal(
+            proposal_id=proposal_id,
+            login_token=self.login_tokens[wallet_name],
+            pub_key=self.pub_keys[wallet_name],
+            wallet_server_url=self.wallet_url(),
+        )
+        self.forward("360s")
+
     def create_simple_market(
         self,
         market_name: str,
         proposal_wallet: str,
-        settlement_asset: str,
+        settlement_asset_id: str,
         termination_wallet: str,
         future_asset: Optional[str] = None,
         position_decimals: Optional[int] = None,
@@ -153,8 +205,8 @@ class VegaService(ABC):
                 str, name of the market
             proposal_wallet:
                 str, the name of the wallet to use for proposing the market
-            settlement_asset:
-                str, the asset the market will use for settlement
+            settlement_asset_id:
+                str, the asset id the market will use for settlement
             termination_wallet:
                 str, the name of the wallet which will be used to send termination data
             position_decimals:
@@ -173,7 +225,7 @@ class VegaService(ABC):
             market_name=market_name,
             pub_key=self.pub_keys[proposal_wallet],
             login_token=self.login_tokens[proposal_wallet],
-            settlement_asset=settlement_asset,
+            settlement_asset_id=settlement_asset_id,
             data_client=self.trading_data_client(),
             termination_pub_key=self.pub_keys[termination_wallet],
             wallet_server_url=self.wallet_url(),
@@ -181,10 +233,10 @@ class VegaService(ABC):
             market_decimals=market_decimals,
             **additional_kwargs,
         )
-        gov.accept_market_proposal(
-            self.login_tokens[proposal_wallet],
+        gov.approve_proposal(
             proposal_id,
             self.pub_keys[proposal_wallet],
+            self.login_tokens[proposal_wallet],
             self.wallet_url(),
         )
         self.forward("480s")
@@ -403,7 +455,7 @@ class VegaService(ABC):
             enactment_time=blockchain_time_seconds + 360,
             validation_time=blockchain_time_seconds + 1,
         )
-        gov.approve_network_parameter_change(
+        gov.approve_proposal(
             proposal_id=proposal_id,
             pub_key=self.pub_keys[proposal_wallet],
             login_token=self.login_tokens[proposal_wallet],
@@ -574,4 +626,23 @@ class VegaService(ABC):
             pub_key=self.pub_keys[wallet_name],
             is_amendment=is_amendment,
             wallet_server_url=self.wallet_url(),
+        )
+
+    def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:
+        """Looks up the Asset ID of a given asset name
+
+        Args:
+            symbol:
+                str, The symbol of the asset to look up
+            raise_on_missing:
+                bool, whether to raise an Error or silently return if the asset
+                 does not exist
+
+        Returns:
+            str, the ID of the asset
+        """
+        return data.find_asset_id(
+            symbol=symbol,
+            raise_on_missing=raise_on_missing,
+            data_client=self.trading_data_client(),
         )

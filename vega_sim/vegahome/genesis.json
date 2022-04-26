@@ -46,18 +46,6 @@
           }
         }
       },
-      "6d9d35f657589e40ddfb448b7ad4a7463b66efb307527fedd2aa7df1bbd5ea61": {
-        "name": "tDAI",
-        "symbol": "tDAI",
-        "total_supply": "0",
-        "decimals": 5,
-        "min_lp_stake": "1",
-        "source": {
-          "builtin_asset": {
-            "max_faucet_amount_mint": "10000000000"
-          }
-        }
-      },
       "XYZ": {
         "name": "XYZ",
         "symbol": "XYZ",

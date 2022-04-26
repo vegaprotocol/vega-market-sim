@@ -3,7 +3,7 @@ NodeMode = "validator"
 UlimitNOFile = 8192
 
 [API]
-  Level = "Warning"
+  Level = "Info"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -16,7 +16,7 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Blockchain]
-  Level = "Warning"
+  Level = "Info"
   LogTimeDebug = true
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
@@ -32,7 +32,7 @@ UlimitNOFile = 8192
     ABCIRecordDir = ""
     ABCIReplayFile = ""
   [Blockchain.Null]
-    Level = "Warning"
+    Level = "Debug"
     BlockDuration = "1s"
     TransactionsPerBlock = 1
     GenesisFile = "./null-blockchain/node-startup/vegahome/genesis.json"
@@ -40,10 +40,10 @@ UlimitNOFile = 8192
     Port = "TO_BE_SET"
 
 [Collateral]
-  Level = "Warning"
+  Level = "Info"
 
 [CoreAPI]
-  LogLevel = "Warning"
+  LogLevel = "Info"
   Accounts = true
   Assets = true
   NetworkParameters = true
@@ -58,26 +58,26 @@ UlimitNOFile = 8192
   Delegations = true
 
 [Execution]
-  Level = "Warning"
+  Level = "Info"
   [Execution.Matching]
-    Level = "Warning"
+    Level = "Info"
     LogPriceLevelsDebug = false
     LogRemovedOrdersDebug = false
   [Execution.Risk]
-    Level = "Warning"
+    Level = "Info"
     LogMarginUpdate = true
   [Execution.Position]
-    Level = "Warning"
+    Level = "Info"
     LogPositionUpdate = true
   [Execution.Settlement]
-    Level = "Warning"
+    Level = "Info"
   [Execution.Fee]
-    Level = "Warning"
+    Level = "Info"
   [Execution.Liquidity]
-    Level = "Warning"
+    Level = "Info"
 
 [Processor]
-  Level = "Warning"
+  Level = "Info"
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
@@ -109,73 +109,73 @@ UlimitNOFile = 8192
       TimeKey = "T"
 
 [Oracles]
-  Level = "Warning"
+  Level = "Info"
 
 [Time]
-  Level = "Warning"
+  Level = "Info"
 
 [Epoch]
-  Level = "Warning"
+  Level = "Info"
 
 [Monitoring]
-  Level = "Warning"
+  Level = "Info"
   Interval = "500ms"
   Retries = 5
 
 [Metrics]
-  Level = "Warning"
+  Level = "Info"
   Timeout = "5s"
   Port = "TO_BE_SET"
   Path = "/metrics"
   Enabled = false
 
 [Governance]
-  Level = "Warning"
+  Level = "Debug"
 
 [NodeWallet]
-  Level = "Warning"
+  Level = "Info"
   [NodeWallet.ETH]
-    Level = "Warning"
+    Level = "Info"
     Address = "http://127.0.0.1:545"
     ClefAddress = ""
 
 [Assets]
-  Level = "Warning"
+  Level = "Debug"
 
 [Notary]
-  Level = "Warning"
+  Level = "Info"
 
 [EvtForward]
-  Level = "Warning"
+  Level = "Info"
   RetryRate = "10s"
   BlockchainQueueAllowlist = ["8b4f12b0d3919ea6e433b9736218dca036443aa08fd10f978a1fbede9621073f"]
 
 [Genesis]
-  Level = "Warning"
+  Level = "Info"
 
 [Validators]
-  Level = "Warning"
+  Level = "Info"
 
 [Banking]
-  Level = "Warning"
+  Level = "Info"
 
 [Stats]
-  Level = "Warning"
+  Level = "Info"
 
 [NetworkParameters]
-  Level = "Warning"
+  Level = "Info"
 
 [Limits]
-  Level = "Warning"
+  Level = "Info"
 
 [Checkpoint]
-  Level = "Warning"
+  Level = "Info"
 
 [Staking]
-  Level = "Warning"
+  Level = "Info"
 
 [Broker]
-  Level = "Warning"
+  Level = "Info"
   [Broker.Socket]
     DialTimeout = "2m0s"
     DialRetryInterval = "5s"
@@ -189,16 +189,16 @@ UlimitNOFile = 8192
     Transport = "tcp"
 
 [Rewards]
-  Level = "Warning"
+  Level = "Info"
 
 [Delegation]
-  Level = "Warning"
+  Level = "Info"
 
 [Spam]
-  Level = "Warning"
+  Level = "Info"
 
 [Snapshot]
-  Level = "Warning"
+  Level = "Info"
   KeepRecent = 10
   RetryLimit = 5
   Storage = "GOLevelDB"
@@ -206,10 +206,10 @@ UlimitNOFile = 8192
   StartHeight = 0
 
 [StateVar]
-  Level = "Warning"
+  Level = "Info"
 
 [Pprof]
-  Level = "Warning"
+  Level = "Info"
   Enabled = false
   Port = "TO_BE_SET"
   ProfilesDir = "/tmp"
