@@ -7,7 +7,7 @@ from vega_sim.null_service import VegaServiceNull
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
 # Set up parties in the market/ Submit liquidity provision/ Control midprice
-MM_WALLET = WalletConfig("wwestgarth", "pin")
+MM_WALLET = WalletConfig("mm", "pin")
 
 # The party to send selling/buying MOs to hit LP orders
 TRADER_WALLET = WalletConfig("Zl3pLs6Xk6SwIK7Jlp2x", "bJQDDVGAhKkj3PVCc7Rr")

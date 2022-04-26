@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import atexit
 import logging
+import os
 import shutil
 import signal
 import socket
@@ -20,7 +21,6 @@ import toml
 from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
-
 from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
@@ -233,12 +233,15 @@ def _find_free_port(existing_set: Optional[Set[int]] = None):
 
 
 def _popen_process(
-    popen_args: List[str], dir_root: str, log_name: str
+    popen_args: List[str],
+    dir_root: str,
+    log_name: str,
+    env: Optional[Dict[str, str]] = None,
 ) -> subprocess.Popen[bytes]:
     with open(path.join(dir_root, f"{log_name}.out"), "wb") as out, open(
         path.join(dir_root, f"{log_name}.err"), "wb"
     ) as err:
-        sub_proc = subprocess.Popen(popen_args, stdout=out, stderr=err)
+        sub_proc = subprocess.Popen(popen_args, stdout=out, stderr=err, env=env)
     atexit.register(lambda: sub_proc.terminate())
     return sub_proc
 
@@ -277,6 +280,7 @@ def manage_vega_processes(
     vega_path: str,
     data_node_path: str,
     vega_wallet_path: str,
+    vega_console_path: Optional[str] = None,
     run_wallet_with_console: bool = False,
     port_config: Optional[Dict[Ports, int]] = None,
 ) -> None:
@@ -333,13 +337,36 @@ def manage_vega_processes(
             log_name="vegawallet",
         )
 
+        if run_wallet_with_console:
+            env_copy = os.environ.copy()
+            env_copy.update(
+                {
+                    "REACT_APP_VEGA_URL": (
+                        f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}"
+                    ),
+                    "PORT": f"{port_config[Ports.CONSOLE]}",
+                    "NODE_ENV": "development",
+                }
+            )
+            console_process = _popen_process(
+                [
+                    "yarn",
+                    "--cwd",
+                    vega_console_path,
+                    "start",
+                ],
+                dir_root=tmp_vega_dir,
+                log_name="console",
+                env=env_copy,
+            )
+
         signal.sigwait([signal.SIGKILL, signal.SIGTERM])
         processes = [
             dataNodeProcess,
             vegaFaucetProcess,
             vegaWalletProcess,
             vegaNodeProcess,
-        ]
+        ] + ([console_process] if run_wallet_with_console else [])
         for process in processes:
             process.terminate()
         for process in processes:
@@ -369,6 +396,7 @@ class VegaServiceNull(VegaService):
         vega_path: Optional[str] = None,
         data_node_path: Optional[str] = None,
         vega_wallet_path: Optional[str] = None,
+        vega_console_path: Optional[str] = None,
         start_immediately: bool = False,
         run_wallet_with_console: bool = False,
         run_wallet_with_token_dapp: bool = False,
@@ -379,6 +407,9 @@ class VegaServiceNull(VegaService):
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
         self.vega_wallet_path = vega_wallet_path or path.join(
             vega_bin_path, "vegawallet"
+        )
+        self.vega_console_path = vega_console_path or path.join(
+            vega_bin_path, "console"
         )
         self.proc = None
         self.run_wallet_with_console = run_wallet_with_console
@@ -429,6 +460,7 @@ class VegaServiceNull(VegaService):
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
+                "vega_console_path": self.vega_console_path,
                 "run_wallet_with_console": self.run_wallet_with_console,
                 "port_config": self._generate_port_config(),
             },
@@ -444,8 +476,8 @@ class VegaServiceNull(VegaService):
                 ).raise_for_status()
                 if self.run_wallet_with_console:
                     logger.info(
-                        "Vega Running. Launch console vs"
-                        f" {self.data_node_graphql_port} for GUI"
+                        "Vega Running. Console launched at"
+                        f" http://localhost:{self.console_port}"
                     )
                 return
             except (

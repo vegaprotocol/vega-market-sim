@@ -1,6 +1,7 @@
 VEGA_TAG := develop
 WALLET_TAG := develop
 DATA_NODE_TAG := develop
+CONSOLE_TAG := master
 EXTERN_DIR := "./extern"
 
 all: pull_deps build_deps
@@ -35,6 +36,24 @@ build_deps:
 	cd ${EXTERN_DIR}/vega && go build -o ../../vega_sim/bin/ ./...
 	cd ${EXTERN_DIR}/vegawallet && go build -o ../../vega_sim/bin/ ./...
 	cd ${EXTERN_DIR}/data-node && go build -o ../../vega_sim/bin/ ./...
+
+pull_deps_ui:
+	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
+	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
+	@echo "Downloading Vega slimline console"
+	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol//slimline-console ${EXTERN_DIR}/console; fi
+ifneq (${CONSOLE_TAG},master)
+	@git -C ${EXTERN_DIR}/console checkout -b ${CONSOLE_TAG}
+else
+	@git -C ${EXTERN_DIR}/console checkout master; git -C ${EXTERN_DIR}/console pull
+endif
+
+build_deps_ui:
+	@mkdir -p ./vega_sim/bin/console
+	@rsync -av ${EXTERN_DIR}/console vega_sim/bin/ --exclude ${EXTERN_DIR}/console/.git
+	@yarn --cwd vega_sim/bin/console install
+
+ui: pull_deps_ui build_deps_ui
 
 .PHONY: black
 black:
