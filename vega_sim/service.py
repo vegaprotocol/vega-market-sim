@@ -584,14 +584,6 @@ class VegaService(ABC):
             market_id=market_id, data_client=self.trading_data_client()
         )
 
-    def open_orders_by_market(
-        self,
-        market_id: str,
-    ) -> data.OrderBook:
-        return data.open_orders_by_market(
-            market_id=market_id, data_client=self.trading_data_client()
-        )
-
     def submit_simple_liquidity(
         self,
         wallet_name: str,

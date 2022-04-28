@@ -23,30 +23,36 @@ wallets = [MM_WALLET, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    vega = VegaServiceNull(run_wallet_with_console=True)
-    vega.start()
+    while True:
+        vega = VegaServiceNull(run_wallet_with_console=False)
+        vega.start()
 
-    for wallet in wallets:
-        vega.create_wallet(wallet.name, wallet.passphrase)
+        for wallet in wallets:
+            vega.create_wallet(wallet.name, wallet.passphrase)
 
-    # for wallet in wallets:
-    #     vega.login(wallet.name, wallet.passphrase)
-    vega.mint(
-        MM_WALLET.name,
-        asset="VOTE",
-        amount=10000000000,
-    )
+        # for wallet in wallets:
+        #     vega.login(wallet.name, wallet.passphrase)
+        vega.mint(
+            MM_WALLET.name,
+            asset="VOTE",
+            amount=10000000000,
+        )
 
-    vega.forward("10s")
-    vega.create_asset(
-        MM_WALLET.name,
-        name="tDAI",
-        symbol="tDAI",
-        decimals=5,
-        max_faucet_amount=1e10,
-    )
+        vega.forward("10s")
+        vega.create_asset(
+            MM_WALLET.name,
+            name="tDAI",
+            symbol="tDAI",
+            decimals=5,
+            max_faucet_amount=1e10,
+        )
 
-    tdai_id = vega.find_asset_id(symbol="tDAI")
+        tdai_id = vega.find_asset_id(symbol="tDAI")
+        print("TDAI: ", tdai_id)
+        vega.stop()
+        import time
+
+        time.sleep(1)
 
     vega.mint(
         MM_WALLET.name,
