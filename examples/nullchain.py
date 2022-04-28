@@ -37,6 +37,7 @@ if __name__ == "__main__":
         amount=10000000000,
     )
 
+    vega.forward("10s")
     vega.create_asset(
         MM_WALLET.name,
         name="tDAI",
@@ -46,12 +47,13 @@ if __name__ == "__main__":
     )
 
     tdai_id = vega.find_asset_id(symbol="tDAI")
+
     vega.mint(
         MM_WALLET.name,
         asset=tdai_id,
         amount=10000000000,
     )
-
+    vega.forward("10s")
     vega.create_simple_market(
         market_name="BTC:DAI_Mar22",
         proposal_wallet=MM_WALLET.name,

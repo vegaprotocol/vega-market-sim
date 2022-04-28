@@ -79,6 +79,9 @@ def propose_future_market(
     future_asset: str = "BTC",
     position_decimals: Optional[int] = None,
     market_decimals: Optional[int] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    validation_time: Optional[int] = None,
     liquidity_commitment: Optional[vega_protos.governance.NewMarketCommitment] = None,
 ) -> str:
     """Propose a future market as specified user.
@@ -209,7 +212,13 @@ def propose_future_market(
         liquidity_commitment=liquidity_commitment,
     )
 
-    proposal = _build_generic_proposal(pub_key=pub_key, data_client=data_client)
+    proposal = _build_generic_proposal(
+        pub_key=pub_key,
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+        validation_time=validation_time,
+    )
     proposal.terms.new_market.CopyFrom(market_proposal)
 
     _make_and_wait_for_proposal(
@@ -368,8 +377,13 @@ def _make_and_wait_for_proposal(
     data_client: vac.VegaTradingDataClient,
 ):
     headers = {"Authorization": f"Bearer {login_token}"}
+
+    submiss = MessageToDict(proposal)
+    submiss["rationale"] = {
+        "description": "Making a proposal",
+    }
     proposal_json = {
-        "proposalSubmission": MessageToDict(proposal),
+        "proposalSubmission": submiss,
         "pubKey": pub_key,
         "propagate": True,
     }
