@@ -1,6 +1,6 @@
 import numpy as np
 from collections import namedtuple
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import vegaapiclient as vac
 import vegaapiclient.generated.data_node.api.v1 as data_node_protos
@@ -190,3 +190,29 @@ def open_orders_by_market(
                 offers[price] = bids.get(price, 0) + volume
 
     return OrderBook(bids, offers)
+
+
+def order_status(
+    order_id: str, data_client: vac.VegaTradingDataClient, version: int = 0
+) -> Optional[vega_protos.vega.Order]:
+    """Loads information about a specific order identified by the ID.
+    Optionally return historic order versions.
+
+    Args:
+        order_id:
+            str, the order identifier as specified by Vega when originally placed
+        data_client:
+            VegaTradingDataClient, an instantiated gRPC trading data client
+        version:
+            int, Optional, Version of the order:
+                - Set `version` to 0 for most recent version of the order
+                - Set `1` for original version of the order
+                - Set `2` for first amendment, `3` for second amendment, etc
+    Returns:
+        Optional[vega.Order], the requested Order object or None if nothing found
+    """
+    return data_client.OrderByID(
+        data_node_protos.trading_data.OrderByIDRequest(
+            order_id=order_id, version=version
+        )
+    ).order

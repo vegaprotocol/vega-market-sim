@@ -186,7 +186,7 @@ class VegaService(ABC):
             pub_key=self.pub_keys[wallet_name],
             wallet_server_url=self.wallet_url(),
         )
-        self.forward("360s")
+        self.forward("365s")
 
     def create_simple_market(
         self,
@@ -221,6 +221,7 @@ class VegaService(ABC):
         if future_asset is not None:
             additional_kwargs["future_asset"] = future_asset
 
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
         proposal_id = gov.propose_future_market(
             market_name=market_name,
             pub_key=self.pub_keys[proposal_wallet],
@@ -231,6 +232,9 @@ class VegaService(ABC):
             wallet_server_url=self.wallet_url(),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
+            closing_time=blockchain_time_seconds + 30,
+            enactment_time=blockchain_time_seconds + 360,
+            validation_time=blockchain_time_seconds + 10,
             **additional_kwargs,
         )
         gov.approve_proposal(
@@ -239,7 +243,7 @@ class VegaService(ABC):
             self.login_tokens[proposal_wallet],
             self.wallet_url(),
         )
-        self.forward("480s")
+        self.forward("360s")
 
     def submit_market_order(
         self,
@@ -645,4 +649,25 @@ class VegaService(ABC):
             symbol=symbol,
             raise_on_missing=raise_on_missing,
             data_client=self.trading_data_client(),
+        )
+
+    def order_status(
+        self, order_id: str, version: int = 0
+    ) -> Optional[vega_protos.vega.Order]:
+        """Loads information about a specific order identified by the ID.
+        Optionally return historic order versions.
+
+        Args:
+            order_id:
+                str, the order identifier as specified by Vega when originally placed
+            version:
+                int, Optional, Version of the order:
+                    - Set `version` to 0 for most recent version of the order
+                    - Set `1` for original version of the order
+                    - Set `2` for first amendment, `3` for second amendment, etc
+        Returns:
+            Optional[vega.Order], the requested Order object or None if nothing found
+        """
+        return data.order_status(
+            order_id=order_id, data_client=self.trading_data_client(), version=version
         )
