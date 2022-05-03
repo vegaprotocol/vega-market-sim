@@ -28,8 +28,8 @@ def submit_order(
     order_type: Union[vega_protos.vega.Order.Type, str],
     time_in_force: Union[vega_protos.vega.Order.TimeInForce, str],
     side: Union[vega_protos.vega.Side, str],
-    volume: int,
-    price: Optional[int] = None,
+    volume: float,
+    price: Optional[float] = None,
     expires_at: Optional[int] = None,
     pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
     wait: bool = True,
@@ -60,11 +60,9 @@ def submit_order(
         side:
             vega.Side or str, Side of the order (BUY or SELL)
         volume:
-            int, volume of the order in market position decimals
-                (e.g. if position decimals is 2 then 1.0 should be passed as 100)
+            float, volume of the order
         price:
-            str, price of the order in market price decimals
-                (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
+            float, price of the order
         expires_at:
             int, Optional timestamp for when the order will expire, in
             nanoseconds since the epoch,
@@ -92,6 +90,7 @@ def submit_order(
         expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
 
     order_ref = f"{pub_key}-{uuid.uuid4()}"
+
     order_data = vac.vega.commands.v1.commands.OrderSubmission(
         market_id=market_id,
         # price is an integer. For example 123456 is a price of 1.23456,
@@ -168,11 +167,11 @@ def amend_order(
     pub_key: str,
     market_id: str,
     order_id: str,
-    price: Optional[int] = None,
+    price: Optional[float] = None,
     expires_at: Optional[int] = None,
     pegged_offset: Optional[str] = None,
     pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
-    volume_delta: int = 0,
+    volume_delta: float = 0,
     time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
 ):
     """
@@ -193,11 +192,9 @@ def amend_order(
         side:
             vega.Side or str, Side of the order (BUY or SELL)
         volume_delta:
-            int, change in volume of the order in market position decimals
-                (e.g. if position decimals is 2 then 1.0 should be passed as 100)
+            float, change in volume of the order
         price:
-            int, price of the order in market price decimals
-                (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
+            float, price of the order
         time_in_force:
             vega.Order.TimeInForce or str, The time in force setting for the order
                 (Only valid options for market are TIME_IN_FORCE_IOC and

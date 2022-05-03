@@ -401,8 +401,11 @@ class VegaServiceNull(VegaService):
         run_wallet_with_console: bool = False,
         run_wallet_with_token_dapp: bool = False,
         port_config: Optional[Dict[Ports, int]] = None,
+        warn_on_raw_data_access: bool = True,
     ):
-        super().__init__(can_control_time=True)
+        super().__init__(
+            can_control_time=True, warn_on_raw_data_access=warn_on_raw_data_access
+        )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
         self.vega_wallet_path = vega_wallet_path or path.join(

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC
+from functools import wraps
 from time import time
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import grpc
 import requests
@@ -10,10 +12,14 @@ import vegaapiclient as vac
 import vegaapiclient.generated.vega as vega_protos
 
 import vega_sim.api.data as data
+import vega_sim.api.data_raw as data_raw
 import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
 import vega_sim.api.wallet as wallet
+from vega_sim.api.helpers import num_to_padded_int
+
+logger = logging.getLogger(__name__)
 
 TIME_FORWARD_URL = "{base_url}/api/v1/forwardtime"
 
@@ -22,12 +28,51 @@ class LoginError(Exception):
     pass
 
 
+def raw_data(fn):
+    @wraps(fn)
+    def wrapped_fn(self, *args, **kwargs):
+        if self.warn_on_raw_data_access:
+            logger.warn(
+                f"Using function with raw data from data-node {fn.__qualname__}. Be"
+                " wary if prices/positions are not converted from int form"
+            )
+        return fn(self, *args, **kwargs)
+
+    return wrapped_fn
+
+
 class VegaService(ABC):
-    def __init__(self, can_control_time: bool = False):
+    def __init__(
+        self, can_control_time: bool = False, warn_on_raw_data_access: bool = True
+    ):
+        """A generic service for accessing a set of Vega processes.
+
+        Contains generic methods aimed at working whether the derived class
+        is referencing a locally hosted Nullchain version of Vega
+        or a fully-fledged remote market.
+
+        Args:
+            can_control_time:
+                bool, default False, do we have control over the passage of time.
+                    Generally this will be True for a nullchain, but False for
+                    anything else. When False we sleep when a wait is required,
+                    when True we can manually forward instead.
+            warn_on_raw_data_access:
+                bool, default True, whether to warn on accessing functions containing
+                    data straight from a data-node. The main risk here relates to
+                    decimal places. On non-raw data functions the 'zero-padded int'
+                    version of numbers will be promised to have been converted to a
+                    real float version. On raw versions (generally complex objects)
+                    they may well be still zero padded integers which must be
+                    converted by the user.
+                    (e.g. 10.1 with decimal places set to 2 would be 1010)
+
+        """
         self.login_tokens = {}
         self.pub_keys = {}
         self._trading_data_client = None
         self.can_control_time = can_control_time
+        self.warn_on_raw_data_access = warn_on_raw_data_access
 
     def wallet_url(self) -> str:
         pass
@@ -103,20 +148,26 @@ class VegaService(ABC):
             metadata=[{"name": "default_key"}],
         )
 
-    def mint(self, wallet_name: str, asset: str, amount: int) -> None:
+    def mint(self, wallet_name: str, asset: str, amount: float) -> None:
         """Mints a given amount of requested asset into the associated wallet
 
         Args:
             wallet_name:
                 str, The name of the wallet
             asset:
-                str, The name of the asset to mint
+                str, The ID of the asset to mint
             amount:
-                int, the amount of asset to mint
+                float, the amount of asset to mint
         """
         self._check_logged_in(wallet_name)
+        asset_decimals = data.asset_decimals(
+            asset_id=asset, data_client=self.trading_data_client()
+        )
         faucet.mint(
-            self.pub_keys[wallet_name], asset, amount, faucet_url=self.faucet_url()
+            self.pub_keys[wallet_name],
+            asset,
+            num_to_padded_int(amount, asset_decimals),
+            faucet_url=self.faucet_url(),
         )
 
     def forward(self, time: str) -> None:
@@ -250,7 +301,7 @@ class VegaService(ABC):
         trading_wallet: str,
         market_id: str,
         side: Union[vega_protos.vega.Side, str],
-        volume: int,
+        volume: float,
         fill_or_kill: bool = True,
         wait: bool = True,
     ) -> str:
@@ -264,7 +315,7 @@ class VegaService(ABC):
             side:
                 vega.Side or str, Side of the order (BUY or SELL)
             volume:
-                int, The volume to trade in market position decimal places.
+                float, The volume to trade.
             wait:
                 bool, whether to wait for order acceptance.
                     If true, will raise an error if order is not accepted
@@ -272,13 +323,19 @@ class VegaService(ABC):
         Returns:
             str, The ID of the order
         """
+
         return self.submit_order(
             trading_wallet=trading_wallet,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_FOK" if fill_or_kill else "TIME_IN_FORCE_IOC",
             order_type="TYPE_MARKET",
             side=side,
-            volume=volume,
+            volume=num_to_padded_int(
+                volume,
+                data.market_position_decimals(
+                    market_id, data_client=self.trading_data_client()
+                ),
+            ),
             wait=wait,
         )
 
@@ -314,11 +371,9 @@ class VegaService(ABC):
             side:
                 vega.Side or str, Side of the order (BUY or SELL)
             volume:
-                int, volume of the order in market position decimals
-                    (e.g. if position decimals is 2 then 1.0 should be passed as 100)
+                float, volume of the order
             price:
-                str, price of the order in market price decimals
-                    (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
+                float, price of the order
             expires_at:
                 int, Optional timestamp for when the order will expire,
                     in nanoseconds since the epoch,
@@ -342,8 +397,18 @@ class VegaService(ABC):
             order_type=order_type,
             time_in_force=time_in_force,
             side=side,
-            volume=volume,
-            price=price,
+            volume=num_to_padded_int(
+                volume,
+                data.market_position_decimals(
+                    market_id, data_client=self.trading_data_client()
+                ),
+            ),
+            price=num_to_padded_int(
+                price,
+                data.market_price_decimals(
+                    market_id, data_client=self.trading_data_client()
+                ),
+            ),
             expires_at=expires_at,
             pegged_order=pegged_order,
             wait=wait,
@@ -355,11 +420,11 @@ class VegaService(ABC):
         trading_wallet: str,
         market_id: str,
         order_id: str,
-        price: Optional[int] = None,
+        price: Optional[float] = None,
         expires_at: Optional[int] = None,
         pegged_offset: Optional[str] = None,
         pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
-        volume_delta: int = 0,
+        volume_delta: float = 0,
         time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
     ):
         """
@@ -376,11 +441,9 @@ class VegaService(ABC):
             side:
                 vega.Side or str, Side of the order (BUY or SELL)
             volume_delta:
-                int, change in volume of the order in market position decimals
-                    (e.g. if position decimals is 2 then 1.0 should be passed as 100)
+                int, change in volume of the order
             price:
-                int, price of the order in market price decimals
-                    (e.g. if price decimals is 2 then 10.00 should be passed as 1000)
+                int, price of the order
             time_in_force:
                 vega.Order.TimeInForce or str, The time in force setting for the order
                     (Only valid options for market are TIME_IN_FORCE_IOC and
@@ -394,11 +457,23 @@ class VegaService(ABC):
             pub_key=self.pub_keys[trading_wallet],
             market_id=market_id,
             order_id=order_id,
-            price=price,
+            price=num_to_padded_int(
+                price,
+                data.market_price_decimals(
+                    market_id, data_client=self.trading_data_client()
+                ),
+            )
+            if price is not None
+            else None,
             expires_at=expires_at,
             pegged_offset=pegged_offset,
             pegged_reference=pegged_reference,
-            volume_delta=volume_delta,
+            volume_delta=num_to_padded_int(
+                volume_delta,
+                data.market_position_decimals(
+                    market_id, data_client=self.trading_data_client()
+                ),
+            ),
             time_in_force=time_in_force,
         )
 
@@ -471,53 +546,66 @@ class VegaService(ABC):
         self,
         settlement_wallet: str,
         settlement_price: float,
-        settlement_asset: str,
-        decimal_place: int = 0,
+        market_id: str,
     ):
-        gov.settle_market(
+        decimals = data.market_price_decimals(
+            market_id, data_client=self.trading_data_client()
+        )
+
+        oracle_name = (
+            data_raw.market_info(market_id)
+            .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
+                0
+            ]
+            .key.name
+        )
+        gov.settle_oracle(
             login_token=self.login_tokens[settlement_wallet],
             pub_key=self.pub_keys[settlement_wallet],
             wallet_server_url=self.wallet_url(),
-            settlement_price=settlement_price,
-            settlement_asset=settlement_asset,
-            decimal_place=decimal_place,
+            oracle_name=oracle_name,
+            settlement_price=num_to_padded_int(settlement_price, decimals=decimals),
         )
 
+    @raw_data
     def party_account(
         self,
         wallet_name: str,
         asset_id: str,
         market_id: str,
-    ) -> data.AccountData:
+    ) -> data_raw.AccountData:
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
-        return data.party_account(
+        return data_raw.party_account(
             self.pub_keys[wallet_name],
             asset_id=asset_id,
             market_id=market_id,
             data_client=self.trading_data_client(),
         )
 
+    @raw_data
     def positions_by_market(
         self,
         wallet_name: str,
         market_id: str,
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
-        return data.positions_by_market(
+        return data_raw.positions_by_market(
             self.pub_keys[wallet_name],
             market_id=market_id,
             data_client=self.trading_data_client(),
         )
 
+    @raw_data
     def all_markets(
         self,
     ) -> List[vega_protos.markets.Market]:
         """
         Output market info.
         """
-        return data.all_markets(data_client=self.trading_data_client())
+        return data_raw.all_markets(data_client=self.trading_data_client())
 
+    @raw_data
     def market_info(
         self,
         market_id: str,
@@ -525,10 +613,11 @@ class VegaService(ABC):
         """
         Output market info.
         """
-        return data.market_info(
+        return data_raw.market_info(
             market_id=market_id, data_client=self.trading_data_client()
         )
 
+    @raw_data
     def market_data(
         self,
         market_id: str,
@@ -536,10 +625,11 @@ class VegaService(ABC):
         """
         Output market info.
         """
-        return data.market_data(
+        return data_raw.market_data(
             market_id=market_id, data_client=self.trading_data_client()
         )
 
+    @raw_data
     def infrastructure_fee_accounts(
         self,
         asset_id: str,
@@ -547,7 +637,7 @@ class VegaService(ABC):
         """
         Output infrastructure fee accounts
         """
-        return data.infrastructure_fee_accounts(
+        return data_raw.infrastructure_fee_accounts(
             asset_id=asset_id, data_client=self.trading_data_client()
         )
 
@@ -588,7 +678,7 @@ class VegaService(ABC):
         self,
         wallet_name: str,
         market_id: str,
-        commitment_amount: int,
+        commitment_amount: float,
         fee: float,
         reference_buy: str,
         reference_sell: str,
@@ -618,9 +708,17 @@ class VegaService(ABC):
             delta_sell:
                 int, the offset from reference point for the sell side of LP
         """
+        asset_id = data_raw.market_info(
+            market_id=market_id, data_client=self.trading_data_client()
+        ).tradable_instrument.instrument.settlement_asset
         return trading.submit_simple_liquidity(
             market_id=market_id,
-            commitment_amount=commitment_amount,
+            commitment_amount=num_to_padded_int(
+                commitment_amount,
+                data.asset_decimals(
+                    asset_id=asset_id, data_client=self.trading_data_client()
+                ),
+            ),
             fee=fee,
             reference_buy=reference_buy,
             reference_sell=reference_sell,
@@ -651,6 +749,7 @@ class VegaService(ABC):
             data_client=self.trading_data_client(),
         )
 
+    @raw_data
     def order_status(
         self, order_id: str, version: int = 0
     ) -> Optional[vega_protos.vega.Order]:
@@ -668,6 +767,6 @@ class VegaService(ABC):
         Returns:
             Optional[vega.Order], the requested Order object or None if nothing found
         """
-        return data.order_status(
+        return data_raw.order_status(
             order_id=order_id, data_client=self.trading_data_client(), version=version
         )
