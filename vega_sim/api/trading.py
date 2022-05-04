@@ -120,6 +120,7 @@ def submit_order(
 
     response = requests.post(url, headers=headers, json=submission)
     response.raise_for_status()
+
     logger.debug(f"Submitted Order on {side} at price {price}.")
 
     if wait:

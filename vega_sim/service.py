@@ -567,16 +567,15 @@ class VegaService(ABC):
             settlement_price=num_to_padded_int(settlement_price, decimals=decimals),
         )
 
-    @raw_data
     def party_account(
         self,
         wallet_name: str,
         asset_id: str,
         market_id: str,
-    ) -> data_raw.AccountData:
+    ) -> data.AccountData:
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
-        return data_raw.party_account(
+        return data.party_account(
             self.pub_keys[wallet_name],
             asset_id=asset_id,
             market_id=market_id,
@@ -734,7 +733,7 @@ class VegaService(ABC):
         """
         asset_id = data_raw.market_info(
             market_id=market_id, data_client=self.trading_data_client()
-        ).tradable_instrument.instrument.settlement_asset
+        ).tradable_instrument.instrument.future.settlement_asset
         return trading.submit_simple_liquidity(
             market_id=market_id,
             commitment_amount=num_to_padded_int(
