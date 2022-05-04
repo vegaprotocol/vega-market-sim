@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections import namedtuple
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import vegaapiclient as vac
 import vegaapiclient.generated.data_node.api.v1 as data_node_protos
@@ -62,11 +64,11 @@ def asset_info(
     ).asset
 
 
-def market_accounts(
+def all_market_accounts(
     asset_id: str,
     market_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> MarketAccount:
+) -> Dict[vega_protos.vega.AccountType, MarketAccount]:
     """
     Output liquidity fee account/ insurance pool in the market
     """
@@ -76,7 +78,20 @@ def market_accounts(
         )
     ).accounts
 
-    account_type_map = {account.type: account for account in accounts}
+    return {account.type: account for account in accounts}
+
+
+def market_accounts(
+    asset_id: str,
+    market_id: str,
+    data_client: vac.VegaTradingDataClient,
+) -> MarketAccount:
+    """
+    Output liquidity fee account/ insurance pool in the market
+    """
+    account_type_map = all_market_accounts(
+        asset_id=asset_id, market_id=market_id, data_client=data_client
+    )
     return MarketAccount(
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY],
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_INSURANCE],

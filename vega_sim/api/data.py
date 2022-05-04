@@ -182,3 +182,32 @@ def open_orders_by_market(
                 offers[price] = bids.get(price, 0) + volume
 
     return OrderBook(bids, offers)
+
+
+def market_account(
+    market_id: str,
+    account_type: vega_protos.vega.AccountType,
+    data_client: vac.VegaTradingDataClient,
+) -> float:
+    """
+    Returns the current asset value in the Market's fee account
+
+    Args:
+        market_id:
+            str, The ID of the market to check
+        account_type:
+            vega.AccountType, the account type to check for
+
+    Returns:
+        float, the current balance in the market's fee asset
+    """
+    accounts = data_raw.all_market_accounts(
+        asset_id=None, market_id=market_id, data_client=data_client
+    )
+    acct = accounts[account_type]
+
+    asset_dp = asset_decimals(asset_id=acct.asset, data_client=data_client)
+    return num_from_padded_int(
+        acct.balance,
+        asset_dp,
+    )

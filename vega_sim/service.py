@@ -641,17 +641,41 @@ class VegaService(ABC):
             asset_id=asset_id, data_client=self.trading_data_client()
         )
 
+    @raw_data
     def market_accounts(
         self,
         asset_id: str,
         market_id: str,
-    ) -> data.MarketAccount:
+    ) -> data_raw.MarketAccount:
         """
         Output liquidity fee account/ insurance pool in the market
         """
-        return data.market_accounts(
+        return data_raw.market_accounts(
             asset_id=asset_id,
             market_id=market_id,
+            data_client=self.trading_data_client(),
+        )
+
+    def market_account(
+        self,
+        market_id: str,
+        account_type: vega_protos.vega.AccountType,
+    ) -> float:
+        """
+        Returns the current asset value in the Market's fee account
+
+        Args:
+            market_id:
+                str, The ID of the market to check
+            account_type:
+                vega.AccountType, the account type to check for
+
+        Returns:
+            float, the current balance in the market's fee asset
+        """
+        return data.market_account(
+            market_id=market_id,
+            account_type=account_type,
             data_client=self.trading_data_client(),
         )
 
