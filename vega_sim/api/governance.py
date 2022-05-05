@@ -411,13 +411,12 @@ def _make_and_wait_for_proposal(
         )
 
 
-def settle_market(
+def settle_oracle(
     login_token: str,
     pub_key: str,
     wallet_server_url: str,
     settlement_price: float,
-    settlement_asset: str,
-    decimal_place: int,
+    oracle_name: str,
 ) -> None:
     """
     Settle the market and send settlement price.
@@ -431,11 +430,8 @@ def settle_market(
              termination/settlement oracle signals
         settlement_price:
             float, final settlement price for the asset
-        settlement_asset:
-            str, The name of the asset. Should be the argument used to future_asset
-             if propose_future_market was used
-        decimal_place:
-            int, the number of decimal places market precision
+        oracle_name:
+            str, the name of the oracle to settle
 
     """
     headers = {"Authorization": f"Bearer {login_token}"}
@@ -452,15 +448,14 @@ def settle_market(
         "propagate": True,
     }
 
-    logger.info(f"Settling market at price {settlement_price} for {settlement_asset}")
+    logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
     url = f"{wallet_server_url}/api/v1/command/sync"
     response = requests.post(url, headers=headers, json=oracle)
     response.raise_for_status()
 
     # use oracle to settle market
-    settlement_price = str(int(settlement_price * 10**decimal_place))
-    payload = {f"price.{settlement_asset}.value": settlement_price}
+    payload = {oracle_name: settlement_price}
     as_str = json.dumps(payload).encode()
     oracle = {
         "oracleDataSubmission": {

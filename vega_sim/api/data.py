@@ -1,18 +1,20 @@
 import numpy as np
 from collections import namedtuple
-from typing import Dict, List, Optional, Tuple
+from typing import Tuple
 
 import vegaapiclient as vac
 import vegaapiclient.generated.data_node.api.v1 as data_node_protos
 import vegaapiclient.generated.vega as vega_protos
-
-AccountData = namedtuple("AccountData", ["general", "margin", "bond"])
-MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
-OrderBook = namedtuple("OrderBook", ["bids", "offers"])
+import vega_sim.api.data_raw as data_raw
+from vega_sim.api.helpers import num_from_padded_int
 
 
 class MissingAssetError(Exception):
     pass
+
+
+AccountData = namedtuple("AccountData", ["general", "margin", "bond"])
+OrderBook = namedtuple("OrderBook", ["bids", "offers"])
 
 
 def party_account(
@@ -29,6 +31,8 @@ def party_account(
     )
     accounts = data_client.PartyAccounts(account_req).accounts
 
+    asset_dp = asset_decimals(asset_id, data_client)
+
     general, margin, bond = np.nan, np.nan, np.nan
     for account in accounts:
         if account.market_id and account.market_id != market_id:
@@ -36,11 +40,11 @@ def party_account(
             # all markets then filter down here
             continue
         if account.type == vega_protos.vega.ACCOUNT_TYPE_GENERAL:
-            general = float(account.balance)
+            general = num_from_padded_int(float(account.balance), asset_dp)
         if account.type == vega_protos.vega.ACCOUNT_TYPE_MARGIN:
-            margin = float(account.balance)
+            margin = num_from_padded_int(float(account.balance), asset_dp)
         if account.type == vega_protos.vega.ACCOUNT_TYPE_BOND:
-            bond = float(account.balance)
+            bond = num_from_padded_int(float(account.balance), asset_dp)
 
     return AccountData(general, margin, bond)
 
@@ -56,7 +60,8 @@ def find_asset_id(
         data_client:
             VegaTradingDataClient, the gRPC data client
         raise_on_missing:
-            bool, whether to raise an Error or silently return if the asset does not exist
+            bool, whether to raise an Error or silently return
+                if the asset does not exist
 
     Returns:
         str, the ID of the asset
@@ -74,95 +79,79 @@ def find_asset_id(
         )
 
 
-def positions_by_market(
-    pub_key: str,
+def market_price_decimals(
     market_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> List[vega_protos.vega.Position]:
-    """Output positions of a party."""
-    positions_req = data_node_protos.trading_data.PositionsByPartyRequest(
-        party_id=pub_key,
-        market_id=market_id,
-    )
-    return data_client.PositionsByParty(positions_req).positions
+) -> int:
+    """Returns the number of decimal places a specified market uses for price units.
 
+    Args:
+        market_id:
+            str, The ID of the market requested
+        data_client:
+            VegaTradingDataClient, an instantiated gRPC data client
 
-def all_markets(
-    data_client: vac.VegaTradingDataClient,
-) -> List[vega_protos.markets.Market]:
+    Returns:
+        int, The number of decimal places the market uses
     """
-    Output market info.
-    """
-    market_req = data_node_protos.trading_data.MarketsRequest()
-    return data_client.Markets(market_req).markets
+    return data_raw.market_info(
+        market_id=market_id, data_client=data_client
+    ).decimal_places
 
 
-def market_info(
+def market_position_decimals(
     market_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> vega_protos.markets.Market:
+) -> int:
+    """Returns the number of decimal places a specified market uses for position units.
+
+    Args:
+        market_id:
+            str, The ID of the market requested
+        data_client:
+            VegaTradingDataClient, an instantiated gRPC data client
+
+    Returns:
+        int, The number of decimal places the market uses for positions
     """
-    Output market info.
-    """
-    market_req = data_node_protos.trading_data.MarketByIDRequest(market_id=market_id)
-    return data_client.MarketByID(market_req).market
+    return data_raw.market_info(
+        market_id=market_id, data_client=data_client
+    ).position_decimal_places
 
 
-def market_data(
-    market_id: str,
-    data_client: vac.VegaTradingDataClient,
-) -> vega_protos.vega.MarketData:
-    """
-    Output market info.
-    """
-    market_req = data_node_protos.trading_data.MarketDataByIDRequest(
-        market_id=market_id
-    )
-    return data_client.MarketDataByID(market_req).market_data
-
-
-def infrastructure_fee_accounts(
+def asset_decimals(
     asset_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> List[vega_protos.vega.Account]:
-    """
-    Output infrastructure fee accounts
-    """
-    return data_client.FeeInfrastructureAccounts(
-        data_node_protos.trading_data.FeeInfrastructureAccountsRequest(asset=asset_id)
-    ).accounts
+) -> int:
+    """Returns the number of decimal places a specified asset uses for price.
 
+    Args:
+        asset_id:
+            str, The ID of the asset requested
+        data_client:
+            VegaTradingDataClient, an instantiated gRPC data client
 
-def market_accounts(
-    asset_id: str,
-    market_id: str,
-    data_client: vac.VegaTradingDataClient,
-) -> MarketAccount:
+    Returns:
+        int, The number of decimal places the asset uses
     """
-    Output liquidity fee account/ insurance pool in the market
-    """
-    accounts = data_client.MarketAccounts(
-        data_node_protos.trading_data.MarketAccountsRequest(
-            asset=asset_id, market_id=market_id
-        )
-    ).accounts
-
-    account_type_map = {account.type: account for account in accounts}
-    return MarketAccount(
-        account_type_map[vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY],
-        account_type_map[vega_protos.vega.ACCOUNT_TYPE_INSURANCE],
-    )
+    return data_raw.asset_info(
+        asset_id=asset_id, data_client=data_client
+    ).details.decimals
 
 
 def best_prices(
     market_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> Tuple[int, int]:
+) -> Tuple[float, float]:
     """
     Output the best static bid price and best static ask price in current market.
     """
-    mkt_data = market_data(market_id=market_id, data_client=data_client)
-    return int(mkt_data.best_static_bid_price), int(mkt_data.best_static_offer_price)
+    mkt_data = data_raw.market_data(market_id=market_id, data_client=data_client)
+    mkt_price_dp = market_price_decimals(market_id=market_id, data_client=data_client)
+
+    return num_from_padded_int(
+        mkt_data.best_static_bid_price, mkt_price_dp
+    ), num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp)
 
 
 def open_orders_by_market(
@@ -176,43 +165,49 @@ def open_orders_by_market(
         data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id)
     ).orders
 
+    mkt_price_dp = market_price_decimals(market_id=market_id, data_client=data_client)
+    mkt_pos_dp = market_position_decimals(market_id=market_id, data_client=data_client)
+
     bids = {}
     offers = {}
     for order in orders:
         if order.status == vega_protos.vega.Order.Status.STATUS_ACTIVE:
-            if order.side == vega_protos.vega.Order.Side.SIDE_BUY:
-                price = int(order["price"])
-                volume = int(order["remaining"])
+            if order.side == vega_protos.vega.Side.SIDE_BUY:
+                price = num_from_padded_int(order.price, mkt_price_dp)
+                volume = num_from_padded_int(order.remaining, mkt_pos_dp)
                 bids[price] = bids.get(price, 0) + volume
             else:
-                price = int(order["price"])
-                volume = int(order["remaining"])
+                price = num_from_padded_int(order.price, mkt_price_dp)
+                volume = num_from_padded_int(order.remaining, mkt_pos_dp)
                 offers[price] = bids.get(price, 0) + volume
 
     return OrderBook(bids, offers)
 
 
-def order_status(
-    order_id: str, data_client: vac.VegaTradingDataClient, version: int = 0
-) -> Optional[vega_protos.vega.Order]:
-    """Loads information about a specific order identified by the ID.
-    Optionally return historic order versions.
+def market_account(
+    market_id: str,
+    account_type: vega_protos.vega.AccountType,
+    data_client: vac.VegaTradingDataClient,
+) -> float:
+    """
+    Returns the current asset value in the Market's fee account
 
     Args:
-        order_id:
-            str, the order identifier as specified by Vega when originally placed
-        data_client:
-            VegaTradingDataClient, an instantiated gRPC trading data client
-        version:
-            int, Optional, Version of the order:
-                - Set `version` to 0 for most recent version of the order
-                - Set `1` for original version of the order
-                - Set `2` for first amendment, `3` for second amendment, etc
+        market_id:
+            str, The ID of the market to check
+        account_type:
+            vega.AccountType, the account type to check for
+
     Returns:
-        Optional[vega.Order], the requested Order object or None if nothing found
+        float, the current balance in the market's fee asset
     """
-    return data_client.OrderByID(
-        data_node_protos.trading_data.OrderByIDRequest(
-            order_id=order_id, version=version
-        )
-    ).order
+    accounts = data_raw.all_market_accounts(
+        asset_id=None, market_id=market_id, data_client=data_client
+    )
+    acct = accounts[account_type]
+
+    asset_dp = asset_decimals(asset_id=acct.asset, data_client=data_client)
+    return num_from_padded_int(
+        acct.balance,
+        asset_dp,
+    )

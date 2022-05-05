@@ -25,6 +25,15 @@ def enum_to_str(e: Any, val: int) -> str:
     return e.keys()[e.values().index(val)]
 
 
+def num_to_padded_int(to_convert: float, decimals: int) -> float:
+    return int(to_convert * 10**decimals)
+
+
+def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
+    to_convert = int(to_convert) if isinstance(to_convert, str) else to_convert
+    return float(to_convert) / 10**decimals
+
+
 def wait_for_acceptance(
     submission_ref: str,
     submission_load_func: Callable[[str], T],
