@@ -424,6 +424,13 @@ class VegaServiceNull(VegaService):
         if start_immediately:
             self.start()
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
+
     def _assign_ports(self):
         self.wallet_port = 0
         self.data_node_rest_port = 0
@@ -464,7 +471,6 @@ class VegaServiceNull(VegaService):
                 "run_wallet_with_console": self.run_wallet_with_console,
                 "port_config": self._generate_port_config(),
             },
-            daemon=True,
         )
         self.proc.start()
 
