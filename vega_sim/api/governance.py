@@ -59,6 +59,14 @@ def _default_initial_liquidity_commitment() -> vega_protos.governance.NewMarketC
     )
 
 
+def _default_risk_model() -> vega_protos.markets.LogNormalRiskModel:
+    return vega_protos.markets.LogNormalRiskModel(
+        risk_aversion_parameter=0.01,
+        tau=1.90128526884173e-06,
+        params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.016, sigma=3.0),
+    )
+
+
 def get_blockchain_time(data_client: vac.VegaTradingDataClient) -> int:
     """Returns blockchain time in seconds since the epoch"""
     blockchain_time = data_client.GetVegaTime(
@@ -83,6 +91,7 @@ def propose_future_market(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
     liquidity_commitment: Optional[vega_protos.governance.NewMarketCommitment] = None,
+    risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -146,6 +155,8 @@ def propose_future_market(
         else _default_initial_liquidity_commitment()
     )
 
+    risk_model = risk_model if risk_model is not None else _default_risk_model()
+
     oracle_spec_for_settlement_price = oracles_protos.spec.OracleSpecConfiguration(
         pub_keys=[termination_pub_key],
         filters=[
@@ -201,13 +212,7 @@ def propose_future_market(
                 triggering_ratio=0.7,
                 auction_extension=0,
             ),
-            log_normal=vega_protos.markets.LogNormalRiskModel(
-                risk_aversion_parameter=0.01,
-                tau=1.90128526884173e-06,
-                params=vega_protos.markets.LogNormalModelParams(
-                    mu=0, r=0.016, sigma=1.5
-                ),
-            ),
+            log_normal=risk_model,
         ),
         liquidity_commitment=liquidity_commitment,
     )
