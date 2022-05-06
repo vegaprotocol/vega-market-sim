@@ -197,6 +197,9 @@ class VegaService(ABC):
         future_asset: Optional[str] = None,
         position_decimals: Optional[int] = None,
         market_decimals: Optional[int] = None,
+        risk_aversion: Optional[float] = 1e-6,
+        tau: Optional[float] = 1.0/365.25/24,
+        sigma: Optional[float] = 1.0,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -222,6 +225,13 @@ class VegaService(ABC):
             additional_kwargs["future_asset"] = future_asset
 
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+        
+        risk_model = vega_protos.markets.LogNormalRiskModel(
+                risk_aversion_parameter=risk_aversion,
+                tau=tau,
+                params=vega_protos.markets.LogNormalModelParams(
+                    mu=0, r=0.0, sigma=sigma))
+        
         proposal_id = gov.propose_future_market(
             market_name=market_name,
             pub_key=self.pub_keys[proposal_wallet],
@@ -235,6 +245,7 @@ class VegaService(ABC):
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
             validation_time=blockchain_time_seconds + 10,
+            risk_model=risk_model,
             **additional_kwargs,
         )
         gov.approve_proposal(
