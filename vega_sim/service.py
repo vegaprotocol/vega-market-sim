@@ -419,7 +419,9 @@ class VegaService(ABC):
                 data.market_price_decimals(
                     market_id, data_client=self.trading_data_client()
                 ),
-            ),
+            )
+            if price is not None
+            else None,
             expires_at=expires_at,
             pegged_order=pegged_order,
             wait=wait,
