@@ -566,7 +566,7 @@ class VegaService(ABC):
         )
 
         oracle_name = (
-            data_raw.market_info(market_id)
+            data_raw.market_info(market_id, data_client=self.trading_data_client())
             .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
                 0
             ]
