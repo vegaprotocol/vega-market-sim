@@ -7,9 +7,9 @@ import uuid
 from google.protobuf.json_format import MessageToDict
 from typing import Callable, Optional, Union
 
-import vegaapiclient as vac
-import vegaapiclient.generated.data_node.api.v1 as data_node_protos
-import vegaapiclient.generated.vega as vega_protos
+import vega_sim.grpc.client as vac
+import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.vega as vega_protos
 from vega_sim.api.helpers import get_enum, enum_to_str, wait_for_acceptance
 
 logger = logging.getLogger(__name__)
@@ -85,13 +85,13 @@ def submit_order(
 
     if expires_at is None:
         blockchain_time = data_client.GetVegaTime(
-            vac.data_node.api.v1.trading_data.GetVegaTimeRequest()
+            data_node_protos.trading_data.GetVegaTimeRequest()
         ).timestamp
         expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
 
     order_ref = f"{pub_key}-{uuid.uuid4()}"
 
-    order_data = vac.vega.commands.v1.commands.OrderSubmission(
+    order_data = vega_protos.commands.v1.commands.OrderSubmission(
         market_id=market_id,
         # price is an integer. For example 123456 is a price of 1.23456,
         # assuming 5 decimal places.
@@ -148,7 +148,7 @@ def submit_order(
             wait_fn()
             response = wait_for_acceptance(order_ref, _proposal_loader)
 
-        order_status = enum_to_str(vac.vega.vega.Order.Status, response.status)
+        order_status = enum_to_str(vega_protos.vega.Order.Status, response.status)
 
         logger.debug(
             f"Order processed, ID: {response.id}, Status: {order_status}, Version:"
@@ -157,7 +157,7 @@ def submit_order(
         if order_status == "STATUS_REJECTED":
             raise OrderRejectedError(
                 "Rejection reason:"
-                f" {enum_to_str(vac.vega.vega.OrderError, response.reason)}"
+                f" {enum_to_str(vega_protos.vega.OrderError, response.reason)}"
             )
         return response.id
 
@@ -211,7 +211,7 @@ def amend_order(
     )
     headers = {"Authorization": f"Bearer {login_token}"}
 
-    order_data = vac.vega.commands.v1.commands.OrderAmendment(
+    order_data = vega_protos.commands.v1.commands.OrderAmendment(
         market_id=market_id,
         order_id=order_id,
         # price is an integer. For example 123456 is a price of 1.23456,
@@ -271,7 +271,7 @@ def cancel_order(
 
     cancellation = {
         "orderCancellation": MessageToDict(
-            vac.vega.commands.v1.commands.OrderCancellation(
+            vega_protos.commands.v1.commands.OrderCancellation(
                 order_id=order_id,
                 market_id=market_id,
             )
@@ -333,7 +333,7 @@ def submit_simple_liquidity(
 
     submission = {
         submission_name: MessageToDict(
-            vac.vega.commands.v1.commands.LiquidityProvisionSubmission(
+            vega_protos.commands.v1.commands.LiquidityProvisionSubmission(
                 market_id=market_id,
                 commitment_amount=str(commitment_amount),
                 fee=str(fee),

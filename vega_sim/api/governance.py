@@ -5,11 +5,11 @@ from typing import Optional
 from google.protobuf.json_format import MessageToDict
 
 import requests
-import vegaapiclient as vac
-import vegaapiclient.generated.data_node.api.v1 as data_node_protos
-import vegaapiclient.generated.vega as vega_protos
-import vegaapiclient.generated.vega.oracles.v1 as oracles_protos
-import vegaapiclient.generated.vega.commands.v1 as commands_protos
+import vega_sim.grpc.client as vac
+import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.oracles.v1 as oracles_protos
+import vega_sim.proto.vega.commands.v1 as commands_protos
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
     generate_id,

@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections import namedtuple
 from typing import Dict, List, Optional
 
-import vegaapiclient as vac
-import vegaapiclient.generated.data_node.api.v1 as data_node_protos
-import vegaapiclient.generated.vega as vega_protos
+import vega_sim.grpc.client as vac
+import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.vega as vega_protos
 
 MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
 

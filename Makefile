@@ -2,6 +2,7 @@ VEGA_TAG := develop
 WALLET_TAG := develop
 DATA_NODE_TAG := develop
 CONSOLE_TAG := master
+PROTO_TAG := develop
 EXTERN_DIR := "./extern"
 
 all: pull_deps build_deps
@@ -54,6 +55,23 @@ build_deps_ui:
 	@yarn --cwd vega_sim/bin/console install
 
 ui: pull_deps_ui build_deps_ui
+
+pull_deps_proto:
+	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
+	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
+	@echo "Downloading Vega Protos"
+	@if [ ! -d ./extern/proto ]; then mkdir ${EXTERN_DIR}/proto; git clone https://github.com/vegaprotocol/protos ${EXTERN_DIR}/proto; fi
+ifneq (${PROTO_TAG},develop)
+	@git -C ${EXTERN_DIR}/proto checkout -b ${PROTO_TAG}
+else
+	@git -C ${EXTERN_DIR}/proto checkout develop; git -C ${EXTERN_DIR}/proto pull
+endif
+
+build_proto:
+	@rm -rf ./vega_sim/proto
+	@mkdir ./vega_sim/proto
+	@python -m grpc_tools.protoc -I ${EXTERN_DIR}/proto/sources --python_out=vega_sim/proto --grpc_python_out=vega_sim/proto $(shell find ${EXTERN_DIR}/proto/sources -name '*.proto')
+	@GENERATED_DIR=./vega_sim/proto scripts/post-generate.sh
 
 .PHONY: black
 black:

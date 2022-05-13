@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 requests = "*"
-vega-api-client = "*"
 toml = "*"
 numpy = "*"
+grpcio-tools = "*"
 
 [dev-packages]
 black = "*"
@@ -16,6 +16,7 @@ requests-mock = "*"
 jupyterlab = "*"
 jupyter = "*"
 notebook = "*"
+jinja2 = "*"
 
 [requires]
 python_version = "3"

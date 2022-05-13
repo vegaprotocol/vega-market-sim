@@ -8,8 +8,8 @@ from typing import List, Optional, Tuple, Union
 
 import grpc
 import requests
-import vegaapiclient as vac
-import vegaapiclient.generated.vega as vega_protos
+import vega_sim.grpc.client as vac
+import vega_sim.proto.vega as vega_protos
 
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
