@@ -8,7 +8,7 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
 
 
-MarketState = namedtuple("MarketState", ["state"])
+MarketState = namedtuple("MarketState", ["state", "trading_mode"])
 
 
 class MarketEnvironment:
@@ -27,11 +27,17 @@ class MarketEnvironment:
         self.run_with_console = run_with_console
 
     def run(self) -> None:
-        with VegaServiceNull(run_wallet_with_console=self.run_with_console) as vega:
+        with VegaServiceNull(
+            run_wallet_with_console=self.run_with_console, warn_on_raw_data_access=False
+        ) as vega:
+            print(vega.data_node_graphql_port)
             for agent in self.agents:
                 agent.initialise(vega=vega)
             for _ in range(self.n_steps):
                 self.step(vega)
+            import pdb
+
+            pdb.set_trace()
 
     def step(self, vega: VegaService) -> None:
         for agent in (
@@ -44,15 +50,6 @@ class MarketEnvironment:
 
 
 class MarketEnvironmentWithState(MarketEnvironment):
-    @staticmethod
-    def _default_state_extraction(vega: VegaService) -> VegaState:
-        market_state = {}
-        for market_id in vega.all_markets():
-            market_info = vega.market_info(market_id=market_id)
-            market_state[market_id] = MarketState(state=market_info.state)
-
-        return VegaState(network_state=(), market_state=market_state)
-
     def __init__(
         self,
         agents: List[StateAgent],
@@ -72,6 +69,17 @@ class MarketEnvironmentWithState(MarketEnvironment):
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
         )
+
+    @staticmethod
+    def _default_state_extraction(vega: VegaService) -> VegaState:
+        market_state = {}
+        for market in vega.all_markets():
+            market_info = vega.market_info(market_id=market.id)
+            market_state[market.id] = MarketState(
+                state=market_info.state, trading_mode=market_info.trading_mode
+            )
+
+        return VegaState(network_state=(), market_state=market_state)
 
     def step(self, vega: VegaService) -> None:
         state = self.state_func(vega)

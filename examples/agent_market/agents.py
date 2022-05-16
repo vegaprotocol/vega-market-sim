@@ -2,7 +2,7 @@ import random
 from collections import namedtuple
 from vega_sim.environment import StateAgent, VegaState
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.proto.vega import vega as vega_protos
+from vega_sim.proto.vega import vega as vega_protos, markets as markets_protos
 from vega_sim.service import VegaService
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -81,6 +81,7 @@ class MarketMaker(StateAgent):
             amount=1e5,
         )
 
+        self.vega.forward("2s")
         # Get the market set up
         self.vega.create_simple_market(
             market_name="BTC:DAI_Mar22",
@@ -110,7 +111,28 @@ class MarketMaker(StateAgent):
             time_in_force="TIME_IN_FORCE_GTC",
             side="SIDE_SELL",
             volume=100,
-            price=1.01,
+            price=1,
+        )
+
+        # Submit some orders to open the market
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side="SIDE_BUY",
+            volume=100,
+            price=0.95,
+        )
+
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side="SIDE_SELL",
+            volume=100,
+            price=1.05,
         )
 
         self.vega.submit_simple_liquidity(
@@ -126,13 +148,13 @@ class MarketMaker(StateAgent):
         )
 
     def step(self, vega_state: VegaState):
-        market_state = vega_state[self.market_id].state
+        market_state = vega_state.market_state[self.market_id].state
 
-        if market_state == vega_protos.markets.Market.State.STATE_SUSPENDED:
+        if market_state == markets_protos.Market.State.STATE_SUSPENDED:
             curr_buy = self.vega.order_status(self.order_id_buy)
             curr_sell = self.vega.order_status(self.order_id_sell)
 
-            if curr_sell.status == vega_protos.vega.Order.Status.STATUS_FILLED:
+            if curr_sell.status == vega_protos.Order.Status.STATUS_FILLED:
                 self.order_id_sell = self.vega.submit_order(
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
@@ -159,12 +181,25 @@ class MarketMaker(StateAgent):
 
 class MarketOrderTraders(StateAgent):
     def initialise(self, vega: VegaService):
+        super().initialise(vega=vega)
         self.market_id = self.vega.all_markets()[0].id
 
-    def step(self, vega_state: VegaState):
-        self.vega.submit_market_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            side="SIDE_BUY" if random.random() > 0.5 else "SIDE_SELL",
-            volume=1,
+        tdai_id = self.vega.find_asset_id(symbol="tDAI")
+        self.vega.mint(
+            self.wallet_name,
+            asset=tdai_id,
+            amount=1e5,
         )
+        self.vega.forward("2s")
+
+    def step(self, vega_state: VegaState):
+        if (
+            vega_state.market_state[self.market_id].trading_mode
+            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        ):
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side="SIDE_BUY" if random.random() > 0.5 else "SIDE_SELL",
+                volume=1,
+            )

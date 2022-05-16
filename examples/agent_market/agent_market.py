@@ -20,7 +20,9 @@ def main():
         wallet_name=TRADER_WALLET.name, wallet_pass=TRADER_WALLET.passphrase
     )
     env = MarketEnvironmentWithState(
-        agents=[market_maker, mo_traders], n_steps=1000, run_with_console=True
+        agents=[market_maker, mo_traders],
+        n_steps=1 * 60 * 60 * 24,
+        run_with_console=True,
     )
     env.run()
 
