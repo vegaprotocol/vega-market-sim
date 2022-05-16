@@ -371,6 +371,9 @@ def _build_generic_proposal(
             enactment_timestamp=enactment_time,
             validation_timestamp=validation_time,
         ),
+        rationale=vega_protos.governance.ProposalRationale(
+            description="Making a proposal"
+        ),
     )
 
 
@@ -384,9 +387,9 @@ def _make_and_wait_for_proposal(
     headers = {"Authorization": f"Bearer {login_token}"}
 
     submiss = MessageToDict(proposal)
-    submiss["rationale"] = {
-        "description": "Making a proposal",
-    }
+    # submiss["rationale"] = {
+    #     "description": "Making a proposal",
+    # }
     proposal_json = {
         "proposalSubmission": submiss,
         "pubKey": pub_key,
