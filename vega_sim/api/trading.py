@@ -359,5 +359,6 @@ def submit_simple_liquidity(
 
     url = f"{wallet_server_url}/api/v1/command/sync"
     response = requests.post(url, headers=headers, json=submission)
+
     response.raise_for_status()
     logger.debug(f"Submitted liquidity on market {market_id}")

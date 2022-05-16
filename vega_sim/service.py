@@ -159,7 +159,6 @@ class VegaService(ABC):
             amount:
                 float, the amount of asset to mint
         """
-        self._check_logged_in(wallet_name)
         asset_decimals = data.asset_decimals(
             asset_id=asset, data_client=self.trading_data_client()
         )

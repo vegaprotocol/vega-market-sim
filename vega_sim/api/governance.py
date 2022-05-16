@@ -414,7 +414,7 @@ def _make_and_wait_for_proposal(
     if prop_state in ["STATE_REJECTED", "STATE_DECLINED", "STATE_FAILED"]:
         raise ProposalNotAcceptedError(
             f"Your proposal was {prop_state} due to"
-            f" {enum_to_str(vac.vega.governance.ProposalError, proposal.proposal.reason)}."
+            f" {enum_to_str(vega_protos.vega.governance.ProposalError, proposal.proposal.reason)}."
             f" Any further info: {proposal.proposal.error_details}"
         )
 
