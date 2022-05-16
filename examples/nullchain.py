@@ -23,7 +23,7 @@ wallets = [MM_WALLET, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    with VegaServiceNull(run_wallet_with_console=True) as vega:
+    with VegaServiceNull(run_wallet_with_console=False) as vega:
 
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
@@ -66,13 +66,13 @@ if __name__ == "__main__":
         vega.submit_simple_liquidity(
             wallet_name=MM_WALLET.name,
             market_id=market_id,
-            commitment_amount=200000,
+            commitment_amount=1.9,
             fee=0.002,
             reference_buy="PEGGED_REFERENCE_MID",
             reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=1,
-            delta_sell=1,
-            is_amendment=False,
+            delta_buy=0.5,
+            delta_sell=0.5,
+            is_amendment=True,
         )
 
         vega.submit_order(
