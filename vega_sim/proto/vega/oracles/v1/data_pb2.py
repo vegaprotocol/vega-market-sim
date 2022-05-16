@@ -7,39 +7,47 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x1avega/oracles/v1/data.proto\x12\noracles.v1"r\n\nOracleData\x12\x10\n\x08pub_keys\x18\x01 \x03(\t\x12"\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x14.oracles.v1.Property\x12\x18\n\x10matched_spec_ids\x18\x03 \x03(\t\x12\x14\n\x0c\x62roadcast_at\x18\x04 \x01(\x03"\'\n\x08Property\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\tB-Z+code.vegaprotocol.io/protos/vega/oracles/v1b\x06proto3'
+)
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1avega/oracles/v1/data.proto\x12\noracles.v1\"r\n\nOracleData\x12\x10\n\x08pub_keys\x18\x01 \x03(\t\x12\"\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x14.oracles.v1.Property\x12\x18\n\x10matched_spec_ids\x18\x03 \x03(\t\x12\x14\n\x0c\x62roadcast_at\x18\x04 \x01(\x03\"\'\n\x08Property\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\tB-Z+code.vegaprotocol.io/protos/vega/oracles/v1b\x06proto3')
-
-
-
-_ORACLEDATA = DESCRIPTOR.message_types_by_name['OracleData']
-_PROPERTY = DESCRIPTOR.message_types_by_name['Property']
-OracleData = _reflection.GeneratedProtocolMessageType('OracleData', (_message.Message,), {
-  'DESCRIPTOR' : _ORACLEDATA,
-  '__module__' : 'vega.oracles.v1.data_pb2'
-  # @@protoc_insertion_point(class_scope:oracles.v1.OracleData)
-  })
+_ORACLEDATA = DESCRIPTOR.message_types_by_name["OracleData"]
+_PROPERTY = DESCRIPTOR.message_types_by_name["Property"]
+OracleData = _reflection.GeneratedProtocolMessageType(
+    "OracleData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ORACLEDATA,
+        "__module__": "vega.oracles.v1.data_pb2"
+        # @@protoc_insertion_point(class_scope:oracles.v1.OracleData)
+    },
+)
 _sym_db.RegisterMessage(OracleData)
 
-Property = _reflection.GeneratedProtocolMessageType('Property', (_message.Message,), {
-  'DESCRIPTOR' : _PROPERTY,
-  '__module__' : 'vega.oracles.v1.data_pb2'
-  # @@protoc_insertion_point(class_scope:oracles.v1.Property)
-  })
+Property = _reflection.GeneratedProtocolMessageType(
+    "Property",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PROPERTY,
+        "__module__": "vega.oracles.v1.data_pb2"
+        # @@protoc_insertion_point(class_scope:oracles.v1.Property)
+    },
+)
 _sym_db.RegisterMessage(Property)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z+code.vegaprotocol.io/protos/vega/oracles/v1'
-  _ORACLEDATA._serialized_start=42
-  _ORACLEDATA._serialized_end=156
-  _PROPERTY._serialized_start=158
-  _PROPERTY._serialized_end=197
+    DESCRIPTOR._options = None
+    DESCRIPTOR._serialized_options = b"Z+code.vegaprotocol.io/protos/vega/oracles/v1"
+    _ORACLEDATA._serialized_start = 42
+    _ORACLEDATA._serialized_end = 156
+    _PROPERTY._serialized_start = 158
+    _PROPERTY._serialized_end = 197
 # @@protoc_insertion_point(module_scope)
