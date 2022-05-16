@@ -7,6 +7,7 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -18,292 +19,407 @@ from ... import governance_pb2 as vega_dot_governance__pb2
 from ...events.v1 import events_pb2 as vega_dot_events_dot_v1_dot_events__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n#vega/checkpoint/v1/checkpoint.proto\x12\x12vega.checkpoint.v1\x1a\x0fvega/vega.proto\x1a\x11vega/assets.proto\x1a\x15vega/governance.proto\x1a\x1bvega/events/v1/events.proto\".\n\x0f\x43heckpointState\x12\x0c\n\x04hash\x18\x01 \x01(\x0c\x12\r\n\x05state\x18\x02 \x01(\x0c\"\x8b\x02\n\nCheckpoint\x12\x12\n\ngovernance\x18\x01 \x01(\x0c\x12\x0e\n\x06\x61ssets\x18\x02 \x01(\x0c\x12\x12\n\ncollateral\x18\x03 \x01(\x0c\x12\x1a\n\x12network_parameters\x18\x04 \x01(\x0c\x12\x12\n\ndelegation\x18\x05 \x01(\x0c\x12\r\n\x05\x65poch\x18\x06 \x01(\x0c\x12\r\n\x05\x62lock\x18\x07 \x01(\x0c\x12\x0f\n\x07rewards\x18\x08 \x01(\x0c\x12\x0f\n\x07\x62\x61nking\x18\t \x01(\x0c\x12\x12\n\nvalidators\x18\n \x01(\x0c\x12\x0f\n\x07staking\x18\x0b \x01(\x0c\x12\x18\n\x10multisig_control\x18\x0c \x01(\x0c\x12\x16\n\x0emarket_tracker\x18\r \x01(\x0c\"C\n\nAssetEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12)\n\rasset_details\x18\x02 \x01(\x0b\x32\x12.vega.AssetDetails\"8\n\x06\x41ssets\x12.\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x1e.vega.checkpoint.v1.AssetEntry\"=\n\x0c\x41ssetBalance\x12\r\n\x05party\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\t\"@\n\nCollateral\x12\x32\n\x08\x62\x61lances\x18\x01 \x03(\x0b\x32 .vega.checkpoint.v1.AssetBalance\"3\n\tNetParams\x12&\n\x06params\x18\x01 \x03(\x0b\x32\x16.vega.NetworkParameter\".\n\tProposals\x12!\n\tproposals\x18\x01 \x03(\x0b\x32\x0e.vega.Proposal\"c\n\rDelegateEntry\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0c\n\x04node\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nundelegate\x18\x04 \x01(\x08\x12\x11\n\tepoch_seq\x18\x05 \x01(\x04\"\x8a\x01\n\x08\x44\x65legate\x12\x31\n\x06\x61\x63tive\x18\x01 \x03(\x0b\x32!.vega.checkpoint.v1.DelegateEntry\x12\x32\n\x07pending\x18\x02 \x03(\x0b\x32!.vega.checkpoint.v1.DelegateEntry\x12\x17\n\x0f\x61uto_delegation\x18\x03 \x03(\t\"\x17\n\x05\x42lock\x12\x0e\n\x06height\x18\x01 \x01(\x03\"<\n\x07Rewards\x12\x31\n\x07rewards\x18\x01 \x03(\x0b\x32 .vega.checkpoint.v1.RewardPayout\"d\n\x0cRewardPayout\x12\x13\n\x0bpayout_time\x18\x01 \x01(\x03\x12?\n\x0erewards_payout\x18\x02 \x03(\x0b\x32\'.vega.checkpoint.v1.PendingRewardPayout\"\xad\x01\n\x13PendingRewardPayout\x12\x14\n\x0c\x66rom_account\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x35\n\x0cparty_amount\x18\x03 \x03(\x0b\x32\x1f.vega.checkpoint.v1.PartyAmount\x12\x14\n\x0ctotal_reward\x18\x04 \x01(\t\x12\x11\n\tepoch_seq\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\",\n\x0bPartyAmount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t\"{\n\x12PendingKeyRotation\x12$\n\x1crelative_target_block_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_pub_key\x18\x03 \x01(\t\x12\x19\n\x11new_pub_key_index\x18\x04 \x01(\r\"h\n\x1aPendingEthereumKeyRotation\x12$\n\x1crelative_target_block_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_address\x18\x03 \x01(\t\"\xa4\x01\n\x11ScheduledTransfer\x12 \n\x08transfer\x18\x01 \x01(\x0b\x32\x0e.vega.Transfer\x12\'\n\x0c\x61\x63\x63ount_type\x18\x02 \x01(\x0e\x32\x11.vega.AccountType\x12\x11\n\treference\x18\x03 \x01(\t\x12\x31\n\x0foneoff_transfer\x18\x04 \x01(\x0b\x32\x18.vega.events.v1.Transfer\"g\n\x17ScheduledTransferAtTime\x12\x12\n\ndeliver_on\x18\x01 \x01(\x03\x12\x38\n\ttransfers\x18\x02 \x03(\x0b\x32%.vega.checkpoint.v1.ScheduledTransfer\"K\n\x12RecurringTransfers\x12\x35\n\x13recurring_transfers\x18\x01 \x03(\x0b\x32\x18.vega.events.v1.Transfer\"\x96\x01\n\x07\x42\x61nking\x12\x46\n\x11transfers_at_time\x18\x01 \x03(\x0b\x32+.vega.checkpoint.v1.ScheduledTransferAtTime\x12\x43\n\x13recurring_transfers\x18\x02 \x01(\x0b\x32&.vega.checkpoint.v1.RecurringTransfers\"\xe8\x01\n\nValidators\x12;\n\x0fvalidator_state\x18\x01 \x03(\x0b\x32\".vega.checkpoint.v1.ValidatorState\x12\x45\n\x15pending_key_rotations\x18\x02 \x03(\x0b\x32&.vega.checkpoint.v1.PendingKeyRotation\x12V\n\x1epending_ethereum_key_rotations\x18\x03 \x03(\x0b\x32..vega.checkpoint.v1.PendingEthereumKeyRotation\"\xbd\x01\n\x0eValidatorState\x12\x39\n\x10validator_update\x18\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdate\x12\x0e\n\x06status\x18\x02 \x01(\x05\x12\x1c\n\x14\x65th_events_forwarded\x18\x03 \x01(\x04\x12\x17\n\x0fvalidator_power\x18\x04 \x01(\x03\x12)\n\rranking_score\x18\x05 \x01(\x0b\x32\x12.vega.RankingScore\"R\n\x07Staking\x12.\n\x08\x61\x63\x63\x65pted\x18\x01 \x03(\x0b\x32\x1c.vega.events.v1.StakeLinking\x12\x17\n\x0flast_block_seen\x18\x02 \x01(\x04\"\xac\x01\n\x0fMultisigControl\x12\x39\n\x07signers\x18\x01 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEvent\x12\x45\n\rthreshold_set\x18\x02 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEvent\x12\x17\n\x0flast_block_seen\x18\x03 \x01(\x04\"S\n\rMarketTracker\x12\x42\n\x0fmarket_activity\x18\x01 \x03(\x0b\x32).vega.checkpoint.v1.MarketActivityTracker\"\xa1\x02\n\x15MarketActivityTracker\x12\x0e\n\x06market\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x31\n\nmaker_fees\x18\x03 \x03(\x0b\x32\x1d.vega.checkpoint.v1.PartyFees\x12\x31\n\ntaker_fees\x18\x04 \x03(\x0b\x32\x1d.vega.checkpoint.v1.PartyFees\x12.\n\x07lp_fees\x18\x05 \x03(\x0b\x32\x1d.vega.checkpoint.v1.PartyFees\x12\x10\n\x08proposer\x18\x06 \x01(\t\x12\x12\n\nbonus_paid\x18\x07 \x01(\x08\x12\x14\n\x0cvalue_traded\x18\x08 \x01(\t\x12\x17\n\x0fready_to_delete\x18\t \x01(\x08\"\'\n\tPartyFees\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x02 \x01(\tB0Z.code.vegaprotocol.io/protos/vega/checkpoint/v1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n#vega/checkpoint/v1/checkpoint.proto\x12\x12vega.checkpoint.v1\x1a\x0fvega/vega.proto\x1a\x11vega/assets.proto\x1a\x15vega/governance.proto\x1a\x1bvega/events/v1/events.proto".\n\x0f\x43heckpointState\x12\x0c\n\x04hash\x18\x01 \x01(\x0c\x12\r\n\x05state\x18\x02 \x01(\x0c"\x8b\x02\n\nCheckpoint\x12\x12\n\ngovernance\x18\x01 \x01(\x0c\x12\x0e\n\x06\x61ssets\x18\x02 \x01(\x0c\x12\x12\n\ncollateral\x18\x03 \x01(\x0c\x12\x1a\n\x12network_parameters\x18\x04 \x01(\x0c\x12\x12\n\ndelegation\x18\x05 \x01(\x0c\x12\r\n\x05\x65poch\x18\x06 \x01(\x0c\x12\r\n\x05\x62lock\x18\x07 \x01(\x0c\x12\x0f\n\x07rewards\x18\x08 \x01(\x0c\x12\x0f\n\x07\x62\x61nking\x18\t \x01(\x0c\x12\x12\n\nvalidators\x18\n \x01(\x0c\x12\x0f\n\x07staking\x18\x0b \x01(\x0c\x12\x18\n\x10multisig_control\x18\x0c \x01(\x0c\x12\x16\n\x0emarket_tracker\x18\r \x01(\x0c"C\n\nAssetEntry\x12\n\n\x02id\x18\x01 \x01(\t\x12)\n\rasset_details\x18\x02 \x01(\x0b\x32\x12.vega.AssetDetails"8\n\x06\x41ssets\x12.\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x1e.vega.checkpoint.v1.AssetEntry"=\n\x0c\x41ssetBalance\x12\r\n\x05party\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\t"@\n\nCollateral\x12\x32\n\x08\x62\x61lances\x18\x01 \x03(\x0b\x32 .vega.checkpoint.v1.AssetBalance"3\n\tNetParams\x12&\n\x06params\x18\x01 \x03(\x0b\x32\x16.vega.NetworkParameter".\n\tProposals\x12!\n\tproposals\x18\x01 \x03(\x0b\x32\x0e.vega.Proposal"c\n\rDelegateEntry\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0c\n\x04node\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nundelegate\x18\x04 \x01(\x08\x12\x11\n\tepoch_seq\x18\x05 \x01(\x04"\x8a\x01\n\x08\x44\x65legate\x12\x31\n\x06\x61\x63tive\x18\x01 \x03(\x0b\x32!.vega.checkpoint.v1.DelegateEntry\x12\x32\n\x07pending\x18\x02 \x03(\x0b\x32!.vega.checkpoint.v1.DelegateEntry\x12\x17\n\x0f\x61uto_delegation\x18\x03 \x03(\t"\x17\n\x05\x42lock\x12\x0e\n\x06height\x18\x01 \x01(\x03"<\n\x07Rewards\x12\x31\n\x07rewards\x18\x01 \x03(\x0b\x32 .vega.checkpoint.v1.RewardPayout"d\n\x0cRewardPayout\x12\x13\n\x0bpayout_time\x18\x01 \x01(\x03\x12?\n\x0erewards_payout\x18\x02 \x03(\x0b\x32\'.vega.checkpoint.v1.PendingRewardPayout"\xad\x01\n\x13PendingRewardPayout\x12\x14\n\x0c\x66rom_account\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x35\n\x0cparty_amount\x18\x03 \x03(\x0b\x32\x1f.vega.checkpoint.v1.PartyAmount\x12\x14\n\x0ctotal_reward\x18\x04 \x01(\t\x12\x11\n\tepoch_seq\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03",\n\x0bPartyAmount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t"{\n\x12PendingKeyRotation\x12$\n\x1crelative_target_block_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_pub_key\x18\x03 \x01(\t\x12\x19\n\x11new_pub_key_index\x18\x04 \x01(\r"h\n\x1aPendingEthereumKeyRotation\x12$\n\x1crelative_target_block_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_address\x18\x03 \x01(\t"\xa4\x01\n\x11ScheduledTransfer\x12 \n\x08transfer\x18\x01 \x01(\x0b\x32\x0e.vega.Transfer\x12\'\n\x0c\x61\x63\x63ount_type\x18\x02 \x01(\x0e\x32\x11.vega.AccountType\x12\x11\n\treference\x18\x03 \x01(\t\x12\x31\n\x0foneoff_transfer\x18\x04 \x01(\x0b\x32\x18.vega.events.v1.Transfer"g\n\x17ScheduledTransferAtTime\x12\x12\n\ndeliver_on\x18\x01 \x01(\x03\x12\x38\n\ttransfers\x18\x02 \x03(\x0b\x32%.vega.checkpoint.v1.ScheduledTransfer"K\n\x12RecurringTransfers\x12\x35\n\x13recurring_transfers\x18\x01 \x03(\x0b\x32\x18.vega.events.v1.Transfer"\x96\x01\n\x07\x42\x61nking\x12\x46\n\x11transfers_at_time\x18\x01 \x03(\x0b\x32+.vega.checkpoint.v1.ScheduledTransferAtTime\x12\x43\n\x13recurring_transfers\x18\x02 \x01(\x0b\x32&.vega.checkpoint.v1.RecurringTransfers"\xe8\x01\n\nValidators\x12;\n\x0fvalidator_state\x18\x01 \x03(\x0b\x32".vega.checkpoint.v1.ValidatorState\x12\x45\n\x15pending_key_rotations\x18\x02 \x03(\x0b\x32&.vega.checkpoint.v1.PendingKeyRotation\x12V\n\x1epending_ethereum_key_rotations\x18\x03 \x03(\x0b\x32..vega.checkpoint.v1.PendingEthereumKeyRotation"\xbd\x01\n\x0eValidatorState\x12\x39\n\x10validator_update\x18\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdate\x12\x0e\n\x06status\x18\x02 \x01(\x05\x12\x1c\n\x14\x65th_events_forwarded\x18\x03 \x01(\x04\x12\x17\n\x0fvalidator_power\x18\x04 \x01(\x03\x12)\n\rranking_score\x18\x05 \x01(\x0b\x32\x12.vega.RankingScore"R\n\x07Staking\x12.\n\x08\x61\x63\x63\x65pted\x18\x01 \x03(\x0b\x32\x1c.vega.events.v1.StakeLinking\x12\x17\n\x0flast_block_seen\x18\x02 \x01(\x04"\xac\x01\n\x0fMultisigControl\x12\x39\n\x07signers\x18\x01 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEvent\x12\x45\n\rthreshold_set\x18\x02 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEvent\x12\x17\n\x0flast_block_seen\x18\x03 \x01(\x04"S\n\rMarketTracker\x12\x42\n\x0fmarket_activity\x18\x01 \x03(\x0b\x32).vega.checkpoint.v1.MarketActivityTracker"\xa1\x02\n\x15MarketActivityTracker\x12\x0e\n\x06market\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x31\n\nmaker_fees\x18\x03 \x03(\x0b\x32\x1d.vega.checkpoint.v1.PartyFees\x12\x31\n\ntaker_fees\x18\x04 \x03(\x0b\x32\x1d.vega.checkpoint.v1.PartyFees\x12.\n\x07lp_fees\x18\x05 \x03(\x0b\x32\x1d.vega.checkpoint.v1.PartyFees\x12\x10\n\x08proposer\x18\x06 \x01(\t\x12\x12\n\nbonus_paid\x18\x07 \x01(\x08\x12\x14\n\x0cvalue_traded\x18\x08 \x01(\t\x12\x17\n\x0fready_to_delete\x18\t \x01(\x08"\'\n\tPartyFees\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x02 \x01(\tB0Z.code.vegaprotocol.io/protos/vega/checkpoint/v1b\x06proto3'
+)
 
 
-
-_CHECKPOINTSTATE = DESCRIPTOR.message_types_by_name['CheckpointState']
-_CHECKPOINT = DESCRIPTOR.message_types_by_name['Checkpoint']
-_ASSETENTRY = DESCRIPTOR.message_types_by_name['AssetEntry']
-_ASSETS = DESCRIPTOR.message_types_by_name['Assets']
-_ASSETBALANCE = DESCRIPTOR.message_types_by_name['AssetBalance']
-_COLLATERAL = DESCRIPTOR.message_types_by_name['Collateral']
-_NETPARAMS = DESCRIPTOR.message_types_by_name['NetParams']
-_PROPOSALS = DESCRIPTOR.message_types_by_name['Proposals']
-_DELEGATEENTRY = DESCRIPTOR.message_types_by_name['DelegateEntry']
-_DELEGATE = DESCRIPTOR.message_types_by_name['Delegate']
-_BLOCK = DESCRIPTOR.message_types_by_name['Block']
-_REWARDS = DESCRIPTOR.message_types_by_name['Rewards']
-_REWARDPAYOUT = DESCRIPTOR.message_types_by_name['RewardPayout']
-_PENDINGREWARDPAYOUT = DESCRIPTOR.message_types_by_name['PendingRewardPayout']
-_PARTYAMOUNT = DESCRIPTOR.message_types_by_name['PartyAmount']
-_PENDINGKEYROTATION = DESCRIPTOR.message_types_by_name['PendingKeyRotation']
-_PENDINGETHEREUMKEYROTATION = DESCRIPTOR.message_types_by_name['PendingEthereumKeyRotation']
-_SCHEDULEDTRANSFER = DESCRIPTOR.message_types_by_name['ScheduledTransfer']
-_SCHEDULEDTRANSFERATTIME = DESCRIPTOR.message_types_by_name['ScheduledTransferAtTime']
-_RECURRINGTRANSFERS = DESCRIPTOR.message_types_by_name['RecurringTransfers']
-_BANKING = DESCRIPTOR.message_types_by_name['Banking']
-_VALIDATORS = DESCRIPTOR.message_types_by_name['Validators']
-_VALIDATORSTATE = DESCRIPTOR.message_types_by_name['ValidatorState']
-_STAKING = DESCRIPTOR.message_types_by_name['Staking']
-_MULTISIGCONTROL = DESCRIPTOR.message_types_by_name['MultisigControl']
-_MARKETTRACKER = DESCRIPTOR.message_types_by_name['MarketTracker']
-_MARKETACTIVITYTRACKER = DESCRIPTOR.message_types_by_name['MarketActivityTracker']
-_PARTYFEES = DESCRIPTOR.message_types_by_name['PartyFees']
-CheckpointState = _reflection.GeneratedProtocolMessageType('CheckpointState', (_message.Message,), {
-  'DESCRIPTOR' : _CHECKPOINTSTATE,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.CheckpointState)
-  })
+_CHECKPOINTSTATE = DESCRIPTOR.message_types_by_name["CheckpointState"]
+_CHECKPOINT = DESCRIPTOR.message_types_by_name["Checkpoint"]
+_ASSETENTRY = DESCRIPTOR.message_types_by_name["AssetEntry"]
+_ASSETS = DESCRIPTOR.message_types_by_name["Assets"]
+_ASSETBALANCE = DESCRIPTOR.message_types_by_name["AssetBalance"]
+_COLLATERAL = DESCRIPTOR.message_types_by_name["Collateral"]
+_NETPARAMS = DESCRIPTOR.message_types_by_name["NetParams"]
+_PROPOSALS = DESCRIPTOR.message_types_by_name["Proposals"]
+_DELEGATEENTRY = DESCRIPTOR.message_types_by_name["DelegateEntry"]
+_DELEGATE = DESCRIPTOR.message_types_by_name["Delegate"]
+_BLOCK = DESCRIPTOR.message_types_by_name["Block"]
+_REWARDS = DESCRIPTOR.message_types_by_name["Rewards"]
+_REWARDPAYOUT = DESCRIPTOR.message_types_by_name["RewardPayout"]
+_PENDINGREWARDPAYOUT = DESCRIPTOR.message_types_by_name["PendingRewardPayout"]
+_PARTYAMOUNT = DESCRIPTOR.message_types_by_name["PartyAmount"]
+_PENDINGKEYROTATION = DESCRIPTOR.message_types_by_name["PendingKeyRotation"]
+_PENDINGETHEREUMKEYROTATION = DESCRIPTOR.message_types_by_name[
+    "PendingEthereumKeyRotation"
+]
+_SCHEDULEDTRANSFER = DESCRIPTOR.message_types_by_name["ScheduledTransfer"]
+_SCHEDULEDTRANSFERATTIME = DESCRIPTOR.message_types_by_name["ScheduledTransferAtTime"]
+_RECURRINGTRANSFERS = DESCRIPTOR.message_types_by_name["RecurringTransfers"]
+_BANKING = DESCRIPTOR.message_types_by_name["Banking"]
+_VALIDATORS = DESCRIPTOR.message_types_by_name["Validators"]
+_VALIDATORSTATE = DESCRIPTOR.message_types_by_name["ValidatorState"]
+_STAKING = DESCRIPTOR.message_types_by_name["Staking"]
+_MULTISIGCONTROL = DESCRIPTOR.message_types_by_name["MultisigControl"]
+_MARKETTRACKER = DESCRIPTOR.message_types_by_name["MarketTracker"]
+_MARKETACTIVITYTRACKER = DESCRIPTOR.message_types_by_name["MarketActivityTracker"]
+_PARTYFEES = DESCRIPTOR.message_types_by_name["PartyFees"]
+CheckpointState = _reflection.GeneratedProtocolMessageType(
+    "CheckpointState",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CHECKPOINTSTATE,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.CheckpointState)
+    },
+)
 _sym_db.RegisterMessage(CheckpointState)
 
-Checkpoint = _reflection.GeneratedProtocolMessageType('Checkpoint', (_message.Message,), {
-  'DESCRIPTOR' : _CHECKPOINT,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Checkpoint)
-  })
+Checkpoint = _reflection.GeneratedProtocolMessageType(
+    "Checkpoint",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CHECKPOINT,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Checkpoint)
+    },
+)
 _sym_db.RegisterMessage(Checkpoint)
 
-AssetEntry = _reflection.GeneratedProtocolMessageType('AssetEntry', (_message.Message,), {
-  'DESCRIPTOR' : _ASSETENTRY,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.AssetEntry)
-  })
+AssetEntry = _reflection.GeneratedProtocolMessageType(
+    "AssetEntry",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ASSETENTRY,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.AssetEntry)
+    },
+)
 _sym_db.RegisterMessage(AssetEntry)
 
-Assets = _reflection.GeneratedProtocolMessageType('Assets', (_message.Message,), {
-  'DESCRIPTOR' : _ASSETS,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Assets)
-  })
+Assets = _reflection.GeneratedProtocolMessageType(
+    "Assets",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ASSETS,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Assets)
+    },
+)
 _sym_db.RegisterMessage(Assets)
 
-AssetBalance = _reflection.GeneratedProtocolMessageType('AssetBalance', (_message.Message,), {
-  'DESCRIPTOR' : _ASSETBALANCE,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.AssetBalance)
-  })
+AssetBalance = _reflection.GeneratedProtocolMessageType(
+    "AssetBalance",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ASSETBALANCE,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.AssetBalance)
+    },
+)
 _sym_db.RegisterMessage(AssetBalance)
 
-Collateral = _reflection.GeneratedProtocolMessageType('Collateral', (_message.Message,), {
-  'DESCRIPTOR' : _COLLATERAL,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Collateral)
-  })
+Collateral = _reflection.GeneratedProtocolMessageType(
+    "Collateral",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COLLATERAL,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Collateral)
+    },
+)
 _sym_db.RegisterMessage(Collateral)
 
-NetParams = _reflection.GeneratedProtocolMessageType('NetParams', (_message.Message,), {
-  'DESCRIPTOR' : _NETPARAMS,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.NetParams)
-  })
+NetParams = _reflection.GeneratedProtocolMessageType(
+    "NetParams",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _NETPARAMS,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.NetParams)
+    },
+)
 _sym_db.RegisterMessage(NetParams)
 
-Proposals = _reflection.GeneratedProtocolMessageType('Proposals', (_message.Message,), {
-  'DESCRIPTOR' : _PROPOSALS,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Proposals)
-  })
+Proposals = _reflection.GeneratedProtocolMessageType(
+    "Proposals",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PROPOSALS,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Proposals)
+    },
+)
 _sym_db.RegisterMessage(Proposals)
 
-DelegateEntry = _reflection.GeneratedProtocolMessageType('DelegateEntry', (_message.Message,), {
-  'DESCRIPTOR' : _DELEGATEENTRY,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.DelegateEntry)
-  })
+DelegateEntry = _reflection.GeneratedProtocolMessageType(
+    "DelegateEntry",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELEGATEENTRY,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.DelegateEntry)
+    },
+)
 _sym_db.RegisterMessage(DelegateEntry)
 
-Delegate = _reflection.GeneratedProtocolMessageType('Delegate', (_message.Message,), {
-  'DESCRIPTOR' : _DELEGATE,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Delegate)
-  })
+Delegate = _reflection.GeneratedProtocolMessageType(
+    "Delegate",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELEGATE,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Delegate)
+    },
+)
 _sym_db.RegisterMessage(Delegate)
 
-Block = _reflection.GeneratedProtocolMessageType('Block', (_message.Message,), {
-  'DESCRIPTOR' : _BLOCK,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Block)
-  })
+Block = _reflection.GeneratedProtocolMessageType(
+    "Block",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BLOCK,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Block)
+    },
+)
 _sym_db.RegisterMessage(Block)
 
-Rewards = _reflection.GeneratedProtocolMessageType('Rewards', (_message.Message,), {
-  'DESCRIPTOR' : _REWARDS,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Rewards)
-  })
+Rewards = _reflection.GeneratedProtocolMessageType(
+    "Rewards",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REWARDS,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Rewards)
+    },
+)
 _sym_db.RegisterMessage(Rewards)
 
-RewardPayout = _reflection.GeneratedProtocolMessageType('RewardPayout', (_message.Message,), {
-  'DESCRIPTOR' : _REWARDPAYOUT,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.RewardPayout)
-  })
+RewardPayout = _reflection.GeneratedProtocolMessageType(
+    "RewardPayout",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REWARDPAYOUT,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.RewardPayout)
+    },
+)
 _sym_db.RegisterMessage(RewardPayout)
 
-PendingRewardPayout = _reflection.GeneratedProtocolMessageType('PendingRewardPayout', (_message.Message,), {
-  'DESCRIPTOR' : _PENDINGREWARDPAYOUT,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PendingRewardPayout)
-  })
+PendingRewardPayout = _reflection.GeneratedProtocolMessageType(
+    "PendingRewardPayout",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PENDINGREWARDPAYOUT,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PendingRewardPayout)
+    },
+)
 _sym_db.RegisterMessage(PendingRewardPayout)
 
-PartyAmount = _reflection.GeneratedProtocolMessageType('PartyAmount', (_message.Message,), {
-  'DESCRIPTOR' : _PARTYAMOUNT,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PartyAmount)
-  })
+PartyAmount = _reflection.GeneratedProtocolMessageType(
+    "PartyAmount",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PARTYAMOUNT,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PartyAmount)
+    },
+)
 _sym_db.RegisterMessage(PartyAmount)
 
-PendingKeyRotation = _reflection.GeneratedProtocolMessageType('PendingKeyRotation', (_message.Message,), {
-  'DESCRIPTOR' : _PENDINGKEYROTATION,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PendingKeyRotation)
-  })
+PendingKeyRotation = _reflection.GeneratedProtocolMessageType(
+    "PendingKeyRotation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PENDINGKEYROTATION,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PendingKeyRotation)
+    },
+)
 _sym_db.RegisterMessage(PendingKeyRotation)
 
-PendingEthereumKeyRotation = _reflection.GeneratedProtocolMessageType('PendingEthereumKeyRotation', (_message.Message,), {
-  'DESCRIPTOR' : _PENDINGETHEREUMKEYROTATION,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PendingEthereumKeyRotation)
-  })
+PendingEthereumKeyRotation = _reflection.GeneratedProtocolMessageType(
+    "PendingEthereumKeyRotation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PENDINGETHEREUMKEYROTATION,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PendingEthereumKeyRotation)
+    },
+)
 _sym_db.RegisterMessage(PendingEthereumKeyRotation)
 
-ScheduledTransfer = _reflection.GeneratedProtocolMessageType('ScheduledTransfer', (_message.Message,), {
-  'DESCRIPTOR' : _SCHEDULEDTRANSFER,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.ScheduledTransfer)
-  })
+ScheduledTransfer = _reflection.GeneratedProtocolMessageType(
+    "ScheduledTransfer",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SCHEDULEDTRANSFER,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.ScheduledTransfer)
+    },
+)
 _sym_db.RegisterMessage(ScheduledTransfer)
 
-ScheduledTransferAtTime = _reflection.GeneratedProtocolMessageType('ScheduledTransferAtTime', (_message.Message,), {
-  'DESCRIPTOR' : _SCHEDULEDTRANSFERATTIME,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.ScheduledTransferAtTime)
-  })
+ScheduledTransferAtTime = _reflection.GeneratedProtocolMessageType(
+    "ScheduledTransferAtTime",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SCHEDULEDTRANSFERATTIME,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.ScheduledTransferAtTime)
+    },
+)
 _sym_db.RegisterMessage(ScheduledTransferAtTime)
 
-RecurringTransfers = _reflection.GeneratedProtocolMessageType('RecurringTransfers', (_message.Message,), {
-  'DESCRIPTOR' : _RECURRINGTRANSFERS,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.RecurringTransfers)
-  })
+RecurringTransfers = _reflection.GeneratedProtocolMessageType(
+    "RecurringTransfers",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RECURRINGTRANSFERS,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.RecurringTransfers)
+    },
+)
 _sym_db.RegisterMessage(RecurringTransfers)
 
-Banking = _reflection.GeneratedProtocolMessageType('Banking', (_message.Message,), {
-  'DESCRIPTOR' : _BANKING,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Banking)
-  })
+Banking = _reflection.GeneratedProtocolMessageType(
+    "Banking",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BANKING,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Banking)
+    },
+)
 _sym_db.RegisterMessage(Banking)
 
-Validators = _reflection.GeneratedProtocolMessageType('Validators', (_message.Message,), {
-  'DESCRIPTOR' : _VALIDATORS,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Validators)
-  })
+Validators = _reflection.GeneratedProtocolMessageType(
+    "Validators",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VALIDATORS,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Validators)
+    },
+)
 _sym_db.RegisterMessage(Validators)
 
-ValidatorState = _reflection.GeneratedProtocolMessageType('ValidatorState', (_message.Message,), {
-  'DESCRIPTOR' : _VALIDATORSTATE,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.ValidatorState)
-  })
+ValidatorState = _reflection.GeneratedProtocolMessageType(
+    "ValidatorState",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VALIDATORSTATE,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.ValidatorState)
+    },
+)
 _sym_db.RegisterMessage(ValidatorState)
 
-Staking = _reflection.GeneratedProtocolMessageType('Staking', (_message.Message,), {
-  'DESCRIPTOR' : _STAKING,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Staking)
-  })
+Staking = _reflection.GeneratedProtocolMessageType(
+    "Staking",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STAKING,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.Staking)
+    },
+)
 _sym_db.RegisterMessage(Staking)
 
-MultisigControl = _reflection.GeneratedProtocolMessageType('MultisigControl', (_message.Message,), {
-  'DESCRIPTOR' : _MULTISIGCONTROL,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.MultisigControl)
-  })
+MultisigControl = _reflection.GeneratedProtocolMessageType(
+    "MultisigControl",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MULTISIGCONTROL,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.MultisigControl)
+    },
+)
 _sym_db.RegisterMessage(MultisigControl)
 
-MarketTracker = _reflection.GeneratedProtocolMessageType('MarketTracker', (_message.Message,), {
-  'DESCRIPTOR' : _MARKETTRACKER,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.MarketTracker)
-  })
+MarketTracker = _reflection.GeneratedProtocolMessageType(
+    "MarketTracker",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKETTRACKER,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.MarketTracker)
+    },
+)
 _sym_db.RegisterMessage(MarketTracker)
 
-MarketActivityTracker = _reflection.GeneratedProtocolMessageType('MarketActivityTracker', (_message.Message,), {
-  'DESCRIPTOR' : _MARKETACTIVITYTRACKER,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.MarketActivityTracker)
-  })
+MarketActivityTracker = _reflection.GeneratedProtocolMessageType(
+    "MarketActivityTracker",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKETACTIVITYTRACKER,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.MarketActivityTracker)
+    },
+)
 _sym_db.RegisterMessage(MarketActivityTracker)
 
-PartyFees = _reflection.GeneratedProtocolMessageType('PartyFees', (_message.Message,), {
-  'DESCRIPTOR' : _PARTYFEES,
-  '__module__' : 'vega.checkpoint.v1.checkpoint_pb2'
-  # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PartyFees)
-  })
+PartyFees = _reflection.GeneratedProtocolMessageType(
+    "PartyFees",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PARTYFEES,
+        "__module__": "vega.checkpoint.v1.checkpoint_pb2"
+        # @@protoc_insertion_point(class_scope:vega.checkpoint.v1.PartyFees)
+    },
+)
 _sym_db.RegisterMessage(PartyFees)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z.code.vegaprotocol.io/protos/vega/checkpoint/v1'
-  _CHECKPOINTSTATE._serialized_start=147
-  _CHECKPOINTSTATE._serialized_end=193
-  _CHECKPOINT._serialized_start=196
-  _CHECKPOINT._serialized_end=463
-  _ASSETENTRY._serialized_start=465
-  _ASSETENTRY._serialized_end=532
-  _ASSETS._serialized_start=534
-  _ASSETS._serialized_end=590
-  _ASSETBALANCE._serialized_start=592
-  _ASSETBALANCE._serialized_end=653
-  _COLLATERAL._serialized_start=655
-  _COLLATERAL._serialized_end=719
-  _NETPARAMS._serialized_start=721
-  _NETPARAMS._serialized_end=772
-  _PROPOSALS._serialized_start=774
-  _PROPOSALS._serialized_end=820
-  _DELEGATEENTRY._serialized_start=822
-  _DELEGATEENTRY._serialized_end=921
-  _DELEGATE._serialized_start=924
-  _DELEGATE._serialized_end=1062
-  _BLOCK._serialized_start=1064
-  _BLOCK._serialized_end=1087
-  _REWARDS._serialized_start=1089
-  _REWARDS._serialized_end=1149
-  _REWARDPAYOUT._serialized_start=1151
-  _REWARDPAYOUT._serialized_end=1251
-  _PENDINGREWARDPAYOUT._serialized_start=1254
-  _PENDINGREWARDPAYOUT._serialized_end=1427
-  _PARTYAMOUNT._serialized_start=1429
-  _PARTYAMOUNT._serialized_end=1473
-  _PENDINGKEYROTATION._serialized_start=1475
-  _PENDINGKEYROTATION._serialized_end=1598
-  _PENDINGETHEREUMKEYROTATION._serialized_start=1600
-  _PENDINGETHEREUMKEYROTATION._serialized_end=1704
-  _SCHEDULEDTRANSFER._serialized_start=1707
-  _SCHEDULEDTRANSFER._serialized_end=1871
-  _SCHEDULEDTRANSFERATTIME._serialized_start=1873
-  _SCHEDULEDTRANSFERATTIME._serialized_end=1976
-  _RECURRINGTRANSFERS._serialized_start=1978
-  _RECURRINGTRANSFERS._serialized_end=2053
-  _BANKING._serialized_start=2056
-  _BANKING._serialized_end=2206
-  _VALIDATORS._serialized_start=2209
-  _VALIDATORS._serialized_end=2441
-  _VALIDATORSTATE._serialized_start=2444
-  _VALIDATORSTATE._serialized_end=2633
-  _STAKING._serialized_start=2635
-  _STAKING._serialized_end=2717
-  _MULTISIGCONTROL._serialized_start=2720
-  _MULTISIGCONTROL._serialized_end=2892
-  _MARKETTRACKER._serialized_start=2894
-  _MARKETTRACKER._serialized_end=2977
-  _MARKETACTIVITYTRACKER._serialized_start=2980
-  _MARKETACTIVITYTRACKER._serialized_end=3269
-  _PARTYFEES._serialized_start=3271
-  _PARTYFEES._serialized_end=3310
+    DESCRIPTOR._options = None
+    DESCRIPTOR._serialized_options = b"Z.code.vegaprotocol.io/protos/vega/checkpoint/v1"
+    _CHECKPOINTSTATE._serialized_start = 147
+    _CHECKPOINTSTATE._serialized_end = 193
+    _CHECKPOINT._serialized_start = 196
+    _CHECKPOINT._serialized_end = 463
+    _ASSETENTRY._serialized_start = 465
+    _ASSETENTRY._serialized_end = 532
+    _ASSETS._serialized_start = 534
+    _ASSETS._serialized_end = 590
+    _ASSETBALANCE._serialized_start = 592
+    _ASSETBALANCE._serialized_end = 653
+    _COLLATERAL._serialized_start = 655
+    _COLLATERAL._serialized_end = 719
+    _NETPARAMS._serialized_start = 721
+    _NETPARAMS._serialized_end = 772
+    _PROPOSALS._serialized_start = 774
+    _PROPOSALS._serialized_end = 820
+    _DELEGATEENTRY._serialized_start = 822
+    _DELEGATEENTRY._serialized_end = 921
+    _DELEGATE._serialized_start = 924
+    _DELEGATE._serialized_end = 1062
+    _BLOCK._serialized_start = 1064
+    _BLOCK._serialized_end = 1087
+    _REWARDS._serialized_start = 1089
+    _REWARDS._serialized_end = 1149
+    _REWARDPAYOUT._serialized_start = 1151
+    _REWARDPAYOUT._serialized_end = 1251
+    _PENDINGREWARDPAYOUT._serialized_start = 1254
+    _PENDINGREWARDPAYOUT._serialized_end = 1427
+    _PARTYAMOUNT._serialized_start = 1429
+    _PARTYAMOUNT._serialized_end = 1473
+    _PENDINGKEYROTATION._serialized_start = 1475
+    _PENDINGKEYROTATION._serialized_end = 1598
+    _PENDINGETHEREUMKEYROTATION._serialized_start = 1600
+    _PENDINGETHEREUMKEYROTATION._serialized_end = 1704
+    _SCHEDULEDTRANSFER._serialized_start = 1707
+    _SCHEDULEDTRANSFER._serialized_end = 1871
+    _SCHEDULEDTRANSFERATTIME._serialized_start = 1873
+    _SCHEDULEDTRANSFERATTIME._serialized_end = 1976
+    _RECURRINGTRANSFERS._serialized_start = 1978
+    _RECURRINGTRANSFERS._serialized_end = 2053
+    _BANKING._serialized_start = 2056
+    _BANKING._serialized_end = 2206
+    _VALIDATORS._serialized_start = 2209
+    _VALIDATORS._serialized_end = 2441
+    _VALIDATORSTATE._serialized_start = 2444
+    _VALIDATORSTATE._serialized_end = 2633
+    _STAKING._serialized_start = 2635
+    _STAKING._serialized_end = 2717
+    _MULTISIGCONTROL._serialized_start = 2720
+    _MULTISIGCONTROL._serialized_end = 2892
+    _MARKETTRACKER._serialized_start = 2894
+    _MARKETTRACKER._serialized_end = 2977
+    _MARKETACTIVITYTRACKER._serialized_start = 2980
+    _MARKETACTIVITYTRACKER._serialized_end = 3269
+    _PARTYFEES._serialized_start = 3271
+    _PARTYFEES._serialized_end = 3310
 # @@protoc_insertion_point(module_scope)
