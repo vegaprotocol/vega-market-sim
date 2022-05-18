@@ -718,8 +718,8 @@ class VegaService(ABC):
         fee: float,
         reference_buy: str,
         reference_sell: str,
-        delta_buy: int,
-        delta_sell: int,
+        delta_buy: float,
+        delta_sell: float,
         is_amendment: bool = False,
     ):
         """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
@@ -740,13 +740,17 @@ class VegaService(ABC):
             reference_sell:
                 str, the reference point to use for the sell side of LP
             delta_buy:
-                int, the offset from reference point for the buy side of LP
+                float, the offset from reference point for the buy side of LP
             delta_sell:
-                int, the offset from reference point for the sell side of LP
+                float, the offset from reference point for the sell side of LP
         """
         asset_id = data_raw.market_info(
             market_id=market_id, data_client=self.trading_data_client()
         ).tradable_instrument.instrument.future.settlement_asset
+
+        market_decimals = data.market_price_decimals(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
         return trading.submit_simple_liquidity(
             market_id=market_id,
             commitment_amount=num_to_padded_int(
@@ -758,8 +762,8 @@ class VegaService(ABC):
             fee=fee,
             reference_buy=reference_buy,
             reference_sell=reference_sell,
-            delta_buy=delta_buy,
-            delta_sell=delta_sell,
+            delta_buy=num_to_padded_int(delta_buy, market_decimals),
+            delta_sell=num_to_padded_int(delta_sell, market_decimals),
             login_token=self.login_tokens[wallet_name],
             pub_key=self.pub_keys[wallet_name],
             is_amendment=is_amendment,
