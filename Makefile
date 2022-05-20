@@ -7,6 +7,8 @@ EXTERN_DIR := "./extern"
 
 all: pull_deps build_deps
 
+ui: pull_deps_ui build_deps_ui
+
 pull_deps:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
@@ -53,8 +55,6 @@ build_deps_ui:
 	@mkdir -p ./vega_sim/bin/console
 	@rsync -av ${EXTERN_DIR}/console vega_sim/bin/ --exclude ${EXTERN_DIR}/console/.git
 	@yarn --cwd vega_sim/bin/console install
-
-ui: pull_deps_ui build_deps_ui
 
 pull_deps_proto:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi

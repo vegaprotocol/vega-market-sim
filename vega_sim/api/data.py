@@ -1,6 +1,9 @@
+from dataclasses import dataclass
+from turtle import pos
 import numpy as np
 from collections import namedtuple
-from typing import Tuple
+from typing import Any, Callable, List, Optional, Tuple, TypeVar
+
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
@@ -13,8 +16,74 @@ class MissingAssetError(Exception):
     pass
 
 
+T = TypeVar("T")
+S = TypeVar("S")
+
 AccountData = namedtuple("AccountData", ["general", "margin", "bond"])
-OrderBook = namedtuple("OrderBook", ["bids", "offers"])
+OrderBook = namedtuple("OrderBook", ["bids", "asks"])
+Order = namedtuple(
+    "Order",
+    [
+        "price",
+        "size",
+        "id",
+        "reference",
+        "side",
+        "status",
+        "remaining",
+        "time_in_force",
+        "order_type",
+        "created_at",
+        "expires_at",
+        "party_id",
+        "updated_at",
+        "version",
+    ],
+)
+
+
+@dataclass
+class OrdersBySide:
+    bids: List[Order]
+    asks: List[Order]
+
+
+def _unroll_pagination(
+    base_request: S, extraction_func: Callable[[S], List[T]], step_size: int = 50
+) -> List[T]:
+    skip = 0
+    base_request.pagination.CopyFrom(
+        data_node_protos.trading_data.Pagination(skip=skip, limit=step_size)
+    )
+    curr_list = extraction_func(base_request)
+    full_list = curr_list
+    while len(curr_list) == step_size:
+        skip += step_size
+        base_request.pagination.skip = skip
+        curr_list = extraction_func(base_request)
+        full_list.extend(curr_list)
+    return full_list
+
+
+def _order_from_proto(
+    order: vega_protos.vega.Order, price_decimals: int, position_decimals: int
+) -> Order:
+    return Order(
+        id=order.id,
+        price=num_from_padded_int(order.price, price_decimals),
+        size=num_from_padded_int(order.size, position_decimals),
+        reference=order.reference,
+        side=order.side,
+        status=order.status,
+        remaining=num_from_padded_int(order.remaining, position_decimals),
+        time_in_force=order.time_in_force,
+        order_type=order.type,
+        created_at=order.created_at,
+        expires_at=order.expires_at,
+        party_id=order.party_id,
+        updated_at=order.updated_at,
+        version=order.version,
+    )
 
 
 def party_account(
@@ -151,25 +220,79 @@ def best_prices(
 
     return num_from_padded_int(
         mkt_data.best_static_bid_price, mkt_price_dp
-    ), num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp)
+    ), num_from_padded_int(mkt_data.best_static_ask_price, mkt_price_dp)
 
 
 def open_orders_by_market(
     market_id: str,
     data_client: vac.VegaTradingDataClient,
-) -> OrderBook:
+    price_decimals: Optional[int] = None,
+    position_decimals: Optional[int] = None,
+) -> OrdersBySide:
     """
     Output all active limit orders in current market.
+
+    Args:
+        market_id:
+            str, ID for the market to load
+        data_client:
+            VegaTradingDataClient, instantiated gRPC client
+
+    Returns:
+        OrdersBySide, Live orders segregated by side
     """
-    orders = data_client.OrdersByMarket(
-        data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id)
-    ).orders
+    orders = _unroll_pagination(
+        data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
+        lambda x: data_client.OrdersByMarket(x).orders,
+    )
+
+    mkt_price_dp = (
+        price_decimals
+        if price_decimals is not None
+        else market_price_decimals(market_id=market_id, data_client=data_client)
+    )
+    mkt_pos_dp = (
+        position_decimals
+        if position_decimals is not None
+        else market_position_decimals(market_id=market_id, data_client=data_client)
+    )
+
+    bids = []
+    asks = []
+    for order in orders:
+        if order.status != vega_protos.vega.Order.Status.STATUS_ACTIVE:
+            continue
+        converted_order = _order_from_proto(
+            order, price_decimals=mkt_price_dp, position_decimals=mkt_pos_dp
+        )
+        bids.append(
+            converted_order
+        ) if converted_order.side == vega_protos.vega.SIDE_BUY else asks.append(
+            converted_order
+        )
+
+    return OrdersBySide(bids, asks)
+
+
+def order_book_by_market(
+    market_id: str,
+    data_client: vac.VegaTradingDataClient,
+) -> OrderBook:
+    """
+    Output state of order book for a given market.
+    """
+
+    orders = _unroll_pagination(
+        data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
+        lambda x: data_client.OrdersByMarket(x).orders,
+    )
 
     mkt_price_dp = market_price_decimals(market_id=market_id, data_client=data_client)
     mkt_pos_dp = market_position_decimals(market_id=market_id, data_client=data_client)
 
     bids = {}
-    offers = {}
+    asks = {}
+
     for order in orders:
         if order.status == vega_protos.vega.Order.Status.STATUS_ACTIVE:
             if order.side == vega_protos.vega.Side.SIDE_BUY:
@@ -179,9 +302,41 @@ def open_orders_by_market(
             else:
                 price = num_from_padded_int(order.price, mkt_price_dp)
                 volume = num_from_padded_int(order.remaining, mkt_pos_dp)
-                offers[price] = bids.get(price, 0) + volume
+                asks[price] = bids.get(price, 0) + volume
 
-    return OrderBook(bids, offers)
+    return OrderBook(bids, asks)
+
+
+def order_status_by_reference(
+    reference: str,
+    data_client: vac.VegaTradingDataClient,
+    price_decimals: Optional[int] = None,
+    position_decimals: Optional[int] = None,
+) -> Optional[vega_protos.vega.Order]:
+    """Loads information about a specific order identified by the reference.
+    Optionally return historic order versions.
+
+    Args:
+        reference:
+            str, the order reference as specified by Vega when originally placed
+                or assigned by Vega
+        data_client:
+            VegaTradingDataClient, an instantiated gRPC trading data client
+        price_decimals:
+            int, the decimal precision used when specifying prices on the market
+        position_decimals:
+            int, the decimal precision used when specifying positions on the market
+
+    Returns:
+        Optional[vega.Order], the requested Order object or None if nothing found
+    """
+    return _order_from_proto(
+        data_raw.order_status_by_reference(
+            reference=reference, data_client=data_client
+        ),
+        price_decimals=price_decimals,
+        position_decimals=position_decimals,
+    )
 
 
 def market_account(

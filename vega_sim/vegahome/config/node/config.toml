@@ -33,8 +33,8 @@ UlimitNOFile = 8192
     ABCIReplayFile = ""
   [Blockchain.Null]
     Level = "Debug"
-    BlockDuration = "1s"
-    TransactionsPerBlock = 1
+    BlockDuration = "TO_BE_SET"
+    TransactionsPerBlock = "TO_BE_SET"
     GenesisFile = "./null-blockchain/node-startup/vegahome/genesis.json"
     IP = "0.0.0.0"
     Port = "TO_BE_SET"

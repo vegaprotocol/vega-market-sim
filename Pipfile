@@ -17,6 +17,8 @@ jupyterlab = "*"
 jupyter = "*"
 notebook = "*"
 jinja2 = "*"
+snakeviz = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3"

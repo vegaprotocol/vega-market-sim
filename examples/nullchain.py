@@ -1,6 +1,8 @@
 import logging
 from collections import namedtuple
 
+from pytest import param
+
 from vega_sim.null_service import VegaServiceNull
 
 
@@ -28,12 +30,14 @@ if __name__ == "__main__":
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
 
-        # for wallet in wallets:
-        #     vega.login(wallet.name, wallet.passphrase)
         vega.mint(
             MM_WALLET.name,
             asset="VOTE",
             amount=1e4,
+        )
+
+        vega.update_network_parameter(
+            MM_WALLET, parameter="market.fee.factors.makerFee", new_value="0.1"
         )
 
         vega.forward("10s")

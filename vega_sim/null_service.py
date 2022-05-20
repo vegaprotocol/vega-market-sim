@@ -15,6 +15,7 @@ from enum import Enum, auto
 from multiprocessing import Process
 from os import path
 from typing import Dict, List, Optional, Set
+from numpy import block
 
 import requests
 import toml
@@ -246,12 +247,19 @@ def _popen_process(
     return sub_proc
 
 
-def _update_node_config(vega_home: str, port_config: Dict[Ports, int]) -> None:
+def _update_node_config(
+    vega_home: str,
+    port_config: Dict[Ports, int],
+    transactions_per_block: int = 1,
+    block_duration: str = "1s",
+) -> None:
     config_path = path.join(vega_home, "config", "node", "config.toml")
     config_toml = toml.load(config_path)
     config_toml["Blockchain"]["Null"]["GenesisFile"] = path.join(
         vega_home, "genesis.json"
     )
+    config_toml["Blockchain"]["Null"]["BlockDuration"] = block_duration
+    config_toml["Blockchain"]["Null"]["TransactionsPerBlock"] = transactions_per_block
 
     existing_ports = set(port_config.values())
     for port in Ports:
@@ -260,6 +268,7 @@ def _update_node_config(vega_home: str, port_config: Dict[Ports, int]) -> None:
         new_port = _find_free_port(existing_ports)
         existing_ports.add(new_port)
         port_config[port] = new_port
+
     with open(config_path, "w") as f:
         toml.dump(config_toml, f)
 
@@ -283,6 +292,8 @@ def manage_vega_processes(
     vega_console_path: Optional[str] = None,
     run_wallet_with_console: bool = False,
     port_config: Optional[Dict[Ports, int]] = None,
+    transactions_per_block: int = 1,
+    block_duration: str = "1s",
 ) -> None:
     port_config = port_config if port_config is not None else {}
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
@@ -291,7 +302,12 @@ def manage_vega_processes(
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
         tmp_vega_home = tmp_vega_dir + "/vegahome"
-        _update_node_config(tmp_vega_home, port_config=port_config)
+        _update_node_config(
+            tmp_vega_home,
+            port_config=port_config,
+            transactions_per_block=transactions_per_block,
+            block_duration=block_duration,
+        )
 
         dataNodeProcess = _popen_process(
             [data_node_path, "node", "--home=" + tmp_vega_home],
@@ -388,6 +404,7 @@ class VegaServiceNull(VegaService):
         Ports.DATA_NODE_GRAPHQL: "data_node_graphql_port",
         Ports.FAUCET: "faucet_port",
         Ports.VEGA_NODE: "vega_node_port",
+        Ports.CORE_GRPC: "vega_node_grpc_port",
         Ports.CONSOLE: "console_port",
     }
 
@@ -402,6 +419,8 @@ class VegaServiceNull(VegaService):
         run_wallet_with_token_dapp: bool = False,
         port_config: Optional[Dict[Ports, int]] = None,
         warn_on_raw_data_access: bool = True,
+        transactions_per_block: int = 1,
+        block_duration: str = "1s",
     ):
         super().__init__(
             can_control_time=True, warn_on_raw_data_access=warn_on_raw_data_access
@@ -417,6 +436,9 @@ class VegaServiceNull(VegaService):
         self.proc = None
         self.run_wallet_with_console = run_wallet_with_console
         self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
+
+        self.transactions_per_block = transactions_per_block
+        self.block_duration = block_duration
 
         if port_config is None:
             self._assign_ports()
@@ -441,6 +463,7 @@ class VegaServiceNull(VegaService):
         self.data_node_graphql_port = 0
         self.faucet_port = 0
         self.vega_node_port = 0
+        self.vega_node_grpc_port = 0
         self.console_port = 0
         for port_opt in self.PORT_TO_FIELD_MAP.values():
             curr_ports = set(
@@ -460,6 +483,7 @@ class VegaServiceNull(VegaService):
             Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
             Ports.FAUCET: self.faucet_port,
             Ports.VEGA_NODE: self.vega_node_port,
+            Ports.CORE_GRPC: self.vega_node_grpc_port,
             Ports.CONSOLE: self.console_port,
         }
 
@@ -473,6 +497,8 @@ class VegaServiceNull(VegaService):
                 "vega_console_path": self.vega_console_path,
                 "run_wallet_with_console": self.run_wallet_with_console,
                 "port_config": self._generate_port_config(),
+                "transactions_per_block": self.transactions_per_block,
+                "block_duration": self.block_duration,
             },
         )
         self.proc.start()
@@ -494,7 +520,7 @@ class VegaServiceNull(VegaService):
                 requests.exceptions.ConnectionError,
                 requests.exceptions.HTTPError,
             ):
-                time.sleep(0.5)
+                time.sleep(0.1)
         raise VegaStartupTimeoutError(
             "Timed out waiting for Vega simulator to start up"
         )
@@ -527,6 +553,9 @@ class VegaServiceNull(VegaService):
 
     def vega_node_url(self) -> str:
         return self._build_url(self.vega_node_port)
+
+    def vega_node_grpc_url(self) -> str:
+        return self._build_url(self.vega_node_grpc_port, prefix="")
 
     def clone(self) -> VegaServiceNull:
         """Creates a clone of the service without the handle to other processes.
