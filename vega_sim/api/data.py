@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from turtle import pos
 import numpy as np
 from collections import namedtuple
-from typing import Any, Callable, List, Optional, Tuple, TypeVar
+from typing import Callable, List, Optional, Tuple, TypeVar
 
 
 import vega_sim.grpc.client as vac
