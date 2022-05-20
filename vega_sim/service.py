@@ -5,11 +5,9 @@ import logging
 from abc import ABC
 from functools import wraps
 from time import time
-from turtle import pos
 from typing import List, Optional, Tuple, Union
 
 import grpc
-import requests
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
 

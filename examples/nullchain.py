@@ -1,8 +1,6 @@
 import logging
 from collections import namedtuple
 
-from pytest import param
-
 from vega_sim.null_service import VegaServiceNull
 
 
