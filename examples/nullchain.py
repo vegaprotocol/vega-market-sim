@@ -66,6 +66,19 @@ if __name__ == "__main__":
         )
 
         market_id = vega.all_markets()[0].id
+
+        vega.submit_simple_liquidity(
+            wallet_name=MM_WALLET.name,
+            market_id=market_id,
+            commitment_amount=1.9,
+            fee=0.002,
+            reference_buy="PEGGED_REFERENCE_MID",
+            reference_sell="PEGGED_REFERENCE_MID",
+            delta_buy=0.5,
+            delta_sell=0.5,
+            is_amendment=True,
+        )
+
         vega.submit_order(
             trading_wallet=MM_WALLET.name,
             market_id=market_id,
@@ -73,7 +86,7 @@ if __name__ == "__main__":
             order_type="TYPE_LIMIT",
             side="SIDE_SELL",
             volume=10,
-            price=100,
+            price=100.5,
         )
 
         vega.settle_market(

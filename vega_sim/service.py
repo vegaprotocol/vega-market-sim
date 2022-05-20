@@ -804,7 +804,9 @@ class VegaService(ABC):
             market_id=market_id, data_client=self.trading_data_client()
         ).tradable_instrument.instrument.future.settlement_asset
 
-        market_decimals = self.market_price_decimals[market_id]
+        market_decimals = data.market_price_decimals(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
         return trading.submit_simple_liquidity(
             market_id=market_id,
             commitment_amount=num_to_padded_int(
