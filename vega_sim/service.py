@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import defaultdict
 
 import logging
 from abc import ABC
@@ -7,7 +8,6 @@ from time import time
 from typing import List, Optional, Tuple, Union
 
 import grpc
-import requests
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
 
@@ -17,11 +17,9 @@ import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
 import vega_sim.api.wallet as wallet
-from vega_sim.api.helpers import num_to_padded_int
+from vega_sim.api.helpers import num_to_padded_int, forward, wait_for_datanode_sync
 
 logger = logging.getLogger(__name__)
-
-TIME_FORWARD_URL = "{base_url}/api/v1/forwardtime"
 
 
 class LoginError(Exception):
@@ -39,6 +37,15 @@ def raw_data(fn):
         return fn(self, *args, **kwargs)
 
     return wrapped_fn
+
+
+class DecimalsCache(defaultdict):
+    def __missing__(self, key):
+        if self.default_factory is None:
+            raise KeyError(key)
+        else:
+            ret = self[key] = self.default_factory(key)
+            return ret
 
 
 class VegaService(ABC):
@@ -70,9 +77,25 @@ class VegaService(ABC):
         """
         self.login_tokens = {}
         self.pub_keys = {}
+        self._core_client = None
         self._trading_data_client = None
         self.can_control_time = can_control_time
         self.warn_on_raw_data_access = warn_on_raw_data_access
+        self.market_price_decimals = DecimalsCache(
+            lambda market_id: data.market_price_decimals(
+                market_id=market_id, data_client=self.trading_data_client()
+            )
+        )
+        self.market_pos_decimals = DecimalsCache(
+            lambda market_id: data.market_position_decimals(
+                market_id=market_id, data_client=self.trading_data_client()
+            )
+        )
+        self.asset_decimals = DecimalsCache(
+            lambda asset_id: data.asset_decimals(
+                asset_id=asset_id, data_client=self.trading_data_client()
+            )
+        )
 
     def wallet_url(self) -> str:
         pass
@@ -84,6 +107,9 @@ class VegaService(ABC):
         pass
 
     def vega_node_url(self) -> str:
+        pass
+
+    def vega_node_grpc_url(self) -> str:
         pass
 
     def data_node_grpc_url(self) -> str:
@@ -103,6 +129,20 @@ class VegaService(ABC):
                 channel=channel,
             )
         return self._trading_data_client
+
+    def core_client(self) -> vac.VegaCoreClient:
+        if self._core_client is None:
+            channel = grpc.insecure_channel(self.vega_node_grpc_url())
+
+            grpc.channel_ready_future(channel).result(timeout=10)
+            self._core_client = vac.VegaCoreClient(
+                self.vega_node_grpc_url(),
+                channel=channel,
+            )
+        return self._core_client
+
+    def wait_for_datanode_sync(self) -> None:
+        wait_for_datanode_sync(self.trading_data_client(), self.core_client())
 
     def _check_logged_in(self, wallet_name: str):
         if wallet_name not in self.login_tokens:
@@ -160,15 +200,15 @@ class VegaService(ABC):
                 float, the amount of asset to mint
         """
         self._check_logged_in(wallet_name)
-        asset_decimals = data.asset_decimals(
-            asset_id=asset, data_client=self.trading_data_client()
-        )
+        asset_decimals = self.asset_decimals[asset]
         faucet.mint(
             self.pub_keys[wallet_name],
             asset,
             num_to_padded_int(amount, asset_decimals),
             faucet_url=self.faucet_url(),
         )
+        if self.can_control_time:
+            self.forward("1s")
 
     def forward(self, time: str) -> None:
         """Steps chain forward a given amount of time, either with an amount of time or
@@ -181,11 +221,7 @@ class VegaService(ABC):
         """
         if not self.can_control_time:
             return
-        payload = {"forward": time}
-
-        requests.post(
-            TIME_FORWARD_URL.format(base_url=self.vega_node_url()), json=payload
-        ).raise_for_status()
+        forward(time=time, vega_node_url=self.vega_node_url())
 
     def create_asset(
         self,
@@ -229,7 +265,10 @@ class VegaService(ABC):
             wallet_server_url=self.wallet_url(),
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 10,
+            validation_time=blockchain_time_seconds + 20,
+            node_url_for_time_forwarding=self.vega_node_url()
+            if self.can_control_time
+            else None,
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
@@ -295,8 +334,11 @@ class VegaService(ABC):
             market_decimals=market_decimals,
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 10,
+            validation_time=blockchain_time_seconds + 20,
             risk_model=risk_model,
+            node_url_for_time_forwarding=self.vega_node_url()
+            if self.can_control_time
+            else None,
             **additional_kwargs,
         )
         gov.approve_proposal(
@@ -315,6 +357,7 @@ class VegaService(ABC):
         volume: float,
         fill_or_kill: bool = True,
         wait: bool = True,
+        order_ref: Optional[str] = None,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -330,6 +373,8 @@ class VegaService(ABC):
             wait:
                 bool, whether to wait for order acceptance.
                     If true, will raise an error if order is not accepted
+            order_ref:
+                optional str, reference for later identification of order
 
         Returns:
             str, The ID of the order
@@ -343,11 +388,10 @@ class VegaService(ABC):
             side=side,
             volume=num_to_padded_int(
                 volume,
-                data.market_position_decimals(
-                    market_id, data_client=self.trading_data_client()
-                ),
+                self.market_pos_decimals[market_id],
             ),
             wait=wait,
+            order_ref=order_ref,
         )
 
     def submit_order(
@@ -362,6 +406,7 @@ class VegaService(ABC):
         expires_at: Optional[int] = None,
         pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
         wait: bool = True,
+        order_ref: Optional[str] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -395,6 +440,8 @@ class VegaService(ABC):
             wait:
                 bool, whether to wait for order acceptance.
                     If true, will raise an error if order is not accepted
+            order_ref:
+                optional str, reference for later identification of order
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
                 Otherwise None
@@ -410,22 +457,21 @@ class VegaService(ABC):
             side=side,
             volume=num_to_padded_int(
                 volume,
-                data.market_position_decimals(
-                    market_id, data_client=self.trading_data_client()
-                ),
+                self.market_pos_decimals[market_id],
             ),
             price=num_to_padded_int(
                 price,
-                data.market_price_decimals(
-                    market_id, data_client=self.trading_data_client()
-                ),
+                self.market_price_decimals[market_id],
             )
             if price is not None
             else None,
             expires_at=expires_at,
             pegged_order=pegged_order,
             wait=wait,
-            time_forward_fn=self._default_wait_fn,
+            time_forward_fn=lambda: self.forward("1s")
+            if self.can_control_time
+            else self._default_wait_fn,
+            order_ref=order_ref,
         )
 
     def amend_order(
@@ -472,9 +518,7 @@ class VegaService(ABC):
             order_id=order_id,
             price=num_to_padded_int(
                 price,
-                data.market_price_decimals(
-                    market_id, data_client=self.trading_data_client()
-                ),
+                self.market_price_decimals[market_id],
             )
             if price is not None
             else None,
@@ -483,9 +527,7 @@ class VegaService(ABC):
             pegged_reference=pegged_reference,
             volume_delta=num_to_padded_int(
                 volume_delta,
-                data.market_position_decimals(
-                    market_id, data_client=self.trading_data_client()
-                ),
+                self.market_pos_decimals[market_id],
             ),
             time_in_force=time_in_force,
         )
@@ -545,7 +587,10 @@ class VegaService(ABC):
             data_client=self.trading_data_client(),
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 1,
+            validation_time=blockchain_time_seconds + 20,
+            node_url_for_time_forwarding=self.vega_node_url()
+            if self.can_control_time
+            else None,
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
@@ -561,9 +606,7 @@ class VegaService(ABC):
         settlement_price: float,
         market_id: str,
     ):
-        decimals = data.market_price_decimals(
-            market_id, data_client=self.trading_data_client()
-        )
+        decimals = self.market_price_decimals[market_id]
 
         oracle_name = (
             data_raw.market_info(market_id, data_client=self.trading_data_client())
@@ -702,12 +745,23 @@ class VegaService(ABC):
             market_id=market_id, data_client=self.trading_data_client()
         )
 
+    def order_book_by_market(
+        self,
+        market_id: str,
+    ) -> data.OrderBook:
+        return data.order_book_by_market(
+            market_id=market_id, data_client=self.trading_data_client()
+        )
+
     def open_orders_by_market(
         self,
         market_id: str,
     ) -> data.OrderBook:
         return data.open_orders_by_market(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id,
+            data_client=self.trading_data_client(),
+            price_decimals=self.market_price_decimals[market_id],
+            position_decimals=self.market_pos_decimals[market_id],
         )
 
     def submit_simple_liquidity(
@@ -754,10 +808,7 @@ class VegaService(ABC):
         return trading.submit_simple_liquidity(
             market_id=market_id,
             commitment_amount=num_to_padded_int(
-                commitment_amount,
-                data.asset_decimals(
-                    asset_id=asset_id, data_client=self.trading_data_client()
-                ),
+                commitment_amount, self.asset_decimals[asset_id]
             ),
             fee=fee,
             reference_buy=reference_buy,
@@ -809,4 +860,27 @@ class VegaService(ABC):
         """
         return data_raw.order_status(
             order_id=order_id, data_client=self.trading_data_client(), version=version
+        )
+
+    def order_status_by_reference(
+        self,
+        reference: str,
+        market_id: str,
+    ) -> Optional[vega_protos.vega.Order]:
+        """Loads information about a specific order identified by the reference
+
+        Args:
+            reference:
+                str, the order reference as specified by Vega when originally placed
+                    or assigned by Vega
+            market_id:
+                str, the ID of the market on which the order was placed
+        Returns:
+            Optional[vega.Order], the requested Order object or None if nothing found
+        """
+        return data.order_status_by_reference(
+            reference=reference,
+            data_client=self.trading_data_client(),
+            price_decimals=self.market_price_decimals[market_id],
+            position_decimals=self.market_pos_decimals[market_id],
         )

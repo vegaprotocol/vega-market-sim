@@ -34,7 +34,8 @@ def submit_order(
     pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
     wait: bool = True,
     time_forward_fn: Optional[Callable[[], None]] = None,
-):
+    order_ref: Optional[str] = None,
+) -> Optional[str]:
     """
     Submit orders as specified to required pre-existing market.
     Optionally wait for acceptance of order (raises on non-acceptance)
@@ -76,6 +77,10 @@ def submit_order(
         time_forward_fn:
             optional function, Function which takes no arguments and
             waits or manually forwards the chain when waiting for order acceptance
+        order_ref:
+            optional str, reference for later identification of order
+    Returns:
+        Optional[str], Order ID if wait is True, otherwise None
     """
     # Login wallet
     time_in_force = get_enum(time_in_force, vega_protos.vega.Order)
@@ -89,7 +94,7 @@ def submit_order(
         ).timestamp
         expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
 
-    order_ref = f"{pub_key}-{uuid.uuid4()}"
+    order_ref = f"{pub_key}-{uuid.uuid4()}" if order_ref is None else order_ref
 
     order_data = vega_protos.commands.v1.commands.OrderSubmission(
         market_id=market_id,
@@ -133,21 +138,15 @@ def submit_order(
 
         # Wait for proposal to be included in a block and to be accepted by Vega network
         logger.debug("Waiting for proposal acceptance")
-        try:
-            response = wait_for_acceptance(order_ref, _proposal_loader)
-        except Exception as e:
-            logger.debug(
-                "Order wasn't immediately valid, waiting before trying again,"
-                f" raised {e}"
-            )
-            wait_fn = (
+        response = wait_for_acceptance(
+            order_ref,
+            _proposal_loader,
+            time_forward_fn=(
                 time_forward_fn
                 if time_forward_fn is not None
                 else lambda: time.sleep(1)
-            )
-            wait_fn()
-            response = wait_for_acceptance(order_ref, _proposal_loader)
-
+            ),
+        )
         order_status = enum_to_str(vega_protos.vega.Order.Status, response.status)
 
         logger.debug(
@@ -359,5 +358,6 @@ def submit_simple_liquidity(
 
     url = f"{wallet_server_url}/api/v1/command/sync"
     response = requests.post(url, headers=headers, json=submission)
+
     response.raise_for_status()
     logger.debug(f"Submitted liquidity on market {market_id}")
