@@ -298,6 +298,7 @@ def manage_vega_processes(
     port_config = port_config if port_config is not None else {}
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
         print(tmp_vega_dir)
+        logger.info(tmp_vega_dir)
         logger.debug(f"Running NullChain from vegahome of {tmp_vega_dir}")
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 

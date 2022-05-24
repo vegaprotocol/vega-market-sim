@@ -8,6 +8,8 @@ requests = "*"
 toml = "*"
 numpy = "*"
 grpcio-tools = "*"
+pynacl = "*"
+numba = "*"
 
 [dev-packages]
 black = "*"
