@@ -1,4 +1,4 @@
-VEGA_TAG := develop
+VEGA_TAG := fix_nil_check
 WALLET_TAG := develop
 DATA_NODE_TAG := develop
 CONSOLE_TAG := master
@@ -15,21 +15,21 @@ pull_deps:
 	@echo "Downloading Vega"
 	@if [ ! -d ./extern/vega ]; then mkdir ./extern/vega; git clone https://github.com/vegaprotocol/vega ${EXTERN_DIR}/vega; fi
 ifneq (${VEGA_TAG},develop)
-	@git -C ${EXTERN_DIR}/vega checkout -b ${VEGA_TAG}
+	@git -C ${EXTERN_DIR}/vega checkout ${VEGA_TAG}
 else
 	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
 endif
 	@echo "Downloading data-node"
 	@if [ ! -d ./extern/data-node ]; then mkdir ./extern/data-node; git clone https://github.com/vegaprotocol/data-node ${EXTERN_DIR}/data-node; fi
 ifneq (${DATA_NODE_TAG},develop)
-	@git -C ${EXTERN_DIR}/data-node checkout -b ${DATA_NODE_TAG}
+	@git -C ${EXTERN_DIR}/data-node checkout ${DATA_NODE_TAG}
 else
 	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
 endif
 	@echo "Downloading Vegawallet"
 	@if [ ! -d ./extern/vegawallet ]; then mkdir ./extern/vegawallet; git clone https://github.com/vegaprotocol/vegawallet ${EXTERN_DIR}/vegawallet; fi
 ifneq (${WALLET_TAG},develop)
-	@git -C ${EXTERN_DIR}/vegawallet checkout -b ${WALLET_TAG}
+	@git -C ${EXTERN_DIR}/vegawallet checkout ${WALLET_TAG}
 else
 	@git -C ${EXTERN_DIR}/vegawallet checkout develop; git -C ${EXTERN_DIR}/vegawallet pull
 endif
@@ -46,7 +46,7 @@ pull_deps_ui:
 	@echo "Downloading Vega slimline console"
 	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol//slimline-console ${EXTERN_DIR}/console; fi
 ifneq (${CONSOLE_TAG},master)
-	@git -C ${EXTERN_DIR}/console checkout -b ${CONSOLE_TAG}
+	@git -C ${EXTERN_DIR}/console checkout ${CONSOLE_TAG}
 else
 	@git -C ${EXTERN_DIR}/console checkout master; git -C ${EXTERN_DIR}/console pull
 endif
@@ -62,7 +62,7 @@ pull_deps_proto:
 	@echo "Downloading Vega Protos"
 	@if [ ! -d ./extern/proto ]; then mkdir ${EXTERN_DIR}/proto; git clone https://github.com/vegaprotocol/protos ${EXTERN_DIR}/proto; fi
 ifneq (${PROTO_TAG},develop)
-	@git -C ${EXTERN_DIR}/proto checkout -b ${PROTO_TAG}
+	@git -C ${EXTERN_DIR}/proto checkout ${PROTO_TAG}
 else
 	@git -C ${EXTERN_DIR}/proto checkout develop; git -C ${EXTERN_DIR}/proto pull
 endif

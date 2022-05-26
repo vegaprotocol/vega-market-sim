@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from optparse import Option
 import numpy as np
 from collections import namedtuple
 from typing import Callable, List, Optional, Tuple, TypeVar

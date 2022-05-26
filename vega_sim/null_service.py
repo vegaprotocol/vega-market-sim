@@ -23,6 +23,8 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
+from vega_sim.wallet.base import Wallet
+from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = logging.getLogger(__name__)
 
@@ -441,6 +443,8 @@ class VegaServiceNull(VegaService):
         self.transactions_per_block = transactions_per_block
         self.block_duration = block_duration
 
+        self._wallet = None
+
         if port_config is None:
             self._assign_ports()
         else:
@@ -456,6 +460,11 @@ class VegaServiceNull(VegaService):
 
     def __exit__(self, type, value, traceback):
         self.stop()
+
+    def wallet(self) -> Wallet:
+        if self._wallet is None:
+            self._wallet = VegaWallet(wallet_url=self.wallet_url())
+        return self._wallet
 
     def _assign_ports(self):
         self.wallet_port = 0

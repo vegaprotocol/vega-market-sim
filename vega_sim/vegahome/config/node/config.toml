@@ -16,7 +16,7 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Blockchain]
-  Level = "Info"
+  Level = "Debug"
   LogTimeDebug = true
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
@@ -60,14 +60,14 @@ UlimitNOFile = 8192
 [Execution]
   Level = "Debug"
   [Execution.Matching]
-    Level = "Info"
+    Level = "Debug"
     LogPriceLevelsDebug = false
     LogRemovedOrdersDebug = false
   [Execution.Risk]
     Level = "Info"
     LogMarginUpdate = true
   [Execution.Position]
-    Level = "Info"
+    Level = "Debug"
     LogPositionUpdate = true
   [Execution.Settlement]
     Level = "Info"
@@ -154,7 +154,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Validators]
-  Level = "Info"
+  Level = "Debug"
 
 [Banking]
   Level = "Info"
@@ -195,7 +195,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Spam]
-  Level = "Info"
+  Level = "Debug"
 
 [Snapshot]
   Level = "Info"

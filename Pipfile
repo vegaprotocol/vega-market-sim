@@ -10,6 +10,7 @@ numpy = "*"
 grpcio-tools = "*"
 pynacl = "*"
 numba = "*"
+inflection = "*"
 
 [dev-packages]
 black = "*"
@@ -21,6 +22,7 @@ notebook = "*"
 jinja2 = "*"
 snakeviz = "*"
 matplotlib = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3"

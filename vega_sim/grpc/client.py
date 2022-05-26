@@ -1,6 +1,6 @@
 import grpc
 from vega_sim.proto.data_node.api.v1 import trading_data_grpc
-from vega_sim.proto.vega.api.v1 import core_grpc
+from vega_sim.proto.vega.api.v1 import core_grpc, corestate_grpc
 
 
 class GRPCClient:
@@ -42,6 +42,19 @@ class VegaCoreClient(GRPCClient):
     def __init__(self, url: str, channel=None) -> None:
         super().__init__(url, channel=channel)
         self._core = core_grpc.CoreServiceStub(self.channel)
+
+    def __getattr__(self, funcname):
+        return getattr(self._core, funcname)
+
+
+class VegaCoreStateClient(GRPCClient):
+    """
+    The Vega Core Client talks to a back-end node.
+    """
+
+    def __init__(self, url: str, channel=None) -> None:
+        super().__init__(url, channel=channel)
+        self._core = corestate_grpc.CoreStateServiceStub(self.channel)
 
     def __getattr__(self, funcname):
         return getattr(self._core, funcname)
