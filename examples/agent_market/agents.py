@@ -116,6 +116,7 @@ class MarketMaker(StateAgent):
             amount=5e5,
         )
 
+        self.vega.wait_for_datanode_sync()
         self.vega.forward("30s")
         self.vega.wait_for_datanode_sync()
 

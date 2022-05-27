@@ -1,4 +1,4 @@
-VEGA_TAG := fix_nil_check
+VEGA_TAG := develop
 WALLET_TAG := develop
 DATA_NODE_TAG := develop
 CONSOLE_TAG := master

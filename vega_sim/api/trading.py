@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from operator import is_
 from time import time
 import requests
 import uuid
@@ -295,13 +296,14 @@ def submit_simple_liquidity(
             int, the offset from reference point for the sell side of LP
     """
 
-    submission_name = (
-        "liquidity_provision_submission"
-        if not is_amendment
-        else "liquidity_provision_amendment"
-    )
+    if is_amendment:
+        submission_name = "liquidity_provision_amendment"
+        command = vega_protos.commands.v1.commands.LiquidityProvisionAmendment
+    else:
+        submission_name = "liquidity_provision_submission"
+        command = vega_protos.commands.v1.commands.LiquidityProvisionSubmission
 
-    submission = vega_protos.commands.v1.commands.LiquidityProvisionSubmission(
+    submission = command(
         market_id=market_id,
         commitment_amount=str(commitment_amount),
         fee=str(fee),
