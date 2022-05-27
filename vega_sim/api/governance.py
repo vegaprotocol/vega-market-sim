@@ -3,7 +3,6 @@ import json
 import logging
 from typing import Optional
 
-import requests
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
