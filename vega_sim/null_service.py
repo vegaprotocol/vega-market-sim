@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import atexit
+from distutils.log import warn
 import logging
 import os
 import shutil
@@ -463,12 +464,13 @@ class VegaServiceNull(VegaService):
     def __exit__(self, type, value, traceback):
         self.stop()
 
+    @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
             if self._use_full_vega_wallet:
-                self._wallet = VegaWallet(self.wallet_url())
+                self._wallet = VegaWallet(self.wallet_url)
             else:
-                self._wallet = SlimWallet(self.core_client())
+                self._wallet = SlimWallet(self.core_client)
         return self._wallet
 
     def _assign_ports(self):
@@ -502,7 +504,7 @@ class VegaServiceNull(VegaService):
             Ports.CONSOLE: self.console_port,
         }
 
-    def start(self) -> None:
+    def start(self, block_on_startup: bool = True) -> None:
         self.proc = Process(
             target=manage_vega_processes,
             kwargs={
@@ -519,27 +521,29 @@ class VegaServiceNull(VegaService):
         )
         self.proc.start()
 
-        # Wait for startup
-        for _ in range(300):
-            try:
-                requests.get(
-                    f"http://localhost:{self.data_node_rest_port}/assets"
-                ).raise_for_status()
-                if self.run_wallet_with_console:
-                    logger.info(
-                        "Vega Running. Console launched at"
-                        f" http://localhost:{self.console_port}"
-                    )
-                return
-            except (
-                MaxRetryError,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.HTTPError,
-            ):
-                time.sleep(0.1)
-        raise VegaStartupTimeoutError(
-            "Timed out waiting for Vega simulator to start up"
-        )
+        if block_on_startup:
+            # Wait for startup
+            for _ in range(300):
+                try:
+                    requests.get(
+                        f"http://localhost:{self.data_node_rest_port}/assets"
+                    ).raise_for_status()
+                    return
+                except (
+                    MaxRetryError,
+                    requests.exceptions.ConnectionError,
+                    requests.exceptions.HTTPError,
+                ):
+                    time.sleep(0.1)
+            raise VegaStartupTimeoutError(
+                "Timed out waiting for Vega simulator to start up"
+            )
+
+        if self.run_wallet_with_console:
+            logger.info(
+                "Vega Running. Console launched at"
+                f" http://localhost:{self.console_port}"
+            )
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod
@@ -555,21 +559,27 @@ class VegaServiceNull(VegaService):
         else:
             self.proc.terminate()
 
+    @property
     def wallet_url(self) -> str:
         return self._build_url(self.wallet_port)
 
+    @property
     def data_node_rest_url(self) -> str:
         return self._build_url(self.data_node_rest_port)
 
+    @property
     def data_node_grpc_url(self) -> str:
         return self._build_url(self.data_node_grpc_port, prefix="")
 
+    @property
     def faucet_url(self) -> str:
         return self._build_url(self.faucet_port)
 
+    @property
     def vega_node_url(self) -> str:
         return self._build_url(self.vega_node_port)
 
+    @property
     def vega_node_grpc_url(self) -> str:
         return self._build_url(self.vega_node_grpc_port, prefix="")
 
@@ -587,4 +597,6 @@ class VegaServiceNull(VegaService):
             self.vega_wallet_path,
             start_immediately=False,
             port_config=self._generate_port_config(),
+            use_full_vega_wallet=self._use_full_vega_wallet,
+            warn_on_raw_data_access=self.warn_on_raw_data_access,
         )
