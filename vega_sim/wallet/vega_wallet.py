@@ -71,7 +71,9 @@ class VegaWallet(Wallet):
             json=req,
         )
         response.raise_for_status()
-        return response.json()["token"]
+        self.login_tokens[name] = response.json()["token"]
+        self.pub_keys[name] = self.get_keypairs(name)
+        return self.login_tokens[name]
 
     def generate_keypair(
         self,
