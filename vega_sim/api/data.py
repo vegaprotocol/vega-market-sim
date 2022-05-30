@@ -90,6 +90,7 @@ def party_account(
     asset_id: str,
     market_id: str,
     data_client: vac.VegaTradingDataClient,
+    asset_dp: Optional[int] = None,
 ) -> AccountData:
     """Output money in general accounts/margin accounts/bond accounts (if exists)
     of a party."""
@@ -99,7 +100,9 @@ def party_account(
     )
     accounts = data_client.PartyAccounts(account_req).accounts
 
-    asset_dp = asset_decimals(asset_id, data_client)
+    asset_dp = (
+        asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
+    )
 
     general, margin, bond = np.nan, np.nan, np.nan
     for account in accounts:
@@ -210,12 +213,17 @@ def asset_decimals(
 def best_prices(
     market_id: str,
     data_client: vac.VegaTradingDataClient,
+    price_decimals: Optional[int] = None,
 ) -> Tuple[float, float]:
     """
     Output the best static bid price and best static ask price in current market.
     """
     mkt_data = data_raw.market_data(market_id=market_id, data_client=data_client)
-    mkt_price_dp = market_price_decimals(market_id=market_id, data_client=data_client)
+    mkt_price_dp = (
+        price_decimals
+        if price_decimals is not None
+        else market_price_decimals(market_id=market_id, data_client=data_client)
+    )
 
     return num_from_padded_int(
         mkt_data.best_static_bid_price, mkt_price_dp

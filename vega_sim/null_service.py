@@ -209,7 +209,7 @@ class SocketNotFoundError(Exception):
     pass
 
 
-def _find_free_port(existing_set: Optional[Set[int]] = None):
+def find_free_port(existing_set: Optional[Set[int]] = None):
     ret_sock = 0
     existing_set = (
         existing_set.union(set([ret_sock]))
@@ -265,7 +265,7 @@ def _update_node_config(
     for port in Ports:
         if port in port_config:
             continue
-        new_port = _find_free_port(existing_ports)
+        new_port = find_free_port(existing_ports)
         existing_ports.add(new_port)
         port_config[port] = new_port
 
@@ -469,7 +469,7 @@ class VegaServiceNull(VegaService):
             curr_ports = set(
                 [getattr(self, port) for port in self.PORT_TO_FIELD_MAP.values()]
             )
-            setattr(self, port_opt, _find_free_port(curr_ports))
+            setattr(self, port_opt, find_free_port(curr_ports))
 
     def _check_started(self) -> None:
         if self.proc is None:
