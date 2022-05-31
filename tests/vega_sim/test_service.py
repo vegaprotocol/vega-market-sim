@@ -14,10 +14,7 @@ from vega_sim.wallet.vega_wallet import (
 class StubService(VegaService):
     def __init__(self, wallet_url: str):
         super().__init__()
-        self._wallet = VegaWallet(wallet_url=wallet_url)
-
-    def wallet(self):
-        return self._wallet
+        self.wallet = VegaWallet(wallet_url=wallet_url)
 
 
 @pytest.fixture
