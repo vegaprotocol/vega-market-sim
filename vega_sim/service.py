@@ -307,6 +307,9 @@ class VegaService(ABC):
         risk_aversion: Optional[float] = 1e-6,
         tau: Optional[float] = 1.0 / 365.25 / 24,
         sigma: Optional[float] = 1.0,
+        liquidity_commitment: Optional[
+            vega_protos.governance.NewMarketCommitment
+        ] = None,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -352,6 +355,7 @@ class VegaService(ABC):
             enactment_time=blockchain_time_seconds + 360,
             validation_time=blockchain_time_seconds + 20,
             risk_model=risk_model,
+            liquidity_commitment=liquidity_commitment,
             node_url_for_time_forwarding=self.vega_node_url
             if self.can_control_time
             else None,

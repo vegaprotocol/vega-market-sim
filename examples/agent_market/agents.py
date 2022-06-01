@@ -4,9 +4,10 @@ from typing import Dict, List, Optional
 import numpy as np
 from vega_sim.api.data import Order
 from vega_sim.environment import StateAgent, VegaState
+from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.proto.vega import vega as vega_protos
+from vega_sim.proto.vega import vega as vega_protos, governance as gov_protos
 from vega_sim.service import VegaService
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -15,7 +16,10 @@ WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 MM_WALLET = WalletConfig("mm", "pin")
 
 # The party to send selling/buying MOs to hit LP orders
-TRADER_WALLET = WalletConfig("Zl3pLs6Xk6SwIK7Jlp2x", "bJQDDVGAhKkj3PVCc7Rr")
+TRADER_1_WALLET = WalletConfig("trader1", "t1p")
+TRADER_2_WALLET = WalletConfig("trader2", "t2p")
+TRADER_3_WALLET = WalletConfig("trader3", "t3p")
+TRADER_4_WALLET = WalletConfig("trader4", "t4p")
 
 # The party randomly post LOs at buy/sell side to simulate real Market situation
 RANDOM_WALLET = WalletConfig("OJpVLvU5fgLJbhNPdESa", "GmJTt9Gk34BHDlovB7AJ")
@@ -23,7 +27,15 @@ RANDOM_WALLET = WalletConfig("OJpVLvU5fgLJbhNPdESa", "GmJTt9Gk34BHDlovB7AJ")
 # The party to terminate the market and send settlment price
 TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 
-wallets = [MM_WALLET, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
+wallets = [
+    MM_WALLET,
+    TRADER_1_WALLET,
+    TRADER_2_WALLET,
+    TRADER_3_WALLET,
+    TRADER_4_WALLET,
+    RANDOM_WALLET,
+    TERMINATE_WALLET,
+]
 
 
 def random_walk_price(
@@ -67,7 +79,7 @@ def random_walk_price(
     return S
 
 
-class MarketMaker(StateAgent):
+class MarketMaker(StateAgentWithWallet):
     def __init__(
         self,
         wallet_name: str,
@@ -109,52 +121,49 @@ class MarketMaker(StateAgent):
         self.vega.forward("10s")
         self.vega.wait_for_datanode_sync()
 
-        tdai_id = self.vega.find_asset_id(symbol="tDAI")
+        self.asset_id = self.vega.find_asset_id(symbol="tDAI")
         self.vega.mint(
             self.wallet_name,
-            asset=tdai_id,
+            asset=self.asset_id,
             amount=5e5,
         )
 
         self.vega.wait_for_datanode_sync()
         self.vega.forward("30s")
         self.vega.wait_for_datanode_sync()
+        liquidity_commitment = gov_protos.NewMarketCommitment(
+            commitment_amount="20000000000",
+            fee="0.002",
+            sells=[
+                vega_protos.LiquidityOrder(
+                    reference=vega_protos.PeggedReference.PEGGED_REFERENCE_MID,
+                    proportion=1,
+                    offset="50",
+                )
+            ],
+            buys=[
+                vega_protos.LiquidityOrder(
+                    reference=vega_protos.PeggedReference.PEGGED_REFERENCE_MID,
+                    proportion=1,
+                    offset="50",
+                )
+            ],
+            reference="",
+        )
 
         # Get the market set up
         self.vega.create_simple_market(
             market_name="BTC:DAI_Mar22",
             proposal_wallet=self.wallet_name,
-            settlement_asset_id=tdai_id,
+            settlement_asset_id=self.asset_id,
             termination_wallet=self.terminate_wallet_name,
+            liquidity_commitment=liquidity_commitment,
         )
         self.vega.forward("2s")
 
         self.market_id = self.vega.all_markets()[0].id
 
         spot_price = next(self.price_process)
-        # Submit some orders to open the market
-        self.vega.submit_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            order_type="TYPE_LIMIT",
-            time_in_force="TIME_IN_FORCE_GTC",
-            side="SIDE_BUY",
-            volume=1,
-            price=spot_price,
-            wait=False,
-        )
-
-        self.vega.submit_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            order_type="TYPE_LIMIT",
-            time_in_force="TIME_IN_FORCE_GTC",
-            side="SIDE_SELL",
-            volume=1,
-            price=spot_price,
-            wait=False,
-        )
-
         # Submit some orders to open the market
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
@@ -206,17 +215,17 @@ class MarketMaker(StateAgent):
             order_ref=f"sell_keep_alive{self.sell_order_keepalive_num}",
         )
 
-        self.vega.submit_simple_liquidity(
-            wallet_name=self.wallet_name,
-            market_id=self.market_id,
-            commitment_amount=3e5,
-            fee=0.005,
-            reference_buy="PEGGED_REFERENCE_BEST_BID",
-            reference_sell="PEGGED_REFERENCE_BEST_ASK",
-            delta_buy=0,
-            delta_sell=0,
-            is_amendment=True,
-        )
+        # self.vega.submit_simple_liquidity(
+        #     wallet_name=self.wallet_name,
+        #     market_id=self.market_id,
+        #     commitment_amount=2e5,
+        #     fee=0.05,
+        #     reference_buy="PEGGED_REFERENCE_BEST_BID",
+        #     reference_sell="PEGGED_REFERENCE_BEST_ASK",
+        #     delta_buy=0,
+        #     delta_sell=0,
+        #     is_amendment=True,
+        # )
 
     def _place_or_amend(
         self,
@@ -317,12 +326,12 @@ class MarketMaker(StateAgent):
 class MarketOrderTraders(StateAgent):
     def __init__(
         self,
-        wallet_name: str,
-        wallet_pass: str,
+        market_agents: List[StateAgentWithWallet],
         buy_order_arrival_rate: float = 1,
         sell_order_arrival_rate: float = 1,
     ):
-        super().__init__(wallet_name, wallet_pass)
+        super().__init__()
+        self.market_agents = market_agents
         self.buy_order_arrival_rate = buy_order_arrival_rate
         self.sell_order_arrival_rate = sell_order_arrival_rate
 
@@ -331,35 +340,67 @@ class MarketOrderTraders(StateAgent):
         self.market_id = self.vega.all_markets()[0].id
 
         tdai_id = self.vega.find_asset_id(symbol="tDAI")
-        self.vega.mint(
-            self.wallet_name,
-            asset=tdai_id,
-            amount=1e5,
-        )
+
+        for trader in self.market_agents:
+            trader.initialise(vega=vega)
+            self.vega.mint(
+                trader.wallet_name,
+                asset=tdai_id,
+                amount=1e5,
+            )
         self.vega.forward("1s")
 
     def step(self, vega_state: VegaState):
         if (
             vega_state.market_state[self.market_id].trading_mode
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ) and vega_state.market_state[
-            self.market_id
-        ].state == markets_protos.Market.State.STATE_ACTIVE:
+        ):
             buy_arrival = np.random.poisson(self.buy_order_arrival_rate)
-            if buy_arrival > 0:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side="SIDE_BUY",
-                    volume=buy_arrival,
-                    wait=False,
-                )
             sell_arrival = np.random.poisson(self.sell_order_arrival_rate)
-            if sell_arrival > 0:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side="SIDE_SELL",
-                    volume=sell_arrival,
-                    wait=False,
-                )
+
+            buy_trader = np.random.choice(self.market_agents)
+            sell_trader = np.random.choice(self.market_agents)
+
+            if (
+                vega_state.market_state[self.market_id].state
+                == markets_protos.Market.State.STATE_ACTIVE
+            ):
+                if buy_arrival > 0:
+                    self.vega.submit_market_order(
+                        trading_wallet=buy_trader.wallet_name,
+                        market_id=self.market_id,
+                        side="SIDE_BUY",
+                        volume=buy_arrival,
+                        wait=False,
+                    )
+                if sell_arrival > 0:
+                    self.vega.submit_market_order(
+                        trading_wallet=sell_trader.wallet_name,
+                        market_id=self.market_id,
+                        side="SIDE_SELL",
+                        volume=sell_arrival,
+                        wait=False,
+                    )
+            # else:
+            #     if buy_arrival > 0:
+            #         self.vega.submit_order(
+            #             trading_wallet=buy_trader.wallet_name,
+            #             market_id=self.market_id,
+            #             order_type="TYPE_LIMIT",
+            #             time_in_force="TIME_IN_FORCE_GTC",
+            #             side="SIDE_BUY",
+            #             volume=1,
+            #             price=2000,
+            #             wait=False,
+            #         )
+            #     if sell_arrival > 0:
+            #         self.vega.submit_order(
+            #             trading_wallet=sell_trader.wallet_name,
+            #             market_id=self.market_id,
+            #             order_type="TYPE_LIMIT",
+            #             time_in_force="TIME_IN_FORCE_GTC",
+            #             side="SIDE_SELL",
+            #             price=0.1,
+            #             volume=1,
+            #             wait=False,
+            #         )
