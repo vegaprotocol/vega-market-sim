@@ -1,10 +1,8 @@
 import base64
 import json
 import logging
-from typing import Callable, Optional
-from google.protobuf.json_format import MessageToDict
+from typing import Optional
 
-import requests
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
@@ -18,6 +16,7 @@ from vega_sim.api.helpers import (
     forward,
 )
 from vega_sim.api.data import find_asset_id
+from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
 
@@ -78,12 +77,11 @@ def get_blockchain_time(data_client: vac.VegaTradingDataClient) -> int:
 
 def propose_future_market(
     market_name: str,
-    pub_key: str,
-    login_token: str,
+    wallet_name: str,
+    wallet: Wallet,
     settlement_asset_id: str,
     data_client: vac.VegaTradingDataClient,
     termination_pub_key: str,
-    wallet_server_url: str,
     governance_asset: str = "VOTE",
     future_asset: str = "BTC",
     position_decimals: Optional[int] = None,
@@ -100,8 +98,10 @@ def propose_future_market(
     Args:
         market_name:
             str, name of the market
-        pub_key:
-            str, public key of the proposer
+        wallet_name:
+            str, the wallet name performing the action
+        wallet:
+            Wallet, wallet client
         login_token:
             str, the token returned from proposer wallet login
         settlement_asset_id:
@@ -111,8 +111,6 @@ def propose_future_market(
                 Vega data node
         termination_pub_key:
             str, the public key of the oracle to be used for trading termination
-        wallet_server_url:
-            str, the URL for the wallet server
         governance_asset:
             str, the governance asset on the market
         future_asset:
@@ -131,6 +129,7 @@ def propose_future_market(
     vote_asset_id = find_asset_id(
         governance_asset, raise_on_missing=True, data_client=data_client
     )
+    pub_key = wallet.public_key(wallet_name)
 
     # Request accounts for party and check governance asset balance
 
@@ -229,10 +228,9 @@ def propose_future_market(
     proposal.terms.new_market.CopyFrom(market_proposal)
 
     _make_and_wait_for_proposal(
-        login_token=login_token,
-        pub_key=pub_key,
+        wallet_name=wallet_name,
+        wallet=wallet,
         proposal=proposal,
-        wallet_server_url=wallet_server_url,
         data_client=data_client,
         node_url_for_time_forwarding=node_url_for_time_forwarding,
     )
@@ -242,9 +240,8 @@ def propose_future_market(
 def propose_network_parameter_change(
     parameter: str,
     value: str,
-    pub_key: str,
-    login_token: str,
-    wallet_server_url: str,
+    wallet_name: str,
+    wallet: Wallet,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
@@ -252,7 +249,7 @@ def propose_network_parameter_change(
     node_url_for_time_forwarding: Optional[str] = None,
 ):
     network_param_update = _build_generic_proposal(
-        pub_key=pub_key,
+        pub_key=wallet.public_key(wallet_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -265,10 +262,9 @@ def propose_network_parameter_change(
     )
 
     _make_and_wait_for_proposal(
-        login_token=login_token,
-        pub_key=pub_key,
+        wallet_name=wallet_name,
+        wallet=wallet,
         proposal=network_param_update,
-        wallet_server_url=wallet_server_url,
         data_client=data_client,
         node_url_for_time_forwarding=node_url_for_time_forwarding,
     )
@@ -276,34 +272,27 @@ def propose_network_parameter_change(
 
 
 def approve_proposal(
+    wallet_name: str,
     proposal_id: str,
-    pub_key: str,
-    login_token: str,
-    wallet_server_url: str,
+    wallet: Wallet,
 ):
-    headers = {"Authorization": f"Bearer {login_token}"}
-    vote = {
-        "voteSubmission": {
-            "value": "VALUE_YES",  # Can be either VALUE_YES or VALUE_NO
-            "proposalId": proposal_id,
-        },
-        "pubKey": pub_key,
-        "propagate": True,
-    }
-
-    url = f"{wallet_server_url}/api/v1/command/sync"
-    requests.post(url, headers=headers, json=vote).raise_for_status()
+    wallet.submit_transaction(
+        transaction=commands_protos.commands.VoteSubmission(
+            value=vega_protos.governance.Vote.Value.VALUE_YES, proposal_id=proposal_id
+        ),
+        name=wallet_name,
+        transaction_type="vote_submission",
+    )
 
 
 def propose_asset(
-    login_token: str,
-    pub_key: str,
+    wallet_name: str,
+    wallet: Wallet,
     name: str,
     symbol: str,
     total_supply: int,
     decimals: int,
     data_client: vac.VegaTradingDataClient,
-    wallet_server_url: str,
     quantum: int = 1,
     max_faucet_amount: int = 10e9,
     closing_time: Optional[int] = None,
@@ -322,7 +311,7 @@ def propose_asset(
         ),
     )
     proposal = _build_generic_proposal(
-        pub_key=pub_key,
+        pub_key=wallet.public_key(wallet_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -332,10 +321,9 @@ def propose_asset(
         vega_protos.governance.NewAsset(changes=asset_detail)
     )
     _make_and_wait_for_proposal(
-        login_token=login_token,
-        pub_key=pub_key,
+        wallet_name=wallet_name,
+        wallet=wallet,
         proposal=proposal,
-        wallet_server_url=wallet_server_url,
         data_client=data_client,
         node_url_for_time_forwarding=node_url_for_time_forwarding,
     )
@@ -385,32 +373,15 @@ def _build_generic_proposal(
 
 
 def _make_and_wait_for_proposal(
-    login_token: str,
-    pub_key: str,
+    wallet_name: str,
+    wallet: Wallet,
     proposal: commands_protos.commands.ProposalSubmission,
-    wallet_server_url: str,
     data_client: vac.VegaTradingDataClient,
     node_url_for_time_forwarding: Optional[str] = None,
 ):
-    headers = {"Authorization": f"Bearer {login_token}"}
-
-    submiss = MessageToDict(proposal)
-    # submiss["rationale"] = {
-    #     "description": "Making a proposal",
-    # }
-    proposal_json = {
-        "proposalSubmission": submiss,
-        "pubKey": pub_key,
-        "propagate": True,
-    }
-
-    # __sign_tx_proposal:
-    # Sign the network param update proposal transaction
-    # Note: Setting propagate to true will also submit to a Vega node
-    url = f"{wallet_server_url}/api/v1/command/sync"
-    response = requests.post(url, headers=headers, json=proposal_json)
-    response.raise_for_status()
-
+    wallet.submit_transaction(
+        transaction=proposal, name=wallet_name, transaction_type="proposal_submission"
+    )
     logger.debug("Waiting for proposal acceptance")
     proposal = wait_for_acceptance(
         proposal.reference,
@@ -434,9 +405,8 @@ def _make_and_wait_for_proposal(
 
 
 def settle_oracle(
-    login_token: str,
-    pub_key: str,
-    wallet_server_url: str,
+    wallet_name: str,
+    wallet: Wallet,
     settlement_price: float,
     oracle_name: str,
 ) -> None:
@@ -456,39 +426,35 @@ def settle_oracle(
             str, the name of the oracle to settle
 
     """
-    headers = {"Authorization": f"Bearer {login_token}"}
 
     # Use oracle feed to terminate market
     payload = {"trading.terminated": "true"}
     as_str = json.dumps(payload).encode()
-    oracle = {
-        "oracleDataSubmission": {
-            "source": "ORACLE_SOURCE_JSON",
-            "payload": base64.b64encode(as_str).decode("ascii"),
-        },
-        "pubKey": pub_key,
-        "propagate": True,
-    }
+    payload = base64.b64encode(as_str)
+
+    oracle_submission = commands_protos.oracles.OracleDataSubmission(
+        payload=payload,
+        source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
+    )
+    wallet.submit_transaction(
+        transaction=oracle_submission,
+        name=wallet_name,
+        transaction_type="oracle_data_submission",
+    )
 
     logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
-
-    url = f"{wallet_server_url}/api/v1/command/sync"
-    response = requests.post(url, headers=headers, json=oracle)
-    response.raise_for_status()
 
     # use oracle to settle market
     payload = {oracle_name: settlement_price}
     as_str = json.dumps(payload).encode()
-    oracle = {
-        "oracleDataSubmission": {
-            "source": "ORACLE_SOURCE_JSON",
-            "payload": base64.b64encode(as_str).decode("ascii"),
-        },
-        "pubKey": pub_key,
-        "propagate": True,
-    }
+    payload = base64.b64encode(as_str)
 
-    # Send it in
-    url = f"{wallet_server_url}/api/v1/command/sync"
-    response = requests.post(url, headers=headers, json=oracle)
-    response.raise_for_status()
+    oracle_submission = commands_protos.oracles.OracleDataSubmission(
+        payload=payload,
+        source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
+    )
+    wallet.submit_transaction(
+        transaction=oracle_submission,
+        name=wallet_name,
+        transaction_type="oracle_data_submission",
+    )

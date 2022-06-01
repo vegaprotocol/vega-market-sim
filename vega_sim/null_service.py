@@ -23,6 +23,9 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
+from vega_sim.wallet.base import Wallet
+from vega_sim.wallet.slim_wallet import SlimWallet
+from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = logging.getLogger(__name__)
 
@@ -294,10 +297,12 @@ def manage_vega_processes(
     port_config: Optional[Dict[Ports, int]] = None,
     transactions_per_block: int = 1,
     block_duration: str = "1s",
+    run_wallet: bool = False,
 ) -> None:
     port_config = port_config if port_config is not None else {}
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
         print(tmp_vega_dir)
+        logger.info(tmp_vega_dir)
         logger.debug(f"Running NullChain from vegahome of {tmp_vega_dir}")
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
@@ -336,22 +341,25 @@ def manage_vega_processes(
             dir_root=tmp_vega_dir,
             log_name="node",
         )
+        processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
 
-        wallet_args = [
-            vega_wallet_path,
-            "service",
-            "run",
-            "--network",
-            "local",
-            "--home=" + tmp_vega_home,
-            "--automatic-consent",
-        ]
+        if run_wallet:
+            wallet_args = [
+                vega_wallet_path,
+                "service",
+                "run",
+                "--network",
+                "local",
+                "--home=" + tmp_vega_home,
+                "--automatic-consent",
+            ]
 
-        vegaWalletProcess = _popen_process(
-            wallet_args,
-            dir_root=tmp_vega_dir,
-            log_name="vegawallet",
-        )
+            vegaWalletProcess = _popen_process(
+                wallet_args,
+                dir_root=tmp_vega_dir,
+                log_name="vegawallet",
+            )
+            processes.append(vegaWalletProcess)
 
         if run_wallet_with_console:
             env_copy = os.environ.copy()
@@ -375,14 +383,9 @@ def manage_vega_processes(
                 log_name="console",
                 env=env_copy,
             )
+            processes.append(console_process)
 
         signal.sigwait([signal.SIGKILL, signal.SIGTERM])
-        processes = [
-            dataNodeProcess,
-            vegaFaucetProcess,
-            vegaWalletProcess,
-            vegaNodeProcess,
-        ] + ([console_process] if run_wallet_with_console else [])
         for process in processes:
             process.terminate()
         for process in processes:
@@ -421,6 +424,7 @@ class VegaServiceNull(VegaService):
         warn_on_raw_data_access: bool = True,
         transactions_per_block: int = 1,
         block_duration: str = "1s",
+        use_full_vega_wallet: bool = False,
     ):
         super().__init__(
             can_control_time=True, warn_on_raw_data_access=warn_on_raw_data_access
@@ -440,6 +444,9 @@ class VegaServiceNull(VegaService):
         self.transactions_per_block = transactions_per_block
         self.block_duration = block_duration
 
+        self._wallet = None
+        self._use_full_vega_wallet = use_full_vega_wallet
+
         if port_config is None:
             self._assign_ports()
         else:
@@ -455,6 +462,14 @@ class VegaServiceNull(VegaService):
 
     def __exit__(self, type, value, traceback):
         self.stop()
+
+    def wallet(self) -> Wallet:
+        if self._wallet is None:
+            if self._use_full_vega_wallet:
+                self._wallet = VegaWallet(self.wallet_url())
+            else:
+                self._wallet = SlimWallet(self.core_client())
+        return self._wallet
 
     def _assign_ports(self):
         self.wallet_port = 0
@@ -499,6 +514,7 @@ class VegaServiceNull(VegaService):
                 "port_config": self._generate_port_config(),
                 "transactions_per_block": self.transactions_per_block,
                 "block_duration": self.block_duration,
+                "run_wallet": self._use_full_vega_wallet,
             },
         )
         self.proc.start()
@@ -507,7 +523,7 @@ class VegaServiceNull(VegaService):
         for _ in range(300):
             try:
                 requests.get(
-                    f"http://localhost:{self.wallet_port}/api/v1/status"
+                    f"http://localhost:{self.data_node_rest_port}/assets"
                 ).raise_for_status()
                 if self.run_wallet_with_console:
                     logger.info(

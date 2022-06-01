@@ -107,6 +107,7 @@ class MarketEnvironment:
             warn_on_raw_data_access=False,
             transactions_per_block=self.transactions_per_block,
             block_duration=f"{self.block_length_seconds}s",
+            use_full_vega_wallet=False,
         ) as vega:
             logger.info(f"Running wallet at: {vega.wallet_url()}")
             logger.info(

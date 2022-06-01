@@ -3,31 +3,26 @@ import pytest
 import requests_mock
 
 from vega_sim.service import VegaService
-from vega_sim.api.wallet import WALLET_CREATION_URL, WALLET_KEY_URL, WALLET_LOGIN_URL
+from vega_sim.wallet.vega_wallet import (
+    WALLET_CREATION_URL,
+    WALLET_KEY_URL,
+    WALLET_LOGIN_URL,
+    VegaWallet,
+)
 
 
 class StubService(VegaService):
-    def __init__(self, wallet_url: str, data_url: str, faucet_url: str):
+    def __init__(self, wallet_url: str):
         super().__init__()
-        self.wallet_url_str = wallet_url
-        self.data_url_str = data_url
-        self.faucet_url_str = faucet_url
+        self._wallet = VegaWallet(wallet_url=wallet_url)
 
-    def wallet_url(self) -> str:
-        return self.wallet_url_str
-
-    def data_node_rest_url(self) -> str:
-        return self.data_url_str
-
-    def faucet_url(self) -> str:
-        return self.faucet_url_str
+    def wallet(self):
+        return self._wallet
 
 
 @pytest.fixture
 def stub_service():
-    return StubService(
-        "localhost:TEST_WALLET", "localhost:TEST_DATA", "localhost:TEST_FAUCET"
-    )
+    return StubService("localhost:TEST_WALLET")
 
 
 def test_base_service_wallet_creation(stub_service: StubService):
@@ -47,9 +42,10 @@ def test_base_service_wallet_creation(stub_service: StubService):
             },
         )
         stub_service.create_wallet("TEST_NAME", "TEST_PHRASE")
-        assert stub_service.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
+        assert stub_service.wallet().login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
         assert (
-            stub_service.pub_keys["TEST_NAME"] == 'TEST_PHRASE[{"name": "default_key"}]'
+            stub_service.wallet().pub_keys["TEST_NAME"]
+            == 'TEST_PHRASE[{"name": "default_key"}]'
         )
 
 
@@ -69,8 +65,13 @@ def test_base_service_wallet_login(stub_service: StubService):
                 }
             },
         )
+        req_mocker.get(
+            WALLET_KEY_URL.format(wallet_server_url="localhost:TEST_WALLET"),
+            json=lambda req, _: {"keys": 'TEST_PHRASE[{"name": "default_key"}]'},
+        )
         stub_service.login("TEST_NAME", "TEST_PHRASE")
-        assert stub_service.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
+        assert stub_service.wallet().login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
         assert (
-            stub_service.pub_keys["TEST_NAME"] == 'TEST_PHRASE[{"name": "default_key"}]'
+            stub_service.wallet().pub_keys["TEST_NAME"]
+            == 'TEST_PHRASE[{"name": "default_key"}]'
         )

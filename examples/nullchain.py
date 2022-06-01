@@ -34,9 +34,9 @@ if __name__ == "__main__":
             amount=1e4,
         )
 
-        vega.update_network_parameter(
-            MM_WALLET, parameter="market.fee.factors.makerFee", new_value="0.1"
-        )
+        # vega.update_network_parameter(
+        #     MM_WALLET.name, parameter="market.fee.factors.makerFee", new_value="0.1"
+        # )
 
         vega.forward("10s")
         vega.create_asset(

@@ -3,7 +3,7 @@ NodeMode = "validator"
 UlimitNOFile = 8192
 
 [API]
-  Level = "Info"
+  Level = "Debug"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -16,7 +16,7 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Blockchain]
-  Level = "Info"
+  Level = "Debug"
   LogTimeDebug = true
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
@@ -43,7 +43,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [CoreAPI]
-  LogLevel = "Info"
+  LogLevel = "Debug"
   Accounts = true
   Assets = true
   NetworkParameters = true
@@ -58,16 +58,16 @@ UlimitNOFile = 8192
   Delegations = true
 
 [Execution]
-  Level = "Info"
+  Level = "Debug"
   [Execution.Matching]
-    Level = "Info"
+    Level = "Debug"
     LogPriceLevelsDebug = false
     LogRemovedOrdersDebug = false
   [Execution.Risk]
     Level = "Info"
     LogMarginUpdate = true
   [Execution.Position]
-    Level = "Info"
+    Level = "Debug"
     LogPositionUpdate = true
   [Execution.Settlement]
     Level = "Info"
@@ -77,7 +77,7 @@ UlimitNOFile = 8192
     Level = "Info"
 
 [Processor]
-  Level = "Info"
+  Level = "Debug"
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
@@ -154,7 +154,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Validators]
-  Level = "Info"
+  Level = "Debug"
 
 [Banking]
   Level = "Info"
@@ -195,7 +195,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Spam]
-  Level = "Info"
+  Level = "Debug"
 
 [Snapshot]
   Level = "Info"
