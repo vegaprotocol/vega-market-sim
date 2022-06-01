@@ -6,6 +6,7 @@ import os
 import numpy as np
 from nacl.encoding import HexEncoder
 from nacl.signing import SigningKey
+from typing import Optional
 from vega_sim.api.trading import submit_order
 from vega_sim.grpc.client import VegaCoreClient
 from vega_sim.wallet.base import Wallet
@@ -13,12 +14,19 @@ from vega_sim.wallet.base import Wallet
 import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
 import vega_sim.proto.vega.commands.v1.transaction_pb2 as transaction_proto
 import vega_sim.proto.vega.commands.v1.signature_pb2 as signature_proto
+from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = getLogger(__name__)
 
 
 class SlimWallet(Wallet):
-    def __init__(self, core_client: VegaCoreClient, height_update_frequency: int = 500):
+    def __init__(
+        self,
+        core_client: VegaCoreClient,
+        height_update_frequency: int = 500,
+        full_wallet: Optional[VegaWallet] = None,
+        full_wallet_default_pass: str = "passwd",
+    ):
         """Creates a wallet to running key generation internally
         and directly sending transactions to the Core node
 
@@ -29,7 +37,14 @@ class SlimWallet(Wallet):
                 int, default 500, how frequently to update the block height parameter
                     for transactions (e.g. 500 will update every 500 calls to
                     submit_transaction).
-
+            full_wallet:
+                Optional[VegaWallet], optional full wallet backing. This will be used
+                    for creating keypairs instead of generating them locally, making it
+                    possible to connect to the Console
+            full_wallet_default_pass:
+                str, default 'passwd', If full wallet is passed, the password used
+                    when creating dummy accounts if none are passed.
+                    Use this password to log in to the Vega Console
         """
         self.core_client = core_client
         self.keys = {}
@@ -41,6 +56,9 @@ class SlimWallet(Wallet):
         self.height_update_frequency = 500
         self.remaining_until_height_update = 0
         self.block_height = None
+
+        self.vega_wallet = full_wallet
+        self.full_wallet_default_pass = full_wallet_default_pass
 
         # If it turns out that customising these is useful it's trivial to
         # make a parameter
@@ -77,10 +95,17 @@ class SlimWallet(Wallet):
             name:
                 str, The name to use for the wallet
         """
-        self.keys[name] = SigningKey.generate()
-        self.pub_keys[name] = (
-            self.keys[name].verify_key.encode(encoder=HexEncoder).decode()
-        )
+        if self.vega_wallet is None:
+            self.keys[name] = SigningKey.generate()
+            self.pub_keys[name] = (
+                self.keys[name].verify_key.encode(encoder=HexEncoder).decode()
+            )
+        else:
+            self.vega_wallet.create_wallet(
+                name=name,
+                passphrase=kwargs.get("passphrase", self.full_wallet_default_pass),
+            )
+            self.pub_keys[name] = self.vega_wallet.public_key(name)
 
     def login(self, name: str, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
