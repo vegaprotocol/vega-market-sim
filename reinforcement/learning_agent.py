@@ -84,14 +84,15 @@ class LearningAgent(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
-        action = self._step(learning_state)
+        self.latest_action = self._step(learning_state)
+        self.latest_state = learning_state
 
-        if action.buy or action.sell:
+        if self.latest_action.buy or self.latest_action.sell:
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
-                side="SIDE_BUY" if action.buy else "SIDE_SELL",
-                volume=action.volume,
+                side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
+                volume=self.latest_action.volume,
                 wait=False,
                 fill_or_kill=False,
             )

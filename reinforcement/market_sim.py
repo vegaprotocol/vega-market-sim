@@ -2,9 +2,16 @@ import argparse
 import logging
 from multiprocessing import Pool
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
+from reinforcement.helpers import states_to_sarsa
 
-from reinforcement.learning_agent import LearningAgent, WALLET as LEARNING_WALLET
+from reinforcement.learning_agent import (
+    Action,
+    LearningAgent,
+    WALLET as LEARNING_WALLET,
+)
+from vega_sim.environment.agent import Agent
+from .learning_agent import MarketState
 
 from .full_market_sim.lib.external_assetprice import RW_model
 from .full_market_sim.environments import MarketEnvironmentforMMsim
@@ -23,6 +30,13 @@ from .full_market_sim.agents import (
 )
 
 
+def state_fn(
+    service: VegaServiceNull, agents: List[Agent]
+) -> Tuple[MarketState, Action]:
+    learner = [a for a in agents if isinstance(a, LearningAgent)][0]
+    return (learner.latest_state, learner.latest_action)
+
+
 def main(
     num_steps: int = 120,
     dt: float = 1 / 60 / 24 / 365.25,
@@ -38,6 +52,7 @@ def main(
     phi: float = 5 * 10**-6,
     spread: float = 0.00002,
     block_size: int = 1,
+    state_extraction_freq: int = 1,
     run_with_console: bool = False,
     pause_at_completion: bool = False,
     vega: Optional[VegaServiceNull] = None,
@@ -113,12 +128,15 @@ def main(
         n_steps=num_steps,
         transactions_per_block=block_size,
         vega_service=vega,
+        state_extraction_fn=state_fn,
+        state_extraction_freq=state_extraction_freq,
     )
 
-    env.run(
+    result = env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
     )
+    sarsa = states_to_sarsa(result)
 
 
 if __name__ == "__main__":
