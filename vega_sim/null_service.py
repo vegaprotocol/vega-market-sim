@@ -471,8 +471,8 @@ class VegaServiceNull(VegaService):
                 self._wallet = VegaWallet(self.wallet_url)
             else:
                 self._wallet = SlimWallet(
-                    self.core_client(),
-                    full_wallet=VegaWallet(self.wallet_url())
+                    self.core_client,
+                    full_wallet=VegaWallet(self.wallet_url)
                     if self.run_with_console
                     else None,
                 )
