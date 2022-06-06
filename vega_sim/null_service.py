@@ -294,7 +294,7 @@ def manage_vega_processes(
     data_node_path: str,
     vega_wallet_path: str,
     vega_console_path: Optional[str] = None,
-    run_wallet_with_console: bool = False,
+    run_with_console: bool = False,
     port_config: Optional[Dict[Ports, int]] = None,
     transactions_per_block: int = 1,
     block_duration: str = "1s",
@@ -362,7 +362,7 @@ def manage_vega_processes(
             )
             processes.append(vegaWalletProcess)
 
-        if run_wallet_with_console:
+        if run_with_console:
             env_copy = os.environ.copy()
             env_copy.update(
                 {
@@ -419,7 +419,7 @@ class VegaServiceNull(VegaService):
         vega_wallet_path: Optional[str] = None,
         vega_console_path: Optional[str] = None,
         start_immediately: bool = False,
-        run_wallet_with_console: bool = False,
+        run_with_console: bool = False,
         run_wallet_with_token_dapp: bool = False,
         port_config: Optional[Dict[Ports, int]] = None,
         warn_on_raw_data_access: bool = True,
@@ -439,7 +439,7 @@ class VegaServiceNull(VegaService):
             vega_bin_path, "console"
         )
         self.proc = None
-        self.run_wallet_with_console = run_wallet_with_console
+        self.run_with_console = run_with_console
         self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
 
         self.transactions_per_block = transactions_per_block
@@ -470,7 +470,12 @@ class VegaServiceNull(VegaService):
             if self._use_full_vega_wallet:
                 self._wallet = VegaWallet(self.wallet_url)
             else:
-                self._wallet = SlimWallet(self.core_client)
+                self._wallet = SlimWallet(
+                    self.core_client(),
+                    full_wallet=VegaWallet(self.wallet_url())
+                    if self.run_with_console
+                    else None,
+                )
         return self._wallet
 
     def _assign_ports(self):
@@ -512,11 +517,11 @@ class VegaServiceNull(VegaService):
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
                 "vega_console_path": self.vega_console_path,
-                "run_wallet_with_console": self.run_wallet_with_console,
+                "run_with_console": self.run_with_console,
                 "port_config": self._generate_port_config(),
                 "transactions_per_block": self.transactions_per_block,
                 "block_duration": self.block_duration,
-                "run_wallet": self._use_full_vega_wallet,
+                "run_wallet": self._use_full_vega_wallet or self.run_with_console,
             },
         )
         self.proc.start()
