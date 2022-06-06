@@ -167,3 +167,15 @@ def order_status_by_reference(
     return data_client.OrderByReference(
         data_node_protos.trading_data.OrderByReferenceRequest(reference=reference)
     ).order
+
+
+def market_depth(
+    market_id: str,
+    data_client: vac.VegaTradingDataClient,
+    max_depth: Optional[int] = None,
+) -> Optional[vega_protos.vega.MarketDepth]:
+    return data_client.MarketDepth(
+        data_node_protos.trading_data.MarketDepthRequest(
+            market_id=market_id, max_depth=max_depth
+        )
+    )

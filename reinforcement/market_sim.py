@@ -4,6 +4,8 @@ from multiprocessing import Pool
 import datetime
 from typing import List, Optional
 
+from reinforcement.learning_agent import LearningAgent, WALLET as LEARNING_WALLET
+
 from .full_market_sim.lib.external_assetprice import RW_model
 from .full_market_sim.environments import MarketEnvironmentforMMsim
 from vega_sim.null_service import VegaServiceNull
@@ -95,8 +97,19 @@ def main(
         initial_price=initial_price,
     )
 
+    learning_agent = LearningAgent(
+        wallet_name=LEARNING_WALLET.name, wallet_pass=LEARNING_WALLET.passphrase
+    )
+
     env = MarketEnvironmentforMMsim(
-        agents=[market_maker, tradingbot, randomtrader, auctionpass1, auctionpass2],
+        agents=[
+            market_maker,
+            tradingbot,
+            randomtrader,
+            auctionpass1,
+            auctionpass2,
+            learning_agent,
+        ],
         n_steps=num_steps,
         transactions_per_block=block_size,
         vega_service=vega,
@@ -138,9 +151,9 @@ if __name__ == "__main__":
             for vega_service in vega_services:
                 vega_service.stop()
     else:
-        with VegaServiceNull(warn_on_raw_data_access=False) as vega:
+        with VegaServiceNull(
+            warn_on_raw_data_access=False, run_with_console=True
+        ) as vega:
             main(
-                **{
-                    "vega": vega,
-                },
+                **{"vega": vega, "pause_at_completion": True, "num_steps": 120},
             )

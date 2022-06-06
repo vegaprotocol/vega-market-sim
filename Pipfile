@@ -11,6 +11,7 @@ grpcio-tools = "*"
 pynacl = "*"
 numba = "*"
 inflection = "*"
+scipy = "*"
 
 [dev-packages]
 black = "*"

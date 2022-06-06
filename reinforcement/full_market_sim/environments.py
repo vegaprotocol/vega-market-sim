@@ -1,4 +1,4 @@
-
+from dataclasses import dataclass
 from typing import Any, Callable, List, Optional
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
@@ -20,18 +20,18 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
-        state_extraction_freq: int = 10,       
+        state_extraction_freq: int = 10,
     ):
         super().__init__(
-            agents = agents,
-            n_steps = n_steps,
-            random_agent_ordering = random_agent_ordering,
-            transactions_per_block = transactions_per_block,
-            block_length_seconds = block_length_seconds,
-            vega_service = vega_service,
-            state_extraction_fn = state_extraction_fn,
-            state_extraction_freq = state_extraction_freq,
-            state_func = state_func,
+            agents=agents,
+            n_steps=n_steps,
+            random_agent_ordering=random_agent_ordering,
+            transactions_per_block=transactions_per_block,
+            block_length_seconds=block_length_seconds,
+            vega_service=vega_service,
+            state_extraction_fn=state_extraction_fn,
+            state_extraction_freq=state_extraction_freq,
+            state_func=state_func,
         )
 
     def step(self, vega: VegaService):
@@ -46,7 +46,7 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
         self.agents[2].num_post_at_bid = self.agents[0].num_bidhit
         self.agents[2].num_post_at_ask = self.agents[0].num_askhit
         self.agents[1].num_buyMO = self.agents[0].num_buyMO
-        self.agents[1].num_sellMO = self.agents[0].num_sellMO       
+        self.agents[1].num_sellMO = self.agents[0].num_sellMO
 
         self.agents[2].step_limitorders(state)
         self.agents[1].step_buy(state)
@@ -57,5 +57,5 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
 
         self.agents[0].logdata()
 
-        
-
+        # Learning agent
+        self.agents[-1].step(state)

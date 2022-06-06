@@ -20,6 +20,7 @@ S = TypeVar("S")
 
 AccountData = namedtuple("AccountData", ["general", "margin", "bond"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
+PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
 Order = namedtuple(
     "Order",
     [
@@ -39,6 +40,12 @@ Order = namedtuple(
         "version",
     ],
 )
+
+
+@dataclass
+class MarketDepth:
+    buys: List[PriceLevel]
+    sells: List[PriceLevel]
 
 
 @dataclass
@@ -372,4 +379,49 @@ def market_account(
     return num_from_padded_int(
         acct.balance,
         asset_dp,
+    )
+
+
+def market_depth(
+    market_id: str,
+    data_client: vac.VegaTradingDataClient,
+    max_depth: Optional[int] = None,
+    price_decimals: Optional[int] = None,
+    position_decimals: Optional[int] = None,
+) -> Optional[MarketDepth]:
+    mkt_depth = data_client.MarketDepth(
+        data_node_protos.trading_data.MarketDepthRequest(
+            market_id=market_id, max_depth=max_depth
+        )
+    )
+    if mkt_depth is None:
+        return mkt_depth
+
+    mkt_price_dp = (
+        price_decimals
+        if price_decimals is not None
+        else market_price_decimals(market_id=market_id, data_client=data_client)
+    )
+    mkt_pos_dp = (
+        position_decimals
+        if position_decimals is not None
+        else market_position_decimals(market_id=market_id, data_client=data_client)
+    )
+
+    def _price_level_from_raw(level) -> PriceLevel:
+        return PriceLevel(
+            price=num_from_padded_int(
+                level.price,
+                mkt_price_dp,
+            ),
+            number_of_orders=level.number_of_orders,
+            volume=num_from_padded_int(
+                level.volume,
+                mkt_pos_dp,
+            ),
+        )
+
+    return MarketDepth(
+        buys=[_price_level_from_raw(level) for level in mkt_depth.buy],
+        sells=[_price_level_from_raw(level) for level in mkt_depth.sell],
     )
