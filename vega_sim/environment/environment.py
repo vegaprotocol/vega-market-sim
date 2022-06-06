@@ -51,6 +51,7 @@ class MarketEnvironment:
         random_agent_ordering: bool = True,
         transactions_per_block: int = 1,
         block_length_seconds: int = 1,
+        vega_service: Optional[VegaServiceNull] = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -78,12 +79,16 @@ class MarketEnvironment:
             block_length_seconds:
                 int, default 1, How many seconds each block in the Vega chain
                     is taken to represent.
+            vega_service:
+                optional, VegaServiceNull, If passed will use this precreated vega
+                    service instead of creating one internally.
         """
         self.agents = agents
         self.n_steps = n_steps
         self.random_agent_ordering = random_agent_ordering
         self.transactions_per_block = transactions_per_block
         self.block_length_seconds = block_length_seconds
+        self._vega = vega_service
 
     def run(
         self,
@@ -102,35 +107,53 @@ class MarketEnvironment:
                     once the simulation has completed, allowing the final state
                     to be inspected, either via code or the Console
         """
-        with VegaServiceNull(
-            run_wallet_with_console=run_with_console,
-            warn_on_raw_data_access=False,
-            transactions_per_block=self.transactions_per_block,
-            block_duration=f"{self.block_length_seconds}s",
-            use_full_vega_wallet=False,
-        ) as vega:
-            logger.info(f"Running wallet at: {vega.wallet_url()}")
-            logger.info(
-                f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
+        if self._vega is None:
+            with VegaServiceNull(
+                run_wallet_with_console=run_with_console,
+                warn_on_raw_data_access=False,
+                transactions_per_block=self.transactions_per_block,
+                block_duration=f"{self.block_length_seconds}s",
+                use_full_vega_wallet=False,
+            ) as vega:
+                self._run(vega, pause_at_completion=pause_at_completion)
+        else:
+            self._run(self._vega, pause_at_completion=pause_at_completion)
+
+    def _run(
+        self,
+        vega: VegaServiceNull,
+        pause_at_completion: bool = False,
+    ) -> None:
+        """Run the simulation with specified agents.
+
+        Args:
+            pause_at_completion:
+                bool, default False, If True will pause with a keypress-prompt
+                    once the simulation has completed, allowing the final state
+                    to be inspected, either via code or the Console
+        """
+        logger.info(f"Running wallet at: {vega.wallet_url}")
+        logger.info(
+            f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
+        )
+
+        start = datetime.datetime.now()
+        for agent in self.agents:
+            agent.initialise(vega=vega)
+            if self.transactions_per_block > 1 and self.block_length_seconds > 1:
+                vega.forward(f"{self.block_length_seconds + 1}s")
+        for _ in range(self.n_steps):
+            self.step(vega)
+            if self.transactions_per_block > 1 and self.block_length_seconds > 1:
+                vega.forward(f"{self.block_length_seconds + 1}s")
+            vega.wait_for_datanode_sync()
+        logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
+
+        if pause_at_completion:
+            input(
+                "Environment run completed. Pausing to allow inspection of state."
+                " Press Enter to continue"
             )
-
-            start = datetime.datetime.now()
-            for agent in self.agents:
-                agent.initialise(vega=vega)
-                if self.transactions_per_block > 1 and self.block_length_seconds > 1:
-                    vega.forward(f"{self.block_length_seconds + 1}s")
-            for _ in range(self.n_steps):
-                self.step(vega)
-                if self.transactions_per_block > 1 and self.block_length_seconds > 1:
-                    vega.forward(f"{self.block_length_seconds + 1}s")
-                vega.wait_for_datanode_sync()
-            logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
-
-            if pause_at_completion:
-                input(
-                    "Environment run completed. Pausing to allow inspection of state."
-                    " Press Enter to continue"
-                )
 
     def step(self, vega: VegaService) -> None:
         for agent in (
@@ -150,6 +173,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
         transactions_per_block: int = 1,
         block_length_seconds: int = 1,
+        vega_service: Optional[VegaServiceNull] = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -180,6 +204,9 @@ class MarketEnvironmentWithState(MarketEnvironment):
             block_length_seconds:
                 int, default 1, How many seconds each block in the Vega chain
                     is taken to represent.
+            vega_service:
+                optional, VegaServiceNull, If passed will use this precreated vega
+                    service instead of creating one internally.
         """
         super().__init__(
             agents=agents,
@@ -187,6 +214,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             random_agent_ordering=random_agent_ordering,
             transactions_per_block=transactions_per_block,
             block_length_seconds=block_length_seconds,
+            vega_service=vega_service,
         )
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
