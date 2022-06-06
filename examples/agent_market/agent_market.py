@@ -7,12 +7,13 @@ from typing import List, Optional
 from examples.agent_market.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
-    TRADER_WALLET,
+    TRADER_1_WALLET,
     MarketMaker,
     MarketOrderTraders,
     random_walk_price,
 )
 from vega_sim.environment import MarketEnvironmentWithState
+from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 
 
@@ -33,13 +34,13 @@ def main(
             terminal_time_seconds=num_steps + 10, sigma=0.1, initial_price=100
         ),
     )
-    mo_traders = MarketOrderTraders(
-        wallet_name=TRADER_WALLET.name,
-        wallet_pass=TRADER_WALLET.passphrase,
+    mo_traders = [StateAgentWithWallet(w.name, w.passphrase) for w in [TRADER_1_WALLET]]
+    mo_trader_agent = MarketOrderTraders(
+        mo_traders[:1],
         buy_order_arrival_rate=order_arrival_rate,
     )
     env = MarketEnvironmentWithState(
-        agents=[market_maker, mo_traders],
+        agents=[market_maker, mo_trader_agent],
         n_steps=num_steps,
         transactions_per_block=block_size,
         vega_service=vega,
