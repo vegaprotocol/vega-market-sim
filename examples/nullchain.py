@@ -23,7 +23,7 @@ wallets = [MM_WALLET, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    with VegaServiceNull(run_wallet_with_console=False) as vega:
+    with VegaServiceNull(run_with_console=False) as vega:
 
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)

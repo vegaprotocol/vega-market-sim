@@ -544,7 +544,7 @@ class VegaServiceNull(VegaService):
                 "Timed out waiting for Vega simulator to start up"
             )
 
-        if self.run_wallet_with_console:
+        if self.run_with_console:
             logger.info(
                 "Vega Running. Console launched at"
                 f" http://localhost:{self.console_port}"

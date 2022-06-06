@@ -123,7 +123,7 @@ class MarketEnvironment:
         """
         if self._vega is None:
             with VegaServiceNull(
-                run_wallet_with_console=run_with_console,
+                run_with_console=run_with_console,
                 warn_on_raw_data_access=False,
                 transactions_per_block=self.transactions_per_block,
                 block_duration=f"{self.block_length_seconds}s",
