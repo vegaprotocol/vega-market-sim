@@ -158,6 +158,7 @@ class MarketEnvironment:
             agent.initialise(vega=vega)
             if self.transactions_per_block > 1 and self.block_length_seconds > 1:
                 vega.forward(f"{self.block_length_seconds + 1}s")
+
         for i in range(self.n_steps):
             self.step(vega)
             if self.transactions_per_block > 1 and self.block_length_seconds > 1:

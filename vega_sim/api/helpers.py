@@ -83,7 +83,7 @@ def wait_for_acceptance(
         except:
             if time_forward_fn is not None:
                 time_forward_fn()
-            time.sleep(0.1)
+            time.sleep(0.001)
             continue
 
         if proposal:
@@ -92,7 +92,7 @@ def wait_for_acceptance(
             break
         if time_forward_fn is not None:
             time_forward_fn()
-        time.sleep(0.1)
+        time.sleep(0.001)
 
     if not submission_accepted:
         raise ProposalNotAcceptedError(
