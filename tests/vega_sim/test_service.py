@@ -16,6 +16,7 @@ class StubService(VegaService):
         super().__init__()
         self._wallet = VegaWallet(wallet_url=wallet_url)
 
+    @property
     def wallet(self):
         return self._wallet
 
@@ -42,9 +43,9 @@ def test_base_service_wallet_creation(stub_service: StubService):
             },
         )
         stub_service.create_wallet("TEST_NAME", "TEST_PHRASE")
-        assert stub_service.wallet().login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
+        assert stub_service.wallet.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
         assert (
-            stub_service.wallet().pub_keys["TEST_NAME"]
+            stub_service.wallet.pub_keys["TEST_NAME"]
             == 'TEST_PHRASE[{"name": "default_key"}]'
         )
 
@@ -70,8 +71,8 @@ def test_base_service_wallet_login(stub_service: StubService):
             json=lambda req, _: {"keys": 'TEST_PHRASE[{"name": "default_key"}]'},
         )
         stub_service.login("TEST_NAME", "TEST_PHRASE")
-        assert stub_service.wallet().login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
+        assert stub_service.wallet.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
         assert (
-            stub_service.wallet().pub_keys["TEST_NAME"]
+            stub_service.wallet.pub_keys["TEST_NAME"]
             == 'TEST_PHRASE[{"name": "default_key"}]'
         )

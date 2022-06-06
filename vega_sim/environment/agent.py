@@ -12,6 +12,14 @@ class VegaState:
 
 
 class Agent(ABC):
+    def step(self, vega: VegaService):
+        pass
+
+    def initialise(self, vega: VegaService):
+        self.vega = vega
+
+
+class AgentWithWallet(Agent):
     def __init__(
         self,
         wallet_name: str,
@@ -31,6 +39,7 @@ class Agent(ABC):
             wallet_pass:
                 str, The password which this agent uses to log in to the wallet
         """
+        super().__init__()
         self.wallet_name = wallet_name
         self.wallet_pass = wallet_pass
 
@@ -38,8 +47,13 @@ class Agent(ABC):
         pass
 
     def initialise(self, vega: VegaService):
-        self.vega = vega
+        super().initialise(vega=vega)
         self.vega.create_wallet(name=self.wallet_name, passphrase=self.wallet_pass)
+
+
+class StateAgentWithWallet(AgentWithWallet):
+    def step(self, vega_state: VegaState):
+        pass
 
 
 class StateAgent(Agent):

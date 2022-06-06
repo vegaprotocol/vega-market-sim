@@ -227,7 +227,7 @@ def best_prices(
 
     return num_from_padded_int(
         mkt_data.best_static_bid_price, mkt_price_dp
-    ), num_from_padded_int(mkt_data.best_static_ask_price, mkt_price_dp)
+    ), num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp)
 
 
 def open_orders_by_market(

@@ -16,13 +16,9 @@ from vega_sim.api.data import (
     party_account,
     find_asset_id,
     market_position_decimals,
-    market_position_decimals,
     asset_decimals,
     best_prices,
     open_orders_by_market,
-    order_book_by_market,
-    market_account,
-    order_status_by_reference,
     MissingAssetError,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
@@ -173,7 +169,7 @@ def test_best_prices(mkt_data_mock):
     mkt_data_mock.return_value = mkt_data
 
     mkt_data.best_static_bid_price = "202"
-    mkt_data.best_static_ask_price = "212"
+    mkt_data.best_static_offer_price = "212"
 
     bid_res, ask_res = best_prices("mkt", None, 2)
     assert bid_res == pytest.approx(2.02)

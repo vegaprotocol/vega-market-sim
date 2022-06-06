@@ -82,79 +82,107 @@ class VegaService(ABC):
         self._trading_data_client = None
         self.can_control_time = can_control_time
         self.warn_on_raw_data_access = warn_on_raw_data_access
-        self.market_price_decimals = DecimalsCache(
-            lambda market_id: data.market_price_decimals(
-                market_id=market_id, data_client=self.trading_data_client()
-            )
-        )
-        self.market_pos_decimals = DecimalsCache(
-            lambda market_id: data.market_position_decimals(
-                market_id=market_id, data_client=self.trading_data_client()
-            )
-        )
-        self.asset_decimals = DecimalsCache(
-            lambda asset_id: data.asset_decimals(
-                asset_id=asset_id, data_client=self.trading_data_client()
-            )
-        )
 
+        self._market_price_decimals = None
+        self._market_pos_decimals = None
+        self._asset_decimals = None
+
+    @property
+    def market_price_decimals(self) -> int:
+        if self._market_price_decimals is None:
+            self._market_price_decimals = DecimalsCache(
+                lambda market_id: data.market_price_decimals(
+                    market_id=market_id, data_client=self.trading_data_client
+                )
+            )
+        return self._market_price_decimals
+
+    @property
+    def market_pos_decimals(self) -> int:
+        if self._market_pos_decimals is None:
+            self._market_pos_decimals = DecimalsCache(
+                lambda market_id: data.market_position_decimals(
+                    market_id=market_id, data_client=self.trading_data_client
+                )
+            )
+        return self._market_pos_decimals
+
+    @property
+    def asset_decimals(self) -> int:
+        if self._asset_decimals is None:
+            self._asset_decimals = DecimalsCache(
+                lambda asset_id: data.asset_decimals(
+                    asset_id=asset_id, data_client=self.trading_data_client
+                )
+            )
+        return self._asset_decimals
+
+    @property
     def data_node_rest_url(self) -> str:
         pass
 
+    @property
     def faucet_url(self) -> str:
         pass
 
+    @property
     def vega_node_url(self) -> str:
         pass
 
+    @property
     def vega_node_grpc_url(self) -> str:
         pass
 
+    @property
     def data_node_grpc_url(self) -> str:
         pass
 
+    @property
     def wallet(self) -> Wallet:
         pass
 
     def _default_wait_fn(self) -> None:
         time.sleep(1)
 
+    @property
     def trading_data_client(self) -> vac.VegaTradingDataClient:
         if self._trading_data_client is None:
             channel = grpc.insecure_channel(
-                self.data_node_grpc_url(), options=(("grpc.enable_http_proxy", 0),)
+                self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
             )
             grpc.channel_ready_future(channel).result(timeout=10)
             self._trading_data_client = vac.VegaTradingDataClient(
-                self.data_node_grpc_url(),
+                self.data_node_grpc_url,
                 channel=channel,
             )
         return self._trading_data_client
 
+    @property
     def core_state_client(self) -> vac.VegaCoreStateClient:
         if self._core_state_client is None:
-            channel = grpc.insecure_channel(self.vega_node_grpc_url())
+            channel = grpc.insecure_channel(self.vega_node_grpc_url)
 
             grpc.channel_ready_future(channel).result(timeout=10)
             self._core_state_client = vac.VegaCoreStateClient(
-                self.vega_node_grpc_url(),
+                self.vega_node_grpc_url,
                 channel=channel,
             )
         return self._core_state_client
 
+    @property
     def core_client(self) -> vac.VegaCoreClient:
         if self._core_client is None:
-            channel = grpc.insecure_channel(self.vega_node_grpc_url())
+            channel = grpc.insecure_channel(self.vega_node_grpc_url)
 
             grpc.channel_ready_future(channel).result(timeout=10)
             self._core_client = vac.VegaCoreClient(
-                self.vega_node_grpc_url(),
+                self.vega_node_grpc_url,
                 channel=channel,
             )
         return self._core_client
 
     def wait_for_datanode_sync(self) -> None:
-        wait_for_datanode_sync(self.trading_data_client(), self.core_client())
+        wait_for_datanode_sync(self.trading_data_client, self.core_client)
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -167,7 +195,7 @@ class VegaService(ABC):
         Returns:
             str, public key associated to this waller
         """
-        return self.wallet().login(name=name, passphrase=passphrase)
+        return self.wallet.login(name=name, passphrase=passphrase)
 
     def create_wallet(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -180,7 +208,7 @@ class VegaService(ABC):
         Returns:
             str, public key associated to this waller
         """
-        return self.wallet().create_wallet(name=name, passphrase=passphrase)
+        return self.wallet.create_wallet(name=name, passphrase=passphrase)
 
     def mint(self, wallet_name: str, asset: str, amount: float) -> None:
         """Mints a given amount of requested asset into the associated wallet
@@ -195,10 +223,10 @@ class VegaService(ABC):
         """
         asset_decimals = self.asset_decimals[asset]
         faucet.mint(
-            self.wallet().public_key(wallet_name),
+            self.wallet.public_key(wallet_name),
             asset,
             num_to_padded_int(amount, asset_decimals),
-            faucet_url=self.faucet_url(),
+            faucet_url=self.faucet_url,
         )
         if self.can_control_time:
             self.forward("1s")
@@ -214,7 +242,7 @@ class VegaService(ABC):
         """
         if not self.can_control_time:
             return
-        forward(time=time, vega_node_url=self.vega_node_url())
+        forward(time=time, vega_node_url=self.vega_node_url)
 
     def create_asset(
         self,
@@ -244,9 +272,9 @@ class VegaService(ABC):
             max_faucet_amount:
                 int, The maximum number of tokens which can be fauceted (in asset decimal precision)
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
         proposal_id = gov.propose_asset(
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=wallet_name,
             name=name,
             symbol=symbol,
@@ -254,16 +282,16 @@ class VegaService(ABC):
             decimals=decimals,
             max_faucet_amount=max_faucet_amount,
             quantum=quantum,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
             validation_time=blockchain_time_seconds + 20,
-            node_url_for_time_forwarding=self.vega_node_url()
+            node_url_for_time_forwarding=self.vega_node_url
             if self.can_control_time
             else None,
         )
         gov.approve_proposal(
-            proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet()
+            proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
         )
         self.forward("365s")
 
@@ -279,6 +307,9 @@ class VegaService(ABC):
         risk_aversion: Optional[float] = 1e-6,
         tau: Optional[float] = 1.0 / 365.25 / 24,
         sigma: Optional[float] = 1.0,
+        liquidity_commitment: Optional[
+            vega_protos.governance.NewMarketCommitment
+        ] = None,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -303,7 +334,7 @@ class VegaService(ABC):
         if future_asset is not None:
             additional_kwargs["future_asset"] = future_asset
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
         risk_model = vega_protos.markets.LogNormalRiskModel(
             risk_aversion_parameter=risk_aversion,
@@ -313,25 +344,26 @@ class VegaService(ABC):
 
         proposal_id = gov.propose_future_market(
             market_name=market_name,
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=proposal_wallet,
             settlement_asset_id=settlement_asset_id,
-            data_client=self.trading_data_client(),
-            termination_pub_key=self.wallet().public_key(termination_wallet),
+            data_client=self.trading_data_client,
+            termination_pub_key=self.wallet.public_key(termination_wallet),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
             validation_time=blockchain_time_seconds + 20,
             risk_model=risk_model,
-            node_url_for_time_forwarding=self.vega_node_url()
+            liquidity_commitment=liquidity_commitment,
+            node_url_for_time_forwarding=self.vega_node_url
             if self.can_control_time
             else None,
             **additional_kwargs,
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
         self.forward("360s")
@@ -434,9 +466,9 @@ class VegaService(ABC):
                 Otherwise None
         """
         return trading.submit_order(
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=trading_wallet,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
             market_id=market_id,
             order_type=order_type,
             time_in_force=time_in_force,
@@ -497,7 +529,7 @@ class VegaService(ABC):
                     Defaults to Fill or Kill
         """
         trading.amend_order(
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=trading_wallet,
             market_id=market_id,
             order_id=order_id,
@@ -535,7 +567,7 @@ class VegaService(ABC):
                 str, Identifier of the order to cancel
         """
         trading.cancel_order(
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=trading_wallet,
             market_id=market_id,
             order_id=order_id,
@@ -560,24 +592,24 @@ class VegaService(ABC):
         Returns:
             str, the ID of the proposal
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client())
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
             value=new_value,
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=proposal_wallet,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
             closing_time=blockchain_time_seconds + 30,
             enactment_time=blockchain_time_seconds + 360,
             validation_time=blockchain_time_seconds + 20,
-            node_url_for_time_forwarding=self.vega_node_url()
+            node_url_for_time_forwarding=self.vega_node_url
             if self.can_control_time
             else None,
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
         self.forward("360s")
@@ -591,14 +623,14 @@ class VegaService(ABC):
         decimals = self.market_price_decimals[market_id]
 
         oracle_name = (
-            data_raw.market_info(market_id, data_client=self.trading_data_client())
+            data_raw.market_info(market_id, data_client=self.trading_data_client)
             .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
                 0
             ]
             .key.name
         )
         gov.settle_oracle(
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=settlement_wallet,
             oracle_name=oracle_name,
             settlement_price=num_to_padded_int(settlement_price, decimals=decimals),
@@ -613,10 +645,10 @@ class VegaService(ABC):
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
         return data.party_account(
-            self.wallet().public_key(wallet_name),
+            self.wallet.public_key(wallet_name),
             asset_id=asset_id,
             market_id=market_id,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
         )
 
     @raw_data
@@ -627,9 +659,9 @@ class VegaService(ABC):
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data_raw.positions_by_market(
-            self.wallet().public_key(wallet_name),
+            self.wallet.public_key(wallet_name),
             market_id=market_id,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
         )
 
     @raw_data
@@ -639,7 +671,7 @@ class VegaService(ABC):
         """
         Output market info.
         """
-        return data_raw.all_markets(data_client=self.trading_data_client())
+        return data_raw.all_markets(data_client=self.trading_data_client)
 
     @raw_data
     def market_info(
@@ -650,7 +682,7 @@ class VegaService(ABC):
         Output market info.
         """
         return data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id, data_client=self.trading_data_client
         )
 
     @raw_data
@@ -662,7 +694,7 @@ class VegaService(ABC):
         Output market info.
         """
         return data_raw.market_data(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id, data_client=self.trading_data_client
         )
 
     @raw_data
@@ -674,7 +706,7 @@ class VegaService(ABC):
         Output infrastructure fee accounts
         """
         return data_raw.infrastructure_fee_accounts(
-            asset_id=asset_id, data_client=self.trading_data_client()
+            asset_id=asset_id, data_client=self.trading_data_client
         )
 
     @raw_data
@@ -689,7 +721,7 @@ class VegaService(ABC):
         return data_raw.market_accounts(
             asset_id=asset_id,
             market_id=market_id,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
         )
 
     def market_account(
@@ -712,7 +744,7 @@ class VegaService(ABC):
         return data.market_account(
             market_id=market_id,
             account_type=account_type,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
         )
 
     def best_prices(
@@ -723,7 +755,7 @@ class VegaService(ABC):
         Output the best static bid price and best static ask price in current market.
         """
         return data.best_prices(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id, data_client=self.trading_data_client
         )
 
     def order_book_by_market(
@@ -731,7 +763,7 @@ class VegaService(ABC):
         market_id: str,
     ) -> data.OrderBook:
         return data.order_book_by_market(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id, data_client=self.trading_data_client
         )
 
     def open_orders_by_market(
@@ -740,7 +772,7 @@ class VegaService(ABC):
     ) -> data.OrderBook:
         return data.open_orders_by_market(
             market_id=market_id,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
             price_decimals=self.market_price_decimals[market_id],
             position_decimals=self.market_pos_decimals[market_id],
         )
@@ -780,11 +812,11 @@ class VegaService(ABC):
                 float, the offset from reference point for the sell side of LP
         """
         asset_id = data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id, data_client=self.trading_data_client
         ).tradable_instrument.instrument.future.settlement_asset
 
         market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client()
+            market_id=market_id, data_client=self.trading_data_client
         )
         return trading.submit_simple_liquidity(
             market_id=market_id,
@@ -796,7 +828,7 @@ class VegaService(ABC):
             reference_sell=reference_sell,
             delta_buy=num_to_padded_int(delta_buy, market_decimals),
             delta_sell=num_to_padded_int(delta_sell, market_decimals),
-            wallet=self.wallet(),
+            wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
         )
@@ -817,7 +849,7 @@ class VegaService(ABC):
         return data.find_asset_id(
             symbol=symbol,
             raise_on_missing=raise_on_missing,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
         )
 
     @raw_data
@@ -839,7 +871,7 @@ class VegaService(ABC):
             Optional[vega.Order], the requested Order object or None if nothing found
         """
         return data_raw.order_status(
-            order_id=order_id, data_client=self.trading_data_client(), version=version
+            order_id=order_id, data_client=self.trading_data_client, version=version
         )
 
     def order_status_by_reference(
@@ -860,7 +892,7 @@ class VegaService(ABC):
         """
         return data.order_status_by_reference(
             reference=reference,
-            data_client=self.trading_data_client(),
+            data_client=self.trading_data_client,
             price_decimals=self.market_price_decimals[market_id],
             position_decimals=self.market_pos_decimals[market_id],
         )
