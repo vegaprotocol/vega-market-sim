@@ -20,7 +20,7 @@ MM_WALLET = WalletConfig("mm", "pin")
 TRADER_WALLET = WalletConfig("Zl3pLs6Xk6SwIK7Jlp2x", "bJQDDVGAhKkj3PVCc7Rr")
 
 # Randomly posts LOs at buy/sell side to simulate real Market situation
-RANDOM_WALLET = WalletConfig("OJpVLvU5fgLJbhNPdESa", "GmJTt9Gk34BHDlovB7AJ")
+RANDOM_WALLET = WalletConfig("random", "random")
 
 # Pass opening auction
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
