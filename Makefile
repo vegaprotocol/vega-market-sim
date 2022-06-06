@@ -1,8 +1,8 @@
-VEGA_TAG := 607a5b1
-WALLET_TAG := cb58876
-DATA_NODE_TAG := 3d8887d
-CONSOLE_TAG := d4f0d62
-PROTO_TAG := f303ea3
+VEGA_TAG := develop
+WALLET_TAG := develop
+DATA_NODE_TAG := develop
+CONSOLE_TAG := master
+PROTO_TAG := develop
 EXTERN_DIR := "./extern"
 
 all: pull_deps build_deps
