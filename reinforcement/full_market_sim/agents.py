@@ -82,6 +82,14 @@ class OptimalMarketMaker(StateAgentWithWallet):
             phi=self.phi,
         )
 
+    def finalise(self):
+        import pdb
+
+        pdb.set_trace()
+        self.vega.settle_market(
+            self.terminate_wallet_name, self.price_process[-1], self.market_id
+        )
+
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega)

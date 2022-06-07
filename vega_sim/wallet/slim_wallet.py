@@ -148,12 +148,15 @@ class SlimWallet(Wallet):
             ),
         )
         request = core_proto.SubmitTransactionRequest(
-            tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_ASYNC
+            tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_COMMIT
         )
 
         submit_future = self.core_client.SubmitTransaction.future(request)
-        # submit_future.result()
-        self.pool.submit(lambda: submit_future.result())
+        if not submit_future.result().success:
+            import pdb
+
+            pdb.set_trace()
+        # self.pool.submit(lambda: submit_future.result())
         self.remaining_until_height_update -= 1
 
     def public_key(self, name: str) -> str:

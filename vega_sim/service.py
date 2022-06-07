@@ -625,6 +625,9 @@ class VegaService(ABC):
     ):
         decimals = self.market_price_decimals[market_id]
 
+        import pdb
+
+        pdb.set_trace()
         oracle_name = (
             data_raw.market_info(market_id, data_client=self.trading_data_client)
             .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
