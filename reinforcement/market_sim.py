@@ -13,7 +13,7 @@ from reinforcement.learning_agent import (
 )
 from vega_sim.environment.agent import Agent
 
-from reinforcement.full_market_sim.lib.external_assetprice import RW_model
+from reinforcement.full_market_sim.utils.external_assetprice import RW_model
 from reinforcement.full_market_sim.environments import MarketEnvironmentforMMsim
 from vega_sim.null_service import VegaServiceNull
 from reinforcement.full_market_sim.agents import (

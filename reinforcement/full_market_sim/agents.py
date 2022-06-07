@@ -3,9 +3,9 @@ import os
 from collections import namedtuple
 from typing import List
 
-from reinforcement.full_market_sim.lib.strategy import A_S_MMmodel
-from reinforcement.full_market_sim.lib.create_csv import createfile_MMmodel
-from reinforcement.full_market_sim.lib.logdata import log_simple_MMmodel
+from reinforcement.full_market_sim.utils.strategy import A_S_MMmodel
+from reinforcement.full_market_sim.utils.create_csv import createfile_MMmodel
+from reinforcement.full_market_sim.utils.logdata import log_simple_MMmodel
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
