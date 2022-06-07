@@ -37,17 +37,16 @@ class FFN(nn.Module):
 
         self.net = nn.Sequential(*layers)
 
+    def forward(self, *args):
+            x = torch.cat(args, -1)
+            return self.net(x)
 
-def forward(self, *args):
-        x = torch.cat(args, -1)
-    
-        return self.net(x)
 
 class FFN_Q(nn.Module):
     """
     Specific class for Q-func of trader
     """
-    def __init__(self, state_dim: int, action_cont_dim: int):
+    def __init__(self, state_dim: int, ):
         """
         I create as many sub-networks as possible discrete actions that the agent can take. 
         The input of each network is the continuous part of the action (i.e. the volume). 

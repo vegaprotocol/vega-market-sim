@@ -28,7 +28,7 @@ def reg_policy(z: torch.Tensor, mu: torch.Tensor, sigma: torch.Tensor):
 
     """
     normal_policy = Normal(loc=mu, scale=sigma)
-    normal_ref = Normal(loc=torch.zeros_like(mu), scale=0.5*torch.ones_like(sigma))
+    normal_ref = Normal(loc=torch.zeros_like(mu), scale=torch.ones_like(sigma))
 
     d_kl = normal_policy.log_prob(z) - normal_ref.log_prob(z)
     return d_kl
