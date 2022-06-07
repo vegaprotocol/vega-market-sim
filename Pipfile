@@ -12,6 +12,7 @@ pynacl = "*"
 numba = "*"
 inflection = "*"
 scipy = "*"
+pandas = "*"
 
 [dev-packages]
 black = "*"

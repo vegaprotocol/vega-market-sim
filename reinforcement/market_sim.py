@@ -8,15 +8,15 @@ from reinforcement.helpers import states_to_sarsa
 from reinforcement.learning_agent import (
     Action,
     LearningAgent,
+    MarketState,
     WALLET as LEARNING_WALLET,
 )
 from vega_sim.environment.agent import Agent
-from .learning_agent import MarketState
 
-from .full_market_sim.lib.external_assetprice import RW_model
-from .full_market_sim.environments import MarketEnvironmentforMMsim
+from reinforcement.full_market_sim.lib.external_assetprice import RW_model
+from reinforcement.full_market_sim.environments import MarketEnvironmentforMMsim
 from vega_sim.null_service import VegaServiceNull
-from .full_market_sim.agents import (
+from reinforcement.full_market_sim.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
     TRADER_WALLET,

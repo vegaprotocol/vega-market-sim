@@ -1,6 +1,5 @@
 from typing import List, Tuple
-from reinforcement.learning_agent import Action
-from .learning_agent import MarketState
+from reinforcement.learning_agent import Action, MarketState
 
 
 def states_to_sarsa(
