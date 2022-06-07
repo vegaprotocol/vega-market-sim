@@ -273,6 +273,10 @@ class VegaService(ABC):
                 int, The maximum number of tokens which can be fauceted (in asset decimal precision)
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+        if wallet_name == "mm4":
+            import pdb
+
+            pdb.set_trace()
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
             wallet_name=wallet_name,
@@ -293,7 +297,7 @@ class VegaService(ABC):
         gov.approve_proposal(
             proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
         )
-        self.forward("365s")
+        self.forward("360s")
 
     def create_simple_market(
         self,
@@ -341,7 +345,6 @@ class VegaService(ABC):
             tau=tau,
             params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.0, sigma=sigma),
         )
-
         proposal_id = gov.propose_future_market(
             market_name=market_name,
             wallet=self.wallet,
@@ -351,9 +354,9 @@ class VegaService(ABC):
             termination_pub_key=self.wallet.public_key(termination_wallet),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + 30,
+            closing_time=blockchain_time_seconds + 300,
             enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 20,
+            validation_time=blockchain_time_seconds + 200,
             risk_model=risk_model,
             liquidity_commitment=liquidity_commitment,
             node_url_for_time_forwarding=self.vega_node_url

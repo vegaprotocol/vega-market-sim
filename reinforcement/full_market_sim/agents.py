@@ -48,10 +48,12 @@ class OptimalMarketMaker(StateAgentWithWallet):
         running_penalty_parameter: float = 5 * 10**-6,
         asset_decimal: int = 5,
         market_decimal: int = 5,
+        tag: str = "",
     ):
-        super().__init__(wallet_name, wallet_pass)
-        self.terminate_wallet_name = terminate_wallet_name
+        super().__init__(wallet_name + tag, wallet_pass)
+        self.terminate_wallet_name = terminate_wallet_name + tag
         self.terminate_wallet_pass = terminate_wallet_pass
+
         self.price_process = price_processs
         self.spread = spread
         self.time = num_steps
@@ -65,12 +67,28 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.mdp = market_decimal
         self.current_step = 0
 
+        self.tag = tag
+
+        self.optimal_bid, self.optimal_ask, _ = A_S_MMmodel(
+            T=self.time / 60 / 24 / 365.25,
+            dt=1 / 60 / 24 / 365.25,
+            length=self.time + 1,
+            mdp=self.mdp,
+            q_upper=self.q_upper,
+            q_lower=self.q_lower,
+            kappa=self.kappa,
+            Lambda=self.Lambda,
+            alpha=self.alpha,
+            phi=self.phi,
+        )
+
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega)
         self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
 
         # Faucet vega tokens
+        self.vega.wait_for_datanode_sync()
         self.vega.mint(
             self.wallet_name,
             asset="VOTE",
@@ -78,17 +96,18 @@ class OptimalMarketMaker(StateAgentWithWallet):
         )
         self.vega.forward("10s")
 
+        ccy_name = f"tDAI{self.tag}"
         # Create asset
         self.vega.create_asset(
             self.wallet_name,
-            name="tDAI",
-            symbol="tDAI",
+            name=ccy_name,
+            symbol=ccy_name,
             decimals=self.adp,
             max_faucet_amount=5e10,
         )
         self.vega.forward("10s")
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol="tDAI")
+        self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
         # Top up asset
         self.initial = 100000
         self.vega.mint(
@@ -99,9 +118,10 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.forward("10s")
         self.vega.wait_for_datanode_sync()
 
+        market_name = f"BTC:DAI_{self.tag}"
         # Set up a future market
         self.vega.create_simple_market(
-            market_name="BTC:DAI_Mar22",
+            market_name=market_name,
             proposal_wallet=self.wallet_name,
             settlement_asset_id=self.tdai_id,
             termination_wallet=self.terminate_wallet_name,
@@ -109,8 +129,13 @@ class OptimalMarketMaker(StateAgentWithWallet):
         )
         self.vega.forward("10s")
 
+        market_name = f"BTC:DAI_{self.tag}"
         # Get market id
-        self.market_id = self.vega.all_markets()[0].id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == market_name
+        ][0]
 
         # Create csv file
         path = os.getcwd() + "/"
@@ -146,29 +171,18 @@ class OptimalMarketMaker(StateAgentWithWallet):
         return num_BidLimitOrderHit, num_AskLimitOrderHit
 
     def OptimalStrategy(self, current_position):
-        optimal_bid, optimal_ask, _ = A_S_MMmodel(
-            T=self.time / 60 / 24 / 365.25,
-            dt=1 / 60 / 24 / 365.25,
-            length=self.time + 1,
-            mdp=self.mdp,
-            q_upper=self.q_upper,
-            q_lower=self.q_lower,
-            kappa=self.kappa,
-            Lambda=self.Lambda,
-            alpha=self.alpha,
-            phi=self.phi,
-        )
+
         if current_position >= self.q_upper:
-            current_bid_depth = optimal_bid[self.current_step, 0]
+            current_bid_depth = self.optimal_bid[self.current_step, 0]
             current_ask_depth = 1 / 10**self.mdp
         elif current_position <= self.q_lower:
             current_bid_depth = 1 / 10**self.mdp
-            current_ask_depth = optimal_ask[self.current_step, -1]
+            current_ask_depth = self.optimal_ask[self.current_step, -1]
         else:
-            current_bid_depth = optimal_bid[
+            current_bid_depth = self.optimal_bid[
                 self.current_step, int(self.q_upper - 1 - current_position)
             ]
-            current_ask_depth = optimal_ask[
+            current_ask_depth = self.optimal_ask[
                 self.current_step, int(self.q_upper - current_position)
             ]
 
@@ -317,18 +331,27 @@ class MarketOrderTrader(StateAgentWithWallet):
         wallet_pass: str,
         num_buy_market_order: int = None,
         num_sell_market_order: int = None,
+        tag: str = "",
     ):
-        super().__init__(wallet_name, wallet_pass)
+        super().__init__(wallet_name + tag, wallet_pass)
         self.num_buyMO = num_buy_market_order
         self.num_sellMO = num_sell_market_order
+        self.tag = tag
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
+        market_name = f"BTC:DAI_{self.tag}"
         # Get market id
-        self.market_id = self.vega.all_markets()[0].id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == market_name
+        ][0]
+
         # Get asset id
-        tDAI_id = self.vega.find_asset_id(symbol="tDAI")
+
+        tDAI_id = self.vega.find_asset_id(symbol=f"tDAI{self.tag}")
         # Top up asset
         self.vega.mint(
             self.wallet_name,
@@ -384,8 +407,9 @@ class LimitOrderTrader(StateAgentWithWallet):
         initial_price: float = 0.3,
         market_decimal: int = 5,
         asset_decimal: int = 5,
+        tag: str = "",
     ):
-        super().__init__(wallet_name, wallet_pass)
+        super().__init__(wallet_name + tag, wallet_pass)
         self.num_post_at_bid = num_post_at_bid
         self.num_post_at_ask = num_post_at_ask
         self.price_process = price_process
@@ -394,14 +418,21 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.mdp = market_decimal
         self.adp = asset_decimal
         self.current_step = 0
+        self.tag = tag
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
         # Get market id
-        self.market_id = self.vega.all_markets()[0].id
+        market_name = f"BTC:DAI_{self.tag}"
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == market_name
+        ][0]
+
         # Get asset id
-        tDAI_id = self.vega.find_asset_id(symbol="tDAI")
+        tDAI_id = self.vega.find_asset_id(symbol=f"tDAI{self.tag}")
         # Top up asset
         self.vega.mint(
             self.wallet_name,
@@ -547,18 +578,26 @@ class OpenAuctionPass(StateAgentWithWallet):
         wallet_pass: str,
         side: str,
         initial_price: float = 0.3,
+        tag: str = "",
     ):
-        super().__init__(wallet_name, wallet_pass)
+        super().__init__(wallet_name + tag, wallet_pass)
         self.side = side
         self.initial_price = initial_price
+        self.tag = tag
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
         # Get market id
-        self.market_id = self.vega.all_markets()[0].id
+        market_name = f"BTC:DAI_{self.tag}"
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == market_name
+        ][0]
+
         # Get asset id
-        tDAI_id = self.vega.find_asset_id(symbol="tDAI")
+        tDAI_id = self.vega.find_asset_id(symbol=f"tDAI{self.tag}")
         # Top up asset
         self.vega.mint(
             self.wallet_name,

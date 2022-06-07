@@ -86,15 +86,15 @@ UlimitNOFile = 8192
     PerNBlocks = 10
 
 [Logging]
-  Environment = "dev"
+  Environment = "custom"
   # This section takes effect only when Environment is set to "custom".
   [Logging.Custom]
     [Logging.Custom.Zap]
       Level = -1
       Development = true
       Encoding = "console"
-      OutputPaths = ["stdout"]
-      ErrorOutputPaths = ["stderr"]
+      OutputPaths = ["zapfiles.log"]
+      ErrorOutputPaths = ["zapfiles.err"]
     [Logging.Custom.ZapEncoder]
       CallerKey = "C"
       EncodeCaller = "short"

@@ -77,7 +77,7 @@ def wait_for_acceptance(
 ) -> T:
     logger.debug("Waiting for proposal acceptance")
     submission_accepted = False
-    for _ in range(100):
+    for _ in range(1000):
         try:
             proposal = submission_load_func(submission_ref)
         except:
