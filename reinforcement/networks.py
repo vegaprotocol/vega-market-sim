@@ -76,8 +76,8 @@ class FFN_Params_Normal(nn.Module):
 
         super().__init__()
         self.net = FFN(sizes = [n_in]+hidden_sizes, activation = nn.Tanh, output_activation=nn.Tanh) 
-        self.net_mu = nn.Linear(sizes[-1], n_distr) 
-        self.net_sigma = nn.Sequential(nn.Linear(sizes[-1], n_distr), nn.Softplus())
+        self.net_mu = nn.Linear(hidden_sizes[-1], n_distr) 
+        self.net_sigma = nn.Sequential(nn.Linear(hidden_sizes[-1], n_distr), nn.Softplus())
 
     def forward(self, *args):
         x = torch.cat(args, -1)
