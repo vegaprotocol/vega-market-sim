@@ -71,7 +71,7 @@ class LearningAgent(StateAgentWithWallet):
         logfile: str,
         num_levels: int,
         wallet_name: str,
-        walet_pass: str):
+        wallet_pass: str):
 
         self.device = device
         self.discount_factor = discount_factor
@@ -87,7 +87,7 @@ class LearningAgent(StateAgentWithWallet):
         self.q_func = FFN_Q(state_dim = state_dim, )
         self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
         # policy
-        self.policy_volume = FFN_Params_Normal(n_in = state_dim, n_distr = 2, hiden_sizes=[32],)
+        self.policy_volume = FFN_Params_Normal(n_in = state_dim, n_distr = 2, hidden_sizes=[32],)
         self.policy_discr = FFN(sizes = [state_dim, 32, action_discrete_dim], 
                                 activation=nn.Tanh, 
                                 output_activation = Softmax) # this network decides whether to buy/sell/do nothing
@@ -100,6 +100,10 @@ class LearningAgent(StateAgentWithWallet):
         self.losses = defaultdict(list)
         # logfile
         self.logfile = logfile
+
+        # Wallet
+        self.wallet_name = wallet_name
+        self.wallet_pass = wallet_pass
 
         
     def _update_memory(self, state: MarketState, 
