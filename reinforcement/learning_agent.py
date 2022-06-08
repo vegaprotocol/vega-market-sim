@@ -40,7 +40,6 @@ class MarketState:
     bid_volumes: List[float]
     ask_volumes: List[float]
     trading_fee: float
-
     next_price: float
 
     def to_array(self):
@@ -53,6 +52,7 @@ class MarketState:
                 int(self.market_in_auction),
                 int(self.market_active),
                 self.trading_fee,
+                self.next_price
             ]
             + self.bid_prices
             + self.ask_prices
@@ -128,7 +128,7 @@ class LearningAgent(StateAgentWithWallet):
 
         # Dimensions of state and action
         self.num_levels = num_levels
-        state_dim = 6 + 4 * self.num_levels  # from MarketState
+        state_dim = 7 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
         # Q func
         self.q_func = FFN_Q(
@@ -152,7 +152,7 @@ class LearningAgent(StateAgentWithWallet):
             lr=0.001,
         )
 
-        # Coefficients or regularisation
+        # Coefficients for regularisation
         self.coefH_discr = 5.0
         self.coefH_cont = 0.5
         # losses logger
@@ -330,9 +330,9 @@ class LearningAgent(StateAgentWithWallet):
             with torch.no_grad():
                 soft_action = self.sample_action(state=state, sim=True)
             choice = int(soft_action.c.item())
-            if choice == 0:
+            if choice == 0: # choice = 0 --> sell
                 volume = soft_action.volume_sell.item()
-            elif choice == 1:
+            elif choice == 1: # choice = 1 --> buy
                 volume = soft_action.volume_buy.item()
             else:
                 volume = 1  # choice=2, hence do nothing, hence volume is irrelevant
@@ -377,7 +377,7 @@ class LearningAgent(StateAgentWithWallet):
         else:
             c = probs
         if evaluate:
-            c = torch.max(action.C, 1, keepdim=True)[1]
+            c = torch.max(probs, 1, keepdim=True)[1]
 
         return SoftAction(
             z_sell=z_sell,
