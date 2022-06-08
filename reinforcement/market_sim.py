@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple
 import os
 import torch
 import torch.nn as nn
+import time
 
 
 from reinforcement.learning_agent import (
@@ -203,15 +204,16 @@ if __name__ == "__main__":
         # Agent training:
         for it in range(args.rl_max_it):
             # simulation of market to get some data
+            learning_agent.move_to_cpu()
             with VegaServiceNull(
                 warn_on_raw_data_access=False, run_with_console=False
             ) as vega:
+                time.sleep(2)
                 main(
                     learning_agent = learning_agent, 
                     **{"vega": vega, "pause_at_completion": True, "num_steps": 10},
                 )
             # Policy evaluation + Policy improvement
-            learning_agent.policy_eval(batch_size = 50, 
-                n_epochs = 10)
-            learning_agent.policy_improvement(batch_size = 50,
-                n_epochs = 10)
+            learning_agent.move_to_device()
+            learning_agent.policy_eval(batch_size = 50, n_epochs = 10)
+            learning_agent.policy_improvement(batch_size = 50, n_epochs = 10)

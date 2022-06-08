@@ -6,7 +6,6 @@ from functools import partial
 from torch.distributions.normal import Normal
 
 
-
 def lognorm_sample(mu: torch.Tensor, sigma: torch.Tensor):
     z = mu + sigma * torch.randn_like(sigma)
     sample = torch.exp(z)

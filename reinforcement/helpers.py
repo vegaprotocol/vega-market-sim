@@ -1,16 +1,16 @@
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Any
 from functools import partial
 import torch
 import torch.nn as nn
 import numpy as np
 
 
-def apply_funcs(value, *functions):
+def apply_funcs(value, funcs: List[Callable[...,Any]]):
     """
     composition of functions applied to value
     """
     res = value
-    for f in functions:
+    for f in funcs:
         res = f(res)
     return res
 
