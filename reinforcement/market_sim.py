@@ -178,6 +178,7 @@ def main(
             block_size=block_size,
             state_extraction_freq=state_extraction_freq,
         )
+
         learning_agent.set_market_tag(str(i))
         env.add_learning_agent(learning_agent)
 
@@ -221,8 +222,12 @@ if __name__ == "__main__":
         with VegaServiceNull(
             warn_on_raw_data_access=False,
             run_with_console=True,
-            use_full_vega_wallet=True,
+            use_full_vega_wallet=False,
+            block_duration="60s",
         ) as vega:
+            import pdb
+
+            pdb.set_trace()
             main(
                 **{"vega": vega, "pause_at_completion": False, "num_steps": 120},
             )

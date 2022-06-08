@@ -141,7 +141,7 @@ class VegaService(ABC):
     def wallet(self) -> Wallet:
         pass
 
-    def _default_wait_fn(self) -> None:
+    def wait_fn(self) -> None:
         time.sleep(1)
 
     @property
@@ -273,10 +273,7 @@ class VegaService(ABC):
                 int, The maximum number of tokens which can be fauceted (in asset decimal precision)
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
-        if wallet_name == "mm4":
-            import pdb
 
-            pdb.set_trace()
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
             wallet_name=wallet_name,
@@ -625,9 +622,6 @@ class VegaService(ABC):
     ):
         decimals = self.market_price_decimals[market_id]
 
-        import pdb
-
-        pdb.set_trace()
         oracle_name = (
             data_raw.market_info(market_id, data_client=self.trading_data_client)
             .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
