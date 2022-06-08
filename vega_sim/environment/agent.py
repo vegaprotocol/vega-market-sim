@@ -18,6 +18,9 @@ class Agent(ABC):
     def initialise(self, vega: VegaService):
         self.vega = vega
 
+    def finalise(self):
+        pass
+
 
 class AgentWithWallet(Agent):
     def __init__(

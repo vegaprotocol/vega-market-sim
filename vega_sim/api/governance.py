@@ -429,13 +429,13 @@ def settle_oracle(
 
     # Use oracle feed to terminate market
     payload = {"trading.terminated": "true"}
-    as_str = json.dumps(payload).encode()
-    payload = base64.b64encode(as_str)
+    payload = json.dumps(payload).encode()
 
     oracle_submission = commands_protos.oracles.OracleDataSubmission(
         payload=payload,
         source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
     )
+
     wallet.submit_transaction(
         transaction=oracle_submission,
         name=wallet_name,
@@ -445,14 +445,14 @@ def settle_oracle(
     logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
     # use oracle to settle market
-    payload = {oracle_name: settlement_price}
-    as_str = json.dumps(payload).encode()
-    payload = base64.b64encode(as_str)
+    payload = {oracle_name: str(settlement_price)}
+    payload = json.dumps(payload).encode()
 
     oracle_submission = commands_protos.oracles.OracleDataSubmission(
         payload=payload,
         source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
     )
+
     wallet.submit_transaction(
         transaction=oracle_submission,
         name=wallet_name,

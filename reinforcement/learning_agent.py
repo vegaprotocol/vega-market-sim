@@ -116,6 +116,8 @@ class LearningAgent(StateAgentWithWallet):
         wallet_name: str,
         wallet_pass: str,
     ):
+        super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
+        self.base_wallet_name = wallet_name
 
         self.price_process = None
         self.step_num = 0
@@ -160,9 +162,9 @@ class LearningAgent(StateAgentWithWallet):
         # logfile
         self.logfile = logfile
 
-        # Wallet
-        self.wallet_name = wallet_name
-        self.wallet_pass = wallet_pass
+    def set_market_tag(self, tag: str):
+        self.tag = tag
+        self.wallet_name = self.base_wallet_name + str(tag)
 
     def move_to_device(self):
         self.q_func.to(self.device)
@@ -177,12 +179,17 @@ class LearningAgent(StateAgentWithWallet):
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
+        market_name = f"BTC:DAI_{self.tag}"
         self.step_num = 0
 
         # Get market id
-        self.market_id = self.vega.all_markets()[0].id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == market_name
+        ][0]
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol="tDAI")
+        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI{self.tag}")
         # Top up asset
         self.vega.mint(
             self.wallet_name,
