@@ -492,6 +492,10 @@ class VegaService(ABC):
             order_ref=order_ref,
         )
 
+    def get_blockchain_time(self) -> int:
+        """Returns blockchain time in seconds since the epoch"""
+        return gov.get_blockchain_time(self.trading_data_client)
+
     def amend_order(
         self,
         trading_wallet: str,
