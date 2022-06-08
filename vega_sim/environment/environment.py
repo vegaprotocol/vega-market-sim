@@ -174,6 +174,9 @@ class MarketEnvironment:
         for agent in self.agents:
             agent.finalise()
 
+        if self._state_extraction_fn:
+            state_values.append(self._state_extraction_fn(vega, self.agents))
+
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 
         if pause_at_completion:
