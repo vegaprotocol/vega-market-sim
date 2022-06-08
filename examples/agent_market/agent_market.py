@@ -20,6 +20,7 @@ from vega_sim.null_service import VegaServiceNull
 def main(
     num_steps: int = 60,
     block_size: int = 1,
+    step_length_seconds: Optional[int] = None,
     run_with_console: bool = False,
     pause_at_completion: bool = False,
     order_arrival_rate: float = 2,
@@ -44,6 +45,7 @@ def main(
         n_steps=num_steps,
         transactions_per_block=block_size,
         vega_service=vega,
+        step_length_seconds=step_length_seconds,
     )
     env.run(run_with_console=run_with_console, pause_at_completion=pause_at_completion)
 
@@ -82,13 +84,17 @@ if __name__ == "__main__":
             for vega_service in vega_services:
                 vega_service.stop()
     else:
-        with VegaServiceNull(warn_on_raw_data_access=False) as vega:
+        with VegaServiceNull(
+            warn_on_raw_data_access=False,
+            run_with_console=True,
+            transactions_per_block=100,
+        ) as vega:
             main(
                 **{
-                    "num_steps": int(1 * 60 * 60 * 1),
-                    "block_size": 10,
-                    "pause_at_completion": False,
-                    "run_with_console": False,
+                    "num_steps": 72,
+                    "step_length_seconds": 60 * 60,
+                    "pause_at_completion": True,
+                    "run_with_console": True,
                     "vega": vega,
                 },
             )
