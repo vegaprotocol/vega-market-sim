@@ -98,28 +98,30 @@ def states_to_sarsa(
     res = []
     for i in range(len(states)):
         pres = states[i]
-        next = states[i + 1] if i < len(states) - 1 else None
-        prev = states[i - 1] if i > 0 else None
-        reward = (
-            (pres[0].general_balance + pres[0].margin_balance)
-            - (prev[0].general_balance + prev[0].margin_balance)
-            if prev is not None
-            else 0
-        )
-        res.append(
-            (
-                pres[0],
-                pres[1] if next is not None else None,
-                reward,
-                next[0] if next is not None else None,
-                next[1] if next is not None else None,
-            )
-        )
+        next = states[i + 1] if i < len(states) - 1 else np.nan#None
+        prev = states[i - 1] if i > 0 else np.nan#None
         if pres[0].margin_balance + pres[0].general_balance <= 0:
             reward = -10
             res.append((pres[0], pres[1], reward, next[0], next[1]))
             break
-        res.append((pres[0], pres[1], reward, next[0], next[1]))
+        reward = (
+            (pres[0].general_balance + pres[0].margin_balance)
+            - (prev[0].general_balance + prev[0].margin_balance)
+            if prev is not np.nan
+            else 0
+        )
+        if next is not np.nan:
+            res.append(
+                (
+                    pres[0],
+                    pres[1],
+                    reward,
+                    next[0],
+                    next[1]
+                )
+                )
+        else:
+            res[-1] = (res[-1][0], res[-1][1], reward + res[-1][2], np.nan, np.nan)
     return res
 
 
@@ -234,7 +236,11 @@ class LearningAgent(StateAgentWithWallet):
 
         self.memory["action_volume"].append([action.volume])
         self.memory["reward"].append([reward])
-        self.memory["next_state"].append(next_state.to_array())
+        if next_state is not np.nan:
+            self.memory["next_state"].append(next_state.to_array())
+        else:
+            self.memory["next_state"].append(np.nan * np.ones_like(state.to_array()))
+
         return 0
 
     def update_memory(self, states: List[Tuple[MarketState, Action]]):
@@ -446,6 +452,8 @@ class LearningAgent(StateAgentWithWallet):
                 batch_reward,
                 batch_next_state,
             ) in enumerate(dataloader):
+                next_state_terminal = torch.isnan(batch_next_state).float() # shape (batch_size, dim_state)
+                batch_next_state[next_state_terminal.eq(True)] = batch_state[next_state_terminal.eq(True)]
                 self.optimizer_q.zero_grad()
                 # differentiate between sell and buy volumes for the q_func
                 volume_sell = batch_action_volume.clone()
@@ -461,7 +469,7 @@ class LearningAgent(StateAgentWithWallet):
 
                 with torch.no_grad():
                     v = self.v_func(batch_next_state)
-                    target = batch_reward + self.discount_factor * v
+                    target = batch_reward + (1-next_state_terminal.mean(1, keepdim=True)) * self.discount_factor * v
                 loss = torch.pow(pred - target, 2).mean()
                 loss.backward()
                 self.optimizer_q.step()
