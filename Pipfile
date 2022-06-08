@@ -13,6 +13,8 @@ numba = "*"
 inflection = "*"
 scipy = "*"
 pandas = "*"
+torch = "*"
+tqdm = "*"
 
 [dev-packages]
 black = "*"

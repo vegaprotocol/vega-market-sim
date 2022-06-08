@@ -111,7 +111,7 @@ def party_account(
         asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
     )
 
-    general, margin, bond = np.nan, np.nan, np.nan
+    general, margin, bond = 0, 0, 0 #np.nan, np.nan, np.nan
     for account in accounts:
         if account.market_id and account.market_id != market_id:
             # The 'general' account type has no market ID, so we have to pull

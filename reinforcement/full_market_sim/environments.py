@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Any, Callable, List, Optional
 from reinforcement.learning_agent import LearningAgent
 
@@ -44,7 +43,8 @@ class RLMarketEnvironment(MarketEnvironmentWithState):
         state = self.state_func(vega)
 
         # Agent must step in order
-        #   agents = [market_maker, tradingbot, randomtrader, auctionpass1, auctionpass2]
+        #   agents = [market_maker, tradingbot, randomtrader,
+        #    auctionpass1, auctionpass2]
         self.agents[0].AvoidCrossedOrder()
         self.agents[2].step_amendprice(state)
         self.agents[0].step(state)
@@ -64,4 +64,4 @@ class RLMarketEnvironment(MarketEnvironmentWithState):
         self.agents[0].logdata()
 
         # Learning agent
-        self.learning_agent.step(state)
+        self.learning_agent.step(state, random=False)
