@@ -3,7 +3,11 @@ import logging
 from multiprocessing import Pool
 import datetime
 from typing import List, Optional, Tuple
-from reinforcement.helpers import states_to_sarsa
+import os
+import torch
+import torch.nn as nn
+import time
+
 
 from reinforcement.learning_agent import (
     Action,
@@ -38,6 +42,7 @@ def state_fn(
 
 
 def main(
+    learning_agent: LearningAgent,
     num_steps: int = 120,
     dt: float = 1 / 60 / 24 / 365.25,
     market_decimal: int = 5,
@@ -112,9 +117,9 @@ def main(
         initial_price=initial_price,
     )
 
-    learning_agent = LearningAgent(
-        wallet_name=LEARNING_WALLET.name, wallet_pass=LEARNING_WALLET.passphrase
-    )
+    #learning_agent = LearningAgent(
+    #    wallet_name=LEARNING_WALLET.name, wallet_pass=LEARNING_WALLET.passphrase
+    #)
 
     env = MarketEnvironmentforMMsim(
         agents=[
@@ -131,12 +136,17 @@ def main(
         state_extraction_fn=state_fn,
         state_extraction_freq=state_extraction_freq,
     )
-
+    
     result = env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
     )
-    sarsa = states_to_sarsa(result)
+    #sarsa = states_to_sarsa(result)
+    # Update the memory of the learning agent with the simulated data
+    learning_agent.update_memory(result)
+    
+
+
 
 
 if __name__ == "__main__":
@@ -144,7 +154,20 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num-procs", default=1, type=int)
+    parser.add_argument("--rl-max-it", default=10, type=int, help="Number of iterations of policy improvement + policy iterations")
+    parser.add_argument("--use_cuda", action='store_true', default=False)
+    parser.add_argument("--device", default=0, type=int)
+    parser.add_argument("--results_dir", default='numerical_results', type=str)
     args = parser.parse_args()
+
+    if torch.cuda.is_available() and args.use_cuda:
+        device = "cuda:{}".format(args.device)
+    else:
+        device = "cpu"
+    
+    if not os.path.exists(args.results_dir):
+        os.makedirs(args.results_dir)
+    logfile = os.path.join(args.results_dir, "learning_agent.txt")
 
     if args.num_procs > 1:
         ress = []
@@ -169,9 +192,28 @@ if __name__ == "__main__":
             for vega_service in vega_services:
                 vega_service.stop()
     else:
-        with VegaServiceNull(
-            warn_on_raw_data_access=False, run_with_console=True
-        ) as vega:
-            main(
-                **{"vega": vega, "pause_at_completion": True, "num_steps": 120},
-            )
+        # create the Learning Agent
+        learning_agent = LearningAgent(
+            device=device,
+            discount_factor=0.8,
+            logfile=logfile,
+            num_levels=5,
+            wallet_name=LEARNING_WALLET.name, 
+            wallet_pass=LEARNING_WALLET.passphrase
+        )
+        # Agent training:
+        for it in range(args.rl_max_it):
+            # simulation of market to get some data
+            learning_agent.move_to_cpu()
+            with VegaServiceNull(
+                warn_on_raw_data_access=False, run_with_console=False
+            ) as vega:
+                time.sleep(2)
+                main(
+                    learning_agent = learning_agent, 
+                    **{"vega": vega, "pause_at_completion": False, "num_steps": 10},
+                )
+            # Policy evaluation + Policy improvement
+            learning_agent.move_to_device()
+            learning_agent.policy_eval(batch_size = 50, n_epochs = 10)
+            learning_agent.policy_improvement(batch_size = 50, n_epochs = 10)

@@ -58,4 +58,4 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
         self.agents[0].logdata()
 
         # Learning agent
-        self.agents[-1].step(state)
+        self.agents[-1].step(state, random=False)
