@@ -7,6 +7,8 @@ import os
 import torch
 import torch.nn as nn
 import time
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 from reinforcement.learning_agent import (
@@ -17,6 +19,7 @@ from reinforcement.learning_agent import (
 )
 from vega_sim.environment.agent import Agent
 
+from reinforcement.helpers import set_seed
 from reinforcement.full_market_sim.utils.external_assetprice import RW_model
 from reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
@@ -190,6 +193,7 @@ def run_iteration(
     )
     # Update the memory of the learning agent with the simulated data
     learning_agent.update_memory(result)
+    return result
 
 
 if __name__ == "__main__":
@@ -206,16 +210,22 @@ if __name__ == "__main__":
     parser.add_argument("--use_cuda", action="store_true", default=False)
     parser.add_argument("--device", default=0, type=int)
     parser.add_argument("--results_dir", default="numerical_results", type=str)
+    parser.add_argument("--evaluate", action="store_true", default=False, help="If true, do not train and directly evaluate")
     args = parser.parse_args()
 
+    # set device
     if torch.cuda.is_available() and args.use_cuda:
         device = "cuda:{}".format(args.device)
     else:
         device = "cpu"
-
+    
+    # create results dir
     if not os.path.exists(args.results_dir):
         os.makedirs(args.results_dir)
     logfile = os.path.join(args.results_dir, "learning_agent.txt")
+
+    # set seed for results replication
+    set_seed(1)
 
     # create the Learning Agent
     learning_agent = LearningAgent(
@@ -226,17 +236,47 @@ if __name__ == "__main__":
         wallet_name=LEARNING_WALLET.name,
         wallet_pass=LEARNING_WALLET.passphrase,
     )
-    # Agent training:
+    # Agent training / evaluation:
     with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
         time.sleep(2)
-        for it in range(args.rl_max_it):
-            # simulation of market to get some data
-            learning_agent.move_to_cpu()
-            main(
+        # TRAINING OF AGENT
+        if not args.evaluate:
+            for it in range(args.rl_max_it):
+                # simulation of market to get some data
+                try:
+                    learning_agent.move_to_cpu()
+                    _ = run_iteration(
+                        learning_agent=learning_agent,
+                        **{"vega": vega, "pause_at_completion": False, "num_steps": 50, "step_tag":it},
+                    )
+                    # Policy evaluation + Policy improvement
+                    learning_agent.move_to_device()
+                    learning_agent.policy_eval(batch_size=50, n_epochs=10)
+                    learning_agent.policy_improvement(batch_size=50, n_epochs=10)
+                except:
+                    print("Creashed in iteration {}".format(it))
+                    raise Exception("crashed")
+
+
+            learning_agent.save(args.results_dir)
+
+    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
+        time.sleep(2)
+        # EVALUATION OF AGENT
+        learning_agent.load(args.results_dir)
+        for it in range(10):
+            learning_agent.clear_memory()
+            _ = run_iteration(
                 learning_agent=learning_agent,
-                **{"vega": vega, "pause_at_completion": False, "num_steps": 10},
+                **{"vega": vega, "pause_at_completion": False, "num_steps": 50, "step_tag":it},
             )
-            # Policy evaluation + Policy improvement
-            learning_agent.move_to_device()
-            learning_agent.policy_eval(batch_size=50, n_epochs=10)
-            learning_agent.policy_improvement(batch_size=50, n_epochs=10)
+            fig, ax = plt.subplots()
+            acc_reward = np.array(learning_agent.memory['reward']).cumsum()
+            ax.plot(acc_reward)
+            fig.savefig(os.path.join(args.results_dir, "PnL_{}.pdf".format(it)))
+            plt.close()
+
+
+        
+
+

@@ -102,6 +102,10 @@ def states_to_sarsa(
         reward = (next[0].general_balance + next[0].margin_balance) - (
             pres[0].general_balance + pres[0].margin_balance
         )
+        if pres[0].margin_balance + pres[0].general_balance <= 0:
+            reward = -10
+            res.append((pres[0], pres[1], reward, next[0], next[1]))
+            break
         res.append((pres[0], pres[1], reward, next[0], next[1]))
     return res
 
@@ -232,7 +236,12 @@ class LearningAgent(StateAgentWithWallet):
                 first_n = len(self.memory[key]) - self.memory_capacity
                 del self.memory[key][:first_n]
         return 0
+    
+    def clear_memory(self):
+        for key in self.memory.keys():
+            self.memory[key].clear()
 
+    
     def create_dataloader(self, batch_size):
         """
         creates dataset and dataloader for training.
@@ -310,19 +319,26 @@ class LearningAgent(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState, random: bool = False):
         learning_state = self.state(self.vega)
-        self.latest_action = self._step(learning_state, random)
-        self.latest_state = learning_state
+        if learning_state.margin_balance + learning_state.general_balance <= 0:
+            return 0
+        else:
+            self.latest_action = self._step(learning_state, random)
+            self.latest_state = learning_state
 
-        if self.latest_action.buy or self.latest_action.sell:
-            self.vega.submit_market_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
-                volume=self.latest_action.volume,
-                wait=False,
-                fill_or_kill=False,
-            )
-        self.step_num += 1
+            if self.latest_action.buy or self.latest_action.sell:
+                try:
+                    self.vega.submit_market_order(
+                        trading_wallet=self.wallet_name,
+                        market_id=self.market_id,
+                        side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
+                        volume=self.latest_action.volume,
+                        wait=False,
+                        fill_or_kill=False,
+                    )
+                except Exception as e:
+                    print(e)
+
+            self.step_num += 1
 
     def _step(self, vega_state: MarketState, random: bool = False) -> Action:
         if random:
@@ -444,6 +460,7 @@ class LearningAgent(StateAgentWithWallet):
                         epoch, n_epochs, loss.item()
                     )
                 )
+            pbar.update(1)
         return 0
 
     def v_func(self, state, n_mc=50):
@@ -558,3 +575,10 @@ class LearningAgent(StateAgentWithWallet):
             "policy_volume": self.policy_volume.state_dict(),
         }
         torch.save(d, filename)
+
+    def load(self, results_dir: str):
+        filename = os.path.join(results_dir, "agent.pth.tar")
+        d = torch.load(filename, map_location= "cpu")
+        self.q_func.load_state_dict(d["q"])
+        self.policy_discr.load_state_dict(d["policy_discr"])
+        self.policy_volume.load_state_dict(d["policy_volume"])
