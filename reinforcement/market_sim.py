@@ -223,11 +223,8 @@ if __name__ == "__main__":
             warn_on_raw_data_access=False,
             run_with_console=True,
             use_full_vega_wallet=False,
-            block_duration="60s",
+            block_duration="1s",
         ) as vega:
-            import pdb
-
-            pdb.set_trace()
             main(
                 **{"vega": vega, "pause_at_completion": False, "num_steps": 120},
             )

@@ -118,11 +118,11 @@ class SlimWallet(Wallet):
             self.create_wallet(name=name)
 
     def submit_transaction(self, name: str, transaction: Any, transaction_type: str):
-        if self.remaining_until_height_update <= 0:
-            self.block_height = self.core_client.LastBlockHeight(
-                core_proto.LastBlockHeightRequest()
-            ).height
-            self.remaining_until_height_update = self.height_update_frequency
+        # if self.remaining_until_height_update <= 0:
+        #     self.block_height = self.core_client.LastBlockHeight(
+        #         core_proto.LastBlockHeightRequest()
+        #     ).height
+        #     self.remaining_until_height_update = self.height_update_frequency
 
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
@@ -148,15 +148,11 @@ class SlimWallet(Wallet):
             ),
         )
         request = core_proto.SubmitTransactionRequest(
-            tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_COMMIT
+            tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_ASYNC
         )
 
         submit_future = self.core_client.SubmitTransaction.future(request)
-        if not submit_future.result().success:
-            import pdb
-
-            pdb.set_trace()
-        # self.pool.submit(lambda: submit_future.result())
+        self.pool.submit(lambda: submit_future.result())
         self.remaining_until_height_update -= 1
 
     def public_key(self, name: str) -> str:
