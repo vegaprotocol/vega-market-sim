@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from typing import Any, Callable, List, Optional
+from reinforcement.learning_agent import LearningAgent
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
 from vega_sim.environment.environment import MarketEnvironmentWithState
@@ -7,10 +7,10 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
 
 
-class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
+class RLMarketEnvironment(MarketEnvironmentWithState):
     def __init__(
         self,
-        agents: List[StateAgent],
+        base_agents: List[StateAgent],
         n_steps: int = 180,
         random_agent_ordering: bool = False,
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
@@ -23,7 +23,7 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
         state_extraction_freq: int = 10,
     ):
         super().__init__(
-            agents=agents,
+            agents=base_agents,
             n_steps=n_steps,
             random_agent_ordering=random_agent_ordering,
             transactions_per_block=transactions_per_block,
@@ -33,12 +33,18 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
             state_extraction_freq=state_extraction_freq,
             state_func=state_func,
         )
+        self._base_agents = base_agents
+
+    def add_learning_agent(self, agent: LearningAgent):
+        self.learning_agent = agent
+        self.agents = self._base_agents + [agent]
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)
 
         # Agent must step in order
-        #   agents = [market_maker, tradingbot, randomtrader, auctionpass1, auctionpass2]
+        #   agents = [market_maker, tradingbot, randomtrader,
+        #    auctionpass1, auctionpass2]
         self.agents[0].AvoidCrossedOrder()
         self.agents[2].step_amendprice(state)
         self.agents[0].step(state)
@@ -58,4 +64,4 @@ class MarketEnvironmentforMMsim(MarketEnvironmentWithState):
         self.agents[0].logdata()
 
         # Learning agent
-        self.agents[-1].step(state, random=False)
+        self.learning_agent.step(state, random=False)

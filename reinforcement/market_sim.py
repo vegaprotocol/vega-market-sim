@@ -18,7 +18,7 @@ from reinforcement.learning_agent import (
 from vega_sim.environment.agent import Agent
 
 from reinforcement.full_market_sim.utils.external_assetprice import RW_model
-from reinforcement.full_market_sim.environments import MarketEnvironmentforMMsim
+from reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 from reinforcement.full_market_sim.agents import (
     MM_WALLET,
@@ -41,8 +41,9 @@ def state_fn(
     return (learner.latest_state, learner.latest_action)
 
 
-def main(
-    learning_agent: LearningAgent,
+def set_up_background_market(
+    vega: VegaServiceNull,
+    tag: str = "",
     num_steps: int = 120,
     dt: float = 1 / 60 / 24 / 365.25,
     market_decimal: int = 5,
@@ -58,10 +59,7 @@ def main(
     spread: float = 0.00002,
     block_size: int = 1,
     state_extraction_freq: int = 1,
-    run_with_console: bool = False,
-    pause_at_completion: bool = False,
-    vega: Optional[VegaServiceNull] = None,
-):
+) -> RLMarketEnvironment:
     _, price_process = RW_model(
         T=num_steps * dt,
         dt=dt,
@@ -88,11 +86,13 @@ def main(
         running_penalty_parameter=phi,
         asset_decimal=asset_decimal,
         market_decimal=market_decimal,
+        tag=str(tag),
     )
 
     tradingbot = MarketOrderTrader(
         wallet_name=TRADER_WALLET.name,
         wallet_pass=TRADER_WALLET.passphrase,
+        tag=str(tag),
     )
 
     randomtrader = LimitOrderTrader(
@@ -103,6 +103,7 @@ def main(
         initial_price=initial_price,
         asset_decimal=asset_decimal,
         market_decimal=market_decimal,
+        tag=str(tag),
     )
 
     auctionpass1 = OpenAuctionPass(
@@ -110,6 +111,7 @@ def main(
         wallet_pass=AUCTION1_WALLET.passphrase,
         side="SIDE_BUY",
         initial_price=initial_price,
+        tag=str(tag),
     )
 
     auctionpass2 = OpenAuctionPass(
@@ -117,20 +119,16 @@ def main(
         wallet_pass=AUCTION2_WALLET.passphrase,
         side="SIDE_SELL",
         initial_price=initial_price,
+        tag=str(tag),
     )
 
-    # learning_agent = LearningAgent(
-    #    wallet_name=LEARNING_WALLET.name, wallet_pass=LEARNING_WALLET.passphrase
-    # )
-
-    env = MarketEnvironmentforMMsim(
-        agents=[
+    env = RLMarketEnvironment(
+        base_agents=[
             market_maker,
             tradingbot,
             randomtrader,
             auctionpass1,
             auctionpass2,
-            learning_agent,
         ],
         n_steps=num_steps,
         transactions_per_block=block_size,
@@ -138,12 +136,58 @@ def main(
         state_extraction_fn=state_fn,
         state_extraction_freq=state_extraction_freq,
     )
+    return env
+
+
+def run_iteration(
+    learning_agent: LearningAgent,
+    step_tag: int,
+    num_steps: int = 120,
+    dt: float = 1 / 60 / 24 / 365.25,
+    market_decimal: int = 5,
+    asset_decimal: int = 5,
+    initial_price: float = 0.3,
+    sigma: float = 1,
+    kappa: float = 500,
+    Lambda: float = 5,
+    q_upper: int = 20,
+    q_lower: int = -20,
+    alpha: float = 10**-4,
+    phi: float = 5 * 10**-6,
+    spread: float = 0.00002,
+    block_size: int = 1,
+    state_extraction_freq: int = 1,
+    run_with_console: bool = False,
+    pause_at_completion: bool = False,
+    vega: Optional[VegaServiceNull] = None,
+):
+    env = set_up_background_market(
+        vega=vega,
+        tag=str(step_tag),
+        num_steps=num_steps,
+        dt=dt,
+        market_decimal=market_decimal,
+        asset_decimal=asset_decimal,
+        initial_price=initial_price,
+        sigma=sigma,
+        kappa=kappa,
+        Lambda=Lambda,
+        q_upper=q_upper,
+        q_lower=q_lower,
+        alpha=alpha,
+        phi=phi,
+        spread=spread,
+        block_size=block_size,
+        state_extraction_freq=state_extraction_freq,
+    )
+
+    learning_agent.set_market_tag(str(step_tag))
+    env.add_learning_agent(learning_agent)
 
     result = env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
     )
-    # sarsa = states_to_sarsa(result)
     # Update the memory of the learning agent with the simulated data
     learning_agent.update_memory(result)
 
@@ -173,50 +217,25 @@ if __name__ == "__main__":
         os.makedirs(args.results_dir)
     logfile = os.path.join(args.results_dir, "learning_agent.txt")
 
-    if args.num_procs > 1:
-        ress = []
-        vega_services: List[VegaServiceNull] = []
-        with Pool(args.num_procs) as p:
-            start = datetime.datetime.now()
-            for _ in range(args.num_procs):
-                vega_service = VegaServiceNull(warn_on_raw_data_access=False)
-                vega_service.start(block_on_startup=True)
-                vega_services.append(vega_service)
-                ress.append(
-                    p.apply_async(
-                        main,
-                        kwds={
-                            "vega": vega_service.clone(),
-                        },
-                    )
-                )
-
-            [res.get() for res in ress]
-            print(f"Run took {(datetime.datetime.now() - start).seconds}s")
-            for vega_service in vega_services:
-                vega_service.stop()
-    else:
-        # create the Learning Agent
-        learning_agent = LearningAgent(
-            device=device,
-            discount_factor=0.8,
-            logfile=logfile,
-            num_levels=5,
-            wallet_name=LEARNING_WALLET.name,
-            wallet_pass=LEARNING_WALLET.passphrase,
-        )
-        # Agent training:
+    # create the Learning Agent
+    learning_agent = LearningAgent(
+        device=device,
+        discount_factor=0.8,
+        logfile=logfile,
+        num_levels=5,
+        wallet_name=LEARNING_WALLET.name,
+        wallet_pass=LEARNING_WALLET.passphrase,
+    )
+    # Agent training:
+    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
+        time.sleep(2)
         for it in range(args.rl_max_it):
             # simulation of market to get some data
             learning_agent.move_to_cpu()
-            with VegaServiceNull(
-                warn_on_raw_data_access=False, run_with_console=False
-            ) as vega:
-                time.sleep(2)
-                main(
-                    learning_agent=learning_agent,
-                    **{"vega": vega, "pause_at_completion": False, "num_steps": 10},
-                )
+            main(
+                learning_agent=learning_agent,
+                **{"vega": vega, "pause_at_completion": False, "num_steps": 10},
+            )
             # Policy evaluation + Policy improvement
             learning_agent.move_to_device()
             learning_agent.policy_eval(batch_size=50, n_epochs=10)

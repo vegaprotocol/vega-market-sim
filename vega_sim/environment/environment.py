@@ -170,6 +170,10 @@ class MarketEnvironment:
                 state_values.append(self._state_extraction_fn(vega, self.agents))
 
             vega.wait_for_datanode_sync()
+
+        for agent in self.agents:
+            agent.finalise()
+
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 
         if pause_at_completion:
