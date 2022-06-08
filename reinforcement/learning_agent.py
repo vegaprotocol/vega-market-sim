@@ -96,11 +96,24 @@ def states_to_sarsa(
     states: List[Tuple[MarketState, Action]]
 ) -> List[Tuple[MarketState, Action, float, MarketState, Action]]:
     res = []
-    for i in range(len(states) - 1):
+    for i in range(len(states)):
         pres = states[i]
-        next = states[i + 1]
-        reward = (next[0].general_balance + next[0].margin_balance) - (
-            pres[0].general_balance + pres[0].margin_balance
+        next = states[i + 1] if i < len(states) - 1 else None
+        prev = states[i - 1] if i > 0 else None
+        reward = (
+            (pres[0].general_balance + pres[0].margin_balance)
+            - (prev[0].general_balance + prev[0].margin_balance)
+            if prev is not None
+            else 0
+        )
+        res.append(
+            (
+                pres[0],
+                pres[1] if next is not None else None,
+                reward,
+                next[0] if next is not None else None,
+                next[1] if next is not None else None,
+            )
         )
         if pres[0].margin_balance + pres[0].general_balance <= 0:
             reward = -10
