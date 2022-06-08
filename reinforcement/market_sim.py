@@ -211,7 +211,7 @@ if __name__ == "__main__":
                 time.sleep(2)
                 main(
                     learning_agent = learning_agent, 
-                    **{"vega": vega, "pause_at_completion": True, "num_steps": 10},
+                    **{"vega": vega, "pause_at_completion": False, "num_steps": 10},
                 )
             # Policy evaluation + Policy improvement
             learning_agent.move_to_device()
