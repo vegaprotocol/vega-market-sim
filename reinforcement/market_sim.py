@@ -232,8 +232,9 @@ if __name__ == "__main__":
         for it in range(args.rl_max_it):
             # simulation of market to get some data
             learning_agent.move_to_cpu()
-            main(
+            run_iteration(
                 learning_agent=learning_agent,
+                step_tag=it,
                 **{"vega": vega, "pause_at_completion": False, "num_steps": 10},
             )
             # Policy evaluation + Policy improvement
