@@ -52,7 +52,7 @@ class MarketState:
                 int(self.market_in_auction),
                 int(self.market_active),
                 self.trading_fee,
-                self.next_price
+                self.next_price,
             ]
             + self.bid_prices
             + self.ask_prices
@@ -98,8 +98,8 @@ def states_to_sarsa(
     res = []
     for i in range(len(states)):
         pres = states[i]
-        next = states[i + 1] if i < len(states) - 1 else np.nan#None
-        prev = states[i - 1] if i > 0 else np.nan#None
+        next = states[i + 1] if i < len(states) - 1 else np.nan  # None
+        prev = states[i - 1] if i > 0 else np.nan  # None
         if pres[0].margin_balance + pres[0].general_balance <= 0:
             reward = -10
             res.append((pres[0], pres[1], reward, next[0], next[1]))
@@ -111,15 +111,7 @@ def states_to_sarsa(
             else 0
         )
         if next is not np.nan:
-            res.append(
-                (
-                    pres[0],
-                    pres[1],
-                    reward,
-                    next[0],
-                    next[1]
-                )
-                )
+            res.append((pres[0], pres[1], reward, next[0], next[1]))
         else:
             res[-1] = (res[-1][0], res[-1][1], reward + res[-1][2], np.nan, np.nan)
     return res
@@ -255,12 +247,11 @@ class LearningAgent(StateAgentWithWallet):
                 first_n = len(self.memory[key]) - self.memory_capacity
                 del self.memory[key][:first_n]
         return 0
-    
+
     def clear_memory(self):
         for key in self.memory.keys():
             self.memory[key].clear()
 
-    
     def create_dataloader(self, batch_size):
         """
         creates dataset and dataloader for training.
@@ -372,9 +363,9 @@ class LearningAgent(StateAgentWithWallet):
             with torch.no_grad():
                 soft_action = self.sample_action(state=state, sim=True)
             choice = int(soft_action.c.item())
-            if choice == 0: # choice = 0 --> sell
+            if choice == 0:  # choice = 0 --> sell
                 volume = soft_action.volume_sell.item()
-            elif choice == 1: # choice = 1 --> buy
+            elif choice == 1:  # choice = 1 --> buy
                 volume = soft_action.volume_buy.item()
             else:
                 volume = 1  # choice=2, hence do nothing, hence volume is irrelevant
@@ -452,8 +443,12 @@ class LearningAgent(StateAgentWithWallet):
                 batch_reward,
                 batch_next_state,
             ) in enumerate(dataloader):
-                next_state_terminal = torch.isnan(batch_next_state).float() # shape (batch_size, dim_state)
-                batch_next_state[next_state_terminal.eq(True)] = batch_state[next_state_terminal.eq(True)]
+                next_state_terminal = torch.isnan(
+                    batch_next_state
+                ).float()  # shape (batch_size, dim_state)
+                batch_next_state[next_state_terminal.eq(True)] = batch_state[
+                    next_state_terminal.eq(True)
+                ]
                 self.optimizer_q.zero_grad()
                 # differentiate between sell and buy volumes for the q_func
                 volume_sell = batch_action_volume.clone()
@@ -469,7 +464,12 @@ class LearningAgent(StateAgentWithWallet):
 
                 with torch.no_grad():
                     v = self.v_func(batch_next_state)
-                    target = batch_reward + (1-next_state_terminal.mean(1, keepdim=True)) * self.discount_factor * v
+                    target = (
+                        batch_reward
+                        + (1 - next_state_terminal.mean(1, keepdim=True))
+                        * self.discount_factor
+                        * v
+                    )
                 loss = torch.pow(pred - target, 2).mean()
                 loss.backward()
                 self.optimizer_q.step()
@@ -599,7 +599,7 @@ class LearningAgent(StateAgentWithWallet):
 
     def load(self, results_dir: str):
         filename = os.path.join(results_dir, "agent.pth.tar")
-        d = torch.load(filename, map_location= "cpu")
+        d = torch.load(filename, map_location="cpu")
         self.q_func.load_state_dict(d["q"])
         self.policy_discr.load_state_dict(d["policy_discr"])
         self.policy_volume.load_state_dict(d["policy_volume"])

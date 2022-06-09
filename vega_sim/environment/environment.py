@@ -179,6 +179,7 @@ class MarketEnvironment:
                 to_forward = max(0, self.step_length_seconds - (end_time - start_time))
                 if to_forward > 0:
                     vega.forward(f"{to_forward}s")
+                start_time = end_time
 
         for agent in self.agents:
             agent.finalise()

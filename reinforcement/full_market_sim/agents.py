@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 from typing import List
 
-from reinforcement.full_market_sim.utils.strategy import A_S_MMmodel
+from reinforcement.full_market_sim.utils.strategy import A_S_MMmodel, GLFT_approx
 from reinforcement.full_market_sim.utils.create_csv import createfile_MMmodel
 from reinforcement.full_market_sim.utils.logdata import log_simple_MMmodel
 from vega_sim.environment import VegaState
@@ -82,6 +82,15 @@ class OptimalMarketMaker(StateAgentWithWallet):
             phi=self.phi,
         )
 
+        # self.optimal_bid, self.optimal_ask = GLFT_approx(
+        #     q_upper=self.q_upper,
+        #     q_lower=self.q_lower,
+        #     kappa=self.kappa,
+        #     Lambda=self.Lambda,
+        #     alpha=self.alpha,
+        #     phi=self.phi,
+        # )
+
     def finalise(self):
         self.vega.settle_market(
             self.terminate_wallet_name, self.price_process[-1], self.market_id
@@ -115,6 +124,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
         # Top up asset
         self.initial = 100000
+        self.vega.wait_for_datanode_sync()
         self.vega.mint(
             self.wallet_name,
             asset=self.tdai_id,

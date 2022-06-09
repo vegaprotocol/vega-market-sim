@@ -62,6 +62,7 @@ def set_up_background_market(
     spread: float = 0.00002,
     block_size: int = 1,
     state_extraction_freq: int = 1,
+    step_length_seconds: Optional[int] = None,
 ) -> RLMarketEnvironment:
     _, price_process = RW_model(
         T=num_steps * dt,
@@ -138,6 +139,7 @@ def set_up_background_market(
         vega_service=vega,
         state_extraction_fn=state_fn,
         state_extraction_freq=state_extraction_freq,
+        step_length_seconds=step_length_seconds,
     )
     return env
 
@@ -162,6 +164,7 @@ def run_iteration(
     state_extraction_freq: int = 1,
     run_with_console: bool = False,
     pause_at_completion: bool = False,
+    step_length_seconds: Optional[int] = None,
     vega: Optional[VegaServiceNull] = None,
 ):
     env = set_up_background_market(
@@ -182,6 +185,7 @@ def run_iteration(
         spread=spread,
         block_size=block_size,
         state_extraction_freq=state_extraction_freq,
+        step_length_seconds=step_length_seconds,
     )
 
     learning_agent.set_market_tag(str(step_tag))
@@ -210,7 +214,12 @@ if __name__ == "__main__":
     parser.add_argument("--use_cuda", action="store_true", default=False)
     parser.add_argument("--device", default=0, type=int)
     parser.add_argument("--results_dir", default="numerical_results", type=str)
-    parser.add_argument("--evaluate", action="store_true", default=False, help="If true, do not train and directly evaluate")
+    parser.add_argument(
+        "--evaluate",
+        action="store_true",
+        default=False,
+        help="If true, do not train and directly evaluate",
+    )
     args = parser.parse_args()
 
     # set device
@@ -218,7 +227,7 @@ if __name__ == "__main__":
         device = "cuda:{}".format(args.device)
     else:
         device = "cpu"
-    
+
     # create results dir
     if not os.path.exists(args.results_dir):
         os.makedirs(args.results_dir)
@@ -247,7 +256,13 @@ if __name__ == "__main__":
                     learning_agent.move_to_cpu()
                     _ = run_iteration(
                         learning_agent=learning_agent,
-                        **{"vega": vega, "pause_at_completion": False, "num_steps": 50, "step_tag":it},
+                        **{
+                            "vega": vega,
+                            "pause_at_completion": False,
+                            "num_steps": 50,
+                            "step_tag": it,
+                            "block_size": 50,
+                        },
                     )
                     # Policy evaluation + Policy improvement
                     learning_agent.move_to_device()
@@ -257,26 +272,28 @@ if __name__ == "__main__":
                     print("Creashed in iteration {}".format(it))
                     raise Exception("crashed")
 
-
             learning_agent.save(args.results_dir)
 
-    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
+    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=True) as vega:
         time.sleep(2)
         # EVALUATION OF AGENT
         learning_agent.load(args.results_dir)
-        for it in range(10):
+        for it in range(2):
             learning_agent.clear_memory()
             _ = run_iteration(
                 learning_agent=learning_agent,
-                **{"vega": vega, "pause_at_completion": False, "num_steps": 50, "step_tag":it},
+                **{
+                    "vega": vega,
+                    "pause_at_completion": True,
+                    "num_steps": 50,
+                    "step_tag": it,
+                    "block_size": 1,
+                    "step_length_seconds": 60,
+                },
             )
             fig, ax = plt.subplots()
-            acc_reward = np.array(learning_agent.memory['reward']).cumsum()
+            acc_reward = np.array(learning_agent.memory["reward"]).cumsum()
             ax.plot(acc_reward)
             fig.savefig(os.path.join(args.results_dir, "PnL_{}.pdf".format(it)))
             plt.close()
-
-
-        
-
-
+        input("Waiting")

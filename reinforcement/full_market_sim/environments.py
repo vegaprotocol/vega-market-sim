@@ -15,7 +15,7 @@ class RLMarketEnvironment(MarketEnvironmentWithState):
         random_agent_ordering: bool = False,
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
         transactions_per_block: int = 1,
-        block_length_seconds: int = 1,
+        step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
@@ -27,7 +27,7 @@ class RLMarketEnvironment(MarketEnvironmentWithState):
             n_steps=n_steps,
             random_agent_ordering=random_agent_ordering,
             transactions_per_block=transactions_per_block,
-            block_length_seconds=block_length_seconds,
+            step_length_seconds=step_length_seconds,
             vega_service=vega_service,
             state_extraction_fn=state_extraction_fn,
             state_extraction_freq=state_extraction_freq,
@@ -46,22 +46,38 @@ class RLMarketEnvironment(MarketEnvironmentWithState):
         #   agents = [market_maker, tradingbot, randomtrader,
         #    auctionpass1, auctionpass2]
         self.agents[0].AvoidCrossedOrder()
-        self.agents[2].step_amendprice(state)
+
+        try:
+            self.agents[2].step_amendprice(state)
+        except Exception as e:
+            print(e)
         self.agents[0].step(state)
 
-        self.agents[2].num_post_at_bid = self.agents[0].num_bidhit
-        self.agents[2].num_post_at_ask = self.agents[0].num_askhit
-        self.agents[1].num_buyMO = self.agents[0].num_buyMO
-        self.agents[1].num_sellMO = self.agents[0].num_sellMO
+        try:
+            self.agents[2].num_post_at_bid = self.agents[0].num_bidhit
+            self.agents[2].num_post_at_ask = self.agents[0].num_askhit
+            self.agents[1].num_buyMO = self.agents[0].num_buyMO
+            self.agents[1].num_sellMO = self.agents[0].num_sellMO
+        except Exception as e:
+            print(e)
 
-        self.agents[2].step_limitorders(state)
-        self.agents[1].step_buy(state)
-        self.agents[2].step_limitorderask(state)
+        try:
+            self.agents[2].step_limitorders(state)
+            self.agents[1].step_buy(state)
+            self.agents[2].step_limitorderask(state)
+        except Exception as e:
+            print(e)
 
-        self.agents[1].step_sell(state)
-        self.agents[2].step_limitorderbid(state)
+        try:
+            self.agents[1].step_sell(state)
+            self.agents[2].step_limitorderbid(state)
+        except Exception as e:
+            print(e)
 
-        self.agents[0].logdata()
+        try:
+            self.agents[0].logdata()
+        except Exception as e:
+            print(e)
 
         # Learning agent
         self.learning_agent.step(state, random=False)
