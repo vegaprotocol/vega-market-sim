@@ -377,7 +377,7 @@ class LearningAgent(StateAgentWithWallet):
             elif choice == 1: # choice = 1 --> buy
                 volume = soft_action.volume_buy.item()
             else:
-                volume = 1  # choice=2, hence do nothing, hence volume is irrelevant
+                volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
         return Action(buy=choice == 0, sell=choice == 1, volume=volume)
 
     def sample_action(
