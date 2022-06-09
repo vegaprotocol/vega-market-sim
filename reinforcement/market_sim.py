@@ -35,6 +35,7 @@ from reinforcement.full_market_sim.agents import (
     LimitOrderTrader,
     OpenAuctionPass,
 )
+from reinforcement.plot import plot_simulation
 
 
 def state_fn(
@@ -280,7 +281,7 @@ if __name__ == "__main__":
         learning_agent.load(args.results_dir)
         for it in range(2):
             learning_agent.clear_memory()
-            _ = run_iteration(
+            result = run_iteration(
                 learning_agent=learning_agent,
                 **{
                     "vega": vega,
@@ -291,9 +292,4 @@ if __name__ == "__main__":
                     "step_length_seconds": 60,
                 },
             )
-            fig, ax = plt.subplots()
-            acc_reward = np.array(learning_agent.memory["reward"]).cumsum()
-            ax.plot(acc_reward)
-            fig.savefig(os.path.join(args.results_dir, "PnL_{}.pdf".format(it)))
-            plt.close()
-        input("Waiting")
+            plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
