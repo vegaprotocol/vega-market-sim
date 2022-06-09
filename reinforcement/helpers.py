@@ -24,3 +24,8 @@ def toggle(m: nn.Module, to: bool):
     """
     for p in m.parameters():
         p.requires_grad_(to)
+
+
+def set_seed(seed):
+    torch.manual_seed(seed)
+    np.random.seed(seed)

@@ -13,7 +13,8 @@ def lognorm_sample(mu: torch.Tensor, sigma: torch.Tensor):
 
 def lognorm_logprob(z: torch.Tensor, mu: torch.Tensor, sigma: torch.Tensor):
     """
-    It's a change of measure: calculate the expected value of the log-density of the lognormal by changing the measure to the law of the normal .
+    ENtropy of lognormal calculated using samples. 
+    We change the variable to calculate the expected value of the log-density of the lognormal
     """
     normal = Normal(loc = mu, scale = sigma)
     logprob = normal.log_prob(z) - z

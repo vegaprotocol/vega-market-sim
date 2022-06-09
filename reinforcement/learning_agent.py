@@ -40,7 +40,6 @@ class MarketState:
     bid_volumes: List[float]
     ask_volumes: List[float]
     trading_fee: float
-
     next_price: float
 
     def to_array(self):
@@ -53,6 +52,7 @@ class MarketState:
                 int(self.market_in_auction),
                 int(self.market_active),
                 self.trading_fee,
+                self.next_price
             ]
             + self.bid_prices
             + self.ask_prices
@@ -98,23 +98,30 @@ def states_to_sarsa(
     res = []
     for i in range(len(states)):
         pres = states[i]
-        next = states[i + 1] if i < len(states) - 1 else None
-        prev = states[i - 1] if i > 0 else None
+        next = states[i + 1] if i < len(states) - 1 else np.nan#None
+        prev = states[i - 1] if i > 0 else np.nan#None
+        if pres[0].margin_balance + pres[0].general_balance <= 0:
+            reward = -10
+            res.append((pres[0], pres[1], reward, next[0], next[1]))
+            break
         reward = (
             (pres[0].general_balance + pres[0].margin_balance)
             - (prev[0].general_balance + prev[0].margin_balance)
-            if prev is not None
+            if prev is not np.nan
             else 0
         )
-        res.append(
-            (
-                pres[0],
-                pres[1] if next is not None else None,
-                reward,
-                next[0] if next is not None else None,
-                next[1] if next is not None else None,
-            )
-        )
+        if next is not np.nan:
+            res.append(
+                (
+                    pres[0],
+                    pres[1],
+                    reward,
+                    next[0],
+                    next[1]
+                )
+                )
+        else:
+            res[-1] = (res[-1][0], res[-1][1], reward + res[-1][2], np.nan, np.nan)
     return res
 
 
@@ -142,7 +149,7 @@ class LearningAgent(StateAgentWithWallet):
 
         # Dimensions of state and action
         self.num_levels = num_levels
-        state_dim = 6 + 4 * self.num_levels  # from MarketState
+        state_dim = 7 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
         # Q func
         self.q_func = FFN_Q(
@@ -166,7 +173,7 @@ class LearningAgent(StateAgentWithWallet):
             lr=0.001,
         )
 
-        # Coefficients or regularisation
+        # Coefficients for regularisation
         self.coefH_discr = 5.0
         self.coefH_cont = 0.5
         # losses logger
@@ -229,7 +236,11 @@ class LearningAgent(StateAgentWithWallet):
 
         self.memory["action_volume"].append([action.volume])
         self.memory["reward"].append([reward])
-        self.memory["next_state"].append(next_state.to_array())
+        if next_state is not np.nan:
+            self.memory["next_state"].append(next_state.to_array())
+        else:
+            self.memory["next_state"].append(np.nan * np.ones_like(state.to_array()))
+
         return 0
 
     def update_memory(self, states: List[Tuple[MarketState, Action]]):
@@ -244,7 +255,12 @@ class LearningAgent(StateAgentWithWallet):
                 first_n = len(self.memory[key]) - self.memory_capacity
                 del self.memory[key][:first_n]
         return 0
+    
+    def clear_memory(self):
+        for key in self.memory.keys():
+            self.memory[key].clear()
 
+    
     def create_dataloader(self, batch_size):
         """
         creates dataset and dataloader for training.
@@ -322,19 +338,26 @@ class LearningAgent(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState, random: bool = False):
         learning_state = self.state(self.vega)
-        self.latest_action = self._step(learning_state, random)
-        self.latest_state = learning_state
+        if learning_state.margin_balance + learning_state.general_balance <= 0:
+            return 0
+        else:
+            self.latest_action = self._step(learning_state, random)
+            self.latest_state = learning_state
 
-        if self.latest_action.buy or self.latest_action.sell:
-            self.vega.submit_market_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
-                volume=self.latest_action.volume,
-                wait=False,
-                fill_or_kill=False,
-            )
-        self.step_num += 1
+            if self.latest_action.buy or self.latest_action.sell:
+                try:
+                    self.vega.submit_market_order(
+                        trading_wallet=self.wallet_name,
+                        market_id=self.market_id,
+                        side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
+                        volume=self.latest_action.volume,
+                        wait=False,
+                        fill_or_kill=False,
+                    )
+                except Exception as e:
+                    print(e)
+
+            self.step_num += 1
 
     def _step(self, vega_state: MarketState, random: bool = False) -> Action:
         if random:
@@ -349,9 +372,9 @@ class LearningAgent(StateAgentWithWallet):
             with torch.no_grad():
                 soft_action = self.sample_action(state=state, sim=True)
             choice = int(soft_action.c.item())
-            if choice == 0:
+            if choice == 0: # choice = 0 --> sell
                 volume = soft_action.volume_sell.item()
-            elif choice == 1:
+            elif choice == 1: # choice = 1 --> buy
                 volume = soft_action.volume_buy.item()
             else:
                 volume = 1  # choice=2, hence do nothing, hence volume is irrelevant
@@ -396,7 +419,7 @@ class LearningAgent(StateAgentWithWallet):
         else:
             c = probs
         if evaluate:
-            c = torch.max(action.C, 1, keepdim=True)[1]
+            c = torch.max(probs, 1, keepdim=True)[1]
 
         return SoftAction(
             z_sell=z_sell,
@@ -429,6 +452,8 @@ class LearningAgent(StateAgentWithWallet):
                 batch_reward,
                 batch_next_state,
             ) in enumerate(dataloader):
+                next_state_terminal = torch.isnan(batch_next_state).float() # shape (batch_size, dim_state)
+                batch_next_state[next_state_terminal.eq(True)] = batch_state[next_state_terminal.eq(True)]
                 self.optimizer_q.zero_grad()
                 # differentiate between sell and buy volumes for the q_func
                 volume_sell = batch_action_volume.clone()
@@ -444,7 +469,7 @@ class LearningAgent(StateAgentWithWallet):
 
                 with torch.no_grad():
                     v = self.v_func(batch_next_state)
-                    target = batch_reward + self.discount_factor * v
+                    target = batch_reward + (1-next_state_terminal.mean(1, keepdim=True)) * self.discount_factor * v
                 loss = torch.pow(pred - target, 2).mean()
                 loss.backward()
                 self.optimizer_q.step()
@@ -456,6 +481,7 @@ class LearningAgent(StateAgentWithWallet):
                         epoch, n_epochs, loss.item()
                     )
                 )
+            pbar.update(1)
         return 0
 
     def v_func(self, state, n_mc=50):
@@ -570,3 +596,10 @@ class LearningAgent(StateAgentWithWallet):
             "policy_volume": self.policy_volume.state_dict(),
         }
         torch.save(d, filename)
+
+    def load(self, results_dir: str):
+        filename = os.path.join(results_dir, "agent.pth.tar")
+        d = torch.load(filename, map_location= "cpu")
+        self.q_func.load_state_dict(d["q"])
+        self.policy_discr.load_state_dict(d["policy_discr"])
+        self.policy_volume.load_state_dict(d["policy_volume"])
