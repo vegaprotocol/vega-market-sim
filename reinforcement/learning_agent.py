@@ -102,7 +102,15 @@ def states_to_sarsa(
         prev = states[i - 1] if i > 0 else np.nan  # None
         if pres[0].margin_balance + pres[0].general_balance <= 0:
             reward = -10
-            res.append((pres[0], pres[1], reward, next[0], next[1]))
+            res.append(
+                (
+                    pres[0],
+                    pres[1],
+                    reward,
+                    next[0] if next is not np.nan else np.nan,
+                    next[1] if next is not np.nan else np.nan,
+                )
+            )
             break
         reward = (
             (pres[0].general_balance + pres[0].margin_balance)

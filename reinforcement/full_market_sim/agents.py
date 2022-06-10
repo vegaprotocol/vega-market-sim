@@ -142,6 +142,14 @@ class OptimalMarketMaker(StateAgentWithWallet):
             termination_wallet=self.terminate_wallet_name,
             market_decimals=self.mdp,
             future_asset=ccy_name,
+            liquidity_commitment=vega.build_new_market_liquidity_commitment(
+                asset_id=self.tdai_id,
+                commitment_amount=5000,
+                fee=0.001,
+                buy_specs=[("PEGGED_REFERENCE_MID", 10, 1)],
+                sell_specs=[("PEGGED_REFERENCE_MID", 10, 1)],
+                market_decimals=5,
+            ),
         )
         self.vega.forward("10s")
 

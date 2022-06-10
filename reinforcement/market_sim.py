@@ -260,12 +260,9 @@ if __name__ == "__main__":
                         **{
                             "vega": vega,
                             "pause_at_completion": False,
-                            "num_steps": 50,
+                            "num_steps": 100,
                             "step_tag": it,
                             "block_size": 50,
-                            # "initial_p
-                            # 
-                            0,
                         },
                     )
                     # Policy evaluation + Policy improvement
@@ -273,7 +270,7 @@ if __name__ == "__main__":
                     learning_agent.policy_eval(batch_size=50, n_epochs=10)
                     learning_agent.policy_improvement(batch_size=50, n_epochs=10)
                 except:
-                    print("Creashed in iteration {}".format(it))
+                    print("Crashed in iteration {}".format(it))
                     raise Exception("crashed")
 
             learning_agent.save(args.results_dir)
@@ -289,12 +286,13 @@ if __name__ == "__main__":
                 **{
                     "vega": vega,
                     "pause_at_completion": False,
-                    "num_steps": 50,
+                    "num_steps": 100,
                     "step_tag": it,
                     "block_size": 1,
                     "step_length_seconds": 60,
-                    # "initial_price": 100,
-                    # "sigma": 10,
                 },
             )
             plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
+        import pdb
+
+        pdb.set_trace()
