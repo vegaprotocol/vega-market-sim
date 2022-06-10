@@ -213,6 +213,15 @@ def propose_future_market(
                 triggering_ratio=0.7,
                 auction_extension=0,
             ),
+            price_monitoring_parameters=vega_protos.markets.PriceMonitoringParameters(
+                triggers=[
+                    vega_protos.markets.PriceMonitoringTrigger(
+                        horizon=2,
+                        probability="0.01",
+                        auction_extension=5,
+                    )
+                ]
+            ),
             log_normal=risk_model,
         ),
         liquidity_commitment=liquidity_commitment,

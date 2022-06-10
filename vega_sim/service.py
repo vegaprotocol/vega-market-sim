@@ -846,6 +846,94 @@ class VegaService(ABC):
             is_amendment=is_amendment,
         )
 
+    def build_new_market_liquidity_commitment(
+        self,
+        asset_id: str,
+        commitment_amount: float,
+        fee: float,
+        buy_specs: List[Tuple[str, int, int]],
+        sell_specs: List[Tuple[str, int, int]],
+        market_decimals: int,
+    ) -> vega_protos.governance.NewMarketCommitment:
+
+        buy_specs = [
+            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
+        ]
+        sell_specs = [
+            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
+        ]
+
+        return trading.build_new_market_commitment(
+            commitment_amount=num_to_padded_int(
+                commitment_amount, self.asset_decimals[asset_id]
+            ),
+            fee=fee,
+            buy_specs=buy_specs,
+            sell_specs=sell_specs,
+        )
+
+    def submit_liquidity(
+        self,
+        wallet_name: str,
+        market_id: str,
+        commitment_amount: float,
+        fee: float,
+        buy_specs: List[Tuple[str, int, int]],
+        sell_specs: List[Tuple[str, int, int]],
+        is_amendment: bool = False,
+    ):
+        """Submit/Amend a custom liquidity profile.
+
+        Args:
+            wallet_name:
+                str, the wallet name performing the action
+            wallet:
+                Wallet, wallet client
+            market_id:
+                str, The ID of the market to place the commitment on
+            commitment_amount:
+                int, The amount in asset decimals of market asset to commit
+                to liquidity provision
+            fee:
+                float, The fee level at which to set the LP fee
+                 (in %, e.g. 0.01 == 1% and 1 == 100%)
+            buy_specs:
+                List[Tuple[str, int, int]], List of tuples, each containing a reference
+                point in their first position, a desired offset in their second and
+                a proportion in third
+            sell_specs:
+                List[Tuple[str, int, int]], List of tuples, each containing a reference
+                point in their first position, a desired offset in their second and
+                a proportion in third
+        """
+        asset_id = data_raw.market_info(
+            market_id=market_id, data_client=self.trading_data_client
+        ).tradable_instrument.instrument.future.settlement_asset
+
+        market_decimals = data.market_price_decimals(
+            market_id=market_id, data_client=self.trading_data_client
+        )
+
+        buy_specs = [
+            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
+        ]
+        sell_specs = [
+            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
+        ]
+
+        return trading.submit_liquidity(
+            market_id=market_id,
+            commitment_amount=num_to_padded_int(
+                commitment_amount, self.asset_decimals[asset_id]
+            ),
+            fee=fee,
+            buy_specs=buy_specs,
+            sell_specs=sell_specs,
+            wallet=self.wallet,
+            wallet_name=wallet_name,
+            is_amendment=is_amendment,
+        )
+
     def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:
         """Looks up the Asset ID of a given asset name
 
