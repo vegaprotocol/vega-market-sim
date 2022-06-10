@@ -42,7 +42,7 @@ def state_fn(
     service: VegaServiceNull, agents: List[Agent]
 ) -> Tuple[MarketState, Action]:
     learner = [a for a in agents if isinstance(a, LearningAgent)][0]
-    return (learner.latest_state, learner.latest_action)
+    return (learner.state(service), learner.latest_action)
 
 
 def set_up_background_market(
@@ -263,6 +263,9 @@ if __name__ == "__main__":
                             "num_steps": 50,
                             "step_tag": it,
                             "block_size": 50,
+                            # "initial_p
+                            # 
+                            0,
                         },
                     )
                     # Policy evaluation + Policy improvement
@@ -279,17 +282,19 @@ if __name__ == "__main__":
         time.sleep(2)
         # EVALUATION OF AGENT
         learning_agent.load(args.results_dir)
-        for it in range(2):
+        for it in range(10):
             learning_agent.clear_memory()
             result = run_iteration(
                 learning_agent=learning_agent,
                 **{
                     "vega": vega,
-                    "pause_at_completion": True,
+                    "pause_at_completion": False,
                     "num_steps": 50,
                     "step_tag": it,
                     "block_size": 1,
                     "step_length_seconds": 60,
+                    # "initial_price": 100,
+                    # "sigma": 10,
                 },
             )
             plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)

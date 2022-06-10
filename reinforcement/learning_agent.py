@@ -324,6 +324,7 @@ class LearningAgent(StateAgentWithWallet):
             trading_fee=0,
             next_price=self.price_process[self.step_num + 1]
             if self.price_process is not None
+            and len(self.price_process) > self.step_num + 1
             else np.nan,
         )
 
