@@ -304,6 +304,7 @@ def submit_simple_liquidity(
         fee=fee,
         buy_specs=[(reference_buy, delta_buy, 1)],
         sell_specs=[(reference_sell, delta_sell, 1)],
+        is_amendment=is_amendment,
     )
 
 
