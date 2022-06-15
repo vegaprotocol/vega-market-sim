@@ -97,29 +97,31 @@ def states_to_sarsa(
 ) -> List[Tuple[MarketState, Action, float, MarketState, Action]]:
     res = []
     for i in range(len(states)):
-        pres = states[i]
-        next = states[i + 1] if i < len(states) - 1 else np.nan  # None
-        prev = states[i - 1] if i > 0 else np.nan  # None
-        if pres[0].margin_balance + pres[0].general_balance <= 0:
+        pres_state = states[i]
+        next_state = states[i + 1] if i < len(states) - 1 else np.nan  # None
+        prev_state = states[i - 1] if i > 0 else np.nan  # None
+        if pres_state[0].margin_balance + pres_state[0].general_balance <= 0:
             reward = -10
             res.append(
                 (
-                    pres[0],
-                    pres[1],
+                    pres_state[0],
+                    pres_state[1],
                     reward,
-                    next[0] if next is not np.nan else np.nan,
-                    next[1] if next is not np.nan else np.nan,
+                    next_state[0] if next_state is not np.nan else np.nan,
+                    next_state[1] if next_state is not np.nan else np.nan,
                 )
             )
             break
         reward = (
-            (pres[0].general_balance + pres[0].margin_balance)
-            - (prev[0].general_balance + prev[0].margin_balance)
-            if prev is not np.nan
+            (pres_state[0].general_balance + pres_state[0].margin_balance)
+            - (prev_state[0].general_balance + prev_state[0].margin_balance)
+            if prev_state is not np.nan
             else 0
         )
-        if next is not np.nan:
-            res.append((pres[0], pres[1], reward, next[0], next[1]))
+        if next_state is not np.nan:
+            res.append(
+                (pres_state[0], pres_state[1], reward, next_state[0], next_state[1])
+            )
         else:
             res[-1] = (res[-1][0], res[-1][1], reward + res[-1][2], np.nan, np.nan)
     return res

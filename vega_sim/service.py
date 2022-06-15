@@ -624,20 +624,18 @@ class VegaService(ABC):
         settlement_price: float,
         market_id: str,
     ):
-        decimals = self.market_price_decimals[market_id]
+        future_inst = data_raw.market_info(
+            market_id, data_client=self.trading_data_client
+        ).tradable_instrument.instrument.future
+        oracle_name = future_inst.oracle_spec_for_settlement_price.filters[0].key.name
 
-        oracle_name = (
-            data_raw.market_info(market_id, data_client=self.trading_data_client)
-            .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
-                0
-            ]
-            .key.name
-        )
         gov.settle_oracle(
             wallet=self.wallet,
             wallet_name=settlement_wallet,
             oracle_name=oracle_name,
-            settlement_price=num_to_padded_int(settlement_price, decimals=decimals),
+            settlement_price=num_to_padded_int(
+                settlement_price, decimals=future_inst.settlement_price_decimals
+            ),
         )
 
     def party_account(

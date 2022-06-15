@@ -183,6 +183,7 @@ def propose_future_market(
         ],
     )
 
+    price_decimals = 5 if market_decimals is None else market_decimals
     market_proposal = vega_protos.governance.NewMarket(
         changes=vega_protos.governance.NewMarketConfiguration(
             instrument=vega_protos.governance.InstrumentConfiguration(
@@ -197,9 +198,10 @@ def propose_future_market(
                         settlement_price_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
                     ),
+                    settlement_price_decimals=price_decimals,
                 ),
             ),
-            decimal_places=5 if market_decimals is None else market_decimals,
+            decimal_places=price_decimals,
             position_decimal_places=0
             if position_decimals is None
             else position_decimals,
