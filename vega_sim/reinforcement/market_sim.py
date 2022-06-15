@@ -241,11 +241,14 @@ if __name__ == "__main__":
         wallet_name=LEARNING_WALLET.name,
         wallet_pass=LEARNING_WALLET.passphrase,
     )
-    # Agent training / evaluation:
-    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
-        time.sleep(2)
-        # TRAINING OF AGENT
-        if not args.evaluate:
+
+    if not args.evaluate:
+        # Agent training / evaluation:
+        with VegaServiceNull(
+            warn_on_raw_data_access=False, run_with_console=False
+        ) as vega:
+            time.sleep(2)
+            # TRAINING OF AGENT
             for it in range(args.rl_max_it):
                 # simulation of market to get some data
                 try:

@@ -1,5 +1,5 @@
 from typing import Any, Callable, List, Optional
-from reinforcement.learning_agent import LearningAgent
+from vega_sim.reinforcement.learning_agent import LearningAgent
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
 from vega_sim.environment.environment import MarketEnvironmentWithState

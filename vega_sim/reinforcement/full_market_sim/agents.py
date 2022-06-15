@@ -3,9 +3,11 @@ import os
 from collections import namedtuple
 from typing import List
 
-from reinforcement.full_market_sim.utils.strategy import A_S_MMmodel, GLFT_approx
-from reinforcement.full_market_sim.utils.create_csv import createfile_MMmodel
-from reinforcement.full_market_sim.utils.logdata import log_simple_MMmodel
+from vega_sim.reinforcement.full_market_sim.utils.strategy import (
+    A_S_MMmodel,
+)
+from vega_sim.reinforcement.full_market_sim.utils.create_csv import createfile_MMmodel
+from vega_sim.reinforcement.full_market_sim.utils.logdata import log_simple_MMmodel
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
@@ -162,10 +164,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
         ][0]
 
         # Create csv file
-        path = os.getcwd() + "/"
+        path = os.getcwd() + "/rl_logs/"
         strategy = "Agent_simple_MMmodel.csv"
-        self.file = path + strategy
-        createfile_MMmodel(strategy=strategy)
+        self.file_path = createfile_MMmodel(path, strategy=strategy)
 
     def num_MarketOrders(self):
         num_buyMO = np.random.poisson(self.Lambda)
@@ -344,7 +345,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             market_state,
             self.adp,
             self.mdp,
-            self.file,
+            self.file_path,
         )
 
 
