@@ -50,7 +50,7 @@ class MarketEnvironment:
         n_steps: int,
         random_agent_ordering: bool = True,
         transactions_per_block: int = 1,
-        block_length_seconds: int = 1,
+        step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
@@ -80,9 +80,14 @@ class MarketEnvironment:
                     for each block in the Vega chain. Often this is best set
                     as the maximum number of actions agents can take per step
                     to ensure they all happen 'at the same time' per step.
-            block_length_seconds:
-                int, default 1, How many seconds each block in the Vega chain
-                    is taken to represent.
+            step_length_seconds:
+                Optional[int], default None, How many seconds each step is
+                    taken to represent.
+                    After each round of actions, if time has not advanced at least
+                    this much we will be forwarded to that far in the future
+                    (minus however long the actions did take).
+                    e.g. for a step_length_seconds = 60 if all actions take up 10s
+                    we will forward 50s at the end.
             vega_service:
                 optional, VegaServiceNull, If passed will use this precreated vega
                     service instead of creating one internally.
@@ -99,7 +104,7 @@ class MarketEnvironment:
         self.n_steps = n_steps
         self.random_agent_ordering = random_agent_ordering
         self.transactions_per_block = transactions_per_block
-        self.block_length_seconds = block_length_seconds
+        self.step_length_seconds = step_length_seconds
         self._vega = vega_service
         self._state_extraction_fn = state_extraction_fn
         self._state_extraction_freq = state_extraction_freq
@@ -126,7 +131,7 @@ class MarketEnvironment:
                 run_with_console=run_with_console,
                 warn_on_raw_data_access=False,
                 transactions_per_block=self.transactions_per_block,
-                block_duration=f"{self.block_length_seconds}s",
+                block_duration="1s",
                 use_full_vega_wallet=False,
             ) as vega:
                 return self._run(vega, pause_at_completion=pause_at_completion)
@@ -156,12 +161,12 @@ class MarketEnvironment:
 
         for agent in self.agents:
             agent.initialise(vega=vega)
-            if self.transactions_per_block > 1 and self.block_length_seconds > 1:
-                vega.forward(f"{self.block_length_seconds + 1}s")
+            if self.transactions_per_block > 1:
+                vega.forward("1s")
+
+        start_time = vega.get_blockchain_time()
         for i in range(self.n_steps):
             self.step(vega)
-            if self.transactions_per_block > 1 and self.block_length_seconds > 1:
-                vega.forward(f"{self.block_length_seconds + 1}s")
             if (
                 self._state_extraction_fn is not None
                 and i % self._state_extraction_freq == 0
@@ -169,6 +174,18 @@ class MarketEnvironment:
                 state_values.append(self._state_extraction_fn(vega, self.agents))
 
             vega.wait_for_datanode_sync()
+            if self.step_length_seconds is not None:
+                end_time = vega.get_blockchain_time()
+                to_forward = max(0, self.step_length_seconds - (end_time - start_time))
+                if to_forward > 0:
+                    vega.forward(f"{to_forward}s")
+                start_time = end_time
+
+        for agent in self.agents:
+            agent.finalise()
+
+        if self._state_extraction_fn is not None:
+            state_values.append(self._state_extraction_fn(vega, self.agents))
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 
         if pause_at_completion:
@@ -196,7 +213,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         random_agent_ordering: bool = True,
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
         transactions_per_block: int = 1,
-        block_length_seconds: int = 1,
+        step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
@@ -229,9 +246,14 @@ class MarketEnvironmentWithState(MarketEnvironment):
                     for each block in the Vega chain. Often this is best set
                     as the maximum number of actions agents can take per step
                     to ensure they all happen 'at the same time' per step.
-            block_length_seconds:
-                int, default 1, How many seconds each block in the Vega chain
-                    is taken to represent.
+            step_length_seconds:
+                Optional[int], default None, How many seconds each step is
+                    taken to represent.
+                    After each round of actions, if time has not advanced at least
+                    this much we will be forwarded to that far in the future
+                    (minus however long the actions did take).
+                    e.g. for a step_length_seconds = 60 if all actions take up 10s
+                    we will forward 50s at the end.
             vega_service:
                 optional, VegaServiceNull, If passed will use this precreated vega
                     service instead of creating one internally.
@@ -249,7 +271,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             n_steps=n_steps,
             random_agent_ordering=random_agent_ordering,
             transactions_per_block=transactions_per_block,
-            block_length_seconds=block_length_seconds,
+            step_length_seconds=step_length_seconds,
             vega_service=vega_service,
             state_extraction_fn=state_extraction_fn,
             state_extraction_freq=state_extraction_freq,

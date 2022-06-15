@@ -183,6 +183,7 @@ def propose_future_market(
         ],
     )
 
+    price_decimals = 5 if market_decimals is None else market_decimals
     market_proposal = vega_protos.governance.NewMarket(
         changes=vega_protos.governance.NewMarketConfiguration(
             instrument=vega_protos.governance.InstrumentConfiguration(
@@ -197,9 +198,10 @@ def propose_future_market(
                         settlement_price_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
                     ),
+                    settlement_price_decimals=price_decimals,
                 ),
             ),
-            decimal_places=5 if market_decimals is None else market_decimals,
+            decimal_places=price_decimals,
             position_decimal_places=0
             if position_decimals is None
             else position_decimals,
@@ -438,13 +440,13 @@ def settle_oracle(
 
     # Use oracle feed to terminate market
     payload = {"trading.terminated": "true"}
-    as_str = json.dumps(payload).encode()
-    payload = base64.b64encode(as_str)
+    payload = json.dumps(payload).encode()
 
     oracle_submission = commands_protos.oracles.OracleDataSubmission(
         payload=payload,
         source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
     )
+
     wallet.submit_transaction(
         transaction=oracle_submission,
         name=wallet_name,
@@ -454,14 +456,14 @@ def settle_oracle(
     logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
     # use oracle to settle market
-    payload = {oracle_name: settlement_price}
-    as_str = json.dumps(payload).encode()
-    payload = base64.b64encode(as_str)
+    payload = {oracle_name: str(settlement_price)}
+    payload = json.dumps(payload).encode()
 
     oracle_submission = commands_protos.oracles.OracleDataSubmission(
         payload=payload,
         source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
     )
+
     wallet.submit_transaction(
         transaction=oracle_submission,
         name=wallet_name,

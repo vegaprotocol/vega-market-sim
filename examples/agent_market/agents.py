@@ -128,9 +128,9 @@ class MarketMaker(StateAgentWithWallet):
             amount=5e5,
         )
 
+        self.vega.forward("1s")
         self.vega.wait_for_datanode_sync()
-        self.vega.forward("30s")
-        self.vega.wait_for_datanode_sync()
+
         liquidity_commitment = gov_protos.NewMarketCommitment(
             commitment_amount="20000000000",
             fee="0.002",
@@ -347,6 +347,17 @@ class MarketOrderTraders(StateAgent):
                 trader.wallet_name,
                 asset=tdai_id,
                 amount=1e5,
+            )
+            self.vega.submit_order(
+                trading_wallet=trader.wallet_name,
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                time_in_force="TIME_IN_FORCE_GTC",
+                side="SIDE_BUY",
+                volume=1,
+                price=1000,
+                wait=False,
+                order_ref="",
             )
         self.vega.forward("1s")
 

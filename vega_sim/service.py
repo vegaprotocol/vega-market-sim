@@ -141,7 +141,7 @@ class VegaService(ABC):
     def wallet(self) -> Wallet:
         pass
 
-    def _default_wait_fn(self) -> None:
+    def wait_fn(self) -> None:
         time.sleep(1)
 
     @property
@@ -273,6 +273,7 @@ class VegaService(ABC):
                 int, The maximum number of tokens which can be fauceted (in asset decimal precision)
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
             wallet_name=wallet_name,
@@ -293,7 +294,7 @@ class VegaService(ABC):
         gov.approve_proposal(
             proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
         )
-        self.forward("365s")
+        self.forward("360s")
 
     def create_simple_market(
         self,
@@ -341,7 +342,6 @@ class VegaService(ABC):
             tau=tau,
             params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.0, sigma=sigma),
         )
-
         proposal_id = gov.propose_future_market(
             market_name=market_name,
             wallet=self.wallet,
@@ -351,9 +351,9 @@ class VegaService(ABC):
             termination_pub_key=self.wallet.public_key(termination_wallet),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + 30,
+            closing_time=blockchain_time_seconds + 300,
             enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 20,
+            validation_time=blockchain_time_seconds + 200,
             risk_model=risk_model,
             liquidity_commitment=liquidity_commitment,
             node_url_for_time_forwarding=self.vega_node_url
@@ -492,6 +492,10 @@ class VegaService(ABC):
             order_ref=order_ref,
         )
 
+    def get_blockchain_time(self) -> int:
+        """Returns blockchain time in seconds since the epoch"""
+        return gov.get_blockchain_time(self.trading_data_client)
+
     def amend_order(
         self,
         trading_wallet: str,
@@ -620,20 +624,18 @@ class VegaService(ABC):
         settlement_price: float,
         market_id: str,
     ):
-        decimals = self.market_price_decimals[market_id]
+        future_inst = data_raw.market_info(
+            market_id, data_client=self.trading_data_client
+        ).tradable_instrument.instrument.future
+        oracle_name = future_inst.oracle_spec_for_settlement_price.filters[0].key.name
 
-        oracle_name = (
-            data_raw.market_info(market_id, data_client=self.trading_data_client)
-            .tradable_instrument.instrument.future.oracle_spec_for_settlement_price.filters[
-                0
-            ]
-            .key.name
-        )
         gov.settle_oracle(
             wallet=self.wallet,
             wallet_name=settlement_wallet,
             oracle_name=oracle_name,
-            settlement_price=num_to_padded_int(settlement_price, decimals=decimals),
+            settlement_price=num_to_padded_int(
+                settlement_price, decimals=future_inst.settlement_price_decimals
+            ),
         )
 
     def party_account(
@@ -764,6 +766,15 @@ class VegaService(ABC):
     ) -> data.OrderBook:
         return data.order_book_by_market(
             market_id=market_id, data_client=self.trading_data_client
+        )
+
+    def market_depth(self, market_id: str, num_levels: int = 5) -> data.MarketDepth:
+        return data.market_depth(
+            market_id=market_id,
+            data_client=self.trading_data_client,
+            max_depth=num_levels,
+            price_decimals=self.market_price_decimals[market_id],
+            position_decimals=self.market_pos_decimals[market_id],
         )
 
     def open_orders_by_market(

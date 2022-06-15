@@ -11,6 +11,10 @@ grpcio-tools = "*"
 pynacl = "*"
 numba = "*"
 inflection = "*"
+scipy = "*"
+pandas = "*"
+torch = "*"
+tqdm = "*"
 
 [dev-packages]
 black = "*"
