@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.linalg import expm
 
+
 def A_S_MMmodel(
     T: float,
     dt: float,
@@ -41,50 +42,51 @@ def A_S_MMmodel(
             float, risk aversion parameter to represnet running penalty coefficient
     """
     # Unify unit to minute in MM Model
-    T *= 60*24*365.25
-    dt *= 60*24*365.25
+    T *= 60 * 24 * 365.25
+    dt *= 60 * 24 * 365.25
 
     # Initialize 2-d arrays to store optimal strategy
-    optimal_depth_bid = np.zeros([length , q_upper-q_lower])
-    optimal_depth_ask = np.zeros([length , q_upper-q_lower])
+    optimal_depth_bid = np.zeros([length, q_upper - q_lower])
+    optimal_depth_ask = np.zeros([length, q_upper - q_lower])
 
     # Let A be a (q_upper-q_lower+1)-square matrix
-    A = np.zeros([q_upper-q_lower+1, q_upper-q_lower+1])
+    A = np.zeros([q_upper - q_lower + 1, q_upper - q_lower + 1])
     # w, time * (q_upper-q_lower+1)-dim matrix, to store the solution of ODE
     #   row corresponds to time_step, column corresponds to inventory q
-    w = np.zeros([length , q_upper-q_lower+1])
-
+    w = np.zeros([length, q_upper - q_lower + 1])
 
     # A is the coefficient matrix of ODE
-    for i in range(q_upper-q_lower+1):
-        for j in range(q_upper-q_lower+1):
+    for i in range(q_upper - q_lower + 1):
+        for j in range(q_upper - q_lower + 1):
             # i denotes row/ j denotes column
             if j == i:
-                A[i,j] = -kappa * phi * (q_upper-i)**2
-            elif j == i+1:
-                A[i,j] = Lambda * np.e**-1
-            elif j == i-1:
-                A[i,j] = Lambda * np.e**-1
+                A[i, j] = -kappa * phi * (q_upper - i) ** 2
+            elif j == i + 1:
+                A[i, j] = Lambda * np.e**-1
+            elif j == i - 1:
+                A[i, j] = Lambda * np.e**-1
 
     # z, (q_upper-q_lower+1)-dim vector, denotes the terminal condition of ODE
-    z = np.array([np.exp(-alpha * kappa * j**2) for j in range(q_upper,q_lower-1,-1)])
+    z = np.array(
+        [np.exp(-alpha * kappa * j**2) for j in range(q_upper, q_lower - 1, -1)]
+    )
 
     for i in range(length):
         # at each time_step
-        w[i,:] = np.dot(expm(A * (T - i*dt)), z)
+        w[i, :] = np.dot(expm(A * (T - i * dt)), z)
 
     # h is the transformation of solution from ODE
     #   also the key term of value function
     h = np.log(w) / kappa
 
     # Calculate optimal strategy
-    for i in range(q_upper-q_lower):
+    for i in range(q_upper - q_lower):
         # column corresponds to Q, Q-1,..., -Q+1
-        optimal_depth_ask[:,i] = 1/kappa + h[:,i] - h[:,i+1]
+        optimal_depth_ask[:, i] = 1 / kappa + h[:, i] - h[:, i + 1]
 
-    for i in range(1,q_upper-q_lower+1):
+    for i in range(1, q_upper - q_lower + 1):
         # column corresponds to Q-1, Q-2,..., -Q
-        optimal_depth_bid[:,i-1] = 1/kappa + h[:,i] - h[:,i-1]
+        optimal_depth_bid[:, i - 1] = 1 / kappa + h[:, i] - h[:, i - 1]
 
     # In A_S model, optimal depth can be negative, however, in Vega,
     #   offset must be positive and notice the market precision
@@ -127,7 +129,13 @@ def GLFT_approx(
     """
 
     # approximation method
-    delta_buy_approx = [1/kappa+(2*i+1)*np.sqrt(phi*np.e/Lambda/kappa)/2 for i in range(q_upper-1,q_lower-1,-1)]
-    delta_sell_approx = [1/kappa-(2*i-1)*np.sqrt(phi*np.e/Lambda/kappa)/2 for i in range(q_upper,q_lower,-1)]
+    delta_buy_approx = [
+        1 / kappa + (2 * i + 1) * np.sqrt(phi * np.e / Lambda / kappa) / 2
+        for i in range(q_upper - 1, q_lower - 1, -1)
+    ]
+    delta_sell_approx = [
+        1 / kappa - (2 * i - 1) * np.sqrt(phi * np.e / Lambda / kappa) / 2
+        for i in range(q_upper, q_lower, -1)
+    ]
 
     return delta_buy_approx, delta_sell_approx
