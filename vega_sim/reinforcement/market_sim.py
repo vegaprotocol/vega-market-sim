@@ -1,17 +1,12 @@
 import argparse
 import logging
-from multiprocessing import Pool
-import datetime
 from typing import List, Optional, Tuple
 import os
 import torch
-import torch.nn as nn
 import time
-import matplotlib.pyplot as plt
-import numpy as np
 
 
-from reinforcement.learning_agent import (
+from vega_sim.reinforcement.learning_agent import (
     Action,
     LearningAgent,
     MarketState,
@@ -19,11 +14,11 @@ from reinforcement.learning_agent import (
 )
 from vega_sim.environment.agent import Agent
 
-from reinforcement.helpers import set_seed
-from reinforcement.full_market_sim.utils.external_assetprice import RW_model
-from reinforcement.full_market_sim.environments import RLMarketEnvironment
+from vega_sim.reinforcement.helpers import set_seed
+from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_model
+from vega_sim.reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
-from reinforcement.full_market_sim.agents import (
+from vega_sim.reinforcement.full_market_sim.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
     TRADER_WALLET,
@@ -35,7 +30,7 @@ from reinforcement.full_market_sim.agents import (
     LimitOrderTrader,
     OpenAuctionPass,
 )
-from reinforcement.plot import plot_simulation
+from .plot import plot_simulation
 
 
 def state_fn(

@@ -1,7 +1,4 @@
 import torch
-import torch.nn as nn
-import numpy as np
-from functools import partial
 
 from torch.distributions.normal import Normal
 
@@ -11,12 +8,13 @@ def lognorm_sample(mu: torch.Tensor, sigma: torch.Tensor):
     sample = torch.exp(z)
     return z, sample
 
+
 def lognorm_logprob(z: torch.Tensor, mu: torch.Tensor, sigma: torch.Tensor):
     """
-    ENtropy of lognormal calculated using samples. 
+    ENtropy of lognormal calculated using samples.
     We change the variable to calculate the expected value of the log-density of the lognormal
     """
-    normal = Normal(loc = mu, scale = sigma)
+    normal = Normal(loc=mu, scale=sigma)
     logprob = normal.log_prob(z) - z
 
     return logprob

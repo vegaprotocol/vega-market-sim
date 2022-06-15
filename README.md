@@ -52,3 +52,10 @@ If you're just using the Service interface (as hopefully is generally sufficient
 warn log every time a method which returns something which could/does contain these integers is called. It's then up to the external code to handle this information (or ignore it if you know you are safe). 
 
 Once code has been written, this flag can be turned off for production runs so as not to flag erroneously.
+
+
+### Reinforcement Learning
+
+The nascent framework for reinforcement learning applications of the Vega Market Sim can be found within `vega_sim.reinforcement`, this includes the beginnings of a 'background market' within the folder `vega_sim.reinforcement.full_market_sim`
+alongside an agent in `vega_sim.reinforcement.learning_agent` which learns from a currently very simple set of inputs (alongside an input of a future price, to make learning on a random walk possible at all!) Usage is new, and the code strucure
+and functionality is liable to change *significantly* in the future, however input is welcomed.

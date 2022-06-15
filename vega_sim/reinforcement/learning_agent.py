@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 import numpy as np
-from collections import namedtuple, defaultdict, deque
+from collections import namedtuple, defaultdict
 from typing import List, Tuple
 import os
-import math
 from functools import partial
 from tqdm import tqdm
 
@@ -11,9 +10,18 @@ import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
 
-from reinforcement.networks import Softmax, FFN, Softmax, FFN_Params_Normal, FFN_Q
-from reinforcement.helpers import apply_funcs, to_torch, toggle
-from reinforcement.distributions import lognorm_sample, lognorm_logprob, reg_policy
+from vega_sim.reinforcement.networks import (
+    Softmax,
+    FFN,
+    FFN_Params_Normal,
+    FFN_Q,
+)
+from vega_sim.reinforcement.helpers import apply_funcs, to_torch, toggle
+from vega_sim.reinforcement.distributions import (
+    lognorm_sample,
+    lognorm_logprob,
+    reg_policy,
+)
 
 from vega_sim.api.helpers import num_from_padded_int
 

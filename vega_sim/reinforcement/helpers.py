@@ -1,11 +1,10 @@
-from typing import List, Tuple, Callable, Any
-from functools import partial
+from typing import List, Callable, Any
 import torch
 import torch.nn as nn
 import numpy as np
 
 
-def apply_funcs(value, funcs: List[Callable[...,Any]]):
+def apply_funcs(value, funcs: List[Callable[..., Any]]):
     """
     composition of functions applied to value
     """
@@ -14,9 +13,10 @@ def apply_funcs(value, funcs: List[Callable[...,Any]]):
         res = f(res)
     return res
 
-def to_torch(arr: np.array, dtype: torch.dtype = torch.float, device: str = 'cpu'):
+
+def to_torch(arr: np.array, dtype: torch.dtype = torch.float, device: str = "cpu"):
     return torch.tensor(arr, dtype=dtype, device=device)
-    
+
 
 def toggle(m: nn.Module, to: bool):
     """
