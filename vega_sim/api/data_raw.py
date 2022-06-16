@@ -179,3 +179,28 @@ def market_depth(
             market_id=market_id, max_depth=max_depth
         )
     )
+
+
+def liquidity_provisions(
+    data_client: vac.VegaTradingDataClient,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> Optional[List[vega_protos.vega.LiquidityProvision]]:
+    """Loads the current liquidity provision(s) for a given market and/or party.
+
+    Args:
+        data_client:
+            VegaTradingDataClient, an instantiated gRPC trading data client
+        market_id:
+            Optional[str], the ID of the market from which to pull liquidity provisions
+        party_id:
+            Optional[str], the ID of the party from which to pull liquidity provisions
+
+    Returns:
+        List[LiquidityProvision], list of liquidity provisions (if any exist)
+    """
+    return data_client.LiquidityProvisions(
+        data_node_protos.trading_data.LiquidityProvisionsRequest(
+            market=market_id, party=party_id
+        )
+    ).liquidity_provisions

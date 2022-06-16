@@ -876,8 +876,8 @@ class VegaService(ABC):
         market_id: str,
         commitment_amount: float,
         fee: float,
-        buy_specs: List[Tuple[str, int, int]],
-        sell_specs: List[Tuple[str, int, int]],
+        buy_specs: List[Tuple[str, float, int]],
+        sell_specs: List[Tuple[str, float, int]],
         is_amendment: bool = False,
     ):
         """Submit/Amend a custom liquidity profile.
@@ -994,4 +994,49 @@ class VegaService(ABC):
             data_client=self.trading_data_client,
             price_decimals=self.market_price_decimals[market_id],
             position_decimals=self.market_pos_decimals[market_id],
+        )
+
+    @raw_data
+    def liquidity_provisions(
+        self,
+        market_id: Optional[str] = None,
+        party_id: Optional[str] = None,
+    ) -> Optional[List[vega_protos.vega.LiquidityProvision]]:
+        """Loads the current liquidity provision(s) for a given market and/or party.
+
+        Args:
+            market_id:
+                Optional[str], the ID of the market from which to
+                    pull liquidity provisions
+            party_id:
+                Optional[str], the ID of the party from which to
+                    pull liquidity provisions
+
+        Returns:
+            List[LiquidityProvision], list of liquidity provisions (if any exist)
+        """
+        return data_raw.liquidity_provisions(
+            self.trading_data_client, market_id=market_id, party_id=party_id
+        )
+
+    def party_liquidity_provisions(
+        self,
+        wallet_name: str,
+        market_id: Optional[str] = None,
+    ) -> Optional[List[vega_protos.vega.LiquidityProvision]]:
+        """Loads the current liquidity provision(s) for a given market and/or party.
+
+        Args:
+            market_id:
+                Optional[str], the ID of the market from which to
+                    pull liquidity provisions
+            party_id:
+                Optional[str], the ID of the party from which to
+                    pull liquidity provisions
+
+        Returns:
+            List[LiquidityProvision], list of liquidity provisions (if any exist)
+        """
+        return self.liquidity_provisions(
+            market_id=market_id, party_id=self.wallet.public_key(wallet_name)
         )
