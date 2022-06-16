@@ -5,7 +5,7 @@ name: Python
 "on":
   pull_request:
     branches:
-      - main
+      - develop
 
 jobs:
 
