@@ -14,6 +14,7 @@ from vega_sim.api.data_raw import (
     all_markets,
     asset_info,
     infrastructure_fee_accounts,
+    liquidity_provisions,
     market_accounts,
     market_data,
     market_info,
@@ -348,3 +349,26 @@ def test_order_status_by_reference(trading_data_servicer_and_port):
     res = order_status_by_reference(reference="foo", data_client=data_client)
 
     assert res == expected
+
+
+def test_liquidity_provisions(trading_data_servicer_and_port):
+    def LiquidityProvisions(self, request, context):
+        return data_node_protos.trading_data.LiquidityProvisionsResponse(
+            liquidity_provisions=[
+                vega_protos.vega.LiquidityProvision(
+                    market_id=request.market, party_id=request.party
+                )
+            ]
+        )
+
+    server, port, mock_servicer = trading_data_servicer_and_port
+    mock_servicer.LiquidityProvisions = LiquidityProvisions
+
+    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClient(f"localhost:{port}")
+    res = liquidity_provisions(
+        market_id="MARKET", party_id="PARTY", data_client=data_client
+    )
+
+    assert res[0].market_id == "MARKET"
