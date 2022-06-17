@@ -28,6 +28,7 @@ def create_and_faucet_wallet(
 
 
 def build_basic_market(vega: VegaServiceNull):
+    vega.wait_for_datanode_sync()
     for wallet in WALLETS:
         vega.create_wallet(wallet.name, wallet.passphrase)
 
