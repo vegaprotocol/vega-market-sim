@@ -1,0 +1,7 @@
+.ipynb_checkpoints
+.pytest_cache
+.vscode
+examples
+numerical_results
+rl_logs
+vega_market_sim.egg-info
