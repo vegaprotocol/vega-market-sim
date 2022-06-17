@@ -23,6 +23,7 @@ pipeline {
         string(name: 'VEGA_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega repository')
         string(name: 'VEGA_WALLET_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vegawallet repository')
         string(name: 'DATA_NODE_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/data-node repository')
+        string(name: 'VEGA_SIM_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega-market-sim repository')
     }
     environment {
         CGO_ENABLED = 0
@@ -56,34 +57,93 @@ pipeline {
                         }
                     }
                 }
+                stage('vega-market-sim') {
+                    options { retry(3) }
+                    steps {
+                        dir('vega-market-sim') {
+                            git branch: "${params.VEGA_SIM_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega-market-sim.git'
+                        }
+                    }
+                }
             }
         }
         stage('Dependencies') {
             options { retry(3) }
-            steps {
-                dir('vega') {
-                    sh 'go mod download -x'
+            parallel {
+                stage('vega') {
+                    steps {
+                        dir('vega') {
+                            sh 'go mod download -x'
+                        }
+                    }
+                }
+                stage('vegawallet') {
+                    steps {
+                        dir('vegawallet') {
+                            sh 'go mod download -x'
+                        }
+                    }
+                }
+                stage('data-node') {
+                    steps {
+                        dir('data-node') {
+                            sh 'go mod download -x'
+                        }
+                    }
                 }
             }
         }
 
         stage('Compile') {
-        }
-
-        stage('Linters') {
-        }
-
-        stage('Tests') {
-        }
-    }
-    post {
-        success {
-        }
-        unsuccessful {
-        }
-        cleanup {
-            retry(3) {
+            options { retry(3) }
+            parallel {
+                stage('vega') {
+                    steps {
+                        dir('vega') {
+                            sh 'mkdir -p ../vega-market-sim/vega_sim/bin'
+                            sh label: 'Compile', script: '''
+                                go build -o ../vega-market-sim/vega_sim/bin/ ./...
+                            '''
+                        }
+                    }
+                }
+                stage('vegawallet') {
+                    steps {
+                        dir('vegawallet') {
+                            sh 'mkdir -p ../vega-market-sim/vega_sim/bin'
+                            sh label: 'Compile', script: '''
+                                go build -o ../vega-market-sim/vega_sim/bin/ ./...
+                            '''
+                        }
+                    }
+                }
+                stage('data-node') {
+                    steps {
+                        dir('data-node') {
+                            sh 'mkdir -p ../vega-market-sim/vega_sim/bin'
+                            sh label: 'Compile', script: '''
+                                go build -o ../vega-market-sim/vega_sim/bin/ ./...
+                            '''
+                        }
+                    }
+                }
             }
         }
+
+        // stage('Linters') {
+        // }
+
+        // stage('Tests') {
+        // }
     }
+    // post {
+    //     // success {
+    //     // }
+    //     // unsuccessful {
+    //     // }
+    //     // cleanup {
+    //     //     retry(3) {
+    //     //     }
+    //     // }
+    // }
 }
