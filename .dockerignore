@@ -5,3 +5,4 @@ examples
 numerical_results
 rl_logs
 vega_market_sim.egg-info
+vega_sim/bin

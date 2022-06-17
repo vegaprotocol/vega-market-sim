@@ -130,11 +130,24 @@ pipeline {
             }
         }
 
-        // stage('Linters') {
-        // }
+        stage('Build Docker Image') {
+            options { retry(3) }
+            steps {
+                dir('vega-market-sim') {
+                    sh label: 'Build docker image', script: '''
+                        docker build --build-arg vega_path=../vega/vega --build-arg wallet_path=../vegawallet/vegawallet --build-arg data_node_path=../data-node/data-node --tag=sim:latest .
+                    '''
+                }
+            }
+        }
 
-        // stage('Tests') {
-        // }
+        stage('Tests') {
+            steps {
+                sh label: 'Run full tests', script: '''
+                docker run --rm sim:latest
+                '''
+            }
+        }
     }
     // post {
     //     // success {
