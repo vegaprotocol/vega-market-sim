@@ -15,9 +15,6 @@ LIQ = WalletConfig("liq", "liq")
 
 @pytest.mark.integration
 def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
-    import time
-
-    time.sleep(5)
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 

@@ -405,10 +405,7 @@ class VegaService(ABC):
             time_in_force="TIME_IN_FORCE_FOK" if fill_or_kill else "TIME_IN_FORCE_IOC",
             order_type="TYPE_MARKET",
             side=side,
-            volume=num_to_padded_int(
-                volume,
-                self.market_pos_decimals[market_id],
-            ),
+            volume=volume,
             wait=wait,
             order_ref=order_ref,
         )
