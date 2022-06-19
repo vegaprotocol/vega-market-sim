@@ -79,7 +79,7 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         is_amendment=True,
     )
 
-    vega.forward("1s")
+    vega.forward("10s")
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
 
     assert len(liq_provis) == 1
@@ -93,3 +93,37 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         assert provis.liquidity_order.reference == exp_provis.reference
         assert provis.liquidity_order.offset == exp_provis.offset
         assert provis.liquidity_order.proportion == exp_provis.proportion
+
+    vega.forward('10s')
+    vega.wait_for_datanode_sync()
+    
+    num_levels = 11
+    expected_bid_prices = [0.29998, 0.2995, 0.23194, 0, 0, 0, 0, 0, 0, 0, 0]
+    expected_bid_volumes = [1.0, 669.0, 1851.0, 0, 0, 0, 0, 0, 0, 0, 0] 
+    expected_ask_prices = [0.3, 0.30002, 0.3005, 0.38697, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_volumes = [1.0, 1.0, 666.0, 1133.0, 0, 0, 0, 0, 0, 0, 0] 
+    
+    book_state = vega.market_depth(
+                market_id, num_levels=num_levels
+            )
+    bid_prices=[level.price for level in book_state.buys] + [0] * max(0, num_levels - len(book_state.buys))
+    for price, exp_price in zip(bid_prices, expected_bid_prices):
+        assert price == exp_price 
+
+    bid_volumes=[level.volume for level in book_state.buys] + [0] * max(0, num_levels - len(book_state.buys))
+    for vol, exp_vol in zip(bid_volumes, expected_bid_volumes):
+        assert vol == exp_vol
+
+    ask_prices=[level.price for level in book_state.sells] + [0] * max(0, num_levels - len(book_state.sells))
+    print(ask_prices)
+    print(expected_ask_prices)
+    # for price, exp_price in zip(ask_prices, expected_ask_prices):
+    #     assert price == exp_price
+
+    ask_volumes=[level.volume for level in book_state.sells] + [0] * max(0, num_levels - len(book_state.sells))
+    # print(ask_volumes)
+    # print(expected_ask_volumes)
+    # # for vol, exp_vol in zip(ask_volumes, expected_ask_volumes):
+    #     assert vol == exp_vol
+
+    
