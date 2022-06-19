@@ -218,9 +218,12 @@ def propose_future_market(
             price_monitoring_parameters=vega_protos.markets.PriceMonitoringParameters(
                 triggers=[
                     vega_protos.markets.PriceMonitoringTrigger(
-                        horizon=24*3600, # in seconds, so 24h, the longer the wider bounds
-                        probability="0.999999",  # number close to but below 1 leads to wide bounds 
-                        auction_extension=5, # in seconds
+                        # in seconds, so 24h, the longer the wider bounds
+                        horizon=24 * 3600,
+                        # number close to but below 1 leads to wide bounds
+                        probability="0.999999",
+                        # in seconds
+                        auction_extension=5,
                     )
                 ]
             ),
