@@ -22,6 +22,18 @@ For the most part the package is fairly self-contained Python, however there are
     -  `pipenv install /path/from/pipenv/to/vega-market-sim`
  -  Then run your environment
 
+### Setup if you're using `conda` as your python package manager
+
+1. Create a new conda environment, perhaps call it `sim` as in `conda create -n sim python=3.10`. 
+2. Activate the new environment `conda activate sim` 
+3. Clone the repo into `mypath/vega-market-sim` and run `make` there. 
+4. Use `conda install *` to install `pytest, numpy, requests, toml, grpcio, googleapis-common-protos, pynacl, inflection, conda-build, jupyter` with `*` being a substitute for any of the names. 
+5. Run `pytest -s tests/integration/test_trading.py` from `mypath/vega-market-sim`. This should pass; if not one of the steps above didn't work.
+6. You now want to be able to use the `vega-market-sim` even from other directories, to that end run `conda develop mypath/vega-market-sim`. 
+7. Optional: to have UI, run `make ui`. 
+
+
+
 ### UI
 
 Building the console UI is not a necessary component, but can be useful for visualising the state of the Vega service. In order to do this:
