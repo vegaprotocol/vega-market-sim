@@ -125,7 +125,7 @@ def build_basic_market(
 
 @pytest.fixture
 def vega_service():
-    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=True) as vega:
+    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
         yield vega
 
 
