@@ -2,41 +2,33 @@ import pytest
 
 from tests.integration.utils.fixtures import (
     vega_service,
-    create_and_faucet_wallet,
-    WalletConfig,
+    MM_WALLET,
+    AUCTION1 as TRADER_1_WALLET,
+    AUCTION2 as TRADER_2_WALLET,
 )
 from vega_sim.null_service import VegaServiceNull
-import vega_sim.proto.vega as vega_protos
-from collections import namedtuple
 import random
 
-WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
-
-MM_WALLET = WalletConfig("mm", "pin")
-TRADER_1_WALLET = WalletConfig("T1", "pin")
-TRADER_2_WALLET = WalletConfig("T2", "pin")
-
 wallets = [MM_WALLET, TRADER_1_WALLET, TRADER_2_WALLET]
-
-participants_initial_deposit = 10e5
-
-trade_price = random.randint(80, 120)
-bid_ask_offest = random.randint(1, 11)
-
-settlement_price = random.randint(80, 120)
-trade_size = random.randint(1, 10)
-
-
-pnl_long = trade_size * (settlement_price - trade_price)
 
 
 @pytest.mark.integration
 def test_settlement(vega_service: VegaServiceNull):
     vega = vega_service
 
+    participants_initial_deposit = 10e5
+
+    trade_price = random.randint(80, 120)
+    bid_ask_offest = random.randint(1, 11)
+
+    settlement_price = random.randint(80, 120)
+    trade_size = random.randint(1, 10)
+
+    pnl_long = trade_size * (settlement_price - trade_price)
+
     for wallet in wallets:
         vega.create_wallet(wallet.name, passphrase=wallet.passphrase)
-    vega.forward("10s")
+    vega.forward("1s")
 
     vega.mint(
         MM_WALLET.name,
@@ -44,7 +36,7 @@ def test_settlement(vega_service: VegaServiceNull):
         amount=10000,
     )
 
-    vega.forward("20s")
+    vega.forward("1s")
     vega.create_asset(
         MM_WALLET.name,
         name="tDAI",
@@ -52,7 +44,6 @@ def test_settlement(vega_service: VegaServiceNull):
         decimals=5,
         max_faucet_amount=10e10,
     )
-
     tdai_id = vega.find_asset_id(symbol="tDAI")
 
     for wallet in wallets:
@@ -106,13 +97,6 @@ def test_settlement(vega_service: VegaServiceNull):
         wait=False,
     )
 
-    # for i in range(0,len(wallets)):
-    #     wallet = wallets[i]
-    #     general, margin, bond = vega.party_account(wallet_name=wallet.name, asset_id=tdai_id, market_id=market_id)
-    #     print(wallet.name + " General = "+str(general))
-    #     print(wallet.name + " Margin  = "+str(margin))
-    #     print(wallet.name + " Bond    = "+str(bond))
-
     # Do a trade which will cross
     vega.submit_order(
         trading_wallet=TRADER_1_WALLET.name,
@@ -135,37 +119,19 @@ def test_settlement(vega_service: VegaServiceNull):
         price=trade_price,
         wait=False,
     )
-    vega.forward("10s")
-
-    for wallet in wallets:
-        general, margin, bond = vega.party_account(
-            wallet_name=wallet.name, asset_id=tdai_id, market_id=market_id
-        )
-        print(wallet.name + " General = " + str(general))
-        print(wallet.name + " Margin  = " + str(margin))
-        print(wallet.name + " Bond    = " + str(bond))
-        positions = vega.positions_by_market(
-            wallet_name=wallet.name, market_id=market_id
-        )
-        print(positions)
-
-    vega.forward("10s")
+    vega.forward("1s")
     vega.settle_market(
         settlement_wallet=MM_WALLET.name,
         settlement_price=settlement_price,
         market_id=market_id,
     )
-    vega.forward("10s")
+    vega.forward("1s")
 
     # check bond and magin for all
     for wallet in wallets:
         general, margin, bond = vega.party_account(
             wallet_name=wallet.name, asset_id=tdai_id, market_id=market_id
         )
-        print(wallet.name + " General = " + str(general))
-        print(wallet.name + " Margin  = " + str(margin))
-        print(wallet.name + " Bond    = " + str(bond))
-
         assert margin == 0
         assert bond == 0
 
@@ -179,7 +145,6 @@ def test_settlement(vega_service: VegaServiceNull):
     general, margin, bond = vega.party_account(
         wallet_name=TRADER_1_WALLET.name, asset_id=tdai_id, market_id=market_id
     )
-    print("expected long side pnl = " + str(pnl_long))
     assert general == (participants_initial_deposit + pnl_long)
 
     # Trader 2 who went short
@@ -187,5 +152,3 @@ def test_settlement(vega_service: VegaServiceNull):
         wallet_name=TRADER_2_WALLET.name, asset_id=tdai_id, market_id=market_id
     )
     assert general == (participants_initial_deposit - pnl_long)
-
-    vega.stop()
