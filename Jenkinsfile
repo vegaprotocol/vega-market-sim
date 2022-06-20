@@ -61,9 +61,11 @@ pipeline {
                     options { retry(3) }
                     steps {
                         dir('vega-market-sim') {
-                            scmVars = checkout(scm)
-                            versionHash = sh (returnStdout: true, script: "echo \"${scmVars.GIT_COMMIT}\"|cut -b1-8").trim()
-                            version = sh (returnStdout: true, script: "git describe --tags 2>/dev/null || echo ${versionHash}").trim()
+                            script {
+                                scmVars = checkout(scm)
+                                versionHash = sh (returnStdout: true, script: "echo \"${scmVars.GIT_COMMIT}\"|cut -b1-8").trim()
+                                version = sh (returnStdout: true, script: "git describe --tags 2>/dev/null || echo ${versionHash}").trim()
+                            }
                         }
                     }
                 }
