@@ -4,7 +4,7 @@
     - GIT_COMMIT:05a1c6fbe7d1ff87cfc40a011a63db574edad7e6
     - GIT_PREVIOUS_COMMIT:5d02b46fdb653f789e799ff6ad304baccc32cbf9
     - GIT_PREVIOUS_SUCCESSFUL_COMMIT:5d02b46fdb653f789e799ff6ad304baccc32cbf9
-    - GIT_URL:https://github.com/vegaprotocol/vega.git
+    - GIT_URL:https://github.com/vegaprotocol/vega-market-sim.git
 */
 def scmVars = null
 def version = 'UNKNOWN'
@@ -23,7 +23,6 @@ pipeline {
         string(name: 'VEGA_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega repository')
         string(name: 'VEGA_WALLET_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vegawallet repository')
         string(name: 'DATA_NODE_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/data-node repository')
-        string(name: 'VEGA_SIM_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega-market-sim repository')
     }
     environment {
         CGO_ENABLED = 0
