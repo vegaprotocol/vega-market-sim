@@ -61,7 +61,9 @@ pipeline {
                     options { retry(3) }
                     steps {
                         dir('vega-market-sim') {
-                            git branch: "${params.VEGA_SIM_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega-market-sim.git'
+                            scmVars = checkout(scm)
+                            versionHash = sh (returnStdout: true, script: "echo \"${scmVars.GIT_COMMIT}\"|cut -b1-8").trim()
+                            version = sh (returnStdout: true, script: "git describe --tags 2>/dev/null || echo ${versionHash}").trim()
                         }
                     }
                 }
