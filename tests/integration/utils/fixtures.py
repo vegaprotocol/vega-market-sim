@@ -1,6 +1,6 @@
-import pytest
 from collections import namedtuple
 
+import pytest
 from vega_sim.null_service import VegaServiceNull
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -27,7 +27,14 @@ def create_and_faucet_wallet(
     vega.mint(wallet.name, asset_id, amount)
 
 
-def build_basic_market(vega: VegaServiceNull):
+def build_basic_market(
+    vega: VegaServiceNull,
+    mint_amount: float = 10000,
+    initial_price: float = 1,
+    initial_volume: float = 1,
+    initial_spread: float = 0.1,
+    initial_commitment: float = 100,
+):
     vega.wait_for_datanode_sync()
     for wallet in WALLETS:
         vega.create_wallet(wallet.name, wallet.passphrase)
@@ -45,7 +52,7 @@ def build_basic_market(vega: VegaServiceNull):
         name=ASSET_NAME,
         symbol=ASSET_NAME,
         decimals=5,
-        max_faucet_amount=1e10,
+        max_faucet_amount=10 * mint_amount * 1e5,
     )
     vega.forward("10s")
     vega.wait_for_datanode_sync()
@@ -56,7 +63,7 @@ def build_basic_market(vega: VegaServiceNull):
         vega.mint(
             wallet.name,
             asset=asset_id,
-            amount=10000,
+            amount=mint_amount,
         )
     vega.forward("10s")
     vega.create_simple_market(
@@ -67,7 +74,7 @@ def build_basic_market(vega: VegaServiceNull):
         market_decimals=5,
         liquidity_commitment=vega.build_new_market_liquidity_commitment(
             asset_id=asset_id,
-            commitment_amount=100,
+            commitment_amount=initial_commitment,
             fee=0.002,
             buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
             sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
@@ -83,8 +90,8 @@ def build_basic_market(vega: VegaServiceNull):
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        volume=1,
-        price=0.3,
+        volume=initial_volume,
+        price=initial_price,
     )
 
     vega.submit_order(
@@ -93,8 +100,8 @@ def build_basic_market(vega: VegaServiceNull):
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        volume=1,
-        price=0.3,
+        volume=initial_volume,
+        price=initial_price,
     )
 
     vega.submit_order(
@@ -103,8 +110,8 @@ def build_basic_market(vega: VegaServiceNull):
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        volume=1,
-        price=0.29998,
+        volume=initial_volume,
+        price=initial_price - initial_spread / 2,
     )
     vega.submit_order(
         trading_wallet=TRADER_WALLET.name,
@@ -112,8 +119,8 @@ def build_basic_market(vega: VegaServiceNull):
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        volume=1,
-        price=0.30002,
+        volume=initial_volume,
+        price=initial_price + initial_spread / 2,
     )
 
 
