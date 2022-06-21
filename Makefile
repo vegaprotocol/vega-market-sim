@@ -96,3 +96,6 @@ test:
 .PHONY: test_integration
 test_integration:
 	@env PYTHONPATH=. pytest -m integration tests/
+
+export_reqs:
+	@poetry export -f requirements.txt -o requirements.txt
