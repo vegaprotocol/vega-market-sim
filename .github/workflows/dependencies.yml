@@ -27,7 +27,8 @@ jobs:
         run: poetry export -f requirements.txt --output requirements.txt
 
       - name: Commit and add changes
-        run: git commit -m "fix: Updating requirements.txt from Poetry"
+        run: |
+          git commit -m "fix: Updating requirements.txt from Poetry"
 
       - name: Fetch from develop
         run: git fetch origin develop
