@@ -1,6 +1,6 @@
 ---
 
-name: PythonDependencies
+name: Dependencies
 
 "on":
   pull_request:
