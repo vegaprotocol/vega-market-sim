@@ -1,5 +1,5 @@
 certifi==2022.6.15; python_version >= "3.7" and python_version < "4" \
-    --hash=sha256:fe86415d55e84719d75f8b69414f6438ac3547d2078ab91b67e779ef69378412 \
+    --hash=sha256:fe86415d55e84719d75f8b69414f6438wc3547d2078ab91b67e779ef69378412 \
     --hash=sha256:84c85a9078b11105f04f3036a9482ae10e4621616db313fe045dd24743a0820d
 cffi==1.15.0; python_version >= "3.6" \
     --hash=sha256:c2502a1a03b6312837279c8c1bd3ebedf6c12c4228ddbad40912d671ccc8a962 \
