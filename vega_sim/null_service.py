@@ -369,6 +369,9 @@ def manage_vega_processes(
                     "REACT_APP_VEGA_URL": (
                         f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}"
                     ),
+                    "REACT_APP_VEGA_WALLET_URL": (
+                        f"http://localhost:{port_config[Ports.WALLET]}/api/v1"
+                    ),
                     "PORT": f"{port_config[Ports.CONSOLE]}",
                     "NODE_ENV": "development",
                 }
