@@ -1,6 +1,6 @@
-import pytest
 from collections import namedtuple
 
+import pytest
 from vega_sim.null_service import VegaServiceNull
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])

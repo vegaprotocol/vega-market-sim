@@ -91,12 +91,8 @@ flake8:
 
 .PHONY: test
 test:
-	@pipenv --bare install --dev # 1>/dev/null 2>&1
-	@pipenv run pip install -e .
-	@env PYTHONPATH=. pipenv run pytest -m "not integration" tests/
+	@env PYTHONPATH=. pytest -m "not integration" tests/
 
 .PHONY: test_integration
 test_integration:
-	@pipenv --bare install --dev # 1>/dev/null 2>&1
-	@pipenv run pip install -e .
-	@env PYTHONPATH=. pipenv run pytest -m integration tests/
+	@env PYTHONPATH=. pytest -m integration tests/
