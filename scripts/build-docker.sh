@@ -1,0 +1,1 @@
+docker build --tag=vega_sim_py:latest -t vegasim .
