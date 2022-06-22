@@ -29,11 +29,11 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         is_amendment=False,
     )
     vega.forward("1s")
+    vega.wait_for_datanode_sync()
 
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
 
     assert len(liq_provis) == 1
-
     for provis in [
         liq_provis[0].sells[0].liquidity_order,
         liq_provis[0].buys[0].liquidity_order,
@@ -80,6 +80,7 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
     )
 
     vega.forward("1s")
+    vega.wait_for_datanode_sync()
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
 
     assert len(liq_provis) == 1

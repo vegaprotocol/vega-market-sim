@@ -35,6 +35,7 @@ def build_basic_market(
     initial_spread: float = 0.1,
     initial_commitment: float = 100,
 ):
+    vega.wait_for_datanode_sync()
     for wallet in WALLETS:
         vega.create_wallet(wallet.name, wallet.passphrase)
 

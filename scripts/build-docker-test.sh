@@ -1,0 +1,1 @@
+docker build --tag=vega_sim_test:latest -t vegasim_test .

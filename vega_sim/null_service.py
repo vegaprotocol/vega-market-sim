@@ -412,6 +412,7 @@ class VegaServiceNull(VegaService):
         Ports.FAUCET: "faucet_port",
         Ports.VEGA_NODE: "vega_node_port",
         Ports.CORE_GRPC: "vega_node_grpc_port",
+        Ports.CORE_REST: "vega_node_rest_port",
         Ports.CONSOLE: "console_port",
     }
 
@@ -489,6 +490,7 @@ class VegaServiceNull(VegaService):
         self.faucet_port = 0
         self.vega_node_port = 0
         self.vega_node_grpc_port = 0
+        self.vega_node_rest_port = 0
         self.console_port = 0
         for port_opt in self.PORT_TO_FIELD_MAP.values():
             curr_ports = set(
@@ -509,6 +511,7 @@ class VegaServiceNull(VegaService):
             Ports.FAUCET: self.faucet_port,
             Ports.VEGA_NODE: self.vega_node_port,
             Ports.CORE_GRPC: self.vega_node_grpc_port,
+            Ports.CORE_REST: self.vega_node_rest_port,
             Ports.CONSOLE: self.console_port,
         }
 
@@ -535,6 +538,9 @@ class VegaServiceNull(VegaService):
                 try:
                     requests.get(
                         f"http://localhost:{self.data_node_rest_port}/assets"
+                    ).raise_for_status()
+                    requests.get(
+                        f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
                     return
                 except (
