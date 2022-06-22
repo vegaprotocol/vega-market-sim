@@ -11,6 +11,9 @@ The market simulator aims to:
    - This allows multiple Vega market simulators to run alongside each other on the same box without interfering with one another.
 
 
+Market Simulator is still under active development and so may change notably over time.
+
+
 ## Setup
 
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
