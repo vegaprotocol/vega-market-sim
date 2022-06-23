@@ -24,7 +24,7 @@ endif
 ifneq (${DATA_NODE_TAG},develop)
 	@git -C ${EXTERN_DIR}/data-node pull; git -C ${EXTERN_DIR}/data-node checkout ${DATA_NODE_TAG}
 else
-	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
+	@git -C ${EXTERN_DIR}/data-node checkout develop; git -C ${EXTERN_DIR}/data-node pull
 endif
 	@echo "Downloading Vegawallet"
 	@if [ ! -d ./extern/vegawallet ]; then mkdir ./extern/vegawallet; git clone https://github.com/vegaprotocol/vegawallet ${EXTERN_DIR}/vegawallet; fi
