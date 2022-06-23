@@ -81,6 +81,7 @@ def build_basic_market(
             market_decimals=5,
         ),
     )
+
     market_id = vega.all_markets()[0].id
 
     # Add transactions in the proposed market to pass opening auction at price 0.3
@@ -113,6 +114,7 @@ def build_basic_market(
         volume=initial_volume,
         price=initial_price - initial_spread / 2,
     )
+
     vega.submit_order(
         trading_wallet=TRADER_WALLET.name,
         market_id=market_id,
@@ -132,5 +134,5 @@ def vega_service():
 
 @pytest.fixture
 def vega_service_with_market(vega_service):
-    build_basic_market(vega_service)
+    build_basic_market(vega_service, initial_price=0.3)
     return vega_service

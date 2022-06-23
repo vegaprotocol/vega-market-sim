@@ -94,3 +94,38 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         assert provis.liquidity_order.reference == exp_provis.reference
         assert provis.liquidity_order.offset == exp_provis.offset
         assert provis.liquidity_order.proportion == exp_provis.proportion
+
+    vega.forward("10s")
+    vega.wait_for_datanode_sync()
+
+    num_levels = 11
+    expected_bid_prices = [0.2995, 0.25, 0.23194, 0, 0, 0, 0, 0, 0, 0, 0]
+    expected_bid_volumes = [668.0, 1.0, 1757.0, 0, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_prices = [0.3005, 0.35, 0.38697, 0, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_volumes = [666.0, 1.0, 1075.0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    book_state = vega.market_depth(market_id, num_levels=num_levels)
+    bid_prices = [level.price for level in book_state.buys] + [0] * max(
+        0, num_levels - len(book_state.buys)
+    )
+    bid_volumes = [level.volume for level in book_state.buys] + [0] * max(
+        0, num_levels - len(book_state.buys)
+    )
+    ask_prices = [level.price for level in book_state.sells] + [0] * max(
+        0, num_levels - len(book_state.sells)
+    )
+    ask_volumes = [level.volume for level in book_state.sells] + [0] * max(
+        0, num_levels - len(book_state.sells)
+    )
+
+    for price, exp_price in zip(bid_prices, expected_bid_prices):
+        assert price == exp_price
+
+    for vol, exp_vol in zip(bid_volumes, expected_bid_volumes):
+        assert vol == exp_vol
+
+    for price, exp_price in zip(ask_prices, expected_ask_prices):
+        assert price == exp_price
+
+    for vol, exp_vol in zip(ask_volumes, expected_ask_volumes):
+        assert vol == exp_vol

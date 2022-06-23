@@ -11,25 +11,28 @@ The market simulator aims to:
    - This allows multiple Vega market simulators to run alongside each other on the same box without interfering with one another.
 
 
+Market Simulator is still under active development and so may change notably over time.
+
+
 ## Setup
 
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
   - Clone the repository to your local drive
+  - Install the latest version of [Golang](https://go.dev)
   - Run `make` to automatically pull install dependencies
     - If you have your own instances of the various service to run from elsewhere, you can skip this step
   - Install the package into your local environment. 
-    - The process for this will vary depending upon your package manager of choice, but to use pipenv as an example one would run
-    -  `pipenv install /path/from/pipenv/to/vega-market-sim`
- -  Then run your environment
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests.
+ -  Then run your environment.
 
 ### Setup if you're using `conda` as your python package manager
 
 1. Create a new conda environment, perhaps call it `sim` as in `conda create -n sim python=3.10`. 
 2. Activate the new environment `conda activate sim` 
 3. Clone the repo into `mypath/vega-market-sim` and run `make` there. 
-4. Use `conda install *` to install `pytest, numpy, requests, toml, grpcio, googleapis-common-protos, pynacl, inflection, conda-build, jupyter` with `*` being a substitute for any of the names. 
+4. Use `conda install --file requirements.txt`.
 5. Run `pytest -s tests/integration/test_trading.py` from `mypath/vega-market-sim`. This should pass; if not one of the steps above didn't work.
-6. You now want to be able to use the `vega-market-sim` even from other directories, to that end run `conda develop mypath/vega-market-sim`. 
+6. If you now want to be able to use the `vega-market-sim` even from other directories, run `conda develop mypath/vega-market-sim`. 
 7. Optional: to have UI, run `make ui`. 
 
 

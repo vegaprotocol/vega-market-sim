@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Commitsar conventional commits check
+      - name: Conventional commits check
         uses: aevea/commitsar@v0.18.0
 
   build:
