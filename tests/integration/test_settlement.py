@@ -47,7 +47,8 @@ def test_settlement(vega_service: VegaServiceNull):
         settlement_price=settlement_price,
         market_id=market_id,
     )
-    vega.forward("1s")
+    vega.forward("10s")
+    vega.wait_for_datanode_sync()
 
     # check bond and margin for all
     for wallet in wallets:
