@@ -225,7 +225,7 @@ class LearningAgent(StateAgentWithWallet):
             asset=self.tdai_id,
             amount=100000,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(2)
 
     def _update_memory(
         self, state: MarketState, action: Action, reward: float, next_state: MarketState

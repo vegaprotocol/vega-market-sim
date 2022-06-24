@@ -3,11 +3,12 @@ import os
 from collections import namedtuple
 from typing import List
 
-from vega_sim.reinforcement.full_market_sim.utils.strategy import (
+from vega_sim.scenario.ideal_market_maker.utils.strategy import (
     A_S_MMmodel,
 )
-from vega_sim.reinforcement.full_market_sim.utils.create_csv import createfile_MMmodel
-from vega_sim.reinforcement.full_market_sim.utils.logdata import log_simple_MMmodel
+from vega_sim.scenario.ideal_market_maker.utils.log_data import (
+    log_simple_MMmodel,
+)
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
@@ -110,7 +111,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             asset="VOTE",
             amount=1e4,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(5)
 
         ccy_name = f"tDAI{self.tag}"
         # Create asset
@@ -121,7 +122,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             decimals=self.adp,
             max_faucet_amount=5e10,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(5)
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
         # Top up asset
@@ -132,7 +133,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             asset=self.tdai_id,
             amount=self.initial,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(5)
         self.vega.wait_for_datanode_sync()
 
         market_name = f"BTC:DAI_{self.tag}"
@@ -153,7 +154,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 market_decimals=5,
             ),
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(5)
 
         market_name = f"BTC:DAI_{self.tag}"
         # Get market id
@@ -162,11 +163,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == market_name
         ][0]
-
-        # Create csv file
-        path = os.getcwd() + "/rl_logs/"
-        strategy = "Agent_simple_MMmodel.csv"
-        self.file_path = createfile_MMmodel(path, strategy=strategy)
 
     def num_MarketOrders(self):
         num_buyMO = np.random.poisson(self.Lambda)
@@ -283,70 +279,71 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.current_step += 1
 
     def logdata(self):
-        general_lp, margin_lp, bond_lp = self.vega.party_account(
-            wallet_name=self.wallet_name,
-            asset_id=self.tdai_id,
-            market_id=self.market_id,
-        )
+        pass
+        # general_lp, margin_lp, bond_lp = self.vega.party_account(
+        #     wallet_name=self.wallet_name,
+        #     asset_id=self.tdai_id,
+        #     market_id=self.market_id,
+        # )
 
-        position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
-        )
-        if not position:
-            realisedPnl_lp = 0
-            unrealisedPnl_lp = 0
-            inventory_lp = 0
-            entry_price = 0
-        else:
-            realisedPnl_lp = float(position[0].realised_pnl)
-            unrealisedPnl_lp = float(position[0].unrealised_pnl)
-            inventory_lp = int(position[0].open_volume)
-            entry_price = float(position[0].average_entry_price)
+        # position = self.vega.positions_by_market(
+        #     wallet_name=self.wallet_name, market_id=self.market_id
+        # )
+        # if not position:
+        #     realisedPnl_lp = 0
+        #     unrealisedPnl_lp = 0
+        #     inventory_lp = 0
+        #     entry_price = 0
+        # else:
+        #     realisedPnl_lp = float(position[0].realised_pnl)
+        #     unrealisedPnl_lp = float(position[0].unrealised_pnl)
+        #     inventory_lp = int(position[0].open_volume)
+        #     entry_price = float(position[0].average_entry_price)
 
-        market_state = self.vega.market_info(market_id=self.market_id).state
-        market_data = self.vega.market_data(market_id=self.market_id)
-        markprice = float(market_data.mark_price)
-        trading_mode = market_data.market_trading_mode
+        # market_state = self.vega.market_info(market_id=self.market_id).state
+        # market_data = self.vega.market_data(market_id=self.market_id)
+        # markprice = float(market_data.mark_price)
+        # trading_mode = market_data.market_trading_mode
 
-        liquifee, insurance = [
-            int(account.balance)
-            for account in self.vega.market_accounts(
-                asset_id=self.tdai_id, market_id=self.market_id
-            )
-        ]
+        # liquifee, insurance = [
+        #     int(account.balance)
+        #     for account in self.vega.market_accounts(
+        #         asset_id=self.tdai_id, market_id=self.market_id
+        #     )
+        # ]
 
-        infrafee = int(
-            self.vega.infrastructure_fee_accounts(asset_id=self.tdai_id)[0].balance
-        )
+        # infrafee = int(
+        #     self.vega.infrastructure_fee_accounts(asset_id=self.tdai_id)[0].balance
+        # )
 
-        log_simple_MMmodel(
-            1,
-            self.current_step,
-            general_lp,
-            margin_lp,
-            bond_lp,
-            general_lp + margin_lp + bond_lp - self.initial,
-            realisedPnl_lp,
-            unrealisedPnl_lp,
-            inventory_lp,
-            -self.bid_depth,
-            self.ask_depth,
-            self.num_buyMO,
-            self.num_sellMO,
-            self.num_bidhit,
-            self.num_askhit,
-            self.price_process[self.current_step - 1],
-            markprice,
-            entry_price,
-            insurance,
-            liquifee,
-            infrafee,
-            trading_mode,
-            market_state,
-            self.adp,
-            self.mdp,
-            self.file_path,
-        )
+        # log_simple_MMmodel(
+        #     1,
+        #     self.current_step,
+        #     general_lp,
+        #     margin_lp,
+        #     bond_lp,
+        #     general_lp + margin_lp + bond_lp - self.initial,
+        #     realisedPnl_lp,
+        #     unrealisedPnl_lp,
+        #     inventory_lp,
+        #     -self.bid_depth,
+        #     self.ask_depth,
+        #     self.num_buyMO,
+        #     self.num_sellMO,
+        #     self.num_bidhit,
+        #     self.num_askhit,
+        #     self.price_process[self.current_step - 1],
+        #     markprice,
+        #     entry_price,
+        #     insurance,
+        #     liquifee,
+        #     infrafee,
+        #     trading_mode,
+        #     market_state,
+        #     self.adp,
+        #     self.mdp,
+        #     self.file_path,
+        # )
 
 
 class MarketOrderTrader(StateAgentWithWallet):
@@ -383,7 +380,7 @@ class MarketOrderTrader(StateAgentWithWallet):
             asset=tDAI_id,
             amount=100000,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(2)
 
     def step_buy(self, vega_state: VegaState):
         if (
@@ -464,7 +461,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             asset=tDAI_id,
             amount=100000,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(2)
 
         self.buy_order_id = self.vega.submit_order(
             trading_wallet=self.wallet_name,
@@ -629,7 +626,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             asset=tDAI_id,
             amount=100000,
         )
-        self.vega.forward("10s")
+        self.vega.wait_fn(2)
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,

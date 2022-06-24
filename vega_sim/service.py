@@ -4,7 +4,7 @@ from collections import defaultdict
 import logging
 from abc import ABC
 from functools import wraps
-from time import time
+import time
 from typing import List, Optional, Tuple, Union
 
 import grpc
@@ -53,6 +53,7 @@ class VegaService(ABC):
         self,
         can_control_time: bool = False,
         warn_on_raw_data_access: bool = True,
+        seconds_per_block: int = 1,
     ):
         """A generic service for accessing a set of Vega processes.
 
@@ -75,6 +76,11 @@ class VegaService(ABC):
                     they may well be still zero padded integers which must be
                     converted by the user.
                     (e.g. 10.1 with decimal places set to 2 would be 1010)
+            seconds_per_block:
+                int, default 1, How long each block represents in seconds. For a nullchain
+                    service this can be known exactly, for anything else it will be an
+                    estimate. Used for waiting/forwarding time and determining how far
+                    forwards to place proposals starting/ending.
 
         """
         self._core_client = None
@@ -86,6 +92,7 @@ class VegaService(ABC):
         self._market_price_decimals = None
         self._market_pos_decimals = None
         self._asset_decimals = None
+        self.seconds_per_block = seconds_per_block
 
     @property
     def market_price_decimals(self) -> int:
@@ -141,8 +148,8 @@ class VegaService(ABC):
     def wallet(self) -> Wallet:
         pass
 
-    def wait_fn(self) -> None:
-        time.sleep(1)
+    def wait_fn(self, wait_multiple: float = 1) -> None:
+        time.sleep(1 * wait_multiple)
 
     @property
     def trading_data_client(self) -> vac.VegaTradingDataClient:
@@ -228,8 +235,7 @@ class VegaService(ABC):
             num_to_padded_int(amount, asset_decimals),
             faucet_url=self.faucet_url,
         )
-        if self.can_control_time:
-            self.forward("1s")
+        self.wait_fn(2)
 
     def forward(self, time: str) -> None:
         """Steps chain forward a given amount of time, either with an amount of time or
@@ -284,17 +290,15 @@ class VegaService(ABC):
             max_faucet_amount=max_faucet_amount,
             quantum=quantum,
             data_client=self.trading_data_client,
-            closing_time=blockchain_time_seconds + 30,
-            enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 20,
-            node_url_for_time_forwarding=self.vega_node_url
-            if self.can_control_time
-            else None,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
+            time_forward_fn=lambda: self.wait_fn(2),
         )
         gov.approve_proposal(
             proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
         )
-        self.forward("360s")
+        self.wait_fn(self.seconds_per_block * 110)
 
     def create_simple_market(
         self,
@@ -351,14 +355,12 @@ class VegaService(ABC):
             termination_pub_key=self.wallet.public_key(termination_wallet),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + 300,
-            enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 200,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             risk_model=risk_model,
             liquidity_commitment=liquidity_commitment,
-            node_url_for_time_forwarding=self.vega_node_url
-            if self.can_control_time
-            else None,
+            time_forward_fn=lambda: self.wait_fn(2),
             **additional_kwargs,
         )
         gov.approve_proposal(
@@ -366,7 +368,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
-        self.forward("360s")
+        self.wait_fn(self.seconds_per_block * 110)
 
     def submit_market_order(
         self,
@@ -483,9 +485,7 @@ class VegaService(ABC):
             expires_at=expires_at,
             pegged_order=pegged_order,
             wait=wait,
-            time_forward_fn=lambda: self.forward("1s")
-            if self.can_control_time
-            else self._default_wait_fn,
+            time_forward_fn=lambda: self.wait_fn(2),
             order_ref=order_ref,
         )
 
@@ -601,19 +601,17 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=proposal_wallet,
             data_client=self.trading_data_client,
-            closing_time=blockchain_time_seconds + 30,
-            enactment_time=blockchain_time_seconds + 360,
-            validation_time=blockchain_time_seconds + 20,
-            node_url_for_time_forwarding=self.vega_node_url
-            if self.can_control_time
-            else None,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
+            time_forward_fn=lambda: self.wait_fn(2),
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
-        self.forward("360s")
+        self.wait_fn(self.seconds_per_block * 110)
 
     def settle_market(
         self,

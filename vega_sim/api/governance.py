@@ -1,7 +1,7 @@
 import base64
 import json
 import logging
-from typing import Optional
+from typing import Callable, Optional
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
@@ -91,7 +91,7 @@ def propose_future_market(
     validation_time: Optional[int] = None,
     liquidity_commitment: Optional[vega_protos.governance.NewMarketCommitment] = None,
     risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
-    node_url_for_time_forwarding: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -246,7 +246,7 @@ def propose_future_market(
         wallet=wallet,
         proposal=proposal,
         data_client=data_client,
-        node_url_for_time_forwarding=node_url_for_time_forwarding,
+        time_forward_fn=time_forward_fn,
     )
     return proposal.reference
 
@@ -260,7 +260,7 @@ def propose_network_parameter_change(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClient] = None,
-    node_url_for_time_forwarding: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
 ):
     network_param_update = _build_generic_proposal(
         pub_key=wallet.public_key(wallet_name),
@@ -280,7 +280,7 @@ def propose_network_parameter_change(
         wallet=wallet,
         proposal=network_param_update,
         data_client=data_client,
-        node_url_for_time_forwarding=node_url_for_time_forwarding,
+        time_forward_fn=time_forward_fn,
     )
     return network_param_update.reference
 
@@ -312,7 +312,7 @@ def propose_asset(
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
-    node_url_for_time_forwarding: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
 ):
     asset_detail = vega_protos.assets.AssetDetails(
         name=name,
@@ -339,7 +339,7 @@ def propose_asset(
         wallet=wallet,
         proposal=proposal,
         data_client=data_client,
-        node_url_for_time_forwarding=node_url_for_time_forwarding,
+        time_forward_fn=time_forward_fn,
     )
     return proposal.reference
 
@@ -391,7 +391,7 @@ def _make_and_wait_for_proposal(
     wallet: Wallet,
     proposal: commands_protos.commands.ProposalSubmission,
     data_client: vac.VegaTradingDataClient,
-    node_url_for_time_forwarding: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
 ):
     wallet.submit_transaction(
         transaction=proposal, name=wallet_name, transaction_type="proposal_submission"
@@ -400,11 +400,7 @@ def _make_and_wait_for_proposal(
     proposal = wait_for_acceptance(
         proposal.reference,
         lambda p: _proposal_loader(p, data_client),
-        time_forward_fn=lambda: forward(
-            time="1s", vega_node_url=node_url_for_time_forwarding
-        )
-        if node_url_for_time_forwarding is not None
-        else None,
+        time_forward_fn=time_forward_fn,
     )
 
     prop_state = enum_to_str(

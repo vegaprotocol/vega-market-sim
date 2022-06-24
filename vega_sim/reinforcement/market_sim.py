@@ -18,7 +18,7 @@ from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_model
 from vega_sim.reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.reinforcement.full_market_sim.agents import (
+from vega_sim.scenario.ideal_market_maker.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
     TRADER_WALLET,
@@ -291,6 +291,3 @@ if __name__ == "__main__":
                 },
             )
             plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
-        import pdb
-
-        pdb.set_trace()
