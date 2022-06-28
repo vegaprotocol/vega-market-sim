@@ -428,11 +428,13 @@ class VegaServiceNull(VegaService):
         transactions_per_block: int = 1,
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
+        start_order_feed: bool = True,
     ):
         super().__init__(
             can_control_time=True,
             warn_on_raw_data_access=warn_on_raw_data_access,
             seconds_per_block=seconds_per_block,
+            start_order_feed=start_order_feed,
         )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
@@ -568,6 +570,7 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
+        super().stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:

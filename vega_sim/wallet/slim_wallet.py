@@ -7,7 +7,6 @@ import numpy as np
 from nacl.encoding import HexEncoder
 from nacl.signing import SigningKey
 from typing import Optional
-from vega_sim.api.trading import submit_order
 from vega_sim.grpc.client import VegaCoreClient
 from vega_sim.wallet.base import Wallet
 

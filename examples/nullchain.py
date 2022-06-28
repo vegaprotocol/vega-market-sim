@@ -25,7 +25,7 @@ wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    with VegaServiceNull(run_with_console=True) as vega:
+    with VegaServiceNull(run_with_console=False, start_order_feed=False) as vega:
 
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
@@ -165,7 +165,10 @@ if __name__ == "__main__":
         #     sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
         #     is_amendment=False,
         # )
+        vega.start_order_monitoring()
+        import pdb
 
+        pdb.set_trace()
         vega.forward("10s")
         vega.settle_market(
             settlement_wallet=TERMINATE_WALLET.name,
