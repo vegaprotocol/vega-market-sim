@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "vega-market-sim"
+name = "vega_sim"
 version = "0.1.0"
 description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]

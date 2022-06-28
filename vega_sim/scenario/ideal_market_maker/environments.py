@@ -71,8 +71,3 @@ class MarketEnvironment(MarketEnvironmentWithState):
             self.agents[2].step_limitorderbid(state)
         except Exception as e:
             print(e)
-
-        try:
-            self.agents[0].logdata()
-        except Exception as e:
-            print(e)

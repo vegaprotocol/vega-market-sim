@@ -1,6 +1,7 @@
 import argparse
 import logging
-from typing import Optional
+from typing import Any, Callable, List, Optional
+from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.ideal_market_maker.utils.price_process import (
@@ -44,6 +45,9 @@ class IdealMarketMaker(Scenario):
         block_length_seconds: int = 1,
         state_extraction_freq: int = 1,
         step_length_seconds: Optional[int] = None,
+        state_extraction_fn: Optional[
+            Callable[[VegaServiceNull, List[Agent]], Any]
+        ] = None,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -62,6 +66,7 @@ class IdealMarketMaker(Scenario):
         self.block_length_seconds = block_length_seconds
         self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
+        self.state_extraction_fn = state_extraction_fn
 
     def set_up_background_market(
         self,
@@ -142,6 +147,7 @@ class IdealMarketMaker(Scenario):
             state_extraction_freq=self.state_extraction_freq,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
+            state_extraction_fn=self.state_extraction_fn,
         )
         return env
 
