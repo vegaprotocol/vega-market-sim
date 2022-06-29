@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from collections import namedtuple
-from typing import Dict, List, Optional
+from queue import Queue
+import threading
+from typing import Dict, Iterable, List, Optional
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
@@ -204,3 +206,28 @@ def liquidity_provisions(
             market=market_id, party=party_id
         )
     ).liquidity_provisions
+
+
+def order_subscription(
+    data_client: vac.VegaTradingDataClient,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> Iterable[List[vega_protos.vega.Order]]:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Args:
+        market_id:
+            Optional[str], If provided, only update orders from this market
+        party_id:
+            Optional[str], If provided, only update orders from this party
+    Returns:
+        Iterable[List[vega.Order]], Infinite iterable of lists of order updates
+    """
+    return data_client.OrdersSubscribe(
+        data_node_protos.trading_data.OrdersSubscribeRequest(
+            market_id=market_id, party_id=party_id
+        )
+    )

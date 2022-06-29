@@ -428,6 +428,7 @@ class VegaServiceNull(VegaService):
         transactions_per_block: int = 1,
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
+        start_order_feed: bool = True,
     ):
         super().__init__(
             can_control_time=True,
@@ -451,6 +452,8 @@ class VegaServiceNull(VegaService):
 
         self._wallet = None
         self._use_full_vega_wallet = use_full_vega_wallet
+
+        self._start_order_feed = start_order_feed
 
         if port_config is None:
             self._assign_ports()
@@ -562,12 +565,16 @@ class VegaServiceNull(VegaService):
                 f" http://localhost:{self.console_port}"
             )
 
+        if self._start_order_feed:
+            self.start_order_monitoring()
+
     # Class internal as at some point the host may vary as well as the port
     @staticmethod
     def _build_url(port: int, prefix: str = "http://"):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
+        super().stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:

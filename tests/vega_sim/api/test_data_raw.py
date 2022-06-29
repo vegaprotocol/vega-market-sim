@@ -20,6 +20,7 @@ from vega_sim.api.data_raw import (
     market_info,
     order_status,
     positions_by_market,
+    order_subscription,
     order_status_by_reference,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
@@ -372,3 +373,151 @@ def test_liquidity_provisions(trading_data_servicer_and_port):
     )
 
     assert res[0].market_id == "MARKET"
+
+
+def test_order_subscription(trading_data_servicer_and_port):
+    def OrdersSubscribe(self, request, context):
+        orders = [
+            vega_protos.vega.Order(
+                id="id1",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_BUY,
+                price="10100",
+                size=101,
+                remaining=101,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party1",
+                updated_at=1653266950,
+                version=1,
+            ),
+            vega_protos.vega.Order(
+                id="id2",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_CANCELLED,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_BUY,
+                price="10100",
+                size=101,
+                remaining=101,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party1",
+                updated_at=1653266950,
+                version=1,
+            ),
+            vega_protos.vega.Order(
+                id="id3",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_FILLED,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_BUY,
+                price="10100",
+                size=101,
+                remaining=0,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party1",
+                updated_at=1653266950,
+                version=1,
+            ),
+            vega_protos.vega.Order(
+                id="id4",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_BUY,
+                price="10110",
+                size=101,
+                remaining=101,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party1",
+                updated_at=1653266950,
+                version=1,
+            ),
+            vega_protos.vega.Order(
+                id="id5",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_BUY,
+                price="10100",
+                size=101,
+                remaining=101,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party2",
+                updated_at=1653266950,
+                version=1,
+            ),
+            vega_protos.vega.Order(
+                id="id6",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_SELL,
+                price="10400",
+                size=111,
+                remaining=121,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party1",
+                updated_at=1653266950,
+                version=1,
+            ),
+            vega_protos.vega.Order(
+                id="id7",
+                market_id="market",
+                status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                reference="ref1",
+                side=vega_protos.vega.SIDE_SELL,
+                price="10100",
+                size=101,
+                remaining=101,
+                time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                created_at=1653266950,
+                expires_at=1653276950,
+                party_id="party1",
+                updated_at=1653266950,
+                version=1,
+            ),
+        ]
+        for order_chunk in [orders[:3], orders[3:6], orders[6:]]:
+            yield data_node_protos.trading_data.OrdersSubscribeResponse(
+                orders=order_chunk
+            )
+
+    server, port, mock_servicer = trading_data_servicer_and_port
+    mock_servicer.OrdersSubscribe = OrdersSubscribe
+
+    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClient(f"localhost:{port}")
+
+    queue = order_subscription(
+        data_client=data_client,
+    )
+
+    batch_one = next(queue)
+    batch_two = next(queue)
+    batch_three = next(queue)
+
+    assert len(batch_one.orders) == 3
+    assert len(batch_two.orders) == 3
+    assert len(batch_three.orders) == 1

@@ -1,19 +1,22 @@
-from dataclasses import dataclass
-import numpy as np
+import logging
+import threading
 from collections import namedtuple
-from typing import Callable, List, Optional, Tuple, TypeVar
+from dataclasses import dataclass
+from queue import Queue
+from typing import Callable, DefaultDict, Iterable, List, Optional, Tuple, TypeVar
 
-
+import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
-import vega_sim.api.data_raw as data_raw
 from vega_sim.api.helpers import num_from_padded_int
 
 
 class MissingAssetError(Exception):
     pass
 
+
+logger = logging.Logger(__name__)
 
 T = TypeVar("T")
 S = TypeVar("S")
@@ -36,6 +39,7 @@ Order = namedtuple(
         "created_at",
         "expires_at",
         "party_id",
+        "market_id",
         "updated_at",
         "version",
     ],
@@ -89,6 +93,7 @@ def _order_from_proto(
         party_id=order.party_id,
         updated_at=order.updated_at,
         version=order.version,
+        market_id=order.market_id,
     )
 
 
@@ -255,37 +260,76 @@ def open_orders_by_market(
     Returns:
         OrdersBySide, Live orders segregated by side
     """
+    bids = []
+    asks = []
+    orders = all_orders(
+        market_id=market_id,
+        data_client=data_client,
+        price_decimals=price_decimals,
+        position_decimals=position_decimals,
+        open_only=True,
+    )
+    for order in orders:
+        bids.append(order) if order.side == vega_protos.vega.SIDE_BUY else asks.append(
+            order
+        )
+
+    return OrdersBySide(bids, asks)
+
+
+def all_orders(
+    market_id: str,
+    data_client: vac.VegaTradingDataClient,
+    price_decimals: Optional[int] = None,
+    position_decimals: Optional[int] = None,
+    open_only: bool = False,
+) -> OrdersBySide:
+    """
+    Output all active limit orders in current market.
+
+    Args:
+        market_id:
+            str, ID for the market to load
+        data_client:
+            VegaTradingDataClient, instantiated gRPC client
+        open_only:
+            bool, default False, whether to only return still
+                open orders
+
+    Returns:
+        OrdersBySide, Live orders segregated by side
+    """
     orders = _unroll_pagination(
         data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
         lambda x: data_client.OrdersByMarket(x).orders,
     )
 
     mkt_price_dp = (
-        price_decimals
-        if price_decimals is not None
-        else market_price_decimals(market_id=market_id, data_client=data_client)
+        DefaultDict(lambda: price_decimals) if price_decimals is not None else {}
     )
     mkt_pos_dp = (
-        position_decimals
-        if position_decimals is not None
-        else market_position_decimals(market_id=market_id, data_client=data_client)
+        DefaultDict(lambda: position_decimals) if position_decimals is not None else {}
     )
 
-    bids = []
-    asks = []
+    output_orders = []
     for order in orders:
-        if order.status != vega_protos.vega.Order.Status.STATUS_ACTIVE:
+        if price_decimals is None and order.market_id not in mkt_price_dp:
+            mkt_pos_dp[order.market_id] = market_position_decimals(
+                market_id=order.market_id, data_client=data_client
+            )
+            mkt_price_dp[order.market_id] = market_price_decimals(
+                market_id=order.market_id, data_client=data_client
+            )
+
+        if open_only and order.status != vega_protos.vega.Order.Status.STATUS_ACTIVE:
             continue
         converted_order = _order_from_proto(
-            order, price_decimals=mkt_price_dp, position_decimals=mkt_pos_dp
+            order,
+            price_decimals=mkt_price_dp[order.market_id],
+            position_decimals=mkt_pos_dp[order.market_id],
         )
-        bids.append(
-            converted_order
-        ) if converted_order.side == vega_protos.vega.SIDE_BUY else asks.append(
-            converted_order
-        )
-
-    return OrdersBySide(bids, asks)
+        output_orders.append(converted_order)
+    return output_orders
 
 
 def order_book_by_market(
@@ -425,3 +469,64 @@ def market_depth(
         buys=[_price_level_from_raw(level) for level in mkt_depth.buy],
         sells=[_price_level_from_raw(level) for level in mkt_depth.sell],
     )
+
+
+def order_subscription(
+    data_client: vac.VegaTradingDataClient,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> Queue[Order]:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Args:
+        market_id:
+            Optional[str], If provided, only update orders from this market
+        party_id:
+            Optional[str], If provided, only update orders from this party
+    Returns:
+        Iterable[Order], Infinite iterable of order updates
+    """
+
+    queue = Queue()
+
+    order_stream = data_raw.order_subscription(
+        data_client=data_client, market_id=market_id, party_id=party_id
+    )
+
+    threading.Thread(
+        target=_queue_thread, args=(queue, order_stream, data_client)
+    ).start()
+
+    return queue
+
+
+def _queue_thread(
+    queue: Queue,
+    order_stream: Iterable[vega_protos.vega.Order],
+    data_client: vac.VegaTradingDataClient,
+):
+    mkt_pos_dp = {}
+    mkt_price_dp = {}
+    try:
+        for order_list in order_stream:
+            for order in order_list.orders:
+                if order.market_id not in mkt_pos_dp:
+                    mkt_pos_dp[order.market_id] = market_position_decimals(
+                        market_id=order.market_id, data_client=data_client
+                    )
+                    mkt_price_dp[order.market_id] = market_price_decimals(
+                        market_id=order.market_id, data_client=data_client
+                    )
+                queue.put(
+                    _order_from_proto(
+                        order,
+                        mkt_price_dp[order.market_id],
+                        mkt_pos_dp[order.market_id],
+                    )
+                )
+    except Exception as e:
+        logger.info("Order subscription closed")
+        return

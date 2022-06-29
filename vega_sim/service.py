@@ -1,22 +1,25 @@
 from __future__ import annotations
-from collections import defaultdict
 
+import copy
+from email.mime import base
 import logging
-from abc import ABC
-from functools import wraps
+import threading
 import time
-from typing import List, Optional, Tuple, Union
+from abc import ABC
+from collections import defaultdict
+from functools import wraps
+from queue import Queue
+from typing import Dict, List, Optional, Tuple, Union
 
 import grpc
-import vega_sim.grpc.client as vac
-import vega_sim.proto.vega as vega_protos
-
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
-from vega_sim.api.helpers import num_to_padded_int, forward, wait_for_datanode_sync
+import vega_sim.grpc.client as vac
+import vega_sim.proto.vega as vega_protos
+from vega_sim.api.helpers import forward, num_to_padded_int, wait_for_datanode_sync
 from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
@@ -93,6 +96,10 @@ class VegaService(ABC):
         self._market_pos_decimals = None
         self._asset_decimals = None
         self.seconds_per_block = seconds_per_block
+
+        self.order_thread = None
+        self.orders_lock = threading.RLock()
+        self._order_state_from_feed = {}
 
     @property
     def market_price_decimals(self) -> int:
@@ -190,6 +197,11 @@ class VegaService(ABC):
 
     def wait_for_datanode_sync(self) -> None:
         wait_for_datanode_sync(self.trading_data_client, self.core_client)
+
+    def stop(self) -> None:
+        if self.order_thread is not None:
+            self.order_queue.put(None)
+            self.order_thread.join()
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -991,6 +1003,32 @@ class VegaService(ABC):
             position_decimals=self.market_pos_decimals[market_id],
         )
 
+    def order_status_from_feed(
+        self, live_only: bool = True
+    ) -> Dict[str, Dict[str, Dict[str, data.Order]]]:
+        """Returns a copy of current order status based on Order feed if started.
+        If order feed has not been started, dict will be empty
+
+        Args:
+            live_only:
+                bool, default True, whether to filter out dead/cancelled deals
+                    from result
+
+        Returns:
+            Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
+        with self.orders_lock:
+            order_dict = copy.copy(self._order_state_from_feed)
+        if live_only:
+            to_delete = []
+            for market_id, party_orders in order_dict.items():
+                for party_id, orders in party_orders.items():
+                    for order_id, order in orders.items():
+                        if order.status != vega_protos.vega.Order.Status.STATUS_ACTIVE:
+                            to_delete.append((market_id, party_id, order_id))
+            for market_id, party_id, order_id in to_delete:
+                del order_dict[market_id][party_id][order_id]
+        return order_dict
+
     @raw_data
     def liquidity_provisions(
         self,
@@ -1035,3 +1073,49 @@ class VegaService(ABC):
         return self.liquidity_provisions(
             market_id=market_id, party_id=self.wallet.public_key(wallet_name)
         )
+
+    def start_order_monitoring(
+        self,
+        market_id: Optional[str] = None,
+        party_id: Optional[str] = None,
+    ):
+        self.order_queue = data.order_subscription(
+            self.trading_data_client, market_id=market_id, party_id=party_id
+        )
+        base_orders = []
+
+        for m_id in (
+            [market_id] if market_id is not None else [m.id for m in self.all_markets()]
+        ):
+            base_orders.extend(
+                data.all_orders(market_id=m_id, data_client=self.trading_data_client)
+            )
+
+        with self.orders_lock:
+            for order in base_orders:
+                if party_id is not None and order.party_id != party_id:
+                    continue
+                self._order_state_from_feed.setdefault(order.market_id, {}).setdefault(
+                    order.party_id, {}
+                )[order.id] = order
+
+        self.order_thread = threading.Thread(
+            target=self._monitor_stream, args=(self.order_queue,)
+        )
+        self.order_thread.start()
+
+    def _monitor_stream(self, trade_stream: Queue[data.Order]):
+        while True:
+            o = trade_stream.get()
+            if o is None:
+                break
+
+            with self.orders_lock:
+                if o.version > getattr(
+                    self._order_state_from_feed.setdefault(o.market_id, {})
+                    .setdefault(o.party_id, {})
+                    .get(o.id, None),
+                    "version",
+                    0,
+                ):
+                    self._order_state_from_feed[o.market_id][o.party_id][o.id] = o
