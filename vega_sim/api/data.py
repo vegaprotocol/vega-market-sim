@@ -313,7 +313,7 @@ def all_orders(
 
     output_orders = []
     for order in orders:
-        if order.market_id not in mkt_pos_dp:
+        if price_decimals is None and order.market_id not in mkt_price_dp:
             mkt_pos_dp[order.market_id] = market_position_decimals(
                 market_id=order.market_id, data_client=data_client
             )

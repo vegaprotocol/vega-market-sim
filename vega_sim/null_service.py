@@ -434,7 +434,6 @@ class VegaServiceNull(VegaService):
             can_control_time=True,
             warn_on_raw_data_access=warn_on_raw_data_access,
             seconds_per_block=seconds_per_block,
-            start_order_feed=start_order_feed,
         )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
@@ -453,6 +452,8 @@ class VegaServiceNull(VegaService):
 
         self._wallet = None
         self._use_full_vega_wallet = use_full_vega_wallet
+
+        self._start_order_feed = start_order_feed
 
         if port_config is None:
             self._assign_ports()
@@ -563,6 +564,9 @@ class VegaServiceNull(VegaService):
                 "Vega Running. Console launched at"
                 f" http://localhost:{self.console_port}"
             )
+
+        if self._start_order_feed:
+            self.start_order_monitoring()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

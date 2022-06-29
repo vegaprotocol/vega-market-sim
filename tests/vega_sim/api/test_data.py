@@ -183,6 +183,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
             orders=[
                 vega_protos.vega.Order(
                     id="id1",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_BUY,
@@ -199,6 +200,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
                 ),
                 vega_protos.vega.Order(
                     id="id2",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_CANCELLED,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_BUY,
@@ -215,6 +217,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
                 ),
                 vega_protos.vega.Order(
                     id="id3",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_FILLED,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_BUY,
@@ -231,6 +234,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
                 ),
                 vega_protos.vega.Order(
                     id="id4",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_BUY,
@@ -247,6 +251,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
                 ),
                 vega_protos.vega.Order(
                     id="id5",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_BUY,
@@ -263,6 +268,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
                 ),
                 vega_protos.vega.Order(
                     id="id6",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_SELL,
@@ -279,6 +285,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
                 ),
                 vega_protos.vega.Order(
                     id="id7",
+                    market_id="market",
                     status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                     reference="ref1",
                     side=vega_protos.vega.SIDE_SELL,
@@ -314,6 +321,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
         bids=[
             Order(
                 id="id1",
+                market_id="market",
                 status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                 reference="ref1",
                 side=vega_protos.vega.SIDE_BUY,
@@ -330,6 +338,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
             ),
             Order(
                 id="id4",
+                market_id="market",
                 status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                 reference="ref1",
                 side=vega_protos.vega.SIDE_BUY,
@@ -346,6 +355,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
             ),
             Order(
                 id="id5",
+                market_id="market",
                 status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                 reference="ref1",
                 side=vega_protos.vega.SIDE_BUY,
@@ -364,6 +374,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
         asks=[
             Order(
                 id="id6",
+                market_id="market",
                 status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                 reference="ref1",
                 side=vega_protos.vega.SIDE_SELL,
@@ -380,6 +391,7 @@ def test_open_orders_by_market(trading_data_servicer_and_port):
             ),
             Order(
                 id="id7",
+                market_id="market",
                 status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
                 reference="ref1",
                 side=vega_protos.vega.SIDE_SELL,
@@ -408,6 +420,7 @@ def test_order_subscription(
     orders = [
         vega_protos.vega.Order(
             id="id1",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
             reference="ref1",
             side=vega_protos.vega.SIDE_BUY,
@@ -424,6 +437,7 @@ def test_order_subscription(
         ),
         vega_protos.vega.Order(
             id="id2",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_CANCELLED,
             reference="ref1",
             side=vega_protos.vega.SIDE_BUY,
@@ -440,6 +454,7 @@ def test_order_subscription(
         ),
         vega_protos.vega.Order(
             id="id3",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_FILLED,
             reference="ref1",
             side=vega_protos.vega.SIDE_BUY,
@@ -456,6 +471,7 @@ def test_order_subscription(
         ),
         vega_protos.vega.Order(
             id="id4",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
             reference="ref1",
             side=vega_protos.vega.SIDE_BUY,
@@ -472,6 +488,7 @@ def test_order_subscription(
         ),
         vega_protos.vega.Order(
             id="id5",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
             reference="ref1",
             side=vega_protos.vega.SIDE_BUY,
@@ -488,6 +505,7 @@ def test_order_subscription(
         ),
         vega_protos.vega.Order(
             id="id6",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
             reference="ref1",
             side=vega_protos.vega.SIDE_SELL,
@@ -504,6 +522,7 @@ def test_order_subscription(
         ),
         vega_protos.vega.Order(
             id="id7",
+            market_id="market",
             status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
             reference="ref1",
             side=vega_protos.vega.SIDE_SELL,

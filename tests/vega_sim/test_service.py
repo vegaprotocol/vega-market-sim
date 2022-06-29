@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 import pytest
 import requests_mock
 
@@ -19,6 +20,11 @@ class StubService(VegaService):
     @property
     def wallet(self):
         return self._wallet
+
+    def start_order_monitoring(
+        self, market_id: Optional[str] = None, party_id: Optional[str] = None
+    ):
+        pass
 
 
 @pytest.fixture

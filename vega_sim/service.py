@@ -57,7 +57,6 @@ class VegaService(ABC):
         can_control_time: bool = False,
         warn_on_raw_data_access: bool = True,
         seconds_per_block: int = 1,
-        start_order_feed: bool = True,
     ):
         """A generic service for accessing a set of Vega processes.
 
@@ -85,9 +84,6 @@ class VegaService(ABC):
                     service this can be known exactly, for anything else it will be an
                     estimate. Used for waiting/forwarding time and determining how far
                     forwards to place proposals starting/ending.
-            start_order_feed:
-                bool, default True, Whether to start up an order feed which listens to
-                    order updates from the datanode and keeps a local copy of orders
 
         """
         self._core_client = None
@@ -104,9 +100,6 @@ class VegaService(ABC):
         self.order_thread = None
         self.orders_lock = threading.RLock()
         self._order_state_from_feed = {}
-
-        if start_order_feed:
-            self.start_order_monitoring()
 
     @property
     def market_price_decimals(self) -> int:
