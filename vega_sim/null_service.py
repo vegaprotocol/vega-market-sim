@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import atexit
-from distutils.log import warn
 import logging
 import os
 import shutil
@@ -16,7 +15,6 @@ from enum import Enum, auto
 from multiprocessing import Process
 from os import path
 from typing import Dict, List, Optional, Set
-from numpy import block
 
 import requests
 import toml
@@ -428,11 +426,13 @@ class VegaServiceNull(VegaService):
         port_config: Optional[Dict[Ports, int]] = None,
         warn_on_raw_data_access: bool = True,
         transactions_per_block: int = 1,
-        block_duration: str = "1s",
+        seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
     ):
         super().__init__(
-            can_control_time=True, warn_on_raw_data_access=warn_on_raw_data_access
+            can_control_time=True,
+            warn_on_raw_data_access=warn_on_raw_data_access,
+            seconds_per_block=seconds_per_block,
         )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
@@ -447,7 +447,7 @@ class VegaServiceNull(VegaService):
         self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
 
         self.transactions_per_block = transactions_per_block
-        self.block_duration = block_duration
+        self.seconds_per_block = seconds_per_block
 
         self._wallet = None
         self._use_full_vega_wallet = use_full_vega_wallet
@@ -467,6 +467,9 @@ class VegaServiceNull(VegaService):
 
     def __exit__(self, type, value, traceback):
         self.stop()
+
+    def wait_fn(self, wait_multiple: float = 1) -> None:
+        self.forward(f"{int(wait_multiple * self.seconds_per_block)}s")
 
     @property
     def wallet(self) -> Wallet:
@@ -526,7 +529,7 @@ class VegaServiceNull(VegaService):
                 "run_with_console": self.run_with_console,
                 "port_config": self._generate_port_config(),
                 "transactions_per_block": self.transactions_per_block,
-                "block_duration": self.block_duration,
+                "block_duration": f"{int(self.seconds_per_block)}s",
                 "run_wallet": self._use_full_vega_wallet or self.run_with_console,
             },
         )
@@ -563,9 +566,6 @@ class VegaServiceNull(VegaService):
     @staticmethod
     def _build_url(port: int, prefix: str = "http://"):
         return f"{prefix}localhost:{port}"
-
-    def _default_wait_fn(self) -> None:
-        self.forward("2s")
 
     def stop(self) -> None:
         if self.proc is None:
