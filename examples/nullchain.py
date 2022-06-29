@@ -165,10 +165,6 @@ if __name__ == "__main__":
         #     sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
         #     is_amendment=False,
         # )
-        vega.start_order_monitoring()
-        import pdb
-
-        pdb.set_trace()
         vega.forward("10s")
         vega.settle_market(
             settlement_wallet=TERMINATE_WALLET.name,
