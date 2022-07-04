@@ -321,7 +321,7 @@ UlimitNOFile = 8192
   UseEmbedded = true
   [SQLStore.ConnectionConfig]
     Host = "localhost"
-    Port = 5432
+    Port = "TO_BE_SET"
     Username = "vega"
     Password = "vega"
     Database = "vega"
