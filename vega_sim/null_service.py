@@ -538,6 +538,15 @@ class VegaServiceNull(VegaService):
         )
         self.proc.start()
 
+        if self.run_with_console:
+            logger.info(
+                "Vega Running. Console launched at"
+                f" http://localhost:{self.console_port}"
+            )
+
+        if self._start_order_feed:
+            self.start_order_monitoring()
+
         if block_on_startup:
             # Wait for startup
             for _ in range(300):
@@ -558,15 +567,6 @@ class VegaServiceNull(VegaService):
             raise VegaStartupTimeoutError(
                 "Timed out waiting for Vega simulator to start up"
             )
-
-        if self.run_with_console:
-            logger.info(
-                "Vega Running. Console launched at"
-                f" http://localhost:{self.console_port}"
-            )
-
-        if self._start_order_feed:
-            self.start_order_monitoring()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

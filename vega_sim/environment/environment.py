@@ -38,7 +38,7 @@ MarketState = namedtuple(
     [
         "state",
         "trading_mode",
-        # "orders",
+        "orders",
     ],  # "order_book"]
 )
 
@@ -57,6 +57,7 @@ class MarketEnvironment:
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         state_extraction_freq: int = 10,
+        pause_every_n_steps: Optional[int] = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -103,6 +104,10 @@ class MarketEnvironment:
             state_extraction_freq:
                 int, default 10, If state_extraction_fn is passed, how many steps
                     should be between each call.
+            pause_every_n_steps:
+                Optional[int], default None, If passed, simulation will pause every
+                    time the passed number of steps elapses waiting on user to press
+                    return. Allows inspection of the simulation at given frequency
         """
         self.agents = agents
         self.n_steps = n_steps
@@ -113,6 +118,7 @@ class MarketEnvironment:
         self._vega = vega_service
         self._state_extraction_fn = state_extraction_fn
         self._state_extraction_freq = state_extraction_freq
+        self._pause_every_n_steps = pause_every_n_steps
 
     def run(
         self,
@@ -192,6 +198,15 @@ class MarketEnvironment:
                     vega.forward(f"{to_forward}s")
                 start_time = end_time
 
+            if (
+                self._pause_every_n_steps is not None
+                and i % self._pause_every_n_steps == 0
+            ):
+                input(
+                    f"Environment run at step {i}. Pausing to allow inspection of"
+                    " state. Press Enter to continue"
+                )
+
         for agent in self.agents:
             agent.finalise()
 
@@ -231,6 +246,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         state_extraction_freq: int = 10,
+        pause_every_n_steps: Optional[int] = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -280,6 +296,10 @@ class MarketEnvironmentWithState(MarketEnvironment):
             state_extraction_freq:
                 int, default 10, If state_extraction_fn is passed, how many steps
                     should be between each call.
+            pause_every_n_steps:
+                Optional[int], default None, If passed, simulation will pause every
+                    time the passed number of steps elapses waiting on user to press
+                    return. Allows inspection of the simulation at given frequency
         """
         super().__init__(
             agents=agents,
@@ -291,6 +311,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             vega_service=vega_service,
             state_extraction_fn=state_extraction_fn,
             state_extraction_freq=state_extraction_freq,
+            pause_every_n_steps=pause_every_n_steps,
         )
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
@@ -299,13 +320,14 @@ class MarketEnvironmentWithState(MarketEnvironment):
     @staticmethod
     def _default_state_extraction(vega: VegaService) -> VegaState:
         market_state = {}
+        order_status = vega.order_status_from_feed(live_only=True)
         for market in vega.all_markets():
             market_info = vega.market_info(market_id=market.id)
             market_state[market.id] = MarketState(
                 state=market_info.state,
                 trading_mode=market_info.trading_mode,
+                orders=order_status[market.id],
                 # order_book=vega.order_book_by_market(market.id),
-                # orders=vega.open_orders_by_market(market.id),
             )
 
         return VegaState(network_state=(), market_state=market_state)
