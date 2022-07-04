@@ -48,7 +48,7 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
 def wait_for_datanode_sync(
     trading_data_client: VegaTradingDataClient,
     core_data_client: VegaCoreClient,
-    max_retries: int = 50,
+    max_retries: int = 100,
 ) -> None:
     """Waits for Datanode to catch up to vega core client.
     Note: Will wait for datanode 'latest' time to catch up to core time when function is called.

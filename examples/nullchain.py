@@ -49,6 +49,7 @@ if __name__ == "__main__":
             max_faucet_amount=1e10,
         )
 
+        vega.wait_for_datanode_sync()
         tdai_id = vega.find_asset_id(symbol="tDAI")
         print("TDAI: ", tdai_id)
 
