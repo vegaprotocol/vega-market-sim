@@ -1,1 +1,1 @@
-docker build --tag=vega_sim_py:latest -t vegasim .
+docker build --platform linux/amd64 --tag=vega_sim_py:latest -t vegasim .

@@ -1,1 +1,1 @@
-docker build --tag=vega_sim_test:latest -t vegasim_test .
+docker build --platform linux/amd64 --tag=vega_sim_test:latest -t vegasim_test .
