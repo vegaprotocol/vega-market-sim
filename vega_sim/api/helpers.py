@@ -60,6 +60,7 @@ def wait_for_datanode_sync(
     attempts = 1
     core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     trading_time = trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+
     while core_time > trading_time:
         time.sleep(0.05)
         trading_time = trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp

@@ -555,7 +555,7 @@ class VegaServiceNull(VegaService):
             for _ in range(3000):
                 try:
                     requests.get(
-                        f"http://localhost:{self.data_node_rest_port}/assets"
+                        f"http://localhost:{self.data_node_rest_port}/time"
                     ).raise_for_status()
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"

@@ -118,7 +118,11 @@ def party_account(
 
     general, margin, bond = 0, 0, 0  # np.nan, np.nan, np.nan
     for account in accounts:
-        if account.market_id and account.market_id != market_id:
+        if (
+            account.market_id
+            and account.market_id != "!"
+            and account.market_id != market_id
+        ):
             # The 'general' account type has no market ID, so we have to pull
             # all markets then filter down here
             continue
