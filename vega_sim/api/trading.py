@@ -1,17 +1,14 @@
 from __future__ import annotations
 
 import logging
-from operator import is_
-from time import time
-import requests
 import uuid
-from google.protobuf.json_format import MessageToDict
+from time import time
 from typing import Callable, List, Optional, Tuple, Union
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
-from vega_sim.api.helpers import get_enum, enum_to_str, wait_for_acceptance
+from vega_sim.api.helpers import enum_to_str, get_enum, wait_for_acceptance
 from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
@@ -110,7 +107,7 @@ def submit_order(
         reference=order_ref,
     )
     if pegged_order is not None:
-        order_data.pegged_order = pegged_order
+        order_data.pegged_order.CopyFrom(pegged_order)
     if price is not None:
         order_data.price = str(price)
     if time_in_force == vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_UNSPECIFIED:
@@ -212,7 +209,6 @@ def amend_order(
     )
     for name, val in [
         ("price", vega_protos.vega.Price(value=str(price))),
-        ("pegged_reference", pegged_reference),
     ]:
         if val is not None:
             getattr(order_data, name).CopyFrom(val)
@@ -220,6 +216,7 @@ def amend_order(
     for name, val in [
         ("expires_at", expires_at),
         ("pegged_offset", pegged_offset),
+        ("pegged_reference", pegged_reference),
     ]:
         if val is not None:
             setattr(order_data, name, val)
@@ -295,7 +292,7 @@ def submit_simple_liquidity(
         delta_sell:
             int, the offset from reference point for the sell side of LP
     """
-
+    print(f"Submitting with buy {delta_buy} and sell {delta_sell}")
     return submit_liquidity(
         wallet_name=wallet_name,
         wallet=wallet,

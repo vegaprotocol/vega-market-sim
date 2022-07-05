@@ -28,8 +28,12 @@ def generate_id(n: int) -> str:
     return "".join(random.choices(string.ascii_lowercase + (2 * string.digits), k=n))
 
 
-def get_enum(value: Union[str, T], enum_class: Any) -> T:
-    return value if isinstance(value, type(enum_class)) else getattr(enum_class, value)
+def get_enum(value: Union[str, T, int], enum_class: Any) -> T:
+    return (
+        value
+        if isinstance(value, (type(enum_class), int))
+        else getattr(enum_class, value)
+    )
 
 
 def enum_to_str(e: Any, val: int) -> str:

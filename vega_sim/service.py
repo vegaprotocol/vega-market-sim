@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import dataclass
 from email.mime import base
 import logging
 import threading
@@ -23,6 +24,12 @@ from vega_sim.api.helpers import forward, num_to_padded_int, wait_for_datanode_s
 from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class PeggedOrder:
+    reference: vega_protos.vega.PeggedReference
+    offset: float
 
 
 class LoginError(Exception):
@@ -302,7 +309,7 @@ class VegaService(ABC):
             max_faucet_amount=max_faucet_amount,
             quantum=quantum,
             data_client=self.trading_data_client,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             time_forward_fn=lambda: self.wait_fn(2),
@@ -310,7 +317,7 @@ class VegaService(ABC):
         gov.approve_proposal(
             proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
         )
-        self.wait_fn(self.seconds_per_block * 110)
+        self.wait_fn(110)
 
     def create_simple_market(
         self,
@@ -367,7 +374,7 @@ class VegaService(ABC):
             termination_pub_key=self.wallet.public_key(termination_wallet),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             risk_model=risk_model,
@@ -380,7 +387,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
-        self.wait_fn(self.seconds_per_block * 110)
+        self.wait_fn(110)
 
     def submit_market_order(
         self,
@@ -431,10 +438,10 @@ class VegaService(ABC):
         order_type: Union[vega_protos.vega.Order.Type, str],
         time_in_force: Union[vega_protos.vega.Order.TimeInForce, str],
         side: Union[vega_protos.vega.Side, str],
-        volume: int,
-        price: Optional[int] = None,
-        expires_at: Optional[int] = None,
-        pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
+        volume: float,
+        price: Optional[float] = None,
+        expires_at: Optional[float] = None,
+        pegged_order: Optional[PeggedOrder] = None,
         wait: bool = True,
         order_ref: Optional[str] = None,
     ) -> Optional[str]:
@@ -466,7 +473,7 @@ class VegaService(ABC):
                     required field only for [`Order.TimeInForce`].
                     Defaults to 2 minutes
             pegged_order:
-                vega.PeggedOrder, Used to specify the details for a pegged order
+                PeggedOrder, Used to specify the details for a pegged order
             wait:
                 bool, whether to wait for order acceptance.
                     If true, will raise an error if order is not accepted
@@ -495,7 +502,16 @@ class VegaService(ABC):
             if price is not None
             else None,
             expires_at=expires_at,
-            pegged_order=pegged_order,
+            pegged_order=vega_protos.vega.PeggedOrder(
+                reference=pegged_order.reference,
+                offset=str(
+                    num_to_padded_int(
+                        pegged_order.offset, self.market_price_decimals[market_id]
+                    )
+                ),
+            )
+            if pegged_order is not None
+            else None,
             wait=wait,
             time_forward_fn=lambda: self.wait_fn(2),
             order_ref=order_ref,
@@ -512,7 +528,7 @@ class VegaService(ABC):
         order_id: str,
         price: Optional[float] = None,
         expires_at: Optional[int] = None,
-        pegged_offset: Optional[str] = None,
+        pegged_offset: Optional[float] = None,
         pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
         volume_delta: float = 0,
         time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
@@ -553,7 +569,14 @@ class VegaService(ABC):
             if price is not None
             else None,
             expires_at=expires_at,
-            pegged_offset=pegged_offset,
+            pegged_offset=str(
+                num_to_padded_int(
+                    pegged_offset,
+                    self.market_price_decimals[market_id],
+                )
+            )
+            if pegged_offset is not None
+            else None,
             pegged_reference=pegged_reference,
             volume_delta=num_to_padded_int(
                 volume_delta,
@@ -613,7 +636,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=proposal_wallet,
             data_client=self.trading_data_client,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             time_forward_fn=lambda: self.wait_fn(2),
@@ -623,7 +646,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
-        self.wait_fn(self.seconds_per_block * 110)
+        self.wait_fn(110)
 
     def settle_market(
         self,
@@ -635,6 +658,8 @@ class VegaService(ABC):
             market_id, data_client=self.trading_data_client
         ).tradable_instrument.instrument.future
         oracle_name = future_inst.oracle_spec_for_settlement_price.filters[0].key.name
+
+        logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
         gov.settle_oracle(
             wallet=self.wallet,
@@ -660,17 +685,18 @@ class VegaService(ABC):
             data_client=self.trading_data_client,
         )
 
-    @raw_data
     def positions_by_market(
         self,
         wallet_name: str,
         market_id: str,
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
-        return data_raw.positions_by_market(
+        return data.positions_by_market(
             self.wallet.public_key(wallet_name),
             market_id=market_id,
             data_client=self.trading_data_client,
+            price_decimals=self.market_price_decimals[market_id],
+            position_decimals=self.market_pos_decimals[market_id],
         )
 
     @raw_data
@@ -805,7 +831,7 @@ class VegaService(ABC):
         reference_sell: str,
         delta_buy: float,
         delta_sell: float,
-        is_amendment: bool = False,
+        is_amendment: Optional[bool] = None,
     ):
         """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
 
@@ -835,6 +861,14 @@ class VegaService(ABC):
 
         market_decimals = data.market_price_decimals(
             market_id=market_id, data_client=self.trading_data_client
+        )
+        is_amendment = (
+            is_amendment
+            if is_amendment is not None
+            else self.has_liquidity_provision(
+                market_id=market_id,
+                wallet_name=wallet_name,
+            )
         )
         return trading.submit_simple_liquidity(
             market_id=market_id,
@@ -877,6 +911,17 @@ class VegaService(ABC):
             sell_specs=sell_specs,
         )
 
+    def has_liquidity_provision(
+        self,
+        wallet_name: str,
+        market_id: str,
+    ):
+        return data.has_liquidity_provision(
+            self.trading_data_client,
+            market_id,
+            party_id=self.wallet.public_key(wallet_name),
+        )
+
     def submit_liquidity(
         self,
         wallet_name: str,
@@ -885,7 +930,7 @@ class VegaService(ABC):
         fee: float,
         buy_specs: List[Tuple[str, float, int]],
         sell_specs: List[Tuple[str, float, int]],
-        is_amendment: bool = False,
+        is_amendment: Optional[bool] = None,
     ):
         """Submit/Amend a custom liquidity profile.
 
@@ -925,6 +970,14 @@ class VegaService(ABC):
         sell_specs = [
             (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
         ]
+        is_amendment = (
+            is_amendment
+            if is_amendment is not None
+            else self.has_liquidity_provision(
+                market_id=market_id,
+                wallet_name=wallet_name,
+            )
+        )
 
         return trading.submit_liquidity(
             market_id=market_id,
@@ -1029,6 +1082,16 @@ class VegaService(ABC):
                 del order_dict[market_id][party_id][order_id]
         return order_dict
 
+    def orders_for_party_from_feed(
+        self, wallet_name: str, market_id: str, live_only: bool = True
+    ) -> List[data.Order]:
+        party_id = self.wallet.public_key(wallet_name)
+        return (
+            self.order_status_from_feed(live_only=live_only)
+            .get(market_id, {})
+            .get(party_id, {})
+        )
+
     @raw_data
     def liquidity_provisions(
         self,
@@ -1111,7 +1174,7 @@ class VegaService(ABC):
                 break
 
             with self.orders_lock:
-                if o.version > getattr(
+                if o.version >= getattr(
                     self._order_state_from_feed.setdefault(o.market_id, {})
                     .setdefault(o.party_id, {})
                     .get(o.id, None),

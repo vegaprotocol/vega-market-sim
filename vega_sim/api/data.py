@@ -44,6 +44,18 @@ Order = namedtuple(
         "version",
     ],
 )
+Position = namedtuple(
+    "Position",
+    [
+        "party_id",
+        "market_id",
+        "open_volume",
+        "realised_pnl",
+        "unrealised_pnl",
+        "average_entry_price",
+        "updated_at",
+    ],
+)
 
 
 @dataclass
@@ -95,6 +107,40 @@ def _order_from_proto(
         version=order.version,
         market_id=order.market_id,
     )
+
+
+def _position_from_proto(
+    position: vega_protos.vega.Position, price_decimals: int, position_decimals: int
+) -> Position:
+    return Position(
+        party_id=position.party_id,
+        market_id=position.market_id,
+        open_volume=num_from_padded_int(position.open_volume, position_decimals),
+        realised_pnl=num_from_padded_int(position.open_volume, price_decimals),
+        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, price_decimals),
+        average_entry_price=num_from_padded_int(
+            position.average_entry_price, position_decimals
+        ),
+        updated_at=position.updated_at,
+    )
+
+
+def positions_by_market(
+    pub_key: str,
+    market_id: str,
+    price_decimals: int,
+    position_decimals: int,
+    data_client: vac.VegaTradingDataClient,
+) -> List[vega_protos.vega.Position]:
+    """Output positions of a party."""
+    return [
+        _position_from_proto(
+            pos, price_decimals=price_decimals, position_decimals=position_decimals
+        )
+        for pos in data_raw.positions_by_market(
+            pub_key=pub_key, market_id=market_id, data_client=data_client
+        )
+    ]
 
 
 def party_account(
@@ -534,3 +580,23 @@ def _queue_thread(
     except Exception as e:
         logger.info("Order subscription closed")
         return
+
+
+def has_liquidity_provision(
+    data_client: vac.VegaTradingDataClient,
+    market_id: str,
+    party_id: str,
+) -> bool:
+    lip = data_raw.liquidity_provisions(
+        data_client=data_client, market_id=market_id, party_id=party_id
+    )
+    return (
+        lip
+        and len(lip) > 0
+        and lip[0].status
+        in [
+            vega_protos.vega.LiquidityProvision.Status.STATUS_ACTIVE,
+            vega_protos.vega.LiquidityProvision.Status.STATUS_UNDEPLOYED,
+            vega_protos.vega.LiquidityProvision.Status.STATUS_PENDING,
+        ]
+    )

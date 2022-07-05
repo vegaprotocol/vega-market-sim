@@ -397,6 +397,7 @@ def _make_and_wait_for_proposal(
         transaction=proposal, name=wallet_name, transaction_type="proposal_submission"
     )
     logger.debug("Waiting for proposal acceptance")
+
     proposal = wait_for_acceptance(
         proposal.reference,
         lambda p: _proposal_loader(p, data_client),
@@ -451,8 +452,6 @@ def settle_oracle(
         name=wallet_name,
         transaction_type="oracle_data_submission",
     )
-
-    logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
     # use oracle to settle market
     payload = {oracle_name: str(settlement_price)}
