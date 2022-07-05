@@ -10,9 +10,9 @@ SCENARIOS = {
         initial_price=10,
         step_length_seconds=60,
         block_length_seconds=1,
-        buy_intensity=2,
-        sell_intensity=2,
-        kappa=1,
-        sigma=200,
+        buy_intensity=1,
+        sell_intensity=1,
+        kappa=1.1,
+        sigma=20,
     ),
 }

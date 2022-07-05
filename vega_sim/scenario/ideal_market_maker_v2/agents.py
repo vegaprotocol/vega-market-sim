@@ -132,11 +132,11 @@ class OptimalMarketMaker(StateAgentWithWallet):
             max_faucet_amount=5e10,
         )
         self.vega.wait_fn(5)
+        self.vega.wait_for_datanode_sync()
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
         # Top up asset
         self.initial = 100000
-        self.vega.wait_for_datanode_sync()
         self.vega.mint(
             self.wallet_name,
             asset=self.tdai_id,
@@ -149,6 +149,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
             "market.liquidity.minimum.probabilityOfTrading.lpOrders",
             "0.001",
         )
+
+        self.vega.wait_for_datanode_sync()
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.stakeToCcySiskas",
