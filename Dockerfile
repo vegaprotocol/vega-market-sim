@@ -1,5 +1,7 @@
 FROM python:3.10-slim-bullseye AS vegasim
 
+RUN useradd -ms /bin/bash vega
+
 WORKDIR /vega_market_sim
 
 COPY ./requirements.txt .
@@ -12,4 +14,7 @@ FROM vegasim AS vegasim_test
 
 COPY pytest.ini .
 
+
 RUN pip install pytest requests-mock
+
+USER vega

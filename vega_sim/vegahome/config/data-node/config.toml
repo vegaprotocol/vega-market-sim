@@ -314,3 +314,15 @@ UlimitNOFile = 8192
   ProfilesDir = "/tmp"
   BlockProfileRate = 0
   MutexProfileFraction = 0
+
+[SQLStore]
+  Enabled = true
+  WipeOnStartup = true
+  UseEmbedded = true
+  [SQLStore.ConnectionConfig]
+    Host = "localhost"
+    Port = "TO_BE_SET"
+    Username = "vega"
+    Password = "vega"
+    Database = "vega"
+    UseTransactions = true

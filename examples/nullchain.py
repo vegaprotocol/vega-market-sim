@@ -25,7 +25,7 @@ wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    with VegaServiceNull(run_with_console=False, start_order_feed=False) as vega:
+    with VegaServiceNull(run_with_console=True, start_order_feed=False) as vega:
 
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
@@ -49,6 +49,7 @@ if __name__ == "__main__":
             max_faucet_amount=1e10,
         )
 
+        vega.wait_for_datanode_sync()
         tdai_id = vega.find_asset_id(symbol="tDAI")
         print("TDAI: ", tdai_id)
 
@@ -135,7 +136,7 @@ if __name__ == "__main__":
             price=99.5,
         )
 
-        vega.submit_order(
+        to_cancel = vega.submit_order(
             trading_wallet=MM_WALLET.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
@@ -143,7 +144,11 @@ if __name__ == "__main__":
             side="SIDE_SELL",
             volume=10,
             price=100.5,
+            wait=True,
         )
+
+        vega.cancel_order(MM_WALLET.name, market_id, to_cancel)
+
         vega.submit_simple_liquidity(
             wallet_name=MM_WALLET.name,
             market_id=market_id,

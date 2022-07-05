@@ -37,6 +37,7 @@ class Ports(Enum):
     DATA_NODE_GRPC = auto()
     DATA_NODE_REST = auto()
     DATA_NODE_GRAPHQL = auto()
+    DATA_NODE_POSTGRES = auto()
     FAUCET = auto()
     WALLET = auto()
     VEGA_NODE = auto()
@@ -81,6 +82,14 @@ PORT_UPDATERS = {
             ["API", "REST"],
             "Hosts",
             lambda port: [f"localhost:{port}"],
+        ),
+    ],
+    Ports.DATA_NODE_POSTGRES: [
+        PortUpdateConfig(
+            ("config", "data-node", "config.toml"),
+            ["SQLStore", "ConnectionConfig"],
+            "Port",
+            lambda port: port,
         ),
     ],
     Ports.FAUCET: [
@@ -407,6 +416,7 @@ class VegaServiceNull(VegaService):
         Ports.DATA_NODE_GRPC: "data_node_grpc_port",
         Ports.DATA_NODE_REST: "data_node_rest_port",
         Ports.DATA_NODE_GRAPHQL: "data_node_graphql_port",
+        Ports.DATA_NODE_POSTGRES: "data_node_postgres_port",
         Ports.FAUCET: "faucet_port",
         Ports.VEGA_NODE: "vega_node_port",
         Ports.CORE_GRPC: "vega_node_grpc_port",
@@ -493,6 +503,7 @@ class VegaServiceNull(VegaService):
         self.data_node_rest_port = 0
         self.data_node_grpc_port = 0
         self.data_node_graphql_port = 0
+        self.data_node_postgres_port = 0
         self.faucet_port = 0
         self.vega_node_port = 0
         self.vega_node_grpc_port = 0
@@ -514,6 +525,7 @@ class VegaServiceNull(VegaService):
             Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
             Ports.DATA_NODE_REST: self.data_node_rest_port,
             Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
+            Ports.DATA_NODE_POSTGRES: self.data_node_postgres_port,
             Ports.FAUCET: self.faucet_port,
             Ports.VEGA_NODE: self.vega_node_port,
             Ports.CORE_GRPC: self.vega_node_grpc_port,
@@ -540,10 +552,10 @@ class VegaServiceNull(VegaService):
 
         if block_on_startup:
             # Wait for startup
-            for _ in range(300):
+            for _ in range(3000):
                 try:
                     requests.get(
-                        f"http://localhost:{self.data_node_rest_port}/assets"
+                        f"http://localhost:{self.data_node_rest_port}/time"
                     ).raise_for_status()
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
