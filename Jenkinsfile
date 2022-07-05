@@ -98,6 +98,10 @@ pipeline {
         }
 
         stage('Compile') {
+            environment {
+                GOOS         = 'linux'
+                GOARCH       = 'amd64'
+            }
             options { retry(3) }
             parallel {
                 stage('vega') {

@@ -42,6 +42,7 @@ def test_settlement(vega_service: VegaServiceNull):
 
     vega.forward("1s")
     vega.wait_for_datanode_sync()
+
     vega.settle_market(
         settlement_wallet=TERMINATE_WALLET.name,
         settlement_price=settlement_price,

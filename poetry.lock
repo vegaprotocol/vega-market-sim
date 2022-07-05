@@ -478,7 +478,7 @@ name = "jinja2"
 version = "3.1.2"
 description = "A very fast and expressive template engine."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
@@ -686,7 +686,7 @@ name = "markupsafe"
 version = "2.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7"
 
 [[package]]
@@ -1528,7 +1528,7 @@ learning = ["matplotlib", "tqdm", "torch"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "4ba58a241e6450e742df7d6bfd599a3baf49a2259c1c4d8098c29a47975db2aa"
+content-hash = "5caf1207f3a6064427529824bfbcb2b7fb040067c68d8204d99aef85069f56b8"
 
 [metadata.files]
 anyio = [

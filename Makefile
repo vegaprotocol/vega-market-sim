@@ -9,6 +9,8 @@ all: pull_deps build_deps
 
 ui: pull_deps_ui build_deps_ui
 
+proto: pull_deps_proto build_proto
+
 pull_deps:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
