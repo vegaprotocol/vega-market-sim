@@ -17,6 +17,8 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     AUCTION1_WALLET,
     AUCTION2_WALLET,
     OptimalMarketMaker,
+)
+from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
@@ -134,6 +136,8 @@ class IdealMarketMaker(Scenario):
             wallet_pass=AUCTION1_WALLET.passphrase,
             side="SIDE_BUY",
             initial_price=self.initial_price,
+            market_name=market_name,
+            asset_name=asset_name,
             tag=str(tag),
         )
 
@@ -142,6 +146,8 @@ class IdealMarketMaker(Scenario):
             wallet_pass=AUCTION2_WALLET.passphrase,
             side="SIDE_SELL",
             initial_price=self.initial_price,
+            market_name=market_name,
+            asset_name=asset_name,
             tag=str(tag),
         )
 
