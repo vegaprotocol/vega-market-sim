@@ -41,7 +41,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         wallet_pass: str,
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
-        price_processs: List[float],
+        price_process: List[float],
         spread: float = 0.00002,
         num_steps: int = 180,
         market_order_arrival_rate: float = 5,
@@ -60,7 +60,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.terminate_wallet_name = terminate_wallet_name + str(tag)
         self.terminate_wallet_pass = terminate_wallet_pass
 
-        self.price_process = price_processs
+        self.price_process = price_process
         self.spread = spread
         self.time = num_steps
         self.Lambda = market_order_arrival_rate
@@ -244,17 +244,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 buy_order = order
             else:
                 sell_order = order
-
-        # self.vega.submit_simple_liquidity(
-        #     wallet_name=self.wallet_name,
-        #     market_id=self.market_id,
-        #     commitment_amount=self.commitment_amount,
-        #     fee=0.002,
-        #     reference_buy="PEGGED_REFERENCE_MID",
-        #     reference_sell="PEGGED_REFERENCE_MID",
-        #     delta_buy=self.bid_depth,
-        #     delta_sell=self.ask_depth,
-        # )
 
         self._place_orders(
             buy_offset=self.bid_depth,

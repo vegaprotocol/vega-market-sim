@@ -35,10 +35,11 @@ def build_basic_market(
     initial_spread: float = 0.1,
     initial_commitment: float = 100,
 ):
-    vega.wait_for_datanode_sync()
+    vega.wait_for_total_catchup()
     for wallet in WALLETS:
         vega.create_wallet(wallet.name, wallet.passphrase)
 
+    vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
         asset="VOTE",
@@ -55,7 +56,7 @@ def build_basic_market(
         max_faucet_amount=10 * mint_amount * 1e5,
     )
     vega.forward("10s")
-    vega.wait_for_datanode_sync()
+    vega.wait_for_total_catchup()
 
     asset_id = vega.find_asset_id(symbol=ASSET_NAME)
 
@@ -124,12 +125,29 @@ def build_basic_market(
         volume=initial_volume,
         price=initial_price + initial_spread / 2,
     )
+    vega.wait_for_total_catchup()
 
 
 @pytest.fixture
 def vega_service():
     with VegaServiceNull(
-        warn_on_raw_data_access=False, run_with_console=False, start_order_feed=False
+        warn_on_raw_data_access=False,
+        run_with_console=False,
+        start_order_feed=False,
+        retain_log_files=True,
+        transactions_per_block=50,
+    ) as vega:
+        yield vega
+
+
+@pytest.fixture
+def vega_service_with_order_feed():
+    with VegaServiceNull(
+        warn_on_raw_data_access=False,
+        run_with_console=False,
+        start_order_feed=True,
+        retain_log_files=True,
+        transactions_per_block=50,
     ) as vega:
         yield vega
 

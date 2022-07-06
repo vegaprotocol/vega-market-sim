@@ -75,11 +75,7 @@ class IdealMarketMaker(Scenario):
         self.sell_intensity = sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
 
-    def set_up_background_market(
-        self,
-        vega: VegaServiceNull,
-        tag: str = "",
-    ) -> MarketEnvironmentWithState:
+    def _generate_price_process(self):
         _, price_process = RW_model(
             T=self.num_steps * self.dt,
             dt=self.dt,
@@ -87,15 +83,24 @@ class IdealMarketMaker(Scenario):
             sigma=self.sigma,
             Midprice=self.initial_price,
         )
+        return price_process
+
+    def set_up_background_market(
+        self,
+        vega: VegaServiceNull,
+        tag: str = "",
+    ) -> MarketEnvironmentWithState:
         market_name = f"BTC:DAI_{tag}"
         asset_name = f"tDAI{tag}"
+
+        price_process = self._generate_price_process()
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
             wallet_pass=MM_WALLET.passphrase,
             terminate_wallet_name=TERMINATE_WALLET.name,
             terminate_wallet_pass=TERMINATE_WALLET.passphrase,
-            price_processs=price_process,
+            price_process=price_process,
             spread=self.spread,
             num_steps=self.num_steps,
             market_order_arrival_rate=self.buy_intensity,

@@ -21,7 +21,6 @@ pipeline {
     }
     parameters {
         string(name: 'VEGA_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega repository')
-        string(name: 'VEGA_WALLET_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vegawallet repository')
         string(name: 'DATA_NODE_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/data-node repository')
     }
     environment {
@@ -32,30 +31,6 @@ pipeline {
     stages {
         stage('Git Clone') {
             parallel {
-                stage('vega core') {
-                    options { retry(3) }
-                    steps {
-                        dir('vega') {
-                            git branch: "${params.VEGA_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git'
-                        }
-                    }
-                }
-                stage('vegawallet') {
-                    options { retry(3) }
-                    steps {
-                        dir('vegawallet') {
-                            git branch: "${params.VEGA_WALLET_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vegawallet.git'
-                        }
-                    }
-                }
-                stage('data-node') {
-                    options { retry(3) }
-                    steps {
-                        dir('data-node') {
-                            git branch: "${params.DATA_NODE_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/data-node.git'
-                        }
-                    }
-                }
                 stage('vega-market-sim') {
                     options { retry(3) }
                     steps {
@@ -68,69 +43,23 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        stage('Dependencies') {
-            options { retry(3) }
-            parallel {
-                stage('vega') {
+                stage('vega core') {
+                    options { retry(3) }
                     steps {
-                        dir('vega') {
-                            sh 'go mod download -x'
-                        }
-                    }
-                }
-                stage('vegawallet') {
-                    steps {
-                        dir('vegawallet') {
-                            sh 'go mod download -x'
+                        dir('vega-market-sim') {
+                            dir('extern/vega') {
+                                git branch: "${params.VEGA_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git'
+                            }
                         }
                     }
                 }
                 stage('data-node') {
+                    options { retry(3) }
                     steps {
-                        dir('data-node') {
-                            sh 'go mod download -x'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Compile') {
-            environment {
-                GOOS         = 'linux'
-                GOARCH       = 'amd64'
-            }
-            options { retry(3) }
-            parallel {
-                stage('vega') {
-                    steps {
-                        dir('vega') {
-                            sh 'mkdir -p ../vega-market-sim/vega_sim/bin'
-                            sh label: 'Compile', script: '''
-                                go build -o ../vega-market-sim/vega_sim/bin/ ./...
-                            '''
-                        }
-                    }
-                }
-                stage('vegawallet') {
-                    steps {
-                        dir('vegawallet') {
-                            sh 'mkdir -p ../vega-market-sim/vega_sim/bin'
-                            sh label: 'Compile', script: '''
-                                go build -o ../vega-market-sim/vega_sim/bin/ ./...
-                            '''
-                        }
-                    }
-                }
-                stage('data-node') {
-                    steps {
-                        dir('data-node') {
-                            sh 'mkdir -p ../vega-market-sim/vega_sim/bin'
-                            sh label: 'Compile', script: '''
-                                go build -o ../vega-market-sim/vega_sim/bin/ ./...
-                            '''
+                        dir('vega-market-sim') {
+                            dir('extern/data-node') {
+                                git branch: "${params.DATA_NODE_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/data-node.git'
+                            }
                         }
                     }
                 }
@@ -154,6 +83,11 @@ pipeline {
                     sh label: 'Build docker image', script: '''
                         scripts/run-docker-integration-test.sh
                     '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: '/tmp/**/*.out'
                 }
             }
         }

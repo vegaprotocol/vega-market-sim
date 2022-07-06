@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import atexit
 import logging
+import multiprocessing
 import os
 import shutil
 import signal
 import socket
 import subprocess
+import sys
 import tempfile
 import time
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum, auto
-from multiprocessing import Process
 from os import path
 from typing import Dict, List, Optional, Set
 
@@ -306,12 +307,13 @@ def manage_vega_processes(
     transactions_per_block: int = 1,
     block_duration: str = "1s",
     run_wallet: bool = False,
+    retain_log_files: bool = False,
 ) -> None:
     port_config = port_config if port_config is not None else {}
+
     with tempfile.TemporaryDirectory() as tmp_vega_dir:
-        print(tmp_vega_dir)
-        logger.info(tmp_vega_dir)
-        logger.debug(f"Running NullChain from vegahome of {tmp_vega_dir}")
+        logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
+        sys.stdout.flush()
         shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
         tmp_vega_home = tmp_vega_dir + "/vegahome"
@@ -407,6 +409,11 @@ def manage_vega_processes(
             # and would really be a symptom of these children taking too long to close
             time.sleep(5)
             process.kill()
+        if retain_log_files:
+            log_dir = tempfile.mkdtemp()
+            shutil.copytree(tmp_vega_dir, log_dir, dirs_exist_ok=True)
+            logger.info(f"Retained logs in {log_dir}")
+            sys.stdout.flush()
 
 
 class VegaServiceNull(VegaService):
@@ -439,12 +446,15 @@ class VegaServiceNull(VegaService):
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
         start_order_feed: bool = True,
+        retain_log_files: bool = False,
     ):
         super().__init__(
             can_control_time=True,
             warn_on_raw_data_access=warn_on_raw_data_access,
             seconds_per_block=seconds_per_block,
         )
+        self.retain_log_files = retain_log_files
+
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
         self.vega_wallet_path = vega_wallet_path or path.join(
@@ -534,7 +544,8 @@ class VegaServiceNull(VegaService):
         }
 
     def start(self, block_on_startup: bool = True) -> None:
-        self.proc = Process(
+        ctx = multiprocessing.get_context("fork")
+        self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
                 "vega_path": self.vega_path,
@@ -546,6 +557,7 @@ class VegaServiceNull(VegaService):
                 "transactions_per_block": self.transactions_per_block,
                 "block_duration": f"{int(self.seconds_per_block)}s",
                 "run_wallet": self._use_full_vega_wallet or self.run_with_console,
+                "retain_log_files": self.retain_log_files,
             },
         )
         self.proc.start()
@@ -556,11 +568,9 @@ class VegaServiceNull(VegaService):
                 f" http://localhost:{self.console_port}"
             )
 
-        if self._start_order_feed:
-            self.start_order_monitoring()
-
         if block_on_startup:
             # Wait for startup
+            started = False
             for _ in range(3000):
                 try:
                     requests.get(
@@ -569,16 +579,21 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
-                    return
+                    started = True
+                    break
                 except (
                     MaxRetryError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.HTTPError,
                 ):
                     time.sleep(0.1)
-            raise VegaStartupTimeoutError(
-                "Timed out waiting for Vega simulator to start up"
-            )
+            if not started:
+                raise VegaStartupTimeoutError(
+                    "Timed out waiting for Vega simulator to start up"
+                )
+
+        if self._start_order_feed:
+            self.start_order_monitoring()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

@@ -557,4 +557,4 @@ def test_order_subscription(
         data_client=data_client,
     )
     for order in orders:
-        assert order.id == queue.get().id
+        assert order.id == next(queue).id

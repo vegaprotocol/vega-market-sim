@@ -18,7 +18,11 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
+    vega.wait_for_total_catchup()
+
     create_and_faucet_wallet(vega=vega, wallet=LIQ)
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
     vega.submit_liquidity(
         LIQ.name,
         market_id=market_id,
@@ -28,8 +32,8 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         sell_specs=[("PEGGED_REFERENCE_MID", 0.5, 1)],
         is_amendment=False,
     )
-    vega.forward("1s")
-    vega.wait_for_datanode_sync()
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
 
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
 
@@ -66,6 +70,7 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
             proportion=1,
         ),
     ]
+    vega.wait_for_total_catchup()
     vega.submit_liquidity(
         LIQ.name,
         market_id=market_id,
@@ -79,8 +84,9 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         is_amendment=True,
     )
 
-    vega.forward("1s")
-    vega.wait_for_datanode_sync()
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
 
     assert len(liq_provis) == 1
@@ -94,9 +100,6 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         assert provis.liquidity_order.reference == exp_provis.reference
         assert provis.liquidity_order.offset == exp_provis.offset
         assert provis.liquidity_order.proportion == exp_provis.proportion
-
-    vega.forward("10s")
-    vega.wait_for_datanode_sync()
 
     num_levels = 11
     expected_bid_prices = [0.2995, 0.25, 0.23194, 0, 0, 0, 0, 0, 0, 0, 0]
