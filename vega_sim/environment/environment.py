@@ -326,7 +326,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             market_state[market.id] = MarketState(
                 state=market_info.state,
                 trading_mode=market_info.trading_mode,
-                orders=order_status[market.id],
+                orders=order_status.get(market.id, {}),
                 # order_book=vega.order_book_by_market(market.id),
             )
 
