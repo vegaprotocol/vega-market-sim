@@ -136,3 +136,4 @@ dmypy.json
 vega_sim/bin/*
 rl_logs/
 numerical_results/
+test_logs/

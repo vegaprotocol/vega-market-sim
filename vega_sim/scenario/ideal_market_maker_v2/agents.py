@@ -114,7 +114,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
 
         # Faucet vega tokens
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         self.vega.mint(
             self.wallet_name,
             asset="VOTE",
@@ -132,7 +132,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             max_faucet_amount=5e10,
         )
         self.vega.wait_fn(5)
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
         # Top up asset
@@ -142,7 +142,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             asset=self.tdai_id,
             amount=self.initial,
         )
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
 
         self.vega.update_network_parameter(
             self.wallet_name,
@@ -150,7 +150,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             "0.001",
         )
 
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.stakeToCcySiskas",

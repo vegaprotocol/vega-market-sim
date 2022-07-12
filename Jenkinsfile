@@ -80,14 +80,14 @@ pipeline {
         stage('Tests') {
             steps {
                 dir('vega-market-sim') {
-                    sh label: 'Build docker image', script: '''
+                    sh label: 'Run Integration Tests', script: '''
                         scripts/run-docker-integration-test.sh
                     '''
                 }
             }
             post {
                 always {
-                    archiveArtifacts artifacts: '/tmp/**/*.out'
+                    archiveArtifacts artifacts: 'vega-market-sim/test_logs/'
                 }
             }
         }

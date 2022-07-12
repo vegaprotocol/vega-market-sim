@@ -311,109 +311,108 @@ def manage_vega_processes(
 ) -> None:
     port_config = port_config if port_config is not None else {}
 
-    with tempfile.TemporaryDirectory() as tmp_vega_dir:
-        logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
-        sys.stdout.flush()
-        shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
+    # Explicitly not using context here so that crashed logs are retained
+    tmp_vega_dir = tempfile.mkdtemp()
 
-        tmp_vega_home = tmp_vega_dir + "/vegahome"
-        _update_node_config(
-            tmp_vega_home,
-            port_config=port_config,
-            transactions_per_block=transactions_per_block,
-            block_duration=block_duration,
-        )
+    logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
+    shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
-        dataNodeProcess = _popen_process(
-            [data_node_path, "node", "--home=" + tmp_vega_home],
+    tmp_vega_home = tmp_vega_dir + "/vegahome"
+    _update_node_config(
+        tmp_vega_home,
+        port_config=port_config,
+        transactions_per_block=transactions_per_block,
+        block_duration=block_duration,
+    )
+
+    dataNodeProcess = _popen_process(
+        [data_node_path, "node", "--home=" + tmp_vega_home],
+        dir_root=tmp_vega_dir,
+        log_name="data_node",
+    )
+
+    vegaFaucetProcess = _popen_process(
+        [
+            vega_path,
+            "faucet",
+            "run",
+            "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
+            "--home=" + tmp_vega_home,
+        ],
+        dir_root=tmp_vega_dir,
+        log_name="faucet",
+    )
+    vegaNodeProcess = _popen_process(
+        [
+            vega_path,
+            "node",
+            "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+            "--home=" + tmp_vega_home,
+        ],
+        dir_root=tmp_vega_dir,
+        log_name="node",
+    )
+    processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
+
+    if run_wallet:
+        wallet_args = [
+            vega_wallet_path,
+            "service",
+            "run",
+            "--network",
+            "local",
+            "--home=" + tmp_vega_home,
+            "--automatic-consent",
+        ]
+
+        vegaWalletProcess = _popen_process(
+            wallet_args,
             dir_root=tmp_vega_dir,
-            log_name="data_node",
+            log_name="vegawallet",
         )
+        processes.append(vegaWalletProcess)
 
-        vegaFaucetProcess = _popen_process(
+    if run_with_console:
+        env_copy = os.environ.copy()
+        env_copy.update(
+            {
+                "REACT_APP_VEGA_URL": (
+                    f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}"
+                ),
+                "REACT_APP_VEGA_WALLET_URL": (
+                    f"http://localhost:{port_config[Ports.WALLET]}/api/v1"
+                ),
+                "PORT": f"{port_config[Ports.CONSOLE]}",
+                "NODE_ENV": "development",
+            }
+        )
+        console_process = _popen_process(
             [
-                vega_path,
-                "faucet",
-                "run",
-                "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
-                "--home=" + tmp_vega_home,
+                "yarn",
+                "--cwd",
+                vega_console_path,
+                "start",
             ],
             dir_root=tmp_vega_dir,
-            log_name="faucet",
+            log_name="console",
+            env=env_copy,
         )
-        vegaNodeProcess = _popen_process(
-            [
-                vega_path,
-                "node",
-                "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
-                "--home=" + tmp_vega_home,
-            ],
-            dir_root=tmp_vega_dir,
-            log_name="node",
-        )
-        processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
+        processes.append(console_process)
 
-        if run_wallet:
-            wallet_args = [
-                vega_wallet_path,
-                "service",
-                "run",
-                "--network",
-                "local",
-                "--home=" + tmp_vega_home,
-                "--automatic-consent",
-            ]
+    signal.sigwait([signal.SIGKILL, signal.SIGTERM])
+    for process in processes:
+        process.terminate()
+    for process in processes:
+        return_code = process.poll()
+        if return_code is not None:
+            continue
+        # Could mean 5s wait per process, but we're not holding the outer process
+        # and would really be a symptom of these children taking too long to close
+        time.sleep(5)
+        process.kill()
 
-            vegaWalletProcess = _popen_process(
-                wallet_args,
-                dir_root=tmp_vega_dir,
-                log_name="vegawallet",
-            )
-            processes.append(vegaWalletProcess)
-
-        if run_with_console:
-            env_copy = os.environ.copy()
-            env_copy.update(
-                {
-                    "REACT_APP_VEGA_URL": (
-                        f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}"
-                    ),
-                    "REACT_APP_VEGA_WALLET_URL": (
-                        f"http://localhost:{port_config[Ports.WALLET]}/api/v1"
-                    ),
-                    "PORT": f"{port_config[Ports.CONSOLE]}",
-                    "NODE_ENV": "development",
-                }
-            )
-            console_process = _popen_process(
-                [
-                    "yarn",
-                    "--cwd",
-                    vega_console_path,
-                    "start",
-                ],
-                dir_root=tmp_vega_dir,
-                log_name="console",
-                env=env_copy,
-            )
-            processes.append(console_process)
-
-        signal.sigwait([signal.SIGKILL, signal.SIGTERM])
-        for process in processes:
-            process.terminate()
-        for process in processes:
-            return_code = process.poll()
-            if return_code is not None:
-                continue
-            # Could mean 5s wait per process, but we're not holding the outer process
-            # and would really be a symptom of these children taking too long to close
-            time.sleep(5)
-            process.kill()
-        if retain_log_files:
-            log_dir = tempfile.mkdtemp()
-            shutil.copytree(tmp_vega_dir, log_dir, dirs_exist_ok=True)
-            logger.info(f"Retained logs in {log_dir}")
-            sys.stdout.flush()
+    if not retain_log_files:
+        shutil.rmtree(tmp_vega_dir)
 
 
 class VegaServiceNull(VegaService):

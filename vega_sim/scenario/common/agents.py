@@ -182,6 +182,7 @@ class BackgroundMarket(StateAgentWithWallet):
             side=vega_protos.SIDE_SELL,
         )
 
+        self.vega.wait_for_total_catchup()
         for price, size in buy_shape:
             self._submit_order(vega_protos.SIDE_BUY, price, size)
         for price, size in sell_shape:
@@ -395,6 +396,7 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
             num_levels=market_regime.num_levels_per_side,
         )
 
+        self.vega.wait_for_total_catchup()
         for price, size in buy_shape:
             self._submit_order(vega_protos.SIDE_BUY, price, size)
         for price, size in sell_shape:
@@ -533,6 +535,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
 
+        self.vega.wait_for_total_catchup()
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
@@ -542,6 +545,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             amount=100000,
         )
         self.vega.wait_fn(2)
+        self.vega.wait_for_total_catchup()
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
@@ -596,13 +600,14 @@ class MarketManager(StateAgentWithWallet):
         self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
 
         # Faucet vega tokens
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         self.vega.mint(
             self.wallet_name,
             asset="VOTE",
             amount=1e4,
         )
         self.vega.wait_fn(5)
+        self.vega.wait_for_total_catchup()
 
         # Create asset
         self.vega.create_asset(
@@ -613,7 +618,7 @@ class MarketManager(StateAgentWithWallet):
             max_faucet_amount=5e10,
         )
         self.vega.wait_fn(5)
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
@@ -624,7 +629,7 @@ class MarketManager(StateAgentWithWallet):
             amount=self.initial,
         )
         self.vega.wait_fn(5)
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
 
         self.vega.update_network_parameter(
             self.wallet_name,
@@ -632,14 +637,14 @@ class MarketManager(StateAgentWithWallet):
             "0.001",
         )
 
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.stakeToCcySiskas",
             "0.001",
         )
 
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         # Set up a future market
         self.vega.create_simple_market(
             market_name=self.market_name,
