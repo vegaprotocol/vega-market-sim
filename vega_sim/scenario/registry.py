@@ -21,7 +21,7 @@ SCENARIOS = {
         sigma_pre=1,
         sigma_post=5,
         drift_pre=0,
-        drift_post=-8,
+        drift_post=-10,
         break_point=100,
         initial_price=100,
         kappa=1.1,
@@ -33,6 +33,6 @@ SCENARIOS = {
         num_noise_traders=5,
         step_length_seconds=120,
         block_length_seconds=1,
-        trim_to_min=0.01,
+        trim_to_min=1,
     ),
 }

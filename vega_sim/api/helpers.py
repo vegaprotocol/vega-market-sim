@@ -90,7 +90,7 @@ def wait_for_core_catchup(
     core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
 
     while core_time != core_time_two:
-        time.sleep(0.5)
+        time.sleep(0.05)
         core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
         time.sleep(0.1)
         core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
