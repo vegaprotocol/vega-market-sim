@@ -8,7 +8,6 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -20,19 +19,13 @@ from ... import assets_pb2 as vega_dot_assets__pb2
 from ... import chain_events_pb2 as vega_dot_chain__events__pb2
 from ... import governance_pb2 as vega_dot_governance__pb2
 from ...events.v1 import events_pb2 as vega_dot_events_dot_v1_dot_events__pb2
-from ...commands.v1 import (
-    validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2,
-)
-from ...checkpoint.v1 import (
-    checkpoint_pb2 as vega_dot_checkpoint_dot_v1_dot_checkpoint__pb2,
-)
+from ...commands.v1 import validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2
+from ...checkpoint.v1 import checkpoint_pb2 as vega_dot_checkpoint_dot_v1_dot_checkpoint__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1fvega/snapshot/v1/snapshot.proto\x12\x10vega.snapshot.v1\x1a\x0fvega/vega.proto\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x17vega/chain_events.proto\x1a\x15vega/governance.proto\x1a\x1bvega/events/v1/events.proto\x1a)vega/commands/v1/validator_commands.proto\x1a#vega/checkpoint/v1/checkpoint.proto"t\n\x08Snapshot\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12(\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x18.vega.snapshot.v1.Format\x12\x0e\n\x06\x63hunks\x18\x03 \x01(\r\x12\x0c\n\x04hash\x18\x04 \x01(\x0c\x12\x10\n\x08metadata\x18\x05 \x01(\x0c"W\n\x08NodeHash\x12\x0b\n\x03key\x18\x03 \x01(\t\x12\x0c\n\x04hash\x18\x04 \x01(\t\x12\x0e\n\x06height\x18\x05 \x01(\x05\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x0f\n\x07is_leaf\x18\x07 \x01(\x08"b\n\x08Metadata\x12\x0f\n\x07version\x18\x01 \x01(\x03\x12\x14\n\x0c\x63hunk_hashes\x18\x02 \x03(\t\x12/\n\x0bnode_hashes\x18\x03 \x03(\x0b\x32\x1a.vega.snapshot.v1.NodeHash"H\n\x05\x43hunk\x12\'\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x19.vega.snapshot.v1.Payload\x12\n\n\x02nr\x18\x02 \x01(\x03\x12\n\n\x02of\x18\x03 \x01(\x03"\x82\x1a\n\x07Payload\x12\x37\n\ractive_assets\x18\x01 \x01(\x0b\x32\x1e.vega.snapshot.v1.ActiveAssetsH\x00\x12\x39\n\x0epending_assets\x18\x02 \x01(\x0b\x32\x1f.vega.snapshot.v1.PendingAssetsH\x00\x12\x43\n\x13\x62\x61nking_withdrawals\x18\x03 \x01(\x0b\x32$.vega.snapshot.v1.BankingWithdrawalsH\x00\x12=\n\x10\x62\x61nking_deposits\x18\x04 \x01(\x0b\x32!.vega.snapshot.v1.BankingDepositsH\x00\x12\x35\n\x0c\x62\x61nking_seen\x18\x05 \x01(\x0b\x32\x1d.vega.snapshot.v1.BankingSeenH\x00\x12\x46\n\x15\x62\x61nking_asset_actions\x18\x06 \x01(\x0b\x32%.vega.snapshot.v1.BankingAssetActionsH\x00\x12\x32\n\ncheckpoint\x18\x07 \x01(\x0b\x32\x1c.vega.snapshot.v1.CheckpointH\x00\x12\x43\n\x13\x63ollateral_accounts\x18\x08 \x01(\x0b\x32$.vega.snapshot.v1.CollateralAccountsH\x00\x12?\n\x11\x63ollateral_assets\x18\t \x01(\x0b\x32".vega.snapshot.v1.CollateralAssetsH\x00\x12?\n\x11\x64\x65legation_active\x18\n \x01(\x0b\x32".vega.snapshot.v1.DelegationActiveH\x00\x12\x41\n\x12\x64\x65legation_pending\x18\x0b \x01(\x0b\x32#.vega.snapshot.v1.DelegationPendingH\x00\x12;\n\x0f\x64\x65legation_auto\x18\x0c \x01(\x0b\x32 .vega.snapshot.v1.DelegationAutoH\x00\x12?\n\x11governance_active\x18\r \x01(\x0b\x32".vega.snapshot.v1.GovernanceActiveH\x00\x12\x41\n\x12governance_enacted\x18\x0e \x01(\x0b\x32#.vega.snapshot.v1.GovernanceEnactedH\x00\x12=\n\x10staking_accounts\x18\x0f \x01(\x0b\x32!.vega.snapshot.v1.StakingAccountsH\x00\x12\x37\n\rmatching_book\x18\x10 \x01(\x0b\x32\x1e.vega.snapshot.v1.MatchingBookH\x00\x12\x39\n\x12network_parameters\x18\x11 \x01(\x0b\x32\x1b.vega.snapshot.v1.NetParamsH\x00\x12?\n\x11\x65xecution_markets\x18\x12 \x01(\x0b\x32".vega.snapshot.v1.ExecutionMarketsH\x00\x12=\n\x10market_positions\x18\x13 \x01(\x0b\x32!.vega.snapshot.v1.MarketPositionsH\x00\x12/\n\tapp_state\x18\x14 \x01(\x0b\x32\x1a.vega.snapshot.v1.AppStateH\x00\x12-\n\x05\x65poch\x18\x15 \x01(\x0b\x32\x1c.vega.snapshot.v1.EpochStateH\x00\x12J\n\x17rewards_pending_payouts\x18\x17 \x01(\x0b\x32\'.vega.snapshot.v1.RewardsPendingPayoutsH\x00\x12;\n\x0fgovernance_node\x18\x18 \x01(\x0b\x32 .vega.snapshot.v1.GovernanceNodeH\x00\x12\x33\n\x0blimit_state\x18\x19 \x01(\x0b\x32\x1c.vega.snapshot.v1.LimitStateH\x00\x12<\n\x10vote_spam_policy\x18\x1a \x01(\x0b\x32 .vega.snapshot.v1.VoteSpamPolicyH\x00\x12@\n\x12simple_spam_policy\x18\x1b \x01(\x0b\x32".vega.snapshot.v1.SimpleSpamPolicyH\x00\x12*\n\x06notary\x18\x1c \x01(\x0b\x32\x18.vega.snapshot.v1.NotaryH\x00\x12?\n\x11replay_protection\x18\x1d \x01(\x0b\x32".vega.snapshot.v1.ReplayProtectionH\x00\x12\x35\n\x0c\x66uture_state\x18\x1e \x01(\x0b\x32\x1d.vega.snapshot.v1.FutureStateH\x00\x12;\n\x0f\x65vent_forwarder\x18\x1f \x01(\x0b\x32 .vega.snapshot.v1.EventForwarderH\x00\x12L\n\x18stake_verifier_deposited\x18  \x01(\x0b\x32(.vega.snapshot.v1.StakeVerifierDepositedH\x00\x12H\n\x16stake_verifier_removed\x18! \x01(\x0b\x32&.vega.snapshot.v1.StakeVerifierRemovedH\x00\x12,\n\x07witness\x18" \x01(\x0b\x32\x19.vega.snapshot.v1.WitnessH\x00\x12\x61\n#delegation_last_reconciliation_time\x18# \x01(\x0b\x32\x32.vega.snapshot.v1.DelegationLastReconciliationTimeH\x00\x12.\n\x08topology\x18$ \x01(\x0b\x32\x1a.vega.snapshot.v1.TopologyH\x00\x12\x38\n\x0boracle_data\x18% \x01(\x0b\x32!.vega.snapshot.v1.OracleDataBatchH\x00\x12\x45\n\x14liquidity_parameters\x18& \x01(\x0b\x32%.vega.snapshot.v1.LiquidityParametersH\x00\x12T\n\x1cliquidity_pending_provisions\x18\' \x01(\x0b\x32,.vega.snapshot.v1.LiquidityPendingProvisionsH\x00\x12_\n"liquidity_parties_liquidity_orders\x18( \x01(\x0b\x32\x31.vega.snapshot.v1.LiquidityPartiesLiquidityOrdersH\x00\x12L\n\x18liquidity_parties_orders\x18) \x01(\x0b\x32(.vega.snapshot.v1.LiquidityPartiesOrdersH\x00\x12\x45\n\x14liquidity_provisions\x18* \x01(\x0b\x32%.vega.snapshot.v1.LiquidityProvisionsH\x00\x12\x41\n\x12liquidity_supplied\x18+ \x01(\x0b\x32#.vega.snapshot.v1.LiquiditySuppliedH\x00\x12=\n\x10liquidity_target\x18, \x01(\x0b\x32!.vega.snapshot.v1.LiquidityTargetH\x00\x12L\n\x18\x66loating_point_consensus\x18. \x01(\x0b\x32(.vega.snapshot.v1.FloatingPointConsensusH\x00\x12\x39\n\x0emarket_tracker\x18/ \x01(\x0b\x32\x1f.vega.snapshot.v1.MarketTrackerH\x00\x12R\n\x1b\x62\x61nking_recurring_transfers\x18\x31 \x01(\x0b\x32+.vega.snapshot.v1.BankingRecurringTransfersH\x00\x12R\n\x1b\x62\x61nking_scheduled_transfers\x18\x32 \x01(\x0b\x32+.vega.snapshot.v1.BankingScheduledTransfersH\x00\x12[\n erc20_multisig_topology_verified\x18\x33 \x01(\x0b\x32/.vega.snapshot.v1.ERC20MultiSigTopologyVerifiedH\x00\x12Y\n\x1f\x65rc20_multisig_topology_pending\x18\x34 \x01(\x0b\x32..vega.snapshot.v1.ERC20MultiSigTopologyPendingH\x00\x12\x36\n\rproof_of_work\x18\x35 \x01(\x0b\x32\x1d.vega.snapshot.v1.ProofOfWorkH\x00\x42\x06\n\x04\x64\x61ta">\n\x17TimestampedOpenInterest\x12\x15\n\ropen_interest\x18\x01 \x01(\x04\x12\x0c\n\x04time\x18\x02 \x01(\x03"\x89\x02\n\x0fLiquidityTarget\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63urrent_time\x18\x02 \x01(\x03\x12\x1a\n\x12scheduled_truncate\x18\x03 \x01(\x03\x12\x1e\n\x16\x63urrent_open_interests\x18\x04 \x03(\x04\x12J\n\x17previous_open_interests\x18\x05 \x03(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterest\x12\x45\n\x12max_open_interests\x18\x06 \x01(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterest"C\n\x1dLiquidityPriceProbabilityPair\x12\r\n\x05price\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\t"\xc9\x01\n\x11LiquiditySupplied\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x19\n\x11\x63onsensus_reached\x18\x02 \x01(\x08\x12\x42\n\tbid_cache\x18\x03 \x03(\x0b\x32/.vega.snapshot.v1.LiquidityPriceProbabilityPair\x12\x42\n\task_cache\x18\x04 \x03(\x0b\x32/.vega.snapshot.v1.LiquidityPriceProbabilityPair"D\n\x0fOracleDataBatch\x12\x31\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.OracleData"N\n\nOracleData\x12\x10\n\x08pub_keys\x18\x01 \x03(\t\x12.\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32 .vega.snapshot.v1.OracleDataPair",\n\x0eOracleDataPair\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t"W\n\x07Witness\x12-\n\tresources\x18\x01 \x03(\x0b\x32\x1a.vega.snapshot.v1.Resource\x12\x1d\n\x15need_resend_resources\x18\x02 \x03(\t"I\n\x08Resource\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x63heck_until\x18\x02 \x01(\x03\x12\r\n\x05votes\x18\x03 \x03(\t\x12\r\n\x05state\x18\x04 \x01(\r"D\n\x0e\x45ventForwarder\x12\x32\n\x0c\x61\x63ked_events\x18\x01 \x03(\x0b\x32\x1c.vega.commands.v1.ChainEvent"5\n\x12\x43ollateralAccounts\x12\x1f\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\r.vega.Account"/\n\x10\x43ollateralAssets\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset"+\n\x0c\x41\x63tiveAssets\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset",\n\rPendingAssets\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset"?\n\nWithdrawal\x12\x0b\n\x03ref\x18\x01 \x01(\t\x12$\n\nwithdrawal\x18\x02 \x01(\x0b\x32\x10.vega.Withdrawal"5\n\x07\x44\x65posit\x12\n\n\x02id\x18\x01 \x01(\t\x12\x1e\n\x07\x64\x65posit\x18\x02 \x01(\x0b\x32\r.vega.Deposit"I\n\x05TxRef\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x10\n\x08\x62lock_nr\x18\x02 \x01(\x04\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\tlog_index\x18\x04 \x01(\x04"\xf6\x01\n\x0b\x41ssetAction\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05state\x18\x02 \x01(\r\x12\r\n\x05\x61sset\x18\x03 \x01(\t\x12\x14\n\x0c\x62lock_number\x18\x04 \x01(\x04\x12\x10\n\x08tx_index\x18\x05 \x01(\x04\x12\x0c\n\x04hash\x18\x06 \x01(\t\x12\x32\n\x0f\x62uiltin_deposit\x18\x07 \x01(\x0b\x32\x19.vega.BuiltinAssetDeposit\x12)\n\rerc20_deposit\x18\x08 \x01(\x0b\x32\x12.vega.ERC20Deposit\x12(\n\nasset_list\x18\t \x01(\x0b\x32\x14.vega.ERC20AssetList"G\n\x12\x42\x61nkingWithdrawals\x12\x31\n\x0bwithdrawals\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.Withdrawal"=\n\x0f\x42\x61nkingDeposits\x12*\n\x07\x64\x65posit\x18\x01 \x03(\x0b\x32\x19.vega.snapshot.v1.Deposit"4\n\x0b\x42\x61nkingSeen\x12%\n\x04refs\x18\x01 \x03(\x0b\x32\x17.vega.snapshot.v1.TxRef"J\n\x13\x42\x61nkingAssetActions\x12\x33\n\x0c\x61sset_action\x18\x01 \x03(\x0b\x32\x1d.vega.snapshot.v1.AssetAction"_\n\x19\x42\x61nkingRecurringTransfers\x12\x42\n\x12recurring_tranfers\x18\x01 \x01(\x0b\x32&.vega.checkpoint.v1.RecurringTransfers"c\n\x19\x42\x61nkingScheduledTransfers\x12\x46\n\x11transfers_at_time\x18\x01 \x03(\x0b\x32+.vega.checkpoint.v1.ScheduledTransferAtTime"\x1d\n\nCheckpoint\x12\x0f\n\x07next_cp\x18\x01 \x01(\x03"D\n DelegationLastReconciliationTime\x12 \n\x18last_reconciliation_time\x18\x01 \x01(\x03"9\n\x10\x44\x65legationActive\x12%\n\x0b\x64\x65legations\x18\x01 \x03(\x0b\x32\x10.vega.Delegation"b\n\x11\x44\x65legationPending\x12%\n\x0b\x64\x65legations\x18\x01 \x03(\x0b\x32\x10.vega.Delegation\x12&\n\x0cundelegation\x18\x02 \x03(\x0b\x32\x10.vega.Delegation"!\n\x0e\x44\x65legationAuto\x12\x0f\n\x07parties\x18\x01 \x03(\t"~\n\x0cProposalData\x12 \n\x08proposal\x18\x01 \x01(\x0b\x32\x0e.vega.Proposal\x12\x17\n\x03yes\x18\x02 \x03(\x0b\x32\n.vega.Vote\x12\x16\n\x02no\x18\x03 \x03(\x0b\x32\n.vega.Vote\x12\x1b\n\x07invalid\x18\x04 \x03(\x0b\x32\n.vega.Vote"F\n\x11GovernanceEnacted\x12\x31\n\tproposals\x18\x01 \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalData"E\n\x10GovernanceActive\x12\x31\n\tproposals\x18\x01 \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalData"3\n\x0eGovernanceNode\x12!\n\tproposals\x18\x01 \x03(\x0b\x32\x0e.vega.Proposal"^\n\x0eStakingAccount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\x12,\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x1c.vega.events.v1.StakeLinking"i\n\x0fStakingAccounts\x12\x32\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32 .vega.snapshot.v1.StakingAccount\x12"\n\x1astaking_asset_total_supply\x18\x02 \x01(\t"\x94\x01\n\x0cMatchingBook\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x18\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x0b.vega.Order\x12\x19\n\x04sell\x18\x03 \x03(\x0b\x32\x0b.vega.Order\x12\x19\n\x11last_traded_price\x18\x04 \x01(\t\x12\x0f\n\x07\x61uction\x18\x05 \x01(\x08\x12\x10\n\x08\x62\x61tch_id\x18\x06 \x01(\x04"3\n\tNetParams\x12&\n\x06params\x18\x01 \x03(\x0b\x32\x16.vega.NetworkParameter"&\n\nDecimalMap\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\x0b\n\x03val\x18\x02 \x01(\t"(\n\tTimePrice\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\r\n\x05price\x18\x02 \x01(\t",\n\x0bPriceVolume\x12\r\n\x05price\x18\x01 \x01(\t\x12\x0e\n\x06volume\x18\x02 \x01(\x04"3\n\nPriceRange\x12\x0b\n\x03min\x18\x01 \x01(\t\x12\x0b\n\x03max\x18\x02 \x01(\t\x12\x0b\n\x03ref\x18\x03 \x01(\t"s\n\nPriceBound\x12\x0e\n\x06\x61\x63tive\x18\x01 \x01(\x08\x12\x11\n\tup_factor\x18\x02 \x01(\t\x12\x13\n\x0b\x64own_factor\x18\x03 \x01(\t\x12-\n\x07trigger\x18\x04 \x01(\x0b\x32\x1c.vega.PriceMonitoringTrigger"k\n\x0fPriceRangeCache\x12+\n\x05\x62ound\x18\x01 \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceBound\x12+\n\x05range\x18\x02 \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceRange"-\n\x0c\x43urrentPrice\x12\r\n\x05price\x18\x01 \x01(\t\x12\x0e\n\x06volume\x18\x02 \x01(\x04"8\n\tPastPrice\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\x1d\n\x15volume_weighted_price\x18\x02 \x01(\t"\xd5\x03\n\x0cPriceMonitor\x12\x13\n\x0binitialised\x18\x03 \x01(\x08\x12\x31\n\x0b\x66p_horizons\x18\x04 \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMap\x12\x0b\n\x03now\x18\x05 \x01(\x03\x12\x0e\n\x06update\x18\x06 \x01(\x03\x12,\n\x06\x62ounds\x18\x07 \x03(\x0b\x32\x1c.vega.snapshot.v1.PriceBound\x12\x1e\n\x16price_range_cache_time\x18\x08 \x01(\x03\x12<\n\x11price_range_cache\x18\t \x03(\x0b\x32!.vega.snapshot.v1.PriceRangeCache\x12\x1c\n\x14ref_price_cache_time\x18\n \x01(\x03\x12\x35\n\x0fref_price_cache\x18\x0b \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMap\x12\x32\n\nprices_now\x18\x0c \x03(\x0b\x32\x1e.vega.snapshot.v1.CurrentPrice\x12\x30\n\x0bprices_past\x18\r \x03(\x0b\x32\x1b.vega.snapshot.v1.PastPrice\x12\x19\n\x11\x63onsensus_reached\x18\x0e \x01(\x08"\x86\x02\n\x0c\x41uctionState\x12&\n\x04mode\x18\x01 \x01(\x0e\x32\x18.vega.Market.TradingMode\x12.\n\x0c\x64\x65\x66\x61ult_mode\x18\x02 \x01(\x0e\x32\x18.vega.Market.TradingMode\x12%\n\x07trigger\x18\x03 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12\r\n\x05\x62\x65gin\x18\x04 \x01(\x03\x12"\n\x03\x65nd\x18\x05 \x01(\x0b\x32\x15.vega.AuctionDuration\x12\r\n\x05start\x18\x06 \x01(\x08\x12\x0c\n\x04stop\x18\x07 \x01(\x08\x12\'\n\textension\x18\x08 \x01(\x0e\x32\x14.vega.AuctionTrigger"V\n\rEquityShareLP\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05stake\x18\x02 \x01(\t\x12\r\n\x05share\x18\x03 \x01(\t\x12\x0b\n\x03\x61vg\x18\x04 \x01(\t\x12\x0e\n\x06vshare\x18\x05 \x01(\t"r\n\x0b\x45quityShare\x12\x0b\n\x03mvp\x18\x01 \x01(\t\x12\x1d\n\x15opening_auction_ended\x18\x02 \x01(\x08\x12,\n\x03lps\x18\x03 \x03(\x0b\x32\x1f.vega.snapshot.v1.EquityShareLP\x12\t\n\x01r\x18\x04 \x01(\t"=\n\x0b\x46\x65\x65Splitter\x12\x19\n\x11time_window_start\x18\x01 \x01(\x03\x12\x13\n\x0btrade_value\x18\x02 \x01(\t"\xe2\x04\n\x06Market\x12\x1c\n\x06market\x18\x01 \x01(\x0b\x32\x0c.vega.Market\x12\x35\n\rprice_monitor\x18\x02 \x01(\x0b\x32\x1e.vega.snapshot.v1.PriceMonitor\x12\x35\n\rauction_state\x18\x03 \x01(\x0b\x32\x1e.vega.snapshot.v1.AuctionState\x12"\n\rpegged_orders\x18\x04 \x03(\x0b\x32\x0b.vega.Order\x12$\n\x0f\x65xpiring_orders\x18\x05 \x03(\x0b\x32\x0b.vega.Order\x12\x15\n\rlast_best_bid\x18\x06 \x01(\t\x12\x15\n\rlast_best_ask\x18\x07 \x01(\t\x12\x14\n\x0clast_mid_bid\x18\x08 \x01(\t\x12\x14\n\x0clast_mid_ask\x18\t \x01(\t\x12\x1f\n\x17last_market_value_proxy\x18\n \x01(\t\x12%\n\x1dlast_equity_share_distributed\x18\x0b \x01(\x03\x12\x33\n\x0c\x65quity_share\x18\x0c \x01(\x0b\x32\x1d.vega.snapshot.v1.EquityShare\x12\x1a\n\x12\x63urrent_mark_price\x18\r \x01(\t\x12\x19\n\x11risk_factor_short\x18\x0e \x01(\t\x12\x18\n\x10risk_factor_long\x18\x0f \x01(\t\x12%\n\x1drisk_factor_consensus_reached\x18\x10 \x01(\x08\x12\x33\n\x0c\x66\x65\x65_splitter\x18\x11 \x01(\x0b\x32\x1d.vega.snapshot.v1.FeeSplitter"=\n\x10\x45xecutionMarkets\x12)\n\x07markets\x18\x01 \x03(\x0b\x32\x18.vega.snapshot.v1.Market"\x81\x01\n\x08Position\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0b\n\x03\x62uy\x18\x03 \x01(\x03\x12\x0c\n\x04sell\x18\x04 \x01(\x03\x12\r\n\x05price\x18\x05 \x01(\t\x12\x14\n\x0cvw_buy_price\x18\x06 \x01(\t\x12\x15\n\rvw_sell_price\x18\x07 \x01(\t"S\n\x0fMarketPositions\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12-\n\tpositions\x18\x02 \x03(\x0b\x32\x1a.vega.snapshot.v1.Position"I\n\x08\x41ppState\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\t\x12\x0c\n\x04time\x18\x03 \x01(\x03\x12\x10\n\x08\x63hain_id\x18\x04 \x01(\t"\x80\x01\n\nEpochState\x12\x0b\n\x03seq\x18\x01 \x01(\x04\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x13\n\x0b\x65xpire_time\x18\x04 \x01(\x03\x12 \n\x18ready_to_start_new_epoch\x18\x06 \x01(\x08\x12\x1a\n\x12ready_to_end_epoch\x18\x07 \x01(\x08"c\n\x15RewardsPendingPayouts\x12J\n\x18scheduled_rewards_payout\x18\x01 \x03(\x0b\x32(.vega.snapshot.v1.ScheduledRewardsPayout"f\n\x16ScheduledRewardsPayout\x12\x13\n\x0bpayout_time\x18\x01 \x01(\x03\x12\x37\n\x0erewards_payout\x18\x02 \x03(\x0b\x32\x1f.vega.snapshot.v1.RewardsPayout"\xb3\x01\n\rRewardsPayout\x12\x14\n\x0c\x66rom_account\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x41\n\x13reward_party_amount\x18\x03 \x03(\x0b\x32$.vega.snapshot.v1.RewardsPartyAmount\x12\x14\n\x0ctotal_reward\x18\x04 \x01(\t\x12\x11\n\tepoch_seq\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03"3\n\x12RewardsPartyAmount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t"\xf8\x01\n\nLimitState\x12\x13\n\x0b\x62lock_count\x18\x01 \x01(\r\x12\x1a\n\x12\x63\x61n_propose_market\x18\x02 \x01(\x08\x12\x19\n\x11\x63\x61n_propose_asset\x18\x03 \x01(\x08\x12\x16\n\x0egenesis_loaded\x18\x04 \x01(\x08\x12\x1e\n\x16propose_market_enabled\x18\x05 \x01(\x08\x12\x1d\n\x15propose_asset_enabled\x18\x06 \x01(\x08\x12#\n\x1bpropose_market_enabled_from\x18\x07 \x01(\x03\x12"\n\x1apropose_asset_enabled_from\x18\x08 \x01(\x03"\x83\x03\n\x0eVoteSpamPolicy\x12?\n\rparty_to_vote\x18\x01 \x03(\x0b\x32(.vega.snapshot.v1.PartyProposalVoteCount\x12\x35\n\x0e\x62\x61nned_parties\x18\x02 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedParty\x12:\n\rtoken_balance\x18\x03 \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalance\x12\x46\n\x1arecent_blocks_reject_stats\x18\x04 \x03(\x0b\x32".vega.snapshot.v1.BlockRejectStats\x12\x1b\n\x13\x63urrent_block_index\x18\x05 \x01(\x04\x12\x1b\n\x13last_increase_block\x18\x06 \x01(\x04\x12\x19\n\x11\x63urrent_epoch_seq\x18\x07 \x01(\x04\x12 \n\x18min_voting_tokens_factor\x18\x08 \x01(\t"H\n\x16PartyProposalVoteCount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x10\n\x08proposal\x18\x02 \x01(\t\x12\r\n\x05\x63ount\x18\x03 \x01(\x04"1\n\x0b\x42\x61nnedParty\x12\r\n\x05party\x18\x01 \x01(\t\x12\x13\n\x0buntil_epoch\x18\x02 \x01(\x04"3\n\x11PartyTokenBalance\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t"3\n\x10\x42lockRejectStats\x12\x10\n\x08rejected\x18\x01 \x01(\x04\x12\r\n\x05total\x18\x02 \x01(\x04"9\n\x19SpamPartyTransactionCount\x12\r\n\x05party\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x04"\xfa\x01\n\x10SimpleSpamPolicy\x12\x13\n\x0bpolicy_name\x18\x01 \x01(\t\x12\x43\n\x0eparty_to_count\x18\x02 \x03(\x0b\x32+.vega.snapshot.v1.SpamPartyTransactionCount\x12\x35\n\x0e\x62\x61nned_parties\x18\x03 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedParty\x12:\n\rtoken_balance\x18\x04 \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalance\x12\x19\n\x11\x63urrent_epoch_seq\x18\x05 \x01(\x04"A\n\nNotarySigs\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04kind\x18\x02 \x01(\x05\x12\x0c\n\x04node\x18\x03 \x01(\t\x12\x0b\n\x03sig\x18\x04 \x01(\t";\n\x06Notary\x12\x31\n\x0bnotary_sigs\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.NotarySigs"v\n\x10ReplayProtection\x12;\n\x0ctransactions\x18\x01 \x03(\x0b\x32%.vega.snapshot.v1.TransactionAtHeight\x12\x10\n\x08\x62\x61\x63k_tol\x18\x02 \x01(\x04\x12\x13\n\x0b\x66orward_tol\x18\x03 \x01(\x04"1\n\x13TransactionAtHeight\x12\n\n\x02tx\x18\x01 \x01(\t\x12\x0e\n\x06height\x18\x02 \x01(\x04"V\n\x0b\x46utureState\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x18\n\x10settlement_price\x18\x02 \x01(\t\x12\x1a\n\x12trading_terminated\x18\x03 \x01(\x08"[\n\x16StakeVerifierDeposited\x12\x41\n\x11pending_deposited\x18\x01 \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPending"W\n\x14StakeVerifierRemoved\x12?\n\x0fpending_removed\x18\x01 \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPending"\xb1\x01\n\x14StakeVerifierPending\x12\x18\n\x10\x65thereum_address\x18\x01 \x01(\t\x12\x17\n\x0fvega_public_key\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03\x12\x14\n\x0c\x62lock_number\x18\x05 \x01(\x04\x12\x11\n\tlog_index\x18\x06 \x01(\x04\x12\r\n\x05tx_id\x18\x07 \x01(\t\x12\n\n\x02id\x18\x08 \x01(\t"k\n\x12PendingKeyRotation\x12\x14\n\x0c\x62lock_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_pub_key\x18\x03 \x01(\t\x12\x19\n\x11new_pub_key_index\x18\x04 \x01(\r"X\n\x1aPendingEthereumKeyRotation\x12\x14\n\x0c\x62lock_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_address\x18\x03 \x01(\t"\xbe\x02\n\x08Topology\x12\x38\n\x0evalidator_data\x18\x01 \x03(\x0b\x32 .vega.snapshot.v1.ValidatorState\x12\x12\n\nchain_keys\x18\x02 \x03(\t\x12G\n\x19pending_pub_key_rotations\x18\x03 \x03(\x0b\x32$.vega.snapshot.v1.PendingKeyRotation\x12\x45\n\x15validator_performance\x18\x04 \x01(\x0b\x32&.vega.snapshot.v1.ValidatorPerformance\x12T\n\x1epending_ethereum_key_rotations\x18\x05 \x03(\x0b\x32,.vega.snapshot.v1.PendingEthereumKeyRotation"\xd8\x02\n\x0eValidatorState\x12\x39\n\x10validator_update\x18\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdate\x12\x13\n\x0b\x62lock_added\x18\x02 \x01(\x04\x12\x0e\n\x06status\x18\x03 \x01(\x05\x12\x1b\n\x13status_change_block\x18\x04 \x01(\x04\x12(\n last_block_with_positive_ranking\x18\x05 \x01(\x04\x12\x1c\n\x14\x65th_events_forwarded\x18\x06 \x01(\x04\x12=\n\x11heartbeat_tracker\x18\x07 \x01(\x0b\x32".vega.snapshot.v1.HeartbeatTracker\x12\x17\n\x0fvalidator_power\x18\x08 \x01(\x03\x12)\n\rranking_score\x18\t \x01(\x0b\x32\x12.vega.RankingScore"y\n\x10HeartbeatTracker\x12\x1a\n\x12\x65xpected_next_hash\x18\x01 \x01(\t\x12 \n\x18\x65xpected_next_hash_since\x18\x02 \x01(\x03\x12\x13\n\x0b\x62lock_index\x18\x03 \x01(\x05\x12\x12\n\nblock_sigs\x18\x04 \x03(\x08"\xb5\x01\n\x10PerformanceStats\x12\x19\n\x11validator_address\x18\x01 \x01(\t\x12\x10\n\x08proposed\x18\x02 \x01(\x04\x12\x0f\n\x07\x65lected\x18\x03 \x01(\x04\x12\r\n\x05voted\x18\x04 \x01(\x04\x12\x19\n\x11last_height_voted\x18\x05 \x01(\x03\x12\x1c\n\x14last_height_proposed\x18\x06 \x01(\x03\x12\x1b\n\x13last_height_elected\x18\x07 \x01(\x03"X\n\x14ValidatorPerformance\x12@\n\x14validator_perf_stats\x18\x01 \x03(\x0b\x32".vega.snapshot.v1.PerformanceStats"u\n\x13LiquidityParameters\x12\x0f\n\x07max_fee\x18\x01 \x01(\t\x12\x16\n\x0emax_shape_size\x18\x02 \x01(\t\x12"\n\x1astake_to_obligation_factor\x18\x03 \x01(\t\x12\x11\n\tmarket_id\x18\x04 \x01(\t"K\n\x1aLiquidityPendingProvisions\x12\x1a\n\x12pending_provisions\x18\x01 \x03(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t"Q\n\x1fLiquidityPartiesLiquidityOrders\x12\x1b\n\x06orders\x18\x01 \x03(\x0b\x32\x0b.vega.Order\x12\x11\n\tmarket_id\x18\x02 \x01(\t"H\n\x16LiquidityPartiesOrders\x12\x1b\n\x06orders\x18\x01 \x03(\x0b\x32\x0b.vega.Order\x12\x11\n\tmarket_id\x18\x02 \x01(\t"`\n\x13LiquidityProvisions\x12\x36\n\x14liquidity_provisions\x18\x01 \x03(\x0b\x32\x18.vega.LiquidityProvision\x12\x11\n\tmarket_id\x18\x02 \x01(\t"V\n\x16\x46loatingPointConsensus\x12<\n\x11next_time_trigger\x18\x01 \x03(\x0b\x32!.vega.snapshot.v1.NextTimeTrigger"R\n\x0fNextTimeTrigger\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x0e\n\x06market\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\x12\x14\n\x0cnext_trigger\x18\x04 \x01(\x03"S\n\rMarketTracker\x12\x42\n\x0fmarket_activity\x18\x01 \x03(\x0b\x32).vega.checkpoint.v1.MarketActivityTracker"c\n\x16SignerEventsPerAddress\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x38\n\x06\x65vents\x18\x02 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEvent"\xce\x01\n\x1d\x45RC20MultiSigTopologyVerified\x12\x0f\n\x07signers\x18\x01 \x03(\t\x12\x44\n\x12\x65vents_per_address\x18\x02 \x03(\x0b\x32(.vega.snapshot.v1.SignerEventsPerAddress\x12\x41\n\tthreshold\x18\x03 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEvent\x12\x13\n\x0bseen_events\x18\x04 \x03(\t"\xed\x01\n\x1c\x45RC20MultiSigTopologyPending\x12\x41\n\x0fpending_signers\x18\x01 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEvent\x12M\n\x15pending_threshold_set\x18\x02 \x03(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEvent\x12\x19\n\x11witnessed_signers\x18\x03 \x03(\t\x12 \n\x18witnessed_threshold_sets\x18\x04 \x03(\t"\x86\x02\n\x0bProofOfWork\x12\x14\n\x0c\x62lock_height\x18\x01 \x03(\x04\x12\x12\n\nblock_hash\x18\x02 \x03(\t\x12\x0f\n\x07seen_tx\x18\x03 \x03(\t\x12<\n\x0ctx_at_height\x18\x04 \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeight\x12\x10\n\x08seen_tid\x18\x05 \x03(\t\x12=\n\rtid_at_height\x18\x06 \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeight\x12-\n\x06\x62\x61nned\x18\x07 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedParty"<\n\x14TransactionsAtHeight\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12\x14\n\x0ctransactions\x18\x02 \x03(\t*`\n\x06\x46ormat\x12\x16\n\x12\x46ORMAT_UNSPECIFIED\x10\x00\x12\x10\n\x0c\x46ORMAT_PROTO\x10\x01\x12\x1b\n\x17\x46ORMAT_PROTO_COMPRESSED\x10\x02\x12\x0f\n\x0b\x46ORMAT_JSON\x10\x03\x42.Z,code.vegaprotocol.io/protos/vega/snapshot/v1b\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1fvega/snapshot/v1/snapshot.proto\x12\x10vega.snapshot.v1\x1a\x0fvega/vega.proto\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x17vega/chain_events.proto\x1a\x15vega/governance.proto\x1a\x1bvega/events/v1/events.proto\x1a)vega/commands/v1/validator_commands.proto\x1a#vega/checkpoint/v1/checkpoint.proto\"t\n\x08Snapshot\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12(\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x18.vega.snapshot.v1.Format\x12\x0e\n\x06\x63hunks\x18\x03 \x01(\r\x12\x0c\n\x04hash\x18\x04 \x01(\x0c\x12\x10\n\x08metadata\x18\x05 \x01(\x0c\"W\n\x08NodeHash\x12\x0b\n\x03key\x18\x03 \x01(\t\x12\x0c\n\x04hash\x18\x04 \x01(\t\x12\x0e\n\x06height\x18\x05 \x01(\x05\x12\x0f\n\x07version\x18\x06 \x01(\x03\x12\x0f\n\x07is_leaf\x18\x07 \x01(\x08\"b\n\x08Metadata\x12\x0f\n\x07version\x18\x01 \x01(\x03\x12\x14\n\x0c\x63hunk_hashes\x18\x02 \x03(\t\x12/\n\x0bnode_hashes\x18\x03 \x03(\x0b\x32\x1a.vega.snapshot.v1.NodeHash\"H\n\x05\x43hunk\x12\'\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x19.vega.snapshot.v1.Payload\x12\n\n\x02nr\x18\x02 \x01(\x03\x12\n\n\x02of\x18\x03 \x01(\x03\"\xca\x1a\n\x07Payload\x12\x37\n\ractive_assets\x18\x01 \x01(\x0b\x32\x1e.vega.snapshot.v1.ActiveAssetsH\x00\x12\x39\n\x0epending_assets\x18\x02 \x01(\x0b\x32\x1f.vega.snapshot.v1.PendingAssetsH\x00\x12\x43\n\x13\x62\x61nking_withdrawals\x18\x03 \x01(\x0b\x32$.vega.snapshot.v1.BankingWithdrawalsH\x00\x12=\n\x10\x62\x61nking_deposits\x18\x04 \x01(\x0b\x32!.vega.snapshot.v1.BankingDepositsH\x00\x12\x35\n\x0c\x62\x61nking_seen\x18\x05 \x01(\x0b\x32\x1d.vega.snapshot.v1.BankingSeenH\x00\x12\x46\n\x15\x62\x61nking_asset_actions\x18\x06 \x01(\x0b\x32%.vega.snapshot.v1.BankingAssetActionsH\x00\x12\x32\n\ncheckpoint\x18\x07 \x01(\x0b\x32\x1c.vega.snapshot.v1.CheckpointH\x00\x12\x43\n\x13\x63ollateral_accounts\x18\x08 \x01(\x0b\x32$.vega.snapshot.v1.CollateralAccountsH\x00\x12?\n\x11\x63ollateral_assets\x18\t \x01(\x0b\x32\".vega.snapshot.v1.CollateralAssetsH\x00\x12?\n\x11\x64\x65legation_active\x18\n \x01(\x0b\x32\".vega.snapshot.v1.DelegationActiveH\x00\x12\x41\n\x12\x64\x65legation_pending\x18\x0b \x01(\x0b\x32#.vega.snapshot.v1.DelegationPendingH\x00\x12;\n\x0f\x64\x65legation_auto\x18\x0c \x01(\x0b\x32 .vega.snapshot.v1.DelegationAutoH\x00\x12?\n\x11governance_active\x18\r \x01(\x0b\x32\".vega.snapshot.v1.GovernanceActiveH\x00\x12\x41\n\x12governance_enacted\x18\x0e \x01(\x0b\x32#.vega.snapshot.v1.GovernanceEnactedH\x00\x12=\n\x10staking_accounts\x18\x0f \x01(\x0b\x32!.vega.snapshot.v1.StakingAccountsH\x00\x12\x37\n\rmatching_book\x18\x10 \x01(\x0b\x32\x1e.vega.snapshot.v1.MatchingBookH\x00\x12\x39\n\x12network_parameters\x18\x11 \x01(\x0b\x32\x1b.vega.snapshot.v1.NetParamsH\x00\x12?\n\x11\x65xecution_markets\x18\x12 \x01(\x0b\x32\".vega.snapshot.v1.ExecutionMarketsH\x00\x12=\n\x10market_positions\x18\x13 \x01(\x0b\x32!.vega.snapshot.v1.MarketPositionsH\x00\x12/\n\tapp_state\x18\x14 \x01(\x0b\x32\x1a.vega.snapshot.v1.AppStateH\x00\x12-\n\x05\x65poch\x18\x15 \x01(\x0b\x32\x1c.vega.snapshot.v1.EpochStateH\x00\x12J\n\x17rewards_pending_payouts\x18\x17 \x01(\x0b\x32\'.vega.snapshot.v1.RewardsPendingPayoutsH\x00\x12;\n\x0fgovernance_node\x18\x18 \x01(\x0b\x32 .vega.snapshot.v1.GovernanceNodeH\x00\x12\x33\n\x0blimit_state\x18\x19 \x01(\x0b\x32\x1c.vega.snapshot.v1.LimitStateH\x00\x12<\n\x10vote_spam_policy\x18\x1a \x01(\x0b\x32 .vega.snapshot.v1.VoteSpamPolicyH\x00\x12@\n\x12simple_spam_policy\x18\x1b \x01(\x0b\x32\".vega.snapshot.v1.SimpleSpamPolicyH\x00\x12*\n\x06notary\x18\x1c \x01(\x0b\x32\x18.vega.snapshot.v1.NotaryH\x00\x12?\n\x11replay_protection\x18\x1d \x01(\x0b\x32\".vega.snapshot.v1.ReplayProtectionH\x00\x12\x35\n\x0c\x66uture_state\x18\x1e \x01(\x0b\x32\x1d.vega.snapshot.v1.FutureStateH\x00\x12;\n\x0f\x65vent_forwarder\x18\x1f \x01(\x0b\x32 .vega.snapshot.v1.EventForwarderH\x00\x12L\n\x18stake_verifier_deposited\x18  \x01(\x0b\x32(.vega.snapshot.v1.StakeVerifierDepositedH\x00\x12H\n\x16stake_verifier_removed\x18! \x01(\x0b\x32&.vega.snapshot.v1.StakeVerifierRemovedH\x00\x12,\n\x07witness\x18\" \x01(\x0b\x32\x19.vega.snapshot.v1.WitnessH\x00\x12\x61\n#delegation_last_reconciliation_time\x18# \x01(\x0b\x32\x32.vega.snapshot.v1.DelegationLastReconciliationTimeH\x00\x12.\n\x08topology\x18$ \x01(\x0b\x32\x1a.vega.snapshot.v1.TopologyH\x00\x12\x38\n\x0boracle_data\x18% \x01(\x0b\x32!.vega.snapshot.v1.OracleDataBatchH\x00\x12\x45\n\x14liquidity_parameters\x18& \x01(\x0b\x32%.vega.snapshot.v1.LiquidityParametersH\x00\x12T\n\x1cliquidity_pending_provisions\x18\' \x01(\x0b\x32,.vega.snapshot.v1.LiquidityPendingProvisionsH\x00\x12_\n\"liquidity_parties_liquidity_orders\x18( \x01(\x0b\x32\x31.vega.snapshot.v1.LiquidityPartiesLiquidityOrdersH\x00\x12L\n\x18liquidity_parties_orders\x18) \x01(\x0b\x32(.vega.snapshot.v1.LiquidityPartiesOrdersH\x00\x12\x45\n\x14liquidity_provisions\x18* \x01(\x0b\x32%.vega.snapshot.v1.LiquidityProvisionsH\x00\x12\x41\n\x12liquidity_supplied\x18+ \x01(\x0b\x32#.vega.snapshot.v1.LiquiditySuppliedH\x00\x12=\n\x10liquidity_target\x18, \x01(\x0b\x32!.vega.snapshot.v1.LiquidityTargetH\x00\x12L\n\x18\x66loating_point_consensus\x18. \x01(\x0b\x32(.vega.snapshot.v1.FloatingPointConsensusH\x00\x12\x39\n\x0emarket_tracker\x18/ \x01(\x0b\x32\x1f.vega.snapshot.v1.MarketTrackerH\x00\x12R\n\x1b\x62\x61nking_recurring_transfers\x18\x31 \x01(\x0b\x32+.vega.snapshot.v1.BankingRecurringTransfersH\x00\x12R\n\x1b\x62\x61nking_scheduled_transfers\x18\x32 \x01(\x0b\x32+.vega.snapshot.v1.BankingScheduledTransfersH\x00\x12[\n erc20_multisig_topology_verified\x18\x33 \x01(\x0b\x32/.vega.snapshot.v1.ERC20MultiSigTopologyVerifiedH\x00\x12Y\n\x1f\x65rc20_multisig_topology_pending\x18\x34 \x01(\x0b\x32..vega.snapshot.v1.ERC20MultiSigTopologyPendingH\x00\x12\x36\n\rproof_of_work\x18\x35 \x01(\x0b\x32\x1d.vega.snapshot.v1.ProofOfWorkH\x00\x12\x46\n\x15pending_asset_updates\x18\x36 \x01(\x0b\x32%.vega.snapshot.v1.PendingAssetUpdatesH\x00\x42\x06\n\x04\x64\x61ta\">\n\x17TimestampedOpenInterest\x12\x15\n\ropen_interest\x18\x01 \x01(\x04\x12\x0c\n\x04time\x18\x02 \x01(\x03\"\x89\x02\n\x0fLiquidityTarget\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x14\n\x0c\x63urrent_time\x18\x02 \x01(\x03\x12\x1a\n\x12scheduled_truncate\x18\x03 \x01(\x03\x12\x1e\n\x16\x63urrent_open_interests\x18\x04 \x03(\x04\x12J\n\x17previous_open_interests\x18\x05 \x03(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterest\x12\x45\n\x12max_open_interests\x18\x06 \x01(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterest\"C\n\x1dLiquidityPriceProbabilityPair\x12\r\n\x05price\x18\x01 \x01(\t\x12\x13\n\x0bprobability\x18\x02 \x01(\t\"\xc9\x01\n\x11LiquiditySupplied\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x19\n\x11\x63onsensus_reached\x18\x02 \x01(\x08\x12\x42\n\tbid_cache\x18\x03 \x03(\x0b\x32/.vega.snapshot.v1.LiquidityPriceProbabilityPair\x12\x42\n\task_cache\x18\x04 \x03(\x0b\x32/.vega.snapshot.v1.LiquidityPriceProbabilityPair\"D\n\x0fOracleDataBatch\x12\x31\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.OracleData\"N\n\nOracleData\x12\x10\n\x08pub_keys\x18\x01 \x03(\t\x12.\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32 .vega.snapshot.v1.OracleDataPair\",\n\x0eOracleDataPair\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"W\n\x07Witness\x12-\n\tresources\x18\x01 \x03(\x0b\x32\x1a.vega.snapshot.v1.Resource\x12\x1d\n\x15need_resend_resources\x18\x02 \x03(\t\"I\n\x08Resource\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x63heck_until\x18\x02 \x01(\x03\x12\r\n\x05votes\x18\x03 \x03(\t\x12\r\n\x05state\x18\x04 \x01(\r\"D\n\x0e\x45ventForwarder\x12\x32\n\x0c\x61\x63ked_events\x18\x01 \x03(\x0b\x32\x1c.vega.commands.v1.ChainEvent\"5\n\x12\x43ollateralAccounts\x12\x1f\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\r.vega.Account\"/\n\x10\x43ollateralAssets\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset\"+\n\x0c\x41\x63tiveAssets\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset\",\n\rPendingAssets\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset\"2\n\x13PendingAssetUpdates\x12\x1b\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.Asset\"?\n\nWithdrawal\x12\x0b\n\x03ref\x18\x01 \x01(\t\x12$\n\nwithdrawal\x18\x02 \x01(\x0b\x32\x10.vega.Withdrawal\"5\n\x07\x44\x65posit\x12\n\n\x02id\x18\x01 \x01(\t\x12\x1e\n\x07\x64\x65posit\x18\x02 \x01(\x0b\x32\r.vega.Deposit\"I\n\x05TxRef\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x10\n\x08\x62lock_nr\x18\x02 \x01(\x04\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\tlog_index\x18\x04 \x01(\x04\"\xb9\x02\n\x0b\x41ssetAction\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05state\x18\x02 \x01(\r\x12\r\n\x05\x61sset\x18\x03 \x01(\t\x12\x14\n\x0c\x62lock_number\x18\x04 \x01(\x04\x12\x10\n\x08tx_index\x18\x05 \x01(\x04\x12\x0c\n\x04hash\x18\x06 \x01(\t\x12\x32\n\x0f\x62uiltin_deposit\x18\x07 \x01(\x0b\x32\x19.vega.BuiltinAssetDeposit\x12)\n\rerc20_deposit\x18\x08 \x01(\x0b\x32\x12.vega.ERC20Deposit\x12(\n\nasset_list\x18\t \x01(\x0b\x32\x14.vega.ERC20AssetList\x12\x41\n\x1a\x65rc20_asset_limits_updated\x18\n \x01(\x0b\x32\x1d.vega.ERC20AssetLimitsUpdated\"G\n\x12\x42\x61nkingWithdrawals\x12\x31\n\x0bwithdrawals\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.Withdrawal\"=\n\x0f\x42\x61nkingDeposits\x12*\n\x07\x64\x65posit\x18\x01 \x03(\x0b\x32\x19.vega.snapshot.v1.Deposit\"4\n\x0b\x42\x61nkingSeen\x12%\n\x04refs\x18\x01 \x03(\x0b\x32\x17.vega.snapshot.v1.TxRef\"J\n\x13\x42\x61nkingAssetActions\x12\x33\n\x0c\x61sset_action\x18\x01 \x03(\x0b\x32\x1d.vega.snapshot.v1.AssetAction\"_\n\x19\x42\x61nkingRecurringTransfers\x12\x42\n\x12recurring_tranfers\x18\x01 \x01(\x0b\x32&.vega.checkpoint.v1.RecurringTransfers\"c\n\x19\x42\x61nkingScheduledTransfers\x12\x46\n\x11transfers_at_time\x18\x01 \x03(\x0b\x32+.vega.checkpoint.v1.ScheduledTransferAtTime\"\x1d\n\nCheckpoint\x12\x0f\n\x07next_cp\x18\x01 \x01(\x03\"D\n DelegationLastReconciliationTime\x12 \n\x18last_reconciliation_time\x18\x01 \x01(\x03\"9\n\x10\x44\x65legationActive\x12%\n\x0b\x64\x65legations\x18\x01 \x03(\x0b\x32\x10.vega.Delegation\"b\n\x11\x44\x65legationPending\x12%\n\x0b\x64\x65legations\x18\x01 \x03(\x0b\x32\x10.vega.Delegation\x12&\n\x0cundelegation\x18\x02 \x03(\x0b\x32\x10.vega.Delegation\"!\n\x0e\x44\x65legationAuto\x12\x0f\n\x07parties\x18\x01 \x03(\t\"~\n\x0cProposalData\x12 \n\x08proposal\x18\x01 \x01(\x0b\x32\x0e.vega.Proposal\x12\x17\n\x03yes\x18\x02 \x03(\x0b\x32\n.vega.Vote\x12\x16\n\x02no\x18\x03 \x03(\x0b\x32\n.vega.Vote\x12\x1b\n\x07invalid\x18\x04 \x03(\x0b\x32\n.vega.Vote\"F\n\x11GovernanceEnacted\x12\x31\n\tproposals\x18\x01 \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalData\"E\n\x10GovernanceActive\x12\x31\n\tproposals\x18\x01 \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalData\"3\n\x0eGovernanceNode\x12!\n\tproposals\x18\x01 \x03(\x0b\x32\x0e.vega.Proposal\"^\n\x0eStakingAccount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\x12,\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x1c.vega.events.v1.StakeLinking\"i\n\x0fStakingAccounts\x12\x32\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32 .vega.snapshot.v1.StakingAccount\x12\"\n\x1astaking_asset_total_supply\x18\x02 \x01(\t\"\x94\x01\n\x0cMatchingBook\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x18\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x0b.vega.Order\x12\x19\n\x04sell\x18\x03 \x03(\x0b\x32\x0b.vega.Order\x12\x19\n\x11last_traded_price\x18\x04 \x01(\t\x12\x0f\n\x07\x61uction\x18\x05 \x01(\x08\x12\x10\n\x08\x62\x61tch_id\x18\x06 \x01(\x04\"3\n\tNetParams\x12&\n\x06params\x18\x01 \x03(\x0b\x32\x16.vega.NetworkParameter\"&\n\nDecimalMap\x12\x0b\n\x03key\x18\x01 \x01(\x03\x12\x0b\n\x03val\x18\x02 \x01(\t\"(\n\tTimePrice\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\r\n\x05price\x18\x02 \x01(\t\",\n\x0bPriceVolume\x12\r\n\x05price\x18\x01 \x01(\t\x12\x0e\n\x06volume\x18\x02 \x01(\x04\"3\n\nPriceRange\x12\x0b\n\x03min\x18\x01 \x01(\t\x12\x0b\n\x03max\x18\x02 \x01(\t\x12\x0b\n\x03ref\x18\x03 \x01(\t\"s\n\nPriceBound\x12\x0e\n\x06\x61\x63tive\x18\x01 \x01(\x08\x12\x11\n\tup_factor\x18\x02 \x01(\t\x12\x13\n\x0b\x64own_factor\x18\x03 \x01(\t\x12-\n\x07trigger\x18\x04 \x01(\x0b\x32\x1c.vega.PriceMonitoringTrigger\"k\n\x0fPriceRangeCache\x12+\n\x05\x62ound\x18\x01 \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceBound\x12+\n\x05range\x18\x02 \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceRange\"-\n\x0c\x43urrentPrice\x12\r\n\x05price\x18\x01 \x01(\t\x12\x0e\n\x06volume\x18\x02 \x01(\x04\"8\n\tPastPrice\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\x1d\n\x15volume_weighted_price\x18\x02 \x01(\t\"\xd5\x03\n\x0cPriceMonitor\x12\x13\n\x0binitialised\x18\x03 \x01(\x08\x12\x31\n\x0b\x66p_horizons\x18\x04 \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMap\x12\x0b\n\x03now\x18\x05 \x01(\x03\x12\x0e\n\x06update\x18\x06 \x01(\x03\x12,\n\x06\x62ounds\x18\x07 \x03(\x0b\x32\x1c.vega.snapshot.v1.PriceBound\x12\x1e\n\x16price_range_cache_time\x18\x08 \x01(\x03\x12<\n\x11price_range_cache\x18\t \x03(\x0b\x32!.vega.snapshot.v1.PriceRangeCache\x12\x1c\n\x14ref_price_cache_time\x18\n \x01(\x03\x12\x35\n\x0fref_price_cache\x18\x0b \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMap\x12\x32\n\nprices_now\x18\x0c \x03(\x0b\x32\x1e.vega.snapshot.v1.CurrentPrice\x12\x30\n\x0bprices_past\x18\r \x03(\x0b\x32\x1b.vega.snapshot.v1.PastPrice\x12\x19\n\x11\x63onsensus_reached\x18\x0e \x01(\x08\"\xa4\x02\n\x0c\x41uctionState\x12&\n\x04mode\x18\x01 \x01(\x0e\x32\x18.vega.Market.TradingMode\x12.\n\x0c\x64\x65\x66\x61ult_mode\x18\x02 \x01(\x0e\x32\x18.vega.Market.TradingMode\x12%\n\x07trigger\x18\x03 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12\r\n\x05\x62\x65gin\x18\x04 \x01(\x03\x12\"\n\x03\x65nd\x18\x05 \x01(\x0b\x32\x15.vega.AuctionDuration\x12\r\n\x05start\x18\x06 \x01(\x08\x12\x0c\n\x04stop\x18\x07 \x01(\x08\x12\'\n\textension\x18\x08 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12\x1c\n\x14\x65xtension_event_sent\x18\t \x01(\x08\"V\n\rEquityShareLP\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05stake\x18\x02 \x01(\t\x12\r\n\x05share\x18\x03 \x01(\t\x12\x0b\n\x03\x61vg\x18\x04 \x01(\t\x12\x0e\n\x06vshare\x18\x05 \x01(\t\"\x81\x01\n\x0b\x45quityShare\x12\x0b\n\x03mvp\x18\x01 \x01(\t\x12\x1d\n\x15opening_auction_ended\x18\x02 \x01(\x08\x12,\n\x03lps\x18\x03 \x03(\x0b\x32\x1f.vega.snapshot.v1.EquityShareLP\x12\t\n\x01r\x18\x04 \x01(\t\x12\r\n\x05p_mvp\x18\x05 \x01(\t\"=\n\x0b\x46\x65\x65Splitter\x12\x19\n\x11time_window_start\x18\x01 \x01(\x03\x12\x13\n\x0btrade_value\x18\x02 \x01(\t\"\xfc\x04\n\x06Market\x12\x1c\n\x06market\x18\x01 \x01(\x0b\x32\x0c.vega.Market\x12\x35\n\rprice_monitor\x18\x02 \x01(\x0b\x32\x1e.vega.snapshot.v1.PriceMonitor\x12\x35\n\rauction_state\x18\x03 \x01(\x0b\x32\x1e.vega.snapshot.v1.AuctionState\x12\"\n\rpegged_orders\x18\x04 \x03(\x0b\x32\x0b.vega.Order\x12$\n\x0f\x65xpiring_orders\x18\x05 \x03(\x0b\x32\x0b.vega.Order\x12\x15\n\rlast_best_bid\x18\x06 \x01(\t\x12\x15\n\rlast_best_ask\x18\x07 \x01(\t\x12\x14\n\x0clast_mid_bid\x18\x08 \x01(\t\x12\x14\n\x0clast_mid_ask\x18\t \x01(\t\x12\x1f\n\x17last_market_value_proxy\x18\n \x01(\t\x12%\n\x1dlast_equity_share_distributed\x18\x0b \x01(\x03\x12\x33\n\x0c\x65quity_share\x18\x0c \x01(\x0b\x32\x1d.vega.snapshot.v1.EquityShare\x12\x1a\n\x12\x63urrent_mark_price\x18\r \x01(\t\x12\x19\n\x11risk_factor_short\x18\x0e \x01(\t\x12\x18\n\x10risk_factor_long\x18\x0f \x01(\t\x12%\n\x1drisk_factor_consensus_reached\x18\x10 \x01(\x08\x12\x33\n\x0c\x66\x65\x65_splitter\x18\x11 \x01(\x0b\x32\x1d.vega.snapshot.v1.FeeSplitter\x12\x18\n\x10settlement_price\x18\x12 \x01(\t\"=\n\x10\x45xecutionMarkets\x12)\n\x07markets\x18\x01 \x03(\x0b\x32\x18.vega.snapshot.v1.Market\"\x81\x01\n\x08Position\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0b\n\x03\x62uy\x18\x03 \x01(\x03\x12\x0c\n\x04sell\x18\x04 \x01(\x03\x12\r\n\x05price\x18\x05 \x01(\t\x12\x14\n\x0cvw_buy_price\x18\x06 \x01(\t\x12\x15\n\rvw_sell_price\x18\x07 \x01(\t\"S\n\x0fMarketPositions\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12-\n\tpositions\x18\x02 \x03(\x0b\x32\x1a.vega.snapshot.v1.Position\"I\n\x08\x41ppState\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\t\x12\x0c\n\x04time\x18\x03 \x01(\x03\x12\x10\n\x08\x63hain_id\x18\x04 \x01(\t\"\x80\x01\n\nEpochState\x12\x0b\n\x03seq\x18\x01 \x01(\x04\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x13\n\x0b\x65xpire_time\x18\x04 \x01(\x03\x12 \n\x18ready_to_start_new_epoch\x18\x06 \x01(\x08\x12\x1a\n\x12ready_to_end_epoch\x18\x07 \x01(\x08\"c\n\x15RewardsPendingPayouts\x12J\n\x18scheduled_rewards_payout\x18\x01 \x03(\x0b\x32(.vega.snapshot.v1.ScheduledRewardsPayout\"f\n\x16ScheduledRewardsPayout\x12\x13\n\x0bpayout_time\x18\x01 \x01(\x03\x12\x37\n\x0erewards_payout\x18\x02 \x03(\x0b\x32\x1f.vega.snapshot.v1.RewardsPayout\"\xb3\x01\n\rRewardsPayout\x12\x14\n\x0c\x66rom_account\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x41\n\x13reward_party_amount\x18\x03 \x03(\x0b\x32$.vega.snapshot.v1.RewardsPartyAmount\x12\x14\n\x0ctotal_reward\x18\x04 \x01(\t\x12\x11\n\tepoch_seq\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\"3\n\x12RewardsPartyAmount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t\"\xf8\x01\n\nLimitState\x12\x13\n\x0b\x62lock_count\x18\x01 \x01(\r\x12\x1a\n\x12\x63\x61n_propose_market\x18\x02 \x01(\x08\x12\x19\n\x11\x63\x61n_propose_asset\x18\x03 \x01(\x08\x12\x16\n\x0egenesis_loaded\x18\x04 \x01(\x08\x12\x1e\n\x16propose_market_enabled\x18\x05 \x01(\x08\x12\x1d\n\x15propose_asset_enabled\x18\x06 \x01(\x08\x12#\n\x1bpropose_market_enabled_from\x18\x07 \x01(\x03\x12\"\n\x1apropose_asset_enabled_from\x18\x08 \x01(\x03\"\x83\x03\n\x0eVoteSpamPolicy\x12?\n\rparty_to_vote\x18\x01 \x03(\x0b\x32(.vega.snapshot.v1.PartyProposalVoteCount\x12\x35\n\x0e\x62\x61nned_parties\x18\x02 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedParty\x12:\n\rtoken_balance\x18\x03 \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalance\x12\x46\n\x1arecent_blocks_reject_stats\x18\x04 \x03(\x0b\x32\".vega.snapshot.v1.BlockRejectStats\x12\x1b\n\x13\x63urrent_block_index\x18\x05 \x01(\x04\x12\x1b\n\x13last_increase_block\x18\x06 \x01(\x04\x12\x19\n\x11\x63urrent_epoch_seq\x18\x07 \x01(\x04\x12 \n\x18min_voting_tokens_factor\x18\x08 \x01(\t\"H\n\x16PartyProposalVoteCount\x12\r\n\x05party\x18\x01 \x01(\t\x12\x10\n\x08proposal\x18\x02 \x01(\t\x12\r\n\x05\x63ount\x18\x03 \x01(\x04\"1\n\x0b\x42\x61nnedParty\x12\r\n\x05party\x18\x01 \x01(\t\x12\x13\n\x0buntil_epoch\x18\x02 \x01(\x04\"3\n\x11PartyTokenBalance\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\"3\n\x10\x42lockRejectStats\x12\x10\n\x08rejected\x18\x01 \x01(\x04\x12\r\n\x05total\x18\x02 \x01(\x04\"9\n\x19SpamPartyTransactionCount\x12\r\n\x05party\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x04\"\xfa\x01\n\x10SimpleSpamPolicy\x12\x13\n\x0bpolicy_name\x18\x01 \x01(\t\x12\x43\n\x0eparty_to_count\x18\x02 \x03(\x0b\x32+.vega.snapshot.v1.SpamPartyTransactionCount\x12\x35\n\x0e\x62\x61nned_parties\x18\x03 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedParty\x12:\n\rtoken_balance\x18\x04 \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalance\x12\x19\n\x11\x63urrent_epoch_seq\x18\x05 \x01(\x04\"A\n\nNotarySigs\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04kind\x18\x02 \x01(\x05\x12\x0c\n\x04node\x18\x03 \x01(\t\x12\x0b\n\x03sig\x18\x04 \x01(\t\";\n\x06Notary\x12\x31\n\x0bnotary_sigs\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.NotarySigs\"v\n\x10ReplayProtection\x12;\n\x0ctransactions\x18\x01 \x03(\x0b\x32%.vega.snapshot.v1.TransactionAtHeight\x12\x10\n\x08\x62\x61\x63k_tol\x18\x02 \x01(\x04\x12\x13\n\x0b\x66orward_tol\x18\x03 \x01(\x04\"1\n\x13TransactionAtHeight\x12\n\n\x02tx\x18\x01 \x01(\t\x12\x0e\n\x06height\x18\x02 \x01(\x04\"V\n\x0b\x46utureState\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x18\n\x10settlement_price\x18\x02 \x01(\t\x12\x1a\n\x12trading_terminated\x18\x03 \x01(\x08\"[\n\x16StakeVerifierDeposited\x12\x41\n\x11pending_deposited\x18\x01 \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPending\"W\n\x14StakeVerifierRemoved\x12?\n\x0fpending_removed\x18\x01 \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPending\"\xb1\x01\n\x14StakeVerifierPending\x12\x18\n\x10\x65thereum_address\x18\x01 \x01(\t\x12\x17\n\x0fvega_public_key\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03\x12\x14\n\x0c\x62lock_number\x18\x05 \x01(\x04\x12\x11\n\tlog_index\x18\x06 \x01(\x04\x12\r\n\x05tx_id\x18\x07 \x01(\t\x12\n\n\x02id\x18\x08 \x01(\t\"k\n\x12PendingKeyRotation\x12\x14\n\x0c\x62lock_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_pub_key\x18\x03 \x01(\t\x12\x19\n\x11new_pub_key_index\x18\x04 \x01(\r\"X\n\x1aPendingEthereumKeyRotation\x12\x14\n\x0c\x62lock_height\x18\x01 \x01(\x04\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bnew_address\x18\x03 \x01(\t\"\xbe\x02\n\x08Topology\x12\x38\n\x0evalidator_data\x18\x01 \x03(\x0b\x32 .vega.snapshot.v1.ValidatorState\x12\x12\n\nchain_keys\x18\x02 \x03(\t\x12G\n\x19pending_pub_key_rotations\x18\x03 \x03(\x0b\x32$.vega.snapshot.v1.PendingKeyRotation\x12\x45\n\x15validator_performance\x18\x04 \x01(\x0b\x32&.vega.snapshot.v1.ValidatorPerformance\x12T\n\x1epending_ethereum_key_rotations\x18\x05 \x03(\x0b\x32,.vega.snapshot.v1.PendingEthereumKeyRotation\"\xd8\x02\n\x0eValidatorState\x12\x39\n\x10validator_update\x18\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdate\x12\x13\n\x0b\x62lock_added\x18\x02 \x01(\x04\x12\x0e\n\x06status\x18\x03 \x01(\x05\x12\x1b\n\x13status_change_block\x18\x04 \x01(\x04\x12(\n last_block_with_positive_ranking\x18\x05 \x01(\x04\x12\x1c\n\x14\x65th_events_forwarded\x18\x06 \x01(\x04\x12=\n\x11heartbeat_tracker\x18\x07 \x01(\x0b\x32\".vega.snapshot.v1.HeartbeatTracker\x12\x17\n\x0fvalidator_power\x18\x08 \x01(\x03\x12)\n\rranking_score\x18\t \x01(\x0b\x32\x12.vega.RankingScore\"y\n\x10HeartbeatTracker\x12\x1a\n\x12\x65xpected_next_hash\x18\x01 \x01(\t\x12 \n\x18\x65xpected_next_hash_since\x18\x02 \x01(\x03\x12\x13\n\x0b\x62lock_index\x18\x03 \x01(\x05\x12\x12\n\nblock_sigs\x18\x04 \x03(\x08\"\xb5\x01\n\x10PerformanceStats\x12\x19\n\x11validator_address\x18\x01 \x01(\t\x12\x10\n\x08proposed\x18\x02 \x01(\x04\x12\x0f\n\x07\x65lected\x18\x03 \x01(\x04\x12\r\n\x05voted\x18\x04 \x01(\x04\x12\x19\n\x11last_height_voted\x18\x05 \x01(\x03\x12\x1c\n\x14last_height_proposed\x18\x06 \x01(\x03\x12\x1b\n\x13last_height_elected\x18\x07 \x01(\x03\"X\n\x14ValidatorPerformance\x12@\n\x14validator_perf_stats\x18\x01 \x03(\x0b\x32\".vega.snapshot.v1.PerformanceStats\"u\n\x13LiquidityParameters\x12\x0f\n\x07max_fee\x18\x01 \x01(\t\x12\x16\n\x0emax_shape_size\x18\x02 \x01(\t\x12\"\n\x1astake_to_obligation_factor\x18\x03 \x01(\t\x12\x11\n\tmarket_id\x18\x04 \x01(\t\"K\n\x1aLiquidityPendingProvisions\x12\x1a\n\x12pending_provisions\x18\x01 \x03(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\"i\n\x1fLiquidityPartiesLiquidityOrders\x12\x33\n\x0cparty_orders\x18\x01 \x03(\x0b\x32\x1d.vega.snapshot.v1.PartyOrders\x12\x11\n\tmarket_id\x18\x02 \x01(\t\"9\n\x0bPartyOrders\x12\r\n\x05party\x18\x01 \x01(\t\x12\x1b\n\x06orders\x18\x02 \x03(\x0b\x32\x0b.vega.Order\"`\n\x16LiquidityPartiesOrders\x12\x33\n\x0cparty_orders\x18\x01 \x03(\x0b\x32\x1d.vega.snapshot.v1.PartyOrders\x12\x11\n\tmarket_id\x18\x02 \x01(\t\"`\n\x13LiquidityProvisions\x12\x36\n\x14liquidity_provisions\x18\x01 \x03(\x0b\x32\x18.vega.LiquidityProvision\x12\x11\n\tmarket_id\x18\x02 \x01(\t\"\x98\x01\n\x16\x46loatingPointConsensus\x12<\n\x11next_time_trigger\x18\x01 \x03(\x0b\x32!.vega.snapshot.v1.NextTimeTrigger\x12@\n\x0fstate_variables\x18\x02 \x03(\x0b\x32\'.vega.snapshot.v1.StateVarInternalState\"\xb8\x01\n\x15StateVarInternalState\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05state\x18\x02 \x01(\x05\x12\x10\n\x08\x65vent_id\x18\x03 \x01(\t\x12J\n\x12validators_results\x18\x04 \x03(\x0b\x32..vega.snapshot.v1.FloatingPointValidatorResult\x12&\n\x1erounds_since_meaningful_update\x18\x05 \x01(\x05\"P\n\x1c\x46loatingPointValidatorResult\x12\n\n\x02id\x18\x01 \x01(\t\x12$\n\x06\x62undle\x18\x02 \x03(\x0b\x32\x14.vega.KeyValueBundle\"R\n\x0fNextTimeTrigger\x12\r\n\x05\x61sset\x18\x01 \x01(\t\x12\x0e\n\x06market\x18\x02 \x01(\t\x12\n\n\x02id\x18\x03 \x01(\t\x12\x14\n\x0cnext_trigger\x18\x04 \x01(\x03\"S\n\rMarketTracker\x12\x42\n\x0fmarket_activity\x18\x01 \x03(\x0b\x32).vega.checkpoint.v1.MarketActivityTracker\"c\n\x16SignerEventsPerAddress\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x38\n\x06\x65vents\x18\x02 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEvent\"\xce\x01\n\x1d\x45RC20MultiSigTopologyVerified\x12\x0f\n\x07signers\x18\x01 \x03(\t\x12\x44\n\x12\x65vents_per_address\x18\x02 \x03(\x0b\x32(.vega.snapshot.v1.SignerEventsPerAddress\x12\x41\n\tthreshold\x18\x03 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEvent\x12\x13\n\x0bseen_events\x18\x04 \x03(\t\"\xed\x01\n\x1c\x45RC20MultiSigTopologyPending\x12\x41\n\x0fpending_signers\x18\x01 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEvent\x12M\n\x15pending_threshold_set\x18\x02 \x03(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEvent\x12\x19\n\x11witnessed_signers\x18\x03 \x03(\t\x12 \n\x18witnessed_threshold_sets\x18\x04 \x03(\t\"\x9c\x02\n\x0bProofOfWork\x12\x14\n\x0c\x62lock_height\x18\x01 \x03(\x04\x12\x12\n\nblock_hash\x18\x02 \x03(\t\x12<\n\x0ctx_at_height\x18\x04 \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeight\x12=\n\rtid_at_height\x18\x06 \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeight\x12-\n\x06\x62\x61nned\x18\x07 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedParty\x12\x37\n\npow_params\x18\x08 \x03(\x0b\x32#.vega.snapshot.v1.ProofOfWorkParams\"\xf2\x01\n\x11ProofOfWorkParams\x12&\n\x1espam_pow_number_of_past_blocks\x18\x01 \x01(\x04\x12\x1b\n\x13spam_pow_difficulty\x18\x02 \x01(\r\x12\x1e\n\x16spam_pow_hash_function\x18\x03 \x01(\t\x12\'\n\x1fspam_pow_number_of_tx_per_block\x18\x04 \x01(\x04\x12&\n\x1espam_pow_increasing_difficulty\x18\x05 \x01(\x08\x12\x12\n\nfrom_block\x18\x06 \x01(\x04\x12\x13\n\x0buntil_block\x18\x07 \x01(\x03\"<\n\x14TransactionsAtHeight\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12\x14\n\x0ctransactions\x18\x02 \x03(\t*`\n\x06\x46ormat\x12\x16\n\x12\x46ORMAT_UNSPECIFIED\x10\x00\x12\x10\n\x0c\x46ORMAT_PROTO\x10\x01\x12\x1b\n\x17\x46ORMAT_PROTO_COMPRESSED\x10\x02\x12\x0f\n\x0b\x46ORMAT_JSON\x10\x03\x42.Z,code.vegaprotocol.io/protos/vega/snapshot/v1b\x06proto3')
 
-_FORMAT = DESCRIPTOR.enum_types_by_name["Format"]
+_FORMAT = DESCRIPTOR.enum_types_by_name['Format']
 Format = enum_type_wrapper.EnumTypeWrapper(_FORMAT)
 FORMAT_UNSPECIFIED = 0
 FORMAT_PROTO = 1
@@ -40,1444 +33,1070 @@ FORMAT_PROTO_COMPRESSED = 2
 FORMAT_JSON = 3
 
 
-_SNAPSHOT = DESCRIPTOR.message_types_by_name["Snapshot"]
-_NODEHASH = DESCRIPTOR.message_types_by_name["NodeHash"]
-_METADATA = DESCRIPTOR.message_types_by_name["Metadata"]
-_CHUNK = DESCRIPTOR.message_types_by_name["Chunk"]
-_PAYLOAD = DESCRIPTOR.message_types_by_name["Payload"]
-_TIMESTAMPEDOPENINTEREST = DESCRIPTOR.message_types_by_name["TimestampedOpenInterest"]
-_LIQUIDITYTARGET = DESCRIPTOR.message_types_by_name["LiquidityTarget"]
-_LIQUIDITYPRICEPROBABILITYPAIR = DESCRIPTOR.message_types_by_name[
-    "LiquidityPriceProbabilityPair"
-]
-_LIQUIDITYSUPPLIED = DESCRIPTOR.message_types_by_name["LiquiditySupplied"]
-_ORACLEDATABATCH = DESCRIPTOR.message_types_by_name["OracleDataBatch"]
-_ORACLEDATA = DESCRIPTOR.message_types_by_name["OracleData"]
-_ORACLEDATAPAIR = DESCRIPTOR.message_types_by_name["OracleDataPair"]
-_WITNESS = DESCRIPTOR.message_types_by_name["Witness"]
-_RESOURCE = DESCRIPTOR.message_types_by_name["Resource"]
-_EVENTFORWARDER = DESCRIPTOR.message_types_by_name["EventForwarder"]
-_COLLATERALACCOUNTS = DESCRIPTOR.message_types_by_name["CollateralAccounts"]
-_COLLATERALASSETS = DESCRIPTOR.message_types_by_name["CollateralAssets"]
-_ACTIVEASSETS = DESCRIPTOR.message_types_by_name["ActiveAssets"]
-_PENDINGASSETS = DESCRIPTOR.message_types_by_name["PendingAssets"]
-_WITHDRAWAL = DESCRIPTOR.message_types_by_name["Withdrawal"]
-_DEPOSIT = DESCRIPTOR.message_types_by_name["Deposit"]
-_TXREF = DESCRIPTOR.message_types_by_name["TxRef"]
-_ASSETACTION = DESCRIPTOR.message_types_by_name["AssetAction"]
-_BANKINGWITHDRAWALS = DESCRIPTOR.message_types_by_name["BankingWithdrawals"]
-_BANKINGDEPOSITS = DESCRIPTOR.message_types_by_name["BankingDeposits"]
-_BANKINGSEEN = DESCRIPTOR.message_types_by_name["BankingSeen"]
-_BANKINGASSETACTIONS = DESCRIPTOR.message_types_by_name["BankingAssetActions"]
-_BANKINGRECURRINGTRANSFERS = DESCRIPTOR.message_types_by_name[
-    "BankingRecurringTransfers"
-]
-_BANKINGSCHEDULEDTRANSFERS = DESCRIPTOR.message_types_by_name[
-    "BankingScheduledTransfers"
-]
-_CHECKPOINT = DESCRIPTOR.message_types_by_name["Checkpoint"]
-_DELEGATIONLASTRECONCILIATIONTIME = DESCRIPTOR.message_types_by_name[
-    "DelegationLastReconciliationTime"
-]
-_DELEGATIONACTIVE = DESCRIPTOR.message_types_by_name["DelegationActive"]
-_DELEGATIONPENDING = DESCRIPTOR.message_types_by_name["DelegationPending"]
-_DELEGATIONAUTO = DESCRIPTOR.message_types_by_name["DelegationAuto"]
-_PROPOSALDATA = DESCRIPTOR.message_types_by_name["ProposalData"]
-_GOVERNANCEENACTED = DESCRIPTOR.message_types_by_name["GovernanceEnacted"]
-_GOVERNANCEACTIVE = DESCRIPTOR.message_types_by_name["GovernanceActive"]
-_GOVERNANCENODE = DESCRIPTOR.message_types_by_name["GovernanceNode"]
-_STAKINGACCOUNT = DESCRIPTOR.message_types_by_name["StakingAccount"]
-_STAKINGACCOUNTS = DESCRIPTOR.message_types_by_name["StakingAccounts"]
-_MATCHINGBOOK = DESCRIPTOR.message_types_by_name["MatchingBook"]
-_NETPARAMS = DESCRIPTOR.message_types_by_name["NetParams"]
-_DECIMALMAP = DESCRIPTOR.message_types_by_name["DecimalMap"]
-_TIMEPRICE = DESCRIPTOR.message_types_by_name["TimePrice"]
-_PRICEVOLUME = DESCRIPTOR.message_types_by_name["PriceVolume"]
-_PRICERANGE = DESCRIPTOR.message_types_by_name["PriceRange"]
-_PRICEBOUND = DESCRIPTOR.message_types_by_name["PriceBound"]
-_PRICERANGECACHE = DESCRIPTOR.message_types_by_name["PriceRangeCache"]
-_CURRENTPRICE = DESCRIPTOR.message_types_by_name["CurrentPrice"]
-_PASTPRICE = DESCRIPTOR.message_types_by_name["PastPrice"]
-_PRICEMONITOR = DESCRIPTOR.message_types_by_name["PriceMonitor"]
-_AUCTIONSTATE = DESCRIPTOR.message_types_by_name["AuctionState"]
-_EQUITYSHARELP = DESCRIPTOR.message_types_by_name["EquityShareLP"]
-_EQUITYSHARE = DESCRIPTOR.message_types_by_name["EquityShare"]
-_FEESPLITTER = DESCRIPTOR.message_types_by_name["FeeSplitter"]
-_MARKET = DESCRIPTOR.message_types_by_name["Market"]
-_EXECUTIONMARKETS = DESCRIPTOR.message_types_by_name["ExecutionMarkets"]
-_POSITION = DESCRIPTOR.message_types_by_name["Position"]
-_MARKETPOSITIONS = DESCRIPTOR.message_types_by_name["MarketPositions"]
-_APPSTATE = DESCRIPTOR.message_types_by_name["AppState"]
-_EPOCHSTATE = DESCRIPTOR.message_types_by_name["EpochState"]
-_REWARDSPENDINGPAYOUTS = DESCRIPTOR.message_types_by_name["RewardsPendingPayouts"]
-_SCHEDULEDREWARDSPAYOUT = DESCRIPTOR.message_types_by_name["ScheduledRewardsPayout"]
-_REWARDSPAYOUT = DESCRIPTOR.message_types_by_name["RewardsPayout"]
-_REWARDSPARTYAMOUNT = DESCRIPTOR.message_types_by_name["RewardsPartyAmount"]
-_LIMITSTATE = DESCRIPTOR.message_types_by_name["LimitState"]
-_VOTESPAMPOLICY = DESCRIPTOR.message_types_by_name["VoteSpamPolicy"]
-_PARTYPROPOSALVOTECOUNT = DESCRIPTOR.message_types_by_name["PartyProposalVoteCount"]
-_BANNEDPARTY = DESCRIPTOR.message_types_by_name["BannedParty"]
-_PARTYTOKENBALANCE = DESCRIPTOR.message_types_by_name["PartyTokenBalance"]
-_BLOCKREJECTSTATS = DESCRIPTOR.message_types_by_name["BlockRejectStats"]
-_SPAMPARTYTRANSACTIONCOUNT = DESCRIPTOR.message_types_by_name[
-    "SpamPartyTransactionCount"
-]
-_SIMPLESPAMPOLICY = DESCRIPTOR.message_types_by_name["SimpleSpamPolicy"]
-_NOTARYSIGS = DESCRIPTOR.message_types_by_name["NotarySigs"]
-_NOTARY = DESCRIPTOR.message_types_by_name["Notary"]
-_REPLAYPROTECTION = DESCRIPTOR.message_types_by_name["ReplayProtection"]
-_TRANSACTIONATHEIGHT = DESCRIPTOR.message_types_by_name["TransactionAtHeight"]
-_FUTURESTATE = DESCRIPTOR.message_types_by_name["FutureState"]
-_STAKEVERIFIERDEPOSITED = DESCRIPTOR.message_types_by_name["StakeVerifierDeposited"]
-_STAKEVERIFIERREMOVED = DESCRIPTOR.message_types_by_name["StakeVerifierRemoved"]
-_STAKEVERIFIERPENDING = DESCRIPTOR.message_types_by_name["StakeVerifierPending"]
-_PENDINGKEYROTATION = DESCRIPTOR.message_types_by_name["PendingKeyRotation"]
-_PENDINGETHEREUMKEYROTATION = DESCRIPTOR.message_types_by_name[
-    "PendingEthereumKeyRotation"
-]
-_TOPOLOGY = DESCRIPTOR.message_types_by_name["Topology"]
-_VALIDATORSTATE = DESCRIPTOR.message_types_by_name["ValidatorState"]
-_HEARTBEATTRACKER = DESCRIPTOR.message_types_by_name["HeartbeatTracker"]
-_PERFORMANCESTATS = DESCRIPTOR.message_types_by_name["PerformanceStats"]
-_VALIDATORPERFORMANCE = DESCRIPTOR.message_types_by_name["ValidatorPerformance"]
-_LIQUIDITYPARAMETERS = DESCRIPTOR.message_types_by_name["LiquidityParameters"]
-_LIQUIDITYPENDINGPROVISIONS = DESCRIPTOR.message_types_by_name[
-    "LiquidityPendingProvisions"
-]
-_LIQUIDITYPARTIESLIQUIDITYORDERS = DESCRIPTOR.message_types_by_name[
-    "LiquidityPartiesLiquidityOrders"
-]
-_LIQUIDITYPARTIESORDERS = DESCRIPTOR.message_types_by_name["LiquidityPartiesOrders"]
-_LIQUIDITYPROVISIONS = DESCRIPTOR.message_types_by_name["LiquidityProvisions"]
-_FLOATINGPOINTCONSENSUS = DESCRIPTOR.message_types_by_name["FloatingPointConsensus"]
-_NEXTTIMETRIGGER = DESCRIPTOR.message_types_by_name["NextTimeTrigger"]
-_MARKETTRACKER = DESCRIPTOR.message_types_by_name["MarketTracker"]
-_SIGNEREVENTSPERADDRESS = DESCRIPTOR.message_types_by_name["SignerEventsPerAddress"]
-_ERC20MULTISIGTOPOLOGYVERIFIED = DESCRIPTOR.message_types_by_name[
-    "ERC20MultiSigTopologyVerified"
-]
-_ERC20MULTISIGTOPOLOGYPENDING = DESCRIPTOR.message_types_by_name[
-    "ERC20MultiSigTopologyPending"
-]
-_PROOFOFWORK = DESCRIPTOR.message_types_by_name["ProofOfWork"]
-_TRANSACTIONSATHEIGHT = DESCRIPTOR.message_types_by_name["TransactionsAtHeight"]
-Snapshot = _reflection.GeneratedProtocolMessageType(
-    "Snapshot",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SNAPSHOT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Snapshot)
-    },
-)
+_SNAPSHOT = DESCRIPTOR.message_types_by_name['Snapshot']
+_NODEHASH = DESCRIPTOR.message_types_by_name['NodeHash']
+_METADATA = DESCRIPTOR.message_types_by_name['Metadata']
+_CHUNK = DESCRIPTOR.message_types_by_name['Chunk']
+_PAYLOAD = DESCRIPTOR.message_types_by_name['Payload']
+_TIMESTAMPEDOPENINTEREST = DESCRIPTOR.message_types_by_name['TimestampedOpenInterest']
+_LIQUIDITYTARGET = DESCRIPTOR.message_types_by_name['LiquidityTarget']
+_LIQUIDITYPRICEPROBABILITYPAIR = DESCRIPTOR.message_types_by_name['LiquidityPriceProbabilityPair']
+_LIQUIDITYSUPPLIED = DESCRIPTOR.message_types_by_name['LiquiditySupplied']
+_ORACLEDATABATCH = DESCRIPTOR.message_types_by_name['OracleDataBatch']
+_ORACLEDATA = DESCRIPTOR.message_types_by_name['OracleData']
+_ORACLEDATAPAIR = DESCRIPTOR.message_types_by_name['OracleDataPair']
+_WITNESS = DESCRIPTOR.message_types_by_name['Witness']
+_RESOURCE = DESCRIPTOR.message_types_by_name['Resource']
+_EVENTFORWARDER = DESCRIPTOR.message_types_by_name['EventForwarder']
+_COLLATERALACCOUNTS = DESCRIPTOR.message_types_by_name['CollateralAccounts']
+_COLLATERALASSETS = DESCRIPTOR.message_types_by_name['CollateralAssets']
+_ACTIVEASSETS = DESCRIPTOR.message_types_by_name['ActiveAssets']
+_PENDINGASSETS = DESCRIPTOR.message_types_by_name['PendingAssets']
+_PENDINGASSETUPDATES = DESCRIPTOR.message_types_by_name['PendingAssetUpdates']
+_WITHDRAWAL = DESCRIPTOR.message_types_by_name['Withdrawal']
+_DEPOSIT = DESCRIPTOR.message_types_by_name['Deposit']
+_TXREF = DESCRIPTOR.message_types_by_name['TxRef']
+_ASSETACTION = DESCRIPTOR.message_types_by_name['AssetAction']
+_BANKINGWITHDRAWALS = DESCRIPTOR.message_types_by_name['BankingWithdrawals']
+_BANKINGDEPOSITS = DESCRIPTOR.message_types_by_name['BankingDeposits']
+_BANKINGSEEN = DESCRIPTOR.message_types_by_name['BankingSeen']
+_BANKINGASSETACTIONS = DESCRIPTOR.message_types_by_name['BankingAssetActions']
+_BANKINGRECURRINGTRANSFERS = DESCRIPTOR.message_types_by_name['BankingRecurringTransfers']
+_BANKINGSCHEDULEDTRANSFERS = DESCRIPTOR.message_types_by_name['BankingScheduledTransfers']
+_CHECKPOINT = DESCRIPTOR.message_types_by_name['Checkpoint']
+_DELEGATIONLASTRECONCILIATIONTIME = DESCRIPTOR.message_types_by_name['DelegationLastReconciliationTime']
+_DELEGATIONACTIVE = DESCRIPTOR.message_types_by_name['DelegationActive']
+_DELEGATIONPENDING = DESCRIPTOR.message_types_by_name['DelegationPending']
+_DELEGATIONAUTO = DESCRIPTOR.message_types_by_name['DelegationAuto']
+_PROPOSALDATA = DESCRIPTOR.message_types_by_name['ProposalData']
+_GOVERNANCEENACTED = DESCRIPTOR.message_types_by_name['GovernanceEnacted']
+_GOVERNANCEACTIVE = DESCRIPTOR.message_types_by_name['GovernanceActive']
+_GOVERNANCENODE = DESCRIPTOR.message_types_by_name['GovernanceNode']
+_STAKINGACCOUNT = DESCRIPTOR.message_types_by_name['StakingAccount']
+_STAKINGACCOUNTS = DESCRIPTOR.message_types_by_name['StakingAccounts']
+_MATCHINGBOOK = DESCRIPTOR.message_types_by_name['MatchingBook']
+_NETPARAMS = DESCRIPTOR.message_types_by_name['NetParams']
+_DECIMALMAP = DESCRIPTOR.message_types_by_name['DecimalMap']
+_TIMEPRICE = DESCRIPTOR.message_types_by_name['TimePrice']
+_PRICEVOLUME = DESCRIPTOR.message_types_by_name['PriceVolume']
+_PRICERANGE = DESCRIPTOR.message_types_by_name['PriceRange']
+_PRICEBOUND = DESCRIPTOR.message_types_by_name['PriceBound']
+_PRICERANGECACHE = DESCRIPTOR.message_types_by_name['PriceRangeCache']
+_CURRENTPRICE = DESCRIPTOR.message_types_by_name['CurrentPrice']
+_PASTPRICE = DESCRIPTOR.message_types_by_name['PastPrice']
+_PRICEMONITOR = DESCRIPTOR.message_types_by_name['PriceMonitor']
+_AUCTIONSTATE = DESCRIPTOR.message_types_by_name['AuctionState']
+_EQUITYSHARELP = DESCRIPTOR.message_types_by_name['EquityShareLP']
+_EQUITYSHARE = DESCRIPTOR.message_types_by_name['EquityShare']
+_FEESPLITTER = DESCRIPTOR.message_types_by_name['FeeSplitter']
+_MARKET = DESCRIPTOR.message_types_by_name['Market']
+_EXECUTIONMARKETS = DESCRIPTOR.message_types_by_name['ExecutionMarkets']
+_POSITION = DESCRIPTOR.message_types_by_name['Position']
+_MARKETPOSITIONS = DESCRIPTOR.message_types_by_name['MarketPositions']
+_APPSTATE = DESCRIPTOR.message_types_by_name['AppState']
+_EPOCHSTATE = DESCRIPTOR.message_types_by_name['EpochState']
+_REWARDSPENDINGPAYOUTS = DESCRIPTOR.message_types_by_name['RewardsPendingPayouts']
+_SCHEDULEDREWARDSPAYOUT = DESCRIPTOR.message_types_by_name['ScheduledRewardsPayout']
+_REWARDSPAYOUT = DESCRIPTOR.message_types_by_name['RewardsPayout']
+_REWARDSPARTYAMOUNT = DESCRIPTOR.message_types_by_name['RewardsPartyAmount']
+_LIMITSTATE = DESCRIPTOR.message_types_by_name['LimitState']
+_VOTESPAMPOLICY = DESCRIPTOR.message_types_by_name['VoteSpamPolicy']
+_PARTYPROPOSALVOTECOUNT = DESCRIPTOR.message_types_by_name['PartyProposalVoteCount']
+_BANNEDPARTY = DESCRIPTOR.message_types_by_name['BannedParty']
+_PARTYTOKENBALANCE = DESCRIPTOR.message_types_by_name['PartyTokenBalance']
+_BLOCKREJECTSTATS = DESCRIPTOR.message_types_by_name['BlockRejectStats']
+_SPAMPARTYTRANSACTIONCOUNT = DESCRIPTOR.message_types_by_name['SpamPartyTransactionCount']
+_SIMPLESPAMPOLICY = DESCRIPTOR.message_types_by_name['SimpleSpamPolicy']
+_NOTARYSIGS = DESCRIPTOR.message_types_by_name['NotarySigs']
+_NOTARY = DESCRIPTOR.message_types_by_name['Notary']
+_REPLAYPROTECTION = DESCRIPTOR.message_types_by_name['ReplayProtection']
+_TRANSACTIONATHEIGHT = DESCRIPTOR.message_types_by_name['TransactionAtHeight']
+_FUTURESTATE = DESCRIPTOR.message_types_by_name['FutureState']
+_STAKEVERIFIERDEPOSITED = DESCRIPTOR.message_types_by_name['StakeVerifierDeposited']
+_STAKEVERIFIERREMOVED = DESCRIPTOR.message_types_by_name['StakeVerifierRemoved']
+_STAKEVERIFIERPENDING = DESCRIPTOR.message_types_by_name['StakeVerifierPending']
+_PENDINGKEYROTATION = DESCRIPTOR.message_types_by_name['PendingKeyRotation']
+_PENDINGETHEREUMKEYROTATION = DESCRIPTOR.message_types_by_name['PendingEthereumKeyRotation']
+_TOPOLOGY = DESCRIPTOR.message_types_by_name['Topology']
+_VALIDATORSTATE = DESCRIPTOR.message_types_by_name['ValidatorState']
+_HEARTBEATTRACKER = DESCRIPTOR.message_types_by_name['HeartbeatTracker']
+_PERFORMANCESTATS = DESCRIPTOR.message_types_by_name['PerformanceStats']
+_VALIDATORPERFORMANCE = DESCRIPTOR.message_types_by_name['ValidatorPerformance']
+_LIQUIDITYPARAMETERS = DESCRIPTOR.message_types_by_name['LiquidityParameters']
+_LIQUIDITYPENDINGPROVISIONS = DESCRIPTOR.message_types_by_name['LiquidityPendingProvisions']
+_LIQUIDITYPARTIESLIQUIDITYORDERS = DESCRIPTOR.message_types_by_name['LiquidityPartiesLiquidityOrders']
+_PARTYORDERS = DESCRIPTOR.message_types_by_name['PartyOrders']
+_LIQUIDITYPARTIESORDERS = DESCRIPTOR.message_types_by_name['LiquidityPartiesOrders']
+_LIQUIDITYPROVISIONS = DESCRIPTOR.message_types_by_name['LiquidityProvisions']
+_FLOATINGPOINTCONSENSUS = DESCRIPTOR.message_types_by_name['FloatingPointConsensus']
+_STATEVARINTERNALSTATE = DESCRIPTOR.message_types_by_name['StateVarInternalState']
+_FLOATINGPOINTVALIDATORRESULT = DESCRIPTOR.message_types_by_name['FloatingPointValidatorResult']
+_NEXTTIMETRIGGER = DESCRIPTOR.message_types_by_name['NextTimeTrigger']
+_MARKETTRACKER = DESCRIPTOR.message_types_by_name['MarketTracker']
+_SIGNEREVENTSPERADDRESS = DESCRIPTOR.message_types_by_name['SignerEventsPerAddress']
+_ERC20MULTISIGTOPOLOGYVERIFIED = DESCRIPTOR.message_types_by_name['ERC20MultiSigTopologyVerified']
+_ERC20MULTISIGTOPOLOGYPENDING = DESCRIPTOR.message_types_by_name['ERC20MultiSigTopologyPending']
+_PROOFOFWORK = DESCRIPTOR.message_types_by_name['ProofOfWork']
+_PROOFOFWORKPARAMS = DESCRIPTOR.message_types_by_name['ProofOfWorkParams']
+_TRANSACTIONSATHEIGHT = DESCRIPTOR.message_types_by_name['TransactionsAtHeight']
+Snapshot = _reflection.GeneratedProtocolMessageType('Snapshot', (_message.Message,), {
+  'DESCRIPTOR' : _SNAPSHOT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Snapshot)
+  })
 _sym_db.RegisterMessage(Snapshot)
 
-NodeHash = _reflection.GeneratedProtocolMessageType(
-    "NodeHash",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _NODEHASH,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NodeHash)
-    },
-)
+NodeHash = _reflection.GeneratedProtocolMessageType('NodeHash', (_message.Message,), {
+  'DESCRIPTOR' : _NODEHASH,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NodeHash)
+  })
 _sym_db.RegisterMessage(NodeHash)
 
-Metadata = _reflection.GeneratedProtocolMessageType(
-    "Metadata",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _METADATA,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Metadata)
-    },
-)
+Metadata = _reflection.GeneratedProtocolMessageType('Metadata', (_message.Message,), {
+  'DESCRIPTOR' : _METADATA,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Metadata)
+  })
 _sym_db.RegisterMessage(Metadata)
 
-Chunk = _reflection.GeneratedProtocolMessageType(
-    "Chunk",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHUNK,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Chunk)
-    },
-)
+Chunk = _reflection.GeneratedProtocolMessageType('Chunk', (_message.Message,), {
+  'DESCRIPTOR' : _CHUNK,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Chunk)
+  })
 _sym_db.RegisterMessage(Chunk)
 
-Payload = _reflection.GeneratedProtocolMessageType(
-    "Payload",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PAYLOAD,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Payload)
-    },
-)
+Payload = _reflection.GeneratedProtocolMessageType('Payload', (_message.Message,), {
+  'DESCRIPTOR' : _PAYLOAD,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Payload)
+  })
 _sym_db.RegisterMessage(Payload)
 
-TimestampedOpenInterest = _reflection.GeneratedProtocolMessageType(
-    "TimestampedOpenInterest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TIMESTAMPEDOPENINTEREST,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TimestampedOpenInterest)
-    },
-)
+TimestampedOpenInterest = _reflection.GeneratedProtocolMessageType('TimestampedOpenInterest', (_message.Message,), {
+  'DESCRIPTOR' : _TIMESTAMPEDOPENINTEREST,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TimestampedOpenInterest)
+  })
 _sym_db.RegisterMessage(TimestampedOpenInterest)
 
-LiquidityTarget = _reflection.GeneratedProtocolMessageType(
-    "LiquidityTarget",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYTARGET,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityTarget)
-    },
-)
+LiquidityTarget = _reflection.GeneratedProtocolMessageType('LiquidityTarget', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYTARGET,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityTarget)
+  })
 _sym_db.RegisterMessage(LiquidityTarget)
 
-LiquidityPriceProbabilityPair = _reflection.GeneratedProtocolMessageType(
-    "LiquidityPriceProbabilityPair",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYPRICEPROBABILITYPAIR,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPriceProbabilityPair)
-    },
-)
+LiquidityPriceProbabilityPair = _reflection.GeneratedProtocolMessageType('LiquidityPriceProbabilityPair', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYPRICEPROBABILITYPAIR,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPriceProbabilityPair)
+  })
 _sym_db.RegisterMessage(LiquidityPriceProbabilityPair)
 
-LiquiditySupplied = _reflection.GeneratedProtocolMessageType(
-    "LiquiditySupplied",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYSUPPLIED,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquiditySupplied)
-    },
-)
+LiquiditySupplied = _reflection.GeneratedProtocolMessageType('LiquiditySupplied', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYSUPPLIED,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquiditySupplied)
+  })
 _sym_db.RegisterMessage(LiquiditySupplied)
 
-OracleDataBatch = _reflection.GeneratedProtocolMessageType(
-    "OracleDataBatch",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ORACLEDATABATCH,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.OracleDataBatch)
-    },
-)
+OracleDataBatch = _reflection.GeneratedProtocolMessageType('OracleDataBatch', (_message.Message,), {
+  'DESCRIPTOR' : _ORACLEDATABATCH,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.OracleDataBatch)
+  })
 _sym_db.RegisterMessage(OracleDataBatch)
 
-OracleData = _reflection.GeneratedProtocolMessageType(
-    "OracleData",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ORACLEDATA,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.OracleData)
-    },
-)
+OracleData = _reflection.GeneratedProtocolMessageType('OracleData', (_message.Message,), {
+  'DESCRIPTOR' : _ORACLEDATA,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.OracleData)
+  })
 _sym_db.RegisterMessage(OracleData)
 
-OracleDataPair = _reflection.GeneratedProtocolMessageType(
-    "OracleDataPair",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ORACLEDATAPAIR,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.OracleDataPair)
-    },
-)
+OracleDataPair = _reflection.GeneratedProtocolMessageType('OracleDataPair', (_message.Message,), {
+  'DESCRIPTOR' : _ORACLEDATAPAIR,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.OracleDataPair)
+  })
 _sym_db.RegisterMessage(OracleDataPair)
 
-Witness = _reflection.GeneratedProtocolMessageType(
-    "Witness",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _WITNESS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Witness)
-    },
-)
+Witness = _reflection.GeneratedProtocolMessageType('Witness', (_message.Message,), {
+  'DESCRIPTOR' : _WITNESS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Witness)
+  })
 _sym_db.RegisterMessage(Witness)
 
-Resource = _reflection.GeneratedProtocolMessageType(
-    "Resource",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _RESOURCE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Resource)
-    },
-)
+Resource = _reflection.GeneratedProtocolMessageType('Resource', (_message.Message,), {
+  'DESCRIPTOR' : _RESOURCE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Resource)
+  })
 _sym_db.RegisterMessage(Resource)
 
-EventForwarder = _reflection.GeneratedProtocolMessageType(
-    "EventForwarder",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _EVENTFORWARDER,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EventForwarder)
-    },
-)
+EventForwarder = _reflection.GeneratedProtocolMessageType('EventForwarder', (_message.Message,), {
+  'DESCRIPTOR' : _EVENTFORWARDER,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EventForwarder)
+  })
 _sym_db.RegisterMessage(EventForwarder)
 
-CollateralAccounts = _reflection.GeneratedProtocolMessageType(
-    "CollateralAccounts",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _COLLATERALACCOUNTS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.CollateralAccounts)
-    },
-)
+CollateralAccounts = _reflection.GeneratedProtocolMessageType('CollateralAccounts', (_message.Message,), {
+  'DESCRIPTOR' : _COLLATERALACCOUNTS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.CollateralAccounts)
+  })
 _sym_db.RegisterMessage(CollateralAccounts)
 
-CollateralAssets = _reflection.GeneratedProtocolMessageType(
-    "CollateralAssets",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _COLLATERALASSETS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.CollateralAssets)
-    },
-)
+CollateralAssets = _reflection.GeneratedProtocolMessageType('CollateralAssets', (_message.Message,), {
+  'DESCRIPTOR' : _COLLATERALASSETS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.CollateralAssets)
+  })
 _sym_db.RegisterMessage(CollateralAssets)
 
-ActiveAssets = _reflection.GeneratedProtocolMessageType(
-    "ActiveAssets",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ACTIVEASSETS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ActiveAssets)
-    },
-)
+ActiveAssets = _reflection.GeneratedProtocolMessageType('ActiveAssets', (_message.Message,), {
+  'DESCRIPTOR' : _ACTIVEASSETS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ActiveAssets)
+  })
 _sym_db.RegisterMessage(ActiveAssets)
 
-PendingAssets = _reflection.GeneratedProtocolMessageType(
-    "PendingAssets",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PENDINGASSETS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingAssets)
-    },
-)
+PendingAssets = _reflection.GeneratedProtocolMessageType('PendingAssets', (_message.Message,), {
+  'DESCRIPTOR' : _PENDINGASSETS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingAssets)
+  })
 _sym_db.RegisterMessage(PendingAssets)
 
-Withdrawal = _reflection.GeneratedProtocolMessageType(
-    "Withdrawal",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _WITHDRAWAL,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Withdrawal)
-    },
-)
+PendingAssetUpdates = _reflection.GeneratedProtocolMessageType('PendingAssetUpdates', (_message.Message,), {
+  'DESCRIPTOR' : _PENDINGASSETUPDATES,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingAssetUpdates)
+  })
+_sym_db.RegisterMessage(PendingAssetUpdates)
+
+Withdrawal = _reflection.GeneratedProtocolMessageType('Withdrawal', (_message.Message,), {
+  'DESCRIPTOR' : _WITHDRAWAL,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Withdrawal)
+  })
 _sym_db.RegisterMessage(Withdrawal)
 
-Deposit = _reflection.GeneratedProtocolMessageType(
-    "Deposit",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DEPOSIT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Deposit)
-    },
-)
+Deposit = _reflection.GeneratedProtocolMessageType('Deposit', (_message.Message,), {
+  'DESCRIPTOR' : _DEPOSIT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Deposit)
+  })
 _sym_db.RegisterMessage(Deposit)
 
-TxRef = _reflection.GeneratedProtocolMessageType(
-    "TxRef",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TXREF,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TxRef)
-    },
-)
+TxRef = _reflection.GeneratedProtocolMessageType('TxRef', (_message.Message,), {
+  'DESCRIPTOR' : _TXREF,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TxRef)
+  })
 _sym_db.RegisterMessage(TxRef)
 
-AssetAction = _reflection.GeneratedProtocolMessageType(
-    "AssetAction",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ASSETACTION,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.AssetAction)
-    },
-)
+AssetAction = _reflection.GeneratedProtocolMessageType('AssetAction', (_message.Message,), {
+  'DESCRIPTOR' : _ASSETACTION,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.AssetAction)
+  })
 _sym_db.RegisterMessage(AssetAction)
 
-BankingWithdrawals = _reflection.GeneratedProtocolMessageType(
-    "BankingWithdrawals",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANKINGWITHDRAWALS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingWithdrawals)
-    },
-)
+BankingWithdrawals = _reflection.GeneratedProtocolMessageType('BankingWithdrawals', (_message.Message,), {
+  'DESCRIPTOR' : _BANKINGWITHDRAWALS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingWithdrawals)
+  })
 _sym_db.RegisterMessage(BankingWithdrawals)
 
-BankingDeposits = _reflection.GeneratedProtocolMessageType(
-    "BankingDeposits",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANKINGDEPOSITS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingDeposits)
-    },
-)
+BankingDeposits = _reflection.GeneratedProtocolMessageType('BankingDeposits', (_message.Message,), {
+  'DESCRIPTOR' : _BANKINGDEPOSITS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingDeposits)
+  })
 _sym_db.RegisterMessage(BankingDeposits)
 
-BankingSeen = _reflection.GeneratedProtocolMessageType(
-    "BankingSeen",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANKINGSEEN,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingSeen)
-    },
-)
+BankingSeen = _reflection.GeneratedProtocolMessageType('BankingSeen', (_message.Message,), {
+  'DESCRIPTOR' : _BANKINGSEEN,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingSeen)
+  })
 _sym_db.RegisterMessage(BankingSeen)
 
-BankingAssetActions = _reflection.GeneratedProtocolMessageType(
-    "BankingAssetActions",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANKINGASSETACTIONS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingAssetActions)
-    },
-)
+BankingAssetActions = _reflection.GeneratedProtocolMessageType('BankingAssetActions', (_message.Message,), {
+  'DESCRIPTOR' : _BANKINGASSETACTIONS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingAssetActions)
+  })
 _sym_db.RegisterMessage(BankingAssetActions)
 
-BankingRecurringTransfers = _reflection.GeneratedProtocolMessageType(
-    "BankingRecurringTransfers",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANKINGRECURRINGTRANSFERS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingRecurringTransfers)
-    },
-)
+BankingRecurringTransfers = _reflection.GeneratedProtocolMessageType('BankingRecurringTransfers', (_message.Message,), {
+  'DESCRIPTOR' : _BANKINGRECURRINGTRANSFERS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingRecurringTransfers)
+  })
 _sym_db.RegisterMessage(BankingRecurringTransfers)
 
-BankingScheduledTransfers = _reflection.GeneratedProtocolMessageType(
-    "BankingScheduledTransfers",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANKINGSCHEDULEDTRANSFERS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingScheduledTransfers)
-    },
-)
+BankingScheduledTransfers = _reflection.GeneratedProtocolMessageType('BankingScheduledTransfers', (_message.Message,), {
+  'DESCRIPTOR' : _BANKINGSCHEDULEDTRANSFERS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BankingScheduledTransfers)
+  })
 _sym_db.RegisterMessage(BankingScheduledTransfers)
 
-Checkpoint = _reflection.GeneratedProtocolMessageType(
-    "Checkpoint",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHECKPOINT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Checkpoint)
-    },
-)
+Checkpoint = _reflection.GeneratedProtocolMessageType('Checkpoint', (_message.Message,), {
+  'DESCRIPTOR' : _CHECKPOINT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Checkpoint)
+  })
 _sym_db.RegisterMessage(Checkpoint)
 
-DelegationLastReconciliationTime = _reflection.GeneratedProtocolMessageType(
-    "DelegationLastReconciliationTime",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELEGATIONLASTRECONCILIATIONTIME,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationLastReconciliationTime)
-    },
-)
+DelegationLastReconciliationTime = _reflection.GeneratedProtocolMessageType('DelegationLastReconciliationTime', (_message.Message,), {
+  'DESCRIPTOR' : _DELEGATIONLASTRECONCILIATIONTIME,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationLastReconciliationTime)
+  })
 _sym_db.RegisterMessage(DelegationLastReconciliationTime)
 
-DelegationActive = _reflection.GeneratedProtocolMessageType(
-    "DelegationActive",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELEGATIONACTIVE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationActive)
-    },
-)
+DelegationActive = _reflection.GeneratedProtocolMessageType('DelegationActive', (_message.Message,), {
+  'DESCRIPTOR' : _DELEGATIONACTIVE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationActive)
+  })
 _sym_db.RegisterMessage(DelegationActive)
 
-DelegationPending = _reflection.GeneratedProtocolMessageType(
-    "DelegationPending",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELEGATIONPENDING,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationPending)
-    },
-)
+DelegationPending = _reflection.GeneratedProtocolMessageType('DelegationPending', (_message.Message,), {
+  'DESCRIPTOR' : _DELEGATIONPENDING,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationPending)
+  })
 _sym_db.RegisterMessage(DelegationPending)
 
-DelegationAuto = _reflection.GeneratedProtocolMessageType(
-    "DelegationAuto",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELEGATIONAUTO,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationAuto)
-    },
-)
+DelegationAuto = _reflection.GeneratedProtocolMessageType('DelegationAuto', (_message.Message,), {
+  'DESCRIPTOR' : _DELEGATIONAUTO,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DelegationAuto)
+  })
 _sym_db.RegisterMessage(DelegationAuto)
 
-ProposalData = _reflection.GeneratedProtocolMessageType(
-    "ProposalData",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PROPOSALDATA,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ProposalData)
-    },
-)
+ProposalData = _reflection.GeneratedProtocolMessageType('ProposalData', (_message.Message,), {
+  'DESCRIPTOR' : _PROPOSALDATA,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ProposalData)
+  })
 _sym_db.RegisterMessage(ProposalData)
 
-GovernanceEnacted = _reflection.GeneratedProtocolMessageType(
-    "GovernanceEnacted",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _GOVERNANCEENACTED,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.GovernanceEnacted)
-    },
-)
+GovernanceEnacted = _reflection.GeneratedProtocolMessageType('GovernanceEnacted', (_message.Message,), {
+  'DESCRIPTOR' : _GOVERNANCEENACTED,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.GovernanceEnacted)
+  })
 _sym_db.RegisterMessage(GovernanceEnacted)
 
-GovernanceActive = _reflection.GeneratedProtocolMessageType(
-    "GovernanceActive",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _GOVERNANCEACTIVE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.GovernanceActive)
-    },
-)
+GovernanceActive = _reflection.GeneratedProtocolMessageType('GovernanceActive', (_message.Message,), {
+  'DESCRIPTOR' : _GOVERNANCEACTIVE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.GovernanceActive)
+  })
 _sym_db.RegisterMessage(GovernanceActive)
 
-GovernanceNode = _reflection.GeneratedProtocolMessageType(
-    "GovernanceNode",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _GOVERNANCENODE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.GovernanceNode)
-    },
-)
+GovernanceNode = _reflection.GeneratedProtocolMessageType('GovernanceNode', (_message.Message,), {
+  'DESCRIPTOR' : _GOVERNANCENODE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.GovernanceNode)
+  })
 _sym_db.RegisterMessage(GovernanceNode)
 
-StakingAccount = _reflection.GeneratedProtocolMessageType(
-    "StakingAccount",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STAKINGACCOUNT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakingAccount)
-    },
-)
+StakingAccount = _reflection.GeneratedProtocolMessageType('StakingAccount', (_message.Message,), {
+  'DESCRIPTOR' : _STAKINGACCOUNT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakingAccount)
+  })
 _sym_db.RegisterMessage(StakingAccount)
 
-StakingAccounts = _reflection.GeneratedProtocolMessageType(
-    "StakingAccounts",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STAKINGACCOUNTS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakingAccounts)
-    },
-)
+StakingAccounts = _reflection.GeneratedProtocolMessageType('StakingAccounts', (_message.Message,), {
+  'DESCRIPTOR' : _STAKINGACCOUNTS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakingAccounts)
+  })
 _sym_db.RegisterMessage(StakingAccounts)
 
-MatchingBook = _reflection.GeneratedProtocolMessageType(
-    "MatchingBook",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MATCHINGBOOK,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.MatchingBook)
-    },
-)
+MatchingBook = _reflection.GeneratedProtocolMessageType('MatchingBook', (_message.Message,), {
+  'DESCRIPTOR' : _MATCHINGBOOK,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.MatchingBook)
+  })
 _sym_db.RegisterMessage(MatchingBook)
 
-NetParams = _reflection.GeneratedProtocolMessageType(
-    "NetParams",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _NETPARAMS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NetParams)
-    },
-)
+NetParams = _reflection.GeneratedProtocolMessageType('NetParams', (_message.Message,), {
+  'DESCRIPTOR' : _NETPARAMS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NetParams)
+  })
 _sym_db.RegisterMessage(NetParams)
 
-DecimalMap = _reflection.GeneratedProtocolMessageType(
-    "DecimalMap",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DECIMALMAP,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DecimalMap)
-    },
-)
+DecimalMap = _reflection.GeneratedProtocolMessageType('DecimalMap', (_message.Message,), {
+  'DESCRIPTOR' : _DECIMALMAP,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.DecimalMap)
+  })
 _sym_db.RegisterMessage(DecimalMap)
 
-TimePrice = _reflection.GeneratedProtocolMessageType(
-    "TimePrice",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TIMEPRICE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TimePrice)
-    },
-)
+TimePrice = _reflection.GeneratedProtocolMessageType('TimePrice', (_message.Message,), {
+  'DESCRIPTOR' : _TIMEPRICE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TimePrice)
+  })
 _sym_db.RegisterMessage(TimePrice)
 
-PriceVolume = _reflection.GeneratedProtocolMessageType(
-    "PriceVolume",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PRICEVOLUME,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceVolume)
-    },
-)
+PriceVolume = _reflection.GeneratedProtocolMessageType('PriceVolume', (_message.Message,), {
+  'DESCRIPTOR' : _PRICEVOLUME,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceVolume)
+  })
 _sym_db.RegisterMessage(PriceVolume)
 
-PriceRange = _reflection.GeneratedProtocolMessageType(
-    "PriceRange",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PRICERANGE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceRange)
-    },
-)
+PriceRange = _reflection.GeneratedProtocolMessageType('PriceRange', (_message.Message,), {
+  'DESCRIPTOR' : _PRICERANGE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceRange)
+  })
 _sym_db.RegisterMessage(PriceRange)
 
-PriceBound = _reflection.GeneratedProtocolMessageType(
-    "PriceBound",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PRICEBOUND,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceBound)
-    },
-)
+PriceBound = _reflection.GeneratedProtocolMessageType('PriceBound', (_message.Message,), {
+  'DESCRIPTOR' : _PRICEBOUND,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceBound)
+  })
 _sym_db.RegisterMessage(PriceBound)
 
-PriceRangeCache = _reflection.GeneratedProtocolMessageType(
-    "PriceRangeCache",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PRICERANGECACHE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceRangeCache)
-    },
-)
+PriceRangeCache = _reflection.GeneratedProtocolMessageType('PriceRangeCache', (_message.Message,), {
+  'DESCRIPTOR' : _PRICERANGECACHE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceRangeCache)
+  })
 _sym_db.RegisterMessage(PriceRangeCache)
 
-CurrentPrice = _reflection.GeneratedProtocolMessageType(
-    "CurrentPrice",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CURRENTPRICE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.CurrentPrice)
-    },
-)
+CurrentPrice = _reflection.GeneratedProtocolMessageType('CurrentPrice', (_message.Message,), {
+  'DESCRIPTOR' : _CURRENTPRICE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.CurrentPrice)
+  })
 _sym_db.RegisterMessage(CurrentPrice)
 
-PastPrice = _reflection.GeneratedProtocolMessageType(
-    "PastPrice",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PASTPRICE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PastPrice)
-    },
-)
+PastPrice = _reflection.GeneratedProtocolMessageType('PastPrice', (_message.Message,), {
+  'DESCRIPTOR' : _PASTPRICE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PastPrice)
+  })
 _sym_db.RegisterMessage(PastPrice)
 
-PriceMonitor = _reflection.GeneratedProtocolMessageType(
-    "PriceMonitor",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PRICEMONITOR,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceMonitor)
-    },
-)
+PriceMonitor = _reflection.GeneratedProtocolMessageType('PriceMonitor', (_message.Message,), {
+  'DESCRIPTOR' : _PRICEMONITOR,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PriceMonitor)
+  })
 _sym_db.RegisterMessage(PriceMonitor)
 
-AuctionState = _reflection.GeneratedProtocolMessageType(
-    "AuctionState",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _AUCTIONSTATE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.AuctionState)
-    },
-)
+AuctionState = _reflection.GeneratedProtocolMessageType('AuctionState', (_message.Message,), {
+  'DESCRIPTOR' : _AUCTIONSTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.AuctionState)
+  })
 _sym_db.RegisterMessage(AuctionState)
 
-EquityShareLP = _reflection.GeneratedProtocolMessageType(
-    "EquityShareLP",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _EQUITYSHARELP,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EquityShareLP)
-    },
-)
+EquityShareLP = _reflection.GeneratedProtocolMessageType('EquityShareLP', (_message.Message,), {
+  'DESCRIPTOR' : _EQUITYSHARELP,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EquityShareLP)
+  })
 _sym_db.RegisterMessage(EquityShareLP)
 
-EquityShare = _reflection.GeneratedProtocolMessageType(
-    "EquityShare",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _EQUITYSHARE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EquityShare)
-    },
-)
+EquityShare = _reflection.GeneratedProtocolMessageType('EquityShare', (_message.Message,), {
+  'DESCRIPTOR' : _EQUITYSHARE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EquityShare)
+  })
 _sym_db.RegisterMessage(EquityShare)
 
-FeeSplitter = _reflection.GeneratedProtocolMessageType(
-    "FeeSplitter",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _FEESPLITTER,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FeeSplitter)
-    },
-)
+FeeSplitter = _reflection.GeneratedProtocolMessageType('FeeSplitter', (_message.Message,), {
+  'DESCRIPTOR' : _FEESPLITTER,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FeeSplitter)
+  })
 _sym_db.RegisterMessage(FeeSplitter)
 
-Market = _reflection.GeneratedProtocolMessageType(
-    "Market",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MARKET,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Market)
-    },
-)
+Market = _reflection.GeneratedProtocolMessageType('Market', (_message.Message,), {
+  'DESCRIPTOR' : _MARKET,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Market)
+  })
 _sym_db.RegisterMessage(Market)
 
-ExecutionMarkets = _reflection.GeneratedProtocolMessageType(
-    "ExecutionMarkets",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _EXECUTIONMARKETS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ExecutionMarkets)
-    },
-)
+ExecutionMarkets = _reflection.GeneratedProtocolMessageType('ExecutionMarkets', (_message.Message,), {
+  'DESCRIPTOR' : _EXECUTIONMARKETS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ExecutionMarkets)
+  })
 _sym_db.RegisterMessage(ExecutionMarkets)
 
-Position = _reflection.GeneratedProtocolMessageType(
-    "Position",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _POSITION,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Position)
-    },
-)
+Position = _reflection.GeneratedProtocolMessageType('Position', (_message.Message,), {
+  'DESCRIPTOR' : _POSITION,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Position)
+  })
 _sym_db.RegisterMessage(Position)
 
-MarketPositions = _reflection.GeneratedProtocolMessageType(
-    "MarketPositions",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MARKETPOSITIONS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.MarketPositions)
-    },
-)
+MarketPositions = _reflection.GeneratedProtocolMessageType('MarketPositions', (_message.Message,), {
+  'DESCRIPTOR' : _MARKETPOSITIONS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.MarketPositions)
+  })
 _sym_db.RegisterMessage(MarketPositions)
 
-AppState = _reflection.GeneratedProtocolMessageType(
-    "AppState",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _APPSTATE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.AppState)
-    },
-)
+AppState = _reflection.GeneratedProtocolMessageType('AppState', (_message.Message,), {
+  'DESCRIPTOR' : _APPSTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.AppState)
+  })
 _sym_db.RegisterMessage(AppState)
 
-EpochState = _reflection.GeneratedProtocolMessageType(
-    "EpochState",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _EPOCHSTATE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EpochState)
-    },
-)
+EpochState = _reflection.GeneratedProtocolMessageType('EpochState', (_message.Message,), {
+  'DESCRIPTOR' : _EPOCHSTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.EpochState)
+  })
 _sym_db.RegisterMessage(EpochState)
 
-RewardsPendingPayouts = _reflection.GeneratedProtocolMessageType(
-    "RewardsPendingPayouts",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _REWARDSPENDINGPAYOUTS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.RewardsPendingPayouts)
-    },
-)
+RewardsPendingPayouts = _reflection.GeneratedProtocolMessageType('RewardsPendingPayouts', (_message.Message,), {
+  'DESCRIPTOR' : _REWARDSPENDINGPAYOUTS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.RewardsPendingPayouts)
+  })
 _sym_db.RegisterMessage(RewardsPendingPayouts)
 
-ScheduledRewardsPayout = _reflection.GeneratedProtocolMessageType(
-    "ScheduledRewardsPayout",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SCHEDULEDREWARDSPAYOUT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ScheduledRewardsPayout)
-    },
-)
+ScheduledRewardsPayout = _reflection.GeneratedProtocolMessageType('ScheduledRewardsPayout', (_message.Message,), {
+  'DESCRIPTOR' : _SCHEDULEDREWARDSPAYOUT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ScheduledRewardsPayout)
+  })
 _sym_db.RegisterMessage(ScheduledRewardsPayout)
 
-RewardsPayout = _reflection.GeneratedProtocolMessageType(
-    "RewardsPayout",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _REWARDSPAYOUT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.RewardsPayout)
-    },
-)
+RewardsPayout = _reflection.GeneratedProtocolMessageType('RewardsPayout', (_message.Message,), {
+  'DESCRIPTOR' : _REWARDSPAYOUT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.RewardsPayout)
+  })
 _sym_db.RegisterMessage(RewardsPayout)
 
-RewardsPartyAmount = _reflection.GeneratedProtocolMessageType(
-    "RewardsPartyAmount",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _REWARDSPARTYAMOUNT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.RewardsPartyAmount)
-    },
-)
+RewardsPartyAmount = _reflection.GeneratedProtocolMessageType('RewardsPartyAmount', (_message.Message,), {
+  'DESCRIPTOR' : _REWARDSPARTYAMOUNT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.RewardsPartyAmount)
+  })
 _sym_db.RegisterMessage(RewardsPartyAmount)
 
-LimitState = _reflection.GeneratedProtocolMessageType(
-    "LimitState",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIMITSTATE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LimitState)
-    },
-)
+LimitState = _reflection.GeneratedProtocolMessageType('LimitState', (_message.Message,), {
+  'DESCRIPTOR' : _LIMITSTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LimitState)
+  })
 _sym_db.RegisterMessage(LimitState)
 
-VoteSpamPolicy = _reflection.GeneratedProtocolMessageType(
-    "VoteSpamPolicy",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _VOTESPAMPOLICY,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.VoteSpamPolicy)
-    },
-)
+VoteSpamPolicy = _reflection.GeneratedProtocolMessageType('VoteSpamPolicy', (_message.Message,), {
+  'DESCRIPTOR' : _VOTESPAMPOLICY,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.VoteSpamPolicy)
+  })
 _sym_db.RegisterMessage(VoteSpamPolicy)
 
-PartyProposalVoteCount = _reflection.GeneratedProtocolMessageType(
-    "PartyProposalVoteCount",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PARTYPROPOSALVOTECOUNT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PartyProposalVoteCount)
-    },
-)
+PartyProposalVoteCount = _reflection.GeneratedProtocolMessageType('PartyProposalVoteCount', (_message.Message,), {
+  'DESCRIPTOR' : _PARTYPROPOSALVOTECOUNT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PartyProposalVoteCount)
+  })
 _sym_db.RegisterMessage(PartyProposalVoteCount)
 
-BannedParty = _reflection.GeneratedProtocolMessageType(
-    "BannedParty",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BANNEDPARTY,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BannedParty)
-    },
-)
+BannedParty = _reflection.GeneratedProtocolMessageType('BannedParty', (_message.Message,), {
+  'DESCRIPTOR' : _BANNEDPARTY,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BannedParty)
+  })
 _sym_db.RegisterMessage(BannedParty)
 
-PartyTokenBalance = _reflection.GeneratedProtocolMessageType(
-    "PartyTokenBalance",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PARTYTOKENBALANCE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PartyTokenBalance)
-    },
-)
+PartyTokenBalance = _reflection.GeneratedProtocolMessageType('PartyTokenBalance', (_message.Message,), {
+  'DESCRIPTOR' : _PARTYTOKENBALANCE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PartyTokenBalance)
+  })
 _sym_db.RegisterMessage(PartyTokenBalance)
 
-BlockRejectStats = _reflection.GeneratedProtocolMessageType(
-    "BlockRejectStats",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BLOCKREJECTSTATS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BlockRejectStats)
-    },
-)
+BlockRejectStats = _reflection.GeneratedProtocolMessageType('BlockRejectStats', (_message.Message,), {
+  'DESCRIPTOR' : _BLOCKREJECTSTATS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.BlockRejectStats)
+  })
 _sym_db.RegisterMessage(BlockRejectStats)
 
-SpamPartyTransactionCount = _reflection.GeneratedProtocolMessageType(
-    "SpamPartyTransactionCount",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SPAMPARTYTRANSACTIONCOUNT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.SpamPartyTransactionCount)
-    },
-)
+SpamPartyTransactionCount = _reflection.GeneratedProtocolMessageType('SpamPartyTransactionCount', (_message.Message,), {
+  'DESCRIPTOR' : _SPAMPARTYTRANSACTIONCOUNT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.SpamPartyTransactionCount)
+  })
 _sym_db.RegisterMessage(SpamPartyTransactionCount)
 
-SimpleSpamPolicy = _reflection.GeneratedProtocolMessageType(
-    "SimpleSpamPolicy",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SIMPLESPAMPOLICY,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.SimpleSpamPolicy)
-    },
-)
+SimpleSpamPolicy = _reflection.GeneratedProtocolMessageType('SimpleSpamPolicy', (_message.Message,), {
+  'DESCRIPTOR' : _SIMPLESPAMPOLICY,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.SimpleSpamPolicy)
+  })
 _sym_db.RegisterMessage(SimpleSpamPolicy)
 
-NotarySigs = _reflection.GeneratedProtocolMessageType(
-    "NotarySigs",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _NOTARYSIGS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NotarySigs)
-    },
-)
+NotarySigs = _reflection.GeneratedProtocolMessageType('NotarySigs', (_message.Message,), {
+  'DESCRIPTOR' : _NOTARYSIGS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NotarySigs)
+  })
 _sym_db.RegisterMessage(NotarySigs)
 
-Notary = _reflection.GeneratedProtocolMessageType(
-    "Notary",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _NOTARY,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Notary)
-    },
-)
+Notary = _reflection.GeneratedProtocolMessageType('Notary', (_message.Message,), {
+  'DESCRIPTOR' : _NOTARY,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Notary)
+  })
 _sym_db.RegisterMessage(Notary)
 
-ReplayProtection = _reflection.GeneratedProtocolMessageType(
-    "ReplayProtection",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _REPLAYPROTECTION,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ReplayProtection)
-    },
-)
+ReplayProtection = _reflection.GeneratedProtocolMessageType('ReplayProtection', (_message.Message,), {
+  'DESCRIPTOR' : _REPLAYPROTECTION,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ReplayProtection)
+  })
 _sym_db.RegisterMessage(ReplayProtection)
 
-TransactionAtHeight = _reflection.GeneratedProtocolMessageType(
-    "TransactionAtHeight",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRANSACTIONATHEIGHT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TransactionAtHeight)
-    },
-)
+TransactionAtHeight = _reflection.GeneratedProtocolMessageType('TransactionAtHeight', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSACTIONATHEIGHT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TransactionAtHeight)
+  })
 _sym_db.RegisterMessage(TransactionAtHeight)
 
-FutureState = _reflection.GeneratedProtocolMessageType(
-    "FutureState",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _FUTURESTATE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FutureState)
-    },
-)
+FutureState = _reflection.GeneratedProtocolMessageType('FutureState', (_message.Message,), {
+  'DESCRIPTOR' : _FUTURESTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FutureState)
+  })
 _sym_db.RegisterMessage(FutureState)
 
-StakeVerifierDeposited = _reflection.GeneratedProtocolMessageType(
-    "StakeVerifierDeposited",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STAKEVERIFIERDEPOSITED,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakeVerifierDeposited)
-    },
-)
+StakeVerifierDeposited = _reflection.GeneratedProtocolMessageType('StakeVerifierDeposited', (_message.Message,), {
+  'DESCRIPTOR' : _STAKEVERIFIERDEPOSITED,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakeVerifierDeposited)
+  })
 _sym_db.RegisterMessage(StakeVerifierDeposited)
 
-StakeVerifierRemoved = _reflection.GeneratedProtocolMessageType(
-    "StakeVerifierRemoved",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STAKEVERIFIERREMOVED,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakeVerifierRemoved)
-    },
-)
+StakeVerifierRemoved = _reflection.GeneratedProtocolMessageType('StakeVerifierRemoved', (_message.Message,), {
+  'DESCRIPTOR' : _STAKEVERIFIERREMOVED,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakeVerifierRemoved)
+  })
 _sym_db.RegisterMessage(StakeVerifierRemoved)
 
-StakeVerifierPending = _reflection.GeneratedProtocolMessageType(
-    "StakeVerifierPending",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STAKEVERIFIERPENDING,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakeVerifierPending)
-    },
-)
+StakeVerifierPending = _reflection.GeneratedProtocolMessageType('StakeVerifierPending', (_message.Message,), {
+  'DESCRIPTOR' : _STAKEVERIFIERPENDING,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StakeVerifierPending)
+  })
 _sym_db.RegisterMessage(StakeVerifierPending)
 
-PendingKeyRotation = _reflection.GeneratedProtocolMessageType(
-    "PendingKeyRotation",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PENDINGKEYROTATION,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingKeyRotation)
-    },
-)
+PendingKeyRotation = _reflection.GeneratedProtocolMessageType('PendingKeyRotation', (_message.Message,), {
+  'DESCRIPTOR' : _PENDINGKEYROTATION,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingKeyRotation)
+  })
 _sym_db.RegisterMessage(PendingKeyRotation)
 
-PendingEthereumKeyRotation = _reflection.GeneratedProtocolMessageType(
-    "PendingEthereumKeyRotation",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PENDINGETHEREUMKEYROTATION,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingEthereumKeyRotation)
-    },
-)
+PendingEthereumKeyRotation = _reflection.GeneratedProtocolMessageType('PendingEthereumKeyRotation', (_message.Message,), {
+  'DESCRIPTOR' : _PENDINGETHEREUMKEYROTATION,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PendingEthereumKeyRotation)
+  })
 _sym_db.RegisterMessage(PendingEthereumKeyRotation)
 
-Topology = _reflection.GeneratedProtocolMessageType(
-    "Topology",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TOPOLOGY,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Topology)
-    },
-)
+Topology = _reflection.GeneratedProtocolMessageType('Topology', (_message.Message,), {
+  'DESCRIPTOR' : _TOPOLOGY,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.Topology)
+  })
 _sym_db.RegisterMessage(Topology)
 
-ValidatorState = _reflection.GeneratedProtocolMessageType(
-    "ValidatorState",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _VALIDATORSTATE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ValidatorState)
-    },
-)
+ValidatorState = _reflection.GeneratedProtocolMessageType('ValidatorState', (_message.Message,), {
+  'DESCRIPTOR' : _VALIDATORSTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ValidatorState)
+  })
 _sym_db.RegisterMessage(ValidatorState)
 
-HeartbeatTracker = _reflection.GeneratedProtocolMessageType(
-    "HeartbeatTracker",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _HEARTBEATTRACKER,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.HeartbeatTracker)
-    },
-)
+HeartbeatTracker = _reflection.GeneratedProtocolMessageType('HeartbeatTracker', (_message.Message,), {
+  'DESCRIPTOR' : _HEARTBEATTRACKER,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.HeartbeatTracker)
+  })
 _sym_db.RegisterMessage(HeartbeatTracker)
 
-PerformanceStats = _reflection.GeneratedProtocolMessageType(
-    "PerformanceStats",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PERFORMANCESTATS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PerformanceStats)
-    },
-)
+PerformanceStats = _reflection.GeneratedProtocolMessageType('PerformanceStats', (_message.Message,), {
+  'DESCRIPTOR' : _PERFORMANCESTATS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PerformanceStats)
+  })
 _sym_db.RegisterMessage(PerformanceStats)
 
-ValidatorPerformance = _reflection.GeneratedProtocolMessageType(
-    "ValidatorPerformance",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _VALIDATORPERFORMANCE,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ValidatorPerformance)
-    },
-)
+ValidatorPerformance = _reflection.GeneratedProtocolMessageType('ValidatorPerformance', (_message.Message,), {
+  'DESCRIPTOR' : _VALIDATORPERFORMANCE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ValidatorPerformance)
+  })
 _sym_db.RegisterMessage(ValidatorPerformance)
 
-LiquidityParameters = _reflection.GeneratedProtocolMessageType(
-    "LiquidityParameters",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYPARAMETERS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityParameters)
-    },
-)
+LiquidityParameters = _reflection.GeneratedProtocolMessageType('LiquidityParameters', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYPARAMETERS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityParameters)
+  })
 _sym_db.RegisterMessage(LiquidityParameters)
 
-LiquidityPendingProvisions = _reflection.GeneratedProtocolMessageType(
-    "LiquidityPendingProvisions",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYPENDINGPROVISIONS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPendingProvisions)
-    },
-)
+LiquidityPendingProvisions = _reflection.GeneratedProtocolMessageType('LiquidityPendingProvisions', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYPENDINGPROVISIONS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPendingProvisions)
+  })
 _sym_db.RegisterMessage(LiquidityPendingProvisions)
 
-LiquidityPartiesLiquidityOrders = _reflection.GeneratedProtocolMessageType(
-    "LiquidityPartiesLiquidityOrders",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYPARTIESLIQUIDITYORDERS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPartiesLiquidityOrders)
-    },
-)
+LiquidityPartiesLiquidityOrders = _reflection.GeneratedProtocolMessageType('LiquidityPartiesLiquidityOrders', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYPARTIESLIQUIDITYORDERS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPartiesLiquidityOrders)
+  })
 _sym_db.RegisterMessage(LiquidityPartiesLiquidityOrders)
 
-LiquidityPartiesOrders = _reflection.GeneratedProtocolMessageType(
-    "LiquidityPartiesOrders",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYPARTIESORDERS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPartiesOrders)
-    },
-)
+PartyOrders = _reflection.GeneratedProtocolMessageType('PartyOrders', (_message.Message,), {
+  'DESCRIPTOR' : _PARTYORDERS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.PartyOrders)
+  })
+_sym_db.RegisterMessage(PartyOrders)
+
+LiquidityPartiesOrders = _reflection.GeneratedProtocolMessageType('LiquidityPartiesOrders', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYPARTIESORDERS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityPartiesOrders)
+  })
 _sym_db.RegisterMessage(LiquidityPartiesOrders)
 
-LiquidityProvisions = _reflection.GeneratedProtocolMessageType(
-    "LiquidityProvisions",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LIQUIDITYPROVISIONS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityProvisions)
-    },
-)
+LiquidityProvisions = _reflection.GeneratedProtocolMessageType('LiquidityProvisions', (_message.Message,), {
+  'DESCRIPTOR' : _LIQUIDITYPROVISIONS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.LiquidityProvisions)
+  })
 _sym_db.RegisterMessage(LiquidityProvisions)
 
-FloatingPointConsensus = _reflection.GeneratedProtocolMessageType(
-    "FloatingPointConsensus",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _FLOATINGPOINTCONSENSUS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FloatingPointConsensus)
-    },
-)
+FloatingPointConsensus = _reflection.GeneratedProtocolMessageType('FloatingPointConsensus', (_message.Message,), {
+  'DESCRIPTOR' : _FLOATINGPOINTCONSENSUS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FloatingPointConsensus)
+  })
 _sym_db.RegisterMessage(FloatingPointConsensus)
 
-NextTimeTrigger = _reflection.GeneratedProtocolMessageType(
-    "NextTimeTrigger",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _NEXTTIMETRIGGER,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NextTimeTrigger)
-    },
-)
+StateVarInternalState = _reflection.GeneratedProtocolMessageType('StateVarInternalState', (_message.Message,), {
+  'DESCRIPTOR' : _STATEVARINTERNALSTATE,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.StateVarInternalState)
+  })
+_sym_db.RegisterMessage(StateVarInternalState)
+
+FloatingPointValidatorResult = _reflection.GeneratedProtocolMessageType('FloatingPointValidatorResult', (_message.Message,), {
+  'DESCRIPTOR' : _FLOATINGPOINTVALIDATORRESULT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.FloatingPointValidatorResult)
+  })
+_sym_db.RegisterMessage(FloatingPointValidatorResult)
+
+NextTimeTrigger = _reflection.GeneratedProtocolMessageType('NextTimeTrigger', (_message.Message,), {
+  'DESCRIPTOR' : _NEXTTIMETRIGGER,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.NextTimeTrigger)
+  })
 _sym_db.RegisterMessage(NextTimeTrigger)
 
-MarketTracker = _reflection.GeneratedProtocolMessageType(
-    "MarketTracker",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MARKETTRACKER,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.MarketTracker)
-    },
-)
+MarketTracker = _reflection.GeneratedProtocolMessageType('MarketTracker', (_message.Message,), {
+  'DESCRIPTOR' : _MARKETTRACKER,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.MarketTracker)
+  })
 _sym_db.RegisterMessage(MarketTracker)
 
-SignerEventsPerAddress = _reflection.GeneratedProtocolMessageType(
-    "SignerEventsPerAddress",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SIGNEREVENTSPERADDRESS,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.SignerEventsPerAddress)
-    },
-)
+SignerEventsPerAddress = _reflection.GeneratedProtocolMessageType('SignerEventsPerAddress', (_message.Message,), {
+  'DESCRIPTOR' : _SIGNEREVENTSPERADDRESS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.SignerEventsPerAddress)
+  })
 _sym_db.RegisterMessage(SignerEventsPerAddress)
 
-ERC20MultiSigTopologyVerified = _reflection.GeneratedProtocolMessageType(
-    "ERC20MultiSigTopologyVerified",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULTISIGTOPOLOGYVERIFIED,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ERC20MultiSigTopologyVerified)
-    },
-)
+ERC20MultiSigTopologyVerified = _reflection.GeneratedProtocolMessageType('ERC20MultiSigTopologyVerified', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULTISIGTOPOLOGYVERIFIED,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ERC20MultiSigTopologyVerified)
+  })
 _sym_db.RegisterMessage(ERC20MultiSigTopologyVerified)
 
-ERC20MultiSigTopologyPending = _reflection.GeneratedProtocolMessageType(
-    "ERC20MultiSigTopologyPending",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULTISIGTOPOLOGYPENDING,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ERC20MultiSigTopologyPending)
-    },
-)
+ERC20MultiSigTopologyPending = _reflection.GeneratedProtocolMessageType('ERC20MultiSigTopologyPending', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULTISIGTOPOLOGYPENDING,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ERC20MultiSigTopologyPending)
+  })
 _sym_db.RegisterMessage(ERC20MultiSigTopologyPending)
 
-ProofOfWork = _reflection.GeneratedProtocolMessageType(
-    "ProofOfWork",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PROOFOFWORK,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ProofOfWork)
-    },
-)
+ProofOfWork = _reflection.GeneratedProtocolMessageType('ProofOfWork', (_message.Message,), {
+  'DESCRIPTOR' : _PROOFOFWORK,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ProofOfWork)
+  })
 _sym_db.RegisterMessage(ProofOfWork)
 
-TransactionsAtHeight = _reflection.GeneratedProtocolMessageType(
-    "TransactionsAtHeight",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRANSACTIONSATHEIGHT,
-        "__module__": "vega.snapshot.v1.snapshot_pb2"
-        # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TransactionsAtHeight)
-    },
-)
+ProofOfWorkParams = _reflection.GeneratedProtocolMessageType('ProofOfWorkParams', (_message.Message,), {
+  'DESCRIPTOR' : _PROOFOFWORKPARAMS,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.ProofOfWorkParams)
+  })
+_sym_db.RegisterMessage(ProofOfWorkParams)
+
+TransactionsAtHeight = _reflection.GeneratedProtocolMessageType('TransactionsAtHeight', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSACTIONSATHEIGHT,
+  '__module__' : 'vega.snapshot.v1.snapshot_pb2'
+  # @@protoc_insertion_point(class_scope:vega.snapshot.v1.TransactionsAtHeight)
+  })
 _sym_db.RegisterMessage(TransactionsAtHeight)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/protos/vega/snapshot/v1"
-    _FORMAT._serialized_start = 14981
-    _FORMAT._serialized_end = 15077
-    _SNAPSHOT._serialized_start = 266
-    _SNAPSHOT._serialized_end = 382
-    _NODEHASH._serialized_start = 384
-    _NODEHASH._serialized_end = 471
-    _METADATA._serialized_start = 473
-    _METADATA._serialized_end = 571
-    _CHUNK._serialized_start = 573
-    _CHUNK._serialized_end = 645
-    _PAYLOAD._serialized_start = 648
-    _PAYLOAD._serialized_end = 3978
-    _TIMESTAMPEDOPENINTEREST._serialized_start = 3980
-    _TIMESTAMPEDOPENINTEREST._serialized_end = 4042
-    _LIQUIDITYTARGET._serialized_start = 4045
-    _LIQUIDITYTARGET._serialized_end = 4310
-    _LIQUIDITYPRICEPROBABILITYPAIR._serialized_start = 4312
-    _LIQUIDITYPRICEPROBABILITYPAIR._serialized_end = 4379
-    _LIQUIDITYSUPPLIED._serialized_start = 4382
-    _LIQUIDITYSUPPLIED._serialized_end = 4583
-    _ORACLEDATABATCH._serialized_start = 4585
-    _ORACLEDATABATCH._serialized_end = 4653
-    _ORACLEDATA._serialized_start = 4655
-    _ORACLEDATA._serialized_end = 4733
-    _ORACLEDATAPAIR._serialized_start = 4735
-    _ORACLEDATAPAIR._serialized_end = 4779
-    _WITNESS._serialized_start = 4781
-    _WITNESS._serialized_end = 4868
-    _RESOURCE._serialized_start = 4870
-    _RESOURCE._serialized_end = 4943
-    _EVENTFORWARDER._serialized_start = 4945
-    _EVENTFORWARDER._serialized_end = 5013
-    _COLLATERALACCOUNTS._serialized_start = 5015
-    _COLLATERALACCOUNTS._serialized_end = 5068
-    _COLLATERALASSETS._serialized_start = 5070
-    _COLLATERALASSETS._serialized_end = 5117
-    _ACTIVEASSETS._serialized_start = 5119
-    _ACTIVEASSETS._serialized_end = 5162
-    _PENDINGASSETS._serialized_start = 5164
-    _PENDINGASSETS._serialized_end = 5208
-    _WITHDRAWAL._serialized_start = 5210
-    _WITHDRAWAL._serialized_end = 5273
-    _DEPOSIT._serialized_start = 5275
-    _DEPOSIT._serialized_end = 5328
-    _TXREF._serialized_start = 5330
-    _TXREF._serialized_end = 5403
-    _ASSETACTION._serialized_start = 5406
-    _ASSETACTION._serialized_end = 5652
-    _BANKINGWITHDRAWALS._serialized_start = 5654
-    _BANKINGWITHDRAWALS._serialized_end = 5725
-    _BANKINGDEPOSITS._serialized_start = 5727
-    _BANKINGDEPOSITS._serialized_end = 5788
-    _BANKINGSEEN._serialized_start = 5790
-    _BANKINGSEEN._serialized_end = 5842
-    _BANKINGASSETACTIONS._serialized_start = 5844
-    _BANKINGASSETACTIONS._serialized_end = 5918
-    _BANKINGRECURRINGTRANSFERS._serialized_start = 5920
-    _BANKINGRECURRINGTRANSFERS._serialized_end = 6015
-    _BANKINGSCHEDULEDTRANSFERS._serialized_start = 6017
-    _BANKINGSCHEDULEDTRANSFERS._serialized_end = 6116
-    _CHECKPOINT._serialized_start = 6118
-    _CHECKPOINT._serialized_end = 6147
-    _DELEGATIONLASTRECONCILIATIONTIME._serialized_start = 6149
-    _DELEGATIONLASTRECONCILIATIONTIME._serialized_end = 6217
-    _DELEGATIONACTIVE._serialized_start = 6219
-    _DELEGATIONACTIVE._serialized_end = 6276
-    _DELEGATIONPENDING._serialized_start = 6278
-    _DELEGATIONPENDING._serialized_end = 6376
-    _DELEGATIONAUTO._serialized_start = 6378
-    _DELEGATIONAUTO._serialized_end = 6411
-    _PROPOSALDATA._serialized_start = 6413
-    _PROPOSALDATA._serialized_end = 6539
-    _GOVERNANCEENACTED._serialized_start = 6541
-    _GOVERNANCEENACTED._serialized_end = 6611
-    _GOVERNANCEACTIVE._serialized_start = 6613
-    _GOVERNANCEACTIVE._serialized_end = 6682
-    _GOVERNANCENODE._serialized_start = 6684
-    _GOVERNANCENODE._serialized_end = 6735
-    _STAKINGACCOUNT._serialized_start = 6737
-    _STAKINGACCOUNT._serialized_end = 6831
-    _STAKINGACCOUNTS._serialized_start = 6833
-    _STAKINGACCOUNTS._serialized_end = 6938
-    _MATCHINGBOOK._serialized_start = 6941
-    _MATCHINGBOOK._serialized_end = 7089
-    _NETPARAMS._serialized_start = 7091
-    _NETPARAMS._serialized_end = 7142
-    _DECIMALMAP._serialized_start = 7144
-    _DECIMALMAP._serialized_end = 7182
-    _TIMEPRICE._serialized_start = 7184
-    _TIMEPRICE._serialized_end = 7224
-    _PRICEVOLUME._serialized_start = 7226
-    _PRICEVOLUME._serialized_end = 7270
-    _PRICERANGE._serialized_start = 7272
-    _PRICERANGE._serialized_end = 7323
-    _PRICEBOUND._serialized_start = 7325
-    _PRICEBOUND._serialized_end = 7440
-    _PRICERANGECACHE._serialized_start = 7442
-    _PRICERANGECACHE._serialized_end = 7549
-    _CURRENTPRICE._serialized_start = 7551
-    _CURRENTPRICE._serialized_end = 7596
-    _PASTPRICE._serialized_start = 7598
-    _PASTPRICE._serialized_end = 7654
-    _PRICEMONITOR._serialized_start = 7657
-    _PRICEMONITOR._serialized_end = 8126
-    _AUCTIONSTATE._serialized_start = 8129
-    _AUCTIONSTATE._serialized_end = 8391
-    _EQUITYSHARELP._serialized_start = 8393
-    _EQUITYSHARELP._serialized_end = 8479
-    _EQUITYSHARE._serialized_start = 8481
-    _EQUITYSHARE._serialized_end = 8595
-    _FEESPLITTER._serialized_start = 8597
-    _FEESPLITTER._serialized_end = 8658
-    _MARKET._serialized_start = 8661
-    _MARKET._serialized_end = 9271
-    _EXECUTIONMARKETS._serialized_start = 9273
-    _EXECUTIONMARKETS._serialized_end = 9334
-    _POSITION._serialized_start = 9337
-    _POSITION._serialized_end = 9466
-    _MARKETPOSITIONS._serialized_start = 9468
-    _MARKETPOSITIONS._serialized_end = 9551
-    _APPSTATE._serialized_start = 9553
-    _APPSTATE._serialized_end = 9626
-    _EPOCHSTATE._serialized_start = 9629
-    _EPOCHSTATE._serialized_end = 9757
-    _REWARDSPENDINGPAYOUTS._serialized_start = 9759
-    _REWARDSPENDINGPAYOUTS._serialized_end = 9858
-    _SCHEDULEDREWARDSPAYOUT._serialized_start = 9860
-    _SCHEDULEDREWARDSPAYOUT._serialized_end = 9962
-    _REWARDSPAYOUT._serialized_start = 9965
-    _REWARDSPAYOUT._serialized_end = 10144
-    _REWARDSPARTYAMOUNT._serialized_start = 10146
-    _REWARDSPARTYAMOUNT._serialized_end = 10197
-    _LIMITSTATE._serialized_start = 10200
-    _LIMITSTATE._serialized_end = 10448
-    _VOTESPAMPOLICY._serialized_start = 10451
-    _VOTESPAMPOLICY._serialized_end = 10838
-    _PARTYPROPOSALVOTECOUNT._serialized_start = 10840
-    _PARTYPROPOSALVOTECOUNT._serialized_end = 10912
-    _BANNEDPARTY._serialized_start = 10914
-    _BANNEDPARTY._serialized_end = 10963
-    _PARTYTOKENBALANCE._serialized_start = 10965
-    _PARTYTOKENBALANCE._serialized_end = 11016
-    _BLOCKREJECTSTATS._serialized_start = 11018
-    _BLOCKREJECTSTATS._serialized_end = 11069
-    _SPAMPARTYTRANSACTIONCOUNT._serialized_start = 11071
-    _SPAMPARTYTRANSACTIONCOUNT._serialized_end = 11128
-    _SIMPLESPAMPOLICY._serialized_start = 11131
-    _SIMPLESPAMPOLICY._serialized_end = 11381
-    _NOTARYSIGS._serialized_start = 11383
-    _NOTARYSIGS._serialized_end = 11448
-    _NOTARY._serialized_start = 11450
-    _NOTARY._serialized_end = 11509
-    _REPLAYPROTECTION._serialized_start = 11511
-    _REPLAYPROTECTION._serialized_end = 11629
-    _TRANSACTIONATHEIGHT._serialized_start = 11631
-    _TRANSACTIONATHEIGHT._serialized_end = 11680
-    _FUTURESTATE._serialized_start = 11682
-    _FUTURESTATE._serialized_end = 11768
-    _STAKEVERIFIERDEPOSITED._serialized_start = 11770
-    _STAKEVERIFIERDEPOSITED._serialized_end = 11861
-    _STAKEVERIFIERREMOVED._serialized_start = 11863
-    _STAKEVERIFIERREMOVED._serialized_end = 11950
-    _STAKEVERIFIERPENDING._serialized_start = 11953
-    _STAKEVERIFIERPENDING._serialized_end = 12130
-    _PENDINGKEYROTATION._serialized_start = 12132
-    _PENDINGKEYROTATION._serialized_end = 12239
-    _PENDINGETHEREUMKEYROTATION._serialized_start = 12241
-    _PENDINGETHEREUMKEYROTATION._serialized_end = 12329
-    _TOPOLOGY._serialized_start = 12332
-    _TOPOLOGY._serialized_end = 12650
-    _VALIDATORSTATE._serialized_start = 12653
-    _VALIDATORSTATE._serialized_end = 12997
-    _HEARTBEATTRACKER._serialized_start = 12999
-    _HEARTBEATTRACKER._serialized_end = 13120
-    _PERFORMANCESTATS._serialized_start = 13123
-    _PERFORMANCESTATS._serialized_end = 13304
-    _VALIDATORPERFORMANCE._serialized_start = 13306
-    _VALIDATORPERFORMANCE._serialized_end = 13394
-    _LIQUIDITYPARAMETERS._serialized_start = 13396
-    _LIQUIDITYPARAMETERS._serialized_end = 13513
-    _LIQUIDITYPENDINGPROVISIONS._serialized_start = 13515
-    _LIQUIDITYPENDINGPROVISIONS._serialized_end = 13590
-    _LIQUIDITYPARTIESLIQUIDITYORDERS._serialized_start = 13592
-    _LIQUIDITYPARTIESLIQUIDITYORDERS._serialized_end = 13673
-    _LIQUIDITYPARTIESORDERS._serialized_start = 13675
-    _LIQUIDITYPARTIESORDERS._serialized_end = 13747
-    _LIQUIDITYPROVISIONS._serialized_start = 13749
-    _LIQUIDITYPROVISIONS._serialized_end = 13845
-    _FLOATINGPOINTCONSENSUS._serialized_start = 13847
-    _FLOATINGPOINTCONSENSUS._serialized_end = 13933
-    _NEXTTIMETRIGGER._serialized_start = 13935
-    _NEXTTIMETRIGGER._serialized_end = 14017
-    _MARKETTRACKER._serialized_start = 14019
-    _MARKETTRACKER._serialized_end = 14102
-    _SIGNEREVENTSPERADDRESS._serialized_start = 14104
-    _SIGNEREVENTSPERADDRESS._serialized_end = 14203
-    _ERC20MULTISIGTOPOLOGYVERIFIED._serialized_start = 14206
-    _ERC20MULTISIGTOPOLOGYVERIFIED._serialized_end = 14412
-    _ERC20MULTISIGTOPOLOGYPENDING._serialized_start = 14415
-    _ERC20MULTISIGTOPOLOGYPENDING._serialized_end = 14652
-    _PROOFOFWORK._serialized_start = 14655
-    _PROOFOFWORK._serialized_end = 14917
-    _TRANSACTIONSATHEIGHT._serialized_start = 14919
-    _TRANSACTIONSATHEIGHT._serialized_end = 14979
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z,code.vegaprotocol.io/protos/vega/snapshot/v1'
+  _FORMAT._serialized_start=15954
+  _FORMAT._serialized_end=16050
+  _SNAPSHOT._serialized_start=266
+  _SNAPSHOT._serialized_end=382
+  _NODEHASH._serialized_start=384
+  _NODEHASH._serialized_end=471
+  _METADATA._serialized_start=473
+  _METADATA._serialized_end=571
+  _CHUNK._serialized_start=573
+  _CHUNK._serialized_end=645
+  _PAYLOAD._serialized_start=648
+  _PAYLOAD._serialized_end=4050
+  _TIMESTAMPEDOPENINTEREST._serialized_start=4052
+  _TIMESTAMPEDOPENINTEREST._serialized_end=4114
+  _LIQUIDITYTARGET._serialized_start=4117
+  _LIQUIDITYTARGET._serialized_end=4382
+  _LIQUIDITYPRICEPROBABILITYPAIR._serialized_start=4384
+  _LIQUIDITYPRICEPROBABILITYPAIR._serialized_end=4451
+  _LIQUIDITYSUPPLIED._serialized_start=4454
+  _LIQUIDITYSUPPLIED._serialized_end=4655
+  _ORACLEDATABATCH._serialized_start=4657
+  _ORACLEDATABATCH._serialized_end=4725
+  _ORACLEDATA._serialized_start=4727
+  _ORACLEDATA._serialized_end=4805
+  _ORACLEDATAPAIR._serialized_start=4807
+  _ORACLEDATAPAIR._serialized_end=4851
+  _WITNESS._serialized_start=4853
+  _WITNESS._serialized_end=4940
+  _RESOURCE._serialized_start=4942
+  _RESOURCE._serialized_end=5015
+  _EVENTFORWARDER._serialized_start=5017
+  _EVENTFORWARDER._serialized_end=5085
+  _COLLATERALACCOUNTS._serialized_start=5087
+  _COLLATERALACCOUNTS._serialized_end=5140
+  _COLLATERALASSETS._serialized_start=5142
+  _COLLATERALASSETS._serialized_end=5189
+  _ACTIVEASSETS._serialized_start=5191
+  _ACTIVEASSETS._serialized_end=5234
+  _PENDINGASSETS._serialized_start=5236
+  _PENDINGASSETS._serialized_end=5280
+  _PENDINGASSETUPDATES._serialized_start=5282
+  _PENDINGASSETUPDATES._serialized_end=5332
+  _WITHDRAWAL._serialized_start=5334
+  _WITHDRAWAL._serialized_end=5397
+  _DEPOSIT._serialized_start=5399
+  _DEPOSIT._serialized_end=5452
+  _TXREF._serialized_start=5454
+  _TXREF._serialized_end=5527
+  _ASSETACTION._serialized_start=5530
+  _ASSETACTION._serialized_end=5843
+  _BANKINGWITHDRAWALS._serialized_start=5845
+  _BANKINGWITHDRAWALS._serialized_end=5916
+  _BANKINGDEPOSITS._serialized_start=5918
+  _BANKINGDEPOSITS._serialized_end=5979
+  _BANKINGSEEN._serialized_start=5981
+  _BANKINGSEEN._serialized_end=6033
+  _BANKINGASSETACTIONS._serialized_start=6035
+  _BANKINGASSETACTIONS._serialized_end=6109
+  _BANKINGRECURRINGTRANSFERS._serialized_start=6111
+  _BANKINGRECURRINGTRANSFERS._serialized_end=6206
+  _BANKINGSCHEDULEDTRANSFERS._serialized_start=6208
+  _BANKINGSCHEDULEDTRANSFERS._serialized_end=6307
+  _CHECKPOINT._serialized_start=6309
+  _CHECKPOINT._serialized_end=6338
+  _DELEGATIONLASTRECONCILIATIONTIME._serialized_start=6340
+  _DELEGATIONLASTRECONCILIATIONTIME._serialized_end=6408
+  _DELEGATIONACTIVE._serialized_start=6410
+  _DELEGATIONACTIVE._serialized_end=6467
+  _DELEGATIONPENDING._serialized_start=6469
+  _DELEGATIONPENDING._serialized_end=6567
+  _DELEGATIONAUTO._serialized_start=6569
+  _DELEGATIONAUTO._serialized_end=6602
+  _PROPOSALDATA._serialized_start=6604
+  _PROPOSALDATA._serialized_end=6730
+  _GOVERNANCEENACTED._serialized_start=6732
+  _GOVERNANCEENACTED._serialized_end=6802
+  _GOVERNANCEACTIVE._serialized_start=6804
+  _GOVERNANCEACTIVE._serialized_end=6873
+  _GOVERNANCENODE._serialized_start=6875
+  _GOVERNANCENODE._serialized_end=6926
+  _STAKINGACCOUNT._serialized_start=6928
+  _STAKINGACCOUNT._serialized_end=7022
+  _STAKINGACCOUNTS._serialized_start=7024
+  _STAKINGACCOUNTS._serialized_end=7129
+  _MATCHINGBOOK._serialized_start=7132
+  _MATCHINGBOOK._serialized_end=7280
+  _NETPARAMS._serialized_start=7282
+  _NETPARAMS._serialized_end=7333
+  _DECIMALMAP._serialized_start=7335
+  _DECIMALMAP._serialized_end=7373
+  _TIMEPRICE._serialized_start=7375
+  _TIMEPRICE._serialized_end=7415
+  _PRICEVOLUME._serialized_start=7417
+  _PRICEVOLUME._serialized_end=7461
+  _PRICERANGE._serialized_start=7463
+  _PRICERANGE._serialized_end=7514
+  _PRICEBOUND._serialized_start=7516
+  _PRICEBOUND._serialized_end=7631
+  _PRICERANGECACHE._serialized_start=7633
+  _PRICERANGECACHE._serialized_end=7740
+  _CURRENTPRICE._serialized_start=7742
+  _CURRENTPRICE._serialized_end=7787
+  _PASTPRICE._serialized_start=7789
+  _PASTPRICE._serialized_end=7845
+  _PRICEMONITOR._serialized_start=7848
+  _PRICEMONITOR._serialized_end=8317
+  _AUCTIONSTATE._serialized_start=8320
+  _AUCTIONSTATE._serialized_end=8612
+  _EQUITYSHARELP._serialized_start=8614
+  _EQUITYSHARELP._serialized_end=8700
+  _EQUITYSHARE._serialized_start=8703
+  _EQUITYSHARE._serialized_end=8832
+  _FEESPLITTER._serialized_start=8834
+  _FEESPLITTER._serialized_end=8895
+  _MARKET._serialized_start=8898
+  _MARKET._serialized_end=9534
+  _EXECUTIONMARKETS._serialized_start=9536
+  _EXECUTIONMARKETS._serialized_end=9597
+  _POSITION._serialized_start=9600
+  _POSITION._serialized_end=9729
+  _MARKETPOSITIONS._serialized_start=9731
+  _MARKETPOSITIONS._serialized_end=9814
+  _APPSTATE._serialized_start=9816
+  _APPSTATE._serialized_end=9889
+  _EPOCHSTATE._serialized_start=9892
+  _EPOCHSTATE._serialized_end=10020
+  _REWARDSPENDINGPAYOUTS._serialized_start=10022
+  _REWARDSPENDINGPAYOUTS._serialized_end=10121
+  _SCHEDULEDREWARDSPAYOUT._serialized_start=10123
+  _SCHEDULEDREWARDSPAYOUT._serialized_end=10225
+  _REWARDSPAYOUT._serialized_start=10228
+  _REWARDSPAYOUT._serialized_end=10407
+  _REWARDSPARTYAMOUNT._serialized_start=10409
+  _REWARDSPARTYAMOUNT._serialized_end=10460
+  _LIMITSTATE._serialized_start=10463
+  _LIMITSTATE._serialized_end=10711
+  _VOTESPAMPOLICY._serialized_start=10714
+  _VOTESPAMPOLICY._serialized_end=11101
+  _PARTYPROPOSALVOTECOUNT._serialized_start=11103
+  _PARTYPROPOSALVOTECOUNT._serialized_end=11175
+  _BANNEDPARTY._serialized_start=11177
+  _BANNEDPARTY._serialized_end=11226
+  _PARTYTOKENBALANCE._serialized_start=11228
+  _PARTYTOKENBALANCE._serialized_end=11279
+  _BLOCKREJECTSTATS._serialized_start=11281
+  _BLOCKREJECTSTATS._serialized_end=11332
+  _SPAMPARTYTRANSACTIONCOUNT._serialized_start=11334
+  _SPAMPARTYTRANSACTIONCOUNT._serialized_end=11391
+  _SIMPLESPAMPOLICY._serialized_start=11394
+  _SIMPLESPAMPOLICY._serialized_end=11644
+  _NOTARYSIGS._serialized_start=11646
+  _NOTARYSIGS._serialized_end=11711
+  _NOTARY._serialized_start=11713
+  _NOTARY._serialized_end=11772
+  _REPLAYPROTECTION._serialized_start=11774
+  _REPLAYPROTECTION._serialized_end=11892
+  _TRANSACTIONATHEIGHT._serialized_start=11894
+  _TRANSACTIONATHEIGHT._serialized_end=11943
+  _FUTURESTATE._serialized_start=11945
+  _FUTURESTATE._serialized_end=12031
+  _STAKEVERIFIERDEPOSITED._serialized_start=12033
+  _STAKEVERIFIERDEPOSITED._serialized_end=12124
+  _STAKEVERIFIERREMOVED._serialized_start=12126
+  _STAKEVERIFIERREMOVED._serialized_end=12213
+  _STAKEVERIFIERPENDING._serialized_start=12216
+  _STAKEVERIFIERPENDING._serialized_end=12393
+  _PENDINGKEYROTATION._serialized_start=12395
+  _PENDINGKEYROTATION._serialized_end=12502
+  _PENDINGETHEREUMKEYROTATION._serialized_start=12504
+  _PENDINGETHEREUMKEYROTATION._serialized_end=12592
+  _TOPOLOGY._serialized_start=12595
+  _TOPOLOGY._serialized_end=12913
+  _VALIDATORSTATE._serialized_start=12916
+  _VALIDATORSTATE._serialized_end=13260
+  _HEARTBEATTRACKER._serialized_start=13262
+  _HEARTBEATTRACKER._serialized_end=13383
+  _PERFORMANCESTATS._serialized_start=13386
+  _PERFORMANCESTATS._serialized_end=13567
+  _VALIDATORPERFORMANCE._serialized_start=13569
+  _VALIDATORPERFORMANCE._serialized_end=13657
+  _LIQUIDITYPARAMETERS._serialized_start=13659
+  _LIQUIDITYPARAMETERS._serialized_end=13776
+  _LIQUIDITYPENDINGPROVISIONS._serialized_start=13778
+  _LIQUIDITYPENDINGPROVISIONS._serialized_end=13853
+  _LIQUIDITYPARTIESLIQUIDITYORDERS._serialized_start=13855
+  _LIQUIDITYPARTIESLIQUIDITYORDERS._serialized_end=13960
+  _PARTYORDERS._serialized_start=13962
+  _PARTYORDERS._serialized_end=14019
+  _LIQUIDITYPARTIESORDERS._serialized_start=14021
+  _LIQUIDITYPARTIESORDERS._serialized_end=14117
+  _LIQUIDITYPROVISIONS._serialized_start=14119
+  _LIQUIDITYPROVISIONS._serialized_end=14215
+  _FLOATINGPOINTCONSENSUS._serialized_start=14218
+  _FLOATINGPOINTCONSENSUS._serialized_end=14370
+  _STATEVARINTERNALSTATE._serialized_start=14373
+  _STATEVARINTERNALSTATE._serialized_end=14557
+  _FLOATINGPOINTVALIDATORRESULT._serialized_start=14559
+  _FLOATINGPOINTVALIDATORRESULT._serialized_end=14639
+  _NEXTTIMETRIGGER._serialized_start=14641
+  _NEXTTIMETRIGGER._serialized_end=14723
+  _MARKETTRACKER._serialized_start=14725
+  _MARKETTRACKER._serialized_end=14808
+  _SIGNEREVENTSPERADDRESS._serialized_start=14810
+  _SIGNEREVENTSPERADDRESS._serialized_end=14909
+  _ERC20MULTISIGTOPOLOGYVERIFIED._serialized_start=14912
+  _ERC20MULTISIGTOPOLOGYVERIFIED._serialized_end=15118
+  _ERC20MULTISIGTOPOLOGYPENDING._serialized_start=15121
+  _ERC20MULTISIGTOPOLOGYPENDING._serialized_end=15358
+  _PROOFOFWORK._serialized_start=15361
+  _PROOFOFWORK._serialized_end=15645
+  _PROOFOFWORKPARAMS._serialized_start=15648
+  _PROOFOFWORKPARAMS._serialized_end=15890
+  _TRANSACTIONSATHEIGHT._serialized_start=15892
+  _TRANSACTIONSATHEIGHT._serialized_end=15952
 # @@protoc_insertion_point(module_scope)

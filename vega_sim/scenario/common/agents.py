@@ -184,9 +184,11 @@ class BackgroundMarket(StateAgentWithWallet):
 
         self.vega.wait_for_total_catchup()
         for price, size in buy_shape:
-            self._submit_order(vega_protos.SIDE_BUY, price, size)
+            if price > 0:
+                self._submit_order(vega_protos.SIDE_BUY, price, size)
         for price, size in sell_shape:
-            self._submit_order(vega_protos.SIDE_SELL, price, size)
+            if price > 0:
+                self._submit_order(vega_protos.SIDE_SELL, price, size)
 
     def _submit_order(
         self, side: Union[str, vega_protos.Side], price: float, size: float
@@ -398,9 +400,11 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
 
         self.vega.wait_for_total_catchup()
         for price, size in buy_shape:
-            self._submit_order(vega_protos.SIDE_BUY, price, size)
+            if price > 0:
+                self._submit_order(vega_protos.SIDE_BUY, price, size)
         for price, size in sell_shape:
-            self._submit_order(vega_protos.SIDE_SELL, price, size)
+            if price > 0:
+                self._submit_order(vega_protos.SIDE_SELL, price, size)
 
     def _submit_order(
         self, side: Union[str, vega_protos.Side], price: float, size: float

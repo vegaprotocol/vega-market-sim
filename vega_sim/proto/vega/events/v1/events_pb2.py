@@ -8,7 +8,6 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -22,16 +21,12 @@ from ...oracles.v1 import spec_pb2 as vega_dot_oracles_dot_v1_dot_spec__pb2
 from ...oracles.v1 import data_pb2 as vega_dot_oracles_dot_v1_dot_data__pb2
 from ...commands.v1 import commands_pb2 as vega_dot_commands_dot_v1_dot_commands__pb2
 from ...commands.v1 import oracles_pb2 as vega_dot_commands_dot_v1_dot_oracles__pb2
-from ...commands.v1 import (
-    validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2,
-)
+from ...commands.v1 import validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1bvega/events/v1/events.proto\x12\x0evega.events.v1\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x15vega/governance.proto\x1a\x0fvega/vega.proto\x1a\x1avega/oracles/v1/spec.proto\x1a\x1avega/oracles/v1/data.proto\x1a\x1fvega/commands/v1/commands.proto\x1a\x1evega/commands/v1/oracles.proto\x1a)vega/commands/v1/validator_commands.proto"\xa2\x01\n\x18\x45RC20MultiSigSignerAdded\x12\x14\n\x0csignature_id\x18\x01 \x01(\t\x12\x14\n\x0cvalidator_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x12\n\nnew_signer\x18\x04 \x01(\t\x12\x11\n\tsubmitter\x18\x05 \x01(\t\x12\r\n\x05nonce\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x07 \x01(\t"O\n$ERC20MulistSigSignerRemovedSubmitter\x12\x14\n\x0csignature_id\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t"\xcf\x01\n\x1a\x45RC20MultiSigSignerRemoved\x12R\n\x14signature_submitters\x18\x01 \x03(\x0b\x32\x34.vega.events.v1.ERC20MulistSigSignerRemovedSubmitter\x12\x14\n\x0cvalidator_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x12\n\nold_signer\x18\x04 \x01(\t\x12\r\n\x05nonce\x18\x05 \x01(\t\x12\x11\n\tepoch_seq\x18\x06 \x01(\t"\xfa\x03\n\x08Transfer\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04\x66rom\x18\x02 \x01(\t\x12,\n\x11\x66rom_account_type\x18\x03 \x01(\x0e\x32\x11.vega.AccountType\x12\n\n\x02to\x18\x04 \x01(\t\x12*\n\x0fto_account_type\x18\x05 \x01(\x0e\x32\x11.vega.AccountType\x12\r\n\x05\x61sset\x18\x06 \x01(\t\x12\x0e\n\x06\x61mount\x18\x07 \x01(\t\x12\x11\n\treference\x18\x08 \x01(\t\x12/\n\x06status\x18\t \x01(\x0e\x32\x1f.vega.events.v1.Transfer.Status\x12\x11\n\ttimestamp\x18\n \x01(\x03\x12\x31\n\x07one_off\x18\x65 \x01(\x0b\x32\x1e.vega.events.v1.OneOffTransferH\x00\x12\x36\n\trecurring\x18\x66 \x01(\x0b\x32!.vega.events.v1.RecurringTransferH\x00"\x84\x01\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x12\n\x0eSTATUS_PENDING\x10\x01\x12\x0f\n\x0bSTATUS_DONE\x10\x02\x12\x13\n\x0fSTATUS_REJECTED\x10\x03\x12\x12\n\x0eSTATUS_STOPPED\x10\x04\x12\x14\n\x10STATUS_CANCELLED\x10\x05\x42\x06\n\x04kind"$\n\x0eOneOffTransfer\x12\x12\n\ndeliver_on\x18\x01 \x01(\x03"\x91\x01\n\x11RecurringTransfer\x12\x13\n\x0bstart_epoch\x18\x01 \x01(\x04\x12$\n\tend_epoch\x18\x02 \x01(\x0b\x32\x11.vega.Uint64Value\x12\x0e\n\x06\x66\x61\x63tor\x18\x03 \x01(\t\x12\x31\n\x11\x64ispatch_strategy\x18\x04 \x01(\x0b\x32\x16.vega.DispatchStrategy"\xc7\x03\n\x0cStakeLinking\x12\n\n\x02id\x18\x01 \x01(\t\x12/\n\x04type\x18\x02 \x01(\x0e\x32!.vega.events.v1.StakeLinking.Type\x12\n\n\x02ts\x18\x03 \x01(\x03\x12\r\n\x05party\x18\x04 \x01(\t\x12\x0e\n\x06\x61mount\x18\x05 \x01(\t\x12\x33\n\x06status\x18\x06 \x01(\x0e\x32#.vega.events.v1.StakeLinking.Status\x12\x14\n\x0c\x66inalized_at\x18\x07 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x08 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\t \x01(\x04\x12\x12\n\nblock_time\x18\n \x01(\x03\x12\x11\n\tlog_index\x18\x0b \x01(\x04\x12\x18\n\x10\x65thereum_address\x18\x0c \x01(\t"<\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\r\n\tTYPE_LINK\x10\x01\x12\x0f\n\x0bTYPE_UNLINK\x10\x02"^\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x12\n\x0eSTATUS_PENDING\x10\x01\x12\x13\n\x0fSTATUS_ACCEPTED\x10\x02\x12\x13\n\x0fSTATUS_REJECTED\x10\x03"\x90\x02\n\x18\x45RC20MultiSigSignerEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12;\n\x04type\x18\x02 \x01(\x0e\x32-.vega.events.v1.ERC20MultiSigSignerEvent.Type\x12\x0e\n\x06signer\x18\x03 \x01(\t\x12\r\n\x05nonce\x18\x04 \x01(\t\x12\x12\n\nblock_time\x18\x05 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x06 \x01(\t\x12\x11\n\tlog_index\x18\x07 \x01(\x04\x12\x14\n\x0c\x62lock_number\x18\x08 \x01(\x04">\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_ADDED\x10\x01\x12\x10\n\x0cTYPE_REMOVED\x10\x02"\xa0\x01\n\x1e\x45RC20MultiSigThresholdSetEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\rnew_threshold\x18\x02 \x01(\r\x12\r\n\x05nonce\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x05 \x01(\t\x12\x11\n\tlog_index\x18\x06 \x01(\x04\x12\x14\n\x0c\x62lock_number\x18\x07 \x01(\x04"I\n\x0f\x43heckpointEvent\x12\x0c\n\x04hash\x18\x01 \x01(\t\x12\x12\n\nblock_hash\x18\x02 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\x03 \x01(\x04"$\n\x10StreamStartEvent\x12\x10\n\x08\x63hain_id\x18\x01 \x01(\t"\xad\x01\n\x11RewardPayoutEvent\x12\r\n\x05party\x18\x01 \x01(\t\x12\x11\n\tepoch_seq\x18\x02 \x01(\t\x12\r\n\x05\x61sset\x18\x03 \x01(\t\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\x12\x1f\n\x17percent_of_total_reward\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\x12\x13\n\x0breward_type\x18\x07 \x01(\t\x12\x0e\n\x06market\x18\x08 \x01(\t"\xda\x01\n\x13ValidatorScoreEvent\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tepoch_seq\x18\x02 \x01(\t\x12\x17\n\x0fvalidator_score\x18\x03 \x01(\t\x12\x18\n\x10normalised_score\x18\x04 \x01(\t\x12\x1d\n\x15validator_performance\x18\x05 \x01(\t\x12\x1b\n\x13raw_validator_score\x18\x06 \x01(\t\x12\x18\n\x10validator_status\x18\x07 \x01(\t\x12\x16\n\x0emultisig_score\x18\x08 \x01(\t"[\n\x16\x44\x65legationBalanceEvent\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x11\n\tepoch_seq\x18\x04 \x01(\t"1\n\x0bMarketEvent\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x0f\n\x07payload\x18\x02 \x01(\t"\x88\t\n\x0cTxErrorEvent\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x0f\n\x07\x65rr_msg\x18\x02 \x01(\t\x12=\n\x10order_submission\x18\x65 \x01(\x0b\x32!.vega.commands.v1.OrderSubmissionH\x00\x12;\n\x0forder_amendment\x18\x66 \x01(\x0b\x32 .vega.commands.v1.OrderAmendmentH\x00\x12\x41\n\x12order_cancellation\x18g \x01(\x0b\x32#.vega.commands.v1.OrderCancellationH\x00\x12\x38\n\x08proposal\x18h \x01(\x0b\x32$.vega.commands.v1.ProposalSubmissionH\x00\x12;\n\x0fvote_submission\x18i \x01(\x0b\x32 .vega.commands.v1.VoteSubmissionH\x00\x12X\n\x1eliquidity_provision_submission\x18j \x01(\x0b\x32..vega.commands.v1.LiquidityProvisionSubmissionH\x00\x12\x43\n\x13withdraw_submission\x18k \x01(\x0b\x32$.vega.commands.v1.WithdrawSubmissionH\x00\x12\x43\n\x13\x64\x65legate_submission\x18l \x01(\x0b\x32$.vega.commands.v1.DelegateSubmissionH\x00\x12G\n\x15undelegate_submission\x18m \x01(\x0b\x32&.vega.commands.v1.UndelegateSubmissionH\x00\x12=\n\x10restore_snapshot\x18n \x01(\x0b\x32!.vega.commands.v1.RestoreSnapshotH\x00\x12\\\n liquidity_provision_cancellation\x18o \x01(\x0b\x32\x30.vega.commands.v1.LiquidityProvisionCancellationH\x00\x12V\n\x1dliquidity_provision_amendment\x18p \x01(\x0b\x32-.vega.commands.v1.LiquidityProvisionAmendmentH\x00\x12.\n\x08transfer\x18q \x01(\x0b\x32\x1a.vega.commands.v1.TransferH\x00\x12;\n\x0f\x63\x61ncel_transfer\x18r \x01(\x0b\x32 .vega.commands.v1.CancelTransferH\x00\x12\x37\n\rannounce_node\x18s \x01(\x0b\x32\x1e.vega.commands.v1.AnnounceNodeH\x00\x12H\n\x16oracle_data_submission\x18t \x01(\x0b\x32&.vega.commands.v1.OracleDataSubmissionH\x00\x42\r\n\x0btransaction"\x1f\n\nTimeUpdate\x12\x11\n\ttimestamp\x18\x01 \x01(\x03"w\n\nEpochEvent\x12\x0b\n\x03seq\x18\x01 \x01(\x04\x12!\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x11.vega.EpochAction\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x13\n\x0b\x65xpire_time\x18\x04 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\x03">\n\x11TransferResponses\x12)\n\tresponses\x18\x01 \x03(\x0b\x32\x16.vega.TransferResponse"_\n\x12PositionResolution\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x12\n\ndistressed\x18\x02 \x01(\x03\x12\x0e\n\x06\x63losed\x18\x03 \x01(\x03\x12\x12\n\nmark_price\x18\x04 \x01(\t"H\n\x11LossSocialization\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t".\n\x0fTradeSettlement\x12\x0c\n\x04size\x18\x01 \x01(\x03\x12\r\n\x05price\x18\x02 \x01(\t"\x99\x01\n\x0eSettlePosition\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\r\n\x05price\x18\x03 \x01(\t\x12:\n\x11trade_settlements\x18\x04 \x03(\x0b\x32\x1f.vega.events.v1.TradeSettlement\x12\x17\n\x0fposition_factor\x18\x05 \x01(\t"\xa5\x01\n\x12PositionStateEvent\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x03\x12\x16\n\x0epotential_buys\x18\x04 \x01(\x03\x12\x17\n\x0fpotential_sells\x18\x05 \x01(\x03\x12\x14\n\x0cvw_buy_price\x18\x06 \x01(\t\x12\x15\n\rvw_sell_price\x18\x07 \x01(\t"V\n\x10SettleDistressed\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06margin\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\t"&\n\nMarketTick\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04time\x18\x02 \x01(\x03"\xbd\x01\n\x0c\x41uctionEvent\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x17\n\x0fopening_auction\x18\x02 \x01(\x08\x12\r\n\x05leave\x18\x03 \x01(\x08\x12\r\n\x05start\x18\x04 \x01(\x03\x12\x0b\n\x03\x65nd\x18\x05 \x01(\x03\x12%\n\x07trigger\x18\x06 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12/\n\x11\x65xtension_trigger\x18\x07 \x01(\x0e\x32\x14.vega.AuctionTrigger"\xea\x01\n\x0fValidatorUpdate\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x14\n\x0cvega_pub_key\x18\x02 \x01(\t\x12\x18\n\x10\x65thereum_address\x18\x03 \x01(\t\x12\x12\n\ntm_pub_key\x18\x04 \x01(\t\x12\x10\n\x08info_url\x18\x05 \x01(\t\x12\x0f\n\x07\x63ountry\x18\x06 \x01(\t\x12\x0c\n\x04name\x18\x07 \x01(\t\x12\x12\n\navatar_url\x18\x08 \x01(\t\x12\x1a\n\x12vega_pub_key_index\x18\t \x01(\r\x12\r\n\x05\x61\x64\x64\x65\x64\x18\n \x01(\x08\x12\x12\n\nfrom_epoch\x18\x0b \x01(\x04"\xc9\x01\n\x15ValidatorRankingEvent\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bstake_score\x18\x02 \x01(\t\x12\x19\n\x11performance_score\x18\x03 \x01(\t\x12\x15\n\rranking_score\x18\x04 \x01(\t\x12\x17\n\x0fprevious_status\x18\x05 \x01(\t\x12\x13\n\x0bnext_status\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x07 \x01(\t\x12\x17\n\x0ftm_voting_power\x18\x08 \x01(\r"^\n\x0bKeyRotation\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bold_pub_key\x18\x02 \x01(\t\x12\x13\n\x0bnew_pub_key\x18\x03 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\x04 \x01(\x04"f\n\x13\x45thereumKeyRotation\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bold_address\x18\x02 \x01(\t\x12\x13\n\x0bnew_address\x18\x03 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\x04 \x01(\x04"7\n\x08StateVar\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12\r\n\x05state\x18\x03 \x01(\t"\xd7\x14\n\x08\x42usEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x62lock\x18\x02 \x01(\t\x12*\n\x04type\x18\x03 \x01(\x0e\x32\x1c.vega.events.v1.BusEventType\x12\x31\n\x0btime_update\x18\x65 \x01(\x0b\x32\x1a.vega.events.v1.TimeUpdateH\x00\x12?\n\x12transfer_responses\x18\x66 \x01(\x0b\x32!.vega.events.v1.TransferResponsesH\x00\x12\x41\n\x13position_resolution\x18g \x01(\x0b\x32".vega.events.v1.PositionResolutionH\x00\x12\x1c\n\x05order\x18h \x01(\x0b\x32\x0b.vega.OrderH\x00\x12 \n\x07\x61\x63\x63ount\x18i \x01(\x0b\x32\r.vega.AccountH\x00\x12\x1c\n\x05party\x18j \x01(\x0b\x32\x0b.vega.PartyH\x00\x12\x1c\n\x05trade\x18k \x01(\x0b\x32\x0b.vega.TradeH\x00\x12+\n\rmargin_levels\x18l \x01(\x0b\x32\x12.vega.MarginLevelsH\x00\x12"\n\x08proposal\x18m \x01(\x0b\x32\x0e.vega.ProposalH\x00\x12\x1a\n\x04vote\x18n \x01(\x0b\x32\n.vega.VoteH\x00\x12\'\n\x0bmarket_data\x18o \x01(\x0b\x32\x10.vega.MarketDataH\x00\x12\x39\n\x0enode_signature\x18p \x01(\x0b\x32\x1f.vega.commands.v1.NodeSignatureH\x00\x12?\n\x12loss_socialization\x18q \x01(\x0b\x32!.vega.events.v1.LossSocializationH\x00\x12\x39\n\x0fsettle_position\x18r \x01(\x0b\x32\x1e.vega.events.v1.SettlePositionH\x00\x12=\n\x11settle_distressed\x18s \x01(\x0b\x32 .vega.events.v1.SettleDistressedH\x00\x12&\n\x0emarket_created\x18t \x01(\x0b\x32\x0c.vega.MarketH\x00\x12\x1c\n\x05\x61sset\x18u \x01(\x0b\x32\x0b.vega.AssetH\x00\x12\x31\n\x0bmarket_tick\x18v \x01(\x0b\x32\x1a.vega.events.v1.MarketTickH\x00\x12&\n\nwithdrawal\x18w \x01(\x0b\x32\x10.vega.WithdrawalH\x00\x12 \n\x07\x64\x65posit\x18x \x01(\x0b\x32\r.vega.DepositH\x00\x12/\n\x07\x61uction\x18y \x01(\x0b\x32\x1c.vega.events.v1.AuctionEventH\x00\x12\'\n\x0brisk_factor\x18z \x01(\x0b\x32\x10.vega.RiskFactorH\x00\x12\x33\n\x11network_parameter\x18{ \x01(\x0b\x32\x16.vega.NetworkParameterH\x00\x12\x37\n\x13liquidity_provision\x18| \x01(\x0b\x32\x18.vega.LiquidityProvisionH\x00\x12&\n\x0emarket_updated\x18} \x01(\x0b\x32\x0c.vega.MarketH\x00\x12-\n\x0boracle_spec\x18~ \x01(\x0b\x32\x16.oracles.v1.OracleSpecH\x00\x12-\n\x0boracle_data\x18\x7f \x01(\x0b\x32\x16.oracles.v1.OracleDataH\x00\x12\x45\n\x12\x64\x65legation_balance\x18\x81\x01 \x01(\x0b\x32&.vega.events.v1.DelegationBalanceEventH\x00\x12?\n\x0fvalidator_score\x18\x82\x01 \x01(\x0b\x32#.vega.events.v1.ValidatorScoreEventH\x00\x12\x32\n\x0b\x65poch_event\x18\x83\x01 \x01(\x0b\x32\x1a.vega.events.v1.EpochEventH\x00\x12<\n\x10validator_update\x18\x84\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdateH\x00\x12\x36\n\rstake_linking\x18\x85\x01 \x01(\x0b\x32\x1c.vega.events.v1.StakeLinkingH\x00\x12;\n\rreward_payout\x18\x86\x01 \x01(\x0b\x32!.vega.events.v1.RewardPayoutEventH\x00\x12\x36\n\ncheckpoint\x18\x87\x01 \x01(\x0b\x32\x1f.vega.events.v1.CheckpointEventH\x00\x12\x34\n\x0ckey_rotation\x18\x88\x01 \x01(\x0b\x32\x1b.vega.events.v1.KeyRotationH\x00\x12.\n\tstate_var\x18\x89\x01 \x01(\x0b\x32\x18.vega.events.v1.StateVarH\x00\x12.\n\x0enetwork_limits\x18\x8a\x01 \x01(\x0b\x32\x13.vega.NetworkLimitsH\x00\x12-\n\x08transfer\x18\x8b\x01 \x01(\x0b\x32\x18.vega.events.v1.TransferH\x00\x12?\n\rranking_event\x18\x8c\x01 \x01(\x0b\x32%.vega.events.v1.ValidatorRankingEventH\x00\x12P\n\x1b\x65rc20_multisig_signer_event\x18\x8d\x01 \x01(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEventH\x00\x12]\n"erc20_multisig_set_threshold_event\x18\x8e\x01 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEventH\x00\x12P\n\x1b\x65rc20_multisig_signer_added\x18\x8f\x01 \x01(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerAddedH\x00\x12T\n\x1d\x65rc20_multisig_signer_removed\x18\x90\x01 \x01(\x0b\x32*.vega.events.v1.ERC20MultiSigSignerRemovedH\x00\x12\x43\n\x14position_state_event\x18\x91\x01 \x01(\x0b\x32".vega.events.v1.PositionStateEventH\x00\x12\x45\n\x15\x65thereum_key_rotation\x18\x92\x01 \x01(\x0b\x32#.vega.events.v1.EthereumKeyRotationH\x00\x12.\n\x06market\x18\xe9\x07 \x01(\x0b\x32\x1b.vega.events.v1.MarketEventH\x00\x12\x35\n\x0ctx_err_event\x18\xd1\x0f \x01(\x0b\x32\x1c.vega.events.v1.TxErrorEventH\x00\x12\x0f\n\x07version\x18\x04 \x01(\r\x12\x10\n\x08\x63hain_id\x18\x05 \x01(\t\x12\x0f\n\x07tx_hash\x18\x06 \x01(\tB\x07\n\x05\x65vent*\xbd\r\n\x0c\x42usEventType\x12\x1e\n\x1a\x42US_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12\x42US_EVENT_TYPE_ALL\x10\x01\x12\x1e\n\x1a\x42US_EVENT_TYPE_TIME_UPDATE\x10\x02\x12%\n!BUS_EVENT_TYPE_TRANSFER_RESPONSES\x10\x03\x12&\n"BUS_EVENT_TYPE_POSITION_RESOLUTION\x10\x04\x12\x18\n\x14\x42US_EVENT_TYPE_ORDER\x10\x05\x12\x1a\n\x16\x42US_EVENT_TYPE_ACCOUNT\x10\x06\x12\x18\n\x14\x42US_EVENT_TYPE_PARTY\x10\x07\x12\x18\n\x14\x42US_EVENT_TYPE_TRADE\x10\x08\x12 \n\x1c\x42US_EVENT_TYPE_MARGIN_LEVELS\x10\t\x12\x1b\n\x17\x42US_EVENT_TYPE_PROPOSAL\x10\n\x12\x17\n\x13\x42US_EVENT_TYPE_VOTE\x10\x0b\x12\x1e\n\x1a\x42US_EVENT_TYPE_MARKET_DATA\x10\x0c\x12!\n\x1d\x42US_EVENT_TYPE_NODE_SIGNATURE\x10\r\x12%\n!BUS_EVENT_TYPE_LOSS_SOCIALIZATION\x10\x0e\x12"\n\x1e\x42US_EVENT_TYPE_SETTLE_POSITION\x10\x0f\x12$\n BUS_EVENT_TYPE_SETTLE_DISTRESSED\x10\x10\x12!\n\x1d\x42US_EVENT_TYPE_MARKET_CREATED\x10\x11\x12\x18\n\x14\x42US_EVENT_TYPE_ASSET\x10\x12\x12\x1e\n\x1a\x42US_EVENT_TYPE_MARKET_TICK\x10\x13\x12\x1d\n\x19\x42US_EVENT_TYPE_WITHDRAWAL\x10\x14\x12\x1a\n\x16\x42US_EVENT_TYPE_DEPOSIT\x10\x15\x12\x1a\n\x16\x42US_EVENT_TYPE_AUCTION\x10\x16\x12\x1e\n\x1a\x42US_EVENT_TYPE_RISK_FACTOR\x10\x17\x12$\n BUS_EVENT_TYPE_NETWORK_PARAMETER\x10\x18\x12&\n"BUS_EVENT_TYPE_LIQUIDITY_PROVISION\x10\x19\x12!\n\x1d\x42US_EVENT_TYPE_MARKET_UPDATED\x10\x1a\x12\x1e\n\x1a\x42US_EVENT_TYPE_ORACLE_SPEC\x10\x1b\x12\x1e\n\x1a\x42US_EVENT_TYPE_ORACLE_DATA\x10\x1c\x12%\n!BUS_EVENT_TYPE_DELEGATION_BALANCE\x10\x1d\x12"\n\x1e\x42US_EVENT_TYPE_VALIDATOR_SCORE\x10\x1e\x12\x1f\n\x1b\x42US_EVENT_TYPE_EPOCH_UPDATE\x10\x1f\x12#\n\x1f\x42US_EVENT_TYPE_VALIDATOR_UPDATE\x10 \x12 \n\x1c\x42US_EVENT_TYPE_STAKE_LINKING\x10!\x12&\n"BUS_EVENT_TYPE_REWARD_PAYOUT_EVENT\x10"\x12\x1d\n\x19\x42US_EVENT_TYPE_CHECKPOINT\x10#\x12\x1f\n\x1b\x42US_EVENT_TYPE_STREAM_START\x10$\x12\x1f\n\x1b\x42US_EVENT_TYPE_KEY_ROTATION\x10%\x12\x1c\n\x18\x42US_EVENT_TYPE_STATE_VAR\x10&\x12!\n\x1d\x42US_EVENT_TYPE_NETWORK_LIMITS\x10\'\x12\x1b\n\x17\x42US_EVENT_TYPE_TRANSFER\x10(\x12$\n BUS_EVENT_TYPE_VALIDATOR_RANKING\x10)\x12/\n+BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_EVENT\x10*\x12\x30\n,BUS_EVENT_TYPE_ERC20_MULTI_SIG_SET_THRESHOLD\x10+\x12/\n+BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_ADDED\x10,\x12\x31\n-BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_REMOVED\x10-\x12!\n\x1d\x42US_EVENT_TYPE_POSITION_STATE\x10.\x12(\n$BUS_EVENT_TYPE_ETHEREUM_KEY_ROTATION\x10/\x12\x19\n\x15\x42US_EVENT_TYPE_MARKET\x10\x65\x12\x1c\n\x17\x42US_EVENT_TYPE_TX_ERROR\x10\xc9\x01\x42,Z*code.vegaprotocol.io/protos/vega/events/v1b\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bvega/events/v1/events.proto\x12\x0evega.events.v1\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x15vega/governance.proto\x1a\x0fvega/vega.proto\x1a\x1avega/oracles/v1/spec.proto\x1a\x1avega/oracles/v1/data.proto\x1a\x1fvega/commands/v1/commands.proto\x1a\x1evega/commands/v1/oracles.proto\x1a)vega/commands/v1/validator_commands.proto\"\xa2\x01\n\x18\x45RC20MultiSigSignerAdded\x12\x14\n\x0csignature_id\x18\x01 \x01(\t\x12\x14\n\x0cvalidator_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x12\n\nnew_signer\x18\x04 \x01(\t\x12\x11\n\tsubmitter\x18\x05 \x01(\t\x12\r\n\x05nonce\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x07 \x01(\t\"O\n$ERC20MulistSigSignerRemovedSubmitter\x12\x14\n\x0csignature_id\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\"\xcf\x01\n\x1a\x45RC20MultiSigSignerRemoved\x12R\n\x14signature_submitters\x18\x01 \x03(\x0b\x32\x34.vega.events.v1.ERC20MulistSigSignerRemovedSubmitter\x12\x14\n\x0cvalidator_id\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\x03\x12\x12\n\nold_signer\x18\x04 \x01(\t\x12\r\n\x05nonce\x18\x05 \x01(\t\x12\x11\n\tepoch_seq\x18\x06 \x01(\t\"\xfa\x03\n\x08Transfer\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04\x66rom\x18\x02 \x01(\t\x12,\n\x11\x66rom_account_type\x18\x03 \x01(\x0e\x32\x11.vega.AccountType\x12\n\n\x02to\x18\x04 \x01(\t\x12*\n\x0fto_account_type\x18\x05 \x01(\x0e\x32\x11.vega.AccountType\x12\r\n\x05\x61sset\x18\x06 \x01(\t\x12\x0e\n\x06\x61mount\x18\x07 \x01(\t\x12\x11\n\treference\x18\x08 \x01(\t\x12/\n\x06status\x18\t \x01(\x0e\x32\x1f.vega.events.v1.Transfer.Status\x12\x11\n\ttimestamp\x18\n \x01(\x03\x12\x31\n\x07one_off\x18\x65 \x01(\x0b\x32\x1e.vega.events.v1.OneOffTransferH\x00\x12\x36\n\trecurring\x18\x66 \x01(\x0b\x32!.vega.events.v1.RecurringTransferH\x00\"\x84\x01\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x12\n\x0eSTATUS_PENDING\x10\x01\x12\x0f\n\x0bSTATUS_DONE\x10\x02\x12\x13\n\x0fSTATUS_REJECTED\x10\x03\x12\x12\n\x0eSTATUS_STOPPED\x10\x04\x12\x14\n\x10STATUS_CANCELLED\x10\x05\x42\x06\n\x04kind\"$\n\x0eOneOffTransfer\x12\x12\n\ndeliver_on\x18\x01 \x01(\x03\"\x91\x01\n\x11RecurringTransfer\x12\x13\n\x0bstart_epoch\x18\x01 \x01(\x04\x12$\n\tend_epoch\x18\x02 \x01(\x0b\x32\x11.vega.Uint64Value\x12\x0e\n\x06\x66\x61\x63tor\x18\x03 \x01(\t\x12\x31\n\x11\x64ispatch_strategy\x18\x04 \x01(\x0b\x32\x16.vega.DispatchStrategy\"\xc7\x03\n\x0cStakeLinking\x12\n\n\x02id\x18\x01 \x01(\t\x12/\n\x04type\x18\x02 \x01(\x0e\x32!.vega.events.v1.StakeLinking.Type\x12\n\n\x02ts\x18\x03 \x01(\x03\x12\r\n\x05party\x18\x04 \x01(\t\x12\x0e\n\x06\x61mount\x18\x05 \x01(\t\x12\x33\n\x06status\x18\x06 \x01(\x0e\x32#.vega.events.v1.StakeLinking.Status\x12\x14\n\x0c\x66inalized_at\x18\x07 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x08 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\t \x01(\x04\x12\x12\n\nblock_time\x18\n \x01(\x03\x12\x11\n\tlog_index\x18\x0b \x01(\x04\x12\x18\n\x10\x65thereum_address\x18\x0c \x01(\t\"<\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\r\n\tTYPE_LINK\x10\x01\x12\x0f\n\x0bTYPE_UNLINK\x10\x02\"^\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x12\n\x0eSTATUS_PENDING\x10\x01\x12\x13\n\x0fSTATUS_ACCEPTED\x10\x02\x12\x13\n\x0fSTATUS_REJECTED\x10\x03\"\x90\x02\n\x18\x45RC20MultiSigSignerEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12;\n\x04type\x18\x02 \x01(\x0e\x32-.vega.events.v1.ERC20MultiSigSignerEvent.Type\x12\x0e\n\x06signer\x18\x03 \x01(\t\x12\r\n\x05nonce\x18\x04 \x01(\t\x12\x12\n\nblock_time\x18\x05 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x06 \x01(\t\x12\x11\n\tlog_index\x18\x07 \x01(\x04\x12\x14\n\x0c\x62lock_number\x18\x08 \x01(\x04\">\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_ADDED\x10\x01\x12\x10\n\x0cTYPE_REMOVED\x10\x02\"\xa0\x01\n\x1e\x45RC20MultiSigThresholdSetEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\rnew_threshold\x18\x02 \x01(\r\x12\r\n\x05nonce\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x05 \x01(\t\x12\x11\n\tlog_index\x18\x06 \x01(\x04\x12\x14\n\x0c\x62lock_number\x18\x07 \x01(\x04\"I\n\x0f\x43heckpointEvent\x12\x0c\n\x04hash\x18\x01 \x01(\t\x12\x12\n\nblock_hash\x18\x02 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\x03 \x01(\x04\"$\n\x10StreamStartEvent\x12\x10\n\x08\x63hain_id\x18\x01 \x01(\t\"\xad\x01\n\x11RewardPayoutEvent\x12\r\n\x05party\x18\x01 \x01(\t\x12\x11\n\tepoch_seq\x18\x02 \x01(\t\x12\r\n\x05\x61sset\x18\x03 \x01(\t\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\x12\x1f\n\x17percent_of_total_reward\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\x12\x13\n\x0breward_type\x18\x07 \x01(\t\x12\x0e\n\x06market\x18\x08 \x01(\t\"\xda\x01\n\x13ValidatorScoreEvent\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tepoch_seq\x18\x02 \x01(\t\x12\x17\n\x0fvalidator_score\x18\x03 \x01(\t\x12\x18\n\x10normalised_score\x18\x04 \x01(\t\x12\x1d\n\x15validator_performance\x18\x05 \x01(\t\x12\x1b\n\x13raw_validator_score\x18\x06 \x01(\t\x12\x18\n\x10validator_status\x18\x07 \x01(\t\x12\x16\n\x0emultisig_score\x18\x08 \x01(\t\"[\n\x16\x44\x65legationBalanceEvent\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x11\n\tepoch_seq\x18\x04 \x01(\t\"1\n\x0bMarketEvent\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x0f\n\x07payload\x18\x02 \x01(\t\"\xcf\x08\n\x0cTxErrorEvent\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x0f\n\x07\x65rr_msg\x18\x02 \x01(\t\x12=\n\x10order_submission\x18\x65 \x01(\x0b\x32!.vega.commands.v1.OrderSubmissionH\x00\x12;\n\x0forder_amendment\x18\x66 \x01(\x0b\x32 .vega.commands.v1.OrderAmendmentH\x00\x12\x41\n\x12order_cancellation\x18g \x01(\x0b\x32#.vega.commands.v1.OrderCancellationH\x00\x12\x38\n\x08proposal\x18h \x01(\x0b\x32$.vega.commands.v1.ProposalSubmissionH\x00\x12;\n\x0fvote_submission\x18i \x01(\x0b\x32 .vega.commands.v1.VoteSubmissionH\x00\x12X\n\x1eliquidity_provision_submission\x18j \x01(\x0b\x32..vega.commands.v1.LiquidityProvisionSubmissionH\x00\x12\x43\n\x13withdraw_submission\x18k \x01(\x0b\x32$.vega.commands.v1.WithdrawSubmissionH\x00\x12\x43\n\x13\x64\x65legate_submission\x18l \x01(\x0b\x32$.vega.commands.v1.DelegateSubmissionH\x00\x12G\n\x15undelegate_submission\x18m \x01(\x0b\x32&.vega.commands.v1.UndelegateSubmissionH\x00\x12\\\n liquidity_provision_cancellation\x18o \x01(\x0b\x32\x30.vega.commands.v1.LiquidityProvisionCancellationH\x00\x12V\n\x1dliquidity_provision_amendment\x18p \x01(\x0b\x32-.vega.commands.v1.LiquidityProvisionAmendmentH\x00\x12.\n\x08transfer\x18q \x01(\x0b\x32\x1a.vega.commands.v1.TransferH\x00\x12;\n\x0f\x63\x61ncel_transfer\x18r \x01(\x0b\x32 .vega.commands.v1.CancelTransferH\x00\x12\x37\n\rannounce_node\x18s \x01(\x0b\x32\x1e.vega.commands.v1.AnnounceNodeH\x00\x12H\n\x16oracle_data_submission\x18t \x01(\x0b\x32&.vega.commands.v1.OracleDataSubmissionH\x00\x42\r\n\x0btransactionJ\x04\x08n\x10o\"\x1f\n\nTimeUpdate\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\"w\n\nEpochEvent\x12\x0b\n\x03seq\x18\x01 \x01(\x04\x12!\n\x06\x61\x63tion\x18\x02 \x01(\x0e\x32\x11.vega.EpochAction\x12\x12\n\nstart_time\x18\x03 \x01(\x03\x12\x13\n\x0b\x65xpire_time\x18\x04 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\x03\">\n\x11TransferResponses\x12)\n\tresponses\x18\x01 \x03(\x0b\x32\x16.vega.TransferResponse\"_\n\x12PositionResolution\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x12\n\ndistressed\x18\x02 \x01(\x03\x12\x0e\n\x06\x63losed\x18\x03 \x01(\x03\x12\x12\n\nmark_price\x18\x04 \x01(\t\"H\n\x11LossSocialization\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\".\n\x0fTradeSettlement\x12\x0c\n\x04size\x18\x01 \x01(\x03\x12\r\n\x05price\x18\x02 \x01(\t\"\x99\x01\n\x0eSettlePosition\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\r\n\x05price\x18\x03 \x01(\t\x12:\n\x11trade_settlements\x18\x04 \x03(\x0b\x32\x1f.vega.events.v1.TradeSettlement\x12\x17\n\x0fposition_factor\x18\x05 \x01(\t\"\xa5\x01\n\x12PositionStateEvent\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x03\x12\x16\n\x0epotential_buys\x18\x04 \x01(\x03\x12\x17\n\x0fpotential_sells\x18\x05 \x01(\x03\x12\x14\n\x0cvw_buy_price\x18\x06 \x01(\t\x12\x15\n\rvw_sell_price\x18\x07 \x01(\t\"V\n\x10SettleDistressed\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06margin\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\t\"&\n\nMarketTick\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04time\x18\x02 \x01(\x03\"\xbd\x01\n\x0c\x41uctionEvent\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x17\n\x0fopening_auction\x18\x02 \x01(\x08\x12\r\n\x05leave\x18\x03 \x01(\x08\x12\r\n\x05start\x18\x04 \x01(\x03\x12\x0b\n\x03\x65nd\x18\x05 \x01(\x03\x12%\n\x07trigger\x18\x06 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12/\n\x11\x65xtension_trigger\x18\x07 \x01(\x0e\x32\x14.vega.AuctionTrigger\"\xea\x01\n\x0fValidatorUpdate\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x14\n\x0cvega_pub_key\x18\x02 \x01(\t\x12\x18\n\x10\x65thereum_address\x18\x03 \x01(\t\x12\x12\n\ntm_pub_key\x18\x04 \x01(\t\x12\x10\n\x08info_url\x18\x05 \x01(\t\x12\x0f\n\x07\x63ountry\x18\x06 \x01(\t\x12\x0c\n\x04name\x18\x07 \x01(\t\x12\x12\n\navatar_url\x18\x08 \x01(\t\x12\x1a\n\x12vega_pub_key_index\x18\t \x01(\r\x12\r\n\x05\x61\x64\x64\x65\x64\x18\n \x01(\x08\x12\x12\n\nfrom_epoch\x18\x0b \x01(\x04\"\xc9\x01\n\x15ValidatorRankingEvent\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bstake_score\x18\x02 \x01(\t\x12\x19\n\x11performance_score\x18\x03 \x01(\t\x12\x15\n\rranking_score\x18\x04 \x01(\t\x12\x17\n\x0fprevious_status\x18\x05 \x01(\t\x12\x13\n\x0bnext_status\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x07 \x01(\t\x12\x17\n\x0ftm_voting_power\x18\x08 \x01(\r\"^\n\x0bKeyRotation\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bold_pub_key\x18\x02 \x01(\t\x12\x13\n\x0bnew_pub_key\x18\x03 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\x04 \x01(\x04\"f\n\x13\x45thereumKeyRotation\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bold_address\x18\x02 \x01(\t\x12\x13\n\x0bnew_address\x18\x03 \x01(\t\x12\x14\n\x0c\x62lock_height\x18\x04 \x01(\x04\"7\n\x08StateVar\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12\r\n\x05state\x18\x03 \x01(\t\"\xd7\x14\n\x08\x42usEvent\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05\x62lock\x18\x02 \x01(\t\x12*\n\x04type\x18\x03 \x01(\x0e\x32\x1c.vega.events.v1.BusEventType\x12\x31\n\x0btime_update\x18\x65 \x01(\x0b\x32\x1a.vega.events.v1.TimeUpdateH\x00\x12?\n\x12transfer_responses\x18\x66 \x01(\x0b\x32!.vega.events.v1.TransferResponsesH\x00\x12\x41\n\x13position_resolution\x18g \x01(\x0b\x32\".vega.events.v1.PositionResolutionH\x00\x12\x1c\n\x05order\x18h \x01(\x0b\x32\x0b.vega.OrderH\x00\x12 \n\x07\x61\x63\x63ount\x18i \x01(\x0b\x32\r.vega.AccountH\x00\x12\x1c\n\x05party\x18j \x01(\x0b\x32\x0b.vega.PartyH\x00\x12\x1c\n\x05trade\x18k \x01(\x0b\x32\x0b.vega.TradeH\x00\x12+\n\rmargin_levels\x18l \x01(\x0b\x32\x12.vega.MarginLevelsH\x00\x12\"\n\x08proposal\x18m \x01(\x0b\x32\x0e.vega.ProposalH\x00\x12\x1a\n\x04vote\x18n \x01(\x0b\x32\n.vega.VoteH\x00\x12\'\n\x0bmarket_data\x18o \x01(\x0b\x32\x10.vega.MarketDataH\x00\x12\x39\n\x0enode_signature\x18p \x01(\x0b\x32\x1f.vega.commands.v1.NodeSignatureH\x00\x12?\n\x12loss_socialization\x18q \x01(\x0b\x32!.vega.events.v1.LossSocializationH\x00\x12\x39\n\x0fsettle_position\x18r \x01(\x0b\x32\x1e.vega.events.v1.SettlePositionH\x00\x12=\n\x11settle_distressed\x18s \x01(\x0b\x32 .vega.events.v1.SettleDistressedH\x00\x12&\n\x0emarket_created\x18t \x01(\x0b\x32\x0c.vega.MarketH\x00\x12\x1c\n\x05\x61sset\x18u \x01(\x0b\x32\x0b.vega.AssetH\x00\x12\x31\n\x0bmarket_tick\x18v \x01(\x0b\x32\x1a.vega.events.v1.MarketTickH\x00\x12&\n\nwithdrawal\x18w \x01(\x0b\x32\x10.vega.WithdrawalH\x00\x12 \n\x07\x64\x65posit\x18x \x01(\x0b\x32\r.vega.DepositH\x00\x12/\n\x07\x61uction\x18y \x01(\x0b\x32\x1c.vega.events.v1.AuctionEventH\x00\x12\'\n\x0brisk_factor\x18z \x01(\x0b\x32\x10.vega.RiskFactorH\x00\x12\x33\n\x11network_parameter\x18{ \x01(\x0b\x32\x16.vega.NetworkParameterH\x00\x12\x37\n\x13liquidity_provision\x18| \x01(\x0b\x32\x18.vega.LiquidityProvisionH\x00\x12&\n\x0emarket_updated\x18} \x01(\x0b\x32\x0c.vega.MarketH\x00\x12-\n\x0boracle_spec\x18~ \x01(\x0b\x32\x16.oracles.v1.OracleSpecH\x00\x12-\n\x0boracle_data\x18\x7f \x01(\x0b\x32\x16.oracles.v1.OracleDataH\x00\x12\x45\n\x12\x64\x65legation_balance\x18\x81\x01 \x01(\x0b\x32&.vega.events.v1.DelegationBalanceEventH\x00\x12?\n\x0fvalidator_score\x18\x82\x01 \x01(\x0b\x32#.vega.events.v1.ValidatorScoreEventH\x00\x12\x32\n\x0b\x65poch_event\x18\x83\x01 \x01(\x0b\x32\x1a.vega.events.v1.EpochEventH\x00\x12<\n\x10validator_update\x18\x84\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdateH\x00\x12\x36\n\rstake_linking\x18\x85\x01 \x01(\x0b\x32\x1c.vega.events.v1.StakeLinkingH\x00\x12;\n\rreward_payout\x18\x86\x01 \x01(\x0b\x32!.vega.events.v1.RewardPayoutEventH\x00\x12\x36\n\ncheckpoint\x18\x87\x01 \x01(\x0b\x32\x1f.vega.events.v1.CheckpointEventH\x00\x12\x34\n\x0ckey_rotation\x18\x88\x01 \x01(\x0b\x32\x1b.vega.events.v1.KeyRotationH\x00\x12.\n\tstate_var\x18\x89\x01 \x01(\x0b\x32\x18.vega.events.v1.StateVarH\x00\x12.\n\x0enetwork_limits\x18\x8a\x01 \x01(\x0b\x32\x13.vega.NetworkLimitsH\x00\x12-\n\x08transfer\x18\x8b\x01 \x01(\x0b\x32\x18.vega.events.v1.TransferH\x00\x12?\n\rranking_event\x18\x8c\x01 \x01(\x0b\x32%.vega.events.v1.ValidatorRankingEventH\x00\x12P\n\x1b\x65rc20_multisig_signer_event\x18\x8d\x01 \x01(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEventH\x00\x12]\n\"erc20_multisig_set_threshold_event\x18\x8e\x01 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEventH\x00\x12P\n\x1b\x65rc20_multisig_signer_added\x18\x8f\x01 \x01(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerAddedH\x00\x12T\n\x1d\x65rc20_multisig_signer_removed\x18\x90\x01 \x01(\x0b\x32*.vega.events.v1.ERC20MultiSigSignerRemovedH\x00\x12\x43\n\x14position_state_event\x18\x91\x01 \x01(\x0b\x32\".vega.events.v1.PositionStateEventH\x00\x12\x45\n\x15\x65thereum_key_rotation\x18\x92\x01 \x01(\x0b\x32#.vega.events.v1.EthereumKeyRotationH\x00\x12.\n\x06market\x18\xe9\x07 \x01(\x0b\x32\x1b.vega.events.v1.MarketEventH\x00\x12\x35\n\x0ctx_err_event\x18\xd1\x0f \x01(\x0b\x32\x1c.vega.events.v1.TxErrorEventH\x00\x12\x0f\n\x07version\x18\x04 \x01(\r\x12\x10\n\x08\x63hain_id\x18\x05 \x01(\t\x12\x0f\n\x07tx_hash\x18\x06 \x01(\tB\x07\n\x05\x65vent*\xbd\r\n\x0c\x42usEventType\x12\x1e\n\x1a\x42US_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12\x42US_EVENT_TYPE_ALL\x10\x01\x12\x1e\n\x1a\x42US_EVENT_TYPE_TIME_UPDATE\x10\x02\x12%\n!BUS_EVENT_TYPE_TRANSFER_RESPONSES\x10\x03\x12&\n\"BUS_EVENT_TYPE_POSITION_RESOLUTION\x10\x04\x12\x18\n\x14\x42US_EVENT_TYPE_ORDER\x10\x05\x12\x1a\n\x16\x42US_EVENT_TYPE_ACCOUNT\x10\x06\x12\x18\n\x14\x42US_EVENT_TYPE_PARTY\x10\x07\x12\x18\n\x14\x42US_EVENT_TYPE_TRADE\x10\x08\x12 \n\x1c\x42US_EVENT_TYPE_MARGIN_LEVELS\x10\t\x12\x1b\n\x17\x42US_EVENT_TYPE_PROPOSAL\x10\n\x12\x17\n\x13\x42US_EVENT_TYPE_VOTE\x10\x0b\x12\x1e\n\x1a\x42US_EVENT_TYPE_MARKET_DATA\x10\x0c\x12!\n\x1d\x42US_EVENT_TYPE_NODE_SIGNATURE\x10\r\x12%\n!BUS_EVENT_TYPE_LOSS_SOCIALIZATION\x10\x0e\x12\"\n\x1e\x42US_EVENT_TYPE_SETTLE_POSITION\x10\x0f\x12$\n BUS_EVENT_TYPE_SETTLE_DISTRESSED\x10\x10\x12!\n\x1d\x42US_EVENT_TYPE_MARKET_CREATED\x10\x11\x12\x18\n\x14\x42US_EVENT_TYPE_ASSET\x10\x12\x12\x1e\n\x1a\x42US_EVENT_TYPE_MARKET_TICK\x10\x13\x12\x1d\n\x19\x42US_EVENT_TYPE_WITHDRAWAL\x10\x14\x12\x1a\n\x16\x42US_EVENT_TYPE_DEPOSIT\x10\x15\x12\x1a\n\x16\x42US_EVENT_TYPE_AUCTION\x10\x16\x12\x1e\n\x1a\x42US_EVENT_TYPE_RISK_FACTOR\x10\x17\x12$\n BUS_EVENT_TYPE_NETWORK_PARAMETER\x10\x18\x12&\n\"BUS_EVENT_TYPE_LIQUIDITY_PROVISION\x10\x19\x12!\n\x1d\x42US_EVENT_TYPE_MARKET_UPDATED\x10\x1a\x12\x1e\n\x1a\x42US_EVENT_TYPE_ORACLE_SPEC\x10\x1b\x12\x1e\n\x1a\x42US_EVENT_TYPE_ORACLE_DATA\x10\x1c\x12%\n!BUS_EVENT_TYPE_DELEGATION_BALANCE\x10\x1d\x12\"\n\x1e\x42US_EVENT_TYPE_VALIDATOR_SCORE\x10\x1e\x12\x1f\n\x1b\x42US_EVENT_TYPE_EPOCH_UPDATE\x10\x1f\x12#\n\x1f\x42US_EVENT_TYPE_VALIDATOR_UPDATE\x10 \x12 \n\x1c\x42US_EVENT_TYPE_STAKE_LINKING\x10!\x12&\n\"BUS_EVENT_TYPE_REWARD_PAYOUT_EVENT\x10\"\x12\x1d\n\x19\x42US_EVENT_TYPE_CHECKPOINT\x10#\x12\x1f\n\x1b\x42US_EVENT_TYPE_STREAM_START\x10$\x12\x1f\n\x1b\x42US_EVENT_TYPE_KEY_ROTATION\x10%\x12\x1c\n\x18\x42US_EVENT_TYPE_STATE_VAR\x10&\x12!\n\x1d\x42US_EVENT_TYPE_NETWORK_LIMITS\x10\'\x12\x1b\n\x17\x42US_EVENT_TYPE_TRANSFER\x10(\x12$\n BUS_EVENT_TYPE_VALIDATOR_RANKING\x10)\x12/\n+BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_EVENT\x10*\x12\x30\n,BUS_EVENT_TYPE_ERC20_MULTI_SIG_SET_THRESHOLD\x10+\x12/\n+BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_ADDED\x10,\x12\x31\n-BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_REMOVED\x10-\x12!\n\x1d\x42US_EVENT_TYPE_POSITION_STATE\x10.\x12(\n$BUS_EVENT_TYPE_ETHEREUM_KEY_ROTATION\x10/\x12\x19\n\x15\x42US_EVENT_TYPE_MARKET\x10\x65\x12\x1c\n\x17\x42US_EVENT_TYPE_TX_ERROR\x10\xc9\x01\x42,Z*code.vegaprotocol.io/protos/vega/events/v1b\x06proto3')
 
-_BUSEVENTTYPE = DESCRIPTOR.enum_types_by_name["BusEventType"]
+_BUSEVENTTYPE = DESCRIPTOR.enum_types_by_name['BusEventType']
 BusEventType = enum_type_wrapper.EnumTypeWrapper(_BUSEVENTTYPE)
 BUS_EVENT_TYPE_UNSPECIFIED = 0
 BUS_EVENT_TYPE_ALL = 1
@@ -85,490 +80,352 @@ BUS_EVENT_TYPE_MARKET = 101
 BUS_EVENT_TYPE_TX_ERROR = 201
 
 
-_ERC20MULTISIGSIGNERADDED = DESCRIPTOR.message_types_by_name["ERC20MultiSigSignerAdded"]
-_ERC20MULISTSIGSIGNERREMOVEDSUBMITTER = DESCRIPTOR.message_types_by_name[
-    "ERC20MulistSigSignerRemovedSubmitter"
-]
-_ERC20MULTISIGSIGNERREMOVED = DESCRIPTOR.message_types_by_name[
-    "ERC20MultiSigSignerRemoved"
-]
-_TRANSFER = DESCRIPTOR.message_types_by_name["Transfer"]
-_ONEOFFTRANSFER = DESCRIPTOR.message_types_by_name["OneOffTransfer"]
-_RECURRINGTRANSFER = DESCRIPTOR.message_types_by_name["RecurringTransfer"]
-_STAKELINKING = DESCRIPTOR.message_types_by_name["StakeLinking"]
-_ERC20MULTISIGSIGNEREVENT = DESCRIPTOR.message_types_by_name["ERC20MultiSigSignerEvent"]
-_ERC20MULTISIGTHRESHOLDSETEVENT = DESCRIPTOR.message_types_by_name[
-    "ERC20MultiSigThresholdSetEvent"
-]
-_CHECKPOINTEVENT = DESCRIPTOR.message_types_by_name["CheckpointEvent"]
-_STREAMSTARTEVENT = DESCRIPTOR.message_types_by_name["StreamStartEvent"]
-_REWARDPAYOUTEVENT = DESCRIPTOR.message_types_by_name["RewardPayoutEvent"]
-_VALIDATORSCOREEVENT = DESCRIPTOR.message_types_by_name["ValidatorScoreEvent"]
-_DELEGATIONBALANCEEVENT = DESCRIPTOR.message_types_by_name["DelegationBalanceEvent"]
-_MARKETEVENT = DESCRIPTOR.message_types_by_name["MarketEvent"]
-_TXERROREVENT = DESCRIPTOR.message_types_by_name["TxErrorEvent"]
-_TIMEUPDATE = DESCRIPTOR.message_types_by_name["TimeUpdate"]
-_EPOCHEVENT = DESCRIPTOR.message_types_by_name["EpochEvent"]
-_TRANSFERRESPONSES = DESCRIPTOR.message_types_by_name["TransferResponses"]
-_POSITIONRESOLUTION = DESCRIPTOR.message_types_by_name["PositionResolution"]
-_LOSSSOCIALIZATION = DESCRIPTOR.message_types_by_name["LossSocialization"]
-_TRADESETTLEMENT = DESCRIPTOR.message_types_by_name["TradeSettlement"]
-_SETTLEPOSITION = DESCRIPTOR.message_types_by_name["SettlePosition"]
-_POSITIONSTATEEVENT = DESCRIPTOR.message_types_by_name["PositionStateEvent"]
-_SETTLEDISTRESSED = DESCRIPTOR.message_types_by_name["SettleDistressed"]
-_MARKETTICK = DESCRIPTOR.message_types_by_name["MarketTick"]
-_AUCTIONEVENT = DESCRIPTOR.message_types_by_name["AuctionEvent"]
-_VALIDATORUPDATE = DESCRIPTOR.message_types_by_name["ValidatorUpdate"]
-_VALIDATORRANKINGEVENT = DESCRIPTOR.message_types_by_name["ValidatorRankingEvent"]
-_KEYROTATION = DESCRIPTOR.message_types_by_name["KeyRotation"]
-_ETHEREUMKEYROTATION = DESCRIPTOR.message_types_by_name["EthereumKeyRotation"]
-_STATEVAR = DESCRIPTOR.message_types_by_name["StateVar"]
-_BUSEVENT = DESCRIPTOR.message_types_by_name["BusEvent"]
-_TRANSFER_STATUS = _TRANSFER.enum_types_by_name["Status"]
-_STAKELINKING_TYPE = _STAKELINKING.enum_types_by_name["Type"]
-_STAKELINKING_STATUS = _STAKELINKING.enum_types_by_name["Status"]
-_ERC20MULTISIGSIGNEREVENT_TYPE = _ERC20MULTISIGSIGNEREVENT.enum_types_by_name["Type"]
-ERC20MultiSigSignerAdded = _reflection.GeneratedProtocolMessageType(
-    "ERC20MultiSigSignerAdded",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULTISIGSIGNERADDED,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigSignerAdded)
-    },
-)
+_ERC20MULTISIGSIGNERADDED = DESCRIPTOR.message_types_by_name['ERC20MultiSigSignerAdded']
+_ERC20MULISTSIGSIGNERREMOVEDSUBMITTER = DESCRIPTOR.message_types_by_name['ERC20MulistSigSignerRemovedSubmitter']
+_ERC20MULTISIGSIGNERREMOVED = DESCRIPTOR.message_types_by_name['ERC20MultiSigSignerRemoved']
+_TRANSFER = DESCRIPTOR.message_types_by_name['Transfer']
+_ONEOFFTRANSFER = DESCRIPTOR.message_types_by_name['OneOffTransfer']
+_RECURRINGTRANSFER = DESCRIPTOR.message_types_by_name['RecurringTransfer']
+_STAKELINKING = DESCRIPTOR.message_types_by_name['StakeLinking']
+_ERC20MULTISIGSIGNEREVENT = DESCRIPTOR.message_types_by_name['ERC20MultiSigSignerEvent']
+_ERC20MULTISIGTHRESHOLDSETEVENT = DESCRIPTOR.message_types_by_name['ERC20MultiSigThresholdSetEvent']
+_CHECKPOINTEVENT = DESCRIPTOR.message_types_by_name['CheckpointEvent']
+_STREAMSTARTEVENT = DESCRIPTOR.message_types_by_name['StreamStartEvent']
+_REWARDPAYOUTEVENT = DESCRIPTOR.message_types_by_name['RewardPayoutEvent']
+_VALIDATORSCOREEVENT = DESCRIPTOR.message_types_by_name['ValidatorScoreEvent']
+_DELEGATIONBALANCEEVENT = DESCRIPTOR.message_types_by_name['DelegationBalanceEvent']
+_MARKETEVENT = DESCRIPTOR.message_types_by_name['MarketEvent']
+_TXERROREVENT = DESCRIPTOR.message_types_by_name['TxErrorEvent']
+_TIMEUPDATE = DESCRIPTOR.message_types_by_name['TimeUpdate']
+_EPOCHEVENT = DESCRIPTOR.message_types_by_name['EpochEvent']
+_TRANSFERRESPONSES = DESCRIPTOR.message_types_by_name['TransferResponses']
+_POSITIONRESOLUTION = DESCRIPTOR.message_types_by_name['PositionResolution']
+_LOSSSOCIALIZATION = DESCRIPTOR.message_types_by_name['LossSocialization']
+_TRADESETTLEMENT = DESCRIPTOR.message_types_by_name['TradeSettlement']
+_SETTLEPOSITION = DESCRIPTOR.message_types_by_name['SettlePosition']
+_POSITIONSTATEEVENT = DESCRIPTOR.message_types_by_name['PositionStateEvent']
+_SETTLEDISTRESSED = DESCRIPTOR.message_types_by_name['SettleDistressed']
+_MARKETTICK = DESCRIPTOR.message_types_by_name['MarketTick']
+_AUCTIONEVENT = DESCRIPTOR.message_types_by_name['AuctionEvent']
+_VALIDATORUPDATE = DESCRIPTOR.message_types_by_name['ValidatorUpdate']
+_VALIDATORRANKINGEVENT = DESCRIPTOR.message_types_by_name['ValidatorRankingEvent']
+_KEYROTATION = DESCRIPTOR.message_types_by_name['KeyRotation']
+_ETHEREUMKEYROTATION = DESCRIPTOR.message_types_by_name['EthereumKeyRotation']
+_STATEVAR = DESCRIPTOR.message_types_by_name['StateVar']
+_BUSEVENT = DESCRIPTOR.message_types_by_name['BusEvent']
+_TRANSFER_STATUS = _TRANSFER.enum_types_by_name['Status']
+_STAKELINKING_TYPE = _STAKELINKING.enum_types_by_name['Type']
+_STAKELINKING_STATUS = _STAKELINKING.enum_types_by_name['Status']
+_ERC20MULTISIGSIGNEREVENT_TYPE = _ERC20MULTISIGSIGNEREVENT.enum_types_by_name['Type']
+ERC20MultiSigSignerAdded = _reflection.GeneratedProtocolMessageType('ERC20MultiSigSignerAdded', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULTISIGSIGNERADDED,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigSignerAdded)
+  })
 _sym_db.RegisterMessage(ERC20MultiSigSignerAdded)
 
-ERC20MulistSigSignerRemovedSubmitter = _reflection.GeneratedProtocolMessageType(
-    "ERC20MulistSigSignerRemovedSubmitter",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULISTSIGSIGNERREMOVEDSUBMITTER,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MulistSigSignerRemovedSubmitter)
-    },
-)
+ERC20MulistSigSignerRemovedSubmitter = _reflection.GeneratedProtocolMessageType('ERC20MulistSigSignerRemovedSubmitter', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULISTSIGSIGNERREMOVEDSUBMITTER,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MulistSigSignerRemovedSubmitter)
+  })
 _sym_db.RegisterMessage(ERC20MulistSigSignerRemovedSubmitter)
 
-ERC20MultiSigSignerRemoved = _reflection.GeneratedProtocolMessageType(
-    "ERC20MultiSigSignerRemoved",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULTISIGSIGNERREMOVED,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigSignerRemoved)
-    },
-)
+ERC20MultiSigSignerRemoved = _reflection.GeneratedProtocolMessageType('ERC20MultiSigSignerRemoved', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULTISIGSIGNERREMOVED,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigSignerRemoved)
+  })
 _sym_db.RegisterMessage(ERC20MultiSigSignerRemoved)
 
-Transfer = _reflection.GeneratedProtocolMessageType(
-    "Transfer",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRANSFER,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.Transfer)
-    },
-)
+Transfer = _reflection.GeneratedProtocolMessageType('Transfer', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSFER,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.Transfer)
+  })
 _sym_db.RegisterMessage(Transfer)
 
-OneOffTransfer = _reflection.GeneratedProtocolMessageType(
-    "OneOffTransfer",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ONEOFFTRANSFER,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.OneOffTransfer)
-    },
-)
+OneOffTransfer = _reflection.GeneratedProtocolMessageType('OneOffTransfer', (_message.Message,), {
+  'DESCRIPTOR' : _ONEOFFTRANSFER,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.OneOffTransfer)
+  })
 _sym_db.RegisterMessage(OneOffTransfer)
 
-RecurringTransfer = _reflection.GeneratedProtocolMessageType(
-    "RecurringTransfer",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _RECURRINGTRANSFER,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.RecurringTransfer)
-    },
-)
+RecurringTransfer = _reflection.GeneratedProtocolMessageType('RecurringTransfer', (_message.Message,), {
+  'DESCRIPTOR' : _RECURRINGTRANSFER,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.RecurringTransfer)
+  })
 _sym_db.RegisterMessage(RecurringTransfer)
 
-StakeLinking = _reflection.GeneratedProtocolMessageType(
-    "StakeLinking",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STAKELINKING,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.StakeLinking)
-    },
-)
+StakeLinking = _reflection.GeneratedProtocolMessageType('StakeLinking', (_message.Message,), {
+  'DESCRIPTOR' : _STAKELINKING,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.StakeLinking)
+  })
 _sym_db.RegisterMessage(StakeLinking)
 
-ERC20MultiSigSignerEvent = _reflection.GeneratedProtocolMessageType(
-    "ERC20MultiSigSignerEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULTISIGSIGNEREVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigSignerEvent)
-    },
-)
+ERC20MultiSigSignerEvent = _reflection.GeneratedProtocolMessageType('ERC20MultiSigSignerEvent', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULTISIGSIGNEREVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigSignerEvent)
+  })
 _sym_db.RegisterMessage(ERC20MultiSigSignerEvent)
 
-ERC20MultiSigThresholdSetEvent = _reflection.GeneratedProtocolMessageType(
-    "ERC20MultiSigThresholdSetEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20MULTISIGTHRESHOLDSETEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigThresholdSetEvent)
-    },
-)
+ERC20MultiSigThresholdSetEvent = _reflection.GeneratedProtocolMessageType('ERC20MultiSigThresholdSetEvent', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20MULTISIGTHRESHOLDSETEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ERC20MultiSigThresholdSetEvent)
+  })
 _sym_db.RegisterMessage(ERC20MultiSigThresholdSetEvent)
 
-CheckpointEvent = _reflection.GeneratedProtocolMessageType(
-    "CheckpointEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHECKPOINTEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.CheckpointEvent)
-    },
-)
+CheckpointEvent = _reflection.GeneratedProtocolMessageType('CheckpointEvent', (_message.Message,), {
+  'DESCRIPTOR' : _CHECKPOINTEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.CheckpointEvent)
+  })
 _sym_db.RegisterMessage(CheckpointEvent)
 
-StreamStartEvent = _reflection.GeneratedProtocolMessageType(
-    "StreamStartEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STREAMSTARTEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.StreamStartEvent)
-    },
-)
+StreamStartEvent = _reflection.GeneratedProtocolMessageType('StreamStartEvent', (_message.Message,), {
+  'DESCRIPTOR' : _STREAMSTARTEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.StreamStartEvent)
+  })
 _sym_db.RegisterMessage(StreamStartEvent)
 
-RewardPayoutEvent = _reflection.GeneratedProtocolMessageType(
-    "RewardPayoutEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _REWARDPAYOUTEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.RewardPayoutEvent)
-    },
-)
+RewardPayoutEvent = _reflection.GeneratedProtocolMessageType('RewardPayoutEvent', (_message.Message,), {
+  'DESCRIPTOR' : _REWARDPAYOUTEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.RewardPayoutEvent)
+  })
 _sym_db.RegisterMessage(RewardPayoutEvent)
 
-ValidatorScoreEvent = _reflection.GeneratedProtocolMessageType(
-    "ValidatorScoreEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _VALIDATORSCOREEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ValidatorScoreEvent)
-    },
-)
+ValidatorScoreEvent = _reflection.GeneratedProtocolMessageType('ValidatorScoreEvent', (_message.Message,), {
+  'DESCRIPTOR' : _VALIDATORSCOREEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ValidatorScoreEvent)
+  })
 _sym_db.RegisterMessage(ValidatorScoreEvent)
 
-DelegationBalanceEvent = _reflection.GeneratedProtocolMessageType(
-    "DelegationBalanceEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _DELEGATIONBALANCEEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.DelegationBalanceEvent)
-    },
-)
+DelegationBalanceEvent = _reflection.GeneratedProtocolMessageType('DelegationBalanceEvent', (_message.Message,), {
+  'DESCRIPTOR' : _DELEGATIONBALANCEEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.DelegationBalanceEvent)
+  })
 _sym_db.RegisterMessage(DelegationBalanceEvent)
 
-MarketEvent = _reflection.GeneratedProtocolMessageType(
-    "MarketEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MARKETEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.MarketEvent)
-    },
-)
+MarketEvent = _reflection.GeneratedProtocolMessageType('MarketEvent', (_message.Message,), {
+  'DESCRIPTOR' : _MARKETEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.MarketEvent)
+  })
 _sym_db.RegisterMessage(MarketEvent)
 
-TxErrorEvent = _reflection.GeneratedProtocolMessageType(
-    "TxErrorEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TXERROREVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.TxErrorEvent)
-    },
-)
+TxErrorEvent = _reflection.GeneratedProtocolMessageType('TxErrorEvent', (_message.Message,), {
+  'DESCRIPTOR' : _TXERROREVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.TxErrorEvent)
+  })
 _sym_db.RegisterMessage(TxErrorEvent)
 
-TimeUpdate = _reflection.GeneratedProtocolMessageType(
-    "TimeUpdate",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TIMEUPDATE,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.TimeUpdate)
-    },
-)
+TimeUpdate = _reflection.GeneratedProtocolMessageType('TimeUpdate', (_message.Message,), {
+  'DESCRIPTOR' : _TIMEUPDATE,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.TimeUpdate)
+  })
 _sym_db.RegisterMessage(TimeUpdate)
 
-EpochEvent = _reflection.GeneratedProtocolMessageType(
-    "EpochEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _EPOCHEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.EpochEvent)
-    },
-)
+EpochEvent = _reflection.GeneratedProtocolMessageType('EpochEvent', (_message.Message,), {
+  'DESCRIPTOR' : _EPOCHEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.EpochEvent)
+  })
 _sym_db.RegisterMessage(EpochEvent)
 
-TransferResponses = _reflection.GeneratedProtocolMessageType(
-    "TransferResponses",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRANSFERRESPONSES,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.TransferResponses)
-    },
-)
+TransferResponses = _reflection.GeneratedProtocolMessageType('TransferResponses', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSFERRESPONSES,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.TransferResponses)
+  })
 _sym_db.RegisterMessage(TransferResponses)
 
-PositionResolution = _reflection.GeneratedProtocolMessageType(
-    "PositionResolution",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _POSITIONRESOLUTION,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.PositionResolution)
-    },
-)
+PositionResolution = _reflection.GeneratedProtocolMessageType('PositionResolution', (_message.Message,), {
+  'DESCRIPTOR' : _POSITIONRESOLUTION,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.PositionResolution)
+  })
 _sym_db.RegisterMessage(PositionResolution)
 
-LossSocialization = _reflection.GeneratedProtocolMessageType(
-    "LossSocialization",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LOSSSOCIALIZATION,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.LossSocialization)
-    },
-)
+LossSocialization = _reflection.GeneratedProtocolMessageType('LossSocialization', (_message.Message,), {
+  'DESCRIPTOR' : _LOSSSOCIALIZATION,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.LossSocialization)
+  })
 _sym_db.RegisterMessage(LossSocialization)
 
-TradeSettlement = _reflection.GeneratedProtocolMessageType(
-    "TradeSettlement",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRADESETTLEMENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.TradeSettlement)
-    },
-)
+TradeSettlement = _reflection.GeneratedProtocolMessageType('TradeSettlement', (_message.Message,), {
+  'DESCRIPTOR' : _TRADESETTLEMENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.TradeSettlement)
+  })
 _sym_db.RegisterMessage(TradeSettlement)
 
-SettlePosition = _reflection.GeneratedProtocolMessageType(
-    "SettlePosition",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SETTLEPOSITION,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.SettlePosition)
-    },
-)
+SettlePosition = _reflection.GeneratedProtocolMessageType('SettlePosition', (_message.Message,), {
+  'DESCRIPTOR' : _SETTLEPOSITION,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.SettlePosition)
+  })
 _sym_db.RegisterMessage(SettlePosition)
 
-PositionStateEvent = _reflection.GeneratedProtocolMessageType(
-    "PositionStateEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _POSITIONSTATEEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.PositionStateEvent)
-    },
-)
+PositionStateEvent = _reflection.GeneratedProtocolMessageType('PositionStateEvent', (_message.Message,), {
+  'DESCRIPTOR' : _POSITIONSTATEEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.PositionStateEvent)
+  })
 _sym_db.RegisterMessage(PositionStateEvent)
 
-SettleDistressed = _reflection.GeneratedProtocolMessageType(
-    "SettleDistressed",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SETTLEDISTRESSED,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.SettleDistressed)
-    },
-)
+SettleDistressed = _reflection.GeneratedProtocolMessageType('SettleDistressed', (_message.Message,), {
+  'DESCRIPTOR' : _SETTLEDISTRESSED,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.SettleDistressed)
+  })
 _sym_db.RegisterMessage(SettleDistressed)
 
-MarketTick = _reflection.GeneratedProtocolMessageType(
-    "MarketTick",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _MARKETTICK,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.MarketTick)
-    },
-)
+MarketTick = _reflection.GeneratedProtocolMessageType('MarketTick', (_message.Message,), {
+  'DESCRIPTOR' : _MARKETTICK,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.MarketTick)
+  })
 _sym_db.RegisterMessage(MarketTick)
 
-AuctionEvent = _reflection.GeneratedProtocolMessageType(
-    "AuctionEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _AUCTIONEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.AuctionEvent)
-    },
-)
+AuctionEvent = _reflection.GeneratedProtocolMessageType('AuctionEvent', (_message.Message,), {
+  'DESCRIPTOR' : _AUCTIONEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.AuctionEvent)
+  })
 _sym_db.RegisterMessage(AuctionEvent)
 
-ValidatorUpdate = _reflection.GeneratedProtocolMessageType(
-    "ValidatorUpdate",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _VALIDATORUPDATE,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ValidatorUpdate)
-    },
-)
+ValidatorUpdate = _reflection.GeneratedProtocolMessageType('ValidatorUpdate', (_message.Message,), {
+  'DESCRIPTOR' : _VALIDATORUPDATE,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ValidatorUpdate)
+  })
 _sym_db.RegisterMessage(ValidatorUpdate)
 
-ValidatorRankingEvent = _reflection.GeneratedProtocolMessageType(
-    "ValidatorRankingEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _VALIDATORRANKINGEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.ValidatorRankingEvent)
-    },
-)
+ValidatorRankingEvent = _reflection.GeneratedProtocolMessageType('ValidatorRankingEvent', (_message.Message,), {
+  'DESCRIPTOR' : _VALIDATORRANKINGEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.ValidatorRankingEvent)
+  })
 _sym_db.RegisterMessage(ValidatorRankingEvent)
 
-KeyRotation = _reflection.GeneratedProtocolMessageType(
-    "KeyRotation",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _KEYROTATION,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.KeyRotation)
-    },
-)
+KeyRotation = _reflection.GeneratedProtocolMessageType('KeyRotation', (_message.Message,), {
+  'DESCRIPTOR' : _KEYROTATION,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.KeyRotation)
+  })
 _sym_db.RegisterMessage(KeyRotation)
 
-EthereumKeyRotation = _reflection.GeneratedProtocolMessageType(
-    "EthereumKeyRotation",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ETHEREUMKEYROTATION,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.EthereumKeyRotation)
-    },
-)
+EthereumKeyRotation = _reflection.GeneratedProtocolMessageType('EthereumKeyRotation', (_message.Message,), {
+  'DESCRIPTOR' : _ETHEREUMKEYROTATION,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.EthereumKeyRotation)
+  })
 _sym_db.RegisterMessage(EthereumKeyRotation)
 
-StateVar = _reflection.GeneratedProtocolMessageType(
-    "StateVar",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STATEVAR,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.StateVar)
-    },
-)
+StateVar = _reflection.GeneratedProtocolMessageType('StateVar', (_message.Message,), {
+  'DESCRIPTOR' : _STATEVAR,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.StateVar)
+  })
 _sym_db.RegisterMessage(StateVar)
 
-BusEvent = _reflection.GeneratedProtocolMessageType(
-    "BusEvent",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BUSEVENT,
-        "__module__": "vega.events.v1.events_pb2"
-        # @@protoc_insertion_point(class_scope:vega.events.v1.BusEvent)
-    },
-)
+BusEvent = _reflection.GeneratedProtocolMessageType('BusEvent', (_message.Message,), {
+  'DESCRIPTOR' : _BUSEVENT,
+  '__module__' : 'vega.events.v1.events_pb2'
+  # @@protoc_insertion_point(class_scope:vega.events.v1.BusEvent)
+  })
 _sym_db.RegisterMessage(BusEvent)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z*code.vegaprotocol.io/protos/vega/events/v1"
-    _BUSEVENTTYPE._serialized_start = 8584
-    _BUSEVENTTYPE._serialized_end = 10309
-    _ERC20MULTISIGSIGNERADDED._serialized_start = 291
-    _ERC20MULTISIGSIGNERADDED._serialized_end = 453
-    _ERC20MULISTSIGSIGNERREMOVEDSUBMITTER._serialized_start = 455
-    _ERC20MULISTSIGSIGNERREMOVEDSUBMITTER._serialized_end = 534
-    _ERC20MULTISIGSIGNERREMOVED._serialized_start = 537
-    _ERC20MULTISIGSIGNERREMOVED._serialized_end = 744
-    _TRANSFER._serialized_start = 747
-    _TRANSFER._serialized_end = 1253
-    _TRANSFER_STATUS._serialized_start = 1113
-    _TRANSFER_STATUS._serialized_end = 1245
-    _ONEOFFTRANSFER._serialized_start = 1255
-    _ONEOFFTRANSFER._serialized_end = 1291
-    _RECURRINGTRANSFER._serialized_start = 1294
-    _RECURRINGTRANSFER._serialized_end = 1439
-    _STAKELINKING._serialized_start = 1442
-    _STAKELINKING._serialized_end = 1897
-    _STAKELINKING_TYPE._serialized_start = 1741
-    _STAKELINKING_TYPE._serialized_end = 1801
-    _STAKELINKING_STATUS._serialized_start = 1803
-    _STAKELINKING_STATUS._serialized_end = 1897
-    _ERC20MULTISIGSIGNEREVENT._serialized_start = 1900
-    _ERC20MULTISIGSIGNEREVENT._serialized_end = 2172
-    _ERC20MULTISIGSIGNEREVENT_TYPE._serialized_start = 2110
-    _ERC20MULTISIGSIGNEREVENT_TYPE._serialized_end = 2172
-    _ERC20MULTISIGTHRESHOLDSETEVENT._serialized_start = 2175
-    _ERC20MULTISIGTHRESHOLDSETEVENT._serialized_end = 2335
-    _CHECKPOINTEVENT._serialized_start = 2337
-    _CHECKPOINTEVENT._serialized_end = 2410
-    _STREAMSTARTEVENT._serialized_start = 2412
-    _STREAMSTARTEVENT._serialized_end = 2448
-    _REWARDPAYOUTEVENT._serialized_start = 2451
-    _REWARDPAYOUTEVENT._serialized_end = 2624
-    _VALIDATORSCOREEVENT._serialized_start = 2627
-    _VALIDATORSCOREEVENT._serialized_end = 2845
-    _DELEGATIONBALANCEEVENT._serialized_start = 2847
-    _DELEGATIONBALANCEEVENT._serialized_end = 2938
-    _MARKETEVENT._serialized_start = 2940
-    _MARKETEVENT._serialized_end = 2989
-    _TXERROREVENT._serialized_start = 2992
-    _TXERROREVENT._serialized_end = 4152
-    _TIMEUPDATE._serialized_start = 4154
-    _TIMEUPDATE._serialized_end = 4185
-    _EPOCHEVENT._serialized_start = 4187
-    _EPOCHEVENT._serialized_end = 4306
-    _TRANSFERRESPONSES._serialized_start = 4308
-    _TRANSFERRESPONSES._serialized_end = 4370
-    _POSITIONRESOLUTION._serialized_start = 4372
-    _POSITIONRESOLUTION._serialized_end = 4467
-    _LOSSSOCIALIZATION._serialized_start = 4469
-    _LOSSSOCIALIZATION._serialized_end = 4541
-    _TRADESETTLEMENT._serialized_start = 4543
-    _TRADESETTLEMENT._serialized_end = 4589
-    _SETTLEPOSITION._serialized_start = 4592
-    _SETTLEPOSITION._serialized_end = 4745
-    _POSITIONSTATEEVENT._serialized_start = 4748
-    _POSITIONSTATEEVENT._serialized_end = 4913
-    _SETTLEDISTRESSED._serialized_start = 4915
-    _SETTLEDISTRESSED._serialized_end = 5001
-    _MARKETTICK._serialized_start = 5003
-    _MARKETTICK._serialized_end = 5041
-    _AUCTIONEVENT._serialized_start = 5044
-    _AUCTIONEVENT._serialized_end = 5233
-    _VALIDATORUPDATE._serialized_start = 5236
-    _VALIDATORUPDATE._serialized_end = 5470
-    _VALIDATORRANKINGEVENT._serialized_start = 5473
-    _VALIDATORRANKINGEVENT._serialized_end = 5674
-    _KEYROTATION._serialized_start = 5676
-    _KEYROTATION._serialized_end = 5770
-    _ETHEREUMKEYROTATION._serialized_start = 5772
-    _ETHEREUMKEYROTATION._serialized_end = 5874
-    _STATEVAR._serialized_start = 5876
-    _STATEVAR._serialized_end = 5931
-    _BUSEVENT._serialized_start = 5934
-    _BUSEVENT._serialized_end = 8581
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z*code.vegaprotocol.io/protos/vega/events/v1'
+  _BUSEVENTTYPE._serialized_start=8527
+  _BUSEVENTTYPE._serialized_end=10252
+  _ERC20MULTISIGSIGNERADDED._serialized_start=291
+  _ERC20MULTISIGSIGNERADDED._serialized_end=453
+  _ERC20MULISTSIGSIGNERREMOVEDSUBMITTER._serialized_start=455
+  _ERC20MULISTSIGSIGNERREMOVEDSUBMITTER._serialized_end=534
+  _ERC20MULTISIGSIGNERREMOVED._serialized_start=537
+  _ERC20MULTISIGSIGNERREMOVED._serialized_end=744
+  _TRANSFER._serialized_start=747
+  _TRANSFER._serialized_end=1253
+  _TRANSFER_STATUS._serialized_start=1113
+  _TRANSFER_STATUS._serialized_end=1245
+  _ONEOFFTRANSFER._serialized_start=1255
+  _ONEOFFTRANSFER._serialized_end=1291
+  _RECURRINGTRANSFER._serialized_start=1294
+  _RECURRINGTRANSFER._serialized_end=1439
+  _STAKELINKING._serialized_start=1442
+  _STAKELINKING._serialized_end=1897
+  _STAKELINKING_TYPE._serialized_start=1741
+  _STAKELINKING_TYPE._serialized_end=1801
+  _STAKELINKING_STATUS._serialized_start=1803
+  _STAKELINKING_STATUS._serialized_end=1897
+  _ERC20MULTISIGSIGNEREVENT._serialized_start=1900
+  _ERC20MULTISIGSIGNEREVENT._serialized_end=2172
+  _ERC20MULTISIGSIGNEREVENT_TYPE._serialized_start=2110
+  _ERC20MULTISIGSIGNEREVENT_TYPE._serialized_end=2172
+  _ERC20MULTISIGTHRESHOLDSETEVENT._serialized_start=2175
+  _ERC20MULTISIGTHRESHOLDSETEVENT._serialized_end=2335
+  _CHECKPOINTEVENT._serialized_start=2337
+  _CHECKPOINTEVENT._serialized_end=2410
+  _STREAMSTARTEVENT._serialized_start=2412
+  _STREAMSTARTEVENT._serialized_end=2448
+  _REWARDPAYOUTEVENT._serialized_start=2451
+  _REWARDPAYOUTEVENT._serialized_end=2624
+  _VALIDATORSCOREEVENT._serialized_start=2627
+  _VALIDATORSCOREEVENT._serialized_end=2845
+  _DELEGATIONBALANCEEVENT._serialized_start=2847
+  _DELEGATIONBALANCEEVENT._serialized_end=2938
+  _MARKETEVENT._serialized_start=2940
+  _MARKETEVENT._serialized_end=2989
+  _TXERROREVENT._serialized_start=2992
+  _TXERROREVENT._serialized_end=4095
+  _TIMEUPDATE._serialized_start=4097
+  _TIMEUPDATE._serialized_end=4128
+  _EPOCHEVENT._serialized_start=4130
+  _EPOCHEVENT._serialized_end=4249
+  _TRANSFERRESPONSES._serialized_start=4251
+  _TRANSFERRESPONSES._serialized_end=4313
+  _POSITIONRESOLUTION._serialized_start=4315
+  _POSITIONRESOLUTION._serialized_end=4410
+  _LOSSSOCIALIZATION._serialized_start=4412
+  _LOSSSOCIALIZATION._serialized_end=4484
+  _TRADESETTLEMENT._serialized_start=4486
+  _TRADESETTLEMENT._serialized_end=4532
+  _SETTLEPOSITION._serialized_start=4535
+  _SETTLEPOSITION._serialized_end=4688
+  _POSITIONSTATEEVENT._serialized_start=4691
+  _POSITIONSTATEEVENT._serialized_end=4856
+  _SETTLEDISTRESSED._serialized_start=4858
+  _SETTLEDISTRESSED._serialized_end=4944
+  _MARKETTICK._serialized_start=4946
+  _MARKETTICK._serialized_end=4984
+  _AUCTIONEVENT._serialized_start=4987
+  _AUCTIONEVENT._serialized_end=5176
+  _VALIDATORUPDATE._serialized_start=5179
+  _VALIDATORUPDATE._serialized_end=5413
+  _VALIDATORRANKINGEVENT._serialized_start=5416
+  _VALIDATORRANKINGEVENT._serialized_end=5617
+  _KEYROTATION._serialized_start=5619
+  _KEYROTATION._serialized_end=5713
+  _ETHEREUMKEYROTATION._serialized_start=5715
+  _ETHEREUMKEYROTATION._serialized_end=5817
+  _STATEVAR._serialized_start=5819
+  _STATEVAR._serialized_end=5874
+  _BUSEVENT._serialized_start=5877
+  _BUSEVENT._serialized_end=8524
 # @@protoc_insertion_point(module_scope)

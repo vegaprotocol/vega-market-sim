@@ -83,7 +83,6 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         ],
         is_amendment=True,
     )
-
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
 
