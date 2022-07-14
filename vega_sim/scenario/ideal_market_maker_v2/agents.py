@@ -42,6 +42,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
         price_processs: List[float],
+        initial_asset_mint: float = 1000000,
         spread: float = 0.002,
         num_steps: int = 180,
         market_order_arrival_rate: float = 5,
@@ -55,7 +56,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         market_position_decimal: int = 2,
         market_name: str = None,
         asset_name: str = None,
-        commitment_amount: float = 20000000000,
+        commitment_amount: float = 6000,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -75,12 +76,13 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.mdp = market_decimal
         self.market_position_decimal = market_position_decimal
         self.commitment_amount = commitment_amount
+        self.initial_asset_mint = initial_asset_mint
 
         self.current_step = 0
 
         self.tag = tag
 
-        self.market_name = f"BTC:DAI_{self.tag}" if market_name is None else market_name
+        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
 
         self.long_horizon_estimate = num_steps >= 200
@@ -141,11 +143,10 @@ class OptimalMarketMaker(StateAgentWithWallet):
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
-        self.initial = 1e15
         self.vega.mint(
             self.wallet_name,
             asset=self.tdai_id,
-            amount=self.initial,
+            amount=self.initial_asset_mint,
         )
         self.vega.wait_for_datanode_sync()
 
@@ -190,28 +191,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
-
-        # self.buy_order_id = self.vega.submit_order(
-        #     trading_wallet=self.wallet_name,
-        #     market_id=self.market_id,
-        #     order_type=vega_protos.Order.Type.TYPE_LIMIT,
-        #     time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
-        #     side=vega_protos.SIDE_BUY,
-        #     volume=20,
-        #     price=self.price_process[self.current_step] - self.optimal_strategy(current_position)[0],
-        #     wait=True,
-        # )
-
-        # self.sell_order_id = self.vega.submit_order(
-        #     trading_wallet=self.wallet_name,
-        #     market_id=self.market_id,
-        #     order_type=vega_protos.Order.Type.TYPE_LIMIT,
-        #     time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
-        #     side=vega_protos.SIDE_SELL,
-        #     volume=20,
-        #     price=self.price_process[self.current_step] + self.optimal_strategy(current_position)[1],
-        #     wait=True,
-        # )
 
     def optimal_strategy(self, current_position):
 
@@ -264,20 +243,19 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
         buy_order, sell_order = None, None
 
-        try:
-            for order in (
-                vega_state.market_state[self.market_id]
-                .orders[self.vega.wallet.public_key(self.wallet_name)]
-                .values()
-            ):
-                if order.side == vega_protos.SIDE_BUY:
-                    buy_order = order
-                else:
-                    sell_order = order
-            
-        except Exception as error:
-            print(error)
-            pass
+        for order in (
+            vega_state.market_state[self.market_id]
+            .orders[self.vega.wallet.public_key(self.wallet_name)]
+            .values()
+        ):
+            if order.side == vega_protos.SIDE_BUY:
+                buy_order = order
+            else:
+                sell_order = order
+
+        market_data = self.vega.market_data(market_id=self.market_id)
+        LOB_best_bid = market_data.best_bid_price / 10**self.mdp
+        LOB_bset_ask = market_data.best_offer_price / 10**self.mdp
 
         self.vega.submit_simple_liquidity(
             wallet_name=self.wallet_name,
@@ -286,8 +264,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
             fee=0.002,
             reference_buy="PEGGED_REFERENCE_BEST_BID",
             reference_sell="PEGGED_REFERENCE_BEST_ASK",
-            delta_buy=self.bid_depth - self.spread,
-            delta_sell=self.ask_depth - self.spread,
+            delta_buy=self.bid_depth + LOB_best_bid - self.price_process[self.current_step],
+            delta_sell=self.ask_depth + self.price_process[self.current_step] - LOB_bset_ask,
             is_amendment=True,
         )
 
