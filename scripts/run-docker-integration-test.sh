@@ -6,4 +6,4 @@ docker run \
 docker_status=$?
 docker cp vega_test:/tmp ./test_logs/
 docker rm vega_test
-exit(docker_status)
+exit docker_status
