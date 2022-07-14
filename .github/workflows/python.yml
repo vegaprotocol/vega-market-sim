@@ -67,6 +67,11 @@ jobs:
           source .venv/bin/activate
           make test
 
+      - name: Test example notebooks
+        run: |
+          source .venv/bin/activate
+          make test_examples
+
   check_dependencies:
     runs-on: ubuntu-latest
     steps:
