@@ -2,7 +2,9 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from ...api.v2 import trading_data_pb2 as data__node_dot_api_dot_v2_dot_trading__data__pb2
+from ...api.v2 import (
+    trading_data_pb2 as data__node_dot_api_dot_v2_dot_trading__data__pb2,
+)
 
 
 class TradingDataServiceStub(object):
@@ -15,180 +17,180 @@ class TradingDataServiceStub(object):
             channel: A grpc.Channel.
         """
         self.GetOrder = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetOrder',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetOrder",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderResponse.FromString,
+        )
         self.ListOrders = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/ListOrders',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ListOrders",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersResponse.FromString,
+        )
         self.ListOrderVersions = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/ListOrderVersions',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ListOrderVersions",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsResponse.FromString,
+        )
         self.GetPositionsByPartyConnection = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetPositionsByPartyConnection',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetPositionsByPartyConnection",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionResponse.FromString,
+        )
         self.GetBalanceHistory = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetBalanceHistory',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetBalanceHistory",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.FromString,
+        )
         self.GetMarketDataHistoryByID = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetMarketDataHistoryByID',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetMarketDataHistoryByID",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.FromString,
+        )
         self.MarketsDataSubscribe = channel.unary_stream(
-                '/datanode.api.v2.TradingDataService/MarketsDataSubscribe',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/MarketsDataSubscribe",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.FromString,
+        )
         self.ListTransfers = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/ListTransfers',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ListTransfers",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.FromString,
+        )
         self.GetNetworkLimits = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetNetworkLimits',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetNetworkLimits",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsResponse.FromString,
+        )
         self.GetCandleData = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetCandleData',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetCandleData",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataResponse.FromString,
+        )
         self.SubscribeToCandleData = channel.unary_stream(
-                '/datanode.api.v2.TradingDataService/SubscribeToCandleData',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/SubscribeToCandleData",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataResponse.FromString,
+        )
         self.GetCandlesForMarket = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetCandlesForMarket',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetCandlesForMarket",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketResponse.FromString,
+        )
         self.ListVotes = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/ListVotes',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ListVotes",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesResponse.FromString,
+        )
         self.ObserveVotes = channel.unary_stream(
-                '/datanode.api.v2.TradingDataService/ObserveVotes',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ObserveVotes",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.FromString,
+        )
         self.GetERC20MultiSigSignerAddedBundles = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerAddedBundles',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerAddedBundles",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.FromString,
+        )
         self.GetERC20MultiSigSignerRemovedBundles = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerRemovedBundles',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerRemovedBundles",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.FromString,
+        )
         self.GetERC20ListAssetBundle = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetERC20ListAssetBundle',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetERC20ListAssetBundle",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.FromString,
+        )
         self.GetTradesByMarket = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetTradesByMarket',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetTradesByMarket",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketResponse.FromString,
+        )
         self.GetTradesByParty = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetTradesByParty',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetTradesByParty",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyResponse.FromString,
+        )
         self.GetTradesByOrderID = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetTradesByOrderID',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetTradesByOrderID",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDResponse.FromString,
+        )
         self.GetOracleSpecByID = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetOracleSpecByID',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetOracleSpecByID",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.FromString,
+        )
         self.ListOracleSpecs = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/ListOracleSpecs',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ListOracleSpecs",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.FromString,
+        )
         self.GetOracleDataBySpecID = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetOracleDataBySpecID',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetOracleDataBySpecID",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.FromString,
+        )
         self.ListOracleData = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/ListOracleData',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/ListOracleData",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.FromString,
+        )
         self.GetOracleSpecsConnection = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetOracleSpecsConnection',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetOracleSpecsConnection",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.FromString,
+        )
         self.GetOracleDataConnection = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetOracleDataConnection',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetOracleDataConnection",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.FromString,
+        )
         self.GetMarkets = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetMarkets',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetMarkets",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsResponse.FromString,
+        )
         self.GetParties = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetParties',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetParties",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesResponse.FromString,
+        )
         self.GetMarginLevels = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetMarginLevels',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetMarginLevels",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsResponse.FromString,
+        )
         self.GetRewards = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetRewards',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetRewards",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsResponse.FromString,
+        )
         self.GetRewardSummaries = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetRewardSummaries',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetRewardSummaries",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesResponse.FromString,
+        )
         self.GetDeposits = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetDeposits',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetDeposits",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsResponse.FromString,
+        )
         self.GetWithdrawals = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetWithdrawals',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetWithdrawals",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsResponse.FromString,
+        )
         self.GetAssets = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetAssets',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetAssets",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsResponse.FromString,
+        )
         self.GetLiquidityProvisions = channel.unary_unary(
-                '/datanode.api.v2.TradingDataService/GetLiquidityProvisions',
-                request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsRequest.SerializeToString,
-                response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsResponse.FromString,
-                )
+            "/datanode.api.v2.TradingDataService/GetLiquidityProvisions",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsResponse.FromString,
+        )
 
 
 class TradingDataServiceServicer(object):
@@ -199,209 +201,194 @@ class TradingDataServiceServicer(object):
         Gets the current version of an order, or optionally provide a version id to retrieve a given version.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ListOrders(self, request, context):
-        """Get a list of orders that match the given filters
-        """
+        """Get a list of orders that match the given filters"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ListOrderVersions(self, request, context):
-        """List all versions of an order in the order history
-        """
+        """List all versions of an order in the order history"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetPositionsByPartyConnection(self, request, context):
         """-- Positions --
         Get a list of Positions by Party using cursor based pagination
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetBalanceHistory(self, request, context):
         """-- Balances --
         Get an aggregated list of the changes in balances in a set of accounts over time
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetMarketDataHistoryByID(self, request, context):
         """-- Market Data --
         Get Market Data History for a Market ID between given dates using a cursor based pagination model
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def MarketsDataSubscribe(self, request, context):
-        """Subscribe to a stream of Markets Data
-        """
+        """Subscribe to a stream of Markets Data"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ListTransfers(self, request, context):
         """-- Transfers --
         List Transfers to/from/either a public key using a cursor based pagination model
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetNetworkLimits(self, request, context):
         """-- Network Limits --
         Get the current network limits (is bootstrapping finished, are proposals enabled etc..)
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetCandleData(self, request, context):
         """-- Candles --
         Get candle data for a given candle id
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def SubscribeToCandleData(self, request, context):
-        """Subscribe to a stream of Candle updates
-        """
+        """Subscribe to a stream of Candle updates"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetCandlesForMarket(self, request, context):
-        """Gets all available intervals for a given market along with the corresponding candle id
-        """
+        """Gets all available intervals for a given market along with the corresponding candle id"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ListVotes(self, request, context):
         """-- Votes --
         Get Votes for a Party ID using a cursor based pagination model
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ObserveVotes(self, request, context):
-        """Subscribe to a stream of votes
-        """
+        """Subscribe to a stream of votes"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetERC20MultiSigSignerAddedBundles(self, request, context):
         """-- ERC20 Multi Sig --
         Gets the signature bundles that add a particular validator to the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetERC20MultiSigSignerRemovedBundles(self, request, context):
-        """Gets the signature bundles that remove a particular validator to the multisig contract
-        """
+        """Gets the signature bundles that remove a particular validator to the multisig contract"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetERC20ListAssetBundle(self, request, context):
-        """Gets the signature bundles that remove a particular validator to the multisig contract
-        """
+        """Gets the signature bundles that remove a particular validator to the multisig contract"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetTradesByMarket(self, request, context):
         """-- Trades --
         Get trades by market using a cursor based pagination model
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetTradesByParty(self, request, context):
-        """Get trades by party using a cursor based pagination model
-        """
+        """Get trades by party using a cursor based pagination model"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetTradesByOrderID(self, request, context):
-        """Get trades by market with the corresponding orderID using a cursor based pagination model
-        """
+        """Get trades by market with the corresponding orderID using a cursor based pagination model"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetOracleSpecByID(self, request, context):
         """-- Oracles --
         Get an oracle spec by ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ListOracleSpecs(self, request, context):
-        """Get the oracle specs
-        """
+        """Get the oracle specs"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetOracleDataBySpecID(self, request, context):
-        """Get oracle data that matched the given spec
-        """
+        """Get oracle data that matched the given spec"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def ListOracleData(self, request, context):
-        """Get all oracle data
-        """
+        """Get all oracle data"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetOracleSpecsConnection(self, request, context):
-        """Get cursor based paginated oracle specs data
-        """
+        """Get cursor based paginated oracle specs data"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetOracleDataConnection(self, request, context):
-        """Get cursor based paginated oracle data
-        """
+        """Get cursor based paginated oracle data"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetMarkets(self, request, context):
         """-- Markets --
         Get all markets using a cursor based pagination model
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetParties(self, request, context):
         """-- Parties --
         Get Parties using a cursor based pagination model
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetMarginLevels(self, request, context):
         """-- Margin Levels --
@@ -409,830 +396,1245 @@ class TradingDataServiceServicer(object):
         -- Rewards --
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetRewards(self, request, context):
-        """Get rewards
-        """
+        """Get rewards"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetRewardSummaries(self, request, context):
-        """Get reward summaries
-        """
+        """Get reward summaries"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetDeposits(self, request, context):
-        """-- Deposits --
-        """
+        """-- Deposits --"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetWithdrawals(self, request, context):
-        """-- Withdrawals --
-        """
+        """-- Withdrawals --"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetAssets(self, request, context):
-        """-- Assets --
-        """
+        """-- Assets --"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
     def GetLiquidityProvisions(self, request, context):
-        """-- Liquidity Provisions --
-        """
+        """-- Liquidity Provisions --"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
 
 
 def add_TradingDataServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetOrder': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetOrder,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderResponse.SerializeToString,
-            ),
-            'ListOrders': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListOrders,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersResponse.SerializeToString,
-            ),
-            'ListOrderVersions': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListOrderVersions,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsResponse.SerializeToString,
-            ),
-            'GetPositionsByPartyConnection': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetPositionsByPartyConnection,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionResponse.SerializeToString,
-            ),
-            'GetBalanceHistory': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetBalanceHistory,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.SerializeToString,
-            ),
-            'GetMarketDataHistoryByID': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetMarketDataHistoryByID,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.SerializeToString,
-            ),
-            'MarketsDataSubscribe': grpc.unary_stream_rpc_method_handler(
-                    servicer.MarketsDataSubscribe,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.SerializeToString,
-            ),
-            'ListTransfers': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListTransfers,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.SerializeToString,
-            ),
-            'GetNetworkLimits': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetNetworkLimits,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsResponse.SerializeToString,
-            ),
-            'GetCandleData': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetCandleData,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataResponse.SerializeToString,
-            ),
-            'SubscribeToCandleData': grpc.unary_stream_rpc_method_handler(
-                    servicer.SubscribeToCandleData,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataResponse.SerializeToString,
-            ),
-            'GetCandlesForMarket': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetCandlesForMarket,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketResponse.SerializeToString,
-            ),
-            'ListVotes': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListVotes,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesResponse.SerializeToString,
-            ),
-            'ObserveVotes': grpc.unary_stream_rpc_method_handler(
-                    servicer.ObserveVotes,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.SerializeToString,
-            ),
-            'GetERC20MultiSigSignerAddedBundles': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetERC20MultiSigSignerAddedBundles,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.SerializeToString,
-            ),
-            'GetERC20MultiSigSignerRemovedBundles': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetERC20MultiSigSignerRemovedBundles,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.SerializeToString,
-            ),
-            'GetERC20ListAssetBundle': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetERC20ListAssetBundle,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.SerializeToString,
-            ),
-            'GetTradesByMarket': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTradesByMarket,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketResponse.SerializeToString,
-            ),
-            'GetTradesByParty': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTradesByParty,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyResponse.SerializeToString,
-            ),
-            'GetTradesByOrderID': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTradesByOrderID,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDResponse.SerializeToString,
-            ),
-            'GetOracleSpecByID': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetOracleSpecByID,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.SerializeToString,
-            ),
-            'ListOracleSpecs': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListOracleSpecs,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.SerializeToString,
-            ),
-            'GetOracleDataBySpecID': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetOracleDataBySpecID,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.SerializeToString,
-            ),
-            'ListOracleData': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListOracleData,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.SerializeToString,
-            ),
-            'GetOracleSpecsConnection': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetOracleSpecsConnection,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.SerializeToString,
-            ),
-            'GetOracleDataConnection': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetOracleDataConnection,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.SerializeToString,
-            ),
-            'GetMarkets': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetMarkets,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsResponse.SerializeToString,
-            ),
-            'GetParties': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetParties,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesResponse.SerializeToString,
-            ),
-            'GetMarginLevels': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetMarginLevels,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsResponse.SerializeToString,
-            ),
-            'GetRewards': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetRewards,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsResponse.SerializeToString,
-            ),
-            'GetRewardSummaries': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetRewardSummaries,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesResponse.SerializeToString,
-            ),
-            'GetDeposits': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetDeposits,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsResponse.SerializeToString,
-            ),
-            'GetWithdrawals': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetWithdrawals,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsResponse.SerializeToString,
-            ),
-            'GetAssets': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetAssets,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsResponse.SerializeToString,
-            ),
-            'GetLiquidityProvisions': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetLiquidityProvisions,
-                    request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsRequest.FromString,
-                    response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsResponse.SerializeToString,
-            ),
+        "GetOrder": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOrder,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderResponse.SerializeToString,
+        ),
+        "ListOrders": grpc.unary_unary_rpc_method_handler(
+            servicer.ListOrders,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersResponse.SerializeToString,
+        ),
+        "ListOrderVersions": grpc.unary_unary_rpc_method_handler(
+            servicer.ListOrderVersions,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsResponse.SerializeToString,
+        ),
+        "GetPositionsByPartyConnection": grpc.unary_unary_rpc_method_handler(
+            servicer.GetPositionsByPartyConnection,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionResponse.SerializeToString,
+        ),
+        "GetBalanceHistory": grpc.unary_unary_rpc_method_handler(
+            servicer.GetBalanceHistory,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.SerializeToString,
+        ),
+        "GetMarketDataHistoryByID": grpc.unary_unary_rpc_method_handler(
+            servicer.GetMarketDataHistoryByID,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.SerializeToString,
+        ),
+        "MarketsDataSubscribe": grpc.unary_stream_rpc_method_handler(
+            servicer.MarketsDataSubscribe,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.SerializeToString,
+        ),
+        "ListTransfers": grpc.unary_unary_rpc_method_handler(
+            servicer.ListTransfers,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.SerializeToString,
+        ),
+        "GetNetworkLimits": grpc.unary_unary_rpc_method_handler(
+            servicer.GetNetworkLimits,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsResponse.SerializeToString,
+        ),
+        "GetCandleData": grpc.unary_unary_rpc_method_handler(
+            servicer.GetCandleData,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataResponse.SerializeToString,
+        ),
+        "SubscribeToCandleData": grpc.unary_stream_rpc_method_handler(
+            servicer.SubscribeToCandleData,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataResponse.SerializeToString,
+        ),
+        "GetCandlesForMarket": grpc.unary_unary_rpc_method_handler(
+            servicer.GetCandlesForMarket,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketResponse.SerializeToString,
+        ),
+        "ListVotes": grpc.unary_unary_rpc_method_handler(
+            servicer.ListVotes,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesResponse.SerializeToString,
+        ),
+        "ObserveVotes": grpc.unary_stream_rpc_method_handler(
+            servicer.ObserveVotes,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.SerializeToString,
+        ),
+        "GetERC20MultiSigSignerAddedBundles": grpc.unary_unary_rpc_method_handler(
+            servicer.GetERC20MultiSigSignerAddedBundles,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.SerializeToString,
+        ),
+        "GetERC20MultiSigSignerRemovedBundles": grpc.unary_unary_rpc_method_handler(
+            servicer.GetERC20MultiSigSignerRemovedBundles,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.SerializeToString,
+        ),
+        "GetERC20ListAssetBundle": grpc.unary_unary_rpc_method_handler(
+            servicer.GetERC20ListAssetBundle,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.SerializeToString,
+        ),
+        "GetTradesByMarket": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTradesByMarket,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketResponse.SerializeToString,
+        ),
+        "GetTradesByParty": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTradesByParty,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyResponse.SerializeToString,
+        ),
+        "GetTradesByOrderID": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTradesByOrderID,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDResponse.SerializeToString,
+        ),
+        "GetOracleSpecByID": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOracleSpecByID,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.SerializeToString,
+        ),
+        "ListOracleSpecs": grpc.unary_unary_rpc_method_handler(
+            servicer.ListOracleSpecs,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.SerializeToString,
+        ),
+        "GetOracleDataBySpecID": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOracleDataBySpecID,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.SerializeToString,
+        ),
+        "ListOracleData": grpc.unary_unary_rpc_method_handler(
+            servicer.ListOracleData,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.SerializeToString,
+        ),
+        "GetOracleSpecsConnection": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOracleSpecsConnection,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.SerializeToString,
+        ),
+        "GetOracleDataConnection": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOracleDataConnection,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.SerializeToString,
+        ),
+        "GetMarkets": grpc.unary_unary_rpc_method_handler(
+            servicer.GetMarkets,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsResponse.SerializeToString,
+        ),
+        "GetParties": grpc.unary_unary_rpc_method_handler(
+            servicer.GetParties,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesResponse.SerializeToString,
+        ),
+        "GetMarginLevels": grpc.unary_unary_rpc_method_handler(
+            servicer.GetMarginLevels,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsResponse.SerializeToString,
+        ),
+        "GetRewards": grpc.unary_unary_rpc_method_handler(
+            servicer.GetRewards,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsResponse.SerializeToString,
+        ),
+        "GetRewardSummaries": grpc.unary_unary_rpc_method_handler(
+            servicer.GetRewardSummaries,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesResponse.SerializeToString,
+        ),
+        "GetDeposits": grpc.unary_unary_rpc_method_handler(
+            servicer.GetDeposits,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsResponse.SerializeToString,
+        ),
+        "GetWithdrawals": grpc.unary_unary_rpc_method_handler(
+            servicer.GetWithdrawals,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsResponse.SerializeToString,
+        ),
+        "GetAssets": grpc.unary_unary_rpc_method_handler(
+            servicer.GetAssets,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsResponse.SerializeToString,
+        ),
+        "GetLiquidityProvisions": grpc.unary_unary_rpc_method_handler(
+            servicer.GetLiquidityProvisions,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsResponse.SerializeToString,
+        ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'datanode.api.v2.TradingDataService', rpc_method_handlers)
+        "datanode.api.v2.TradingDataService", rpc_method_handlers
+    )
     server.add_generic_rpc_handlers((generic_handler,))
 
 
- # This class is part of an EXPERIMENTAL API.
+# This class is part of an EXPERIMENTAL API.
 class TradingDataService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetOrder(request,
+    def GetOrder(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetOrder',
+            "/datanode.api.v2.TradingDataService/GetOrder",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ListOrders(request,
+    def ListOrders(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/ListOrders',
+            "/datanode.api.v2.TradingDataService/ListOrders",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ListOrderVersions(request,
+    def ListOrderVersions(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/ListOrderVersions',
+            "/datanode.api.v2.TradingDataService/ListOrderVersions",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetPositionsByPartyConnection(request,
+    def GetPositionsByPartyConnection(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetPositionsByPartyConnection',
+            "/datanode.api.v2.TradingDataService/GetPositionsByPartyConnection",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPositionsByPartyConnectionResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetBalanceHistory(request,
+    def GetBalanceHistory(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetBalanceHistory',
+            "/datanode.api.v2.TradingDataService/GetBalanceHistory",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetMarketDataHistoryByID(request,
+    def GetMarketDataHistoryByID(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetMarketDataHistoryByID',
+            "/datanode.api.v2.TradingDataService/GetMarketDataHistoryByID",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def MarketsDataSubscribe(request,
+    def MarketsDataSubscribe(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/datanode.api.v2.TradingDataService/MarketsDataSubscribe',
+            "/datanode.api.v2.TradingDataService/MarketsDataSubscribe",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ListTransfers(request,
+    def ListTransfers(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/ListTransfers',
+            "/datanode.api.v2.TradingDataService/ListTransfers",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetNetworkLimits(request,
+    def GetNetworkLimits(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetNetworkLimits',
+            "/datanode.api.v2.TradingDataService/GetNetworkLimits",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetCandleData(request,
+    def GetCandleData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetCandleData',
+            "/datanode.api.v2.TradingDataService/GetCandleData",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandleDataResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def SubscribeToCandleData(request,
+    def SubscribeToCandleData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/datanode.api.v2.TradingDataService/SubscribeToCandleData',
+            "/datanode.api.v2.TradingDataService/SubscribeToCandleData",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.SubscribeToCandleDataResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetCandlesForMarket(request,
+    def GetCandlesForMarket(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetCandlesForMarket',
+            "/datanode.api.v2.TradingDataService/GetCandlesForMarket",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCandlesForMarketResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ListVotes(request,
+    def ListVotes(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/ListVotes',
+            "/datanode.api.v2.TradingDataService/ListVotes",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ObserveVotes(request,
+    def ObserveVotes(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/datanode.api.v2.TradingDataService/ObserveVotes',
+            "/datanode.api.v2.TradingDataService/ObserveVotes",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetERC20MultiSigSignerAddedBundles(request,
+    def GetERC20MultiSigSignerAddedBundles(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerAddedBundles',
+            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerAddedBundles",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetERC20MultiSigSignerRemovedBundles(request,
+    def GetERC20MultiSigSignerRemovedBundles(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerRemovedBundles',
+            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerRemovedBundles",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetERC20ListAssetBundle(request,
+    def GetERC20ListAssetBundle(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetERC20ListAssetBundle',
+            "/datanode.api.v2.TradingDataService/GetERC20ListAssetBundle",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetTradesByMarket(request,
+    def GetTradesByMarket(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetTradesByMarket',
+            "/datanode.api.v2.TradingDataService/GetTradesByMarket",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByMarketResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetTradesByParty(request,
+    def GetTradesByParty(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetTradesByParty',
+            "/datanode.api.v2.TradingDataService/GetTradesByParty",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByPartyResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetTradesByOrderID(request,
+    def GetTradesByOrderID(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetTradesByOrderID',
+            "/datanode.api.v2.TradingDataService/GetTradesByOrderID",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTradesByOrderIDResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetOracleSpecByID(request,
+    def GetOracleSpecByID(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetOracleSpecByID',
+            "/datanode.api.v2.TradingDataService/GetOracleSpecByID",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ListOracleSpecs(request,
+    def ListOracleSpecs(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/ListOracleSpecs',
+            "/datanode.api.v2.TradingDataService/ListOracleSpecs",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetOracleDataBySpecID(request,
+    def GetOracleDataBySpecID(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetOracleDataBySpecID',
+            "/datanode.api.v2.TradingDataService/GetOracleDataBySpecID",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def ListOracleData(request,
+    def ListOracleData(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/ListOracleData',
+            "/datanode.api.v2.TradingDataService/ListOracleData",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetOracleSpecsConnection(request,
+    def GetOracleSpecsConnection(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetOracleSpecsConnection',
+            "/datanode.api.v2.TradingDataService/GetOracleSpecsConnection",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetOracleDataConnection(request,
+    def GetOracleDataConnection(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetOracleDataConnection',
+            "/datanode.api.v2.TradingDataService/GetOracleDataConnection",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetMarkets(request,
+    def GetMarkets(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetMarkets',
+            "/datanode.api.v2.TradingDataService/GetMarkets",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetParties(request,
+    def GetParties(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetParties',
+            "/datanode.api.v2.TradingDataService/GetParties",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartiesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetMarginLevels(request,
+    def GetMarginLevels(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetMarginLevels',
+            "/datanode.api.v2.TradingDataService/GetMarginLevels",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarginLevelsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetRewards(request,
+    def GetRewards(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetRewards',
+            "/datanode.api.v2.TradingDataService/GetRewards",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetRewardSummaries(request,
+    def GetRewardSummaries(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetRewardSummaries',
+            "/datanode.api.v2.TradingDataService/GetRewardSummaries",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRewardSummariesResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetDeposits(request,
+    def GetDeposits(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetDeposits',
+            "/datanode.api.v2.TradingDataService/GetDeposits",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetWithdrawals(request,
+    def GetWithdrawals(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetWithdrawals',
+            "/datanode.api.v2.TradingDataService/GetWithdrawals",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetAssets(request,
+    def GetAssets(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetAssets',
+            "/datanode.api.v2.TradingDataService/GetAssets",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
 
     @staticmethod
-    def GetLiquidityProvisions(request,
+    def GetLiquidityProvisions(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
             target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/datanode.api.v2.TradingDataService/GetLiquidityProvisions',
+            "/datanode.api.v2.TradingDataService/GetLiquidityProvisions",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLiquidityProvisionsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
