@@ -56,13 +56,12 @@ class MarketOrderTrader(StateAgentWithWallet):
         ][0]
 
         # Get asset id
-
         asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
             asset=asset_id,
-            amount=100000,
+            amount=1e15,
         )
         self.vega.wait_fn(2)
 
@@ -153,7 +152,7 @@ class BackgroundMarket(StateAgentWithWallet):
         self.vega.mint(
             self.wallet_name,
             asset=asset_id,
-            amount=200000,
+            amount=1e15,
         )
         self.vega.wait_fn(2)
 
@@ -298,7 +297,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         self.vega.mint(
             self.wallet_name,
             asset=tDAI_id,
-            amount=100000,
+            amount=1e15,
         )
         self.vega.wait_fn(2)
 

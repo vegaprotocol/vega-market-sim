@@ -32,6 +32,7 @@ class IdealMarketMaker(Scenario):
         dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
+        market_position_decimal: int = 2,
         initial_price: float = 100,
         sigma: float = 1,
         kappa: float = 1,
@@ -39,6 +40,7 @@ class IdealMarketMaker(Scenario):
         q_lower: int = -20,
         alpha: float = 10**-4,
         phi: float = 5 * 10**-6,
+        lp_commitamount: float = 200000,
         spread: float = 0.02,
         block_size: int = 1,
         block_length_seconds: int = 1,
@@ -58,6 +60,7 @@ class IdealMarketMaker(Scenario):
         self.dt = dt
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
+        self.market_position_decimal = market_position_decimal
         self.initial_price = initial_price
         self.sigma = sigma
         self.kappa = kappa
@@ -74,6 +77,7 @@ class IdealMarketMaker(Scenario):
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
+        self.lp_commitamount = lp_commitamount
 
     def set_up_background_market(
         self,
@@ -87,7 +91,9 @@ class IdealMarketMaker(Scenario):
             sigma=self.sigma,
             Midprice=self.initial_price,
         )
-        market_name = f"BTC:DAI_{tag}"
+        
+        # Set up market name and settlement asset
+        market_name = f"ETH:USD_{tag}"
         asset_name = f"tDAI{tag}"
 
         market_maker = OptimalMarketMaker(
@@ -106,6 +112,10 @@ class IdealMarketMaker(Scenario):
             running_penalty_parameter=self.phi,
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
+            market_position_decimal=self.market_position_decimal,
+            market_name=market_name,
+            asset_name=asset_name,
+            commitment_amount=self.lp_commitamount,
             tag=str(tag),
         )
 
@@ -126,8 +136,9 @@ class IdealMarketMaker(Scenario):
             asset_name=asset_name,
             price_process=price_process,
             spread=self.spread,
-            tick_spacing=0.1,
+            tick_spacing=0.002,
             order_distribution_kappa=self.kappa,
+            num_levels_per_side=40,
             tag=str(tag),
         )
 
@@ -170,13 +181,19 @@ class IdealMarketMaker(Scenario):
         )
         return env
 
-    def run_iteration(self, vega: VegaServiceNull, pause_at_completion: bool = False):
+    def run_iteration(
+        self, 
+        vega: VegaServiceNull, 
+        pause_at_completion: bool = False,
+        run_with_console: bool = False,
+    ):
         env = self.set_up_background_market(
             vega=vega,
             tag=str(0),
         )
         result = env.run(
             pause_at_completion=pause_at_completion,
+            run_with_console=run_with_console,
         )
         return result
 
@@ -198,4 +215,8 @@ if __name__ == "__main__":
         run_with_console=True,
         seconds_per_block=40,  # Heuristic
     ) as vega:
-        scenario.run_iteration(vega=vega, pause_at_completion=True)
+        scenario.run_iteration(
+            vega=vega, 
+            pause_at_completion=True,
+            run_with_console=False,
+        )
