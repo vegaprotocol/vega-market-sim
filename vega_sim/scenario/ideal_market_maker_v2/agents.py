@@ -257,25 +257,13 @@ class OptimalMarketMaker(StateAgentWithWallet):
         LOB_best_bid = market_data.best_bid_price / 10**self.mdp
         LOB_bset_ask = market_data.best_offer_price / 10**self.mdp
 
-        self.vega.submit_simple_liquidity(
-            wallet_name=self.wallet_name,
-            market_id=self.market_id,
-            commitment_amount=self.commitment_amount,
-            fee=0.002,
-            reference_buy="PEGGED_REFERENCE_BEST_BID",
-            reference_sell="PEGGED_REFERENCE_BEST_ASK",
-            delta_buy=self.bid_depth + LOB_best_bid - self.price_process[self.current_step],
-            delta_sell=self.ask_depth + self.price_process[self.current_step] - LOB_bset_ask,
-            is_amendment=True,
+        self._place_orders(
+            buy_offset=self.bid_depth + LOB_best_bid - self.price_process[self.current_step],
+            sell_offset=self.ask_depth + self.price_process[self.current_step] - LOB_bset_ask,
+            volume=20,
+            buy_order=buy_order,
+            sell_order=sell_order,
         )
-
-        # self._place_orders(
-        #     buy_offset=self.bid_depth,
-        #     sell_offset=self.ask_depth,
-        #     volume=1,
-        #     buy_order=buy_order,
-        #     sell_order=sell_order,
-        # )
 
     def _place_orders(
         self,
@@ -307,17 +295,20 @@ class OptimalMarketMaker(StateAgentWithWallet):
         side: vega_protos.Side,
         order: Optional[Order] = None,
     ):
+        is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
+        reference = vega_protos.PEGGED_REFERENCE_BEST_BID if is_buy else vega_protos.PEGGED_REFERENCE_BEST_ASK
+
         if order is None:
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 pegged_order=PeggedOrder(
-                    reference=vega_protos.PEGGED_REFERENCE_MID, offset=offset
+                    reference=reference, offset=offset
                 ),
                 side=side,
                 volume=volume,
                 order_type=vega_protos.Order.Type.TYPE_LIMIT,
-                wait=True,
+                wait=False,
                 time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
             )
         else:
@@ -325,7 +316,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 order_id=order.id,
-                pegged_reference=vega_protos.PEGGED_REFERENCE_MID,
+                pegged_reference=reference,
                 pegged_offset=offset,
                 volume_delta=volume - order.size,
             )
