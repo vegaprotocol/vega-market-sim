@@ -14,7 +14,8 @@ FROM vegasim AS vegasim_test
 
 COPY pytest.ini .
 
-
-RUN pip install pytest requests-mock
+COPY ./requirements-dev.txt .
+COPY ./examples ./examples
+RUN  pip install -r requirements-dev.txt
 
 USER vega

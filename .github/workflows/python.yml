@@ -67,11 +67,6 @@ jobs:
           source .venv/bin/activate
           make test
 
-      - name: Test example notebooks
-        run: |
-          source .venv/bin/activate
-          make test_examples
-
   check_dependencies:
     runs-on: ubuntu-latest
     steps:
@@ -90,6 +85,15 @@ jobs:
         run: |
           export LATEST_REQ=$(poetry export -f requirements.txt)
           export CURR_REQ=$(cat requirements.txt)
+          if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
+            echo "Requirements file out of date, please run 'poetry export -f requirements.txt -o requirements.txt' or 'make export_reqs'"
+            exit 1
+          fi
+
+      - name: Check requirements-dev.txt up to date
+        run: |
+          export LATEST_REQ=$(poetry export --dev -f requirements.txt)
+          export CURR_REQ=$(cat requirements-dev.txt)
           if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
             echo "Requirements file out of date, please run 'poetry export -f requirements.txt -o requirements.txt' or 'make export_reqs'"
             exit 1
