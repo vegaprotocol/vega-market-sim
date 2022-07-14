@@ -30,12 +30,14 @@ class MarketOrderTrader(StateAgentWithWallet):
         wallet_pass: str,
         market_name: str,
         asset_name: str,
+        initial_asset_mint: float = 1000000,
         buy_intensity: float = 1,
         sell_intensity: float = 1,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
+        self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.tag = tag
@@ -61,7 +63,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.vega.mint(
             self.wallet_name,
             asset=asset_id,
-            amount=1e15,
+            amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(2)
 
@@ -116,6 +118,7 @@ class BackgroundMarket(StateAgentWithWallet):
         market_name: str,
         asset_name: str,
         price_process: List[float],
+        initial_asset_mint: float = 1000000,
         spread: float = 0.02,
         tick_spacing: float = 0.01,
         num_levels_per_side: int = 20,
@@ -125,6 +128,7 @@ class BackgroundMarket(StateAgentWithWallet):
     ):
         super().__init__(wallet_name + tag, wallet_pass)
         self.price_process = price_process
+        self.initial_asset_mint = initial_asset_mint
         self.spread = spread
         self.current_step = 0
         self.tag = tag
@@ -152,7 +156,7 @@ class BackgroundMarket(StateAgentWithWallet):
         self.vega.mint(
             self.wallet_name,
             asset=asset_id,
-            amount=1e15,
+            amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(2)
 
@@ -271,11 +275,13 @@ class OpenAuctionPass(StateAgentWithWallet):
         side: str,
         market_name: str,
         asset_name: str,
+        initial_asset_mint: float = 1000000,
         initial_price: float = 0.3,
         tag: str = "",
     ):
         super().__init__(wallet_name + tag, wallet_pass)
         self.side = side
+        self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
         self.tag = tag
         self.market_name = market_name
@@ -297,7 +303,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         self.vega.mint(
             self.wallet_name,
             asset=tDAI_id,
-            amount=1e15,
+            amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(2)
 
