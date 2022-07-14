@@ -12,7 +12,7 @@ from vega_sim.null_service import VegaServiceNull
 PARAMETER_AMEND_WALLET = ("param", "amend")
 
 FILE_PATTERN = "NETP_{param_name}_{param_value}.csv"
-OUTPUT_DIR = "results"
+OUTPUT_DIR = "parameter_results"
 
 
 @dataclass

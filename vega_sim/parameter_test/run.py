@@ -1,7 +1,7 @@
 import argparse
 
-import parameter.experiment as experiment
-from parameter.configs import CONFIGS
+import vega_sim.parameter_test.parameter.experiment as experiment
+from vega_sim.parameter_test.parameter.configs import CONFIGS
 
 
 if __name__ == "__main__":

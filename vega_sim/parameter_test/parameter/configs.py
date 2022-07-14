@@ -1,5 +1,5 @@
-from vega_sim.parameter_tests.parameter.experiment import SingleParameterExperiment
-from vega_sim.parameter_tests.parameter.loggers import (
+from vega_sim.parameter_test.parameter.experiment import SingleParameterExperiment
+from vega_sim.parameter_test.parameter.loggers import (
     ideal_market_maker_single_data_extraction,
     target_stake_additional_data,
     v1_ideal_mm_additional_data,
