@@ -50,6 +50,8 @@ class IdealMarketMaker(Scenario):
         state_extraction_freq: int = 1,
         buy_intensity: float = 5,
         sell_intensity: float = 5,
+        backgroundmarket_tick_spacing: float = 0.002,
+        backgroundmarket_number_levels_per_side: int = 20,
         step_length_seconds: int = 1,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
@@ -82,6 +84,8 @@ class IdealMarketMaker(Scenario):
         self.pause_every_n_steps = pause_every_n_steps
         self.lp_commitamount = lp_commitamount
         self.initial_asset_mint = initial_asset_mint
+        self.backgroundmarket_tick_spacing = backgroundmarket_tick_spacing
+        self.backgroundmarket_number_levels_per_side = backgroundmarket_number_levels_per_side
         self.market_name = f"ETH:USD" if market_name is None else market_name
         self.asset_name = f"tDAI" if asset_name is None else asset_name
 
@@ -145,9 +149,9 @@ class IdealMarketMaker(Scenario):
             initial_asset_mint=self.initial_asset_mint,
             price_process=price_process,
             spread=self.spread,
-            tick_spacing=0.002,
+            tick_spacing=self.backgroundmarket_tick_spacing,
             order_distribution_kappa=self.kappa,
-            num_levels_per_side=40,
+            num_levels_per_side=self.backgroundmarket_number_levels_per_side,
             tag=str(tag),
         )
 
