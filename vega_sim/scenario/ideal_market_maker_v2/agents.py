@@ -253,7 +253,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
-        breakpoint()
+
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
             wallet_name=self.wallet_name, market_id=self.market_id
@@ -265,7 +265,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         buy_order, sell_order = None, None
 
         try:
-            # breakpoint()
             for order in (
                 vega_state.market_state[self.market_id]
                 .orders[self.vega.wallet.public_key(self.wallet_name)]
@@ -277,7 +276,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
                     sell_order = order
             
         except Exception as error:
-            # breakpoint()
             print(error)
             pass
 
@@ -352,32 +350,4 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 pegged_reference=vega_protos.PEGGED_REFERENCE_MID,
                 pegged_offset=offset,
                 volume_delta=volume - order.size,
-            )
-
-    def __place_or_amend_order(
-        self,
-        offset: float,
-        volume: float,
-        side: vega_protos.Side,
-        order: Optional[Order] = None,
-    ):
-        if order is None:
-            self.vega.submit_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=side,
-                volume=volume,
-                price=self.price_process[self.current_step] + offset,
-                order_type=vega_protos.Order.Type.TYPE_LIMIT,
-                wait=True,
-                time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            )
-        else:
-            self.vega.amend_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                order_id=order.id,
-                price=self.price_process[self.current_step] + offset,
-                volume_delta=volume - order.size,
-                time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
             )
