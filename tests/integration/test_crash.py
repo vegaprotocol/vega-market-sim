@@ -30,7 +30,7 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
         trim_to_min=1,
     )
 
-    scenario.run_iteration(vega=vega, pause_at_completion=True, tag="_iter")
+    scenario.run_iteration(vega=vega, pause_at_completion=False, tag="_iter")
 
     asset_id = vega.find_asset_id(symbol="tDAI_iter")
     market_id = vega.all_markets()[0].id
