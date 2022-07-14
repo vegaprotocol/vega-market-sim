@@ -1,16 +1,19 @@
-FROM python:3.10-slim-bullseye AS vegasim
+FROM python:3.10-slim-bullseye AS vegasim_base
 
 RUN useradd -ms /bin/bash vega
 
 WORKDIR /vega_market_sim
 
 COPY ./requirements.txt .
-RUN  pip install -r requirements.txt
 
 COPY ./tests ./tests
 COPY ./vega_sim ./vega_sim
 
-FROM vegasim AS vegasim_test
+FROM vegasim_base AS vegasim
+
+RUN  pip install -r requirements.txt
+
+FROM vegasim_base AS vegasim_test
 
 COPY pytest.ini .
 
