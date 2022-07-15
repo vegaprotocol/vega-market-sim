@@ -85,7 +85,9 @@ class IdealMarketMaker(Scenario):
         self.lp_commitamount = lp_commitamount
         self.initial_asset_mint = initial_asset_mint
         self.backgroundmarket_tick_spacing = backgroundmarket_tick_spacing
-        self.backgroundmarket_number_levels_per_side = backgroundmarket_number_levels_per_side
+        self.backgroundmarket_number_levels_per_side = (
+            backgroundmarket_number_levels_per_side
+        )
         self.market_name = f"ETH:USD" if market_name is None else market_name
         self.asset_name = f"tDAI" if asset_name is None else asset_name
 
@@ -101,17 +103,17 @@ class IdealMarketMaker(Scenario):
             sigma=self.sigma,
             Midprice=self.initial_price,
         )
-        
+
         # Set up market name and settlement asset
-        market_name = self.market_name+f"_{tag}"
-        asset_name = self.asset_name+f"_{tag}"
+        market_name = self.market_name + f"_{tag}"
+        asset_name = self.asset_name + f"_{tag}"
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
             wallet_pass=MM_WALLET.passphrase,
             terminate_wallet_name=TERMINATE_WALLET.name,
             terminate_wallet_pass=TERMINATE_WALLET.passphrase,
-            initial_asset_mint = self.initial_asset_mint,
+            initial_asset_mint=self.initial_asset_mint,
             price_processs=price_process,
             spread=self.spread,
             num_steps=self.num_steps,
@@ -197,8 +199,8 @@ class IdealMarketMaker(Scenario):
         return env
 
     def run_iteration(
-        self, 
-        vega: VegaServiceNull, 
+        self,
+        vega: VegaServiceNull,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
     ):
@@ -231,6 +233,6 @@ if __name__ == "__main__":
         seconds_per_block=40,  # Heuristic
     ) as vega:
         scenario.run_iteration(
-            vega=vega, 
+            vega=vega,
             pause_at_completion=True,
         )
