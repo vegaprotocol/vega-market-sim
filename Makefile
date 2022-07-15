@@ -105,3 +105,4 @@ test_examples:
 
 export_reqs:
 	@poetry export -f requirements.txt -o requirements.txt
+	@poetry export -f requirements.txt --dev -o requirements-dev.txt

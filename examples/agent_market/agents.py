@@ -273,21 +273,16 @@ class MarketMaker(StateAgentWithWallet):
             f"sell_keep_alive{self.sell_order_keepalive_num}",
         ]
 
-        # Something in the vega node is not fully updating even when forwarding
-        # transactions. Needs further investigation.
-        order_map = None
-        for _ in range(10):
-            try:
-                order_map = {
-                    ref: self.vega.order_status_by_reference(ref, self.market_id)
-                    for ref in refs
-                }
-                break
-            except:
-                self.vega.forward("5s")
-                continue
-        if order_map is None:
-            raise Exception("Max retries exceeded")
+        orders = (
+            self.vega.order_status_from_feed(live_only=True)
+            .get(self.market_id, {})
+            .get(self.vega.wallet.public_key(self.wallet_name), {})
+        )
+        order_map = {
+            order.reference: order
+            for order in orders.values()
+            if order.reference in refs
+        }
 
         self._place_or_amend(
             "sell_front",

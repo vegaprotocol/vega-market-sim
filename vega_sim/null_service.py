@@ -410,7 +410,6 @@ def manage_vega_processes(
 
 
 class VegaServiceNull(VegaService):
-
     PORT_TO_FIELD_MAP = {
         Ports.WALLET: "wallet_port",
         Ports.DATA_NODE_GRPC: "data_node_grpc_port",
@@ -556,11 +555,9 @@ class VegaServiceNull(VegaService):
                 f" http://localhost:{self.console_port}"
             )
 
-        if self._start_order_feed:
-            self.start_order_monitoring()
-
         if block_on_startup:
             # Wait for startup
+            started = False
             for _ in range(3000):
                 try:
                     requests.get(
@@ -569,16 +566,21 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
-                    return
+                    started = True
+                    break
                 except (
                     MaxRetryError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.HTTPError,
                 ):
                     time.sleep(0.1)
-            raise VegaStartupTimeoutError(
-                "Timed out waiting for Vega simulator to start up"
-            )
+            if not started:
+                raise VegaStartupTimeoutError(
+                    "Timed out waiting for Vega simulator to start up"
+                )
+
+        if self._start_order_feed:
+            self.start_order_monitoring()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

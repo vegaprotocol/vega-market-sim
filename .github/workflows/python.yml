@@ -59,7 +59,7 @@ jobs:
       #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction
       #----------------------------------------------
 
       - name: Test with pytest
@@ -85,6 +85,15 @@ jobs:
         run: |
           export LATEST_REQ=$(poetry export -f requirements.txt)
           export CURR_REQ=$(cat requirements.txt)
+          if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
+            echo "Requirements file out of date, please run 'poetry export -f requirements.txt -o requirements.txt' or 'make export_reqs'"
+            exit 1
+          fi
+
+      - name: Check requirements-dev.txt up to date
+        run: |
+          export LATEST_REQ=$(poetry export --dev -f requirements.txt)
+          export CURR_REQ=$(cat requirements-dev.txt)
           if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
             echo "Requirements file out of date, please run 'poetry export -f requirements.txt -o requirements.txt' or 'make export_reqs'"
             exit 1

@@ -151,8 +151,13 @@ pipeline {
         stage('Tests') {
             steps {
                 dir('vega-market-sim') {
-                    sh label: 'Build docker image', script: '''
+                    sh label: 'Integration Tests', script: '''
                         scripts/run-docker-integration-test.sh
+                    '''
+                }
+                dir('vega-market-sim') {
+                    sh label: 'Example Notebook Tests', script: '''
+                        scripts/run-docker-example-notebook-test.sh
                     '''
                 }
             }
