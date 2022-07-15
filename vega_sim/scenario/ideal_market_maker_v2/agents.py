@@ -162,7 +162,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             "market.liquidity.stakeToCcySiskas",
             "0.001",
         )
-    
+
         self.vega.wait_for_datanode_sync()
 
         # Set up a future market
@@ -258,8 +258,12 @@ class OptimalMarketMaker(StateAgentWithWallet):
         LOB_bset_ask = float(market_data.best_offer_price) / 10**self.mdp
 
         self._place_orders(
-            buy_offset=self.bid_depth + LOB_best_bid - self.price_process[self.current_step],
-            sell_offset=self.ask_depth + self.price_process[self.current_step] - LOB_bset_ask,
+            buy_offset=self.bid_depth
+            + LOB_best_bid
+            - self.price_process[self.current_step],
+            sell_offset=self.ask_depth
+            + self.price_process[self.current_step]
+            - LOB_bset_ask,
             volume=20,
             buy_order=buy_order,
             sell_order=sell_order,
@@ -275,9 +279,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
     ):
 
         self._place_or_amend_order(
-            offset=buy_offset, 
-            volume=volume, 
-            order=buy_order, 
+            offset=buy_offset,
+            volume=volume,
+            order=buy_order,
             side=vega_protos.SIDE_BUY,
         )
 
@@ -296,15 +300,17 @@ class OptimalMarketMaker(StateAgentWithWallet):
         order: Optional[Order] = None,
     ):
         is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
-        reference = vega_protos.PEGGED_REFERENCE_BEST_BID if is_buy else vega_protos.PEGGED_REFERENCE_BEST_ASK
+        reference = (
+            vega_protos.PEGGED_REFERENCE_BEST_BID
+            if is_buy
+            else vega_protos.PEGGED_REFERENCE_BEST_ASK
+        )
 
         if order is None:
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
-                pegged_order=PeggedOrder(
-                    reference=reference, offset=offset
-                ),
+                pegged_order=PeggedOrder(reference=reference, offset=offset),
                 side=side,
                 volume=volume,
                 order_type=vega_protos.Order.Type.TYPE_LIMIT,
