@@ -124,7 +124,7 @@ class IdealMarketMaker(Scenario):
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
             market_position_decimal=self.market_position_decimal,
-            market_name=self.market_name,
+            market_name=market_name,
             asset_name=asset_name,
             commitment_amount=self.lp_commitamount,
             tag=str(tag),
