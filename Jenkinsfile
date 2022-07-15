@@ -26,6 +26,7 @@ pipeline {
     environment {
         CGO_ENABLED = 0
         GO111MODULE = 'on'
+        DOCKER_IMAGE_NAME_LOCAL = 'vega_sim_test:latest'
     }
 
     stages {
@@ -71,7 +72,7 @@ pipeline {
             steps {
                 dir('vega-market-sim') {
                     sh label: 'Build docker image', script: '''
-                        scripts/build-docker-test.sh
+                        docker build --tag="${DOCKER_IMAGE_NAME_LOCAL}" -t vegasim_test .
                     '''
                 }
             }
@@ -98,14 +99,13 @@ pipeline {
             }
         }
     }
-    // post {
-    //     // success {
-    //     // }
-    //     // unsuccessful {
-    //     // }
-    //     // cleanup {
-    //     //     retry(3) {
-    //     //     }
-    //     // }
-    // }
+    post {
+        always {
+            retry(3) {
+                sh label: 'Clean docker images', script: '''#!/bin/bash -e
+                    [ -z "$(docker images -q "${DOCKER_IMAGE_NAME_LOCAL}")" ] || docker rmi "${DOCKER_IMAGE_NAME_LOCAL}"
+                '''
+            }
+        }
+    }
 }
