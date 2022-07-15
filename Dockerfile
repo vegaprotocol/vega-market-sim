@@ -18,7 +18,11 @@ FROM vegasim_base AS vegasim_test
 COPY pytest.ini .
 
 COPY ./requirements-dev.txt .
-COPY ./examples ./examples
 RUN  pip install -r requirements-dev.txt
+
+COPY ./examples ./examples
+COPY ./pyproject.toml ./pyproject.toml
+
+RUN pip install -e .
 
 USER vega
