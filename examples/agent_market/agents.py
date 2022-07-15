@@ -273,9 +273,11 @@ class MarketMaker(StateAgentWithWallet):
             f"sell_keep_alive{self.sell_order_keepalive_num}",
         ]
 
-        orders = self.vega.order_status_from_feed(live_only=True)[self.market_id][
-            self.vega.wallet.public_key(self.wallet_name)
-        ]
+        orders = (
+            self.vega.order_status_from_feed(live_only=True)
+            .get(self.market_id, {})
+            .get(self.vega.wallet.public_key(self.wallet_name), {})
+        )
         order_map = {
             order.reference: order
             for order in orders.values()
