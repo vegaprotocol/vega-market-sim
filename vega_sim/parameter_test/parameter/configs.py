@@ -55,7 +55,8 @@ TARGET_STAKE_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
         market_position_decimal=2,
         initial_price=1123.11,
         spread=0.002,
-        lp_commitamount=2000000,
+        lp_commitamount=1000000,
+        initial_asset_mint=1e8,
         step_length_seconds=60,
         block_length_seconds=1,
         buy_intensity=10,
@@ -88,7 +89,8 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
         market_position_decimal=2,
         initial_price=1123.11,
         spread=0.002,
-        lp_commitamount=2000000,
+        lp_commitamount=1000000,
+        initial_asset_mint=1e8,
         step_length_seconds=60,
         block_length_seconds=1,
         buy_intensity=10,
@@ -105,7 +107,7 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
             ]
         ),
     ),
-    runs_per_scenario=2,
+    runs_per_scenario=1,
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
     ],
