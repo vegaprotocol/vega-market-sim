@@ -546,11 +546,11 @@ class OpenAuctionPass(StateAgentWithWallet):
 
         self.vega.wait_for_total_catchup()
         # Get asset id
-        tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
+        asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
-            asset=tDAI_id,
+            asset=asset_id,
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(2)

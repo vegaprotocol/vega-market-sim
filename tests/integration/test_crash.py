@@ -16,9 +16,10 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
         sigma_pre=1,
         sigma_post=5,
         drift_pre=0,
-        drift_post=-16,
+        drift_post=-10,
         break_point=300,
         initial_price=200,
+        initial_asset_mint=1000,
         kappa=1.1,
         position_taker_buy_intensity=50,
         position_taker_sell_intensity=0,
@@ -28,6 +29,7 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
         num_noise_traders=5,
         step_length_seconds=1,
         trim_to_min=1,
+        settle_at_end=False,
     )
 
     scenario.run_iteration(vega=vega, pause_at_completion=False, tag="_iter")

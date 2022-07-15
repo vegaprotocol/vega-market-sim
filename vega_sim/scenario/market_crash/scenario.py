@@ -37,6 +37,7 @@ class MarketCrash(Scenario):
         market_decimal: int = 5,
         asset_decimal: int = 5,
         initial_price: float = 100,
+        initial_asset_mint: float = 1000,
         sigma_pre: float = 1,
         sigma_post: float = 2,
         drift_pre: float = 0,
@@ -58,6 +59,7 @@ class MarketCrash(Scenario):
         num_position_traders: int = 5,
         num_noise_traders: int = 5,
         step_length_seconds: int = 1,
+        settle_at_end: bool = True,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
@@ -95,6 +97,8 @@ class MarketCrash(Scenario):
         self.trim_to_min = trim_to_min
         self.num_position_traders = num_position_traders
         self.num_noise_traders = num_noise_traders
+        self.settle_at_end = settle_at_end
+        self.initial_asset_mint = initial_asset_mint
 
     def _generate_price_process(self):
         return regime_change_random_walk(
@@ -115,7 +119,6 @@ class MarketCrash(Scenario):
         vega: VegaServiceNull,
         tag: str = "",
     ) -> MarketEnvironmentWithState:
-
         self.market_name = f"BTC:DAI_{tag}"
         self.asset_name = f"tDAI{tag}"
 
@@ -129,7 +132,7 @@ class MarketCrash(Scenario):
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
             commitment_amount=60000,
-            settlement_price=self.price_process[-1],
+            settlement_price=self.price_process[-1] if self.settle_at_end else None,
             market_name=self.market_name,
             asset_name=self.asset_name,
             tag=str(tag),
@@ -146,6 +149,7 @@ class MarketCrash(Scenario):
                     market_name=self.market_name,
                     asset_name=self.asset_name,
                     tag=f"{tag}_noise_{i}",
+                    initial_asset_mint=self.initial_asset_mint,
                     buy_intensity=self.noise_buy_intensity,
                     sell_intensity=self.noise_sell_intensity,
                 )
@@ -157,6 +161,7 @@ class MarketCrash(Scenario):
                     wallet_pass=TRADER_WALLET.passphrase,
                     market_name=self.market_name,
                     asset_name=self.asset_name,
+                    initial_asset_mint=self.initial_asset_mint,
                     tag=f"{tag}_pos_{i}",
                     buy_intensity=self.position_taker_buy_intensity,
                     sell_intensity=self.position_taker_sell_intensity,
@@ -191,6 +196,7 @@ class MarketCrash(Scenario):
             initial_price=self.initial_price,
             market_name=self.market_name,
             asset_name=self.asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
 
@@ -201,6 +207,7 @@ class MarketCrash(Scenario):
             initial_price=self.initial_price,
             market_name=self.market_name,
             asset_name=self.asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
 
@@ -241,7 +248,6 @@ class MarketCrash(Scenario):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
