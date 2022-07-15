@@ -292,7 +292,6 @@ def submit_simple_liquidity(
         delta_sell:
             int, the offset from reference point for the sell side of LP
     """
-    print(f"Submitting with buy {delta_buy} and sell {delta_sell}")
     return submit_liquidity(
         wallet_name=wallet_name,
         wallet=wallet,
