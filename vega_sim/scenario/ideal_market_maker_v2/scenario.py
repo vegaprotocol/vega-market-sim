@@ -32,6 +32,10 @@ class IdealMarketMaker(Scenario):
         dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
+        market_position_decimal: int = 2,
+        market_name: str = None,
+        asset_name: str = None,
+        initial_asset_mint: float = 1000000,
         initial_price: float = 100,
         sigma: float = 1,
         kappa: float = 1,
@@ -39,12 +43,15 @@ class IdealMarketMaker(Scenario):
         q_lower: int = -20,
         alpha: float = 10**-4,
         phi: float = 5 * 10**-6,
-        spread: float = 0.02,
+        lp_commitamount: float = 200000,
+        spread: int = 2,
         block_size: int = 1,
         block_length_seconds: int = 1,
         state_extraction_freq: int = 1,
         buy_intensity: float = 5,
         sell_intensity: float = 5,
+        backgroundmarket_tick_spacing: float = 0.002,
+        backgroundmarket_number_levels_per_side: int = 20,
         step_length_seconds: int = 1,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
@@ -58,6 +65,7 @@ class IdealMarketMaker(Scenario):
         self.dt = dt
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
+        self.market_position_decimal = market_position_decimal
         self.initial_price = initial_price
         self.sigma = sigma
         self.kappa = kappa
@@ -65,7 +73,7 @@ class IdealMarketMaker(Scenario):
         self.q_lower = q_lower
         self.alpha = alpha
         self.phi = phi
-        self.spread = spread
+        self.spread = spread / 10**self.market_decimal
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
         self.state_extraction_freq = state_extraction_freq
@@ -74,6 +82,14 @@ class IdealMarketMaker(Scenario):
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
+        self.lp_commitamount = lp_commitamount
+        self.initial_asset_mint = initial_asset_mint
+        self.backgroundmarket_tick_spacing = backgroundmarket_tick_spacing
+        self.backgroundmarket_number_levels_per_side = (
+            backgroundmarket_number_levels_per_side
+        )
+        self.market_name = f"ETH:USD" if market_name is None else market_name
+        self.asset_name = f"tDAI" if asset_name is None else asset_name
 
     def _generate_price_process(self):
         _, price_process = RW_model(
@@ -90,8 +106,9 @@ class IdealMarketMaker(Scenario):
         vega: VegaServiceNull,
         tag: str = "",
     ) -> MarketEnvironmentWithState:
-        market_name = f"BTC:DAI_{tag}"
-        asset_name = f"tDAI{tag}"
+        # Set up market name and settlement asset
+        market_name = self.market_name + f"_{tag}"
+        asset_name = self.asset_name + f"_{tag}"
 
         price_process = self._generate_price_process()
 
@@ -100,6 +117,7 @@ class IdealMarketMaker(Scenario):
             wallet_pass=MM_WALLET.passphrase,
             terminate_wallet_name=TERMINATE_WALLET.name,
             terminate_wallet_pass=TERMINATE_WALLET.passphrase,
+            initial_asset_mint=self.initial_asset_mint,
             price_process=price_process,
             spread=self.spread,
             num_steps=self.num_steps,
@@ -111,12 +129,17 @@ class IdealMarketMaker(Scenario):
             running_penalty_parameter=self.phi,
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
+            market_position_decimal=self.market_position_decimal,
+            market_name=market_name,
+            asset_name=asset_name,
+            commitment_amount=self.lp_commitamount,
             tag=str(tag),
         )
 
         trader = MarketOrderTrader(
             wallet_name=TRADER_WALLET.name,
             wallet_pass=TRADER_WALLET.passphrase,
+            initial_asset_mint=self.initial_asset_mint,
             market_name=market_name,
             asset_name=asset_name,
             tag=str(tag),
@@ -129,10 +152,12 @@ class IdealMarketMaker(Scenario):
             wallet_pass=BACKGROUND_MARKET.passphrase,
             market_name=market_name,
             asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             price_process=price_process,
             spread=self.spread,
-            tick_spacing=0.1,
+            tick_spacing=self.backgroundmarket_tick_spacing,
             order_distribution_kappa=self.kappa,
+            num_levels_per_side=self.backgroundmarket_number_levels_per_side,
             tag=str(tag),
         )
 
@@ -140,6 +165,7 @@ class IdealMarketMaker(Scenario):
             wallet_name=AUCTION1_WALLET.name,
             wallet_pass=AUCTION1_WALLET.passphrase,
             side="SIDE_BUY",
+            initial_asset_mint=self.initial_asset_mint,
             initial_price=self.initial_price,
             market_name=market_name,
             asset_name=asset_name,
@@ -150,6 +176,7 @@ class IdealMarketMaker(Scenario):
             wallet_name=AUCTION2_WALLET.name,
             wallet_pass=AUCTION2_WALLET.passphrase,
             side="SIDE_SELL",
+            initial_asset_mint=self.initial_asset_mint,
             initial_price=self.initial_price,
             market_name=market_name,
             asset_name=asset_name,
@@ -175,19 +202,24 @@ class IdealMarketMaker(Scenario):
         )
         return env
 
-    def run_iteration(self, vega: VegaServiceNull, pause_at_completion: bool = False):
+    def run_iteration(
+        self,
+        vega: VegaServiceNull,
+        pause_at_completion: bool = False,
+        run_with_console: bool = False,
+    ):
         env = self.set_up_background_market(
             vega=vega,
             tag=str(0),
         )
         result = env.run(
             pause_at_completion=pause_at_completion,
+            run_with_console=run_with_console,
         )
         return result
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
@@ -203,4 +235,7 @@ if __name__ == "__main__":
         run_with_console=True,
         seconds_per_block=40,  # Heuristic
     ) as vega:
-        scenario.run_iteration(vega=vega, pause_at_completion=True)
+        scenario.run_iteration(
+            vega=vega,
+            pause_at_completion=True,
+        )

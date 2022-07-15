@@ -84,6 +84,11 @@ pipeline {
                         scripts/run-docker-integration-test.sh
                     '''
                 }
+                dir('vega-market-sim') {
+                    sh label: 'Example Notebook Tests', script: '''
+                        scripts/run-docker-example-notebook-test.sh
+                    '''
+                }
             }
             post {
                 always {

@@ -91,5 +91,10 @@ test:
 test_integration:
 	@env PYTHONPATH=. pytest -m integration tests/
 
+.PHONY: test_examples
+test_examples:
+	@env PYTHONPATH=. pytest --nbmake examples/notebooks/
+
 export_reqs:
 	@poetry export -f requirements.txt -o requirements.txt
+	@poetry export -f requirements.txt --dev -o requirements-dev.txt

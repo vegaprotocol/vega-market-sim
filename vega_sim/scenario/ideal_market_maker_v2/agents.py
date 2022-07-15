@@ -42,7 +42,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
         price_process: List[float],
-        spread: float = 0.00002,
+        initial_asset_mint: float = 1000000,
+        spread: float = 0.002,
         num_steps: int = 180,
         market_order_arrival_rate: float = 5,
         kappa: float = 500,
@@ -53,6 +54,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
         asset_decimal: int = 5,
         market_decimal: int = 5,
         market_position_decimal: int = 2,
+        market_name: str = None,
+        asset_name: str = None,
         commitment_amount: float = 6000,
         tag: str = "",
     ):
@@ -73,10 +76,14 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.mdp = market_decimal
         self.market_position_decimal = market_position_decimal
         self.commitment_amount = commitment_amount
+        self.initial_asset_mint = initial_asset_mint
 
         self.current_step = 0
 
         self.tag = tag
+
+        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
+        self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
 
         self.long_horizon_estimate = num_steps >= 200
 
@@ -107,6 +114,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.settle_market(
             self.terminate_wallet_name, self.price_process[-1], self.market_id
         )
+        self.current_step += 1
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party
@@ -122,32 +130,30 @@ class OptimalMarketMaker(StateAgentWithWallet):
         )
         self.vega.wait_fn(5)
 
-        ccy_name = f"tDAI{self.tag}"
         # Create asset
         self.vega.create_asset(
             self.wallet_name,
-            name=ccy_name,
-            symbol=ccy_name,
+            name=self.asset_name,
+            symbol=self.asset_name,
             decimals=self.adp,
-            max_faucet_amount=5e10,
+            max_faucet_amount=1e20,
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
+        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
-        self.initial = 100000
         self.vega.mint(
             self.wallet_name,
             asset=self.tdai_id,
-            amount=self.initial,
+            amount=self.initial_asset_mint,
         )
         self.vega.wait_for_total_catchup()
 
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.minimum.probabilityOfTrading.lpOrders",
-            "0.001",
+            "1e-6",
         )
 
         self.vega.wait_for_total_catchup()
@@ -156,34 +162,34 @@ class OptimalMarketMaker(StateAgentWithWallet):
             "market.liquidity.stakeToCcySiskas",
             "0.001",
         )
-        market_name = f"BTC:DAI_{self.tag}"
+
+        self.vega.wait_for_datanode_sync()
 
         # Set up a future market
         self.vega.create_simple_market(
-            market_name=market_name,
+            market_name=self.market_name,
             proposal_wallet=self.wallet_name,
             settlement_asset_id=self.tdai_id,
             termination_wallet=self.terminate_wallet_name,
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
-            future_asset=ccy_name,
+            future_asset=self.asset_name,
             liquidity_commitment=vega.build_new_market_liquidity_commitment(
                 asset_id=self.tdai_id,
                 commitment_amount=self.commitment_amount,
                 fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 0.2, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 0.2, 1)],
+                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
+                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
                 market_decimals=self.mdp,
             ),
         )
         self.vega.wait_fn(5)
 
-        market_name = f"BTC:DAI_{self.tag}"
         # Get market id
         self.market_id = [
             m.id
             for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == market_name
+            if m.tradable_instrument.instrument.name == self.market_name
         ][0]
 
     def optimal_strategy(self, current_position):
@@ -225,6 +231,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
         return current_bid_depth, current_ask_depth
 
     def step(self, vega_state: VegaState):
+        self.current_step += 1
+
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
             wallet_name=self.wallet_name, market_id=self.market_id
@@ -236,7 +244,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         buy_order, sell_order = None, None
 
         for order in (
-            vega_state.market_state[self.market_id]
+            vega_state.market_state.get(self.market_id, {})
             .orders[self.vega.wallet.public_key(self.wallet_name)]
             .values()
         ):
@@ -245,14 +253,21 @@ class OptimalMarketMaker(StateAgentWithWallet):
             else:
                 sell_order = order
 
+        market_data = self.vega.market_data(market_id=self.market_id)
+        LOB_best_bid = float(market_data.best_bid_price) / 10**self.mdp
+        LOB_bset_ask = float(market_data.best_offer_price) / 10**self.mdp
+
         self._place_orders(
-            buy_offset=self.bid_depth,
-            sell_offset=self.ask_depth,
-            volume=1,
+            buy_offset=self.bid_depth
+            + LOB_best_bid
+            - self.price_process[self.current_step],
+            sell_offset=self.ask_depth
+            + self.price_process[self.current_step]
+            - LOB_bset_ask,
+            volume=20,
             buy_order=buy_order,
             sell_order=sell_order,
         )
-        self.current_step += 1
 
     def _place_orders(
         self,
@@ -262,9 +277,14 @@ class OptimalMarketMaker(StateAgentWithWallet):
         buy_order: Optional[str] = None,
         sell_order: Optional[str] = None,
     ):
+
         self._place_or_amend_order(
-            offset=buy_offset, volume=volume, order=buy_order, side=vega_protos.SIDE_BUY
+            offset=buy_offset,
+            volume=volume,
+            order=buy_order,
+            side=vega_protos.SIDE_BUY,
         )
+
         self._place_or_amend_order(
             offset=sell_offset,
             volume=volume,
@@ -279,13 +299,18 @@ class OptimalMarketMaker(StateAgentWithWallet):
         side: vega_protos.Side,
         order: Optional[Order] = None,
     ):
+        is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
+        reference = (
+            vega_protos.PEGGED_REFERENCE_BEST_BID
+            if is_buy
+            else vega_protos.PEGGED_REFERENCE_BEST_ASK
+        )
+
         if order is None:
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
-                pegged_order=PeggedOrder(
-                    reference=vega_protos.PEGGED_REFERENCE_MID, offset=offset
-                ),
+                pegged_order=PeggedOrder(reference=reference, offset=offset),
                 side=side,
                 volume=volume,
                 order_type=vega_protos.Order.Type.TYPE_LIMIT,
@@ -297,7 +322,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 order_id=order.id,
-                pegged_reference=vega_protos.PEGGED_REFERENCE_MID,
+                pegged_reference=reference,
                 pegged_offset=offset,
                 volume_delta=volume - order.size,
             )

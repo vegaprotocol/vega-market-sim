@@ -416,7 +416,6 @@ def manage_vega_processes(
 
 
 class VegaServiceNull(VegaService):
-
     PORT_TO_FIELD_MAP = {
         Ports.WALLET: "wallet_port",
         Ports.DATA_NODE_GRPC: "data_node_grpc_port",
