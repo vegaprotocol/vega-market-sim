@@ -22,7 +22,7 @@ pipeline {
     parameters {
         string(name: 'VEGA_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega repository')
         string(name: 'VEGA_WALLET_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vegawallet repository')
-        string(name: 'DATA_NODE_BRANCH', defaultValue: 'liquidity-provision-order', description: 'Git branch name of the vegaprotocol/data-node repository')
+        string(name: 'DATA_NODE_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/data-node repository')
     }
     environment {
         CGO_ENABLED = 0
