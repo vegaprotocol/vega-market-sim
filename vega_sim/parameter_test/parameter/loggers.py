@@ -104,7 +104,10 @@ def _ideal_market_maker_single_data_extraction(
         "LP: General Account": general_lp,
         "LP: Margin Account": margin_lp,
         "LP: Bond Account": bond_lp,
-        "LP: General Pnl": general_lp + margin_lp + bond_lp - mm_agent.initial,
+        "LP: General Pnl": general_lp
+        + margin_lp
+        + bond_lp
+        - mm_agent.initial_asset_mint,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
