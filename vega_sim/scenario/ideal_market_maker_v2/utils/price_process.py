@@ -38,7 +38,7 @@ def RW_model(
     S[0] = Midprice
 
     while True:
-        dW = np.sqrt(dt) * random_state.randn(len(time_step) - 1)
+        dW = random_state.randn(len(time_step) - 1)
         # Simulate external midprice
         for i in range(len(time_step) - 1):
             S[i + 1] = S[i] + sigma * dW[i]
