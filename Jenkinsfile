@@ -48,8 +48,10 @@ pipeline {
                     options { retry(3) }
                     steps {
                         dir('vega-market-sim') {
-                            dir('extern/vega') {
-                                git branch: "${params.VEGA_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git'
+                            dir('extern') {
+                                dir('vega') {
+                                    git branch: "${params.VEGA_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git'
+                                }
                             }
                         }
                     }
@@ -58,8 +60,10 @@ pipeline {
                     options { retry(3) }
                     steps {
                         dir('vega-market-sim') {
-                            dir('extern/data-node') {
-                                git branch: "${params.DATA_NODE_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/data-node.git'
+                            dir('extern') {
+                                dir('data-node') {
+                                    git branch: "${params.DATA_NODE_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/data-node.git'
+                                }
                             }
                         }
                     }
