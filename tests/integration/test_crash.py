@@ -14,16 +14,16 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
     scenario = MarketCrash(
         num_steps=400,
         sigma_pre=1,
-        sigma_post=5,
+        sigma_post=2,
         drift_pre=0,
         drift_post=-10,
-        break_point=300,
+        break_point=200,
         initial_price=100,
         initial_asset_mint=100000,
         kappa=1.1,
-        position_taker_buy_intensity=50,
+        position_taker_buy_intensity=3,
         position_taker_sell_intensity=0,
-        position_taker_mint=1000,
+        position_taker_mint=200,
         noise_buy_intensity=2,
         noise_sell_intensity=2,
         num_position_traders=2,
@@ -48,4 +48,4 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
         )
         assert margin == 0
         assert bond == 0
-        assert general < 1
+        assert general < 100

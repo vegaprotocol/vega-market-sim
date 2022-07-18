@@ -71,11 +71,11 @@ class MarketOrderTrader(StateAgentWithWallet):
         ][0]
 
         # Get asset id
-        asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
-            asset=asset_id,
+            asset=self.asset_id,
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(2)

@@ -98,7 +98,6 @@ pipeline {
             post {
                 always {
                     archiveArtifacts artifacts: 'vega-market-sim/test_logs/**/*.out'
-                    archiveArtifacts artifacts: 'vega-market-sim/test_logs/**/*.err'
                 }
             }
         }
