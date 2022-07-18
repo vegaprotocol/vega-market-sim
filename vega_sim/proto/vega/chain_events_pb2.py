@@ -7,189 +7,257 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x17vega/chain_events.proto\x12\x04vega"N\n\x13\x42uiltinAssetDeposit\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t"Q\n\x16\x42uiltinAssetWithdrawal\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t"\x81\x01\n\x11\x42uiltinAssetEvent\x12-\n\x07\x64\x65posit\x18\xe9\x07 \x01(\x0b\x32\x19.vega.BuiltinAssetDepositH\x00\x12\x33\n\nwithdrawal\x18\xea\x07 \x01(\x0b\x32\x1c.vega.BuiltinAssetWithdrawalH\x00\x42\x08\n\x06\x61\x63tion"=\n\x0e\x45RC20AssetList\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x14\n\x0c\x61sset_source\x18\x02 \x01(\t")\n\x10\x45RC20AssetDelist\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t"\x86\x01\n\x17\x45RC20AssetLimitsUpdated\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x1f\n\x17source_ethereum_address\x18\x02 \x01(\t\x12\x17\n\x0flifetime_limits\x18\x03 \x01(\t\x12\x1a\n\x12withdraw_threshold\x18\x04 \x01(\t"o\n\x0c\x45RC20Deposit\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x1f\n\x17source_ethereum_address\x18\x02 \x01(\t\x12\x17\n\x0ftarget_party_id\x18\x03 \x01(\t\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t"b\n\x0f\x45RC20Withdrawal\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x1f\n\x17target_ethereum_address\x18\x02 \x01(\t\x12\x17\n\x0freference_nonce\x18\x03 \x01(\t"\xa8\x02\n\nERC20Event\x12\r\n\x05index\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\x04\x12+\n\nasset_list\x18\xe9\x07 \x01(\x0b\x32\x14.vega.ERC20AssetListH\x00\x12/\n\x0c\x61sset_delist\x18\xea\x07 \x01(\x0b\x32\x16.vega.ERC20AssetDelistH\x00\x12&\n\x07\x64\x65posit\x18\xeb\x07 \x01(\x0b\x32\x12.vega.ERC20DepositH\x00\x12,\n\nwithdrawal\x18\xec\x07 \x01(\x0b\x32\x15.vega.ERC20WithdrawalH\x00\x12>\n\x14\x61sset_limits_updated\x18\xed\x07 \x01(\x0b\x32\x1d.vega.ERC20AssetLimitsUpdatedH\x00\x42\x08\n\x06\x61\x63tion"I\n\x10\x45RC20SignerAdded\x12\x12\n\nnew_signer\x18\x01 \x01(\t\x12\r\n\x05nonce\x18\x02 \x01(\t\x12\x12\n\nblock_time\x18\x03 \x01(\x03"K\n\x12\x45RC20SignerRemoved\x12\x12\n\nold_signer\x18\x01 \x01(\t\x12\r\n\x05nonce\x18\x02 \x01(\t\x12\x12\n\nblock_time\x18\x03 \x01(\x03"M\n\x11\x45RC20ThresholdSet\x12\x15\n\rnew_threshold\x18\x01 \x01(\r\x12\r\n\x05nonce\x18\x02 \x01(\t\x12\x12\n\nblock_time\x18\x03 \x01(\x03"\xd5\x01\n\x12\x45RC20MultiSigEvent\x12\r\n\x05index\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\x04\x12/\n\x0csigner_added\x18\xe9\x07 \x01(\x0b\x32\x16.vega.ERC20SignerAddedH\x00\x12\x33\n\x0esigner_removed\x18\xea\x07 \x01(\x0b\x32\x18.vega.ERC20SignerRemovedH\x00\x12\x31\n\rthreshold_set\x18\xeb\x07 \x01(\x0b\x32\x17.vega.ERC20ThresholdSetH\x00\x42\x08\n\x06\x61\x63tion"\xc7\x01\n\x0cStakingEvent\x12\r\n\x05index\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\x04\x12\x30\n\x0fstake_deposited\x18\xe9\x07 \x01(\x0b\x32\x14.vega.StakeDepositedH\x00\x12,\n\rstake_removed\x18\xea\x07 \x01(\x0b\x32\x12.vega.StakeRemovedH\x00\x12/\n\x0ctotal_supply\x18\xeb\x07 \x01(\x0b\x32\x16.vega.StakeTotalSupplyH\x00\x42\x08\n\x06\x61\x63tion"g\n\x0eStakeDeposited\x12\x18\n\x10\x65thereum_address\x18\x01 \x01(\t\x12\x17\n\x0fvega_public_key\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03"e\n\x0cStakeRemoved\x12\x18\n\x10\x65thereum_address\x18\x01 \x01(\t\x12\x17\n\x0fvega_public_key\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03"?\n\x10StakeTotalSupply\x12\x15\n\rtoken_address\x18\x01 \x01(\t\x12\x14\n\x0ctotal_supply\x18\x02 \x01(\tB"Z code.vegaprotocol.io/protos/vegab\x06proto3'
+)
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x17vega/chain_events.proto\x12\x04vega\"N\n\x13\x42uiltinAssetDeposit\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\"Q\n\x16\x42uiltinAssetWithdrawal\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\"\x81\x01\n\x11\x42uiltinAssetEvent\x12-\n\x07\x64\x65posit\x18\xe9\x07 \x01(\x0b\x32\x19.vega.BuiltinAssetDepositH\x00\x12\x33\n\nwithdrawal\x18\xea\x07 \x01(\x0b\x32\x1c.vega.BuiltinAssetWithdrawalH\x00\x42\x08\n\x06\x61\x63tion\"=\n\x0e\x45RC20AssetList\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x14\n\x0c\x61sset_source\x18\x02 \x01(\t\")\n\x10\x45RC20AssetDelist\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\"\x86\x01\n\x17\x45RC20AssetLimitsUpdated\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x1f\n\x17source_ethereum_address\x18\x02 \x01(\t\x12\x17\n\x0flifetime_limits\x18\x03 \x01(\t\x12\x1a\n\x12withdraw_threshold\x18\x04 \x01(\t\"o\n\x0c\x45RC20Deposit\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x1f\n\x17source_ethereum_address\x18\x02 \x01(\t\x12\x17\n\x0ftarget_party_id\x18\x03 \x01(\t\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\"b\n\x0f\x45RC20Withdrawal\x12\x15\n\rvega_asset_id\x18\x01 \x01(\t\x12\x1f\n\x17target_ethereum_address\x18\x02 \x01(\t\x12\x17\n\x0freference_nonce\x18\x03 \x01(\t\"\xa8\x02\n\nERC20Event\x12\r\n\x05index\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\x04\x12+\n\nasset_list\x18\xe9\x07 \x01(\x0b\x32\x14.vega.ERC20AssetListH\x00\x12/\n\x0c\x61sset_delist\x18\xea\x07 \x01(\x0b\x32\x16.vega.ERC20AssetDelistH\x00\x12&\n\x07\x64\x65posit\x18\xeb\x07 \x01(\x0b\x32\x12.vega.ERC20DepositH\x00\x12,\n\nwithdrawal\x18\xec\x07 \x01(\x0b\x32\x15.vega.ERC20WithdrawalH\x00\x12>\n\x14\x61sset_limits_updated\x18\xed\x07 \x01(\x0b\x32\x1d.vega.ERC20AssetLimitsUpdatedH\x00\x42\x08\n\x06\x61\x63tion\"I\n\x10\x45RC20SignerAdded\x12\x12\n\nnew_signer\x18\x01 \x01(\t\x12\r\n\x05nonce\x18\x02 \x01(\t\x12\x12\n\nblock_time\x18\x03 \x01(\x03\"K\n\x12\x45RC20SignerRemoved\x12\x12\n\nold_signer\x18\x01 \x01(\t\x12\r\n\x05nonce\x18\x02 \x01(\t\x12\x12\n\nblock_time\x18\x03 \x01(\x03\"M\n\x11\x45RC20ThresholdSet\x12\x15\n\rnew_threshold\x18\x01 \x01(\r\x12\r\n\x05nonce\x18\x02 \x01(\t\x12\x12\n\nblock_time\x18\x03 \x01(\x03\"\xd5\x01\n\x12\x45RC20MultiSigEvent\x12\r\n\x05index\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\x04\x12/\n\x0csigner_added\x18\xe9\x07 \x01(\x0b\x32\x16.vega.ERC20SignerAddedH\x00\x12\x33\n\x0esigner_removed\x18\xea\x07 \x01(\x0b\x32\x18.vega.ERC20SignerRemovedH\x00\x12\x31\n\rthreshold_set\x18\xeb\x07 \x01(\x0b\x32\x17.vega.ERC20ThresholdSetH\x00\x42\x08\n\x06\x61\x63tion\"\xc7\x01\n\x0cStakingEvent\x12\r\n\x05index\x18\x01 \x01(\x04\x12\r\n\x05\x62lock\x18\x02 \x01(\x04\x12\x30\n\x0fstake_deposited\x18\xe9\x07 \x01(\x0b\x32\x14.vega.StakeDepositedH\x00\x12,\n\rstake_removed\x18\xea\x07 \x01(\x0b\x32\x12.vega.StakeRemovedH\x00\x12/\n\x0ctotal_supply\x18\xeb\x07 \x01(\x0b\x32\x16.vega.StakeTotalSupplyH\x00\x42\x08\n\x06\x61\x63tion\"g\n\x0eStakeDeposited\x12\x18\n\x10\x65thereum_address\x18\x01 \x01(\t\x12\x17\n\x0fvega_public_key\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03\"e\n\x0cStakeRemoved\x12\x18\n\x10\x65thereum_address\x18\x01 \x01(\t\x12\x17\n\x0fvega_public_key\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nblock_time\x18\x04 \x01(\x03\"?\n\x10StakeTotalSupply\x12\x15\n\rtoken_address\x18\x01 \x01(\t\x12\x14\n\x0ctotal_supply\x18\x02 \x01(\tB\"Z code.vegaprotocol.io/protos/vegab\x06proto3')
-
-
-
-_BUILTINASSETDEPOSIT = DESCRIPTOR.message_types_by_name['BuiltinAssetDeposit']
-_BUILTINASSETWITHDRAWAL = DESCRIPTOR.message_types_by_name['BuiltinAssetWithdrawal']
-_BUILTINASSETEVENT = DESCRIPTOR.message_types_by_name['BuiltinAssetEvent']
-_ERC20ASSETLIST = DESCRIPTOR.message_types_by_name['ERC20AssetList']
-_ERC20ASSETDELIST = DESCRIPTOR.message_types_by_name['ERC20AssetDelist']
-_ERC20ASSETLIMITSUPDATED = DESCRIPTOR.message_types_by_name['ERC20AssetLimitsUpdated']
-_ERC20DEPOSIT = DESCRIPTOR.message_types_by_name['ERC20Deposit']
-_ERC20WITHDRAWAL = DESCRIPTOR.message_types_by_name['ERC20Withdrawal']
-_ERC20EVENT = DESCRIPTOR.message_types_by_name['ERC20Event']
-_ERC20SIGNERADDED = DESCRIPTOR.message_types_by_name['ERC20SignerAdded']
-_ERC20SIGNERREMOVED = DESCRIPTOR.message_types_by_name['ERC20SignerRemoved']
-_ERC20THRESHOLDSET = DESCRIPTOR.message_types_by_name['ERC20ThresholdSet']
-_ERC20MULTISIGEVENT = DESCRIPTOR.message_types_by_name['ERC20MultiSigEvent']
-_STAKINGEVENT = DESCRIPTOR.message_types_by_name['StakingEvent']
-_STAKEDEPOSITED = DESCRIPTOR.message_types_by_name['StakeDeposited']
-_STAKEREMOVED = DESCRIPTOR.message_types_by_name['StakeRemoved']
-_STAKETOTALSUPPLY = DESCRIPTOR.message_types_by_name['StakeTotalSupply']
-BuiltinAssetDeposit = _reflection.GeneratedProtocolMessageType('BuiltinAssetDeposit', (_message.Message,), {
-  'DESCRIPTOR' : _BUILTINASSETDEPOSIT,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.BuiltinAssetDeposit)
-  })
+_BUILTINASSETDEPOSIT = DESCRIPTOR.message_types_by_name["BuiltinAssetDeposit"]
+_BUILTINASSETWITHDRAWAL = DESCRIPTOR.message_types_by_name["BuiltinAssetWithdrawal"]
+_BUILTINASSETEVENT = DESCRIPTOR.message_types_by_name["BuiltinAssetEvent"]
+_ERC20ASSETLIST = DESCRIPTOR.message_types_by_name["ERC20AssetList"]
+_ERC20ASSETDELIST = DESCRIPTOR.message_types_by_name["ERC20AssetDelist"]
+_ERC20ASSETLIMITSUPDATED = DESCRIPTOR.message_types_by_name["ERC20AssetLimitsUpdated"]
+_ERC20DEPOSIT = DESCRIPTOR.message_types_by_name["ERC20Deposit"]
+_ERC20WITHDRAWAL = DESCRIPTOR.message_types_by_name["ERC20Withdrawal"]
+_ERC20EVENT = DESCRIPTOR.message_types_by_name["ERC20Event"]
+_ERC20SIGNERADDED = DESCRIPTOR.message_types_by_name["ERC20SignerAdded"]
+_ERC20SIGNERREMOVED = DESCRIPTOR.message_types_by_name["ERC20SignerRemoved"]
+_ERC20THRESHOLDSET = DESCRIPTOR.message_types_by_name["ERC20ThresholdSet"]
+_ERC20MULTISIGEVENT = DESCRIPTOR.message_types_by_name["ERC20MultiSigEvent"]
+_STAKINGEVENT = DESCRIPTOR.message_types_by_name["StakingEvent"]
+_STAKEDEPOSITED = DESCRIPTOR.message_types_by_name["StakeDeposited"]
+_STAKEREMOVED = DESCRIPTOR.message_types_by_name["StakeRemoved"]
+_STAKETOTALSUPPLY = DESCRIPTOR.message_types_by_name["StakeTotalSupply"]
+BuiltinAssetDeposit = _reflection.GeneratedProtocolMessageType(
+    "BuiltinAssetDeposit",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BUILTINASSETDEPOSIT,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.BuiltinAssetDeposit)
+    },
+)
 _sym_db.RegisterMessage(BuiltinAssetDeposit)
 
-BuiltinAssetWithdrawal = _reflection.GeneratedProtocolMessageType('BuiltinAssetWithdrawal', (_message.Message,), {
-  'DESCRIPTOR' : _BUILTINASSETWITHDRAWAL,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.BuiltinAssetWithdrawal)
-  })
+BuiltinAssetWithdrawal = _reflection.GeneratedProtocolMessageType(
+    "BuiltinAssetWithdrawal",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BUILTINASSETWITHDRAWAL,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.BuiltinAssetWithdrawal)
+    },
+)
 _sym_db.RegisterMessage(BuiltinAssetWithdrawal)
 
-BuiltinAssetEvent = _reflection.GeneratedProtocolMessageType('BuiltinAssetEvent', (_message.Message,), {
-  'DESCRIPTOR' : _BUILTINASSETEVENT,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.BuiltinAssetEvent)
-  })
+BuiltinAssetEvent = _reflection.GeneratedProtocolMessageType(
+    "BuiltinAssetEvent",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BUILTINASSETEVENT,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.BuiltinAssetEvent)
+    },
+)
 _sym_db.RegisterMessage(BuiltinAssetEvent)
 
-ERC20AssetList = _reflection.GeneratedProtocolMessageType('ERC20AssetList', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20ASSETLIST,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20AssetList)
-  })
+ERC20AssetList = _reflection.GeneratedProtocolMessageType(
+    "ERC20AssetList",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20ASSETLIST,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20AssetList)
+    },
+)
 _sym_db.RegisterMessage(ERC20AssetList)
 
-ERC20AssetDelist = _reflection.GeneratedProtocolMessageType('ERC20AssetDelist', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20ASSETDELIST,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20AssetDelist)
-  })
+ERC20AssetDelist = _reflection.GeneratedProtocolMessageType(
+    "ERC20AssetDelist",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20ASSETDELIST,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20AssetDelist)
+    },
+)
 _sym_db.RegisterMessage(ERC20AssetDelist)
 
-ERC20AssetLimitsUpdated = _reflection.GeneratedProtocolMessageType('ERC20AssetLimitsUpdated', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20ASSETLIMITSUPDATED,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20AssetLimitsUpdated)
-  })
+ERC20AssetLimitsUpdated = _reflection.GeneratedProtocolMessageType(
+    "ERC20AssetLimitsUpdated",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20ASSETLIMITSUPDATED,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20AssetLimitsUpdated)
+    },
+)
 _sym_db.RegisterMessage(ERC20AssetLimitsUpdated)
 
-ERC20Deposit = _reflection.GeneratedProtocolMessageType('ERC20Deposit', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20DEPOSIT,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20Deposit)
-  })
+ERC20Deposit = _reflection.GeneratedProtocolMessageType(
+    "ERC20Deposit",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20DEPOSIT,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20Deposit)
+    },
+)
 _sym_db.RegisterMessage(ERC20Deposit)
 
-ERC20Withdrawal = _reflection.GeneratedProtocolMessageType('ERC20Withdrawal', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20WITHDRAWAL,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20Withdrawal)
-  })
+ERC20Withdrawal = _reflection.GeneratedProtocolMessageType(
+    "ERC20Withdrawal",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20WITHDRAWAL,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20Withdrawal)
+    },
+)
 _sym_db.RegisterMessage(ERC20Withdrawal)
 
-ERC20Event = _reflection.GeneratedProtocolMessageType('ERC20Event', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20EVENT,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20Event)
-  })
+ERC20Event = _reflection.GeneratedProtocolMessageType(
+    "ERC20Event",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20EVENT,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20Event)
+    },
+)
 _sym_db.RegisterMessage(ERC20Event)
 
-ERC20SignerAdded = _reflection.GeneratedProtocolMessageType('ERC20SignerAdded', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20SIGNERADDED,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20SignerAdded)
-  })
+ERC20SignerAdded = _reflection.GeneratedProtocolMessageType(
+    "ERC20SignerAdded",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20SIGNERADDED,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20SignerAdded)
+    },
+)
 _sym_db.RegisterMessage(ERC20SignerAdded)
 
-ERC20SignerRemoved = _reflection.GeneratedProtocolMessageType('ERC20SignerRemoved', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20SIGNERREMOVED,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20SignerRemoved)
-  })
+ERC20SignerRemoved = _reflection.GeneratedProtocolMessageType(
+    "ERC20SignerRemoved",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20SIGNERREMOVED,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20SignerRemoved)
+    },
+)
 _sym_db.RegisterMessage(ERC20SignerRemoved)
 
-ERC20ThresholdSet = _reflection.GeneratedProtocolMessageType('ERC20ThresholdSet', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20THRESHOLDSET,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20ThresholdSet)
-  })
+ERC20ThresholdSet = _reflection.GeneratedProtocolMessageType(
+    "ERC20ThresholdSet",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20THRESHOLDSET,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20ThresholdSet)
+    },
+)
 _sym_db.RegisterMessage(ERC20ThresholdSet)
 
-ERC20MultiSigEvent = _reflection.GeneratedProtocolMessageType('ERC20MultiSigEvent', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20MULTISIGEVENT,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ERC20MultiSigEvent)
-  })
+ERC20MultiSigEvent = _reflection.GeneratedProtocolMessageType(
+    "ERC20MultiSigEvent",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20MULTISIGEVENT,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ERC20MultiSigEvent)
+    },
+)
 _sym_db.RegisterMessage(ERC20MultiSigEvent)
 
-StakingEvent = _reflection.GeneratedProtocolMessageType('StakingEvent', (_message.Message,), {
-  'DESCRIPTOR' : _STAKINGEVENT,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.StakingEvent)
-  })
+StakingEvent = _reflection.GeneratedProtocolMessageType(
+    "StakingEvent",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STAKINGEVENT,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.StakingEvent)
+    },
+)
 _sym_db.RegisterMessage(StakingEvent)
 
-StakeDeposited = _reflection.GeneratedProtocolMessageType('StakeDeposited', (_message.Message,), {
-  'DESCRIPTOR' : _STAKEDEPOSITED,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.StakeDeposited)
-  })
+StakeDeposited = _reflection.GeneratedProtocolMessageType(
+    "StakeDeposited",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STAKEDEPOSITED,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.StakeDeposited)
+    },
+)
 _sym_db.RegisterMessage(StakeDeposited)
 
-StakeRemoved = _reflection.GeneratedProtocolMessageType('StakeRemoved', (_message.Message,), {
-  'DESCRIPTOR' : _STAKEREMOVED,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.StakeRemoved)
-  })
+StakeRemoved = _reflection.GeneratedProtocolMessageType(
+    "StakeRemoved",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STAKEREMOVED,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.StakeRemoved)
+    },
+)
 _sym_db.RegisterMessage(StakeRemoved)
 
-StakeTotalSupply = _reflection.GeneratedProtocolMessageType('StakeTotalSupply', (_message.Message,), {
-  'DESCRIPTOR' : _STAKETOTALSUPPLY,
-  '__module__' : 'vega.chain_events_pb2'
-  # @@protoc_insertion_point(class_scope:vega.StakeTotalSupply)
-  })
+StakeTotalSupply = _reflection.GeneratedProtocolMessageType(
+    "StakeTotalSupply",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STAKETOTALSUPPLY,
+        "__module__": "vega.chain_events_pb2"
+        # @@protoc_insertion_point(class_scope:vega.StakeTotalSupply)
+    },
+)
 _sym_db.RegisterMessage(StakeTotalSupply)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z code.vegaprotocol.io/protos/vega'
-  _BUILTINASSETDEPOSIT._serialized_start=33
-  _BUILTINASSETDEPOSIT._serialized_end=111
-  _BUILTINASSETWITHDRAWAL._serialized_start=113
-  _BUILTINASSETWITHDRAWAL._serialized_end=194
-  _BUILTINASSETEVENT._serialized_start=197
-  _BUILTINASSETEVENT._serialized_end=326
-  _ERC20ASSETLIST._serialized_start=328
-  _ERC20ASSETLIST._serialized_end=389
-  _ERC20ASSETDELIST._serialized_start=391
-  _ERC20ASSETDELIST._serialized_end=432
-  _ERC20ASSETLIMITSUPDATED._serialized_start=435
-  _ERC20ASSETLIMITSUPDATED._serialized_end=569
-  _ERC20DEPOSIT._serialized_start=571
-  _ERC20DEPOSIT._serialized_end=682
-  _ERC20WITHDRAWAL._serialized_start=684
-  _ERC20WITHDRAWAL._serialized_end=782
-  _ERC20EVENT._serialized_start=785
-  _ERC20EVENT._serialized_end=1081
-  _ERC20SIGNERADDED._serialized_start=1083
-  _ERC20SIGNERADDED._serialized_end=1156
-  _ERC20SIGNERREMOVED._serialized_start=1158
-  _ERC20SIGNERREMOVED._serialized_end=1233
-  _ERC20THRESHOLDSET._serialized_start=1235
-  _ERC20THRESHOLDSET._serialized_end=1312
-  _ERC20MULTISIGEVENT._serialized_start=1315
-  _ERC20MULTISIGEVENT._serialized_end=1528
-  _STAKINGEVENT._serialized_start=1531
-  _STAKINGEVENT._serialized_end=1730
-  _STAKEDEPOSITED._serialized_start=1732
-  _STAKEDEPOSITED._serialized_end=1835
-  _STAKEREMOVED._serialized_start=1837
-  _STAKEREMOVED._serialized_end=1938
-  _STAKETOTALSUPPLY._serialized_start=1940
-  _STAKETOTALSUPPLY._serialized_end=2003
+    DESCRIPTOR._options = None
+    DESCRIPTOR._serialized_options = b"Z code.vegaprotocol.io/protos/vega"
+    _BUILTINASSETDEPOSIT._serialized_start = 33
+    _BUILTINASSETDEPOSIT._serialized_end = 111
+    _BUILTINASSETWITHDRAWAL._serialized_start = 113
+    _BUILTINASSETWITHDRAWAL._serialized_end = 194
+    _BUILTINASSETEVENT._serialized_start = 197
+    _BUILTINASSETEVENT._serialized_end = 326
+    _ERC20ASSETLIST._serialized_start = 328
+    _ERC20ASSETLIST._serialized_end = 389
+    _ERC20ASSETDELIST._serialized_start = 391
+    _ERC20ASSETDELIST._serialized_end = 432
+    _ERC20ASSETLIMITSUPDATED._serialized_start = 435
+    _ERC20ASSETLIMITSUPDATED._serialized_end = 569
+    _ERC20DEPOSIT._serialized_start = 571
+    _ERC20DEPOSIT._serialized_end = 682
+    _ERC20WITHDRAWAL._serialized_start = 684
+    _ERC20WITHDRAWAL._serialized_end = 782
+    _ERC20EVENT._serialized_start = 785
+    _ERC20EVENT._serialized_end = 1081
+    _ERC20SIGNERADDED._serialized_start = 1083
+    _ERC20SIGNERADDED._serialized_end = 1156
+    _ERC20SIGNERREMOVED._serialized_start = 1158
+    _ERC20SIGNERREMOVED._serialized_end = 1233
+    _ERC20THRESHOLDSET._serialized_start = 1235
+    _ERC20THRESHOLDSET._serialized_end = 1312
+    _ERC20MULTISIGEVENT._serialized_start = 1315
+    _ERC20MULTISIGEVENT._serialized_end = 1528
+    _STAKINGEVENT._serialized_start = 1531
+    _STAKINGEVENT._serialized_end = 1730
+    _STAKEDEPOSITED._serialized_start = 1732
+    _STAKEDEPOSITED._serialized_end = 1835
+    _STAKEREMOVED._serialized_start = 1837
+    _STAKEREMOVED._serialized_end = 1938
+    _STAKETOTALSUPPLY._serialized_start = 1940
+    _STAKETOTALSUPPLY._serialized_end = 2003
 # @@protoc_insertion_point(module_scope)
