@@ -7,7 +7,6 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -15,309 +14,214 @@ _sym_db = _symbol_database.Default()
 
 from ... import vega_pb2 as vega_dot_vega__pb2
 from ...events.v1 import events_pb2 as vega_dot_events_dot_v1_dot_events__pb2
-from ...commands.v1 import (
-    transaction_pb2 as vega_dot_commands_dot_v1_dot_transaction__pb2,
-)
+from ...commands.v1 import transaction_pb2 as vega_dot_commands_dot_v1_dot_transaction__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x16vega/api/v1/core.proto\x12\x0bvega.api.v1\x1a\x0fvega/vega.proto\x1a\x1bvega/events/v1/events.proto\x1a"vega/commands/v1/transaction.proto"O\n\x1aPropagateChainEventRequest\x12\r\n\x05\x65vent\x18\x01 \x01(\x0c\x12\x0f\n\x07pub_key\x18\x02 \x01(\t\x12\x11\n\tsignature\x18\x03 \x01(\x0c".\n\x1bPropagateChainEventResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08"\xcd\x01\n\x18SubmitTransactionRequest\x12)\n\x02tx\x18\x01 \x01(\x0b\x32\x1d.vega.commands.v1.Transaction\x12\x38\n\x04type\x18\x02 \x01(\x0e\x32*.vega.api.v1.SubmitTransactionRequest.Type"L\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_ASYNC\x10\x01\x12\r\n\tTYPE_SYNC\x10\x02\x12\x0f\n\x0bTYPE_COMMIT\x10\x03"v\n\x19SubmitTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07tx_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x63ode\x18\x03 \x01(\r\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\t\x12\x0b\n\x03log\x18\x05 \x01(\t\x12\x0e\n\x06height\x18\x06 \x01(\x03"D\n\x17\x43heckTransactionRequest\x12)\n\x02tx\x18\x01 \x01(\x0b\x32\x1d.vega.commands.v1.Transaction"_\n\x18\x43heckTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\r\x12\x12\n\ngas_wanted\x18\x03 \x01(\x03\x12\x10\n\x08gas_used\x18\x04 \x01(\x03"\xb4\x01\n\x1bSubmitRawTransactionRequest\x12\n\n\x02tx\x18\x01 \x01(\x0c\x12;\n\x04type\x18\x02 \x01(\x0e\x32-.vega.api.v1.SubmitRawTransactionRequest.Type"L\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_ASYNC\x10\x01\x12\r\n\tTYPE_SYNC\x10\x02\x12\x0f\n\x0bTYPE_COMMIT\x10\x03"y\n\x1cSubmitRawTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07tx_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x63ode\x18\x03 \x01(\r\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\t\x12\x0b\n\x03log\x18\x05 \x01(\t\x12\x0e\n\x06height\x18\x06 \x01(\x03"(\n\x1a\x43heckRawTransactionRequest\x12\n\n\x02tx\x18\x01 \x01(\x0c"b\n\x1b\x43heckRawTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\r\x12\x12\n\ngas_wanted\x18\x03 \x01(\x03\x12\x10\n\x08gas_used\x18\x04 \x01(\x03"\x14\n\x12GetVegaTimeRequest"(\n\x13GetVegaTimeResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\x03"}\n\x16ObserveEventBusRequest\x12*\n\x04type\x18\x01 \x03(\x0e\x32\x1c.vega.events.v1.BusEventType\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x10\n\x08party_id\x18\x03 \x01(\t\x12\x12\n\nbatch_size\x18\x04 \x01(\x03"C\n\x17ObserveEventBusResponse\x12(\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x18.vega.events.v1.BusEvent"\x13\n\x11StatisticsRequest"A\n\x12StatisticsResponse\x12+\n\nstatistics\x18\x01 \x01(\x0b\x32\x17.vega.api.v1.Statistics"\xee\x06\n\nStatistics\x12\x14\n\x0c\x62lock_height\x18\x01 \x01(\x04\x12\x16\n\x0e\x62\x61\x63klog_length\x18\x02 \x01(\x04\x12\x13\n\x0btotal_peers\x18\x03 \x01(\x04\x12\x14\n\x0cgenesis_time\x18\x04 \x01(\t\x12\x14\n\x0c\x63urrent_time\x18\x05 \x01(\t\x12\x11\n\tvega_time\x18\x06 \x01(\t\x12!\n\x06status\x18\x07 \x01(\x0e\x32\x11.vega.ChainStatus\x12\x14\n\x0ctx_per_block\x18\x08 \x01(\x04\x12\x18\n\x10\x61verage_tx_bytes\x18\t \x01(\x04\x12 \n\x18\x61verage_orders_per_block\x18\n \x01(\x04\x12\x19\n\x11trades_per_second\x18\x0b \x01(\x04\x12\x19\n\x11orders_per_second\x18\x0c \x01(\x04\x12\x15\n\rtotal_markets\x18\r \x01(\x04\x12\x19\n\x11total_amend_order\x18\x10 \x01(\x04\x12\x1a\n\x12total_cancel_order\x18\x11 \x01(\x04\x12\x1a\n\x12total_create_order\x18\x12 \x01(\x04\x12\x14\n\x0ctotal_orders\x18\x13 \x01(\x04\x12\x14\n\x0ctotal_trades\x18\x14 \x01(\x04\x12\x1b\n\x13order_subscriptions\x18\x15 \x01(\r\x12\x1b\n\x13trade_subscriptions\x18\x16 \x01(\r\x12\x1c\n\x14\x63\x61ndle_subscriptions\x18\x17 \x01(\r\x12"\n\x1amarket_depth_subscriptions\x18\x18 \x01(\r\x12\x1f\n\x17positions_subscriptions\x18\x19 \x01(\r\x12\x1d\n\x15\x61\x63\x63ount_subscriptions\x18\x1a \x01(\r\x12!\n\x19market_data_subscriptions\x18\x1b \x01(\r\x12\x18\n\x10\x61pp_version_hash\x18\x1c \x01(\t\x12\x13\n\x0b\x61pp_version\x18\x1d \x01(\t\x12\x15\n\rchain_version\x18\x1e \x01(\t\x12\x16\n\x0e\x62lock_duration\x18\x1f \x01(\x04\x12\x0e\n\x06uptime\x18  \x01(\t\x12\x10\n\x08\x63hain_id\x18! \x01(\t\x12*\n"market_depth_updates_subscriptions\x18" \x01(\r\x12\x12\n\nblock_hash\x18# \x01(\t"\x18\n\x16LastBlockHeightRequest"\xed\x01\n\x17LastBlockHeightResponse\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\x1e\n\x16spam_pow_hash_function\x18\x03 \x01(\t\x12\x1b\n\x13spam_pow_difficulty\x18\x04 \x01(\r\x12&\n\x1espam_pow_number_of_past_blocks\x18\x05 \x01(\r\x12\'\n\x1fspam_pow_number_of_tx_per_block\x18\x06 \x01(\r\x12&\n\x1espam_pow_increasing_difficulty\x18\x07 \x01(\x08\x32\xf4\x06\n\x0b\x43oreService\x12\x62\n\x11SubmitTransaction\x12%.vega.api.v1.SubmitTransactionRequest\x1a&.vega.api.v1.SubmitTransactionResponse\x12h\n\x13PropagateChainEvent\x12\'.vega.api.v1.PropagateChainEventRequest\x1a(.vega.api.v1.PropagateChainEventResponse\x12M\n\nStatistics\x12\x1e.vega.api.v1.StatisticsRequest\x1a\x1f.vega.api.v1.StatisticsResponse\x12\\\n\x0fLastBlockHeight\x12#.vega.api.v1.LastBlockHeightRequest\x1a$.vega.api.v1.LastBlockHeightResponse\x12P\n\x0bGetVegaTime\x12\x1f.vega.api.v1.GetVegaTimeRequest\x1a .vega.api.v1.GetVegaTimeResponse\x12`\n\x0fObserveEventBus\x12#.vega.api.v1.ObserveEventBusRequest\x1a$.vega.api.v1.ObserveEventBusResponse(\x01\x30\x01\x12k\n\x14SubmitRawTransaction\x12(.vega.api.v1.SubmitRawTransactionRequest\x1a).vega.api.v1.SubmitRawTransactionResponse\x12_\n\x10\x43heckTransaction\x12$.vega.api.v1.CheckTransactionRequest\x1a%.vega.api.v1.CheckTransactionResponse\x12h\n\x13\x43heckRawTransaction\x12\'.vega.api.v1.CheckRawTransactionRequest\x1a(.vega.api.v1.CheckRawTransactionResponseB)Z\'code.vegaprotocol.io/protos/vega/api/v1b\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16vega/api/v1/core.proto\x12\x0bvega.api.v1\x1a\x0fvega/vega.proto\x1a\x1bvega/events/v1/events.proto\x1a\"vega/commands/v1/transaction.proto\"O\n\x1aPropagateChainEventRequest\x12\r\n\x05\x65vent\x18\x01 \x01(\x0c\x12\x0f\n\x07pub_key\x18\x02 \x01(\t\x12\x11\n\tsignature\x18\x03 \x01(\x0c\".\n\x1bPropagateChainEventResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xcd\x01\n\x18SubmitTransactionRequest\x12)\n\x02tx\x18\x01 \x01(\x0b\x32\x1d.vega.commands.v1.Transaction\x12\x38\n\x04type\x18\x02 \x01(\x0e\x32*.vega.api.v1.SubmitTransactionRequest.Type\"L\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_ASYNC\x10\x01\x12\r\n\tTYPE_SYNC\x10\x02\x12\x0f\n\x0bTYPE_COMMIT\x10\x03\"v\n\x19SubmitTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07tx_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x63ode\x18\x03 \x01(\r\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\t\x12\x0b\n\x03log\x18\x05 \x01(\t\x12\x0e\n\x06height\x18\x06 \x01(\x03\"D\n\x17\x43heckTransactionRequest\x12)\n\x02tx\x18\x01 \x01(\x0b\x32\x1d.vega.commands.v1.Transaction\"_\n\x18\x43heckTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\r\x12\x12\n\ngas_wanted\x18\x03 \x01(\x03\x12\x10\n\x08gas_used\x18\x04 \x01(\x03\"\xb4\x01\n\x1bSubmitRawTransactionRequest\x12\n\n\x02tx\x18\x01 \x01(\x0c\x12;\n\x04type\x18\x02 \x01(\x0e\x32-.vega.api.v1.SubmitRawTransactionRequest.Type\"L\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_ASYNC\x10\x01\x12\r\n\tTYPE_SYNC\x10\x02\x12\x0f\n\x0bTYPE_COMMIT\x10\x03\"y\n\x1cSubmitRawTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07tx_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x63ode\x18\x03 \x01(\r\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\t\x12\x0b\n\x03log\x18\x05 \x01(\t\x12\x0e\n\x06height\x18\x06 \x01(\x03\"(\n\x1a\x43heckRawTransactionRequest\x12\n\n\x02tx\x18\x01 \x01(\x0c\"b\n\x1b\x43heckRawTransactionResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0c\n\x04\x63ode\x18\x02 \x01(\r\x12\x12\n\ngas_wanted\x18\x03 \x01(\x03\x12\x10\n\x08gas_used\x18\x04 \x01(\x03\"\x14\n\x12GetVegaTimeRequest\"(\n\x13GetVegaTimeResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\"}\n\x16ObserveEventBusRequest\x12*\n\x04type\x18\x01 \x03(\x0e\x32\x1c.vega.events.v1.BusEventType\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x10\n\x08party_id\x18\x03 \x01(\t\x12\x12\n\nbatch_size\x18\x04 \x01(\x03\"C\n\x17ObserveEventBusResponse\x12(\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x18.vega.events.v1.BusEvent\"\x13\n\x11StatisticsRequest\"A\n\x12StatisticsResponse\x12+\n\nstatistics\x18\x01 \x01(\x0b\x32\x17.vega.api.v1.Statistics\"\xee\x06\n\nStatistics\x12\x14\n\x0c\x62lock_height\x18\x01 \x01(\x04\x12\x16\n\x0e\x62\x61\x63klog_length\x18\x02 \x01(\x04\x12\x13\n\x0btotal_peers\x18\x03 \x01(\x04\x12\x14\n\x0cgenesis_time\x18\x04 \x01(\t\x12\x14\n\x0c\x63urrent_time\x18\x05 \x01(\t\x12\x11\n\tvega_time\x18\x06 \x01(\t\x12!\n\x06status\x18\x07 \x01(\x0e\x32\x11.vega.ChainStatus\x12\x14\n\x0ctx_per_block\x18\x08 \x01(\x04\x12\x18\n\x10\x61verage_tx_bytes\x18\t \x01(\x04\x12 \n\x18\x61verage_orders_per_block\x18\n \x01(\x04\x12\x19\n\x11trades_per_second\x18\x0b \x01(\x04\x12\x19\n\x11orders_per_second\x18\x0c \x01(\x04\x12\x15\n\rtotal_markets\x18\r \x01(\x04\x12\x19\n\x11total_amend_order\x18\x10 \x01(\x04\x12\x1a\n\x12total_cancel_order\x18\x11 \x01(\x04\x12\x1a\n\x12total_create_order\x18\x12 \x01(\x04\x12\x14\n\x0ctotal_orders\x18\x13 \x01(\x04\x12\x14\n\x0ctotal_trades\x18\x14 \x01(\x04\x12\x1b\n\x13order_subscriptions\x18\x15 \x01(\r\x12\x1b\n\x13trade_subscriptions\x18\x16 \x01(\r\x12\x1c\n\x14\x63\x61ndle_subscriptions\x18\x17 \x01(\r\x12\"\n\x1amarket_depth_subscriptions\x18\x18 \x01(\r\x12\x1f\n\x17positions_subscriptions\x18\x19 \x01(\r\x12\x1d\n\x15\x61\x63\x63ount_subscriptions\x18\x1a \x01(\r\x12!\n\x19market_data_subscriptions\x18\x1b \x01(\r\x12\x18\n\x10\x61pp_version_hash\x18\x1c \x01(\t\x12\x13\n\x0b\x61pp_version\x18\x1d \x01(\t\x12\x15\n\rchain_version\x18\x1e \x01(\t\x12\x16\n\x0e\x62lock_duration\x18\x1f \x01(\x04\x12\x0e\n\x06uptime\x18  \x01(\t\x12\x10\n\x08\x63hain_id\x18! \x01(\t\x12*\n\"market_depth_updates_subscriptions\x18\" \x01(\r\x12\x12\n\nblock_hash\x18# \x01(\t\"\x18\n\x16LastBlockHeightRequest\"\xed\x01\n\x17LastBlockHeightResponse\x12\x0e\n\x06height\x18\x01 \x01(\x04\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\x1e\n\x16spam_pow_hash_function\x18\x03 \x01(\t\x12\x1b\n\x13spam_pow_difficulty\x18\x04 \x01(\r\x12&\n\x1espam_pow_number_of_past_blocks\x18\x05 \x01(\r\x12\'\n\x1fspam_pow_number_of_tx_per_block\x18\x06 \x01(\r\x12&\n\x1espam_pow_increasing_difficulty\x18\x07 \x01(\x08\x32\xf4\x06\n\x0b\x43oreService\x12\x62\n\x11SubmitTransaction\x12%.vega.api.v1.SubmitTransactionRequest\x1a&.vega.api.v1.SubmitTransactionResponse\x12h\n\x13PropagateChainEvent\x12\'.vega.api.v1.PropagateChainEventRequest\x1a(.vega.api.v1.PropagateChainEventResponse\x12M\n\nStatistics\x12\x1e.vega.api.v1.StatisticsRequest\x1a\x1f.vega.api.v1.StatisticsResponse\x12\\\n\x0fLastBlockHeight\x12#.vega.api.v1.LastBlockHeightRequest\x1a$.vega.api.v1.LastBlockHeightResponse\x12P\n\x0bGetVegaTime\x12\x1f.vega.api.v1.GetVegaTimeRequest\x1a .vega.api.v1.GetVegaTimeResponse\x12`\n\x0fObserveEventBus\x12#.vega.api.v1.ObserveEventBusRequest\x1a$.vega.api.v1.ObserveEventBusResponse(\x01\x30\x01\x12k\n\x14SubmitRawTransaction\x12(.vega.api.v1.SubmitRawTransactionRequest\x1a).vega.api.v1.SubmitRawTransactionResponse\x12_\n\x10\x43heckTransaction\x12$.vega.api.v1.CheckTransactionRequest\x1a%.vega.api.v1.CheckTransactionResponse\x12h\n\x13\x43heckRawTransaction\x12\'.vega.api.v1.CheckRawTransactionRequest\x1a(.vega.api.v1.CheckRawTransactionResponseB)Z\'code.vegaprotocol.io/protos/vega/api/v1b\x06proto3')
 
 
-_PROPAGATECHAINEVENTREQUEST = DESCRIPTOR.message_types_by_name[
-    "PropagateChainEventRequest"
-]
-_PROPAGATECHAINEVENTRESPONSE = DESCRIPTOR.message_types_by_name[
-    "PropagateChainEventResponse"
-]
-_SUBMITTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name["SubmitTransactionRequest"]
-_SUBMITTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name[
-    "SubmitTransactionResponse"
-]
-_CHECKTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name["CheckTransactionRequest"]
-_CHECKTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name["CheckTransactionResponse"]
-_SUBMITRAWTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name[
-    "SubmitRawTransactionRequest"
-]
-_SUBMITRAWTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name[
-    "SubmitRawTransactionResponse"
-]
-_CHECKRAWTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name[
-    "CheckRawTransactionRequest"
-]
-_CHECKRAWTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name[
-    "CheckRawTransactionResponse"
-]
-_GETVEGATIMEREQUEST = DESCRIPTOR.message_types_by_name["GetVegaTimeRequest"]
-_GETVEGATIMERESPONSE = DESCRIPTOR.message_types_by_name["GetVegaTimeResponse"]
-_OBSERVEEVENTBUSREQUEST = DESCRIPTOR.message_types_by_name["ObserveEventBusRequest"]
-_OBSERVEEVENTBUSRESPONSE = DESCRIPTOR.message_types_by_name["ObserveEventBusResponse"]
-_STATISTICSREQUEST = DESCRIPTOR.message_types_by_name["StatisticsRequest"]
-_STATISTICSRESPONSE = DESCRIPTOR.message_types_by_name["StatisticsResponse"]
-_STATISTICS = DESCRIPTOR.message_types_by_name["Statistics"]
-_LASTBLOCKHEIGHTREQUEST = DESCRIPTOR.message_types_by_name["LastBlockHeightRequest"]
-_LASTBLOCKHEIGHTRESPONSE = DESCRIPTOR.message_types_by_name["LastBlockHeightResponse"]
-_SUBMITTRANSACTIONREQUEST_TYPE = _SUBMITTRANSACTIONREQUEST.enum_types_by_name["Type"]
-_SUBMITRAWTRANSACTIONREQUEST_TYPE = _SUBMITRAWTRANSACTIONREQUEST.enum_types_by_name[
-    "Type"
-]
-PropagateChainEventRequest = _reflection.GeneratedProtocolMessageType(
-    "PropagateChainEventRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PROPAGATECHAINEVENTREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.PropagateChainEventRequest)
-    },
-)
+
+_PROPAGATECHAINEVENTREQUEST = DESCRIPTOR.message_types_by_name['PropagateChainEventRequest']
+_PROPAGATECHAINEVENTRESPONSE = DESCRIPTOR.message_types_by_name['PropagateChainEventResponse']
+_SUBMITTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name['SubmitTransactionRequest']
+_SUBMITTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name['SubmitTransactionResponse']
+_CHECKTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name['CheckTransactionRequest']
+_CHECKTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name['CheckTransactionResponse']
+_SUBMITRAWTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name['SubmitRawTransactionRequest']
+_SUBMITRAWTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name['SubmitRawTransactionResponse']
+_CHECKRAWTRANSACTIONREQUEST = DESCRIPTOR.message_types_by_name['CheckRawTransactionRequest']
+_CHECKRAWTRANSACTIONRESPONSE = DESCRIPTOR.message_types_by_name['CheckRawTransactionResponse']
+_GETVEGATIMEREQUEST = DESCRIPTOR.message_types_by_name['GetVegaTimeRequest']
+_GETVEGATIMERESPONSE = DESCRIPTOR.message_types_by_name['GetVegaTimeResponse']
+_OBSERVEEVENTBUSREQUEST = DESCRIPTOR.message_types_by_name['ObserveEventBusRequest']
+_OBSERVEEVENTBUSRESPONSE = DESCRIPTOR.message_types_by_name['ObserveEventBusResponse']
+_STATISTICSREQUEST = DESCRIPTOR.message_types_by_name['StatisticsRequest']
+_STATISTICSRESPONSE = DESCRIPTOR.message_types_by_name['StatisticsResponse']
+_STATISTICS = DESCRIPTOR.message_types_by_name['Statistics']
+_LASTBLOCKHEIGHTREQUEST = DESCRIPTOR.message_types_by_name['LastBlockHeightRequest']
+_LASTBLOCKHEIGHTRESPONSE = DESCRIPTOR.message_types_by_name['LastBlockHeightResponse']
+_SUBMITTRANSACTIONREQUEST_TYPE = _SUBMITTRANSACTIONREQUEST.enum_types_by_name['Type']
+_SUBMITRAWTRANSACTIONREQUEST_TYPE = _SUBMITRAWTRANSACTIONREQUEST.enum_types_by_name['Type']
+PropagateChainEventRequest = _reflection.GeneratedProtocolMessageType('PropagateChainEventRequest', (_message.Message,), {
+  'DESCRIPTOR' : _PROPAGATECHAINEVENTREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.PropagateChainEventRequest)
+  })
 _sym_db.RegisterMessage(PropagateChainEventRequest)
 
-PropagateChainEventResponse = _reflection.GeneratedProtocolMessageType(
-    "PropagateChainEventResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PROPAGATECHAINEVENTRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.PropagateChainEventResponse)
-    },
-)
+PropagateChainEventResponse = _reflection.GeneratedProtocolMessageType('PropagateChainEventResponse', (_message.Message,), {
+  'DESCRIPTOR' : _PROPAGATECHAINEVENTRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.PropagateChainEventResponse)
+  })
 _sym_db.RegisterMessage(PropagateChainEventResponse)
 
-SubmitTransactionRequest = _reflection.GeneratedProtocolMessageType(
-    "SubmitTransactionRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SUBMITTRANSACTIONREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitTransactionRequest)
-    },
-)
+SubmitTransactionRequest = _reflection.GeneratedProtocolMessageType('SubmitTransactionRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SUBMITTRANSACTIONREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitTransactionRequest)
+  })
 _sym_db.RegisterMessage(SubmitTransactionRequest)
 
-SubmitTransactionResponse = _reflection.GeneratedProtocolMessageType(
-    "SubmitTransactionResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SUBMITTRANSACTIONRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitTransactionResponse)
-    },
-)
+SubmitTransactionResponse = _reflection.GeneratedProtocolMessageType('SubmitTransactionResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SUBMITTRANSACTIONRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitTransactionResponse)
+  })
 _sym_db.RegisterMessage(SubmitTransactionResponse)
 
-CheckTransactionRequest = _reflection.GeneratedProtocolMessageType(
-    "CheckTransactionRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHECKTRANSACTIONREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.CheckTransactionRequest)
-    },
-)
+CheckTransactionRequest = _reflection.GeneratedProtocolMessageType('CheckTransactionRequest', (_message.Message,), {
+  'DESCRIPTOR' : _CHECKTRANSACTIONREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.CheckTransactionRequest)
+  })
 _sym_db.RegisterMessage(CheckTransactionRequest)
 
-CheckTransactionResponse = _reflection.GeneratedProtocolMessageType(
-    "CheckTransactionResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHECKTRANSACTIONRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.CheckTransactionResponse)
-    },
-)
+CheckTransactionResponse = _reflection.GeneratedProtocolMessageType('CheckTransactionResponse', (_message.Message,), {
+  'DESCRIPTOR' : _CHECKTRANSACTIONRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.CheckTransactionResponse)
+  })
 _sym_db.RegisterMessage(CheckTransactionResponse)
 
-SubmitRawTransactionRequest = _reflection.GeneratedProtocolMessageType(
-    "SubmitRawTransactionRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SUBMITRAWTRANSACTIONREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitRawTransactionRequest)
-    },
-)
+SubmitRawTransactionRequest = _reflection.GeneratedProtocolMessageType('SubmitRawTransactionRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SUBMITRAWTRANSACTIONREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitRawTransactionRequest)
+  })
 _sym_db.RegisterMessage(SubmitRawTransactionRequest)
 
-SubmitRawTransactionResponse = _reflection.GeneratedProtocolMessageType(
-    "SubmitRawTransactionResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _SUBMITRAWTRANSACTIONRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitRawTransactionResponse)
-    },
-)
+SubmitRawTransactionResponse = _reflection.GeneratedProtocolMessageType('SubmitRawTransactionResponse', (_message.Message,), {
+  'DESCRIPTOR' : _SUBMITRAWTRANSACTIONRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.SubmitRawTransactionResponse)
+  })
 _sym_db.RegisterMessage(SubmitRawTransactionResponse)
 
-CheckRawTransactionRequest = _reflection.GeneratedProtocolMessageType(
-    "CheckRawTransactionRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHECKRAWTRANSACTIONREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.CheckRawTransactionRequest)
-    },
-)
+CheckRawTransactionRequest = _reflection.GeneratedProtocolMessageType('CheckRawTransactionRequest', (_message.Message,), {
+  'DESCRIPTOR' : _CHECKRAWTRANSACTIONREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.CheckRawTransactionRequest)
+  })
 _sym_db.RegisterMessage(CheckRawTransactionRequest)
 
-CheckRawTransactionResponse = _reflection.GeneratedProtocolMessageType(
-    "CheckRawTransactionResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _CHECKRAWTRANSACTIONRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.CheckRawTransactionResponse)
-    },
-)
+CheckRawTransactionResponse = _reflection.GeneratedProtocolMessageType('CheckRawTransactionResponse', (_message.Message,), {
+  'DESCRIPTOR' : _CHECKRAWTRANSACTIONRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.CheckRawTransactionResponse)
+  })
 _sym_db.RegisterMessage(CheckRawTransactionResponse)
 
-GetVegaTimeRequest = _reflection.GeneratedProtocolMessageType(
-    "GetVegaTimeRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _GETVEGATIMEREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.GetVegaTimeRequest)
-    },
-)
+GetVegaTimeRequest = _reflection.GeneratedProtocolMessageType('GetVegaTimeRequest', (_message.Message,), {
+  'DESCRIPTOR' : _GETVEGATIMEREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.GetVegaTimeRequest)
+  })
 _sym_db.RegisterMessage(GetVegaTimeRequest)
 
-GetVegaTimeResponse = _reflection.GeneratedProtocolMessageType(
-    "GetVegaTimeResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _GETVEGATIMERESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.GetVegaTimeResponse)
-    },
-)
+GetVegaTimeResponse = _reflection.GeneratedProtocolMessageType('GetVegaTimeResponse', (_message.Message,), {
+  'DESCRIPTOR' : _GETVEGATIMERESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.GetVegaTimeResponse)
+  })
 _sym_db.RegisterMessage(GetVegaTimeResponse)
 
-ObserveEventBusRequest = _reflection.GeneratedProtocolMessageType(
-    "ObserveEventBusRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _OBSERVEEVENTBUSREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.ObserveEventBusRequest)
-    },
-)
+ObserveEventBusRequest = _reflection.GeneratedProtocolMessageType('ObserveEventBusRequest', (_message.Message,), {
+  'DESCRIPTOR' : _OBSERVEEVENTBUSREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.ObserveEventBusRequest)
+  })
 _sym_db.RegisterMessage(ObserveEventBusRequest)
 
-ObserveEventBusResponse = _reflection.GeneratedProtocolMessageType(
-    "ObserveEventBusResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _OBSERVEEVENTBUSRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.ObserveEventBusResponse)
-    },
-)
+ObserveEventBusResponse = _reflection.GeneratedProtocolMessageType('ObserveEventBusResponse', (_message.Message,), {
+  'DESCRIPTOR' : _OBSERVEEVENTBUSRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.ObserveEventBusResponse)
+  })
 _sym_db.RegisterMessage(ObserveEventBusResponse)
 
-StatisticsRequest = _reflection.GeneratedProtocolMessageType(
-    "StatisticsRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STATISTICSREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.StatisticsRequest)
-    },
-)
+StatisticsRequest = _reflection.GeneratedProtocolMessageType('StatisticsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _STATISTICSREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.StatisticsRequest)
+  })
 _sym_db.RegisterMessage(StatisticsRequest)
 
-StatisticsResponse = _reflection.GeneratedProtocolMessageType(
-    "StatisticsResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STATISTICSRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.StatisticsResponse)
-    },
-)
+StatisticsResponse = _reflection.GeneratedProtocolMessageType('StatisticsResponse', (_message.Message,), {
+  'DESCRIPTOR' : _STATISTICSRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.StatisticsResponse)
+  })
 _sym_db.RegisterMessage(StatisticsResponse)
 
-Statistics = _reflection.GeneratedProtocolMessageType(
-    "Statistics",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _STATISTICS,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.Statistics)
-    },
-)
+Statistics = _reflection.GeneratedProtocolMessageType('Statistics', (_message.Message,), {
+  'DESCRIPTOR' : _STATISTICS,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.Statistics)
+  })
 _sym_db.RegisterMessage(Statistics)
 
-LastBlockHeightRequest = _reflection.GeneratedProtocolMessageType(
-    "LastBlockHeightRequest",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LASTBLOCKHEIGHTREQUEST,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.LastBlockHeightRequest)
-    },
-)
+LastBlockHeightRequest = _reflection.GeneratedProtocolMessageType('LastBlockHeightRequest', (_message.Message,), {
+  'DESCRIPTOR' : _LASTBLOCKHEIGHTREQUEST,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.LastBlockHeightRequest)
+  })
 _sym_db.RegisterMessage(LastBlockHeightRequest)
 
-LastBlockHeightResponse = _reflection.GeneratedProtocolMessageType(
-    "LastBlockHeightResponse",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _LASTBLOCKHEIGHTRESPONSE,
-        "__module__": "vega.api.v1.core_pb2"
-        # @@protoc_insertion_point(class_scope:vega.api.v1.LastBlockHeightResponse)
-    },
-)
+LastBlockHeightResponse = _reflection.GeneratedProtocolMessageType('LastBlockHeightResponse', (_message.Message,), {
+  'DESCRIPTOR' : _LASTBLOCKHEIGHTRESPONSE,
+  '__module__' : 'vega.api.v1.core_pb2'
+  # @@protoc_insertion_point(class_scope:vega.api.v1.LastBlockHeightResponse)
+  })
 _sym_db.RegisterMessage(LastBlockHeightResponse)
 
-_CORESERVICE = DESCRIPTOR.services_by_name["CoreService"]
+_CORESERVICE = DESCRIPTOR.services_by_name['CoreService']
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z'code.vegaprotocol.io/protos/vega/api/v1"
-    _PROPAGATECHAINEVENTREQUEST._serialized_start = 121
-    _PROPAGATECHAINEVENTREQUEST._serialized_end = 200
-    _PROPAGATECHAINEVENTRESPONSE._serialized_start = 202
-    _PROPAGATECHAINEVENTRESPONSE._serialized_end = 248
-    _SUBMITTRANSACTIONREQUEST._serialized_start = 251
-    _SUBMITTRANSACTIONREQUEST._serialized_end = 456
-    _SUBMITTRANSACTIONREQUEST_TYPE._serialized_start = 380
-    _SUBMITTRANSACTIONREQUEST_TYPE._serialized_end = 456
-    _SUBMITTRANSACTIONRESPONSE._serialized_start = 458
-    _SUBMITTRANSACTIONRESPONSE._serialized_end = 576
-    _CHECKTRANSACTIONREQUEST._serialized_start = 578
-    _CHECKTRANSACTIONREQUEST._serialized_end = 646
-    _CHECKTRANSACTIONRESPONSE._serialized_start = 648
-    _CHECKTRANSACTIONRESPONSE._serialized_end = 743
-    _SUBMITRAWTRANSACTIONREQUEST._serialized_start = 746
-    _SUBMITRAWTRANSACTIONREQUEST._serialized_end = 926
-    _SUBMITRAWTRANSACTIONREQUEST_TYPE._serialized_start = 380
-    _SUBMITRAWTRANSACTIONREQUEST_TYPE._serialized_end = 456
-    _SUBMITRAWTRANSACTIONRESPONSE._serialized_start = 928
-    _SUBMITRAWTRANSACTIONRESPONSE._serialized_end = 1049
-    _CHECKRAWTRANSACTIONREQUEST._serialized_start = 1051
-    _CHECKRAWTRANSACTIONREQUEST._serialized_end = 1091
-    _CHECKRAWTRANSACTIONRESPONSE._serialized_start = 1093
-    _CHECKRAWTRANSACTIONRESPONSE._serialized_end = 1191
-    _GETVEGATIMEREQUEST._serialized_start = 1193
-    _GETVEGATIMEREQUEST._serialized_end = 1213
-    _GETVEGATIMERESPONSE._serialized_start = 1215
-    _GETVEGATIMERESPONSE._serialized_end = 1255
-    _OBSERVEEVENTBUSREQUEST._serialized_start = 1257
-    _OBSERVEEVENTBUSREQUEST._serialized_end = 1382
-    _OBSERVEEVENTBUSRESPONSE._serialized_start = 1384
-    _OBSERVEEVENTBUSRESPONSE._serialized_end = 1451
-    _STATISTICSREQUEST._serialized_start = 1453
-    _STATISTICSREQUEST._serialized_end = 1472
-    _STATISTICSRESPONSE._serialized_start = 1474
-    _STATISTICSRESPONSE._serialized_end = 1539
-    _STATISTICS._serialized_start = 1542
-    _STATISTICS._serialized_end = 2420
-    _LASTBLOCKHEIGHTREQUEST._serialized_start = 2422
-    _LASTBLOCKHEIGHTREQUEST._serialized_end = 2446
-    _LASTBLOCKHEIGHTRESPONSE._serialized_start = 2449
-    _LASTBLOCKHEIGHTRESPONSE._serialized_end = 2686
-    _CORESERVICE._serialized_start = 2689
-    _CORESERVICE._serialized_end = 3573
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z\'code.vegaprotocol.io/protos/vega/api/v1'
+  _PROPAGATECHAINEVENTREQUEST._serialized_start=121
+  _PROPAGATECHAINEVENTREQUEST._serialized_end=200
+  _PROPAGATECHAINEVENTRESPONSE._serialized_start=202
+  _PROPAGATECHAINEVENTRESPONSE._serialized_end=248
+  _SUBMITTRANSACTIONREQUEST._serialized_start=251
+  _SUBMITTRANSACTIONREQUEST._serialized_end=456
+  _SUBMITTRANSACTIONREQUEST_TYPE._serialized_start=380
+  _SUBMITTRANSACTIONREQUEST_TYPE._serialized_end=456
+  _SUBMITTRANSACTIONRESPONSE._serialized_start=458
+  _SUBMITTRANSACTIONRESPONSE._serialized_end=576
+  _CHECKTRANSACTIONREQUEST._serialized_start=578
+  _CHECKTRANSACTIONREQUEST._serialized_end=646
+  _CHECKTRANSACTIONRESPONSE._serialized_start=648
+  _CHECKTRANSACTIONRESPONSE._serialized_end=743
+  _SUBMITRAWTRANSACTIONREQUEST._serialized_start=746
+  _SUBMITRAWTRANSACTIONREQUEST._serialized_end=926
+  _SUBMITRAWTRANSACTIONREQUEST_TYPE._serialized_start=380
+  _SUBMITRAWTRANSACTIONREQUEST_TYPE._serialized_end=456
+  _SUBMITRAWTRANSACTIONRESPONSE._serialized_start=928
+  _SUBMITRAWTRANSACTIONRESPONSE._serialized_end=1049
+  _CHECKRAWTRANSACTIONREQUEST._serialized_start=1051
+  _CHECKRAWTRANSACTIONREQUEST._serialized_end=1091
+  _CHECKRAWTRANSACTIONRESPONSE._serialized_start=1093
+  _CHECKRAWTRANSACTIONRESPONSE._serialized_end=1191
+  _GETVEGATIMEREQUEST._serialized_start=1193
+  _GETVEGATIMEREQUEST._serialized_end=1213
+  _GETVEGATIMERESPONSE._serialized_start=1215
+  _GETVEGATIMERESPONSE._serialized_end=1255
+  _OBSERVEEVENTBUSREQUEST._serialized_start=1257
+  _OBSERVEEVENTBUSREQUEST._serialized_end=1382
+  _OBSERVEEVENTBUSRESPONSE._serialized_start=1384
+  _OBSERVEEVENTBUSRESPONSE._serialized_end=1451
+  _STATISTICSREQUEST._serialized_start=1453
+  _STATISTICSREQUEST._serialized_end=1472
+  _STATISTICSRESPONSE._serialized_start=1474
+  _STATISTICSRESPONSE._serialized_end=1539
+  _STATISTICS._serialized_start=1542
+  _STATISTICS._serialized_end=2420
+  _LASTBLOCKHEIGHTREQUEST._serialized_start=2422
+  _LASTBLOCKHEIGHTREQUEST._serialized_end=2446
+  _LASTBLOCKHEIGHTRESPONSE._serialized_start=2449
+  _LASTBLOCKHEIGHTRESPONSE._serialized_end=2686
+  _CORESERVICE._serialized_start=2689
+  _CORESERVICE._serialized_end=3573
 # @@protoc_insertion_point(module_scope)

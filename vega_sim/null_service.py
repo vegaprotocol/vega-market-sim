@@ -345,7 +345,7 @@ def manage_vega_processes(
     vegaNodeProcess = _popen_process(
         [
             vega_path,
-            "node",
+            "start",
             "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
             "--home=" + tmp_vega_home,
         ],
