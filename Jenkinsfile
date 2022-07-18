@@ -20,7 +20,7 @@ pipeline {
         timeout(time: 45, unit: 'MINUTES')
     }
     parameters {
-        string(name: 'VEGA_BRANCH', defaultValue: '404f93a', description: 'Git branch name of the vegaprotocol/vega repository')
+        string(name: 'VEGA_BRANCH', defaultValue: 'master', description: 'Git branch name of the vegaprotocol/vega repository')
         string(name: 'DATA_NODE_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/data-node repository')
     }
     environment {
