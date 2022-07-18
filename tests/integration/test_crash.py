@@ -23,6 +23,7 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
         kappa=1.1,
         position_taker_buy_intensity=50,
         position_taker_sell_intensity=0,
+        position_taker_mint=1000,
         noise_buy_intensity=2,
         noise_sell_intensity=2,
         num_position_traders=2,

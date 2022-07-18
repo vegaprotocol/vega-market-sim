@@ -52,6 +52,7 @@ class MarketCrash(Scenario):
         block_size: int = 1,
         block_length_seconds: int = 1,
         state_extraction_freq: int = 1,
+        position_taker_mint: float = 1000,
         position_taker_buy_intensity: float = 5,
         position_taker_sell_intensity: float = 5,
         noise_buy_intensity: float = 1,
@@ -95,6 +96,7 @@ class MarketCrash(Scenario):
         self.pause_every_n_steps = pause_every_n_steps
         self.random_state = random_state
         self.trim_to_min = trim_to_min
+        self.position_taker_mint = position_taker_mint
         self.num_position_traders = num_position_traders
         self.num_noise_traders = num_noise_traders
         self.settle_at_end = settle_at_end
@@ -149,7 +151,7 @@ class MarketCrash(Scenario):
                     market_name=self.market_name,
                     asset_name=self.asset_name,
                     tag=f"{tag}_noise_{i}",
-                    initial_asset_mint=self.initial_asset_mint,
+                    initial_asset_mint=self.position_taker_mint,
                     buy_intensity=self.noise_buy_intensity,
                     sell_intensity=self.noise_sell_intensity,
                 )
@@ -161,7 +163,7 @@ class MarketCrash(Scenario):
                     wallet_pass=TRADER_WALLET.passphrase,
                     market_name=self.market_name,
                     asset_name=self.asset_name,
-                    initial_asset_mint=self.initial_asset_mint,
+                    initial_asset_mint=self.position_taker_mint,
                     tag=f"{tag}_pos_{i}",
                     buy_intensity=self.position_taker_buy_intensity,
                     sell_intensity=self.position_taker_sell_intensity,
