@@ -1,3 +1,4 @@
+docker rm vega_test || true
 docker run \
     --platform linux/amd64 \
     --name vega_test \
