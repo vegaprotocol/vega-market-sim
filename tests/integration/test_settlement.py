@@ -40,7 +40,7 @@ def test_settlement(vega_service: VegaServiceNull):
     tdai_id = vega.find_asset_id(symbol="tDAI")
     market_id = vega.all_markets()[0].id
 
-    vega.forward("1s")
+    vega.wait_fn(1)
     vega.wait_for_datanode_sync()
 
     vega.settle_market(
@@ -48,7 +48,7 @@ def test_settlement(vega_service: VegaServiceNull):
         settlement_price=settlement_price,
         market_id=market_id,
     )
-    vega.forward("10s")
+    vega.wait_fn(10)
     vega.wait_for_datanode_sync()
 
     # check bond and margin for all

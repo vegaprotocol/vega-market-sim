@@ -18,7 +18,7 @@ from ... import vega_pb2 as vega_dot_vega__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1fvega/commands/v1/commands.proto\x12\x10vega.commands.v1\x1a\x15vega/governance.proto\x1a\x0fvega/vega.proto"\x1b\n\nInt64Value\x12\r\n\x05value\x18\x01 \x01(\x03"\xfb\x01\n\x0fOrderSubmission\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\r\n\x05price\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x04\x12\x18\n\x04side\x18\x04 \x01(\x0e\x32\n.vega.Side\x12.\n\rtime_in_force\x18\x05 \x01(\x0e\x32\x17.vega.Order.TimeInForce\x12\x12\n\nexpires_at\x18\x06 \x01(\x03\x12\x1e\n\x04type\x18\x07 \x01(\x0e\x32\x10.vega.Order.Type\x12\x11\n\treference\x18\x08 \x01(\t\x12\'\n\x0cpegged_order\x18\t \x01(\x0b\x32\x11.vega.PeggedOrder"8\n\x11OrderCancellation\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t"\x82\x02\n\x0eOrderAmendment\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x1a\n\x05price\x18\x03 \x01(\x0b\x32\x0b.vega.Price\x12\x12\n\nsize_delta\x18\x04 \x01(\x03\x12#\n\nexpires_at\x18\x05 \x01(\x0b\x32\x0f.vega.Timestamp\x12.\n\rtime_in_force\x18\x06 \x01(\x0e\x32\x17.vega.Order.TimeInForce\x12\x15\n\rpegged_offset\x18\x07 \x01(\t\x12/\n\x10pegged_reference\x18\x08 \x01(\x0e\x32\x15.vega.PeggedReference"\xb5\x01\n\x1cLiquidityProvisionSubmission\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x19\n\x11\x63ommitment_amount\x18\x02 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x03 \x01(\t\x12#\n\x05sells\x18\x04 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12"\n\x04\x62uys\x18\x05 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12\x11\n\treference\x18\x06 \x01(\t"3\n\x1eLiquidityProvisionCancellation\x12\x11\n\tmarket_id\x18\x01 \x01(\t"\xb4\x01\n\x1bLiquidityProvisionAmendment\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x19\n\x11\x63ommitment_amount\x18\x02 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x03 \x01(\t\x12#\n\x05sells\x18\x04 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12"\n\x04\x62uys\x18\x05 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12\x11\n\treference\x18\x06 \x01(\t"S\n\x12WithdrawSubmission\x12\x0e\n\x06\x61mount\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x1e\n\x03\x65xt\x18\x03 \x01(\x0b\x32\x11.vega.WithdrawExt"w\n\x12ProposalSubmission\x12\x11\n\treference\x18\x01 \x01(\t\x12"\n\x05terms\x18\x02 \x01(\x0b\x32\x13.vega.ProposalTerms\x12*\n\trationale\x18\x03 \x01(\x0b\x32\x17.vega.ProposalRationale"F\n\x0eVoteSubmission\x12\x13\n\x0bproposal_id\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0e\x32\x10.vega.Vote.Value"5\n\x12\x44\x65legateSubmission\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t"\xd9\x01\n\x14UndelegateSubmission\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t\x12=\n\x06method\x18\x03 \x01(\x0e\x32-.vega.commands.v1.UndelegateSubmission.Method"a\n\x06Method\x12\x16\n\x12METHOD_UNSPECIFIED\x10\x00\x12\x0e\n\nMETHOD_NOW\x10\x01\x12\x1a\n\x16METHOD_AT_END_OF_EPOCH\x10\x02\x12\x13\n\x0fMETHOD_IN_ANGER\x10\x03"\x1f\n\x0fRestoreSnapshot\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c"\x99\x02\n\x08Transfer\x12,\n\x11\x66rom_account_type\x18\x01 \x01(\x0e\x32\x11.vega.AccountType\x12\n\n\x02to\x18\x02 \x01(\t\x12*\n\x0fto_account_type\x18\x03 \x01(\x0e\x32\x11.vega.AccountType\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\x0e\n\x06\x61mount\x18\x05 \x01(\t\x12\x11\n\treference\x18\x06 \x01(\t\x12\x33\n\x07one_off\x18\x65 \x01(\x0b\x32 .vega.commands.v1.OneOffTransferH\x00\x12\x38\n\trecurring\x18\x66 \x01(\x0b\x32#.vega.commands.v1.RecurringTransferH\x00\x42\x06\n\x04kind"$\n\x0eOneOffTransfer\x12\x12\n\ndeliver_on\x18\x01 \x01(\x03"\x91\x01\n\x11RecurringTransfer\x12\x13\n\x0bstart_epoch\x18\x01 \x01(\x04\x12$\n\tend_epoch\x18\x02 \x01(\x0b\x32\x11.vega.Uint64Value\x12\x0e\n\x06\x66\x61\x63tor\x18\x03 \x01(\t\x12\x31\n\x11\x64ispatch_strategy\x18\x04 \x01(\x0b\x32\x16.vega.DispatchStrategy"%\n\x0e\x43\x61ncelTransfer\x12\x13\n\x0btransfer_id\x18\x01 \x01(\tB.Z,code.vegaprotocol.io/protos/vega/commands/v1b\x06proto3'
+    b'\n\x1fvega/commands/v1/commands.proto\x12\x10vega.commands.v1\x1a\x15vega/governance.proto\x1a\x0fvega/vega.proto"\x1b\n\nInt64Value\x12\r\n\x05value\x18\x01 \x01(\x03"\xfb\x01\n\x0fOrderSubmission\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\r\n\x05price\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x04\x12\x18\n\x04side\x18\x04 \x01(\x0e\x32\n.vega.Side\x12.\n\rtime_in_force\x18\x05 \x01(\x0e\x32\x17.vega.Order.TimeInForce\x12\x12\n\nexpires_at\x18\x06 \x01(\x03\x12\x1e\n\x04type\x18\x07 \x01(\x0e\x32\x10.vega.Order.Type\x12\x11\n\treference\x18\x08 \x01(\t\x12\'\n\x0cpegged_order\x18\t \x01(\x0b\x32\x11.vega.PeggedOrder"8\n\x11OrderCancellation\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t"\x82\x02\n\x0eOrderAmendment\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x1a\n\x05price\x18\x03 \x01(\x0b\x32\x0b.vega.Price\x12\x12\n\nsize_delta\x18\x04 \x01(\x03\x12#\n\nexpires_at\x18\x05 \x01(\x0b\x32\x0f.vega.Timestamp\x12.\n\rtime_in_force\x18\x06 \x01(\x0e\x32\x17.vega.Order.TimeInForce\x12\x15\n\rpegged_offset\x18\x07 \x01(\t\x12/\n\x10pegged_reference\x18\x08 \x01(\x0e\x32\x15.vega.PeggedReference"\xb5\x01\n\x1cLiquidityProvisionSubmission\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x19\n\x11\x63ommitment_amount\x18\x02 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x03 \x01(\t\x12#\n\x05sells\x18\x04 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12"\n\x04\x62uys\x18\x05 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12\x11\n\treference\x18\x06 \x01(\t"3\n\x1eLiquidityProvisionCancellation\x12\x11\n\tmarket_id\x18\x01 \x01(\t"\xb4\x01\n\x1bLiquidityProvisionAmendment\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x19\n\x11\x63ommitment_amount\x18\x02 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x03 \x01(\t\x12#\n\x05sells\x18\x04 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12"\n\x04\x62uys\x18\x05 \x03(\x0b\x32\x14.vega.LiquidityOrder\x12\x11\n\treference\x18\x06 \x01(\t"S\n\x12WithdrawSubmission\x12\x0e\n\x06\x61mount\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\x12\x1e\n\x03\x65xt\x18\x03 \x01(\x0b\x32\x11.vega.WithdrawExt"w\n\x12ProposalSubmission\x12\x11\n\treference\x18\x01 \x01(\t\x12"\n\x05terms\x18\x02 \x01(\x0b\x32\x13.vega.ProposalTerms\x12*\n\trationale\x18\x03 \x01(\x0b\x32\x17.vega.ProposalRationale"F\n\x0eVoteSubmission\x12\x13\n\x0bproposal_id\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0e\x32\x10.vega.Vote.Value"5\n\x12\x44\x65legateSubmission\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t"\xd9\x01\n\x14UndelegateSubmission\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\t\x12=\n\x06method\x18\x03 \x01(\x0e\x32-.vega.commands.v1.UndelegateSubmission.Method"a\n\x06Method\x12\x16\n\x12METHOD_UNSPECIFIED\x10\x00\x12\x0e\n\nMETHOD_NOW\x10\x01\x12\x1a\n\x16METHOD_AT_END_OF_EPOCH\x10\x02\x12\x13\n\x0fMETHOD_IN_ANGER\x10\x03"\x99\x02\n\x08Transfer\x12,\n\x11\x66rom_account_type\x18\x01 \x01(\x0e\x32\x11.vega.AccountType\x12\n\n\x02to\x18\x02 \x01(\t\x12*\n\x0fto_account_type\x18\x03 \x01(\x0e\x32\x11.vega.AccountType\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\x0e\n\x06\x61mount\x18\x05 \x01(\t\x12\x11\n\treference\x18\x06 \x01(\t\x12\x33\n\x07one_off\x18\x65 \x01(\x0b\x32 .vega.commands.v1.OneOffTransferH\x00\x12\x38\n\trecurring\x18\x66 \x01(\x0b\x32#.vega.commands.v1.RecurringTransferH\x00\x42\x06\n\x04kind"$\n\x0eOneOffTransfer\x12\x12\n\ndeliver_on\x18\x01 \x01(\x03"\x91\x01\n\x11RecurringTransfer\x12\x13\n\x0bstart_epoch\x18\x01 \x01(\x04\x12$\n\tend_epoch\x18\x02 \x01(\x0b\x32\x11.vega.Uint64Value\x12\x0e\n\x06\x66\x61\x63tor\x18\x03 \x01(\t\x12\x31\n\x11\x64ispatch_strategy\x18\x04 \x01(\x0b\x32\x16.vega.DispatchStrategy"%\n\x0e\x43\x61ncelTransfer\x12\x13\n\x0btransfer_id\x18\x01 \x01(\tB.Z,code.vegaprotocol.io/protos/vega/commands/v1b\x06proto3'
 )
 
 
@@ -40,7 +40,6 @@ _PROPOSALSUBMISSION = DESCRIPTOR.message_types_by_name["ProposalSubmission"]
 _VOTESUBMISSION = DESCRIPTOR.message_types_by_name["VoteSubmission"]
 _DELEGATESUBMISSION = DESCRIPTOR.message_types_by_name["DelegateSubmission"]
 _UNDELEGATESUBMISSION = DESCRIPTOR.message_types_by_name["UndelegateSubmission"]
-_RESTORESNAPSHOT = DESCRIPTOR.message_types_by_name["RestoreSnapshot"]
 _TRANSFER = DESCRIPTOR.message_types_by_name["Transfer"]
 _ONEOFFTRANSFER = DESCRIPTOR.message_types_by_name["OneOffTransfer"]
 _RECURRINGTRANSFER = DESCRIPTOR.message_types_by_name["RecurringTransfer"]
@@ -178,17 +177,6 @@ UndelegateSubmission = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(UndelegateSubmission)
 
-RestoreSnapshot = _reflection.GeneratedProtocolMessageType(
-    "RestoreSnapshot",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _RESTORESNAPSHOT,
-        "__module__": "vega.commands.v1.commands_pb2"
-        # @@protoc_insertion_point(class_scope:vega.commands.v1.RestoreSnapshot)
-    },
-)
-_sym_db.RegisterMessage(RestoreSnapshot)
-
 Transfer = _reflection.GeneratedProtocolMessageType(
     "Transfer",
     (_message.Message,),
@@ -263,14 +251,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _UNDELEGATESUBMISSION._serialized_end = 1666
     _UNDELEGATESUBMISSION_METHOD._serialized_start = 1569
     _UNDELEGATESUBMISSION_METHOD._serialized_end = 1666
-    _RESTORESNAPSHOT._serialized_start = 1668
-    _RESTORESNAPSHOT._serialized_end = 1699
-    _TRANSFER._serialized_start = 1702
-    _TRANSFER._serialized_end = 1983
-    _ONEOFFTRANSFER._serialized_start = 1985
-    _ONEOFFTRANSFER._serialized_end = 2021
-    _RECURRINGTRANSFER._serialized_start = 2024
-    _RECURRINGTRANSFER._serialized_end = 2169
-    _CANCELTRANSFER._serialized_start = 2171
-    _CANCELTRANSFER._serialized_end = 2208
+    _TRANSFER._serialized_start = 1669
+    _TRANSFER._serialized_end = 1950
+    _ONEOFFTRANSFER._serialized_start = 1952
+    _ONEOFFTRANSFER._serialized_end = 1988
+    _RECURRINGTRANSFER._serialized_start = 1991
+    _RECURRINGTRANSFER._serialized_end = 2136
+    _CANCELTRANSFER._serialized_start = 2138
+    _CANCELTRANSFER._serialized_end = 2175
 # @@protoc_insertion_point(module_scope)

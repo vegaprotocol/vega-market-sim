@@ -1,8 +1,8 @@
-docker run --rm \
-    --mount type=bind,source=$PWD/vega_sim/bin/data-node,target=/vega_market_sim/vega_sim/bin/data-node \
-    --mount type=bind,source=$PWD/vega_sim/bin/vega,target=/vega_market_sim/vega_sim/bin/vega \
-    --mount type=bind,source=$PWD/vega_sim/bin/vegawallet,target=/vega_market_sim/vega_sim/bin/vegawallet \
-    --mount type=bind,source=/tmp,target=/tmp \
-    --mount type=bind,source=$PWD/tests,target=/vega_market_sim/tests \
+docker run \
     --platform linux/amd64 \
-    vega_sim_test:latest pytest -v -m integration
+    --name vega_test \
+    vega_sim_test:latest pytest -s -v -m integration --log-cli-level INFO
+docker_status=$?
+docker cp vega_test:/tmp ./test_logs/
+docker rm vega_test
+exit ${docker_status}

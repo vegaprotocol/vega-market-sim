@@ -210,7 +210,7 @@ def propose_future_market(
             ],
             liquidity_monitoring_parameters=vega_protos.markets.LiquidityMonitoringParameters(
                 target_stake_parameters=vega_protos.markets.TargetStakeParameters(
-                    time_window=3600, scaling_factor=100
+                    time_window=3600, scaling_factor=1
                 ),
                 triggering_ratio=0.7,
                 auction_extension=0,

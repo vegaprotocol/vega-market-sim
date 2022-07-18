@@ -525,7 +525,7 @@ def order_subscription(
     data_client: vac.VegaTradingDataClient,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
-) -> Queue[Order]:
+) -> Iterable[Order]:
     """Subscribe to a stream of Order updates from the data-node.
     The stream of orders returned from this function is an iterable which
     does not end and will continue to tick another order update whenever
@@ -540,46 +540,33 @@ def order_subscription(
         Iterable[Order], Infinite iterable of order updates
     """
 
-    queue = Queue()
-
     order_stream = data_raw.order_subscription(
         data_client=data_client, market_id=market_id, party_id=party_id
     )
 
-    threading.Thread(
-        target=_queue_thread, args=(queue, order_stream, data_client)
-    ).start()
-
-    return queue
-
-
-def _queue_thread(
-    queue: Queue,
-    order_stream: Iterable[vega_protos.vega.Order],
-    data_client: vac.VegaTradingDataClient,
-):
-    mkt_pos_dp = {}
-    mkt_price_dp = {}
-    try:
-        for order_list in order_stream:
-            for order in order_list.orders:
-                if order.market_id not in mkt_pos_dp:
-                    mkt_pos_dp[order.market_id] = market_position_decimals(
-                        market_id=order.market_id, data_client=data_client
-                    )
-                    mkt_price_dp[order.market_id] = market_price_decimals(
-                        market_id=order.market_id, data_client=data_client
-                    )
-                queue.put(
-                    _order_from_proto(
+    def _order_gen(order_stream: Iterable[vega_protos.vega.Order]) -> Iterable[Order]:
+        mkt_pos_dp = {}
+        mkt_price_dp = {}
+        try:
+            for order_list in order_stream:
+                for order in order_list.orders:
+                    if order.market_id not in mkt_pos_dp:
+                        mkt_pos_dp[order.market_id] = market_position_decimals(
+                            market_id=order.market_id, data_client=data_client
+                        )
+                        mkt_price_dp[order.market_id] = market_price_decimals(
+                            market_id=order.market_id, data_client=data_client
+                        )
+                    yield _order_from_proto(
                         order,
                         mkt_price_dp[order.market_id],
                         mkt_pos_dp[order.market_id],
                     )
-                )
-    except Exception as e:
-        logger.info("Order subscription closed")
-        return
+        except Exception as _:
+            logger.info("Order subscription closed")
+            return
+
+    return _order_gen(order_stream=order_stream)
 
 
 def has_liquidity_provision(

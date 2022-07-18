@@ -91,11 +91,7 @@ class IdealMarketMaker(Scenario):
         self.market_name = f"ETH:USD" if market_name is None else market_name
         self.asset_name = f"tDAI" if asset_name is None else asset_name
 
-    def set_up_background_market(
-        self,
-        vega: VegaServiceNull,
-        tag: str = "",
-    ) -> MarketEnvironmentWithState:
+    def _generate_price_process(self):
         _, price_process = RW_model(
             T=self.num_steps * self.dt,
             dt=self.dt,
@@ -103,10 +99,18 @@ class IdealMarketMaker(Scenario):
             sigma=self.sigma,
             Midprice=self.initial_price,
         )
+        return price_process
 
+    def set_up_background_market(
+        self,
+        vega: VegaServiceNull,
+        tag: str = "",
+    ) -> MarketEnvironmentWithState:
         # Set up market name and settlement asset
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
+
+        price_process = self._generate_price_process()
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
@@ -114,7 +118,7 @@ class IdealMarketMaker(Scenario):
             terminate_wallet_name=TERMINATE_WALLET.name,
             terminate_wallet_pass=TERMINATE_WALLET.passphrase,
             initial_asset_mint=self.initial_asset_mint,
-            price_processs=price_process,
+            price_process=price_process,
             spread=self.spread,
             num_steps=self.num_steps,
             market_order_arrival_rate=self.buy_intensity,
@@ -216,7 +220,6 @@ class IdealMarketMaker(Scenario):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
