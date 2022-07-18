@@ -135,7 +135,7 @@ def vega_service():
         run_with_console=False,
         start_order_feed=False,
         retain_log_files=True,
-        transactions_per_block=50,
+        transactions_per_block=1,
     ) as vega:
         yield vega
 
@@ -144,7 +144,7 @@ def vega_service():
 def vega_service_with_order_feed():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=False,
+        run_with_console=True,
         start_order_feed=True,
         retain_log_files=True,
         transactions_per_block=1,
