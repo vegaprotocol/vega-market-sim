@@ -144,7 +144,7 @@ def vega_service():
 def vega_service_with_order_feed():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=True,
+        run_with_console=False,
         start_order_feed=True,
         retain_log_files=True,
         transactions_per_block=1,
