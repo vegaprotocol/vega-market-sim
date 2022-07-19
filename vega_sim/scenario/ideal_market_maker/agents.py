@@ -69,7 +69,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.adp = asset_decimal
         self.mdp = market_decimal
         self.current_step = 0
-
+        self.initial_asset_mint = 0
         self.tag = tag
 
         self.optimal_bid, self.optimal_ask, _ = A_S_MMmodel(
@@ -126,12 +126,12 @@ class OptimalMarketMaker(StateAgentWithWallet):
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=ccy_name)
         # Top up asset
-        self.initial = 100000
+        self.initial_asset_mint = 100000
         self.vega.wait_for_datanode_sync()
         self.vega.mint(
             self.wallet_name,
             asset=self.tdai_id,
-            amount=self.initial,
+            amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_datanode_sync()

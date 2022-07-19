@@ -46,6 +46,5 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
             asset_id=asset_id,
             market_id=market_id,
         )
-        assert margin < 100
+        assert margin + general < 200
         assert bond == 0
-        assert general < 100

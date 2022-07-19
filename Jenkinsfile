@@ -86,7 +86,7 @@ pipeline {
             steps {
                 dir('vega-market-sim') {
                     sh label: 'Run Integration Tests', script: '''
-                        scripts/run-docker-integration-test.sh
+                        scripts/run-docker-integration-test.sh ${BUILD_NUMBER}
                     '''
                 }
                 dir('vega-market-sim') {
