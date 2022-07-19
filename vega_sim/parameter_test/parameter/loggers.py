@@ -71,7 +71,7 @@ def _ideal_market_maker_single_data_extraction(
         entry_price = 0
     else:
         realised_pnl_lp = round(float(position[0].realised_pnl), mm_agent.adp)
-        unrealised_pnl_lp = round(float(position[0].unrealised_pnl),mm_agent.adp)
+        unrealised_pnl_lp = round(float(position[0].unrealised_pnl), mm_agent.adp)
         inventory_lp = int(position[0].open_volume)
         entry_price = float(position[0].average_entry_price) / 10**mm_agent.mdp
 
@@ -91,7 +91,9 @@ def _ideal_market_maker_single_data_extraction(
         vega.infrastructure_fee_accounts(asset_id=mm_agent.tdai_id)[0].balance
     )
     infrafee /= 10**mm_agent.adp
-    infrafee_rate = float(vega.market_info(market_id=mm_agent.market_id).fees.factors.infrastructure_fee)
+    infrafee_rate = float(
+        vega.market_info(market_id=mm_agent.market_id).fees.factors.infrastructure_fee
+    )
     traded_notional = round(infrafee / infrafee_rate, 3)
 
     additional_fns = additional_data_fns if additional_data_fns is not None else []
@@ -100,7 +102,10 @@ def _ideal_market_maker_single_data_extraction(
         "LP: General Account": general_lp,
         "LP: Margin Account": margin_lp,
         "LP: Bond Account": bond_lp,
-        "LP: GeneralPnl": general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint,
+        "LP: GeneralPnl": general_lp
+        + margin_lp
+        + bond_lp
+        - mm_agent.initial_asset_mint,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
@@ -120,6 +125,7 @@ def _ideal_market_maker_single_data_extraction(
         base_logs.update(data_fn(vega, agents))
 
     return base_logs
+
 
 def v1_ideal_mm_additional_data(
     vega: VegaServiceNull,
@@ -168,6 +174,7 @@ def tau_scaling_additional_data(
         / 10**market_info.position_decimal_places
     }
 
+
 def limit_order_book(
     vega: VegaServiceNull,
     agents: List[Agent],
@@ -181,20 +188,28 @@ def limit_order_book(
     order_book = vega.open_orders_by_market(market_id=mm_agent.market_id)
     LOB_bids = {}
     LOB_asks = {}
-    
+
     for _ in range(len(order_book.bids)):
         if order_book.bids[_].price not in LOB_bids:
-            LOB_bids[order_book.bids[_].price] = order_book.bids[_].remaining
+            LOB_bids[order_book.bids[_].price] = round(
+                order_book.bids[_].remaining, mm_agent.market_position_decimal
+            )
         else:
-            LOB_bids[order_book.bids[_].price] += order_book.bids[_].remaining
+            LOB_bids[order_book.bids[_].price] += round(
+                order_book.bids[_].remaining, mm_agent.market_position_decimal
+            )
 
     for _ in range(len(order_book.asks)):
         if order_book.asks[_].price not in LOB_asks:
-            LOB_asks[order_book.asks[_].price] = order_book.asks[_].remaining
+            LOB_asks[order_book.asks[_].price] = round(
+                order_book.asks[_].remaining, mm_agent.market_position_decimal
+            )
         else:
-            LOB_asks[order_book.asks[_].price] += order_book.asks[_].remaining
+            LOB_asks[order_book.asks[_].price] += round(
+                order_book.asks[_].remaining, mm_agent.market_position_decimal
+            )
 
     return {
-        "Order Book Bid Side": round(LOB_bids, mm_agent.market_position_decimal),
-        "Order Book Ask Side": round(LOB_asks, mm_agent.market_position_decimal),
+        "Order Book Bid Side": LOB_bids,
+        "Order Book Ask Side": LOB_asks,
     }
