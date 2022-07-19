@@ -1,4 +1,4 @@
-VEGA_TAG := develop
+VEGA_TAG := 740c9f7
 DATA_NODE_TAG := develop
 CONSOLE_TAG := master
 PROTO_TAG := develop
