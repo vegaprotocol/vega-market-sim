@@ -1,4 +1,4 @@
-VEGA_TAG := 404f93a
+VEGA_TAG := 740c9f7
 DATA_NODE_TAG := develop
 CONSOLE_TAG := master
 PROTO_TAG := develop
@@ -8,7 +8,7 @@ all: pull_deps build_deps
 
 ui: pull_deps_ui build_deps_ui
 
-proto: pull_deps_proto build_proto
+proto: pull_deps_proto build_proto black
 
 pull_deps:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi

@@ -48,4 +48,4 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
         )
         assert margin < 100
         assert bond == 0
-        assert general < 100
+        assert general < 200
