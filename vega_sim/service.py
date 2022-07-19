@@ -904,7 +904,6 @@ class VegaService(ABC):
         sell_specs: List[Tuple[str, int, int]],
         market_decimals: int,
     ) -> vega_protos.governance.NewMarketCommitment:
-
         buy_specs = [
             (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
         ]
@@ -1080,16 +1079,16 @@ class VegaService(ABC):
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
         with self.orders_lock:
-            order_dict = copy.deepcopy(self._order_state_from_feed)
-        if live_only:
-            to_delete = []
-            for market_id, party_orders in order_dict.items():
+            order_dict = {}
+            for market_id, party_orders in self._order_state_from_feed.items():
                 for party_id, orders in party_orders.items():
                     for order_id, order in orders.items():
-                        if order.status != vega_protos.vega.Order.Status.STATUS_ACTIVE:
-                            to_delete.append((market_id, party_id, order_id))
-            for market_id, party_id, order_id in to_delete:
-                del order_dict[market_id][party_id][order_id]
+                        if not live_only or (
+                            order.status == vega_protos.vega.Order.Status.STATUS_ACTIVE
+                        ):
+                            order_dict.setdefault(market_id, {}).setdefault(
+                                party_id, {}
+                            )[order_id] = order
         return order_dict
 
     def orders_for_party_from_feed(
