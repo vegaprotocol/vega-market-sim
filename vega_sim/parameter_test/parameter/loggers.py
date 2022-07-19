@@ -70,14 +70,14 @@ def _ideal_market_maker_single_data_extraction(
         inventory_lp = 0
         entry_price = 0
     else:
-        realised_pnl_lp = float(position[0].realised_pnl)
-        unrealised_pnl_lp = float(position[0].unrealised_pnl)
+        realised_pnl_lp = round(float(position[0].realised_pnl), mm_agent.adp)
+        unrealised_pnl_lp = round(float(position[0].unrealised_pnl),mm_agent.adp)
         inventory_lp = int(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price)
+        entry_price = float(position[0].average_entry_price) / 10**mm_agent.mdp
 
     market_state = vega.market_info(market_id=mm_agent.market_id).state
     market_data = vega.market_data(market_id=mm_agent.market_id)
-    markprice = float(market_data.mark_price)
+    markprice = float(market_data.mark_price) / 10**mm_agent.mdp
     trading_mode = market_data.market_trading_mode
 
     liquifee, insurance = [
@@ -90,13 +90,9 @@ def _ideal_market_maker_single_data_extraction(
     infrafee = int(
         vega.infrastructure_fee_accounts(asset_id=mm_agent.tdai_id)[0].balance
     )
-
-    realised_pnl_lp /= 10**mm_agent.adp
-    unrealised_pnl_lp /= 10**mm_agent.adp
-    entry_price /= 10**mm_agent.mdp
-
-    markprice /= 10**mm_agent.mdp
     infrafee /= 10**mm_agent.adp
+    infrafee_rate = float(vega.market_info(market_id=mm_agent.market_id).fees.factors.infrastructure_fee)
+    traded_notional = round(infrafee / infrafee_rate, 3)
 
     additional_fns = additional_data_fns if additional_data_fns is not None else []
     base_logs = {
@@ -104,18 +100,19 @@ def _ideal_market_maker_single_data_extraction(
         "LP: General Account": general_lp,
         "LP: Margin Account": margin_lp,
         "LP: Bond Account": bond_lp,
-        "LP: General Pnl": general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint,
+        "LP: GeneralPnl": general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
-        "LP: Bid Depth": -mm_agent.bid_depth,
-        "LP: Ask Depth": mm_agent.ask_depth,
-        "External Midprice": mm_agent.price_process[mm_agent.current_step - 1],
+        "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp),
+        "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp),
+        "Midprice": mm_agent.price_process[mm_agent.current_step - 1],
         "Markprice": markprice,
-        "Average Entry price": entry_price,
+        "LP: entry price": entry_price,
         "InsurancePool": insurance,
         "LiquifeeAccount": liquifee,
         "InfrafeeAccount": infrafee,
+        "Total Traded Notional": traded_notional,
         "Market Trading mode": trading_mode,
         "Market State": market_state,
     }
@@ -123,7 +120,6 @@ def _ideal_market_maker_single_data_extraction(
         base_logs.update(data_fn(vega, agents))
 
     return base_logs
-
 
 def v1_ideal_mm_additional_data(
     vega: VegaServiceNull,
@@ -170,4 +166,35 @@ def tau_scaling_additional_data(
     return {
         "Market Open Interest": int(market_data.open_interest)
         / 10**market_info.position_decimal_places
+    }
+
+def limit_order_book(
+    vega: VegaServiceNull,
+    agents: List[Agent],
+) -> Dict[str, Any]:
+    mm_agent = [
+        agent
+        for agent in agents
+        if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
+    ][0]
+
+    order_book = vega.open_orders_by_market(market_id=mm_agent.market_id)
+    LOB_bids = {}
+    LOB_asks = {}
+    
+    for _ in range(len(order_book.bids)):
+        if order_book.bids[_].price not in LOB_bids:
+            LOB_bids[order_book.bids[_].price] = order_book.bids[_].remaining
+        else:
+            LOB_bids[order_book.bids[_].price] += order_book.bids[_].remaining
+
+    for _ in range(len(order_book.asks)):
+        if order_book.asks[_].price not in LOB_asks:
+            LOB_asks[order_book.asks[_].price] = order_book.asks[_].remaining
+        else:
+            LOB_asks[order_book.asks[_].price] += order_book.asks[_].remaining
+
+    return {
+        "Order Book Bid Side": LOB_bids,
+        "Order Book Ask Side": LOB_asks,
     }
