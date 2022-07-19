@@ -86,8 +86,7 @@ pipeline {
             steps {
                 dir('vega-market-sim') {
                     sh label: 'Run Integration Tests', script: '''
-                        echo ${scmVars.GIT_BRANCH}
-                        scripts/run-docker-integration-test.sh ${scmVars.GIT_BRANCH}
+                        scripts/run-docker-integration-test.sh ${BUILD_NUMBER}
                     '''
                 }
                 dir('vega-market-sim') {
