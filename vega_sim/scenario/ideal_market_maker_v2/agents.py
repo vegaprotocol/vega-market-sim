@@ -193,7 +193,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         ][0]
 
     def optimal_strategy(self, current_position):
-
         if current_position >= self.q_upper:
             current_bid_depth = (
                 self.optimal_bid[self.current_step, 0]
@@ -245,7 +244,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
         for order in (
             vega_state.market_state.get(self.market_id, {})
-            .orders[self.vega.wallet.public_key(self.wallet_name)]
+            .orders.get(self.vega.wallet.public_key(self.wallet_name), {})
             .values()
         ):
             if order.side == vega_protos.SIDE_BUY:
@@ -277,7 +276,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         buy_order: Optional[str] = None,
         sell_order: Optional[str] = None,
     ):
-
         self._place_or_amend_order(
             offset=buy_offset,
             volume=volume,
