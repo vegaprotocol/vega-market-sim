@@ -52,7 +52,7 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
 def wait_for_datanode_sync(
     trading_data_client: VegaTradingDataClient,
     core_data_client: VegaCoreClient,
-    max_retries: int = 1000,
+    max_retries: int = 650,
 ) -> None:
     """Waits for Datanode to catch up to vega core client.
     Note: Will wait for datanode 'latest' time to catch up to core time
@@ -61,13 +61,16 @@ def wait_for_datanode_sync(
 
     As such, this ensures that the data node has data from the core
     *at the time of call* not necessarily the latest data when the function returns.
+
+    Wait time is exponential with increasing retries
+    (each attempt waits 0.0005 * 1.01^attempt_num seconds).
     """
     attempts = 1
     core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     trading_time = trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
 
     while core_time > trading_time:
-        time.sleep(0.0005)
+        time.sleep(0.0005 * 1.01**attempts)
         trading_time = trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
         attempts += 1
         if attempts >= max_retries:
