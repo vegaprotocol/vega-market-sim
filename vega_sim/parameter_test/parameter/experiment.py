@@ -12,6 +12,7 @@ from vega_sim.null_service import VegaServiceNull
 PARAMETER_AMEND_WALLET = ("param", "amend")
 
 FILE_PATTERN = "NETP_{param_name}_{param_value}.csv"
+FILE_PATTERN_LOB = "NETP_{param_name}_{param_value}_LOB.csv"
 OUTPUT_DIR = "parameter_results"
 
 
@@ -105,14 +106,35 @@ def output_logs(
         file_path = final_folder / FILE_PATTERN.format(
             param_name=parameter_name, param_value=value
         )
+
+        file_path_LOB = final_folder / FILE_PATTERN_LOB.format(
+            param_name=parameter_name, param_value=value
+        )
+
         with open(file_path, "w") as f:
             csv_writer = csv.writer(f, delimiter=",")
-            # Keys should not change throughout, so just take the first
+            # Keys should not change throughout, so just take the first            
             headers = (
                 list(result_list[0][0].keys()) if col_ordering is None else col_ordering
             )
+            if 'Order Book Bid Side' in result_list[0][0]:
+                headers.remove('Order Book Bid Side')
+                headers.remove('Order Book Ask Side')
 
             csv_writer.writerow(["Iteration"] + headers)
             for i, res in enumerate(result_list):
                 for row in res:
                     csv_writer.writerow([i] + [row[c] for c in headers])
+        
+        if 'Order Book Bid Side' in result_list[0][0]:
+            with open(file_path_LOB, "w") as f:
+                csv_writer = csv.writer(f, delimiter=",")
+                # Keys should not change throughout, so just take the first
+                headers = (
+                    ['Time Step', 'Order Book Bid Side', 'Order Book Ask Side']
+                )
+
+                csv_writer.writerow(["Iteration"] + headers)
+                for i, res in enumerate(result_list):
+                    for row in res:
+                        csv_writer.writerow([i] + [row[c] for c in headers])
