@@ -195,6 +195,6 @@ def limit_order_book(
             LOB_asks[order_book.asks[_].price] += order_book.asks[_].remaining
 
     return {
-        "Order Book Bid Side": LOB_bids,
-        "Order Book Ask Side": LOB_asks,
+        "Order Book Bid Side": round(LOB_bids, mm_agent.market_position_decimal),
+        "Order Book Ask Side": round(LOB_asks, mm_agent.market_position_decimal),
     }
