@@ -7,6 +7,7 @@ from typing import Dict, Iterable, List, Optional
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 
 MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
@@ -202,8 +203,10 @@ def liquidity_provisions(
         List[LiquidityProvision], list of liquidity provisions (if any exist)
     """
     return data_client.LiquidityProvisions(
-        data_node_protos.trading_data.LiquidityProvisionsRequest(
-            market=market_id, party=party_id
+        data_node_protos_v2.trading_data.GetLiquidityProvisionsRequest(
+            market=market_id,
+            party=party_id,
+            pagination=data_node_protos_v2.trading_data.Pagination(first=0, last=100),
         )
     ).liquidity_provisions
 

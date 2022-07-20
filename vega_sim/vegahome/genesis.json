@@ -45,18 +45,6 @@
             "max_faucet_amount_mint": "10000000000"
           }
         }
-      },
-      "XYZ": {
-        "name": "XYZ",
-        "symbol": "XYZ",
-        "total_supply": "0",
-        "decimals": 5,
-        "min_lp_stake": "1",
-        "source": {
-          "builtin_asset": {
-            "max_faucet_amount_mint": "10000000000"
-          }
-        }
       }
     },
     "validators": {

@@ -20,7 +20,12 @@ import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
-from vega_sim.api.helpers import forward, num_to_padded_int, wait_for_datanode_sync
+from vega_sim.api.helpers import (
+    forward,
+    num_to_padded_int,
+    wait_for_core_catchup,
+    wait_for_datanode_sync,
+)
 from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
@@ -205,10 +210,15 @@ class VegaService(ABC):
     def wait_for_datanode_sync(self) -> None:
         wait_for_datanode_sync(self.trading_data_client, self.core_client)
 
+    def wait_for_core_catchup(self) -> None:
+        wait_for_core_catchup(self.core_client)
+
+    def wait_for_total_catchup(self) -> None:
+        self.wait_for_core_catchup()
+        self.wait_for_datanode_sync()
+
     def stop(self) -> None:
-        if self.order_thread is not None:
-            self.order_queue.put(None)
-            self.order_thread.join()
+        pass
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -295,7 +305,7 @@ class VegaService(ABC):
             quantum:
                 int, The smallest unit of currency it makes sense to talk about
             max_faucet_amount:
-                int, The maximum number of tokens which can be fauceted (in asset decimal precision)
+                int, The maximum number of tokens which can be fauceted (in full decimal numbers, rather than asset decimal)
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
@@ -306,7 +316,7 @@ class VegaService(ABC):
             symbol=symbol,
             total_supply=total_supply,
             decimals=decimals,
-            max_faucet_amount=max_faucet_amount,
+            max_faucet_amount=max_faucet_amount * 10**decimals,
             quantum=quantum,
             data_client=self.trading_data_client,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
@@ -1070,7 +1080,7 @@ class VegaService(ABC):
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
         with self.orders_lock:
-            order_dict = copy.copy(self._order_state_from_feed)
+            order_dict = copy.deepcopy(self._order_state_from_feed)
         if live_only:
             to_delete = []
             for market_id, party_orders in order_dict.items():
@@ -1163,16 +1173,12 @@ class VegaService(ABC):
                 )[order.id] = order
 
         self.order_thread = threading.Thread(
-            target=self._monitor_stream, args=(self.order_queue,)
+            target=self._monitor_stream, args=(self.order_queue,), daemon=True
         )
         self.order_thread.start()
 
     def _monitor_stream(self, trade_stream: Queue[data.Order]):
-        while True:
-            o = trade_stream.get()
-            if o is None:
-                break
-
+        for o in trade_stream:
             with self.orders_lock:
                 if o.version >= getattr(
                     self._order_state_from_feed.setdefault(o.market_id, {})
