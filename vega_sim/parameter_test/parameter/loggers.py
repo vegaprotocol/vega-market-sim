@@ -1,4 +1,5 @@
 import functools
+import vega_sim.proto.vega as vega_protos
 from typing import Any, Callable, Dict, List, Optional
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.environment.agent import Agent
@@ -184,30 +185,32 @@ def limit_order_book(
         for agent in agents
         if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
     ][0]
-
-    order_book = vega.open_orders_by_market(market_id=mm_agent.market_id)
+    order_book = []
+    for _ , orders in vega.order_status_from_feed(live_only=True).get(mm_agent.market_id, {}).items():
+        order_book += list(orders.values())
+        
     LOB_bids = {}
     LOB_asks = {}
 
-    for _ in range(len(order_book.bids)):
-        if order_book.bids[_].price not in LOB_bids:
-            LOB_bids[order_book.bids[_].price] = round(
-                order_book.bids[_].remaining, mm_agent.market_position_decimal
-            )
+    for order in order_book:
+        if order.side == vega_protos.vega.Side.SIDE_BUY:
+            if order.price not in LOB_bids:
+                LOB_bids[order.price] = round(
+                    order.remaining, mm_agent.market_position_decimal
+                )
+            else:
+                LOB_bids[order.price] += round(
+                    order.remaining, mm_agent.market_position_decimal
+                )
         else:
-            LOB_bids[order_book.bids[_].price] += round(
-                order_book.bids[_].remaining, mm_agent.market_position_decimal
-            )
-
-    for _ in range(len(order_book.asks)):
-        if order_book.asks[_].price not in LOB_asks:
-            LOB_asks[order_book.asks[_].price] = round(
-                order_book.asks[_].remaining, mm_agent.market_position_decimal
-            )
-        else:
-            LOB_asks[order_book.asks[_].price] += round(
-                order_book.asks[_].remaining, mm_agent.market_position_decimal
-            )
+            if order.price not in LOB_asks:
+                LOB_asks[order.price] = round(
+                    order.remaining, mm_agent.market_position_decimal
+                )
+            else:
+                LOB_asks[order.price] += round(
+                    order.remaining, mm_agent.market_position_decimal
+                )
 
     return {
         "Order Book Bid Side": LOB_bids,
