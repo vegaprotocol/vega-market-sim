@@ -69,7 +69,6 @@ TARGET_STAKE_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
         num_steps=288,
         backgroundmarket_tick_spacing=0.002,
         backgroundmarket_number_levels_per_side=20,
-
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
@@ -107,7 +106,6 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
         num_steps=288,
         backgroundmarket_tick_spacing=0.002,
         backgroundmarket_number_levels_per_side=25,
-
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
