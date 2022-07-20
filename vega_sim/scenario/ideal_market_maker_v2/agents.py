@@ -41,7 +41,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         wallet_pass: str,
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
-        price_processs: List[float],
+        price_process: List[float],
         initial_asset_mint: float = 1000000,
         spread: float = 0.002,
         num_steps: int = 180,
@@ -63,7 +63,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.terminate_wallet_name = terminate_wallet_name + str(tag)
         self.terminate_wallet_pass = terminate_wallet_pass
 
-        self.price_process = price_processs
+        self.price_process = price_process
         self.spread = spread
         self.time = num_steps
         self.Lambda = market_order_arrival_rate
@@ -122,7 +122,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
 
         # Faucet vega tokens
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         self.vega.mint(
             self.wallet_name,
             asset="VOTE",
@@ -139,7 +139,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             max_faucet_amount=1e20,
         )
         self.vega.wait_fn(5)
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
@@ -148,7 +148,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             asset=self.tdai_id,
             amount=self.initial_asset_mint,
         )
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
 
         self.vega.update_network_parameter(
             self.wallet_name,
@@ -156,7 +156,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             "1e-6",
         )
 
-        self.vega.wait_for_datanode_sync()
+        self.vega.wait_for_total_catchup()
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.stakeToCcySiskas",

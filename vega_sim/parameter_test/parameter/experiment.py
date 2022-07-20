@@ -93,9 +93,10 @@ def output_logs(
     results: Dict[str, List[List[Tuple[List[Any], Dict[str, Any]]]]],
     parameter_name: str,
     experiment: Experiment,
-    result_folder: str = OUTPUT_DIR,
+    result_folder: Optional[str] = None,
     col_ordering: Optional[List[str]] = None,
 ):
+    result_folder = result_folder or OUTPUT_DIR
     final_folder = pathlib.Path(result_folder) / experiment.name
     os.makedirs(final_folder, exist_ok=True)
 

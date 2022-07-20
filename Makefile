@@ -1,5 +1,4 @@
-VEGA_TAG := develop
-WALLET_TAG := develop
+VEGA_TAG := 404f93a
 DATA_NODE_TAG := develop
 CONSOLE_TAG := master
 PROTO_TAG := develop
@@ -28,18 +27,11 @@ ifneq (${DATA_NODE_TAG},develop)
 else
 	@git -C ${EXTERN_DIR}/data-node checkout develop; git -C ${EXTERN_DIR}/data-node pull
 endif
-	@echo "Downloading Vegawallet"
-	@if [ ! -d ./extern/vegawallet ]; then mkdir ./extern/vegawallet; git clone https://github.com/vegaprotocol/vegawallet ${EXTERN_DIR}/vegawallet; fi
-ifneq (${WALLET_TAG},develop)
-	@git -C ${EXTERN_DIR}/vegawallet pull; git -C ${EXTERN_DIR}/vegawallet checkout ${WALLET_TAG}
-else
-	@git -C ${EXTERN_DIR}/vegawallet checkout develop; git -C ${EXTERN_DIR}/vegawallet pull
-endif
+
 
 build_deps:
 	@mkdir -p ./vega_sim/bin
 	cd ${EXTERN_DIR}/vega && go build -o ../../vega_sim/bin/ ./...
-	cd ${EXTERN_DIR}/vegawallet && go build -o ../../vega_sim/bin/ ./...
 	cd ${EXTERN_DIR}/data-node && go build -o ../../vega_sim/bin/ ./...
 
 pull_deps_ui:

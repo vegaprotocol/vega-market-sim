@@ -178,6 +178,16 @@ class MarketEnvironment:
         start_time = vega.get_blockchain_time()
         for i in range(self.n_steps):
             self.step(vega)
+
+            # Ensure core is caught up
+            core_catchup_start = datetime.datetime.now()
+            vega.wait_for_core_catchup()
+            core_catchup_seconds = (
+                datetime.datetime.now() - core_catchup_start
+            ).seconds
+            if core_catchup_seconds > 1:
+                logger.warn(f"Waited {core_catchup_seconds}s for core catchup")
+
             if (
                 self._state_extraction_fn is not None
                 and i % self._state_extraction_freq == 0
@@ -209,6 +219,8 @@ class MarketEnvironment:
 
         for agent in self.agents:
             agent.finalise()
+        vega.wait_for_core_catchup()
+        vega.wait_for_datanode_sync()
 
         if self._state_extraction_fn is not None:
             state_values.append(self._state_extraction_fn(vega, self.agents))
@@ -317,8 +329,8 @@ class MarketEnvironmentWithState(MarketEnvironment):
             state_func if state_func is not None else self._default_state_extraction
         )
 
-    @staticmethod
-    def _default_state_extraction(vega: VegaService) -> VegaState:
+    # @staticmethod
+    def _default_state_extraction(self, vega: VegaService) -> VegaState:
         market_state = {}
         order_status = vega.order_status_from_feed(live_only=True)
         for market in vega.all_markets():
@@ -327,12 +339,12 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 state=market_info.state,
                 trading_mode=market_info.trading_mode,
                 orders=order_status.get(market.id, {}),
-                # order_book=vega.order_book_by_market(market.id),
             )
 
         return VegaState(network_state=(), market_state=market_state)
 
     def step(self, vega: VegaService) -> None:
+        vega.wait_for_datanode_sync()
         state = self.state_func(vega)
         for agent in (
             sorted(self.agents, key=lambda _: random.random())
