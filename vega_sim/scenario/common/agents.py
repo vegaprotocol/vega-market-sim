@@ -162,12 +162,12 @@ class BackgroundMarket(StateAgentWithWallet):
 
         initial_price = self.price_process[self.current_step]
         buy_shape = self._calculate_price_volume_levels(
-            initial_price - self.spread,
+            initial_price - self.spread / 2,
             initial_price,
             side=vega_protos.SIDE_BUY,
         )
         sell_shape = self._calculate_price_volume_levels(
-            initial_price + self.spread,
+            initial_price + self.spread / 2,
             initial_price,
             side=vega_protos.SIDE_SELL,
         )
