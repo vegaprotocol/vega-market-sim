@@ -1,9 +1,7 @@
-from threading import Thread
-from typing import Any, Callable
 import grpc
 import pytest
 from concurrent.futures import ThreadPoolExecutor
-from vega_sim.grpc.client import VegaTradingDataClient
+from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClient
 from vega_sim.null_service import find_free_port
 
 import vega_sim.proto.data_node.api.v1 as data_node_protos
@@ -27,6 +25,12 @@ from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
     TradingDataServiceServicer,
     add_TradingDataServiceServicer_to_server,
 )
+from vega_sim.proto.vega.api.v1.core_pb2_grpc import (
+    CoreServiceServicer,
+    add_CoreServiceServicer_to_server,
+)
+
+import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 
 
 @pytest.fixture
@@ -40,6 +44,19 @@ def trading_data_servicer_and_port():
         pass
 
     return server, port, MockTradingDataServicer
+
+
+@pytest.fixture
+def core_servicer_and_port():
+    server = grpc.server(ThreadPoolExecutor(1))
+    port = find_free_port()
+    server.add_insecure_port(f"[::]:{port}")
+    server.start()
+
+    class MockCoreServicer(CoreServiceServicer):
+        pass
+
+    return server, port, MockCoreServicer
 
 
 def test_positions_by_market(trading_data_servicer_and_port):
@@ -375,8 +392,8 @@ def test_liquidity_provisions(trading_data_servicer_and_port):
     assert res[0].market_id == "MARKET"
 
 
-def test_order_subscription(trading_data_servicer_and_port):
-    def OrdersSubscribe(self, request, context):
+def test_order_subscription(core_servicer_and_port):
+    def ObserveEventBus(self, request, context):
         orders = [
             vega_protos.vega.Order(
                 id="id1",
@@ -499,16 +516,16 @@ def test_order_subscription(trading_data_servicer_and_port):
             ),
         ]
         for order_chunk in [orders[:3], orders[3:6], orders[6:]]:
-            yield data_node_protos.trading_data.OrdersSubscribeResponse(
-                orders=order_chunk
+            yield vega_protos.api.v1.core.ObserveEventBusResponse(
+                events=[events_protos.BusEvent(order=order) for order in order_chunk]
             )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.OrdersSubscribe = OrdersSubscribe
+    server, port, mock_servicer = core_servicer_and_port
+    mock_servicer.ObserveEventBus = ObserveEventBus
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_CoreServiceServicer_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaCoreClient(f"localhost:{port}")
 
     queue = order_subscription(
         data_client=data_client,
@@ -518,6 +535,6 @@ def test_order_subscription(trading_data_servicer_and_port):
     batch_two = next(queue)
     batch_three = next(queue)
 
-    assert len(batch_one.orders) == 3
-    assert len(batch_two.orders) == 3
-    assert len(batch_three.orders) == 1
+    assert len(batch_one.events) == 3
+    assert len(batch_two.events) == 3
+    assert len(batch_three.events) == 1

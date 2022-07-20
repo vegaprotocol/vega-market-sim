@@ -545,7 +545,9 @@ def order_subscription(
         data_client=data_client, market_id=market_id, party_id=party_id
     )
 
-    def _order_gen(order_stream: Iterable[vega_protos.vega.Order]) -> Iterable[Order]:
+    def _order_gen(
+        order_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    ) -> Iterable[Order]:
         mkt_pos_dp = {}
         mkt_price_dp = {}
         try:

@@ -216,7 +216,7 @@ def order_subscription(
     data_client: vac.VegaCoreClient,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
-) -> Iterable[List[vega_protos.vega.Order]]:
+) -> Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
     """Subscribe to a stream of Order updates from the data-node.
     The stream of orders returned from this function is an iterable which
     does not end and will continue to tick another order update whenever
