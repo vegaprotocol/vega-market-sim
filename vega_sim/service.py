@@ -1152,7 +1152,10 @@ class VegaService(ABC):
         party_id: Optional[str] = None,
     ):
         self.order_queue = data.order_subscription(
-            self.trading_data_client, market_id=market_id, party_id=party_id
+            self.core_client,
+            self.trading_data_client,
+            market_id=market_id,
+            party_id=party_id,
         )
         base_orders = []
 

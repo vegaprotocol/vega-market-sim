@@ -522,7 +522,8 @@ def market_depth(
 
 
 def order_subscription(
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClient,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[Order]:
@@ -549,13 +550,14 @@ def order_subscription(
         mkt_price_dp = {}
         try:
             for order_list in order_stream:
-                for order in order_list.orders:
+                for bus_event in order_list.events:
+                    order = bus_event.order
                     if order.market_id not in mkt_pos_dp:
                         mkt_pos_dp[order.market_id] = market_position_decimals(
-                            market_id=order.market_id, data_client=data_client
+                            market_id=order.market_id, data_client=trading_data_client
                         )
                         mkt_price_dp[order.market_id] = market_price_decimals(
-                            market_id=order.market_id, data_client=data_client
+                            market_id=order.market_id, data_client=trading_data_client
                         )
                     yield _order_from_proto(
                         order,
