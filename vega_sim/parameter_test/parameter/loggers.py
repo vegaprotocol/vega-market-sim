@@ -10,25 +10,31 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
 
 
 BASE_IDEAL_MM_CSV_HEADERS = [
-    "Iteration",
     "Time Step",
     "LP: General Account",
     "LP: Margin Account",
     "LP: Bond Account",
-    "LP: General Pnl",
+    "LP: GeneralPnl",
     "LP: RealisedPnl",
     "LP: UnrealisedPnl",
     "LP: Position",
-    "LP: Bid Depth",
-    "LP: Ask Depth",
-    "External Midprice",
+    "LP: Bid",
+    "LP: Ask",
+    "Midprice",
     "Markprice",
-    "Average Entry price",
+    "LP: entry price",
     "InsurancePool",
     "LiquifeeAccount",
     "InfrafeeAccount",
+    "Total Traded Notional",
     "Market Trading mode",
     "Market State",
+]
+
+LOB_CSV_HEADERS = [
+    "Time Step",
+    "Order Book Bid Side",
+    "Order Book Ask Side",
 ]
 
 
@@ -186,9 +192,11 @@ def limit_order_book(
         if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
     ][0]
     order_book = []
-    for _ , orders in vega.order_status_from_feed(live_only=True).get(mm_agent.market_id, {}).items():
+    for _, orders in (
+        vega.order_status_from_feed(live_only=True).get(mm_agent.market_id, {}).items()
+    ):
         order_book += list(orders.values())
-        
+
     LOB_bids = {}
     LOB_asks = {}
 

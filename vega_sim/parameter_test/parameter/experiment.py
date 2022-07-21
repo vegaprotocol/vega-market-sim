@@ -33,6 +33,7 @@ class SingleParameterExperiment(Experiment):
     scenario: Scenario
     runs_per_scenario: int = 1
     additional_parameters_to_set: Optional[Dict[str, str]] = None
+    data_extraction: List[Tuple] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -42,6 +43,7 @@ class SingleParameterExperiment(Experiment):
             "scenario": self.scenario.__class__.__name__,
             "num_runs": self.runs_per_scenario,
             "additional_parameters": self.additional_parameters_to_set,
+            "data_extraction": self.data_extraction,
         }
 
 
@@ -93,49 +95,44 @@ def output_logs(
     results: Dict[str, List[List[Tuple[List[Any], Dict[str, Any]]]]],
     parameter_name: str,
     experiment: Experiment,
+    file_pattern: Optional[str] = FILE_PATTERN,
     result_folder: Optional[str] = None,
     col_ordering: Optional[List[str]] = None,
+    config_json: bool = True,
 ):
     result_folder = result_folder or OUTPUT_DIR
     final_folder = pathlib.Path(result_folder) / experiment.name
     os.makedirs(final_folder, exist_ok=True)
 
-    with open(final_folder / "run_config.json", "w") as f:
-        json.dump(experiment.to_dict(), f, indent=4, sort_keys=True)
+    if config_json:
+        with open(final_folder / "run_config.json", "w") as f:
+            json.dump(experiment.to_dict(), f, indent=4, sort_keys=True)
 
-    for value, result_list in results.items():
-        file_path = final_folder / FILE_PATTERN.format(
-            param_name=parameter_name, param_value=value
-        )
-
-        file_path_LOB = final_folder / FILE_PATTERN_LOB.format(
-            param_name=parameter_name, param_value=value
-        )
-
+    if experiment.data_extraction is None:
+        for value, result_list in results.items():
+            file_path = final_folder / file_pattern.format(
+                param_name=parameter_name, param_value=value
+            )
         with open(file_path, "w") as f:
             csv_writer = csv.writer(f, delimiter=",")
-            # Keys should not change throughout, so just take the first            
             headers = (
                 list(result_list[0][0].keys()) if col_ordering is None else col_ordering
             )
-            if 'Order Book Bid Side' in result_list[0][0]:
-                headers.remove('Order Book Bid Side')
-                headers.remove('Order Book Ask Side')
-
             csv_writer.writerow(["Iteration"] + headers)
             for i, res in enumerate(result_list):
                 for row in res:
                     csv_writer.writerow([i] + [row[c] for c in headers])
-        
-        if 'Order Book Bid Side' in result_list[0][0]:
-            with open(file_path_LOB, "w") as f:
-                csv_writer = csv.writer(f, delimiter=",")
-                # Keys should not change throughout, so just take the first
-                headers = (
-                    ['Time Step', 'Order Book Bid Side', 'Order Book Ask Side']
+    else:
+        for value, result_list in results.items():
+            for data_extraction in experiment.data_extraction:
+                file_path = final_folder / data_extraction[0].format(
+                    param_name=parameter_name, param_value=value
                 )
-
-                csv_writer.writerow(["Iteration"] + headers)
-                for i, res in enumerate(result_list):
-                    for row in res:
-                        csv_writer.writerow([i] + [row[c] for c in headers])
+                with open(file_path, "w") as f:
+                    csv_writer = csv.writer(f, delimiter=",")
+                    csv_writer.writerow(["Iteration"] + data_extraction[1])
+                    for i, res in enumerate(result_list):
+                        for row in res:
+                            csv_writer.writerow(
+                                [i] + [row[c] for c in data_extraction[1]]
+                            )
