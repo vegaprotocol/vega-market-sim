@@ -7,6 +7,14 @@ from vega_sim.parameter_test.parameter.loggers import (
     limit_order_book,
 )
 from vega_sim.scenario.registry import IdealMarketMaker, IdealMarketMakerV2
+from vega_sim.parameter_test.parameter.loggers import (
+    BASE_IDEAL_MM_CSV_HEADERS,
+    LOB_CSV_HEADERS,
+)
+from vega_sim.parameter_test.parameter.experiment import (
+    FILE_PATTERN,
+    FILE_PATTERN_LOB,
+)
 
 TARGET_STAKE_SCALING_FACTOR_IDEAL = SingleParameterExperiment(
     name="StakeTargetScaling",
@@ -81,6 +89,10 @@ TARGET_STAKE_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
     ],
+    data_extraction=[
+        (FILE_PATTERN, BASE_IDEAL_MM_CSV_HEADERS),
+        (FILE_PATTERN_LOB, LOB_CSV_HEADERS),
+    ],
 )
 
 TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
@@ -114,9 +126,13 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
             ]
         ),
     ),
-    runs_per_scenario=2,
+    runs_per_scenario=1,
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
+    ],
+    data_extraction=[
+        (FILE_PATTERN, BASE_IDEAL_MM_CSV_HEADERS),
+        (FILE_PATTERN_LOB, LOB_CSV_HEADERS),
     ],
 )
 
