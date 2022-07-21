@@ -9,6 +9,7 @@ import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 
 MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
 
@@ -212,10 +213,10 @@ def liquidity_provisions(
 
 
 def order_subscription(
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaCoreClient,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
-) -> Iterable[List[vega_protos.vega.Order]]:
+) -> Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
     """Subscribe to a stream of Order updates from the data-node.
     The stream of orders returned from this function is an iterable which
     does not end and will continue to tick another order update whenever
@@ -229,8 +230,12 @@ def order_subscription(
     Returns:
         Iterable[List[vega.Order]], Infinite iterable of lists of order updates
     """
-    return data_client.OrdersSubscribe(
-        data_node_protos.trading_data.OrdersSubscribeRequest(
-            market_id=market_id, party_id=party_id
+    return data_client.ObserveEventBus(
+        iter(
+            [
+                vega_protos.api.v1.core.ObserveEventBusRequest(
+                    type=[events_protos.BUS_EVENT_TYPE_ORDER]
+                )
+            ]
         )
     )

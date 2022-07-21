@@ -139,3 +139,5 @@ numerical_results/
 test_logs/
 parameter_results/**/*.csv
 parameter_results/**/*.json
+prof/
+*.prof

@@ -27,9 +27,8 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         run_with_console=False,
-        start_order_feed=False,
+        start_order_feed=True,
     ) as vega:
-
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
 
@@ -105,7 +104,6 @@ if __name__ == "__main__":
             volume=1,
             price=100,
         )
-
         # for i in range(1, 100, 2):
         #     trader = np.random.choice([MM_WALLET.name, MM_WALLET2.name])
 
@@ -163,7 +161,6 @@ if __name__ == "__main__":
             delta_sell=0.5,
             is_amendment=True,
         )
-
         # vega.submit_liquidity(
         #     wallet_name=MM_WALLET2.name,
         #     market_id=market_id,
