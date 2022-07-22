@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from collections import namedtuple
-from queue import Queue
-import threading
-from typing import Dict, Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional, TypeVar
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
@@ -12,6 +10,43 @@ import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 
 MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
+
+T = TypeVar("T")
+S = TypeVar("S")
+U = TypeVar("U")
+
+
+def unroll_pagination(
+    base_request: S, extraction_func: Callable[[S], List[T]], step_size: int = 50
+) -> List[T]:
+    skip = 0
+    base_request.pagination.CopyFrom(
+        data_node_protos.trading_data.Pagination(skip=skip, limit=step_size)
+    )
+    curr_list = extraction_func(base_request)
+    full_list = curr_list
+    while len(curr_list) == step_size:
+        skip += step_size
+        base_request.pagination.skip = skip
+        curr_list = extraction_func(base_request)
+        full_list.extend(curr_list)
+    return full_list
+
+
+def unroll_v2_pagination(
+    base_request: S,
+    request_func: Callable[[S], T],
+    extraction_func: Callable[[S], List[U]],
+) -> List[T]:
+    base_request.pagination.CopyFrom(data_node_protos_v2.trading_data.Pagination())
+    response = request_func(base_request)
+    full_list = extraction_func(response)
+    while response.page_info.has_next_page:
+        base_request.pagination.after = response.page_info.end_cursor
+        response = request_func(base_request)
+        curr_list = extraction_func(response)
+        full_list.extend(curr_list)
+    return full_list
 
 
 def positions_by_market(
@@ -204,10 +239,9 @@ def liquidity_provisions(
         List[LiquidityProvision], list of liquidity provisions (if any exist)
     """
     return data_client.LiquidityProvisions(
-        data_node_protos_v2.trading_data.GetLiquidityProvisionsRequest(
+        data_node_protos.trading_data.LiquidityProvisionsRequest(
             market=market_id,
             party=party_id,
-            pagination=data_node_protos_v2.trading_data.Pagination(first=0, last=100),
         )
     ).liquidity_provisions
 
@@ -238,4 +272,18 @@ def order_subscription(
                 )
             ]
         )
+    )
+
+
+def margin_levels(
+    data_client: vac.VegaTradingDataClientV2,
+    party_id: str,
+    market_id: Optional[str] = None,
+) -> List[vega_protos.vega.MarginLevels]:
+    return unroll_v2_pagination(
+        data_node_protos_v2.trading_data.ListMarginLevelsRequest(
+            market_id=market_id, party_id=party_id
+        ),
+        request_func=lambda x: data_client.ListMarginLevels(x).margin_levels,
+        extraction_func=lambda res: [i.node for i in res.edges],
     )

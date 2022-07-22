@@ -1,10 +1,15 @@
 import grpc
 import pytest
 from concurrent.futures import ThreadPoolExecutor
-from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClient
+from vega_sim.grpc.client import (
+    VegaCoreClient,
+    VegaTradingDataClient,
+    VegaTradingDataClientV2,
+)
 from vega_sim.null_service import find_free_port
 
 import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.data_raw import (
     MarketAccount,
@@ -20,10 +25,15 @@ from vega_sim.api.data_raw import (
     positions_by_market,
     order_subscription,
     order_status_by_reference,
+    margin_levels,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
     TradingDataServiceServicer,
     add_TradingDataServiceServicer_to_server,
+)
+from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
+    TradingDataServiceServicer as TradingDataServiceServicerV2,
+    add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
 )
 from vega_sim.proto.vega.api.v1.core_pb2_grpc import (
     CoreServiceServicer,
@@ -41,6 +51,19 @@ def trading_data_servicer_and_port():
     server.start()
 
     class MockTradingDataServicer(TradingDataServiceServicer):
+        pass
+
+    return server, port, MockTradingDataServicer
+
+
+@pytest.fixture
+def trading_data_v2_servicer_and_port():
+    server = grpc.server(ThreadPoolExecutor(1))
+    port = find_free_port()
+    server.add_insecure_port(f"[::]:{port}")
+    server.start()
+
+    class MockTradingDataServicer(TradingDataServiceServicerV2):
         pass
 
     return server, port, MockTradingDataServicer
@@ -538,3 +561,44 @@ def test_order_subscription(core_servicer_and_port):
     assert len(batch_one.events) == 3
     assert len(batch_two.events) == 3
     assert len(batch_three.events) == 1
+
+
+def test_market_limits(trading_data_v2_servicer_and_port):
+    expected = vega_protos.vega.MarginLevels(
+        maintenance_margin="100",
+        search_level="150",
+        initial_margin="200",
+        collateral_release_level="300",
+        party_id="party",
+        market_id="market",
+        asset="asset",
+        timestamp=1251825938592,
+    )
+
+    def ListMarginLevels(self, request, context):
+        return data_node_protos_v2.trading_data.ListMarginLevelsResponse(
+            margin_levels=data_node_protos_v2.trading_data.MarginConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.MarginEdge(
+                        cursor="cursor",
+                        node=expected,
+                    )
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListMarginLevels = ListMarginLevels
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = margin_levels(party_id="party", market_id="market", data_client=data_client)
+
+    assert res == [expected]

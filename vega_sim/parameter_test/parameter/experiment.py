@@ -50,7 +50,7 @@ def _run_parameter_iteration(
     value: str,
     additional_parameters_to_set: Optional[Dict[str, str]] = None,
 ) -> Any:
-    with VegaServiceNull(warn_on_raw_data_access=False) as vega:
+    with VegaServiceNull(warn_on_raw_data_access=False, retain_log_files=True) as vega:
         vega.create_wallet(*PARAMETER_AMEND_WALLET)
         vega.mint(
             PARAMETER_AMEND_WALLET[0],

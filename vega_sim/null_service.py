@@ -254,7 +254,10 @@ def _popen_process(
     with open(path.join(dir_root, f"{log_name}.out"), "wb") as out, open(
         path.join(dir_root, f"{log_name}.err"), "wb"
     ) as err:
-        sub_proc = subprocess.Popen(popen_args, stdout=out, stderr=err, env=env)
+        sub_proc = subprocess.Popen(
+            popen_args, stdout=out, stderr=err, env=env, close_fds=True
+        )
+
     atexit.register(lambda: sub_proc.terminate())
     return sub_proc
 
@@ -345,7 +348,7 @@ def manage_vega_processes(
     vegaNodeProcess = _popen_process(
         [
             vega_path,
-            "node",
+            "start",
             "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
             "--home=" + tmp_vega_home,
         ],

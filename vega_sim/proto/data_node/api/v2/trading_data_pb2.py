@@ -24,7 +24,7 @@ from ....vega.events.v1 import events_pb2 as vega_dot_events_dot_v1_dot_events__
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n#data-node/api/v2/trading_data.proto\x12\x0f\x64\x61tanode.api.v2\x1a\x0fvega/vega.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x1avega/oracles/v1/data.proto\x1a\x1avega/oracles/v1/spec.proto\x1a\x1bvega/events/v1/events.proto"C\n\x10OffsetPagination\x12\x0c\n\x04skip\x18\x01 \x01(\x04\x12\r\n\x05limit\x18\x02 \x01(\x04\x12\x12\n\ndescending\x18\x03 \x01(\x08"\xb0\x01\n\nPagination\x12\x12\n\x05\x66irst\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\x12\n\x05\x61\x66ter\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x11\n\x04last\x18\x03 \x01(\x05H\x02\x88\x01\x01\x12\x13\n\x06\x62\x65\x66ore\x18\x04 \x01(\tH\x03\x88\x01\x01\x12\x19\n\x0cnewest_first\x18\x05 \x01(\x08H\x04\x88\x01\x01\x42\x08\n\x06_firstB\x08\n\x06_afterB\x07\n\x05_lastB\t\n\x07_beforeB\x0f\n\r_newest_first"f\n\x08PageInfo\x12\x15\n\rhas_next_page\x18\x01 \x01(\x08\x12\x19\n\x11has_previous_page\x18\x02 \x01(\x08\x12\x14\n\x0cstart_cursor\x18\x03 \x01(\t\x12\x12\n\nend_cursor\x18\x04 \x01(\t"q\n\x18ListOrderVersionsRequest\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"M\n\x19ListOrderVersionsResponse\x12\x30\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnection"E\n\x0fGetOrderRequest\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x14\n\x07version\x18\x02 \x01(\x05H\x00\x88\x01\x01\x42\n\n\x08_version".\n\x10GetOrderResponse\x12\x1a\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.Order"\xc8\x01\n\x11ListOrdersRequest\x12\x15\n\x08party_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x16\n\tmarket_id\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x16\n\treference\x18\x03 \x01(\tH\x02\x88\x01\x01\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03\x88\x01\x01\x42\x0b\n\t_party_idB\x0c\n\n_market_idB\x0c\n\n_referenceB\r\n\x0b_pagination"F\n\x12ListOrdersResponse\x12\x30\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnection"\x90\x01\n$GetPositionsByPartyConnectionRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x34\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"_\n%GetPositionsByPartyConnectionResponse\x12\x36\n\tpositions\x18\x01 \x01(\x0b\x32#.datanode.api.v2.PositionConnection"<\n\x0cPositionEdge\x12\x1c\n\x04node\x18\x01 \x01(\x0b\x32\x0e.vega.Position\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x85\x01\n\x12PositionConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12,\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1d.datanode.api.v2.PositionEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"{\n\x18GetBalanceHistoryRequest\x12.\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilter\x12/\n\x08group_by\x18\x02 \x03(\x0e\x32\x1d.datanode.api.v2.AccountField"Q\n\x19GetBalanceHistoryResponse\x12\x34\n\x08\x62\x61lances\x18\x01 \x03(\x0b\x32".datanode.api.v2.AggregatedBalance"r\n\rAccountFilter\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12\x11\n\tparty_ids\x18\x02 \x03(\t\x12\x12\n\nmarket_ids\x18\x03 \x03(\t\x12(\n\raccount_types\x18\x04 \x03(\x0e\x32\x11.vega.AccountType"\xf6\x01\n\x11\x41ggregatedBalance\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\x12\x17\n\naccount_id\x18\x03 \x01(\tH\x00\x88\x01\x01\x12\x15\n\x08party_id\x18\x04 \x01(\tH\x01\x88\x01\x01\x12\x15\n\x08\x61sset_id\x18\x05 \x01(\tH\x02\x88\x01\x01\x12\x16\n\tmarket_id\x18\x06 \x01(\tH\x03\x88\x01\x01\x12\'\n\x0c\x61\x63\x63ount_type\x18\x07 \x01(\x0e\x32\x11.vega.AccountTypeB\r\n\x0b_account_idB\x0b\n\t_party_idB\x0b\n\t_asset_idB\x0c\n\n_market_id"\xb6\x02\n\x1fGetMarketDataHistoryByIDRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1c\n\x0fstart_timestamp\x18\x02 \x01(\x03H\x00\x88\x01\x01\x12\x1a\n\rend_timestamp\x18\x03 \x01(\x03H\x01\x88\x01\x01\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02\x88\x01\x01\x12\x45\n\x11offset_pagination\x18\x05 \x01(\x0b\x32!.datanode.api.v2.OffsetPaginationB\x02\x18\x01H\x03\x88\x01\x01\x42\x12\n\x10_start_timestampB\x10\n\x0e_end_timestampB\r\n\x0b_paginationB\x14\n\x12_offset_pagination"^\n GetMarketDataHistoryByIDResponse\x12:\n\x0bmarket_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.MarketDataConnection"@\n\x0eMarketDataEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.MarketData\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x89\x01\n\x14MarketDataConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12.\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1f.datanode.api.v2.MarketDataEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"0\n\x1bMarketsDataSubscribeRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t"E\n\x1cMarketsDataSubscribeResponse\x12%\n\x0bmarket_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketData"\xb2\x01\n\x14ListTransfersRequest\x12\x13\n\x06pubkey\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x35\n\tdirection\x18\x02 \x01(\x0e\x32".datanode.api.v2.TransferDirection\x12\x34\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01\x88\x01\x01\x42\t\n\x07_pubkeyB\r\n\x0b_pagination"O\n\x15ListTransfersResponse\x12\x36\n\ttransfers\x18\x01 \x01(\x0b\x32#.datanode.api.v2.TransferConnection"F\n\x0cTransferEdge\x12&\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.events.v1.Transfer\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x85\x01\n\x12TransferConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12,\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1d.datanode.api.v2.TransferEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\x19\n\x17GetNetworkLimitsRequest"?\n\x18GetNetworkLimitsResponse\x12#\n\x06limits\x18\x01 \x01(\x0b\x32\x13.vega.NetworkLimits"/\n\x1aGetCandlesForMarketRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t"9\n\x12IntervalToCandleId\x12\x10\n\x08interval\x18\x01 \x01(\t\x12\x11\n\tcandle_id\x18\x02 \x01(\t"a\n\x1bGetCandlesForMarketResponse\x12\x42\n\x15interval_to_candle_id\x18\x01 \x03(\x0b\x32#.datanode.api.v2.IntervalToCandleId"t\n\x06\x43\x61ndle\x12\r\n\x05start\x18\x01 \x01(\x03\x12\x13\n\x0blast_update\x18\x02 \x01(\x03\x12\x0c\n\x04high\x18\x03 \x01(\t\x12\x0b\n\x03low\x18\x04 \x01(\t\x12\x0c\n\x04open\x18\x05 \x01(\t\x12\r\n\x05\x63lose\x18\x06 \x01(\t\x12\x0e\n\x06volume\x18\x07 \x01(\x04"1\n\x1cSubscribeToCandleDataRequest\x12\x11\n\tcandle_id\x18\x01 \x01(\t"H\n\x1dSubscribeToCandleDataResponse\x12\'\n\x06\x63\x61ndle\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.Candle"\xaa\x01\n\x14GetCandleDataRequest\x12\x11\n\tcandle_id\x18\x01 \x01(\t\x12\x16\n\x0e\x66rom_timestamp\x18\x02 \x01(\x03\x12\x14\n\x0cto_timestamp\x18\x03 \x01(\x03\x12 \n\x08interval\x18\x04 \x01(\x0e\x32\x0e.vega.Interval\x12/\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"O\n\x15GetCandleDataResponse\x12\x36\n\x07\x63\x61ndles\x18\x01 \x01(\x0b\x32%.datanode.api.v2.CandleDataConnection"C\n\nCandleEdge\x12%\n\x04node\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.Candle\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x85\x01\n\x14\x43\x61ndleDataConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12*\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1b.datanode.api.v2.CandleEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"i\n\x10ListVotesRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x34\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"C\n\x11ListVotesResponse\x12.\n\x05votes\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.VoteConnection"4\n\x08VoteEdge\x12\x18\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.Vote\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"}\n\x0eVoteConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12(\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x19.datanode.api.v2.VoteEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"c\n\x13ObserveVotesRequest\x12\x15\n\x08party_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0bproposal_id\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\x0b\n\t_party_idB\x0e\n\x0c_proposal_id"0\n\x14ObserveVotesResponse\x12\x18\n\x04vote\x18\x01 \x01(\x0b\x32\n.vega.Vote"\x86\x01\n)GetERC20MultiSigSignerAddedBundlesRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tepoch_seq\x18\x02 \x01(\t\x12\x35\n\npagination\x18\x03 \x01(\x0b\x32!.datanode.api.v2.OffsetPagination"n\n*GetERC20MultiSigSignerAddedBundlesResponse\x12@\n\x07\x62undles\x18\x01 \x03(\x0b\x32/.datanode.api.v2.ERC20MultiSigSignerAddedBundle"\x90\x01\n\x1e\x45RC20MultiSigSignerAddedBundle\x12\x12\n\nnew_signer\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\x12\r\n\x05nonce\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x12\n\nsignatures\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x03 \x01(\t"\x9b\x01\n+GetERC20MultiSigSignerRemovedBundlesRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\x12\x11\n\tepoch_seq\x18\x03 \x01(\t\x12\x35\n\npagination\x18\x04 \x01(\x0b\x32!.datanode.api.v2.OffsetPagination"r\n,GetERC20MultiSigSignerRemovedBundlesResponse\x12\x42\n\x07\x62undles\x18\x01 \x03(\x0b\x32\x31.datanode.api.v2.ERC20MultiSigSignerRemovedBundle"\x92\x01\n ERC20MultiSigSignerRemovedBundle\x12\x12\n\nold_signer\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\x12\r\n\x05nonce\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x12\n\nsignatures\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x07 \x01(\t"2\n\x1eGetERC20ListAssetBundleRequest\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t"q\n\x1fGetERC20ListAssetBundleResponse\x12\x14\n\x0c\x61sset_source\x18\x01 \x01(\t\x12\x15\n\rvega_asset_id\x18\x02 \x01(\t\x12\r\n\x05nonce\x18\x03 \x01(\t\x12\x12\n\nsignatures\x18\x04 \x01(\t"6\n\tTradeEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Trade\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x7f\n\x0fTradeConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12)\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1a.datanode.api.v2.TradeEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"^\n\x18GetTradesByMarketRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"M\n\x19GetTradesByMarketResponse\x12\x30\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnection"q\n\x19GetTradesByOrderIDRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08order_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"N\n\x1aGetTradesByOrderIDResponse\x12\x30\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnection"o\n\x17GetTradesByPartyRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"L\n\x18GetTradesByPartyResponse\x12\x30\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnection"2\n\x18GetOracleSpecByIDRequest\x12\x16\n\x0eoracle_spec_id\x18\x01 \x01(\t"H\n\x19GetOracleSpecByIDResponse\x12+\n\x0boracle_spec\x18\x01 \x01(\x0b\x32\x16.oracles.v1.OracleSpec"I\n\x16ListOracleSpecsRequest\x12/\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"G\n\x17ListOracleSpecsResponse\x12,\n\x0coracle_specs\x18\x01 \x03(\x0b\x32\x16.oracles.v1.OracleSpec"g\n\x1cGetOracleDataBySpecIDRequest\x12\x16\n\x0eoracle_spec_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"L\n\x1dGetOracleDataBySpecIDResponse\x12+\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x16.oracles.v1.OracleData"H\n\x15ListOracleDataRequest\x12/\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"E\n\x16ListOracleDataResponse\x12+\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x16.oracles.v1.OracleData"c\n\x1fGetOracleSpecsConnectionRequest\x12\x0f\n\x07spec_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"`\n GetOracleSpecsConnectionResponse\x12<\n\x0coracle_specs\x18\x01 \x01(\x0b\x32&.datanode.api.v2.OracleSpecsConnection"b\n\x1eGetOracleDataConnectionRequest\x12\x0f\n\x07spec_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"]\n\x1fGetOracleDataConnectionResponse\x12:\n\x0boracle_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.OracleDataConnection"F\n\x0eOracleSpecEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x16.oracles.v1.OracleSpec\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x8a\x01\n\x15OracleSpecsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12.\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1f.datanode.api.v2.OracleSpecEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"F\n\x0eOracleDataEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x16.oracles.v1.OracleData\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x89\x01\n\x14OracleDataConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12.\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1f.datanode.api.v2.OracleDataEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"W\n\x11GetMarketsRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"H\n\x12GetMarketsResponse\x12\x32\n\x07markets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarketConnection"8\n\nMarketEdge\x12\x1a\n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.Market\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x81\x01\n\x10MarketConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12*\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1b.datanode.api.v2.MarketEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"V\n\x11GetPartiesRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"E\n\x12GetPartiesResponse\x12/\n\x05party\x18\x01 \x01(\x0b\x32 .datanode.api.v2.PartyConnection"6\n\tPartyEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Party\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x7f\n\x0fPartyConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12)\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1a.datanode.api.v2.PartyEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"6\n\tOrderEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Order\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"n\n\x16GetMarginLevelsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"S\n\x17GetMarginLevelsResponse\x12\x38\n\rmargin_levels\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarginConnection"\x7f\n\x0fOrderConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12)\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1a.datanode.api.v2.OrderEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo">\n\nMarginEdge\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevels\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x81\x01\n\x10MarginConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12*\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1b.datanode.api.v2.MarginEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"?\n\x19GetRewardSummariesRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x10\n\x08\x61sset_id\x18\x02 \x01(\t"D\n\x1aGetRewardSummariesResponse\x12&\n\tsummaries\x18\x01 \x03(\x0b\x32\x13.vega.RewardSummary"h\n\x11GetRewardsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x10\n\x08\x61sset_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"I\n\x12GetRewardsResponse\x12\x33\n\x07rewards\x18\x01 \x01(\x0b\x32".datanode.api.v2.RewardsConnection"8\n\nRewardEdge\x12\x1a\n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.Reward\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x82\x01\n\x11RewardsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12*\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1b.datanode.api.v2.RewardEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"W\n\x12GetDepositsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"L\n\x13GetDepositsResponse\x12\x35\n\x08\x64\x65posits\x18\x01 \x01(\x0b\x32#.datanode.api.v2.DepositsConnection":\n\x0b\x44\x65positEdge\x12\x1b\n\x04node\x18\x01 \x01(\x0b\x32\r.vega.Deposit\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x84\x01\n\x12\x44\x65positsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12+\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1c.datanode.api.v2.DepositEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"Z\n\x15GetWithdrawalsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"U\n\x16GetWithdrawalsResponse\x12;\n\x0bwithdrawals\x18\x01 \x01(\x0b\x32&.datanode.api.v2.WithdrawalsConnection"@\n\x0eWithdrawalEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.Withdrawal\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x8a\x01\n\x15WithdrawalsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12.\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1f.datanode.api.v2.WithdrawalEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"U\n\x10GetAssetsRequest\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"F\n\x11GetAssetsResponse\x12\x31\n\x06\x61ssets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.AssetsConnection"6\n\tAssetEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Asset\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x80\x01\n\x10\x41ssetsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12)\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1a.datanode.api.v2.AssetEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\x82\x01\n\x1dGetLiquidityProvisionsRequest\x12\x0e\n\x06market\x18\x01 \x01(\t\x12\r\n\x05party\x18\x02 \x01(\t\x12\x11\n\treference\x18\x03 \x01(\t\x12/\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"n\n\x1eGetLiquidityProvisionsResponse\x12L\n\x14liquidity_provisions\x18\x01 \x01(\x0b\x32..datanode.api.v2.LiquidityProvisionsConnection"Q\n\x17LiquidityProvisionsEdge\x12&\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.LiquidityProvision\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x9b\x01\n\x1dLiquidityProvisionsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12\x37\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32(.datanode.api.v2.LiquidityProvisionsEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo*\xb0\x01\n\x0c\x41\x63\x63ountField\x12\x1d\n\x19\x41\x43\x43OUNT_FIELD_UNSPECIFIED\x10\x00\x12\x14\n\x10\x41\x43\x43OUNT_FIELD_ID\x10\x01\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_PARTY_ID\x10\x02\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_ASSET_ID\x10\x03\x12\x1b\n\x17\x41\x43\x43OUNT_FIELD_MARKET_ID\x10\x04\x12\x16\n\x12\x41\x43\x43OUNT_FIELD_TYPE\x10\x05*\xad\x01\n\x11TransferDirection\x12"\n\x1eTRANSFER_DIRECTION_UNSPECIFIED\x10\x00\x12$\n TRANSFER_DIRECTION_TRANSFER_FROM\x10\x01\x12"\n\x1eTRANSFER_DIRECTION_TRANSFER_TO\x10\x02\x12*\n&TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM\x10\x03\x32\x81\x1e\n\x12TradingDataService\x12O\n\x08GetOrder\x12 .datanode.api.v2.GetOrderRequest\x1a!.datanode.api.v2.GetOrderResponse\x12U\n\nListOrders\x12".datanode.api.v2.ListOrdersRequest\x1a#.datanode.api.v2.ListOrdersResponse\x12j\n\x11ListOrderVersions\x12).datanode.api.v2.ListOrderVersionsRequest\x1a*.datanode.api.v2.ListOrderVersionsResponse\x12\x8e\x01\n\x1dGetPositionsByPartyConnection\x12\x35.datanode.api.v2.GetPositionsByPartyConnectionRequest\x1a\x36.datanode.api.v2.GetPositionsByPartyConnectionResponse\x12l\n\x11GetBalanceHistory\x12).datanode.api.v2.GetBalanceHistoryRequest\x1a*.datanode.api.v2.GetBalanceHistoryResponse"\x00\x12\x7f\n\x18GetMarketDataHistoryByID\x12\x30.datanode.api.v2.GetMarketDataHistoryByIDRequest\x1a\x31.datanode.api.v2.GetMarketDataHistoryByIDResponse\x12u\n\x14MarketsDataSubscribe\x12,.datanode.api.v2.MarketsDataSubscribeRequest\x1a-.datanode.api.v2.MarketsDataSubscribeResponse0\x01\x12^\n\rListTransfers\x12%.datanode.api.v2.ListTransfersRequest\x1a&.datanode.api.v2.ListTransfersResponse\x12g\n\x10GetNetworkLimits\x12(.datanode.api.v2.GetNetworkLimitsRequest\x1a).datanode.api.v2.GetNetworkLimitsResponse\x12^\n\rGetCandleData\x12%.datanode.api.v2.GetCandleDataRequest\x1a&.datanode.api.v2.GetCandleDataResponse\x12x\n\x15SubscribeToCandleData\x12-.datanode.api.v2.SubscribeToCandleDataRequest\x1a..datanode.api.v2.SubscribeToCandleDataResponse0\x01\x12p\n\x13GetCandlesForMarket\x12+.datanode.api.v2.GetCandlesForMarketRequest\x1a,.datanode.api.v2.GetCandlesForMarketResponse\x12R\n\tListVotes\x12!.datanode.api.v2.ListVotesRequest\x1a".datanode.api.v2.ListVotesResponse\x12]\n\x0cObserveVotes\x12$.datanode.api.v2.ObserveVotesRequest\x1a%.datanode.api.v2.ObserveVotesResponse0\x01\x12\x9d\x01\n"GetERC20MultiSigSignerAddedBundles\x12:.datanode.api.v2.GetERC20MultiSigSignerAddedBundlesRequest\x1a;.datanode.api.v2.GetERC20MultiSigSignerAddedBundlesResponse\x12\xa3\x01\n$GetERC20MultiSigSignerRemovedBundles\x12<.datanode.api.v2.GetERC20MultiSigSignerRemovedBundlesRequest\x1a=.datanode.api.v2.GetERC20MultiSigSignerRemovedBundlesResponse\x12|\n\x17GetERC20ListAssetBundle\x12/.datanode.api.v2.GetERC20ListAssetBundleRequest\x1a\x30.datanode.api.v2.GetERC20ListAssetBundleResponse\x12j\n\x11GetTradesByMarket\x12).datanode.api.v2.GetTradesByMarketRequest\x1a*.datanode.api.v2.GetTradesByMarketResponse\x12g\n\x10GetTradesByParty\x12(.datanode.api.v2.GetTradesByPartyRequest\x1a).datanode.api.v2.GetTradesByPartyResponse\x12m\n\x12GetTradesByOrderID\x12*.datanode.api.v2.GetTradesByOrderIDRequest\x1a+.datanode.api.v2.GetTradesByOrderIDResponse\x12j\n\x11GetOracleSpecByID\x12).datanode.api.v2.GetOracleSpecByIDRequest\x1a*.datanode.api.v2.GetOracleSpecByIDResponse\x12\x64\n\x0fListOracleSpecs\x12\'.datanode.api.v2.ListOracleSpecsRequest\x1a(.datanode.api.v2.ListOracleSpecsResponse\x12v\n\x15GetOracleDataBySpecID\x12-.datanode.api.v2.GetOracleDataBySpecIDRequest\x1a..datanode.api.v2.GetOracleDataBySpecIDResponse\x12\x61\n\x0eListOracleData\x12&.datanode.api.v2.ListOracleDataRequest\x1a\'.datanode.api.v2.ListOracleDataResponse\x12\x7f\n\x18GetOracleSpecsConnection\x12\x30.datanode.api.v2.GetOracleSpecsConnectionRequest\x1a\x31.datanode.api.v2.GetOracleSpecsConnectionResponse\x12|\n\x17GetOracleDataConnection\x12/.datanode.api.v2.GetOracleDataConnectionRequest\x1a\x30.datanode.api.v2.GetOracleDataConnectionResponse\x12U\n\nGetMarkets\x12".datanode.api.v2.GetMarketsRequest\x1a#.datanode.api.v2.GetMarketsResponse\x12U\n\nGetParties\x12".datanode.api.v2.GetPartiesRequest\x1a#.datanode.api.v2.GetPartiesResponse\x12\x64\n\x0fGetMarginLevels\x12\'.datanode.api.v2.GetMarginLevelsRequest\x1a(.datanode.api.v2.GetMarginLevelsResponse\x12U\n\nGetRewards\x12".datanode.api.v2.GetRewardsRequest\x1a#.datanode.api.v2.GetRewardsResponse\x12m\n\x12GetRewardSummaries\x12*.datanode.api.v2.GetRewardSummariesRequest\x1a+.datanode.api.v2.GetRewardSummariesResponse\x12X\n\x0bGetDeposits\x12#.datanode.api.v2.GetDepositsRequest\x1a$.datanode.api.v2.GetDepositsResponse\x12\x61\n\x0eGetWithdrawals\x12&.datanode.api.v2.GetWithdrawalsRequest\x1a\'.datanode.api.v2.GetWithdrawalsResponse\x12R\n\tGetAssets\x12!.datanode.api.v2.GetAssetsRequest\x1a".datanode.api.v2.GetAssetsResponse\x12y\n\x16GetLiquidityProvisions\x12..datanode.api.v2.GetLiquidityProvisionsRequest\x1a/.datanode.api.v2.GetLiquidityProvisionsResponseB.Z,code.vegaprotocol.io/protos/data-node/api/v2b\x06proto3'
+    b'\n#data-node/api/v2/trading_data.proto\x12\x0f\x64\x61tanode.api.v2\x1a\x0fvega/vega.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x1avega/oracles/v1/data.proto\x1a\x1avega/oracles/v1/spec.proto\x1a\x1bvega/events/v1/events.proto"C\n\x10OffsetPagination\x12\x0c\n\x04skip\x18\x01 \x01(\x04\x12\r\n\x05limit\x18\x02 \x01(\x04\x12\x12\n\ndescending\x18\x03 \x01(\x08"\xb0\x01\n\nPagination\x12\x12\n\x05\x66irst\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\x12\n\x05\x61\x66ter\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x11\n\x04last\x18\x03 \x01(\x05H\x02\x88\x01\x01\x12\x13\n\x06\x62\x65\x66ore\x18\x04 \x01(\tH\x03\x88\x01\x01\x12\x19\n\x0cnewest_first\x18\x05 \x01(\x08H\x04\x88\x01\x01\x42\x08\n\x06_firstB\x08\n\x06_afterB\x07\n\x05_lastB\t\n\x07_beforeB\x0f\n\r_newest_first"f\n\x08PageInfo\x12\x15\n\rhas_next_page\x18\x01 \x01(\x08\x12\x19\n\x11has_previous_page\x18\x02 \x01(\x08\x12\x14\n\x0cstart_cursor\x18\x03 \x01(\t\x12\x12\n\nend_cursor\x18\x04 \x01(\t"\x8a\x01\n\x13ListAccountsRequest\x12.\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilter\x12\x34\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"M\n\x14ListAccountsResponse\x12\x35\n\x08\x61\x63\x63ounts\x18\x01 \x01(\x0b\x32#.datanode.api.v2.AccountsConnection"\x84\x01\n\x12\x41\x63\x63ountsConnection\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12+\n\x05\x65\x64ges\x18\x02 \x03(\x0b\x32\x1c.datanode.api.v2.AccountEdge\x12,\n\tpage_info\x18\x03 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"=\n\x0b\x41\x63\x63ountEdge\x12\x1e\n\x07\x61\x63\x63ount\x18\x01 \x01(\x0b\x32\r.vega.Account\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"m\n\x16ObserveAccountsRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\r\n\x05\x61sset\x18\x03 \x01(\t\x12\x1f\n\x04type\x18\x04 \x01(\x0e\x32\x11.vega.AccountType"9\n\x17ObserveAccountsResponse\x12\x1e\n\x07\x61\x63\x63ount\x18\x01 \x01(\x0b\x32\r.vega.Account"q\n\x18ListOrderVersionsRequest\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"M\n\x19ListOrderVersionsResponse\x12\x30\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnection"E\n\x0fGetOrderRequest\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12\x14\n\x07version\x18\x02 \x01(\x05H\x00\x88\x01\x01\x42\n\n\x08_version".\n\x10GetOrderResponse\x12\x1a\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.Order"\xc8\x01\n\x11ListOrdersRequest\x12\x15\n\x08party_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x16\n\tmarket_id\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x16\n\treference\x18\x03 \x01(\tH\x02\x88\x01\x01\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03\x88\x01\x01\x42\x0b\n\t_party_idB\x0c\n\n_market_idB\x0c\n\n_referenceB\r\n\x0b_pagination"F\n\x12ListOrdersResponse\x12\x30\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnection"\x80\x01\n\x14ListPositionsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x34\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"O\n\x15ListPositionsResponse\x12\x36\n\tpositions\x18\x01 \x01(\x0b\x32#.datanode.api.v2.PositionConnection"<\n\x0cPositionEdge\x12\x1c\n\x04node\x18\x01 \x01(\x0b\x32\x0e.vega.Position\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"p\n\x12PositionConnection\x12,\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1d.datanode.api.v2.PositionEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"{\n\x18GetBalanceHistoryRequest\x12.\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilter\x12/\n\x08group_by\x18\x02 \x03(\x0e\x32\x1d.datanode.api.v2.AccountField"Q\n\x19GetBalanceHistoryResponse\x12\x34\n\x08\x62\x61lances\x18\x01 \x03(\x0b\x32".datanode.api.v2.AggregatedBalance"r\n\rAccountFilter\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12\x11\n\tparty_ids\x18\x02 \x03(\t\x12\x12\n\nmarket_ids\x18\x03 \x03(\t\x12(\n\raccount_types\x18\x04 \x03(\x0e\x32\x11.vega.AccountType"\xf6\x01\n\x11\x41ggregatedBalance\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\x12\x17\n\naccount_id\x18\x03 \x01(\tH\x00\x88\x01\x01\x12\x15\n\x08party_id\x18\x04 \x01(\tH\x01\x88\x01\x01\x12\x15\n\x08\x61sset_id\x18\x05 \x01(\tH\x02\x88\x01\x01\x12\x16\n\tmarket_id\x18\x06 \x01(\tH\x03\x88\x01\x01\x12\'\n\x0c\x61\x63\x63ount_type\x18\x07 \x01(\x0e\x32\x11.vega.AccountTypeB\r\n\x0b_account_idB\x0b\n\t_party_idB\x0b\n\t_asset_idB\x0c\n\n_market_id"0\n\x1aObserveMarketsDepthRequest\x12\x12\n\nmarket_ids\x18\x01 \x03(\t"F\n\x1bObserveMarketsDepthResponse\x12\'\n\x0cmarket_depth\x18\x01 \x03(\x0b\x32\x11.vega.MarketDepth"7\n!ObserveMarketsDepthUpdatesRequest\x12\x12\n\nmarket_ids\x18\x01 \x03(\t"M\n"ObserveMarketsDepthUpdatesResponse\x12\'\n\x06update\x18\x01 \x03(\x0b\x32\x17.vega.MarketDepthUpdate"/\n\x19ObserveMarketsDataRequest\x12\x12\n\nmarket_ids\x18\x01 \x03(\t"C\n\x1aObserveMarketsDataResponse\x12%\n\x0bmarket_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketData"V\n\x1bGetLatestMarketDepthRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x16\n\tmax_depth\x18\x02 \x01(\x04H\x00\x88\x01\x01\x42\x0c\n\n_max_depth"\xaa\x01\n\x1cGetLatestMarketDepthResponse\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1d\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x1e\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x1f\n\nlast_trade\x18\x04 \x01(\x0b\x32\x0b.vega.Trade\x12\x17\n\x0fsequence_number\x18\x05 \x01(\x04"\x1d\n\x1bListLatestMarketDataRequest"F\n\x1cListLatestMarketDataResponse\x12&\n\x0cmarkets_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketData"/\n\x1aGetLatestMarketDataRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t"D\n\x1bGetLatestMarketDataResponse\x12%\n\x0bmarket_data\x18\x01 \x01(\x0b\x32\x10.vega.MarketData"\xb6\x02\n\x1fGetMarketDataHistoryByIDRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1c\n\x0fstart_timestamp\x18\x02 \x01(\x03H\x00\x88\x01\x01\x12\x1a\n\rend_timestamp\x18\x03 \x01(\x03H\x01\x88\x01\x01\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02\x88\x01\x01\x12\x45\n\x11offset_pagination\x18\x05 \x01(\x0b\x32!.datanode.api.v2.OffsetPaginationB\x02\x18\x01H\x03\x88\x01\x01\x42\x12\n\x10_start_timestampB\x10\n\x0e_end_timestampB\r\n\x0b_paginationB\x14\n\x12_offset_pagination"^\n GetMarketDataHistoryByIDResponse\x12:\n\x0bmarket_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.MarketDataConnection"@\n\x0eMarketDataEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.MarketData\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"t\n\x14MarketDataConnection\x12.\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.MarketDataEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"0\n\x1bMarketsDataSubscribeRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t"E\n\x1cMarketsDataSubscribeResponse\x12%\n\x0bmarket_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketData"\xb2\x01\n\x14ListTransfersRequest\x12\x13\n\x06pubkey\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x35\n\tdirection\x18\x02 \x01(\x0e\x32".datanode.api.v2.TransferDirection\x12\x34\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01\x88\x01\x01\x42\t\n\x07_pubkeyB\r\n\x0b_pagination"O\n\x15ListTransfersResponse\x12\x36\n\ttransfers\x18\x01 \x01(\x0b\x32#.datanode.api.v2.TransferConnection"F\n\x0cTransferEdge\x12&\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.events.v1.Transfer\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"p\n\x12TransferConnection\x12,\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1d.datanode.api.v2.TransferEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\x19\n\x17GetNetworkLimitsRequest"?\n\x18GetNetworkLimitsResponse\x12#\n\x06limits\x18\x01 \x01(\x0b\x32\x13.vega.NetworkLimits"/\n\x1aListCandleIntervalsRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t"9\n\x12IntervalToCandleId\x12\x10\n\x08interval\x18\x01 \x01(\t\x12\x11\n\tcandle_id\x18\x02 \x01(\t"a\n\x1bListCandleIntervalsResponse\x12\x42\n\x15interval_to_candle_id\x18\x01 \x03(\x0b\x32#.datanode.api.v2.IntervalToCandleId"t\n\x06\x43\x61ndle\x12\r\n\x05start\x18\x01 \x01(\x03\x12\x13\n\x0blast_update\x18\x02 \x01(\x03\x12\x0c\n\x04high\x18\x03 \x01(\t\x12\x0b\n\x03low\x18\x04 \x01(\t\x12\x0c\n\x04open\x18\x05 \x01(\t\x12\r\n\x05\x63lose\x18\x06 \x01(\t\x12\x0e\n\x06volume\x18\x07 \x01(\x04"-\n\x18ObserveCandleDataRequest\x12\x11\n\tcandle_id\x18\x01 \x01(\t"D\n\x19ObserveCandleDataResponse\x12\'\n\x06\x63\x61ndle\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.Candle"\xbf\x01\n\x15ListCandleDataRequest\x12\x11\n\tcandle_id\x18\x01 \x01(\t\x12\x16\n\x0e\x66rom_timestamp\x18\x02 \x01(\x03\x12\x14\n\x0cto_timestamp\x18\x03 \x01(\x03\x12 \n\x08interval\x18\x04 \x01(\x0e\x32\x0e.vega.Interval\x12\x34\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"P\n\x16ListCandleDataResponse\x12\x36\n\x07\x63\x61ndles\x18\x01 \x01(\x0b\x32%.datanode.api.v2.CandleDataConnection"C\n\nCandleEdge\x12%\n\x04node\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.Candle\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"p\n\x14\x43\x61ndleDataConnection\x12*\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.CandleEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"i\n\x10ListVotesRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x34\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"C\n\x11ListVotesResponse\x12.\n\x05votes\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.VoteConnection"4\n\x08VoteEdge\x12\x18\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.Vote\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"h\n\x0eVoteConnection\x12(\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x19.datanode.api.v2.VoteEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"c\n\x13ObserveVotesRequest\x12\x15\n\x08party_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x18\n\x0bproposal_id\x18\x02 \x01(\tH\x01\x88\x01\x01\x42\x0b\n\t_party_idB\x0e\n\x0c_proposal_id"0\n\x14ObserveVotesResponse\x12\x18\n\x04vote\x18\x01 \x01(\x0b\x32\n.vega.Vote"\x86\x01\n)GetERC20MultiSigSignerAddedBundlesRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tepoch_seq\x18\x02 \x01(\t\x12\x35\n\npagination\x18\x03 \x01(\x0b\x32!.datanode.api.v2.OffsetPagination"n\n*GetERC20MultiSigSignerAddedBundlesResponse\x12@\n\x07\x62undles\x18\x01 \x03(\x0b\x32/.datanode.api.v2.ERC20MultiSigSignerAddedBundle"\x90\x01\n\x1e\x45RC20MultiSigSignerAddedBundle\x12\x12\n\nnew_signer\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\x12\r\n\x05nonce\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x12\n\nsignatures\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x03 \x01(\t"\x9b\x01\n+GetERC20MultiSigSignerRemovedBundlesRequest\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\x12\x11\n\tepoch_seq\x18\x03 \x01(\t\x12\x35\n\npagination\x18\x04 \x01(\x0b\x32!.datanode.api.v2.OffsetPagination"r\n,GetERC20MultiSigSignerRemovedBundlesResponse\x12\x42\n\x07\x62undles\x18\x01 \x03(\x0b\x32\x31.datanode.api.v2.ERC20MultiSigSignerRemovedBundle"\x92\x01\n ERC20MultiSigSignerRemovedBundle\x12\x12\n\nold_signer\x18\x01 \x01(\t\x12\x11\n\tsubmitter\x18\x02 \x01(\t\x12\r\n\x05nonce\x18\x04 \x01(\t\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x12\n\nsignatures\x18\x06 \x01(\t\x12\x11\n\tepoch_seq\x18\x07 \x01(\t"2\n\x1eGetERC20ListAssetBundleRequest\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t"q\n\x1fGetERC20ListAssetBundleResponse\x12\x14\n\x0c\x61sset_source\x18\x01 \x01(\t\x12\x15\n\rvega_asset_id\x18\x02 \x01(\t\x12\r\n\x05nonce\x18\x03 \x01(\t\x12\x12\n\nsignatures\x18\x04 \x01(\t"6\n\tTradeEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Trade\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"j\n\x0fTradeConnection\x12)\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.TradeEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"^\n\x18GetTradesByMarketRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"M\n\x19GetTradesByMarketResponse\x12\x30\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnection"q\n\x19GetTradesByOrderIDRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08order_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"N\n\x1aGetTradesByOrderIDResponse\x12\x30\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnection"o\n\x17GetTradesByPartyRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"L\n\x18GetTradesByPartyResponse\x12\x30\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnection"2\n\x18GetOracleSpecByIDRequest\x12\x16\n\x0eoracle_spec_id\x18\x01 \x01(\t"H\n\x19GetOracleSpecByIDResponse\x12+\n\x0boracle_spec\x18\x01 \x01(\x0b\x32\x16.oracles.v1.OracleSpec"I\n\x16ListOracleSpecsRequest\x12/\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"G\n\x17ListOracleSpecsResponse\x12,\n\x0coracle_specs\x18\x01 \x03(\x0b\x32\x16.oracles.v1.OracleSpec"g\n\x1cGetOracleDataBySpecIDRequest\x12\x16\n\x0eoracle_spec_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"L\n\x1dGetOracleDataBySpecIDResponse\x12+\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x16.oracles.v1.OracleData"H\n\x15ListOracleDataRequest\x12/\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"E\n\x16ListOracleDataResponse\x12+\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x16.oracles.v1.OracleData"c\n\x1fGetOracleSpecsConnectionRequest\x12\x0f\n\x07spec_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"`\n GetOracleSpecsConnectionResponse\x12<\n\x0coracle_specs\x18\x01 \x01(\x0b\x32&.datanode.api.v2.OracleSpecsConnection"b\n\x1eGetOracleDataConnectionRequest\x12\x0f\n\x07spec_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"]\n\x1fGetOracleDataConnectionResponse\x12:\n\x0boracle_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.OracleDataConnection"F\n\x0eOracleSpecEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x16.oracles.v1.OracleSpec\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"u\n\x15OracleSpecsConnection\x12.\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.OracleSpecEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"F\n\x0eOracleDataEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x16.oracles.v1.OracleData\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"t\n\x14OracleDataConnection\x12.\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.OracleDataEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"l\n\x12ListMarketsRequest\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x34\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00\x88\x01\x01\x42\r\n\x0b_pagination"I\n\x13ListMarketsResponse\x12\x32\n\x07markets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarketConnection"8\n\nMarketEdge\x12\x1a\n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.Market\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"l\n\x10MarketConnection\x12*\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.MarketEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"W\n\x12ListPartiesRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"F\n\x13ListPartiesResponse\x12/\n\x05party\x18\x01 \x01(\x0b\x32 .datanode.api.v2.PartyConnection"6\n\tPartyEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Party\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"j\n\x0fPartyConnection\x12)\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.PartyEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"6\n\tOrderEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Order\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"o\n\x17ListMarginLevelsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"T\n\x18ListMarginLevelsResponse\x12\x38\n\rmargin_levels\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarginConnection"j\n\x0fOrderConnection\x12)\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.OrderEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo">\n\nMarginEdge\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevels\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"l\n\x10MarginConnection\x12*\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.MarginEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"@\n\x1aListRewardSummariesRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x10\n\x08\x61sset_id\x18\x02 \x01(\t"E\n\x1bListRewardSummariesResponse\x12&\n\tsummaries\x18\x01 \x03(\x0b\x32\x13.vega.RewardSummary"i\n\x12ListRewardsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12\x10\n\x08\x61sset_id\x18\x02 \x01(\t\x12/\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"J\n\x13ListRewardsResponse\x12\x33\n\x07rewards\x18\x01 \x01(\x0b\x32".datanode.api.v2.RewardsConnection"8\n\nRewardEdge\x12\x1a\n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.Reward\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"m\n\x11RewardsConnection\x12*\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.RewardEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"X\n\x13ListDepositsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"M\n\x14ListDepositsResponse\x12\x35\n\x08\x64\x65posits\x18\x01 \x01(\x0b\x32#.datanode.api.v2.DepositsConnection":\n\x0b\x44\x65positEdge\x12\x1b\n\x04node\x18\x01 \x01(\x0b\x32\r.vega.Deposit\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"o\n\x12\x44\x65positsConnection\x12+\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1c.datanode.api.v2.DepositEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"[\n\x16ListWithdrawalsRequest\x12\x10\n\x08party_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"V\n\x17ListWithdrawalsResponse\x12;\n\x0bwithdrawals\x18\x01 \x01(\x0b\x32&.datanode.api.v2.WithdrawalsConnection"@\n\x0eWithdrawalEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.Withdrawal\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"u\n\x15WithdrawalsConnection\x12.\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.WithdrawalEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"V\n\x11ListAssetsRequest\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12/\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.Pagination"G\n\x12ListAssetsResponse\x12\x31\n\x06\x61ssets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.AssetsConnection"6\n\tAssetEdge\x12\x19\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.Asset\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"k\n\x10\x41ssetsConnection\x12)\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.AssetEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\xd5\x01\n\x1eListLiquidityProvisionsRequest\x12\x16\n\tmarket_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x15\n\x08party_id\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x16\n\treference\x18\x03 \x01(\tH\x02\x88\x01\x01\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_idB\x0c\n\n_referenceB\r\n\x0b_pagination"o\n\x1fListLiquidityProvisionsResponse\x12L\n\x14liquidity_provisions\x18\x01 \x01(\x0b\x32..datanode.api.v2.LiquidityProvisionsConnection"Q\n\x17LiquidityProvisionsEdge\x12&\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.LiquidityProvision\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"\x86\x01\n\x1dLiquidityProvisionsConnection\x12\x37\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32(.datanode.api.v2.LiquidityProvisionsEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\x96\x04\n\x19ListGovernanceDataRequest\x12\x31\n\x0eproposal_state\x18\x01 \x01(\x0e\x32\x14.vega.Proposal.StateH\x00\x88\x01\x01\x12K\n\rproposal_type\x18\x02 \x01(\x0e\x32/.datanode.api.v2.ListGovernanceDataRequest.TypeH\x01\x88\x01\x01\x12\x1e\n\x11proposer_party_id\x18\x03 \x01(\tH\x02\x88\x01\x01\x12\x1f\n\x12proposal_reference\x18\x04 \x01(\tH\x03\x88\x01\x01\x12\x34\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x04\x88\x01\x01"\xa0\x01\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0c\n\x08TYPE_ALL\x10\x01\x12\x13\n\x0fTYPE_NEW_MARKET\x10\x02\x12\x16\n\x12TYPE_UPDATE_MARKET\x10\x03\x12\x1b\n\x17TYPE_NETWORK_PARAMETERS\x10\x04\x12\x12\n\x0eTYPE_NEW_ASSET\x10\x05\x12\x16\n\x12TYPE_NEW_FREE_FORM\x10\x06\x42\x11\n\x0f_proposal_stateB\x10\n\x0e_proposal_typeB\x14\n\x12_proposer_party_idB\x15\n\x13_proposal_referenceB\r\n\x0b_pagination"[\n\x1aListGovernanceDataResponse\x12=\n\nconnection\x18\x01 \x01(\x0b\x32).datanode.api.v2.GovernanceDataConnection"H\n\x12GovernanceDataEdge\x12"\n\x04node\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceData\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"|\n\x18GovernanceDataConnection\x12\x32\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32#.datanode.api.v2.GovernanceDataEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\xc7\x01\n\x16ListDelegationsRequest\x12\x15\n\x08party_id\x18\x01 \x01(\tH\x00\x88\x01\x01\x12\x14\n\x07node_id\x18\x02 \x01(\tH\x01\x88\x01\x01\x12\x15\n\x08\x65poch_id\x18\x03 \x01(\tH\x02\x88\x01\x01\x12\x34\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03\x88\x01\x01\x42\x0b\n\t_party_idB\n\n\x08_node_idB\x0b\n\t_epoch_idB\r\n\x0b_pagination"V\n\x17ListDelegationsResponse\x12;\n\x0b\x64\x65legations\x18\x01 \x01(\x0b\x32&.datanode.api.v2.DelegationsConnection"@\n\x0e\x44\x65legationEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.Delegation\x12\x0e\n\x06\x63ursor\x18\x02 \x01(\t"u\n\x15\x44\x65legationsConnection\x12.\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.DelegationEdge\x12,\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfo"\r\n\x0bInfoRequest"4\n\x0cInfoResponse\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x13\n\x0b\x63ommit_hash\x18\x02 \x01(\t*\xb0\x01\n\x0c\x41\x63\x63ountField\x12\x1d\n\x19\x41\x43\x43OUNT_FIELD_UNSPECIFIED\x10\x00\x12\x14\n\x10\x41\x43\x43OUNT_FIELD_ID\x10\x01\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_PARTY_ID\x10\x02\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_ASSET_ID\x10\x03\x12\x1b\n\x17\x41\x43\x43OUNT_FIELD_MARKET_ID\x10\x04\x12\x16\n\x12\x41\x43\x43OUNT_FIELD_TYPE\x10\x05*\xad\x01\n\x11TransferDirection\x12"\n\x1eTRANSFER_DIRECTION_UNSPECIFIED\x10\x00\x12$\n TRANSFER_DIRECTION_TRANSFER_FROM\x10\x01\x12"\n\x1eTRANSFER_DIRECTION_TRANSFER_TO\x10\x02\x12*\n&TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM\x10\x03\x32\x8c\'\n\x12TradingDataService\x12[\n\x0cListAccounts\x12$.datanode.api.v2.ListAccountsRequest\x1a%.datanode.api.v2.ListAccountsResponse\x12\x66\n\x0fObserveAccounts\x12\'.datanode.api.v2.ObserveAccountsRequest\x1a(.datanode.api.v2.ObserveAccountsResponse0\x01\x12\x43\n\x04Info\x12\x1c.datanode.api.v2.InfoRequest\x1a\x1d.datanode.api.v2.InfoResponse\x12O\n\x08GetOrder\x12 .datanode.api.v2.GetOrderRequest\x1a!.datanode.api.v2.GetOrderResponse\x12U\n\nListOrders\x12".datanode.api.v2.ListOrdersRequest\x1a#.datanode.api.v2.ListOrdersResponse\x12j\n\x11ListOrderVersions\x12).datanode.api.v2.ListOrderVersionsRequest\x1a*.datanode.api.v2.ListOrderVersionsResponse\x12^\n\rListPositions\x12%.datanode.api.v2.ListPositionsRequest\x1a&.datanode.api.v2.ListPositionsResponse\x12l\n\x11GetBalanceHistory\x12).datanode.api.v2.GetBalanceHistoryRequest\x1a*.datanode.api.v2.GetBalanceHistoryResponse"\x00\x12p\n\x13GetLatestMarketData\x12+.datanode.api.v2.GetLatestMarketDataRequest\x1a,.datanode.api.v2.GetLatestMarketDataResponse\x12s\n\x14ListLatestMarketData\x12,.datanode.api.v2.ListLatestMarketDataRequest\x1a-.datanode.api.v2.ListLatestMarketDataResponse\x12s\n\x14GetLatestMarketDepth\x12,.datanode.api.v2.GetLatestMarketDepthRequest\x1a-.datanode.api.v2.GetLatestMarketDepthResponse\x12r\n\x13ObserveMarketsDepth\x12+.datanode.api.v2.ObserveMarketsDepthRequest\x1a,.datanode.api.v2.ObserveMarketsDepthResponse0\x01\x12\x87\x01\n\x1aObserveMarketsDepthUpdates\x12\x32.datanode.api.v2.ObserveMarketsDepthUpdatesRequest\x1a\x33.datanode.api.v2.ObserveMarketsDepthUpdatesResponse0\x01\x12o\n\x12ObserveMarketsData\x12*.datanode.api.v2.ObserveMarketsDataRequest\x1a+.datanode.api.v2.ObserveMarketsDataResponse0\x01\x12\x7f\n\x18GetMarketDataHistoryByID\x12\x30.datanode.api.v2.GetMarketDataHistoryByIDRequest\x1a\x31.datanode.api.v2.GetMarketDataHistoryByIDResponse\x12u\n\x14MarketsDataSubscribe\x12,.datanode.api.v2.MarketsDataSubscribeRequest\x1a-.datanode.api.v2.MarketsDataSubscribeResponse0\x01\x12^\n\rListTransfers\x12%.datanode.api.v2.ListTransfersRequest\x1a&.datanode.api.v2.ListTransfersResponse\x12g\n\x10GetNetworkLimits\x12(.datanode.api.v2.GetNetworkLimitsRequest\x1a).datanode.api.v2.GetNetworkLimitsResponse\x12\x61\n\x0eListCandleData\x12&.datanode.api.v2.ListCandleDataRequest\x1a\'.datanode.api.v2.ListCandleDataResponse\x12l\n\x11ObserveCandleData\x12).datanode.api.v2.ObserveCandleDataRequest\x1a*.datanode.api.v2.ObserveCandleDataResponse0\x01\x12p\n\x13ListCandleIntervals\x12+.datanode.api.v2.ListCandleIntervalsRequest\x1a,.datanode.api.v2.ListCandleIntervalsResponse\x12R\n\tListVotes\x12!.datanode.api.v2.ListVotesRequest\x1a".datanode.api.v2.ListVotesResponse\x12]\n\x0cObserveVotes\x12$.datanode.api.v2.ObserveVotesRequest\x1a%.datanode.api.v2.ObserveVotesResponse0\x01\x12\x9d\x01\n"GetERC20MultiSigSignerAddedBundles\x12:.datanode.api.v2.GetERC20MultiSigSignerAddedBundlesRequest\x1a;.datanode.api.v2.GetERC20MultiSigSignerAddedBundlesResponse\x12\xa3\x01\n$GetERC20MultiSigSignerRemovedBundles\x12<.datanode.api.v2.GetERC20MultiSigSignerRemovedBundlesRequest\x1a=.datanode.api.v2.GetERC20MultiSigSignerRemovedBundlesResponse\x12|\n\x17GetERC20ListAssetBundle\x12/.datanode.api.v2.GetERC20ListAssetBundleRequest\x1a\x30.datanode.api.v2.GetERC20ListAssetBundleResponse\x12j\n\x11GetTradesByMarket\x12).datanode.api.v2.GetTradesByMarketRequest\x1a*.datanode.api.v2.GetTradesByMarketResponse\x12g\n\x10GetTradesByParty\x12(.datanode.api.v2.GetTradesByPartyRequest\x1a).datanode.api.v2.GetTradesByPartyResponse\x12m\n\x12GetTradesByOrderID\x12*.datanode.api.v2.GetTradesByOrderIDRequest\x1a+.datanode.api.v2.GetTradesByOrderIDResponse\x12j\n\x11GetOracleSpecByID\x12).datanode.api.v2.GetOracleSpecByIDRequest\x1a*.datanode.api.v2.GetOracleSpecByIDResponse\x12\x64\n\x0fListOracleSpecs\x12\'.datanode.api.v2.ListOracleSpecsRequest\x1a(.datanode.api.v2.ListOracleSpecsResponse\x12v\n\x15GetOracleDataBySpecID\x12-.datanode.api.v2.GetOracleDataBySpecIDRequest\x1a..datanode.api.v2.GetOracleDataBySpecIDResponse\x12\x61\n\x0eListOracleData\x12&.datanode.api.v2.ListOracleDataRequest\x1a\'.datanode.api.v2.ListOracleDataResponse\x12\x7f\n\x18GetOracleSpecsConnection\x12\x30.datanode.api.v2.GetOracleSpecsConnectionRequest\x1a\x31.datanode.api.v2.GetOracleSpecsConnectionResponse\x12|\n\x17GetOracleDataConnection\x12/.datanode.api.v2.GetOracleDataConnectionRequest\x1a\x30.datanode.api.v2.GetOracleDataConnectionResponse\x12X\n\x0bListMarkets\x12#.datanode.api.v2.ListMarketsRequest\x1a$.datanode.api.v2.ListMarketsResponse\x12X\n\x0bListParties\x12#.datanode.api.v2.ListPartiesRequest\x1a$.datanode.api.v2.ListPartiesResponse\x12g\n\x10ListMarginLevels\x12(.datanode.api.v2.ListMarginLevelsRequest\x1a).datanode.api.v2.ListMarginLevelsResponse\x12X\n\x0bListRewards\x12#.datanode.api.v2.ListRewardsRequest\x1a$.datanode.api.v2.ListRewardsResponse\x12p\n\x13ListRewardSummaries\x12+.datanode.api.v2.ListRewardSummariesRequest\x1a,.datanode.api.v2.ListRewardSummariesResponse\x12[\n\x0cListDeposits\x12$.datanode.api.v2.ListDepositsRequest\x1a%.datanode.api.v2.ListDepositsResponse\x12\x64\n\x0fListWithdrawals\x12\'.datanode.api.v2.ListWithdrawalsRequest\x1a(.datanode.api.v2.ListWithdrawalsResponse\x12U\n\nListAssets\x12".datanode.api.v2.ListAssetsRequest\x1a#.datanode.api.v2.ListAssetsResponse\x12|\n\x17ListLiquidityProvisions\x12/.datanode.api.v2.ListLiquidityProvisionsRequest\x1a\x30.datanode.api.v2.ListLiquidityProvisionsResponse\x12m\n\x12ListGovernanceData\x12*.datanode.api.v2.ListGovernanceDataRequest\x1a+.datanode.api.v2.ListGovernanceDataResponse\x12\x64\n\x0fListDelegations\x12\'.datanode.api.v2.ListDelegationsRequest\x1a(.datanode.api.v2.ListDelegationsResponseB.Z,code.vegaprotocol.io/protos/data-node/api/v2b\x06proto3'
 )
 
 _ACCOUNTFIELD = DESCRIPTOR.enum_types_by_name["AccountField"]
@@ -46,6 +46,12 @@ TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM = 3
 _OFFSETPAGINATION = DESCRIPTOR.message_types_by_name["OffsetPagination"]
 _PAGINATION = DESCRIPTOR.message_types_by_name["Pagination"]
 _PAGEINFO = DESCRIPTOR.message_types_by_name["PageInfo"]
+_LISTACCOUNTSREQUEST = DESCRIPTOR.message_types_by_name["ListAccountsRequest"]
+_LISTACCOUNTSRESPONSE = DESCRIPTOR.message_types_by_name["ListAccountsResponse"]
+_ACCOUNTSCONNECTION = DESCRIPTOR.message_types_by_name["AccountsConnection"]
+_ACCOUNTEDGE = DESCRIPTOR.message_types_by_name["AccountEdge"]
+_OBSERVEACCOUNTSREQUEST = DESCRIPTOR.message_types_by_name["ObserveAccountsRequest"]
+_OBSERVEACCOUNTSRESPONSE = DESCRIPTOR.message_types_by_name["ObserveAccountsResponse"]
 _LISTORDERVERSIONSREQUEST = DESCRIPTOR.message_types_by_name["ListOrderVersionsRequest"]
 _LISTORDERVERSIONSRESPONSE = DESCRIPTOR.message_types_by_name[
     "ListOrderVersionsResponse"
@@ -54,12 +60,8 @@ _GETORDERREQUEST = DESCRIPTOR.message_types_by_name["GetOrderRequest"]
 _GETORDERRESPONSE = DESCRIPTOR.message_types_by_name["GetOrderResponse"]
 _LISTORDERSREQUEST = DESCRIPTOR.message_types_by_name["ListOrdersRequest"]
 _LISTORDERSRESPONSE = DESCRIPTOR.message_types_by_name["ListOrdersResponse"]
-_GETPOSITIONSBYPARTYCONNECTIONREQUEST = DESCRIPTOR.message_types_by_name[
-    "GetPositionsByPartyConnectionRequest"
-]
-_GETPOSITIONSBYPARTYCONNECTIONRESPONSE = DESCRIPTOR.message_types_by_name[
-    "GetPositionsByPartyConnectionResponse"
-]
+_LISTPOSITIONSREQUEST = DESCRIPTOR.message_types_by_name["ListPositionsRequest"]
+_LISTPOSITIONSRESPONSE = DESCRIPTOR.message_types_by_name["ListPositionsResponse"]
 _POSITIONEDGE = DESCRIPTOR.message_types_by_name["PositionEdge"]
 _POSITIONCONNECTION = DESCRIPTOR.message_types_by_name["PositionConnection"]
 _GETBALANCEHISTORYREQUEST = DESCRIPTOR.message_types_by_name["GetBalanceHistoryRequest"]
@@ -68,6 +70,42 @@ _GETBALANCEHISTORYRESPONSE = DESCRIPTOR.message_types_by_name[
 ]
 _ACCOUNTFILTER = DESCRIPTOR.message_types_by_name["AccountFilter"]
 _AGGREGATEDBALANCE = DESCRIPTOR.message_types_by_name["AggregatedBalance"]
+_OBSERVEMARKETSDEPTHREQUEST = DESCRIPTOR.message_types_by_name[
+    "ObserveMarketsDepthRequest"
+]
+_OBSERVEMARKETSDEPTHRESPONSE = DESCRIPTOR.message_types_by_name[
+    "ObserveMarketsDepthResponse"
+]
+_OBSERVEMARKETSDEPTHUPDATESREQUEST = DESCRIPTOR.message_types_by_name[
+    "ObserveMarketsDepthUpdatesRequest"
+]
+_OBSERVEMARKETSDEPTHUPDATESRESPONSE = DESCRIPTOR.message_types_by_name[
+    "ObserveMarketsDepthUpdatesResponse"
+]
+_OBSERVEMARKETSDATAREQUEST = DESCRIPTOR.message_types_by_name[
+    "ObserveMarketsDataRequest"
+]
+_OBSERVEMARKETSDATARESPONSE = DESCRIPTOR.message_types_by_name[
+    "ObserveMarketsDataResponse"
+]
+_GETLATESTMARKETDEPTHREQUEST = DESCRIPTOR.message_types_by_name[
+    "GetLatestMarketDepthRequest"
+]
+_GETLATESTMARKETDEPTHRESPONSE = DESCRIPTOR.message_types_by_name[
+    "GetLatestMarketDepthResponse"
+]
+_LISTLATESTMARKETDATAREQUEST = DESCRIPTOR.message_types_by_name[
+    "ListLatestMarketDataRequest"
+]
+_LISTLATESTMARKETDATARESPONSE = DESCRIPTOR.message_types_by_name[
+    "ListLatestMarketDataResponse"
+]
+_GETLATESTMARKETDATAREQUEST = DESCRIPTOR.message_types_by_name[
+    "GetLatestMarketDataRequest"
+]
+_GETLATESTMARKETDATARESPONSE = DESCRIPTOR.message_types_by_name[
+    "GetLatestMarketDataResponse"
+]
 _GETMARKETDATAHISTORYBYIDREQUEST = DESCRIPTOR.message_types_by_name[
     "GetMarketDataHistoryByIDRequest"
 ]
@@ -88,22 +126,20 @@ _TRANSFEREDGE = DESCRIPTOR.message_types_by_name["TransferEdge"]
 _TRANSFERCONNECTION = DESCRIPTOR.message_types_by_name["TransferConnection"]
 _GETNETWORKLIMITSREQUEST = DESCRIPTOR.message_types_by_name["GetNetworkLimitsRequest"]
 _GETNETWORKLIMITSRESPONSE = DESCRIPTOR.message_types_by_name["GetNetworkLimitsResponse"]
-_GETCANDLESFORMARKETREQUEST = DESCRIPTOR.message_types_by_name[
-    "GetCandlesForMarketRequest"
+_LISTCANDLEINTERVALSREQUEST = DESCRIPTOR.message_types_by_name[
+    "ListCandleIntervalsRequest"
 ]
 _INTERVALTOCANDLEID = DESCRIPTOR.message_types_by_name["IntervalToCandleId"]
-_GETCANDLESFORMARKETRESPONSE = DESCRIPTOR.message_types_by_name[
-    "GetCandlesForMarketResponse"
+_LISTCANDLEINTERVALSRESPONSE = DESCRIPTOR.message_types_by_name[
+    "ListCandleIntervalsResponse"
 ]
 _CANDLE = DESCRIPTOR.message_types_by_name["Candle"]
-_SUBSCRIBETOCANDLEDATAREQUEST = DESCRIPTOR.message_types_by_name[
-    "SubscribeToCandleDataRequest"
+_OBSERVECANDLEDATAREQUEST = DESCRIPTOR.message_types_by_name["ObserveCandleDataRequest"]
+_OBSERVECANDLEDATARESPONSE = DESCRIPTOR.message_types_by_name[
+    "ObserveCandleDataResponse"
 ]
-_SUBSCRIBETOCANDLEDATARESPONSE = DESCRIPTOR.message_types_by_name[
-    "SubscribeToCandleDataResponse"
-]
-_GETCANDLEDATAREQUEST = DESCRIPTOR.message_types_by_name["GetCandleDataRequest"]
-_GETCANDLEDATARESPONSE = DESCRIPTOR.message_types_by_name["GetCandleDataResponse"]
+_LISTCANDLEDATAREQUEST = DESCRIPTOR.message_types_by_name["ListCandleDataRequest"]
+_LISTCANDLEDATARESPONSE = DESCRIPTOR.message_types_by_name["ListCandleDataResponse"]
 _CANDLEEDGE = DESCRIPTOR.message_types_by_name["CandleEdge"]
 _CANDLEDATACONNECTION = DESCRIPTOR.message_types_by_name["CandleDataConnection"]
 _LISTVOTESREQUEST = DESCRIPTOR.message_types_by_name["ListVotesRequest"]
@@ -180,52 +216,67 @@ _ORACLESPECEDGE = DESCRIPTOR.message_types_by_name["OracleSpecEdge"]
 _ORACLESPECSCONNECTION = DESCRIPTOR.message_types_by_name["OracleSpecsConnection"]
 _ORACLEDATAEDGE = DESCRIPTOR.message_types_by_name["OracleDataEdge"]
 _ORACLEDATACONNECTION = DESCRIPTOR.message_types_by_name["OracleDataConnection"]
-_GETMARKETSREQUEST = DESCRIPTOR.message_types_by_name["GetMarketsRequest"]
-_GETMARKETSRESPONSE = DESCRIPTOR.message_types_by_name["GetMarketsResponse"]
+_LISTMARKETSREQUEST = DESCRIPTOR.message_types_by_name["ListMarketsRequest"]
+_LISTMARKETSRESPONSE = DESCRIPTOR.message_types_by_name["ListMarketsResponse"]
 _MARKETEDGE = DESCRIPTOR.message_types_by_name["MarketEdge"]
 _MARKETCONNECTION = DESCRIPTOR.message_types_by_name["MarketConnection"]
-_GETPARTIESREQUEST = DESCRIPTOR.message_types_by_name["GetPartiesRequest"]
-_GETPARTIESRESPONSE = DESCRIPTOR.message_types_by_name["GetPartiesResponse"]
+_LISTPARTIESREQUEST = DESCRIPTOR.message_types_by_name["ListPartiesRequest"]
+_LISTPARTIESRESPONSE = DESCRIPTOR.message_types_by_name["ListPartiesResponse"]
 _PARTYEDGE = DESCRIPTOR.message_types_by_name["PartyEdge"]
 _PARTYCONNECTION = DESCRIPTOR.message_types_by_name["PartyConnection"]
 _ORDEREDGE = DESCRIPTOR.message_types_by_name["OrderEdge"]
-_GETMARGINLEVELSREQUEST = DESCRIPTOR.message_types_by_name["GetMarginLevelsRequest"]
-_GETMARGINLEVELSRESPONSE = DESCRIPTOR.message_types_by_name["GetMarginLevelsResponse"]
+_LISTMARGINLEVELSREQUEST = DESCRIPTOR.message_types_by_name["ListMarginLevelsRequest"]
+_LISTMARGINLEVELSRESPONSE = DESCRIPTOR.message_types_by_name["ListMarginLevelsResponse"]
 _ORDERCONNECTION = DESCRIPTOR.message_types_by_name["OrderConnection"]
 _MARGINEDGE = DESCRIPTOR.message_types_by_name["MarginEdge"]
 _MARGINCONNECTION = DESCRIPTOR.message_types_by_name["MarginConnection"]
-_GETREWARDSUMMARIESREQUEST = DESCRIPTOR.message_types_by_name[
-    "GetRewardSummariesRequest"
+_LISTREWARDSUMMARIESREQUEST = DESCRIPTOR.message_types_by_name[
+    "ListRewardSummariesRequest"
 ]
-_GETREWARDSUMMARIESRESPONSE = DESCRIPTOR.message_types_by_name[
-    "GetRewardSummariesResponse"
+_LISTREWARDSUMMARIESRESPONSE = DESCRIPTOR.message_types_by_name[
+    "ListRewardSummariesResponse"
 ]
-_GETREWARDSREQUEST = DESCRIPTOR.message_types_by_name["GetRewardsRequest"]
-_GETREWARDSRESPONSE = DESCRIPTOR.message_types_by_name["GetRewardsResponse"]
+_LISTREWARDSREQUEST = DESCRIPTOR.message_types_by_name["ListRewardsRequest"]
+_LISTREWARDSRESPONSE = DESCRIPTOR.message_types_by_name["ListRewardsResponse"]
 _REWARDEDGE = DESCRIPTOR.message_types_by_name["RewardEdge"]
 _REWARDSCONNECTION = DESCRIPTOR.message_types_by_name["RewardsConnection"]
-_GETDEPOSITSREQUEST = DESCRIPTOR.message_types_by_name["GetDepositsRequest"]
-_GETDEPOSITSRESPONSE = DESCRIPTOR.message_types_by_name["GetDepositsResponse"]
+_LISTDEPOSITSREQUEST = DESCRIPTOR.message_types_by_name["ListDepositsRequest"]
+_LISTDEPOSITSRESPONSE = DESCRIPTOR.message_types_by_name["ListDepositsResponse"]
 _DEPOSITEDGE = DESCRIPTOR.message_types_by_name["DepositEdge"]
 _DEPOSITSCONNECTION = DESCRIPTOR.message_types_by_name["DepositsConnection"]
-_GETWITHDRAWALSREQUEST = DESCRIPTOR.message_types_by_name["GetWithdrawalsRequest"]
-_GETWITHDRAWALSRESPONSE = DESCRIPTOR.message_types_by_name["GetWithdrawalsResponse"]
+_LISTWITHDRAWALSREQUEST = DESCRIPTOR.message_types_by_name["ListWithdrawalsRequest"]
+_LISTWITHDRAWALSRESPONSE = DESCRIPTOR.message_types_by_name["ListWithdrawalsResponse"]
 _WITHDRAWALEDGE = DESCRIPTOR.message_types_by_name["WithdrawalEdge"]
 _WITHDRAWALSCONNECTION = DESCRIPTOR.message_types_by_name["WithdrawalsConnection"]
-_GETASSETSREQUEST = DESCRIPTOR.message_types_by_name["GetAssetsRequest"]
-_GETASSETSRESPONSE = DESCRIPTOR.message_types_by_name["GetAssetsResponse"]
+_LISTASSETSREQUEST = DESCRIPTOR.message_types_by_name["ListAssetsRequest"]
+_LISTASSETSRESPONSE = DESCRIPTOR.message_types_by_name["ListAssetsResponse"]
 _ASSETEDGE = DESCRIPTOR.message_types_by_name["AssetEdge"]
 _ASSETSCONNECTION = DESCRIPTOR.message_types_by_name["AssetsConnection"]
-_GETLIQUIDITYPROVISIONSREQUEST = DESCRIPTOR.message_types_by_name[
-    "GetLiquidityProvisionsRequest"
+_LISTLIQUIDITYPROVISIONSREQUEST = DESCRIPTOR.message_types_by_name[
+    "ListLiquidityProvisionsRequest"
 ]
-_GETLIQUIDITYPROVISIONSRESPONSE = DESCRIPTOR.message_types_by_name[
-    "GetLiquidityProvisionsResponse"
+_LISTLIQUIDITYPROVISIONSRESPONSE = DESCRIPTOR.message_types_by_name[
+    "ListLiquidityProvisionsResponse"
 ]
 _LIQUIDITYPROVISIONSEDGE = DESCRIPTOR.message_types_by_name["LiquidityProvisionsEdge"]
 _LIQUIDITYPROVISIONSCONNECTION = DESCRIPTOR.message_types_by_name[
     "LiquidityProvisionsConnection"
 ]
+_LISTGOVERNANCEDATAREQUEST = DESCRIPTOR.message_types_by_name[
+    "ListGovernanceDataRequest"
+]
+_LISTGOVERNANCEDATARESPONSE = DESCRIPTOR.message_types_by_name[
+    "ListGovernanceDataResponse"
+]
+_GOVERNANCEDATAEDGE = DESCRIPTOR.message_types_by_name["GovernanceDataEdge"]
+_GOVERNANCEDATACONNECTION = DESCRIPTOR.message_types_by_name["GovernanceDataConnection"]
+_LISTDELEGATIONSREQUEST = DESCRIPTOR.message_types_by_name["ListDelegationsRequest"]
+_LISTDELEGATIONSRESPONSE = DESCRIPTOR.message_types_by_name["ListDelegationsResponse"]
+_DELEGATIONEDGE = DESCRIPTOR.message_types_by_name["DelegationEdge"]
+_DELEGATIONSCONNECTION = DESCRIPTOR.message_types_by_name["DelegationsConnection"]
+_INFOREQUEST = DESCRIPTOR.message_types_by_name["InfoRequest"]
+_INFORESPONSE = DESCRIPTOR.message_types_by_name["InfoResponse"]
+_LISTGOVERNANCEDATAREQUEST_TYPE = _LISTGOVERNANCEDATAREQUEST.enum_types_by_name["Type"]
 OffsetPagination = _reflection.GeneratedProtocolMessageType(
     "OffsetPagination",
     (_message.Message,),
@@ -258,6 +309,72 @@ PageInfo = _reflection.GeneratedProtocolMessageType(
     },
 )
 _sym_db.RegisterMessage(PageInfo)
+
+ListAccountsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListAccountsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTACCOUNTSREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListAccountsRequest)
+    },
+)
+_sym_db.RegisterMessage(ListAccountsRequest)
+
+ListAccountsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListAccountsResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTACCOUNTSRESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListAccountsResponse)
+    },
+)
+_sym_db.RegisterMessage(ListAccountsResponse)
+
+AccountsConnection = _reflection.GeneratedProtocolMessageType(
+    "AccountsConnection",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACCOUNTSCONNECTION,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.AccountsConnection)
+    },
+)
+_sym_db.RegisterMessage(AccountsConnection)
+
+AccountEdge = _reflection.GeneratedProtocolMessageType(
+    "AccountEdge",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACCOUNTEDGE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.AccountEdge)
+    },
+)
+_sym_db.RegisterMessage(AccountEdge)
+
+ObserveAccountsRequest = _reflection.GeneratedProtocolMessageType(
+    "ObserveAccountsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEACCOUNTSREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveAccountsRequest)
+    },
+)
+_sym_db.RegisterMessage(ObserveAccountsRequest)
+
+ObserveAccountsResponse = _reflection.GeneratedProtocolMessageType(
+    "ObserveAccountsResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEACCOUNTSRESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveAccountsResponse)
+    },
+)
+_sym_db.RegisterMessage(ObserveAccountsResponse)
 
 ListOrderVersionsRequest = _reflection.GeneratedProtocolMessageType(
     "ListOrderVersionsRequest",
@@ -325,27 +442,27 @@ ListOrdersResponse = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(ListOrdersResponse)
 
-GetPositionsByPartyConnectionRequest = _reflection.GeneratedProtocolMessageType(
-    "GetPositionsByPartyConnectionRequest",
+ListPositionsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListPositionsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETPOSITIONSBYPARTYCONNECTIONREQUEST,
+        "DESCRIPTOR": _LISTPOSITIONSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetPositionsByPartyConnectionRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListPositionsRequest)
     },
 )
-_sym_db.RegisterMessage(GetPositionsByPartyConnectionRequest)
+_sym_db.RegisterMessage(ListPositionsRequest)
 
-GetPositionsByPartyConnectionResponse = _reflection.GeneratedProtocolMessageType(
-    "GetPositionsByPartyConnectionResponse",
+ListPositionsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListPositionsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETPOSITIONSBYPARTYCONNECTIONRESPONSE,
+        "DESCRIPTOR": _LISTPOSITIONSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetPositionsByPartyConnectionResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListPositionsResponse)
     },
 )
-_sym_db.RegisterMessage(GetPositionsByPartyConnectionResponse)
+_sym_db.RegisterMessage(ListPositionsResponse)
 
 PositionEdge = _reflection.GeneratedProtocolMessageType(
     "PositionEdge",
@@ -412,6 +529,138 @@ AggregatedBalance = _reflection.GeneratedProtocolMessageType(
     },
 )
 _sym_db.RegisterMessage(AggregatedBalance)
+
+ObserveMarketsDepthRequest = _reflection.GeneratedProtocolMessageType(
+    "ObserveMarketsDepthRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEMARKETSDEPTHREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveMarketsDepthRequest)
+    },
+)
+_sym_db.RegisterMessage(ObserveMarketsDepthRequest)
+
+ObserveMarketsDepthResponse = _reflection.GeneratedProtocolMessageType(
+    "ObserveMarketsDepthResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEMARKETSDEPTHRESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveMarketsDepthResponse)
+    },
+)
+_sym_db.RegisterMessage(ObserveMarketsDepthResponse)
+
+ObserveMarketsDepthUpdatesRequest = _reflection.GeneratedProtocolMessageType(
+    "ObserveMarketsDepthUpdatesRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEMARKETSDEPTHUPDATESREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveMarketsDepthUpdatesRequest)
+    },
+)
+_sym_db.RegisterMessage(ObserveMarketsDepthUpdatesRequest)
+
+ObserveMarketsDepthUpdatesResponse = _reflection.GeneratedProtocolMessageType(
+    "ObserveMarketsDepthUpdatesResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEMARKETSDEPTHUPDATESRESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveMarketsDepthUpdatesResponse)
+    },
+)
+_sym_db.RegisterMessage(ObserveMarketsDepthUpdatesResponse)
+
+ObserveMarketsDataRequest = _reflection.GeneratedProtocolMessageType(
+    "ObserveMarketsDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEMARKETSDATAREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveMarketsDataRequest)
+    },
+)
+_sym_db.RegisterMessage(ObserveMarketsDataRequest)
+
+ObserveMarketsDataResponse = _reflection.GeneratedProtocolMessageType(
+    "ObserveMarketsDataResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _OBSERVEMARKETSDATARESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveMarketsDataResponse)
+    },
+)
+_sym_db.RegisterMessage(ObserveMarketsDataResponse)
+
+GetLatestMarketDepthRequest = _reflection.GeneratedProtocolMessageType(
+    "GetLatestMarketDepthRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETLATESTMARKETDEPTHREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetLatestMarketDepthRequest)
+    },
+)
+_sym_db.RegisterMessage(GetLatestMarketDepthRequest)
+
+GetLatestMarketDepthResponse = _reflection.GeneratedProtocolMessageType(
+    "GetLatestMarketDepthResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETLATESTMARKETDEPTHRESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetLatestMarketDepthResponse)
+    },
+)
+_sym_db.RegisterMessage(GetLatestMarketDepthResponse)
+
+ListLatestMarketDataRequest = _reflection.GeneratedProtocolMessageType(
+    "ListLatestMarketDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTLATESTMARKETDATAREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListLatestMarketDataRequest)
+    },
+)
+_sym_db.RegisterMessage(ListLatestMarketDataRequest)
+
+ListLatestMarketDataResponse = _reflection.GeneratedProtocolMessageType(
+    "ListLatestMarketDataResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTLATESTMARKETDATARESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListLatestMarketDataResponse)
+    },
+)
+_sym_db.RegisterMessage(ListLatestMarketDataResponse)
+
+GetLatestMarketDataRequest = _reflection.GeneratedProtocolMessageType(
+    "GetLatestMarketDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETLATESTMARKETDATAREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetLatestMarketDataRequest)
+    },
+)
+_sym_db.RegisterMessage(GetLatestMarketDataRequest)
+
+GetLatestMarketDataResponse = _reflection.GeneratedProtocolMessageType(
+    "GetLatestMarketDataResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETLATESTMARKETDATARESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetLatestMarketDataResponse)
+    },
+)
+_sym_db.RegisterMessage(GetLatestMarketDataResponse)
 
 GetMarketDataHistoryByIDRequest = _reflection.GeneratedProtocolMessageType(
     "GetMarketDataHistoryByIDRequest",
@@ -545,16 +794,16 @@ GetNetworkLimitsResponse = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(GetNetworkLimitsResponse)
 
-GetCandlesForMarketRequest = _reflection.GeneratedProtocolMessageType(
-    "GetCandlesForMarketRequest",
+ListCandleIntervalsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListCandleIntervalsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETCANDLESFORMARKETREQUEST,
+        "DESCRIPTOR": _LISTCANDLEINTERVALSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetCandlesForMarketRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListCandleIntervalsRequest)
     },
 )
-_sym_db.RegisterMessage(GetCandlesForMarketRequest)
+_sym_db.RegisterMessage(ListCandleIntervalsRequest)
 
 IntervalToCandleId = _reflection.GeneratedProtocolMessageType(
     "IntervalToCandleId",
@@ -567,16 +816,16 @@ IntervalToCandleId = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(IntervalToCandleId)
 
-GetCandlesForMarketResponse = _reflection.GeneratedProtocolMessageType(
-    "GetCandlesForMarketResponse",
+ListCandleIntervalsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListCandleIntervalsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETCANDLESFORMARKETRESPONSE,
+        "DESCRIPTOR": _LISTCANDLEINTERVALSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetCandlesForMarketResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListCandleIntervalsResponse)
     },
 )
-_sym_db.RegisterMessage(GetCandlesForMarketResponse)
+_sym_db.RegisterMessage(ListCandleIntervalsResponse)
 
 Candle = _reflection.GeneratedProtocolMessageType(
     "Candle",
@@ -589,49 +838,49 @@ Candle = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(Candle)
 
-SubscribeToCandleDataRequest = _reflection.GeneratedProtocolMessageType(
-    "SubscribeToCandleDataRequest",
+ObserveCandleDataRequest = _reflection.GeneratedProtocolMessageType(
+    "ObserveCandleDataRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _SUBSCRIBETOCANDLEDATAREQUEST,
+        "DESCRIPTOR": _OBSERVECANDLEDATAREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.SubscribeToCandleDataRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveCandleDataRequest)
     },
 )
-_sym_db.RegisterMessage(SubscribeToCandleDataRequest)
+_sym_db.RegisterMessage(ObserveCandleDataRequest)
 
-SubscribeToCandleDataResponse = _reflection.GeneratedProtocolMessageType(
-    "SubscribeToCandleDataResponse",
+ObserveCandleDataResponse = _reflection.GeneratedProtocolMessageType(
+    "ObserveCandleDataResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _SUBSCRIBETOCANDLEDATARESPONSE,
+        "DESCRIPTOR": _OBSERVECANDLEDATARESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.SubscribeToCandleDataResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ObserveCandleDataResponse)
     },
 )
-_sym_db.RegisterMessage(SubscribeToCandleDataResponse)
+_sym_db.RegisterMessage(ObserveCandleDataResponse)
 
-GetCandleDataRequest = _reflection.GeneratedProtocolMessageType(
-    "GetCandleDataRequest",
+ListCandleDataRequest = _reflection.GeneratedProtocolMessageType(
+    "ListCandleDataRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETCANDLEDATAREQUEST,
+        "DESCRIPTOR": _LISTCANDLEDATAREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetCandleDataRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListCandleDataRequest)
     },
 )
-_sym_db.RegisterMessage(GetCandleDataRequest)
+_sym_db.RegisterMessage(ListCandleDataRequest)
 
-GetCandleDataResponse = _reflection.GeneratedProtocolMessageType(
-    "GetCandleDataResponse",
+ListCandleDataResponse = _reflection.GeneratedProtocolMessageType(
+    "ListCandleDataResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETCANDLEDATARESPONSE,
+        "DESCRIPTOR": _LISTCANDLEDATARESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetCandleDataResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListCandleDataResponse)
     },
 )
-_sym_db.RegisterMessage(GetCandleDataResponse)
+_sym_db.RegisterMessage(ListCandleDataResponse)
 
 CandleEdge = _reflection.GeneratedProtocolMessageType(
     "CandleEdge",
@@ -1073,27 +1322,27 @@ OracleDataConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(OracleDataConnection)
 
-GetMarketsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetMarketsRequest",
+ListMarketsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListMarketsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETMARKETSREQUEST,
+        "DESCRIPTOR": _LISTMARKETSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetMarketsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListMarketsRequest)
     },
 )
-_sym_db.RegisterMessage(GetMarketsRequest)
+_sym_db.RegisterMessage(ListMarketsRequest)
 
-GetMarketsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetMarketsResponse",
+ListMarketsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListMarketsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETMARKETSRESPONSE,
+        "DESCRIPTOR": _LISTMARKETSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetMarketsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListMarketsResponse)
     },
 )
-_sym_db.RegisterMessage(GetMarketsResponse)
+_sym_db.RegisterMessage(ListMarketsResponse)
 
 MarketEdge = _reflection.GeneratedProtocolMessageType(
     "MarketEdge",
@@ -1117,27 +1366,27 @@ MarketConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(MarketConnection)
 
-GetPartiesRequest = _reflection.GeneratedProtocolMessageType(
-    "GetPartiesRequest",
+ListPartiesRequest = _reflection.GeneratedProtocolMessageType(
+    "ListPartiesRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETPARTIESREQUEST,
+        "DESCRIPTOR": _LISTPARTIESREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetPartiesRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListPartiesRequest)
     },
 )
-_sym_db.RegisterMessage(GetPartiesRequest)
+_sym_db.RegisterMessage(ListPartiesRequest)
 
-GetPartiesResponse = _reflection.GeneratedProtocolMessageType(
-    "GetPartiesResponse",
+ListPartiesResponse = _reflection.GeneratedProtocolMessageType(
+    "ListPartiesResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETPARTIESRESPONSE,
+        "DESCRIPTOR": _LISTPARTIESRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetPartiesResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListPartiesResponse)
     },
 )
-_sym_db.RegisterMessage(GetPartiesResponse)
+_sym_db.RegisterMessage(ListPartiesResponse)
 
 PartyEdge = _reflection.GeneratedProtocolMessageType(
     "PartyEdge",
@@ -1172,27 +1421,27 @@ OrderEdge = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(OrderEdge)
 
-GetMarginLevelsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetMarginLevelsRequest",
+ListMarginLevelsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListMarginLevelsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETMARGINLEVELSREQUEST,
+        "DESCRIPTOR": _LISTMARGINLEVELSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetMarginLevelsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListMarginLevelsRequest)
     },
 )
-_sym_db.RegisterMessage(GetMarginLevelsRequest)
+_sym_db.RegisterMessage(ListMarginLevelsRequest)
 
-GetMarginLevelsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetMarginLevelsResponse",
+ListMarginLevelsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListMarginLevelsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETMARGINLEVELSRESPONSE,
+        "DESCRIPTOR": _LISTMARGINLEVELSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetMarginLevelsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListMarginLevelsResponse)
     },
 )
-_sym_db.RegisterMessage(GetMarginLevelsResponse)
+_sym_db.RegisterMessage(ListMarginLevelsResponse)
 
 OrderConnection = _reflection.GeneratedProtocolMessageType(
     "OrderConnection",
@@ -1227,49 +1476,49 @@ MarginConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(MarginConnection)
 
-GetRewardSummariesRequest = _reflection.GeneratedProtocolMessageType(
-    "GetRewardSummariesRequest",
+ListRewardSummariesRequest = _reflection.GeneratedProtocolMessageType(
+    "ListRewardSummariesRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETREWARDSUMMARIESREQUEST,
+        "DESCRIPTOR": _LISTREWARDSUMMARIESREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetRewardSummariesRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListRewardSummariesRequest)
     },
 )
-_sym_db.RegisterMessage(GetRewardSummariesRequest)
+_sym_db.RegisterMessage(ListRewardSummariesRequest)
 
-GetRewardSummariesResponse = _reflection.GeneratedProtocolMessageType(
-    "GetRewardSummariesResponse",
+ListRewardSummariesResponse = _reflection.GeneratedProtocolMessageType(
+    "ListRewardSummariesResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETREWARDSUMMARIESRESPONSE,
+        "DESCRIPTOR": _LISTREWARDSUMMARIESRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetRewardSummariesResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListRewardSummariesResponse)
     },
 )
-_sym_db.RegisterMessage(GetRewardSummariesResponse)
+_sym_db.RegisterMessage(ListRewardSummariesResponse)
 
-GetRewardsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetRewardsRequest",
+ListRewardsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListRewardsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETREWARDSREQUEST,
+        "DESCRIPTOR": _LISTREWARDSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetRewardsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListRewardsRequest)
     },
 )
-_sym_db.RegisterMessage(GetRewardsRequest)
+_sym_db.RegisterMessage(ListRewardsRequest)
 
-GetRewardsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetRewardsResponse",
+ListRewardsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListRewardsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETREWARDSRESPONSE,
+        "DESCRIPTOR": _LISTREWARDSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetRewardsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListRewardsResponse)
     },
 )
-_sym_db.RegisterMessage(GetRewardsResponse)
+_sym_db.RegisterMessage(ListRewardsResponse)
 
 RewardEdge = _reflection.GeneratedProtocolMessageType(
     "RewardEdge",
@@ -1293,27 +1542,27 @@ RewardsConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(RewardsConnection)
 
-GetDepositsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetDepositsRequest",
+ListDepositsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListDepositsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETDEPOSITSREQUEST,
+        "DESCRIPTOR": _LISTDEPOSITSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetDepositsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListDepositsRequest)
     },
 )
-_sym_db.RegisterMessage(GetDepositsRequest)
+_sym_db.RegisterMessage(ListDepositsRequest)
 
-GetDepositsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetDepositsResponse",
+ListDepositsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListDepositsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETDEPOSITSRESPONSE,
+        "DESCRIPTOR": _LISTDEPOSITSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetDepositsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListDepositsResponse)
     },
 )
-_sym_db.RegisterMessage(GetDepositsResponse)
+_sym_db.RegisterMessage(ListDepositsResponse)
 
 DepositEdge = _reflection.GeneratedProtocolMessageType(
     "DepositEdge",
@@ -1337,27 +1586,27 @@ DepositsConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(DepositsConnection)
 
-GetWithdrawalsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetWithdrawalsRequest",
+ListWithdrawalsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListWithdrawalsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETWITHDRAWALSREQUEST,
+        "DESCRIPTOR": _LISTWITHDRAWALSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetWithdrawalsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListWithdrawalsRequest)
     },
 )
-_sym_db.RegisterMessage(GetWithdrawalsRequest)
+_sym_db.RegisterMessage(ListWithdrawalsRequest)
 
-GetWithdrawalsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetWithdrawalsResponse",
+ListWithdrawalsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListWithdrawalsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETWITHDRAWALSRESPONSE,
+        "DESCRIPTOR": _LISTWITHDRAWALSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetWithdrawalsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListWithdrawalsResponse)
     },
 )
-_sym_db.RegisterMessage(GetWithdrawalsResponse)
+_sym_db.RegisterMessage(ListWithdrawalsResponse)
 
 WithdrawalEdge = _reflection.GeneratedProtocolMessageType(
     "WithdrawalEdge",
@@ -1381,27 +1630,27 @@ WithdrawalsConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(WithdrawalsConnection)
 
-GetAssetsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetAssetsRequest",
+ListAssetsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListAssetsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETASSETSREQUEST,
+        "DESCRIPTOR": _LISTASSETSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetAssetsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListAssetsRequest)
     },
 )
-_sym_db.RegisterMessage(GetAssetsRequest)
+_sym_db.RegisterMessage(ListAssetsRequest)
 
-GetAssetsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetAssetsResponse",
+ListAssetsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListAssetsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETASSETSRESPONSE,
+        "DESCRIPTOR": _LISTASSETSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetAssetsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListAssetsResponse)
     },
 )
-_sym_db.RegisterMessage(GetAssetsResponse)
+_sym_db.RegisterMessage(ListAssetsResponse)
 
 AssetEdge = _reflection.GeneratedProtocolMessageType(
     "AssetEdge",
@@ -1425,27 +1674,27 @@ AssetsConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(AssetsConnection)
 
-GetLiquidityProvisionsRequest = _reflection.GeneratedProtocolMessageType(
-    "GetLiquidityProvisionsRequest",
+ListLiquidityProvisionsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListLiquidityProvisionsRequest",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETLIQUIDITYPROVISIONSREQUEST,
+        "DESCRIPTOR": _LISTLIQUIDITYPROVISIONSREQUEST,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetLiquidityProvisionsRequest)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListLiquidityProvisionsRequest)
     },
 )
-_sym_db.RegisterMessage(GetLiquidityProvisionsRequest)
+_sym_db.RegisterMessage(ListLiquidityProvisionsRequest)
 
-GetLiquidityProvisionsResponse = _reflection.GeneratedProtocolMessageType(
-    "GetLiquidityProvisionsResponse",
+ListLiquidityProvisionsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListLiquidityProvisionsResponse",
     (_message.Message,),
     {
-        "DESCRIPTOR": _GETLIQUIDITYPROVISIONSRESPONSE,
+        "DESCRIPTOR": _LISTLIQUIDITYPROVISIONSRESPONSE,
         "__module__": "data_node.api.v2.trading_data_pb2"
-        # @@protoc_insertion_point(class_scope:datanode.api.v2.GetLiquidityProvisionsResponse)
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListLiquidityProvisionsResponse)
     },
 )
-_sym_db.RegisterMessage(GetLiquidityProvisionsResponse)
+_sym_db.RegisterMessage(ListLiquidityProvisionsResponse)
 
 LiquidityProvisionsEdge = _reflection.GeneratedProtocolMessageType(
     "LiquidityProvisionsEdge",
@@ -1469,6 +1718,116 @@ LiquidityProvisionsConnection = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(LiquidityProvisionsConnection)
 
+ListGovernanceDataRequest = _reflection.GeneratedProtocolMessageType(
+    "ListGovernanceDataRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTGOVERNANCEDATAREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListGovernanceDataRequest)
+    },
+)
+_sym_db.RegisterMessage(ListGovernanceDataRequest)
+
+ListGovernanceDataResponse = _reflection.GeneratedProtocolMessageType(
+    "ListGovernanceDataResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTGOVERNANCEDATARESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListGovernanceDataResponse)
+    },
+)
+_sym_db.RegisterMessage(ListGovernanceDataResponse)
+
+GovernanceDataEdge = _reflection.GeneratedProtocolMessageType(
+    "GovernanceDataEdge",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GOVERNANCEDATAEDGE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.GovernanceDataEdge)
+    },
+)
+_sym_db.RegisterMessage(GovernanceDataEdge)
+
+GovernanceDataConnection = _reflection.GeneratedProtocolMessageType(
+    "GovernanceDataConnection",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GOVERNANCEDATACONNECTION,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.GovernanceDataConnection)
+    },
+)
+_sym_db.RegisterMessage(GovernanceDataConnection)
+
+ListDelegationsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListDelegationsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTDELEGATIONSREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListDelegationsRequest)
+    },
+)
+_sym_db.RegisterMessage(ListDelegationsRequest)
+
+ListDelegationsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListDelegationsResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTDELEGATIONSRESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.ListDelegationsResponse)
+    },
+)
+_sym_db.RegisterMessage(ListDelegationsResponse)
+
+DelegationEdge = _reflection.GeneratedProtocolMessageType(
+    "DelegationEdge",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELEGATIONEDGE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.DelegationEdge)
+    },
+)
+_sym_db.RegisterMessage(DelegationEdge)
+
+DelegationsConnection = _reflection.GeneratedProtocolMessageType(
+    "DelegationsConnection",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELEGATIONSCONNECTION,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.DelegationsConnection)
+    },
+)
+_sym_db.RegisterMessage(DelegationsConnection)
+
+InfoRequest = _reflection.GeneratedProtocolMessageType(
+    "InfoRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _INFOREQUEST,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.InfoRequest)
+    },
+)
+_sym_db.RegisterMessage(InfoRequest)
+
+InfoResponse = _reflection.GeneratedProtocolMessageType(
+    "InfoResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _INFORESPONSE,
+        "__module__": "data_node.api.v2.trading_data_pb2"
+        # @@protoc_insertion_point(class_scope:datanode.api.v2.InfoResponse)
+    },
+)
+_sym_db.RegisterMessage(InfoResponse)
+
 _TRADINGDATASERVICE = DESCRIPTOR.services_by_name["TradingDataService"]
 if _descriptor._USE_C_DESCRIPTORS == False:
 
@@ -1478,236 +1837,294 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _GETMARKETDATAHISTORYBYIDREQUEST.fields_by_name[
         "offset_pagination"
     ]._serialized_options = b"\030\001"
-    _ACCOUNTFIELD._serialized_start = 11406
-    _ACCOUNTFIELD._serialized_end = 11582
-    _TRANSFERDIRECTION._serialized_start = 11585
-    _TRANSFERDIRECTION._serialized_end = 11758
+    _ACCOUNTFIELD._serialized_start = 13960
+    _ACCOUNTFIELD._serialized_end = 14136
+    _TRANSFERDIRECTION._serialized_start = 14139
+    _TRANSFERDIRECTION._serialized_end = 14312
     _OFFSETPAGINATION._serialized_start = 220
     _OFFSETPAGINATION._serialized_end = 287
     _PAGINATION._serialized_start = 290
     _PAGINATION._serialized_end = 466
     _PAGEINFO._serialized_start = 468
     _PAGEINFO._serialized_end = 570
-    _LISTORDERVERSIONSREQUEST._serialized_start = 572
-    _LISTORDERVERSIONSREQUEST._serialized_end = 685
-    _LISTORDERVERSIONSRESPONSE._serialized_start = 687
-    _LISTORDERVERSIONSRESPONSE._serialized_end = 764
-    _GETORDERREQUEST._serialized_start = 766
-    _GETORDERREQUEST._serialized_end = 835
-    _GETORDERRESPONSE._serialized_start = 837
-    _GETORDERRESPONSE._serialized_end = 883
-    _LISTORDERSREQUEST._serialized_start = 886
-    _LISTORDERSREQUEST._serialized_end = 1086
-    _LISTORDERSRESPONSE._serialized_start = 1088
-    _LISTORDERSRESPONSE._serialized_end = 1158
-    _GETPOSITIONSBYPARTYCONNECTIONREQUEST._serialized_start = 1161
-    _GETPOSITIONSBYPARTYCONNECTIONREQUEST._serialized_end = 1305
-    _GETPOSITIONSBYPARTYCONNECTIONRESPONSE._serialized_start = 1307
-    _GETPOSITIONSBYPARTYCONNECTIONRESPONSE._serialized_end = 1402
-    _POSITIONEDGE._serialized_start = 1404
-    _POSITIONEDGE._serialized_end = 1464
-    _POSITIONCONNECTION._serialized_start = 1467
-    _POSITIONCONNECTION._serialized_end = 1600
-    _GETBALANCEHISTORYREQUEST._serialized_start = 1602
-    _GETBALANCEHISTORYREQUEST._serialized_end = 1725
-    _GETBALANCEHISTORYRESPONSE._serialized_start = 1727
-    _GETBALANCEHISTORYRESPONSE._serialized_end = 1808
-    _ACCOUNTFILTER._serialized_start = 1810
-    _ACCOUNTFILTER._serialized_end = 1924
-    _AGGREGATEDBALANCE._serialized_start = 1927
-    _AGGREGATEDBALANCE._serialized_end = 2173
-    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_start = 2176
-    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_end = 2486
-    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_start = 2488
-    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_end = 2582
-    _MARKETDATAEDGE._serialized_start = 2584
-    _MARKETDATAEDGE._serialized_end = 2648
-    _MARKETDATACONNECTION._serialized_start = 2651
-    _MARKETDATACONNECTION._serialized_end = 2788
-    _MARKETSDATASUBSCRIBEREQUEST._serialized_start = 2790
-    _MARKETSDATASUBSCRIBEREQUEST._serialized_end = 2838
-    _MARKETSDATASUBSCRIBERESPONSE._serialized_start = 2840
-    _MARKETSDATASUBSCRIBERESPONSE._serialized_end = 2909
-    _LISTTRANSFERSREQUEST._serialized_start = 2912
-    _LISTTRANSFERSREQUEST._serialized_end = 3090
-    _LISTTRANSFERSRESPONSE._serialized_start = 3092
-    _LISTTRANSFERSRESPONSE._serialized_end = 3171
-    _TRANSFEREDGE._serialized_start = 3173
-    _TRANSFEREDGE._serialized_end = 3243
-    _TRANSFERCONNECTION._serialized_start = 3246
-    _TRANSFERCONNECTION._serialized_end = 3379
-    _GETNETWORKLIMITSREQUEST._serialized_start = 3381
-    _GETNETWORKLIMITSREQUEST._serialized_end = 3406
-    _GETNETWORKLIMITSRESPONSE._serialized_start = 3408
-    _GETNETWORKLIMITSRESPONSE._serialized_end = 3471
-    _GETCANDLESFORMARKETREQUEST._serialized_start = 3473
-    _GETCANDLESFORMARKETREQUEST._serialized_end = 3520
-    _INTERVALTOCANDLEID._serialized_start = 3522
-    _INTERVALTOCANDLEID._serialized_end = 3579
-    _GETCANDLESFORMARKETRESPONSE._serialized_start = 3581
-    _GETCANDLESFORMARKETRESPONSE._serialized_end = 3678
-    _CANDLE._serialized_start = 3680
-    _CANDLE._serialized_end = 3796
-    _SUBSCRIBETOCANDLEDATAREQUEST._serialized_start = 3798
-    _SUBSCRIBETOCANDLEDATAREQUEST._serialized_end = 3847
-    _SUBSCRIBETOCANDLEDATARESPONSE._serialized_start = 3849
-    _SUBSCRIBETOCANDLEDATARESPONSE._serialized_end = 3921
-    _GETCANDLEDATAREQUEST._serialized_start = 3924
-    _GETCANDLEDATAREQUEST._serialized_end = 4094
-    _GETCANDLEDATARESPONSE._serialized_start = 4096
-    _GETCANDLEDATARESPONSE._serialized_end = 4175
-    _CANDLEEDGE._serialized_start = 4177
-    _CANDLEEDGE._serialized_end = 4244
-    _CANDLEDATACONNECTION._serialized_start = 4247
-    _CANDLEDATACONNECTION._serialized_end = 4380
-    _LISTVOTESREQUEST._serialized_start = 4382
-    _LISTVOTESREQUEST._serialized_end = 4487
-    _LISTVOTESRESPONSE._serialized_start = 4489
-    _LISTVOTESRESPONSE._serialized_end = 4556
-    _VOTEEDGE._serialized_start = 4558
-    _VOTEEDGE._serialized_end = 4610
-    _VOTECONNECTION._serialized_start = 4612
-    _VOTECONNECTION._serialized_end = 4737
-    _OBSERVEVOTESREQUEST._serialized_start = 4739
-    _OBSERVEVOTESREQUEST._serialized_end = 4838
-    _OBSERVEVOTESRESPONSE._serialized_start = 4840
-    _OBSERVEVOTESRESPONSE._serialized_end = 4888
-    _GETERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_start = 4891
-    _GETERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_end = 5025
-    _GETERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_start = 5027
-    _GETERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_end = 5137
-    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_start = 5140
-    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_end = 5284
-    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_start = 5287
-    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_end = 5442
-    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_start = 5444
-    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_end = 5558
-    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_start = 5561
-    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_end = 5707
-    _GETERC20LISTASSETBUNDLEREQUEST._serialized_start = 5709
-    _GETERC20LISTASSETBUNDLEREQUEST._serialized_end = 5759
-    _GETERC20LISTASSETBUNDLERESPONSE._serialized_start = 5761
-    _GETERC20LISTASSETBUNDLERESPONSE._serialized_end = 5874
-    _TRADEEDGE._serialized_start = 5876
-    _TRADEEDGE._serialized_end = 5930
-    _TRADECONNECTION._serialized_start = 5932
-    _TRADECONNECTION._serialized_end = 6059
-    _GETTRADESBYMARKETREQUEST._serialized_start = 6061
-    _GETTRADESBYMARKETREQUEST._serialized_end = 6155
-    _GETTRADESBYMARKETRESPONSE._serialized_start = 6157
-    _GETTRADESBYMARKETRESPONSE._serialized_end = 6234
-    _GETTRADESBYORDERIDREQUEST._serialized_start = 6236
-    _GETTRADESBYORDERIDREQUEST._serialized_end = 6349
-    _GETTRADESBYORDERIDRESPONSE._serialized_start = 6351
-    _GETTRADESBYORDERIDRESPONSE._serialized_end = 6429
-    _GETTRADESBYPARTYREQUEST._serialized_start = 6431
-    _GETTRADESBYPARTYREQUEST._serialized_end = 6542
-    _GETTRADESBYPARTYRESPONSE._serialized_start = 6544
-    _GETTRADESBYPARTYRESPONSE._serialized_end = 6620
-    _GETORACLESPECBYIDREQUEST._serialized_start = 6622
-    _GETORACLESPECBYIDREQUEST._serialized_end = 6672
-    _GETORACLESPECBYIDRESPONSE._serialized_start = 6674
-    _GETORACLESPECBYIDRESPONSE._serialized_end = 6746
-    _LISTORACLESPECSREQUEST._serialized_start = 6748
-    _LISTORACLESPECSREQUEST._serialized_end = 6821
-    _LISTORACLESPECSRESPONSE._serialized_start = 6823
-    _LISTORACLESPECSRESPONSE._serialized_end = 6894
-    _GETORACLEDATABYSPECIDREQUEST._serialized_start = 6896
-    _GETORACLEDATABYSPECIDREQUEST._serialized_end = 6999
-    _GETORACLEDATABYSPECIDRESPONSE._serialized_start = 7001
-    _GETORACLEDATABYSPECIDRESPONSE._serialized_end = 7077
-    _LISTORACLEDATAREQUEST._serialized_start = 7079
-    _LISTORACLEDATAREQUEST._serialized_end = 7151
-    _LISTORACLEDATARESPONSE._serialized_start = 7153
-    _LISTORACLEDATARESPONSE._serialized_end = 7222
-    _GETORACLESPECSCONNECTIONREQUEST._serialized_start = 7224
-    _GETORACLESPECSCONNECTIONREQUEST._serialized_end = 7323
-    _GETORACLESPECSCONNECTIONRESPONSE._serialized_start = 7325
-    _GETORACLESPECSCONNECTIONRESPONSE._serialized_end = 7421
-    _GETORACLEDATACONNECTIONREQUEST._serialized_start = 7423
-    _GETORACLEDATACONNECTIONREQUEST._serialized_end = 7521
-    _GETORACLEDATACONNECTIONRESPONSE._serialized_start = 7523
-    _GETORACLEDATACONNECTIONRESPONSE._serialized_end = 7616
-    _ORACLESPECEDGE._serialized_start = 7618
-    _ORACLESPECEDGE._serialized_end = 7688
-    _ORACLESPECSCONNECTION._serialized_start = 7691
-    _ORACLESPECSCONNECTION._serialized_end = 7829
-    _ORACLEDATAEDGE._serialized_start = 7831
-    _ORACLEDATAEDGE._serialized_end = 7901
-    _ORACLEDATACONNECTION._serialized_start = 7904
-    _ORACLEDATACONNECTION._serialized_end = 8041
-    _GETMARKETSREQUEST._serialized_start = 8043
-    _GETMARKETSREQUEST._serialized_end = 8130
-    _GETMARKETSRESPONSE._serialized_start = 8132
-    _GETMARKETSRESPONSE._serialized_end = 8204
-    _MARKETEDGE._serialized_start = 8206
-    _MARKETEDGE._serialized_end = 8262
-    _MARKETCONNECTION._serialized_start = 8265
-    _MARKETCONNECTION._serialized_end = 8394
-    _GETPARTIESREQUEST._serialized_start = 8396
-    _GETPARTIESREQUEST._serialized_end = 8482
-    _GETPARTIESRESPONSE._serialized_start = 8484
-    _GETPARTIESRESPONSE._serialized_end = 8553
-    _PARTYEDGE._serialized_start = 8555
-    _PARTYEDGE._serialized_end = 8609
-    _PARTYCONNECTION._serialized_start = 8611
-    _PARTYCONNECTION._serialized_end = 8738
-    _ORDEREDGE._serialized_start = 8740
-    _ORDEREDGE._serialized_end = 8794
-    _GETMARGINLEVELSREQUEST._serialized_start = 8796
-    _GETMARGINLEVELSREQUEST._serialized_end = 8906
-    _GETMARGINLEVELSRESPONSE._serialized_start = 8908
-    _GETMARGINLEVELSRESPONSE._serialized_end = 8991
-    _ORDERCONNECTION._serialized_start = 8993
-    _ORDERCONNECTION._serialized_end = 9120
-    _MARGINEDGE._serialized_start = 9122
-    _MARGINEDGE._serialized_end = 9184
-    _MARGINCONNECTION._serialized_start = 9187
-    _MARGINCONNECTION._serialized_end = 9316
-    _GETREWARDSUMMARIESREQUEST._serialized_start = 9318
-    _GETREWARDSUMMARIESREQUEST._serialized_end = 9381
-    _GETREWARDSUMMARIESRESPONSE._serialized_start = 9383
-    _GETREWARDSUMMARIESRESPONSE._serialized_end = 9451
-    _GETREWARDSREQUEST._serialized_start = 9453
-    _GETREWARDSREQUEST._serialized_end = 9557
-    _GETREWARDSRESPONSE._serialized_start = 9559
-    _GETREWARDSRESPONSE._serialized_end = 9632
-    _REWARDEDGE._serialized_start = 9634
-    _REWARDEDGE._serialized_end = 9690
-    _REWARDSCONNECTION._serialized_start = 9693
-    _REWARDSCONNECTION._serialized_end = 9823
-    _GETDEPOSITSREQUEST._serialized_start = 9825
-    _GETDEPOSITSREQUEST._serialized_end = 9912
-    _GETDEPOSITSRESPONSE._serialized_start = 9914
-    _GETDEPOSITSRESPONSE._serialized_end = 9990
-    _DEPOSITEDGE._serialized_start = 9992
-    _DEPOSITEDGE._serialized_end = 10050
-    _DEPOSITSCONNECTION._serialized_start = 10053
-    _DEPOSITSCONNECTION._serialized_end = 10185
-    _GETWITHDRAWALSREQUEST._serialized_start = 10187
-    _GETWITHDRAWALSREQUEST._serialized_end = 10277
-    _GETWITHDRAWALSRESPONSE._serialized_start = 10279
-    _GETWITHDRAWALSRESPONSE._serialized_end = 10364
-    _WITHDRAWALEDGE._serialized_start = 10366
-    _WITHDRAWALEDGE._serialized_end = 10430
-    _WITHDRAWALSCONNECTION._serialized_start = 10433
-    _WITHDRAWALSCONNECTION._serialized_end = 10571
-    _GETASSETSREQUEST._serialized_start = 10573
-    _GETASSETSREQUEST._serialized_end = 10658
-    _GETASSETSRESPONSE._serialized_start = 10660
-    _GETASSETSRESPONSE._serialized_end = 10730
-    _ASSETEDGE._serialized_start = 10732
-    _ASSETEDGE._serialized_end = 10786
-    _ASSETSCONNECTION._serialized_start = 10789
-    _ASSETSCONNECTION._serialized_end = 10917
-    _GETLIQUIDITYPROVISIONSREQUEST._serialized_start = 10920
-    _GETLIQUIDITYPROVISIONSREQUEST._serialized_end = 11050
-    _GETLIQUIDITYPROVISIONSRESPONSE._serialized_start = 11052
-    _GETLIQUIDITYPROVISIONSRESPONSE._serialized_end = 11162
-    _LIQUIDITYPROVISIONSEDGE._serialized_start = 11164
-    _LIQUIDITYPROVISIONSEDGE._serialized_end = 11245
-    _LIQUIDITYPROVISIONSCONNECTION._serialized_start = 11248
-    _LIQUIDITYPROVISIONSCONNECTION._serialized_end = 11403
-    _TRADINGDATASERVICE._serialized_start = 11761
-    _TRADINGDATASERVICE._serialized_end = 15602
+    _LISTACCOUNTSREQUEST._serialized_start = 573
+    _LISTACCOUNTSREQUEST._serialized_end = 711
+    _LISTACCOUNTSRESPONSE._serialized_start = 713
+    _LISTACCOUNTSRESPONSE._serialized_end = 790
+    _ACCOUNTSCONNECTION._serialized_start = 793
+    _ACCOUNTSCONNECTION._serialized_end = 925
+    _ACCOUNTEDGE._serialized_start = 927
+    _ACCOUNTEDGE._serialized_end = 988
+    _OBSERVEACCOUNTSREQUEST._serialized_start = 990
+    _OBSERVEACCOUNTSREQUEST._serialized_end = 1099
+    _OBSERVEACCOUNTSRESPONSE._serialized_start = 1101
+    _OBSERVEACCOUNTSRESPONSE._serialized_end = 1158
+    _LISTORDERVERSIONSREQUEST._serialized_start = 1160
+    _LISTORDERVERSIONSREQUEST._serialized_end = 1273
+    _LISTORDERVERSIONSRESPONSE._serialized_start = 1275
+    _LISTORDERVERSIONSRESPONSE._serialized_end = 1352
+    _GETORDERREQUEST._serialized_start = 1354
+    _GETORDERREQUEST._serialized_end = 1423
+    _GETORDERRESPONSE._serialized_start = 1425
+    _GETORDERRESPONSE._serialized_end = 1471
+    _LISTORDERSREQUEST._serialized_start = 1474
+    _LISTORDERSREQUEST._serialized_end = 1674
+    _LISTORDERSRESPONSE._serialized_start = 1676
+    _LISTORDERSRESPONSE._serialized_end = 1746
+    _LISTPOSITIONSREQUEST._serialized_start = 1749
+    _LISTPOSITIONSREQUEST._serialized_end = 1877
+    _LISTPOSITIONSRESPONSE._serialized_start = 1879
+    _LISTPOSITIONSRESPONSE._serialized_end = 1958
+    _POSITIONEDGE._serialized_start = 1960
+    _POSITIONEDGE._serialized_end = 2020
+    _POSITIONCONNECTION._serialized_start = 2022
+    _POSITIONCONNECTION._serialized_end = 2134
+    _GETBALANCEHISTORYREQUEST._serialized_start = 2136
+    _GETBALANCEHISTORYREQUEST._serialized_end = 2259
+    _GETBALANCEHISTORYRESPONSE._serialized_start = 2261
+    _GETBALANCEHISTORYRESPONSE._serialized_end = 2342
+    _ACCOUNTFILTER._serialized_start = 2344
+    _ACCOUNTFILTER._serialized_end = 2458
+    _AGGREGATEDBALANCE._serialized_start = 2461
+    _AGGREGATEDBALANCE._serialized_end = 2707
+    _OBSERVEMARKETSDEPTHREQUEST._serialized_start = 2709
+    _OBSERVEMARKETSDEPTHREQUEST._serialized_end = 2757
+    _OBSERVEMARKETSDEPTHRESPONSE._serialized_start = 2759
+    _OBSERVEMARKETSDEPTHRESPONSE._serialized_end = 2829
+    _OBSERVEMARKETSDEPTHUPDATESREQUEST._serialized_start = 2831
+    _OBSERVEMARKETSDEPTHUPDATESREQUEST._serialized_end = 2886
+    _OBSERVEMARKETSDEPTHUPDATESRESPONSE._serialized_start = 2888
+    _OBSERVEMARKETSDEPTHUPDATESRESPONSE._serialized_end = 2965
+    _OBSERVEMARKETSDATAREQUEST._serialized_start = 2967
+    _OBSERVEMARKETSDATAREQUEST._serialized_end = 3014
+    _OBSERVEMARKETSDATARESPONSE._serialized_start = 3016
+    _OBSERVEMARKETSDATARESPONSE._serialized_end = 3083
+    _GETLATESTMARKETDEPTHREQUEST._serialized_start = 3085
+    _GETLATESTMARKETDEPTHREQUEST._serialized_end = 3171
+    _GETLATESTMARKETDEPTHRESPONSE._serialized_start = 3174
+    _GETLATESTMARKETDEPTHRESPONSE._serialized_end = 3344
+    _LISTLATESTMARKETDATAREQUEST._serialized_start = 3346
+    _LISTLATESTMARKETDATAREQUEST._serialized_end = 3375
+    _LISTLATESTMARKETDATARESPONSE._serialized_start = 3377
+    _LISTLATESTMARKETDATARESPONSE._serialized_end = 3447
+    _GETLATESTMARKETDATAREQUEST._serialized_start = 3449
+    _GETLATESTMARKETDATAREQUEST._serialized_end = 3496
+    _GETLATESTMARKETDATARESPONSE._serialized_start = 3498
+    _GETLATESTMARKETDATARESPONSE._serialized_end = 3566
+    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_start = 3569
+    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_end = 3879
+    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_start = 3881
+    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_end = 3975
+    _MARKETDATAEDGE._serialized_start = 3977
+    _MARKETDATAEDGE._serialized_end = 4041
+    _MARKETDATACONNECTION._serialized_start = 4043
+    _MARKETDATACONNECTION._serialized_end = 4159
+    _MARKETSDATASUBSCRIBEREQUEST._serialized_start = 4161
+    _MARKETSDATASUBSCRIBEREQUEST._serialized_end = 4209
+    _MARKETSDATASUBSCRIBERESPONSE._serialized_start = 4211
+    _MARKETSDATASUBSCRIBERESPONSE._serialized_end = 4280
+    _LISTTRANSFERSREQUEST._serialized_start = 4283
+    _LISTTRANSFERSREQUEST._serialized_end = 4461
+    _LISTTRANSFERSRESPONSE._serialized_start = 4463
+    _LISTTRANSFERSRESPONSE._serialized_end = 4542
+    _TRANSFEREDGE._serialized_start = 4544
+    _TRANSFEREDGE._serialized_end = 4614
+    _TRANSFERCONNECTION._serialized_start = 4616
+    _TRANSFERCONNECTION._serialized_end = 4728
+    _GETNETWORKLIMITSREQUEST._serialized_start = 4730
+    _GETNETWORKLIMITSREQUEST._serialized_end = 4755
+    _GETNETWORKLIMITSRESPONSE._serialized_start = 4757
+    _GETNETWORKLIMITSRESPONSE._serialized_end = 4820
+    _LISTCANDLEINTERVALSREQUEST._serialized_start = 4822
+    _LISTCANDLEINTERVALSREQUEST._serialized_end = 4869
+    _INTERVALTOCANDLEID._serialized_start = 4871
+    _INTERVALTOCANDLEID._serialized_end = 4928
+    _LISTCANDLEINTERVALSRESPONSE._serialized_start = 4930
+    _LISTCANDLEINTERVALSRESPONSE._serialized_end = 5027
+    _CANDLE._serialized_start = 5029
+    _CANDLE._serialized_end = 5145
+    _OBSERVECANDLEDATAREQUEST._serialized_start = 5147
+    _OBSERVECANDLEDATAREQUEST._serialized_end = 5192
+    _OBSERVECANDLEDATARESPONSE._serialized_start = 5194
+    _OBSERVECANDLEDATARESPONSE._serialized_end = 5262
+    _LISTCANDLEDATAREQUEST._serialized_start = 5265
+    _LISTCANDLEDATAREQUEST._serialized_end = 5456
+    _LISTCANDLEDATARESPONSE._serialized_start = 5458
+    _LISTCANDLEDATARESPONSE._serialized_end = 5538
+    _CANDLEEDGE._serialized_start = 5540
+    _CANDLEEDGE._serialized_end = 5607
+    _CANDLEDATACONNECTION._serialized_start = 5609
+    _CANDLEDATACONNECTION._serialized_end = 5721
+    _LISTVOTESREQUEST._serialized_start = 5723
+    _LISTVOTESREQUEST._serialized_end = 5828
+    _LISTVOTESRESPONSE._serialized_start = 5830
+    _LISTVOTESRESPONSE._serialized_end = 5897
+    _VOTEEDGE._serialized_start = 5899
+    _VOTEEDGE._serialized_end = 5951
+    _VOTECONNECTION._serialized_start = 5953
+    _VOTECONNECTION._serialized_end = 6057
+    _OBSERVEVOTESREQUEST._serialized_start = 6059
+    _OBSERVEVOTESREQUEST._serialized_end = 6158
+    _OBSERVEVOTESRESPONSE._serialized_start = 6160
+    _OBSERVEVOTESRESPONSE._serialized_end = 6208
+    _GETERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_start = 6211
+    _GETERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_end = 6345
+    _GETERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_start = 6347
+    _GETERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_end = 6457
+    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_start = 6460
+    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_end = 6604
+    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_start = 6607
+    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_end = 6762
+    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_start = 6764
+    _GETERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_end = 6878
+    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_start = 6881
+    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_end = 7027
+    _GETERC20LISTASSETBUNDLEREQUEST._serialized_start = 7029
+    _GETERC20LISTASSETBUNDLEREQUEST._serialized_end = 7079
+    _GETERC20LISTASSETBUNDLERESPONSE._serialized_start = 7081
+    _GETERC20LISTASSETBUNDLERESPONSE._serialized_end = 7194
+    _TRADEEDGE._serialized_start = 7196
+    _TRADEEDGE._serialized_end = 7250
+    _TRADECONNECTION._serialized_start = 7252
+    _TRADECONNECTION._serialized_end = 7358
+    _GETTRADESBYMARKETREQUEST._serialized_start = 7360
+    _GETTRADESBYMARKETREQUEST._serialized_end = 7454
+    _GETTRADESBYMARKETRESPONSE._serialized_start = 7456
+    _GETTRADESBYMARKETRESPONSE._serialized_end = 7533
+    _GETTRADESBYORDERIDREQUEST._serialized_start = 7535
+    _GETTRADESBYORDERIDREQUEST._serialized_end = 7648
+    _GETTRADESBYORDERIDRESPONSE._serialized_start = 7650
+    _GETTRADESBYORDERIDRESPONSE._serialized_end = 7728
+    _GETTRADESBYPARTYREQUEST._serialized_start = 7730
+    _GETTRADESBYPARTYREQUEST._serialized_end = 7841
+    _GETTRADESBYPARTYRESPONSE._serialized_start = 7843
+    _GETTRADESBYPARTYRESPONSE._serialized_end = 7919
+    _GETORACLESPECBYIDREQUEST._serialized_start = 7921
+    _GETORACLESPECBYIDREQUEST._serialized_end = 7971
+    _GETORACLESPECBYIDRESPONSE._serialized_start = 7973
+    _GETORACLESPECBYIDRESPONSE._serialized_end = 8045
+    _LISTORACLESPECSREQUEST._serialized_start = 8047
+    _LISTORACLESPECSREQUEST._serialized_end = 8120
+    _LISTORACLESPECSRESPONSE._serialized_start = 8122
+    _LISTORACLESPECSRESPONSE._serialized_end = 8193
+    _GETORACLEDATABYSPECIDREQUEST._serialized_start = 8195
+    _GETORACLEDATABYSPECIDREQUEST._serialized_end = 8298
+    _GETORACLEDATABYSPECIDRESPONSE._serialized_start = 8300
+    _GETORACLEDATABYSPECIDRESPONSE._serialized_end = 8376
+    _LISTORACLEDATAREQUEST._serialized_start = 8378
+    _LISTORACLEDATAREQUEST._serialized_end = 8450
+    _LISTORACLEDATARESPONSE._serialized_start = 8452
+    _LISTORACLEDATARESPONSE._serialized_end = 8521
+    _GETORACLESPECSCONNECTIONREQUEST._serialized_start = 8523
+    _GETORACLESPECSCONNECTIONREQUEST._serialized_end = 8622
+    _GETORACLESPECSCONNECTIONRESPONSE._serialized_start = 8624
+    _GETORACLESPECSCONNECTIONRESPONSE._serialized_end = 8720
+    _GETORACLEDATACONNECTIONREQUEST._serialized_start = 8722
+    _GETORACLEDATACONNECTIONREQUEST._serialized_end = 8820
+    _GETORACLEDATACONNECTIONRESPONSE._serialized_start = 8822
+    _GETORACLEDATACONNECTIONRESPONSE._serialized_end = 8915
+    _ORACLESPECEDGE._serialized_start = 8917
+    _ORACLESPECEDGE._serialized_end = 8987
+    _ORACLESPECSCONNECTION._serialized_start = 8989
+    _ORACLESPECSCONNECTION._serialized_end = 9106
+    _ORACLEDATAEDGE._serialized_start = 9108
+    _ORACLEDATAEDGE._serialized_end = 9178
+    _ORACLEDATACONNECTION._serialized_start = 9180
+    _ORACLEDATACONNECTION._serialized_end = 9296
+    _LISTMARKETSREQUEST._serialized_start = 9298
+    _LISTMARKETSREQUEST._serialized_end = 9406
+    _LISTMARKETSRESPONSE._serialized_start = 9408
+    _LISTMARKETSRESPONSE._serialized_end = 9481
+    _MARKETEDGE._serialized_start = 9483
+    _MARKETEDGE._serialized_end = 9539
+    _MARKETCONNECTION._serialized_start = 9541
+    _MARKETCONNECTION._serialized_end = 9649
+    _LISTPARTIESREQUEST._serialized_start = 9651
+    _LISTPARTIESREQUEST._serialized_end = 9738
+    _LISTPARTIESRESPONSE._serialized_start = 9740
+    _LISTPARTIESRESPONSE._serialized_end = 9810
+    _PARTYEDGE._serialized_start = 9812
+    _PARTYEDGE._serialized_end = 9866
+    _PARTYCONNECTION._serialized_start = 9868
+    _PARTYCONNECTION._serialized_end = 9974
+    _ORDEREDGE._serialized_start = 9976
+    _ORDEREDGE._serialized_end = 10030
+    _LISTMARGINLEVELSREQUEST._serialized_start = 10032
+    _LISTMARGINLEVELSREQUEST._serialized_end = 10143
+    _LISTMARGINLEVELSRESPONSE._serialized_start = 10145
+    _LISTMARGINLEVELSRESPONSE._serialized_end = 10229
+    _ORDERCONNECTION._serialized_start = 10231
+    _ORDERCONNECTION._serialized_end = 10337
+    _MARGINEDGE._serialized_start = 10339
+    _MARGINEDGE._serialized_end = 10401
+    _MARGINCONNECTION._serialized_start = 10403
+    _MARGINCONNECTION._serialized_end = 10511
+    _LISTREWARDSUMMARIESREQUEST._serialized_start = 10513
+    _LISTREWARDSUMMARIESREQUEST._serialized_end = 10577
+    _LISTREWARDSUMMARIESRESPONSE._serialized_start = 10579
+    _LISTREWARDSUMMARIESRESPONSE._serialized_end = 10648
+    _LISTREWARDSREQUEST._serialized_start = 10650
+    _LISTREWARDSREQUEST._serialized_end = 10755
+    _LISTREWARDSRESPONSE._serialized_start = 10757
+    _LISTREWARDSRESPONSE._serialized_end = 10831
+    _REWARDEDGE._serialized_start = 10833
+    _REWARDEDGE._serialized_end = 10889
+    _REWARDSCONNECTION._serialized_start = 10891
+    _REWARDSCONNECTION._serialized_end = 11000
+    _LISTDEPOSITSREQUEST._serialized_start = 11002
+    _LISTDEPOSITSREQUEST._serialized_end = 11090
+    _LISTDEPOSITSRESPONSE._serialized_start = 11092
+    _LISTDEPOSITSRESPONSE._serialized_end = 11169
+    _DEPOSITEDGE._serialized_start = 11171
+    _DEPOSITEDGE._serialized_end = 11229
+    _DEPOSITSCONNECTION._serialized_start = 11231
+    _DEPOSITSCONNECTION._serialized_end = 11342
+    _LISTWITHDRAWALSREQUEST._serialized_start = 11344
+    _LISTWITHDRAWALSREQUEST._serialized_end = 11435
+    _LISTWITHDRAWALSRESPONSE._serialized_start = 11437
+    _LISTWITHDRAWALSRESPONSE._serialized_end = 11523
+    _WITHDRAWALEDGE._serialized_start = 11525
+    _WITHDRAWALEDGE._serialized_end = 11589
+    _WITHDRAWALSCONNECTION._serialized_start = 11591
+    _WITHDRAWALSCONNECTION._serialized_end = 11708
+    _LISTASSETSREQUEST._serialized_start = 11710
+    _LISTASSETSREQUEST._serialized_end = 11796
+    _LISTASSETSRESPONSE._serialized_start = 11798
+    _LISTASSETSRESPONSE._serialized_end = 11869
+    _ASSETEDGE._serialized_start = 11871
+    _ASSETEDGE._serialized_end = 11925
+    _ASSETSCONNECTION._serialized_start = 11927
+    _ASSETSCONNECTION._serialized_end = 12034
+    _LISTLIQUIDITYPROVISIONSREQUEST._serialized_start = 12037
+    _LISTLIQUIDITYPROVISIONSREQUEST._serialized_end = 12250
+    _LISTLIQUIDITYPROVISIONSRESPONSE._serialized_start = 12252
+    _LISTLIQUIDITYPROVISIONSRESPONSE._serialized_end = 12363
+    _LIQUIDITYPROVISIONSEDGE._serialized_start = 12365
+    _LIQUIDITYPROVISIONSEDGE._serialized_end = 12446
+    _LIQUIDITYPROVISIONSCONNECTION._serialized_start = 12449
+    _LIQUIDITYPROVISIONSCONNECTION._serialized_end = 12583
+    _LISTGOVERNANCEDATAREQUEST._serialized_start = 12586
+    _LISTGOVERNANCEDATAREQUEST._serialized_end = 13120
+    _LISTGOVERNANCEDATAREQUEST_TYPE._serialized_start = 12863
+    _LISTGOVERNANCEDATAREQUEST_TYPE._serialized_end = 13023
+    _LISTGOVERNANCEDATARESPONSE._serialized_start = 13122
+    _LISTGOVERNANCEDATARESPONSE._serialized_end = 13213
+    _GOVERNANCEDATAEDGE._serialized_start = 13215
+    _GOVERNANCEDATAEDGE._serialized_end = 13287
+    _GOVERNANCEDATACONNECTION._serialized_start = 13289
+    _GOVERNANCEDATACONNECTION._serialized_end = 13413
+    _LISTDELEGATIONSREQUEST._serialized_start = 13416
+    _LISTDELEGATIONSREQUEST._serialized_end = 13615
+    _LISTDELEGATIONSRESPONSE._serialized_start = 13617
+    _LISTDELEGATIONSRESPONSE._serialized_end = 13703
+    _DELEGATIONEDGE._serialized_start = 13705
+    _DELEGATIONEDGE._serialized_end = 13769
+    _DELEGATIONSCONNECTION._serialized_start = 13771
+    _DELEGATIONSCONNECTION._serialized_end = 13888
+    _INFOREQUEST._serialized_start = 13890
+    _INFOREQUEST._serialized_end = 13903
+    _INFORESPONSE._serialized_start = 13905
+    _INFORESPONSE._serialized_end = 13957
+    _TRADINGDATASERVICE._serialized_start = 14315
+    _TRADINGDATASERVICE._serialized_end = 19319
 # @@protoc_insertion_point(module_scope)
