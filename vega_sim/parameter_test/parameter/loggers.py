@@ -27,6 +27,8 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LiquifeeAccount",
     "InfrafeeAccount",
     "Total Traded Notional",
+    "Target Stake",
+    "Market Open Interest",
     "Market Trading mode",
     "Market State",
 ]
