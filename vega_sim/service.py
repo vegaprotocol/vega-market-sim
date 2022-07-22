@@ -672,6 +672,46 @@ class VegaService(ABC):
         )
         self.wait_fn(110)
 
+    def update_market(
+        self,
+        proposal_wallet: str,
+        market_id: str,
+        update_configuration: vega_protos.governance.UpdateMarketConfiguration,
+    ):
+        """Updates a market based on proposal parameters. Will attempt to propose
+        and then immediately vote on the market change before forwarding time for
+        the enactment to also take effect
+
+        Args:
+            proposal_wallet:
+                str, the wallet proposing the change
+            market_id:
+                str, the market to change
+            new_value:
+                str, the new value to set
+        Returns:
+            str, the ID of the proposal
+        """
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+
+        proposal_id = gov.propose_network_parameter_change(
+            parameter=parameter,
+            value=new_value,
+            wallet=self.wallet,
+            wallet_name=proposal_wallet,
+            data_client=self.trading_data_client,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+        gov.approve_proposal(
+            proposal_id=proposal_id,
+            wallet=self.wallet,
+            wallet_name=proposal_wallet,
+        )
+        self.wait_fn(110)
+
     def settle_market(
         self,
         settlement_wallet: str,

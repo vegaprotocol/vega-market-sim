@@ -37,7 +37,9 @@ def _proposal_loader(
     return data_client.GetProposalByReference(request).data
 
 
-def _default_initial_liquidity_commitment() -> vega_protos.governance.NewMarketCommitment:
+def _default_initial_liquidity_commitment() -> (
+    vega_protos.governance.NewMarketCommitment
+):
     return vega_protos.governance.NewMarketCommitment(
         commitment_amount="10000",
         fee="0.002",
@@ -285,6 +287,38 @@ def propose_network_parameter_change(
     return network_param_update.reference
 
 
+def propose_market_update(
+    market_id: str,
+    wallet_name: str,
+    wallet: Wallet,
+    market_update: vega_protos.governance.UpdateMarketConfiguration,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    validation_time: Optional[int] = None,
+    data_client: Optional[vac.VegaTradingDataClient] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    network_param_update = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+        validation_time=validation_time,
+    )
+    network_param_update.terms.update_market.CopyFrom(
+        vega_protos.governance.UpdateMarket(market_id=market_id, changes=market_update)
+    )
+
+    _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=network_param_update,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+    )
+    return network_param_update.reference
+
+
 def approve_proposal(
     wallet_name: str,
     proposal_id: str,
@@ -351,7 +385,6 @@ def _build_generic_proposal(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
 ) -> commands_protos.commands.ProposalSubmission:
-
     # Set closing/enactment and validation timestamps to valid time offsets
     # from the current Vega blockchain time if not already set
     none_times = [i is None for i in [closing_time, enactment_time, validation_time]]
