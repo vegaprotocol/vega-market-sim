@@ -1,9 +1,7 @@
 import logging
-import threading
 from collections import namedtuple
 from dataclasses import dataclass
-from queue import Queue
-from typing import Callable, DefaultDict, Iterable, List, Optional, Tuple, TypeVar
+from typing import DefaultDict, Iterable, List, Optional, Tuple
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
@@ -18,8 +16,6 @@ class MissingAssetError(Exception):
 
 logger = logging.Logger(__name__)
 
-T = TypeVar("T")
-S = TypeVar("S")
 
 AccountData = namedtuple("AccountData", ["general", "margin", "bond"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
@@ -57,6 +53,20 @@ Position = namedtuple(
     ],
 )
 
+MarginLevels = namedtuple(
+    "MarginLevels",
+    [
+        "maintenance_margin",
+        "search_level",
+        "initial_margin",
+        "collateral_release_level",
+        "party_id",
+        "market_id",
+        "asset",
+        "timestamp",
+    ],
+)
+
 
 @dataclass
 class MarketDepth:
@@ -70,21 +80,23 @@ class OrdersBySide:
     asks: List[Order]
 
 
-def _unroll_pagination(
-    base_request: S, extraction_func: Callable[[S], List[T]], step_size: int = 50
-) -> List[T]:
-    skip = 0
-    base_request.pagination.CopyFrom(
-        data_node_protos.trading_data.Pagination(skip=skip, limit=step_size)
+def _margin_level_from_proto(
+    margin_level: vega_protos.vega.MarginLevels, asset_decimals: int
+) -> MarginLevels:
+    return MarginLevels(
+        maintenance_margin=num_from_padded_int(
+            margin_level.maintenance_margin, asset_decimals
+        ),
+        search_level=num_from_padded_int(margin_level.search_level, asset_decimals),
+        initial_margin=num_from_padded_int(margin_level.initial_margin, asset_decimals),
+        collateral_release_level=num_from_padded_int(
+            margin_level.collateral_release_level, asset_decimals
+        ),
+        party_id=margin_level.party_id,
+        market_id=margin_level.market_id,
+        asset=margin_level.asset,
+        timestamp=margin_level.timestamp,
     )
-    curr_list = extraction_func(base_request)
-    full_list = curr_list
-    while len(curr_list) == step_size:
-        skip += step_size
-        base_request.pagination.skip = skip
-        curr_list = extraction_func(base_request)
-        full_list.extend(curr_list)
-    return full_list
 
 
 def _order_from_proto(
@@ -349,7 +361,7 @@ def all_orders(
     Returns:
         OrdersBySide, Live orders segregated by side
     """
-    orders = _unroll_pagination(
+    orders = data_raw.unroll_pagination(
         data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
         lambda x: data_client.OrdersByMarket(x).orders,
     )
@@ -390,7 +402,7 @@ def order_book_by_market(
     Output state of order book for a given market.
     """
 
-    orders = _unroll_pagination(
+    orders = data_raw.unroll_pagination(
         data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
         lambda x: data_client.OrdersByMarket(x).orders,
     )
@@ -591,3 +603,25 @@ def has_liquidity_provision(
             vega_protos.vega.LiquidityProvision.Status.STATUS_PENDING,
         ]
     )
+
+
+def margin_levels(
+    data_client: vac.VegaTradingDataClientV2,
+    data_client_v1: vac.VegaTradingDataClient,
+    party_id: str,
+    market_id: Optional[str] = None,
+) -> List[MarginLevels]:
+    asset_dp = {}
+    margins = data_raw.margin_levels(
+        data_client=data_client, party_id=party_id, market_id=market_id
+    )
+    res_margins = []
+    for margin in margins:
+        if margin.asset not in asset_dp:
+            asset_dp[margin.asset] = asset_decimals(
+                asset_id=margin.asset, data_client=data_client_v1
+            )
+        res_margins.append(
+            _margin_level_from_proto(margin, asset_decimals=asset_dp[margin.asset])
+        )
+    return res_margins
