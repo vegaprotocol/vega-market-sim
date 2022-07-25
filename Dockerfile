@@ -3,6 +3,7 @@ FROM golang:1.18-buster AS gobuild
 COPY ./extern /extern
 WORKDIR /extern
 RUN mkdir /extern/bin
+RUN ls -l
 RUN cd ./vega && CGO_ENABLED=0 go build -o ../bin/ ./... && cd ..
 RUN cd ./data-node && CGO_ENABLED=0 go build -o ../bin/ ./... && cd ..
 
