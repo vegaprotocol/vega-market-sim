@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import atexit
+import functools
+from io import BufferedWriter
 import logging
 import multiprocessing
 import os
@@ -245,20 +247,27 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
     return ret_sock
 
 
+def _terminate_proc(
+    proc: subprocess.Popen[bytes], out_file: BufferedWriter, err_file: BufferedWriter
+) -> None:
+    proc.terminate()
+    out_file.close()
+    err_file.close()
+
+
 def _popen_process(
     popen_args: List[str],
     dir_root: str,
     log_name: str,
     env: Optional[Dict[str, str]] = None,
 ) -> subprocess.Popen[bytes]:
-    with open(path.join(dir_root, f"{log_name}.out"), "wb") as out, open(
-        path.join(dir_root, f"{log_name}.err"), "wb"
-    ) as err:
-        sub_proc = subprocess.Popen(
-            popen_args, stdout=out, stderr=err, env=env, close_fds=True
-        )
+    out = open(path.join(dir_root, f"{log_name}.out"), "wb")
+    err = open(path.join(dir_root, f"{log_name}.err"), "wb")
+    sub_proc = subprocess.Popen(
+        popen_args, stdout=out, stderr=err, env=env, close_fds=True
+    )
 
-    atexit.register(lambda: sub_proc.terminate())
+    atexit.register(functools.partial(_terminate_proc, sub_proc, out, err))
     return sub_proc
 
 
@@ -316,7 +325,6 @@ def manage_vega_processes(
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp()
-
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
     shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
