@@ -101,6 +101,7 @@ class VegaService(ABC):
         self._core_client = None
         self._core_state_client = None
         self._trading_data_client = None
+        self._trading_data_client_v2 = None
         self.can_control_time = can_control_time
         self.warn_on_raw_data_access = warn_on_raw_data_access
 
@@ -182,6 +183,19 @@ class VegaService(ABC):
                 channel=channel,
             )
         return self._trading_data_client
+
+    @property
+    def trading_data_client_v2(self) -> vac.VegaTradingDataClientV2:
+        if self._trading_data_client_v2 is None:
+            channel = grpc.insecure_channel(
+                self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
+            )
+            grpc.channel_ready_future(channel).result(timeout=10)
+            self._trading_data_client_v2 = vac.VegaTradingDataClientV2(
+                self.data_node_grpc_url,
+                channel=channel,
+            )
+        return self._trading_data_client_v2
 
     @property
     def core_state_client(self) -> vac.VegaCoreStateClient:
@@ -1190,3 +1204,13 @@ class VegaService(ABC):
                     0,
                 ):
                     self._order_state_from_feed[o.market_id][o.party_id][o.id] = o
+
+    def margin_levels(
+        self, wallet_name: str, market_id: Optional[str] = None
+    ) -> List[data.MarginLevels]:
+        return data.margin_levels(
+            self.trading_data_client_v2,
+            self.trading_data_client,
+            party_id=self.wallet.public_key(wallet_name),
+            market_id=market_id,
+        )

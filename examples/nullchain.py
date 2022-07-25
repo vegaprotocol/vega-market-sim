@@ -170,6 +170,8 @@ if __name__ == "__main__":
         #     sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
         #     is_amendment=False,
         # )
+        margin_levels = vega.margin_levels(MM_WALLET2.name)
+        print(f"Margin levels are: {margin_levels}")
         vega.forward("10s")
         vega.settle_market(
             settlement_wallet=TERMINATE_WALLET.name,

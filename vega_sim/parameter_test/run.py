@@ -1,4 +1,5 @@
 import argparse
+import logging
 
 import vega_sim.parameter_test.parameter.experiment as experiment
 from vega_sim.parameter_test.parameter.configs import CONFIGS
@@ -10,6 +11,8 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--config")
 
     args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO)
 
     config_map = {c.name: c for c in CONFIGS}
 

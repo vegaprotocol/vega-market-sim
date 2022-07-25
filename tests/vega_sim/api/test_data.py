@@ -1,63 +1,47 @@
-import grpc
-import pytest
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock, patch
 
-from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClient
-from vega_sim.null_service import find_free_port
-
+import grpc
+import pytest
 import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
+from tests.vega_sim.api.test_data_raw import (
+    core_servicer_and_port,
+    trading_data_servicer_and_port,
+    trading_data_v2_servicer_and_port,
+)
 from vega_sim.api.data import (
     AccountData,
+    MarginLevels,
+    MissingAssetError,
     Order,
     OrdersBySide,
-    market_price_decimals,
-    order_subscription,
-    party_account,
-    find_asset_id,
-    market_position_decimals,
     asset_decimals,
     best_prices,
+    find_asset_id,
+    margin_levels,
+    market_position_decimals,
+    market_price_decimals,
     open_orders_by_market,
-    MissingAssetError,
+    order_subscription,
+    party_account,
+)
+from vega_sim.grpc.client import (
+    VegaCoreClient,
+    VegaTradingDataClient,
+    VegaTradingDataClientV2,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
-    TradingDataServiceServicer,
     add_TradingDataServiceServicer_to_server,
 )
-
+from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
+    add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
+)
 from vega_sim.proto.vega.api.v1.core_pb2_grpc import (
-    CoreServiceServicer,
     add_CoreServiceServicer_to_server,
 )
-import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
-
-
-@pytest.fixture
-def trading_data_servicer_and_port():
-    server = grpc.server(ThreadPoolExecutor(1))
-    port = find_free_port()
-    server.add_insecure_port(f"[::]:{port}")
-    server.start()
-
-    class MockTradingDataServicer(TradingDataServiceServicer):
-        pass
-
-    return server, port, MockTradingDataServicer
-
-
-@pytest.fixture
-def core_servicer_and_port():
-    server = grpc.server(ThreadPoolExecutor(1))
-    port = find_free_port()
-    server.add_insecure_port(f"[::]:{port}")
-    server.start()
-
-    class MockCoreServicer(CoreServiceServicer):
-        pass
-
-    return server, port, MockCoreServicer
 
 
 def test_party_account(trading_data_servicer_and_port):
@@ -572,3 +556,62 @@ def test_order_subscription(mkt_price_mock, mkt_pos_mock, core_servicer_and_port
     queue = order_subscription(data_client=data_client, trading_data_client=None)
     for order in orders:
         assert order.id == next(queue).id
+
+
+@patch("vega_sim.api.data.asset_decimals")
+def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
+    expected = [
+        MarginLevels(
+            maintenance_margin=10,
+            search_level=15,
+            initial_margin=20,
+            collateral_release_level=30,
+            party_id="party",
+            market_id="market",
+            asset="asset",
+            timestamp=1251825938592,
+        )
+    ]
+
+    def ListMarginLevels(self, request, context):
+        return data_node_protos_v2.trading_data.ListMarginLevelsResponse(
+            margin_levels=data_node_protos_v2.trading_data.MarginConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.MarginEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.MarginLevels(
+                            maintenance_margin="100",
+                            search_level="150",
+                            initial_margin="200",
+                            collateral_release_level="300",
+                            party_id="party",
+                            market_id="market",
+                            asset="asset",
+                            timestamp=1251825938592,
+                        ),
+                    )
+                ],
+            )
+        )
+
+    mk_asset_decimals.return_value = 1
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListMarginLevels = ListMarginLevels
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = margin_levels(
+        party_id="party",
+        market_id="market",
+        data_client=data_client,
+        data_client_v1=None,
+    )
+
+    assert res == expected
