@@ -253,18 +253,10 @@ class OptimalMarketMaker(StateAgentWithWallet):
             else:
                 sell_order = order
 
-        market_data = self.vega.market_data(market_id=self.market_id)
-        LOB_best_bid = float(market_data.best_bid_price) / 10**self.mdp
-        LOB_bset_ask = float(market_data.best_offer_price) / 10**self.mdp
-
         self._place_orders(
-            buy_offset=self.bid_depth
-            + LOB_best_bid
-            - self.price_process[self.current_step],
-            sell_offset=self.ask_depth
-            + self.price_process[self.current_step]
-            - LOB_bset_ask,
-            volume=20,
+            buy_offset=self.bid_depth - self.spread / 2,
+            sell_offset=self.ask_depth - self.spread / 2,
+            volume=10,
             buy_order=buy_order,
             sell_order=sell_order,
         )
