@@ -222,7 +222,6 @@ if __name__ == "__main__":
             delta_sell=10,
             is_amendment=True,
         )
-
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Margin levels are: {margin_levels}")
         vega.forward("10s")
