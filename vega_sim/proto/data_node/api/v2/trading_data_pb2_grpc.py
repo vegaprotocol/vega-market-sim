@@ -362,8 +362,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetMarketDataHistoryByID(self, request, context):
-        """Get Market Data History for a Market ID between given dates using a cursor based pagination model
-        """
+        """Get Market Data History for a Market ID between given dates using a cursor based pagination model"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -405,8 +404,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListCandleIntervals(self, request, context):
-        """Gets all available intervals for a given market along with the corresponding candle id
-        """
+        """Gets all available intervals for a given market along with the corresponding candle id"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -434,15 +432,13 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetERC20MultiSigSignerRemovedBundles(self, request, context):
-        """Gets the signature bundles that remove a particular validator to the multisig contract
-        """
+        """Gets the signature bundles that remove a particular validator to the multisig contract"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetERC20ListAssetBundle(self, request, context):
-        """Gets the signature bundles that remove a particular validator to the multisig contract
-        """
+        """Gets the signature bundles that remove a particular validator to the multisig contract"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
