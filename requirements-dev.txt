@@ -18,9 +18,7 @@ debugpy==1.6.2; python_full_version >= "3.7.0" and python_full_version < "4.0.0"
 decorator==5.1.1; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.8"
 defusedxml==0.7.1; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.7"
 entrypoints==0.4; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.7"
-executing==0.9.1; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.8" \
-    --hash=sha256:4ce4d6082d99361c0231fc31ac1a0f56979363cc6819de0b1410784f99e49105 \
-    --hash=sha256:ea278e2cf90cbbacd24f1080dd1f0ac25b71b2e21f50ab439b7ba45dd3195587
+executing==0.9.1; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.8"
 fastjsonschema==2.16.1; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.7"
 flake8==4.0.1; python_version >= "3.6"
 fonttools==4.34.4; python_version >= "3.7"
@@ -100,9 +98,7 @@ tomli==2.0.1; python_full_version < "3.11.0a7" and python_full_version >= "3.7.0
 tornado==6.2; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.7"
 traitlets==5.3.0; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.8"
 typing-extensions==4.3.0; python_version < "3.10" and python_full_version >= "3.7.0" and python_version >= "3.7" and python_full_version < "4.0.0"
-urllib3==1.26.11; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7" \
-    --hash=sha256:c33ccba33c819596124764c23a97d25f32b28433ba0dedeb77d873a38722c9bc \
-    --hash=sha256:ea6e8fb210b19d950fab93b60c9009226c63a28808bc8386e05301e25883ac0a
+urllib3==1.26.11; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" or python_full_version >= "3.6.0" and python_version < "4" and python_version >= "3.7"
 wcwidth==0.2.5; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.8"
 webencodings==0.5.1; python_version >= "3.7"
 widgetsnbextension==3.6.1
