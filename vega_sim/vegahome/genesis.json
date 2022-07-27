@@ -116,7 +116,6 @@
       "market.liquidityProvision.shapes.maxSize": "100",
       "market.margin.scalingFactors": "{\"search_level\": 1.1, \"initial_margin\": 1.2, \"collateral_release\": 1.4}",
       "market.monitor.price.defaultParameters": "{\"triggers\": []}",
-      "market.monitor.price.updateFrequency": "1m0s",
       "market.stake.target.scalingFactor": "1",
       "market.stake.target.timeWindow": "1h0m0s",
       "market.value.windowLength": "2h0m0s",
