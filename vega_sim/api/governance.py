@@ -37,7 +37,9 @@ def _proposal_loader(
     return data_client.GetProposalByReference(request).data
 
 
-def _default_initial_liquidity_commitment() -> vega_protos.governance.NewMarketCommitment:
+def _default_initial_liquidity_commitment() -> (
+    vega_protos.governance.NewMarketCommitment
+):
     return vega_protos.governance.NewMarketCommitment(
         commitment_amount="10000",
         fee="0.002",
@@ -67,6 +69,23 @@ def _default_risk_model() -> vega_protos.markets.LogNormalRiskModel:
     )
 
 
+def _default_price_monitoring_parameters() -> (
+    vega_protos.markets.PriceMonitoringParameters
+):
+    return vega_protos.markets.PriceMonitoringParameters(
+        triggers=[
+            vega_protos.markets.PriceMonitoringTrigger(
+                # in seconds, so 24h, the longer the wider bounds
+                horizon=24 * 3600,
+                # number close to but below 1 leads to wide bounds
+                probability="0.999999",
+                # in seconds
+                auction_extension=5,
+            )
+        ]
+    )
+
+
 def get_blockchain_time(data_client: vac.VegaTradingDataClient) -> int:
     """Returns blockchain time in seconds since the epoch"""
     blockchain_time = data_client.GetVegaTime(
@@ -92,6 +111,9 @@ def propose_future_market(
     liquidity_commitment: Optional[vega_protos.governance.NewMarketCommitment] = None,
     risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    price_monitoring_parameters: Optional[
+        vega_protos.markets.PriceMonitoringParameters
+    ] = None,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -122,6 +144,16 @@ def propose_future_market(
         market_decimals:
             int, the decimal place precision to use for market prices
             (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+        liquidity_commitment:
+            NewMarketCommitment, An object specifying the initial liquidity commitment
+                which the proposer it making to the market.
+        risk_model:
+            LogNormalRiskModel, A parametrised risk model on which the market will run
+        price_monitoring_parameters:
+            PriceMonitoringParameters, A set of parameters determining when the market
+                will drop into a price auction. If not passed defaults to a very
+                permissive setup
+
     Returns:
         str, the ID of the future market proposal on chain
     """
@@ -157,6 +189,11 @@ def propose_future_market(
     )
 
     risk_model = risk_model if risk_model is not None else _default_risk_model()
+    price_monitoring_parameters = (
+        price_monitoring_parameters
+        if price_monitoring_parameters is not None
+        else _default_price_monitoring_parameters()
+    )
 
     oracle_spec_for_settlement_price = oracles_protos.spec.OracleSpecConfiguration(
         pub_keys=[termination_pub_key],
@@ -215,18 +252,7 @@ def propose_future_market(
                 triggering_ratio=0.7,
                 auction_extension=0,
             ),
-            price_monitoring_parameters=vega_protos.markets.PriceMonitoringParameters(
-                triggers=[
-                    vega_protos.markets.PriceMonitoringTrigger(
-                        # in seconds, so 24h, the longer the wider bounds
-                        horizon=24 * 3600,
-                        # number close to but below 1 leads to wide bounds
-                        probability="0.999999",
-                        # in seconds
-                        auction_extension=5,
-                    )
-                ]
-            ),
+            price_monitoring_parameters=price_monitoring_parameters,
             log_normal=risk_model,
         ),
         liquidity_commitment=liquidity_commitment,
@@ -273,6 +299,37 @@ def propose_network_parameter_change(
         vega_protos.governance.UpdateNetworkParameter(
             changes=vega_protos.vega.NetworkParameter(key=parameter, value=value)
         )
+    )
+    _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=network_param_update,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+    )
+    return network_param_update.reference
+
+
+def propose_market_update(
+    market_id: str,
+    wallet_name: str,
+    wallet: Wallet,
+    market_update: vega_protos.governance.UpdateMarketConfiguration,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    validation_time: Optional[int] = None,
+    data_client: Optional[vac.VegaTradingDataClient] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    network_param_update = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+        validation_time=validation_time,
+    )
+    network_param_update.terms.update_market.CopyFrom(
+        vega_protos.governance.UpdateMarket(market_id=market_id, changes=market_update)
     )
 
     _make_and_wait_for_proposal(
@@ -351,7 +408,6 @@ def _build_generic_proposal(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
 ) -> commands_protos.commands.ProposalSubmission:
-
     # Set closing/enactment and validation timestamps to valid time offsets
     # from the current Vega blockchain time if not already set
     none_times = [i is None for i in [closing_time, enactment_time, validation_time]]

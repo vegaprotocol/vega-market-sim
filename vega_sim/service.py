@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import copy
 from dataclasses import dataclass
-from email.mime import base
 import logging
 import threading
 import time
@@ -25,6 +23,17 @@ from vega_sim.api.helpers import (
     num_to_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
+)
+from vega_sim.proto.vega.governance_pb2 import (
+    UpdateFutureProduct,
+    UpdateInstrumentConfiguration,
+    UpdateMarketConfiguration,
+)
+from vega_sim.proto.vega.markets_pb2 import (
+    LiquidityMonitoringParameters,
+    LogNormalRiskModel,
+    PriceMonitoringParameters,
+    SimpleModelParams,
 )
 from vega_sim.wallet.base import Wallet
 
@@ -358,6 +367,9 @@ class VegaService(ABC):
         liquidity_commitment: Optional[
             vega_protos.governance.NewMarketCommitment
         ] = None,
+        price_monitoring_parameters: Optional[
+            vega_protos.markets.PriceMonitoringParameters
+        ] = None,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -376,6 +388,13 @@ class VegaService(ABC):
            market_decimals:
                 int, the decimal place precision to use for market prices
                     (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+            liquidity_commitment:
+                NewMarketCommitment, An object specifying the initial liquidity
+                    commitment which the proposer it making to the market.
+            price_monitoring_parameters:
+                PriceMonitoringParameters, A set of parameters determining when the
+                    market will drop into a price auction. If not passed defaults
+                    to a very permissive setup
 
         """
         additional_kwargs = {}
@@ -404,6 +423,7 @@ class VegaService(ABC):
             risk_model=risk_model,
             liquidity_commitment=liquidity_commitment,
             time_forward_fn=lambda: self.wait_fn(2),
+            price_monitoring_parameters=price_monitoring_parameters,
             **additional_kwargs,
         )
         gov.approve_proposal(
@@ -657,6 +677,108 @@ class VegaService(ABC):
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
             value=new_value,
+            wallet=self.wallet,
+            wallet_name=proposal_wallet,
+            data_client=self.trading_data_client,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+        gov.approve_proposal(
+            proposal_id=proposal_id,
+            wallet=self.wallet,
+            wallet_name=proposal_wallet,
+        )
+        self.wait_fn(110)
+
+    def update_market(
+        self,
+        proposal_wallet: str,
+        market_id: str,
+        updated_instrument: Optional[UpdateInstrumentConfiguration] = None,
+        updated_metadata: Optional[str] = None,
+        updated_price_monitoring_parameters: Optional[PriceMonitoringParameters] = None,
+        updated_liquidity_monitoring_parameters: Optional[
+            LiquidityMonitoringParameters
+        ] = None,
+        updated_simple_model_params: Optional[SimpleModelParams] = None,
+        updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
+    ):
+        """Updates a market based on proposal parameters. Will attempt to propose
+        and then immediately vote on the market change before forwarding time for
+        the enactment to also take effect
+
+        Args:
+            proposal_wallet:
+                str, the wallet proposing the change
+            market_id:
+                str, the market to change
+            new_value:
+                str, the new value to set
+        Returns:
+            str, the ID of the proposal
+        """
+        if (
+            updated_simple_model_params is not None
+            and updated_log_normal_risk_model is not None
+        ):
+            raise Exception(
+                "Only one of simple and log normal risk models can be valid on a single"
+                " market"
+            )
+
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+
+        current_market = self.market_info(market_id=market_id)
+
+        if updated_instrument is None:
+            curr_inst = current_market.tradable_instrument.instrument
+            curr_fut = curr_inst.future
+            curr_fut_prod = UpdateFutureProduct(
+                quote_name=curr_fut.quote_name,
+                oracle_spec_for_settlement_price=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
+                    pub_keys=curr_fut.oracle_spec_for_settlement_price.pub_keys,
+                    filters=curr_fut.oracle_spec_for_settlement_price.filters,
+                ),
+                oracle_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
+                    pub_keys=curr_fut.oracle_spec_for_trading_termination.pub_keys,
+                    filters=curr_fut.oracle_spec_for_trading_termination.filters,
+                ),
+                oracle_spec_binding=curr_fut.oracle_spec_binding,
+                settlement_price_decimals=curr_fut.settlement_price_decimals,
+            )
+            updated_instrument = UpdateInstrumentConfiguration(
+                code=curr_inst.code,
+                future=curr_fut_prod,
+            )
+        if updated_simple_model_params is None:
+            curr_simple_model = current_market.tradable_instrument.simple_risk_model
+            updated_simple_model_params = (
+                curr_simple_model.params if curr_simple_model is not None else None
+            )
+
+        if updated_log_normal_risk_model is None:
+            updated_log_normal_risk_model = (
+                current_market.tradable_instrument.log_normal_risk_model
+            )
+
+        update_configuration = UpdateMarketConfiguration(
+            instrument=updated_instrument,
+            price_monitoring_parameters=updated_price_monitoring_parameters
+            if updated_price_monitoring_parameters is not None
+            else current_market.price_monitoring_settings.parameters,
+            liquidity_monitoring_parameters=updated_liquidity_monitoring_parameters
+            if updated_liquidity_monitoring_parameters is not None
+            else current_market.liquidity_monitoring_parameters,
+            simple=updated_simple_model_params,
+            log_normal=updated_log_normal_risk_model,
+            metadata=updated_metadata,
+        )
+
+        proposal_id = gov.propose_market_update(
+            market_update=update_configuration,
+            market_id=market_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
             data_client=self.trading_data_client,
