@@ -5,6 +5,7 @@ import numpy as np
 from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
+from vega_sim.api.data import Order
 
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
@@ -482,36 +483,58 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
                 else:
                     sell_orders.append(order)
 
-            for i in range(market_regime.num_levels_per_side):
-                if i < len(buy_orders):
-                    order_to_amend = buy_orders[i]
-                    self.vega.amend_order(
-                        trading_wallet=self.wallet_name,
-                        market_id=self.market_id,
-                        order_id=order_to_amend.id,
-                        price=new_buy_shape[i][0],
-                        volume_delta=new_buy_shape[i][1] - order_to_amend.remaining,
-                    )
-                else:
-                    self._submit_order(
-                        vega_protos.SIDE_BUY, new_buy_shape[i][0], new_buy_shape[i][1]
-                    )
+            # We want to first make the spread wider by moving the side which is in the
+            # direction of the move (e.g. if price falls, the bids)
+            first_side = (
+                vega_protos.SIDE_BUY
+                if self.price_process[self.current_step]
+                < self.price_process[self.current_step - 1]
+                else vega_protos.SIDE_SELL
+            )
+            if first_side == vega_protos.SIDE_BUY:
+                self._move_side(
+                    vega_protos.SIDE_BUY,
+                    market_regime.num_levels_per_side,
+                    buy_orders,
+                    new_buy_shape,
+                )
+            self._move_side(
+                vega_protos.SIDE_SELL,
+                market_regime.num_levels_per_side,
+                sell_orders,
+                new_sell_shape,
+            )
+            if first_side == vega_protos.SIDE_SELL:
+                self._move_side(
+                    vega_protos.SIDE_BUY,
+                    market_regime.num_levels_per_side,
+                    buy_orders,
+                    new_buy_shape,
+                )
 
-                if i < len(sell_orders):
-                    order_to_amend = sell_orders[i]
-                    self.vega.amend_order(
-                        trading_wallet=self.wallet_name,
-                        market_id=self.market_id,
-                        order_id=order_to_amend.id,
-                        price=new_sell_shape[i][0],
-                        volume_delta=new_sell_shape[i][1] - order_to_amend.remaining,
-                    )
-                else:
-                    self._submit_order(
-                        vega_protos.SIDE_SELL,
-                        new_sell_shape[i][0],
-                        new_sell_shape[i][1],
-                    )
+    def _move_side(
+        self,
+        side: vega_protos.Side,
+        num_levels: int,
+        orders: List[Order],
+        new_shape: List[List[float, float]],
+    ) -> None:
+        for i in range(num_levels):
+            if i < len(orders):
+                order_to_amend = orders[i]
+                self.vega.amend_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    order_id=order_to_amend.id,
+                    price=new_shape[i][0],
+                    volume_delta=new_shape[i][1] - order_to_amend.remaining,
+                )
+            else:
+                self._submit_order(
+                    side,
+                    new_shape[i][0],
+                    new_shape[i][1],
+                )
 
 
 class OpenAuctionPass(StateAgentWithWallet):
