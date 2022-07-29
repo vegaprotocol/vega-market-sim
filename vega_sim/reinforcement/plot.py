@@ -24,8 +24,12 @@ def plot_simulation(
     sars = states_to_sarsa(simulation)
     reward = np.array([_sars[2] for _sars in sars])
     next_price = np.array([_sars[0].next_price for _sars in sars])
-    best_bid = np.array([_sars[0].bid_prices[0] for _sars in sars])
-    best_ask = np.array([_sars[0].ask_prices[0] for _sars in sars])
+    best_bid = np.array(
+        [_sars[0].bid_prices[0] if _sars[0].bid_prices[0] else np.nan for _sars in sars]
+    )
+    best_ask = np.array(
+        [_sars[0].ask_prices[0] if _sars[0].ask_prices[0] else np.nan for _sars in sars]
+    )
     position = np.array([_sars[0].position for _sars in sars])
     margin_balance = np.array([_sars[0].margin_balance for _sars in sars])
     general_balance = np.array([_sars[0].general_balance for _sars in sars])

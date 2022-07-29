@@ -85,7 +85,7 @@ TARGET_STAKE_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
             ]
         ),
     ),
-    runs_per_scenario=2,
+    runs_per_scenario=1,
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
     ],

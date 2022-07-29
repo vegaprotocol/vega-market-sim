@@ -11,6 +11,7 @@ from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
+from vega_sim.scenario.ideal_market_maker.agents import TERMINATE_WALLET
 
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])

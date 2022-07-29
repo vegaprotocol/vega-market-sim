@@ -553,7 +553,7 @@ class VegaServiceNull(VegaService):
         }
 
     def start(self, block_on_startup: bool = True) -> None:
-        ctx = multiprocessing.get_context("fork")
+        ctx = multiprocessing.get_context()
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
