@@ -91,11 +91,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.FromString,
         )
-        self.MarketsDataSubscribe = channel.unary_stream(
-            "/datanode.api.v2.TradingDataService/MarketsDataSubscribe",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.FromString,
-        )
         self.ListTransfers = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTransfers",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
@@ -146,6 +141,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.FromString,
         )
+        self.GetERC20SetAssetLimitsBundle = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetERC20SetAssetLimitsBundle",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleResponse.FromString,
+        )
+        self.GetERC20WithdrawalApproval = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetERC20WithdrawalApproval",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalResponse.FromString,
+        )
         self.ListTrades = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTrades",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTradesRequest.SerializeToString,
@@ -156,35 +161,20 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTradesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTradesResponse.FromString,
         )
-        self.GetOracleSpecByID = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetOracleSpecByID",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.FromString,
+        self.GetOracleSpec = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetOracleSpec",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecResponse.FromString,
         )
         self.ListOracleSpecs = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListOracleSpecs",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.FromString,
         )
-        self.GetOracleDataBySpecID = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetOracleDataBySpecID",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.FromString,
-        )
         self.ListOracleData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListOracleData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.FromString,
-        )
-        self.GetOracleSpecsConnection = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetOracleSpecsConnection",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.FromString,
-        )
-        self.GetOracleDataConnection = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetOracleDataConnection",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.FromString,
         )
         self.ListMarkets = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListMarkets",
@@ -211,15 +201,30 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesResponse.FromString,
         )
+        self.GetDeposit = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetDeposit",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositResponse.FromString,
+        )
         self.ListDeposits = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListDeposits",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDepositsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDepositsResponse.FromString,
         )
+        self.GetWithdrawal = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetWithdrawal",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalResponse.FromString,
+        )
         self.ListWithdrawals = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListWithdrawals",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsResponse.FromString,
+        )
+        self.GetAsset = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetAsset",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetResponse.FromString,
         )
         self.ListAssets = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListAssets",
@@ -260,6 +265,36 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/GetEpoch",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochResponse.FromString,
+        )
+        self.EstimateFee = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/EstimateFee",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeResponse.FromString,
+        )
+        self.EstimateMargin = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/EstimateMargin",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
+        )
+        self.ListNetworkParameters = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListNetworkParameters",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersResponse.FromString,
+        )
+        self.ListCheckpoints = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListCheckpoints",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsResponse.FromString,
+        )
+        self.GetStake = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetStake",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeResponse.FromString,
+        )
+        self.GetRiskFactors = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetRiskFactors",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsResponse.FromString,
         )
 
 
@@ -367,12 +402,6 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def MarketsDataSubscribe(self, request, context):
-        """Subscribe to a stream of Markets Data"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
     def ListTransfers(self, request, context):
         """-- Transfers --
         List Transfers to/from/either a public key using a cursor based pagination model
@@ -443,6 +472,18 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def GetERC20SetAssetLimitsBundle(self, request, context):
+        """Gets the signature bundles that remove a particular validator to the multisig contract"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetERC20WithdrawalApproval(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ListTrades(self, request, context):
         """-- Trades --
         Get a list of all trades, optionally filtered by party/market/order using a cursor based pagination model
@@ -457,7 +498,7 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetOracleSpecByID(self, request, context):
+    def GetOracleSpec(self, request, context):
         """-- Oracles --
         Get an oracle spec by ID.
         """
@@ -471,26 +512,8 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetOracleDataBySpecID(self, request, context):
-        """Get oracle data that matched the given spec"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
     def ListOracleData(self, request, context):
         """Get all oracle data"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def GetOracleSpecsConnection(self, request, context):
-        """Get cursor based paginated oracle specs data"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def GetOracleDataConnection(self, request, context):
-        """Get cursor based paginated oracle data"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -532,20 +555,40 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ListDeposits(self, request, context):
-        """-- Deposits --"""
+    def GetDeposit(self, request, context):
+        """-- Deposits --
+        Get a deposit by its identifier
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ListWithdrawals(self, request, context):
+    def ListDeposits(self, request, context):
+        """Get a list of deposits for a given party"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetWithdrawal(self, request, context):
         """-- Withdrawals --"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ListAssets(self, request, context):
+    def ListWithdrawals(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetAsset(self, request, context):
         """-- Assets --"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListAssets(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -595,6 +638,46 @@ class TradingDataServiceServicer(object):
     def GetEpoch(self, request, context):
         """-- Epochs --
         Get data for a specific epoch, if id omitted it gets the current epoch
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def EstimateFee(self, request, context):
+        """-- Estimates --"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def EstimateMargin(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListNetworkParameters(self, request, context):
+        """-- Network Parameters --
+        Get the network parameters
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListCheckpoints(self, request, context):
+        """-- Checkpoints --"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetStake(self, request, context):
+        """-- Stake --"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetRiskFactors(self, request, context):
+        """-- Risk Factors --
+        Get Risk Factor data for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -678,11 +761,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.SerializeToString,
         ),
-        "MarketsDataSubscribe": grpc.unary_stream_rpc_method_handler(
-            servicer.MarketsDataSubscribe,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.SerializeToString,
-        ),
         "ListTransfers": grpc.unary_unary_rpc_method_handler(
             servicer.ListTransfers,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.FromString,
@@ -733,6 +811,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.SerializeToString,
         ),
+        "GetERC20SetAssetLimitsBundle": grpc.unary_unary_rpc_method_handler(
+            servicer.GetERC20SetAssetLimitsBundle,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleResponse.SerializeToString,
+        ),
+        "GetERC20WithdrawalApproval": grpc.unary_unary_rpc_method_handler(
+            servicer.GetERC20WithdrawalApproval,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalResponse.SerializeToString,
+        ),
         "ListTrades": grpc.unary_unary_rpc_method_handler(
             servicer.ListTrades,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTradesRequest.FromString,
@@ -743,35 +831,20 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTradesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTradesResponse.SerializeToString,
         ),
-        "GetOracleSpecByID": grpc.unary_unary_rpc_method_handler(
-            servicer.GetOracleSpecByID,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.SerializeToString,
+        "GetOracleSpec": grpc.unary_unary_rpc_method_handler(
+            servicer.GetOracleSpec,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecResponse.SerializeToString,
         ),
         "ListOracleSpecs": grpc.unary_unary_rpc_method_handler(
             servicer.ListOracleSpecs,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.SerializeToString,
         ),
-        "GetOracleDataBySpecID": grpc.unary_unary_rpc_method_handler(
-            servicer.GetOracleDataBySpecID,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.SerializeToString,
-        ),
         "ListOracleData": grpc.unary_unary_rpc_method_handler(
             servicer.ListOracleData,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.SerializeToString,
-        ),
-        "GetOracleSpecsConnection": grpc.unary_unary_rpc_method_handler(
-            servicer.GetOracleSpecsConnection,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.SerializeToString,
-        ),
-        "GetOracleDataConnection": grpc.unary_unary_rpc_method_handler(
-            servicer.GetOracleDataConnection,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.SerializeToString,
         ),
         "ListMarkets": grpc.unary_unary_rpc_method_handler(
             servicer.ListMarkets,
@@ -798,15 +871,30 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesResponse.SerializeToString,
         ),
+        "GetDeposit": grpc.unary_unary_rpc_method_handler(
+            servicer.GetDeposit,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositResponse.SerializeToString,
+        ),
         "ListDeposits": grpc.unary_unary_rpc_method_handler(
             servicer.ListDeposits,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDepositsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDepositsResponse.SerializeToString,
         ),
+        "GetWithdrawal": grpc.unary_unary_rpc_method_handler(
+            servicer.GetWithdrawal,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalResponse.SerializeToString,
+        ),
         "ListWithdrawals": grpc.unary_unary_rpc_method_handler(
             servicer.ListWithdrawals,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsResponse.SerializeToString,
+        ),
+        "GetAsset": grpc.unary_unary_rpc_method_handler(
+            servicer.GetAsset,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetResponse.SerializeToString,
         ),
         "ListAssets": grpc.unary_unary_rpc_method_handler(
             servicer.ListAssets,
@@ -847,6 +935,36 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetEpoch,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochResponse.SerializeToString,
+        ),
+        "EstimateFee": grpc.unary_unary_rpc_method_handler(
+            servicer.EstimateFee,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeResponse.SerializeToString,
+        ),
+        "EstimateMargin": grpc.unary_unary_rpc_method_handler(
+            servicer.EstimateMargin,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.SerializeToString,
+        ),
+        "ListNetworkParameters": grpc.unary_unary_rpc_method_handler(
+            servicer.ListNetworkParameters,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersResponse.SerializeToString,
+        ),
+        "ListCheckpoints": grpc.unary_unary_rpc_method_handler(
+            servicer.ListCheckpoints,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsResponse.SerializeToString,
+        ),
+        "GetStake": grpc.unary_unary_rpc_method_handler(
+            servicer.GetStake,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeResponse.SerializeToString,
+        ),
+        "GetRiskFactors": grpc.unary_unary_rpc_method_handler(
+            servicer.GetRiskFactors,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -1295,35 +1413,6 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def MarketsDataSubscribe(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/MarketsDataSubscribe",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.MarketsDataSubscribeResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def ListTransfers(
         request,
         target,
@@ -1614,6 +1703,64 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def GetERC20SetAssetLimitsBundle(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetERC20SetAssetLimitsBundle",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetERC20WithdrawalApproval(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetERC20WithdrawalApproval",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def ListTrades(
         request,
         target,
@@ -1672,7 +1819,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetOracleSpecByID(
+    def GetOracleSpec(
         request,
         target,
         options=(),
@@ -1687,9 +1834,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetOracleSpecByID",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecByIDResponse.FromString,
+            "/datanode.api.v2.TradingDataService/GetOracleSpec",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -1730,35 +1877,6 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetOracleDataBySpecID(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/GetOracleDataBySpecID",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataBySpecIDResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def ListOracleData(
         request,
         target,
@@ -1777,64 +1895,6 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListOracleData",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def GetOracleSpecsConnection(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/GetOracleSpecsConnection",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecsConnectionResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def GetOracleDataConnection(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/GetOracleDataConnection",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleDataConnectionResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -1991,6 +2051,35 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def GetDeposit(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetDeposit",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def ListDeposits(
         request,
         target,
@@ -2020,6 +2109,35 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def GetWithdrawal(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetWithdrawal",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def ListWithdrawals(
         request,
         target,
@@ -2038,6 +2156,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListWithdrawals",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetAsset(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetAsset",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -2270,6 +2417,180 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetEpoch",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def EstimateFee(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/EstimateFee",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def EstimateMargin(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/EstimateMargin",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListNetworkParameters(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListNetworkParameters",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListCheckpoints(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListCheckpoints",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetStake(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetStake",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetRiskFactors(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetRiskFactors",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsResponse.FromString,
             options,
             channel_credentials,
             insecure,

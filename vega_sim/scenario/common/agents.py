@@ -205,7 +205,7 @@ class BackgroundMarket(StateAgentWithWallet):
             side=side,
             volume=round(size, 4),
             price=price,
-            wait=False,
+            wait=True,
         )
 
     def _calculate_price_volume_levels(
@@ -588,6 +588,10 @@ class OpenAuctionPass(StateAgentWithWallet):
             volume=1,
             price=self.initial_price,
         )
+        # import pdb
+
+        # pdb.set_trace()
+        a = 5
 
     def step(self, vega_state: VegaState):
         pass

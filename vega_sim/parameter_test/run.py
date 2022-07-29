@@ -12,9 +12,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
-
-    logging.basicConfig(level=logging.INFO)
-
     config_map = {c.name: c for c in CONFIGS}
 
     experiment_to_run = config_map[args.config]

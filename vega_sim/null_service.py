@@ -321,6 +321,7 @@ def manage_vega_processes(
     run_wallet: bool = False,
     retain_log_files: bool = False,
 ) -> None:
+    logging.basicConfig(level=logging.INFO)
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
@@ -553,7 +554,7 @@ class VegaServiceNull(VegaService):
         }
 
     def start(self, block_on_startup: bool = True) -> None:
-        ctx = multiprocessing.get_context("fork")
+        ctx = multiprocessing.get_context()
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
