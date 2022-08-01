@@ -9,6 +9,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
+from vega_sim.reinforcement.agents.learning_agent import LearningAgent
 
 from vega_sim.reinforcement.networks import (
     Softmax,
@@ -26,7 +27,6 @@ from vega_sim.reinforcement.distributions import (
 from vega_sim.api.helpers import num_from_padded_int
 
 from vega_sim.environment import VegaState
-from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 
@@ -51,7 +51,6 @@ class MarketState:
     next_price: float
 
     def to_array(self):
-
         l = (
             [
                 self.position,
@@ -135,7 +134,7 @@ def states_to_sarsa(
     return res
 
 
-class LearningAgent(StateAgentWithWallet):
+class MarketOrderLearningAgent(LearningAgent):
     def __init__(
         self,
         device: str,
@@ -204,28 +203,6 @@ class LearningAgent(StateAgentWithWallet):
         self.q_func.to("cpu")
         self.policy_volume.to("cpu")
         self.policy_discr.to("cpu")
-
-    def initialise(self, vega: VegaServiceNull):
-        # Initialise wallet
-        super().initialise(vega=vega)
-        market_name = f"BTC:DAI_{self.tag}"
-        self.step_num = 0
-
-        # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == market_name
-        ][0]
-        # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI{self.tag}")
-        # Top up asset
-        self.vega.mint(
-            self.wallet_name,
-            asset=self.tdai_id,
-            amount=100000,
-        )
-        self.vega.wait_fn(2)
 
     def _update_memory(
         self, state: MarketState, action: Action, reward: float, next_state: MarketState
@@ -446,7 +423,6 @@ class LearningAgent(StateAgentWithWallet):
         batch_size: int,
         n_epochs: int,
     ):
-
         toggle(self.policy_discr, to=False)
         toggle(self.policy_volume, to=False)
         toggle(self.q_func, to=True)

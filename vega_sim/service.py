@@ -1202,7 +1202,10 @@ class VegaService(ABC):
         )
 
     def order_status_from_feed(
-        self, live_only: bool = True
+        self,
+        live_only: bool = True,
+        market_id_filter: Optional[str] = None,
+        party_id_filter: Optional[str] = None,
     ) -> Dict[str, Dict[str, Dict[str, data.Order]]]:
         """Returns a copy of current order status based on Order feed if started.
         If order feed has not been started, dict will be empty
@@ -1216,9 +1219,19 @@ class VegaService(ABC):
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
         with self.orders_lock:
             order_dict = {}
-            for market_id, party_orders in self._order_state_from_feed.items():
-                for party_id, orders in party_orders.items():
-                    for order_id, order in orders.items():
+            for market_id in (
+                [market_id_filter]
+                if market_id_filter is not None
+                else self._order_state_from_feed.keys()
+            ):
+                for party_id in (
+                    [party_id_filter]
+                    if party_id_filter is not None
+                    else self._order_state_from_feed[market_id].keys()
+                ):
+                    for order_id, order in self._order_state_from_feed[market_id][
+                        party_id
+                    ].items():
                         if not live_only or (
                             order.status == vega_protos.vega.Order.Status.STATUS_ACTIVE
                         ):
@@ -1232,7 +1245,11 @@ class VegaService(ABC):
     ) -> List[data.Order]:
         party_id = self.wallet.public_key(wallet_name)
         return (
-            self.order_status_from_feed(live_only=live_only)
+            self.order_status_from_feed(
+                live_only=live_only,
+                market_id_filter=market_id,
+                party_id_filter=party_id,
+            )
             .get(market_id, {})
             .get(party_id, {})
         )

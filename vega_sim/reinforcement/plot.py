@@ -4,7 +4,11 @@ from typing import List, Tuple
 import os
 
 
-from vega_sim.reinforcement.learning_agent import MarketState, Action, states_to_sarsa
+from vega_sim.reinforcement.agents.learning_agent import (
+    MarketState,
+    Action,
+    states_to_sarsa,
+)
 
 
 def action_to_vector(action: Action):
