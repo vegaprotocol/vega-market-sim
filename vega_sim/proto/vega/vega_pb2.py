@@ -8,6 +8,7 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -16,31 +17,33 @@ _sym_db = _symbol_database.Default()
 from . import markets_pb2 as vega_dot_markets__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fvega/vega.proto\x12\x04vega\x1a\x12vega/markets.proto\"\x13\n\x05Party\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\nRiskFactor\x12\x0e\n\x06market\x18\x01 \x01(\t\x12\r\n\x05short\x18\x02 \x01(\t\x12\x0c\n\x04long\x18\x03 \x01(\t\"G\n\x0bPeggedOrder\x12(\n\treference\x18\x01 \x01(\x0e\x32\x15.vega.PeggedReference\x12\x0e\n\x06offset\x18\x02 \x01(\t\"\xa9\x07\n\x05Order\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x10\n\x08party_id\x18\x03 \x01(\t\x12\x18\n\x04side\x18\x04 \x01(\x0e\x32\n.vega.Side\x12\r\n\x05price\x18\x05 \x01(\t\x12\x0c\n\x04size\x18\x06 \x01(\x04\x12\x11\n\tremaining\x18\x07 \x01(\x04\x12.\n\rtime_in_force\x18\x08 \x01(\x0e\x32\x17.vega.Order.TimeInForce\x12\x1e\n\x04type\x18\t \x01(\x0e\x32\x10.vega.Order.Type\x12\x12\n\ncreated_at\x18\n \x01(\x03\x12\"\n\x06status\x18\x0b \x01(\x0e\x32\x12.vega.Order.Status\x12\x12\n\nexpires_at\x18\x0c \x01(\x03\x12\x11\n\treference\x18\r \x01(\t\x12 \n\x06reason\x18\x0e \x01(\x0e\x32\x10.vega.OrderError\x12\x12\n\nupdated_at\x18\x0f \x01(\x03\x12\x0f\n\x07version\x18\x10 \x01(\x04\x12\x10\n\x08\x62\x61tch_id\x18\x11 \x01(\x04\x12\'\n\x0cpegged_order\x18\x12 \x01(\x0b\x32\x11.vega.PeggedOrder\x12\x1e\n\x16liquidity_provision_id\x18\x13 \x01(\t\"\xb6\x01\n\x0bTimeInForce\x12\x1d\n\x19TIME_IN_FORCE_UNSPECIFIED\x10\x00\x12\x15\n\x11TIME_IN_FORCE_GTC\x10\x01\x12\x15\n\x11TIME_IN_FORCE_GTT\x10\x02\x12\x15\n\x11TIME_IN_FORCE_IOC\x10\x03\x12\x15\n\x11TIME_IN_FORCE_FOK\x10\x04\x12\x15\n\x11TIME_IN_FORCE_GFA\x10\x05\x12\x15\n\x11TIME_IN_FORCE_GFN\x10\x06\"O\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_LIMIT\x10\x01\x12\x0f\n\x0bTYPE_MARKET\x10\x02\x12\x10\n\x0cTYPE_NETWORK\x10\x03\"\xc9\x01\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x12\n\x0eSTATUS_EXPIRED\x10\x02\x12\x14\n\x10STATUS_CANCELLED\x10\x03\x12\x12\n\x0eSTATUS_STOPPED\x10\x04\x12\x11\n\rSTATUS_FILLED\x10\x05\x12\x13\n\x0fSTATUS_REJECTED\x10\x06\x12\x1b\n\x17STATUS_PARTIALLY_FILLED\x10\x07\x12\x11\n\rSTATUS_PARKED\x10\x08\";\n\x1dOrderCancellationConfirmation\x12\x1a\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.Order\"z\n\x11OrderConfirmation\x12\x1a\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.Order\x12\x1b\n\x06trades\x18\x02 \x03(\x0b\x32\x0b.vega.Trade\x12,\n\x17passive_orders_affected\x18\x03 \x03(\x0b\x32\x0b.vega.Order\"\x8c\x01\n\x16\x41uctionIndicativeState\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x18\n\x10indicative_price\x18\x02 \x01(\t\x12\x19\n\x11indicative_volume\x18\x03 \x01(\x04\x12\x15\n\rauction_start\x18\x04 \x01(\x03\x12\x13\n\x0b\x61uction_end\x18\x05 \x01(\x03\"\xc4\x03\n\x05Trade\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\r\n\x05price\x18\x03 \x01(\t\x12\x0c\n\x04size\x18\x04 \x01(\x04\x12\r\n\x05\x62uyer\x18\x05 \x01(\t\x12\x0e\n\x06seller\x18\x06 \x01(\t\x12\x1d\n\taggressor\x18\x07 \x01(\x0e\x32\n.vega.Side\x12\x11\n\tbuy_order\x18\x08 \x01(\t\x12\x12\n\nsell_order\x18\t \x01(\t\x12\x11\n\ttimestamp\x18\n \x01(\x03\x12\x1e\n\x04type\x18\x0b \x01(\x0e\x32\x10.vega.Trade.Type\x12\x1c\n\tbuyer_fee\x18\x0c \x01(\x0b\x32\t.vega.Fee\x12\x1d\n\nseller_fee\x18\r \x01(\x0b\x32\t.vega.Fee\x12\x1b\n\x13\x62uyer_auction_batch\x18\x0e \x01(\x04\x12\x1c\n\x14seller_auction_batch\x18\x0f \x01(\x04\"o\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x10\n\x0cTYPE_DEFAULT\x10\x01\x12\x1f\n\x1bTYPE_NETWORK_CLOSE_OUT_GOOD\x10\x02\x12\x1e\n\x1aTYPE_NETWORK_CLOSE_OUT_BAD\x10\x03\"K\n\x03\x46\x65\x65\x12\x11\n\tmaker_fee\x18\x01 \x01(\t\x12\x1a\n\x12infrastructure_fee\x18\x02 \x01(\t\x12\x15\n\rliquidity_fee\x18\x03 \x01(\t\"\'\n\x08TradeSet\x12\x1b\n\x06trades\x18\x01 \x03(\x0b\x32\x0b.vega.Trade\"\x97\x01\n\x06\x43\x61ndle\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x10\n\x08\x64\x61tetime\x18\x02 \x01(\t\x12\x0c\n\x04high\x18\x03 \x01(\t\x12\x0b\n\x03low\x18\x04 \x01(\t\x12\x0c\n\x04open\x18\x05 \x01(\t\x12\r\n\x05\x63lose\x18\x06 \x01(\t\x12\x0e\n\x06volume\x18\x07 \x01(\x04\x12 \n\x08interval\x18\x08 \x01(\x0e\x32\x0e.vega.Interval\"E\n\nPriceLevel\x12\r\n\x05price\x18\x01 \x01(\t\x12\x18\n\x10number_of_orders\x18\x02 \x01(\x04\x12\x0e\n\x06volume\x18\x03 \x01(\x04\"x\n\x0bMarketDepth\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1d\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x1e\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x17\n\x0fsequence_number\x18\x04 \x01(\x04\"\xa0\x01\n\x11MarketDepthUpdate\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1d\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x1e\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x17\n\x0fsequence_number\x18\x04 \x01(\x04\x12 \n\x18previous_sequence_number\x18\x05 \x01(\x04\"\xa3\x01\n\x08Position\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x13\n\x0bopen_volume\x18\x03 \x01(\x03\x12\x14\n\x0crealised_pnl\x18\x04 \x01(\t\x12\x16\n\x0eunrealised_pnl\x18\x05 \x01(\t\x12\x1b\n\x13\x61verage_entry_price\x18\x06 \x01(\t\x12\x12\n\nupdated_at\x18\x07 \x01(\x03\".\n\rPositionTrade\x12\x0e\n\x06volume\x18\x01 \x01(\x03\x12\r\n\x05price\x18\x02 \x01(\t\"\x93\x02\n\x07\x44\x65posit\x12\n\n\x02id\x18\x01 \x01(\t\x12$\n\x06status\x18\x02 \x01(\x0e\x32\x14.vega.Deposit.Status\x12\x10\n\x08party_id\x18\x03 \x01(\t\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\x0e\n\x06\x61mount\x18\x05 \x01(\t\x12\x0f\n\x07tx_hash\x18\x06 \x01(\t\x12\x1a\n\x12\x63redited_timestamp\x18\x07 \x01(\x03\x12\x19\n\x11\x63reated_timestamp\x18\x08 \x01(\x03\"]\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x0f\n\x0bSTATUS_OPEN\x10\x01\x12\x14\n\x10STATUS_CANCELLED\x10\x02\x12\x14\n\x10STATUS_FINALIZED\x10\x03\"\xd6\x02\n\nWithdrawal\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\'\n\x06status\x18\x05 \x01(\x0e\x32\x17.vega.Withdrawal.Status\x12\x0b\n\x03ref\x18\x06 \x01(\t\x12\x0e\n\x06\x65xpiry\x18\x07 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x08 \x01(\t\x12\x19\n\x11\x63reated_timestamp\x18\t \x01(\x03\x12\x1b\n\x13withdrawn_timestamp\x18\n \x01(\x03\x12\x1e\n\x03\x65xt\x18\x0b \x01(\x0b\x32\x11.vega.WithdrawExt\"\\\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x0f\n\x0bSTATUS_OPEN\x10\x01\x12\x13\n\x0fSTATUS_REJECTED\x10\x02\x12\x14\n\x10STATUS_FINALIZED\x10\x03\"=\n\x0bWithdrawExt\x12\'\n\x05\x65rc20\x18\x01 \x01(\x0b\x32\x16.vega.Erc20WithdrawExtH\x00\x42\x05\n\x03\x65xt\",\n\x10\x45rc20WithdrawExt\x12\x18\n\x10receiver_address\x18\x01 \x01(\t\"x\n\x07\x41\x63\x63ount\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\t\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\x11\n\tmarket_id\x18\x05 \x01(\t\x12\x1f\n\x04type\x18\x06 \x01(\x0e\x32\x11.vega.AccountType\"0\n\x0f\x46inancialAmount\x12\x0e\n\x06\x61mount\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t\"\x89\x01\n\x08Transfer\x12\r\n\x05owner\x18\x01 \x01(\t\x12%\n\x06\x61mount\x18\x02 \x01(\x0b\x32\x15.vega.FinancialAmount\x12 \n\x04type\x18\x03 \x01(\x0e\x32\x12.vega.TransferType\x12\x12\n\nmin_amount\x18\x04 \x01(\t\x12\x11\n\tmarket_id\x18\x05 \x01(\t\"c\n\x10\x44ispatchStrategy\x12\x18\n\x10\x61sset_for_metric\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0e\x32\x14.vega.DispatchMetric\x12\x0f\n\x07markets\x18\x03 \x03(\t\"\x9f\x01\n\x0fTransferRequest\x12#\n\x0c\x66rom_account\x18\x01 \x03(\x0b\x32\r.vega.Account\x12!\n\nto_account\x18\x02 \x03(\x0b\x32\r.vega.Account\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nmin_amount\x18\x04 \x01(\t\x12\r\n\x05\x61sset\x18\x05 \x01(\t\x12\x11\n\treference\x18\x06 \x01(\t\"{\n\x0bLedgerEntry\x12\x14\n\x0c\x66rom_account\x18\x01 \x01(\t\x12\x12\n\nto_account\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x11\n\treference\x18\x04 \x01(\t\x12\x0c\n\x04type\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03\"B\n\x0fTransferBalance\x12\x1e\n\x07\x61\x63\x63ount\x18\x01 \x01(\x0b\x32\r.vega.Account\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\"a\n\x10TransferResponse\x12$\n\ttransfers\x18\x01 \x03(\x0b\x32\x11.vega.LedgerEntry\x12\'\n\x08\x62\x61lances\x18\x02 \x03(\x0b\x32\x15.vega.TransferBalance\"\xc1\x01\n\x0cMarginLevels\x12\x1a\n\x12maintenance_margin\x18\x01 \x01(\t\x12\x14\n\x0csearch_level\x18\x02 \x01(\t\x12\x16\n\x0einitial_margin\x18\x03 \x01(\t\x12 \n\x18\x63ollateral_release_level\x18\x04 \x01(\t\x12\x10\n\x08party_id\x18\x05 \x01(\t\x12\x11\n\tmarket_id\x18\x06 \x01(\t\x12\r\n\x05\x61sset\x18\x07 \x01(\t\x12\x11\n\ttimestamp\x18\x08 \x01(\x03\"\xae\x06\n\nMarketData\x12\x12\n\nmark_price\x18\x01 \x01(\t\x12\x16\n\x0e\x62\x65st_bid_price\x18\x02 \x01(\t\x12\x17\n\x0f\x62\x65st_bid_volume\x18\x03 \x01(\x04\x12\x18\n\x10\x62\x65st_offer_price\x18\x04 \x01(\t\x12\x19\n\x11\x62\x65st_offer_volume\x18\x05 \x01(\x04\x12\x1d\n\x15\x62\x65st_static_bid_price\x18\x06 \x01(\t\x12\x1e\n\x16\x62\x65st_static_bid_volume\x18\x07 \x01(\x04\x12\x1f\n\x17\x62\x65st_static_offer_price\x18\x08 \x01(\t\x12 \n\x18\x62\x65st_static_offer_volume\x18\t \x01(\x04\x12\x11\n\tmid_price\x18\n \x01(\t\x12\x18\n\x10static_mid_price\x18\x0b \x01(\t\x12\x0e\n\x06market\x18\x0c \x01(\t\x12\x11\n\ttimestamp\x18\r \x01(\x03\x12\x15\n\ropen_interest\x18\x0e \x01(\x04\x12\x13\n\x0b\x61uction_end\x18\x0f \x01(\x03\x12\x15\n\rauction_start\x18\x10 \x01(\x03\x12\x18\n\x10indicative_price\x18\x11 \x01(\t\x12\x19\n\x11indicative_volume\x18\x12 \x01(\x04\x12\x35\n\x13market_trading_mode\x18\x13 \x01(\x0e\x32\x18.vega.Market.TradingMode\x12%\n\x07trigger\x18\x14 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12/\n\x11\x65xtension_trigger\x18\x15 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12\x14\n\x0ctarget_stake\x18\x16 \x01(\t\x12\x16\n\x0esupplied_stake\x18\x17 \x01(\t\x12<\n\x17price_monitoring_bounds\x18\x18 \x03(\x0b\x32\x1b.vega.PriceMonitoringBounds\x12\x1a\n\x12market_value_proxy\x18\x19 \x01(\t\x12\x45\n\x1cliquidity_provider_fee_share\x18\x1a \x03(\x0b\x32\x1f.vega.LiquidityProviderFeeShare\"f\n\x19LiquidityProviderFeeShare\x12\r\n\x05party\x18\x01 \x01(\t\x12\x19\n\x11\x65quity_like_share\x18\x02 \x01(\t\x12\x1f\n\x17\x61verage_entry_valuation\x18\x03 \x01(\t\"\x91\x01\n\x15PriceMonitoringBounds\x12\x17\n\x0fmin_valid_price\x18\x01 \x01(\t\x12\x17\n\x0fmax_valid_price\x18\x02 \x01(\t\x12-\n\x07trigger\x18\x03 \x01(\x0b\x32\x1c.vega.PriceMonitoringTrigger\x12\x17\n\x0freference_price\x18\x04 \x01(\t\";\n\x0b\x45rrorDetail\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\r\n\x05inner\x18\x03 \x01(\t\".\n\x10NetworkParameter\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\xa1\x02\n\rNetworkLimits\x12\x1a\n\x12\x63\x61n_propose_market\x18\x01 \x01(\x08\x12\x19\n\x11\x63\x61n_propose_asset\x18\x02 \x01(\x08\x12\x1a\n\x12\x62ootstrap_finished\x18\x03 \x01(\x08\x12\x1e\n\x16propose_market_enabled\x18\x04 \x01(\x08\x12\x1d\n\x15propose_asset_enabled\x18\x05 \x01(\x08\x12\x1d\n\x15\x62ootstrap_block_count\x18\x06 \x01(\r\x12\x16\n\x0egenesis_loaded\x18\x07 \x01(\x08\x12#\n\x1bpropose_market_enabled_from\x18\x08 \x01(\x03\x12\"\n\x1apropose_asset_enabled_from\x18\t \x01(\x03\"^\n\x0eLiquidityOrder\x12(\n\treference\x18\x01 \x01(\x0e\x32\x15.vega.PeggedReference\x12\x12\n\nproportion\x18\x02 \x01(\r\x12\x0e\n\x06offset\x18\x03 \x01(\t\"Z\n\x17LiquidityOrderReference\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12-\n\x0fliquidity_order\x18\x02 \x01(\x0b\x32\x14.vega.LiquidityOrder\"\xe5\x03\n\x12LiquidityProvision\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x12\n\ncreated_at\x18\x03 \x01(\x03\x12\x12\n\nupdated_at\x18\x04 \x01(\x03\x12\x11\n\tmarket_id\x18\x05 \x01(\t\x12\x19\n\x11\x63ommitment_amount\x18\x06 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x07 \x01(\t\x12,\n\x05sells\x18\x08 \x03(\x0b\x32\x1d.vega.LiquidityOrderReference\x12+\n\x04\x62uys\x18\t \x03(\x0b\x32\x1d.vega.LiquidityOrderReference\x12\x0f\n\x07version\x18\n \x01(\x04\x12/\n\x06status\x18\x0b \x01(\x0e\x32\x1f.vega.LiquidityProvision.Status\x12\x11\n\treference\x18\x0c \x01(\t\"\x9d\x01\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x12\n\x0eSTATUS_STOPPED\x10\x02\x12\x14\n\x10STATUS_CANCELLED\x10\x03\x12\x13\n\x0fSTATUS_REJECTED\x10\x04\x12\x15\n\x11STATUS_UNDEPLOYED\x10\x05\x12\x12\n\x0eSTATUS_PENDING\x10\x06\"\xcd\x02\n\x0e\x45thereumConfig\x12\x12\n\nnetwork_id\x18\x01 \x01(\t\x12\x10\n\x08\x63hain_id\x18\x02 \x01(\t\x12@\n\x1a\x63ollateral_bridge_contract\x18\x03 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\x12\x15\n\rconfirmations\x18\x04 \x01(\r\x12=\n\x17staking_bridge_contract\x18\x05 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\x12<\n\x16token_vesting_contract\x18\x06 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\x12?\n\x19multisig_control_contract\x18\x07 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\"J\n\x16\x45thereumContractConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x1f\n\x17\x64\x65ployment_block_height\x18\x06 \x01(\x04\"u\n\x0f\x45pochTimestamps\x12\x12\n\nstart_time\x18\x01 \x01(\x03\x12\x13\n\x0b\x65xpiry_time\x18\x02 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x03 \x01(\x03\x12\x13\n\x0b\x66irst_block\x18\x04 \x01(\x04\x12\x12\n\nlast_block\x18\x05 \x01(\x04\"\x86\x01\n\x05\x45poch\x12\x0b\n\x03seq\x18\x01 \x01(\x04\x12)\n\ntimestamps\x18\x02 \x01(\x0b\x32\x15.vega.EpochTimestamps\x12\x1e\n\nvalidators\x18\x03 \x03(\x0b\x32\n.vega.Node\x12%\n\x0b\x64\x65legations\x18\x04 \x03(\x0b\x32\x10.vega.Delegation\"h\n\x12\x45pochParticipation\x12\x1a\n\x05\x65poch\x18\x01 \x01(\x0b\x32\x0b.vega.Epoch\x12\x0f\n\x07offline\x18\x02 \x01(\x04\x12\x0e\n\x06online\x18\x03 \x01(\x04\x12\x15\n\rtotal_rewards\x18\x04 \x01(\x01\";\n\tEpochData\x12\r\n\x05total\x18\x01 \x01(\x05\x12\x0f\n\x07offline\x18\x02 \x01(\x05\x12\x0e\n\x06online\x18\x03 \x01(\x05\"\xca\x01\n\x0cRankingScore\x12\x13\n\x0bstake_score\x18\x01 \x01(\t\x12\x19\n\x11performance_score\x18\x02 \x01(\t\x12\x32\n\x0fprevious_status\x18\x03 \x01(\x0e\x32\x19.vega.ValidatorNodeStatus\x12)\n\x06status\x18\x04 \x01(\x0e\x32\x19.vega.ValidatorNodeStatus\x12\x14\n\x0cvoting_power\x18\x05 \x01(\r\x12\x15\n\rranking_score\x18\x06 \x01(\t\"\xc5\x01\n\x0bRewardScore\x12\x1b\n\x13raw_validator_score\x18\x01 \x01(\t\x12\x19\n\x11performance_score\x18\x02 \x01(\t\x12\x16\n\x0emultisig_score\x18\x03 \x01(\t\x12\x17\n\x0fvalidator_score\x18\x04 \x01(\t\x12\x18\n\x10normalised_score\x18\x05 \x01(\t\x12\x33\n\x10validator_status\x18\x06 \x01(\x0e\x32\x19.vega.ValidatorNodeStatus\"\xdc\x03\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07pub_key\x18\x02 \x01(\t\x12\x12\n\ntm_pub_key\x18\x03 \x01(\t\x12\x19\n\x11\x65thereum_adddress\x18\x04 \x01(\t\x12\x10\n\x08info_url\x18\x05 \x01(\t\x12\x10\n\x08location\x18\x06 \x01(\t\x12\x1a\n\x12staked_by_operator\x18\x07 \x01(\t\x12\x1b\n\x13staked_by_delegates\x18\x08 \x01(\t\x12\x14\n\x0cstaked_total\x18\t \x01(\t\x12\x1a\n\x12max_intended_stake\x18\n \x01(\t\x12\x15\n\rpending_stake\x18\x0b \x01(\t\x12#\n\nepoch_data\x18\x0c \x01(\x0b\x32\x0f.vega.EpochData\x12 \n\x06status\x18\r \x01(\x0e\x32\x10.vega.NodeStatus\x12%\n\x0b\x64\x65legations\x18\x0e \x03(\x0b\x32\x10.vega.Delegation\x12\'\n\x0creward_score\x18\x0f \x01(\x0b\x32\x11.vega.RewardScore\x12)\n\rranking_score\x18\x10 \x01(\x0b\x32\x12.vega.RankingScore\x12\x0c\n\x04name\x18\x11 \x01(\t\x12\x12\n\navatar_url\x18\x12 \x01(\t\"w\n\x08NodeData\x12\x14\n\x0cstaked_total\x18\x01 \x01(\t\x12\x13\n\x0btotal_nodes\x18\x02 \x01(\r\x12\x16\n\x0einactive_nodes\x18\x03 \x01(\r\x12\x18\n\x10validating_nodes\x18\x04 \x01(\r\x12\x0e\n\x06uptime\x18\x05 \x01(\x02\"O\n\nDelegation\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x11\n\tepoch_seq\x18\x04 \x01(\t\"\xa5\x01\n\x06Reward\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\r\n\x05\x65poch\x18\x03 \x01(\x04\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\x12\x1b\n\x13percentage_of_total\x18\x05 \x01(\t\x12\x13\n\x0breceived_at\x18\x06 \x01(\x03\x12\x11\n\tmarket_id\x18\x07 \x01(\t\x12\x13\n\x0breward_type\x18\x08 \x01(\t\"C\n\rRewardSummary\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\"_\n\x12StateValueProposal\x12\x14\n\x0cstate_var_id\x18\x01 \x01(\t\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12!\n\x03kvb\x18\x03 \x03(\x0b\x32\x14.vega.KeyValueBundle\"T\n\x0eKeyValueBundle\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x11\n\ttolerance\x18\x02 \x01(\t\x12\"\n\x05value\x18\x03 \x01(\x0b\x32\x13.vega.StateVarValue\"\x93\x01\n\rStateVarValue\x12\'\n\nscalar_val\x18\x01 \x01(\x0b\x32\x11.vega.ScalarValueH\x00\x12\'\n\nvector_val\x18\x02 \x01(\x0b\x32\x11.vega.VectorValueH\x00\x12\'\n\nmatrix_val\x18\x03 \x01(\x0b\x32\x11.vega.MatrixValueH\x00\x42\x07\n\x05value\"\x1c\n\x0bScalarValue\x12\r\n\x05value\x18\x01 \x01(\t\"\x1c\n\x0bVectorValue\x12\r\n\x05value\x18\x01 \x03(\t\"/\n\x0bMatrixValue\x12 \n\x05value\x18\x01 \x03(\x0b\x32\x11.vega.VectorValue*9\n\x04Side\x12\x14\n\x10SIDE_UNSPECIFIED\x10\x00\x12\x0c\n\x08SIDE_BUY\x10\x01\x12\r\n\tSIDE_SELL\x10\x02*\x98\x01\n\x08Interval\x12\x18\n\x14INTERVAL_UNSPECIFIED\x10\x00\x12\x10\n\x0cINTERVAL_I1M\x10<\x12\x11\n\x0cINTERVAL_I5M\x10\xac\x02\x12\x12\n\rINTERVAL_I15M\x10\x84\x07\x12\x11\n\x0cINTERVAL_I1H\x10\x90\x1c\x12\x12\n\x0cINTERVAL_I6H\x10\xe0\xa8\x01\x12\x12\n\x0cINTERVAL_I1D\x10\x80\xa3\x05*\xa3\x01\n\x0e\x41uctionTrigger\x12\x1f\n\x1b\x41UCTION_TRIGGER_UNSPECIFIED\x10\x00\x12\x19\n\x15\x41UCTION_TRIGGER_BATCH\x10\x01\x12\x1b\n\x17\x41UCTION_TRIGGER_OPENING\x10\x02\x12\x19\n\x15\x41UCTION_TRIGGER_PRICE\x10\x03\x12\x1d\n\x19\x41UCTION_TRIGGER_LIQUIDITY\x10\x04*\x8b\x01\n\x0fPeggedReference\x12 \n\x1cPEGGED_REFERENCE_UNSPECIFIED\x10\x00\x12\x18\n\x14PEGGED_REFERENCE_MID\x10\x01\x12\x1d\n\x19PEGGED_REFERENCE_BEST_BID\x10\x02\x12\x1d\n\x19PEGGED_REFERENCE_BEST_ASK\x10\x03*\x9f\x0f\n\nOrderError\x12\x1b\n\x17ORDER_ERROR_UNSPECIFIED\x10\x00\x12!\n\x1dORDER_ERROR_INVALID_MARKET_ID\x10\x01\x12 \n\x1cORDER_ERROR_INVALID_ORDER_ID\x10\x02\x12\x1f\n\x1bORDER_ERROR_OUT_OF_SEQUENCE\x10\x03\x12&\n\"ORDER_ERROR_INVALID_REMAINING_SIZE\x10\x04\x12\x1c\n\x18ORDER_ERROR_TIME_FAILURE\x10\x05\x12\x1f\n\x1bORDER_ERROR_REMOVAL_FAILURE\x10\x06\x12+\n\'ORDER_ERROR_INVALID_EXPIRATION_DATETIME\x10\x07\x12\'\n#ORDER_ERROR_INVALID_ORDER_REFERENCE\x10\x08\x12 \n\x1cORDER_ERROR_EDIT_NOT_ALLOWED\x10\t\x12\x1d\n\x19ORDER_ERROR_AMEND_FAILURE\x10\n\x12\x19\n\x15ORDER_ERROR_NOT_FOUND\x10\x0b\x12 \n\x1cORDER_ERROR_INVALID_PARTY_ID\x10\x0c\x12\x1d\n\x19ORDER_ERROR_MARKET_CLOSED\x10\r\x12#\n\x1fORDER_ERROR_MARGIN_CHECK_FAILED\x10\x0e\x12\'\n#ORDER_ERROR_MISSING_GENERAL_ACCOUNT\x10\x0f\x12\x1e\n\x1aORDER_ERROR_INTERNAL_ERROR\x10\x10\x12\x1c\n\x18ORDER_ERROR_INVALID_SIZE\x10\x11\x12#\n\x1fORDER_ERROR_INVALID_PERSISTENCE\x10\x12\x12\x1c\n\x18ORDER_ERROR_INVALID_TYPE\x10\x13\x12\x1c\n\x18ORDER_ERROR_SELF_TRADING\x10\x14\x12.\n*ORDER_ERROR_INSUFFICIENT_FUNDS_TO_PAY_FEES\x10\x15\x12%\n!ORDER_ERROR_INCORRECT_MARKET_TYPE\x10\x16\x12%\n!ORDER_ERROR_INVALID_TIME_IN_FORCE\x10\x17\x12+\n\'ORDER_ERROR_GFN_ORDER_DURING_AN_AUCTION\x10\x18\x12\x33\n/ORDER_ERROR_GFA_ORDER_DURING_CONTINUOUS_TRADING\x10\x19\x12\x34\n0ORDER_ERROR_CANNOT_AMEND_TO_GTT_WITHOUT_EXPIRYAT\x10\x1a\x12)\n%ORDER_ERROR_EXPIRYAT_BEFORE_CREATEDAT\x10\x1b\x12,\n(ORDER_ERROR_CANNOT_HAVE_GTC_AND_EXPIRYAT\x10\x1c\x12*\n&ORDER_ERROR_CANNOT_AMEND_TO_FOK_OR_IOC\x10\x1d\x12*\n&ORDER_ERROR_CANNOT_AMEND_TO_GFA_OR_GFN\x10\x1e\x12,\n(ORDER_ERROR_CANNOT_AMEND_FROM_GFA_OR_GFN\x10\x1f\x12\x34\n0ORDER_ERROR_CANNOT_SEND_IOC_ORDER_DURING_AUCTION\x10 \x12\x34\n0ORDER_ERROR_CANNOT_SEND_FOK_ORDER_DURING_AUCTION\x10!\x12#\n\x1fORDER_ERROR_MUST_BE_LIMIT_ORDER\x10\"\x12\"\n\x1eORDER_ERROR_MUST_BE_GTT_OR_GTC\x10#\x12\'\n#ORDER_ERROR_WITHOUT_REFERENCE_PRICE\x10$\x12\x33\n/ORDER_ERROR_BUY_CANNOT_REFERENCE_BEST_ASK_PRICE\x10%\x12\x37\n3ORDER_ERROR_OFFSET_MUST_BE_GREATER_OR_EQUAL_TO_ZERO\x10(\x12\x34\n0ORDER_ERROR_SELL_CANNOT_REFERENCE_BEST_BID_PRICE\x10)\x12\x30\n,ORDER_ERROR_OFFSET_MUST_BE_GREATER_THAN_ZERO\x10*\x12*\n&ORDER_ERROR_INSUFFICIENT_ASSET_BALANCE\x10+\x12\x45\nAORDER_ERROR_CANNOT_AMEND_PEGGED_ORDER_DETAILS_ON_NON_PEGGED_ORDER\x10,\x12.\n*ORDER_ERROR_UNABLE_TO_REPRICE_PEGGED_ORDER\x10-\x12\x35\n1ORDER_ERROR_UNABLE_TO_AMEND_PRICE_ON_PEGGED_ORDER\x10.\x12\x38\n4ORDER_ERROR_NON_PERSISTENT_ORDER_OUT_OF_PRICE_BOUNDS\x10/\"\x04\x08&\x10&\"\x04\x08\'\x10\'*\x82\x01\n\x0b\x43hainStatus\x12\x1c\n\x18\x43HAIN_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n\x19\x43HAIN_STATUS_DISCONNECTED\x10\x01\x12\x1a\n\x16\x43HAIN_STATUS_REPLAYING\x10\x02\x12\x1a\n\x16\x43HAIN_STATUS_CONNECTED\x10\x03*\xc4\x04\n\x0b\x41\x63\x63ountType\x12\x1c\n\x18\x41\x43\x43OUNT_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n\x16\x41\x43\x43OUNT_TYPE_INSURANCE\x10\x01\x12\x1b\n\x17\x41\x43\x43OUNT_TYPE_SETTLEMENT\x10\x02\x12\x17\n\x13\x41\x43\x43OUNT_TYPE_MARGIN\x10\x03\x12\x18\n\x14\x41\x43\x43OUNT_TYPE_GENERAL\x10\x04\x12$\n ACCOUNT_TYPE_FEES_INFRASTRUCTURE\x10\x05\x12\x1f\n\x1b\x41\x43\x43OUNT_TYPE_FEES_LIQUIDITY\x10\x06\x12\x1b\n\x17\x41\x43\x43OUNT_TYPE_FEES_MAKER\x10\x07\x12\x15\n\x11\x41\x43\x43OUNT_TYPE_BOND\x10\t\x12\x19\n\x15\x41\x43\x43OUNT_TYPE_EXTERNAL\x10\n\x12!\n\x1d\x41\x43\x43OUNT_TYPE_GLOBAL_INSURANCE\x10\x0b\x12\x1e\n\x1a\x41\x43\x43OUNT_TYPE_GLOBAL_REWARD\x10\x0c\x12\"\n\x1e\x41\x43\x43OUNT_TYPE_PENDING_TRANSFERS\x10\r\x12\'\n#ACCOUNT_TYPE_REWARD_TAKER_PAID_FEES\x10\x0e\x12+\n\'ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES\x10\x0f\x12(\n$ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES\x10\x10\x12(\n$ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS\x10\x11\"\x04\x08\x08\x10\x08*\xa7\x06\n\x0cTransferType\x12\x1d\n\x19TRANSFER_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12TRANSFER_TYPE_LOSS\x10\x01\x12\x15\n\x11TRANSFER_TYPE_WIN\x10\x02\x12\x17\n\x13TRANSFER_TYPE_CLOSE\x10\x03\x12\x1a\n\x16TRANSFER_TYPE_MTM_LOSS\x10\x04\x12\x19\n\x15TRANSFER_TYPE_MTM_WIN\x10\x05\x12\x1c\n\x18TRANSFER_TYPE_MARGIN_LOW\x10\x06\x12\x1d\n\x19TRANSFER_TYPE_MARGIN_HIGH\x10\x07\x12$\n TRANSFER_TYPE_MARGIN_CONFISCATED\x10\x08\x12\x1f\n\x1bTRANSFER_TYPE_MAKER_FEE_PAY\x10\t\x12#\n\x1fTRANSFER_TYPE_MAKER_FEE_RECEIVE\x10\n\x12(\n$TRANSFER_TYPE_INFRASTRUCTURE_FEE_PAY\x10\x0b\x12/\n+TRANSFER_TYPE_INFRASTRUCTURE_FEE_DISTRIBUTE\x10\x0c\x12#\n\x1fTRANSFER_TYPE_LIQUIDITY_FEE_PAY\x10\r\x12*\n&TRANSFER_TYPE_LIQUIDITY_FEE_DISTRIBUTE\x10\x0e\x12\x1a\n\x16TRANSFER_TYPE_BOND_LOW\x10\x0f\x12\x1b\n\x17TRANSFER_TYPE_BOND_HIGH\x10\x10\x12\x1f\n\x1bTRANSFER_TYPE_WITHDRAW_LOCK\x10\x11\x12\x1a\n\x16TRANSFER_TYPE_WITHDRAW\x10\x12\x12\x19\n\x15TRANSFER_TYPE_DEPOSIT\x10\x13\x12\x1f\n\x1bTRANSFER_TYPE_BOND_SLASHING\x10\x14\x12\x1e\n\x1aTRANSFER_TYPE_STAKE_REWARD\x10\x15\x12%\n!TRANSFER_TYPE_TRANSFER_FUNDS_SEND\x10\x16\x12+\n\'TRANSFER_TYPE_TRANSFER_FUNDS_DISTRIBUTE\x10\x17*\xc7\x01\n\x0e\x44ispatchMetric\x12\x1f\n\x1b\x44ISPATCH_METRIC_UNSPECIFIED\x10\x00\x12#\n\x1f\x44ISPATCH_METRIC_TAKER_FEES_PAID\x10\x01\x12\'\n#DISPATCH_METRIC_MAKER_FEES_RECEIVED\x10\x02\x12$\n DISPATCH_METRIC_LP_FEES_RECEIVED\x10\x03\x12 \n\x1c\x44ISPATCH_METRIC_MARKET_VALUE\x10\x04*c\n\nNodeStatus\x12\x1b\n\x17NODE_STATUS_UNSPECIFIED\x10\x00\x12\x19\n\x15NODE_STATUS_VALIDATOR\x10\x01\x12\x1d\n\x19NODE_STATUS_NON_VALIDATOR\x10\x02*Y\n\x0b\x45pochAction\x12\x1c\n\x18\x45POCH_ACTION_UNSPECIFIED\x10\x00\x12\x16\n\x12\x45POCH_ACTION_START\x10\x01\x12\x14\n\x10\x45POCH_ACTION_END\x10\x02*\xa7\x01\n\x13ValidatorNodeStatus\x12%\n!VALIDATOR_NODE_STATUS_UNSPECIFIED\x10\x00\x12$\n VALIDATOR_NODE_STATUS_TENDERMINT\x10\x01\x12 \n\x1cVALIDATOR_NODE_STATUS_ERSATZ\x10\x02\x12!\n\x1dVALIDATOR_NODE_STATUS_PENDING\x10\x03\x42\'Z%code.vegaprotocol.io/vega/protos/vegab\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x0fvega/vega.proto\x12\x04vega\x1a\x12vega/markets.proto"\x13\n\x05Party\x12\n\n\x02id\x18\x01 \x01(\t"9\n\nRiskFactor\x12\x0e\n\x06market\x18\x01 \x01(\t\x12\r\n\x05short\x18\x02 \x01(\t\x12\x0c\n\x04long\x18\x03 \x01(\t"G\n\x0bPeggedOrder\x12(\n\treference\x18\x01 \x01(\x0e\x32\x15.vega.PeggedReference\x12\x0e\n\x06offset\x18\x02 \x01(\t"\xa9\x07\n\x05Order\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\x10\n\x08party_id\x18\x03 \x01(\t\x12\x18\n\x04side\x18\x04 \x01(\x0e\x32\n.vega.Side\x12\r\n\x05price\x18\x05 \x01(\t\x12\x0c\n\x04size\x18\x06 \x01(\x04\x12\x11\n\tremaining\x18\x07 \x01(\x04\x12.\n\rtime_in_force\x18\x08 \x01(\x0e\x32\x17.vega.Order.TimeInForce\x12\x1e\n\x04type\x18\t \x01(\x0e\x32\x10.vega.Order.Type\x12\x12\n\ncreated_at\x18\n \x01(\x03\x12"\n\x06status\x18\x0b \x01(\x0e\x32\x12.vega.Order.Status\x12\x12\n\nexpires_at\x18\x0c \x01(\x03\x12\x11\n\treference\x18\r \x01(\t\x12 \n\x06reason\x18\x0e \x01(\x0e\x32\x10.vega.OrderError\x12\x12\n\nupdated_at\x18\x0f \x01(\x03\x12\x0f\n\x07version\x18\x10 \x01(\x04\x12\x10\n\x08\x62\x61tch_id\x18\x11 \x01(\x04\x12\'\n\x0cpegged_order\x18\x12 \x01(\x0b\x32\x11.vega.PeggedOrder\x12\x1e\n\x16liquidity_provision_id\x18\x13 \x01(\t"\xb6\x01\n\x0bTimeInForce\x12\x1d\n\x19TIME_IN_FORCE_UNSPECIFIED\x10\x00\x12\x15\n\x11TIME_IN_FORCE_GTC\x10\x01\x12\x15\n\x11TIME_IN_FORCE_GTT\x10\x02\x12\x15\n\x11TIME_IN_FORCE_IOC\x10\x03\x12\x15\n\x11TIME_IN_FORCE_FOK\x10\x04\x12\x15\n\x11TIME_IN_FORCE_GFA\x10\x05\x12\x15\n\x11TIME_IN_FORCE_GFN\x10\x06"O\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_LIMIT\x10\x01\x12\x0f\n\x0bTYPE_MARKET\x10\x02\x12\x10\n\x0cTYPE_NETWORK\x10\x03"\xc9\x01\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x12\n\x0eSTATUS_EXPIRED\x10\x02\x12\x14\n\x10STATUS_CANCELLED\x10\x03\x12\x12\n\x0eSTATUS_STOPPED\x10\x04\x12\x11\n\rSTATUS_FILLED\x10\x05\x12\x13\n\x0fSTATUS_REJECTED\x10\x06\x12\x1b\n\x17STATUS_PARTIALLY_FILLED\x10\x07\x12\x11\n\rSTATUS_PARKED\x10\x08";\n\x1dOrderCancellationConfirmation\x12\x1a\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.Order"z\n\x11OrderConfirmation\x12\x1a\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.Order\x12\x1b\n\x06trades\x18\x02 \x03(\x0b\x32\x0b.vega.Trade\x12,\n\x17passive_orders_affected\x18\x03 \x03(\x0b\x32\x0b.vega.Order"\x8c\x01\n\x16\x41uctionIndicativeState\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x18\n\x10indicative_price\x18\x02 \x01(\t\x12\x19\n\x11indicative_volume\x18\x03 \x01(\x04\x12\x15\n\rauction_start\x18\x04 \x01(\x03\x12\x13\n\x0b\x61uction_end\x18\x05 \x01(\x03"\xc4\x03\n\x05Trade\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tmarket_id\x18\x02 \x01(\t\x12\r\n\x05price\x18\x03 \x01(\t\x12\x0c\n\x04size\x18\x04 \x01(\x04\x12\r\n\x05\x62uyer\x18\x05 \x01(\t\x12\x0e\n\x06seller\x18\x06 \x01(\t\x12\x1d\n\taggressor\x18\x07 \x01(\x0e\x32\n.vega.Side\x12\x11\n\tbuy_order\x18\x08 \x01(\t\x12\x12\n\nsell_order\x18\t \x01(\t\x12\x11\n\ttimestamp\x18\n \x01(\x03\x12\x1e\n\x04type\x18\x0b \x01(\x0e\x32\x10.vega.Trade.Type\x12\x1c\n\tbuyer_fee\x18\x0c \x01(\x0b\x32\t.vega.Fee\x12\x1d\n\nseller_fee\x18\r \x01(\x0b\x32\t.vega.Fee\x12\x1b\n\x13\x62uyer_auction_batch\x18\x0e \x01(\x04\x12\x1c\n\x14seller_auction_batch\x18\x0f \x01(\x04"o\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x10\n\x0cTYPE_DEFAULT\x10\x01\x12\x1f\n\x1bTYPE_NETWORK_CLOSE_OUT_GOOD\x10\x02\x12\x1e\n\x1aTYPE_NETWORK_CLOSE_OUT_BAD\x10\x03"K\n\x03\x46\x65\x65\x12\x11\n\tmaker_fee\x18\x01 \x01(\t\x12\x1a\n\x12infrastructure_fee\x18\x02 \x01(\t\x12\x15\n\rliquidity_fee\x18\x03 \x01(\t"\'\n\x08TradeSet\x12\x1b\n\x06trades\x18\x01 \x03(\x0b\x32\x0b.vega.Trade"\x97\x01\n\x06\x43\x61ndle\x12\x11\n\ttimestamp\x18\x01 \x01(\x03\x12\x10\n\x08\x64\x61tetime\x18\x02 \x01(\t\x12\x0c\n\x04high\x18\x03 \x01(\t\x12\x0b\n\x03low\x18\x04 \x01(\t\x12\x0c\n\x04open\x18\x05 \x01(\t\x12\r\n\x05\x63lose\x18\x06 \x01(\t\x12\x0e\n\x06volume\x18\x07 \x01(\x04\x12 \n\x08interval\x18\x08 \x01(\x0e\x32\x0e.vega.Interval"E\n\nPriceLevel\x12\r\n\x05price\x18\x01 \x01(\t\x12\x18\n\x10number_of_orders\x18\x02 \x01(\x04\x12\x0e\n\x06volume\x18\x03 \x01(\x04"x\n\x0bMarketDepth\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1d\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x1e\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x17\n\x0fsequence_number\x18\x04 \x01(\x04"\xa0\x01\n\x11MarketDepthUpdate\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x1d\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x1e\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevel\x12\x17\n\x0fsequence_number\x18\x04 \x01(\x04\x12 \n\x18previous_sequence_number\x18\x05 \x01(\x04"\xa3\x01\n\x08Position\x12\x11\n\tmarket_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x13\n\x0bopen_volume\x18\x03 \x01(\x03\x12\x14\n\x0crealised_pnl\x18\x04 \x01(\t\x12\x16\n\x0eunrealised_pnl\x18\x05 \x01(\t\x12\x1b\n\x13\x61verage_entry_price\x18\x06 \x01(\t\x12\x12\n\nupdated_at\x18\x07 \x01(\x03".\n\rPositionTrade\x12\x0e\n\x06volume\x18\x01 \x01(\x03\x12\r\n\x05price\x18\x02 \x01(\t"\x93\x02\n\x07\x44\x65posit\x12\n\n\x02id\x18\x01 \x01(\t\x12$\n\x06status\x18\x02 \x01(\x0e\x32\x14.vega.Deposit.Status\x12\x10\n\x08party_id\x18\x03 \x01(\t\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\x0e\n\x06\x61mount\x18\x05 \x01(\t\x12\x0f\n\x07tx_hash\x18\x06 \x01(\t\x12\x1a\n\x12\x63redited_timestamp\x18\x07 \x01(\x03\x12\x19\n\x11\x63reated_timestamp\x18\x08 \x01(\x03"]\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x0f\n\x0bSTATUS_OPEN\x10\x01\x12\x14\n\x10STATUS_CANCELLED\x10\x02\x12\x14\n\x10STATUS_FINALIZED\x10\x03"\xd6\x02\n\nWithdrawal\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\'\n\x06status\x18\x05 \x01(\x0e\x32\x17.vega.Withdrawal.Status\x12\x0b\n\x03ref\x18\x06 \x01(\t\x12\x0e\n\x06\x65xpiry\x18\x07 \x01(\x03\x12\x0f\n\x07tx_hash\x18\x08 \x01(\t\x12\x19\n\x11\x63reated_timestamp\x18\t \x01(\x03\x12\x1b\n\x13withdrawn_timestamp\x18\n \x01(\x03\x12\x1e\n\x03\x65xt\x18\x0b \x01(\x0b\x32\x11.vega.WithdrawExt"\\\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x0f\n\x0bSTATUS_OPEN\x10\x01\x12\x13\n\x0fSTATUS_REJECTED\x10\x02\x12\x14\n\x10STATUS_FINALIZED\x10\x03"=\n\x0bWithdrawExt\x12\'\n\x05\x65rc20\x18\x01 \x01(\x0b\x32\x16.vega.Erc20WithdrawExtH\x00\x42\x05\n\x03\x65xt",\n\x10\x45rc20WithdrawExt\x12\x18\n\x10receiver_address\x18\x01 \x01(\t"x\n\x07\x41\x63\x63ount\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05owner\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61lance\x18\x03 \x01(\t\x12\r\n\x05\x61sset\x18\x04 \x01(\t\x12\x11\n\tmarket_id\x18\x05 \x01(\t\x12\x1f\n\x04type\x18\x06 \x01(\x0e\x32\x11.vega.AccountType"0\n\x0f\x46inancialAmount\x12\x0e\n\x06\x61mount\x18\x01 \x01(\t\x12\r\n\x05\x61sset\x18\x02 \x01(\t"\x89\x01\n\x08Transfer\x12\r\n\x05owner\x18\x01 \x01(\t\x12%\n\x06\x61mount\x18\x02 \x01(\x0b\x32\x15.vega.FinancialAmount\x12 \n\x04type\x18\x03 \x01(\x0e\x32\x12.vega.TransferType\x12\x12\n\nmin_amount\x18\x04 \x01(\t\x12\x11\n\tmarket_id\x18\x05 \x01(\t"c\n\x10\x44ispatchStrategy\x12\x18\n\x10\x61sset_for_metric\x18\x01 \x01(\t\x12$\n\x06metric\x18\x02 \x01(\x0e\x32\x14.vega.DispatchMetric\x12\x0f\n\x07markets\x18\x03 \x03(\t"\x9f\x01\n\x0fTransferRequest\x12#\n\x0c\x66rom_account\x18\x01 \x03(\x0b\x32\r.vega.Account\x12!\n\nto_account\x18\x02 \x03(\x0b\x32\r.vega.Account\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x12\n\nmin_amount\x18\x04 \x01(\t\x12\r\n\x05\x61sset\x18\x05 \x01(\t\x12\x11\n\treference\x18\x06 \x01(\t"{\n\x0bLedgerEntry\x12\x14\n\x0c\x66rom_account\x18\x01 \x01(\t\x12\x12\n\nto_account\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x11\n\treference\x18\x04 \x01(\t\x12\x0c\n\x04type\x18\x05 \x01(\t\x12\x11\n\ttimestamp\x18\x06 \x01(\x03"B\n\x0fTransferBalance\x12\x1e\n\x07\x61\x63\x63ount\x18\x01 \x01(\x0b\x32\r.vega.Account\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t"a\n\x10TransferResponse\x12$\n\ttransfers\x18\x01 \x03(\x0b\x32\x11.vega.LedgerEntry\x12\'\n\x08\x62\x61lances\x18\x02 \x03(\x0b\x32\x15.vega.TransferBalance"\xc1\x01\n\x0cMarginLevels\x12\x1a\n\x12maintenance_margin\x18\x01 \x01(\t\x12\x14\n\x0csearch_level\x18\x02 \x01(\t\x12\x16\n\x0einitial_margin\x18\x03 \x01(\t\x12 \n\x18\x63ollateral_release_level\x18\x04 \x01(\t\x12\x10\n\x08party_id\x18\x05 \x01(\t\x12\x11\n\tmarket_id\x18\x06 \x01(\t\x12\r\n\x05\x61sset\x18\x07 \x01(\t\x12\x11\n\ttimestamp\x18\x08 \x01(\x03"\xae\x06\n\nMarketData\x12\x12\n\nmark_price\x18\x01 \x01(\t\x12\x16\n\x0e\x62\x65st_bid_price\x18\x02 \x01(\t\x12\x17\n\x0f\x62\x65st_bid_volume\x18\x03 \x01(\x04\x12\x18\n\x10\x62\x65st_offer_price\x18\x04 \x01(\t\x12\x19\n\x11\x62\x65st_offer_volume\x18\x05 \x01(\x04\x12\x1d\n\x15\x62\x65st_static_bid_price\x18\x06 \x01(\t\x12\x1e\n\x16\x62\x65st_static_bid_volume\x18\x07 \x01(\x04\x12\x1f\n\x17\x62\x65st_static_offer_price\x18\x08 \x01(\t\x12 \n\x18\x62\x65st_static_offer_volume\x18\t \x01(\x04\x12\x11\n\tmid_price\x18\n \x01(\t\x12\x18\n\x10static_mid_price\x18\x0b \x01(\t\x12\x0e\n\x06market\x18\x0c \x01(\t\x12\x11\n\ttimestamp\x18\r \x01(\x03\x12\x15\n\ropen_interest\x18\x0e \x01(\x04\x12\x13\n\x0b\x61uction_end\x18\x0f \x01(\x03\x12\x15\n\rauction_start\x18\x10 \x01(\x03\x12\x18\n\x10indicative_price\x18\x11 \x01(\t\x12\x19\n\x11indicative_volume\x18\x12 \x01(\x04\x12\x35\n\x13market_trading_mode\x18\x13 \x01(\x0e\x32\x18.vega.Market.TradingMode\x12%\n\x07trigger\x18\x14 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12/\n\x11\x65xtension_trigger\x18\x15 \x01(\x0e\x32\x14.vega.AuctionTrigger\x12\x14\n\x0ctarget_stake\x18\x16 \x01(\t\x12\x16\n\x0esupplied_stake\x18\x17 \x01(\t\x12<\n\x17price_monitoring_bounds\x18\x18 \x03(\x0b\x32\x1b.vega.PriceMonitoringBounds\x12\x1a\n\x12market_value_proxy\x18\x19 \x01(\t\x12\x45\n\x1cliquidity_provider_fee_share\x18\x1a \x03(\x0b\x32\x1f.vega.LiquidityProviderFeeShare"f\n\x19LiquidityProviderFeeShare\x12\r\n\x05party\x18\x01 \x01(\t\x12\x19\n\x11\x65quity_like_share\x18\x02 \x01(\t\x12\x1f\n\x17\x61verage_entry_valuation\x18\x03 \x01(\t"\x91\x01\n\x15PriceMonitoringBounds\x12\x17\n\x0fmin_valid_price\x18\x01 \x01(\t\x12\x17\n\x0fmax_valid_price\x18\x02 \x01(\t\x12-\n\x07trigger\x18\x03 \x01(\x0b\x32\x1c.vega.PriceMonitoringTrigger\x12\x17\n\x0freference_price\x18\x04 \x01(\t";\n\x0b\x45rrorDetail\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\r\n\x05inner\x18\x03 \x01(\t".\n\x10NetworkParameter\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t"\xa1\x02\n\rNetworkLimits\x12\x1a\n\x12\x63\x61n_propose_market\x18\x01 \x01(\x08\x12\x19\n\x11\x63\x61n_propose_asset\x18\x02 \x01(\x08\x12\x1a\n\x12\x62ootstrap_finished\x18\x03 \x01(\x08\x12\x1e\n\x16propose_market_enabled\x18\x04 \x01(\x08\x12\x1d\n\x15propose_asset_enabled\x18\x05 \x01(\x08\x12\x1d\n\x15\x62ootstrap_block_count\x18\x06 \x01(\r\x12\x16\n\x0egenesis_loaded\x18\x07 \x01(\x08\x12#\n\x1bpropose_market_enabled_from\x18\x08 \x01(\x03\x12"\n\x1apropose_asset_enabled_from\x18\t \x01(\x03"^\n\x0eLiquidityOrder\x12(\n\treference\x18\x01 \x01(\x0e\x32\x15.vega.PeggedReference\x12\x12\n\nproportion\x18\x02 \x01(\r\x12\x0e\n\x06offset\x18\x03 \x01(\t"Z\n\x17LiquidityOrderReference\x12\x10\n\x08order_id\x18\x01 \x01(\t\x12-\n\x0fliquidity_order\x18\x02 \x01(\x0b\x32\x14.vega.LiquidityOrder"\xe5\x03\n\x12LiquidityProvision\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x12\n\ncreated_at\x18\x03 \x01(\x03\x12\x12\n\nupdated_at\x18\x04 \x01(\x03\x12\x11\n\tmarket_id\x18\x05 \x01(\t\x12\x19\n\x11\x63ommitment_amount\x18\x06 \x01(\t\x12\x0b\n\x03\x66\x65\x65\x18\x07 \x01(\t\x12,\n\x05sells\x18\x08 \x03(\x0b\x32\x1d.vega.LiquidityOrderReference\x12+\n\x04\x62uys\x18\t \x03(\x0b\x32\x1d.vega.LiquidityOrderReference\x12\x0f\n\x07version\x18\n \x01(\x04\x12/\n\x06status\x18\x0b \x01(\x0e\x32\x1f.vega.LiquidityProvision.Status\x12\x11\n\treference\x18\x0c \x01(\t"\x9d\x01\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x12\n\x0eSTATUS_STOPPED\x10\x02\x12\x14\n\x10STATUS_CANCELLED\x10\x03\x12\x13\n\x0fSTATUS_REJECTED\x10\x04\x12\x15\n\x11STATUS_UNDEPLOYED\x10\x05\x12\x12\n\x0eSTATUS_PENDING\x10\x06"\xcd\x02\n\x0e\x45thereumConfig\x12\x12\n\nnetwork_id\x18\x01 \x01(\t\x12\x10\n\x08\x63hain_id\x18\x02 \x01(\t\x12@\n\x1a\x63ollateral_bridge_contract\x18\x03 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\x12\x15\n\rconfirmations\x18\x04 \x01(\r\x12=\n\x17staking_bridge_contract\x18\x05 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\x12<\n\x16token_vesting_contract\x18\x06 \x01(\x0b\x32\x1c.vega.EthereumContractConfig\x12?\n\x19multisig_control_contract\x18\x07 \x01(\x0b\x32\x1c.vega.EthereumContractConfig"J\n\x16\x45thereumContractConfig\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x1f\n\x17\x64\x65ployment_block_height\x18\x06 \x01(\x04"u\n\x0f\x45pochTimestamps\x12\x12\n\nstart_time\x18\x01 \x01(\x03\x12\x13\n\x0b\x65xpiry_time\x18\x02 \x01(\x03\x12\x10\n\x08\x65nd_time\x18\x03 \x01(\x03\x12\x13\n\x0b\x66irst_block\x18\x04 \x01(\x04\x12\x12\n\nlast_block\x18\x05 \x01(\x04"\x86\x01\n\x05\x45poch\x12\x0b\n\x03seq\x18\x01 \x01(\x04\x12)\n\ntimestamps\x18\x02 \x01(\x0b\x32\x15.vega.EpochTimestamps\x12\x1e\n\nvalidators\x18\x03 \x03(\x0b\x32\n.vega.Node\x12%\n\x0b\x64\x65legations\x18\x04 \x03(\x0b\x32\x10.vega.Delegation"h\n\x12\x45pochParticipation\x12\x1a\n\x05\x65poch\x18\x01 \x01(\x0b\x32\x0b.vega.Epoch\x12\x0f\n\x07offline\x18\x02 \x01(\x04\x12\x0e\n\x06online\x18\x03 \x01(\x04\x12\x15\n\rtotal_rewards\x18\x04 \x01(\x01";\n\tEpochData\x12\r\n\x05total\x18\x01 \x01(\x05\x12\x0f\n\x07offline\x18\x02 \x01(\x05\x12\x0e\n\x06online\x18\x03 \x01(\x05"\xca\x01\n\x0cRankingScore\x12\x13\n\x0bstake_score\x18\x01 \x01(\t\x12\x19\n\x11performance_score\x18\x02 \x01(\t\x12\x32\n\x0fprevious_status\x18\x03 \x01(\x0e\x32\x19.vega.ValidatorNodeStatus\x12)\n\x06status\x18\x04 \x01(\x0e\x32\x19.vega.ValidatorNodeStatus\x12\x14\n\x0cvoting_power\x18\x05 \x01(\r\x12\x15\n\rranking_score\x18\x06 \x01(\t"\xc5\x01\n\x0bRewardScore\x12\x1b\n\x13raw_validator_score\x18\x01 \x01(\t\x12\x19\n\x11performance_score\x18\x02 \x01(\t\x12\x16\n\x0emultisig_score\x18\x03 \x01(\t\x12\x17\n\x0fvalidator_score\x18\x04 \x01(\t\x12\x18\n\x10normalised_score\x18\x05 \x01(\t\x12\x33\n\x10validator_status\x18\x06 \x01(\x0e\x32\x19.vega.ValidatorNodeStatus"\xdc\x03\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07pub_key\x18\x02 \x01(\t\x12\x12\n\ntm_pub_key\x18\x03 \x01(\t\x12\x19\n\x11\x65thereum_adddress\x18\x04 \x01(\t\x12\x10\n\x08info_url\x18\x05 \x01(\t\x12\x10\n\x08location\x18\x06 \x01(\t\x12\x1a\n\x12staked_by_operator\x18\x07 \x01(\t\x12\x1b\n\x13staked_by_delegates\x18\x08 \x01(\t\x12\x14\n\x0cstaked_total\x18\t \x01(\t\x12\x1a\n\x12max_intended_stake\x18\n \x01(\t\x12\x15\n\rpending_stake\x18\x0b \x01(\t\x12#\n\nepoch_data\x18\x0c \x01(\x0b\x32\x0f.vega.EpochData\x12 \n\x06status\x18\r \x01(\x0e\x32\x10.vega.NodeStatus\x12%\n\x0b\x64\x65legations\x18\x0e \x03(\x0b\x32\x10.vega.Delegation\x12\'\n\x0creward_score\x18\x0f \x01(\x0b\x32\x11.vega.RewardScore\x12)\n\rranking_score\x18\x10 \x01(\x0b\x32\x12.vega.RankingScore\x12\x0c\n\x04name\x18\x11 \x01(\t\x12\x12\n\navatar_url\x18\x12 \x01(\t"w\n\x08NodeData\x12\x14\n\x0cstaked_total\x18\x01 \x01(\t\x12\x13\n\x0btotal_nodes\x18\x02 \x01(\r\x12\x16\n\x0einactive_nodes\x18\x03 \x01(\r\x12\x18\n\x10validating_nodes\x18\x04 \x01(\r\x12\x0e\n\x06uptime\x18\x05 \x01(\x02"O\n\nDelegation\x12\r\n\x05party\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t\x12\x11\n\tepoch_seq\x18\x04 \x01(\t"\xa5\x01\n\x06Reward\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\r\n\x05\x65poch\x18\x03 \x01(\x04\x12\x0e\n\x06\x61mount\x18\x04 \x01(\t\x12\x1b\n\x13percentage_of_total\x18\x05 \x01(\t\x12\x13\n\x0breceived_at\x18\x06 \x01(\x03\x12\x11\n\tmarket_id\x18\x07 \x01(\t\x12\x13\n\x0breward_type\x18\x08 \x01(\t"C\n\rRewardSummary\x12\x10\n\x08\x61sset_id\x18\x01 \x01(\t\x12\x10\n\x08party_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61mount\x18\x03 \x01(\t"_\n\x12StateValueProposal\x12\x14\n\x0cstate_var_id\x18\x01 \x01(\t\x12\x10\n\x08\x65vent_id\x18\x02 \x01(\t\x12!\n\x03kvb\x18\x03 \x03(\x0b\x32\x14.vega.KeyValueBundle"T\n\x0eKeyValueBundle\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x11\n\ttolerance\x18\x02 \x01(\t\x12"\n\x05value\x18\x03 \x01(\x0b\x32\x13.vega.StateVarValue"\x93\x01\n\rStateVarValue\x12\'\n\nscalar_val\x18\x01 \x01(\x0b\x32\x11.vega.ScalarValueH\x00\x12\'\n\nvector_val\x18\x02 \x01(\x0b\x32\x11.vega.VectorValueH\x00\x12\'\n\nmatrix_val\x18\x03 \x01(\x0b\x32\x11.vega.MatrixValueH\x00\x42\x07\n\x05value"\x1c\n\x0bScalarValue\x12\r\n\x05value\x18\x01 \x01(\t"\x1c\n\x0bVectorValue\x12\r\n\x05value\x18\x01 \x03(\t"/\n\x0bMatrixValue\x12 \n\x05value\x18\x01 \x03(\x0b\x32\x11.vega.VectorValue*9\n\x04Side\x12\x14\n\x10SIDE_UNSPECIFIED\x10\x00\x12\x0c\n\x08SIDE_BUY\x10\x01\x12\r\n\tSIDE_SELL\x10\x02*\x98\x01\n\x08Interval\x12\x18\n\x14INTERVAL_UNSPECIFIED\x10\x00\x12\x10\n\x0cINTERVAL_I1M\x10<\x12\x11\n\x0cINTERVAL_I5M\x10\xac\x02\x12\x12\n\rINTERVAL_I15M\x10\x84\x07\x12\x11\n\x0cINTERVAL_I1H\x10\x90\x1c\x12\x12\n\x0cINTERVAL_I6H\x10\xe0\xa8\x01\x12\x12\n\x0cINTERVAL_I1D\x10\x80\xa3\x05*\xa3\x01\n\x0e\x41uctionTrigger\x12\x1f\n\x1b\x41UCTION_TRIGGER_UNSPECIFIED\x10\x00\x12\x19\n\x15\x41UCTION_TRIGGER_BATCH\x10\x01\x12\x1b\n\x17\x41UCTION_TRIGGER_OPENING\x10\x02\x12\x19\n\x15\x41UCTION_TRIGGER_PRICE\x10\x03\x12\x1d\n\x19\x41UCTION_TRIGGER_LIQUIDITY\x10\x04*\x8b\x01\n\x0fPeggedReference\x12 \n\x1cPEGGED_REFERENCE_UNSPECIFIED\x10\x00\x12\x18\n\x14PEGGED_REFERENCE_MID\x10\x01\x12\x1d\n\x19PEGGED_REFERENCE_BEST_BID\x10\x02\x12\x1d\n\x19PEGGED_REFERENCE_BEST_ASK\x10\x03*\x9f\x0f\n\nOrderError\x12\x1b\n\x17ORDER_ERROR_UNSPECIFIED\x10\x00\x12!\n\x1dORDER_ERROR_INVALID_MARKET_ID\x10\x01\x12 \n\x1cORDER_ERROR_INVALID_ORDER_ID\x10\x02\x12\x1f\n\x1bORDER_ERROR_OUT_OF_SEQUENCE\x10\x03\x12&\n"ORDER_ERROR_INVALID_REMAINING_SIZE\x10\x04\x12\x1c\n\x18ORDER_ERROR_TIME_FAILURE\x10\x05\x12\x1f\n\x1bORDER_ERROR_REMOVAL_FAILURE\x10\x06\x12+\n\'ORDER_ERROR_INVALID_EXPIRATION_DATETIME\x10\x07\x12\'\n#ORDER_ERROR_INVALID_ORDER_REFERENCE\x10\x08\x12 \n\x1cORDER_ERROR_EDIT_NOT_ALLOWED\x10\t\x12\x1d\n\x19ORDER_ERROR_AMEND_FAILURE\x10\n\x12\x19\n\x15ORDER_ERROR_NOT_FOUND\x10\x0b\x12 \n\x1cORDER_ERROR_INVALID_PARTY_ID\x10\x0c\x12\x1d\n\x19ORDER_ERROR_MARKET_CLOSED\x10\r\x12#\n\x1fORDER_ERROR_MARGIN_CHECK_FAILED\x10\x0e\x12\'\n#ORDER_ERROR_MISSING_GENERAL_ACCOUNT\x10\x0f\x12\x1e\n\x1aORDER_ERROR_INTERNAL_ERROR\x10\x10\x12\x1c\n\x18ORDER_ERROR_INVALID_SIZE\x10\x11\x12#\n\x1fORDER_ERROR_INVALID_PERSISTENCE\x10\x12\x12\x1c\n\x18ORDER_ERROR_INVALID_TYPE\x10\x13\x12\x1c\n\x18ORDER_ERROR_SELF_TRADING\x10\x14\x12.\n*ORDER_ERROR_INSUFFICIENT_FUNDS_TO_PAY_FEES\x10\x15\x12%\n!ORDER_ERROR_INCORRECT_MARKET_TYPE\x10\x16\x12%\n!ORDER_ERROR_INVALID_TIME_IN_FORCE\x10\x17\x12+\n\'ORDER_ERROR_GFN_ORDER_DURING_AN_AUCTION\x10\x18\x12\x33\n/ORDER_ERROR_GFA_ORDER_DURING_CONTINUOUS_TRADING\x10\x19\x12\x34\n0ORDER_ERROR_CANNOT_AMEND_TO_GTT_WITHOUT_EXPIRYAT\x10\x1a\x12)\n%ORDER_ERROR_EXPIRYAT_BEFORE_CREATEDAT\x10\x1b\x12,\n(ORDER_ERROR_CANNOT_HAVE_GTC_AND_EXPIRYAT\x10\x1c\x12*\n&ORDER_ERROR_CANNOT_AMEND_TO_FOK_OR_IOC\x10\x1d\x12*\n&ORDER_ERROR_CANNOT_AMEND_TO_GFA_OR_GFN\x10\x1e\x12,\n(ORDER_ERROR_CANNOT_AMEND_FROM_GFA_OR_GFN\x10\x1f\x12\x34\n0ORDER_ERROR_CANNOT_SEND_IOC_ORDER_DURING_AUCTION\x10 \x12\x34\n0ORDER_ERROR_CANNOT_SEND_FOK_ORDER_DURING_AUCTION\x10!\x12#\n\x1fORDER_ERROR_MUST_BE_LIMIT_ORDER\x10"\x12"\n\x1eORDER_ERROR_MUST_BE_GTT_OR_GTC\x10#\x12\'\n#ORDER_ERROR_WITHOUT_REFERENCE_PRICE\x10$\x12\x33\n/ORDER_ERROR_BUY_CANNOT_REFERENCE_BEST_ASK_PRICE\x10%\x12\x37\n3ORDER_ERROR_OFFSET_MUST_BE_GREATER_OR_EQUAL_TO_ZERO\x10(\x12\x34\n0ORDER_ERROR_SELL_CANNOT_REFERENCE_BEST_BID_PRICE\x10)\x12\x30\n,ORDER_ERROR_OFFSET_MUST_BE_GREATER_THAN_ZERO\x10*\x12*\n&ORDER_ERROR_INSUFFICIENT_ASSET_BALANCE\x10+\x12\x45\nAORDER_ERROR_CANNOT_AMEND_PEGGED_ORDER_DETAILS_ON_NON_PEGGED_ORDER\x10,\x12.\n*ORDER_ERROR_UNABLE_TO_REPRICE_PEGGED_ORDER\x10-\x12\x35\n1ORDER_ERROR_UNABLE_TO_AMEND_PRICE_ON_PEGGED_ORDER\x10.\x12\x38\n4ORDER_ERROR_NON_PERSISTENT_ORDER_OUT_OF_PRICE_BOUNDS\x10/"\x04\x08&\x10&"\x04\x08\'\x10\'*\x82\x01\n\x0b\x43hainStatus\x12\x1c\n\x18\x43HAIN_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n\x19\x43HAIN_STATUS_DISCONNECTED\x10\x01\x12\x1a\n\x16\x43HAIN_STATUS_REPLAYING\x10\x02\x12\x1a\n\x16\x43HAIN_STATUS_CONNECTED\x10\x03*\xc4\x04\n\x0b\x41\x63\x63ountType\x12\x1c\n\x18\x41\x43\x43OUNT_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n\x16\x41\x43\x43OUNT_TYPE_INSURANCE\x10\x01\x12\x1b\n\x17\x41\x43\x43OUNT_TYPE_SETTLEMENT\x10\x02\x12\x17\n\x13\x41\x43\x43OUNT_TYPE_MARGIN\x10\x03\x12\x18\n\x14\x41\x43\x43OUNT_TYPE_GENERAL\x10\x04\x12$\n ACCOUNT_TYPE_FEES_INFRASTRUCTURE\x10\x05\x12\x1f\n\x1b\x41\x43\x43OUNT_TYPE_FEES_LIQUIDITY\x10\x06\x12\x1b\n\x17\x41\x43\x43OUNT_TYPE_FEES_MAKER\x10\x07\x12\x15\n\x11\x41\x43\x43OUNT_TYPE_BOND\x10\t\x12\x19\n\x15\x41\x43\x43OUNT_TYPE_EXTERNAL\x10\n\x12!\n\x1d\x41\x43\x43OUNT_TYPE_GLOBAL_INSURANCE\x10\x0b\x12\x1e\n\x1a\x41\x43\x43OUNT_TYPE_GLOBAL_REWARD\x10\x0c\x12"\n\x1e\x41\x43\x43OUNT_TYPE_PENDING_TRANSFERS\x10\r\x12\'\n#ACCOUNT_TYPE_REWARD_TAKER_PAID_FEES\x10\x0e\x12+\n\'ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES\x10\x0f\x12(\n$ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES\x10\x10\x12(\n$ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS\x10\x11"\x04\x08\x08\x10\x08*\xa7\x06\n\x0cTransferType\x12\x1d\n\x19TRANSFER_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12TRANSFER_TYPE_LOSS\x10\x01\x12\x15\n\x11TRANSFER_TYPE_WIN\x10\x02\x12\x17\n\x13TRANSFER_TYPE_CLOSE\x10\x03\x12\x1a\n\x16TRANSFER_TYPE_MTM_LOSS\x10\x04\x12\x19\n\x15TRANSFER_TYPE_MTM_WIN\x10\x05\x12\x1c\n\x18TRANSFER_TYPE_MARGIN_LOW\x10\x06\x12\x1d\n\x19TRANSFER_TYPE_MARGIN_HIGH\x10\x07\x12$\n TRANSFER_TYPE_MARGIN_CONFISCATED\x10\x08\x12\x1f\n\x1bTRANSFER_TYPE_MAKER_FEE_PAY\x10\t\x12#\n\x1fTRANSFER_TYPE_MAKER_FEE_RECEIVE\x10\n\x12(\n$TRANSFER_TYPE_INFRASTRUCTURE_FEE_PAY\x10\x0b\x12/\n+TRANSFER_TYPE_INFRASTRUCTURE_FEE_DISTRIBUTE\x10\x0c\x12#\n\x1fTRANSFER_TYPE_LIQUIDITY_FEE_PAY\x10\r\x12*\n&TRANSFER_TYPE_LIQUIDITY_FEE_DISTRIBUTE\x10\x0e\x12\x1a\n\x16TRANSFER_TYPE_BOND_LOW\x10\x0f\x12\x1b\n\x17TRANSFER_TYPE_BOND_HIGH\x10\x10\x12\x1f\n\x1bTRANSFER_TYPE_WITHDRAW_LOCK\x10\x11\x12\x1a\n\x16TRANSFER_TYPE_WITHDRAW\x10\x12\x12\x19\n\x15TRANSFER_TYPE_DEPOSIT\x10\x13\x12\x1f\n\x1bTRANSFER_TYPE_BOND_SLASHING\x10\x14\x12\x1e\n\x1aTRANSFER_TYPE_STAKE_REWARD\x10\x15\x12%\n!TRANSFER_TYPE_TRANSFER_FUNDS_SEND\x10\x16\x12+\n\'TRANSFER_TYPE_TRANSFER_FUNDS_DISTRIBUTE\x10\x17*\xc7\x01\n\x0e\x44ispatchMetric\x12\x1f\n\x1b\x44ISPATCH_METRIC_UNSPECIFIED\x10\x00\x12#\n\x1f\x44ISPATCH_METRIC_TAKER_FEES_PAID\x10\x01\x12\'\n#DISPATCH_METRIC_MAKER_FEES_RECEIVED\x10\x02\x12$\n DISPATCH_METRIC_LP_FEES_RECEIVED\x10\x03\x12 \n\x1c\x44ISPATCH_METRIC_MARKET_VALUE\x10\x04*c\n\nNodeStatus\x12\x1b\n\x17NODE_STATUS_UNSPECIFIED\x10\x00\x12\x19\n\x15NODE_STATUS_VALIDATOR\x10\x01\x12\x1d\n\x19NODE_STATUS_NON_VALIDATOR\x10\x02*Y\n\x0b\x45pochAction\x12\x1c\n\x18\x45POCH_ACTION_UNSPECIFIED\x10\x00\x12\x16\n\x12\x45POCH_ACTION_START\x10\x01\x12\x14\n\x10\x45POCH_ACTION_END\x10\x02*\xa7\x01\n\x13ValidatorNodeStatus\x12%\n!VALIDATOR_NODE_STATUS_UNSPECIFIED\x10\x00\x12$\n VALIDATOR_NODE_STATUS_TENDERMINT\x10\x01\x12 \n\x1cVALIDATOR_NODE_STATUS_ERSATZ\x10\x02\x12!\n\x1dVALIDATOR_NODE_STATUS_PENDING\x10\x03\x42\'Z%code.vegaprotocol.io/vega/protos/vegab\x06proto3'
+)
 
-_SIDE = DESCRIPTOR.enum_types_by_name['Side']
+_SIDE = DESCRIPTOR.enum_types_by_name["Side"]
 Side = enum_type_wrapper.EnumTypeWrapper(_SIDE)
-_INTERVAL = DESCRIPTOR.enum_types_by_name['Interval']
+_INTERVAL = DESCRIPTOR.enum_types_by_name["Interval"]
 Interval = enum_type_wrapper.EnumTypeWrapper(_INTERVAL)
-_AUCTIONTRIGGER = DESCRIPTOR.enum_types_by_name['AuctionTrigger']
+_AUCTIONTRIGGER = DESCRIPTOR.enum_types_by_name["AuctionTrigger"]
 AuctionTrigger = enum_type_wrapper.EnumTypeWrapper(_AUCTIONTRIGGER)
-_PEGGEDREFERENCE = DESCRIPTOR.enum_types_by_name['PeggedReference']
+_PEGGEDREFERENCE = DESCRIPTOR.enum_types_by_name["PeggedReference"]
 PeggedReference = enum_type_wrapper.EnumTypeWrapper(_PEGGEDREFERENCE)
-_ORDERERROR = DESCRIPTOR.enum_types_by_name['OrderError']
+_ORDERERROR = DESCRIPTOR.enum_types_by_name["OrderError"]
 OrderError = enum_type_wrapper.EnumTypeWrapper(_ORDERERROR)
-_CHAINSTATUS = DESCRIPTOR.enum_types_by_name['ChainStatus']
+_CHAINSTATUS = DESCRIPTOR.enum_types_by_name["ChainStatus"]
 ChainStatus = enum_type_wrapper.EnumTypeWrapper(_CHAINSTATUS)
-_ACCOUNTTYPE = DESCRIPTOR.enum_types_by_name['AccountType']
+_ACCOUNTTYPE = DESCRIPTOR.enum_types_by_name["AccountType"]
 AccountType = enum_type_wrapper.EnumTypeWrapper(_ACCOUNTTYPE)
-_TRANSFERTYPE = DESCRIPTOR.enum_types_by_name['TransferType']
+_TRANSFERTYPE = DESCRIPTOR.enum_types_by_name["TransferType"]
 TransferType = enum_type_wrapper.EnumTypeWrapper(_TRANSFERTYPE)
-_DISPATCHMETRIC = DESCRIPTOR.enum_types_by_name['DispatchMetric']
+_DISPATCHMETRIC = DESCRIPTOR.enum_types_by_name["DispatchMetric"]
 DispatchMetric = enum_type_wrapper.EnumTypeWrapper(_DISPATCHMETRIC)
-_NODESTATUS = DESCRIPTOR.enum_types_by_name['NodeStatus']
+_NODESTATUS = DESCRIPTOR.enum_types_by_name["NodeStatus"]
 NodeStatus = enum_type_wrapper.EnumTypeWrapper(_NODESTATUS)
-_EPOCHACTION = DESCRIPTOR.enum_types_by_name['EpochAction']
+_EPOCHACTION = DESCRIPTOR.enum_types_by_name["EpochAction"]
 EpochAction = enum_type_wrapper.EnumTypeWrapper(_EPOCHACTION)
-_VALIDATORNODESTATUS = DESCRIPTOR.enum_types_by_name['ValidatorNodeStatus']
+_VALIDATORNODESTATUS = DESCRIPTOR.enum_types_by_name["ValidatorNodeStatus"]
 ValidatorNodeStatus = enum_type_wrapper.EnumTypeWrapper(_VALIDATORNODESTATUS)
 SIDE_UNSPECIFIED = 0
 SIDE_BUY = 1
@@ -169,623 +172,855 @@ VALIDATOR_NODE_STATUS_ERSATZ = 2
 VALIDATOR_NODE_STATUS_PENDING = 3
 
 
-_PARTY = DESCRIPTOR.message_types_by_name['Party']
-_RISKFACTOR = DESCRIPTOR.message_types_by_name['RiskFactor']
-_PEGGEDORDER = DESCRIPTOR.message_types_by_name['PeggedOrder']
-_ORDER = DESCRIPTOR.message_types_by_name['Order']
-_ORDERCANCELLATIONCONFIRMATION = DESCRIPTOR.message_types_by_name['OrderCancellationConfirmation']
-_ORDERCONFIRMATION = DESCRIPTOR.message_types_by_name['OrderConfirmation']
-_AUCTIONINDICATIVESTATE = DESCRIPTOR.message_types_by_name['AuctionIndicativeState']
-_TRADE = DESCRIPTOR.message_types_by_name['Trade']
-_FEE = DESCRIPTOR.message_types_by_name['Fee']
-_TRADESET = DESCRIPTOR.message_types_by_name['TradeSet']
-_CANDLE = DESCRIPTOR.message_types_by_name['Candle']
-_PRICELEVEL = DESCRIPTOR.message_types_by_name['PriceLevel']
-_MARKETDEPTH = DESCRIPTOR.message_types_by_name['MarketDepth']
-_MARKETDEPTHUPDATE = DESCRIPTOR.message_types_by_name['MarketDepthUpdate']
-_POSITION = DESCRIPTOR.message_types_by_name['Position']
-_POSITIONTRADE = DESCRIPTOR.message_types_by_name['PositionTrade']
-_DEPOSIT = DESCRIPTOR.message_types_by_name['Deposit']
-_WITHDRAWAL = DESCRIPTOR.message_types_by_name['Withdrawal']
-_WITHDRAWEXT = DESCRIPTOR.message_types_by_name['WithdrawExt']
-_ERC20WITHDRAWEXT = DESCRIPTOR.message_types_by_name['Erc20WithdrawExt']
-_ACCOUNT = DESCRIPTOR.message_types_by_name['Account']
-_FINANCIALAMOUNT = DESCRIPTOR.message_types_by_name['FinancialAmount']
-_TRANSFER = DESCRIPTOR.message_types_by_name['Transfer']
-_DISPATCHSTRATEGY = DESCRIPTOR.message_types_by_name['DispatchStrategy']
-_TRANSFERREQUEST = DESCRIPTOR.message_types_by_name['TransferRequest']
-_LEDGERENTRY = DESCRIPTOR.message_types_by_name['LedgerEntry']
-_TRANSFERBALANCE = DESCRIPTOR.message_types_by_name['TransferBalance']
-_TRANSFERRESPONSE = DESCRIPTOR.message_types_by_name['TransferResponse']
-_MARGINLEVELS = DESCRIPTOR.message_types_by_name['MarginLevels']
-_MARKETDATA = DESCRIPTOR.message_types_by_name['MarketData']
-_LIQUIDITYPROVIDERFEESHARE = DESCRIPTOR.message_types_by_name['LiquidityProviderFeeShare']
-_PRICEMONITORINGBOUNDS = DESCRIPTOR.message_types_by_name['PriceMonitoringBounds']
-_ERRORDETAIL = DESCRIPTOR.message_types_by_name['ErrorDetail']
-_NETWORKPARAMETER = DESCRIPTOR.message_types_by_name['NetworkParameter']
-_NETWORKLIMITS = DESCRIPTOR.message_types_by_name['NetworkLimits']
-_LIQUIDITYORDER = DESCRIPTOR.message_types_by_name['LiquidityOrder']
-_LIQUIDITYORDERREFERENCE = DESCRIPTOR.message_types_by_name['LiquidityOrderReference']
-_LIQUIDITYPROVISION = DESCRIPTOR.message_types_by_name['LiquidityProvision']
-_ETHEREUMCONFIG = DESCRIPTOR.message_types_by_name['EthereumConfig']
-_ETHEREUMCONTRACTCONFIG = DESCRIPTOR.message_types_by_name['EthereumContractConfig']
-_EPOCHTIMESTAMPS = DESCRIPTOR.message_types_by_name['EpochTimestamps']
-_EPOCH = DESCRIPTOR.message_types_by_name['Epoch']
-_EPOCHPARTICIPATION = DESCRIPTOR.message_types_by_name['EpochParticipation']
-_EPOCHDATA = DESCRIPTOR.message_types_by_name['EpochData']
-_RANKINGSCORE = DESCRIPTOR.message_types_by_name['RankingScore']
-_REWARDSCORE = DESCRIPTOR.message_types_by_name['RewardScore']
-_NODE = DESCRIPTOR.message_types_by_name['Node']
-_NODEDATA = DESCRIPTOR.message_types_by_name['NodeData']
-_DELEGATION = DESCRIPTOR.message_types_by_name['Delegation']
-_REWARD = DESCRIPTOR.message_types_by_name['Reward']
-_REWARDSUMMARY = DESCRIPTOR.message_types_by_name['RewardSummary']
-_STATEVALUEPROPOSAL = DESCRIPTOR.message_types_by_name['StateValueProposal']
-_KEYVALUEBUNDLE = DESCRIPTOR.message_types_by_name['KeyValueBundle']
-_STATEVARVALUE = DESCRIPTOR.message_types_by_name['StateVarValue']
-_SCALARVALUE = DESCRIPTOR.message_types_by_name['ScalarValue']
-_VECTORVALUE = DESCRIPTOR.message_types_by_name['VectorValue']
-_MATRIXVALUE = DESCRIPTOR.message_types_by_name['MatrixValue']
-_ORDER_TIMEINFORCE = _ORDER.enum_types_by_name['TimeInForce']
-_ORDER_TYPE = _ORDER.enum_types_by_name['Type']
-_ORDER_STATUS = _ORDER.enum_types_by_name['Status']
-_TRADE_TYPE = _TRADE.enum_types_by_name['Type']
-_DEPOSIT_STATUS = _DEPOSIT.enum_types_by_name['Status']
-_WITHDRAWAL_STATUS = _WITHDRAWAL.enum_types_by_name['Status']
-_LIQUIDITYPROVISION_STATUS = _LIQUIDITYPROVISION.enum_types_by_name['Status']
-Party = _reflection.GeneratedProtocolMessageType('Party', (_message.Message,), {
-  'DESCRIPTOR' : _PARTY,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Party)
-  })
+_PARTY = DESCRIPTOR.message_types_by_name["Party"]
+_RISKFACTOR = DESCRIPTOR.message_types_by_name["RiskFactor"]
+_PEGGEDORDER = DESCRIPTOR.message_types_by_name["PeggedOrder"]
+_ORDER = DESCRIPTOR.message_types_by_name["Order"]
+_ORDERCANCELLATIONCONFIRMATION = DESCRIPTOR.message_types_by_name[
+    "OrderCancellationConfirmation"
+]
+_ORDERCONFIRMATION = DESCRIPTOR.message_types_by_name["OrderConfirmation"]
+_AUCTIONINDICATIVESTATE = DESCRIPTOR.message_types_by_name["AuctionIndicativeState"]
+_TRADE = DESCRIPTOR.message_types_by_name["Trade"]
+_FEE = DESCRIPTOR.message_types_by_name["Fee"]
+_TRADESET = DESCRIPTOR.message_types_by_name["TradeSet"]
+_CANDLE = DESCRIPTOR.message_types_by_name["Candle"]
+_PRICELEVEL = DESCRIPTOR.message_types_by_name["PriceLevel"]
+_MARKETDEPTH = DESCRIPTOR.message_types_by_name["MarketDepth"]
+_MARKETDEPTHUPDATE = DESCRIPTOR.message_types_by_name["MarketDepthUpdate"]
+_POSITION = DESCRIPTOR.message_types_by_name["Position"]
+_POSITIONTRADE = DESCRIPTOR.message_types_by_name["PositionTrade"]
+_DEPOSIT = DESCRIPTOR.message_types_by_name["Deposit"]
+_WITHDRAWAL = DESCRIPTOR.message_types_by_name["Withdrawal"]
+_WITHDRAWEXT = DESCRIPTOR.message_types_by_name["WithdrawExt"]
+_ERC20WITHDRAWEXT = DESCRIPTOR.message_types_by_name["Erc20WithdrawExt"]
+_ACCOUNT = DESCRIPTOR.message_types_by_name["Account"]
+_FINANCIALAMOUNT = DESCRIPTOR.message_types_by_name["FinancialAmount"]
+_TRANSFER = DESCRIPTOR.message_types_by_name["Transfer"]
+_DISPATCHSTRATEGY = DESCRIPTOR.message_types_by_name["DispatchStrategy"]
+_TRANSFERREQUEST = DESCRIPTOR.message_types_by_name["TransferRequest"]
+_LEDGERENTRY = DESCRIPTOR.message_types_by_name["LedgerEntry"]
+_TRANSFERBALANCE = DESCRIPTOR.message_types_by_name["TransferBalance"]
+_TRANSFERRESPONSE = DESCRIPTOR.message_types_by_name["TransferResponse"]
+_MARGINLEVELS = DESCRIPTOR.message_types_by_name["MarginLevels"]
+_MARKETDATA = DESCRIPTOR.message_types_by_name["MarketData"]
+_LIQUIDITYPROVIDERFEESHARE = DESCRIPTOR.message_types_by_name[
+    "LiquidityProviderFeeShare"
+]
+_PRICEMONITORINGBOUNDS = DESCRIPTOR.message_types_by_name["PriceMonitoringBounds"]
+_ERRORDETAIL = DESCRIPTOR.message_types_by_name["ErrorDetail"]
+_NETWORKPARAMETER = DESCRIPTOR.message_types_by_name["NetworkParameter"]
+_NETWORKLIMITS = DESCRIPTOR.message_types_by_name["NetworkLimits"]
+_LIQUIDITYORDER = DESCRIPTOR.message_types_by_name["LiquidityOrder"]
+_LIQUIDITYORDERREFERENCE = DESCRIPTOR.message_types_by_name["LiquidityOrderReference"]
+_LIQUIDITYPROVISION = DESCRIPTOR.message_types_by_name["LiquidityProvision"]
+_ETHEREUMCONFIG = DESCRIPTOR.message_types_by_name["EthereumConfig"]
+_ETHEREUMCONTRACTCONFIG = DESCRIPTOR.message_types_by_name["EthereumContractConfig"]
+_EPOCHTIMESTAMPS = DESCRIPTOR.message_types_by_name["EpochTimestamps"]
+_EPOCH = DESCRIPTOR.message_types_by_name["Epoch"]
+_EPOCHPARTICIPATION = DESCRIPTOR.message_types_by_name["EpochParticipation"]
+_EPOCHDATA = DESCRIPTOR.message_types_by_name["EpochData"]
+_RANKINGSCORE = DESCRIPTOR.message_types_by_name["RankingScore"]
+_REWARDSCORE = DESCRIPTOR.message_types_by_name["RewardScore"]
+_NODE = DESCRIPTOR.message_types_by_name["Node"]
+_NODEDATA = DESCRIPTOR.message_types_by_name["NodeData"]
+_DELEGATION = DESCRIPTOR.message_types_by_name["Delegation"]
+_REWARD = DESCRIPTOR.message_types_by_name["Reward"]
+_REWARDSUMMARY = DESCRIPTOR.message_types_by_name["RewardSummary"]
+_STATEVALUEPROPOSAL = DESCRIPTOR.message_types_by_name["StateValueProposal"]
+_KEYVALUEBUNDLE = DESCRIPTOR.message_types_by_name["KeyValueBundle"]
+_STATEVARVALUE = DESCRIPTOR.message_types_by_name["StateVarValue"]
+_SCALARVALUE = DESCRIPTOR.message_types_by_name["ScalarValue"]
+_VECTORVALUE = DESCRIPTOR.message_types_by_name["VectorValue"]
+_MATRIXVALUE = DESCRIPTOR.message_types_by_name["MatrixValue"]
+_ORDER_TIMEINFORCE = _ORDER.enum_types_by_name["TimeInForce"]
+_ORDER_TYPE = _ORDER.enum_types_by_name["Type"]
+_ORDER_STATUS = _ORDER.enum_types_by_name["Status"]
+_TRADE_TYPE = _TRADE.enum_types_by_name["Type"]
+_DEPOSIT_STATUS = _DEPOSIT.enum_types_by_name["Status"]
+_WITHDRAWAL_STATUS = _WITHDRAWAL.enum_types_by_name["Status"]
+_LIQUIDITYPROVISION_STATUS = _LIQUIDITYPROVISION.enum_types_by_name["Status"]
+Party = _reflection.GeneratedProtocolMessageType(
+    "Party",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PARTY,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Party)
+    },
+)
 _sym_db.RegisterMessage(Party)
 
-RiskFactor = _reflection.GeneratedProtocolMessageType('RiskFactor', (_message.Message,), {
-  'DESCRIPTOR' : _RISKFACTOR,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.RiskFactor)
-  })
+RiskFactor = _reflection.GeneratedProtocolMessageType(
+    "RiskFactor",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RISKFACTOR,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.RiskFactor)
+    },
+)
 _sym_db.RegisterMessage(RiskFactor)
 
-PeggedOrder = _reflection.GeneratedProtocolMessageType('PeggedOrder', (_message.Message,), {
-  'DESCRIPTOR' : _PEGGEDORDER,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.PeggedOrder)
-  })
+PeggedOrder = _reflection.GeneratedProtocolMessageType(
+    "PeggedOrder",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PEGGEDORDER,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.PeggedOrder)
+    },
+)
 _sym_db.RegisterMessage(PeggedOrder)
 
-Order = _reflection.GeneratedProtocolMessageType('Order', (_message.Message,), {
-  'DESCRIPTOR' : _ORDER,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Order)
-  })
+Order = _reflection.GeneratedProtocolMessageType(
+    "Order",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ORDER,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Order)
+    },
+)
 _sym_db.RegisterMessage(Order)
 
-OrderCancellationConfirmation = _reflection.GeneratedProtocolMessageType('OrderCancellationConfirmation', (_message.Message,), {
-  'DESCRIPTOR' : _ORDERCANCELLATIONCONFIRMATION,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.OrderCancellationConfirmation)
-  })
+OrderCancellationConfirmation = _reflection.GeneratedProtocolMessageType(
+    "OrderCancellationConfirmation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ORDERCANCELLATIONCONFIRMATION,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.OrderCancellationConfirmation)
+    },
+)
 _sym_db.RegisterMessage(OrderCancellationConfirmation)
 
-OrderConfirmation = _reflection.GeneratedProtocolMessageType('OrderConfirmation', (_message.Message,), {
-  'DESCRIPTOR' : _ORDERCONFIRMATION,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.OrderConfirmation)
-  })
+OrderConfirmation = _reflection.GeneratedProtocolMessageType(
+    "OrderConfirmation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ORDERCONFIRMATION,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.OrderConfirmation)
+    },
+)
 _sym_db.RegisterMessage(OrderConfirmation)
 
-AuctionIndicativeState = _reflection.GeneratedProtocolMessageType('AuctionIndicativeState', (_message.Message,), {
-  'DESCRIPTOR' : _AUCTIONINDICATIVESTATE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.AuctionIndicativeState)
-  })
+AuctionIndicativeState = _reflection.GeneratedProtocolMessageType(
+    "AuctionIndicativeState",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _AUCTIONINDICATIVESTATE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.AuctionIndicativeState)
+    },
+)
 _sym_db.RegisterMessage(AuctionIndicativeState)
 
-Trade = _reflection.GeneratedProtocolMessageType('Trade', (_message.Message,), {
-  'DESCRIPTOR' : _TRADE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Trade)
-  })
+Trade = _reflection.GeneratedProtocolMessageType(
+    "Trade",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRADE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Trade)
+    },
+)
 _sym_db.RegisterMessage(Trade)
 
-Fee = _reflection.GeneratedProtocolMessageType('Fee', (_message.Message,), {
-  'DESCRIPTOR' : _FEE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Fee)
-  })
+Fee = _reflection.GeneratedProtocolMessageType(
+    "Fee",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FEE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Fee)
+    },
+)
 _sym_db.RegisterMessage(Fee)
 
-TradeSet = _reflection.GeneratedProtocolMessageType('TradeSet', (_message.Message,), {
-  'DESCRIPTOR' : _TRADESET,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.TradeSet)
-  })
+TradeSet = _reflection.GeneratedProtocolMessageType(
+    "TradeSet",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRADESET,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.TradeSet)
+    },
+)
 _sym_db.RegisterMessage(TradeSet)
 
-Candle = _reflection.GeneratedProtocolMessageType('Candle', (_message.Message,), {
-  'DESCRIPTOR' : _CANDLE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Candle)
-  })
+Candle = _reflection.GeneratedProtocolMessageType(
+    "Candle",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CANDLE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Candle)
+    },
+)
 _sym_db.RegisterMessage(Candle)
 
-PriceLevel = _reflection.GeneratedProtocolMessageType('PriceLevel', (_message.Message,), {
-  'DESCRIPTOR' : _PRICELEVEL,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.PriceLevel)
-  })
+PriceLevel = _reflection.GeneratedProtocolMessageType(
+    "PriceLevel",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PRICELEVEL,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.PriceLevel)
+    },
+)
 _sym_db.RegisterMessage(PriceLevel)
 
-MarketDepth = _reflection.GeneratedProtocolMessageType('MarketDepth', (_message.Message,), {
-  'DESCRIPTOR' : _MARKETDEPTH,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.MarketDepth)
-  })
+MarketDepth = _reflection.GeneratedProtocolMessageType(
+    "MarketDepth",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKETDEPTH,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.MarketDepth)
+    },
+)
 _sym_db.RegisterMessage(MarketDepth)
 
-MarketDepthUpdate = _reflection.GeneratedProtocolMessageType('MarketDepthUpdate', (_message.Message,), {
-  'DESCRIPTOR' : _MARKETDEPTHUPDATE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.MarketDepthUpdate)
-  })
+MarketDepthUpdate = _reflection.GeneratedProtocolMessageType(
+    "MarketDepthUpdate",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKETDEPTHUPDATE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.MarketDepthUpdate)
+    },
+)
 _sym_db.RegisterMessage(MarketDepthUpdate)
 
-Position = _reflection.GeneratedProtocolMessageType('Position', (_message.Message,), {
-  'DESCRIPTOR' : _POSITION,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Position)
-  })
+Position = _reflection.GeneratedProtocolMessageType(
+    "Position",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _POSITION,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Position)
+    },
+)
 _sym_db.RegisterMessage(Position)
 
-PositionTrade = _reflection.GeneratedProtocolMessageType('PositionTrade', (_message.Message,), {
-  'DESCRIPTOR' : _POSITIONTRADE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.PositionTrade)
-  })
+PositionTrade = _reflection.GeneratedProtocolMessageType(
+    "PositionTrade",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _POSITIONTRADE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.PositionTrade)
+    },
+)
 _sym_db.RegisterMessage(PositionTrade)
 
-Deposit = _reflection.GeneratedProtocolMessageType('Deposit', (_message.Message,), {
-  'DESCRIPTOR' : _DEPOSIT,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Deposit)
-  })
+Deposit = _reflection.GeneratedProtocolMessageType(
+    "Deposit",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DEPOSIT,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Deposit)
+    },
+)
 _sym_db.RegisterMessage(Deposit)
 
-Withdrawal = _reflection.GeneratedProtocolMessageType('Withdrawal', (_message.Message,), {
-  'DESCRIPTOR' : _WITHDRAWAL,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Withdrawal)
-  })
+Withdrawal = _reflection.GeneratedProtocolMessageType(
+    "Withdrawal",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WITHDRAWAL,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Withdrawal)
+    },
+)
 _sym_db.RegisterMessage(Withdrawal)
 
-WithdrawExt = _reflection.GeneratedProtocolMessageType('WithdrawExt', (_message.Message,), {
-  'DESCRIPTOR' : _WITHDRAWEXT,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.WithdrawExt)
-  })
+WithdrawExt = _reflection.GeneratedProtocolMessageType(
+    "WithdrawExt",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WITHDRAWEXT,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.WithdrawExt)
+    },
+)
 _sym_db.RegisterMessage(WithdrawExt)
 
-Erc20WithdrawExt = _reflection.GeneratedProtocolMessageType('Erc20WithdrawExt', (_message.Message,), {
-  'DESCRIPTOR' : _ERC20WITHDRAWEXT,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Erc20WithdrawExt)
-  })
+Erc20WithdrawExt = _reflection.GeneratedProtocolMessageType(
+    "Erc20WithdrawExt",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERC20WITHDRAWEXT,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Erc20WithdrawExt)
+    },
+)
 _sym_db.RegisterMessage(Erc20WithdrawExt)
 
-Account = _reflection.GeneratedProtocolMessageType('Account', (_message.Message,), {
-  'DESCRIPTOR' : _ACCOUNT,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Account)
-  })
+Account = _reflection.GeneratedProtocolMessageType(
+    "Account",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ACCOUNT,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Account)
+    },
+)
 _sym_db.RegisterMessage(Account)
 
-FinancialAmount = _reflection.GeneratedProtocolMessageType('FinancialAmount', (_message.Message,), {
-  'DESCRIPTOR' : _FINANCIALAMOUNT,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.FinancialAmount)
-  })
+FinancialAmount = _reflection.GeneratedProtocolMessageType(
+    "FinancialAmount",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _FINANCIALAMOUNT,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.FinancialAmount)
+    },
+)
 _sym_db.RegisterMessage(FinancialAmount)
 
-Transfer = _reflection.GeneratedProtocolMessageType('Transfer', (_message.Message,), {
-  'DESCRIPTOR' : _TRANSFER,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Transfer)
-  })
+Transfer = _reflection.GeneratedProtocolMessageType(
+    "Transfer",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRANSFER,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Transfer)
+    },
+)
 _sym_db.RegisterMessage(Transfer)
 
-DispatchStrategy = _reflection.GeneratedProtocolMessageType('DispatchStrategy', (_message.Message,), {
-  'DESCRIPTOR' : _DISPATCHSTRATEGY,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.DispatchStrategy)
-  })
+DispatchStrategy = _reflection.GeneratedProtocolMessageType(
+    "DispatchStrategy",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DISPATCHSTRATEGY,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.DispatchStrategy)
+    },
+)
 _sym_db.RegisterMessage(DispatchStrategy)
 
-TransferRequest = _reflection.GeneratedProtocolMessageType('TransferRequest', (_message.Message,), {
-  'DESCRIPTOR' : _TRANSFERREQUEST,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.TransferRequest)
-  })
+TransferRequest = _reflection.GeneratedProtocolMessageType(
+    "TransferRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRANSFERREQUEST,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.TransferRequest)
+    },
+)
 _sym_db.RegisterMessage(TransferRequest)
 
-LedgerEntry = _reflection.GeneratedProtocolMessageType('LedgerEntry', (_message.Message,), {
-  'DESCRIPTOR' : _LEDGERENTRY,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.LedgerEntry)
-  })
+LedgerEntry = _reflection.GeneratedProtocolMessageType(
+    "LedgerEntry",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LEDGERENTRY,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.LedgerEntry)
+    },
+)
 _sym_db.RegisterMessage(LedgerEntry)
 
-TransferBalance = _reflection.GeneratedProtocolMessageType('TransferBalance', (_message.Message,), {
-  'DESCRIPTOR' : _TRANSFERBALANCE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.TransferBalance)
-  })
+TransferBalance = _reflection.GeneratedProtocolMessageType(
+    "TransferBalance",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRANSFERBALANCE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.TransferBalance)
+    },
+)
 _sym_db.RegisterMessage(TransferBalance)
 
-TransferResponse = _reflection.GeneratedProtocolMessageType('TransferResponse', (_message.Message,), {
-  'DESCRIPTOR' : _TRANSFERRESPONSE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.TransferResponse)
-  })
+TransferResponse = _reflection.GeneratedProtocolMessageType(
+    "TransferResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TRANSFERRESPONSE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.TransferResponse)
+    },
+)
 _sym_db.RegisterMessage(TransferResponse)
 
-MarginLevels = _reflection.GeneratedProtocolMessageType('MarginLevels', (_message.Message,), {
-  'DESCRIPTOR' : _MARGINLEVELS,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.MarginLevels)
-  })
+MarginLevels = _reflection.GeneratedProtocolMessageType(
+    "MarginLevels",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARGINLEVELS,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.MarginLevels)
+    },
+)
 _sym_db.RegisterMessage(MarginLevels)
 
-MarketData = _reflection.GeneratedProtocolMessageType('MarketData', (_message.Message,), {
-  'DESCRIPTOR' : _MARKETDATA,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.MarketData)
-  })
+MarketData = _reflection.GeneratedProtocolMessageType(
+    "MarketData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MARKETDATA,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.MarketData)
+    },
+)
 _sym_db.RegisterMessage(MarketData)
 
-LiquidityProviderFeeShare = _reflection.GeneratedProtocolMessageType('LiquidityProviderFeeShare', (_message.Message,), {
-  'DESCRIPTOR' : _LIQUIDITYPROVIDERFEESHARE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.LiquidityProviderFeeShare)
-  })
+LiquidityProviderFeeShare = _reflection.GeneratedProtocolMessageType(
+    "LiquidityProviderFeeShare",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LIQUIDITYPROVIDERFEESHARE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.LiquidityProviderFeeShare)
+    },
+)
 _sym_db.RegisterMessage(LiquidityProviderFeeShare)
 
-PriceMonitoringBounds = _reflection.GeneratedProtocolMessageType('PriceMonitoringBounds', (_message.Message,), {
-  'DESCRIPTOR' : _PRICEMONITORINGBOUNDS,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.PriceMonitoringBounds)
-  })
+PriceMonitoringBounds = _reflection.GeneratedProtocolMessageType(
+    "PriceMonitoringBounds",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PRICEMONITORINGBOUNDS,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.PriceMonitoringBounds)
+    },
+)
 _sym_db.RegisterMessage(PriceMonitoringBounds)
 
-ErrorDetail = _reflection.GeneratedProtocolMessageType('ErrorDetail', (_message.Message,), {
-  'DESCRIPTOR' : _ERRORDETAIL,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ErrorDetail)
-  })
+ErrorDetail = _reflection.GeneratedProtocolMessageType(
+    "ErrorDetail",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ERRORDETAIL,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ErrorDetail)
+    },
+)
 _sym_db.RegisterMessage(ErrorDetail)
 
-NetworkParameter = _reflection.GeneratedProtocolMessageType('NetworkParameter', (_message.Message,), {
-  'DESCRIPTOR' : _NETWORKPARAMETER,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.NetworkParameter)
-  })
+NetworkParameter = _reflection.GeneratedProtocolMessageType(
+    "NetworkParameter",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _NETWORKPARAMETER,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.NetworkParameter)
+    },
+)
 _sym_db.RegisterMessage(NetworkParameter)
 
-NetworkLimits = _reflection.GeneratedProtocolMessageType('NetworkLimits', (_message.Message,), {
-  'DESCRIPTOR' : _NETWORKLIMITS,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.NetworkLimits)
-  })
+NetworkLimits = _reflection.GeneratedProtocolMessageType(
+    "NetworkLimits",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _NETWORKLIMITS,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.NetworkLimits)
+    },
+)
 _sym_db.RegisterMessage(NetworkLimits)
 
-LiquidityOrder = _reflection.GeneratedProtocolMessageType('LiquidityOrder', (_message.Message,), {
-  'DESCRIPTOR' : _LIQUIDITYORDER,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.LiquidityOrder)
-  })
+LiquidityOrder = _reflection.GeneratedProtocolMessageType(
+    "LiquidityOrder",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LIQUIDITYORDER,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.LiquidityOrder)
+    },
+)
 _sym_db.RegisterMessage(LiquidityOrder)
 
-LiquidityOrderReference = _reflection.GeneratedProtocolMessageType('LiquidityOrderReference', (_message.Message,), {
-  'DESCRIPTOR' : _LIQUIDITYORDERREFERENCE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.LiquidityOrderReference)
-  })
+LiquidityOrderReference = _reflection.GeneratedProtocolMessageType(
+    "LiquidityOrderReference",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LIQUIDITYORDERREFERENCE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.LiquidityOrderReference)
+    },
+)
 _sym_db.RegisterMessage(LiquidityOrderReference)
 
-LiquidityProvision = _reflection.GeneratedProtocolMessageType('LiquidityProvision', (_message.Message,), {
-  'DESCRIPTOR' : _LIQUIDITYPROVISION,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.LiquidityProvision)
-  })
+LiquidityProvision = _reflection.GeneratedProtocolMessageType(
+    "LiquidityProvision",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LIQUIDITYPROVISION,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.LiquidityProvision)
+    },
+)
 _sym_db.RegisterMessage(LiquidityProvision)
 
-EthereumConfig = _reflection.GeneratedProtocolMessageType('EthereumConfig', (_message.Message,), {
-  'DESCRIPTOR' : _ETHEREUMCONFIG,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.EthereumConfig)
-  })
+EthereumConfig = _reflection.GeneratedProtocolMessageType(
+    "EthereumConfig",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ETHEREUMCONFIG,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.EthereumConfig)
+    },
+)
 _sym_db.RegisterMessage(EthereumConfig)
 
-EthereumContractConfig = _reflection.GeneratedProtocolMessageType('EthereumContractConfig', (_message.Message,), {
-  'DESCRIPTOR' : _ETHEREUMCONTRACTCONFIG,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.EthereumContractConfig)
-  })
+EthereumContractConfig = _reflection.GeneratedProtocolMessageType(
+    "EthereumContractConfig",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ETHEREUMCONTRACTCONFIG,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.EthereumContractConfig)
+    },
+)
 _sym_db.RegisterMessage(EthereumContractConfig)
 
-EpochTimestamps = _reflection.GeneratedProtocolMessageType('EpochTimestamps', (_message.Message,), {
-  'DESCRIPTOR' : _EPOCHTIMESTAMPS,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.EpochTimestamps)
-  })
+EpochTimestamps = _reflection.GeneratedProtocolMessageType(
+    "EpochTimestamps",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _EPOCHTIMESTAMPS,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.EpochTimestamps)
+    },
+)
 _sym_db.RegisterMessage(EpochTimestamps)
 
-Epoch = _reflection.GeneratedProtocolMessageType('Epoch', (_message.Message,), {
-  'DESCRIPTOR' : _EPOCH,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Epoch)
-  })
+Epoch = _reflection.GeneratedProtocolMessageType(
+    "Epoch",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _EPOCH,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Epoch)
+    },
+)
 _sym_db.RegisterMessage(Epoch)
 
-EpochParticipation = _reflection.GeneratedProtocolMessageType('EpochParticipation', (_message.Message,), {
-  'DESCRIPTOR' : _EPOCHPARTICIPATION,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.EpochParticipation)
-  })
+EpochParticipation = _reflection.GeneratedProtocolMessageType(
+    "EpochParticipation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _EPOCHPARTICIPATION,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.EpochParticipation)
+    },
+)
 _sym_db.RegisterMessage(EpochParticipation)
 
-EpochData = _reflection.GeneratedProtocolMessageType('EpochData', (_message.Message,), {
-  'DESCRIPTOR' : _EPOCHDATA,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.EpochData)
-  })
+EpochData = _reflection.GeneratedProtocolMessageType(
+    "EpochData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _EPOCHDATA,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.EpochData)
+    },
+)
 _sym_db.RegisterMessage(EpochData)
 
-RankingScore = _reflection.GeneratedProtocolMessageType('RankingScore', (_message.Message,), {
-  'DESCRIPTOR' : _RANKINGSCORE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.RankingScore)
-  })
+RankingScore = _reflection.GeneratedProtocolMessageType(
+    "RankingScore",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RANKINGSCORE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.RankingScore)
+    },
+)
 _sym_db.RegisterMessage(RankingScore)
 
-RewardScore = _reflection.GeneratedProtocolMessageType('RewardScore', (_message.Message,), {
-  'DESCRIPTOR' : _REWARDSCORE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.RewardScore)
-  })
+RewardScore = _reflection.GeneratedProtocolMessageType(
+    "RewardScore",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REWARDSCORE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.RewardScore)
+    },
+)
 _sym_db.RegisterMessage(RewardScore)
 
-Node = _reflection.GeneratedProtocolMessageType('Node', (_message.Message,), {
-  'DESCRIPTOR' : _NODE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Node)
-  })
+Node = _reflection.GeneratedProtocolMessageType(
+    "Node",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _NODE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Node)
+    },
+)
 _sym_db.RegisterMessage(Node)
 
-NodeData = _reflection.GeneratedProtocolMessageType('NodeData', (_message.Message,), {
-  'DESCRIPTOR' : _NODEDATA,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.NodeData)
-  })
+NodeData = _reflection.GeneratedProtocolMessageType(
+    "NodeData",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _NODEDATA,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.NodeData)
+    },
+)
 _sym_db.RegisterMessage(NodeData)
 
-Delegation = _reflection.GeneratedProtocolMessageType('Delegation', (_message.Message,), {
-  'DESCRIPTOR' : _DELEGATION,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Delegation)
-  })
+Delegation = _reflection.GeneratedProtocolMessageType(
+    "Delegation",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELEGATION,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Delegation)
+    },
+)
 _sym_db.RegisterMessage(Delegation)
 
-Reward = _reflection.GeneratedProtocolMessageType('Reward', (_message.Message,), {
-  'DESCRIPTOR' : _REWARD,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.Reward)
-  })
+Reward = _reflection.GeneratedProtocolMessageType(
+    "Reward",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REWARD,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.Reward)
+    },
+)
 _sym_db.RegisterMessage(Reward)
 
-RewardSummary = _reflection.GeneratedProtocolMessageType('RewardSummary', (_message.Message,), {
-  'DESCRIPTOR' : _REWARDSUMMARY,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.RewardSummary)
-  })
+RewardSummary = _reflection.GeneratedProtocolMessageType(
+    "RewardSummary",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _REWARDSUMMARY,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.RewardSummary)
+    },
+)
 _sym_db.RegisterMessage(RewardSummary)
 
-StateValueProposal = _reflection.GeneratedProtocolMessageType('StateValueProposal', (_message.Message,), {
-  'DESCRIPTOR' : _STATEVALUEPROPOSAL,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.StateValueProposal)
-  })
+StateValueProposal = _reflection.GeneratedProtocolMessageType(
+    "StateValueProposal",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STATEVALUEPROPOSAL,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.StateValueProposal)
+    },
+)
 _sym_db.RegisterMessage(StateValueProposal)
 
-KeyValueBundle = _reflection.GeneratedProtocolMessageType('KeyValueBundle', (_message.Message,), {
-  'DESCRIPTOR' : _KEYVALUEBUNDLE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.KeyValueBundle)
-  })
+KeyValueBundle = _reflection.GeneratedProtocolMessageType(
+    "KeyValueBundle",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _KEYVALUEBUNDLE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.KeyValueBundle)
+    },
+)
 _sym_db.RegisterMessage(KeyValueBundle)
 
-StateVarValue = _reflection.GeneratedProtocolMessageType('StateVarValue', (_message.Message,), {
-  'DESCRIPTOR' : _STATEVARVALUE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.StateVarValue)
-  })
+StateVarValue = _reflection.GeneratedProtocolMessageType(
+    "StateVarValue",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _STATEVARVALUE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.StateVarValue)
+    },
+)
 _sym_db.RegisterMessage(StateVarValue)
 
-ScalarValue = _reflection.GeneratedProtocolMessageType('ScalarValue', (_message.Message,), {
-  'DESCRIPTOR' : _SCALARVALUE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.ScalarValue)
-  })
+ScalarValue = _reflection.GeneratedProtocolMessageType(
+    "ScalarValue",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _SCALARVALUE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.ScalarValue)
+    },
+)
 _sym_db.RegisterMessage(ScalarValue)
 
-VectorValue = _reflection.GeneratedProtocolMessageType('VectorValue', (_message.Message,), {
-  'DESCRIPTOR' : _VECTORVALUE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.VectorValue)
-  })
+VectorValue = _reflection.GeneratedProtocolMessageType(
+    "VectorValue",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _VECTORVALUE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.VectorValue)
+    },
+)
 _sym_db.RegisterMessage(VectorValue)
 
-MatrixValue = _reflection.GeneratedProtocolMessageType('MatrixValue', (_message.Message,), {
-  'DESCRIPTOR' : _MATRIXVALUE,
-  '__module__' : 'vega.vega_pb2'
-  # @@protoc_insertion_point(class_scope:vega.MatrixValue)
-  })
+MatrixValue = _reflection.GeneratedProtocolMessageType(
+    "MatrixValue",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _MATRIXVALUE,
+        "__module__": "vega.vega_pb2"
+        # @@protoc_insertion_point(class_scope:vega.MatrixValue)
+    },
+)
 _sym_db.RegisterMessage(MatrixValue)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z%code.vegaprotocol.io/vega/protos/vega'
-  _SIDE._serialized_start=9304
-  _SIDE._serialized_end=9361
-  _INTERVAL._serialized_start=9364
-  _INTERVAL._serialized_end=9516
-  _AUCTIONTRIGGER._serialized_start=9519
-  _AUCTIONTRIGGER._serialized_end=9682
-  _PEGGEDREFERENCE._serialized_start=9685
-  _PEGGEDREFERENCE._serialized_end=9824
-  _ORDERERROR._serialized_start=9827
-  _ORDERERROR._serialized_end=11778
-  _CHAINSTATUS._serialized_start=11781
-  _CHAINSTATUS._serialized_end=11911
-  _ACCOUNTTYPE._serialized_start=11914
-  _ACCOUNTTYPE._serialized_end=12494
-  _TRANSFERTYPE._serialized_start=12497
-  _TRANSFERTYPE._serialized_end=13304
-  _DISPATCHMETRIC._serialized_start=13307
-  _DISPATCHMETRIC._serialized_end=13506
-  _NODESTATUS._serialized_start=13508
-  _NODESTATUS._serialized_end=13607
-  _EPOCHACTION._serialized_start=13609
-  _EPOCHACTION._serialized_end=13698
-  _VALIDATORNODESTATUS._serialized_start=13701
-  _VALIDATORNODESTATUS._serialized_end=13868
-  _PARTY._serialized_start=45
-  _PARTY._serialized_end=64
-  _RISKFACTOR._serialized_start=66
-  _RISKFACTOR._serialized_end=123
-  _PEGGEDORDER._serialized_start=125
-  _PEGGEDORDER._serialized_end=196
-  _ORDER._serialized_start=199
-  _ORDER._serialized_end=1136
-  _ORDER_TIMEINFORCE._serialized_start=669
-  _ORDER_TIMEINFORCE._serialized_end=851
-  _ORDER_TYPE._serialized_start=853
-  _ORDER_TYPE._serialized_end=932
-  _ORDER_STATUS._serialized_start=935
-  _ORDER_STATUS._serialized_end=1136
-  _ORDERCANCELLATIONCONFIRMATION._serialized_start=1138
-  _ORDERCANCELLATIONCONFIRMATION._serialized_end=1197
-  _ORDERCONFIRMATION._serialized_start=1199
-  _ORDERCONFIRMATION._serialized_end=1321
-  _AUCTIONINDICATIVESTATE._serialized_start=1324
-  _AUCTIONINDICATIVESTATE._serialized_end=1464
-  _TRADE._serialized_start=1467
-  _TRADE._serialized_end=1919
-  _TRADE_TYPE._serialized_start=1808
-  _TRADE_TYPE._serialized_end=1919
-  _FEE._serialized_start=1921
-  _FEE._serialized_end=1996
-  _TRADESET._serialized_start=1998
-  _TRADESET._serialized_end=2037
-  _CANDLE._serialized_start=2040
-  _CANDLE._serialized_end=2191
-  _PRICELEVEL._serialized_start=2193
-  _PRICELEVEL._serialized_end=2262
-  _MARKETDEPTH._serialized_start=2264
-  _MARKETDEPTH._serialized_end=2384
-  _MARKETDEPTHUPDATE._serialized_start=2387
-  _MARKETDEPTHUPDATE._serialized_end=2547
-  _POSITION._serialized_start=2550
-  _POSITION._serialized_end=2713
-  _POSITIONTRADE._serialized_start=2715
-  _POSITIONTRADE._serialized_end=2761
-  _DEPOSIT._serialized_start=2764
-  _DEPOSIT._serialized_end=3039
-  _DEPOSIT_STATUS._serialized_start=2946
-  _DEPOSIT_STATUS._serialized_end=3039
-  _WITHDRAWAL._serialized_start=3042
-  _WITHDRAWAL._serialized_end=3384
-  _WITHDRAWAL_STATUS._serialized_start=3292
-  _WITHDRAWAL_STATUS._serialized_end=3384
-  _WITHDRAWEXT._serialized_start=3386
-  _WITHDRAWEXT._serialized_end=3447
-  _ERC20WITHDRAWEXT._serialized_start=3449
-  _ERC20WITHDRAWEXT._serialized_end=3493
-  _ACCOUNT._serialized_start=3495
-  _ACCOUNT._serialized_end=3615
-  _FINANCIALAMOUNT._serialized_start=3617
-  _FINANCIALAMOUNT._serialized_end=3665
-  _TRANSFER._serialized_start=3668
-  _TRANSFER._serialized_end=3805
-  _DISPATCHSTRATEGY._serialized_start=3807
-  _DISPATCHSTRATEGY._serialized_end=3906
-  _TRANSFERREQUEST._serialized_start=3909
-  _TRANSFERREQUEST._serialized_end=4068
-  _LEDGERENTRY._serialized_start=4070
-  _LEDGERENTRY._serialized_end=4193
-  _TRANSFERBALANCE._serialized_start=4195
-  _TRANSFERBALANCE._serialized_end=4261
-  _TRANSFERRESPONSE._serialized_start=4263
-  _TRANSFERRESPONSE._serialized_end=4360
-  _MARGINLEVELS._serialized_start=4363
-  _MARGINLEVELS._serialized_end=4556
-  _MARKETDATA._serialized_start=4559
-  _MARKETDATA._serialized_end=5373
-  _LIQUIDITYPROVIDERFEESHARE._serialized_start=5375
-  _LIQUIDITYPROVIDERFEESHARE._serialized_end=5477
-  _PRICEMONITORINGBOUNDS._serialized_start=5480
-  _PRICEMONITORINGBOUNDS._serialized_end=5625
-  _ERRORDETAIL._serialized_start=5627
-  _ERRORDETAIL._serialized_end=5686
-  _NETWORKPARAMETER._serialized_start=5688
-  _NETWORKPARAMETER._serialized_end=5734
-  _NETWORKLIMITS._serialized_start=5737
-  _NETWORKLIMITS._serialized_end=6026
-  _LIQUIDITYORDER._serialized_start=6028
-  _LIQUIDITYORDER._serialized_end=6122
-  _LIQUIDITYORDERREFERENCE._serialized_start=6124
-  _LIQUIDITYORDERREFERENCE._serialized_end=6214
-  _LIQUIDITYPROVISION._serialized_start=6217
-  _LIQUIDITYPROVISION._serialized_end=6702
-  _LIQUIDITYPROVISION_STATUS._serialized_start=6545
-  _LIQUIDITYPROVISION_STATUS._serialized_end=6702
-  _ETHEREUMCONFIG._serialized_start=6705
-  _ETHEREUMCONFIG._serialized_end=7038
-  _ETHEREUMCONTRACTCONFIG._serialized_start=7040
-  _ETHEREUMCONTRACTCONFIG._serialized_end=7114
-  _EPOCHTIMESTAMPS._serialized_start=7116
-  _EPOCHTIMESTAMPS._serialized_end=7233
-  _EPOCH._serialized_start=7236
-  _EPOCH._serialized_end=7370
-  _EPOCHPARTICIPATION._serialized_start=7372
-  _EPOCHPARTICIPATION._serialized_end=7476
-  _EPOCHDATA._serialized_start=7478
-  _EPOCHDATA._serialized_end=7537
-  _RANKINGSCORE._serialized_start=7540
-  _RANKINGSCORE._serialized_end=7742
-  _REWARDSCORE._serialized_start=7745
-  _REWARDSCORE._serialized_end=7942
-  _NODE._serialized_start=7945
-  _NODE._serialized_end=8421
-  _NODEDATA._serialized_start=8423
-  _NODEDATA._serialized_end=8542
-  _DELEGATION._serialized_start=8544
-  _DELEGATION._serialized_end=8623
-  _REWARD._serialized_start=8626
-  _REWARD._serialized_end=8791
-  _REWARDSUMMARY._serialized_start=8793
-  _REWARDSUMMARY._serialized_end=8860
-  _STATEVALUEPROPOSAL._serialized_start=8862
-  _STATEVALUEPROPOSAL._serialized_end=8957
-  _KEYVALUEBUNDLE._serialized_start=8959
-  _KEYVALUEBUNDLE._serialized_end=9043
-  _STATEVARVALUE._serialized_start=9046
-  _STATEVARVALUE._serialized_end=9193
-  _SCALARVALUE._serialized_start=9195
-  _SCALARVALUE._serialized_end=9223
-  _VECTORVALUE._serialized_start=9225
-  _VECTORVALUE._serialized_end=9253
-  _MATRIXVALUE._serialized_start=9255
-  _MATRIXVALUE._serialized_end=9302
+    DESCRIPTOR._options = None
+    DESCRIPTOR._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
+    _SIDE._serialized_start = 9304
+    _SIDE._serialized_end = 9361
+    _INTERVAL._serialized_start = 9364
+    _INTERVAL._serialized_end = 9516
+    _AUCTIONTRIGGER._serialized_start = 9519
+    _AUCTIONTRIGGER._serialized_end = 9682
+    _PEGGEDREFERENCE._serialized_start = 9685
+    _PEGGEDREFERENCE._serialized_end = 9824
+    _ORDERERROR._serialized_start = 9827
+    _ORDERERROR._serialized_end = 11778
+    _CHAINSTATUS._serialized_start = 11781
+    _CHAINSTATUS._serialized_end = 11911
+    _ACCOUNTTYPE._serialized_start = 11914
+    _ACCOUNTTYPE._serialized_end = 12494
+    _TRANSFERTYPE._serialized_start = 12497
+    _TRANSFERTYPE._serialized_end = 13304
+    _DISPATCHMETRIC._serialized_start = 13307
+    _DISPATCHMETRIC._serialized_end = 13506
+    _NODESTATUS._serialized_start = 13508
+    _NODESTATUS._serialized_end = 13607
+    _EPOCHACTION._serialized_start = 13609
+    _EPOCHACTION._serialized_end = 13698
+    _VALIDATORNODESTATUS._serialized_start = 13701
+    _VALIDATORNODESTATUS._serialized_end = 13868
+    _PARTY._serialized_start = 45
+    _PARTY._serialized_end = 64
+    _RISKFACTOR._serialized_start = 66
+    _RISKFACTOR._serialized_end = 123
+    _PEGGEDORDER._serialized_start = 125
+    _PEGGEDORDER._serialized_end = 196
+    _ORDER._serialized_start = 199
+    _ORDER._serialized_end = 1136
+    _ORDER_TIMEINFORCE._serialized_start = 669
+    _ORDER_TIMEINFORCE._serialized_end = 851
+    _ORDER_TYPE._serialized_start = 853
+    _ORDER_TYPE._serialized_end = 932
+    _ORDER_STATUS._serialized_start = 935
+    _ORDER_STATUS._serialized_end = 1136
+    _ORDERCANCELLATIONCONFIRMATION._serialized_start = 1138
+    _ORDERCANCELLATIONCONFIRMATION._serialized_end = 1197
+    _ORDERCONFIRMATION._serialized_start = 1199
+    _ORDERCONFIRMATION._serialized_end = 1321
+    _AUCTIONINDICATIVESTATE._serialized_start = 1324
+    _AUCTIONINDICATIVESTATE._serialized_end = 1464
+    _TRADE._serialized_start = 1467
+    _TRADE._serialized_end = 1919
+    _TRADE_TYPE._serialized_start = 1808
+    _TRADE_TYPE._serialized_end = 1919
+    _FEE._serialized_start = 1921
+    _FEE._serialized_end = 1996
+    _TRADESET._serialized_start = 1998
+    _TRADESET._serialized_end = 2037
+    _CANDLE._serialized_start = 2040
+    _CANDLE._serialized_end = 2191
+    _PRICELEVEL._serialized_start = 2193
+    _PRICELEVEL._serialized_end = 2262
+    _MARKETDEPTH._serialized_start = 2264
+    _MARKETDEPTH._serialized_end = 2384
+    _MARKETDEPTHUPDATE._serialized_start = 2387
+    _MARKETDEPTHUPDATE._serialized_end = 2547
+    _POSITION._serialized_start = 2550
+    _POSITION._serialized_end = 2713
+    _POSITIONTRADE._serialized_start = 2715
+    _POSITIONTRADE._serialized_end = 2761
+    _DEPOSIT._serialized_start = 2764
+    _DEPOSIT._serialized_end = 3039
+    _DEPOSIT_STATUS._serialized_start = 2946
+    _DEPOSIT_STATUS._serialized_end = 3039
+    _WITHDRAWAL._serialized_start = 3042
+    _WITHDRAWAL._serialized_end = 3384
+    _WITHDRAWAL_STATUS._serialized_start = 3292
+    _WITHDRAWAL_STATUS._serialized_end = 3384
+    _WITHDRAWEXT._serialized_start = 3386
+    _WITHDRAWEXT._serialized_end = 3447
+    _ERC20WITHDRAWEXT._serialized_start = 3449
+    _ERC20WITHDRAWEXT._serialized_end = 3493
+    _ACCOUNT._serialized_start = 3495
+    _ACCOUNT._serialized_end = 3615
+    _FINANCIALAMOUNT._serialized_start = 3617
+    _FINANCIALAMOUNT._serialized_end = 3665
+    _TRANSFER._serialized_start = 3668
+    _TRANSFER._serialized_end = 3805
+    _DISPATCHSTRATEGY._serialized_start = 3807
+    _DISPATCHSTRATEGY._serialized_end = 3906
+    _TRANSFERREQUEST._serialized_start = 3909
+    _TRANSFERREQUEST._serialized_end = 4068
+    _LEDGERENTRY._serialized_start = 4070
+    _LEDGERENTRY._serialized_end = 4193
+    _TRANSFERBALANCE._serialized_start = 4195
+    _TRANSFERBALANCE._serialized_end = 4261
+    _TRANSFERRESPONSE._serialized_start = 4263
+    _TRANSFERRESPONSE._serialized_end = 4360
+    _MARGINLEVELS._serialized_start = 4363
+    _MARGINLEVELS._serialized_end = 4556
+    _MARKETDATA._serialized_start = 4559
+    _MARKETDATA._serialized_end = 5373
+    _LIQUIDITYPROVIDERFEESHARE._serialized_start = 5375
+    _LIQUIDITYPROVIDERFEESHARE._serialized_end = 5477
+    _PRICEMONITORINGBOUNDS._serialized_start = 5480
+    _PRICEMONITORINGBOUNDS._serialized_end = 5625
+    _ERRORDETAIL._serialized_start = 5627
+    _ERRORDETAIL._serialized_end = 5686
+    _NETWORKPARAMETER._serialized_start = 5688
+    _NETWORKPARAMETER._serialized_end = 5734
+    _NETWORKLIMITS._serialized_start = 5737
+    _NETWORKLIMITS._serialized_end = 6026
+    _LIQUIDITYORDER._serialized_start = 6028
+    _LIQUIDITYORDER._serialized_end = 6122
+    _LIQUIDITYORDERREFERENCE._serialized_start = 6124
+    _LIQUIDITYORDERREFERENCE._serialized_end = 6214
+    _LIQUIDITYPROVISION._serialized_start = 6217
+    _LIQUIDITYPROVISION._serialized_end = 6702
+    _LIQUIDITYPROVISION_STATUS._serialized_start = 6545
+    _LIQUIDITYPROVISION_STATUS._serialized_end = 6702
+    _ETHEREUMCONFIG._serialized_start = 6705
+    _ETHEREUMCONFIG._serialized_end = 7038
+    _ETHEREUMCONTRACTCONFIG._serialized_start = 7040
+    _ETHEREUMCONTRACTCONFIG._serialized_end = 7114
+    _EPOCHTIMESTAMPS._serialized_start = 7116
+    _EPOCHTIMESTAMPS._serialized_end = 7233
+    _EPOCH._serialized_start = 7236
+    _EPOCH._serialized_end = 7370
+    _EPOCHPARTICIPATION._serialized_start = 7372
+    _EPOCHPARTICIPATION._serialized_end = 7476
+    _EPOCHDATA._serialized_start = 7478
+    _EPOCHDATA._serialized_end = 7537
+    _RANKINGSCORE._serialized_start = 7540
+    _RANKINGSCORE._serialized_end = 7742
+    _REWARDSCORE._serialized_start = 7745
+    _REWARDSCORE._serialized_end = 7942
+    _NODE._serialized_start = 7945
+    _NODE._serialized_end = 8421
+    _NODEDATA._serialized_start = 8423
+    _NODEDATA._serialized_end = 8542
+    _DELEGATION._serialized_start = 8544
+    _DELEGATION._serialized_end = 8623
+    _REWARD._serialized_start = 8626
+    _REWARD._serialized_end = 8791
+    _REWARDSUMMARY._serialized_start = 8793
+    _REWARDSUMMARY._serialized_end = 8860
+    _STATEVALUEPROPOSAL._serialized_start = 8862
+    _STATEVALUEPROPOSAL._serialized_end = 8957
+    _KEYVALUEBUNDLE._serialized_start = 8959
+    _KEYVALUEBUNDLE._serialized_end = 9043
+    _STATEVARVALUE._serialized_start = 9046
+    _STATEVARVALUE._serialized_end = 9193
+    _SCALARVALUE._serialized_start = 9195
+    _SCALARVALUE._serialized_end = 9223
+    _VECTORVALUE._serialized_start = 9225
+    _VECTORVALUE._serialized_end = 9253
+    _MATRIXVALUE._serialized_start = 9255
+    _MATRIXVALUE._serialized_end = 9302
 # @@protoc_insertion_point(module_scope)

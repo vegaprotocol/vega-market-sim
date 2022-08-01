@@ -327,6 +327,12 @@ def manage_vega_processes(
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp()
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
+    if port_config.get(Ports.DATA_NODE_GRAPHQL):
+        logger.info(
+            f"Launching GraphQL node at port {port_config.get(Ports.DATA_NODE_GRAPHQL)}"
+        )
+    if port_config.get(Ports.CONSOLE):
+        logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
     shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
     tmp_vega_home = tmp_vega_dir + "/vegahome"
@@ -454,7 +460,7 @@ class VegaServiceNull(VegaService):
         warn_on_raw_data_access: bool = True,
         transactions_per_block: int = 1,
         seconds_per_block: int = 1,
-        use_full_vega_wallet: bool = False,
+        use_full_vega_wallet: bool = True,
         start_order_feed: bool = True,
         retain_log_files: bool = False,
     ):
