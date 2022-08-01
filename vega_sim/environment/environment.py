@@ -180,7 +180,6 @@ class MarketEnvironment:
             self.step(vega)
 
             # Ensure core is caught up
-            # print(i)
             core_catchup_start = datetime.datetime.now()
             vega.wait_for_core_catchup()
             core_catchup_seconds = (

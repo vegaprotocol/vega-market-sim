@@ -460,7 +460,7 @@ class VegaServiceNull(VegaService):
         warn_on_raw_data_access: bool = True,
         transactions_per_block: int = 1,
         seconds_per_block: int = 1,
-        use_full_vega_wallet: bool = True,
+        use_full_vega_wallet: bool = False,
         start_order_feed: bool = True,
         retain_log_files: bool = False,
     ):

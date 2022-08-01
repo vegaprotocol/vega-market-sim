@@ -188,9 +188,6 @@ if __name__ == "__main__":
                 price=103,
             )
 
-        import pdb
-
-        pdb.set_trace()
         to_cancel = vega.submit_order(
             trading_wallet=MM_WALLET.name,
             market_id=market_id,
