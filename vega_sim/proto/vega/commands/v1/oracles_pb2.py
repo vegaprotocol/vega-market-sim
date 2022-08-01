@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1evega/commands/v1/oracles.proto\x12\x10vega.commands.v1"\xd2\x01\n\x14OracleDataSubmission\x12\x43\n\x06source\x18\x01 \x01(\x0e\x32\x33.vega.commands.v1.OracleDataSubmission.OracleSource\x12\x0f\n\x07payload\x18\x02 \x01(\x0c"d\n\x0cOracleSource\x12\x1d\n\x19ORACLE_SOURCE_UNSPECIFIED\x10\x00\x12\x1d\n\x19ORACLE_SOURCE_OPEN_ORACLE\x10\x01\x12\x16\n\x12ORACLE_SOURCE_JSON\x10\x02\x42.Z,code.vegaprotocol.io/protos/vega/commands/v1b\x06proto3'
+    b'\n\x1evega/commands/v1/oracles.proto\x12\x10vega.commands.v1"\xd2\x01\n\x14OracleDataSubmission\x12\x43\n\x06source\x18\x01 \x01(\x0e\x32\x33.vega.commands.v1.OracleDataSubmission.OracleSource\x12\x0f\n\x07payload\x18\x02 \x01(\x0c"d\n\x0cOracleSource\x12\x1d\n\x19ORACLE_SOURCE_UNSPECIFIED\x10\x00\x12\x1d\n\x19ORACLE_SOURCE_OPEN_ORACLE\x10\x01\x12\x16\n\x12ORACLE_SOURCE_JSON\x10\x02\x42\x33Z1code.vegaprotocol.io/vega/protos/vega/commands/v1b\x06proto3'
 )
 
 
@@ -36,7 +36,9 @@ _sym_db.RegisterMessage(OracleDataSubmission)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
     DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/protos/vega/commands/v1"
+    DESCRIPTOR._serialized_options = (
+        b"Z1code.vegaprotocol.io/vega/protos/vega/commands/v1"
+    )
     _ORACLEDATASUBMISSION._serialized_start = 53
     _ORACLEDATASUBMISSION._serialized_end = 263
     _ORACLEDATASUBMISSION_ORACLESOURCE._serialized_start = 163

@@ -321,11 +321,18 @@ def manage_vega_processes(
     run_wallet: bool = False,
     retain_log_files: bool = False,
 ) -> None:
+    logging.basicConfig(level=logging.INFO)
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp()
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
+    if port_config.get(Ports.DATA_NODE_GRAPHQL):
+        logger.info(
+            f"Launching GraphQL node at port {port_config.get(Ports.DATA_NODE_GRAPHQL)}"
+        )
+    if port_config.get(Ports.CONSOLE):
+        logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
     shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
     tmp_vega_home = tmp_vega_dir + "/vegahome"

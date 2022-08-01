@@ -6,6 +6,7 @@ from typing import Callable, Optional
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
+from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 import vega_sim.proto.vega.oracles.v1 as oracles_protos
 import vega_sim.proto.vega.commands.v1 as commands_protos
 from vega_sim.api.helpers import (
@@ -267,14 +268,13 @@ def propose_future_market(
     )
     proposal.terms.new_market.CopyFrom(market_proposal)
 
-    _make_and_wait_for_proposal(
+    return _make_and_wait_for_proposal(
         wallet_name=wallet_name,
         wallet=wallet,
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
-    )
-    return proposal.reference
+    ).proposal.id
 
 
 def propose_network_parameter_change(
@@ -300,14 +300,13 @@ def propose_network_parameter_change(
             changes=vega_protos.vega.NetworkParameter(key=parameter, value=value)
         )
     )
-    _make_and_wait_for_proposal(
+    return _make_and_wait_for_proposal(
         wallet_name=wallet_name,
         wallet=wallet,
         proposal=network_param_update,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
-    )
-    return network_param_update.reference
+    ).proposal.id
 
 
 def propose_market_update(
@@ -320,7 +319,7 @@ def propose_market_update(
     validation_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClient] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
-):
+) -> str:
     network_param_update = _build_generic_proposal(
         pub_key=wallet.public_key(wallet_name),
         data_client=data_client,
@@ -332,14 +331,13 @@ def propose_market_update(
         vega_protos.governance.UpdateMarket(market_id=market_id, changes=market_update)
     )
 
-    _make_and_wait_for_proposal(
+    return _make_and_wait_for_proposal(
         wallet_name=wallet_name,
         wallet=wallet,
         proposal=network_param_update,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
-    )
-    return network_param_update.reference
+    ).proposal.id
 
 
 def approve_proposal(
@@ -370,7 +368,7 @@ def propose_asset(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
-):
+) -> str:
     asset_detail = vega_protos.assets.AssetDetails(
         name=name,
         symbol=symbol,
@@ -391,14 +389,13 @@ def propose_asset(
     proposal.terms.new_asset.CopyFrom(
         vega_protos.governance.NewAsset(changes=asset_detail)
     )
-    _make_and_wait_for_proposal(
+    return _make_and_wait_for_proposal(
         wallet_name=wallet_name,
         wallet=wallet,
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
-    )
-    return proposal.reference
+    ).proposal.id
 
 
 def _build_generic_proposal(
@@ -448,7 +445,7 @@ def _make_and_wait_for_proposal(
     proposal: commands_protos.commands.ProposalSubmission,
     data_client: vac.VegaTradingDataClient,
     time_forward_fn: Optional[Callable[[], None]] = None,
-):
+) -> ProposalSubmission:
     wallet.submit_transaction(
         transaction=proposal, name=wallet_name, transaction_type="proposal_submission"
     )
@@ -469,6 +466,7 @@ def _make_and_wait_for_proposal(
             f" {enum_to_str(vega_protos.governance.ProposalError, proposal.proposal.reason)}."
             f" Any further info: {proposal.proposal.error_details}"
         )
+    return proposal
 
 
 def settle_oracle(
