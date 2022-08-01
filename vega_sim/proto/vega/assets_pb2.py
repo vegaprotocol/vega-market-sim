@@ -7,106 +7,82 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x11vega/assets.proto\x12\x04vega"\xd8\x01\n\x05\x41sset\x12\n\n\x02id\x18\x01 \x01(\t\x12#\n\x07\x64\x65tails\x18\x02 \x01(\x0b\x32\x12.vega.AssetDetails\x12"\n\x06status\x18\x03 \x01(\x0e\x32\x12.vega.Asset.Status"z\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x13\n\x0fSTATUS_PROPOSED\x10\x01\x12\x13\n\x0fSTATUS_REJECTED\x10\x02\x12\x1a\n\x16STATUS_PENDING_LISTING\x10\x03\x12\x12\n\x0eSTATUS_ENABLED\x10\x04"\xba\x01\n\x0c\x41ssetDetails\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x14\n\x0ctotal_supply\x18\x03 \x01(\t\x12\x10\n\x08\x64\x65\x63imals\x18\x04 \x01(\x04\x12\x0f\n\x07quantum\x18\x05 \x01(\t\x12+\n\rbuiltin_asset\x18\x65 \x01(\x0b\x32\x12.vega.BuiltinAssetH\x00\x12\x1c\n\x05\x65rc20\x18\x66 \x01(\x0b\x32\x0b.vega.ERC20H\x00\x42\x08\n\x06source".\n\x0c\x42uiltinAsset\x12\x1e\n\x16max_faucet_amount_mint\x18\x01 \x01(\t"U\n\x05\x45RC20\x12\x18\n\x10\x63ontract_address\x18\x01 \x01(\t\x12\x16\n\x0elifetime_limit\x18\x02 \x01(\t\x12\x1a\n\x12withdraw_threshold\x18\x03 \x01(\t"\x99\x01\n\x12\x41ssetDetailsUpdate\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x14\n\x0ctotal_supply\x18\x03 \x01(\t\x12\x10\n\x08\x64\x65\x63imals\x18\x04 \x01(\x04\x12\x0f\n\x07quantum\x18\x05 \x01(\t\x12"\n\x05\x65rc20\x18\x65 \x01(\x0b\x32\x11.vega.ERC20UpdateH\x00\x42\x08\n\x06source"A\n\x0b\x45RC20Update\x12\x16\n\x0elifetime_limit\x18\x01 \x01(\t\x12\x1a\n\x12withdraw_threshold\x18\x02 \x01(\tB"Z code.vegaprotocol.io/protos/vegab\x06proto3'
-)
 
 
-_ASSET = DESCRIPTOR.message_types_by_name["Asset"]
-_ASSETDETAILS = DESCRIPTOR.message_types_by_name["AssetDetails"]
-_BUILTINASSET = DESCRIPTOR.message_types_by_name["BuiltinAsset"]
-_ERC20 = DESCRIPTOR.message_types_by_name["ERC20"]
-_ASSETDETAILSUPDATE = DESCRIPTOR.message_types_by_name["AssetDetailsUpdate"]
-_ERC20UPDATE = DESCRIPTOR.message_types_by_name["ERC20Update"]
-_ASSET_STATUS = _ASSET.enum_types_by_name["Status"]
-Asset = _reflection.GeneratedProtocolMessageType(
-    "Asset",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ASSET,
-        "__module__": "vega.assets_pb2"
-        # @@protoc_insertion_point(class_scope:vega.Asset)
-    },
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11vega/assets.proto\x12\x04vega\"\xd8\x01\n\x05\x41sset\x12\n\n\x02id\x18\x01 \x01(\t\x12#\n\x07\x64\x65tails\x18\x02 \x01(\x0b\x32\x12.vega.AssetDetails\x12\"\n\x06status\x18\x03 \x01(\x0e\x32\x12.vega.Asset.Status\"z\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x13\n\x0fSTATUS_PROPOSED\x10\x01\x12\x13\n\x0fSTATUS_REJECTED\x10\x02\x12\x1a\n\x16STATUS_PENDING_LISTING\x10\x03\x12\x12\n\x0eSTATUS_ENABLED\x10\x04\"\xba\x01\n\x0c\x41ssetDetails\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x14\n\x0ctotal_supply\x18\x03 \x01(\t\x12\x10\n\x08\x64\x65\x63imals\x18\x04 \x01(\x04\x12\x0f\n\x07quantum\x18\x05 \x01(\t\x12+\n\rbuiltin_asset\x18\x65 \x01(\x0b\x32\x12.vega.BuiltinAssetH\x00\x12\x1c\n\x05\x65rc20\x18\x66 \x01(\x0b\x32\x0b.vega.ERC20H\x00\x42\x08\n\x06source\".\n\x0c\x42uiltinAsset\x12\x1e\n\x16max_faucet_amount_mint\x18\x01 \x01(\t\"U\n\x05\x45RC20\x12\x18\n\x10\x63ontract_address\x18\x01 \x01(\t\x12\x16\n\x0elifetime_limit\x18\x02 \x01(\t\x12\x1a\n\x12withdraw_threshold\x18\x03 \x01(\t\"\x99\x01\n\x12\x41ssetDetailsUpdate\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x14\n\x0ctotal_supply\x18\x03 \x01(\t\x12\x10\n\x08\x64\x65\x63imals\x18\x04 \x01(\x04\x12\x0f\n\x07quantum\x18\x05 \x01(\t\x12\"\n\x05\x65rc20\x18\x65 \x01(\x0b\x32\x11.vega.ERC20UpdateH\x00\x42\x08\n\x06source\"A\n\x0b\x45RC20Update\x12\x16\n\x0elifetime_limit\x18\x01 \x01(\t\x12\x1a\n\x12withdraw_threshold\x18\x02 \x01(\tB\'Z%code.vegaprotocol.io/vega/protos/vegab\x06proto3')
+
+
+
+_ASSET = DESCRIPTOR.message_types_by_name['Asset']
+_ASSETDETAILS = DESCRIPTOR.message_types_by_name['AssetDetails']
+_BUILTINASSET = DESCRIPTOR.message_types_by_name['BuiltinAsset']
+_ERC20 = DESCRIPTOR.message_types_by_name['ERC20']
+_ASSETDETAILSUPDATE = DESCRIPTOR.message_types_by_name['AssetDetailsUpdate']
+_ERC20UPDATE = DESCRIPTOR.message_types_by_name['ERC20Update']
+_ASSET_STATUS = _ASSET.enum_types_by_name['Status']
+Asset = _reflection.GeneratedProtocolMessageType('Asset', (_message.Message,), {
+  'DESCRIPTOR' : _ASSET,
+  '__module__' : 'vega.assets_pb2'
+  # @@protoc_insertion_point(class_scope:vega.Asset)
+  })
 _sym_db.RegisterMessage(Asset)
 
-AssetDetails = _reflection.GeneratedProtocolMessageType(
-    "AssetDetails",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ASSETDETAILS,
-        "__module__": "vega.assets_pb2"
-        # @@protoc_insertion_point(class_scope:vega.AssetDetails)
-    },
-)
+AssetDetails = _reflection.GeneratedProtocolMessageType('AssetDetails', (_message.Message,), {
+  'DESCRIPTOR' : _ASSETDETAILS,
+  '__module__' : 'vega.assets_pb2'
+  # @@protoc_insertion_point(class_scope:vega.AssetDetails)
+  })
 _sym_db.RegisterMessage(AssetDetails)
 
-BuiltinAsset = _reflection.GeneratedProtocolMessageType(
-    "BuiltinAsset",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _BUILTINASSET,
-        "__module__": "vega.assets_pb2"
-        # @@protoc_insertion_point(class_scope:vega.BuiltinAsset)
-    },
-)
+BuiltinAsset = _reflection.GeneratedProtocolMessageType('BuiltinAsset', (_message.Message,), {
+  'DESCRIPTOR' : _BUILTINASSET,
+  '__module__' : 'vega.assets_pb2'
+  # @@protoc_insertion_point(class_scope:vega.BuiltinAsset)
+  })
 _sym_db.RegisterMessage(BuiltinAsset)
 
-ERC20 = _reflection.GeneratedProtocolMessageType(
-    "ERC20",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20,
-        "__module__": "vega.assets_pb2"
-        # @@protoc_insertion_point(class_scope:vega.ERC20)
-    },
-)
+ERC20 = _reflection.GeneratedProtocolMessageType('ERC20', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20,
+  '__module__' : 'vega.assets_pb2'
+  # @@protoc_insertion_point(class_scope:vega.ERC20)
+  })
 _sym_db.RegisterMessage(ERC20)
 
-AssetDetailsUpdate = _reflection.GeneratedProtocolMessageType(
-    "AssetDetailsUpdate",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ASSETDETAILSUPDATE,
-        "__module__": "vega.assets_pb2"
-        # @@protoc_insertion_point(class_scope:vega.AssetDetailsUpdate)
-    },
-)
+AssetDetailsUpdate = _reflection.GeneratedProtocolMessageType('AssetDetailsUpdate', (_message.Message,), {
+  'DESCRIPTOR' : _ASSETDETAILSUPDATE,
+  '__module__' : 'vega.assets_pb2'
+  # @@protoc_insertion_point(class_scope:vega.AssetDetailsUpdate)
+  })
 _sym_db.RegisterMessage(AssetDetailsUpdate)
 
-ERC20Update = _reflection.GeneratedProtocolMessageType(
-    "ERC20Update",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ERC20UPDATE,
-        "__module__": "vega.assets_pb2"
-        # @@protoc_insertion_point(class_scope:vega.ERC20Update)
-    },
-)
+ERC20Update = _reflection.GeneratedProtocolMessageType('ERC20Update', (_message.Message,), {
+  'DESCRIPTOR' : _ERC20UPDATE,
+  '__module__' : 'vega.assets_pb2'
+  # @@protoc_insertion_point(class_scope:vega.ERC20Update)
+  })
 _sym_db.RegisterMessage(ERC20Update)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z code.vegaprotocol.io/protos/vega"
-    _ASSET._serialized_start = 28
-    _ASSET._serialized_end = 244
-    _ASSET_STATUS._serialized_start = 122
-    _ASSET_STATUS._serialized_end = 244
-    _ASSETDETAILS._serialized_start = 247
-    _ASSETDETAILS._serialized_end = 433
-    _BUILTINASSET._serialized_start = 435
-    _BUILTINASSET._serialized_end = 481
-    _ERC20._serialized_start = 483
-    _ERC20._serialized_end = 568
-    _ASSETDETAILSUPDATE._serialized_start = 571
-    _ASSETDETAILSUPDATE._serialized_end = 724
-    _ERC20UPDATE._serialized_start = 726
-    _ERC20UPDATE._serialized_end = 791
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z%code.vegaprotocol.io/vega/protos/vega'
+  _ASSET._serialized_start=28
+  _ASSET._serialized_end=244
+  _ASSET_STATUS._serialized_start=122
+  _ASSET_STATUS._serialized_end=244
+  _ASSETDETAILS._serialized_start=247
+  _ASSETDETAILS._serialized_end=433
+  _BUILTINASSET._serialized_start=435
+  _BUILTINASSET._serialized_end=481
+  _ERC20._serialized_start=483
+  _ERC20._serialized_end=568
+  _ASSETDETAILSUPDATE._serialized_start=571
+  _ASSETDETAILSUPDATE._serialized_end=724
+  _ERC20UPDATE._serialized_start=726
+  _ERC20UPDATE._serialized_end=791
 # @@protoc_insertion_point(module_scope)

@@ -7,69 +7,53 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
 from ...commands.v1 import commands_pb2 as vega_dot_commands_dot_v1_dot_commands__pb2
-from ...commands.v1 import (
-    validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2,
-)
+from ...commands.v1 import validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2
 from ...commands.v1 import oracles_pb2 as vega_dot_commands_dot_v1_dot_oracles__pb2
 from ...commands.v1 import signature_pb2 as vega_dot_commands_dot_v1_dot_signature__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n"vega/commands/v1/transaction.proto\x12\x10vega.commands.v1\x1a\x1fvega/commands/v1/commands.proto\x1a)vega/commands/v1/validator_commands.proto\x1a\x1evega/commands/v1/oracles.proto\x1a vega/commands/v1/signature.proto"\x91\r\n\tInputData\x12\r\n\x05nonce\x18\x01 \x01(\x04\x12\x14\n\x0c\x62lock_height\x18\x02 \x01(\x04\x12>\n\x10order_submission\x18\xe9\x07 \x01(\x0b\x32!.vega.commands.v1.OrderSubmissionH\x00\x12\x42\n\x12order_cancellation\x18\xea\x07 \x01(\x0b\x32#.vega.commands.v1.OrderCancellationH\x00\x12<\n\x0forder_amendment\x18\xeb\x07 \x01(\x0b\x32 .vega.commands.v1.OrderAmendmentH\x00\x12\x44\n\x13withdraw_submission\x18\xec\x07 \x01(\x0b\x32$.vega.commands.v1.WithdrawSubmissionH\x00\x12\x44\n\x13proposal_submission\x18\xed\x07 \x01(\x0b\x32$.vega.commands.v1.ProposalSubmissionH\x00\x12<\n\x0fvote_submission\x18\xee\x07 \x01(\x0b\x32 .vega.commands.v1.VoteSubmissionH\x00\x12Y\n\x1eliquidity_provision_submission\x18\xef\x07 \x01(\x0b\x32..vega.commands.v1.LiquidityProvisionSubmissionH\x00\x12\x44\n\x13\x64\x65legate_submission\x18\xf0\x07 \x01(\x0b\x32$.vega.commands.v1.DelegateSubmissionH\x00\x12H\n\x15undelegate_submission\x18\xf1\x07 \x01(\x0b\x32&.vega.commands.v1.UndelegateSubmissionH\x00\x12]\n liquidity_provision_cancellation\x18\xf2\x07 \x01(\x0b\x32\x30.vega.commands.v1.LiquidityProvisionCancellationH\x00\x12W\n\x1dliquidity_provision_amendment\x18\xf3\x07 \x01(\x0b\x32-.vega.commands.v1.LiquidityProvisionAmendmentH\x00\x12/\n\x08transfer\x18\xf4\x07 \x01(\x0b\x32\x1a.vega.commands.v1.TransferH\x00\x12<\n\x0f\x63\x61ncel_transfer\x18\xf5\x07 \x01(\x0b\x32 .vega.commands.v1.CancelTransferH\x00\x12\x38\n\rannounce_node\x18\xf6\x07 \x01(\x0b\x32\x1e.vega.commands.v1.AnnounceNodeH\x00\x12\x30\n\tnode_vote\x18\xd2\x0f \x01(\x0b\x32\x1a.vega.commands.v1.NodeVoteH\x00\x12:\n\x0enode_signature\x18\xd3\x0f \x01(\x0b\x32\x1f.vega.commands.v1.NodeSignatureH\x00\x12\x34\n\x0b\x63hain_event\x18\xd4\x0f \x01(\x0b\x32\x1c.vega.commands.v1.ChainEventH\x00\x12G\n\x15key_rotate_submission\x18\xd5\x0f \x01(\x0b\x32%.vega.commands.v1.KeyRotateSubmissionH\x00\x12K\n\x17state_variable_proposal\x18\xd6\x0f \x01(\x0b\x32\'.vega.commands.v1.StateVariableProposalH\x00\x12\x44\n\x13validator_heartbeat\x18\xd7\x0f \x01(\x0b\x32$.vega.commands.v1.ValidatorHeartbeatH\x00\x12X\n\x1e\x65thereum_key_rotate_submission\x18\xd8\x0f \x01(\x0b\x32-.vega.commands.v1.EthereumKeyRotateSubmissionH\x00\x12O\n\x19protocol_upgrade_proposal\x18\xd9\x0f \x01(\x0b\x32).vega.commands.v1.ProtocolUpgradeProposalH\x00\x12I\n\x16oracle_data_submission\x18\xb9\x17 \x01(\x0b\x32&.vega.commands.v1.OracleDataSubmissionH\x00\x42\t\n\x07\x63ommandJ\x06\x08\xa1\x1f\x10\xa2\x1f"\xc0\x01\n\x0bTransaction\x12\x12\n\ninput_data\x18\x01 \x01(\x0c\x12.\n\tsignature\x18\x02 \x01(\x0b\x32\x1b.vega.commands.v1.Signature\x12\x12\n\x07\x61\x64\x64ress\x18\xe9\x07 \x01(\tH\x00\x12\x12\n\x07pub_key\x18\xea\x07 \x01(\tH\x00\x12\x10\n\x07version\x18\xd0\x0f \x01(\r\x12+\n\x03pow\x18\xb8\x17 \x01(\x0b\x32\x1d.vega.commands.v1.ProofOfWorkB\x06\n\x04\x66rom"@\n\x0bProofOfWork\x12\x0b\n\x03tid\x18\x01 \x01(\t\x12\r\n\x05nonce\x18\x02 \x01(\x04\x12\x15\n\rhash_function\x18\x03 \x01(\tB.Z,code.vegaprotocol.io/protos/vega/commands/v1b\x06proto3'
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\"vega/commands/v1/transaction.proto\x12\x10vega.commands.v1\x1a\x1fvega/commands/v1/commands.proto\x1a)vega/commands/v1/validator_commands.proto\x1a\x1evega/commands/v1/oracles.proto\x1a vega/commands/v1/signature.proto\"\x91\r\n\tInputData\x12\r\n\x05nonce\x18\x01 \x01(\x04\x12\x14\n\x0c\x62lock_height\x18\x02 \x01(\x04\x12>\n\x10order_submission\x18\xe9\x07 \x01(\x0b\x32!.vega.commands.v1.OrderSubmissionH\x00\x12\x42\n\x12order_cancellation\x18\xea\x07 \x01(\x0b\x32#.vega.commands.v1.OrderCancellationH\x00\x12<\n\x0forder_amendment\x18\xeb\x07 \x01(\x0b\x32 .vega.commands.v1.OrderAmendmentH\x00\x12\x44\n\x13withdraw_submission\x18\xec\x07 \x01(\x0b\x32$.vega.commands.v1.WithdrawSubmissionH\x00\x12\x44\n\x13proposal_submission\x18\xed\x07 \x01(\x0b\x32$.vega.commands.v1.ProposalSubmissionH\x00\x12<\n\x0fvote_submission\x18\xee\x07 \x01(\x0b\x32 .vega.commands.v1.VoteSubmissionH\x00\x12Y\n\x1eliquidity_provision_submission\x18\xef\x07 \x01(\x0b\x32..vega.commands.v1.LiquidityProvisionSubmissionH\x00\x12\x44\n\x13\x64\x65legate_submission\x18\xf0\x07 \x01(\x0b\x32$.vega.commands.v1.DelegateSubmissionH\x00\x12H\n\x15undelegate_submission\x18\xf1\x07 \x01(\x0b\x32&.vega.commands.v1.UndelegateSubmissionH\x00\x12]\n liquidity_provision_cancellation\x18\xf2\x07 \x01(\x0b\x32\x30.vega.commands.v1.LiquidityProvisionCancellationH\x00\x12W\n\x1dliquidity_provision_amendment\x18\xf3\x07 \x01(\x0b\x32-.vega.commands.v1.LiquidityProvisionAmendmentH\x00\x12/\n\x08transfer\x18\xf4\x07 \x01(\x0b\x32\x1a.vega.commands.v1.TransferH\x00\x12<\n\x0f\x63\x61ncel_transfer\x18\xf5\x07 \x01(\x0b\x32 .vega.commands.v1.CancelTransferH\x00\x12\x38\n\rannounce_node\x18\xf6\x07 \x01(\x0b\x32\x1e.vega.commands.v1.AnnounceNodeH\x00\x12\x30\n\tnode_vote\x18\xd2\x0f \x01(\x0b\x32\x1a.vega.commands.v1.NodeVoteH\x00\x12:\n\x0enode_signature\x18\xd3\x0f \x01(\x0b\x32\x1f.vega.commands.v1.NodeSignatureH\x00\x12\x34\n\x0b\x63hain_event\x18\xd4\x0f \x01(\x0b\x32\x1c.vega.commands.v1.ChainEventH\x00\x12G\n\x15key_rotate_submission\x18\xd5\x0f \x01(\x0b\x32%.vega.commands.v1.KeyRotateSubmissionH\x00\x12K\n\x17state_variable_proposal\x18\xd6\x0f \x01(\x0b\x32\'.vega.commands.v1.StateVariableProposalH\x00\x12\x44\n\x13validator_heartbeat\x18\xd7\x0f \x01(\x0b\x32$.vega.commands.v1.ValidatorHeartbeatH\x00\x12X\n\x1e\x65thereum_key_rotate_submission\x18\xd8\x0f \x01(\x0b\x32-.vega.commands.v1.EthereumKeyRotateSubmissionH\x00\x12O\n\x19protocol_upgrade_proposal\x18\xd9\x0f \x01(\x0b\x32).vega.commands.v1.ProtocolUpgradeProposalH\x00\x12I\n\x16oracle_data_submission\x18\xb9\x17 \x01(\x0b\x32&.vega.commands.v1.OracleDataSubmissionH\x00\x42\t\n\x07\x63ommandJ\x06\x08\xa1\x1f\x10\xa2\x1f\"\xc0\x01\n\x0bTransaction\x12\x12\n\ninput_data\x18\x01 \x01(\x0c\x12.\n\tsignature\x18\x02 \x01(\x0b\x32\x1b.vega.commands.v1.Signature\x12\x12\n\x07\x61\x64\x64ress\x18\xe9\x07 \x01(\tH\x00\x12\x12\n\x07pub_key\x18\xea\x07 \x01(\tH\x00\x12\x10\n\x07version\x18\xd0\x0f \x01(\r\x12+\n\x03pow\x18\xb8\x17 \x01(\x0b\x32\x1d.vega.commands.v1.ProofOfWorkB\x06\n\x04\x66rom\"@\n\x0bProofOfWork\x12\x0b\n\x03tid\x18\x01 \x01(\t\x12\r\n\x05nonce\x18\x02 \x01(\x04\x12\x15\n\rhash_function\x18\x03 \x01(\tB3Z1code.vegaprotocol.io/vega/protos/vega/commands/v1b\x06proto3')
 
 
-_INPUTDATA = DESCRIPTOR.message_types_by_name["InputData"]
-_TRANSACTION = DESCRIPTOR.message_types_by_name["Transaction"]
-_PROOFOFWORK = DESCRIPTOR.message_types_by_name["ProofOfWork"]
-InputData = _reflection.GeneratedProtocolMessageType(
-    "InputData",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _INPUTDATA,
-        "__module__": "vega.commands.v1.transaction_pb2"
-        # @@protoc_insertion_point(class_scope:vega.commands.v1.InputData)
-    },
-)
+
+_INPUTDATA = DESCRIPTOR.message_types_by_name['InputData']
+_TRANSACTION = DESCRIPTOR.message_types_by_name['Transaction']
+_PROOFOFWORK = DESCRIPTOR.message_types_by_name['ProofOfWork']
+InputData = _reflection.GeneratedProtocolMessageType('InputData', (_message.Message,), {
+  'DESCRIPTOR' : _INPUTDATA,
+  '__module__' : 'vega.commands.v1.transaction_pb2'
+  # @@protoc_insertion_point(class_scope:vega.commands.v1.InputData)
+  })
 _sym_db.RegisterMessage(InputData)
 
-Transaction = _reflection.GeneratedProtocolMessageType(
-    "Transaction",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _TRANSACTION,
-        "__module__": "vega.commands.v1.transaction_pb2"
-        # @@protoc_insertion_point(class_scope:vega.commands.v1.Transaction)
-    },
-)
+Transaction = _reflection.GeneratedProtocolMessageType('Transaction', (_message.Message,), {
+  'DESCRIPTOR' : _TRANSACTION,
+  '__module__' : 'vega.commands.v1.transaction_pb2'
+  # @@protoc_insertion_point(class_scope:vega.commands.v1.Transaction)
+  })
 _sym_db.RegisterMessage(Transaction)
 
-ProofOfWork = _reflection.GeneratedProtocolMessageType(
-    "ProofOfWork",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _PROOFOFWORK,
-        "__module__": "vega.commands.v1.transaction_pb2"
-        # @@protoc_insertion_point(class_scope:vega.commands.v1.ProofOfWork)
-    },
-)
+ProofOfWork = _reflection.GeneratedProtocolMessageType('ProofOfWork', (_message.Message,), {
+  'DESCRIPTOR' : _PROOFOFWORK,
+  '__module__' : 'vega.commands.v1.transaction_pb2'
+  # @@protoc_insertion_point(class_scope:vega.commands.v1.ProofOfWork)
+  })
 _sym_db.RegisterMessage(ProofOfWork)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/protos/vega/commands/v1"
-    _INPUTDATA._serialized_start = 199
-    _INPUTDATA._serialized_end = 1880
-    _TRANSACTION._serialized_start = 1883
-    _TRANSACTION._serialized_end = 2075
-    _PROOFOFWORK._serialized_start = 2077
-    _PROOFOFWORK._serialized_end = 2141
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z1code.vegaprotocol.io/vega/protos/vega/commands/v1'
+  _INPUTDATA._serialized_start=199
+  _INPUTDATA._serialized_end=1880
+  _TRANSACTION._serialized_start=1883
+  _TRANSACTION._serialized_end=2075
+  _PROOFOFWORK._serialized_start=2077
+  _PROOFOFWORK._serialized_end=2141
 # @@protoc_insertion_point(module_scope)

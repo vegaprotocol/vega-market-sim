@@ -7,38 +7,32 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1evega/commands/v1/oracles.proto\x12\x10vega.commands.v1"\xd2\x01\n\x14OracleDataSubmission\x12\x43\n\x06source\x18\x01 \x01(\x0e\x32\x33.vega.commands.v1.OracleDataSubmission.OracleSource\x12\x0f\n\x07payload\x18\x02 \x01(\x0c"d\n\x0cOracleSource\x12\x1d\n\x19ORACLE_SOURCE_UNSPECIFIED\x10\x00\x12\x1d\n\x19ORACLE_SOURCE_OPEN_ORACLE\x10\x01\x12\x16\n\x12ORACLE_SOURCE_JSON\x10\x02\x42.Z,code.vegaprotocol.io/protos/vega/commands/v1b\x06proto3'
-)
 
 
-_ORACLEDATASUBMISSION = DESCRIPTOR.message_types_by_name["OracleDataSubmission"]
-_ORACLEDATASUBMISSION_ORACLESOURCE = _ORACLEDATASUBMISSION.enum_types_by_name[
-    "OracleSource"
-]
-OracleDataSubmission = _reflection.GeneratedProtocolMessageType(
-    "OracleDataSubmission",
-    (_message.Message,),
-    {
-        "DESCRIPTOR": _ORACLEDATASUBMISSION,
-        "__module__": "vega.commands.v1.oracles_pb2"
-        # @@protoc_insertion_point(class_scope:vega.commands.v1.OracleDataSubmission)
-    },
-)
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1evega/commands/v1/oracles.proto\x12\x10vega.commands.v1\"\xd2\x01\n\x14OracleDataSubmission\x12\x43\n\x06source\x18\x01 \x01(\x0e\x32\x33.vega.commands.v1.OracleDataSubmission.OracleSource\x12\x0f\n\x07payload\x18\x02 \x01(\x0c\"d\n\x0cOracleSource\x12\x1d\n\x19ORACLE_SOURCE_UNSPECIFIED\x10\x00\x12\x1d\n\x19ORACLE_SOURCE_OPEN_ORACLE\x10\x01\x12\x16\n\x12ORACLE_SOURCE_JSON\x10\x02\x42\x33Z1code.vegaprotocol.io/vega/protos/vega/commands/v1b\x06proto3')
+
+
+
+_ORACLEDATASUBMISSION = DESCRIPTOR.message_types_by_name['OracleDataSubmission']
+_ORACLEDATASUBMISSION_ORACLESOURCE = _ORACLEDATASUBMISSION.enum_types_by_name['OracleSource']
+OracleDataSubmission = _reflection.GeneratedProtocolMessageType('OracleDataSubmission', (_message.Message,), {
+  'DESCRIPTOR' : _ORACLEDATASUBMISSION,
+  '__module__' : 'vega.commands.v1.oracles_pb2'
+  # @@protoc_insertion_point(class_scope:vega.commands.v1.OracleDataSubmission)
+  })
 _sym_db.RegisterMessage(OracleDataSubmission)
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/protos/vega/commands/v1"
-    _ORACLEDATASUBMISSION._serialized_start = 53
-    _ORACLEDATASUBMISSION._serialized_end = 263
-    _ORACLEDATASUBMISSION_ORACLESOURCE._serialized_start = 163
-    _ORACLEDATASUBMISSION_ORACLESOURCE._serialized_end = 263
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z1code.vegaprotocol.io/vega/protos/vega/commands/v1'
+  _ORACLEDATASUBMISSION._serialized_start=53
+  _ORACLEDATASUBMISSION._serialized_end=263
+  _ORACLEDATASUBMISSION_ORACLESOURCE._serialized_start=163
+  _ORACLEDATASUBMISSION_ORACLESOURCE._serialized_end=263
 # @@protoc_insertion_point(module_scope)
