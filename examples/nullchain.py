@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     with VegaServiceNull(
-        run_with_console=False,
+        run_with_console=True,
         start_order_feed=True,
     ) as vega:
         for wallet in wallets:

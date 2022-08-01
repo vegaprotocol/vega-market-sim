@@ -53,7 +53,9 @@ def _run_parameter_iteration(
     value: str,
     additional_parameters_to_set: Optional[Dict[str, str]] = None,
 ) -> Any:
-    with VegaServiceNull(warn_on_raw_data_access=False, retain_log_files=True) as vega:
+    with VegaServiceNull(
+        warn_on_raw_data_access=False, retain_log_files=True, run_with_console=False
+    ) as vega:
         vega.create_wallet(*PARAMETER_AMEND_WALLET)
         vega.mint(
             PARAMETER_AMEND_WALLET[0],
@@ -71,7 +73,11 @@ def _run_parameter_iteration(
             PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
         )
 
-        return scenario.run_iteration(vega=vega)
+        res = scenario.run_iteration(vega=vega)
+        # import pdb
+
+        # pdb.set_trace()
+        return res
 
 
 def run_single_parameter_experiment(

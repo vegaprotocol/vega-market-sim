@@ -208,15 +208,10 @@ def amend_order(
         time_in_force=time_in_force,
     )
     for name, val in [
-        ("price", vega_protos.vega.Price(value=str(price))),
-    ]:
-        if val is not None:
-            getattr(order_data, name).CopyFrom(val)
-
-    for name, val in [
         ("expires_at", expires_at),
         ("pegged_offset", pegged_offset),
         ("pegged_reference", pegged_reference),
+        ("price", str(price) if price is not None else None),
     ]:
         if val is not None:
             setattr(order_data, name, val)
@@ -379,7 +374,6 @@ def build_new_market_commitment(
     buy_specs: List[Tuple[str, int, int]],
     sell_specs: List[Tuple[str, int, int]],
 ) -> vega_protos.governance.NewMarketCommitment:
-
     return vega_protos.governance.NewMarketCommitment(
         commitment_amount=str(commitment_amount),
         fee=str(fee),
