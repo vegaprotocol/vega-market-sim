@@ -102,7 +102,10 @@ class MarketCrash(Scenario):
         self.settle_at_end = settle_at_end
         self.initial_asset_mint = initial_asset_mint
 
-    def _generate_price_process(self):
+    def _generate_price_process(
+        self,
+        random_state: Optional[np.random.RandomState] = None,
+    ):
         return regime_change_random_walk(
             num_steps=self.num_steps + 1,  # Number of steps plus 'initial' state
             random_state=self.random_state,
@@ -114,12 +117,14 @@ class MarketCrash(Scenario):
             break_point=self.break_point,
             decimal_precision=self.market_decimal,
             trim_to_min=self.trim_to_min,
+            random_state=random_state,
         )
 
     def set_up_background_market(
         self,
         vega: VegaServiceNull,
         tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironmentWithState:
         self.market_name = f"BTC:DAI_{tag}"
         self.asset_name = f"tDAI{tag}"
@@ -154,6 +159,7 @@ class MarketCrash(Scenario):
                     initial_asset_mint=self.position_taker_mint,
                     buy_intensity=self.noise_buy_intensity,
                     sell_intensity=self.noise_sell_intensity,
+                    random_state=random_state,
                 )
             )
         for i in range(self.num_position_traders):
@@ -167,6 +173,7 @@ class MarketCrash(Scenario):
                     tag=f"{tag}_pos_{i}",
                     buy_intensity=self.position_taker_buy_intensity,
                     sell_intensity=self.position_taker_sell_intensity,
+                    random_state=random_state,
                 )
             )
 
@@ -238,10 +245,10 @@ class MarketCrash(Scenario):
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
         tag: Optional[str] = None,
+        random_state: Optional[np.random.RandomState] = None,
     ):
         env = self.set_up_background_market(
-            vega=vega,
-            tag=tag if tag is not None else str(0),
+            vega=vega, tag=tag if tag is not None else str(0), random_state=random_state
         )
         result = env.run(
             pause_at_completion=pause_at_completion,
