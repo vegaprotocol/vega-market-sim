@@ -394,13 +394,14 @@ def manage_vega_processes(
         env_copy = os.environ.copy()
         env_copy.update(
             {
-                "REACT_APP_VEGA_URL": (
+                "NX_VEGA_URL": (
                     f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}"
                 ),
-                "REACT_APP_VEGA_WALLET_URL": (
+                "NX_VEGA_WALLET_URL": (
                     f"http://localhost:{port_config[Ports.WALLET]}/api/v1"
                 ),
-                "PORT": f"{port_config[Ports.CONSOLE]}",
+                "NX_VEGA_ENV": "CUSTOM",
+                "NX_PORT": f"{port_config[Ports.CONSOLE]}",
                 "NODE_ENV": "development",
             }
         )
@@ -409,7 +410,12 @@ def manage_vega_processes(
                 "yarn",
                 "--cwd",
                 vega_console_path,
-                "start",
+                "nx",
+                "serve",
+                "--port",
+                f"{port_config[Ports.CONSOLE]}",
+                "--open",
+                "trading",
             ],
             dir_root=tmp_vega_dir,
             log_name="console",
