@@ -65,7 +65,6 @@ class MarketCrash(Scenario):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
-        random_state: Optional[np.random.RandomState] = None,
         trim_to_min: Optional[float] = None,
     ):
         self.num_steps = num_steps
@@ -94,7 +93,6 @@ class MarketCrash(Scenario):
         self.noise_buy_intensity = noise_buy_intensity
         self.noise_sell_intensity = noise_sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
-        self.random_state = random_state
         self.trim_to_min = trim_to_min
         self.position_taker_mint = position_taker_mint
         self.num_position_traders = num_position_traders
@@ -108,7 +106,6 @@ class MarketCrash(Scenario):
     ):
         return regime_change_random_walk(
             num_steps=self.num_steps + 1,  # Number of steps plus 'initial' state
-            random_state=self.random_state,
             sigma_pre=self.sigma_pre,
             sigma_post=self.sigma_post,
             drift_pre=self.drift_pre,
@@ -117,6 +114,7 @@ class MarketCrash(Scenario):
             break_point=self.break_point,
             decimal_precision=self.market_decimal,
             trim_to_min=self.trim_to_min,
+            random_state=random_state,
         )
 
     def set_up_background_market(
