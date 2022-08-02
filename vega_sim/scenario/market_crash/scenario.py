@@ -117,7 +117,6 @@ class MarketCrash(Scenario):
             break_point=self.break_point,
             decimal_precision=self.market_decimal,
             trim_to_min=self.trim_to_min,
-            random_state=random_state,
         )
 
     def set_up_background_market(
