@@ -11,6 +11,7 @@ def main():
 
     parser.add_argument("-s", "--scenario")
     parser.add_argument("--console", action="store_true")
+    parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
     parser.add_argument(
         "-p",
@@ -30,9 +31,12 @@ def main():
 
     with VegaServiceNull(
         run_with_console=args.console,
+        launch_graphql=args.graphql,
         warn_on_raw_data_access=False,
         seconds_per_block=scenario.step_length_seconds,
         transactions_per_block=5,
+        retain_log_files=True,
+        use_full_vega_wallet=True,
     ) as vega:
         scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
 

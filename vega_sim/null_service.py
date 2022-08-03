@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import webbrowser
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum, auto
@@ -414,7 +415,7 @@ def manage_vega_processes(
                 "serve",
                 "--port",
                 f"{port_config[Ports.CONSOLE]}",
-                "--open",
+                "-o",
                 "trading",
             ],
             dir_root=tmp_vega_dir,
@@ -469,6 +470,7 @@ class VegaServiceNull(VegaService):
         use_full_vega_wallet: bool = False,
         start_order_feed: bool = True,
         retain_log_files: bool = False,
+        launch_graphql: bool = False,
     ):
         super().__init__(
             can_control_time=True,
@@ -496,6 +498,7 @@ class VegaServiceNull(VegaService):
         self._use_full_vega_wallet = use_full_vega_wallet
 
         self._start_order_feed = start_order_feed
+        self.launch_graphql = launch_graphql
 
         if port_config is None:
             self._assign_ports()
@@ -567,6 +570,7 @@ class VegaServiceNull(VegaService):
 
     def start(self, block_on_startup: bool = True) -> None:
         ctx = multiprocessing.get_context()
+        port_config = self._generate_port_config()
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
@@ -575,7 +579,7 @@ class VegaServiceNull(VegaService):
                 "vega_wallet_path": self.vega_wallet_path,
                 "vega_console_path": self.vega_console_path,
                 "run_with_console": self.run_with_console,
-                "port_config": self._generate_port_config(),
+                "port_config": port_config,
                 "transactions_per_block": self.transactions_per_block,
                 "block_duration": f"{int(self.seconds_per_block)}s",
                 "run_wallet": self._use_full_vega_wallet or self.run_with_console,
@@ -613,6 +617,14 @@ class VegaServiceNull(VegaService):
                 raise VegaStartupTimeoutError(
                     "Timed out waiting for Vega simulator to start up"
                 )
+
+        # if self.run_with_console:
+        #     webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
+
+        # if self.launch_graphql:
+        #     webbrowser.open(
+        #         f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
+        #     )
 
         if self._start_order_feed:
             self.start_order_monitoring()
