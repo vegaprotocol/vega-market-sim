@@ -192,7 +192,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         return num_BidLimitOrderHit, num_AskLimitOrderHit
 
     def OptimalStrategy(self, current_position):
-
         if current_position >= self.q_upper:
             current_bid_depth = self.optimal_bid[self.current_step, 0]
             current_ask_depth = 1 / 10**self.mdp

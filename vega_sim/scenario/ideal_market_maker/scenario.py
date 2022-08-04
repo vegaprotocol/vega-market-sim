@@ -107,7 +107,6 @@ class IdealMarketMaker(Scenario):
             wallet_name=TRADER_WALLET.name,
             wallet_pass=TRADER_WALLET.passphrase,
             tag=str(tag),
-            random_state=random_state,
         )
 
         randomtrader = LimitOrderTrader(
