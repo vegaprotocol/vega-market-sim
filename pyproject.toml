@@ -24,6 +24,7 @@ snakeviz = {version = "^2.1.1", optional = true}
 pytest-profiling = {version = "^1.7.0", optional = true}
 ipywidgets = {version = "^7.7.1", optional = true}
 plotly = {version = "^5.9.0", optional = true}
+graphviz = "^0.20.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"

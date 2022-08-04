@@ -43,7 +43,12 @@ class VegaWallet(Wallet):
             WALLET_CREATION_URL.format(wallet_server_url=self.wallet_url),
             json=req,
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except:
+            import pdb
+
+            pdb.set_trace()
 
         token = response.json()["token"]
 
@@ -129,7 +134,14 @@ class VegaWallet(Wallet):
         url = f"{self.wallet_url}/api/v1/command/sync"
 
         response = requests.post(url, headers=headers, json=submission)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except:
+            print(response.json())
+            import pdb
+
+            pdb.set_trace()
+            response.raise_for_status()
 
     def public_key(self, name: str) -> str:
         """Return the public key associated with a given wallet name.

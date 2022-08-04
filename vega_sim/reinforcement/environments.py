@@ -91,6 +91,7 @@ def set_up_background_market(
         asset_name=asset_name,
         market_position_decimal=2,
         commitment_amount=10000,
+        tag=str(tag),
     )
 
     background_market = BackgroundMarket(
@@ -101,7 +102,7 @@ def set_up_background_market(
         price_process=price_process,
         spread=spread,
         order_distribution_kappa=kappa,
-        tag=tag,
+        tag=str(tag),
     )
 
     tradingbot = MarketOrderTrader(

@@ -139,6 +139,7 @@ class BackgroundMarket(StateAgentWithWallet):
         num_levels_per_side: int = 20,
         base_volume_size: float = 0.1,
         order_distribution_kappa: float = 1,
+        minimum_price: float = 0.1,
         tag: str = "",
     ):
         super().__init__(wallet_name + tag, wallet_pass)
@@ -154,6 +155,7 @@ class BackgroundMarket(StateAgentWithWallet):
         self.market_name = market_name
         self.asset_name = asset_name
         self.kappa = order_distribution_kappa
+        self.minimum_price = minimum_price
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -259,31 +261,49 @@ class BackgroundMarket(StateAgentWithWallet):
         for i in range(self.num_levels_per_side):
             if i < len(buy_orders):
                 order_to_amend = buy_orders[i]
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    order_id=order_to_amend.id,
-                    price=new_buy_shape[i][0],
-                    volume_delta=new_buy_shape[i][1] - order_to_amend.remaining,
-                )
+                if new_buy_shape[i][0] <= self.minimum_price:
+                    self.vega.cancel_order(
+                        trading_wallet=self.wallet_name,
+                        market_id=self.market_id,
+                        order_id=order_to_amend.id,
+                    )
+                else:
+                    self.vega.amend_order(
+                        trading_wallet=self.wallet_name,
+                        market_id=self.market_id,
+                        order_id=order_to_amend.id,
+                        price=new_buy_shape[i][0],
+                        volume_delta=new_buy_shape[i][1] - order_to_amend.remaining,
+                    )
             else:
-                self._submit_order(
-                    vega_protos.SIDE_BUY, new_buy_shape[i][0], new_buy_shape[i][1]
-                )
+                if new_buy_shape[i][0] > self.minimum_price:
+                    self._submit_order(
+                        vega_protos.SIDE_BUY, new_buy_shape[i][0], new_buy_shape[i][1]
+                    )
 
             if i < len(sell_orders):
                 order_to_amend = sell_orders[i]
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    order_id=order_to_amend.id,
-                    price=new_sell_shape[i][0],
-                    volume_delta=new_sell_shape[i][1] - order_to_amend.remaining,
-                )
+                if new_sell_shape[i][0] <= self.minimum_price:
+                    self.vega.cancel_order(
+                        trading_wallet=self.wallet_name,
+                        market_id=self.market_id,
+                        order_id=order_to_amend.id,
+                    )
+                else:
+                    self.vega.amend_order(
+                        trading_wallet=self.wallet_name,
+                        market_id=self.market_id,
+                        order_id=order_to_amend.id,
+                        price=new_sell_shape[i][0],
+                        volume_delta=new_sell_shape[i][1] - order_to_amend.remaining,
+                    )
             else:
-                self._submit_order(
-                    vega_protos.SIDE_SELL, new_sell_shape[i][0], new_sell_shape[i][1]
-                )
+                if new_sell_shape[i][0] > self.minimum_price:
+                    self._submit_order(
+                        vega_protos.SIDE_SELL,
+                        new_sell_shape[i][0],
+                        new_sell_shape[i][1],
+                    )
 
 
 class MultiRegimeBackgroundMarket(StateAgentWithWallet):

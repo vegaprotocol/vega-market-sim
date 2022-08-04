@@ -41,7 +41,10 @@ def main(
     if not evaluate_only:
         # Agent training / evaluation:
         with VegaServiceNull(
-            warn_on_raw_data_access=False, run_with_console=False, retain_log_files=True
+            warn_on_raw_data_access=False,
+            run_with_console=False,
+            retain_log_files=True,
+            use_full_vega_wallet=True,
         ) as vega:
             # TRAINING OF AGENT
             for it in range(max_learning_iterations):
@@ -57,6 +60,10 @@ def main(
                                 "num_steps": 100,
                                 "step_tag": it,
                                 "block_size": 50,
+                                "initial_price": 100,
+                                "sigma": 1,
+                                "kappa": 10,
+                                "spread": 0.1,
                             },
                         )
                         # Policy evaluation + Policy improvement
@@ -84,6 +91,10 @@ def main(
                     "step_tag": it,
                     "block_size": 1,
                     "step_length_seconds": 1,
+                    "initial_price": 100,
+                    "sigma": 1,
+                    "kappa": 10,
+                    "spread": 0.1,
                 },
             )
             plot_simulation(simulation=result, results_dir=results_dir, tag=it)
