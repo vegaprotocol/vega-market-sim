@@ -314,19 +314,6 @@ optional = true
 python-versions = "*"
 
 [[package]]
-name = "graphviz"
-version = "0.20.1"
-description = "Simple Python interface for Graphviz"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[package.extras]
-dev = ["tox (>=3)", "flake8", "pep8-naming", "wheel", "twine"]
-docs = ["sphinx (>=5)", "sphinx-autodoc-typehints", "sphinx-rtd-theme"]
-test = ["pytest (>=7)", "pytest-mock (>=3)", "mock (>=4)", "pytest-cov", "coverage"]
-
-[[package]]
 name = "grpcio"
 version = "1.48.0rc1"
 description = "HTTP/2-based RPC framework"
@@ -1647,7 +1634,7 @@ profile = ["snakeviz", "pytest-profiling"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "7a23c7c54f2f1cbc1fdccef8fb9c1961ada1d54a8f828a2975a622974e48f526"
+content-hash = "320393cedf8e2c9fdae3bd77e617262ad502b82b4821d7dd7f69d5d41ca2ec86"
 
 [metadata.files]
 anyio = []
@@ -1680,10 +1667,6 @@ fastjsonschema = []
 flake8 = []
 fonttools = []
 gprof2dot = []
-graphviz = [
-    {file = "graphviz-0.20.1-py3-none-any.whl", hash = "sha256:587c58a223b51611c0cf461132da386edd896a029524ca61a1462b880bf97977"},
-    {file = "graphviz-0.20.1.zip", hash = "sha256:8c58f14adaa3b947daf26c19bc1e98c4e0702cdc31cf99153e6f06904d492bf8"},
-]
 grpcio = []
 grpcio-tools = []
 idna = []
