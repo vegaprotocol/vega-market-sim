@@ -129,11 +129,7 @@ class VegaWallet(Wallet):
         url = f"{self.wallet_url}/api/v1/command/sync"
 
         response = requests.post(url, headers=headers, json=submission)
-        try:
-            response.raise_for_status()
-        except:
-            print(response.json())
-            response.raise_for_status()
+        response.raise_for_status()
 
     def public_key(self, name: str) -> str:
         """Return the public key associated with a given wallet name.

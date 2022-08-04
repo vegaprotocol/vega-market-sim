@@ -618,13 +618,13 @@ class VegaServiceNull(VegaService):
                     "Timed out waiting for Vega simulator to start up"
                 )
 
-        # if self.run_with_console:
-        #     webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
+        if self.run_with_console:
+            webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
 
-        # if self.launch_graphql:
-        #     webbrowser.open(
-        #         f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
-        #     )
+        if self.launch_graphql:
+            webbrowser.open(
+                f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
+            )
 
         if self._start_order_feed:
             self.start_order_monitoring()

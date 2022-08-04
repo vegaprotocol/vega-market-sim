@@ -36,7 +36,7 @@ def main():
         seconds_per_block=scenario.step_length_seconds,
         transactions_per_block=5,
         retain_log_files=True,
-        use_full_vega_wallet=True,
+        use_full_vega_wallet=False,
     ) as vega:
         scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
 
