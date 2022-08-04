@@ -26,8 +26,8 @@ build_deps:
 pull_deps_ui:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
-	@echo "Downloading Vega slimline console"
-	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol/slimline-console ${EXTERN_DIR}/console; fi
+	@echo "Downloading Vega console"
+	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol/frontend-monorepo.git ${EXTERN_DIR}/console; fi
 ifneq (${CONSOLE_TAG},master)
 	@git -C ${EXTERN_DIR}/console pull; git -C ${EXTERN_DIR}/console checkout ${CONSOLE_TAG}
 else

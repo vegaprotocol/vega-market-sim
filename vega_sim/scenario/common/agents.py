@@ -188,6 +188,7 @@ class BackgroundMarket(StateAgentWithWallet):
         )
 
         self.vega.wait_for_total_catchup()
+
         for price, size in buy_shape:
             if price > 0:
                 self._submit_order(vega_protos.SIDE_BUY, price, size)
@@ -204,7 +205,7 @@ class BackgroundMarket(StateAgentWithWallet):
             order_type="TYPE_LIMIT",
             time_in_force="TIME_IN_FORCE_GTC",
             side=side,
-            volume=round(size, 4),
+            volume=size,
             price=price,
             wait=False,
         )

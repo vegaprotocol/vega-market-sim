@@ -57,6 +57,7 @@ class IdealMarketMaker(Scenario):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
+        settle_at_end: bool = True,
     ):
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
@@ -90,6 +91,7 @@ class IdealMarketMaker(Scenario):
         )
         self.market_name = f"ETH:USD" if market_name is None else market_name
         self.asset_name = f"tDAI" if asset_name is None else asset_name
+        self.settle_at_end = settle_at_end
 
     def _generate_price_process(self):
         _, price_process = RW_model(
@@ -134,6 +136,7 @@ class IdealMarketMaker(Scenario):
             asset_name=asset_name,
             commitment_amount=self.lp_commitamount,
             tag=str(tag),
+            settlement_price=price_process[-1] if self.settle_at_end else None,
         )
 
         trader = MarketOrderTrader(
