@@ -1,4 +1,4 @@
-VEGA_TAG := feature/fix-panic-pegged-orders-clean
+VEGA_TAG := develop
 CONSOLE_TAG := master
 EXTERN_DIR := "./extern"
 
