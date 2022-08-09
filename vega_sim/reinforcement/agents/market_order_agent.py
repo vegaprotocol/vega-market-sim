@@ -49,6 +49,7 @@ class MarketState:
     ask_volumes: List[float]
     trading_fee: float
     next_price: float
+    settlement_price: float
 
     def to_array(self):
         l = (
@@ -60,6 +61,7 @@ class MarketState:
                 int(self.market_active),
                 self.trading_fee,
                 self.next_price,
+                self.settlement_price,
             ]
             + self.bid_prices
             + self.ask_prices
@@ -158,7 +160,7 @@ class MarketOrderLearningAgent(LearningAgent):
 
         # Dimensions of state and action
         self.num_levels = num_levels
-        state_dim = 7 + 4 * self.num_levels  # from MarketState
+        state_dim = 8 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
         # Q func
         self.q_func = FFN_Q(
@@ -301,6 +303,7 @@ class MarketOrderLearningAgent(LearningAgent):
             self.market_id, num_levels=self.num_levels
         )  # make num_levels as a parameter?
         market_info = vega.market_info(market_id=self.market_id)
+
         return MarketState(
             position=position,
             margin_balance=account.margin,
@@ -321,6 +324,7 @@ class MarketOrderLearningAgent(LearningAgent):
             if self.price_process is not None
             and len(self.price_process) > self.step_num + 1
             else np.nan,
+            settlement_price=self.price_process[-1],
         )
 
     def step(self, vega_state: VegaState, random: bool = False):

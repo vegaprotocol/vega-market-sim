@@ -42,12 +42,13 @@ class RLMarketEnvironment(MarketEnvironmentWithState):
         self.learning_agent = agent
         self.agents = self._base_agents + [agent]
 
-    def step(self, vega: VegaService):
-        super().step(vega=vega)
+    # def step(self, vega: VegaService):
+    #     super().step(vega=vega)
 
-        state = self.state_func(vega)
-        # Learning agent
-        self.learning_agent.step(state, random=False)
+    #     state = self.state_func(vega)
+
+    #     # Learning agent
+    #     self.learning_agent.step(state, random=False)
 
 
 def set_up_background_market(

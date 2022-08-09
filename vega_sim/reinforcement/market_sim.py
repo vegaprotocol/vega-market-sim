@@ -44,7 +44,7 @@ def main(
             warn_on_raw_data_access=False,
             run_with_console=False,
             retain_log_files=True,
-            use_full_vega_wallet=True,
+            use_full_vega_wallet=False,
         ) as vega:
             # TRAINING OF AGENT
             for it in range(max_learning_iterations):

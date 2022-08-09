@@ -3,6 +3,8 @@ import json
 import logging
 from typing import Callable, Optional
 
+from numpy import block
+
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
@@ -461,6 +463,9 @@ def _make_and_wait_for_proposal(
         vega_protos.governance.Proposal.State, proposal.proposal.state
     )
     if prop_state in ["STATE_REJECTED", "STATE_DECLINED", "STATE_FAILED"]:
+        import pdb
+
+        pdb.set_trace()
         raise ProposalNotAcceptedError(
             f"Your proposal was {prop_state} due to"
             f" {enum_to_str(vega_protos.governance.ProposalError, proposal.proposal.reason)}."

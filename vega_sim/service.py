@@ -417,12 +417,12 @@ class VegaService(ABC):
             termination_pub_key=self.wallet.public_key(termination_wallet),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 150,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 200,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             risk_model=risk_model,
             liquidity_commitment=liquidity_commitment,
-            time_forward_fn=lambda: self.wait_fn(2),
+            time_forward_fn=lambda: self.wait_fn(1),
             price_monitoring_parameters=price_monitoring_parameters,
             **additional_kwargs,
         )
@@ -431,7 +431,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
-        self.wait_fn(110)
+        self.wait_fn(210)
 
     def submit_market_order(
         self,
@@ -681,24 +681,23 @@ class VegaService(ABC):
             str, the ID of the proposal
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
-
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
             value=new_value,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
             data_client=self.trading_data_client,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 150,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 200,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
-            time_forward_fn=lambda: self.wait_fn(2),
+            time_forward_fn=lambda: self.wait_fn(1),
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
         )
-        self.wait_fn(110)
+        self.wait_fn(210)
 
     def update_market(
         self,

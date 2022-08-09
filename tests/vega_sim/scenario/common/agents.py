@@ -102,7 +102,6 @@ def test_market_regime_sparse_to_dense_multi_gaps():
         if i < 101:
             assert regime == market_regimes[0]
         elif i >= 101 and i < 110:
-            print(i)
             assert regime is None
         elif i >= 110 and i < 241:
             assert regime == market_regimes[1]

@@ -90,13 +90,18 @@ def wait_for_core_catchup(
     """
     attempts = 1
     core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    time.sleep(0.001)
     core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
 
     while core_time != core_time_two:
         core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+        time.sleep(0.001)
         core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
         attempts += 1
         if attempts >= max_retries:
+            import pdb
+
+            pdb.set_trace()
             raise DataNodeBehindError(
                 f"Core Node is behind and not catching up after {attempts} retries"
             )
@@ -109,7 +114,7 @@ def wait_for_acceptance(
 ) -> T:
     logger.debug("Waiting for proposal acceptance")
     submission_accepted = False
-    for _ in range(1000):
+    for i in range(1000):
         try:
             proposal = submission_load_func(submission_ref)
         except:
