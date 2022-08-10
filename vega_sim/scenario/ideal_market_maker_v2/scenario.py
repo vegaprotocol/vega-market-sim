@@ -1,5 +1,6 @@
 import argparse
 import logging
+import numpy as np
 from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
@@ -88,16 +89,20 @@ class IdealMarketMaker(Scenario):
         self.backgroundmarket_number_levels_per_side = (
             backgroundmarket_number_levels_per_side
         )
-        self.market_name = f"ETH:USD" if market_name is None else market_name
-        self.asset_name = f"tDAI" if asset_name is None else asset_name
+        self.market_name = "ETH:USD" if market_name is None else market_name
+        self.asset_name = "tDAI" if asset_name is None else asset_name
 
-    def _generate_price_process(self):
+    def _generate_price_process(
+        self,
+        random_state: Optional[np.random.RandomState] = None,
+    ):
         _, price_process = RW_model(
             T=self.num_steps * self.dt,
             dt=self.dt,
             mdp=self.market_decimal,
             sigma=self.sigma,
             Midprice=self.initial_price,
+            random_state=random_state,
         )
         return price_process
 
@@ -105,12 +110,13 @@ class IdealMarketMaker(Scenario):
         self,
         vega: VegaServiceNull,
         tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironmentWithState:
         # Set up market name and settlement asset
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
 
-        price_process = self._generate_price_process()
+        price_process = self._generate_price_process(random_state=random_state)
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
@@ -145,6 +151,7 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
+            random_state=random_state,
         )
 
         background_market = BackgroundMarket(
@@ -207,10 +214,10 @@ class IdealMarketMaker(Scenario):
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
+        random_state: Optional[np.random.RandomState] = None,
     ):
         env = self.set_up_background_market(
-            vega=vega,
-            tag=str(0),
+            vega=vega, tag=str(0), random_state=random_state
         )
         result = env.run(
             pause_at_completion=pause_at_completion,

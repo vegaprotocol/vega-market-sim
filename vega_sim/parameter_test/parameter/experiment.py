@@ -4,6 +4,7 @@ import json
 import os
 from typing import Any, Dict, List, Optional, Tuple
 import pathlib
+import numpy as np
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.null_service import VegaServiceNull
@@ -52,6 +53,7 @@ def _run_parameter_iteration(
     parameter_to_vary: str,
     value: str,
     additional_parameters_to_set: Optional[Dict[str, str]] = None,
+    random_state: Optional[np.random.RandomState] = None,
 ) -> Any:
     with VegaServiceNull(
         warn_on_raw_data_access=False, retain_log_files=True, run_with_console=False
@@ -73,10 +75,8 @@ def _run_parameter_iteration(
             PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
         )
 
-        res = scenario.run_iteration(vega=vega)
-        # import pdb
+        res = scenario.run_iteration(vega=vega, random_state=random_state)
 
-        # pdb.set_trace()
         return res
 
 
@@ -84,14 +84,18 @@ def run_single_parameter_experiment(
     experiment: SingleParameterExperiment,
 ) -> Dict[str, List[Any]]:
     results = {}
+    random_seeds = [
+        np.random.RandomState(i) for i in range(experiment.runs_per_scenario)
+    ]
     for value in experiment.values:
         results[value] = []
-        for _ in range(experiment.runs_per_scenario):
+        for state in random_seeds:
             results[value].append(
                 _run_parameter_iteration(
                     scenario=experiment.scenario,
                     parameter_to_vary=experiment.parameter_to_vary,
                     value=value,
+                    random_state=state,
                 )
             )
     return results
