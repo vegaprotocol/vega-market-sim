@@ -419,7 +419,6 @@ class VegaService(ABC):
             market_decimals=market_decimals,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
-            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             risk_model=risk_model,
             liquidity_commitment=liquidity_commitment,
             time_forward_fn=lambda: self.wait_fn(2),
@@ -682,7 +681,6 @@ class VegaService(ABC):
             data_client=self.trading_data_client,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
-            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             time_forward_fn=lambda: self.wait_fn(2),
         )
         gov.approve_proposal(
@@ -784,7 +782,6 @@ class VegaService(ABC):
             data_client=self.trading_data_client,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
-            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             time_forward_fn=lambda: self.wait_fn(2),
         )
         gov.approve_proposal(
