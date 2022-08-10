@@ -526,6 +526,17 @@ class VegaService(ABC):
             Optional[str], If order acceptance is waited for, returns order ID.
                 Otherwise None
         """
+        submit_volume = num_to_padded_int(
+            volume,
+            self.market_pos_decimals[market_id],
+        )
+        if submit_volume == 0:
+            msg = "Not submitting order as volume is 0"
+            if wait:
+                raise Exception(msg)
+            else:
+                logger.debug(msg)
+                return
         return trading.submit_order(
             wallet=self.wallet,
             wallet_name=trading_wallet,
@@ -534,10 +545,7 @@ class VegaService(ABC):
             order_type=order_type,
             time_in_force=time_in_force,
             side=side,
-            volume=num_to_padded_int(
-                volume,
-                self.market_pos_decimals[market_id],
-            ),
+            volume=submit_volume,
             price=num_to_padded_int(
                 price,
                 self.market_price_decimals[market_id],
