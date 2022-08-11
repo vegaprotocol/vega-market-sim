@@ -57,6 +57,7 @@ class IdealMarketMaker(Scenario):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
+        price_process_fn: Optional[Callable[[None], List[float]]] = None,
     ):
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
@@ -88,8 +89,9 @@ class IdealMarketMaker(Scenario):
         self.backgroundmarket_number_levels_per_side = (
             backgroundmarket_number_levels_per_side
         )
-        self.market_name = f"ETH:USD" if market_name is None else market_name
-        self.asset_name = f"tDAI" if asset_name is None else asset_name
+        self.market_name = "ETH:USD" if market_name is None else market_name
+        self.asset_name = "tDAI" if asset_name is None else asset_name
+        self.price_process_fn = price_process_fn
 
     def _generate_price_process(self):
         _, price_process = RW_model(
@@ -110,7 +112,11 @@ class IdealMarketMaker(Scenario):
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
 
-        price_process = self._generate_price_process()
+        price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process()
+        )
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
