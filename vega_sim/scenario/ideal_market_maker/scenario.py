@@ -1,5 +1,6 @@
 import argparse
 import logging
+import numpy as np
 from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
@@ -72,6 +73,7 @@ class IdealMarketMaker(Scenario):
         self,
         vega: VegaServiceNull,
         tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironment:
         _, price_process = RW_model(
             T=self.num_steps * self.dt,
@@ -79,6 +81,7 @@ class IdealMarketMaker(Scenario):
             mdp=self.market_decimal,
             sigma=self.sigma,
             Midprice=self.initial_price,
+            random_state=random_state,
         )
 
         market_maker = OptimalMarketMaker(
@@ -151,10 +154,14 @@ class IdealMarketMaker(Scenario):
         )
         return env
 
-    def run_iteration(self, vega: VegaServiceNull, pause_at_completion: bool = False):
+    def run_iteration(
+        self,
+        vega: VegaServiceNull,
+        pause_at_completion: bool = False,
+        random_state: Optional[np.random.RandomState] = None,
+    ):
         env = self.set_up_background_market(
-            vega=vega,
-            tag=str(0),
+            vega=vega, tag=str(0), random_state=random_state
         )
         result = env.run(
             pause_at_completion=pause_at_completion,
@@ -163,7 +170,6 @@ class IdealMarketMaker(Scenario):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()

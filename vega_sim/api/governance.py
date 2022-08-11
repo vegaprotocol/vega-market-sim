@@ -108,7 +108,6 @@ def propose_future_market(
     market_decimals: Optional[int] = None,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    validation_time: Optional[int] = None,
     liquidity_commitment: Optional[vega_protos.governance.NewMarketCommitment] = None,
     risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
@@ -264,7 +263,6 @@ def propose_future_market(
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
-        validation_time=validation_time,
     )
     proposal.terms.new_market.CopyFrom(market_proposal)
 
@@ -284,7 +282,6 @@ def propose_network_parameter_change(
     wallet: Wallet,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    validation_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClient] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
 ):
@@ -293,7 +290,6 @@ def propose_network_parameter_change(
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
-        validation_time=validation_time,
     )
     network_param_update.terms.update_network_parameter.CopyFrom(
         vega_protos.governance.UpdateNetworkParameter(
@@ -316,7 +312,6 @@ def propose_market_update(
     market_update: vega_protos.governance.UpdateMarketConfiguration,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    validation_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClient] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
 ) -> str:
@@ -325,7 +320,6 @@ def propose_market_update(
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
-        validation_time=validation_time,
     )
     network_param_update.terms.update_market.CopyFrom(
         vega_protos.governance.UpdateMarket(market_id=market_id, changes=market_update)
@@ -384,8 +378,13 @@ def propose_asset(
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
-        validation_time=validation_time,
     )
+    proposal.terms.validation_timestamp = (
+        validation_time
+        if validation_time is not None
+        else get_blockchain_time(data_client) + 10
+    )
+
     proposal.terms.new_asset.CopyFrom(
         vega_protos.governance.NewAsset(changes=asset_detail)
     )
@@ -403,11 +402,10 @@ def _build_generic_proposal(
     data_client: vac.VegaTradingDataClient,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    validation_time: Optional[int] = None,
 ) -> commands_protos.commands.ProposalSubmission:
-    # Set closing/enactment and validation timestamps to valid time offsets
+    # Set closing/enactment timestamps to valid time offsets
     # from the current Vega blockchain time if not already set
-    none_times = [i is None for i in [closing_time, enactment_time, validation_time]]
+    none_times = [i is None for i in [closing_time, enactment_time]]
     if any(none_times):
         if not all(none_times):
             logger.warn(
@@ -419,19 +417,15 @@ def _build_generic_proposal(
 
         closing_time = blockchain_time_seconds + 172800
         enactment_time = blockchain_time_seconds + 172900
-        validation_time = blockchain_time_seconds + 100
 
     # Propose market
     proposal_ref = f"{pub_key}-{generate_id(6)}"
 
-    # Set closing/enactment and validation timestamps to valid time offsets
-    # from the current Vega blockchain time
     return commands_protos.commands.ProposalSubmission(
         reference=proposal_ref,
         terms=vega_protos.governance.ProposalTerms(
             closing_timestamp=closing_time,
             enactment_timestamp=enactment_time,
-            validation_timestamp=validation_time,
         ),
         rationale=vega_protos.governance.ProposalRationale(
             description="Making a proposal"
