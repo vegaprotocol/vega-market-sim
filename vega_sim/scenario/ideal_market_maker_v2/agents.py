@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from collections import namedtuple
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
@@ -56,6 +56,10 @@ class OptimalMarketMaker(StateAgentWithWallet):
         market_position_decimal: int = 2,
         market_name: str = None,
         asset_name: str = None,
+        initial_lp_specs: Tuple[List[Tuple[str, int, int]]] = (
+            [("PEGGED_REFERENCE_BEST_BID", 0.1, 1)],
+            [("PEGGED_REFERENCE_BEST_ASK", 0.1, 1)],
+        ),
         commitment_amount: float = 6000,
         tag: str = "",
     ):
@@ -77,6 +81,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.market_position_decimal = market_position_decimal
         self.commitment_amount = commitment_amount
         self.initial_asset_mint = initial_asset_mint
+        self.initial_lp_specs = initial_lp_specs
 
         self.current_step = 0
 
@@ -178,8 +183,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 asset_id=self.tdai_id,
                 commitment_amount=self.commitment_amount,
                 fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
+                buy_specs=self.initial_lp_specs[0],
+                sell_specs=self.initial_lp_specs[1],
                 market_decimals=self.mdp,
             ),
         )

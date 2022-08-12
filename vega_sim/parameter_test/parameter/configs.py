@@ -26,6 +26,7 @@ TARGET_STAKE_SCALING_FACTOR_IDEAL = SingleParameterExperiment(
             additional_data_fns=[
                 v1_ideal_mm_additional_data,
                 target_stake_additional_data,
+                limit_order_book,
             ]
         ),
     ),
@@ -45,6 +46,7 @@ TAU_SCALING_FACTOR_IDEAL = SingleParameterExperiment(
             additional_data_fns=[
                 v1_ideal_mm_additional_data,
                 tau_scaling_additional_data,
+                limit_order_book,
             ]
         ),
     ),
@@ -73,7 +75,7 @@ TARGET_STAKE_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
         q_upper=50,
         q_lower=-50,
         kappa=50,
-        sigma=0.5,
+        sigma=0.1,
         num_steps=288,
         backgroundmarket_tick_spacing=0.002,
         backgroundmarket_number_levels_per_side=20,
@@ -114,10 +116,10 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
         q_upper=50,
         q_lower=-50,
         kappa=50,
-        sigma=0.5,
+        sigma=0.1,
         num_steps=288,
         backgroundmarket_tick_spacing=0.002,
-        backgroundmarket_number_levels_per_side=25,
+        backgroundmarket_number_levels_per_side=20,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
@@ -126,7 +128,7 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
             ]
         ),
     ),
-    runs_per_scenario=1,
+    runs_per_scenario=2,
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
     ],
