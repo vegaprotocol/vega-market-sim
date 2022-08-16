@@ -27,36 +27,32 @@ def RW_model(
     """
     Given the Midprice at time 0, simulate the asset price based on Random Walk Model
     """
+    random_state_set = random_state is not None
+    random_state = random_state if random_state_set else np.random.RandomState()
 
     Termination = int(T / dt)
     time_step = np.linspace(0, Termination, Termination + 1).astype(int)
-    # use seed to make sure gernerate same random number (use to compare different strategy)
-    # random_state = np.random.RandomState()
 
-    dW = np.sqrt(dt) * random_state.randn(len(time_step) - 1)
     S = np.zeros(len(time_step))
     S[0] = Midprice
-    # for i in range(len(time_step)-1):
-    #     S[i+1] = S[i] + sigma*dW[i]
 
-    for i in range(len(time_step) - 1):
-        S[i + 1] = S[i] * np.exp(-0.5 * sigma * sigma * dt + sigma * dW[i])
-
-    # market decimal place
-    S = np.round(S, mdp)
-
-    # make sure the simulated external price is larger than 0
     while True:
-        random_state = np.random.RandomState()
-        # use seed to make sure gernerate same random number (use to compare different strategy)
-        # random_state = np.random.RandomState(seed=123)
-        dW = np.sqrt(dt) * random_state.randn(len(time_step) - 1)
+        dW = random_state.randn(len(time_step) - 1)
         # Simulate external midprice
         for i in range(len(time_step) - 1):
             S[i + 1] = S[i] + sigma * dW[i]
         # market decimal place
         S = np.round(S, mdp)
 
+        # If random state is passed then error if it generates a negative price
+        # Otherwise retry with a new seed
         if (S > 0).all():
             break
+        else:
+            if random_state_set:
+                raise Exception(
+                    "Negative price generated with current random seed. Please try"
+                    " another or don't specify one"
+                )
+            random_state = np.random.RandomState()
     return time_step, S

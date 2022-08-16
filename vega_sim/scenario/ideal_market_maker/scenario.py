@@ -33,6 +33,12 @@ class IdealMarketMaker(Scenario):
         dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
+        market_position_decimal: int = 0,
+        market_name: str = "ETH:USD",
+        asset_name: str = "tDAI",
+        initial_asset_mint: float = 1e6,
+        lp_initial_mint: float = 1e6,
+        lp_commitamount: float = 20000,
         initial_price: float = 0.3,
         sigma: float = 1,
         kappa: float = 500,
@@ -52,8 +58,14 @@ class IdealMarketMaker(Scenario):
     ):
         self.num_steps = num_steps
         self.dt = dt
+        self.market_name = market_name
+        self.asset_name = asset_name
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
+        self.market_position_decimal = market_position_decimal
+        self.lp_commitamount = lp_commitamount
+        self.initial_asset_mint = initial_asset_mint
+        self.lp_initial_mint = lp_initial_mint
         self.initial_price = initial_price
         self.sigma = sigma
         self.kappa = kappa
@@ -84,6 +96,9 @@ class IdealMarketMaker(Scenario):
             random_state=random_state,
         )
 
+        market_name = self.market_name + f"_{tag}" if tag else self.market_name
+        asset_name = self.asset_name + f"_{tag}" if tag else self.asset_name
+
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
             wallet_pass=MM_WALLET.passphrase,
@@ -99,7 +114,13 @@ class IdealMarketMaker(Scenario):
             terminal_penalty_parameter=self.alpha,
             running_penalty_parameter=self.phi,
             asset_decimal=self.asset_decimal,
+            initial_asset_mint=self.lp_initial_mint,
             market_decimal=self.market_decimal,
+            market_position_decimal=self.market_position_decimal,
+            market_name=market_name,
+            asset_name=asset_name,
+            commitamount=self.lp_commitamount,
+            random_state=random_state,
             tag=str(tag),
         )
 
