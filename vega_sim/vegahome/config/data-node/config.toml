@@ -263,7 +263,7 @@ UlimitNOFile = 8192
   Timeout = "5s"
   Port = "TO_BE_SET"
   Path = "/metrics"
-  Enabled = false
+  Enabled = true
 
 [Transfers]
   Level = "Info"
@@ -325,4 +325,4 @@ UlimitNOFile = 8192
     Username = "vega"
     Password = "vega"
     Database = "vega"
-    UseTransactions = true
+    UseTransactions = false

@@ -80,4 +80,4 @@ def get_historic_price_series(
 
 
 if __name__ == "__main__":
-    print(get_historic_price_series("BTC-USD", granularity=Granularity.HOUR))
+    print(get_historic_price_series("ETH-USD", granularity=Granularity.HOUR))

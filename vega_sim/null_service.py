@@ -293,6 +293,10 @@ def _update_node_config(
         existing_ports.add(new_port)
         port_config[port] = new_port
 
+    if port_config.get(Ports.METRICS):
+        logger.info(
+            f"Launching Datanode Metrics at port {port_config.get(Ports.METRICS)}"
+        )
     with open(config_path, "w") as f:
         toml.dump(config_toml, f)
 

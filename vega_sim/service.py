@@ -287,6 +287,11 @@ class VegaService(ABC):
             num_to_padded_int(amount, asset_decimals),
             faucet_url=self.faucet_url,
         )
+        self.wait_fn(1)
+        import time
+
+        time.sleep(2)
+        self.wait_for_core_catchup()
         self.wait_fn(2)
 
     def forward(self, time: str) -> None:
@@ -307,12 +312,13 @@ class VegaService(ABC):
         wallet_name: str,
         name: str,
         symbol: str,
-        total_supply: int = 1,
+        total_supply: int = 10e6,
         decimals: int = 0,
         quantum: int = 1,
         max_faucet_amount: int = 10e9,
     ):
-        """Creates a simple asset and automatically approves the proposal (assuming the proposing wallet has sufficient governance tokens).
+        """Creates a simple asset and automatically approves the proposal (assuming the
+         proposing wallet has sufficient governance tokens).
 
         Args:
             wallet_name:
@@ -322,13 +328,15 @@ class VegaService(ABC):
             symbol:
                 str, The symbol to use for the asset
             total_supply:
-                int, The initial total supply of the asset (will increase when fauceted)
+                int, The initial total supply of the asset
             decimals:
-                int, The number of decimals in which to represent the asset. (e.g with 2 then integer value 101 is really 1.01)
+                int, The number of decimals in which to represent the asset.
+                    (e.g with 2 then integer value 101 is really 1.01)
             quantum:
                 int, The smallest unit of currency it makes sense to talk about
             max_faucet_amount:
-                int, The maximum number of tokens which can be fauceted (in full decimal numbers, rather than asset decimal)
+                int, The maximum number of tokens which can be fauceted
+                    (in full decimal numbers, rather than asset decimal)
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
@@ -337,7 +345,7 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             name=name,
             symbol=symbol,
-            total_supply=total_supply,
+            total_supply=total_supply * 10**decimals,
             decimals=decimals,
             max_faucet_amount=max_faucet_amount * 10**decimals,
             quantum=quantum,
@@ -526,6 +534,13 @@ class VegaService(ABC):
             Optional[str], If order acceptance is waited for, returns order ID.
                 Otherwise None
         """
+        volume = num_to_padded_int(
+            volume,
+            self.market_pos_decimals[market_id],
+        )
+        # Passing wait False is fire and forget, so just return given this does nothing
+        if volume == 0 and not wait:
+            return
         return trading.submit_order(
             wallet=self.wallet,
             wallet_name=trading_wallet,
@@ -534,10 +549,7 @@ class VegaService(ABC):
             order_type=order_type,
             time_in_force=time_in_force,
             side=side,
-            volume=num_to_padded_int(
-                volume,
-                self.market_pos_decimals[market_id],
-            ),
+            volume=volume,
             price=num_to_padded_int(
                 price,
                 self.market_price_decimals[market_id],
