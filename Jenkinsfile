@@ -6,8 +6,7 @@ pipeline {
     }
     parameters {
         string(name: 'VEGA_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/vega repository')
-        string(name: 'DATA_NODE_BRANCH', defaultValue: 'develop', description: 'Git branch name of the vegaprotocol/data-node repository')
-    }
+   }
     environment {
         CGO_ENABLED = 0
         GO111MODULE = 'on'
@@ -29,14 +28,6 @@ pipeline {
                     steps {
                         dir('extern/vega') {
                             git branch: "${params.VEGA_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git'
-                        }
-                    }
-                }
-                stage('data-node') {
-                    options { retry(3) }
-                    steps {
-                        dir('extern/data-node') {
-                            git branch: "${params.DATA_NODE_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/data-node.git'
                         }
                     }
                 }

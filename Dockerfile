@@ -5,7 +5,6 @@ WORKDIR /extern
 RUN mkdir /extern/bin
 RUN ls -l
 RUN cd ./vega && CGO_ENABLED=0 go build -o ../bin/ ./... && cd ..
-RUN cd ./data-node && CGO_ENABLED=0 go build -o ../bin/ ./... && cd ..
 
 FROM python:3.10-slim-bullseye AS vegasim_base
 
