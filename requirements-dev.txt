@@ -22,6 +22,8 @@ executing==0.9.1; python_full_version >= "3.7.0" and python_full_version < "4.0.
 fastjsonschema==2.16.1; python_full_version >= "3.7.0" and python_full_version < "4.0.0" and python_version >= "3.7"
 flake8==4.0.1; python_version >= "3.6"
 fonttools==4.34.4; python_version >= "3.7"
+googleapis-common-protos==1.56.4; python_version >= "3.7"
+grpc-gateway-protoc-gen-openapiv2==0.1.0; python_version >= "3.6"
 grpcio-tools==1.48.0; python_version >= "3.6"
 grpcio==1.48.0; python_version >= "3.6"
 idna==3.3; python_version >= "3.7" and python_version < "4"
