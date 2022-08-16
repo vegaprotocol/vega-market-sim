@@ -42,7 +42,7 @@ build_deps_ui:
 build_proto: pull_deps
 	@rm -rf ./vega_sim/proto
 	@mkdir ./vega_sim/proto
-	@python -m grpc_tools.protoc -I ${EXTERN_DIR}/vega/protos/sources --python_out=vega_sim/proto --grpc_python_out=vega_sim/proto $(shell find ${EXTERN_DIR}/vega/protos/sources -name '*.proto')
+	@buf generate extern/vega/protos/sources 
 	@GENERATED_DIR=./vega_sim/proto scripts/post-generate.sh
 
 .PHONY: black

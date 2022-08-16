@@ -306,12 +306,37 @@ unicode = ["unicodedata2 (>=14.0.0)"]
 woff = ["zopfli (>=0.1.4)", "brotlicffi (>=0.8.0)", "brotli (>=1.0.1)"]
 
 [[package]]
+name = "googleapis-common-protos"
+version = "1.56.4"
+description = "Common protobufs used in Google APIs"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+protobuf = ">=3.15.0,<5.0.0dev"
+
+[package.extras]
+grpc = ["grpcio (>=1.0.0,<2.0.0dev)"]
+
+[[package]]
 name = "gprof2dot"
 version = "2022.7.29"
 description = "Generate a dot graph from the output of several profilers."
 category = "main"
 optional = true
 python-versions = ">=2.7"
+
+[[package]]
+name = "grpc-gateway-protoc-gen-openapiv2"
+version = "0.1.0"
+description = "Provides the missing pieces for gRPC Gateway."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+googleapis-common-protos = "*"
 
 [[package]]
 name = "grpcio"
@@ -1612,7 +1637,7 @@ profile = ["snakeviz", "pytest-profiling"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "aa70acbc613230ef642da0b06c92958be197691e4e29cb3a270be4d8258a764c"
+content-hash = "6a28fb191a85f11b3509502e390057f9e58996b47b73639aaece5e5bab97c609"
 
 [metadata.files]
 anyio = []
@@ -1647,9 +1672,17 @@ executing = [
 fastjsonschema = []
 flake8 = []
 fonttools = []
+googleapis-common-protos = [
+    {file = "googleapis-common-protos-1.56.4.tar.gz", hash = "sha256:c25873c47279387cfdcbdafa36149887901d36202cb645a0e4f29686bf6e4417"},
+    {file = "googleapis_common_protos-1.56.4-py2.py3-none-any.whl", hash = "sha256:8eb2cbc91b69feaf23e32452a7ae60e791e09967d81d4fcc7fc388182d1bd394"},
+]
 gprof2dot = [
     {file = "gprof2dot-2022.7.29-py2.py3-none-any.whl", hash = "sha256:f165b3851d3c52ee4915eb1bd6cca571e5759823c2cd0f71a79bda93c2dc85d6"},
     {file = "gprof2dot-2022.7.29.tar.gz", hash = "sha256:45b4d298bd36608fccf9511c3fd88a773f7a1abc04d6cd39445b11ba43133ec5"},
+]
+grpc-gateway-protoc-gen-openapiv2 = [
+    {file = "grpc-gateway-protoc-gen-openapiv2-0.1.0.tar.gz", hash = "sha256:03b8934080ae81f709af041e4f89694db586a95ff35abba05d033d499811d4f6"},
+    {file = "grpc_gateway_protoc_gen_openapiv2-0.1.0-py3-none-any.whl", hash = "sha256:45ba00a6e9df13d35fe46d4149c62361a63c27e61fb08faa192aea0f4fbed609"},
 ]
 grpcio = [
     {file = "grpcio-1.48.0-cp310-cp310-linux_armv7l.whl", hash = "sha256:4a049a032144641ed5d073535c0dc69eb6029187cc729a66946c86dcc8eec3a1"},

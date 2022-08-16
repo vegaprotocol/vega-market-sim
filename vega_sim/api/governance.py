@@ -353,7 +353,6 @@ def propose_asset(
     wallet: Wallet,
     name: str,
     symbol: str,
-    total_supply: int,
     decimals: int,
     data_client: vac.VegaTradingDataClient,
     quantum: int = 1,
@@ -366,7 +365,6 @@ def propose_asset(
     asset_detail = vega_protos.assets.AssetDetails(
         name=name,
         symbol=symbol,
-        total_supply=str(int(total_supply)),
         decimals=decimals,
         quantum=str(int(quantum)),
         builtin_asset=vega_protos.assets.BuiltinAsset(
