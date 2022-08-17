@@ -458,7 +458,7 @@ class VegaServiceNull(VegaService):
         run_wallet_with_token_dapp: bool = False,
         port_config: Optional[Dict[Ports, int]] = None,
         warn_on_raw_data_access: bool = True,
-        transactions_per_block: int = 1,
+        transactions_per_block: int = 5,
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
         start_order_feed: bool = True,
