@@ -27,7 +27,10 @@ pipeline {
                     options { retry(3) }
                     steps {
                         dir('extern/vega') {
-                            git branch: "${params.VEGA_BRANCH}", credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git'
+                            checkout(
+                                [$class: 'GitSCM', branches: [[name: "${params.VEGA_BRANCH}" ]], 
+                                userRemoteConfigs: [[credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git']]]
+                            )
                         }
                     }
                 }
