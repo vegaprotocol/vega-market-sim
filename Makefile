@@ -1,4 +1,4 @@
-VEGA_TAG := develop
+VEGA_TAG := master
 CONSOLE_TAG := master
 EXTERN_DIR := "./extern"
 
