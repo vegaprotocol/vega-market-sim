@@ -29,7 +29,7 @@ pull_deps_ui:
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
 	@echo "Downloading Vega slimline console"
 	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol/slimline-console ${EXTERN_DIR}/console; fi
-ifneq (${CVEGA_SIM_ONSOLE_TAG},master)
+ifneq (${VEGA_SIM_CONSOLE_TAG},master)
 	@git -C ${EXTERN_DIR}/console pull; git -C ${EXTERN_DIR}/console checkout ${VEGA_SIM_CONSOLE_TAG}
 else
 	@git -C ${EXTERN_DIR}/console checkout master; git -C ${EXTERN_DIR}/console pull
