@@ -3,6 +3,7 @@ import json
 import logging
 from typing import Callable, Optional
 
+
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
@@ -426,7 +427,7 @@ def _build_generic_proposal(
             enactment_timestamp=enactment_time,
         ),
         rationale=vega_protos.governance.ProposalRationale(
-            description="Making a proposal"
+            description="Making a proposal", title="This is a proposal"
         ),
     )
 
