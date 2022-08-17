@@ -262,8 +262,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 self.vega.submit_simple_liquidity(
                     wallet_name=self.wallet_name,
                     market_id=self.market_id,
-                    commitment_amount=100,
-                    fee=0.002,
+                    commitment_amount=self.commitamoumt,
+                    fee=self.lp_fee,
                     reference_buy="PEGGED_REFERENCE_MID",
                     reference_sell="PEGGED_REFERENCE_MID",
                     delta_buy=temp_depth,
@@ -294,8 +294,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.submit_simple_liquidity(
             wallet_name=self.wallet_name,
             market_id=self.market_id,
-            commitment_amount=100,
-            fee=0.002,
+            commitment_amount=self.commitamoumt,
+            fee=self.lp_fee,
             reference_buy="PEGGED_REFERENCE_MID",
             reference_sell="PEGGED_REFERENCE_MID",
             delta_buy=self.bid_depth,
@@ -359,7 +359,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                     market_id=self.market_id,
                     side="SIDE_BUY",
                     volume=self.num_buyMO,
-                    wait=False,
+                    wait=True,
                     fill_or_kill=False,
                 )
 
@@ -376,7 +376,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                     market_id=self.market_id,
                     side="SIDE_SELL",
                     volume=self.num_sellMO,
-                    wait=False,
+                    wait=True,
                     fill_or_kill=False,
                 )
 
@@ -499,13 +499,7 @@ class LimitOrderTrader(StateAgentWithWallet):
 
     def step_limitorders(self, vega_state: VegaState):
         for _ in range(self.num_post_at_bid - 1):
-            random_delta = (
-                np.random.randint(
-                    int(self.spread * 10**self.mdp),
-                    int(30 * self.spread * 10**self.mdp),
-                )
-                / 10**self.mdp
-            )
+            random_delta = self.spread
 
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
@@ -518,13 +512,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             )
 
         for _ in range(self.num_post_at_ask - 1):
-            random_delta = (
-                np.random.randint(
-                    int(self.spread * 10**self.mdp),
-                    int(30 * self.spread * 10**self.mdp),
-                )
-                / 10**self.mdp
-            )
+            random_delta = self.spread
 
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
