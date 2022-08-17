@@ -47,13 +47,21 @@ pipeline {
         }
 
         stage('Tests') {
-            steps {
-                sh label: 'Run Integration Tests', script: '''
-                    scripts/run-docker-integration-test.sh ${BUILD_NUMBER}
-                '''
-                sh label: 'Example Notebook Tests', script: '''
-                    scripts/run-docker-example-notebook-test.sh
-                '''
+            parallel {
+                stage('Integration Tests') {
+                    steps {
+                        sh label: 'Run Integration Tests', script: '''
+                            scripts/run-docker-integration-test.sh ${BUILD_NUMBER}
+                        '''
+                    }
+                }
+                stage('Notebook Tests') {
+                    steps {
+                        sh label: 'Example Notebook Tests', script: '''
+                            scripts/run-docker-example-notebook-test.sh
+                        '''
+                    }
+                }
             }
             post {
                 always {
