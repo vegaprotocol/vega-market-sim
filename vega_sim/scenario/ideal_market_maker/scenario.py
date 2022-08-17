@@ -127,6 +127,9 @@ class IdealMarketMaker(Scenario):
         tradingbot = MarketOrderTrader(
             wallet_name=TRADER_WALLET.name,
             wallet_pass=TRADER_WALLET.passphrase,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
 
@@ -138,6 +141,9 @@ class IdealMarketMaker(Scenario):
             initial_price=self.initial_price,
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
 
@@ -146,6 +152,9 @@ class IdealMarketMaker(Scenario):
             wallet_pass=AUCTION1_WALLET.passphrase,
             side="SIDE_BUY",
             initial_price=self.initial_price,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
 
@@ -154,6 +163,9 @@ class IdealMarketMaker(Scenario):
             wallet_pass=AUCTION2_WALLET.passphrase,
             side="SIDE_SELL",
             initial_price=self.initial_price,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
 

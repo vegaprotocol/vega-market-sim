@@ -45,29 +45,23 @@ class MarketEnvironment(MarketEnvironmentWithState):
 
         self.agents[0].AvoidCrossedOrder()
 
-        try:
-            self.agents[2].step_amendprice(state)
-        except Exception as e:
-            print(e)
+        
+        self.agents[2].step_amendprice(state)
         self.agents[0].step(state)
 
-        try:
-            self.agents[2].num_post_at_bid = self.agents[0].num_bidhit
-            self.agents[2].num_post_at_ask = self.agents[0].num_askhit
-            self.agents[1].num_buyMO = self.agents[0].num_buyMO
-            self.agents[1].num_sellMO = self.agents[0].num_sellMO
-        except Exception as e:
-            print(e)
+    
+        self.agents[2].num_post_at_bid = self.agents[0].num_bidhit
+        self.agents[2].num_post_at_ask = self.agents[0].num_askhit
+        self.agents[1].num_buyMO = self.agents[0].num_buyMO
+        self.agents[1].num_sellMO = self.agents[0].num_sellMO
 
-        try:
-            self.agents[2].step_limitorders(state)
-            self.agents[1].step_buy(state)
-            self.agents[2].step_limitorderask(state)
-        except Exception as e:
-            print(e)
 
-        try:
-            self.agents[1].step_sell(state)
-            self.agents[2].step_limitorderbid(state)
-        except Exception as e:
-            print(e)
+
+        self.agents[2].step_limitorders(state)
+        self.agents[1].step_buy(state)
+        self.agents[2].step_limitorderask(state)
+
+
+        self.agents[1].step_sell(state)
+        self.agents[2].step_limitorderbid(state)
+
