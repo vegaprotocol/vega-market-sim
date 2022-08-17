@@ -67,6 +67,8 @@ class SlimWallet(Wallet):
         self._create_nonces()
         self._create_sigs()
 
+        self.chain_id_bytes = bytes("test-chain-NbThRw", "utf-8") + b"\0"
+
     def _create_sigs(self):
         self.sigs = [os.urandom(6).hex() for _ in range(self.num_sigs_to_create)]
 
@@ -129,7 +131,7 @@ class SlimWallet(Wallet):
             **transaction_info
         )
 
-        serialised = input_data.SerializeToString()
+        serialised = self.chain_id_bytes + input_data.SerializeToString()
 
         trans = transaction_proto.Transaction(
             input_data=serialised,
@@ -139,7 +141,7 @@ class SlimWallet(Wallet):
                 version=1,
             ),
             pub_key=self.pub_keys[name],
-            version=2,
+            version=3,
             pow=transaction_proto.ProofOfWork(
                 tid=None,
                 nonce=0,
