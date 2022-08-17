@@ -1,10 +1,10 @@
 current_env=`cat .env`
-vega_tag=`git ls-remote https://github.com/vegaprotocol/vega HEAD | awk '{ print substr($1,1,10) }'`
+vega_tag=`git ls-remote https://github.com/vegaprotocol/vega HEAD | awk '{ print $1 }'`
 echo "VEGA_SIM_VEGA_TAG=${vega_tag}
 VEGA_SIM_CONSOLE_TAG=master" > .env
 
 make
-poetry run pytest
+poetry run pytest -m "not integration"
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"
