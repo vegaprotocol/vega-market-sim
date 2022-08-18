@@ -2,6 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+
+from math import exp
+
 from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
@@ -718,14 +721,12 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
     the asset for that market, and mints itself the specified quantity of the
     required asset.
 
-    At any given step; the agent randomly choses whether to submit an order
-    using a variable order volume and a randomly sampled price following a
-    normal distribution. For the normal distribution; mu is selected as either
-    the best bid or best offer price for sell and buy orders respectively and
-    sigma is a variable parameter.
+    At any given step; the agent has an adjustable probability of submitting
+    an order and an adjustable probability of cancelling a randomly
+    selected order.
 
-    At any given step; The agent also choses whether to cancel a randomly
-    selected open order sampled from a uniform distribution.
+    When submitting an order; the agent choses a price following a lognormal
+    distribution where the underlying normal distribution can be adjusted.
 
     """
 
@@ -753,7 +754,8 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             "TIME_IN_FORCE_IOC": 0.2,
             "TIME_IN_FORCE_FOK": 0.1,
         },
-        sigma: Optional[float] = 5.0,
+        mean: Optional[float] = 2.0,
+        sigma: Optional[float] = 1.0,
     ):
         """Init the object and class attributes.
 
@@ -786,8 +788,10 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 Dictionary of side options and probabilities.
             time_in_force_opts (dict, optional):
                 Dictionary of time in force options and probabilities.
-            float (float, optional):
-                Standard deviation of the normal distribution
+            mean (float, optional):
+                Mean of the log-normal distribution.
+            sigma (float, optional):
+                Standard deviation of the log-normal distribution.
         """
 
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -806,6 +810,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         self.cancel_bias = cancel_bias
         self.side_opts = side_opts
         self.time_in_force_opts = time_in_force_opts
+        self.mean = mean
         self.sigma = sigma
 
     def initialise(self, vega: VegaServiceNull):
@@ -867,17 +872,21 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             p=list(self.time_in_force_opts.values()),
         )
 
+        random_offset = self.random_state.lognormal(
+            mean=self.mean,
+            sigma=self.sigma,
+            )
+        ln_mean = exp(self.mean + self.sigma ** 2 / 2)
+        
         if side == "SIDE_BUY":
 
             volume = self.buy_volume
-            mu = best_bid_price
+            price = best_bid_price + (random_offset - ln_mean)
 
         elif side == "SIDE_SELL":
 
             volume = self.sell_volume
-            mu = best_offer_price
-
-        price = self.random_state.normal(loc=mu, scale=self.sigma)
+            price = best_offer_price - (random_offset - ln_mean)
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
