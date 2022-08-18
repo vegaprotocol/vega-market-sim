@@ -199,8 +199,6 @@ class IdealMarketMaker(Scenario):
             asset_name=asset_name,
             initial_asset_mint=1000000,
             spread=self.spread,
-            buy_intensity=1,
-            sell_intensity=1,
             tag=str(tag),
         )
 

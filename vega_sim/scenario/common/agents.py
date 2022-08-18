@@ -731,10 +731,23 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         asset_name: str,
         spread: int,
         initial_asset_mint: float = 1000000,
-        buy_intensity: float = 1,
-        sell_intensity: float = 1,
+        buy_volume: float = 2.5,
+        sell_volume: float = 2.5,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
+        submit_bias: float = 0.5,
+        cancel_bias: float = 0.5,
+        side_opts: Optional[dict] = {
+            "SIDE_BUY": 0.5,
+            "SIDE_SELL": 0.5,
+        },
+        time_in_force_opts: Optional[dict] = {
+            "TIME_IN_FORCE_GTC": 0.4,
+            "TIME_IN_FORCE_GTT": 0.3,
+            "TIME_IN_FORCE_IOC": 0.2,
+            "TIME_IN_FORCE_FOK": 0.1,
+        },
+        sigma: Optional[float] = 5.0,
     ):
         """Init the object and class attributes.
 
@@ -745,10 +758,15 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             asset_name: (str): Name of the asset needed for the market.
             spread (int): Spread of the current markets market maker.
             initial_asset_mint (float, optional): Quantity of the asset the agent should initally mint.
-            buy_intensity (float, optional): Median of the poission distribution used to sample the volume of buy orders.
-            sell_intensity (float, optional): Median of the poission distribution used to sample the volume of sell orders.
+            buy_volume (float, optional): Volume used by agent on buy orders.
+            sell_volume (float, optional): Volume used by agent on sell orders.
             tag (str, optional): String to tag to the market and asset name.
             random_state: (np.random.RandomState, optional): Object for creating distributions to randomly sampling from.
+            submit_bias (float, optional): Probability agent attempts to submit a random order.
+            cancel_bias (float, optional): Probability agent attempts to cancel a random order.
+            side_opts(dict, optional): Dictionary of order side options and probabilities to sample with.
+            time_in_force_opts (dict, optional): Dictionary of time in force options and probabilities to sample with.
+            float (float, optional): Standard deviation of the normal distribution
         """
 
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -757,12 +775,17 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         self.asset_name = asset_name
         self.spread = spread
         self.initial_asset_mint = initial_asset_mint
-        self.buy_intensity = buy_intensity
-        self.sell_intensity = sell_intensity
+        self.buy_volume = buy_volume
+        self.sell_volume = sell_volume
         self.tag = tag
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
+        self.submit_bias = submit_bias
+        self.cancel_bias = cancel_bias
+        self.side_opts = side_opts
+        self.time_in_force_opts = time_in_force_opts
+        self.sigma = sigma
 
     def initialise(self, vega: VegaServiceNull):
         """Initialise the agents wallet and mint the required market asset.
@@ -800,12 +823,10 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             self.market_id
         ].state == markets_protos.Market.State.STATE_ACTIVE:
 
-            agent_submit_order = self.random_state.choice([0, 1, 1])
-            if agent_submit_order:
+            if self.random_state.rand() <= self.submit_bias:
                 self._sumbit_order()
 
-            agent_cancel_order = self.random_state.choice([0, 0, 1])
-            if agent_cancel_order:
+            if self.random_state.rand() <= self.cancel_bias:
                 self._cancel_order(vega_state=vega_state)
 
     def _sumbit_order(self):
@@ -814,22 +835,26 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             market_id=self.market_id
         )
 
-        agent_order_side = self.random_state.choice(["buy", "sell"])
+        side = self.random_state.choice(
+            a=list(self.side_opts.keys()),
+            p=list(self.side_opts.values()),
+        )
+        time_in_force = self.random_state.choice(
+            a=list(self.time_in_force_opts.keys()),
+            p=list(self.time_in_force_opts.values()),
+        )
 
-        if agent_order_side == "buy":
+        if side == "SIDE_BUY":
 
-            volume = self.random_state.poisson(self.buy_intensity)
-            side = vega_protos.SIDE_BUY
+            volume = self.buy_volume
             mu = best_bid_price
 
-        elif agent_order_side == "sell":
+        elif side == "SIDE_SELL":
 
-            volume = self.random_state.poisson(self.sell_intensity)
-            side = vega_protos.SIDE_SELL
+            volume = self.sell_volume
             mu = best_offer_price
 
-        sigma = self.spread * 2
-        price = self.random_state.normal(loc=mu, scale=sigma)
+        price = self.random_state.normal(loc=mu, scale=self.sigma)
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
@@ -839,7 +864,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             volume=volume,
             order_type=vega_protos.Order.Type.TYPE_LIMIT,
             wait=False,
-            time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
+            time_in_force=time_in_force,
         )
 
     def _cancel_order(self, vega_state: VegaState):
