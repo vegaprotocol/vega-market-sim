@@ -6,7 +6,6 @@ from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
-from vega_sim.api.helpers import num_to_padded_int
 
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
