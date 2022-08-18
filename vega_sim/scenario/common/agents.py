@@ -713,13 +713,20 @@ class MarketManager(StateAgentWithWallet):
 
 
 class SemiRandomLimitOrderTrader(StateAgentWithWallet):
-    """Agent which randomly submits and cancels limit orders at prices normally distributed about the best bid price or best offer price.
+    """Agent which randomly submits and cancels limit orders.
 
-    At initalisation; the agent creates a wallet, identifies the market id and the asset for that market, and mints itself the specified quantity of the required asset.
+    At initialisation; the agent creates a wallet, identifies the market id and
+    the asset for that market, and mints itself the specified quantity of the
+    required asset.
 
-    At any given step; the agent randomly choses whether to submit an order using a randomly sampled order volume following a poission distribution and a randomly sampled price following a normal distribution. For the normal distribution; mu is selected as either the best bid or best offer price for sell and buy orders respecitvely and sigma is selected as a factor of the spread.
+    At any given step; the agent randomly choses whether to submit an order
+    using a variable order volume and a randomly sampled price following a
+    normal distribution. For the normal distribution; mu is selected as either
+    the best bid or best offer price for sell and buy orders respectively and
+    sigma is a variable parameter.
 
-    At any given step; The agent also choses whether to cancel a randomly selected open order sampled from a uniform distribution.
+    At any given step; The agent also choses whether to cancel a randomly
+    selected open order sampled from a uniform distribution.
 
     """
 
@@ -752,21 +759,36 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         """Init the object and class attributes.
 
         Args:
-            wallet_name (str): Name of the agents wallet.
-            wallet_pass (str): Passcode used by the agent to login to its wallet.
-            market_name (str): Name of the market the agent is to place orders in.
-            asset_name: (str): Name of the asset needed for the market.
-            spread (int): Spread of the current markets market maker.
-            initial_asset_mint (float, optional): Quantity of the asset the agent should initally mint.
-            buy_volume (float, optional): Volume used by agent on buy orders.
-            sell_volume (float, optional): Volume used by agent on sell orders.
-            tag (str, optional): String to tag to the market and asset name.
-            random_state: (np.random.RandomState, optional): Object for creating distributions to randomly sampling from.
-            submit_bias (float, optional): Probability agent attempts to submit a random order.
-            cancel_bias (float, optional): Probability agent attempts to cancel a random order.
-            side_opts(dict, optional): Dictionary of order side options and probabilities to sample with.
-            time_in_force_opts (dict, optional): Dictionary of time in force options and probabilities to sample with.
-            float (float, optional): Standard deviation of the normal distribution
+            wallet_name (str):
+                Name of the agents wallet.
+            wallet_pass (str):
+                Passcode used by the agent to login to its wallet.
+            market_name (str):
+                Name of the market the agent is to place orders in.
+            asset_name: (str):
+                Name of the asset needed for the market.
+            spread (int):
+                Spread of the current markets market maker.
+            initial_asset_mint (float, optional):
+                Quantity of the asset the agent should initially mint.
+            buy_volume (float, optional):
+                Volume used by agent on buy orders.
+            sell_volume (float, optional):
+                Volume used by agent on sell orders.
+            tag (str, optional):
+                String to tag to the market and asset name.
+            random_state: (np.random.RandomState, optional):
+                Object for creating distributions to randomly sampling from.
+            submit_bias (float, optional):
+                Probability agent attempts to submit a random order.
+            cancel_bias (float, optional):
+                Probability agent attempts to cancel a random order.
+            side_opts(dict, optional):
+                Dictionary of side options and probabilities.
+            time_in_force_opts (dict, optional):
+                Dictionary of time in force options and probabilities.
+            float (float, optional):
+                Standard deviation of the normal distribution
         """
 
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -791,7 +813,8 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         """Initialise the agents wallet and mint the required market asset.
 
         Args:
-            vega (VegaServiceNull): Object running a locally-hosted Vega service.
+            vega (VegaServiceNull):
+                Object running a locally-hosted Vega service.
         """
 
         super().initialise(vega=vega)
@@ -813,7 +836,8 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         """Random submits and cancels limit orders.
 
         Args:
-            vega_state (VegaState): Object describing the state of the network and the state of the market.
+            vega_state (VegaState):
+                Object describing the state of the network and the market.
         """
 
         if (
@@ -824,12 +848,12 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         ].state == markets_protos.Market.State.STATE_ACTIVE:
 
             if self.random_state.rand() <= self.submit_bias:
-                self._sumbit_order()
+                self._submit_order()
 
             if self.random_state.rand() <= self.cancel_bias:
                 self._cancel_order(vega_state=vega_state)
 
-    def _sumbit_order(self):
+    def _submit_order(self):
 
         best_bid_price, best_offer_price = self.vega.best_prices(
             market_id=self.market_id
