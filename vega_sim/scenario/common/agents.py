@@ -6,6 +6,7 @@ from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
+from vega_sim.api.helpers import num_to_padded_int
 
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
@@ -708,4 +709,152 @@ class MarketManager(StateAgentWithWallet):
         if self.settlement_price is not None:
             self.vega.settle_market(
                 self.terminate_wallet_name, self.settlement_price, self.market_id
+            )
+
+
+class SemiRandomLimitOrderTrader(StateAgentWithWallet):
+    """Agent which randomly submits and cancels limit orders at prices normally distributed about the best bid price or best offer price.
+
+    At initalisation; the agent creates a wallet, identifies the market id and the asset for that market, and mints itself the specified quantity of the required asset.
+
+    At any given step; the agent randomly choses whether to submit an order using a randomly sampled order volume following a poission distribution and a randomly sampled price following a normal distribution. For the normal distribution; mu is selected as either the best bid or best offer price for sell and buy orders respecitvely and sigma is selected as a factor of the spread.
+
+    At any given step; The agent also choses whether to cancel a randomly selected open order sampled from a uniform distribution.
+
+    """
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        spread: int,
+        initial_asset_mint: float = 1000000,
+        buy_intensity: float = 1,
+        sell_intensity: float = 1,
+        tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
+    ):
+        """Init the object and class attributes.
+
+        Args:
+            wallet_name (str): Name of the agents wallet.
+            wallet_pass (str): Passcode used by the agent to login to its wallet.
+            market_name (str): Name of the market the agent is to place orders in.
+            asset_name: (str): Name of the asset needed for the market.
+            spread (int): Spread of the current markets market maker.
+            initial_asset_mint (float, optional): Quantity of the asset the agent should initally mint.
+            buy_intensity (float, optional): Median of the poission distribution used to sample the volume of buy orders.
+            sell_intensity (float, optional): Median of the poission distribution used to sample the volume of sell orders.
+            tag (str, optional): String to tag to the market and asset name.
+            random_state: (np.random.RandomState, optional): Object for creating distributions to randomly sampling from.
+        """
+
+        super().__init__(wallet_name + str(tag), wallet_pass)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.spread = spread
+        self.initial_asset_mint = initial_asset_mint
+        self.buy_intensity = buy_intensity
+        self.sell_intensity = sell_intensity
+        self.tag = tag
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+
+    def initialise(self, vega: VegaServiceNull):
+        """Initialise the agents wallet and mint the required market asset.
+
+        Args:
+            vega (VegaServiceNull): Object running a locally-hosted Vega service.
+        """
+
+        super().initialise(vega=vega)
+
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_fn(2)
+
+    def step(self, vega_state: VegaState):
+        """Random submits and cancels limit orders.
+
+        Args:
+            vega_state (VegaState): Object describing the state of the network and the state of the market.
+        """
+
+        if (
+            vega_state.market_state[self.market_id].trading_mode
+            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        ) and vega_state.market_state[
+            self.market_id
+        ].state == markets_protos.Market.State.STATE_ACTIVE:
+
+            agent_submit_order = self.random_state.choice([0, 1, 1])
+            if agent_submit_order:
+                self._sumbit_order()
+
+            agent_cancel_order = self.random_state.choice([0, 0, 1])
+            if agent_cancel_order:
+                self._cancel_order(vega_state=vega_state)
+
+    def _sumbit_order(self):
+
+        best_bid_price, best_offer_price = self.vega.best_prices(
+            market_id=self.market_id
+        )
+
+        agent_order_side = self.random_state.choice(["buy", "sell"])
+
+        if agent_order_side == "buy":
+
+            volume = self.random_state.poisson(self.buy_intensity)
+            side = vega_protos.SIDE_BUY
+            mu = best_bid_price
+
+        elif agent_order_side == "sell":
+
+            volume = sell_vol = self.random_state.poisson(self.sell_intensity)
+            side = vega_protos.SIDE_SELL
+            mu = best_offer_price
+
+        sigma = self.spread * 2
+        price = self.random_state.normal(loc=mu, scale=sigma)
+
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            price=price,
+            side=side,
+            volume=volume,
+            order_type=vega_protos.Order.Type.TYPE_LIMIT,
+            wait=False,
+            time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
+        )
+
+    def _cancel_order(self, vega_state: VegaState):
+
+        orders = vega_state.market_state.get(self.market_id, {}).orders.get(
+            self.vega.wallet.public_key(self.wallet_name), {}
+        )
+
+        if len(orders) > 0:
+
+            order_key = self.random_state.choice(list(orders.keys()))
+            order = orders[order_key]
+
+            self.vega.cancel_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_id=order.id,
             )
