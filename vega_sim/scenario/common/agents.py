@@ -824,7 +824,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
 
         elif agent_order_side == "sell":
 
-            volume = sell_vol = self.random_state.poisson(self.sell_intensity)
+            volume = self.random_state.poisson(self.sell_intensity)
             side = vega_protos.SIDE_SELL
             mu = best_offer_price
 
