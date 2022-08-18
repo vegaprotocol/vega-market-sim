@@ -17,12 +17,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    SRLO_TRADER_WALLET,
     OptimalMarketMaker,
 )
 from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
+    SemiRandomLimitOrderTrader,
 )
 
 
@@ -190,6 +192,18 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
+        srlo_trader = SemiRandomLimitOrderTrader(
+            wallet_name=SRLO_TRADER_WALLET.name,
+            wallet_pass=SRLO_TRADER_WALLET.passphrase,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=1000000,
+            spread=self.spread,
+            buy_intensity=1,
+            sell_intensity=1,
+            tag=str(tag),
+        )
+
         env = MarketEnvironmentWithState(
             agents=[
                 market_maker,
@@ -197,6 +211,7 @@ class IdealMarketMaker(Scenario):
                 auctionpass1,
                 auctionpass2,
                 trader,
+                srlo_trader,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,

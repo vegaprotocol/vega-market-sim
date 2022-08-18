@@ -33,6 +33,9 @@ AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 # Terminate the market and send settlment price
 TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 
+# Setup wallet name and wallet passcode for a SemiRandomLimitOrderTrader
+SRLO_TRADER_WALLET = WalletConfig("SRLO_TRADER", "SRLO_TRADERpass")
+
 
 class OptimalMarketMaker(StateAgentWithWallet):
     def __init__(
