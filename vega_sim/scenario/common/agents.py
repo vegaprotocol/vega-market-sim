@@ -738,22 +738,16 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         asset_name: str,
         spread: int,
         initial_asset_mint: float = 1000000,
-        buy_volume: float = 2.5,
-        sell_volume: float = 2.5,
+        buy_volume: float = 1.0,
+        sell_volume: float = 1.0,
+        buy_intensity: float = 5,
+        sell_intensity: float = 5,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         submit_bias: float = 0.5,
         cancel_bias: float = 0.5,
-        side_opts: Optional[dict] = {
-            "SIDE_BUY": 0.5,
-            "SIDE_SELL": 0.5,
-        },
-        time_in_force_opts: Optional[dict] = {
-            "TIME_IN_FORCE_GTC": 0.4,
-            "TIME_IN_FORCE_GTT": 0.3,
-            "TIME_IN_FORCE_IOC": 0.2,
-            "TIME_IN_FORCE_FOK": 0.1,
-        },
+        side_opts: Optional[dict] = None,
+        time_in_force_opts: Optional[dict] = None,
         mean: Optional[float] = 2.0,
         sigma: Optional[float] = 1.0,
     ):
@@ -800,16 +794,29 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         self.asset_name = asset_name
         self.spread = spread
         self.initial_asset_mint = initial_asset_mint
+        self.buy_intensity = buy_intensity
+        self.sell_intensity = sell_intensity
         self.buy_volume = buy_volume
         self.sell_volume = sell_volume
         self.tag = tag
+        self.submit_bias = submit_bias
+        self.cancel_bias = cancel_bias
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
-        self.submit_bias = submit_bias
-        self.cancel_bias = cancel_bias
-        self.side_opts = side_opts
-        self.time_in_force_opts = time_in_force_opts
+        self.side_opts = (
+            side_opts if side_opts is not None else {"SIDE_BUY": 0.5, "SIDE_SELL": 0.5}
+        )
+        self.time_in_force_opts = (
+            time_in_force_opts
+            if time_in_force_opts is not None
+            else {
+                "TIME_IN_FORCE_GTC": 0.4,
+                "TIME_IN_FORCE_GTT": 0.3,
+                "TIME_IN_FORCE_IOC": 0.2,
+                "TIME_IN_FORCE_FOK": 0.1,
+            }
+        )
         self.mean = mean
         self.sigma = sigma
 
@@ -837,7 +844,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         self.vega.wait_fn(2)
 
     def step(self, vega_state: VegaState):
-        """Random submits and cancels limit orders.
+        """Randomly submits and cancels limit orders.
 
         Args:
             vega_state (VegaState):
@@ -875,17 +882,17 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         random_offset = self.random_state.lognormal(
             mean=self.mean,
             sigma=self.sigma,
-            )
-        ln_mean = exp(self.mean + self.sigma ** 2 / 2)
-        
+        )
+        ln_mean = exp(self.mean + self.sigma**2 / 2)
+
         if side == "SIDE_BUY":
 
-            volume = self.buy_volume
+            volume = self.buy_volume * self.random_state.poisson(self.buy_intensity)
             price = best_bid_price + (random_offset - ln_mean)
 
         elif side == "SIDE_SELL":
 
-            volume = self.sell_volume
+            volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
             price = best_offer_price - (random_offset - ln_mean)
 
         self.vega.submit_order(
