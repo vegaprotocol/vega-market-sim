@@ -331,7 +331,7 @@ def manage_vega_processes(
         logger.info(
             f"Launching GraphQL node at port {port_config.get(Ports.DATA_NODE_GRAPHQL)}"
         )
-    if port_config.get(Ports.CONSOLE):
+    if port_config.get(Ports.CONSOLE) and run_with_console:
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
     shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
 
