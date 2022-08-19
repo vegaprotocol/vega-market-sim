@@ -37,7 +37,6 @@
       "VOTE": {
         "name": "VOTE",
         "symbol": "VOTE",
-        "total_supply": "0",
         "decimals": 5,
         "min_lp_stake": "1",
         "source": {

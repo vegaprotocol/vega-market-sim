@@ -307,7 +307,6 @@ class VegaService(ABC):
         wallet_name: str,
         name: str,
         symbol: str,
-        total_supply: int = 1,
         decimals: int = 0,
         quantum: int = 1,
         max_faucet_amount: int = 10e9,
@@ -321,8 +320,6 @@ class VegaService(ABC):
                 str, The name of the asset
             symbol:
                 str, The symbol to use for the asset
-            total_supply:
-                int, The initial total supply of the asset (will increase when fauceted)
             decimals:
                 int, The number of decimals in which to represent the asset. (e.g with 2 then integer value 101 is really 1.01)
             quantum:
@@ -337,7 +334,6 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             name=name,
             symbol=symbol,
-            total_supply=total_supply,
             decimals=decimals,
             max_faucet_amount=max_faucet_amount * 10**decimals,
             quantum=quantum,
