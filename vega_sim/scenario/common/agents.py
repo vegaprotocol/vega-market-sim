@@ -901,10 +901,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
             price = best_offer_price - (random_offset - ln_mean)
 
-        blockchain_time = self.vega.trading_data_client.GetVegaTime(
-            data_node_protos.trading_data.GetVegaTimeRequest()
-        ).timestamp
-        expires_at = int(blockchain_time + self.duration * 1e9)
+        expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
