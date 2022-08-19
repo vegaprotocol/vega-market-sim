@@ -1,6 +1,7 @@
+import time
 from typing import Any, Dict, List, Optional
-import inflection
 
+import inflection
 import requests
 from google.protobuf.json_format import MessageToDict
 from vega_sim.wallet.base import Wallet
@@ -39,11 +40,19 @@ class VegaWallet(Wallet):
             str, login token to use in authenticated requests
         """
         req = {"wallet": name, "passphrase": passphrase}
-        response = requests.post(
-            WALLET_CREATION_URL.format(wallet_server_url=self.wallet_url),
-            json=req,
-        )
-        response.raise_for_status()
+
+        # Wallet now requires a connection to a live vega service during startup,
+        # which can slow initialisation a little
+        for _ in range(5):
+            try:
+                response = requests.post(
+                    WALLET_CREATION_URL.format(wallet_server_url=self.wallet_url),
+                    json=req,
+                )
+                response.raise_for_status()
+                break
+            except requests.exceptions.ConnectionError:
+                time.sleep(1)
 
         token = response.json()["token"]
 

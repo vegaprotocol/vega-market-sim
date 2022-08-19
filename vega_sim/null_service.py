@@ -374,6 +374,7 @@ def manage_vega_processes(
     processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
 
     if run_wallet:
+        time.sleep(8)
         wallet_args = [
             vega_wallet_path,
             "service",
@@ -605,6 +606,11 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
+                    if self.run_with_console:
+                        requests.get(
+                            f"http://localhost:{self.wallet_port}/api/v1/status"
+                        ).raise_for_status()
+
                     started = True
                     break
                 except (
