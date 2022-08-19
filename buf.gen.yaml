@@ -1,0 +1,7 @@
+---
+version: v1
+plugins:
+  - remote: buf.build/protocolbuffers/plugins/python
+    out: ./vega_sim/proto
+  - remote: buf.build/grpc/plugins/python
+    out: ./vega_sim/proto

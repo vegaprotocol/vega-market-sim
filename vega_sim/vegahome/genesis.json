@@ -1,6 +1,6 @@
 {
   "genesis_time": "2021-11-29T11:23:58.259066Z",
-  "chain_id": "test-chain-NbThRw",
+  "chain_id": "CUSTOM",
   "initial_height": "0",
   "consensus_params": {
     "block": {
@@ -37,7 +37,6 @@
       "VOTE": {
         "name": "VOTE",
         "symbol": "VOTE",
-        "total_supply": "0",
         "decimals": 5,
         "min_lp_stake": "1",
         "source": {

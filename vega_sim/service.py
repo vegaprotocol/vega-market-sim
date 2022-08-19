@@ -312,7 +312,6 @@ class VegaService(ABC):
         wallet_name: str,
         name: str,
         symbol: str,
-        total_supply: int = 10e6,
         decimals: int = 0,
         quantum: int = 1,
         max_faucet_amount: int = 10e9,
@@ -327,8 +326,6 @@ class VegaService(ABC):
                 str, The name of the asset
             symbol:
                 str, The symbol to use for the asset
-            total_supply:
-                int, The initial total supply of the asset
             decimals:
                 int, The number of decimals in which to represent the asset.
                     (e.g with 2 then integer value 101 is really 1.01)
@@ -345,7 +342,6 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             name=name,
             symbol=symbol,
-            total_supply=total_supply * 10**decimals,
             decimals=decimals,
             max_faucet_amount=max_faucet_amount * 10**decimals,
             quantum=quantum,
@@ -534,13 +530,17 @@ class VegaService(ABC):
             Optional[str], If order acceptance is waited for, returns order ID.
                 Otherwise None
         """
-        volume = num_to_padded_int(
+        submit_volume = num_to_padded_int(
             volume,
             self.market_pos_decimals[market_id],
         )
-        # Passing wait False is fire and forget, so just return given this does nothing
-        if volume == 0 and not wait:
-            return
+        if submit_volume == 0:
+            msg = "Not submitting order as volume is 0"
+            if wait:
+                raise Exception(msg)
+            else:
+                logger.debug(msg)
+                return
         return trading.submit_order(
             wallet=self.wallet,
             wallet_name=trading_wallet,
@@ -549,7 +549,7 @@ class VegaService(ABC):
             order_type=order_type,
             time_in_force=time_in_force,
             side=side,
-            volume=volume,
+            volume=submit_volume,
             price=num_to_padded_int(
                 price,
                 self.market_price_decimals[market_id],

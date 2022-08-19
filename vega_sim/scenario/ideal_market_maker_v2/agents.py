@@ -58,6 +58,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         asset_name: str = None,
         set_up_market: bool = True,
         commitment_amount: float = 6000,
+        settlement_price: Optional[float] = None,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -77,6 +78,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.mdp = market_decimal
         self.market_position_decimal = market_position_decimal
         self.commitment_amount = commitment_amount
+        self.settlement_price = settlement_price
         self.initial_asset_mint = initial_asset_mint
 
         self.current_step = 0
@@ -113,10 +115,11 @@ class OptimalMarketMaker(StateAgentWithWallet):
             )
 
     def finalise(self):
-        self.vega.settle_market(
-            self.terminate_wallet_name, self.price_process[-1], self.market_id
-        )
-        self.current_step += 1
+        if self.settlement_price:
+            self.vega.settle_market(
+                self.terminate_wallet_name, self.settlement_price, self.market_id
+            )
+            self.current_step += 1
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party

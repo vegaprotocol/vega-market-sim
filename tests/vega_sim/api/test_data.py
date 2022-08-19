@@ -104,19 +104,19 @@ def test_find_asset_id(trading_data_servicer_and_port):
                 vega_protos.assets.Asset(
                     id="asset1_id",
                     details=vega_protos.assets.AssetDetails(
-                        name="asset1", symbol="A1", total_supply="1000000", decimals=5
+                        name="asset1", symbol="A1", decimals=5
                     ),
                 ),
                 vega_protos.assets.Asset(
                     id="asset2_id",
                     details=vega_protos.assets.AssetDetails(
-                        name="asset2", symbol="A2", total_supply="1000000", decimals=5
+                        name="asset2", symbol="A2", decimals=5
                     ),
                 ),
                 vega_protos.assets.Asset(
                     id="asset3_id",
                     details=vega_protos.assets.AssetDetails(
-                        name="asset3", symbol="A3", total_supply="1000000", decimals=5
+                        name="asset3", symbol="A3", decimals=5
                     ),
                 ),
             ]
