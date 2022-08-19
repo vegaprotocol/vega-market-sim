@@ -373,7 +373,6 @@ def manage_vega_processes(
     processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
 
     if run_wallet:
-        time.sleep(10)
         for _ in range(3000):
             try:
                 requests.get(

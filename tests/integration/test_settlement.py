@@ -51,9 +51,6 @@ def test_settlement(vega_service: VegaServiceNull):
     vega.wait_fn(10)
     vega.wait_for_datanode_sync()
 
-    import pdb
-
-    pdb.set_trace()
     # check bond and margin for all
     for wallet in wallets:
         general, margin, bond = vega.party_account(
