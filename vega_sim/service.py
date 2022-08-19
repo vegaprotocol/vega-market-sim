@@ -288,9 +288,6 @@ class VegaService(ABC):
             faucet_url=self.faucet_url,
         )
         self.wait_fn(1)
-        import time
-
-        time.sleep(2)
         self.wait_for_core_catchup()
         self.wait_fn(2)
 

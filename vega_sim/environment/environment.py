@@ -226,9 +226,6 @@ class MarketEnvironment:
             state_values.append(self._state_extraction_fn(vega, self.agents))
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 
-        import pdb
-
-        pdb.set_trace()
         if pause_at_completion:
             input(
                 "Environment run completed. Pausing to allow inspection of state."
