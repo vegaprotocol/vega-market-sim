@@ -15,6 +15,8 @@ from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
 
+import vega_sim.proto.data_node.api.v1 as data_node_protos
+
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -748,6 +750,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         cancel_bias: float = 0.5,
         side_opts: Optional[dict] = None,
         time_in_force_opts: Optional[dict] = None,
+        duration: Optional[float] = 120,
         mean: Optional[float] = 2.0,
         sigma: Optional[float] = 1.0,
     ):
@@ -782,6 +785,8 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 Dictionary of side options and probabilities.
             time_in_force_opts (dict, optional):
                 Dictionary of time in force options and probabilities.
+            duration (int, optional):
+                Duration unfilled GTT orders should remain open in seconds.
             mean (float, optional):
                 Mean of the log-normal distribution.
             sigma (float, optional):
@@ -817,6 +822,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 "TIME_IN_FORCE_FOK": 0.1,
             }
         )
+        self.duration = duration
         self.mean = mean
         self.sigma = sigma
 
@@ -895,6 +901,11 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
             price = best_offer_price - (random_offset - ln_mean)
 
+        blockchain_time = self.vega.trading_data_client.GetVegaTime(
+            data_node_protos.trading_data.GetVegaTimeRequest()
+        ).timestamp
+        expires_at = int(blockchain_time + self.duration * 1e9)
+
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
             market_id=self.market_id,
@@ -904,6 +915,7 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             order_type=vega_protos.Order.Type.TYPE_LIMIT,
             wait=False,
             time_in_force=time_in_force,
+            expires_at=expires_at,
         )
 
     def _cancel_order(self, vega_state: VegaState):
