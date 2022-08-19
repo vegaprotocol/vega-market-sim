@@ -90,9 +90,9 @@ def build_basic_market(
             asset_id=asset_id,
             commitment_amount=initial_commitment,
             fee=0.002,
-            buy_specs=[("PEGGED_REFERENCE_MID", 5, 1)],
-            sell_specs=[("PEGGED_REFERENCE_MID", 5, 1)],
-            market_decimals=2,
+            buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+            sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+            market_decimals=5,
         ),
     )
 
