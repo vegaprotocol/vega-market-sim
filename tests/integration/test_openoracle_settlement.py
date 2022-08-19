@@ -65,7 +65,7 @@ def test_settlement(vega_service: VegaServiceNull):
     vega.wait_for_core_catchup()
 
     vega.settle_market_openoracle(
-        wallet_name=TERMINATE_WALLET.name,
+        settlement_wallet=TERMINATE_WALLET.name,
         payload=PAYLOAD,
     )
     vega.wait_fn(10)
