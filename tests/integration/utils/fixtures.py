@@ -1,7 +1,9 @@
 from collections import namedtuple
+from typing import Optional
 
 import pytest
 from vega_sim.null_service import VegaServiceNull
+import vega_sim.proto.vega.oracles.v1 as oracles_protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -34,6 +36,14 @@ def build_basic_market(
     initial_volume: float = 1,
     initial_spread: float = 0.1,
     initial_commitment: float = 100,
+    market_decimals: int = 5,
+    settlement_price_decimals: Optional[int] = None,
+    oracle_spec_for_settlement_price: Optional[
+        oracles_protos.spec.OracleSpecConfiguration
+    ] = None,
+    oracle_spec_for_trading_termination: Optional[
+        oracles_protos.spec.OracleSpecConfiguration
+    ] = None,
 ):
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
@@ -72,14 +82,17 @@ def build_basic_market(
         proposal_wallet=MM_WALLET.name,
         settlement_asset_id=asset_id,
         termination_wallet=TERMINATE_WALLET.name,
-        market_decimals=5,
+        market_decimals=market_decimals,
+        oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
+        oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
+        settlement_price_decimals=settlement_price_decimals,
         liquidity_commitment=vega.build_new_market_liquidity_commitment(
             asset_id=asset_id,
             commitment_amount=initial_commitment,
             fee=0.002,
-            buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-            sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-            market_decimals=5,
+            buy_specs=[("PEGGED_REFERENCE_MID", 5, 1)],
+            sell_specs=[("PEGGED_REFERENCE_MID", 5, 1)],
+            market_decimals=2,
         ),
     )
 

@@ -109,7 +109,7 @@ UlimitNOFile = 8192
       TimeKey = "T"
 
 [Oracles]
-  Level = "Info"
+  Level = "Debug"
 
 [Time]
   Level = "Info"

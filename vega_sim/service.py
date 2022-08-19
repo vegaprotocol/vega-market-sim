@@ -18,6 +18,7 @@ import vega_sim.api.governance as gov
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.oracles.v1 as oracles_protos
 from vega_sim.api.helpers import (
     forward,
     num_to_padded_int,
@@ -366,6 +367,13 @@ class VegaService(ABC):
         price_monitoring_parameters: Optional[
             vega_protos.markets.PriceMonitoringParameters
         ] = None,
+        oracle_spec_for_settlement_price: Optional[
+            oracles_protos.spec.OracleSpecConfiguration
+        ] = None,
+        oracle_spec_for_trading_termination: Optional[
+            oracles_protos.spec.OracleSpecConfiguration
+        ] = None,
+        settlement_price_decimals: Optional[int] = 2,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -391,6 +399,15 @@ class VegaService(ABC):
                 PriceMonitoringParameters, A set of parameters determining when the
                     market will drop into a price auction. If not passed defaults
                     to a very permissive setup
+            oracle_spec_for_settlement_price:
+                Optional[OracleSpecConfiguration], Spec configuration for oracle used to
+                    determine settlement price.
+            oracle_spec_for_trading_termination:
+                Optional[OracleSpecConfiguration], Spec configuration for oracle used to
+                    close market termination
+            settlement_price_decimals:
+                int, The number of decimals to which the incoming
+                    settlement price will be padded
 
         """
         additional_kwargs = {}
@@ -419,6 +436,9 @@ class VegaService(ABC):
             liquidity_commitment=liquidity_commitment,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
+            oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
+            oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
+            settlement_price_decimals=settlement_price_decimals,
             **additional_kwargs,
         )
         gov.approve_proposal(
@@ -811,6 +831,17 @@ class VegaService(ABC):
             settlement_price=num_to_padded_int(
                 settlement_price, decimals=future_inst.settlement_price_decimals
             ),
+        )
+
+    def settle_market_openoracle(
+        self,
+        settlement_wallet: str,
+        openoracle_data: str,
+    ):
+        gov.settle_oracle_openoracle(
+            wallet_name=settlement_wallet,
+            wallet=self.wallet,
+            payload=openoracle_data.encode(),
         )
 
     def party_account(
