@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import numpy as np
 from collections import namedtuple
-from typing import List, Optional, Union
+from typing import Callable, List, Optional, Tuple, Union
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
@@ -11,6 +11,8 @@ from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
+from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
+from vega_sim.service import PeggedOrder
 
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -23,6 +25,8 @@ BACKGROUND_MARKET = WalletConfig("market", "market")
 # Pass opening auction
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
+
+MMOrder = namedtuple("MMOrder", ["size", "price"])
 
 
 @dataclass
@@ -709,4 +713,165 @@ class MarketManager(StateAgentWithWallet):
         if self.settlement_price is not None:
             self.vega.settle_market(
                 self.terminate_wallet_name, self.settlement_price, self.market_id
+            )
+
+
+class ShapedIdealMarketMaker(StateAgentWithWallet):
+    """Utilises the Ideal market maker formulation from
+        Algorithmic and High-Frequency Trading by Cartea, Jaimungal and Penalva.
+
+    Unlike the purer Ideal Market Makers elsewhere in Vega sim,
+    here we use the positional depth logic to create a best bid/ask
+    for the MM, but behind those the MM will also create a shape
+    (by default an exponential curve). This allows this MM to be the sole liquidity
+    source in the market but still to maintain an interesting full LOB.
+    """
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        price_process: List[float],
+        best_price_offset_fn: Callable[[float, int], Tuple[float, float]],
+        shape_fn: Callable[
+            [
+                float,
+                float,
+            ],
+            Tuple[List[MMOrder], List[MMOrder]],
+        ],
+        initial_asset_mint: float = 1000000,
+        market_name: str = None,
+        asset_name: str = None,
+        commitment_amount: float = 6000,
+        market_decimal_places: int = 5,
+        order_unit_size: float = 1,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name + str(tag), wallet_pass)
+        self.price_process = price_process
+        self.commitment_amount = commitment_amount
+        self.initial_asset_mint = initial_asset_mint
+        self.mdp = market_decimal_places
+
+        self.shape_fn = shape_fn
+        self.best_price_offset_fn = best_price_offset_fn
+
+        self.order_unit_size = order_unit_size
+        self.current_step = 0
+
+        self.tag = tag
+
+        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
+        self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
+
+    def initialise(self, vega: VegaServiceNull):
+        # Initialise wallet for LP/ Settle Party
+        super().initialise(vega=vega)
+        self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
+
+        # Get asset id
+        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
+        # Top up asset
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.tdai_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_for_total_catchup()
+
+        # Get market id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
+    def step(self, vega_state: VegaState):
+        self.current_step += 1
+
+        # Each step, MM posts optimal bid/ask depths
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name, market_id=self.market_id
+        )
+
+        current_position = int(position[0].open_volume) if position else 0
+        self.bid_depth, self.ask_depth = self.best_price_offset_fn(
+            current_position, self.current_step
+        )
+        buy_orders, sell_orders = self.shape_fn(self.bid_depth, self.ask_depth)
+
+        for order in (
+            vega_state.market_state.get(self.market_id, {})
+            .orders.get(self.vega.wallet.public_key(self.wallet_name), {})
+            .values()
+        ):
+            if order.side == vega_protos.SIDE_BUY:
+                buy_order = order
+            else:
+                sell_order = order
+
+        self._place_orders(
+            buy_offset=self.bid_depth,
+            sell_offset=self.ask_depth,
+            volume=self.order_unit_size,
+            buy_order=buy_order,
+            sell_order=sell_order,
+        )
+
+    def _place_orders(
+        self,
+        buy_offset: float,
+        sell_offset: float,
+        volume: float,
+        buy_order: Optional[str] = None,
+        sell_order: Optional[str] = None,
+    ):
+        self._place_or_amend_order(
+            offset=buy_offset,
+            volume=volume,
+            order=buy_order,
+            side=vega_protos.SIDE_BUY,
+        )
+
+        self._place_or_amend_order(
+            offset=sell_offset,
+            volume=volume,
+            order=sell_order,
+            side=vega_protos.SIDE_SELL,
+        )
+
+    def _place_or_amend_order(
+        self,
+        offset: float,
+        volume: float,
+        side: vega_protos.Side,
+        order: Optional[Order] = None,
+    ):
+        is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
+        reference = (
+            vega_protos.PEGGED_REFERENCE_BEST_BID
+            if is_buy
+            else vega_protos.PEGGED_REFERENCE_BEST_ASK
+        )
+
+        if order is None:
+            self.vega.submit_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                pegged_order=PeggedOrder(reference=reference, offset=offset),
+                side=side,
+                volume=volume,
+                order_type=vega_protos.Order.Type.TYPE_LIMIT,
+                wait=False,
+                time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
+            )
+        else:
+            self.vega.amend_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_id=order.id,
+                pegged_reference=reference,
+                pegged_offset=offset,
+                volume_delta=volume - order.size,
             )
