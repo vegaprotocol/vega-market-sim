@@ -83,18 +83,6 @@ class MarketOrderTrader(StateAgentWithWallet):
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(5)
-        self.vega.wait_for_total_catchup()
-
-        self.vega.submit_simple_liquidity(
-            self.wallet_name,
-            self.market_id,
-            1000,
-            "0.0015",
-            vega_protos.PEGGED_REFERENCE_BEST_BID,
-            vega_protos.PEGGED_REFERENCE_BEST_ASK,
-            1,
-            1,
-        )
 
     def step(self, vega_state: VegaState):
         buy_first = self.random_state.choice([0, 1])
