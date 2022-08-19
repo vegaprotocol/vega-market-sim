@@ -11,7 +11,6 @@ from tests.integration.utils.fixtures import (
 from vega_sim.null_service import VegaServiceNull
 import vega_sim.api.governance as vega_gov
 import random
-import datetime
 
 wallets = [MM_WALLET, TRADER_1_WALLET, TRADER_2_WALLET]
 
@@ -19,7 +18,7 @@ PAYLOAD = """{"timestamp":"1660832460","messages":["0x00000000000000000000000000
 
 
 @pytest.mark.integration
-def test_settlement(vega_service: VegaServiceNull):
+def test_settlement_with_openoracle(vega_service: VegaServiceNull):
     vega = vega_service
 
     participants_initial_deposit = 1e6
