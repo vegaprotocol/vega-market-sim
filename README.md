@@ -41,7 +41,7 @@ For the most part the package is fairly self-contained Python, however there are
 
 Building the console UI is not a necessary component, but can be useful for visualising the state of the Vega service. In order to do this:
   - Ensure you have `yarn` installed
-  - Ensure you are running node v14. If you use other versions in general, `nvm` can be useful to switch to v14 without wiping your other version
+  - Ensure you are running node v16. If you use other versions in general, `nvm` can be useful to switch to v14 without wiping your other version
   - Run `make ui`, which will download the requisite repository and install it into the `/extern` directory
   - Set the `run_with_console` flag to `True` when creating the `VegaServiceNull` class
 
