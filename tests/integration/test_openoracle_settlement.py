@@ -66,7 +66,7 @@ def test_settlement(vega_service: VegaServiceNull):
 
     vega.settle_market_openoracle(
         settlement_wallet=TERMINATE_WALLET.name,
-        payload=PAYLOAD,
+        openoracle_data=PAYLOAD,
     )
     vega.wait_fn(10)
     vega.wait_for_datanode_sync()
