@@ -68,7 +68,15 @@ def test_settlement_with_openoracle(vega_service: VegaServiceNull):
         openoracle_data=PAYLOAD,
     )
     vega.wait_fn(10)
-    vega.wait_for_datanode_sync()
+
+    # On Jenkins this large forwarding can chew
+    # up the machine. Give it some time to catch up
+    for _ in range(3):
+        try:
+            vega.wait_for_datanode_sync()
+            break
+        except:
+            continue
 
     # check bond and margin for all
     for wallet in wallets:
