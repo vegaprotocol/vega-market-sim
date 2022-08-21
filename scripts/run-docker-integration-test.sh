@@ -1,11 +1,15 @@
-container_name="vega_test$1"
+#!/usr/bin/env bash
 
-docker rm ${container_name} || true
+set -e
+
+WORK_DIR="$(realpath "$(dirname "$0")/..")"
+RESULT_DIR="${WORK_DIR}/test_logs/$(date '+%F_%H%M%S')-integration"
+mkdir -p "${RESULT_DIR}"
+
 docker run \
-    --platform linux/amd64 \
-    --name ${container_name} \
-    vega_sim_test:latest pytest -s -v -m integration --log-cli-level INFO
-docker_status=$?
-docker cp ${container_name}:/tmp ./test_logs/
-docker rm ${container_name}
-exit ${docker_status}
+    -v "${RESULT_DIR}:/tmp" \
+    vega_sim_test:latest \
+        pytest -s -v \
+            -m integration \
+            --junitxml /tmp/integration-test-results.xml \
+            --log-cli-level INFO
