@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from multiprocessing.connection import wait
 
 import numpy as np
 
@@ -54,6 +55,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         sell_intensity: float = 1,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
+        base_order_size: float = 1,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
@@ -65,6 +67,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
+        self.base_order_size = base_order_size
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -84,14 +87,13 @@ class MarketOrderTrader(StateAgentWithWallet):
             asset=self.asset_id,
             amount=self.initial_asset_mint,
         )
-        self.vega.wait_fn(2)
+        self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
         buy_first = self.random_state.choice([0, 1])
 
-        buy_vol = self.random_state.poisson(self.buy_intensity)
-        sell_vol = self.random_state.poisson(self.sell_intensity)
-
+        buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
+        sell_vol = self.random_state.poisson(self.sell_intensity) * self.base_order_size
         if buy_first:
             self.place_order(
                 vega_state=vega_state,
@@ -114,11 +116,14 @@ class MarketOrderTrader(StateAgentWithWallet):
 
     def place_order(self, vega_state: VegaState, volume: float, side: vega_protos.Side):
         if (
-            vega_state.market_state[self.market_id].trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ) and vega_state.market_state[
-            self.market_id
-        ].state == markets_protos.Market.State.STATE_ACTIVE:
+            (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            )
+            and vega_state.market_state[self.market_id].state
+            == markets_protos.Market.State.STATE_ACTIVE
+            and volume != 0
+        ):
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
@@ -138,6 +143,7 @@ class BackgroundMarket(StateAgentWithWallet):
         asset_name: str,
         price_process: List[float],
         initial_asset_mint: float = 1000000,
+        position_decimals: int = 4,
         spread: float = 0.02,
         tick_spacing: float = 0.01,
         num_levels_per_side: int = 20,
@@ -158,6 +164,7 @@ class BackgroundMarket(StateAgentWithWallet):
         self.market_name = market_name
         self.asset_name = asset_name
         self.kappa = order_distribution_kappa
+        self.position_decimals = position_decimals
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -203,13 +210,16 @@ class BackgroundMarket(StateAgentWithWallet):
     def _submit_order(
         self, side: Union[str, vega_protos.Side], price: float, size: float
     ) -> None:
+        volume = round(size, self.position_decimals)
+        if volume == 0:
+            return
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
             market_id=self.market_id,
             order_type="TYPE_LIMIT",
             time_in_force="TIME_IN_FORCE_GTC",
             side=side,
-            volume=size,
+            volume=volume,
             price=price,
             wait=False,
         )
@@ -553,15 +563,17 @@ class OpenAuctionPass(StateAgentWithWallet):
         asset_name: str,
         initial_asset_mint: float = 1000000,
         initial_price: float = 0.3,
+        opening_auction_trade_amount: float = 1,
         tag: str = "",
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass)
         self.side = side
         self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
         self.tag = tag
         self.market_name = market_name
         self.asset_name = asset_name
+        self.opening_auction_trade_amount = opening_auction_trade_amount
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -582,7 +594,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             asset=asset_id,
             amount=self.initial_asset_mint,
         )
-        self.vega.wait_fn(2)
+        self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
 
         self.vega.submit_order(
@@ -591,7 +603,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             order_type="TYPE_LIMIT",
             time_in_force="TIME_IN_FORCE_GTC",
             side=self.side,
-            volume=1,
+            volume=self.opening_auction_trade_amount,
             price=self.initial_price,
         )
 

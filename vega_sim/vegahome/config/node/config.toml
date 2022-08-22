@@ -157,7 +157,7 @@ UlimitNOFile = 8192
   Level = "Debug"
 
 [Banking]
-  Level = "Info"
+  Level = "Debug"
 
 [Stats]
   Level = "Info"

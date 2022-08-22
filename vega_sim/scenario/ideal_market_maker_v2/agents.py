@@ -56,6 +56,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         market_position_decimal: int = 2,
         market_name: str = None,
         asset_name: str = None,
+        set_up_market: bool = True,
         commitment_amount: float = 6000,
         settlement_price: Optional[float] = None,
         tag: str = "",
@@ -83,6 +84,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.current_step = 0
 
         self.tag = tag
+        self.set_up_market = set_up_market
 
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
@@ -125,24 +127,25 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
 
         # Faucet vega tokens
+        self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
         self.vega.mint(
             self.wallet_name,
             asset="VOTE",
             amount=1e4,
         )
-        self.vega.wait_fn(5)
-
-        # Create asset
-        self.vega.create_asset(
-            self.wallet_name,
-            name=self.asset_name,
-            symbol=self.asset_name,
-            decimals=self.adp,
-            max_faucet_amount=1e20,
-        )
-        self.vega.wait_fn(5)
+        self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
+        if self.set_up_market:
+            # Create asset
+            self.vega.create_asset(
+                self.wallet_name,
+                name=self.asset_name,
+                symbol=self.asset_name,
+                decimals=self.adp,
+            )
+            self.vega.wait_fn(5)
+            self.vega.wait_for_total_catchup()
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
@@ -151,42 +154,44 @@ class OptimalMarketMaker(StateAgentWithWallet):
             asset=self.tdai_id,
             amount=self.initial_asset_mint,
         )
+        self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
 
-        self.vega.update_network_parameter(
-            self.wallet_name,
-            "market.liquidity.minimum.probabilityOfTrading.lpOrders",
-            "1e-6",
-        )
+        if self.set_up_market:
+            self.vega.update_network_parameter(
+                self.wallet_name,
+                "market.liquidity.minimum.probabilityOfTrading.lpOrders",
+                "1e-6",
+            )
 
-        self.vega.wait_for_total_catchup()
-        self.vega.update_network_parameter(
-            self.wallet_name,
-            "market.liquidity.stakeToCcySiskas",
-            "0.001",
-        )
+            self.vega.wait_for_total_catchup()
+            self.vega.update_network_parameter(
+                self.wallet_name,
+                "market.liquidity.stakeToCcySiskas",
+                "0.001",
+            )
 
-        self.vega.wait_for_datanode_sync()
+            self.vega.wait_for_datanode_sync()
 
-        # Set up a future market
-        self.vega.create_simple_market(
-            market_name=self.market_name,
-            proposal_wallet=self.wallet_name,
-            settlement_asset_id=self.tdai_id,
-            termination_wallet=self.terminate_wallet_name,
-            market_decimals=self.mdp,
-            position_decimals=self.market_position_decimal,
-            future_asset=self.asset_name,
-            liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                asset_id=self.tdai_id,
-                commitment_amount=self.commitment_amount,
-                fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
+            # Set up a future market
+            self.vega.create_simple_market(
+                market_name=self.market_name,
+                proposal_wallet=self.wallet_name,
+                settlement_asset_id=self.tdai_id,
+                termination_wallet=self.terminate_wallet_name,
                 market_decimals=self.mdp,
-            ),
-        )
-        self.vega.wait_fn(5)
+                position_decimals=self.market_position_decimal,
+                future_asset=self.asset_name,
+                liquidity_commitment=vega.build_new_market_liquidity_commitment(
+                    asset_id=self.tdai_id,
+                    commitment_amount=self.commitment_amount,
+                    fee=0.0015,
+                    buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
+                    sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
+                    market_decimals=self.mdp,
+                ),
+            )
+            self.vega.wait_fn(5)
 
         # Get market id
         self.market_id = [

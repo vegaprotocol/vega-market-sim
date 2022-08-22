@@ -146,6 +146,5 @@ def forward(time: str, vega_node_url: str) -> None:
     """
     payload = {"forward": time}
 
-    requests.post(
-        TIME_FORWARD_URL.format(base_url=vega_node_url), json=payload
-    ).raise_for_status()
+    req = requests.post(TIME_FORWARD_URL.format(base_url=vega_node_url), json=payload)
+    req.raise_for_status()

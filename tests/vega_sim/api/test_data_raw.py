@@ -246,16 +246,16 @@ def test_all_market_accounts(trading_data_servicer_and_port):
 def test_market_accounts(trading_data_servicer_and_port):
     expected = MarketAccount(
         vega_protos.vega.Account(
-            id="liq",
-            asset="asset1",
-            market_id="market1",
-            type=vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY,
-        ),
-        vega_protos.vega.Account(
             id="ins",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
+        ),
+        vega_protos.vega.Account(
+            id="liq",
+            asset="asset1",
+            market_id="market1",
+            type=vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY,
         ),
     )
 
