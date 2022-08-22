@@ -38,29 +38,22 @@ class MarketEnvironment(MarketEnvironmentWithState):
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)
-
         # Agent must step in order
         #   agents = [market_maker, tradingbot, randomtrader,
         #    auctionpass1, auctionpass2]
-
         self.agents[0].AvoidCrossedOrder()
 
-        
         self.agents[2].step_amendprice(state)
         self.agents[0].step(state)
 
-    
         self.agents[2].num_post_at_bid = self.agents[0].num_bidhit
         self.agents[2].num_post_at_ask = self.agents[0].num_askhit
         self.agents[1].num_buyMO = self.agents[0].num_buyMO
         self.agents[1].num_sellMO = self.agents[0].num_sellMO
 
-
-
         self.agents[2].step_limitorders(state)
         self.agents[1].step_buy(state)
         self.agents[2].step_limitorderask(state)
-
 
         self.agents[1].step_sell(state)
         self.agents[2].step_limitorderbid(state)

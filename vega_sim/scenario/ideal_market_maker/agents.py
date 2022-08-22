@@ -2,13 +2,11 @@ import numpy as np
 from collections import namedtuple
 from typing import List, Optional
 
-from vega_sim.scenario.ideal_market_maker.utils.strategy import (
-    A_S_MMmodel, GLFT_approx
-)
+from vega_sim.scenario.ideal_market_maker.utils.strategy import A_S_MMmodel, GLFT_approx
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.proto.vega import markets as markets_protos
+from vega_sim.proto.vega import vega as vega_protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -16,7 +14,7 @@ WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 MM_WALLET = WalletConfig("mm", "pin")
 
 # Send selling/buying MOs to hit LP orders
-TRADER_WALLET = WalletConfig("Zl3pLs6Xk6SwIK7Jlp2x", "bJQDDVGAhKkj3PVCc7Rr")
+TRADER_WALLET = WalletConfig("trader", "trader")
 
 # Randomly posts LOs at buy/sell side to simulate real Market situation
 RANDOM_WALLET = WalletConfig("random", "random")
@@ -26,7 +24,7 @@ AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
 # Terminate the market and send settlment price
-TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
+TERMINATE_WALLET = WalletConfig("terminate", "terminate")
 
 
 class OptimalMarketMaker(StateAgentWithWallet):
@@ -54,7 +52,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         commitamount: float = 100000,
         lp_fee: float = 0.001,
         tag: str = "",
-        random_state: Optional[np.random.RandomState] = None
+        random_state: Optional[np.random.RandomState] = None,
     ):
         super().__init__(wallet_name + tag, wallet_pass)
         self.terminate_wallet_name = terminate_wallet_name + tag
@@ -80,7 +78,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
         self.random_state = (
-            random_state if random_state is not None else np.random.RandomState(seed=123)
+            random_state
+            if random_state is not None
+            else np.random.RandomState(seed=123)
         )
 
         self.long_horizon_estimate = num_steps >= 200
@@ -106,7 +106,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 Lambda=self.Lambda,
                 alpha=self.alpha,
                 phi=self.phi,
-            )           
+            )
 
     def finalise(self):
         self.current_step += 1
@@ -136,7 +136,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             decimals=self.adp,
             max_faucet_amount=1e20,
         )
-        self.vega.wait_fn(5)        
+        self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
         # Get asset id
         self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -174,6 +174,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
+        self.bid_depth, self.ask_depth = self.OptimalStrategy(0)
 
     def num_MarketOrders(self):
         num_buyMO = self.random_state.poisson(self.Lambda)
@@ -216,7 +217,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 self.optimal_ask[self.current_step, -1]
                 if not self.long_horizon_estimate
                 else self.optimal_ask[-1]
-            )            
+            )
         else:
             current_bid_depth = (
                 self.optimal_bid[
@@ -236,40 +237,32 @@ class OptimalMarketMaker(StateAgentWithWallet):
         return current_bid_depth, current_ask_depth
 
     def AvoidCrossedOrder(self):
-        if self.current_step == 0:
-            pass
-        else:
-            if (
-                min(self.bid_depth, self.ask_depth)
-                > np.abs(
-                    self.price_process[self.current_step]
-                    - self.price_process[self.current_step - 1]
-                )
-                / 2
-            ):
-                pass
+        new_price = self.price_process[self.current_step]
+        price = (
+            self.price_process[self.current_step - 1]
+            if self.current_step > 0
+            else self.price_process[self.current_step]
+        )
 
-            else:
-                temp_depth = round(
-                    np.abs(
-                        self.price_process[self.current_step]
-                        - self.price_process[self.current_step - 1]
-                    )
-                    / 2
-                    + 5 * self.spread,
-                    self.mdp,
-                )
-                self.vega.submit_simple_liquidity(
-                    wallet_name=self.wallet_name,
-                    market_id=self.market_id,
-                    commitment_amount=self.commitamoumt,
-                    fee=self.lp_fee,
-                    reference_buy="PEGGED_REFERENCE_MID",
-                    reference_sell="PEGGED_REFERENCE_MID",
-                    delta_buy=temp_depth,
-                    delta_sell=temp_depth,
-                    is_amendment=True,
-                )
+        if min(self.bid_depth, self.ask_depth) > np.abs(new_price - price) / 2:
+            pass
+
+        else:
+            temp_depth = round(
+                np.abs(new_price - price) / 2 + 5 * self.spread,
+                self.mdp,
+            )
+            self.vega.submit_simple_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=self.commitamoumt,
+                fee=self.lp_fee,
+                reference_buy="PEGGED_REFERENCE_MID",
+                reference_sell="PEGGED_REFERENCE_MID",
+                delta_buy=temp_depth,
+                delta_sell=temp_depth,
+                is_amendment=True,
+            )
 
     def step(self, vega_state: VegaState):
         # Each step, MM posts optimal bid/ask depths
@@ -277,10 +270,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             wallet_name=self.wallet_name, market_id=self.market_id
         )
 
-        if not position:
-            current_position = 0
-        else:
-            current_position = int(position[0].open_volume)
+        current_position = int(position[0].open_volume) if position else 0
         self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
 
         self.num_buyMO, self.num_sellMO = self.num_MarketOrders()
@@ -324,7 +314,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
-         
+
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
@@ -347,38 +337,26 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.vega.wait_fn(2)
 
     def step_buy(self, vega_state: VegaState):
-        if (
-            vega_state.market_state[self.market_id].trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ) and vega_state.market_state[
-            self.market_id
-        ].state == markets_protos.Market.State.STATE_ACTIVE:
-            if self.num_buyMO > 0:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side="SIDE_BUY",
-                    volume=self.num_buyMO,
-                    wait=True,
-                    fill_or_kill=False,
-                )
+        if self.num_buyMO > 0:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side="SIDE_BUY",
+                volume=self.num_buyMO,
+                wait=True,
+                fill_or_kill=False,
+            )
 
     def step_sell(self, vega_state: VegaState):
-        if (
-            vega_state.market_state[self.market_id].trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ) and vega_state.market_state[
-            self.market_id
-        ].state == markets_protos.Market.State.STATE_ACTIVE:
-            if self.num_sellMO > 0:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side="SIDE_SELL",
-                    volume=self.num_sellMO,
-                    wait=True,
-                    fill_or_kill=False,
-                )
+        if self.num_sellMO > 0:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side="SIDE_SELL",
+                volume=self.num_sellMO,
+                wait=True,
+                fill_or_kill=False,
+            )
 
 
 class LimitOrderTrader(StateAgentWithWallet):
@@ -411,7 +389,6 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
-        
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -456,50 +433,52 @@ class LimitOrderTrader(StateAgentWithWallet):
         )
 
     def step_amendprice(self, vega_state: VegaState):
-        if self.current_step == 0:
-            pass
-        else:
-            if (
-                self.price_process[self.current_step]
-                > self.price_process[self.current_step - 1]
-            ):
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    order_id=self.sell_order_id,
-                    price=round(
-                        self.price_process[self.current_step] + self.spread, self.mdp
-                    ),
-                )
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    order_id=self.buy_order_id,
-                    price=round(
-                        self.price_process[self.current_step] - self.spread, self.mdp
-                    ),
-                )
-            else:
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    order_id=self.buy_order_id,
-                    price=round(
-                        self.price_process[self.current_step] - self.spread, self.mdp
-                    ),
-                )
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    order_id=self.sell_order_id,
-                    price=round(
-                        self.price_process[self.current_step] + self.spread, self.mdp
-                    ),
-                )
+        new_price = self.price_process[self.current_step]
+        price = (
+            self.price_process[self.current_step - 1]
+            if self.current_step > 0
+            else self.price_process[self.current_step]
+        )
+
+        first_side = (
+            vega_protos.SIDE_BUY if new_price < price else vega_protos.SIDE_SELL
+        )
+
+        if first_side == vega_protos.SIDE_BUY:
+            self.vega.amend_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_id=self.buy_order_id,
+                price=round(
+                    new_price - self.spread / 2,
+                    self.mdp,
+                ),
+            )
+
+        self.vega.amend_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            order_id=self.sell_order_id,
+            price=round(
+                new_price + self.spread / 2,
+                self.mdp,
+            ),
+        )
+
+        if first_side == vega_protos.SIDE_SELL:
+            self.vega.amend_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_id=self.buy_order_id,
+                price=round(
+                    new_price - self.spread / 2,
+                    self.mdp,
+                ),
+            )
 
     def step_limitorders(self, vega_state: VegaState):
         for _ in range(self.num_post_at_bid - 1):
-            random_delta = self.spread
+            random_delta = self.spread / 2
 
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
@@ -512,7 +491,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             )
 
         for _ in range(self.num_post_at_ask - 1):
-            random_delta = self.spread
+            random_delta = self.spread / 2
 
             self.vega.submit_order(
                 trading_wallet=self.wallet_name,
@@ -557,7 +536,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         wallet_name: str,
         wallet_pass: str,
         side: str,
-        market_name: str = None, 
+        market_name: str = None,
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
         initial_price: float = 0.3,
@@ -570,7 +549,6 @@ class OpenAuctionPass(StateAgentWithWallet):
         self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
-        
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
