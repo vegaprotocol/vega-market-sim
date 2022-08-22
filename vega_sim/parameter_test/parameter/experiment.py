@@ -1,14 +1,14 @@
+import copy
 import csv
-from dataclasses import dataclass
 import json
 import os
-from typing import Any, Dict, List, Optional, Tuple
 import pathlib
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
-
-from vega_sim.scenario.scenario import Scenario
 from vega_sim.null_service import VegaServiceNull
-
+from vega_sim.scenario.scenario import Scenario
 
 PARAMETER_AMEND_WALLET = ("param", "amend")
 
@@ -89,7 +89,7 @@ def run_single_parameter_experiment(
     ]
     for value in experiment.values:
         results[value] = []
-        for state in random_seeds:
+        for state in copy.deepcopy(random_seeds):
             results[value].append(
                 _run_parameter_iteration(
                     scenario=experiment.scenario,

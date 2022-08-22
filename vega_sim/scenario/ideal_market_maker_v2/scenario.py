@@ -41,7 +41,7 @@ class IdealMarketMaker(Scenario):
             [("PEGGED_REFERENCE_BEST_ASK", 0.04, 1)],
         ),
         initial_asset_mint: float = 1000000,
-        initial_price: float = 100,
+        initial_price: Optional[float] = None,
         sigma: float = 1,
         kappa: float = 1,
         q_upper: int = 20,
@@ -58,14 +58,15 @@ class IdealMarketMaker(Scenario):
         backgroundmarket_tick_spacing: float = 0.002,
         backgroundmarket_number_levels_per_side: int = 20,
         step_length_seconds: int = 1,
+        opening_auction_trade_amount: float = 1,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
+        price_process_fn: Optional[Callable[[None], List[float]]] = None,
+        market_order_trader_base_order_size: float = 1,
+        settle_at_end: bool = True,
     ):
-        if buy_intensity != sell_intensity:
-            raise Exception("Model currently requires buy_intensity == sell_intensity")
-
         self.num_steps = num_steps
         self.dt = dt
         self.market_decimal = market_decimal
@@ -96,6 +97,10 @@ class IdealMarketMaker(Scenario):
         )
         self.market_name = "ETH:USD" if market_name is None else market_name
         self.asset_name = "tDAI" if asset_name is None else asset_name
+        self.price_process_fn = price_process_fn
+        self.opening_auction_trade_amount = opening_auction_trade_amount
+        self.market_order_trader_base_order_size = market_order_trader_base_order_size
+        self.settle_at_end = settle_at_end
 
     def _generate_price_process(
         self,
@@ -121,7 +126,11 @@ class IdealMarketMaker(Scenario):
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
 
-        price_process = self._generate_price_process(random_state=random_state)
+        price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(random_state=random_state)
+        )
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
@@ -146,6 +155,7 @@ class IdealMarketMaker(Scenario):
             initial_lp_specs=self.initial_lp_specs,
             commitment_amount=self.lp_commitamount,
             tag=str(tag),
+            settlement_price=price_process[-1] if self.settle_at_end else None,
         )
 
         trader = MarketOrderTrader(
@@ -158,6 +168,7 @@ class IdealMarketMaker(Scenario):
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
             random_state=random_state,
+            base_order_size=self.market_order_trader_base_order_size,
         )
 
         background_market = BackgroundMarket(
@@ -172,6 +183,7 @@ class IdealMarketMaker(Scenario):
             order_distribution_kappa=self.kappa,
             num_levels_per_side=self.backgroundmarket_number_levels_per_side,
             tag=str(tag),
+            position_decimals=self.market_position_decimal,
         )
 
         auctionpass1 = OpenAuctionPass(
@@ -179,9 +191,12 @@ class IdealMarketMaker(Scenario):
             wallet_pass=AUCTION1_WALLET.passphrase,
             side="SIDE_BUY",
             initial_asset_mint=self.initial_asset_mint,
-            initial_price=self.initial_price,
+            initial_price=self.initial_price
+            if self.initial_price is not None
+            else price_process[0],
             market_name=market_name,
             asset_name=asset_name,
+            opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=str(tag),
         )
 
@@ -190,9 +205,12 @@ class IdealMarketMaker(Scenario):
             wallet_pass=AUCTION2_WALLET.passphrase,
             side="SIDE_SELL",
             initial_asset_mint=self.initial_asset_mint,
-            initial_price=self.initial_price,
+            initial_price=self.initial_price
+            if self.initial_price is not None
+            else price_process[0],
             market_name=market_name,
             asset_name=asset_name,
+            opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=str(tag),
         )
 

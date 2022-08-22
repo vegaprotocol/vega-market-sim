@@ -67,7 +67,7 @@ class SlimWallet(Wallet):
         self._create_nonces()
         self._create_sigs()
 
-        self.chain_id_bytes = bytes("test-chain-NbThRw", "utf-8") + b"\0"
+        self.chain_id_bytes = bytes("CUSTOM", "utf-8") + b"\0"
 
     def _create_sigs(self):
         self.sigs = [os.urandom(6).hex() for _ in range(self.num_sigs_to_create)]

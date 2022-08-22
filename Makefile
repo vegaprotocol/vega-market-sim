@@ -1,5 +1,6 @@
-VEGA_TAG := develop
-CONSOLE_TAG := master
+include .env
+export
+
 EXTERN_DIR := "./extern"
 
 all: pull_deps build_deps
@@ -13,8 +14,8 @@ pull_deps:
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
 	@echo "Downloading Vega"
 	@if [ ! -d ./extern/vega ]; then mkdir ./extern/vega; git clone https://github.com/vegaprotocol/vega ${EXTERN_DIR}/vega; fi
-ifneq (${VEGA_TAG},develop)
-	@git -C ${EXTERN_DIR}/vega pull; git -C ${EXTERN_DIR}/vega checkout ${VEGA_TAG}
+ifneq (${VEGA_SIM_VEGA_TAG},develop)
+	@git -C ${EXTERN_DIR}/vega pull; git -C ${EXTERN_DIR}/vega checkout ${VEGA_SIM_VEGA_TAG}
 else
 	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
 endif
@@ -26,10 +27,10 @@ build_deps:
 pull_deps_ui:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
-	@echo "Downloading Vega slimline console"
-	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol/slimline-console ${EXTERN_DIR}/console; fi
-ifneq (${CONSOLE_TAG},master)
-	@git -C ${EXTERN_DIR}/console pull; git -C ${EXTERN_DIR}/console checkout ${CONSOLE_TAG}
+	@echo "Downloading Vega console"
+	@if [ ! -d ./extern/console ]; then mkdir ./extern/console; git clone https://github.com/vegaprotocol/frontend-monorepo.git ${EXTERN_DIR}/console; fi
+ifneq (${VEGA_SIM_CONSOLE_TAG},master)
+	@git -C ${EXTERN_DIR}/console pull; git -C ${EXTERN_DIR}/console checkout ${VEGA_SIM_CONSOLE_TAG}
 else
 	@git -C ${EXTERN_DIR}/console checkout master; git -C ${EXTERN_DIR}/console pull
 endif
