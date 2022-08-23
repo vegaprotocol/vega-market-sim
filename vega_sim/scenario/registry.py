@@ -63,6 +63,7 @@ SCENARIOS = {
         spread=0.01,
         lp_commitamount=250_000,
         initial_asset_mint=10_000_000,
+        step_length_seconds=60,
         # step_length_seconds=Granularity.HOUR.value,
         block_length_seconds=1,
         buy_intensity=700_000,
