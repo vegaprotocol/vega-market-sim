@@ -25,6 +25,7 @@ pipeline {
 
     stages {
         stage('Config') {
+            agent any
             steps {
                 sh 'printenv'
                 echo "params=${params}"
