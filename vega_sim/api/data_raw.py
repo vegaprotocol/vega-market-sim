@@ -132,8 +132,8 @@ def market_accounts(
         asset_id=asset_id, market_id=market_id, data_client=data_client
     )
     return MarketAccount(
-        account_type_map[vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY],
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_INSURANCE],
+        account_type_map[vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY],
     )
 
 

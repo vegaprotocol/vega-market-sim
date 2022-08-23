@@ -33,8 +33,8 @@ def main():
         run_with_console=args.console,
         launch_graphql=args.graphql,
         warn_on_raw_data_access=False,
-        seconds_per_block=scenario.step_length_seconds,
-        transactions_per_block=5,
+        seconds_per_block=scenario.block_length_seconds,
+        transactions_per_block=100,
         retain_log_files=True,
         use_full_vega_wallet=False,
     ) as vega:
