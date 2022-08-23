@@ -5,7 +5,7 @@ pipeline {
         timeout(time: 45, unit: 'MINUTES')
     }
     parameters {
-        string(name: 'VEGA_BRANCH', defaultValue: '9330de0991d0c818a1b08ea623ad807370fbc212', description: 'Git branch name of the vegaprotocol/vega repository')
+        string(name: 'VEGA_BRANCH', defaultValue: '911d1cde253bf474f6a6939758c232c690cdbbd2', description: 'Git branch name of the vegaprotocol/vega repository')
    }
     environment {
         CGO_ENABLED = 0
