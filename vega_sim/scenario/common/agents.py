@@ -1,7 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from multiprocessing.connection import wait
 
 import numpy as np
+
+from math import exp
+
 from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
@@ -11,6 +15,8 @@ from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
+
+import vega_sim.proto.data_node.api.v1 as data_node_protos
 
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -49,6 +55,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         sell_intensity: float = 1,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
+        base_order_size: float = 1,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
@@ -60,6 +67,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
+        self.base_order_size = base_order_size
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -79,14 +87,13 @@ class MarketOrderTrader(StateAgentWithWallet):
             asset=self.asset_id,
             amount=self.initial_asset_mint,
         )
-        self.vega.wait_fn(2)
+        self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
         buy_first = self.random_state.choice([0, 1])
 
-        buy_vol = self.random_state.poisson(self.buy_intensity)
-        sell_vol = self.random_state.poisson(self.sell_intensity)
-
+        buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
+        sell_vol = self.random_state.poisson(self.sell_intensity) * self.base_order_size
         if buy_first:
             self.place_order(
                 vega_state=vega_state,
@@ -109,11 +116,14 @@ class MarketOrderTrader(StateAgentWithWallet):
 
     def place_order(self, vega_state: VegaState, volume: float, side: vega_protos.Side):
         if (
-            vega_state.market_state[self.market_id].trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ) and vega_state.market_state[
-            self.market_id
-        ].state == markets_protos.Market.State.STATE_ACTIVE:
+            (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            )
+            and vega_state.market_state[self.market_id].state
+            == markets_protos.Market.State.STATE_ACTIVE
+            and volume != 0
+        ):
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
@@ -133,6 +143,7 @@ class BackgroundMarket(StateAgentWithWallet):
         asset_name: str,
         price_process: List[float],
         initial_asset_mint: float = 1000000,
+        position_decimals: int = 4,
         spread: float = 0.02,
         tick_spacing: float = 0.01,
         num_levels_per_side: int = 20,
@@ -153,6 +164,7 @@ class BackgroundMarket(StateAgentWithWallet):
         self.market_name = market_name
         self.asset_name = asset_name
         self.kappa = order_distribution_kappa
+        self.position_decimals = position_decimals
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -198,13 +210,16 @@ class BackgroundMarket(StateAgentWithWallet):
     def _submit_order(
         self, side: Union[str, vega_protos.Side], price: float, size: float
     ) -> None:
+        volume = round(size, self.position_decimals)
+        if volume == 0:
+            return
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
             market_id=self.market_id,
             order_type="TYPE_LIMIT",
             time_in_force="TIME_IN_FORCE_GTC",
             side=side,
-            volume=size,
+            volume=volume,
             price=price,
             wait=False,
         )
@@ -548,15 +563,17 @@ class OpenAuctionPass(StateAgentWithWallet):
         asset_name: str,
         initial_asset_mint: float = 1000000,
         initial_price: float = 0.3,
+        opening_auction_trade_amount: float = 1,
         tag: str = "",
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass)
         self.side = side
         self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
         self.tag = tag
         self.market_name = market_name
         self.asset_name = asset_name
+        self.opening_auction_trade_amount = opening_auction_trade_amount
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -577,7 +594,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             asset=asset_id,
             amount=self.initial_asset_mint,
         )
-        self.vega.wait_fn(2)
+        self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
 
         self.vega.submit_order(
@@ -586,7 +603,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             order_type="TYPE_LIMIT",
             time_in_force="TIME_IN_FORCE_GTC",
             side=self.side,
-            volume=1,
+            volume=self.opening_auction_trade_amount,
             price=self.initial_price,
         )
 
@@ -709,4 +726,221 @@ class MarketManager(StateAgentWithWallet):
         if self.settlement_price is not None:
             self.vega.settle_market(
                 self.terminate_wallet_name, self.settlement_price, self.market_id
+            )
+
+
+class SemiRandomLimitOrderTrader(StateAgentWithWallet):
+    """Agent which randomly submits and cancels limit orders.
+
+    At initialisation; the agent creates a wallet, identifies the market id and
+    the asset for that market, and mints itself the specified quantity of the
+    required asset.
+
+    At any given step; the agent has an adjustable probability of submitting
+    an order and an adjustable probability of cancelling a randomly
+    selected order.
+
+    When submitting an order; the agent choses a price following a lognormal
+    distribution where the underlying normal distribution can be adjusted.
+
+    """
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        spread: int,
+        initial_asset_mint: float = 1000000,
+        buy_volume: float = 1.0,
+        sell_volume: float = 1.0,
+        buy_intensity: float = 5,
+        sell_intensity: float = 5,
+        tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
+        submit_bias: float = 0.5,
+        cancel_bias: float = 0.5,
+        side_opts: Optional[dict] = None,
+        time_in_force_opts: Optional[dict] = None,
+        duration: Optional[float] = 120,
+        mean: Optional[float] = 2.0,
+        sigma: Optional[float] = 1.0,
+    ):
+        """Init the object and class attributes.
+
+        Args:
+            wallet_name (str):
+                Name of the agents wallet.
+            wallet_pass (str):
+                Passcode used by the agent to login to its wallet.
+            market_name (str):
+                Name of the market the agent is to place orders in.
+            asset_name: (str):
+                Name of the asset needed for the market.
+            spread (int):
+                Spread of the current markets market maker.
+            initial_asset_mint (float, optional):
+                Quantity of the asset the agent should initially mint.
+            buy_volume (float, optional):
+                Volume used by agent on buy orders.
+            sell_volume (float, optional):
+                Volume used by agent on sell orders.
+            tag (str, optional):
+                String to tag to the market and asset name.
+            random_state: (np.random.RandomState, optional):
+                Object for creating distributions to randomly sampling from.
+            submit_bias (float, optional):
+                Probability agent attempts to submit a random order.
+            cancel_bias (float, optional):
+                Probability agent attempts to cancel a random order.
+            side_opts(dict, optional):
+                Dictionary of side options and probabilities.
+            time_in_force_opts (dict, optional):
+                Dictionary of time in force options and probabilities.
+            duration (int, optional):
+                Duration unfilled GTT orders should remain open in seconds.
+            mean (float, optional):
+                Mean of the log-normal distribution.
+            sigma (float, optional):
+                Standard deviation of the log-normal distribution.
+        """
+
+        super().__init__(wallet_name + str(tag), wallet_pass)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.spread = spread
+        self.initial_asset_mint = initial_asset_mint
+        self.buy_intensity = buy_intensity
+        self.sell_intensity = sell_intensity
+        self.buy_volume = buy_volume
+        self.sell_volume = sell_volume
+        self.tag = tag
+        self.submit_bias = submit_bias
+        self.cancel_bias = cancel_bias
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+        self.side_opts = (
+            side_opts if side_opts is not None else {"SIDE_BUY": 0.5, "SIDE_SELL": 0.5}
+        )
+        self.time_in_force_opts = (
+            time_in_force_opts
+            if time_in_force_opts is not None
+            else {
+                "TIME_IN_FORCE_GTC": 0.4,
+                "TIME_IN_FORCE_GTT": 0.3,
+                "TIME_IN_FORCE_IOC": 0.2,
+                "TIME_IN_FORCE_FOK": 0.1,
+            }
+        )
+        self.duration = duration
+        self.mean = mean
+        self.sigma = sigma
+
+    def initialise(self, vega: VegaServiceNull):
+        """Initialise the agents wallet and mint the required market asset.
+
+        Args:
+            vega (VegaServiceNull):
+                Object running a locally-hosted Vega service.
+        """
+
+        super().initialise(vega=vega)
+
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_fn(2)
+
+    def step(self, vega_state: VegaState):
+        """Randomly submits and cancels limit orders.
+
+        Args:
+            vega_state (VegaState):
+                Object describing the state of the network and the market.
+        """
+
+        if (
+            vega_state.market_state[self.market_id].trading_mode
+            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        ) and vega_state.market_state[
+            self.market_id
+        ].state == markets_protos.Market.State.STATE_ACTIVE:
+
+            if self.random_state.rand() <= self.submit_bias:
+                self._submit_order()
+
+            if self.random_state.rand() <= self.cancel_bias:
+                self._cancel_order(vega_state=vega_state)
+
+    def _submit_order(self):
+
+        best_bid_price, best_offer_price = self.vega.best_prices(
+            market_id=self.market_id
+        )
+
+        side = self.random_state.choice(
+            a=list(self.side_opts.keys()),
+            p=list(self.side_opts.values()),
+        )
+        time_in_force = self.random_state.choice(
+            a=list(self.time_in_force_opts.keys()),
+            p=list(self.time_in_force_opts.values()),
+        )
+
+        random_offset = self.random_state.lognormal(
+            mean=self.mean,
+            sigma=self.sigma,
+        )
+        ln_mean = exp(self.mean + self.sigma**2 / 2)
+
+        if side == "SIDE_BUY":
+
+            volume = self.buy_volume * self.random_state.poisson(self.buy_intensity)
+            price = best_bid_price + (random_offset - ln_mean)
+
+        elif side == "SIDE_SELL":
+
+            volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
+            price = best_offer_price - (random_offset - ln_mean)
+
+        expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
+
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            price=price,
+            side=side,
+            volume=volume,
+            order_type=vega_protos.Order.Type.TYPE_LIMIT,
+            wait=False,
+            time_in_force=time_in_force,
+            expires_at=expires_at,
+        )
+
+    def _cancel_order(self, vega_state: VegaState):
+
+        orders = vega_state.market_state.get(self.market_id, {}).orders.get(
+            self.vega.wallet.public_key(self.wallet_name), {}
+        )
+
+        if len(orders) > 0:
+
+            order_key = self.random_state.choice(list(orders.keys()))
+            order = orders[order_key]
+
+            self.vega.cancel_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_id=order.id,
             )

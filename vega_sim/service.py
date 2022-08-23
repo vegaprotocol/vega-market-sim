@@ -287,6 +287,8 @@ class VegaService(ABC):
             num_to_padded_int(amount, asset_decimals),
             faucet_url=self.faucet_url,
         )
+        self.wait_fn(1)
+        self.wait_for_core_catchup()
         self.wait_fn(2)
 
     def forward(self, time: str) -> None:
@@ -311,7 +313,8 @@ class VegaService(ABC):
         quantum: int = 1,
         max_faucet_amount: int = 10e9,
     ):
-        """Creates a simple asset and automatically approves the proposal (assuming the proposing wallet has sufficient governance tokens).
+        """Creates a simple asset and automatically approves the proposal (assuming the
+         proposing wallet has sufficient governance tokens).
 
         Args:
             wallet_name:
@@ -321,11 +324,13 @@ class VegaService(ABC):
             symbol:
                 str, The symbol to use for the asset
             decimals:
-                int, The number of decimals in which to represent the asset. (e.g with 2 then integer value 101 is really 1.01)
+                int, The number of decimals in which to represent the asset.
+                    (e.g with 2 then integer value 101 is really 1.01)
             quantum:
                 int, The smallest unit of currency it makes sense to talk about
             max_faucet_amount:
-                int, The maximum number of tokens which can be fauceted (in full decimal numbers, rather than asset decimal)
+                int, The maximum number of tokens which can be fauceted
+                    (in full decimal numbers, rather than asset decimal)
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
