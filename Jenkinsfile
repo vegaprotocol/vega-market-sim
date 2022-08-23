@@ -54,7 +54,7 @@ pipeline {
             }
         }
 
-        stage('Vega Merket SIM Tests') {
+        stage('Vega Market Sim Tests') {
             steps {
                 script {
                     vegaMarketSim ignoreFailure: !isPRBuild(),
