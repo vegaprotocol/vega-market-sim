@@ -51,6 +51,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         asset_name: str = None,
         commitamount: float = 100000,
         lp_fee: float = 0.001,
+        settlement_price: Optional[float] = None,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ):
@@ -74,6 +75,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.initial_asset_mint = initial_asset_mint
         self.commitamoumt = commitamount
         self.lp_fee = lp_fee
+        self.settlement_price = self.price_process[-1] if settlement_price is None else settlement_price 
         self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
@@ -111,7 +113,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
     def finalise(self):
         self.current_step += 1
         self.vega.settle_market(
-            self.terminate_wallet_name, self.price_process[-1], self.market_id
+            self.terminate_wallet_name, self.settlement_price, self.market_id
         )
 
     def initialise(self, vega: VegaServiceNull):
@@ -477,7 +479,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             )
 
     def step_limitorders(self, vega_state: VegaState):
-        for _ in range(self.num_post_at_bid - 1):
+        if self.num_post_at_bid > 1:
             random_delta = self.spread / 2
 
             self.vega.submit_order(
@@ -486,11 +488,11 @@ class LimitOrderTrader(StateAgentWithWallet):
                 time_in_force="TIME_IN_FORCE_GTC",
                 order_type="TYPE_LIMIT",
                 side="SIDE_BUY",
-                volume=1,
+                volume=self.num_post_at_bid - 1,
                 price=self.price_process[self.current_step] - random_delta,
             )
 
-        for _ in range(self.num_post_at_ask - 1):
+        if self.num_post_at_ask > 1:
             random_delta = self.spread / 2
 
             self.vega.submit_order(
@@ -499,7 +501,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 time_in_force="TIME_IN_FORCE_GTC",
                 order_type="TYPE_LIMIT",
                 side="SIDE_SELL",
-                volume=1,
+                volume=self.num_post_at_ask - 1,
                 price=self.price_process[self.current_step] + random_delta,
             )
 
