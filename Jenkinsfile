@@ -10,7 +10,7 @@ pipeline {
     options {
         skipDefaultCheckout true
         timestamps()
-        timeout(time: 45, unit: 'MINUTES')
+        timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
         string( name: 'VEGA_VERSION', defaultValue: 'develop',
@@ -58,7 +58,7 @@ pipeline {
             steps {
                 script {
                     vegaMarketSim ignoreFailure: !isPRBuild(),
-                        timeout: 30,
+                        timeout: 45,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH
