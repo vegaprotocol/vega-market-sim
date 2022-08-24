@@ -1,82 +1,68 @@
+@Library('vega-shared-library') _
+
+def scmVars = null
+def version = 'UNKNOWN'
+def versionHash = 'UNKNOWN'
+def commitHash = 'UNKNOWN'
+
 pipeline {
-    agent { label 'system-tests' }
+    agent none
     options {
+        skipDefaultCheckout true
         timestamps()
-        timeout(time: 45, unit: 'MINUTES')
+        timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
-        string(name: 'VEGA_BRANCH', defaultValue: '9330de0991d0c818a1b08ea623ad807370fbc212', description: 'Git branch name of the vegaprotocol/vega repository')
-   }
+        string( name: 'VEGA_VERSION', defaultValue: '42089dca183c9e4d96276b2095c408cb4d820811',
+                description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
+        string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
+                description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
+    }
     environment {
         CGO_ENABLED = 0
         GO111MODULE = 'on'
-        DOCKER_IMAGE_NAME_LOCAL = 'vega_sim_test:latest'
     }
 
     stages {
         stage('Config') {
+            agent any
             steps {
                 sh 'printenv'
                 echo "params=${params}"
-            }
-        }
-
-        stage('Git Clone') {
-            parallel {
-                stage('vega core') {
-                    options { retry(3) }
-                    steps {
-                        dir('extern/vega') {
-                            checkout(
-                                [$class: 'GitSCM', branches: [[name: "${params.VEGA_BRANCH}" ]], 
-                                userRemoteConfigs: [[credentialsId: 'vega-ci-bot', url: 'git@github.com:vegaprotocol/vega.git']]]
-                            )
-                        }
-                    }
+                echo "isPRBuild=${isPRBuild()}"
+                script {
+                    params = pr.injectPRParams()
                 }
+                echo "params (after injection)=${params}"
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Git clone') {
+            agent any
             options { retry(3) }
             steps {
-                sh label: 'Build docker image', script: '''
-                    docker build --tag="${DOCKER_IMAGE_NAME_LOCAL}" -t vegasim_test .
-                '''
+                dir('vega-market-sim') {
+                    script {
+                        scmVars = checkout(scm)
+                        versionHash = sh (returnStdout: true, script: "echo \"${scmVars.GIT_COMMIT}\"|cut -b1-8").trim()
+                        version = sh (returnStdout: true, script: "git describe --tags 2>/dev/null || echo ${versionHash}").trim()
+                        commitHash = getCommitHash()
+                    }
+                    echo "scmVars=${scmVars}"
+                    echo "commitHash=${commitHash}"
+                }
             }
         }
 
-        stage('Tests') {
-            parallel {
-                stage('Integration Tests') {
-                    steps {
-                        sh label: 'Run Integration Tests', script: '''
-                            scripts/run-docker-integration-test.sh ${BUILD_NUMBER}
-                        '''
-                    }
+        stage('Vega Market Sim Tests') {
+            steps {
+                script {
+                    vegaMarketSim ignoreFailure: !isPRBuild(),
+                        timeout: 45,
+                        vegaMarketSim: commitHash,
+                        vegaVersion: params.VEGA_VERSION,
+                        jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH
                 }
-                stage('Notebook Tests') {
-                    steps {
-                        sh label: 'Example Notebook Tests', script: '''
-                            scripts/run-docker-example-notebook-test.sh
-                        '''
-                    }
-                }
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'test_logs/**/*.out'
-                }
-            }
-        }
-    }
-    post {
-        always {
-            retry(3) {
-                cleanWs()
-                sh label: 'Clean docker images', script: '''#!/bin/bash -e
-                    [ -z "$(docker images -q "${DOCKER_IMAGE_NAME_LOCAL}")" ] || docker rmi "${DOCKER_IMAGE_NAME_LOCAL}"
-                '''
             }
         }
     }
