@@ -8,7 +8,7 @@ pytest -m integration
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"
-    sed -i "s/name: 'VEGA_VERSION', defaultValue: '[^']*'/defaultValue: '${vega_tag}'/g" Jenkinsfile
+    sed -i "s/name: 'VEGA_VERSION', defaultValue: '[^']*'/name: 'VEGA_VERSION', defaultValue: '${vega_tag}'/g" Jenkinsfile
 else
     echo "Test run failed, reverting to previous versions"
     echo "$current_env" > .env
