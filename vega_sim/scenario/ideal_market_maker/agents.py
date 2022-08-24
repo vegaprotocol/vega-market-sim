@@ -34,7 +34,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         wallet_pass: str,
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
-        price_processs: List[float],
+        price_process: List[float],
         spread: float = 0.00002,
         num_steps: int = 180,
         market_order_arrival_rate: float = 5,
@@ -59,7 +59,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.terminate_wallet_name = terminate_wallet_name + tag
         self.terminate_wallet_pass = terminate_wallet_pass
 
-        self.price_process = price_processs
+        self.price_process = price_process
         self.spread = spread
         self.time = num_steps
         self.Lambda = market_order_arrival_rate
@@ -75,7 +75,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.initial_asset_mint = initial_asset_mint
         self.commitamoumt = commitamount
         self.lp_fee = lp_fee
-        self.settlement_price = self.price_process[-1] if settlement_price is None else settlement_price 
+        self.settlement_price = (
+            self.price_process[-1] if settlement_price is None else settlement_price
+        )
         self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
@@ -584,3 +586,277 @@ class OpenAuctionPass(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         pass
+
+
+class OptimalLiquidityProvider(StateAgentWithWallet):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        num_steps: int = 100,
+        market_order_arrival_rate: float = 10,
+        pegged_order_fill_rate: float = 500,
+        inventory_upper_boundary: int = 20,
+        inventory_lower_boundary: int = -20,
+        terminal_penalty_parameter: float = 10**-4,
+        running_penalty_parameter: float = 5 * 10**-6,
+        initial_asset_mint: float = 1e8,
+        market_name: str = None,
+        asset_name: str = None,
+        entry_step: int = 0,
+        commitamount: float = 100000,
+        lp_fee: float = 0.001,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name + tag, wallet_pass)
+        self.current_step = 0
+        self.initial_asset_mint = initial_asset_mint
+        self.entry_step = entry_step
+        self.commitamoumt = commitamount
+        self.lp_fee = lp_fee
+        self.time = num_steps
+        self.Lambda = market_order_arrival_rate
+        self.kappa = pegged_order_fill_rate
+        self.q_upper = inventory_upper_boundary
+        self.q_lower = inventory_lower_boundary
+        self.alpha = terminal_penalty_parameter
+        self.phi = running_penalty_parameter
+        self.tag = tag
+        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
+        self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
+        self.long_horizon_estimate = num_steps >= 200
+
+    def initialise(self, vega: VegaServiceNull):
+        # Initialise wallet for LP/ Settle Party
+        super().initialise(vega=vega)
+
+        # Get market id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
+        # Get asset id
+        tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
+        # Top up asset
+        self.vega.mint(
+            self.wallet_name,
+            asset=tDAI_id,
+            amount=self.initial_asset_mint,
+        )
+        # Get asset id
+        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
+        # Top up asset
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.tdai_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_for_total_catchup()
+
+        # Get market decimal place/asset decimal place
+        self.mdp = self.vega._market_price_decimals
+        self.adp = self.vega._asset_decimals
+
+        # Get optimal market making strategy
+        if not self.long_horizon_estimate:
+            self.optimal_bid, self.optimal_ask, _ = A_S_MMmodel(
+                T=self.time / 60 / 24 / 365.25,
+                dt=1 / 60 / 24 / 365.25,
+                length=self.time + 1,
+                mdp=self.mdp,
+                q_upper=self.q_upper,
+                q_lower=self.q_lower,
+                kappa=self.kappa,
+                Lambda=self.Lambda,
+                alpha=self.alpha,
+                phi=self.phi,
+            )
+        else:
+            self.optimal_bid, self.optimal_ask = GLFT_approx(
+                q_upper=self.q_upper,
+                q_lower=self.q_lower,
+                kappa=self.kappa,
+                Lambda=self.Lambda,
+                alpha=self.alpha,
+                phi=self.phi,
+            )
+
+    def OptimalStrategy(self, current_position):
+        if current_position >= self.q_upper:
+            current_bid_depth = (
+                self.optimal_bid[self.current_step, 0]
+                if not self.long_horizon_estimate
+                else self.optimal_bid[0]
+            )
+            current_ask_depth = 1 / 10**self.mdp
+        elif current_position <= self.q_lower:
+            current_bid_depth = 1 / 10**self.mdp
+            current_ask_depth = (
+                self.optimal_ask[self.current_step, -1]
+                if not self.long_horizon_estimate
+                else self.optimal_ask[-1]
+            )
+        else:
+            current_bid_depth = (
+                self.optimal_bid[
+                    self.current_step, int(self.q_upper - 1 - current_position)
+                ]
+                if not self.long_horizon_estimate
+                else self.optimal_bid[int(self.q_upper - 1 - current_position)]
+            )
+            current_ask_depth = (
+                self.optimal_ask[
+                    self.current_step, int(self.q_upper - current_position)
+                ]
+                if not self.long_horizon_estimate
+                else self.optimal_ask[int(self.q_upper - current_position)]
+            )
+
+        return current_bid_depth, current_ask_depth
+
+    def step(self, vega_state: VegaState):
+        if self.current_step < self.entry_step:
+            self.current_step += 1
+            return
+
+        elif self.current_step == self.entry_step:
+            current_position = 0
+            self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
+            self.vega.submit_simple_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=self.commitamoumt,
+                fee=self.lp_fee,
+                reference_buy="PEGGED_REFERENCE_MID",
+                reference_sell="PEGGED_REFERENCE_MID",
+                delta_buy=self.bid_depth,
+                delta_sell=self.ask_depth,
+                is_amendment=False,
+            )
+            self.current_step += 1
+            return
+
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name, market_id=self.market_id
+        )
+
+        current_position = int(position[0].open_volume) if position else 0
+        self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
+
+        self.vega.submit_simple_liquidity(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitamoumt,
+            fee=self.lp_fee,
+            reference_buy="PEGGED_REFERENCE_MID",
+            reference_sell="PEGGED_REFERENCE_MID",
+            delta_buy=self.bid_depth,
+            delta_sell=self.ask_depth,
+            is_amendment=True,
+        )
+
+        self.current_step += 1
+
+
+class InformedTrader(StateAgentWithWallet):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        price_process: List[float],
+        market_name: str = None,
+        asset_name: str = None,
+        initial_asset_mint: float = 1e8,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name + str(tag), wallet_pass)
+        self.initial_asset_mint = initial_asset_mint
+        self.price_process = price_process
+        self.current_step = 0
+        self.sim_length = len(price_process)
+        self.tag = tag
+        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
+        self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
+
+    def initialise(self, vega: VegaServiceNull):
+        # Initialise wallet
+        super().initialise(vega=vega)
+
+        # Get market id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
+        # Get asset id
+        tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
+        # Top up asset
+        self.vega.mint(
+            self.wallet_name,
+            asset=tDAI_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name, market_id=self.market_id
+        )
+        current_position = int(position[0].open_volume) if position else 0
+        trade_side = (
+            vega_protos.vega.Side.SIDE_BUY
+            if current_position < 0
+            else vega_protos.vega.Side.SIDE_SELL
+        )
+        if current_position:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=trade_side,
+                volume=current_position,
+                wait=True,
+                fill_or_kill=False,
+            )
+
+        Order_book = []
+        for _ , orders in (
+            self.vega.order_status_from_feed(live_only=True)
+            .get(self.market_id, {})
+            .items()
+        ):
+            Order_book += list(orders.values())
+
+        price = self.price_process[self.current_step]
+        next_price = (
+            self.price_process[self.current_step + 1]
+            if self.sim_length > self.current_step
+            else price
+        )
+
+        trade_side = (
+            vega_protos.vega.Side.SIDE_BUY
+            if price < next_price
+            else vega_protos.vega.Side.SIDE_SELL
+        )
+        volume = 0
+        if price < next_price:
+            for order in Order_book:
+                if order.side != trade_side and order.price < next_price:
+                    volume += order.remaining
+        else:
+            for order in Order_book:
+                if order.side != trade_side and order.price > next_price:
+                    volume += order.remaining
+
+        if volume:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=trade_side,
+                volume=volume,
+                wait=True,
+                fill_or_kill=False,
+            )

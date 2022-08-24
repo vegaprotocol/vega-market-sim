@@ -104,7 +104,7 @@ class IdealMarketMaker(Scenario):
             wallet_pass=MM_WALLET.passphrase,
             terminate_wallet_name=TERMINATE_WALLET.name,
             terminate_wallet_pass=TERMINATE_WALLET.passphrase,
-            price_processs=price_process,
+            price_process=price_process,
             spread=self.spread,
             num_steps=self.num_steps,
             market_order_arrival_rate=self.lambda_val,
