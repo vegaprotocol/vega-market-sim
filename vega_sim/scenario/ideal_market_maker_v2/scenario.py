@@ -152,7 +152,6 @@ class IdealMarketMaker(Scenario):
             market_position_decimal=self.market_position_decimal,
             market_name=market_name,
             asset_name=asset_name,
-            initial_lp_specs=self.initial_lp_specs,
             commitment_amount=self.lp_commitamount,
             tag=str(tag),
             settlement_price=price_process[-1] if self.settle_at_end else None,

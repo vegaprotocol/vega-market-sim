@@ -80,7 +80,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.commitment_amount = commitment_amount
         self.settlement_price = settlement_price
         self.initial_asset_mint = initial_asset_mint
-        self.initial_lp_specs = initial_lp_specs
 
         self.current_step = 0
 
