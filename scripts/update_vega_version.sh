@@ -4,11 +4,11 @@ echo "VEGA_SIM_VEGA_TAG=${vega_tag}
 VEGA_SIM_CONSOLE_TAG=master" > .env
 
 make
-poetry run pytest -m "not integration"
+pytest -m integration
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"
-    sed -i "s/defaultValue: '[^']*'/defaultValue: '${vega_tag}'/g" Jenkinsfile
+    sed -i "s/name: 'VEGA_VERSION', defaultValue: '[^']*'/name: 'VEGA_VERSION', defaultValue: '${vega_tag}'/g" Jenkinsfile
 else
     echo "Test run failed, reverting to previous versions"
     echo "$current_env" > .env

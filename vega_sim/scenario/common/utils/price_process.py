@@ -76,7 +76,7 @@ def get_historic_price_series(
         index=pd.DatetimeIndex(
             [pd.to_datetime(o[CoinbaseCandle.TIME.value], unit="s") for o in ohlcv],
         ),
-    )
+    ).sort_index()
 
 
 if __name__ == "__main__":
