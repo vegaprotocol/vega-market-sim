@@ -1,7 +1,7 @@
 import argparse
 import logging
 import numpy as np
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
@@ -36,10 +36,6 @@ class IdealMarketMaker(Scenario):
         market_position_decimal: int = 2,
         market_name: str = None,
         asset_name: str = None,
-        initial_lp_specs: Tuple[List[Tuple[str, int, int]]] = (
-            [("PEGGED_REFERENCE_BEST_BID", 0.04, 1)],
-            [("PEGGED_REFERENCE_BEST_ASK", 0.04, 1)],
-        ),
         initial_asset_mint: float = 1000000,
         initial_price: Optional[float] = None,
         sigma: float = 1,
@@ -72,7 +68,6 @@ class IdealMarketMaker(Scenario):
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
         self.market_position_decimal = market_position_decimal
-        self.initial_lp_specs = initial_lp_specs
         self.initial_price = initial_price
         self.sigma = sigma
         self.kappa = kappa

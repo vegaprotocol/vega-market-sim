@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from collections import namedtuple
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Union
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
