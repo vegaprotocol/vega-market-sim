@@ -3,6 +3,10 @@ import logging
 import numpy as np
 from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
+from vega_sim.scenario.common.utils.price_process import (
+    Granularity,
+    get_historic_price_series,
+)
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import (
@@ -27,7 +31,7 @@ from vega_sim.scenario.common.agents import (
 )
 
 
-class IdealMarketMaker(Scenario):
+class CurveMarketMaker(Scenario):
     def __init__(
         self,
         num_steps: int = 120,
@@ -227,7 +231,12 @@ if __name__ == "__main__":
 
     step_length = 60 * 60
 
-    scenario = IdealMarketMaker(num_steps=200)
+    scenario = ExponentialShapedMarketMaker(
+        num_steps=200,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD", granularity=Granularity.HOUR
+        ).values,
+    )
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
