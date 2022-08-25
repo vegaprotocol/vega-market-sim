@@ -73,7 +73,7 @@ def test_settlement_with_openoracle(vega_service: VegaServiceNull):
     # up the machine. Give it some time to catch up
     for _ in range(3):
         try:
-            vega.wait_for_datanode_sync()
+            vega.wait_for_total_catchup()
             break
         except:
             continue
