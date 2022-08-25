@@ -24,7 +24,7 @@ AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
 # Add another liquidity provider
-LIQUIDITY = WalletConfig("liquidity","liquiditypass")
+LIQUIDITY = WalletConfig("liquidity", "liquiditypass")
 
 # Terminate the market and send settlment price
 TERMINATE_WALLET = WalletConfig("terminate", "terminate")
@@ -825,7 +825,7 @@ class InformedTrader(StateAgentWithWallet):
             )
 
         Order_book = []
-        for _ , orders in (
+        for _, orders in (
             self.vega.order_status_from_feed(live_only=True)
             .get(self.market_id, {})
             .items()
