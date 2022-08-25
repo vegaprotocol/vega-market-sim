@@ -325,4 +325,4 @@ UlimitNOFile = 8192
     Username = "vega"
     Password = "vega"
     Database = "vega"
-    UseTransactions = true
+    UseTransactions = false

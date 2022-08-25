@@ -194,7 +194,7 @@ class MarketEnvironment:
             ):
                 state_values.append(self._state_extraction_fn(vega, self.agents))
 
-            vega.wait_for_datanode_sync()
+            vega.wait_for_total_catchup()
             if self.step_length_seconds is not None:
                 end_time = vega.get_blockchain_time()
                 to_forward = max(0, self.step_length_seconds - (end_time - start_time))

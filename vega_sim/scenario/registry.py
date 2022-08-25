@@ -3,10 +3,15 @@ from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
 )
 from vega_sim.scenario.market_crash.scenario import MarketCrash
+from vega_sim.scenario.common.utils.price_process import (
+    get_historic_price_series,
+    Granularity,
+)
 
 SCENARIOS = {
     "ideal_market_maker": IdealMarketMaker,
     "ideal_market_maker_v2": lambda: IdealMarketMakerV2(
+        num_steps=2000,
         market_decimal=3,
         asset_decimal=5,
         market_position_decimal=2,
@@ -22,7 +27,6 @@ SCENARIOS = {
         q_lower=-50,
         kappa=50,
         sigma=5,
-        num_steps=288,
         backgroundmarket_tick_spacing=0.002,
         backgroundmarket_number_levels_per_side=25,
         settle_at_end=False,
@@ -45,5 +49,31 @@ SCENARIOS = {
         step_length_seconds=60,
         block_length_seconds=1,
         trim_to_min=1,
+    ),
+    "historic_ideal_market_maker_v2": lambda: IdealMarketMakerV2(
+        market_name="ETH",
+        asset_name="USD",
+        num_steps=290,
+        market_decimal=2,
+        asset_decimal=4,
+        market_position_decimal=4,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD", granularity=Granularity.HOUR
+        ).values,
+        spread=0.01,
+        lp_commitamount=250_000,
+        initial_asset_mint=10_000_000,
+        step_length_seconds=60,
+        # step_length_seconds=Granularity.HOUR.value,
+        block_length_seconds=1,
+        buy_intensity=700_000,
+        sell_intensity=700_000,
+        q_upper=2,
+        q_lower=-2,
+        kappa=0.2,
+        opening_auction_trade_amount=0.0001,
+        backgroundmarket_tick_spacing=0.1,
+        backgroundmarket_number_levels_per_side=25,
+        market_order_trader_base_order_size=0.01,
     ),
 }
