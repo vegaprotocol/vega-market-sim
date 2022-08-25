@@ -76,7 +76,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.market_position_decimal = market_position_decimal
         self.current_step = 0
         self.initial_asset_mint = initial_asset_mint
-        self.commitamoumt = commitamount
+        self.commitamount = commitamount
         self.lp_fee = lp_fee
         self.settlement_price = (
             self.price_process[-1] if settlement_price is None else settlement_price
@@ -166,7 +166,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             future_asset=self.asset_name,
             liquidity_commitment=vega.build_new_market_liquidity_commitment(
                 asset_id=self.tdai_id,
-                commitment_amount=self.commitamoumt,
+                commitment_amount=self.commitamount,
                 fee=self.lp_fee,
                 buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
                 sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
@@ -262,7 +262,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.vega.submit_simple_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
-                commitment_amount=self.commitamoumt,
+                commitment_amount=self.commitamount,
                 fee=self.lp_fee,
                 reference_buy="PEGGED_REFERENCE_MID",
                 reference_sell="PEGGED_REFERENCE_MID",
@@ -291,7 +291,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.submit_simple_liquidity(
             wallet_name=self.wallet_name,
             market_id=self.market_id,
-            commitment_amount=self.commitamoumt,
+            commitment_amount=self.commitamount,
             fee=self.lp_fee,
             reference_buy="PEGGED_REFERENCE_MID",
             reference_sell="PEGGED_REFERENCE_MID",
@@ -615,7 +615,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
         self.current_step = 0
         self.initial_asset_mint = initial_asset_mint
         self.entry_step = entry_step
-        self.commitamoumt = commitamount
+        self.commitamount = commitamount
         self.lp_fee = lp_fee
         self.time = num_steps
         self.Lambda = market_order_arrival_rate
@@ -730,7 +730,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
             self.vega.submit_simple_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
-                commitment_amount=self.commitamoumt,
+                commitment_amount=self.commitamount,
                 fee=self.lp_fee,
                 reference_buy="PEGGED_REFERENCE_MID",
                 reference_sell="PEGGED_REFERENCE_MID",
@@ -751,7 +751,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
         self.vega.submit_simple_liquidity(
             wallet_name=self.wallet_name,
             market_id=self.market_id,
-            commitment_amount=self.commitamoumt,
+            commitment_amount=self.commitamount,
             fee=self.lp_fee,
             reference_buy="PEGGED_REFERENCE_MID",
             reference_sell="PEGGED_REFERENCE_MID",
@@ -772,6 +772,7 @@ class InformedTrader(StateAgentWithWallet):
         market_name: str = None,
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
+        proportion_taken: float = 0.5,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -780,6 +781,7 @@ class InformedTrader(StateAgentWithWallet):
         self.current_step = 0
         self.sim_length = len(price_process)
         self.tag = tag
+        self.proportion_taken = proportion_taken
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
 
@@ -802,6 +804,8 @@ class InformedTrader(StateAgentWithWallet):
             asset=tDAI_id,
             amount=self.initial_asset_mint,
         )
+
+        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
@@ -824,35 +828,25 @@ class InformedTrader(StateAgentWithWallet):
                 fill_or_kill=False,
             )
 
-        Order_book = []
-        for _, orders in (
-            self.vega.order_status_from_feed(live_only=True)
-            .get(self.market_id, {})
-            .items()
-        ):
-            Order_book += list(orders.values())
+        order_book = self.vega.market_depth(market_id=self.market_id)
 
         price = self.price_process[self.current_step]
-        next_price = (
-            self.price_process[self.current_step + 1]
-            if self.sim_length > self.current_step
-            else price
-        )
+        next_price = self.price_process[self.current_step + 1]
 
         trade_side = (
-            vega_protos.vega.Side.SIDE_BUY
-            if price < next_price
-            else vega_protos.vega.Side.SIDE_SELL
+            vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
         )
-        volume = 0
+
         if price < next_price:
-            for order in Order_book:
-                if order.side != trade_side and order.price < next_price:
-                    volume += order.remaining
+            volume = sum(
+                [order.volume for order in order_book.sells if order.price < next_price]
+            )
         else:
-            for order in Order_book:
-                if order.side != trade_side and order.price > next_price:
-                    volume += order.remaining
+            volume = sum(
+                [order.volume for order in order_book.buys if order.price > next_price]
+            )
+
+        volume = round(self.proportion_taken * volume, self.pdp)
 
         if volume:
             self.vega.submit_market_order(
@@ -860,6 +854,6 @@ class InformedTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side=trade_side,
                 volume=volume,
-                wait=True,
+                wait=False,
                 fill_or_kill=False,
             )
