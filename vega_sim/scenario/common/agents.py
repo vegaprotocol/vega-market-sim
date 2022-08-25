@@ -729,7 +729,7 @@ class MarketManager(StateAgentWithWallet):
             )
 
 
-class SemiRandomLimitOrderTrader(StateAgentWithWallet):
+class LimitOrderTrader(StateAgentWithWallet):
     """Agent which randomly submits and cancels limit orders.
 
     At initialisation; the agent creates a wallet, identifies the market id and
