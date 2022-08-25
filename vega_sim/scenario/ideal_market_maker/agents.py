@@ -23,6 +23,9 @@ RANDOM_WALLET = WalletConfig("random", "random")
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
+# Add another liquidity provider
+LIQUIDITY = WalletConfig("liquidity","liquiditypass")
+
 # Terminate the market and send settlment price
 TERMINATE_WALLET = WalletConfig("terminate", "terminate")
 
@@ -347,7 +350,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side="SIDE_BUY",
                 volume=self.num_buyMO,
-                wait=True,
+                wait=False,
                 fill_or_kill=False,
             )
 
@@ -358,7 +361,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side="SIDE_SELL",
                 volume=self.num_sellMO,
-                wait=True,
+                wait=False,
                 fill_or_kill=False,
             )
 
@@ -656,8 +659,8 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
         # Get market decimal place/asset decimal place
-        self.mdp = self.vega._market_price_decimals
-        self.adp = self.vega._asset_decimals
+        self.mdp = list(self.vega._market_price_decimals.values())[0]
+        self.adp = list(self.vega._asset_decimals.values())[0]
 
         # Get optimal market making strategy
         if not self.long_horizon_estimate:

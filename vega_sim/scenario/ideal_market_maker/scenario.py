@@ -19,6 +19,8 @@ from vega_sim.scenario.ideal_market_maker.agents import (
     RANDOM_WALLET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    LIQUIDITY,
+    OptimalLiquidityProvider,
     OptimalMarketMaker,
     MarketOrderTrader,
     LimitOrderTrader,
@@ -169,6 +171,23 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
+        liquidityprovider = OptimalLiquidityProvider(
+            wallet_name=LIQUIDITY.name,
+            wallet_pass=LIQUIDITY.passphrase,
+            num_steps=self.num_steps,
+            market_order_arrival_rate=self.lambda_val,
+            pegged_order_fill_rate=self.kappa,
+            inventory_upper_boundary=self.q_upper,
+            inventory_lower_boundary=self.q_lower,
+            terminal_penalty_parameter=self.alpha,
+            running_penalty_parameter=self.phi,
+            initial_asset_mint=self.initial_asset_mint,
+            market_name=market_name,
+            asset_name=asset_name,
+            entry_step=5,
+            commitamount=self.lp_commitamount,
+        )
+
         env = MarketEnvironment(
             base_agents=[
                 market_maker,
@@ -176,6 +195,7 @@ class IdealMarketMaker(Scenario):
                 randomtrader,
                 auctionpass1,
                 auctionpass2,
+                # liquidityprovider,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,

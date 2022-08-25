@@ -66,8 +66,13 @@ class MarketEnvironment(MarketEnvironmentWithState):
         state = self.state_func(vega)
         self.mm_agent.AvoidCrossedOrder()
         self.lo_agent.step_amendprice(state)
-
         self.mm_agent.step(state)
+
+        if self.olp_agent:
+            for lp_agent in self.olp_agent:
+                lp_agent.step(state)
+
+        # Pass trading info
         self.lo_agent.num_post_at_bid = self.agents[0].num_bidhit
         self.lo_agent.num_post_at_ask = self.agents[0].num_askhit
         self.mo_agent.num_buyMO = self.agents[0].num_buyMO
@@ -76,6 +81,5 @@ class MarketEnvironment(MarketEnvironmentWithState):
         self.lo_agent.step_limitorders(state)
         self.mo_agent.step_buy(state)
         self.lo_agent.step_limitorderask(state)
-
         self.mo_agent.step_sell(state)
         self.lo_agent.step_limitorderbid(state)
