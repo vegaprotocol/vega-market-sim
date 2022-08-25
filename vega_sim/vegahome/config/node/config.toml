@@ -3,7 +3,7 @@ NodeMode = "validator"
 UlimitNOFile = 8192
 
 [API]
-  Level = "Debug"
+  Level = "Info"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -16,9 +16,9 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Blockchain]
-  Level = "Debug"
+  Level = "Info"
   LogTimeDebug = true
-  LogOrderSubmitDebug = true
+  LogOrderSubmitDebug = false
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
   ChainProvider = "nullchain"
@@ -32,7 +32,7 @@ UlimitNOFile = 8192
     ABCIRecordDir = ""
     ABCIReplayFile = ""
   [Blockchain.Null]
-    Level = "Debug"
+    Level = "Info"
     BlockDuration = "TO_BE_SET"
     TransactionsPerBlock = "TO_BE_SET"
     GenesisFile = "./null-blockchain/node-startup/vegahome/genesis.json"
@@ -43,7 +43,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [CoreAPI]
-  LogLevel = "Debug"
+  LogLevel = "Info"
   Accounts = true
   Assets = true
   NetworkParameters = true
@@ -58,16 +58,16 @@ UlimitNOFile = 8192
   Delegations = true
 
 [Execution]
-  Level = "Debug"
+  Level = "Info"
   [Execution.Matching]
-    Level = "Debug"
+    Level = "Info"
     LogPriceLevelsDebug = false
     LogRemovedOrdersDebug = false
   [Execution.Risk]
     Level = "Info"
     LogMarginUpdate = true
   [Execution.Position]
-    Level = "Debug"
+    Level = "Info"
     LogPositionUpdate = true
   [Execution.Settlement]
     Level = "Info"
@@ -77,7 +77,7 @@ UlimitNOFile = 8192
     Level = "Info"
 
 [Processor]
-  Level = "Debug"
+  Level = "Info"
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
@@ -130,7 +130,7 @@ UlimitNOFile = 8192
   Enabled = false
 
 [Governance]
-  Level = "Debug"
+  Level = "Info"
 
 [NodeWallet]
   Level = "Info"
@@ -140,7 +140,7 @@ UlimitNOFile = 8192
     ClefAddress = ""
 
 [Assets]
-  Level = "Debug"
+  Level = "Info"
 
 [Notary]
   Level = "Info"
@@ -154,10 +154,10 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Validators]
-  Level = "Debug"
+  Level = "Info"
 
 [Banking]
-  Level = "Debug"
+  Level = "Info"
 
 [Stats]
   Level = "Info"
@@ -195,7 +195,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Spam]
-  Level = "Debug"
+  Level = "Info"
 
 [Snapshot]
   Level = "Info"
