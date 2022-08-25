@@ -4,6 +4,7 @@ echo "VEGA_SIM_VEGA_TAG=${vega_tag}
 VEGA_SIM_CONSOLE_TAG=master" > .env
 
 make
+make proto
 pytest -m integration
 if [ "$?" == 0 ]
 then
