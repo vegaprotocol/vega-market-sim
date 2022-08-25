@@ -963,3 +963,99 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 order_id=order.id,
             )
+
+
+class InformedTrader(StateAgentWithWallet):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        price_process: List[float],
+        market_name: str = None,
+        asset_name: str = None,
+        initial_asset_mint: float = 1e8,
+        proportion_taken: float = 0.5,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name + str(tag), wallet_pass)
+        self.initial_asset_mint = initial_asset_mint
+        self.price_process = price_process
+        self.current_step = 0
+        self.sim_length = len(price_process)
+        self.tag = tag
+        self.proportion_taken = proportion_taken
+        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
+        self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
+
+    def initialise(self, vega: VegaServiceNull):
+        # Initialise wallet
+        super().initialise(vega=vega)
+
+        # Get market id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
+        # Get asset id
+        tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
+        # Top up asset
+        self.vega.mint(
+            self.wallet_name,
+            asset=tDAI_id,
+            amount=self.initial_asset_mint,
+        )
+
+        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
+        self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name, market_id=self.market_id
+        )
+        current_position = int(position[0].open_volume) if position else 0
+        trade_side = (
+            vega_protos.vega.Side.SIDE_BUY
+            if current_position < 0
+            else vega_protos.vega.Side.SIDE_SELL
+        )
+        if current_position:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=trade_side,
+                volume=current_position,
+                wait=True,
+                fill_or_kill=False,
+            )
+
+        order_book = self.vega.market_depth(market_id=self.market_id)
+
+        price = self.price_process[self.current_step]
+        next_price = self.price_process[self.current_step + 1]
+
+        trade_side = (
+            vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
+        )
+
+        if price < next_price:
+            volume = sum(
+                [order.volume for order in order_book.sells if order.price < next_price]
+            )
+        else:
+            volume = sum(
+                [order.volume for order in order_book.buys if order.price > next_price]
+            )
+
+        volume = round(self.proportion_taken * volume, self.pdp)
+
+        if volume:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=trade_side,
+                volume=volume,
+                wait=False,
+                fill_or_kill=False,
+            )
