@@ -80,73 +80,109 @@ class CoreStateServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ListAccounts(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Accounts list
+
+        Return a list of accounts
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListAssets(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Assets list
+
+        Return a list of assets
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListNetworkParameters(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Network parameters list
+
+        Return a list of network paramters
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListNetworkLimits(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Network limits list
+
+        Return a list of network limits
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListParties(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Parties list
+
+        Return a list of parties
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListValidators(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Validators list
+
+        Return a list of validators
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListMarkets(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Markets list
+
+        Return a list of markets
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListProposals(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Proposals list
+
+        Return a list of proposals
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListMarketsData(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Markets data list
+
+        Return a list of markets data
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListVotes(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Votes list
+
+        Return a list of votes
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListPartiesStake(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Parties stake list
+
+        Return a list of parties stake
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListDelegations(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Delegations list
+
+        Return a list of delegations
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")

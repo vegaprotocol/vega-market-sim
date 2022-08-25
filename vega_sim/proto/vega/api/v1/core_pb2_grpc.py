@@ -65,31 +65,46 @@ class CoreServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SubmitTransaction(self, request, context):
-        """Submit a signed transaction"""
+        """Submit Transaction
+
+        Submit a signed transaction
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def PropagateChainEvent(self, request, context):
-        """Propagate a chain event"""
+        """Chain event
+
+        Propagate a chain event
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def Statistics(self, request, context):
-        """Get Statistics on Vega"""
+        """Statistics
+
+        Get Statistics on Vega
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def LastBlockHeight(self, request, context):
-        """Get the height of the last tendermint block"""
+        """Blockchain height
+
+        Get the height of the last tendermint block
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetVegaTime(self, request, context):
-        """Get Time"""
+        """Vega time
+
+        Get Time
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -101,19 +116,28 @@ class CoreServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def SubmitRawTransaction(self, request, context):
-        """Submit a version agnostic signed transaction"""
+        """Submit raw transaction
+
+        Submit a version agnostic signed transaction
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def CheckTransaction(self, request, context):
-        """Check a signed transaction"""
+        """Check transaction
+
+        Check a signed transaction
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def CheckRawTransaction(self, request, context):
-        """Check a raw signed transaction"""
+        """Check raw transaction
+
+        Check a raw signed transaction
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
