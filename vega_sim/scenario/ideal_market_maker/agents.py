@@ -495,6 +495,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 side="SIDE_BUY",
                 volume=self.num_post_at_bid - 1,
                 price=self.price_process[self.current_step] - random_delta,
+                wait=False,
             )
 
         if self.num_post_at_ask > 1:
@@ -508,6 +509,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 side="SIDE_SELL",
                 volume=self.num_post_at_ask - 1,
                 price=self.price_process[self.current_step] + random_delta,
+                wait=False,
             )
 
     def step_limitorderask(self, vega_state: VegaState):
