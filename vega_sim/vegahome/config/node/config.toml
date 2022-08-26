@@ -58,7 +58,7 @@ UlimitNOFile = 8192
   Delegations = true
 
 [Execution]
-  Level = "Info"
+  Level = "Debug"
   [Execution.Matching]
     Level = "Info"
     LogPriceLevelsDebug = false
@@ -77,10 +77,10 @@ UlimitNOFile = 8192
     Level = "Info"
 
 [Processor]
-  Level = "Info"
+  Level = "Debug"
   LogOrderSubmitDebug = true
-  LogOrderAmendDebug = false
-  LogOrderCancelDebug = false
+  LogOrderAmendDebug = true
+  LogOrderCancelDebug = true
   [Processor.Ratelimit]
     Requests = 500
     PerNBlocks = 10
