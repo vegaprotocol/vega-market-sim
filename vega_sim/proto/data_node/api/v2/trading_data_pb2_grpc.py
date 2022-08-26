@@ -558,7 +558,7 @@ class TradingDataServiceServicer(object):
     def ListCandleIntervals(self, request, context):
         """Candle intervals list
 
-        Gets all available intervals for a given market along with the corresponding candle id
+        Get all available intervals for a given market along with the corresponding candle id
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -582,7 +582,7 @@ class TradingDataServiceServicer(object):
     def GetERC20MultiSigSignerAddedBundles(self, request, context):
         """ERC20 add signer bundle
 
-        Gets the signature bundles that add a particular validator to the multisig contract
+        Get the signature bundle to add a particular validator to the signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -591,7 +591,7 @@ class TradingDataServiceServicer(object):
     def GetERC20MultiSigSignerRemovedBundles(self, request, context):
         """ERC20 remove signer bundle
 
-        Gets the signature bundles that remove a particular validator to the multisig contract
+        Get the signatures bundle to remove a particular validator from signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -600,7 +600,7 @@ class TradingDataServiceServicer(object):
     def GetERC20ListAssetBundle(self, request, context):
         """ERC20 list asset bundle
 
-        Gets the signature bundles that remove a particular validator to the multisig contract
+        Get the signatures bundle to allowlist an ERC20 token in the collateral bridge
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -609,7 +609,7 @@ class TradingDataServiceServicer(object):
     def GetERC20SetAssetLimitsBundle(self, request, context):
         """ERC20 set asset limit bundle
 
-        Gets the signature bundles that remove a particular validator to the multisig contract
+        Get the signature bundle to update the token limits (maxLifetimeDeposit and withdrawThreshold) for a given ERC20 token (already allowlisted) in the collateral bridge
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")

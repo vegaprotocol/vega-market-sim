@@ -145,7 +145,6 @@ class SlimWallet(Wallet):
             pow=transaction_proto.ProofOfWork(
                 tid=None,
                 nonce=0,
-                hash_function="sha3_24_rounds",
             ),
         )
         request = core_proto.SubmitTransactionRequest(
