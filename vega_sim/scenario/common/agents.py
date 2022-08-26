@@ -1,6 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from multiprocessing.connection import wait
 
 import numpy as np
 
@@ -956,6 +955,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         self,
         wallet_name: str,
         wallet_pass: str,
+        num_steps: int,
         price_process_generator: Callable[[None], float],
         initial_asset_mint: float = 1000000,
         market_name: str = None,
@@ -967,6 +967,12 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         num_levels: int = 25,
         tick_spacing: float = 1,
         max_order_size: float = 200,
+        inventory_upper_boundary: float = 20,
+        inventory_lower_boundary: float = -20,
+        terminal_penalty_parameter: float = 10**-4,
+        running_penalty_parameter: float = 5 * 10**-6,
+        market_order_arrival_rate: float = 5,
+        market_kappa: float = 1,
         tag: str = "",
     ):
         super().__init__(
@@ -993,6 +999,38 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         self.num_levels = num_levels
         self.order_unit_size = order_unit_size
         self.max_order_size = max_order_size
+
+        self.num_steps = num_steps
+        self.long_horizon_estimate = num_steps >= 200
+        self.q_upper = inventory_upper_boundary
+        self.q_lower = inventory_lower_boundary
+        self.market_order_arrival_rate = market_order_arrival_rate
+        self.market_kappa = market_kappa
+        self.alpha = terminal_penalty_parameter
+        self.phi = running_penalty_parameter
+
+        if not self.long_horizon_estimate:
+            self.optimal_bid, self.optimal_ask, _ = a_s_mm_model(
+                T=self.num_steps / 60 / 24 / 365.25,
+                dt=1 / 60 / 24 / 365.25,
+                length=self.num_steps + 1,
+                q_upper=self.q_upper,
+                q_lower=self.q_lower,
+                mdp=self.mdp,
+                kappa=self.market_kappa,
+                lmbda=self.market_order_arrival_rate,
+                alpha=self.alpha,
+                phi=self.phi,
+            )
+        else:
+            self.optimal_bid, self.optimal_ask = GLFT_approx(
+                q_upper=self.q_upper,
+                q_lower=self.q_lower,
+                kappa=self.market_kappa,
+                Lambda=self.market_order_arrival_rate,
+                alpha=self.alpha,
+                phi=self.phi,
+            )
 
     def _generate_shape(
         self, bid_price_depth: float, ask_price_depth: float

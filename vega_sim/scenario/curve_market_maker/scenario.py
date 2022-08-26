@@ -292,8 +292,9 @@ if __name__ == "__main__":
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         run_with_console=True,
-        use_full_vega_wallet=True,
+        use_full_vega_wallet=False,
         retain_log_files=True,
+        launch_graphql=True,
         seconds_per_block=1,  # Heuristic
     ) as vega:
         scenario.run_iteration(

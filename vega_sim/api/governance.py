@@ -183,12 +183,6 @@ def propose_future_market(
             f"Public key {pub_key} is missing governance token {governance_asset}"
         )
 
-    liquidity_commitment = (
-        liquidity_commitment
-        if liquidity_commitment is not None
-        else _default_initial_liquidity_commitment()
-    )
-
     risk_model = risk_model if risk_model is not None else _default_risk_model()
     price_monitoring_parameters = (
         price_monitoring_parameters
