@@ -765,7 +765,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self,
         wallet_name: str,
         wallet_pass: str,
-        price_process: List[float],
+        price_process_generator: Callable[[None], float],
         best_price_offset_fn: Callable[[float, int], Tuple[float, float]],
         shape_fn: Callable[
             [
@@ -778,15 +778,14 @@ class ShapedMarketMaker(StateAgentWithWallet):
             Callable[[Optional[VegaState]], Optional[LiquidityProvision]]
         ],
         initial_asset_mint: float = 1000000,
-        market_name: str = None,
-        asset_name: str = None,
+        market_name: Optional[str] = None,
+        asset_name: Optional[str] = None,
         commitment_amount: float = 6000,
         market_decimal_places: int = 5,
-        order_unit_size: float = 1,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
-        self.price_process = price_process
+        self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
         self.initial_asset_mint = initial_asset_mint
         self.mdp = market_decimal_places
@@ -795,8 +794,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.best_price_offset_fn = best_price_offset_fn
         self.liquidity_commitment_fn = liquidity_commitment_fn
 
-        self.order_unit_size = order_unit_size
         self.current_step = 0
+        self.mid_price = None
+        self.prev_price = None
 
         self.tag = tag
 
@@ -806,14 +806,13 @@ class ShapedMarketMaker(StateAgentWithWallet):
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega)
-        self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
 
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
-            asset=self.tdai_id,
+            asset=self.asset_id,
             amount=self.initial_asset_mint,
         )
         self.vega.wait_for_total_catchup()
@@ -842,6 +841,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
+        self.prev_price = self.mid_price
+        self.curr_price = next(self.price_process_generator)
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
@@ -869,10 +870,13 @@ class ShapedMarketMaker(StateAgentWithWallet):
         # We want to first make the spread wider by moving the side which is in the
         # direction of the move (e.g. if price falls, the bids)
         first_side = (
-            vega_protos.SIDE_BUY
-            if self.price_process[self.current_step]
-            < self.price_process[self.current_step - 1]
-            else vega_protos.SIDE_SELL
+            (
+                vega_protos.SIDE_BUY
+                if self.curr_price < self.prev_price
+                else vega_protos.SIDE_SELL
+            )
+            if self.prev_price is not None
+            else vega_protos.SIDE_BUY
         )
         if first_side == vega_protos.SIDE_BUY:
             self._move_side(
@@ -952,30 +956,78 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         self,
         wallet_name: str,
         wallet_pass: str,
-        price_process: List[float],
+        price_process_generator: Callable[[None], float],
         initial_asset_mint: float = 1000000,
         market_name: str = None,
         asset_name: str = None,
         commitment_amount: float = 6000,
         market_decimal_places: int = 5,
-        order_unit_size: float = 1,
+        order_unit_size: float = 10,
+        kappa: float = 1,
+        num_levels: int = 25,
+        tick_spacing: float = 1,
+        max_order_size: float = 200,
         tag: str = "",
     ):
         super().__init__(
             wallet_name=wallet_name,
             wallet_pass=wallet_pass,
-            price_process=price_process,
+            price_process_generator=price_process_generator,
             initial_asset_mint=initial_asset_mint,
             market_name=market_name,
             asset_name=asset_name,
             commitment_amount=commitment_amount,
             market_decimal_places=market_decimal_places,
-            order_unit_size=order_unit_size,
             tag=tag,
-            shape_fn=lambda p1, p2: ([MMOrder(1, p1)], [MMOrder(1, p2)]),
+            shape_fn=self._generate_shape,
             best_price_offset_fn=lambda posn, step: (10, 10),
-            liquidity_commitment_fn=None,
+            liquidity_commitment_fn=lambda _: LiquidityProvision(
+                amount=commitment_amount,
+                fee=0.01,
+                buy_specs=[["PEGGED_REFERENCE_BEST_BID", 5, 1]],
+                sell_specs=[["PEGGED_REFERENCE_BEST_ASK", 5, 1]],
+            ),
         )
+        self.kappa = kappa
+        self.tick_spacing = tick_spacing
+        self.num_levels = num_levels
+        self.order_unit_size = order_unit_size
+        self.max_order_size = max_order_size
+
+    def _generate_shape(
+        self, bid_price_depth: float, ask_price_depth: float
+    ) -> Tuple[List[MMOrder], List[MMOrder]]:
+        bid_orders = self._calculate_price_volume_levels(
+            bid_price_depth, vega_protos.Side.SIDE_BUY
+        )
+        ask_orders = self._calculate_price_volume_levels(
+            ask_price_depth, vega_protos.Side.SIDE_SELL
+        )
+        return bid_orders, ask_orders
+
+    def _calculate_price_volume_levels(
+        self,
+        price_depth: float,
+        side: Union[str, vega_protos.Side],
+    ) -> ArrayLike:
+        is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
+        mult_factor = -1 if is_buy else 1
+
+        levels = np.arange(0, self.tick_spacing * self.num_levels, self.tick_spacing)
+        cumulative_vol = np.exp(self.kappa * levels)
+        scaled_vol = (1 / cumulative_vol[0]) * cumulative_vol
+
+        base_price = self.curr_price + mult_factor * price_depth
+        level_price = np.arange(
+            base_price,
+            base_price + mult_factor * self.num_levels * self.tick_spacing,
+            mult_factor * self.tick_spacing,
+        )
+        level_vol = np.concatenate([scaled_vol[:1], np.diff(scaled_vol)]).clip(
+            max=self.max_order_size
+        )
+
+        return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
 
 
 class SemiRandomLimitOrderTrader(StateAgentWithWallet):

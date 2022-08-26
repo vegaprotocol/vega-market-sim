@@ -3,7 +3,7 @@ NodeMode = "validator"
 UlimitNOFile = 8192
 
 [API]
-  Level = "Info"
+  Level = "Debug"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -77,7 +77,7 @@ UlimitNOFile = 8192
     Level = "Info"
 
 [Processor]
-  Level = "Info"
+  Level = "Debug"
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
