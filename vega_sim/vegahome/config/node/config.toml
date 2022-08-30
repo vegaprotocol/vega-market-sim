@@ -58,7 +58,7 @@ UlimitNOFile = 8192
   Delegations = true
 
 [Execution]
-  Level = "Info"
+  Level = "Debug"
   [Execution.Matching]
     Level = "Info"
     LogPriceLevelsDebug = false
@@ -70,14 +70,14 @@ UlimitNOFile = 8192
     Level = "Info"
     LogPositionUpdate = true
   [Execution.Settlement]
-    Level = "Info"
+    Level = "Debug"
   [Execution.Fee]
-    Level = "Info"
+    Level = "Debug"
   [Execution.Liquidity]
-    Level = "Info"
+    Level = "Debug"
 
 [Processor]
-  Level = "Info"
+  Level = "Debug"
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
@@ -146,7 +146,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [EvtForward]
-  Level = "Info"
+  Level = "Debug"
   RetryRate = "10s"
   BlockchainQueueAllowlist = ["8b4f12b0d3919ea6e433b9736218dca036443aa08fd10f978a1fbede9621073f"]
 
@@ -157,7 +157,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Banking]
-  Level = "Info"
+  Level = "Debug"
 
 [Stats]
   Level = "Info"
@@ -175,7 +175,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Broker]
-  Level = "Info"
+  Level = "Debug"
   [Broker.Socket]
     DialTimeout = "2m0s"
     DialRetryInterval = "5s"
@@ -189,7 +189,7 @@ UlimitNOFile = 8192
     Transport = "tcp"
 
 [Rewards]
-  Level = "Info"
+  Level = "Debug"
 
 [Delegation]
   Level = "Info"
