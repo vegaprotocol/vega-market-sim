@@ -61,7 +61,8 @@ pipeline {
                         timeout: 45,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
-                        jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH
+                        jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
+                        runExtraTests: true
                 }
             }
         }
