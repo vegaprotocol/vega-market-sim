@@ -57,7 +57,7 @@ pipeline {
         stage('Vega Market Sim Tests') {
             steps {
                 script {
-                    vegaMarketSim ignoreFailure: !isPRBuild(),
+                    vegaMarketSim ignoreFailure: false,
                         timeout: 45,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,

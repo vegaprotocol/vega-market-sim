@@ -21,6 +21,7 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LP: Position",
     "LP: Bid",
     "LP: Ask",
+    "External Midprice",
     "Midprice",
     "Markprice",
     "LP: entry price",
@@ -91,6 +92,7 @@ def _ideal_market_maker_single_data_extraction(
     market_state = vega.market_info(market_id=mm_agent.market_id).state
     market_data = vega.market_data(market_id=mm_agent.market_id)
     markprice = float(market_data.mark_price) / 10**mm_agent.mdp
+    mid_price = float(market_data.mid_price) / 10**mm_agent.mdp
     trading_mode = market_data.market_trading_mode
 
     liquifee, insurance = [
@@ -125,7 +127,8 @@ def _ideal_market_maker_single_data_extraction(
         "LP: Position": inventory_lp,
         "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp),
         "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp),
-        "Midprice": mm_agent.price_process[mm_agent.current_step - 1],
+        "External Midprice": mm_agent.price_process[mm_agent.current_step - 1],
+        "Midprice": mid_price,
         "Markprice": markprice,
         "LP: entry price": entry_price,
         "InsurancePool": insurance,
