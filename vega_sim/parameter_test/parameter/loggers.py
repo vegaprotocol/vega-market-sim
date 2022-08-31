@@ -127,7 +127,7 @@ def _ideal_market_maker_single_data_extraction(
         "LP: Position": inventory_lp,
         "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp),
         "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp),
-        "External Midprice": mm_agent.price_process[mm_agent.current_step - 1],
+        "External Midprice": mm_agent.curr_price,
         "Midprice": mid_price,
         "Markprice": markprice,
         "LP: entry price": entry_price,
