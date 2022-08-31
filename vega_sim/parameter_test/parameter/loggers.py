@@ -3,6 +3,7 @@ import vega_sim.proto.vega as vega_protos
 from typing import Any, Callable, Dict, List, Optional
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.environment.agent import Agent
+from vega_sim.scenario.common.agents import ExponentialShapedMarketMaker
 from vega_sim.scenario.ideal_market_maker.agents import OptimalMarketMaker
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
     OptimalMarketMaker as OptimalMarketMakerV2,
@@ -61,12 +62,15 @@ def _ideal_market_maker_single_data_extraction(
     mm_agent = [
         agent
         for agent in agents
-        if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
+        if isinstance(
+            agent,
+            (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
+        )
     ][0]
 
     general_lp, margin_lp, bond_lp = vega.party_account(
         wallet_name=mm_agent.wallet_name,
-        asset_id=mm_agent.tdai_id,
+        asset_id=mm_agent.asset_id,
         market_id=mm_agent.market_id,
     )
 
@@ -92,14 +96,15 @@ def _ideal_market_maker_single_data_extraction(
     liquifee, insurance = [
         int(account.balance)
         for account in vega.market_accounts(
-            asset_id=mm_agent.tdai_id, market_id=mm_agent.market_id
+            asset_id=mm_agent.asset_id, market_id=mm_agent.market_id
         )
     ]
 
     infrafee = int(
-        vega.infrastructure_fee_accounts(asset_id=mm_agent.tdai_id)[0].balance
+        vega.infrastructure_fee_accounts(asset_id=mm_agent.asset_id)[0].balance
     )
-    infrafee /= 10**mm_agent.adp
+    if hasattr(mm_agent, "adp"):
+        infrafee /= 10**mm_agent.adp
     infrafee_rate = float(
         vega.market_info(market_id=mm_agent.market_id).fees.factors.infrastructure_fee
     )

@@ -18,16 +18,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
     TRADER_WALLET,
-    BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
-    BackgroundMarket,
-    MarketOrderTrader,
     OpenAuctionPass,
     ExponentialShapedMarketMaker,
+    PriceSensitiveMarketOrderTrader,
 )
 
 
@@ -42,7 +40,7 @@ class CurveMarketMaker(Scenario):
         market_name: str = None,
         asset_name: str = None,
         initial_asset_mint: float = 1000000,
-        initial_price: float = 100,
+        initial_price: Optional[float] = None,
         sigma: float = 1,
         kappa: float = 1,
         q_upper: int = 20,
@@ -50,7 +48,6 @@ class CurveMarketMaker(Scenario):
         alpha: float = 10**-4,
         phi: float = 5 * 10**-6,
         lp_commitamount: float = 200000,
-        spread: int = 2,
         block_size: int = 1,
         block_length_seconds: int = 1,
         state_extraction_freq: int = 1,
@@ -83,7 +80,6 @@ class CurveMarketMaker(Scenario):
         self.q_lower = q_lower
         self.alpha = alpha
         self.phi = phi
-        self.spread = spread / 10**self.market_decimal
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
         self.state_extraction_freq = state_extraction_freq
@@ -134,6 +130,9 @@ class CurveMarketMaker(Scenario):
             if self.price_process_fn is not None
             else self._generate_price_process(random_state=random_state)
         )
+        self.initial_price = (
+            self.initial_price if self.initial_price is not None else price_process[0]
+        )
 
         market_manager = MarketManager(
             wallet_name=MM_WALLET.name,
@@ -159,10 +158,11 @@ class CurveMarketMaker(Scenario):
             commitment_amount=self.lp_commitamount,
             market_decimal_places=self.market_decimal,
             order_unit_size=0.1,
+            num_steps=self.num_steps,
             tag=str(tag),
         )
 
-        mo_trader = MarketOrderTrader(
+        sensitive_mo_trader = PriceSensitiveMarketOrderTrader(
             wallet_name=TRADER_WALLET.name,
             wallet_pass=TRADER_WALLET.passphrase,
             market_name=market_name,
@@ -170,23 +170,11 @@ class CurveMarketMaker(Scenario):
             initial_asset_mint=self.initial_asset_mint,
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
+            price_half_life=4,
+            price_process_generator=iter(price_process),
             tag=str(tag),
             base_order_size=self.market_order_trader_base_order_size,
         )
-
-        # background_market = BackgroundMarket(
-        #     wallet_name=BACKGROUND_MARKET.name,
-        #     wallet_pass=BACKGROUND_MARKET.passphrase,
-        #     market_name=market_name,
-        #     asset_name=asset_name,
-        #     initial_asset_mint=self.initial_asset_mint,
-        #     price_process=price_process,
-        #     spread=self.spread,
-        #     tick_spacing=self.backgroundmarket_tick_spacing,
-        #     order_distribution_kappa=self.kappa,
-        #     num_levels_per_side=self.backgroundmarket_number_levels_per_side,
-        #     tag=str(tag),
-        # )
 
         auctionpass1 = OpenAuctionPass(
             wallet_name=AUCTION1_WALLET.name,
@@ -220,7 +208,7 @@ class CurveMarketMaker(Scenario):
                 market_manager,
                 # background_market,
                 shaped_mm,
-                mo_trader,
+                sensitive_mo_trader,
                 auctionpass1,
                 auctionpass2,
             ],
@@ -271,20 +259,19 @@ if __name__ == "__main__":
         price_process_fn=lambda: get_historic_price_series(
             product_id="ETH-USD", granularity=Granularity.HOUR
         ).values,
-        spread=0.01,
         lp_commitamount=250_000,
         initial_asset_mint=10_000_000,
         step_length_seconds=60,
         # step_length_seconds=Granularity.HOUR.value,
         block_length_seconds=1,
-        buy_intensity=700_000,
-        sell_intensity=700_000,
-        q_upper=2,
-        q_lower=-2,
+        buy_intensity=500,
+        sell_intensity=500,
+        q_upper=5,
+        q_lower=-5,
         kappa=0.2,
         opening_auction_trade_amount=0.0001,
-        backgroundmarket_tick_spacing=0.1,
-        backgroundmarket_number_levels_per_side=25,
+        backgroundmarket_tick_spacing=0.01,
+        backgroundmarket_number_levels_per_side=75,
         market_order_trader_base_order_size=0.01,
         pause_every_n_steps=25,
     )
