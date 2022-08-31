@@ -64,6 +64,7 @@ class CurveMarketMaker(Scenario):
         settle_at_end: bool = True,
         opening_auction_trade_amount: float = 1,
         market_order_trader_base_order_size: float = 1,
+        sensitive_price_taker_half_life: float = 0.5,
     ):
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
@@ -100,6 +101,7 @@ class CurveMarketMaker(Scenario):
         self.price_process_fn = price_process_fn
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
+        self.sensitive_price_taker_half_life = sensitive_price_taker_half_life
 
     def _generate_price_process(
         self,
@@ -157,6 +159,7 @@ class CurveMarketMaker(Scenario):
             asset_name=asset_name,
             commitment_amount=self.lp_commitamount,
             market_decimal_places=self.market_decimal,
+            asset_decimal_places=self.asset_decimal,
             order_unit_size=0.1,
             num_steps=self.num_steps,
             tag=str(tag),
@@ -170,7 +173,7 @@ class CurveMarketMaker(Scenario):
             initial_asset_mint=self.initial_asset_mint,
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
-            price_half_life=4,
+            price_half_life=self.sensitive_price_taker_half_life,
             price_process_generator=iter(price_process),
             tag=str(tag),
             base_order_size=self.market_order_trader_base_order_size,

@@ -165,12 +165,16 @@ def target_stake_additional_data(
     mm_agent = [
         agent
         for agent in agents
-        if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
+        if isinstance(
+            agent,
+            (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
+        )
     ][0]
     market_data = vega.market_data(market_id=mm_agent.market_id)
+    scaling = 1 / 10 ** mm_agent.adp if hasattr(mm_agent, "adp") else 1
 
     return {
-        "Target Stake": float(market_data.target_stake) / 10**mm_agent.adp,
+        "Target Stake": float(market_data.target_stake) * scaling,
     }
 
 
@@ -181,7 +185,10 @@ def tau_scaling_additional_data(
     mm_agent = [
         agent
         for agent in agents
-        if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
+        if isinstance(
+            agent,
+            (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
+        )
     ][0]
     market_data = vega.market_data(market_id=mm_agent.market_id)
     market_info = vega.market_info(market_id=mm_agent.market_id)
@@ -199,7 +206,10 @@ def limit_order_book(
     mm_agent = [
         agent
         for agent in agents
-        if isinstance(agent, (OptimalMarketMakerV2, OptimalMarketMaker))
+        if isinstance(
+            agent,
+            (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
+        )
     ][0]
     order_book = []
     for _, orders in (
@@ -211,24 +221,21 @@ def limit_order_book(
     LOB_asks = {}
 
     for order in order_book:
+        order_remaining = (
+            round(order.remaining, mm_agent.market_position_decimal)
+            if hasattr(mm_agent, "market_position_decimal")
+            else order.remaining
+        )
         if order.side == vega_protos.vega.Side.SIDE_BUY:
             if order.price not in LOB_bids:
-                LOB_bids[order.price] = round(
-                    order.remaining, mm_agent.market_position_decimal
-                )
+                LOB_bids[order.price] = order_remaining
             else:
-                LOB_bids[order.price] += round(
-                    order.remaining, mm_agent.market_position_decimal
-                )
+                LOB_bids[order.price] += order_remaining
         else:
             if order.price not in LOB_asks:
-                LOB_asks[order.price] = round(
-                    order.remaining, mm_agent.market_position_decimal
-                )
+                LOB_asks[order.price] = order_remaining
             else:
-                LOB_asks[order.price] += round(
-                    order.remaining, mm_agent.market_position_decimal
-                )
+                LOB_asks[order.price] += order_remaining
 
     return {
         "Order Book Bid Side": LOB_bids,

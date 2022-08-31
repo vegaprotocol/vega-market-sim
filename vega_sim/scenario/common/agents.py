@@ -904,6 +904,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         asset_name: Optional[str] = None,
         commitment_amount: float = 6000,
         market_decimal_places: int = 5,
+        asset_decimal_places: int = 0,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
@@ -911,6 +912,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.commitment_amount = commitment_amount
         self.initial_asset_mint = initial_asset_mint
         self.mdp = market_decimal_places
+        self.adp = asset_decimal_places
 
         self.shape_fn = shape_fn
         self.best_price_offset_fn = best_price_offset_fn
@@ -1096,6 +1098,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         running_penalty_parameter: float = 5 * 10**-6,
         market_order_arrival_rate: float = 5,
         market_kappa: float = 1,
+        asset_decimal_places: int = 0,
         tag: str = "",
     ):
         super().__init__(
@@ -1107,6 +1110,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             asset_name=asset_name,
             commitment_amount=commitment_amount,
             market_decimal_places=market_decimal_places,
+            asset_decimal_places=asset_decimal_places,
             tag=tag,
             shape_fn=self._generate_shape,
             best_price_offset_fn=self._optimal_strategy,

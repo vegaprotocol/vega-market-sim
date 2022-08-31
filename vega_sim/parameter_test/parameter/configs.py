@@ -223,24 +223,25 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
         market_decimal=2,
         asset_decimal=4,
         market_position_decimal=4,
-        price_process_fn=lambda: get_historic_price_series(
-            product_id="ETH-USD", granularity=Granularity.HOUR
-        ).values,
+        # price_process_fn=lambda: get_historic_price_series(
+        #     product_id="ETH-USD", granularity=Granularity.HOUR
+        # ).values,
+        initial_price=1500,
         lp_commitamount=250_000,
         initial_asset_mint=10_000_000,
         step_length_seconds=60,
         # step_length_seconds=Granularity.HOUR.value,
         block_length_seconds=1,
-        buy_intensity=500,
-        sell_intensity=500,
-        q_upper=5,
-        q_lower=-5,
+        buy_intensity=100,
+        sell_intensity=100,
+        q_upper=10,
+        q_lower=-10,
         kappa=0.2,
+        sensitive_price_taker_half_life=1,
         opening_auction_trade_amount=0.0001,
         backgroundmarket_tick_spacing=0.01,
         backgroundmarket_number_levels_per_side=75,
         market_order_trader_base_order_size=0.01,
-        pause_every_n_steps=25,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
