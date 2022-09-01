@@ -1074,3 +1074,60 @@ class InformedTrader(StateAgentWithWallet):
                 wait=False,
                 fill_or_kill=False,
             )
+
+
+class LiquidityProvider(StateAgentWithWallet):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        initial_asset_mint: float,
+        commitment_amount: float = 6000,
+        offset: float = 0.01,
+        fee: float = 0.001,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name + str(tag), wallet_pass)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.initial_asset_mint = initial_asset_mint
+
+        self.offset = offset
+
+        self.fee = fee
+
+        self.commitment_amount = commitment_amount
+
+    def initialise(self, vega: VegaServiceNull):
+
+        super().initialise(vega=vega)
+
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_fn(2)
+
+        self.vega.wait_for_total_catchup()
+
+        self.vega.submit_simple_liquidity(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitment_amount,
+            fee=0.001,
+            reference_buy="PEGGED_REFERENCE_BEST_BID",
+            reference_sell="PEGGED_REFERENCE_BEST_ASK",
+            delta_buy=self.offset,
+            delta_sell=self.offset,
+        )
