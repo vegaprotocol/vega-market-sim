@@ -9,6 +9,11 @@ ui: pull_deps_ui build_deps_ui
 
 proto: build_proto black
 
+clean_ui:
+	@echo "Deleting $(EXTERN_DIR)/console and ./vega_sim/bin/console" 
+	@rm -rf "$(EXTERN_DIR)/console"
+	@rm -rf "./vega_sim/bin/console"
+
 pull_deps:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
