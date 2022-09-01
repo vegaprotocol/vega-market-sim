@@ -5,6 +5,7 @@ from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
+from vega_sim.scenario.common.agents import MomentumTrader
 
 from vega_sim.scenario.ideal_market_maker_v2.utils.strategy import (
     A_S_MMmodel,
@@ -25,6 +26,8 @@ MM_WALLET = WalletConfig("mm", "pin")
 TRADER_WALLET = WalletConfig("trader", "trader")
 
 BACKGROUND_MARKET = WalletConfig("market", "market")
+
+MOMENTUM_WALLET = WalletConfig("momentum", "momentum")
 
 # Pass opening auction
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")

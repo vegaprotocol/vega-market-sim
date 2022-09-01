@@ -17,12 +17,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    MOMENTUM_WALLET,
     OptimalMarketMaker,
 )
 from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
+    MomentumTrader,
 )
 
 
@@ -208,6 +210,14 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
+        trading_agent = MomentumTrader(
+            wallet_name=MOMENTUM_WALLET.name,
+            wallet_pass=MOMENTUM_WALLET.passphrase,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
+        )
+
         env = MarketEnvironmentWithState(
             agents=[
                 market_maker,
@@ -215,6 +225,7 @@ class IdealMarketMaker(Scenario):
                 auctionpass1,
                 auctionpass2,
                 trader,
+                trading_agent,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,

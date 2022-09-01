@@ -1,4 +1,5 @@
 from __future__ import annotations
+from asyncio import futures
 from dataclasses import dataclass
 from multiprocessing.connection import wait
 
@@ -1059,3 +1060,56 @@ class InformedTrader(StateAgentWithWallet):
                 wait=False,
                 fill_or_kill=False,
             )
+
+
+class MomentumTrader(StateAgentWithWallet):
+    """
+    Trading Agent that can follow multiple momentum trading strategies.
+
+    At each step, the trading agent collects future price and trades under
+    certain momentum indicator.
+    """
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        initial_asset_mint: float = 1e8,
+    ):
+        super().__init__(wallet_name, wallet_pass)
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.initial_asset_mint = initial_asset_mint
+        self.prices = []
+
+    def initialise(self, vega: VegaServiceNull):
+        super().initialise(vega=vega)
+
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_asset_mint,
+        )
+
+        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
+        self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
+        self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+        self._collect_prices()
+        pass
+
+    def _collect_prices(self):
+        future_price = (
+            int(self.vega.market_data(market_id=self.market_id).mid_price) / 10**self.mdp
+        )
+        self.prices.append(future_price)
