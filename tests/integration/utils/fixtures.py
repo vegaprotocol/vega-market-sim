@@ -73,18 +73,19 @@ def build_basic_market(
         settlement_asset_id=asset_id,
         termination_wallet=TERMINATE_WALLET.name,
         market_decimals=5,
-        liquidity_commitment=vega.build_new_market_liquidity_commitment(
-            asset_id=asset_id,
-            commitment_amount=initial_commitment,
-            fee=0.002,
-            buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-            sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-            market_decimals=5,
-        ),
     )
 
     market_id = vega.all_markets()[0].id
 
+    vega.submit_liquidity(
+        wallet_name=MM_WALLET.name,
+        market_id=market_id,
+        commitment_amount=initial_commitment,
+        fee=0.002,
+        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        is_amendment=False,
+    )
     # Add transactions in the proposed market to pass opening auction at price 0.3
     vega.submit_order(
         trading_wallet=AUCTION1.name,
@@ -135,6 +136,7 @@ def vega_service():
         run_with_console=False,
         start_order_feed=False,
         retain_log_files=True,
+        use_full_vega_wallet=True,
         transactions_per_block=1,
     ) as vega:
         yield vega
@@ -147,6 +149,7 @@ def vega_service_with_order_feed():
         run_with_console=False,
         start_order_feed=True,
         retain_log_files=True,
+        use_full_vega_wallet=True,
         transactions_per_block=1,
     ) as vega:
         yield vega

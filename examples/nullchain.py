@@ -80,19 +80,19 @@ if __name__ == "__main__":
             settlement_asset_id=tdai_id,
             termination_wallet=TERMINATE_WALLET.name,
             market_decimals=5,
-            liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                asset_id=tdai_id,
-                commitment_amount=10000,
-                fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
-                sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
-                market_decimals=5,
-            ),
         )
         vega.wait_for_total_catchup()
 
         market_id = vega.all_markets()[0].id
-
+        vega.submit_liquidity(
+            wallet_name=MM_WALLET.name,
+            market_id=market_id,
+            commitment_amount=10000,
+            fee=0.001,
+            buy_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
+            sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
+            is_amendment=False,
+        )
         vega.submit_order(
             trading_wallet=MM_WALLET.name,
             market_id=market_id,
