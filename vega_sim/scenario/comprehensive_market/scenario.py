@@ -53,7 +53,7 @@ class ComprehensiveMarket(Scenario):
         ] = None,
         pause_every_n_steps: Optional[int] = None,
         price_process_fn: Optional[Callable[[None], List[float]]] = None,
-        market_order_trader_order_intensity: int  = 10,
+        market_order_trader_order_intensity: int = 10,
         market_order_trader_order_size: float = 0.1,
         settle_at_end: bool = True,
         limit_order_trader_quantity: int = 5,
@@ -177,7 +177,6 @@ class ComprehensiveMarket(Scenario):
                 sell_intensity=self.market_order_trader_order_intensity,
                 base_order_size=self.market_order_trader_order_size,
                 random_state=random_state,
-                
             )
             for i in range(len(MO_WALLETS))
         ]

@@ -896,7 +896,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             vega_state (VegaState):
                 Object describing the state of the network and the market.
         """
-        
+
         self.current_step += 1
 
         if self.random_state.rand() <= self.submit_bias:
@@ -906,8 +906,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             self._cancel_order(vega_state=vega_state)
 
     def _submit_order(self, vega_state: VegaState):
-        
-         
+
         # Calculate mean_buy_price and mean_sell_price of price distribution
         if (isinstance(self.spread, type(None))) or (
             isinstance(self.price_process, type(None))
