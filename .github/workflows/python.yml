@@ -88,7 +88,7 @@ jobs:
           if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
             echo "Requirements file out of date, please run 'poetry export --without-hashes -f requirements.txt -o requirements.txt' or 'make export_reqs'"
             poetry export --without-hashes -f requirements.txt -o reqs_github.txt
-            diff requirements.txt file2.txt
+            diff requirements.txt reqs_github.txt
             exit 1
           fi
 
