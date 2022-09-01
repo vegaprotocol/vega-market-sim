@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import numpy as np
 
 
@@ -11,7 +11,7 @@ def RSI(
 
     RSI calculates a ratio of the recent upward price movements to
     the absolute price movement, which implys an overbought/oversold
-    of assets when the value is over/below threshold.
+    of assets when the value is over/below threshold (0.7/0.3).
     """
     length = len(prices)
 
@@ -43,18 +43,18 @@ def CMO(
     Calculate CMO (Chande Momentum Oscillator) by a given period.
 
     CMO is a modified RSI, which indicates an overbought/oversold
-    condition when the value over/blew certain threshold.
+    condition when the value over/below certain threshold (50/-50).
     """
     length = len(prices)
-    if period <= length:
+    if length <= period:
         return None
 
     differences = np.diff(prices)
     up_list = [i if i > 0 else 0 for i in differences]
     dn_list = [i if i < 0 else 0 for i in differences]
 
-    ups = np.sum(up_list)
-    dns = -np.sum(dn_list)
+    ups = np.sum(up_list[-period:])
+    dns = -np.sum(dn_list[-period:])
     cmo = 100 * (ups - dns) / (ups + dns)
     return cmo
 
@@ -69,7 +69,7 @@ def StochRSI(
 
     StochRSI calculates the RSI relative to its range, which indicates
     an overbought/oversold condition when the value crosses above/blow
-    certain threshold.
+    certain threshold (0.8/0.2).
     """
     length = len(prices)
 
@@ -126,12 +126,16 @@ def MACD(
     fast_period: int = 12,
     slow_period: int = 26,
     signal_period: int = 9,
-):
+) -> Tuple[float, float]:
     """
     Calculate MACD (Moving Average Convergence Divergence)
+
+    MACD calculates the difference between two exponential moving averages. The
+    signal line is an exponential moving average of MACD. When MACD line crosses
+    below signal line, it is a signal to sell, vice versa.
     """
     length = len(prices)
-    if length <= slow_period + signal_period:
+    if length < slow_period + signal_period - 1:
         return None
 
     fast_sf = 2 / (fast_period + 1)
@@ -153,15 +157,17 @@ def MACD(
     macd = np.array(fast_ema) - np.array(slow_ema)
 
     signal = []
-    signal.append(np.mean(macd[:signal]))
+    signal.append(np.mean(macd[:signal_period]))
     for i in range(signal_period, len(macd)):
         signal.append(macd[i] * signal_sf + signal[-1] * (1 - signal_sf))
 
-    return signal[-1] - macd[-1]
+    return macd[-1], signal[-1]
 
 
 # Test Indicators
 if __name__ == "__main__":
+
+    # RSI
     prices = [
         283.46,
         280.69,
@@ -186,6 +192,30 @@ if __name__ == "__main__":
     prices.append(286.48)
     assert round(RSI(prices=prices, period=14), 2) == 51.55
 
+    # CMO
+    prices = [
+        283.46,
+        280.69,
+        285.48,
+        294.08,
+        293.90,
+        299.92,
+        301.15,
+        284.45,
+        294.09,
+        302.77,
+        301.97,
+        306.85,
+        305.02,
+        301.06,
+        291.97,
+    ]
+
+    assert round(CMO(prices=prices, period=14), 2) == 10.75
+    prices.append(284.18)
+    assert round(CMO(prices=prices, period=14), 2) == 4.15
+
+    # MACD
     prices = [
         10.4,
         10.5,
@@ -199,4 +229,39 @@ if __name__ == "__main__":
         11.21,
         11.42,
         11.84,
+        11.75,
+        11.75,
+        11.81,
+        11.79,
+        11.7,
+        11.66,
+        11.62,
+        11.58,
+        12.08,
+        12.21,
+        12.09,
+        12.17,
+        12.43,
+        12.54,
+        12.47,
+        12.84,
+        12.78,
+        13,
+        12.74,
+        12.25,
+        12.68,
+        12.34,
     ]
+
+    assert (
+        round(
+            MACD(prices=prices, fast_period=12, slow_period=26, signal_period=9)[0], 2
+        )
+        == 0.47
+    )
+    assert (
+        round(
+            MACD(prices=prices, fast_period=12, slow_period=26, signal_period=9)[1], 2
+        )
+        == 0.56
+    )
