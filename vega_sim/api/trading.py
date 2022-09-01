@@ -366,31 +366,3 @@ def submit_liquidity(
         transaction=submission, name=wallet_name, transaction_type=submission_name
     )
     logger.debug(f"Submitted liquidity on market {market_id}")
-
-
-def build_new_market_commitment(
-    commitment_amount: str,
-    fee: float,
-    buy_specs: List[Tuple[str, int, int]],
-    sell_specs: List[Tuple[str, int, int]],
-) -> vega_protos.governance.NewMarketCommitment:
-    return vega_protos.governance.NewMarketCommitment(
-        commitment_amount=str(commitment_amount),
-        fee=str(fee),
-        buys=[
-            vega_protos.vega.LiquidityOrder(
-                reference=spec[0],
-                offset=str(spec[1]),
-                proportion=spec[2],
-            )
-            for spec in buy_specs
-        ],
-        sells=[
-            vega_protos.vega.LiquidityOrder(
-                reference=spec[0],
-                offset=str(spec[1]),
-                proportion=spec[2],
-            )
-            for spec in sell_specs
-        ],
-    )

@@ -23,50 +23,49 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
     create_and_faucet_wallet(vega=vega, wallet=LIQ)
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
+
     vega.submit_liquidity(
         LIQ.name,
         market_id=market_id,
         commitment_amount=100,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.5, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.5, 1)],
-        is_amendment=False,
+        buy_specs=[("PEGGED_REFERENCE_MID", 0.005, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID", 0.005, 1)],
     )
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
 
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
-
     assert len(liq_provis) == 1
     for provis in [
         liq_provis[0].sells[0].liquidity_order,
         liq_provis[0].buys[0].liquidity_order,
     ]:
         assert provis.reference == vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID
-        assert provis.offset == "50000"
+        assert provis.offset == "500"
         assert provis.proportion == 1
 
     buy_specs = [
         vega_protos.vega.LiquidityOrder(
             reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
-            offset="100000",
+            offset="100",
             proportion=2,
         ),
         vega_protos.vega.LiquidityOrder(
             reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID,
-            offset="500000",
+            offset="500",
             proportion=5,
         ),
     ]
     sell_specs = [
         vega_protos.vega.LiquidityOrder(
             reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
-            offset="500000",
+            offset="500",
             proportion=6,
         ),
         vega_protos.vega.LiquidityOrder(
             reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK,
-            offset="20000",
+            offset="20",
             proportion=1,
         ),
     ]
@@ -76,12 +75,14 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=200,
         fee=0.005,
-        buy_specs=[("PEGGED_REFERENCE_MID", 1, 2), ("PEGGED_REFERENCE_BEST_BID", 5, 5)],
-        sell_specs=[
-            ("PEGGED_REFERENCE_MID", 5, 6),
-            ("PEGGED_REFERENCE_BEST_ASK", 0.2, 1),
+        buy_specs=[
+            ("PEGGED_REFERENCE_MID", 0.001, 2),
+            ("PEGGED_REFERENCE_BEST_BID", 0.005, 5),
         ],
-        is_amendment=True,
+        sell_specs=[
+            ("PEGGED_REFERENCE_MID", 0.005, 6),
+            ("PEGGED_REFERENCE_BEST_ASK", 0.0002, 1),
+        ],
     )
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
@@ -101,10 +102,10 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         assert provis.liquidity_order.proportion == exp_provis.proportion
 
     num_levels = 11
-    expected_bid_prices = [0.2995, 0.25, 0.23194, 0, 0, 0, 0, 0, 0, 0, 0]
-    expected_bid_volumes = [668.0, 1.0, 1757.0, 0, 0, 0, 0, 0, 0, 0, 0]
-    expected_ask_prices = [0.3005, 0.35, 0.38697, 0, 0, 0, 0, 0, 0, 0, 0]
-    expected_ask_volumes = [666.0, 1.0, 1075.0, 0, 0, 0, 0, 0, 0, 0, 0]
+    expected_bid_prices = [0.2995, 0.299, 0.25, 0.245, 0, 0, 0, 0, 0, 0, 0]
+    expected_bid_volumes = [668.0, 383.0, 1.0, 19760.0, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_prices = [0.3005, 0.305, 0.35, 0.3502, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_volumes = [666.0, 1125.0, 1.0, 171.0, 0, 0, 0, 0, 0, 0, 0]
 
     book_state = vega.market_depth(market_id, num_levels=num_levels)
     bid_prices = [level.price for level in book_state.buys] + [0] * max(

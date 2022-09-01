@@ -182,14 +182,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 market_decimals=self.mdp,
                 position_decimals=self.market_position_decimal,
                 future_asset=self.asset_name,
-                liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                    asset_id=self.tdai_id,
-                    commitment_amount=self.commitment_amount,
-                    fee=0.0015,
-                    buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                    sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
-                    market_decimals=self.mdp,
-                ),
             )
             self.vega.wait_fn(5)
 
@@ -199,6 +191,15 @@ class OptimalMarketMaker(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
+        vega.submit_liquidity(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitment_amount,
+            fee=0.0015,
+            buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
+            sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
+            is_amendment=False,
+        )
 
     def optimal_strategy(self, current_position):
         if current_position >= self.q_upper:
