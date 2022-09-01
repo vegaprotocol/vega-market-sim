@@ -24,6 +24,7 @@ snakeviz = {version = "^2.1.1", optional = true}
 pytest-profiling = {version = "^1.7.0", optional = true}
 ipywidgets = {version = "^7.7.1", extras = ["plotly"]}
 grpc-gateway-protoc-gen-openapiv2 = "^0.1.0"
+plotly = {version = "^5.10.0", optional = true}
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
@@ -41,5 +42,5 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.extras]
 learning = ["matplotlib", "tqdm", "torch"]
-jupyter = ["jupyterlab", "jupyter", "matplotlib"]
+jupyter = ["jupyterlab", "jupyter", "matplotlib", "plotly"]
 profile = ["snakeviz", "pytest-profiling"]
