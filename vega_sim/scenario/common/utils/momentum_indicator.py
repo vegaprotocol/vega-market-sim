@@ -17,7 +17,7 @@ def RSI(
 
     # No RSI before look back period
     if length <= period:
-        return None
+        return np.nan
 
     differences = np.diff(prices)
     up_list = [i if i > 0 else 0 for i in differences]
@@ -47,7 +47,7 @@ def CMO(
     """
     length = len(prices)
     if length <= period:
-        return None
+        return np.nan
 
     differences = np.diff(prices)
     up_list = [i if i > 0 else 0 for i in differences]
@@ -59,7 +59,7 @@ def CMO(
     return cmo
 
 
-def StochRSI(
+def STOCHRSI(
     prices: List,
     rsi_period: int = 7,
     signal_period: int = 7,
@@ -75,7 +75,7 @@ def StochRSI(
 
     # No RSI before look back period
     if length <= rsi_period + signal_period:
-        return None
+        return np.nan
 
     differences = np.diff(prices)
     up_list = [i if i > 0 else 0 for i in differences]
@@ -114,7 +114,7 @@ def APO(
 
     # No APO before fast/slow periods
     if length <= slow_period:
-        return None
+        return np.nan
 
     sma = np.mean(prices[length - slow_period :])
     fma = np.mean(prices[length - fast_period :])
@@ -136,7 +136,7 @@ def MACD(
     """
     length = len(prices)
     if length < slow_period + signal_period - 1:
-        return None
+        return np.nan
 
     fast_sf = 2 / (fast_period + 1)
     slow_sf = 2 / (slow_period + 1)

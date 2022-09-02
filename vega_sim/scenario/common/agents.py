@@ -1,14 +1,15 @@
 from __future__ import annotations
-from asyncio import futures
+from ast import Dict
 from dataclasses import dataclass
 from multiprocessing.connection import wait
+from xml.dom import InvalidCharacterErr
 
 import numpy as np
 
 from math import exp
 
 from collections import namedtuple
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple, Dict
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
@@ -18,6 +19,14 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
 
 import vega_sim.proto.data_node.api.v1 as data_node_protos
+
+from vega_sim.scenario.common.utils.momentum_indicator import (
+    RSI,
+    CMO,
+    STOCHRSI,
+    APO,
+    MACD,
+)
 
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -1076,13 +1085,52 @@ class MomentumTrader(StateAgentWithWallet):
         wallet_pass: str,
         market_name: str,
         asset_name: str,
-        initial_asset_mint: float = 1e8,
+        indicator_threshold: Tuple[float, float] = (
+            0.75,
+            0.25,
+        ),
+        momentum_strategy: Tuple[str, Dict[str, float]] = (
+            "MACD",
+            {
+                "fast_period": 12,
+                "slow_period": 26,
+                "signal_period": 9,
+            },
+        ),
+        initial_asset_mint: float = 1e5,
+        buy_intensity: float = 5,
+        sell_intensity: float = 5,
+        base_order_size: float = 1,
+        trading_proportion: float = 1,
+        random_state: Optional[np.random.RandomState] = None,
+        tag: str = "",
     ):
         super().__init__(wallet_name, wallet_pass)
         self.market_name = market_name
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
+        self.buy_intensity = buy_intensity
+        self.sell_intensity = sell_intensity
+        self.base_order_size = base_order_size
+        self.tag = tag
+        self.momentum_strategy = momentum_strategy
+        self.indicator_threshold = indicator_threshold
+        self.trading_proportion = trading_proportion
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+
         self.prices = []
+
+        self.momentum_func_dict = {
+            "RSI": self._RSI,
+            "CMO": self._CMO,
+            "STOCHRSI": self._STOCHRSI,
+            "APO": self._APO,
+            "MACD": self._MACD,
+        }
+
+        self.indicators = []
 
     def initialise(self, vega: VegaServiceNull):
         super().initialise(vega=vega)
@@ -1102,14 +1150,133 @@ class MomentumTrader(StateAgentWithWallet):
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
         self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
+        self.adp = self.vega._asset_decimals.get(self.market_id, {})
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
         self._collect_prices()
-        pass
+        signal = self.momentum_func_dict.get(self.momentum_strategy[0])()
+
+        trade_side = vega_protos.SIDE_BUY if signal == 1 else vega_protos.SIDE_SELL
+        volume = (
+            self.random_state.poisson(self.buy_intensity)
+            if signal == 1
+            else self.random_state.poisson(self.sell_intensity)
+        )
+
+        if signal == 0:
+            pass
+
+        else:
+            volume *= self.trading_proportion * self.base_order_size
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=trade_side,
+                volume=volume,
+                wait=False,
+                fill_or_kill=False,
+            )
 
     def _collect_prices(self):
         future_price = (
-            int(self.vega.market_data(market_id=self.market_id).mid_price) / 10**self.mdp
+            int(self.vega.market_data(market_id=self.market_id).mid_price)
+            / 10**self.mdp
         )
         self.prices.append(future_price)
+
+    def _MACD(self):
+        macd, signal = MACD(
+            prices=self.prices,
+            fast_period=self.momentum_strategy[1]["fast_period"],
+            slow_period=self.momentum_strategy[1]["slow_period"],
+            signal_period=self.momentum_strategy[1]["signal_period"],
+        )
+        self.indicators.append(macd - signal)
+
+        if len(self.indicators) == 1:
+            return 0
+
+        if self.indicators[-2] < 0 and self.indicators[-1] >= 0:
+            trade_signal = 1
+
+        elif self.indicators[-2] > 0 and self.indicators[-1] <= 0:
+            trade_signal = 2
+
+        else:
+            trade_signal = 0
+
+        return trade_signal
+
+    def _APO(self):
+        apo = APO(
+            prices=self.prices,
+            fast_period=self.momentum_strategy[1]["fast_period"],
+            slow_period=self.momentum_strategy[1]["slow_period"],
+        )
+        self.indicators.append(apo)
+        if len(self.indicators) == 1:
+            return 0
+
+        if self.indicators[-2] < 0 and self.indicators[-1] >= 0:
+            trade_signal = 1
+
+        elif self.indicators[-2] > 0 and self.indicators[-1] <= 0:
+            trade_signal = 2
+
+        else:
+            trade_signal = 0
+
+        return trade_signal
+
+    def _RSI(self):
+        rsi = RSI(
+            prices=self.prices,
+            period=self.momentum_strategy[1]["period"],
+        )
+        self.indicators.append(rsi)
+        if self.indicators[-1] >= max(self.indicator_threshold):
+            trade_signal = 2
+
+        elif self.indicators[-1] <= min(self.indicator_threshold):
+            trade_signal = 1
+
+        else:
+            trade_signal = 0
+
+        return trade_signal
+
+    def _CMO(self):
+        cmo = CMO(
+            prices=self.prices,
+            period=self.momentum_strategy[1]["period"],
+        )
+        self.indicators.append(cmo)
+        if self.indicators[-1] >= max(self.indicator_threshold):
+            trade_signal = 2
+
+        elif self.indicators[-1] <= min(self.indicator_threshold):
+            trade_signal = 1
+
+        else:
+            trade_signal = 0
+
+        return trade_signal
+
+    def _STOCHRSI(self):
+        stochrsi = STOCHRSI(
+            prices=self.prices,
+            rsi_period=self.momentum_strategy[1]["rsi_period"],
+            signal_period=self.momentum_strategy[1]["signal_period"],
+        )
+        self.indicators.append(stochrsi)
+        if self.indicators[-1] >= max(self.indicator_threshold):
+            trade_signal = 2
+
+        elif self.indicators[-1] <= min(self.indicator_threshold):
+            trade_signal = 1
+
+        else:
+            trade_signal = 0
+
+        return trade_signal
