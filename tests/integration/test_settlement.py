@@ -3,6 +3,7 @@ import pytest
 from tests.integration.utils.fixtures import (
     build_basic_market,
     vega_service,
+    create_and_mint_assets,
     MM_WALLET,
     AUCTION1 as TRADER_1_WALLET,
     AUCTION2 as TRADER_2_WALLET,
@@ -25,7 +26,7 @@ def test_settlement(vega_service: VegaServiceNull):
 
     settlement_price = random.randint(80, 120)
     trade_size = random.randint(1, 10)
-
+    create_and_mint_assets(vega=vega)
     build_basic_market(
         vega,
         mint_amount=participants_initial_deposit,

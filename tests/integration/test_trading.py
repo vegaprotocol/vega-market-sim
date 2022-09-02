@@ -5,12 +5,21 @@ from tests.integration.utils.fixtures import (
     vega_service,
     create_and_faucet_wallet,
     WalletConfig,
+    build_basic_market,
+    create_and_mint_assets,
+    MM_WALLET,
+    WALLETS,
+    TERMINATE_WALLET,
 )
 from vega_sim.null_service import VegaServiceNull
 import vega_sim.proto.vega as vega_protos
 
 
 LIQ = WalletConfig("liq", "liq")
+
+TRADER_1_WALLET = WalletConfig("T1", "pin")
+
+TRADER_2_WALLET = WalletConfig("T2", "pin")
 
 
 @pytest.mark.integration
@@ -132,3 +141,81 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
     for vol, exp_vol in zip(ask_volumes, expected_ask_volumes):
         assert vol == exp_vol
+
+
+@pytest.mark.integration
+def test_liquidity_fees_distributed(vega_service: VegaServiceNull):
+    vega = vega_service
+
+    create_and_mint_assets(vega=vega_service)
+    asset_id = vega.find_asset_id(symbol="tDAI")
+    create_and_faucet_wallet(vega=vega, wallet=TRADER_1_WALLET)
+    create_and_faucet_wallet(vega=vega, wallet=TRADER_2_WALLET)
+
+    vega.wait_for_total_catchup()
+    vega.update_network_parameter(
+        MM_WALLET.name, "market.liquidity.providers.fee.distributionTimeStep", "6000s"
+    )
+    vega.wait_for_total_catchup()
+    vega.update_network_parameter(
+        MM_WALLET.name, "market.fee.factors.infrastructureFee", "0.0"
+    )
+    vega.wait_for_total_catchup()
+
+    build_basic_market(
+        vega_service,
+        initial_price=99,
+        liquidity_fee=0.1,
+        initial_spread=0.5,
+        liq_spread=0.6,
+    )
+
+    vega.wait_for_total_catchup()
+
+    market_id = vega.all_markets()[0].id
+
+    vega.submit_order(
+        trading_wallet=TRADER_1_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        volume=2,
+        price=99,
+    )
+
+    vega.submit_order(
+        trading_wallet=TRADER_2_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        volume=2,
+        price=99,
+    )
+    vega.wait_for_total_catchup()
+
+    post_trade_liq_fees = vega.market_account(
+        market_id, vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY
+    )
+    assert post_trade_liq_fees == 19.8
+
+    mm_account_pre_settle = sum(
+        vega.party_account(
+            wallet_name=MM_WALLET.name, asset_id=asset_id, market_id=market_id
+        )
+    )
+
+    vega.settle_market(TERMINATE_WALLET.name, settlement_price=99, market_id=market_id)
+    vega.wait_for_total_catchup()
+
+    post_settle_liq_fees = vega.market_account(
+        market_id, vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY
+    )
+    mm_account = sum(
+        vega.party_account(
+            wallet_name=MM_WALLET.name, asset_id=asset_id, market_id=market_id
+        )
+    )
+    assert mm_account == mm_account_pre_settle + post_settle_liq_fees
+    assert post_settle_liq_fees == 0

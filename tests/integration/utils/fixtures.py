@@ -27,13 +27,9 @@ def create_and_faucet_wallet(
     vega.mint(wallet.name, asset_id, amount)
 
 
-def build_basic_market(
+def create_and_mint_assets(
     vega: VegaServiceNull,
     mint_amount: float = 10000,
-    initial_price: float = 1,
-    initial_volume: float = 1,
-    initial_spread: float = 0.1,
-    initial_commitment: float = 100,
 ):
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
@@ -66,6 +62,18 @@ def build_basic_market(
             asset=asset_id,
             amount=mint_amount,
         )
+
+
+def build_basic_market(
+    vega: VegaServiceNull,
+    initial_price: float = 1,
+    initial_volume: float = 1,
+    initial_spread: float = 0.1,
+    initial_commitment: float = 100,
+    liquidity_fee: float = 0.002,
+    liq_spread: float = 0.0005,
+):
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
     vega.forward("10s")
     vega.create_simple_market(
         market_name="CRYPTO:BTCDAI/DEC22",
@@ -81,9 +89,9 @@ def build_basic_market(
         wallet_name=MM_WALLET.name,
         market_id=market_id,
         commitment_amount=initial_commitment,
-        fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        fee=liquidity_fee,
+        buy_specs=[("PEGGED_REFERENCE_MID", liq_spread, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID", liq_spread, 1)],
         is_amendment=False,
     )
     # Add transactions in the proposed market to pass opening auction at price 0.3
@@ -155,5 +163,6 @@ def vega_service_with_order_feed():
 
 @pytest.fixture
 def vega_service_with_market(vega_service):
+    create_and_mint_assets(vega=vega_service)
     build_basic_market(vega_service, initial_price=0.3)
     return vega_service
