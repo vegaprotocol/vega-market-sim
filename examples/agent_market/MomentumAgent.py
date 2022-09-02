@@ -10,6 +10,7 @@ from vega_sim.parameter_test.parameter.loggers import (
     ideal_market_maker_single_data_extraction,
     target_stake_additional_data,
     tau_scaling_additional_data,
+    momentum_trader_data_extraction,
 )
 
 scenario = IdealMarketMaker(
@@ -40,6 +41,7 @@ scenario = IdealMarketMaker(
         additional_data_fns=[
             tau_scaling_additional_data,
             target_stake_additional_data,
+            momentum_trader_data_extraction,
     ]
 ),
 )
@@ -54,7 +56,7 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=True,
+        run_with_console=False,
         retain_log_files=True,
     ) as vega:
 
