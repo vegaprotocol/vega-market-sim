@@ -652,7 +652,7 @@ class MarketManager(StateAgentWithWallet):
         asset_decimal: int = 5,
         market_decimal: int = 5,
         market_position_decimal: int = 2,
-        commitment_amount: float = 6000,
+        commitment_amount: float = 0,
         settlement_price: Optional[float] = None,
         tag: str = "",
     ):
@@ -733,14 +733,6 @@ class MarketManager(StateAgentWithWallet):
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
-            liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                asset_id=self.asset_id,
-                commitment_amount=self.commitment_amount,
-                fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
-                market_decimals=self.mdp,
-            ),
         )
         self.vega.wait_fn(5)
 
@@ -750,6 +742,16 @@ class MarketManager(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
+        if self.commitment_amount:
+            self.vega.submit_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=self.commitment_amount,
+                fee=0.002,
+                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
+                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
+                is_amendment=False,
+            )
 
     def finalise(self):
         if self.settlement_price is not None:
@@ -905,7 +907,6 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         ) and vega_state.market_state[
             self.market_id
         ].state == markets_protos.Market.State.STATE_ACTIVE:
-
             if self.random_state.rand() <= self.submit_bias:
                 self._submit_order()
 
@@ -913,7 +914,6 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 self._cancel_order(vega_state=vega_state)
 
     def _submit_order(self):
-
         best_bid_price, best_offer_price = self.vega.best_prices(
             market_id=self.market_id
         )
@@ -934,12 +934,10 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         ln_mean = exp(self.mean + self.sigma**2 / 2)
 
         if side == "SIDE_BUY":
-
             volume = self.buy_volume * self.random_state.poisson(self.buy_intensity)
             price = best_bid_price + (random_offset - ln_mean)
 
         elif side == "SIDE_SELL":
-
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
             price = best_offer_price - (random_offset - ln_mean)
 
@@ -958,13 +956,11 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         )
 
     def _cancel_order(self, vega_state: VegaState):
-
         orders = vega_state.market_state.get(self.market_id, {}).orders.get(
             self.vega.wallet.public_key(self.wallet_name), {}
         )
 
         if len(orders) > 0:
-
             order_key = self.random_state.choice(list(orders.keys()))
             order = orders[order_key]
 
