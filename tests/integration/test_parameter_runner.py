@@ -7,7 +7,8 @@ from vega_sim.parameter_test.parameter.configs import CONFIGS
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "experiment_to_run", [pytest.param(c, id=c.name) for c in CONFIGS]
+    "experiment_to_run",
+    [pytest.param(c, id=c.name) for c in CONFIGS],
 )
 def test_parameter_runner(experiment_to_run: experiment.SingleParameterExperiment):
     with TemporaryDirectory() as temp_dir:

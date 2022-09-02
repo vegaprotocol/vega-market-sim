@@ -3,7 +3,7 @@ NodeMode = "validator"
 UlimitNOFile = 8192
 
 [API]
-  Level = "Info"
+  Level = "Debug"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -32,7 +32,7 @@ UlimitNOFile = 8192
     ABCIRecordDir = ""
     ABCIReplayFile = ""
   [Blockchain.Null]
-    Level = "Info"
+    Level = "Debug"
     BlockDuration = "TO_BE_SET"
     TransactionsPerBlock = "TO_BE_SET"
     GenesisFile = "./null-blockchain/node-startup/vegahome/genesis.json"
@@ -79,8 +79,8 @@ UlimitNOFile = 8192
 [Processor]
   Level = "Debug"
   LogOrderSubmitDebug = true
-  LogOrderAmendDebug = false
-  LogOrderCancelDebug = false
+  LogOrderAmendDebug = true
+  LogOrderCancelDebug = true
   [Processor.Ratelimit]
     Requests = 500
     PerNBlocks = 10
@@ -130,7 +130,7 @@ UlimitNOFile = 8192
   Enabled = false
 
 [Governance]
-  Level = "Info"
+  Level = "Debug"
 
 [NodeWallet]
   Level = "Info"
@@ -154,7 +154,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Validators]
-  Level = "Info"
+  Level = "Debug"
 
 [Banking]
   Level = "Debug"

@@ -12,4 +12,4 @@ docker run \
         pytest -s -v \
             -m integration \
             --junitxml /tmp/integration-test-results.xml \
-            --log-cli-level INFO
+            --log-cli-level INFO 

@@ -365,9 +365,6 @@ class VegaService(ABC):
         risk_aversion: Optional[float] = 1e-6,
         tau: Optional[float] = 1.0 / 365.25 / 24,
         sigma: Optional[float] = 1.0,
-        liquidity_commitment: Optional[
-            vega_protos.governance.NewMarketCommitment
-        ] = None,
         price_monitoring_parameters: Optional[
             vega_protos.markets.PriceMonitoringParameters
         ] = None,
@@ -389,9 +386,6 @@ class VegaService(ABC):
            market_decimals:
                 int, the decimal place precision to use for market prices
                     (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-            liquidity_commitment:
-                NewMarketCommitment, An object specifying the initial liquidity
-                    commitment which the proposer it making to the market.
             price_monitoring_parameters:
                 PriceMonitoringParameters, A set of parameters determining when the
                     market will drop into a price auction. If not passed defaults
@@ -421,7 +415,6 @@ class VegaService(ABC):
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             risk_model=risk_model,
-            liquidity_commitment=liquidity_commitment,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
             **additional_kwargs,
@@ -1035,31 +1028,6 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
-        )
-
-    def build_new_market_liquidity_commitment(
-        self,
-        asset_id: str,
-        commitment_amount: float,
-        fee: float,
-        buy_specs: List[Tuple[str, int, int]],
-        sell_specs: List[Tuple[str, int, int]],
-        market_decimals: int,
-    ) -> vega_protos.governance.NewMarketCommitment:
-        buy_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
-        ]
-        sell_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
-        ]
-
-        return trading.build_new_market_commitment(
-            commitment_amount=num_to_padded_int(
-                commitment_amount, self.asset_decimals[asset_id]
-            ),
-            fee=fee,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
         )
 
     def has_liquidity_provision(

@@ -607,7 +607,7 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
-                    if self.run_with_console:
+                    if self.run_with_console or self._use_full_vega_wallet:
                         requests.get(
                             f"http://localhost:{self.wallet_port}/api/v1/status"
                         ).raise_for_status()

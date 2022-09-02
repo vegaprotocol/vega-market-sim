@@ -56,7 +56,9 @@ def _run_parameter_iteration(
     random_state: Optional[np.random.RandomState] = None,
 ) -> Any:
     with VegaServiceNull(
-        warn_on_raw_data_access=False, retain_log_files=True, run_with_console=False
+        warn_on_raw_data_access=False,
+        retain_log_files=True,
+        run_with_console=False,
     ) as vega:
         vega.create_wallet(*PARAMETER_AMEND_WALLET)
         vega.mint(
