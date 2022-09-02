@@ -216,6 +216,10 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
+            buy_intensity=self.buy_intensity,
+            sell_intensity=self.sell_intensity,
+            base_order_size=self.market_order_trader_base_order_size,
+            tag=str(tag),
         )
 
         env = MarketEnvironmentWithState(
@@ -224,8 +228,8 @@ class IdealMarketMaker(Scenario):
                 background_market,
                 auctionpass1,
                 auctionpass2,
-                trader,
                 trading_agent,
+                trader,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,

@@ -136,7 +136,7 @@ def MACD(
     """
     length = len(prices)
     if length < slow_period + signal_period - 1:
-        return np.nan
+        return np.nan, np.nan
 
     fast_sf = 2 / (fast_period + 1)
     slow_sf = 2 / (slow_period + 1)
