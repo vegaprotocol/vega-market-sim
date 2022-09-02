@@ -210,7 +210,7 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
-        trading_agent = MomentumTrader(
+        momentum_trader = MomentumTrader(
             wallet_name=MOMENTUM_WALLET.name,
             wallet_pass=MOMENTUM_WALLET.passphrase,
             market_name=market_name,
@@ -228,7 +228,7 @@ class IdealMarketMaker(Scenario):
                 background_market,
                 auctionpass1,
                 auctionpass2,
-                trading_agent,
+                momentum_trader,
                 trader,
             ],
             n_steps=self.num_steps,

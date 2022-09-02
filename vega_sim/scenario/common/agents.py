@@ -1146,7 +1146,7 @@ class MomentumTrader(StateAgentWithWallet):
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
         self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
-        self.adp = self.vega._asset_decimals.get(self.market_id, {})
+        self.adp = self.vega._asset_decimals.get(self.asset_id, {})
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
