@@ -1022,16 +1022,16 @@ class InformedTrader(StateAgentWithWallet):
         )
         current_position = int(position[0].open_volume) if position else 0
         trade_side = (
-            vega_protos.vega.Side.SIDE_BUY
+            vega_protos.SIDE_BUY
             if current_position < 0
-            else vega_protos.vega.Side.SIDE_SELL
+            else vega_protos.SIDE_SELL
         )
         if current_position:
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 side=trade_side,
-                volume=current_position,
+                volume=np.abs(current_position),
                 wait=True,
                 fill_or_kill=False,
             )
@@ -1152,6 +1152,28 @@ class MomentumTrader(StateAgentWithWallet):
     def step(self, vega_state: VegaState):
         self._collect_prices()
         signal = self.momentum_func_dict.get(self.momentum_strategy[0])()
+        if signal == 0:
+            return
+
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name, market_id=self.market_id
+        )
+        current_position = int(position[0].open_volume) if position else 0
+        trade_side = (
+            vega_protos.SIDE_BUY
+            if current_position < 0
+            else vega_protos.SIDE_SELL
+        )
+
+        if current_position:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=trade_side,
+                volume=np.abs(current_position),
+                wait=False,
+                fill_or_kill=False,
+            )
 
         trade_side = vega_protos.SIDE_BUY if signal == 1 else vega_protos.SIDE_SELL
         volume = (
@@ -1159,20 +1181,16 @@ class MomentumTrader(StateAgentWithWallet):
             if signal == 1
             else self.random_state.poisson(self.sell_intensity)
         )
-
-        if signal == 0:
-            pass
-
-        else:
-            volume *= self.trading_proportion * self.base_order_size
-            self.vega.submit_market_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=trade_side,
-                volume=volume,
-                wait=False,
-                fill_or_kill=False,
-            )
+ 
+        volume *= self.trading_proportion * self.base_order_size
+        self.vega.submit_market_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            side=trade_side,
+            volume=volume,
+            wait=False,
+            fill_or_kill=False,
+        )
 
     def _collect_prices(self):
         future_price = (
