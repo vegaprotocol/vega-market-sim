@@ -909,20 +909,22 @@ class LimitOrderTrader(StateAgentWithWallet):
 
     def _submit_order(self, vega_state: VegaState):
 
-        # Calculate mean_buy_price and mean_sell_price of price distribution
-        if (isinstance(self.spread, type(None))) or (
-            isinstance(self.price_process, type(None))
-        ):
+        # Calculate reference_buy_price and reference_sell_price of price distribution
+        if (self.spread is None) or (self.price_process is None):
             # If agent does not have price_process data, offset orders from best bid/ask
             best_bid_price, best_offer_price = self.vega.best_prices(
                 market_id=self.market_id
             )
-            mean_buy_price = best_bid_price
-            mean_sell_price = best_offer_price
+            reference_buy_price = best_bid_price
+            reference_sell_price = best_offer_price
         else:
             # If agent does have price_process data, offset orders from market price
-            mean_buy_price = self.price_process[self.current_step] - self.spread / 2
-            mean_sell_price = self.price_process[self.current_step] + self.spread / 2
+            reference_buy_price = (
+                self.price_process[self.current_step] - self.spread / 2
+            )
+            reference_sell_price = (
+                self.price_process[self.current_step] + self.spread / 2
+            )
 
         side = self.random_state.choice(
             a=list(self.side_opts.keys()),
@@ -941,11 +943,11 @@ class LimitOrderTrader(StateAgentWithWallet):
 
         if side == "SIDE_BUY":
             volume = self.buy_volume * self.random_state.poisson(self.buy_intensity)
-            price = mean_buy_price + (random_offset - ln_mean)
+            price = reference_buy_price + (random_offset - ln_mean)
 
         elif side == "SIDE_SELL":
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
-            price = mean_sell_price - (random_offset - ln_mean)
+            price = reference_sell_price - (random_offset - ln_mean)
 
         expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
 
