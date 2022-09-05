@@ -83,7 +83,7 @@ def _ideal_market_maker_single_data_extraction(
     else:
         realised_pnl_lp = round(float(position[0].realised_pnl), mm_agent.adp)
         unrealised_pnl_lp = round(float(position[0].unrealised_pnl), mm_agent.adp)
-        inventory_lp = int(position[0].open_volume)
+        inventory_lp = float(position[0].open_volume)
         entry_price = float(position[0].average_entry_price) / 10**mm_agent.mdp
 
     market_state = vega.market_info(market_id=mm_agent.market_id).state
@@ -256,7 +256,7 @@ def momentum_trader_data_extraction(
     else:
         realised_pnl = round(float(position[0].realised_pnl), trader.adp)
         unrealised_pnl = round(float(position[0].unrealised_pnl), trader.adp)
-        inventory = int(position[0].open_volume)
+        inventory = float(position[0].open_volume)
         entry_price = float(position[0].average_entry_price) / 10**trader.mdp
 
     logs = {
@@ -267,5 +267,6 @@ def momentum_trader_data_extraction(
         "MT: UnrealisedPnl": unrealised_pnl,
         "MT: Position": inventory,
         "MT: entry price": entry_price,
+        "MT: Indicator": trader.indicators[-1]
     }
     return logs
