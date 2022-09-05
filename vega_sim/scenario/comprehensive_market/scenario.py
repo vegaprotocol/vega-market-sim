@@ -12,12 +12,10 @@ from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.comprehensive_market.agents import (
     MM_WALLET,
-    LP_WALLETS,
-    MO_WALLETS,
-    LO_WALLETS,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
     TERMINATE_WALLET,
+    create_agent_wallets
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
@@ -65,6 +63,9 @@ class ComprehensiveMarket(Scenario):
         limit_order_trader_sigma: float = 0.5,
         limit_order_trader_duration: int = 300,
         limit_order_trader_time_in_force_opts: Optional[dict] = None,
+        num_lp_agents: int = 3,
+        num_mo_agents: int = 5,
+        num_lo_agents: int = 20,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -104,6 +105,11 @@ class ComprehensiveMarket(Scenario):
         self.limit_order_trader_time_in_force_opts = (
             limit_order_trader_time_in_force_opts
         )
+
+        # Agent options
+        self.lp_wallets = create_agent_wallets(n=num_lp_agents, prefix="lp_agent_")
+        self.mo_wallets = create_agent_wallets(n=num_mo_agents, prefix="lo_agent_")
+        self.lo_wallets = create_agent_wallets(n=num_lo_agents, prefix="mo_agent_")
 
     def _generate_price_process(
         self,
@@ -152,8 +158,8 @@ class ComprehensiveMarket(Scenario):
 
         lp_agents = [
             LiquidityProvider(
-                wallet_name=LP_WALLETS[i].name,
-                wallet_pass=LP_WALLETS[i].passphrase,
+                wallet_name=self.lp_wallets[i].name,
+                wallet_pass=self.lp_wallets[i].passphrase,
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
@@ -162,13 +168,13 @@ class ComprehensiveMarket(Scenario):
                 fee=0.001,
                 offset=self.spread * (i + 1),
             )
-            for i in range(len(LP_WALLETS))
+            for i in range(len(self.lp_wallets))
         ]
 
         mo_agents = [
             MarketOrderTrader(
-                wallet_name=MO_WALLETS[i].name,
-                wallet_pass=MO_WALLETS[i].passphrase,
+                wallet_name=self.mo_wallets[i].name,
+                wallet_pass=self.mo_wallets[i].passphrase,
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
@@ -178,13 +184,13 @@ class ComprehensiveMarket(Scenario):
                 base_order_size=self.market_order_trader_order_size,
                 random_state=random_state,
             )
-            for i in range(len(MO_WALLETS))
+            for i in range(len(self.mo_wallets))
         ]
 
         lo_agents = [
             LimitOrderTrader(
-                wallet_name=LO_WALLETS[i].name,
-                wallet_pass=LO_WALLETS[i].passphrase,
+                wallet_name=self.lo_wallets[i].name,
+                wallet_pass=self.lo_wallets[i].passphrase,
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
@@ -203,7 +209,7 @@ class ComprehensiveMarket(Scenario):
                 sigma=self.limit_order_trader_sigma,
                 random_state=random_state,
             )
-            for i in range(len(LO_WALLETS))
+            for i in range(len(self.lo_wallets))
         ]
 
         auctionpass1 = OpenAuctionPass(

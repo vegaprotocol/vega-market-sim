@@ -38,6 +38,9 @@ SCENARIOS = {
             "TIME_IN_FORCE_GTC": 0.7,
             "TIME_IN_FORCE_GTT": 0.3,
         },
+        num_lp_agents=3,
+        num_mo_agents=5,
+        num_lo_agents=20,
     ),
     "ideal_market_maker": IdealMarketMaker,
     "ideal_market_maker_v2": lambda: IdealMarketMakerV2(
