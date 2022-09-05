@@ -1,5 +1,7 @@
 import argparse
 import logging
+import pathlib
+import csv
 import pandas as pd
 import vega_sim.parameter_test.parameter.experiment as experiment
 from vega_sim.null_service import VegaServiceNull
@@ -82,3 +84,15 @@ if __name__ == "__main__":
             vega=vega,
             pause_at_completion=True,
         )
+
+    file_path = file_path = (
+        pathlib.Path(__file__).parent.resolve() / "MomentumAgent.csv"
+    )
+    with open(file_path, "w") as f:
+        csv_writer = csv.writer(f, delimiter=",")
+        headers = list(results[0].keys())
+        csv_writer.writerow(headers)
+
+        for result in results:
+            headers = list(result.keys())
+            csv_writer.writerow(result[c] for c in headers)
