@@ -15,7 +15,7 @@ from vega_sim.scenario.comprehensive_market.agents import (
     AUCTION1_WALLET,
     AUCTION2_WALLET,
     TERMINATE_WALLET,
-    create_agent_wallets
+    create_agent_wallets,
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
