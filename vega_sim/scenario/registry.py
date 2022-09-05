@@ -1,3 +1,4 @@
+from vega_sim.scenario.comprehensive_market.scenario import ComprehensiveMarket
 from vega_sim.scenario.ideal_market_maker.scenario import IdealMarketMaker
 from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
@@ -9,6 +10,38 @@ from vega_sim.scenario.common.utils.price_process import (
 )
 
 SCENARIOS = {
+    "comprehensive_market": lambda: ComprehensiveMarket(
+        market_name="ETH",
+        asset_name="USD",
+        num_steps=12000,
+        market_decimal=2,
+        asset_decimal=4,
+        market_position_decimal=4,
+        initial_price=1000.00,
+        spread=10,
+        lp_commitamount=500_000,
+        initial_asset_mint=10_000_000,
+        step_length_seconds=60,
+        block_length_seconds=1,
+        opening_auction_trade_amount=1,
+        market_order_trader_order_intensity=10,
+        market_order_trader_order_size=0.01,
+        limit_order_trader_quantity=5,
+        limit_order_trader_submit_bias=0.1,
+        limit_order_trader_cancel_bias=0.1,
+        limit_order_trader_order_intensity=10,
+        limit_order_trader_order_size=0.1,
+        limit_order_trader_mean=-5,
+        limit_order_trader_sigma=0.5,
+        limit_order_trader_duration=300,
+        limit_order_trader_time_in_force_opts={
+            "TIME_IN_FORCE_GTC": 0.7,
+            "TIME_IN_FORCE_GTT": 0.3,
+        },
+        num_lp_agents=3,
+        num_mo_agents=5,
+        num_lo_agents=20,
+    ),
     "ideal_market_maker": IdealMarketMaker,
     "ideal_market_maker_v2": lambda: IdealMarketMakerV2(
         num_steps=2000,

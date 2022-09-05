@@ -73,32 +73,32 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
 
       - name: Check requirements.txt up to date
         run: |
-          export LATEST_REQ=$(poetry export --without-hashes -f requirements.txt)
+          poetry export --without-hashes -f requirements.txt -o reqs.txt
+          export LATEST_REQ=$(cat reqs.txt)
           export CURR_REQ=$(cat requirements.txt)
           if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
             echo "Requirements file out of date, please run 'poetry export --without-hashes -f requirements.txt -o requirements.txt' or 'make export_reqs'"
-            poetry export --without-hashes -f requirements.txt -o reqs_github.txt
-            diff requirements.txt reqs_github.txt
+            echo $LATEST_REQ
             exit 1
           fi
 
       - name: Check requirements-dev.txt up to date
         run: |
-          export LATEST_REQ=$(poetry export --without-hashes --with dev -f requirements.txt)
+          poetry export --without-hashes -f requirements.txt --with dev -o reqs.txt
+          export LATEST_REQ=$(cat reqs.txt)
           export CURR_REQ=$(cat requirements-dev.txt)
           if [[ "$LATEST_REQ" != "$CURR_REQ" ]]; then
             echo "Requirements file out of date, please run 'poetry export --without-hashes -f requirements.txt -o requirements.txt' or 'make export_reqs'"
-            poetry export --without-hashes -f requirements.txt -o reqs_dev_github.txt
-            diff requirements-dev.txt reqs_dev_github.txt
+            echo $LATEST_REQ
             exit 1
           fi
