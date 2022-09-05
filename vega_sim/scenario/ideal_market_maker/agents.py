@@ -164,14 +164,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
-            liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                asset_id=self.tdai_id,
-                commitment_amount=self.commitamount,
-                fee=self.lp_fee,
-                buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
-                sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
-                market_decimals=self.mdp,
-            ),
         )
         self.vega.wait_fn(5)
 
@@ -181,6 +173,16 @@ class OptimalMarketMaker(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
+
+        vega.submit_liquidity(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitamount,
+            fee=self.lp_fee,
+            buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
+            sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
+            is_amendment=False,
+        )
         self.bid_depth, self.ask_depth = self.OptimalStrategy(0)
 
     def num_MarketOrders(self):
