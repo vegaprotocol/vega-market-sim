@@ -219,6 +219,8 @@ class IdealMarketMaker(Scenario):
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
             base_order_size=self.market_order_trader_base_order_size,
+            send_limit_order=True,
+            offset_levels=10,
             tag=str(tag),
         )
 
