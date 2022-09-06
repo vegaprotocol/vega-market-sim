@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
         results = scenario.run_iteration(
             vega=vega,
-            pause_at_completion=True,
+            pause_at_completion=False,
         )
 
     file_path = file_path = (

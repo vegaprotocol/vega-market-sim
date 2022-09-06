@@ -1038,9 +1038,7 @@ class InformedTrader(StateAgentWithWallet):
         )
         current_position = int(position[0].open_volume) if position else 0
         trade_side = (
-            vega_protos.SIDE_BUY
-            if current_position < 0
-            else vega_protos.SIDE_SELL
+            vega_protos.SIDE_BUY if current_position < 0 else vega_protos.SIDE_SELL
         )
         if current_position:
             self.vega.submit_market_order(
@@ -1172,6 +1170,8 @@ class MomentumTrader(StateAgentWithWallet):
         base_order_size: float = 1,
         trading_proportion: float = 1,
         random_state: Optional[np.random.RandomState] = None,
+        send_limit_order: bool = False,
+        offset_levels: int = 10,
         tag: str = "",
     ):
         super().__init__(wallet_name, wallet_pass)
@@ -1188,6 +1188,8 @@ class MomentumTrader(StateAgentWithWallet):
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
+        self.send_limit_order = send_limit_order
+        self.offset_levels = offset_levels
 
         self.prices = []
 
@@ -1228,42 +1230,44 @@ class MomentumTrader(StateAgentWithWallet):
         if signal == 0:
             return
 
-        position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
-        )
-        current_position = int(position[0].open_volume) if position else 0
-        trade_side = (
-            vega_protos.SIDE_BUY
-            if current_position < 0
-            else vega_protos.SIDE_SELL
-        )
-
-        if current_position:
-            self.vega.submit_market_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=trade_side,
-                volume=np.abs(current_position),
-                wait=False,
-                fill_or_kill=False,
-            )
-
         trade_side = vega_protos.SIDE_BUY if signal == 1 else vega_protos.SIDE_SELL
         volume = (
             self.random_state.poisson(self.buy_intensity)
             if signal == 1
             else self.random_state.poisson(self.sell_intensity)
         )
- 
         volume *= self.trading_proportion * self.base_order_size
-        self.vega.submit_market_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            side=trade_side,
-            volume=volume,
-            wait=False,
-            fill_or_kill=False,
-        )
+
+        if volume:
+            if not self.send_limit_order:
+                self.vega.submit_market_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    side=trade_side,
+                    volume=volume,
+                    wait=False,
+                    fill_or_kill=False,
+                )
+            else:
+                best_bid, best_ask = self.vega.best_prices(
+                    market_id=self.market_id
+                )
+                price = (
+                    best_ask + self.offset_levels / 10**self.mdp
+                    if signal == 1
+                    else best_bid - self.offset_levels / 10**self.mdp
+
+                )
+                self.vega.submit_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    order_type="TYPE_LIMIT",
+                    time_in_force="TIME_IN_FORCE_IOC",
+                    side=trade_side,
+                    volume=volume,
+                    price=price,
+                    wait=False,
+                )
 
     def _collect_prices(self):
         future_price = (
