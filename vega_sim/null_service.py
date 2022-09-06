@@ -481,13 +481,17 @@ class VegaServiceNull(VegaService):
         )
         self.retain_log_files = retain_log_files
 
-        self.vega_path = vega_path or path.join(vega_bin_path, "vega")
-        self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
-        self.vega_wallet_path = vega_wallet_path or path.join(
-            vega_bin_path, "vegawallet"
+        self.vega_path = vega_path or os.environ.get(
+            "VEGA_CORE", path.join(vega_bin_path, "vega")
         )
-        self.vega_console_path = vega_console_path or path.join(
-            vega_bin_path, "console"
+        self.data_node_path = data_node_path or os.environ.get(
+            "VEGA_DATA_NODE", path.join(vega_bin_path, "data-node")
+        )
+        self.vega_wallet_path = vega_wallet_path or os.environ.get(
+            "VEGA_WALLET", path.join(vega_bin_path, "vegawallet")
+        )
+        self.vega_console_path = vega_console_path or os.environ.get(
+            "VEGA_CONSOLE", path.join(vega_bin_path, "console")
         )
         self.proc = None
         self.run_with_console = run_with_console

@@ -2,8 +2,19 @@
 name = "vega_sim"
 version = "0.1.0"
 description = "Simulator for running self-contained Vega chain on local PC"
-authors = ["Tom McLean <tom@vegaprotocol.io>"]
+authors = ["Vega <hi@vega.xyz>"]
+homepage = "https://github.com/vegaprotocol/vega-market-sim"
+repository = "https://github.com/vegaprotocol/vega-market-sim"
 license = "MIT"
+exclude = ["vega_sim/bin"]
+include = [
+    "LICENSE"
+]
+classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+]
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.11"

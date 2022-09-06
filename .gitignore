@@ -133,6 +133,7 @@ dmypy.json
 .vscode/*
 
 vega_sim/bin/*
+vega_sim/bin/console/*
 rl_logs/
 numerical_results/
 test_logs/
