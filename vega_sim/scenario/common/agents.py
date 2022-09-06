@@ -845,16 +845,6 @@ class MarketManager(StateAgentWithWallet):
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
-            liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                asset_id=self.asset_id,
-                commitment_amount=self.commitment_amount,
-                fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
-                market_decimals=self.mdp,
-            )
-            if self.commitment_amount is not None
-            else None,
         )
         self.vega.wait_fn(5)
 
@@ -864,6 +854,16 @@ class MarketManager(StateAgentWithWallet):
             for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
+        if self.commitment_amount:
+            self.vega.submit_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=self.commitment_amount,
+                fee=0.002,
+                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
+                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
+                is_amendment=False,
+            )
 
     def finalise(self):
         if self.settlement_price is not None:
@@ -1230,7 +1230,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
 
 
-class SemiRandomLimitOrderTrader(StateAgentWithWallet):
+class LimitOrderTrader(StateAgentWithWallet):
     """Agent which randomly submits and cancels limit orders.
 
     At initialisation; the agent creates a wallet, identifies the market id and
@@ -1251,7 +1251,6 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         wallet_pass: str,
         market_name: str,
         asset_name: str,
-        spread: int,
         initial_asset_mint: float = 1000000,
         buy_volume: float = 1.0,
         sell_volume: float = 1.0,
@@ -1264,6 +1263,8 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
         side_opts: Optional[dict] = None,
         time_in_force_opts: Optional[dict] = None,
         duration: Optional[float] = 120,
+        price_process: Optional[list] = None,
+        spread: Optional[float] = None,
         mean: Optional[float] = 2.0,
         sigma: Optional[float] = 1.0,
     ):
@@ -1278,8 +1279,6 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 Name of the market the agent is to place orders in.
             asset_name: (str):
                 Name of the asset needed for the market.
-            spread (int):
-                Spread of the current markets market maker.
             initial_asset_mint (float, optional):
                 Quantity of the asset the agent should initially mint.
             buy_volume (float, optional):
@@ -1300,6 +1299,10 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 Dictionary of time in force options and probabilities.
             duration (int, optional):
                 Duration unfilled GTT orders should remain open in seconds.
+            price_process(List[float]):
+                Random walk (RW) of asset price.
+            spread (int):
+                Spread of the agent.
             mean (float, optional):
                 Mean of the log-normal distribution.
             sigma (float, optional):
@@ -1308,9 +1311,10 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
 
         super().__init__(wallet_name + str(tag), wallet_pass)
 
+        self.current_step = 0
+
         self.market_name = market_name
         self.asset_name = asset_name
-        self.spread = spread
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -1336,6 +1340,8 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
             }
         )
         self.duration = duration
+        self.price_process = price_process
+        self.spread = spread
         self.mean = mean
         self.sigma = sigma
 
@@ -1364,22 +1370,31 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
                 Object describing the state of the network and the market.
         """
 
-        if (
-            vega_state.market_state[self.market_id].trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ) and vega_state.market_state[
-            self.market_id
-        ].state == markets_protos.Market.State.STATE_ACTIVE:
-            if self.random_state.rand() <= self.submit_bias:
-                self._submit_order()
+        self.current_step += 1
+
+        if self.random_state.rand() <= self.submit_bias:
+            self._submit_order(vega_state=vega_state)
 
             if self.random_state.rand() <= self.cancel_bias:
                 self._cancel_order(vega_state=vega_state)
 
-    def _submit_order(self):
-        best_bid_price, best_offer_price = self.vega.best_prices(
-            market_id=self.market_id
-        )
+    def _submit_order(self, vega_state: VegaState):
+        # Calculate reference_buy_price and reference_sell_price of price distribution
+        if (self.spread is None) or (self.price_process is None):
+            # If agent does not have price_process data, offset orders from best bid/ask
+            best_bid_price, best_offer_price = self.vega.best_prices(
+                market_id=self.market_id
+            )
+            reference_buy_price = best_bid_price
+            reference_sell_price = best_offer_price
+        else:
+            # If agent does have price_process data, offset orders from market price
+            reference_buy_price = (
+                self.price_process[self.current_step] - self.spread / 2
+            )
+            reference_sell_price = (
+                self.price_process[self.current_step] + self.spread / 2
+            )
 
         side = self.random_state.choice(
             a=list(self.side_opts.keys()),
@@ -1398,11 +1413,11 @@ class SemiRandomLimitOrderTrader(StateAgentWithWallet):
 
         if side == "SIDE_BUY":
             volume = self.buy_volume * self.random_state.poisson(self.buy_intensity)
-            price = best_bid_price + (random_offset - ln_mean)
+            price = reference_buy_price + (random_offset - ln_mean)
 
         elif side == "SIDE_SELL":
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
-            price = best_offer_price - (random_offset - ln_mean)
+            price = reference_sell_price - (random_offset - ln_mean)
 
         expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
 
@@ -1528,3 +1543,59 @@ class InformedTrader(StateAgentWithWallet):
                 wait=False,
                 fill_or_kill=False,
             )
+
+
+class LiquidityProvider(StateAgentWithWallet):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        initial_asset_mint: float,
+        commitment_amount: float = 6000,
+        offset: float = 0.01,
+        fee: float = 0.001,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name + str(tag), wallet_pass)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.initial_asset_mint = initial_asset_mint
+
+        self.offset = offset
+
+        self.fee = fee
+
+        self.commitment_amount = commitment_amount
+
+    def initialise(self, vega: VegaServiceNull):
+        super().initialise(vega=vega)
+
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_asset_mint,
+        )
+        self.vega.wait_fn(2)
+
+        self.vega.wait_for_total_catchup()
+
+        self.vega.submit_simple_liquidity(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitment_amount,
+            fee=0.001,
+            reference_buy="PEGGED_REFERENCE_BEST_BID",
+            reference_sell="PEGGED_REFERENCE_BEST_ASK",
+            delta_buy=self.offset,
+            delta_sell=self.offset,
+        )

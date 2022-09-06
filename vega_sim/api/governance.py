@@ -39,30 +39,6 @@ def _proposal_loader(
     return data_client.GetProposalByReference(request).data
 
 
-def _default_initial_liquidity_commitment() -> (
-    vega_protos.governance.NewMarketCommitment
-):
-    return vega_protos.governance.NewMarketCommitment(
-        commitment_amount="10000",
-        fee="0.002",
-        sells=[
-            vega_protos.vega.LiquidityOrder(
-                reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
-                proportion=1,
-                offset="50",
-            )
-        ],
-        buys=[
-            vega_protos.vega.LiquidityOrder(
-                reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
-                proportion=1,
-                offset="50",
-            )
-        ],
-        reference="",
-    )
-
-
 def _default_risk_model() -> vega_protos.markets.LogNormalRiskModel:
     return vega_protos.markets.LogNormalRiskModel(
         risk_aversion_parameter=0.01,
@@ -109,7 +85,6 @@ def propose_future_market(
     market_decimals: Optional[int] = None,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    liquidity_commitment: Optional[vega_protos.governance.NewMarketCommitment] = None,
     risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
     price_monitoring_parameters: Optional[
@@ -145,9 +120,6 @@ def propose_future_market(
         market_decimals:
             int, the decimal place precision to use for market prices
             (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-        liquidity_commitment:
-            NewMarketCommitment, An object specifying the initial liquidity commitment
-                which the proposer it making to the market.
         risk_model:
             LogNormalRiskModel, A parametrised risk model on which the market will run
         price_monitoring_parameters:
@@ -250,7 +222,6 @@ def propose_future_market(
             price_monitoring_parameters=price_monitoring_parameters,
             log_normal=risk_model,
         ),
-        liquidity_commitment=liquidity_commitment,
     )
 
     proposal = _build_generic_proposal(
