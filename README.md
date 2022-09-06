@@ -49,6 +49,20 @@ Building the console UI is not a necessary component, but can be useful for visu
 
 Examples can be found within the `/examples` folder. A good one to start is `/examples/nullchain.py` which spins up a simple service and proposes a market.
 
+To run the example, start by running `poetry shell` if you're using poetry to activate the environment (If you're using another package manager, a similar command likely exists)
+
+Then, to run the example mentioned above call:
+  `python -m examples.nullchain`
+
+Alternatively, to run a longer and more complex scenario, run:
+
+  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause`
+
+If you've installed the console with `make ui` you can also extend this to visualise what is happening with the `--console` flag:
+
+  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause --console`
+
+
 
 ## Decimal Handling
 
@@ -69,8 +83,21 @@ warn log every time a method which returns something which could/does contain th
 Once code has been written, this flag can be turned off for production runs so as not to flag erroneously.
 
 
-### Reinforcement Learning
+## Reinforcement Learning
 
 The nascent framework for reinforcement learning applications of the Vega Market Sim can be found within `vega_sim.reinforcement`, this includes the beginnings of a 'background market' within the folder `vega_sim.reinforcement.full_market_sim`
 alongside an agent in `vega_sim.reinforcement.learning_agent` which learns from a currently very simple set of inputs (alongside an input of a future price, to make learning on a random walk possible at all!) Usage is new, and the code strucure
 and functionality is liable to change *significantly* in the future, however input is welcomed.
+
+## Parameter Testing
+
+One use of this framework is for testing the effect on Vega core itself of varying the various specified network and market parameters, allowing analysis and comparison and hopefully a more optimal set of parameters. 
+To dig into this use case, the configuration for various existing tests lives in `vega_sim.parameter_test.parameter.configs` and these can be run by finding the parameter test name in that file and calling:
+
+`python -m vega_sim.parameter_test.run -c YOUR_TEST_NAME_HERE`
+
+This will run the configured scenario several times with each configured parameter value before outputting them into the `/parameter_results` folder in the root of the repository.
+
+## Scenarios
+
+To support the above mentioned parameter tests, and to allow for more complex capabilities, a set of scenarios (and agents who act within them) live in `vega_sim.scenario`. We aim here to provide a set of agent primitives which allow one to construct complex interactions and trading scenarios.
