@@ -53,8 +53,6 @@ class CurveMarketMaker(Scenario):
         state_extraction_freq: int = 1,
         buy_intensity: float = 5,
         sell_intensity: float = 5,
-        backgroundmarket_tick_spacing: float = 0.002,
-        backgroundmarket_number_levels_per_side: int = 20,
         step_length_seconds: int = 1,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
@@ -91,10 +89,6 @@ class CurveMarketMaker(Scenario):
         self.pause_every_n_steps = pause_every_n_steps
         self.lp_commitamount = lp_commitamount
         self.initial_asset_mint = initial_asset_mint
-        self.backgroundmarket_tick_spacing = backgroundmarket_tick_spacing
-        self.backgroundmarket_number_levels_per_side = (
-            backgroundmarket_number_levels_per_side
-        )
         self.market_name = "ETH:USD" if market_name is None else market_name
         self.asset_name = "tDAI" if asset_name is None else asset_name
         self.settle_at_end = settle_at_end
@@ -273,8 +267,6 @@ if __name__ == "__main__":
         q_lower=-5,
         kappa=0.2,
         opening_auction_trade_amount=0.0001,
-        backgroundmarket_tick_spacing=0.01,
-        backgroundmarket_number_levels_per_side=75,
         market_order_trader_base_order_size=0.01,
         pause_every_n_steps=25,
     )
