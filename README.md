@@ -101,3 +101,19 @@ This will run the configured scenario several times with each configured paramet
 ## Scenarios
 
 To support the above mentioned parameter tests, and to allow for more complex capabilities, a set of scenarios (and agents who act within them) live in `vega_sim.scenario`. We aim here to provide a set of agent primitives which allow one to construct complex interactions and trading scenarios.
+
+### Momentum Agent
+
+One of the agents provided in the scenarios is Momentum Agent that can follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. The default configuration for Momentum Agent is using RSI strategy, but it can be easily configured in `vega_sim.scenario.ideal_market_maker_v2.scenario`. For example, to use an APO strategy, change arguments in `MomentumTrader` as:
+
+```
+  momentum_strategy=(
+      "APO",
+      {
+        "fast_period": 12,
+        "slow_period": 26, 
+      },
+  ),
+```
+
+The momentum agent can also choose to post limit orders or market orders by setting argument `send_limit_order = True (False)`. If momentum agent posts limit orders, `offset_levels` determines the offset of price away from best bid/ ask that the agent can tolerate.
