@@ -105,7 +105,6 @@ def wait_for_core_catchup(
 def wait_for_acceptance(
     submission_ref: str,
     submission_load_func: Callable[[str], T],
-    time_forward_fn: Optional[Callable[[None], None]] = None,
 ) -> T:
     logger.debug("Waiting for proposal acceptance")
     submission_accepted = False
@@ -113,8 +112,6 @@ def wait_for_acceptance(
         try:
             proposal = submission_load_func(submission_ref)
         except:
-            if time_forward_fn is not None:
-                time_forward_fn()
             time.sleep(0.001)
             continue
 
@@ -122,8 +119,6 @@ def wait_for_acceptance(
             logger.debug("Your proposal has been accepted by the network")
             submission_accepted = True
             break
-        if time_forward_fn is not None:
-            time_forward_fn()
         time.sleep(0.001)
 
     if not submission_accepted:

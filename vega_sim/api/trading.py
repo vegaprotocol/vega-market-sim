@@ -129,16 +129,12 @@ def submit_order(
             )
             return data_client.OrderByReference(order_ref_request).order
 
+        time_forward_fn()
         # Wait for proposal to be included in a block and to be accepted by Vega network
         logger.debug("Waiting for proposal acceptance")
         response = wait_for_acceptance(
             order_ref,
             _proposal_loader,
-            time_forward_fn=(
-                time_forward_fn
-                if time_forward_fn is not None
-                else lambda: time.sleep(1)
-            ),
         )
         order_status = enum_to_str(vega_protos.vega.Order.Status, response.status)
 
