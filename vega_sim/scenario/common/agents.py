@@ -634,6 +634,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             side=self.side,
             volume=self.opening_auction_trade_amount,
             price=self.initial_price,
+            wait=False,
         )
 
     def step(self, vega_state: VegaState):
@@ -916,7 +917,6 @@ class LimitOrderTrader(StateAgentWithWallet):
                 self._cancel_order(vega_state=vega_state)
 
     def _submit_order(self, vega_state: VegaState):
-
         # Calculate reference_buy_price and reference_sell_price of price distribution
         if (self.spread is None) or (self.price_process is None):
             # If agent does not have price_process data, offset orders from best bid/ask
@@ -1108,7 +1108,6 @@ class LiquidityProvider(StateAgentWithWallet):
         self.commitment_amount = commitment_amount
 
     def initialise(self, vega: VegaServiceNull):
-
         super().initialise(vega=vega)
 
         self.market_id = [
