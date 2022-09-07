@@ -11,7 +11,7 @@ def RSI(
 
     RSI calculates a ratio of the recent upward price movements to
     the absolute price movement, which implys an overbought/oversold
-    of assets when the value is over/below threshold (0.7/0.3).
+    of assets when the value is over/below threshold (70/30).
     """
     length = len(prices)
 
