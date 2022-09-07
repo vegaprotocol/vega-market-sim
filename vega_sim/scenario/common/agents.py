@@ -1153,8 +1153,8 @@ class MomentumTrader(StateAgentWithWallet):
         market_name: str,
         asset_name: str,
         indicator_threshold: Tuple[float, float] = (
-            0.75,
-            0.25,
+            75,
+            25,
         ),
         momentum_strategy: Tuple[str, Dict[str, float]] = (
             "MACD",
