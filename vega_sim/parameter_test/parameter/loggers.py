@@ -6,7 +6,10 @@ from vega_sim.environment.agent import Agent
 from vega_sim.scenario.ideal_market_maker.agents import OptimalMarketMaker
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
     OptimalMarketMaker as OptimalMarketMakerV2,
+)
+from vega_sim.scenario.common.agents import (
     MomentumTrader,
+    MarketOrderTrader,
 )
 
 
@@ -267,6 +270,45 @@ def momentum_trader_data_extraction(
         "MT: UnrealisedPnl": unrealised_pnl,
         "MT: Position": inventory,
         "MT: entry price": entry_price,
-        "MT: Indicator": trader.indicators[-1]
+        "MT: Indicator": trader.indicators[-1],
+    }
+    return logs
+
+
+def uninformed_tradingbot_data_extraction(
+    vega: VegaServiceNull,
+    agents: List[Agent],
+) -> Dict[str, Any]:
+    trader = [agent for agent in agents if isinstance(agent, MarketOrderTrader)][0]
+
+    general, margin, _ = vega.party_account(
+        wallet_name=trader.wallet_name,
+        asset_id=trader.asset_id,
+        market_id=trader.market_id,
+    )
+
+    position = vega.positions_by_market(
+        wallet_name=trader.wallet_name, market_id=trader.market_id
+    )
+
+    if not position:
+        realised_pnl = 0
+        unrealised_pnl = 0
+        inventory = 0
+        entry_price = 0
+    else:
+        realised_pnl = round(float(position[0].realised_pnl), trader.adp)
+        unrealised_pnl = round(float(position[0].unrealised_pnl), trader.adp)
+        inventory = float(position[0].open_volume)
+        entry_price = float(position[0].average_entry_price) / 10**trader.mdp
+
+    logs = {
+        "UT: General Account": general,
+        "UT: Margin Account": margin,
+        "UT: GeneralPnl": general + margin - trader.initial_asset_mint,
+        "UT: RealisedPnl": realised_pnl,
+        "UT: UnrealisedPnl": unrealised_pnl,
+        "UT: Position": inventory,
+        "UT: entry price": entry_price,
     }
     return logs

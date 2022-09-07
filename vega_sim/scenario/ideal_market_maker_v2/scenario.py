@@ -219,9 +219,7 @@ class IdealMarketMaker(Scenario):
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
             base_order_size=self.market_order_trader_base_order_size,
-            indicator_threshold=(
-                70, 30
-            ),
+            indicator_threshold=(70, 30),
             momentum_strategy=(
                 "RSI",
                 {

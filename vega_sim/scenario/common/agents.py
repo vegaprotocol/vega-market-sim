@@ -98,6 +98,9 @@ class MarketOrderTrader(StateAgentWithWallet):
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(5)
+        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
+        self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
+        self.adp = self.vega._asset_decimals.get(self.asset_id, {})
 
     def step(self, vega_state: VegaState):
         buy_first = self.random_state.choice([0, 1])
@@ -1248,14 +1251,11 @@ class MomentumTrader(StateAgentWithWallet):
                     fill_or_kill=False,
                 )
             else:
-                best_bid, best_ask = self.vega.best_prices(
-                    market_id=self.market_id
-                )
+                best_bid, best_ask = self.vega.best_prices(market_id=self.market_id)
                 price = (
                     best_ask + self.offset_levels / 10**self.mdp
                     if signal == 1
                     else best_bid - self.offset_levels / 10**self.mdp
-
                 )
                 self.vega.submit_order(
                     trading_wallet=self.wallet_name,

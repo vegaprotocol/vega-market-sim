@@ -15,6 +15,7 @@ from vega_sim.parameter_test.parameter.loggers import (
     target_stake_additional_data,
     tau_scaling_additional_data,
     momentum_trader_data_extraction,
+    uninformed_tradingbot_data_extraction,
 )
 
 scenario = IdealMarketMaker(
@@ -62,6 +63,7 @@ scenario = IdealMarketMaker(
             tau_scaling_additional_data,
             target_stake_additional_data,
             momentum_trader_data_extraction,
+            uninformed_tradingbot_data_extraction,
         ]
     ),
 )
