@@ -11,14 +11,8 @@ Attributes:
 
 """
 
-from calendar import formatstring
 import os
 import json
-from pyexpat.errors import XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF
-
-from itertools import product
-
-from math import ceil
 
 import pandas as pd
 import plotly.express as px
@@ -26,10 +20,12 @@ import ipywidgets as widgets
 
 from matplotlib.axes import Axes
 from IPython.display import display
+from math import ceil
+from itertools import product
+from vega_sim.parameter_test.parameter.experiment import FILE_PATTERN, FILE_PATTERN_LOB
 
 from matplotlib import pyplot as plt
 
-from vega_sim.parameter_test.parameter.experiment import FILE_PATTERN, FILE_PATTERN_LOB
 
 DEFAULT_COL_W = 8
 DEFAULT_ROW_H = 6
@@ -205,7 +201,7 @@ class SingleParameterExperimentTk(NotebookTk):
 
         Function visualises the results for the specified variables in the specified
         iterations. The string "avg" can be included in the iterations argument to
-        plot the variables result averaged across of all iterations. 
+        plot the variables result averaged across of all iterations.
 
         Args:
             variables (list, optional):
@@ -269,10 +265,10 @@ class SingleParameterExperimentTk(NotebookTk):
         formats_right: list = None,
         ylabel_right: str = None,
     ):
-        """Plots a comparison of all the specified variables on the same axis.
+        """Plots a comparison of all the specified variables on the same axes.
 
         Creates a subplot for each combination of parameter value and iteration passed
-        in as arguments and plots all the specified variables on the same axis. Plot
+        in as arguments and plots all the specified variables on the same axes. Plot
         appearance can be controlled through optional arguments.
 
         Args:
@@ -281,15 +277,15 @@ class SingleParameterExperimentTk(NotebookTk):
             iterations (list, optional):
                 List of iterations to plot. Defaults to all iterations.
             variables (list, optional):
-                List of variables to plot on left axis. Defaults to widget selection.
+                List of variables to plot on left axes. Defaults to widget selection.
             formats (list, optional):
-                Nested list of formats to use on left axis. Defaults to normal lines.
+                Nested list of formats to use on left axes. Defaults to normal lines.
             ylabel (str, optional):
                 String to use as left yaxis label. Defaults to no label.
             variables_right (list, optional):
-                List of variables to plot on right axis. Defaults to widget selection.
+                List of variables to plot on right axes. Defaults to widget selection.
             formats_right (list, optional):
-                Nested list of formats to use on right axis. Defaults to normal lines.
+                Nested list of formats to use on right axes. Defaults to normal lines.
             ylabel_right (str, optional):
                 String to use as right yaxis label. Defaults to no label.
         """
@@ -348,9 +344,14 @@ class SingleParameterExperimentTk(NotebookTk):
     ):
         """Creates a plot of the LOB for a specified parameter value and iteration.
 
-        Parameter value and iteration value are chosen through use of previously
-        created dropdown widgets. Function than extracts the specified LOB pd.DataFrame
-        and converts into a new pd.DataFrame which can be used by visualisation methods.
+        Parameter value and iteration value can be passed as arguments. If no arguments
+        passed, method uses values selected in widgets.
+
+        Args:
+            param_value (float, optional):
+                Tested parameter value to plot results for. Defaults to widget.
+            iteration:
+                Iteration number to plot results for. Defaults to widget.
         """
 
         if param_value is None:
@@ -386,12 +387,21 @@ class SingleParameterExperimentTk(NotebookTk):
 
         fig.show()
 
-    def animate_lob(self, param_value: float = None, iteration=None):
+    def animate_lob(
+        self,
+        param_value: float = None,
+        iteration=None,
+    ):
         """Creates an animation of the LOB for a given parameter value and iteration.
 
-        Parameter value and iteration value are chosen through use of previously
-        created dropdown widgets. Function than extracts the specified LOB pd.DataFrame
-        and converts into a new pd.DataFrame which can be used by visualisation methods.
+        Parameter value and iteration value can be passed as arguments. If no arguments
+        passed, method uses values selected in widgets.
+
+        Args:
+            param_value (float, optional):
+                Tested parameter value to plot results for. Defaults to widget.
+            iteration:
+                Iteration number to plot results for. Defaults to widget.
         """
 
         if param_value is None:
@@ -518,7 +528,7 @@ class SingleParameterExperimentTk(NotebookTk):
         return data_lob
 
     def _default_widgets(self):
-        """_summary_"""
+        """Generates the default widgets for the class."""
 
         self.add_widget_dropdown(
             des="Parameter Value:",
@@ -609,8 +619,8 @@ class SingleParameterExperimentTk(NotebookTk):
 
     def _add_plot(
         self,
-        ax,
-        variables,
+        ax: Axes,
+        variables: list,
         variables_right: list = None,
         parameters: list = None,
         iterations: list = ["avg"],
@@ -620,10 +630,43 @@ class SingleParameterExperimentTk(NotebookTk):
         ylabel_right: str = None,
         xlabel: str = None,
         title: str = None,
-        output: bool = False,
         labels: list = None,
         labels_right: list = None,
     ):
+        """Adds a complete plot to a given subplot axes.
+
+        Args:
+            ax (Axes):
+                Handles to matplotlib Axes object in which to plot data.
+            variables (list):
+                List of variables to plot in left axes.
+            variables_right (list, optional):
+                List of variables to plot on right axes. Defaults to None.
+            parameters (list, optional):
+                List of parameters to plot on left and right axes. Defaults to all values.
+            iterations (list, optional): 
+                List of iterations to plot on left and right axes. Defaults to ["avg"].
+            formats (list, optional):
+                Nested list of formats to use on left axes. Defaults to normal lines.
+            formats_right (list, optional):
+                Nested list of formats to use on left axes. Defaults to normal lines.
+            ylabel (str, optional):
+                String to use as left yaxis label. Defaults to no label.
+            ylabel_right (str, optional):
+                String to use as right yaxis label. Defaults to no label.
+            xlabel (str, optional):
+                String to use as xaxis label: Defaults to no label.
+            title (str, optional):
+                String to use as axis title. Defaults to no title.
+            labels (list, optional):
+                Nested list of labels to use. Defaults to full information.
+            labels_right (list, optional):
+                Nested list of labels to use. Defaults to full information.
+
+        """
+
+        if parameters is None:
+            parameters = self.settings["tested_values"]
 
         lns = self._add_data(
             ax=ax,
@@ -660,18 +703,38 @@ class SingleParameterExperimentTk(NotebookTk):
         if xlabel is not None:
             ax.set_xlabel(xlabel)
 
-        if output:
-            return ax, ax_right
 
     def _add_data(
         self,
-        ax,
+        ax: Axes,
         variables: list,
         formats: list = None,
         parameters: list = None,
         iterations: list = ["avg"],
         labels: list = None,
     ):
+        """Adds a plot to a specific axes of a subplot.
+
+        Args:
+            ax (Axes):
+                Handles to matplotlib Axes object in which to plot data.
+            variables (list):
+                List of variables to plot in axis.
+            parameters (list, optional):
+                List of parameters to plot on axes. Defaults to all values.
+            iterations (list, optional): 
+                List of iterations to plot on axes. Defaults to ["avg"].
+            formats (list, optional):
+                Nested list of formats to use. Defaults to normal lines.
+            ylabel (str, optional):
+                String to use as  axis label. Defaults to no label.
+            labels (list, optional):
+                Nested list of labels to use. Defaults to full information.
+
+        Returns:
+            list:
+                A list of matplotlib Line objects.
+        """
 
         lns = []
 
@@ -721,14 +784,13 @@ class SingleParameterExperimentTk(NotebookTk):
 
     @staticmethod
     def _market_state_ticks(ax):
-        """Modifies axis ticks with human readable market states.
+        """Modifies axes ticks with human readable market states.
 
         Args:
-            ax (_type_): _description_
+            ax (Axes):
+                Handles to axis to modify.
         """
         ax.set_yticks([4, 5, 6, 7, 8, 9])
-        ax.set_yticklabels(["", "Active", "Suspended", "", "", "Settled"], rotation=-90, va="center")
-
-
-        
-
+        ax.set_yticklabels(
+            ["", "Active", "Suspended", "", "", "Settled"], rotation=-90, va="center"
+        )
