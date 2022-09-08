@@ -409,10 +409,10 @@ def _make_and_wait_for_proposal(
     )
     logger.debug("Waiting for proposal acceptance")
 
+    time_forward_fn()
     proposal = wait_for_acceptance(
         proposal.reference,
         lambda p: _proposal_loader(p, data_client),
-        time_forward_fn=time_forward_fn,
     )
 
     prop_state = enum_to_str(
