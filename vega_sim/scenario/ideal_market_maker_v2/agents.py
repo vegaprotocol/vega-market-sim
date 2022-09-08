@@ -150,11 +150,11 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.vega.wait_fn(5)
             self.vega.wait_for_total_catchup()
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
-            asset=self.tdai_id,
+            asset=self.asset_id,
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(10)
@@ -180,7 +180,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.vega.create_simple_market(
                 market_name=self.market_name,
                 proposal_wallet=self.wallet_name,
-                settlement_asset_id=self.tdai_id,
+                settlement_asset_id=self.asset_id,
                 termination_wallet=self.terminate_wallet_name,
                 market_decimals=self.mdp,
                 position_decimals=self.market_position_decimal,
