@@ -644,7 +644,7 @@ class SingleParameterExperimentTk(NotebookTk):
                 List of variables to plot on right axes. Defaults to None.
             parameters (list, optional):
                 List of parameters to plot on left and right axes. Defaults to all values.
-            iterations (list, optional): 
+            iterations (list, optional):
                 List of iterations to plot on left and right axes. Defaults to ["avg"].
             formats (list, optional):
                 Nested list of formats to use on left axes. Defaults to normal lines.
@@ -703,7 +703,6 @@ class SingleParameterExperimentTk(NotebookTk):
         if xlabel is not None:
             ax.set_xlabel(xlabel)
 
-
     def _add_data(
         self,
         ax: Axes,
@@ -722,7 +721,7 @@ class SingleParameterExperimentTk(NotebookTk):
                 List of variables to plot in axis.
             parameters (list, optional):
                 List of parameters to plot on axes. Defaults to all values.
-            iterations (list, optional): 
+            iterations (list, optional):
                 List of iterations to plot on axes. Defaults to ["avg"].
             formats (list, optional):
                 Nested list of formats to use. Defaults to normal lines.
