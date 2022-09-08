@@ -1,4 +1,4 @@
-from pkg_resources import resource_filename
+from importlib.resources import path
 
-vega_home_path = resource_filename(__name__, "vegahome")
-vega_bin_path = resource_filename(__name__, "bin")
+vega_home_path = path(__name__, "vegahome")
+vega_bin_path = path(__name__, "bin")
