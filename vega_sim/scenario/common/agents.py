@@ -2,12 +2,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from multiprocessing.connection import wait
 from random import random
-from time import time
 
 import numpy as np
 
 from math import exp
 
+import talib
+from enum import Enum
 from collections import namedtuple
 from typing import List, Optional, Union, Tuple, Dict
 from numpy.typing import ArrayLike
@@ -19,14 +20,6 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
 
 import vega_sim.proto.data_node.api.v1 as data_node_protos
-
-from vega_sim.scenario.common.utils.momentum_indicator import (
-    RSI,
-    CMO,
-    STOCHRSI,
-    APO,
-    MACD,
-)
 
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
@@ -51,6 +44,12 @@ class MarketRegime:
     order_distribution_sell_kappa: float
     from_timepoint: int  # Inclusive
     thru_timepoint: int  # Inclusive
+
+
+class TradeSignal(Enum):
+    NOACTION = 0
+    BUY = 1
+    SELL = 2
 
 
 class MarketOrderTrader(StateAgentWithWallet):
@@ -1193,7 +1192,7 @@ class MomentumTrader(StateAgentWithWallet):
         self.send_limit_order = send_limit_order
         self.offset_levels = offset_levels
 
-        self.prices = []
+        self.prices = np.array([])
 
         self.momentum_func_dict = {
             "RSI": self._RSI,
@@ -1227,7 +1226,10 @@ class MomentumTrader(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
-        self._collect_prices()
+        self.prices = np.append(
+            self.prices, vega_state.market_state[self.market_id].midprice
+        )
+
         signal = self.momentum_func_dict.get(self.momentum_strategy[0])()
         if signal == 0:
             return
@@ -1268,105 +1270,112 @@ class MomentumTrader(StateAgentWithWallet):
                     wait=False,
                 )
 
-    def _collect_prices(self):
-        future_price = (
-            int(self.vega.market_data(market_id=self.market_id).mid_price)
-            / 10**self.mdp
-        )
-        self.prices.append(future_price)
-
     def _MACD(self):
-        macd, signal = MACD(
-            prices=self.prices,
-            fast_period=self.momentum_strategy[1]["fast_period"],
-            slow_period=self.momentum_strategy[1]["slow_period"],
-            signal_period=self.momentum_strategy[1]["signal_period"],
+        _, _, macdhist = talib.MACD(
+            self.prices,
+            fastperiod=self.momentum_strategy[1]["fastperiod"],
+            slowperiod=self.momentum_strategy[1]["slowperiod"],
+            signalperiod=self.momentum_strategy[1]["signalperiod"],
         )
-        self.indicators.append(macd - signal)
+        self.indicators = macdhist
 
         if len(self.indicators) == 1:
             return 0
 
         if self.indicators[-2] < 0 and self.indicators[-1] >= 0:
-            trade_signal = 1
+            signal = TradeSignal.BUY
 
         elif self.indicators[-2] > 0 and self.indicators[-1] <= 0:
-            trade_signal = 2
+            signal = TradeSignal.SELL
 
         else:
-            trade_signal = 0
+            signal = TradeSignal.NOACTION
 
-        return trade_signal
+        return signal
 
     def _APO(self):
-        apo = APO(
-            prices=self.prices,
-            fast_period=self.momentum_strategy[1]["fast_period"],
-            slow_period=self.momentum_strategy[1]["slow_period"],
+        self.indicators = talib.APO(
+            self.prices,
+            fastperiod=self.momentum_strategy[1]["fastperiod"],
+            slowperiod=self.momentum_strategy[1]["slowperiod"],
         )
-        self.indicators.append(apo)
+
         if len(self.indicators) == 1:
-            return 0
+            return TradeSignal.NOACTION
 
         if self.indicators[-2] < 0 and self.indicators[-1] >= 0:
-            trade_signal = 1
+            signal = TradeSignal.BUY
 
         elif self.indicators[-2] > 0 and self.indicators[-1] <= 0:
-            trade_signal = 2
+            signal = TradeSignal.SELL
 
         else:
-            trade_signal = 0
+            signal = TradeSignal.NOACTION
 
-        return trade_signal
+        return signal
 
     def _RSI(self):
-        rsi = RSI(
-            prices=self.prices,
-            period=self.momentum_strategy[1]["period"],
+        self.indicators = talib.RSI(
+            self.prices,
+            timeperiod=self.momentum_strategy[1]["timeperiod"],
         )
-        self.indicators.append(rsi)
+
         if self.indicators[-1] >= max(self.indicator_threshold):
-            trade_signal = 2
+            signal = TradeSignal.SELL
 
         elif self.indicators[-1] <= min(self.indicator_threshold):
-            trade_signal = 1
+            signal = TradeSignal.BUY
 
         else:
-            trade_signal = 0
+            signal = TradeSignal.NOACTION
 
-        return trade_signal
+        return signal
 
     def _CMO(self):
-        cmo = CMO(
-            prices=self.prices,
-            period=self.momentum_strategy[1]["period"],
+        self.indicators = talib.CMO(
+            self.prices,
+            timeperiod=self.momentum_strategy[1]["timeperiod"],
         )
-        self.indicators.append(cmo)
+
         if self.indicators[-1] >= max(self.indicator_threshold):
-            trade_signal = 2
+            signal = TradeSignal.SELL
 
         elif self.indicators[-1] <= min(self.indicator_threshold):
-            trade_signal = 1
+            signal = TradeSignal.BUY
 
         else:
-            trade_signal = 0
+            signal = TradeSignal.NOACTION
 
-        return trade_signal
+        return signal
 
     def _STOCHRSI(self):
-        stochrsi = STOCHRSI(
-            prices=self.prices,
-            rsi_period=self.momentum_strategy[1]["rsi_period"],
-            signal_period=self.momentum_strategy[1]["signal_period"],
+        fastk, fastd = talib.STOCHRSI(
+            self.prices,
+            timeperiod=self.momentum_strategy[1]["timeperiod"],
+            fastk_period=self.momentum_strategy[1]["fastk_period"],
+            fastd_period=self.momentum_strategy[1]["fastd_period"],
         )
-        self.indicators.append(stochrsi)
-        if self.indicators[-1] >= max(self.indicator_threshold):
-            trade_signal = 2
 
-        elif self.indicators[-1] <= min(self.indicator_threshold):
-            trade_signal = 1
+        self.indicators = fastk
+        crossover = fastd - fastk
+        if len(crossover) == 1:
+            return TradeSignal.NOACTION
+
+        if (
+            self.indicators[-1] >= max(self.indicator_threshold)
+            and crossover[-2] < 0
+            and crossover[-1] >= 0
+        ):
+            signal = TradeSignal.SELL
+
+        elif (
+            self.indicators[-1] <= min(self.indicator_threshold)
+            and crossover[-2] > 0
+            and crossover[-1] <= 0
+        ):
+            signal = TradeSignal.BUY
 
         else:
-            trade_signal = 0
+            signal = TradeSignal.NOACTION
 
-        return trade_signal
+        return signal
