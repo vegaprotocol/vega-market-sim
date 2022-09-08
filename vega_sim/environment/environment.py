@@ -38,6 +38,7 @@ MarketState = namedtuple(
     [
         "state",
         "trading_mode",
+        "midprice",
         "orders",
     ],  # "order_book"]
 )
@@ -335,9 +336,11 @@ class MarketEnvironmentWithState(MarketEnvironment):
         order_status = vega.order_status_from_feed(live_only=True)
         for market in vega.all_markets():
             market_info = vega.market_info(market_id=market.id)
+            market_data = vega.market_data(market_id=market.id)
             market_state[market.id] = MarketState(
                 state=market_info.state,
                 trading_mode=market_info.trading_mode,
+                midprice=float(market_data.mid_price) / 10**int(market_info.decimal_places),
                 orders=order_status.get(market.id, {}),
             )
 
