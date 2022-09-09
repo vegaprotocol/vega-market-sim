@@ -9,7 +9,7 @@ from math import exp
 try:
     import talib
 except ImportError:
-    pass  # TA-Lib not installed, but most agents don't need 
+    pass  # TA-Lib not installed, but most agents don't need
 
 from enum import Enum
 from collections import namedtuple
