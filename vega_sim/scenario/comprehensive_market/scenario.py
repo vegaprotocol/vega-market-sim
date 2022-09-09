@@ -66,7 +66,8 @@ class ComprehensiveMarket(Scenario):
         limit_order_trader_time_in_force_opts: Optional[dict] = None,
         momentum_trader_order_intensity: int = 10,
         momentum_trader_order_size: float = 0.1,
-        momentum_trader_strategies: List[Tuple[str, Dict[str, float]]] = None,
+        momentum_trader_strategies: List[str] = None,
+        momentum_trader_strategy_args: List[Dict[str, float]] = None,
         momentum_trader_indicator_thresholds: List[Tuple[float, float]] = None,
         num_lp_agents: int = 3,
         num_mo_agents: int = 5,
@@ -118,8 +119,9 @@ class ComprehensiveMarket(Scenario):
         self.momentum_trader_strategies = (
             momentum_trader_strategies
             if momentum_trader_strategies is not None
-            else [("RSI", {"timeperiod": 14})] * num_momentum_agents
+            else ["RSI"] * num_momentum_agents
         )
+        self.momentum_trader_strategy_args = momentum_trader_strategy_args
         self.momentum_trader_indicator_thresholds = (
             momentum_trader_indicator_thresholds
             if momentum_trader_indicator_thresholds is not None
@@ -242,11 +244,13 @@ class ComprehensiveMarket(Scenario):
                 market_name=market_name,
                 asset_name=asset_name,
                 initial_asset_mint=self.initial_asset_mint,
-                buy_intensity=self.momentum_trader_order_intensity,
-                sell_intensity=self.momentum_trader_order_intensity,
+                order_intensity=self.momentum_trader_order_intensity,
                 base_order_size=self.momentum_trader_order_size,
-                indicator_threshold=self.momentum_trader_indicator_thresholds[i],
                 momentum_strategy=self.momentum_trader_strategies[i],
+                momentum_strategy_args=self.momentum_trader_strategy_args[i]
+                if self.momentum_trader_strategy_args is not None
+                else self.momentum_trader_strategy_args,
+                indicator_threshold=self.momentum_trader_indicator_thresholds[i],
                 send_limit_order=True,
                 offset_levels=20,
                 tag=str(tag),
