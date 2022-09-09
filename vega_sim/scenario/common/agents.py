@@ -4,10 +4,13 @@ from multiprocessing.connection import wait
 from random import random
 
 import numpy as np
-
 from math import exp
 
-import talib
+try:
+    import talib
+except ImportError:
+    pass  # TA-Lib not installed, but most agents don't need 
+
 from enum import Enum
 from collections import namedtuple
 from typing import List, Optional, Union, Tuple, Dict
