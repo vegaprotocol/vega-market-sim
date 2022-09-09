@@ -1529,7 +1529,7 @@ name = "ta-lib"
 version = "0.4.25"
 description = "Python wrapper for TA-Lib"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 
 [package.dependencies]
@@ -1721,7 +1721,7 @@ profile = ["snakeviz", "pytest-profiling"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "e62b96d759cedc6e498d4da675ec981ec0d5792c0eb080d9d580ac6d1c39b057"
+content-hash = "76cbf7add5b2c74bd4fe605d66124c0696f31610e692395b7c50fbd58fef1f07"
 
 [metadata.files]
 anyio = [
