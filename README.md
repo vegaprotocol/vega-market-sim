@@ -22,7 +22,7 @@ For the most part the package is fairly self-contained Python, however there are
   - Run `make` to automatically pull install dependencies
     - If you have your own instances of the various service to run from elsewhere, you can skip this step
   - Install the package into your local environment. 
-    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests.
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install`. 
  -  Then run your environment.
 
 ### Setup if you're using `conda` as your python package manager
