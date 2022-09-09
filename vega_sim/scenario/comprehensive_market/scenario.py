@@ -64,7 +64,7 @@ class ComprehensiveMarket(Scenario):
         limit_order_trader_sigma: float = 0.5,
         limit_order_trader_duration: int = 300,
         limit_order_trader_time_in_force_opts: Optional[dict] = None,
-        momentum_trader_order_intensity: int  = 10,
+        momentum_trader_order_intensity: int = 10,
         momentum_trader_order_size: float = 0.1,
         momentum_trader_strategies: List[Tuple[str, Dict[str, float]]] = None,
         momentum_trader_indicator_thresholds: List[Tuple[float, float]] = None,
@@ -116,26 +116,23 @@ class ComprehensiveMarket(Scenario):
         self.momentum_trader_order_intensity = momentum_trader_order_intensity
         self.momentum_trader_order_size = momentum_trader_order_size
         self.momentum_trader_strategies = (
-            momentum_trader_strategies 
+            momentum_trader_strategies
             if momentum_trader_strategies is not None
-            else [
-                ("RSI", {"timeperiod": 14})
-            ] * num_momentum_agents
-
+            else [("RSI", {"timeperiod": 14})] * num_momentum_agents
         )
         self.momentum_trader_indicator_thresholds = (
-            momentum_trader_indicator_thresholds 
-            if momentum_trader_indicator_thresholds is not None 
-            else [
-                (70, 30)
-            ] * num_momentum_agents
+            momentum_trader_indicator_thresholds
+            if momentum_trader_indicator_thresholds is not None
+            else [(70, 30)] * num_momentum_agents
         )
 
         # Agent options
         self.lp_wallets = create_agent_wallets(n=num_lp_agents, prefix="lp_agent_")
         self.mo_wallets = create_agent_wallets(n=num_mo_agents, prefix="lo_agent_")
         self.lo_wallets = create_agent_wallets(n=num_lo_agents, prefix="mo_agent_")
-        self.momentum_wallets = create_agent_wallets(n=num_momentum_agents, prefix="momentum_agent_")
+        self.momentum_wallets = create_agent_wallets(
+            n=num_momentum_agents, prefix="momentum_agent_"
+        )
 
     def _generate_price_process(
         self,

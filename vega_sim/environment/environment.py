@@ -340,7 +340,8 @@ class MarketEnvironmentWithState(MarketEnvironment):
             market_state[market.id] = MarketState(
                 state=market_info.state,
                 trading_mode=market_info.trading_mode,
-                midprice=float(market_data.mid_price) / 10**int(market_info.decimal_places),
+                midprice=float(market_data.mid_price)
+                / 10 ** int(market_info.decimal_places),
                 orders=order_status.get(market.id, {}),
             )
 

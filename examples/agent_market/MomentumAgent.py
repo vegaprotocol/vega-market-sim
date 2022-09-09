@@ -72,7 +72,7 @@ if __name__ == "__main__":
     )
     with open(file_path, "w") as f:
         csv_writer = csv.writer(f, delimiter=",")
-        headers = ['Time Step'] + list(results[0].keys())
+        headers = ["Time Step"] + list(results[0].keys())
         csv_writer.writerow(headers)
         for step, result in enumerate(results):
             headers = list(result.keys())
