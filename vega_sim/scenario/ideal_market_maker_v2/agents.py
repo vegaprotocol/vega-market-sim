@@ -45,6 +45,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         initial_asset_mint: float = 1000000,
         spread: float = 0.002,
         num_steps: int = 180,
+        limit_order_size: float = 10,
         market_order_arrival_rate: float = 5,
         kappa: float = 500,
         inventory_upper_boundary: int = 20,
@@ -70,6 +71,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.time = num_steps
         self.Lambda = market_order_arrival_rate
         self.kappa = kappa
+        self.limit_order_size = limit_order_size
         self.q_upper = inventory_upper_boundary
         self.q_lower = inventory_lower_boundary
         self.alpha = terminal_penalty_parameter
@@ -264,7 +266,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self._place_orders(
             buy_offset=self.bid_depth - self.spread / 2,
             sell_offset=self.ask_depth - self.spread / 2,
-            volume=10,
+            volume=self.limit_order_size,
             buy_order=buy_order,
             sell_order=sell_order,
         )
