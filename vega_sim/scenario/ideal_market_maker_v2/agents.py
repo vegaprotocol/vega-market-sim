@@ -5,6 +5,7 @@ from collections import namedtuple
 from typing import List, Optional, Union
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
+from vega_sim.scenario.common.agents import MomentumTrader
 
 from vega_sim.scenario.ideal_market_maker_v2.utils.strategy import (
     A_S_MMmodel,
@@ -25,6 +26,8 @@ MM_WALLET = WalletConfig("mm", "pin")
 TRADER_WALLET = WalletConfig("trader", "trader")
 
 BACKGROUND_MARKET = WalletConfig("market", "market")
+
+MOMENTUM_WALLET = WalletConfig("momentum", "momentum")
 
 # Pass opening auction
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
@@ -149,11 +152,11 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.vega.wait_fn(5)
             self.vega.wait_for_total_catchup()
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
-            asset=self.tdai_id,
+            asset=self.asset_id,
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(10)
@@ -179,7 +182,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.vega.create_simple_market(
                 market_name=self.market_name,
                 proposal_wallet=self.wallet_name,
-                settlement_asset_id=self.tdai_id,
+                settlement_asset_id=self.asset_id,
                 termination_wallet=self.terminate_wallet_name,
                 market_decimals=self.mdp,
                 position_decimals=self.market_position_decimal,

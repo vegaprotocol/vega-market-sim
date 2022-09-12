@@ -2,14 +2,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from multiprocessing.connection import wait
 from random import random
-from time import time
 
 import numpy as np
-
 from math import exp
 
+try:
+    import talib
+except ImportError:
+    pass  # TA-Lib not installed, but most agents don't need
+
+from enum import Enum
 from collections import namedtuple
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple, Dict
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
@@ -43,6 +47,12 @@ class MarketRegime:
     order_distribution_sell_kappa: float
     from_timepoint: int  # Inclusive
     thru_timepoint: int  # Inclusive
+
+
+class TradeSignal(Enum):
+    NOACTION = 0
+    BUY = 1
+    SELL = 2
 
 
 class MarketOrderTrader(StateAgentWithWallet):
@@ -90,6 +100,9 @@ class MarketOrderTrader(StateAgentWithWallet):
             amount=self.initial_asset_mint,
         )
         self.vega.wait_fn(5)
+        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
+        self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
+        self.adp = self.vega._asset_decimals.get(self.asset_id, {})
 
     def step(self, vega_state: VegaState):
         buy_first = self.random_state.choice([0, 1])
@@ -1030,16 +1043,14 @@ class InformedTrader(StateAgentWithWallet):
         )
         current_position = int(position[0].open_volume) if position else 0
         trade_side = (
-            vega_protos.vega.Side.SIDE_BUY
-            if current_position < 0
-            else vega_protos.vega.Side.SIDE_SELL
+            vega_protos.SIDE_BUY if current_position < 0 else vega_protos.SIDE_SELL
         )
         if current_position:
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 side=trade_side,
-                volume=current_position,
+                volume=np.abs(current_position),
                 wait=True,
                 fill_or_kill=False,
             )
@@ -1129,3 +1140,261 @@ class LiquidityProvider(StateAgentWithWallet):
             delta_buy=self.offset,
             delta_sell=self.offset,
         )
+
+
+class MomentumTrader(StateAgentWithWallet):
+    """
+    Trading Agent that can follow multiple momentum trading strategies.
+
+    At each step, the trading agent collects future price and trades under
+    certain momentum indicator.
+    """
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        momentum_strategy: str = "RSI",
+        momentum_strategy_args: Dict[str, float] = None,
+        indicator_threshold: Tuple[float, float] = (70, 30),
+        initial_asset_mint: float = 1e5,
+        order_intensity: float = 5,
+        base_order_size: float = 1,
+        trading_proportion: float = 1,
+        random_state: Optional[np.random.RandomState] = None,
+        send_limit_order: bool = False,
+        time_in_force_opt: Union[vega_protos.vega.Order.TimeInForce, str] = None,
+        duration: Optional[float] = 120,
+        offset_levels: int = 10,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name, wallet_pass)
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.initial_asset_mint = initial_asset_mint
+        self.order_intensity = order_intensity
+        self.base_order_size = base_order_size
+        self.tag = tag
+        self.trading_proportion = trading_proportion
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+
+        # Order Type
+        self.send_limit_order = send_limit_order
+        if send_limit_order:
+            self.time_in_force_opt = (
+                time_in_force_opt
+                if time_in_force_opt is not None
+                else "TIME_IN_FORCE_IOC"
+            )
+            self.duration = duration
+            self.offset_levels = offset_levels
+
+        # Momentum Strategy
+        self.momentum_strategy = momentum_strategy
+        self.momentum_strategy_args = momentum_strategy_args
+        self.indicator_threshold = indicator_threshold
+        self.momentum_func_dict = {
+            "RSI": self._RSI,
+            "CMO": self._CMO,
+            "STOCHRSI": self._STOCHRSI,
+            "APO": self._APO,
+            "MACD": self._MACD,
+        }
+
+        self.prices = np.array([])
+        self.indicators = []
+
+    def initialise(self, vega: VegaServiceNull):
+        super().initialise(vega=vega)
+
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_asset_mint,
+        )
+
+        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
+        self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
+        self.adp = self.vega._asset_decimals.get(self.asset_id, {})
+        self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+        self.prices = np.append(
+            self.prices, vega_state.market_state[self.market_id].midprice
+        )
+
+        signal = self.momentum_func_dict.get(self.momentum_strategy, self._RSI)()
+        if signal == TradeSignal.NOACTION:
+            return
+
+        trade_side = (
+            vega_protos.SIDE_BUY if signal == TradeSignal.BUY else vega_protos.SIDE_SELL
+        )
+        volume = self.random_state.poisson(self.order_intensity)
+
+        volume *= self.trading_proportion * self.base_order_size
+
+        if volume:
+            if not self.send_limit_order:
+                self.vega.submit_market_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    side=trade_side,
+                    volume=volume,
+                    wait=False,
+                    fill_or_kill=False,
+                )
+            else:
+                best_bid, best_ask = self.vega.best_prices(market_id=self.market_id)
+                price = (
+                    best_ask + self.offset_levels / 10**self.mdp
+                    if signal == TradeSignal.BUY
+                    else best_bid - self.offset_levels / 10**self.mdp
+                )
+                expires_at = int(self.vega.get_blockchain_time() + self.duration * 1e9)
+                self.vega.submit_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    order_type="TYPE_LIMIT",
+                    time_in_force=self.time_in_force_opt,
+                    side=trade_side,
+                    volume=volume,
+                    price=price,
+                    expires_at=expires_at,
+                    wait=False,
+                )
+
+    def _MACD(self):
+        _, _, macdhist = (
+            talib.MACD(self.prices)
+            if self.momentum_strategy_args is None
+            else talib.MACD(
+                self.prices,
+                fastperiod=self.momentum_strategy_args["fastperiod"],
+                slowperiod=self.momentum_strategy_args["slowperiod"],
+                signalperiod=self.momentum_strategy_args["signalperiod"],
+            )
+        )
+        self.indicators = macdhist
+
+        if len(self.indicators) == 1:
+            return 0
+
+        if self.indicators[-2] < 0 and self.indicators[-1] >= 0:
+            signal = TradeSignal.BUY
+
+        elif self.indicators[-2] > 0 and self.indicators[-1] <= 0:
+            signal = TradeSignal.SELL
+
+        else:
+            signal = TradeSignal.NOACTION
+        return signal
+
+    def _APO(self):
+        self.indicators = (
+            talib.MACD(self.prices)
+            if self.momentum_strategy_args is None
+            else talib.APO(
+                self.prices,
+                fastperiod=self.momentum_strategy_args["fastperiod"],
+                slowperiod=self.momentum_strategy_args["slowperiod"],
+            )
+        )
+
+        if len(self.indicators) == 1:
+            return TradeSignal.NOACTION
+
+        if self.indicators[-2] < 0 and self.indicators[-1] >= 0:
+            signal = TradeSignal.BUY
+
+        elif self.indicators[-2] > 0 and self.indicators[-1] <= 0:
+            signal = TradeSignal.SELL
+
+        else:
+            signal = TradeSignal.NOACTION
+        return signal
+
+    def _RSI(self):
+        self.indicators = (
+            talib.RSI(self.prices)
+            if self.momentum_strategy_args is None
+            else talib.RSI(
+                self.prices,
+                timeperiod=self.momentum_strategy_args["timeperiod"],
+            )
+        )
+
+        if self.indicators[-1] >= max(self.indicator_threshold):
+            signal = TradeSignal.SELL
+
+        elif self.indicators[-1] <= min(self.indicator_threshold):
+            signal = TradeSignal.BUY
+
+        else:
+            signal = TradeSignal.NOACTION
+        return signal
+
+    def _CMO(self):
+        self.indicators = (
+            talib.CMO(self.prices)
+            if self.momentum_strategy_args is None
+            else talib.CMO(
+                self.prices,
+                timeperiod=self.momentum_strategy_args["timeperiod"],
+            )
+        )
+
+        if self.indicators[-1] >= max(self.indicator_threshold):
+            signal = TradeSignal.SELL
+
+        elif self.indicators[-1] <= min(self.indicator_threshold):
+            signal = TradeSignal.BUY
+
+        else:
+            signal = TradeSignal.NOACTION
+        return signal
+
+    def _STOCHRSI(self):
+        fastk, fastd = (
+            talib.STOCHRSI(self.prices)
+            if self.momentum_strategy_args is None
+            else talib.STOCHRSI(
+                self.prices,
+                timeperiod=self.momentum_strategy_args["timeperiod"],
+                fastk_period=self.momentum_strategy_args["fastk_period"],
+                fastd_period=self.momentum_strategy_args["fastd_period"],
+            )
+        )
+        self.indicators = fastk
+        crossover = fastd - fastk
+        if len(crossover) == 1:
+            return TradeSignal.NOACTION
+
+        if (
+            self.indicators[-1] >= max(self.indicator_threshold)
+            and crossover[-2] < 0
+            and crossover[-1] >= 0
+        ):
+            signal = TradeSignal.SELL
+
+        elif (
+            self.indicators[-1] <= min(self.indicator_threshold)
+            and crossover[-2] > 0
+            and crossover[-1] <= 0
+        ):
+            signal = TradeSignal.BUY
+
+        else:
+            signal = TradeSignal.NOACTION
+        return signal
