@@ -49,9 +49,9 @@ scenario = ComprehensiveMarket(
     num_mo_agents=0,
     momentum_trader_order_intensity=100,
     momentum_trader_order_size=0.01,
-    momentum_trader_strategies=['RSI'],
-    momentum_trader_strategy_args=[{'timeperiod': 7}],
-    momentum_trader_indicator_thresholds=[(70,30)], 
+    momentum_trader_strategies=["RSI"],
+    momentum_trader_strategy_args=[{"timeperiod": 7}],
+    momentum_trader_indicator_thresholds=[(70, 30)],
     state_extraction_fn=momentum_trader_data_extraction,
 )
 
