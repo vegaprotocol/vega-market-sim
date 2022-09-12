@@ -12,10 +12,10 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from vega import markets_pb2 as vega_dot_markets__pb2
-from vega import vega_pb2 as vega_dot_vega__pb2
-from vega import assets_pb2 as vega_dot_assets__pb2
-from vega.oracles.v1 import spec_pb2 as vega_dot_oracles_dot_v1_dot_spec__pb2
+from . import markets_pb2 as vega_dot_markets__pb2
+from . import vega_pb2 as vega_dot_vega__pb2
+from . import assets_pb2 as vega_dot_assets__pb2
+from .oracles.v1 import spec_pb2 as vega_dot_oracles_dot_v1_dot_spec__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(

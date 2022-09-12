@@ -12,7 +12,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from vega.oracles.v1 import spec_pb2 as vega_dot_oracles_dot_v1_dot_spec__pb2
+from .oracles.v1 import spec_pb2 as vega_dot_oracles_dot_v1_dot_spec__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
