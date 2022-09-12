@@ -186,6 +186,11 @@ class MarketEnvironment:
             core_catchup_seconds = (
                 datetime.datetime.now() - core_catchup_start
             ).seconds
+
+            if self.transactions_per_block > 1:
+                vega.wait_fn(1)
+            vega.wait_for_total_catchup()
+
             if core_catchup_seconds > 1:
                 logger.warn(f"Waited {core_catchup_seconds}s for core catchup")
 
@@ -196,6 +201,10 @@ class MarketEnvironment:
                 state_values.append(self._state_extraction_fn(vega, self.agents))
 
             vega.wait_for_total_catchup()
+
+            if self.transactions_per_block > 1:
+                vega.wait_fn(1)
+
             if self.step_length_seconds is not None:
                 end_time = vega.get_blockchain_time()
                 to_forward = max(0, self.step_length_seconds - (end_time - start_time))
