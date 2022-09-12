@@ -104,16 +104,24 @@ To support the above mentioned parameter tests, and to allow for more complex ca
 
 ### Momentum Agent
 
-One of the agents provided in the scenarios is Momentum Agent that can follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. The default configuration for Momentum Agent is using RSI strategy, but it can be easily configured in `vega_sim.scenario.ideal_market_maker_v2.scenario`. For example, to use an APO strategy, change arguments in `MomentumTrader` as:
+One of the agents provided in the scenarios is momentum agent that can currently follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. A comprehensive scenario for momentum agent tests is in `vega_sim.scenario.comprehensive_market.scenario`, where mutileple momentum agents with different momentum strategies can be tested. 
+
+To run momentum agents, start by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
 
 ```
-  momentum_strategy=(
-      "APO",
-      {
-        "fast_period": 12,
-        "slow_period": 26, 
-      },
-  ),
+ComprehensiveMarket(
+  num_momentum_agents=2,
+  momentum_trader_strategies=['APO', 'MACD'],
+  momentum_trader_strategy_args=[
+    {
+      "fastperiod": 12,
+      "slowperiod": 26,
+    },
+    {
+      "fastperiod": 14,
+      "slowperiod": 26,
+      "signalperiod": 9,
+    }
+  ],  
+)
 ```
-
-The momentum agent can also choose to post limit orders or market orders by setting argument `send_limit_order = True (False)`. If momentum agent posts limit orders, `offset_levels` determines the offset of price away from best bid/ ask that the agent can tolerate.

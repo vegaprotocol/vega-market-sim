@@ -262,6 +262,13 @@ def momentum_trader_data_extraction(
         inventory = float(position[0].open_volume)
         entry_price = float(position[0].average_entry_price) / 10**trader.mdp
 
+    market_data = vega.market_data(market_id=trader.market_id)
+    markprice = float(market_data.mark_price) / 10**trader.mdp
+    mid_price = float(market_data.mid_price) / 10**trader.mdp
+    trading_mode = market_data.market_trading_mode
+
+    market_state = vega.market_info(market_id=trader.market_id).state
+
     logs = {
         "MT: General Account": general,
         "MT: Margin Account": margin,
@@ -271,6 +278,10 @@ def momentum_trader_data_extraction(
         "MT: Position": inventory,
         "MT: entry price": entry_price,
         "MT: Indicator": trader.indicators[-1],
+        "MidPrice": mid_price,
+        "Markprice": markprice,
+        "Market State": market_state,
+        "Market Trading Mode": trading_mode,
     }
     return logs
 
