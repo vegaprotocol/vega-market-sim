@@ -6,40 +6,35 @@ from google.protobuf.internal import builder as _builder
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
-
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1avega/oracles/v1/spec.proto\x12\noracles.v1"b\n\x17OracleSpecConfiguration\x12\x19\n\x08pub_keys\x18\x01 \x03(\tR\x07pubKeys\x12,\n\x07\x66ilters\x18\x02 \x03(\x0b\x32\x12.oracles.v1.FilterR\x07\x66ilters"\xa7\x02\n\nOracleSpec\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\ncreated_at\x18\x02 \x01(\x03R\tcreatedAt\x12\x1d\n\nupdated_at\x18\x03 \x01(\x03R\tupdatedAt\x12\x19\n\x08pub_keys\x18\x04 \x03(\tR\x07pubKeys\x12,\n\x07\x66ilters\x18\x05 \x03(\x0b\x32\x12.oracles.v1.FilterR\x07\x66ilters\x12\x35\n\x06status\x18\x06 \x01(\x0e\x32\x1d.oracles.v1.OracleSpec.StatusR\x06status"K\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x16\n\x12STATUS_DEACTIVATED\x10\x02"j\n\x06\x46ilter\x12)\n\x03key\x18\x01 \x01(\x0b\x32\x17.oracles.v1.PropertyKeyR\x03key\x12\x35\n\nconditions\x18\x02 \x03(\x0b\x32\x15.oracles.v1.ConditionR\nconditions"\xdd\x01\n\x0bPropertyKey\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x30\n\x04type\x18\x02 \x01(\x0e\x32\x1c.oracles.v1.PropertyKey.TypeR\x04type"\x87\x01\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_EMPTY\x10\x01\x12\x10\n\x0cTYPE_INTEGER\x10\x02\x12\x0f\n\x0bTYPE_STRING\x10\x03\x12\x10\n\x0cTYPE_BOOLEAN\x10\x04\x12\x10\n\x0cTYPE_DECIMAL\x10\x05\x12\x12\n\x0eTYPE_TIMESTAMP\x10\x06"\x91\x02\n\tCondition\x12:\n\x08operator\x18\x01 \x01(\x0e\x32\x1e.oracles.v1.Condition.OperatorR\x08operator\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value"\xb1\x01\n\x08Operator\x12\x18\n\x14OPERATOR_UNSPECIFIED\x10\x00\x12\x13\n\x0fOPERATOR_EQUALS\x10\x01\x12\x19\n\x15OPERATOR_GREATER_THAN\x10\x02\x12"\n\x1eOPERATOR_GREATER_THAN_OR_EQUAL\x10\x03\x12\x16\n\x12OPERATOR_LESS_THAN\x10\x04\x12\x1f\n\x1bOPERATOR_LESS_THAN_OR_EQUAL\x10\x05\x42\x32Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1b\x06proto3'
-)
+
+
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1avega/oracles/v1/spec.proto\x12\noracles.v1\"b\n\x17OracleSpecConfiguration\x12\x19\n\x08pub_keys\x18\x01 \x03(\tR\x07pubKeys\x12,\n\x07\x66ilters\x18\x02 \x03(\x0b\x32\x12.oracles.v1.FilterR\x07\x66ilters\"\xa7\x02\n\nOracleSpec\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n\ncreated_at\x18\x02 \x01(\x03R\tcreatedAt\x12\x1d\n\nupdated_at\x18\x03 \x01(\x03R\tupdatedAt\x12\x19\n\x08pub_keys\x18\x04 \x03(\tR\x07pubKeys\x12,\n\x07\x66ilters\x18\x05 \x03(\x0b\x32\x12.oracles.v1.FilterR\x07\x66ilters\x12\x35\n\x06status\x18\x06 \x01(\x0e\x32\x1d.oracles.v1.OracleSpec.StatusR\x06status\"K\n\x06Status\x12\x16\n\x12STATUS_UNSPECIFIED\x10\x00\x12\x11\n\rSTATUS_ACTIVE\x10\x01\x12\x16\n\x12STATUS_DEACTIVATED\x10\x02\"j\n\x06\x46ilter\x12)\n\x03key\x18\x01 \x01(\x0b\x32\x17.oracles.v1.PropertyKeyR\x03key\x12\x35\n\nconditions\x18\x02 \x03(\x0b\x32\x15.oracles.v1.ConditionR\nconditions\"\xdd\x01\n\x0bPropertyKey\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x30\n\x04type\x18\x02 \x01(\x0e\x32\x1c.oracles.v1.PropertyKey.TypeR\x04type\"\x87\x01\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0e\n\nTYPE_EMPTY\x10\x01\x12\x10\n\x0cTYPE_INTEGER\x10\x02\x12\x0f\n\x0bTYPE_STRING\x10\x03\x12\x10\n\x0cTYPE_BOOLEAN\x10\x04\x12\x10\n\x0cTYPE_DECIMAL\x10\x05\x12\x12\n\x0eTYPE_TIMESTAMP\x10\x06\"\x91\x02\n\tCondition\x12:\n\x08operator\x18\x01 \x01(\x0e\x32\x1e.oracles.v1.Condition.OperatorR\x08operator\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value\"\xb1\x01\n\x08Operator\x12\x18\n\x14OPERATOR_UNSPECIFIED\x10\x00\x12\x13\n\x0fOPERATOR_EQUALS\x10\x01\x12\x19\n\x15OPERATOR_GREATER_THAN\x10\x02\x12\"\n\x1eOPERATOR_GREATER_THAN_OR_EQUAL\x10\x03\x12\x16\n\x12OPERATOR_LESS_THAN\x10\x04\x12\x1f\n\x1bOPERATOR_LESS_THAN_OR_EQUAL\x10\x05\x42\x32Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1b\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(
-    DESCRIPTOR, "vega.oracles.v1.spec_pb2", globals()
-)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'vega.oracles.v1.spec_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = (
-        b"Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1"
-    )
-    _ORACLESPECCONFIGURATION._serialized_start = 42
-    _ORACLESPECCONFIGURATION._serialized_end = 140
-    _ORACLESPEC._serialized_start = 143
-    _ORACLESPEC._serialized_end = 438
-    _ORACLESPEC_STATUS._serialized_start = 363
-    _ORACLESPEC_STATUS._serialized_end = 438
-    _FILTER._serialized_start = 440
-    _FILTER._serialized_end = 546
-    _PROPERTYKEY._serialized_start = 549
-    _PROPERTYKEY._serialized_end = 770
-    _PROPERTYKEY_TYPE._serialized_start = 635
-    _PROPERTYKEY_TYPE._serialized_end = 770
-    _CONDITION._serialized_start = 773
-    _CONDITION._serialized_end = 1046
-    _CONDITION_OPERATOR._serialized_start = 869
-    _CONDITION_OPERATOR._serialized_end = 1046
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1'
+  _ORACLESPECCONFIGURATION._serialized_start=42
+  _ORACLESPECCONFIGURATION._serialized_end=140
+  _ORACLESPEC._serialized_start=143
+  _ORACLESPEC._serialized_end=438
+  _ORACLESPEC_STATUS._serialized_start=363
+  _ORACLESPEC_STATUS._serialized_end=438
+  _FILTER._serialized_start=440
+  _FILTER._serialized_end=546
+  _PROPERTYKEY._serialized_start=549
+  _PROPERTYKEY._serialized_end=770
+  _PROPERTYKEY_TYPE._serialized_start=635
+  _PROPERTYKEY_TYPE._serialized_end=770
+  _CONDITION._serialized_start=773
+  _CONDITION._serialized_end=1046
+  _CONDITION_OPERATOR._serialized_start=869
+  _CONDITION_OPERATOR._serialized_end=1046
 # @@protoc_insertion_point(module_scope)
