@@ -6,23 +6,28 @@ from google.protobuf.internal import builder as _builder
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1avega/oracles/v1/data.proto\x12\noracles.v1\"\x9e\x01\n\nOracleData\x12\x19\n\x08pub_keys\x18\x01 \x03(\tR\x07pubKeys\x12(\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x14.oracles.v1.PropertyR\x04\x64\x61ta\x12(\n\x10matched_spec_ids\x18\x03 \x03(\tR\x0ematchedSpecIds\x12!\n\x0c\x62roadcast_at\x18\x04 \x01(\x03R\x0b\x62roadcastAt\"4\n\x08Property\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n\x05value\x18\x02 \x01(\tR\x05valueB2Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x1avega/oracles/v1/data.proto\x12\noracles.v1"\x9e\x01\n\nOracleData\x12\x19\n\x08pub_keys\x18\x01 \x03(\tR\x07pubKeys\x12(\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x14.oracles.v1.PropertyR\x04\x64\x61ta\x12(\n\x10matched_spec_ids\x18\x03 \x03(\tR\x0ematchedSpecIds\x12!\n\x0c\x62roadcast_at\x18\x04 \x01(\x03R\x0b\x62roadcastAt"4\n\x08Property\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n\x05value\x18\x02 \x01(\tR\x05valueB2Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1b\x06proto3'
+)
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'vega.oracles.v1.data_pb2', globals())
+_builder.BuildTopDescriptorsAndMessages(
+    DESCRIPTOR, "vega.oracles.v1.data_pb2", globals()
+)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-  DESCRIPTOR._options = None
-  DESCRIPTOR._serialized_options = b'Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1'
-  _ORACLEDATA._serialized_start=43
-  _ORACLEDATA._serialized_end=201
-  _PROPERTY._serialized_start=203
-  _PROPERTY._serialized_end=255
+    DESCRIPTOR._options = None
+    DESCRIPTOR._serialized_options = (
+        b"Z0code.vegaprotocol.io/vega/protos/vega/oracles/v1"
+    )
+    _ORACLEDATA._serialized_start = 43
+    _ORACLEDATA._serialized_end = 201
+    _PROPERTY._serialized_start = 203
+    _PROPERTY._serialized_end = 255
 # @@protoc_insertion_point(module_scope)
