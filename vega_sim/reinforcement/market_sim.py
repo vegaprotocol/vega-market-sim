@@ -5,32 +5,29 @@ import os
 import torch
 import time
 
-
+from vega_sim.environment.agent import Agent
 from vega_sim.reinforcement.learning_agent import (
     Action,
     LearningAgent,
     MarketState,
     WALLET as LEARNING_WALLET,
 )
-from vega_sim.environment.agent import Agent
+
+from vega_sim.scenario.registry import  IdealMarketMakerV2
+from vega_sim.parameter_test.parameter.loggers import (
+    ideal_market_maker_single_data_extraction,
+    target_stake_additional_data,
+    v1_ideal_mm_additional_data,
+    tau_scaling_additional_data,
+    limit_order_book,
+)
 
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_model
 from vega_sim.reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.ideal_market_maker.agents import (
-    MM_WALLET,
-    TERMINATE_WALLET,
-    TRADER_WALLET,
-    RANDOM_WALLET,
-    AUCTION1_WALLET,
-    AUCTION2_WALLET,
-    OptimalMarketMaker,
-    MarketOrderTrader,
-    LimitOrderTrader,
-    OpenAuctionPass,
-)
-from .plot import plot_simulation
+
+from plot import plot_simulation
 
 
 def state_fn(
@@ -40,152 +37,44 @@ def state_fn(
     return (learner.state(service), learner.latest_action)
 
 
-def set_up_background_market(
-    vega: VegaServiceNull,
-    tag: str = "",
-    num_steps: int = 120,
-    dt: float = 1 / 60 / 24 / 365.25,
-    market_decimal: int = 5,
-    asset_decimal: int = 5,
-    initial_price: float = 0.3,
-    sigma: float = 1,
-    kappa: float = 500,
-    Lambda: float = 5,
-    q_upper: int = 20,
-    q_lower: int = -20,
-    alpha: float = 10**-4,
-    phi: float = 5 * 10**-6,
-    spread: float = 0.00002,
-    block_size: int = 1,
-    state_extraction_freq: int = 1,
-    step_length_seconds: Optional[int] = None,
-) -> RLMarketEnvironment:
-    _, price_process = RW_model(
-        T=num_steps * dt,
-        dt=dt,
-        mdp=market_decimal,
-        sigma=sigma,
-        Midprice=initial_price,
-    )
-
-    learning_agent.price_process = price_process
-
-    market_maker = OptimalMarketMaker(
-        wallet_name=MM_WALLET.name,
-        wallet_pass=MM_WALLET.passphrase,
-        terminate_wallet_name=TERMINATE_WALLET.name,
-        terminate_wallet_pass=TERMINATE_WALLET.passphrase,
-        price_processs=price_process,
-        spread=spread,
-        num_steps=num_steps,
-        market_order_arrival_rate=Lambda,
-        pegged_order_fill_rate=kappa,
-        inventory_upper_boundary=q_upper,
-        inventory_lower_boundary=q_lower,
-        terminal_penalty_parameter=alpha,
-        running_penalty_parameter=phi,
-        asset_decimal=asset_decimal,
-        market_decimal=market_decimal,
-        tag=str(tag),
-    )
-
-    tradingbot = MarketOrderTrader(
-        wallet_name=TRADER_WALLET.name,
-        wallet_pass=TRADER_WALLET.passphrase,
-        tag=str(tag),
-    )
-
-    randomtrader = LimitOrderTrader(
-        wallet_name=RANDOM_WALLET.name,
-        wallet_pass=RANDOM_WALLET.passphrase,
-        price_process=price_process,
-        spread=spread,
-        initial_price=initial_price,
-        asset_decimal=asset_decimal,
-        market_decimal=market_decimal,
-        tag=str(tag),
-    )
-
-    auctionpass1 = OpenAuctionPass(
-        wallet_name=AUCTION1_WALLET.name,
-        wallet_pass=AUCTION1_WALLET.passphrase,
-        side="SIDE_BUY",
-        initial_price=initial_price,
-        tag=str(tag),
-    )
-
-    auctionpass2 = OpenAuctionPass(
-        wallet_name=AUCTION2_WALLET.name,
-        wallet_pass=AUCTION2_WALLET.passphrase,
-        side="SIDE_SELL",
-        initial_price=initial_price,
-        tag=str(tag),
-    )
-
-    env = RLMarketEnvironment(
-        base_agents=[
-            market_maker,
-            tradingbot,
-            randomtrader,
-            auctionpass1,
-            auctionpass2,
-        ],
-        n_steps=num_steps,
-        transactions_per_block=block_size,
-        vega_service=vega,
-        state_extraction_fn=state_fn,
-        state_extraction_freq=state_extraction_freq,
-        step_length_seconds=step_length_seconds,
-    )
-    return env
-
-
 def run_iteration(
     learning_agent: LearningAgent,
     step_tag: int,
-    num_steps: int = 120,
-    dt: float = 1 / 60 / 24 / 365.25,
-    market_decimal: int = 5,
-    asset_decimal: int = 5,
-    initial_price: float = 0.3,
-    sigma: float = 1,
-    kappa: float = 500,
-    Lambda: float = 5,
-    q_upper: int = 20,
-    q_lower: int = -20,
-    alpha: float = 10**-4,
-    phi: float = 5 * 10**-6,
-    spread: float = 0.00002,
-    block_size: int = 1,
-    state_extraction_freq: int = 1,
-    run_with_console: bool = False,
-    pause_at_completion: bool = False,
-    step_length_seconds: Optional[int] = None,
-    vega: Optional[VegaServiceNull] = None,
+    vega,
+    run_with_console=False,
+    pause_at_completion=False,
 ):
-    env = set_up_background_market(
-        vega=vega,
-        tag=str(step_tag),
-        num_steps=num_steps,
-        dt=dt,
-        market_decimal=market_decimal,
-        asset_decimal=asset_decimal,
-        initial_price=initial_price,
-        sigma=sigma,
-        kappa=kappa,
-        Lambda=Lambda,
-        q_upper=q_upper,
-        q_lower=q_lower,
-        alpha=alpha,
-        phi=phi,
-        spread=spread,
-        block_size=block_size,
-        state_extraction_freq=state_extraction_freq,
-        step_length_seconds=step_length_seconds,
+    scenario = IdealMarketMakerV2(
+        market_decimal=3,
+        asset_decimal=5,
+        market_position_decimal=2,
+        initial_price=1123.11,
+        spread=0.002,
+        lp_commitamount=20000,
+        step_length_seconds=60,
+        block_length_seconds=1,
+        buy_intensity=10,
+        sell_intensity=10,
+        q_upper=50,
+        q_lower=-50,
+        kappa=50,
+        sigma=0.5,
+        num_steps=72,
+        state_extraction_fn=ideal_market_maker_single_data_extraction(
+            additional_data_fns=[
+                tau_scaling_additional_data,
+                target_stake_additional_data,
+            ]
+        ),
     )
-
+    env = scenario.set_up_background_market(
+                vega=vega, tag=str(step_tag),
+            )
+    # env.agents.append[learning_agent]
+    env.agents  = env.agents + [learning_agent]
+    
     learning_agent.set_market_tag(str(step_tag))
-    env.add_learning_agent(learning_agent)
+    
 
     result = env.run(
         run_with_console=run_with_console,
@@ -247,7 +136,7 @@ if __name__ == "__main__":
         with VegaServiceNull(
             warn_on_raw_data_access=False, run_with_console=False
         ) as vega:
-            time.sleep(2)
+            vega.wait_for_total_catchup()
             # TRAINING OF AGENT
             for it in range(args.rl_max_it):
                 # simulation of market to get some data
@@ -255,13 +144,10 @@ if __name__ == "__main__":
                     learning_agent.move_to_cpu()
                     _ = run_iteration(
                         learning_agent=learning_agent,
-                        **{
-                            "vega": vega,
-                            "pause_at_completion": False,
-                            "num_steps": 100,
-                            "step_tag": it,
-                            "block_size": 50,
-                        },
+                        step_tag=it,
+                        vega=vega,
+                        run_with_console=False, 
+                        pause_at_completion=False,
                     )
                     # Policy evaluation + Policy improvement
                     learning_agent.move_to_device()
