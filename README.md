@@ -101,3 +101,27 @@ This will run the configured scenario several times with each configured paramet
 ## Scenarios
 
 To support the above mentioned parameter tests, and to allow for more complex capabilities, a set of scenarios (and agents who act within them) live in `vega_sim.scenario`. We aim here to provide a set of agent primitives which allow one to construct complex interactions and trading scenarios.
+
+### Momentum Agent
+
+One of the agents provided in the scenarios is momentum agent that can currently follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. A comprehensive scenario for momentum agent tests is in `vega_sim.scenario.comprehensive_market.scenario`, where mutileple momentum agents with different momentum strategies can be tested. 
+
+To run momentum agents, start by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
+
+```
+ComprehensiveMarket(
+  num_momentum_agents=2,
+  momentum_trader_strategies=['APO', 'MACD'],
+  momentum_trader_strategy_args=[
+    {
+      "fastperiod": 12,
+      "slowperiod": 26,
+    },
+    {
+      "fastperiod": 14,
+      "slowperiod": 26,
+      "signalperiod": 9,
+    }
+  ],  
+)
+```
