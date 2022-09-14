@@ -609,7 +609,7 @@ class SingleParameterExperimentTk(NotebookTk):
                     result["Volume"] = float(tmp[1])
                     result["Side"] = "Ask"
                     new_data_list.append(result)
-            
+
             result = {}
             result["Time Step"] = time_step
             result["Price"] = data_raw.loc[
