@@ -137,6 +137,7 @@ rl_logs/
 numerical_results/
 test_logs/
 parameter_results/**/*.csv
+examples/**/*.csv
 parameter_results/**/*.json
 prof/
 *.prof

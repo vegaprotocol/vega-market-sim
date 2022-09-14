@@ -44,6 +44,7 @@ class IdealMarketMaker(Scenario):
         q_lower: int = -20,
         alpha: float = 10**-4,
         phi: float = 5 * 10**-6,
+        market_marker_limit_order_size: float = 10,
         lp_commitamount: float = 200000,
         spread: int = 2,
         block_size: int = 1,
@@ -87,6 +88,7 @@ class IdealMarketMaker(Scenario):
         self.lp_commitamount = lp_commitamount
         self.initial_asset_mint = initial_asset_mint
         self.backgroundmarket_tick_spacing = backgroundmarket_tick_spacing
+        self.market_marker_limit_order_size = market_marker_limit_order_size
         self.backgroundmarket_number_levels_per_side = (
             backgroundmarket_number_levels_per_side
         )
@@ -138,6 +140,7 @@ class IdealMarketMaker(Scenario):
             num_steps=self.num_steps,
             market_order_arrival_rate=self.buy_intensity,
             kappa=self.kappa,
+            limit_order_size=self.market_marker_limit_order_size,
             inventory_upper_boundary=self.q_upper,
             inventory_lower_boundary=self.q_lower,
             terminal_penalty_parameter=self.alpha,

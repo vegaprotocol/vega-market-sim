@@ -1,4 +1,4 @@
-FROM golang:1.18-buster AS gobuild
+FROM golang:1.19-buster AS gobuild
 
 COPY ./extern /extern
 WORKDIR /extern
