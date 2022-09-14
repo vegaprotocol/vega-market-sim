@@ -1303,7 +1303,7 @@ class MomentumTrader(StateAgentWithWallet):
 
     def _APO(self):
         self.indicators = (
-            talib.MACD(self.prices)
+            talib.APO(self.prices)
             if self.momentum_strategy_args is None
             else talib.APO(
                 self.prices,
