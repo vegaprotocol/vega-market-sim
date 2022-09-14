@@ -19,8 +19,10 @@ import plotly.express as px
 import ipywidgets as widgets
 
 from matplotlib.axes import Axes
-from IPython.display import display
+from IPython.display import display as dsp
+
 from math import ceil
+from typing import Optional
 from itertools import product
 from vega_sim.parameter_test.parameter.experiment import FILE_PATTERN, FILE_PATTERN_LOB
 
@@ -48,7 +50,7 @@ class NotebookTk:
         key: str,
         des: str,
         options: list,
-        value: list = None,
+        value: Optional[list] = None,
     ):
         """Adds a new selectmultiple widget to the objects widgets dictionary.
 
@@ -140,7 +142,7 @@ class NotebookTk:
             if key not in self.widgets.keys():
                 raise ValueError("Specified key does not exist in objects widget dict.")
 
-        display(widgets.HBox([self.widgets[key] for key in keys]))
+        dsp(widgets.HBox([self.widgets[key] for key in keys]))
 
 
 class SingleParameterExperimentTk(NotebookTk):
@@ -173,7 +175,10 @@ class SingleParameterExperimentTk(NotebookTk):
         list of pandas.DataFrame objects.
 
         Args:
-            path (str): Path to directory containing parameter test files.
+            path (str):
+                Path to directory containing parameter test files.
+            dt (float):
+                Float to multiply the time-step by when plotting time along the x-axis.
         """
         super().__init__()
 
@@ -194,8 +199,8 @@ class SingleParameterExperimentTk(NotebookTk):
 
     def plot_results(
         self,
-        variables: list = None,
-        iterations: list = None,
+        variables: Optional[list] = None,
+        iterations: Optional[list] = None,
     ):
         """Plots a variables result for each iteration or averaged across iterations.
 
@@ -256,14 +261,14 @@ class SingleParameterExperimentTk(NotebookTk):
 
     def plot_comparison(
         self,
-        parameters: list = None,
-        iterations: list = None,
-        variables: list = None,
-        formats: list = None,
-        ylabel: str = None,
-        variables_right: list = None,
-        formats_right: list = None,
-        ylabel_right: str = None,
+        parameters: Optional[list] = None,
+        iterations: Optional[list] = None,
+        variables: Optional[list] = None,
+        formats: Optional[list] = None,
+        ylabel: Optional[str] = None,
+        variables_right: Optional[list] = None,
+        formats_right: Optional[list] = None,
+        ylabel_right: Optional[str] = None,
     ):
         """Plots a comparison of all the specified variables on the same axes.
 
@@ -339,8 +344,8 @@ class SingleParameterExperimentTk(NotebookTk):
 
     def plot_lob(
         self,
-        param_value: float = None,
-        iteration: float = None,
+        param_value: Optional[float] = None,
+        iteration: Optional[float] = None,
     ):
         """Creates a plot of the LOB for a specified parameter value and iteration.
 
@@ -389,8 +394,8 @@ class SingleParameterExperimentTk(NotebookTk):
 
     def animate_lob(
         self,
-        param_value: float = None,
-        iteration=None,
+        param_value: Optional[float] = None,
+        iteration: Optional[float] = None,
     ):
         """Creates an animation of the LOB for a given parameter value and iteration.
 
@@ -604,16 +609,16 @@ class SingleParameterExperimentTk(NotebookTk):
                     result["Volume"] = float(tmp[1])
                     result["Side"] = "Ask"
                     new_data_list.append(result)
-            if time_step != 289:
-                result = {}
-                result["Time Step"] = time_step
-                result["Price"] = data_raw.loc[
-                    time_step + iteration * (data_raw.shape[0]) - 1,
-                    "External Midprice",
-                ]
-                result["Side"] = "Mid"
-                result["Volume"] = 0.05
-                new_data_list.append(result)
+            
+            result = {}
+            result["Time Step"] = time_step
+            result["Price"] = data_raw.loc[
+                time_step + iteration * (data_raw.shape[0]) - 1,
+                "External Midprice",
+            ]
+            result["Side"] = "Mid"
+            result["Volume"] = 0.05
+            new_data_list.append(result)
 
         return pd.DataFrame(new_data_list)
 
@@ -621,17 +626,17 @@ class SingleParameterExperimentTk(NotebookTk):
         self,
         ax: Axes,
         variables: list,
-        variables_right: list = None,
-        parameters: list = None,
+        variables_right: Optional[list] = None,
+        parameters: Optional[list] = None,
         iterations: list = ["avg"],
-        formats: list = None,
-        formats_right: list = None,
-        ylabel: str = None,
-        ylabel_right: str = None,
-        xlabel: str = None,
-        title: str = None,
-        labels: list = None,
-        labels_right: list = None,
+        formats: Optional[list] = None,
+        formats_right: Optional[list] = None,
+        ylabel: Optional[str] = None,
+        ylabel_right: Optional[str] = None,
+        xlabel: Optional[str] = None,
+        title: Optional[str] = None,
+        labels: Optional[list] = None,
+        labels_right: Optional[list] = None,
     ):
         """Adds a complete plot to a given subplot axes.
 
@@ -707,10 +712,10 @@ class SingleParameterExperimentTk(NotebookTk):
         self,
         ax: Axes,
         variables: list,
-        formats: list = None,
-        parameters: list = None,
+        formats: Optional[list] = None,
+        parameters: Optional[list] = None,
         iterations: list = ["avg"],
-        labels: list = None,
+        labels: Optional[list] = None,
     ):
         """Adds a plot to a specific axes of a subplot.
 
