@@ -2,7 +2,6 @@ import argparse
 import logging
 import pathlib
 import csv
-import pandas as pd
 
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.comprehensive_market.scenario import ComprehensiveMarket
@@ -21,26 +20,12 @@ scenario = ComprehensiveMarket(
     market_position_decimal=4,
     market_name="ETH:USD",
     asset_name="USD",
-    price_process_fn=lambda: pd.concat(
-        (
-            get_historic_price_series(
-                product_id="ETH-USD",
-                granularity=Granularity.HOUR,
-                start="2022-08-08 12:00:00",
-                end="2022-08-11 12:00:00",
-            ),
-            get_historic_price_series(
-                product_id="ETH-USD",
-                granularity=Granularity.HOUR,
-                start="2022-08-11 12:00:00",
-                end="2022-08-23 21:00:00",
-            ),
-            get_historic_price_series(
-                product_id="ETH-USD",
-                granularity=Granularity.HOUR,
-                start="2022-08-23 22:00:00",
-                end="2022-09-05 09:00:00",
-            ),
+    price_process_fn=lambda: (
+        get_historic_price_series(
+            product_id="ETH-USD",
+            granularity=Granularity.HOUR,
+            start="2022-08-08 11:00:00",
+            end="2022-09-05 09:00:00",
         )
     ).values,
     step_length_seconds=60,
