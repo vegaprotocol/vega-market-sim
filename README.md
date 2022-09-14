@@ -22,7 +22,7 @@ For the most part the package is fairly self-contained Python, however there are
   - Run `make` to automatically pull install dependencies
     - If you have your own instances of the various service to run from elsewhere, you can skip this step
   - Install the package into your local environment. 
-    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests.
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install`. 
  -  Then run your environment.
 
 ### Setup if you're using `conda` as your python package manager
@@ -101,3 +101,27 @@ This will run the configured scenario several times with each configured paramet
 ## Scenarios
 
 To support the above mentioned parameter tests, and to allow for more complex capabilities, a set of scenarios (and agents who act within them) live in `vega_sim.scenario`. We aim here to provide a set of agent primitives which allow one to construct complex interactions and trading scenarios.
+
+### Momentum Agent
+
+One of the agents provided in the scenarios is momentum agent that can currently follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. A comprehensive scenario for momentum agent tests is in `vega_sim.scenario.comprehensive_market.scenario`, where mutileple momentum agents with different momentum strategies can be tested. 
+
+To run momentum agents, start by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
+
+```
+ComprehensiveMarket(
+  num_momentum_agents=2,
+  momentum_trader_strategies=['APO', 'MACD'],
+  momentum_trader_strategy_args=[
+    {
+      "fastperiod": 12,
+      "slowperiod": 26,
+    },
+    {
+      "fastperiod": 14,
+      "slowperiod": 26,
+      "signalperiod": 9,
+    }
+  ],  
+)
+```

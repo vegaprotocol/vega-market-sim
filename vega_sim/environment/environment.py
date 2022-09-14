@@ -38,6 +38,7 @@ MarketState = namedtuple(
     [
         "state",
         "trading_mode",
+        "midprice",
         "orders",
     ],  # "order_book"]
 )
@@ -185,6 +186,11 @@ class MarketEnvironment:
             core_catchup_seconds = (
                 datetime.datetime.now() - core_catchup_start
             ).seconds
+
+            if self.transactions_per_block > 1:
+                vega.wait_fn(1)
+            vega.wait_for_total_catchup()
+
             if core_catchup_seconds > 1:
                 logger.warn(f"Waited {core_catchup_seconds}s for core catchup")
 
@@ -195,6 +201,10 @@ class MarketEnvironment:
                 state_values.append(self._state_extraction_fn(vega, self.agents))
 
             vega.wait_for_total_catchup()
+
+            if self.transactions_per_block > 1:
+                vega.wait_fn(1)
+
             if self.step_length_seconds is not None:
                 end_time = vega.get_blockchain_time()
                 to_forward = max(0, self.step_length_seconds - (end_time - start_time))
@@ -335,9 +345,12 @@ class MarketEnvironmentWithState(MarketEnvironment):
         order_status = vega.order_status_from_feed(live_only=True)
         for market in vega.all_markets():
             market_info = vega.market_info(market_id=market.id)
+            market_data = vega.market_data(market_id=market.id)
             market_state[market.id] = MarketState(
                 state=market_info.state,
                 trading_mode=market_info.trading_mode,
+                midprice=float(market_data.mid_price)
+                / 10 ** int(market_info.decimal_places),
                 orders=order_status.get(market.id, {}),
             )
 

@@ -5,7 +5,7 @@ VEGA_SIM_CONSOLE_TAG=master" > .env
 
 make
 make proto
-pytest -m integration
+pytest -s -v --log-cli-level INFO -m integration
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"
