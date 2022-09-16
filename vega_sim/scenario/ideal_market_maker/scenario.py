@@ -54,6 +54,7 @@ class IdealMarketMaker(Scenario):
         block_length_seconds: int = 1,
         state_extraction_freq: int = 1,
         step_length_seconds: Optional[int] = None,
+        opening_auction_trade_amount: float = 1,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
@@ -82,6 +83,7 @@ class IdealMarketMaker(Scenario):
         self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
         self.state_extraction_fn = state_extraction_fn
+        self.opening_auction_trade_amount = opening_auction_trade_amount
 
     def set_up_background_market(
         self,
@@ -157,6 +159,7 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
+            opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=str(tag),
         )
 
@@ -168,6 +171,7 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
+            opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=str(tag),
         )
 

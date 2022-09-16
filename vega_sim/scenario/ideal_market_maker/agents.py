@@ -352,7 +352,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side="SIDE_BUY",
                 volume=self.num_buyMO,
-                wait=False,
+                wait=True,
                 fill_or_kill=False,
             )
 
@@ -363,7 +363,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side="SIDE_SELL",
                 volume=self.num_sellMO,
-                wait=False,
+                wait=True,
                 fill_or_kill=False,
             )
 
@@ -496,8 +496,10 @@ class LimitOrderTrader(StateAgentWithWallet):
                 order_type="TYPE_LIMIT",
                 side="SIDE_BUY",
                 volume=self.num_post_at_bid - 1,
-                price=self.price_process[self.current_step] - random_delta,
-                wait=False,
+                price=round(
+                    self.price_process[self.current_step] - random_delta, self.mdp
+                ),
+                wait=True,
             )
 
         if self.num_post_at_ask > 1:
@@ -510,8 +512,10 @@ class LimitOrderTrader(StateAgentWithWallet):
                 order_type="TYPE_LIMIT",
                 side="SIDE_SELL",
                 volume=self.num_post_at_ask - 1,
-                price=self.price_process[self.current_step] + random_delta,
-                wait=False,
+                price=round(
+                    self.price_process[self.current_step] + random_delta, self.mdp
+                ),
+                wait=True,
             )
 
     def step_limitorderask(self, vega_state: VegaState):
@@ -551,6 +555,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
         initial_price: float = 0.3,
+        opening_auction_trade_amount: float = 1,
         tag: str = "",
     ):
         super().__init__(wallet_name + tag, wallet_pass)
@@ -560,6 +565,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
+        self.opening_auction_trade_amount = opening_auction_trade_amount
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -587,7 +593,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             order_type="TYPE_LIMIT",
             time_in_force="TIME_IN_FORCE_GTC",
             side=self.side,
-            volume=1,
+            volume=self.opening_auction_trade_amount,
             price=self.initial_price,
         )
 

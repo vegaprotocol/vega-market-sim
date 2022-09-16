@@ -73,6 +73,9 @@ TAU_SCALING_FACTOR_IDEAL = SingleParameterExperiment(
         lambda_val=10,
         q_upper=50,
         q_lower=-50,
+        opening_auction_trade_amount=0.01,
+        step_length_seconds=60,
+        block_length_seconds=1,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 v1_ideal_mm_additional_data,

@@ -9,7 +9,6 @@ from vega_sim.scenario.ideal_market_maker.agents import (
     LimitOrderTrader,
     MarketOrderTrader,
     OptimalLiquidityProvider,
-    InformedTrader,
 )
 
 
@@ -63,7 +62,9 @@ class MarketEnvironment(MarketEnvironmentWithState):
         ]
 
     def step(self, vega: VegaService):
+        vega.wait_for_datanode_sync()        
         state = self.state_func(vega)
+
         self.mm_agent.AvoidCrossedOrder()
         self.lo_agent.step_amendprice(state)
         self.mm_agent.step(state)
@@ -73,10 +74,10 @@ class MarketEnvironment(MarketEnvironmentWithState):
                 lp_agent.step(state)
 
         # Pass trading info
-        self.lo_agent.num_post_at_bid = self.agents[0].num_bidhit
-        self.lo_agent.num_post_at_ask = self.agents[0].num_askhit
-        self.mo_agent.num_buyMO = self.agents[0].num_buyMO
-        self.mo_agent.num_sellMO = self.agents[0].num_sellMO
+        self.lo_agent.num_post_at_bid = self.mm_agent.num_bidhit
+        self.lo_agent.num_post_at_ask = self.mm_agent.num_askhit
+        self.mo_agent.num_buyMO = self.mm_agent.num_buyMO
+        self.mo_agent.num_sellMO = self.mm_agent.num_sellMO
 
         self.lo_agent.step_limitorders(state)
         self.mo_agent.step_buy(state)
