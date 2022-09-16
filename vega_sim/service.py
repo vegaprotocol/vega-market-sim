@@ -348,6 +348,7 @@ class VegaService(ABC):
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             time_forward_fn=lambda: self.wait_fn(2),
         )
+        self.wait_fn(1)
         gov.approve_proposal(
             proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
         )

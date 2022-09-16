@@ -1,7 +1,7 @@
 import argparse
 import logging
 import numpy as np
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Tuple, Dict
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
@@ -22,6 +22,7 @@ from vega_sim.scenario.common.agents import (
     LiquidityProvider,
     MarketOrderTrader,
     LimitOrderTrader,
+    MomentumTrader,
     OpenAuctionPass,
 )
 
@@ -63,9 +64,15 @@ class ComprehensiveMarket(Scenario):
         limit_order_trader_sigma: float = 0.5,
         limit_order_trader_duration: int = 300,
         limit_order_trader_time_in_force_opts: Optional[dict] = None,
+        momentum_trader_order_intensity: int = 10,
+        momentum_trader_order_size: float = 0.1,
+        momentum_trader_strategies: List[str] = None,
+        momentum_trader_strategy_args: List[Dict[str, float]] = None,
+        momentum_trader_indicator_thresholds: List[Tuple[float, float]] = None,
         num_lp_agents: int = 3,
         num_mo_agents: int = 5,
         num_lo_agents: int = 20,
+        num_momentum_agents: int = 1,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -106,10 +113,28 @@ class ComprehensiveMarket(Scenario):
             limit_order_trader_time_in_force_opts
         )
 
+        # MomentumTrader Options
+        self.momentum_trader_order_intensity = momentum_trader_order_intensity
+        self.momentum_trader_order_size = momentum_trader_order_size
+        self.momentum_trader_strategies = (
+            momentum_trader_strategies
+            if momentum_trader_strategies is not None
+            else ["RSI"] * num_momentum_agents
+        )
+        self.momentum_trader_strategy_args = momentum_trader_strategy_args
+        self.momentum_trader_indicator_thresholds = (
+            momentum_trader_indicator_thresholds
+            if momentum_trader_indicator_thresholds is not None
+            else [(70, 30)] * num_momentum_agents
+        )
+
         # Agent options
         self.lp_wallets = create_agent_wallets(n=num_lp_agents, prefix="lp_agent_")
         self.mo_wallets = create_agent_wallets(n=num_mo_agents, prefix="lo_agent_")
         self.lo_wallets = create_agent_wallets(n=num_lo_agents, prefix="mo_agent_")
+        self.momentum_wallets = create_agent_wallets(
+            n=num_momentum_agents, prefix="momentum_agent_"
+        )
 
     def _generate_price_process(
         self,
@@ -212,6 +237,27 @@ class ComprehensiveMarket(Scenario):
             for i in range(len(self.lo_wallets))
         ]
 
+        momentum_agents = [
+            MomentumTrader(
+                wallet_name=self.momentum_wallets[i].name,
+                wallet_pass=self.momentum_wallets[i].passphrase,
+                market_name=market_name,
+                asset_name=asset_name,
+                initial_asset_mint=self.initial_asset_mint,
+                order_intensity=self.momentum_trader_order_intensity,
+                base_order_size=self.momentum_trader_order_size,
+                momentum_strategy=self.momentum_trader_strategies[i],
+                momentum_strategy_args=self.momentum_trader_strategy_args[i]
+                if self.momentum_trader_strategy_args is not None
+                else self.momentum_trader_strategy_args,
+                indicator_threshold=self.momentum_trader_indicator_thresholds[i],
+                send_limit_order=True,
+                offset_levels=20,
+                tag=str(tag),
+            )
+            for i in range(len(self.momentum_wallets))
+        ]
+
         auctionpass1 = OpenAuctionPass(
             wallet_name=AUCTION1_WALLET.name,
             wallet_pass=AUCTION1_WALLET.passphrase,
@@ -248,7 +294,8 @@ class ComprehensiveMarket(Scenario):
             ]
             + lp_agents
             + mo_agents
-            + lo_agents,
+            + lo_agents
+            + momentum_agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
