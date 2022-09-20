@@ -106,9 +106,9 @@ class MarketOrderTrader(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
             )
             self.vega.wait_fn(5)
-        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
-        self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
-        self.adp = self.vega._asset_decimals.get(self.asset_id, {})
+        self.pdp = self.vega.market_pos_decimals.get(self.market_id, {})
+        self.mdp = self.vega.market_price_decimals.get(self.market_id, {})
+        self.adp = self.vega.asset_decimals.get(self.asset_id, {})
 
     def step(self, vega_state: VegaState):
         buy_first = self.random_state.choice([0, 1])
