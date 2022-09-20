@@ -27,6 +27,7 @@ class AgentWithWallet(Agent):
         self,
         wallet_name: str,
         wallet_pass: str,
+        create_wallet: bool = True
     ):
         """Agent for use in environments as specified in environment.py.
         To extend, the crucial function to implement is the step function which will
@@ -45,13 +46,17 @@ class AgentWithWallet(Agent):
         super().__init__()
         self.wallet_name = wallet_name
         self.wallet_pass = wallet_pass
+        self.create_wallet = create_wallet
 
     def step(self, vega: VegaService):
         pass
 
     def initialise(self, vega: VegaService):
         super().initialise(vega=vega)
-        self.vega.create_wallet(name=self.wallet_name, passphrase=self.wallet_pass)
+        if self.create_wallet:
+            self.vega.create_wallet(name=self.wallet_name, passphrase=self.wallet_pass)
+        else:
+            self.vega.login(name=self.wallet_name, passphrase=self.wallet_pass)
 
 
 class StateAgentWithWallet(AgentWithWallet):

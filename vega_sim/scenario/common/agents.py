@@ -70,8 +70,10 @@ class MarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
+        create_wallet: bool = True,
+        mint: bool = True,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, create_wallet)
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -82,6 +84,7 @@ class MarketOrderTrader(StateAgentWithWallet):
             random_state if random_state is not None else np.random.RandomState()
         )
         self.base_order_size = base_order_size
+        self.mint = mint
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -95,13 +98,14 @@ class MarketOrderTrader(StateAgentWithWallet):
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        # Top up asset
-        self.vega.mint(
-            self.wallet_name,
-            asset=self.asset_id,
-            amount=self.initial_asset_mint,
-        )
-        self.vega.wait_fn(5)
+        if self.mint:
+            # Top up asset
+            self.vega.mint(
+                self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+            )
+            self.vega.wait_fn(5)
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
         self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
         self.adp = self.vega._asset_decimals.get(self.asset_id, {})
@@ -884,7 +888,10 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.mean = mean
         self.sigma = sigma
 
-    def initialise(self, vega: VegaServiceNull, ):
+    def initialise(
+        self,
+        vega: VegaServiceNull,
+    ):
         """Initialise the agents wallet and mint the required market asset.
 
         Args:
@@ -915,8 +922,6 @@ class LimitOrderTrader(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-
-
 
     def step(self, vega_state: VegaState):
         """Randomly submits and cancels limit orders.
@@ -976,7 +981,6 @@ class LimitOrderTrader(StateAgentWithWallet):
             price = reference_sell_price - (random_offset - ln_mean)
 
         expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
-        print(f"AGENT SAYS SUBMIT (w/ price={price}, volume={volume}, side={side})")
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
             market_id=self.market_id,
