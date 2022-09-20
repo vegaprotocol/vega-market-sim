@@ -111,23 +111,6 @@ class Fairground(Scenario):
             )
         )
 
-        background_market = BackgroundMarket(
-            wallet_name="BackgroundMarket",
-            wallet_pass="bmwp",
-            tag=str(tag),
-            market_name=self.market_name,
-            asset_name=self.asset_name,
-            price_process=price_process,
-            spread=self.bm_spread / 10**self.market_decimal,
-            tick_spacing=self.bm_tick_spacing,
-            order_distribution_kappa=self.bm_kappa,
-            num_levels_per_side=self.bm_number_levels_per_side,
-            base_volume_size=10000,
-            position_decimals=0,
-            create_wallet=False,
-            mint=False,
-        )
-
         mo_trader_a = MarketOrderTrader(
             wallet_name="MarketOrderTraderA",
             wallet_pass="walletpass",
