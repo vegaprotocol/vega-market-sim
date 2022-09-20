@@ -90,10 +90,12 @@ def wait_for_core_catchup(
     """
     attempts = 1
     core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    time.sleep(0.0001)
     core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
 
     while core_time != core_time_two:
         core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+        time.sleep(0.0001)
         core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
         attempts += 1
         if attempts >= max_retries:

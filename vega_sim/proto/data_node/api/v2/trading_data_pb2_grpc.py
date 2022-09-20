@@ -271,6 +271,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsResponse.FromString,
         )
+        self.ObserveLiquidityProvisions = channel.unary_stream(
+            "/datanode.api.v2.TradingDataService/ObserveLiquidityProvisions",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsResponse.FromString,
+        )
         self.GetGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.SerializeToString,
@@ -813,6 +818,12 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ObserveLiquidityProvisions(self, request, context):
+        """Get a liquidity provision subscription for a given market and party"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetGovernanceData(self, request, context):
         """Governance
 
@@ -1262,6 +1273,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListLiquidityProvisions,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsResponse.SerializeToString,
+        ),
+        "ObserveLiquidityProvisions": grpc.unary_stream_rpc_method_handler(
+            servicer.ObserveLiquidityProvisions,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsResponse.SerializeToString,
         ),
         "GetGovernanceData": grpc.unary_unary_rpc_method_handler(
             servicer.GetGovernanceData,
@@ -2853,6 +2869,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListLiquidityProvisions",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ObserveLiquidityProvisions(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ObserveLiquidityProvisions",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsResponse.FromString,
             options,
             channel_credentials,
             insecure,

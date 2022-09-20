@@ -202,7 +202,7 @@ def propose_future_market(
                         settlement_price_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
                     ),
-                    settlement_price_decimals=price_decimals,
+                    settlement_data_decimals=price_decimals,
                 ),
             ),
             decimal_places=price_decimals,

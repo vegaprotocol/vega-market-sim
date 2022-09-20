@@ -100,7 +100,7 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
             filters=curr_fut.oracle_spec_for_trading_termination.filters,
         ),
         oracle_spec_binding=curr_fut.oracle_spec_binding,
-        settlement_price_decimals=curr_fut.settlement_price_decimals,
+        settlement_data_decimals=curr_fut.settlement_data_decimals,
     )
     updated_instrument = vega_protos.governance.UpdateInstrumentConfiguration(
         code="BTCUSD",
