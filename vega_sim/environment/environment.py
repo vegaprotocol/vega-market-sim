@@ -20,6 +20,7 @@ For examples of this setup, see examples/agent_market.
 
 """
 
+import time
 
 import datetime
 import logging
@@ -29,6 +30,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.fairground_service import VegaServiceFairground
 from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
@@ -365,3 +367,83 @@ class MarketEnvironmentWithState(MarketEnvironment):
             else self.agents
         ):
             agent.step(state)
+
+
+class FairgroundEnvironment(MarketEnvironmentWithState):
+    def __init__(
+        self,
+        agents: List[StateAgent],
+        n_steps: int,
+        random_agent_ordering: bool = True,
+        state_func: Optional[Callable[[VegaService], VegaState]] = None,
+        step_length_seconds: Optional[int] = None,
+        vega_service: Optional[VegaServiceNull] = None,
+        state_extraction_fn: Optional[
+            Callable[[VegaServiceNull, List[Agent]], Any]
+        ] = None,
+        state_extraction_freq: int = 10,
+    ):
+        """"""
+        super().__init__(
+            agents=agents,
+            n_steps=n_steps,
+            random_agent_ordering=random_agent_ordering,
+            step_length_seconds=step_length_seconds,
+            vega_service=vega_service,
+            state_extraction_fn=state_extraction_fn,
+            state_extraction_freq=state_extraction_freq,
+        )
+        self.state_func = (
+            state_func if state_func is not None else self._default_state_extraction
+        )
+
+    def run(self):
+
+        if self._vega is None:
+            with VegaServiceFairground(
+                warn_on_raw_data_access=False,
+                use_full_vega_wallet=True,
+            ) as vega:
+                return self._run(vega)
+        else:
+            return self._run(self._vega)
+
+    def _run(self, vega):
+
+        state_values = []
+
+        # Initialise agents without minting assets
+        for agent in self.agents:
+            agent.initialise(vega=vega)
+
+        for i in range(self.n_steps):
+            time.sleep(1)
+            print(f"Iteration={i}")
+            self.step(vega)
+
+            if (
+                self._state_extraction_fn is not None
+                and i % self._state_extraction_freq == 0
+            ):
+                state_values.append(self._state_extraction_fn(vega, self.agents))
+
+        for agent in self.agents:
+            agent.finalise()
+
+        if self._state_extraction_fn is not None:
+            state_values.append(self._state_extraction_fn(vega, self.agents))
+            return state_values
+
+    def step(self, vega: VegaServiceFairground) -> None:
+        t = time.time()
+        state = self.state_func(vega)
+        print(f"   Get state took {time.time() - t} seconds.")
+        for agent in (
+            sorted(self.agents, key=lambda _: random.random())
+            if self.random_agent_ordering
+            else self.agents
+        ):
+            t2 = time.time()
+            agent.step(state)
+            print(f"   Agent {agent.wallet_name} step took {time.time() - t2} seconds.")
+        print(f"   Env step took {time.time() - t} seconds.")
