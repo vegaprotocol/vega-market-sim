@@ -62,7 +62,7 @@ class MarketEnvironment(MarketEnvironmentWithState):
         ]
 
     def step(self, vega: VegaService):
-        vega.wait_for_datanode_sync()        
+        vega.wait_for_datanode_sync()
         state = self.state_func(vega)
 
         self.mm_agent.AvoidCrossedOrder()
