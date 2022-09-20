@@ -352,7 +352,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side="SIDE_BUY",
                 volume=self.num_buyMO,
-                wait=True,
+                wait=False,
                 fill_or_kill=False,
             )
 
@@ -363,7 +363,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side="SIDE_SELL",
                 volume=self.num_sellMO,
-                wait=True,
+                wait=False,
                 fill_or_kill=False,
             )
 
