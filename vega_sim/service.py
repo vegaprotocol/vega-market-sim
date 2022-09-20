@@ -747,7 +747,7 @@ class VegaService(ABC):
                     filters=curr_fut.oracle_spec_for_trading_termination.filters,
                 ),
                 oracle_spec_binding=curr_fut.oracle_spec_binding,
-                settlement_price_decimals=curr_fut.settlement_price_decimals,
+                settlement_data_decimals=curr_fut.settlement_data_decimals,
             )
             updated_instrument = UpdateInstrumentConfiguration(
                 code=curr_inst.code,
@@ -812,7 +812,7 @@ class VegaService(ABC):
             wallet_name=settlement_wallet,
             oracle_name=oracle_name,
             settlement_price=num_to_padded_int(
-                settlement_price, decimals=future_inst.settlement_price_decimals
+                settlement_price, decimals=future_inst.settlement_data_decimals
             ),
         )
 
