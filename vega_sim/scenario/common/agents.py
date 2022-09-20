@@ -2,7 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from multiprocessing.connection import wait
 from random import random
-from telnetlib import SE
 
 import numpy as np
 from math import exp
@@ -21,7 +20,6 @@ from vega_sim.api.data import Order
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.fairground_service import VegaServiceFairground
 from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
 
 import vega_sim.proto.data_node.api.v1 as data_node_protos
@@ -888,10 +886,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.mean = mean
         self.sigma = sigma
 
-    def initialise(
-        self,
-        vega: VegaServiceNull,
-    ):
+    def initialise(self, vega: VegaServiceNull):
         """Initialise the agents wallet and mint the required market asset.
 
         Args:
@@ -914,15 +909,6 @@ class LimitOrderTrader(StateAgentWithWallet):
         )
         self.vega.wait_fn(2)
 
-    def initialise_for_fairground(self, vega: VegaServiceFairground):
-        self.vega = vega
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-
     def step(self, vega_state: VegaState):
         """Randomly submits and cancels limit orders.
 
@@ -936,8 +922,8 @@ class LimitOrderTrader(StateAgentWithWallet):
         if self.random_state.rand() <= self.submit_bias:
             self._submit_order(vega_state=vega_state)
 
-        if self.random_state.rand() <= self.cancel_bias:
-            self._cancel_order(vega_state=vega_state)
+            if self.random_state.rand() <= self.cancel_bias:
+                self._cancel_order(vega_state=vega_state)
 
     def _submit_order(self, vega_state: VegaState):
         # Calculate reference_buy_price and reference_sell_price of price distribution
@@ -981,6 +967,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             price = reference_sell_price - (random_offset - ln_mean)
 
         expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
+
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
             market_id=self.market_id,
