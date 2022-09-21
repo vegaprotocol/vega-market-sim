@@ -229,7 +229,11 @@ class LearningAgent(StateAgentWithWallet):
         self.vega.wait_fn(2)
 
     def _update_memory(
-        self, state: LAMarketState, action: Action, reward: float, next_state: LAMarketState
+        self,
+        state: LAMarketState,
+        action: Action,
+        reward: float,
+        next_state: LAMarketState,
     ):
         """
         Ensure what is the input?

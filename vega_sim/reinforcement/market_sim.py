@@ -13,7 +13,7 @@ from vega_sim.reinforcement.learning_agent import (
     WALLET as LEARNING_WALLET,
 )
 
-from vega_sim.scenario.registry import  IdealMarketMakerV2
+from vega_sim.scenario.registry import IdealMarketMakerV2
 from vega_sim.parameter_test.parameter.loggers import (
     ideal_market_maker_single_data_extraction,
     target_stake_additional_data,
@@ -60,16 +60,17 @@ def run_iteration(
         kappa=50,
         sigma=0.5,
         num_steps=72,
-        state_extraction_fn=state_fn
+        state_extraction_fn=state_fn,
     )
     env = scenario.set_up_background_market(
-                vega=vega, tag=str(step_tag),
-            )
+        vega=vega,
+        tag=str(step_tag),
+    )
     # env.agents.append[learning_agent]
-    env.agents  = env.agents + [learning_agent]
-    
+    env.agents = env.agents + [learning_agent]
+
     learning_agent.set_market_tag(str(step_tag))
-    
+
     result = env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
@@ -140,7 +141,7 @@ if __name__ == "__main__":
                         learning_agent=learning_agent,
                         step_tag=it,
                         vega=vega,
-                        run_with_console=False, 
+                        run_with_console=False,
                         pause_at_completion=False,
                     )
                     # Policy evaluation + Policy improvement
@@ -160,10 +161,10 @@ if __name__ == "__main__":
         for it in range(10):
             learning_agent.clear_memory()
             result = run_iteration(
-                        learning_agent=learning_agent,
-                        step_tag=it,
-                        vega=vega,
-                        run_with_console=False, 
-                        pause_at_completion=False,
-                    )
+                learning_agent=learning_agent,
+                step_tag=it,
+                vega=vega,
+                run_with_console=False,
+                pause_at_completion=False,
+            )
             plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)

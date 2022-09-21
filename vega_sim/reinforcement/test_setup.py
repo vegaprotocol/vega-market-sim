@@ -1,5 +1,5 @@
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.registry import  IdealMarketMakerV2
+from vega_sim.scenario.registry import IdealMarketMakerV2
 from vega_sim.parameter_test.parameter.loggers import (
     ideal_market_maker_single_data_extraction,
     target_stake_additional_data,
@@ -9,14 +9,13 @@ from vega_sim.parameter_test.parameter.loggers import (
 )
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     with VegaServiceNull(
-        run_with_console=False, 
-        use_full_vega_wallet=False, 
-        warn_on_raw_data_access=False) as vega:
+        run_with_console=False,
+        use_full_vega_wallet=False,
+        warn_on_raw_data_access=False,
+    ) as vega:
 
-    
         scenario = IdealMarketMakerV2(
             market_decimal=3,
             asset_decimal=5,
@@ -40,15 +39,15 @@ if __name__ == '__main__':
                 ]
             ),
         )
-        
-        
+
         print("Starting a run...")
         # res = scenario[0].run_iteration(vega=vega, pause_at_completion=False, run_with_console=False)
         env = scenario.set_up_background_market(
-                vega=vega, tag=str(0),
-            )
+            vega=vega,
+            tag=str(0),
+        )
         result = env.run(pause_at_completion=False)
-        
+
         # env.agents.append
         # scenario[0].age
         print("Wrapping up...")
