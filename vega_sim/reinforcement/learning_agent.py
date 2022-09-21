@@ -37,7 +37,7 @@ WALLET = WalletConfig("learner", "learner")
 
 
 @dataclass
-class MarketState:
+class LAMarketState:
     position: float
     margin_balance: float
     general_balance: float
@@ -101,8 +101,8 @@ class SoftAction:
 
 
 def states_to_sarsa(
-    states: List[Tuple[MarketState, Action]]
-) -> List[Tuple[MarketState, Action, float, MarketState, Action]]:
+    states: List[Tuple[LAMarketState, Action]]
+) -> List[Tuple[LAMarketState, Action, float, LAMarketState, Action]]:
     res = []
     for i in range(len(states)):
         pres_state = states[i]
@@ -208,17 +208,18 @@ class LearningAgent(StateAgentWithWallet):
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
-        market_name = f"BTC:DAI_{self.tag}"
+        market_name = f"ETH:USD_{self.tag}"
         self.step_num = 0
 
         # Get market id
+        all_markets = self.vega.all_markets()
         self.market_id = [
             m.id
-            for m in self.vega.all_markets()
+            for m in all_markets
             if m.tradable_instrument.instrument.name == market_name
         ][0]
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI{self.tag}")
+        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI_{self.tag}")
         # Top up asset
         self.vega.mint(
             self.wallet_name,
@@ -228,7 +229,7 @@ class LearningAgent(StateAgentWithWallet):
         self.vega.wait_fn(2)
 
     def _update_memory(
-        self, state: MarketState, action: Action, reward: float, next_state: MarketState
+        self, state: LAMarketState, action: Action, reward: float, next_state: LAMarketState
     ):
         """
         Ensure what is the input?
@@ -253,7 +254,7 @@ class LearningAgent(StateAgentWithWallet):
 
         return 0
 
-    def update_memory(self, states: List[Tuple[MarketState, Action]]):
+    def update_memory(self, states: List[Tuple[LAMarketState, Action]]):
         """
         Updates memory of the agent, and removes old tuples (s,a,r,s) if memory exceeds its capacity
         """
@@ -306,7 +307,7 @@ class LearningAgent(StateAgentWithWallet):
         )
         return dataloader
 
-    def state(self, vega: VegaServiceNull) -> MarketState:
+    def state(self, vega: VegaServiceNull) -> LAMarketState:
         position = self.vega.positions_by_market(self.wallet_name, self.market_id)
         position = (
             num_from_padded_int(
@@ -324,7 +325,7 @@ class LearningAgent(StateAgentWithWallet):
             self.market_id, num_levels=self.num_levels
         )  # make num_levels as a parameter?
         market_info = vega.market_info(market_id=self.market_id)
-        return MarketState(
+        return LAMarketState(
             position=position,
             margin_balance=account.margin,
             general_balance=account.general,
@@ -369,7 +370,7 @@ class LearningAgent(StateAgentWithWallet):
 
             self.step_num += 1
 
-    def _step(self, vega_state: MarketState, random: bool = False) -> Action:
+    def _step(self, vega_state: LAMarketState, random: bool = False) -> Action:
         if random:
             # random policy
             choice = np.random.choice([0, 1, 2])

@@ -9,7 +9,7 @@ from vega_sim.environment.agent import Agent
 from vega_sim.reinforcement.learning_agent import (
     Action,
     LearningAgent,
-    MarketState,
+    LAMarketState,
     WALLET as LEARNING_WALLET,
 )
 
@@ -32,7 +32,7 @@ from plot import plot_simulation
 
 def state_fn(
     service: VegaServiceNull, agents: List[Agent]
-) -> Tuple[MarketState, Action]:
+) -> Tuple[LAMarketState, Action]:
     learner = [a for a in agents if isinstance(a, LearningAgent)][0]
     return (learner.state(service), learner.latest_action)
 
@@ -60,12 +60,7 @@ def run_iteration(
         kappa=50,
         sigma=0.5,
         num_steps=72,
-        state_extraction_fn=ideal_market_maker_single_data_extraction(
-            additional_data_fns=[
-                tau_scaling_additional_data,
-                target_stake_additional_data,
-            ]
-        ),
+        state_extraction_fn=state_fn
     )
     env = scenario.set_up_background_market(
                 vega=vega, tag=str(step_tag),
@@ -75,7 +70,6 @@ def run_iteration(
     
     learning_agent.set_market_tag(str(step_tag))
     
-
     result = env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
@@ -92,7 +86,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--num-procs", default=1, type=int)
     parser.add_argument(
         "--rl-max-it",
-        default=10,
+        default=2,
         type=int,
         help="Number of iterations of policy improvement + policy iterations",
     )
@@ -166,14 +160,10 @@ if __name__ == "__main__":
         for it in range(10):
             learning_agent.clear_memory()
             result = run_iteration(
-                learning_agent=learning_agent,
-                **{
-                    "vega": vega,
-                    "pause_at_completion": False,
-                    "num_steps": 100,
-                    "step_tag": it,
-                    "block_size": 1,
-                    "step_length_seconds": 60,
-                },
-            )
+                        learning_agent=learning_agent,
+                        step_tag=it,
+                        vega=vega,
+                        run_with_console=False, 
+                        pause_at_completion=False,
+                    )
             plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
