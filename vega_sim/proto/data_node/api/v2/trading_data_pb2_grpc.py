@@ -366,10 +366,10 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveEventBusRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveEventBusResponse.FromString,
         )
-        self.ObserveTransferResponses = channel.unary_stream(
-            "/datanode.api.v2.TradingDataService/ObserveTransferResponses",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransferResponsesRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransferResponsesResponse.FromString,
+        self.ObserveLedgerMovements = channel.unary_stream(
+            "/datanode.api.v2.TradingDataService/ObserveLedgerMovements",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsResponse.FromString,
         )
         self.ListKeyRotations = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListKeyRotations",
@@ -980,7 +980,7 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ObserveTransferResponses(self, request, context):
+    def ObserveLedgerMovements(self, request, context):
         """Transfer Responses
 
         Subscribe to a stream of Transfer Responses
@@ -1369,10 +1369,10 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveEventBusRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveEventBusResponse.SerializeToString,
         ),
-        "ObserveTransferResponses": grpc.unary_stream_rpc_method_handler(
-            servicer.ObserveTransferResponses,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransferResponsesRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransferResponsesResponse.SerializeToString,
+        "ObserveLedgerMovements": grpc.unary_stream_rpc_method_handler(
+            servicer.ObserveLedgerMovements,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsResponse.SerializeToString,
         ),
         "ListKeyRotations": grpc.unary_unary_rpc_method_handler(
             servicer.ListKeyRotations,
@@ -3431,7 +3431,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def ObserveTransferResponses(
+    def ObserveLedgerMovements(
         request,
         target,
         options=(),
@@ -3446,9 +3446,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/ObserveTransferResponses",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransferResponsesRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransferResponsesResponse.FromString,
+            "/datanode.api.v2.TradingDataService/ObserveLedgerMovements",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsResponse.FromString,
             options,
             channel_credentials,
             insecure,
