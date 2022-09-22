@@ -4,7 +4,7 @@ from typing import List, Tuple
 import os
 
 
-from vega_sim.reinforcement.learning_agent import MarketState, Action, states_to_sarsa
+from vega_sim.reinforcement.learning_agent import LAMarketState, Action, states_to_sarsa
 
 
 def action_to_vector(action: Action):
@@ -18,7 +18,7 @@ def action_to_vector(action: Action):
 
 
 def plot_simulation(
-    simulation: List[Tuple[MarketState, Action]], results_dir: str, tag: int
+    simulation: List[Tuple[LAMarketState, Action]], results_dir: str, tag: int
 ):
     """Plot the states of a learning_agent in the simulation"""
     sars = states_to_sarsa(simulation)
