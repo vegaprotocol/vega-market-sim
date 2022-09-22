@@ -14,13 +14,6 @@ from vega_sim.reinforcement.learning_agent import (
 )
 
 from vega_sim.scenario.registry import IdealMarketMakerV2
-from vega_sim.parameter_test.parameter.loggers import (
-    ideal_market_maker_single_data_extraction,
-    target_stake_additional_data,
-    v1_ideal_mm_additional_data,
-    tau_scaling_additional_data,
-    limit_order_book,
-)
 
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_model
@@ -41,6 +34,7 @@ def run_iteration(
     learning_agent: LearningAgent,
     step_tag: int,
     vega,
+    market_name: str,
     run_with_console=False,
     pause_at_completion=False,
 ):
@@ -53,13 +47,7 @@ def run_iteration(
         lp_commitamount=20000,
         step_length_seconds=60,
         block_length_seconds=1,
-        buy_intensity=10,
-        sell_intensity=10,
-        q_upper=50,
-        q_lower=-50,
-        kappa=50,
-        sigma=0.5,
-        num_steps=72,
+        market_name=market_name,
         state_extraction_fn=state_fn,
     )
     env = scenario.set_up_background_market(
@@ -116,6 +104,9 @@ if __name__ == "__main__":
     # set seed for results replication
     set_seed(1)
 
+    # set market name
+    market_name = "ETH:USD"
+
     # create the Learning Agent
     learning_agent = LearningAgent(
         device=device,
@@ -124,6 +115,7 @@ if __name__ == "__main__":
         num_levels=5,
         wallet_name=LEARNING_WALLET.name,
         wallet_pass=LEARNING_WALLET.passphrase,
+        market_name=market_name,
     )
 
     if not args.evaluate:
@@ -141,6 +133,7 @@ if __name__ == "__main__":
                         learning_agent=learning_agent,
                         step_tag=it,
                         vega=vega,
+                        market_name=market_name,
                         run_with_console=False,
                         pause_at_completion=False,
                     )
@@ -154,7 +147,7 @@ if __name__ == "__main__":
 
             learning_agent.save(args.results_dir)
 
-    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=True) as vega:
+    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
         time.sleep(2)
         # EVALUATION OF AGENT
         learning_agent.load(args.results_dir)
@@ -164,6 +157,7 @@ if __name__ == "__main__":
                 learning_agent=learning_agent,
                 step_tag=it,
                 vega=vega,
+                market_name=market_name,
                 run_with_console=False,
                 pause_at_completion=False,
             )

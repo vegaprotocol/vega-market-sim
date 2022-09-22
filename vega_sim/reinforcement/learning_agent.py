@@ -144,6 +144,7 @@ class LearningAgent(StateAgentWithWallet):
         num_levels: int,
         wallet_name: str,
         wallet_pass: str,
+        market_name: str,
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
         self.base_wallet_name = wallet_name
@@ -190,6 +191,7 @@ class LearningAgent(StateAgentWithWallet):
         self.losses = defaultdict(list)
         # logfile
         self.logfile = logfile
+        self.market_name = market_name
 
     def set_market_tag(self, tag: str):
         self.tag = tag
@@ -208,14 +210,13 @@ class LearningAgent(StateAgentWithWallet):
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
         super().initialise(vega=vega)
-        market_name = f"ETH:USD_{self.tag}"
         self.step_num = 0
+        market_name = self.market_name + f"_{self.tag}"
 
         # Get market id
-        all_markets = self.vega.all_markets()
         self.market_id = [
             m.id
-            for m in all_markets
+            for m in self.vega.all_markets()
             if m.tradable_instrument.instrument.name == market_name
         ][0]
         # Get asset id
