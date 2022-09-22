@@ -41,10 +41,18 @@ ifneq (${VEGA_SIM_NEWTORKS_TAG},develop)
 else
 	@git -C ${EXTERN_DIR}/networks-internal checkout develop; git -C ${EXTERN_DIR}/networks-internal pull
 endif
+	@if [ ! -d ./extern/networks ]; then mkdir ./extern/networks; git clone https://github.com/vegaprotocol/networks ${EXTERN_DIR}/networks; fi
+ifneq (${VEGA_SIM_NEWTORKS_TAG},develop)
+	@git -C ${EXTERN_DIR}/networks pull; git -C ${EXTERN_DIR}/networks checkout ${VEGA_SIM_NEWTORKS_TAG}
+else
+	@git -C ${EXTERN_DIR}/networks checkout develop; git -C ${EXTERN_DIR}/networks pull
+endif
 
 build_deps_networks:
 	@mkdir -p ./vega_sim/bin/networks-internal
 	@rsync -av ${EXTERN_DIR}/networks-internal vega_sim/bin/ --exclude ${EXTERN_DIR}/networks-internal/.git
+	@mkdir -p ./vega_sim/bin/networks
+	@rsync -av ${EXTERN_DIR}/networks vega_sim/bin/ --exclude ${EXTERN_DIR}/networks/.git
 
 pull_deps_ui:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
