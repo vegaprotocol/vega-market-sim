@@ -54,7 +54,7 @@ def run_iteration(
         vega=vega,
         tag=str(step_tag),
     )
-    # env.agents.append[learning_agent]
+    # add the learning agaent to the environement's list of agents
     env.agents = env.agents + [learning_agent]
 
     learning_agent.set_market_tag(str(step_tag))
