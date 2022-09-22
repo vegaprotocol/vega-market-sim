@@ -30,6 +30,7 @@ def start_wallet_service(network):
 
     return process
 
+
 def add_network_config(network_config_path: str):
 
     wallet_args = [
@@ -43,8 +44,9 @@ def add_network_config(network_config_path: str):
     ]
 
     process = subprocess.Popen(args=wallet_args)
-    
+
     return process
+
 
 class VegaServiceNetwork(VegaService):
     def __init__(
@@ -77,22 +79,24 @@ class VegaServiceNetwork(VegaService):
     @property
     def network_config(self) -> str:
         if self._network_config is None:
-            
+
             public_path = path.join(
-                    getcwd(),
-                    "vega_sim",
-                    "bin",
-                    "networks-internal",
-                    self.network,
-                    f"{self.network}.toml")
+                getcwd(),
+                "vega_sim",
+                "bin",
+                "networks-internal",
+                self.network,
+                f"{self.network}.toml",
+            )
             internal_path = path.join(
-                    getcwd(),
-                    "vega_sim",
-                    "bin",
-                    "networks",
-                    self.network,
-                    f"{self.network}.toml")
-            
+                getcwd(),
+                "vega_sim",
+                "bin",
+                "networks",
+                self.network,
+                f"{self.network}.toml",
+            )
+
             if path.exists(public_path):
                 self._network_config = toml.load(public_path)
                 process = add_network_config(public_path)
@@ -120,7 +124,9 @@ class VegaServiceNetwork(VegaService):
     @property
     def wallet_url(self) -> str:
         if self._wallet_url is None:
-            self._wallet_url = F"http://{self.network_config['Host']}:{self.network_config['Port']}"
+            self._wallet_url = (
+                f"http://{self.network_config['Host']}:{self.network_config['Port']}"
+            )
         return self._wallet_url
 
     @property
