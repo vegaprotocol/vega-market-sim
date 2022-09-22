@@ -7,6 +7,8 @@ all: pull_deps build_deps
 
 ui: pull_deps_ui build_deps_ui
 
+networks: pull_deps_networks build_deps_networks
+
 proto: build_proto black
 
 clean_ui:
@@ -39,6 +41,10 @@ ifneq (${VEGA_SIM_NEWTORKS_TAG},develop)
 else
 	@git -C ${EXTERN_DIR}/networks-internal checkout develop; git -C ${EXTERN_DIR}/networks-internal pull
 endif
+
+build_deps_networks:
+	@mkdir -p ./vega_sim/bin/networks-internal
+	@rsync -av ${EXTERN_DIR}/networks-internal vega_sim/bin/ --exclude ${EXTERN_DIR}/networks-internal/.git
 
 pull_deps_ui:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
