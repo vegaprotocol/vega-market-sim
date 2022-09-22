@@ -20,7 +20,7 @@ from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_
 from vega_sim.reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 
-from plot import plot_simulation
+from vega_sim.reinforcement.plot import plot_simulation
 
 
 def state_fn(
