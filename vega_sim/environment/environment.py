@@ -373,7 +373,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
     def __init__(
         self,
         agents: List[StateAgent],
-        n_steps: int,
+        n_steps: int = -1,
         random_agent_ordering: bool = True,
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
         step_length_seconds: Optional[int] = None,
@@ -416,9 +416,10 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         for agent in self.agents:
             agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
 
-        for i in range(self.n_steps):
-            time.sleep(1)
-            print(f"Iteration={i}")
+        i = 0
+        while i < self.n_steps:
+            i += 1
+            logging.debug(f"Iteration={i}")
             self.step(vega)
 
             if (
@@ -426,6 +427,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 and i % self._state_extraction_freq == 0
             ):
                 state_values.append(self._state_extraction_fn(vega, self.agents))
+            
+            time.sleep(self.step_length_seconds)
 
         for agent in self.agents:
             agent.finalise()
@@ -437,7 +440,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
     def step(self, vega: VegaServiceNetwork) -> None:
         t = time.time()
         state = self.state_func(vega)
-        print(f"   Get state took {time.time() - t} seconds.")
+        logging.debug(f"Get state took {time.time() - t} seconds.")
         for agent in (
             sorted(self.agents, key=lambda _: random.random())
             if self.random_agent_ordering
@@ -445,5 +448,5 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         ):
             t2 = time.time()
             agent.step(state)
-            print(f"   Agent {agent.wallet_name} step took {time.time() - t2} seconds.")
-        print(f"   Env step took {time.time() - t} seconds.")
+            logging.debug(f"Agent {agent.wallet_name} step took {time.time() - t2} seconds.")
+        logging.debug(f"Env step took {time.time() - t} seconds.")
