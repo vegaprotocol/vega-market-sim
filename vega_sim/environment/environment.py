@@ -427,7 +427,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 and i % self._state_extraction_freq == 0
             ):
                 state_values.append(self._state_extraction_fn(vega, self.agents))
-            
+
             time.sleep(self.step_length_seconds)
 
         for agent in self.agents:
@@ -448,5 +448,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         ):
             t2 = time.time()
             agent.step(state)
-            logging.debug(f"Agent {agent.wallet_name} step took {time.time() - t2} seconds.")
+            logging.debug(
+                f"Agent {agent.wallet_name} step took {time.time() - t2} seconds."
+            )
         logging.debug(f"Env step took {time.time() - t} seconds.")

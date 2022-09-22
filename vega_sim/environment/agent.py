@@ -23,12 +23,7 @@ class Agent(ABC):
 
 
 class AgentWithWallet(Agent):
-    def __init__(
-        self,
-        wallet_name: str,
-        wallet_pass: str,
-        create_wallet: bool = True
-    ):
+    def __init__(self, wallet_name: str, wallet_pass: str, create_wallet: bool = True):
         """Agent for use in environments as specified in environment.py.
         To extend, the crucial function to implement is the step function which will
         be called on each timestep in the simulation.

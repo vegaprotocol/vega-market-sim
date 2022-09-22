@@ -52,5 +52,6 @@ def main():
         ) as vega:
             scenario.run_iteration(vega=vega)
 
+
 if __name__ == "__main__":
     main()

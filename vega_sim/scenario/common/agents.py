@@ -81,7 +81,12 @@ class MarketOrderTrader(StateAgentWithWallet):
         )
         self.base_order_size = base_order_size
 
-    def initialise(self, vega: VegaServiceNull, create_wallet: bool = True, mint_wallet: bool = True):
+    def initialise(
+        self,
+        vega: VegaServiceNull,
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
@@ -883,11 +888,12 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.mean = mean
         self.sigma = sigma
 
-    def initialise(self,
+    def initialise(
+        self,
         vega: VegaServiceNull,
         create_wallet: bool = True,
         mint_wallet: bool = True,
-        ):
+    ):
         """Initialise the agents wallet and mint the required market asset.
 
         Args:
@@ -898,7 +904,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         super().initialise(
             vega=vega,
             create_wallet=create_wallet,
-            )
+        )
 
         self.market_id = [
             m.id
@@ -1218,7 +1224,8 @@ class MomentumTrader(StateAgentWithWallet):
         self.prices = np.array([])
         self.indicators = []
 
-    def initialise(self,
+    def initialise(
+        self,
         vega: VegaServiceNull,
         create_wallet: bool = True,
         mint_wallet: bool = True,
