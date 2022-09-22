@@ -68,10 +68,8 @@ class MarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
-        create_wallet: bool = True,
-        mint: bool = True,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass, create_wallet)
+        super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -82,11 +80,10 @@ class MarketOrderTrader(StateAgentWithWallet):
             random_state if random_state is not None else np.random.RandomState()
         )
         self.base_order_size = base_order_size
-        self.mint = mint
 
-    def initialise(self, vega: VegaServiceNull):
+    def initialise(self, vega: VegaServiceNull, create_wallet: bool = True, mint_wallet: bool = True):
         # Initialise wallet
-        super().initialise(vega=vega)
+        super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
         self.market_id = [
             m.id
@@ -96,7 +93,7 @@ class MarketOrderTrader(StateAgentWithWallet):
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if self.mint:
+        if mint_wallet:
             # Top up asset
             self.vega.mint(
                 self.wallet_name,
@@ -886,7 +883,11 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.mean = mean
         self.sigma = sigma
 
-    def initialise(self, vega: VegaServiceNull):
+    def initialise(self,
+        vega: VegaServiceNull,
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+        ):
         """Initialise the agents wallet and mint the required market asset.
 
         Args:
@@ -894,7 +895,10 @@ class LimitOrderTrader(StateAgentWithWallet):
                 Object running a locally-hosted Vega service.
         """
 
-        super().initialise(vega=vega)
+        super().initialise(
+            vega=vega,
+            create_wallet=create_wallet,
+            )
 
         self.market_id = [
             m.id
@@ -902,12 +906,14 @@ class LimitOrderTrader(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        self.vega.mint(
-            self.wallet_name,
-            asset=self.asset_id,
-            amount=self.initial_asset_mint,
-        )
-        self.vega.wait_fn(2)
+
+        if mint_wallet:
+            self.vega.mint(
+                self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+            )
+            self.vega.wait_fn(2)
 
     def step(self, vega_state: VegaState):
         """Randomly submits and cancels limit orders.
@@ -1212,8 +1218,12 @@ class MomentumTrader(StateAgentWithWallet):
         self.prices = np.array([])
         self.indicators = []
 
-    def initialise(self, vega: VegaServiceNull):
-        super().initialise(vega=vega)
+    def initialise(self,
+        vega: VegaServiceNull,
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
+        super().initialise(vega=vega, create_wallet=create_wallet)
 
         self.market_id = [
             m.id
@@ -1221,16 +1231,17 @@ class MomentumTrader(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == self.market_name
         ][0]
 
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        self.vega.mint(
-            self.wallet_name,
-            asset=self.asset_id,
-            amount=self.initial_asset_mint,
-        )
+        if mint_wallet:
+            self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+            self.vega.mint(
+                self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+            )
 
-        self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
-        self.mdp = self.vega._market_price_decimals.get(self.market_id, {})
-        self.adp = self.vega._asset_decimals.get(self.asset_id, {})
+        self.pdp = self.vega.market_pos_decimals.get(self.market_id, {})
+        self.mdp = self.vega.market_price_decimals.get(self.market_id, {})
+        self.adp = self.vega.asset_decimals.get(self.asset_id, {})
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
