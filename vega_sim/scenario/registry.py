@@ -4,6 +4,7 @@ from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
 )
 from vega_sim.scenario.market_crash.scenario import MarketCrash
+from vega_sim.scenario.fairground.scenario import Fairground
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
     Granularity,
@@ -108,5 +109,10 @@ SCENARIOS = {
         backgroundmarket_tick_spacing=0.1,
         backgroundmarket_number_levels_per_side=25,
         market_order_trader_base_order_size=0.01,
+    ),
+    "fairground": lambda: Fairground(
+        num_steps=200,
+        step_length_seconds=1,
+        market_name="UNIDAI Monthly (30 Jun 2022)",
     ),
 }

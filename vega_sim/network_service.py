@@ -32,6 +32,7 @@ def start_wallet_service():
 class VegaServiceNetwork(VegaService):
     def __init__(
         self,
+        network: str = "fairground",
         warn_on_raw_data_access: bool = False,
     ):
         super().__init__(

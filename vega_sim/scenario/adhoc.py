@@ -44,6 +44,8 @@ def main():
         ) as vega:
             scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
 
+    else:
+
         with VegaServiceNetwork(
             network=args.network,
             warn_on_raw_data_access=False,
