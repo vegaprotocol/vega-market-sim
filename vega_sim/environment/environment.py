@@ -30,7 +30,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.fairground_service import VegaServiceFairground
+from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
@@ -369,7 +369,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             agent.step(state)
 
 
-class FairgroundEnvironment(MarketEnvironmentWithState):
+class NetworkEnvironment(MarketEnvironmentWithState):
     def __init__(
         self,
         agents: List[StateAgent],
@@ -377,9 +377,9 @@ class FairgroundEnvironment(MarketEnvironmentWithState):
         random_agent_ordering: bool = True,
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
         step_length_seconds: Optional[int] = None,
-        vega_service: Optional[VegaServiceNull] = None,
+        vega_service: Optional[VegaServiceNetwork] = None,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNetwork, List[Agent]], Any]
         ] = None,
         state_extraction_freq: int = 10,
     ):
@@ -400,7 +400,7 @@ class FairgroundEnvironment(MarketEnvironmentWithState):
     def run(self):
 
         if self._vega is None:
-            with VegaServiceFairground(
+            with VegaServiceNetwork(
                 warn_on_raw_data_access=False,
                 use_full_vega_wallet=True,
             ) as vega:
@@ -414,7 +414,7 @@ class FairgroundEnvironment(MarketEnvironmentWithState):
 
         # Initialise agents without minting assets
         for agent in self.agents:
-            agent.initialise(vega=vega)
+            agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
 
         for i in range(self.n_steps):
             time.sleep(1)
@@ -434,7 +434,7 @@ class FairgroundEnvironment(MarketEnvironmentWithState):
             state_values.append(self._state_extraction_fn(vega, self.agents))
             return state_values
 
-    def step(self, vega: VegaServiceFairground) -> None:
+    def step(self, vega: VegaServiceNetwork) -> None:
         t = time.time()
         state = self.state_func(vega)
         print(f"   Get state took {time.time() - t} seconds.")

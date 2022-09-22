@@ -29,7 +29,7 @@ def start_wallet_service():
     return process
 
 
-class VegaServiceFairground(VegaService):
+class VegaServiceNetwork(VegaService):
     def __init__(
         self,
         warn_on_raw_data_access: bool = False,
@@ -54,7 +54,7 @@ class VegaServiceFairground(VegaService):
 
     @property
     def data_node_grpc_url(self) -> str:
-        return "api.n09.testnet.vega.xyz:3007"
+        return "api.n07.testnet.vega.xyz:3007"
 
     @property
     def wallet_url(self) -> str:

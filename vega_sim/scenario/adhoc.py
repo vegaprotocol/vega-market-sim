@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.fairground_service import VegaServiceFairground
+from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.registry import SCENARIOS
 from vega_sim.scenario.scenario import Scenario
 
@@ -14,7 +14,7 @@ def main():
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
-    parser.add_argument("--fairground", action="store_true")
+    parser.add_argument("--network")
     parser.add_argument(
         "-p",
         "--pause_every_n_steps",
@@ -31,10 +31,7 @@ def main():
 
     scenario.pause_every_n_steps = args.pause_every_n_steps
 
-    if args.fairground:
-        with VegaServiceFairground(warn_on_raw_data_access=False) as vega:
-            scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
-    else:
+    if (args.network is None) or (args.network == "nullchain"):
 
         with VegaServiceNull(
             run_with_console=args.console,
@@ -47,6 +44,11 @@ def main():
         ) as vega:
             scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
 
+        with VegaServiceNetwork(
+            network=args.network,
+            warn_on_raw_data_access=False,
+        ) as vega:
+            scenario.run_iteration(vega=vega)
 
 if __name__ == "__main__":
     main()

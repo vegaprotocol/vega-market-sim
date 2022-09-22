@@ -8,8 +8,8 @@ from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import (
     RW_model,
 )
-from vega_sim.environment.environment import FairgroundEnvironment
-from vega_sim.fairground_service import VegaServiceFairground
+from vega_sim.environment.environment import NetworkEnvironment
+from vega_sim.network_service import VegaServiceNetwork
 
 from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
@@ -32,7 +32,7 @@ class Fairground(Scenario):
         bm_number_levels_per_side: int = 20,
         state_extraction_freq: int = 1,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceFairground, List[Agent]], Any]
+            Callable[[VegaServiceNetwork, List[Agent]], Any]
         ] = None,
         pp_fn: Optional[Callable[[None], List[float]]] = None,
         pp_sigma: float = 0.01,
@@ -62,27 +62,12 @@ class Fairground(Scenario):
         self.pp_fn = pp_fn
         self.pp_sigma = pp_sigma
 
-    def _generate_price_process(
-        self,
-        initial_price,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        _, price_process = RW_model(
-            T=self.num_steps * self.step_length_seconds,
-            dt=self.step_length_seconds,
-            mdp=self.market_decimal,
-            sigma=self.pp_sigma,
-            Midprice=initial_price,
-            random_state=random_state,
-        )
-        return price_process
-
     def set_up_background_market(
         self,
-        vega: VegaServiceFairground,
+        vega: VegaServiceNetwork,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
-    ) -> FairgroundEnvironment:
+    ) -> NetworkEnvironment:
 
         self.market_id = [
             m.id
@@ -103,14 +88,6 @@ class Fairground(Scenario):
         )
         self.asset_id = vega.find_asset_id(symbol=self.asset_name)
 
-        price_process = (
-            self.pp_fn()
-            if self.pp_fn is not None
-            else self._generate_price_process(
-                initial_price=initial_price, random_state=random_state
-            )
-        )
-
         mo_trader_a = MarketOrderTrader(
             wallet_name="MarketOrderTraderA",
             wallet_pass="walletpass",
@@ -121,8 +98,6 @@ class Fairground(Scenario):
             sell_intensity=self.mo_sell_intensity,
             base_order_size=self.mo_base_order_size,
             random_state=random_state,
-            create_wallet=False,
-            mint=False,
         )
         mo_trader_b = MarketOrderTrader(
             wallet_name="MarketOrderTraderB",
@@ -134,8 +109,6 @@ class Fairground(Scenario):
             sell_intensity=self.mo_sell_intensity,
             base_order_size=self.mo_base_order_size,
             random_state=random_state,
-            create_wallet=False,
-            mint=False,
         )
         mo_trader_c = MarketOrderTrader(
             wallet_name="MarketOrderTraderC",
@@ -147,11 +120,9 @@ class Fairground(Scenario):
             sell_intensity=self.mo_sell_intensity,
             base_order_size=self.mo_base_order_size,
             random_state=random_state,
-            create_wallet=False,
-            mint=False,
         )
 
-        env = FairgroundEnvironment(
+        env = NetworkEnvironment(
             agents=[
                 mo_trader_a,
                 mo_trader_b,
@@ -168,7 +139,7 @@ class Fairground(Scenario):
 
     def run_iteration(
         self,
-        vega: VegaServiceFairground,
+        vega: VegaServiceNetwork,
         random_state: Optional[np.random.RandomState] = None,
     ):
         env = self.set_up_background_market(
@@ -188,10 +159,10 @@ if __name__ == "__main__":
     scenario = Fairground(
         num_steps=200,
         step_length_seconds=1,
-        market_name="OP/USD AUG-SEP22 - Incentive.",
+        market_name="UNIDAI Monthly (30 Jun 2022)",
     )
 
-    with VegaServiceFairground(
+    with VegaServiceNetwork(
         warn_on_raw_data_access=False,
     ) as vega:
         scenario.run_iteration(vega=vega)
