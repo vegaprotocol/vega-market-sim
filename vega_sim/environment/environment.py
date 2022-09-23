@@ -374,16 +374,31 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         self,
         agents: List[StateAgent],
         n_steps: int = -1,
+        step_length_seconds: int = 5,
         random_agent_ordering: bool = True,
-        state_func: Optional[Callable[[VegaService], VegaState]] = None,
-        step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNetwork] = None,
+        state_func: Optional[Callable[[VegaService], VegaState]] = None,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNetwork, List[Agent]], Any]
         ] = None,
         state_extraction_freq: int = 10,
     ):
-        """"""
+        """_summary_
+
+        Args:
+            agents (List[StateAgent]):
+                List of agents to run in the environment
+            n_steps (int, optional):
+                Number of steps to run for. Defaults to stepping indefinitely.
+            step_length_seconds (Optional[int], optional):
+                Duration to wait for at the end of each environment step.
+            random_agent_ordering (bool, optional):
+                Whether to step agents in a random order. Defaults to True.
+            vega_service (Optional[VegaServiceNetwork], optional): _description_. Defaults to None.
+            state_func (Optional[Callable[[VegaService], VegaState]], optional): _description_. Defaults to None.
+            state_extraction_fn (Optional[ Callable[[VegaServiceNetwork, List[Agent]], Any] ], optional): _description_. Defaults to None.
+            state_extraction_freq (int, optional): _description_. Defaults to 10.
+        """
         super().__init__(
             agents=agents,
             n_steps=n_steps,
@@ -401,7 +416,6 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
         if self._vega is None:
             with VegaServiceNetwork(
-                warn_on_raw_data_access=False,
                 use_full_vega_wallet=True,
             ) as vega:
                 return self._run(vega)
@@ -417,9 +431,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
 
         i = 0
-        while i < self.n_steps:
+        # A negative self.n_steps will loop indefinitely
+        while i != self.n_steps:
             i += 1
-            logging.debug(f"Iteration={i}")
             self.step(vega)
 
             if (
@@ -446,9 +460,4 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             if self.random_agent_ordering
             else self.agents
         ):
-            t2 = time.time()
             agent.step(state)
-            logging.debug(
-                f"Agent {agent.wallet_name} step took {time.time() - t2} seconds."
-            )
-        logging.debug(f"Env step took {time.time() - t} seconds.")

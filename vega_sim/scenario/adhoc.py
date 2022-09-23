@@ -48,7 +48,8 @@ def main():
 
         with VegaServiceNetwork(
             network=args.network,
-            warn_on_raw_data_access=False,
+            automatic_consent=True,
+            no_version_check=True,
         ) as vega:
             scenario.run_iteration(vega=vega)
 
