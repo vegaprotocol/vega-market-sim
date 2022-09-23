@@ -164,5 +164,7 @@ if __name__ == "__main__":
 
     with VegaServiceNetwork(
         warn_on_raw_data_access=False,
+        automatic_consent=True,
+        no_version_check=True,
     ) as vega:
         scenario.run_iteration(vega=vega)

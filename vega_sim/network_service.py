@@ -157,7 +157,10 @@ class VegaServiceNetwork(VegaService):
         Special attributes starts the process running the wallet service.
 
         """
-        self.process = start_wallet_service(self.network)
+        self.process = start_wallet_service(
+            self.network,
+            self.automatic_consent,
+            self.no_version_check)
         return self
 
     def __exit__(self, type, value, traceback):
