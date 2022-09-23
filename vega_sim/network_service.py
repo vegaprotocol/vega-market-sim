@@ -158,9 +158,8 @@ class VegaServiceNetwork(VegaService):
 
         """
         self.process = start_wallet_service(
-            self.network,
-            self.automatic_consent,
-            self.no_version_check)
+            self.network, self.automatic_consent, self.no_version_check
+        )
         return self
 
     def __exit__(self, type, value, traceback):
