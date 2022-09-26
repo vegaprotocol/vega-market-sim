@@ -309,6 +309,7 @@ def approve_proposal(
     wallet_name: str,
     proposal_id: str,
     wallet: Wallet,
+    key_name: Optional[str] = None,
 ):
     wallet.submit_transaction(
         transaction=commands_protos.commands.VoteSubmission(

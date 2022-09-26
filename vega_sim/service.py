@@ -400,7 +400,7 @@ class VegaService(ABC):
                 PriceMonitoringParameters, A set of parameters determining when the
                     market will drop into a price auction. If not passed defaults
                     to a very permissive setup
-            key_name:
+            termination_key:
                 Optional[str], key name stored in metadata. Defaults to None.
 
         """
@@ -835,6 +835,7 @@ class VegaService(ABC):
         wallet_name: str,
         asset_id: str,
         market_id: str,
+        key_name: Optional[str] = None,
     ) -> data.AccountData:
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
