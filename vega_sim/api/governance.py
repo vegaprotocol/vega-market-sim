@@ -316,6 +316,7 @@ def approve_proposal(
         ),
         name=wallet_name,
         transaction_type="vote_submission",
+        key_name=key_name,
     )
 
 
@@ -409,9 +410,13 @@ def _make_and_wait_for_proposal(
     proposal: commands_protos.commands.ProposalSubmission,
     data_client: vac.VegaTradingDataClient,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    key_name: Optional[str] = None,
 ) -> ProposalSubmission:
     wallet.submit_transaction(
-        transaction=proposal, name=wallet_name, transaction_type="proposal_submission"
+        transaction=proposal,
+        name=wallet_name,
+        transaction_type="proposal_submission",
+        key_name=key_name,
     )
     logger.debug("Waiting for proposal acceptance")
 
@@ -438,6 +443,7 @@ def settle_oracle(
     wallet: Wallet,
     settlement_price: float,
     oracle_name: str,
+    key_name: Optional[str] = None,
 ) -> None:
     """
     Settle the market and send settlement price.
@@ -453,6 +459,8 @@ def settle_oracle(
             float, final settlement price for the asset
         oracle_name:
             str, the name of the oracle to settle
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
 
     """
 
@@ -469,6 +477,7 @@ def settle_oracle(
         transaction=oracle_submission,
         name=wallet_name,
         transaction_type="oracle_data_submission",
+        key_name=key_name,
     )
 
     # use oracle to settle market
@@ -484,4 +493,5 @@ def settle_oracle(
         transaction=oracle_submission,
         name=wallet_name,
         transaction_type="oracle_data_submission",
+        key_name=key_name,
     )
