@@ -96,15 +96,16 @@ class SlimWallet(Wallet):
         """
         if self.vega_wallet is None:
             self.keys[name] = SigningKey.generate()
-            self.pub_keys[name] = (
+            self.pub_keys[name] = {"key_name":
                 self.keys[name].verify_key.encode(encoder=HexEncoder).decode()
-            )
+            }
         else:
             self.vega_wallet.create_wallet(
                 name=name,
                 passphrase=kwargs.get("passphrase", self.full_wallet_default_pass),
             )
-            self.pub_keys[name] = self.vega_wallet.public_key(name)
+            self.pub_keys[name] = {"key_name":
+                self.vega_wallet.public_key(name)}
 
     def login(self, name: str, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
@@ -116,12 +117,16 @@ class SlimWallet(Wallet):
         if name not in self.keys:
             self.create_wallet(name=name)
 
-    def submit_transaction(self, name: str, transaction: Any, transaction_type: str):
+    def submit_transaction(self, name: str, transaction: Any, transaction_type: str, key_name: Optional[str] = None):
         # if self.remaining_until_height_update <= 0:
         #     self.block_height = self.core_client.LastBlockHeight(
         #         core_proto.LastBlockHeightRequest()
         #     ).height
         #     self.remaining_until_height_update = self.height_update_frequency
+
+        pub_key = self.public_key(name=name, key_name=key_name)
+
+        print(pub_key)
 
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
@@ -138,7 +143,7 @@ class SlimWallet(Wallet):
                 algo="vega/ed25519",
                 version=1,
             ),
-            pub_key=self.pub_keys[name],
+            pub_key=pub_key,
             version=3,
             pow=transaction_proto.ProofOfWork(
                 tid=None,
@@ -153,14 +158,20 @@ class SlimWallet(Wallet):
         self.pool.submit(lambda: submit_future.result())
         self.remaining_until_height_update -= 1
 
-    def public_key(self, name: str) -> str:
-        """Return the public key associated with a given wallet name.
+    def public_key(self, name: str, key_name: Optional[str] = None) -> str:
+        """Return a public key for the given wallet name and key name.
 
         Args:
-            name:
-                str, The name to use for the wallet
+            name (str):
+                Name of the wallet.
+            key_name (str):
+                Name of the key. Defaults to None.
 
         Returns:
             str, public key
         """
-        return self.pub_keys[name]
+
+        if key_name is None:
+            return list(self.pub_keys[name].values())[0]
+        else:
+            return self.pub_keys[name][key_name]
