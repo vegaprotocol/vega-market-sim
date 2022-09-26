@@ -488,6 +488,7 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
         kappa: float,
         tick_spacing: float,
         num_levels: int,
+        min_price: float = 0.01,
     ) -> ArrayLike:
         is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
 
@@ -497,7 +498,9 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
         cumulative_vol = np.exp(kappa * levels) - 1
 
         level_vol = np.concatenate([cumulative_vol[:1], np.diff(cumulative_vol)])
-        level_price = mid_price + (-1 if is_buy else 1) * levels
+        level_price = np.clip(
+            mid_price + (-1 if is_buy else 1) * levels, min_price, None
+        )
 
         return np.c_[level_price, level_vol]
 
@@ -530,7 +533,6 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
                 tick_spacing=market_regime.tick_spacing,
                 num_levels=market_regime.num_levels_per_side,
             )
-
             buy_orders, sell_orders = [], []
 
             for order in orders.values():
