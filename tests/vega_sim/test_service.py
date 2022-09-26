@@ -54,7 +54,10 @@ def test_base_service_wallet_creation(stub_service: StubService):
         )
         stub_service.create_wallet("TEST_NAME", "TEST_PHRASE")
         assert stub_service.wallet.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
-        assert stub_service.wallet.pub_keys["TEST_NAME"]["TEST_KEYNAME"] ==  "TEST_PUBLICKEY"
+        assert (
+            stub_service.wallet.pub_keys["TEST_NAME"]["TEST_KEYNAME"]
+            == "TEST_PUBLICKEY"
+        )
 
 
 def test_base_service_wallet_login(stub_service: StubService):
@@ -79,4 +82,7 @@ def test_base_service_wallet_login(stub_service: StubService):
         )
         stub_service.login("TEST_NAME", "TEST_PHRASE")
         assert stub_service.wallet.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
-        assert stub_service.wallet.pub_keys["TEST_NAME"]["TEST_KEYNAME"] ==  "TEST_PUBLICKEY"
+        assert (
+            stub_service.wallet.pub_keys["TEST_NAME"]["TEST_KEYNAME"]
+            == "TEST_PUBLICKEY"
+        )
