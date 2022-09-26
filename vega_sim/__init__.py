@@ -1,4 +1,4 @@
-from importlib.resources import path
+from pathlib import Path
 
-vega_home_path = path(__name__, "vegahome")
-vega_bin_path = path(__name__, "bin")
+vega_home_path = Path(__file__).parent / "vegahome"
+vega_bin_path = Path(__file__).parent / "bin"
