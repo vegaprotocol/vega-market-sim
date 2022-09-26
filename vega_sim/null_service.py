@@ -5,6 +5,7 @@ import functools
 from io import BufferedWriter
 import logging
 import multiprocessing
+from optparse import Option
 import os
 import shutil
 import signal
@@ -321,12 +322,13 @@ def manage_vega_processes(
     block_duration: str = "1s",
     run_wallet: bool = False,
     retain_log_files: bool = False,
+    log_dir: Optional[str] = None,
 ) -> None:
     logging.basicConfig(level=logging.INFO)
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
-    tmp_vega_dir = tempfile.mkdtemp()
+    tmp_vega_dir = tempfile.mkdtemp() if log_dir is None else log_dir
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
     if port_config.get(Ports.DATA_NODE_GRAPHQL):
         logger.info(
@@ -498,6 +500,7 @@ class VegaServiceNull(VegaService):
 
         self._wallet = None
         self._use_full_vega_wallet = use_full_vega_wallet
+        self.log_dir = tempfile.mkdtemp()
 
         self._start_order_feed = start_order_feed
         self.launch_graphql = launch_graphql
@@ -534,6 +537,8 @@ class VegaServiceNull(VegaService):
                     full_wallet=VegaWallet(self.wallet_url)
                     if self.run_with_console
                     else None,
+                    log_dir=self.log_dir,
+                    store_transactions=True,
                 )
         return self._wallet
 
@@ -588,6 +593,7 @@ class VegaServiceNull(VegaService):
                 "block_duration": f"{int(self.seconds_per_block)}s",
                 "run_wallet": self._use_full_vega_wallet or self.run_with_console,
                 "retain_log_files": self.retain_log_files,
+                "log_dir": self.log_dir,
             },
         )
         self.proc.start()

@@ -25,6 +25,8 @@ class SlimWallet(Wallet):
         height_update_frequency: int = 500,
         full_wallet: Optional[VegaWallet] = None,
         full_wallet_default_pass: str = "passwd",
+        store_transactions: bool = False,
+        log_dir: Optional[str] = None,
     ):
         """Creates a wallet to running key generation internally
         and directly sending transactions to the Core node
@@ -44,6 +46,10 @@ class SlimWallet(Wallet):
                 str, default 'passwd', If full wallet is passed, the password used
                     when creating dummy accounts if none are passed.
                     Use this password to log in to the Vega Console
+            store_transactions:
+                bool, default False, If True will store every transaction sent into
+                    a file, allowing replay of the chain without going through full
+                    logic of actors etc
         """
         self.core_client = core_client
         self.keys = {}
@@ -58,6 +64,12 @@ class SlimWallet(Wallet):
 
         self.vega_wallet = full_wallet
         self.full_wallet_default_pass = full_wallet_default_pass
+
+        self.store_transactions = store_transactions
+        self.log_dir = log_dir
+        if self.store_transactions:
+            os.makedirs(self.log_dir + "/replay", exist_ok=True)
+            self.tx_file = open(self.log_dir + "/replay/transactions", mode="ab")
 
         # If it turns out that customising these is useful it's trivial to
         # make a parameter
@@ -148,6 +160,8 @@ class SlimWallet(Wallet):
         request = core_proto.SubmitTransactionRequest(
             tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_ASYNC
         )
+        if self.store_transactions:
+            self.tx_file.write(request.SerializeToString())
 
         submit_future = self.core_client.SubmitTransaction.future(request)
         self.pool.submit(lambda: submit_future.result())
