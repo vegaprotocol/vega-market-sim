@@ -269,7 +269,13 @@ class VegaService(ABC):
         """
         return self.wallet.create_wallet(name=name, passphrase=passphrase)
 
-    def mint(self, wallet_name: str, asset: str, amount: float) -> None:
+    def mint(
+        self,
+        wallet_name: str,
+        asset: str,
+        amount: float,
+        key_name: Optional[str] = None,
+    ) -> None:
         """Mints a given amount of requested asset into the associated wallet
 
         Args:
@@ -279,10 +285,12 @@ class VegaService(ABC):
                 str, The ID of the asset to mint
             amount:
                 float, the amount of asset to mint
+            key_name:
+                Optional[str], key name stored in metadata. Defaults to None.
         """
         asset_decimals = self.asset_decimals[asset]
         faucet.mint(
-            self.wallet.public_key(wallet_name),
+            self.wallet.public_key(wallet_name, key_name),
             asset,
             num_to_padded_int(amount, asset_decimals),
             faucet_url=self.faucet_url,
@@ -369,6 +377,7 @@ class VegaService(ABC):
         price_monitoring_parameters: Optional[
             vega_protos.markets.PriceMonitoringParameters
         ] = None,
+        termination_key: Optional[str] = None,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -391,6 +400,8 @@ class VegaService(ABC):
                 PriceMonitoringParameters, A set of parameters determining when the
                     market will drop into a price auction. If not passed defaults
                     to a very permissive setup
+            key_name:
+                Optional[str], key name stored in metadata. Defaults to None.
 
         """
         additional_kwargs = {}
@@ -410,7 +421,9 @@ class VegaService(ABC):
             wallet_name=proposal_wallet,
             settlement_asset_id=settlement_asset_id,
             data_client=self.trading_data_client,
-            termination_pub_key=self.wallet.public_key(termination_wallet),
+            termination_pub_key=self.wallet.public_key(
+                termination_wallet, termination_key
+            ),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
@@ -705,6 +718,7 @@ class VegaService(ABC):
         ] = None,
         updated_simple_model_params: Optional[SimpleModelParams] = None,
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
+        key_name: Optional[int] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -825,20 +839,18 @@ class VegaService(ABC):
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
         return data.party_account(
-            self.wallet.public_key(wallet_name),
+            self.wallet.public_key(wallet_name, key_name),
             asset_id=asset_id,
             market_id=market_id,
             data_client=self.trading_data_client,
         )
 
     def positions_by_market(
-        self,
-        wallet_name: str,
-        market_id: str,
+        self, wallet_name: str, market_id: str, key_name: Optional[str] = None
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data.positions_by_market(
-            self.wallet.public_key(wallet_name),
+            self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             data_client=self.trading_data_client,
             price_decimals=self.market_price_decimals[market_id],
@@ -1035,11 +1047,12 @@ class VegaService(ABC):
         self,
         wallet_name: str,
         market_id: str,
+        key_name: Optional[str] = None,
     ):
         return data.has_liquidity_provision(
             self.trading_data_client,
             market_id,
-            party_id=self.wallet.public_key(wallet_name),
+            party_id=self.wallet.public_key(wallet_name, key_name),
         )
 
     def submit_liquidity(
@@ -1203,9 +1216,13 @@ class VegaService(ABC):
         return order_dict
 
     def orders_for_party_from_feed(
-        self, wallet_name: str, market_id: str, live_only: bool = True
+        self,
+        wallet_name: str,
+        market_id: str,
+        live_only: bool = True,
+        key_name: Optional[str] = None,
     ) -> List[data.Order]:
-        party_id = self.wallet.public_key(wallet_name)
+        party_id = self.wallet.public_key(wallet_name, key_name)
         return (
             self.order_status_from_feed(live_only=live_only)
             .get(market_id, {})
@@ -1239,6 +1256,7 @@ class VegaService(ABC):
         self,
         wallet_name: str,
         market_id: Optional[str] = None,
+        key_name: Optional[str] = None,
     ) -> Optional[List[vega_protos.vega.LiquidityProvision]]:
         """Loads the current liquidity provision(s) for a given market and/or party.
 
@@ -1249,12 +1267,14 @@ class VegaService(ABC):
             party_id:
                 Optional[str], the ID of the party from which to
                     pull liquidity provisions
+            key_name:
+                Optional[str], key name stored in metadata. Defaults to None.
 
         Returns:
             List[LiquidityProvision], list of liquidity provisions (if any exist)
         """
         return self.liquidity_provisions(
-            market_id=market_id, party_id=self.wallet.public_key(wallet_name)
+            market_id=market_id, party_id=self.wallet.public_key(wallet_name, key_name)
         )
 
     def start_order_monitoring(
@@ -1303,11 +1323,14 @@ class VegaService(ABC):
                     self._order_state_from_feed[o.market_id][o.party_id][o.id] = o
 
     def margin_levels(
-        self, wallet_name: str, market_id: Optional[str] = None
+        self,
+        wallet_name: str,
+        market_id: Optional[str] = None,
+        key_name: Optional[str] = None,
     ) -> List[data.MarginLevels]:
         return data.margin_levels(
             self.trading_data_client_v2,
             self.trading_data_client,
-            party_id=self.wallet.public_key(wallet_name),
+            party_id=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
         )

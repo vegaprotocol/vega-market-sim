@@ -39,6 +39,7 @@ def submit_order(
     wait: bool = True,
     time_forward_fn: Optional[Callable[[], None]] = None,
     order_ref: Optional[str] = None,
+    key_name: Optional[str] = None,
 ) -> Optional[str]:
     """
     Submit orders as specified to required pre-existing market.
@@ -83,6 +84,8 @@ def submit_order(
             waits or manually forwards the chain when waiting for order acceptance
         order_ref:
             optional str, reference for later identification of order
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
     Returns:
         Optional[str], Order ID if wait is True, otherwise None
     """
@@ -97,7 +100,7 @@ def submit_order(
         expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
 
     order_ref = (
-        f"{wallet.public_key(wallet_name)}-{uuid.uuid4()}"
+        f"{wallet.public_key(wallet_name, key_name)}-{uuid.uuid4()}"
         if order_ref is None
         else order_ref
     )

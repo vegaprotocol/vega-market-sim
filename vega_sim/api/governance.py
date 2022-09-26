@@ -90,6 +90,7 @@ def propose_future_market(
     price_monitoring_parameters: Optional[
         vega_protos.markets.PriceMonitoringParameters
     ] = None,
+    key_name: Optional[str] = None,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -126,6 +127,8 @@ def propose_future_market(
             PriceMonitoringParameters, A set of parameters determining when the market
                 will drop into a price auction. If not passed defaults to a very
                 permissive setup
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
 
     Returns:
         str, the ID of the future market proposal on chain
@@ -134,7 +137,7 @@ def propose_future_market(
     vote_asset_id = find_asset_id(
         governance_asset, raise_on_missing=True, data_client=data_client
     )
-    pub_key = wallet.public_key(wallet_name)
+    pub_key = wallet.public_key(wallet_name, key_name)
 
     # Request accounts for party and check governance asset balance
 
@@ -250,9 +253,10 @@ def propose_network_parameter_change(
     enactment_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClient] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    key_name: Optional[str] = None,
 ):
     network_param_update = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name),
+        pub_key=wallet.public_key(wallet_name, key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -280,9 +284,10 @@ def propose_market_update(
     enactment_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClient] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    key_name: Optional[str] = None,
 ) -> str:
     network_param_update = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name),
+        pub_key=wallet.public_key(wallet_name, key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -327,6 +332,7 @@ def propose_asset(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    key_name: Optional[str] = None,
 ) -> str:
     asset_detail = vega_protos.assets.AssetDetails(
         name=name,
@@ -338,7 +344,7 @@ def propose_asset(
         ),
     )
     proposal = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name),
+        pub_key=wallet.public_key(wallet_name, key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
