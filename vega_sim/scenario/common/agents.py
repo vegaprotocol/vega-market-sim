@@ -1371,6 +1371,12 @@ class LimitOrderTrader(StateAgentWithWallet):
         """
 
         super().initialise(vega=vega)
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         self.vega.mint(
             self.wallet_name,
