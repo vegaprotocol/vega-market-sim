@@ -169,7 +169,6 @@ class VegaWallet(Wallet):
         """
 
         if key_name is None:
-            print(DEFAULT_KEY_NAME)
             return self.pub_keys[name][DEFAULT_KEY_NAME]
         else:
             return self.pub_keys[name][key_name]
