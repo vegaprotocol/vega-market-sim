@@ -242,7 +242,6 @@ def cancel_order(
     wallet: Wallet,
     market_id: str,
     order_id: str,
-    key_name: Optional[str] = None,
 ):
     """
     Cancel Order
@@ -256,14 +255,11 @@ def cancel_order(
             str, the ID of the required market on vega
         order_id:
             str, Identifier of the order to cancel
-        key_name:
-            Optional[str], key name stored in metadata. Defaults to None.
     """
     wallet.submit_transaction(
         transaction=vega_protos.commands.v1.commands.OrderCancellation(
             order_id=order_id,
             market_id=market_id,
-            key_name=key_name,
         ),
         name=wallet_name,
         transaction_type="order_cancellation",
