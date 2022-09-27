@@ -3,6 +3,7 @@ from typing import Any
 from logging import getLogger
 
 import os
+import dotenv
 import numpy as np
 from nacl.encoding import HexEncoder
 from nacl.signing import SigningKey
@@ -16,6 +17,9 @@ import vega_sim.proto.vega.commands.v1.signature_pb2 as signature_proto
 from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = getLogger(__name__)
+
+dotenv.load_dotenv()
+DEFAULT_KEY_NAME = os.environ.get("DEFAULT_KEY_NAME")
 
 
 class SlimWallet(Wallet):
@@ -133,8 +137,6 @@ class SlimWallet(Wallet):
 
         pub_key = self.public_key(name=name, key_name=key_name)
 
-        print(pub_key)
-
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
             nonce=self._next_nonce(),  # block_height=self.block_height,
@@ -179,6 +181,6 @@ class SlimWallet(Wallet):
         """
 
         if key_name is None:
-            return list(self.pub_keys[name].values())[0]
+            return self.pub_keys[name][DEFAULT_KEY_NAME]
         else:
             return self.pub_keys[name][key_name]

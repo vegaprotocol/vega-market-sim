@@ -1,6 +1,8 @@
 import time
 from typing import Any, Dict, List, Optional, Union
 
+import os
+import dotenv
 import inflection
 import requests
 from google.protobuf.json_format import MessageToDict
@@ -9,6 +11,9 @@ from vega_sim.wallet.base import Wallet
 WALLET_CREATION_URL = "{wallet_server_url}/api/v1/wallets"
 WALLET_LOGIN_URL = "{wallet_server_url}/api/v1/auth/token"
 WALLET_KEY_URL = "{wallet_server_url}/api/v1/keys"
+
+dotenv.load_dotenv()
+DEFAULT_KEY_NAME = os.environ.get("DEFAULT_KEY_NAME")
 
 
 class VegaWallet(Wallet):
@@ -164,6 +169,7 @@ class VegaWallet(Wallet):
         """
 
         if key_name is None:
-            return list(self.pub_keys[name].values())[0]
+            print(DEFAULT_KEY_NAME)
+            return self.pub_keys[name][DEFAULT_KEY_NAME]
         else:
             return self.pub_keys[name][key_name]
