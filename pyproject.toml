@@ -5,6 +5,9 @@ description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
 
+[tool.setuptools]
+zip-safe = false
+
 [tool.poetry.dependencies]
 python = "^3.9,<3.11"
 requests = "^2.28.0"

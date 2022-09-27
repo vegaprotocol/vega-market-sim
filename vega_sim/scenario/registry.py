@@ -1,4 +1,6 @@
+from vega_sim.scenario.common.agents import ShapedMarketMaker
 from vega_sim.scenario.comprehensive_market.scenario import ComprehensiveMarket
+from vega_sim.scenario.curve_market_maker.scenario import CurveMarketMaker
 from vega_sim.scenario.ideal_market_maker.scenario import IdealMarketMaker
 from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
@@ -110,6 +112,32 @@ SCENARIOS = {
         backgroundmarket_number_levels_per_side=25,
         market_order_trader_base_order_size=0.01,
     ),
+    "historic_shaped_market_maker": lambda: CurveMarketMaker(
+        market_name="ETH",
+        asset_name="USD",
+        num_steps=290,
+        market_decimal=2,
+        asset_decimal=4,
+        market_position_decimal=4,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD", granularity=Granularity.HOUR
+        ).values,
+        lp_commitamount=250_000,
+        initial_asset_mint=10_000_000,
+        step_length_seconds=60,
+        # step_length_seconds=Granularity.HOUR.value,
+        block_length_seconds=1,
+        q_upper=30,
+        q_lower=-30,
+        market_maker_curve_kappa=0.2,
+        market_maker_assumed_market_kappa=0.2,
+        buy_intensity=100,
+        sell_intensity=100,
+        sensitive_price_taker_half_life=10,
+        opening_auction_trade_amount=0.0001,
+        market_order_trader_base_order_size=0.01,
+    ),
+    
     "fairground": lambda: Fairground(
         num_steps=200,
         step_length_seconds=1,
