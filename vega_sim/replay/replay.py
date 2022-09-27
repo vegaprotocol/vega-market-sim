@@ -12,8 +12,13 @@ def replay_run(
     graphql: bool = False,
     pause_at_end: bool = False,
 ):
-    with VegaServiceNull(launch_graphql=graphql, run_with_console=console) as vega:
-        with open(f"{replay_path}/transactions", "rb") as tx_history:
+    with open(f"{replay_path}/transactions", "rb") as tx_history:
+        tx_per_block = int.from_bytes(tx_history.read(TRANSACTION_LEN_BYTES), "big")
+        with VegaServiceNull(
+            launch_graphql=graphql,
+            run_with_console=console,
+            transactions_per_block=tx_per_block,
+        ) as vega:
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
             while next_tx_type:
                 tx_type = TransactionType._value2member_map_[

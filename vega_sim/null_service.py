@@ -512,6 +512,9 @@ class VegaServiceNull(VegaService):
         if self.store_transactions:
             os.makedirs(self.log_dir + "/replay", exist_ok=True)
             self.tx_file = open(self.log_dir + "/replay/transactions", mode="ab")
+            self.tx_file.write(
+                self.transactions_per_block.to_bytes(TRANSACTION_LEN_BYTES, "big")
+            )
         else:
             self.tx_file = None
 
