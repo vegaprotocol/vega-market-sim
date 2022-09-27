@@ -41,8 +41,10 @@ class CurveMarketMaker(Scenario):
         asset_name: str = None,
         initial_asset_mint: float = 1000000,
         initial_price: Optional[float] = None,
+        num_lp_levels: int = 25,
         sigma: float = 1,
-        kappa: float = 1,
+        market_maker_curve_kappa: float = 1,
+        market_maker_assumed_market_kappa: float = 1,
         q_upper: int = 20,
         q_lower: int = -20,
         alpha: float = 10**-4,
@@ -63,6 +65,9 @@ class CurveMarketMaker(Scenario):
         opening_auction_trade_amount: float = 1,
         market_order_trader_base_order_size: float = 1,
         sensitive_price_taker_half_life: float = 0.5,
+        market_maker_base_order_size: float = 0.1,
+        market_maker_tick_spacing: float = 1,
+        market_maker_max_order: float = 200,
     ):
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
@@ -74,7 +79,8 @@ class CurveMarketMaker(Scenario):
         self.market_position_decimal = market_position_decimal
         self.initial_price = initial_price
         self.sigma = sigma
-        self.kappa = kappa
+        self.market_kappa = market_maker_assumed_market_kappa
+        self.curve_kappa = market_maker_curve_kappa
         self.q_upper = q_upper
         self.q_lower = q_lower
         self.alpha = alpha
@@ -96,6 +102,10 @@ class CurveMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.sensitive_price_taker_half_life = sensitive_price_taker_half_life
+        self.num_lp_levels = num_lp_levels
+        self.market_maker_base_order_size = market_maker_base_order_size
+        self.market_maker_tick_spacing = market_maker_tick_spacing
+        self.market_maker_max_order = market_maker_max_order
 
     def _generate_price_process(
         self,
@@ -154,9 +164,19 @@ class CurveMarketMaker(Scenario):
             commitment_amount=self.lp_commitamount,
             market_decimal_places=self.market_decimal,
             asset_decimal_places=self.asset_decimal,
-            order_unit_size=0.1,
+            order_unit_size=self.market_maker_base_order_size,
             num_steps=self.num_steps,
+            num_levels=self.num_lp_levels,
             tag=str(tag),
+            kappa=self.curve_kappa,
+            tick_spacing=self.market_maker_tick_spacing,
+            max_order_size=self.market_maker_max_order,
+            inventory_upper_boundary=self.q_upper,
+            inventory_lower_boundary=self.q_lower,
+            terminal_penalty_parameter=self.alpha,
+            running_penalty_parameter=self.phi,
+            market_order_arrival_rate=self.buy_intensity,
+            market_kappa=self.market_kappa,
         )
 
         sensitive_mo_trader = PriceSensitiveMarketOrderTrader(
