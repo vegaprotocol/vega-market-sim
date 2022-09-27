@@ -101,7 +101,7 @@ class SlimWallet(Wallet):
         if self.vega_wallet is None:
             self.keys[name] = SigningKey.generate()
             self.pub_keys[name] = {
-                "key_name": self.keys[name]
+                DEFAULT_KEY_NAME: self.keys[name]
                 .verify_key.encode(encoder=HexEncoder)
                 .decode()
             }
