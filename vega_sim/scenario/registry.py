@@ -137,7 +137,6 @@ SCENARIOS = {
         opening_auction_trade_amount=0.0001,
         market_order_trader_base_order_size=0.01,
     ),
-    
     "fairground": lambda: Fairground(
         num_steps=200,
         step_length_seconds=1,
