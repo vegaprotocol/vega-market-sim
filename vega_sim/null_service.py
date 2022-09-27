@@ -26,9 +26,14 @@ import toml
 from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
+from vega_sim.api.helpers import num_to_padded_int
 from vega_sim.service import VegaService
 from vega_sim.wallet.base import Wallet
-from vega_sim.wallet.slim_wallet import SlimWallet
+from vega_sim.wallet.slim_wallet import (
+    TRANSACTION_LEN_BYTES,
+    SlimWallet,
+    TransactionType,
+)
 from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = logging.getLogger(__name__)
@@ -328,7 +333,7 @@ def manage_vega_processes(
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
-    tmp_vega_dir = tempfile.mkdtemp() if log_dir is None else log_dir
+    tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
     if port_config.get(Ports.DATA_NODE_GRAPHQL):
         logger.info(
@@ -475,6 +480,7 @@ class VegaServiceNull(VegaService):
         start_order_feed: bool = True,
         retain_log_files: bool = False,
         launch_graphql: bool = False,
+        store_transactions: bool = False,
     ):
         super().__init__(
             can_control_time=True,
@@ -500,7 +506,14 @@ class VegaServiceNull(VegaService):
 
         self._wallet = None
         self._use_full_vega_wallet = use_full_vega_wallet
-        self.log_dir = tempfile.mkdtemp()
+        self.store_transactions = store_transactions
+
+        self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
+        if self.store_transactions:
+            os.makedirs(self.log_dir + "/replay", exist_ok=True)
+            self.tx_file = open(self.log_dir + "/replay/transactions", mode="ab")
+        else:
+            self.tx_file = None
 
         self._start_order_feed = start_order_feed
         self.launch_graphql = launch_graphql
@@ -526,6 +539,48 @@ class VegaServiceNull(VegaService):
         self.forward(f"{int(wait_multiple * self.seconds_per_block)}s")
         self.wait_for_core_catchup()
 
+        if self.store_transactions:
+            self._store_wait(wait_multiple=wait_multiple)
+
+    def _store_wait(self, wait_multiple: float = 1) -> None:
+        self.tx_file.write(
+            (TransactionType.STEP.value).to_bytes(TRANSACTION_LEN_BYTES, "big")
+        )
+        self.tx_file.write((wait_multiple).to_bytes(TRANSACTION_LEN_BYTES, "big"))
+
+    def _store_mint(self, wallet_name: str, asset: str, amount: float) -> None:
+        self.tx_file.write(
+            (TransactionType.MINT.value).to_bytes(TRANSACTION_LEN_BYTES, "big")
+        )
+        pub_key_bytes = self.wallet.public_key(wallet_name).encode()
+        asset_bytes = asset.encode()
+        asset_decimals = self.asset_decimals[asset]
+
+        self.tx_file.write(len(pub_key_bytes).to_bytes(TRANSACTION_LEN_BYTES, "big"))
+        self.tx_file.write(len(asset).to_bytes(TRANSACTION_LEN_BYTES, "big"))
+        self.tx_file.write(pub_key_bytes)
+        self.tx_file.write(asset_bytes)
+        self.tx_file.write(
+            num_to_padded_int(amount, asset_decimals).to_bytes(
+                TRANSACTION_LEN_BYTES, "big"
+            )
+        )
+
+    def mint(self, wallet_name: str, asset: str, amount: float) -> None:
+        """Mints a given amount of requested asset into the associated wallet
+
+        Args:
+            wallet_name:
+                str, The name of the wallet
+            asset:
+                str, The ID of the asset to mint
+            amount:
+                float, the amount of asset to mint
+        """
+        super().mint(wallet_name=wallet_name, asset=asset, amount=amount)
+        if self.store_transactions:
+            self._store_mint(wallet_name=wallet_name, asset=asset, amount=amount)
+
     @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
@@ -538,7 +593,8 @@ class VegaServiceNull(VegaService):
                     if self.run_with_console
                     else None,
                     log_dir=self.log_dir,
-                    store_transactions=True,
+                    store_transactions=self.store_transactions,
+                    tx_output=self.tx_file,
                 )
         return self._wallet
 
@@ -651,6 +707,8 @@ class VegaServiceNull(VegaService):
 
     def stop(self) -> None:
         super().stop()
+        if self.tx_file is not None:
+            self.tx_file.close()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
