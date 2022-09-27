@@ -1,26 +1,32 @@
 import argparse
 import logging
-from vega_sim.api.faucet import mint
+import time
+from contextlib import contextmanager
+
 import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
+from vega_sim.api.faucet import mint
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.wallet.slim_wallet import TRANSACTION_LEN_BYTES, TransactionType
 
 
-def replay_run(
+@contextmanager
+def replay_run_context(
     replay_path: str,
     console: bool = False,
     graphql: bool = False,
-    pause_at_end: bool = False,
 ):
-    with open(f"{replay_path}/transactions", "rb") as tx_history:
+    with open(f"{replay_path}/replay/transactions", "rb") as tx_history:
         tx_per_block = int.from_bytes(tx_history.read(TRANSACTION_LEN_BYTES), "big")
         with VegaServiceNull(
             launch_graphql=graphql,
             run_with_console=console,
             transactions_per_block=tx_per_block,
+            warn_on_raw_data_access=False,
         ) as vega:
+            vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
             while next_tx_type:
+                vega.wait_for_total_catchup()
                 tx_type = TransactionType._value2member_map_[
                     int.from_bytes(next_tx_type, "big")
                 ]
@@ -31,6 +37,8 @@ def replay_run(
                     transaction = core_proto.SubmitTransactionRequest()
                     transaction.ParseFromString(tx)
 
+                    # input_data = transaction_proto.InputData()
+                    # input_data.ParseFromString(transaction.tx.input_data)
                     vega.wallet.submit_raw_transaction(transaction)
                 elif tx_type == TransactionType.STEP:
                     steps = tx_history.read(TRANSACTION_LEN_BYTES)
@@ -53,8 +61,19 @@ def replay_run(
                         amount,
                         faucet_url=vega.faucet_url,
                     )
+                    vega.wait_fn(1)
                 next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
 
+            yield vega
+
+
+def replay_run(
+    replay_path: str,
+    console: bool = False,
+    graphql: bool = False,
+    pause_at_end: bool = False,
+):
+    with replay_run(replay_path=replay_path, console=console, graphql=graphql) as vega:
         if pause_at_end:
             input("Pausing at completion. Press Return to continue")
 
@@ -72,7 +91,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
-    replay = "/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-poxse766/replay"
+    replay = "/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-poxse766/"
     replay_run(
         replay_path=replay,
         console=args.console,

@@ -143,7 +143,6 @@ class SlimWallet(Wallet):
         #         core_proto.LastBlockHeightRequest()
         #     ).height
         #     self.remaining_until_height_update = self.height_update_frequency
-
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
             nonce=self._next_nonce(),  # block_height=self.block_height,
