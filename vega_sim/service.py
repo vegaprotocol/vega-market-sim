@@ -362,7 +362,10 @@ class VegaService(ABC):
         )
         self.wait_fn(1)
         gov.approve_proposal(
-            proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet, key_name=key_name
+            proposal_id=proposal_id,
+            wallet_name=wallet_name,
+            wallet=self.wallet,
+            key_name=key_name,
         )
         self.wait_fn(110)
 
