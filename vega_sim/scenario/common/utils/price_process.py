@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 import requests
 import pandas as pd
 from enum import Enum
-
+import datetime
 
 COINBASE_REQUEST_BASE = "https://api.exchange.coinbase.com/products"
 COINBASE_CANDLE_BASE = COINBASE_REQUEST_BASE + "/{product_id}/candles"
@@ -97,13 +97,43 @@ def get_historic_candles(
             )
         params["start"] = start
         params["end"] = end
+
+    if start is None and end is None:
+        response = requests.get(
+            COINBASE_CANDLE_BASE.format(product_id=product_id),
+            headers=headers,
+            params=params,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    endtime = datetime.datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+    starttime = datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+    res = []
+
+    while (endtime - starttime).total_seconds() / granularity.value > 300:
+        inter = starttime + datetime.timedelta(seconds=300 * granularity.value)
+        params["start"] = starttime.strftime("%Y-%m-%d %H:%M:%S")
+        params["end"] = inter.strftime("%Y-%m-%d %H:%M:%S")
+        response = requests.get(
+            COINBASE_CANDLE_BASE.format(product_id=product_id),
+            headers=headers,
+            params=params,
+        )
+        response.raise_for_status()
+        res += response.json()
+        starttime = inter
+
+    params["start"] = starttime.strftime("%Y-%m-%d %H:%M:%S")
+    params["end"] = endtime.strftime("%Y-%m-%d %H:%M:%S")
     response = requests.get(
         COINBASE_CANDLE_BASE.format(product_id=product_id),
         headers=headers,
         params=params,
     )
     response.raise_for_status()
-    return response.json()
+    res += response.json()
+    return res
 
 
 def get_historic_price_series(
@@ -128,4 +158,11 @@ def get_historic_price_series(
 
 
 if __name__ == "__main__":
-    print(get_historic_price_series("ETH-USD", granularity=Granularity.HOUR))
+    print(
+        get_historic_price_series(
+            "ETH-USD",
+            granularity=Granularity.HOUR,
+            start="2022-08-02 01:01:50",
+            end="2022-09-05 09:05:20",
+        )
+    )

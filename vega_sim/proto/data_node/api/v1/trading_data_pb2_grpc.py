@@ -291,10 +291,10 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TradesSubscribeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TradesSubscribeResponse.FromString,
         )
-        self.TransferResponsesSubscribe = channel.unary_stream(
-            "/datanode.api.v1.TradingDataService/TransferResponsesSubscribe",
-            request_serializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TransferResponsesSubscribeRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TransferResponsesSubscribeResponse.FromString,
+        self.LedgerMovementsSubscribe = channel.unary_stream(
+            "/datanode.api.v1.TradingDataService/LedgerMovementsSubscribe",
+            request_serializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.LedgerMovementsSubscribeRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.LedgerMovementsSubscribeResponse.FromString,
         )
         self.GetNodeSignaturesAggregate = channel.unary_unary(
             "/datanode.api.v1.TradingDataService/GetNodeSignaturesAggregate",
@@ -795,7 +795,7 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def TransferResponsesSubscribe(self, request, context):
+    def LedgerMovementsSubscribe(self, request, context):
         """Subscribe to a stream of Transfer Responses"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1237,10 +1237,10 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TradesSubscribeRequest.FromString,
             response_serializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TradesSubscribeResponse.SerializeToString,
         ),
-        "TransferResponsesSubscribe": grpc.unary_stream_rpc_method_handler(
-            servicer.TransferResponsesSubscribe,
-            request_deserializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TransferResponsesSubscribeRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.TransferResponsesSubscribeResponse.SerializeToString,
+        "LedgerMovementsSubscribe": grpc.unary_stream_rpc_method_handler(
+            servicer.LedgerMovementsSubscribe,
+            request_deserializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.LedgerMovementsSubscribeRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v1_dot_trading__data__pb2.LedgerMovementsSubscribeResponse.SerializeToString,
         ),
         "GetNodeSignaturesAggregate": grpc.unary_unary_rpc_method_handler(
             servicer.GetNodeSignaturesAggregate,
@@ -2974,7 +2974,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def TransferResponsesSubscribe(
+    def LedgerMovementsSubscribe(
         request,
         target,
         options=(),
@@ -2989,9 +2989,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            "/datanode.api.v1.TradingDataService/TransferResponsesSubscribe",
-            data__node_dot_api_dot_v1_dot_trading__data__pb2.TransferResponsesSubscribeRequest.SerializeToString,
-            data__node_dot_api_dot_v1_dot_trading__data__pb2.TransferResponsesSubscribeResponse.FromString,
+            "/datanode.api.v1.TradingDataService/LedgerMovementsSubscribe",
+            data__node_dot_api_dot_v1_dot_trading__data__pb2.LedgerMovementsSubscribeRequest.SerializeToString,
+            data__node_dot_api_dot_v1_dot_trading__data__pb2.LedgerMovementsSubscribeResponse.FromString,
             options,
             channel_credentials,
             insecure,

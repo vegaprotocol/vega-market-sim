@@ -202,7 +202,7 @@ def propose_future_market(
                         settlement_price_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
                     ),
-                    settlement_price_decimals=price_decimals,
+                    settlement_data_decimals=price_decimals,
                 ),
             ),
             decimal_places=price_decimals,
@@ -409,10 +409,10 @@ def _make_and_wait_for_proposal(
     )
     logger.debug("Waiting for proposal acceptance")
 
+    time_forward_fn()
     proposal = wait_for_acceptance(
         proposal.reference,
         lambda p: _proposal_loader(p, data_client),
-        time_forward_fn=time_forward_fn,
     )
 
     prop_state = enum_to_str(

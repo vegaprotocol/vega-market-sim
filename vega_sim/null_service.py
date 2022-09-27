@@ -519,7 +519,9 @@ class VegaServiceNull(VegaService):
         self.stop()
 
     def wait_fn(self, wait_multiple: float = 1) -> None:
+        self.wait_for_core_catchup()
         self.forward(f"{int(wait_multiple * self.seconds_per_block)}s")
+        self.wait_for_core_catchup()
 
     @property
     def wallet(self) -> Wallet:
