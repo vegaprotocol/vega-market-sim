@@ -242,6 +242,7 @@ def cancel_order(
     wallet: Wallet,
     market_id: str,
     order_id: str,
+    key_name: Optional[str] = None,
 ):
     """
     Cancel Order
@@ -263,6 +264,7 @@ def cancel_order(
         ),
         name=wallet_name,
         transaction_type="order_cancellation",
+        key_name=key_name,
     )
 
     logger.debug(f"Cancelled order {order_id} on market {market_id}")

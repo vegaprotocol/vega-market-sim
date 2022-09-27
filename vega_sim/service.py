@@ -1,4 +1,5 @@
 from __future__ import annotations
+from curses import keyname
 
 from dataclasses import dataclass
 import logging
@@ -320,6 +321,7 @@ class VegaService(ABC):
         decimals: int = 0,
         quantum: int = 1,
         max_faucet_amount: int = 10e9,
+        key_name: Optional[str] = None,
     ):
         """Creates a simple asset and automatically approves the proposal (assuming the
          proposing wallet has sufficient governance tokens).
@@ -339,6 +341,8 @@ class VegaService(ABC):
             max_faucet_amount:
                 int, The maximum number of tokens which can be fauceted
                     (in full decimal numbers, rather than asset decimal)
+            key_name:
+                optionaL, str, name of key in wallet to use
         """
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
@@ -358,7 +362,7 @@ class VegaService(ABC):
         )
         self.wait_fn(1)
         gov.approve_proposal(
-            proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet
+            proposal_id=proposal_id, wallet_name=wallet_name, wallet=self.wallet, key_name=key_name
         )
         self.wait_fn(110)
 
@@ -449,6 +453,7 @@ class VegaService(ABC):
         fill_or_kill: bool = True,
         wait: bool = True,
         order_ref: Optional[str] = None,
+        key_name: Optional[str] = None,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -466,6 +471,8 @@ class VegaService(ABC):
                     If true, will raise an error if order is not accepted
             order_ref:
                 optional str, reference for later identification of order
+            key_name:
+                optional str, name of key in wallet to use
 
         Returns:
             str, The ID of the order
@@ -480,6 +487,7 @@ class VegaService(ABC):
             volume=volume,
             wait=wait,
             order_ref=order_ref,
+            key_name=key_name,
         )
 
     def submit_order(
@@ -495,6 +503,7 @@ class VegaService(ABC):
         pegged_order: Optional[PeggedOrder] = None,
         wait: bool = True,
         order_ref: Optional[str] = None,
+        key_name: Optional[str] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -530,6 +539,9 @@ class VegaService(ABC):
                     If true, will raise an error if order is not accepted
             order_ref:
                 optional str, reference for later identification of order
+            key_name:
+                optional str, name of key in wallet to use
+
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
                 Otherwise None
@@ -574,6 +586,7 @@ class VegaService(ABC):
             wait=wait,
             time_forward_fn=lambda: self.wait_fn(2),
             order_ref=order_ref,
+            key_name=key_name,
         )
 
     def get_blockchain_time(self) -> int:
@@ -591,6 +604,7 @@ class VegaService(ABC):
         pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
         volume_delta: float = 0,
         time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
+        key_name: Optional[str] = None,
     ):
         """
         Amend a Limit order by orderID in the specified market
@@ -615,6 +629,8 @@ class VegaService(ABC):
                         TIME_IN_FORCE_FOK)
                     See API documentation for full list of options
                     Defaults to Fill or Kill
+            key_name:
+                optional str, name of key in wallet to use
         """
         trading.amend_order(
             wallet=self.wallet,
@@ -642,6 +658,7 @@ class VegaService(ABC):
                 self.market_pos_decimals[market_id],
             ),
             time_in_force=time_in_force,
+            key_name=key_name,
         )
 
     def cancel_order(
@@ -649,6 +666,7 @@ class VegaService(ABC):
         trading_wallet: str,
         market_id: str,
         order_id: str,
+        key_name: Optional[str] = None,
     ):
         """
         Cancel Order
@@ -666,6 +684,7 @@ class VegaService(ABC):
             wallet_name=trading_wallet,
             market_id=market_id,
             order_id=order_id,
+            key_name=key_name,
         )
 
     def update_network_parameter(
@@ -813,6 +832,7 @@ class VegaService(ABC):
         settlement_wallet: str,
         settlement_price: float,
         market_id: str,
+        key_name: Optional[str] = None,
     ):
         future_inst = data_raw.market_info(
             market_id, data_client=self.trading_data_client
@@ -828,6 +848,7 @@ class VegaService(ABC):
             settlement_price=num_to_padded_int(
                 settlement_price, decimals=future_inst.settlement_data_decimals
             ),
+            key_name=key_name,
         )
 
     def party_account(
@@ -1065,6 +1086,7 @@ class VegaService(ABC):
         buy_specs: List[Tuple[str, float, int]],
         sell_specs: List[Tuple[str, float, int]],
         is_amendment: Optional[bool] = None,
+        key_name: Optional[str] = None,
     ):
         """Submit/Amend a custom liquidity profile.
 
@@ -1089,6 +1111,8 @@ class VegaService(ABC):
                 List[Tuple[str, int, int]], List of tuples, each containing a reference
                 point in their first position, a desired offset in their second and
                 a proportion in third
+            key_name:
+                optional, str name of key in wallet to use
         """
         asset_id = data_raw.market_info(
             market_id=market_id, data_client=self.trading_data_client
@@ -1124,6 +1148,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
+            key_name=key_name,
         )
 
     def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:
