@@ -19,12 +19,14 @@ from vega_sim.scenario.ideal_market_maker.agents import (
     RANDOM_WALLET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    INFORMEDT_WALLET,
     LIQUIDITY,
     OptimalLiquidityProvider,
     OptimalMarketMaker,
     MarketOrderTrader,
     LimitOrderTrader,
     OpenAuctionPass,
+    InformedTrader,
 )
 
 
@@ -39,6 +41,7 @@ class IdealMarketMaker(Scenario):
         market_name: str = "ETH:USD",
         asset_name: str = "tDAI",
         initial_asset_mint: float = 1e6,
+        initial_asset_info_trader_mint: float = 4e6,
         lp_initial_mint: float = 1e6,
         lp_commitamount: float = 20000,
         initial_price: float = 0.3,
@@ -67,6 +70,7 @@ class IdealMarketMaker(Scenario):
         self.market_position_decimal = market_position_decimal
         self.lp_commitamount = lp_commitamount
         self.initial_asset_mint = initial_asset_mint
+        self.initial_asset_info_trader_mint = initial_asset_info_trader_mint
         self.lp_initial_mint = lp_initial_mint
         self.initial_price = initial_price
         self.sigma = sigma
@@ -188,6 +192,17 @@ class IdealMarketMaker(Scenario):
             commitamount=self.lp_commitamount,
         )
 
+        info_trader = InformedTrader(
+            wallet_name = INFORMEDT_WALLET.name,
+            wallet_pass = INFORMEDT_WALLET.passphrase,
+            price_process = price_process,
+            market_name = self.market_name,
+            asset_name = self.asset_name,
+            initial_asset_info_trader_mint = self.initial_asset_info_trader_mint,
+            # proportion_taken = self.proportion_taken,
+            tag = str(tag),
+        )
+
         env = MarketEnvironment(
             base_agents=[
                 market_maker,
@@ -195,7 +210,8 @@ class IdealMarketMaker(Scenario):
                 randomtrader,
                 auctionpass1,
                 auctionpass2,
-                # liquidityprovider,
+                info_trader,
+                liquidityprovider,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
