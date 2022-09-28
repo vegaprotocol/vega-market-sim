@@ -215,7 +215,7 @@ class MarketEnvironment:
                         f" {(end_time - start_time) / self.block_length_seconds} blocks"
                         " produced this step"
                     )
-                    vega.forward(f"{to_forward}s")
+                    vega.wait_fn(to_forward)
                 start_time = end_time
 
             if (
