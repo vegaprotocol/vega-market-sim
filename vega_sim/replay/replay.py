@@ -26,7 +26,7 @@ def replay_run_context(
             vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
             while next_tx_type:
-                time.sleep(0.01)
+                time.sleep(0.1)
                 vega.wait_for_total_catchup()
                 tx_type = TransactionType._value2member_map_[
                     int.from_bytes(next_tx_type, "big")
