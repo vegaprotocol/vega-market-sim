@@ -70,6 +70,7 @@ TAU_SCALING_FACTOR_IDEAL = SingleParameterExperiment(
         market_position_decimal=2,
         spread=0.002,
         initial_asset_mint=1e8,
+        initial_info_trader_asset_mint=4e8,
         lp_initial_mint=1e8,
         lp_commitamount=50000,
         initial_price=1123.11,
