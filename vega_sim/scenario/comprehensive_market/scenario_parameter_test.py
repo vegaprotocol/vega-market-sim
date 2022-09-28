@@ -40,7 +40,7 @@ class ComprehensiveMarket(Scenario):
         market_name: str = None,
         asset_name: str = None,
         initial_asset_mint: float = 1000000,
-        initial_price: Optional[float] = None,
+        initial_price: Optional[float] = 1000,
         sigma: float = 1,
         lp_commitamount: float = 200000,
         spread: int = 2,
@@ -313,7 +313,7 @@ class ComprehensiveMarket(Scenario):
         self,
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
-        run_with_console: bool = False,
+        run_with_console: bool = True,
         random_state: Optional[np.random.RandomState] = None,
     ):
         env = self.set_up_background_market(
@@ -339,8 +339,8 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=False,
-        seconds_per_block=40,  # Heuristic
+        run_with_console=True,
+        seconds_per_block=1,  # Heuristic
     ) as vega:
         results = scenario.run_iteration(
             vega=vega,
