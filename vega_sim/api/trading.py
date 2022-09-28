@@ -10,6 +10,7 @@ import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.helpers import (
+    ProposalNotAcceptedError,
     enum_to_str,
     get_enum,
     wait_for_acceptance,
@@ -142,13 +143,20 @@ def submit_order(
             )
             return data_client.OrderByReference(order_ref_request).order
 
-        time_forward_fn()
-        # Wait for proposal to be included in a block and to be accepted by Vega network
-        logger.debug("Waiting for proposal acceptance")
-        response = wait_for_acceptance(
-            order_ref,
-            _proposal_loader,
-        )
+        # Allow one failure, forward once more
+        try:
+            time_forward_fn()
+            logger.debug("Waiting for proposal acceptance")
+            response = wait_for_acceptance(
+                order_ref,
+                _proposal_loader,
+            )
+        except ProposalNotAcceptedError:
+            time_forward_fn()
+            response = wait_for_acceptance(
+                order_ref,
+                _proposal_loader,
+            )
         order_status = enum_to_str(vega_protos.vega.Order.Status, response.status)
 
         logger.debug(
