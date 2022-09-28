@@ -39,6 +39,7 @@ def submit_order(
     wait: bool = True,
     time_forward_fn: Optional[Callable[[], None]] = None,
     order_ref: Optional[str] = None,
+    key_name: Optional[str] = None,
 ) -> Optional[str]:
     """
     Submit orders as specified to required pre-existing market.
@@ -83,6 +84,9 @@ def submit_order(
             waits or manually forwards the chain when waiting for order acceptance
         order_ref:
             optional str, reference for later identification of order
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
+
     Returns:
         Optional[str], Order ID if wait is True, otherwise None
     """
@@ -97,7 +101,7 @@ def submit_order(
         expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
 
     order_ref = (
-        f"{wallet.public_key(wallet_name)}-{uuid.uuid4()}"
+        f"{wallet.public_key(wallet_name, key_name)}-{uuid.uuid4()}"
         if order_ref is None
         else order_ref
     )
@@ -122,7 +126,10 @@ def submit_order(
     # Sign the transaction with an order submission command
     # Note: Setting propagate to true will also submit to a Vega node
     wallet.submit_transaction(
-        transaction=order_data, name=wallet_name, transaction_type="order_submission"
+        transaction=order_data,
+        name=wallet_name,
+        transaction_type="order_submission",
+        key_name=key_name,
     )
 
     logger.debug(f"Submitted Order on {side} at price {price}.")
@@ -167,6 +174,7 @@ def amend_order(
     pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
     volume_delta: float = 0,
     time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
+    key_name: Optional[str] = None,
 ):
     """
     Amend a Limit order by orderID in the specified market
@@ -193,6 +201,8 @@ def amend_order(
                     TIME_IN_FORCE_FOK)
                 See API documentation for full list of options
                 Defaults to Fill or Kill
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
     """
     # Login wallet
     time_in_force = (
@@ -219,7 +229,10 @@ def amend_order(
             setattr(order_data, name, val)
 
     wallet.submit_transaction(
-        transaction=order_data, name=wallet_name, transaction_type="order_amendment"
+        transaction=order_data,
+        name=wallet_name,
+        transaction_type="order_amendment",
+        key_name=key_name,
     )
     logger.debug(f"Submitted Order amendment for {order_id}.")
 
@@ -229,6 +242,7 @@ def cancel_order(
     wallet: Wallet,
     market_id: str,
     order_id: str,
+    key_name: Optional[str] = None,
 ):
     """
     Cancel Order
@@ -250,6 +264,7 @@ def cancel_order(
         ),
         name=wallet_name,
         transaction_type="order_cancellation",
+        key_name=key_name,
     )
 
     logger.debug(f"Cancelled order {order_id} on market {market_id}")
@@ -310,6 +325,7 @@ def submit_liquidity(
     buy_specs: List[Tuple[str, int, int]],
     sell_specs: List[Tuple[str, int, int]],
     is_amendment: bool = False,
+    key_name: Optional[str] = None,
 ):
     """Submit/Amend a custom liquidity profile.
 
@@ -334,6 +350,8 @@ def submit_liquidity(
             List[Tuple[str, int, int]], List of tuples, each containing a reference
             point in their first position, a desired offset in their second and
             a proportion in third
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
     """
 
     if is_amendment:
@@ -365,6 +383,9 @@ def submit_liquidity(
         ],
     )
     wallet.submit_transaction(
-        transaction=submission, name=wallet_name, transaction_type=submission_name
+        transaction=submission,
+        name=wallet_name,
+        transaction_type=submission_name,
+        key_name=key_name,
     )
     logger.debug(f"Submitted liquidity on market {market_id}")
