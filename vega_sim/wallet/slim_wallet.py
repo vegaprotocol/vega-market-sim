@@ -134,7 +134,9 @@ class SlimWallet(Wallet):
                 name=name,
                 passphrase=kwargs.get("passphrase", self.full_wallet_default_pass),
             )
-            self.pub_keys[name] = {self.vega_default_key_name: self.vega_wallet.public_key(name)}
+            self.pub_keys[name] = {
+                self.vega_default_key_name: self.vega_wallet.public_key(name)
+            }
 
     def login(self, name: str, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
