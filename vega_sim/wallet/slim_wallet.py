@@ -15,11 +15,9 @@ import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
 import vega_sim.proto.vega.commands.v1.transaction_pb2 as transaction_proto
 import vega_sim.proto.vega.commands.v1.signature_pb2 as signature_proto
 from vega_sim.wallet.vega_wallet import VegaWallet
+from vega_sim.wallet.base import VEGA_DEFAULT_KEY_NAME
 
 logger = getLogger(__name__)
-
-dotenv.load_dotenv()
-DEFAULT_KEY_NAME = os.environ.get("DEFAULT_KEY_NAME")
 
 
 class SlimWallet(Wallet):
@@ -71,6 +69,11 @@ class SlimWallet(Wallet):
         self._create_nonces()
         self._create_sigs()
 
+        dotenv.load_dotenv()
+        self.vega_default_key_name = os.environ.get(
+            "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
+        )
+
     def _create_sigs(self):
         self.sigs = [os.urandom(6).hex() for _ in range(self.num_sigs_to_create)]
 
@@ -101,7 +104,7 @@ class SlimWallet(Wallet):
         if self.vega_wallet is None:
             self.keys[name] = SigningKey.generate()
             self.pub_keys[name] = {
-                DEFAULT_KEY_NAME: self.keys[name]
+                self.vega_default_key_name: self.keys[name]
                 .verify_key.encode(encoder=HexEncoder)
                 .decode()
             }
@@ -181,6 +184,6 @@ class SlimWallet(Wallet):
         """
 
         if key_name is None:
-            return self.pub_keys[name][DEFAULT_KEY_NAME]
+            return self.pub_keys[name][self.vega_default_key_name]
         else:
             return self.pub_keys[name][key_name]

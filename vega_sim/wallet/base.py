@@ -1,6 +1,8 @@
 from abc import ABC
 from typing import Any
 
+VEGA_DEFAULT_KEY_NAME = "foo"
+
 
 class Wallet(ABC):
     def create_wallet(

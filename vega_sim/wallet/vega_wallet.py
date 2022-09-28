@@ -6,14 +6,11 @@ import dotenv
 import inflection
 import requests
 from google.protobuf.json_format import MessageToDict
-from vega_sim.wallet.base import Wallet
+from vega_sim.wallet.base import Wallet, VEGA_DEFAULT_KEY_NAME
 
 WALLET_CREATION_URL = "{wallet_server_url}/api/v1/wallets"
 WALLET_LOGIN_URL = "{wallet_server_url}/api/v1/auth/token"
 WALLET_KEY_URL = "{wallet_server_url}/api/v1/keys"
-
-dotenv.load_dotenv()
-DEFAULT_KEY_NAME = os.environ.get("DEFAULT_KEY_NAME")
 
 
 class VegaWallet(Wallet):
@@ -28,6 +25,11 @@ class VegaWallet(Wallet):
         self.wallet_url = wallet_url
         self.login_tokens = {}
         self.pub_keys = {}
+
+        dotenv.load_dotenv()
+        self.vega_default_key_name = os.environ.get(
+            "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
+        )
 
     def create_wallet(
         self,
@@ -65,7 +67,7 @@ class VegaWallet(Wallet):
         self.generate_keypair(
             token,
             passphrase,
-            metadata=[{"name": "default_key"}],
+            metadata=[{"name": self.vega_default_key_name}],
         )
         self.pub_keys[name] = self.get_keypairs(wallet_name=name)
 
@@ -123,7 +125,7 @@ class VegaWallet(Wallet):
         response.raise_for_status()
         return list(response.json()["key"]["pub"])
 
-    def get_keypairs(self, wallet_name: str) -> list:
+    def get_keypairs(self, wallet_name: str) -> dict:
         headers = {"Authorization": f"Bearer {self.login_tokens[wallet_name]}"}
         response = requests.get(
             WALLET_KEY_URL.format(wallet_server_url=self.wallet_url), headers=headers
@@ -169,6 +171,6 @@ class VegaWallet(Wallet):
         """
 
         if key_name is None:
-            return self.pub_keys[name][DEFAULT_KEY_NAME]
+            return self.pub_keys[name][self.vega_default_key_name]
         else:
             return self.pub_keys[name][key_name]
