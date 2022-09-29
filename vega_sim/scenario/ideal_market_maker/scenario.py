@@ -193,11 +193,9 @@ class IdealMarketMaker(Scenario):
         info_trader = InformedTrader(
             wallet_name = INFORMED_WALLET.name,
             wallet_pass = INFORMED_WALLET.passphrase,
-            informed_wallet_name=INFORMED_WALLET.name,
-            informed_wallet_pass=INFORMED_WALLET.passphrase,
             price_process = price_process,
-            market_name = self.market_name,
-            asset_name = self.asset_name,
+            market_name = market_name,
+            asset_name = asset_name,
             initial_asset_mint = self.initial_asset_mint,
             # proportion_taken = self.proportion_taken,
             tag = str(tag),
