@@ -14,13 +14,16 @@ from tests.vega_sim.api.test_data_raw import (
 )
 from vega_sim.api.data import (
     AccountData,
+    Fee,
     MarginLevels,
     MissingAssetError,
     Order,
     OrdersBySide,
+    Trade,
     asset_decimals,
     best_prices,
     find_asset_id,
+    get_trades,
     margin_levels,
     market_position_decimals,
     market_price_decimals,
@@ -608,6 +611,103 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = margin_levels(
+        party_id="party",
+        market_id="market",
+        data_client=data_client,
+        data_client_v1=None,
+    )
+
+    assert res == expected
+
+
+@patch("vega_sim.api.data.asset_decimals")
+@patch("vega_sim.api.data.market_price_decimals")
+@patch("vega_sim.api.data.market_position_decimals")
+@patch("vega_sim.api.data_raw.market_info")
+def test_get_trades(
+    mk_mkt_info,
+    mk_pos_decimals,
+    mk_price_decimals,
+    mk_asset_decimals,
+    trading_data_v2_servicer_and_port,
+):
+    expected = [
+        Trade(
+            id="t1",
+            market_id="m1",
+            price=10,
+            size=10,
+            buyer="b1",
+            seller="s1",
+            aggressor=vega_protos.vega.SIDE_BUY,
+            buy_order="bo1",
+            sell_order="so1",
+            timestamp=100,
+            trade_type=vega_protos.vega.Trade.TYPE_DEFAULT,
+            buyer_fee=Fee(maker_fee=10, infrastructure_fee=1.2, liquidity_fee=1.4),
+            seller_fee=Fee(maker_fee=20, infrastructure_fee=12.2, liquidity_fee=14.4),
+            buyer_auction_batch=100,
+            seller_auction_batch=96,
+        )
+    ]
+
+    def ListTrades(self, request, context):
+        return data_node_protos_v2.trading_data.ListTradesResponse(
+            trades=data_node_protos_v2.trading_data.TradeConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.TradeEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Trade(
+                            id="t1",
+                            market_id="m1",
+                            price="100",
+                            size=10,
+                            buyer="b1",
+                            seller="s1",
+                            aggressor=vega_protos.vega.SIDE_BUY,
+                            buy_order="bo1",
+                            sell_order="so1",
+                            timestamp=100,
+                            type=vega_protos.vega.Trade.TYPE_DEFAULT,
+                            buyer_fee=vega_protos.vega.Fee(
+                                maker_fee="100",
+                                infrastructure_fee="12",
+                                liquidity_fee="14",
+                            ),
+                            seller_fee=vega_protos.vega.Fee(
+                                maker_fee="200",
+                                infrastructure_fee="122",
+                                liquidity_fee="144",
+                            ),
+                            buyer_auction_batch=100,
+                            seller_auction_batch=96,
+                        ),
+                    )
+                ],
+            )
+        )
+
+    mk_asset_decimals.return_value = 1
+    mk_pos_decimals.return_value = 0
+    mk_price_decimals.return_value = 1
+
+    mk_mkt = MagicMock()
+    mk_mkt_info.return_value = mk_mkt
+    mk_mkt.tradable_instrument.instrument.future.settlement_asset = "a1"
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListTrades = ListTrades
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = get_trades(
         party_id="party",
         market_id="market",
         data_client=data_client,
