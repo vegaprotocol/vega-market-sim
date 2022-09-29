@@ -26,7 +26,7 @@ def replay_run_context(
             vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
             while next_tx_type:
-                time.sleep(0.05)
+                time.sleep(0.001)
                 vega.wait_for_total_catchup()
                 tx_type = TransactionType._value2member_map_[
                     int.from_bytes(next_tx_type, "big")
@@ -37,9 +37,6 @@ def replay_run_context(
                     tx = tx_history.read(int_len)
                     transaction = core_proto.SubmitTransactionRequest()
                     transaction.ParseFromString(tx)
-
-                    # input_data = transaction_proto.InputData()
-                    # input_data.ParseFromString(transaction.tx.input_data)
                     vega.wallet.submit_raw_transaction(transaction)
                 elif tx_type == TransactionType.STEP:
                     steps = tx_history.read(TRANSACTION_LEN_BYTES)
@@ -64,7 +61,6 @@ def replay_run_context(
                     )
                     vega.wait_fn(1)
                 next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
-
             yield vega
 
 

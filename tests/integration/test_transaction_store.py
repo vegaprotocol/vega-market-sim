@@ -34,5 +34,5 @@ def test_transaction_store():
         vega.wait_for_core_catchup()
         final_oi_replay_2 = vega.market_data(market_id=market_id).open_interest
 
-    assert final_oi_replay_2 == final_oi_replay
     assert final_oi == final_oi_replay
+    assert final_oi_replay_2 == final_oi_replay

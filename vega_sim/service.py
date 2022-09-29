@@ -290,6 +290,10 @@ class VegaService(ABC):
                 Optional[str], key name stored in metadata. Defaults to None.
         """
         asset_decimals = self.asset_decimals[asset]
+        curr_acct = self.party_account(
+            wallet_name=wallet_name, asset_id=asset, market_id=None
+        ).general
+
         faucet.mint(
             self.wallet.public_key(wallet_name, key_name),
             asset,
@@ -298,7 +302,19 @@ class VegaService(ABC):
         )
         self.wait_fn(1)
         self.wait_for_core_catchup()
-        self.wait_fn(2)
+        for i in range(500):
+            self.wait_fn(1)
+            time.sleep(0.0005 * 1.01**i)
+            post_acct = self.party_account(
+                wallet_name=wallet_name, asset_id=asset, market_id=None
+            ).general
+            if post_acct > curr_acct:
+                return
+
+        raise Exception(
+            f"Failure minting asset {asset} for party {wallet_name}. Funds never"
+            " appeared in party account"
+        )
 
     def forward(self, time: str) -> None:
         """Steps chain forward a given amount of time, either with an amount of time or
