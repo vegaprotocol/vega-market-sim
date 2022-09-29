@@ -20,12 +20,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     TRADER_WALLET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    INFORMED_WALLET,
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
     OpenAuctionPass,
     ExponentialShapedMarketMaker,
     PriceSensitiveMarketOrderTrader,
+    InformedTrader,
 )
 
 
@@ -220,6 +222,18 @@ class CurveMarketMaker(Scenario):
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=str(tag),
         )
+
+        info_trader = InformedTrader(
+            wallet_name = INFORMED_WALLET.name,
+            wallet_pass = INFORMED_WALLET.passphrase,
+            price_process = price_process,
+            market_name = market_name,
+            asset_name = asset_name,
+            initial_asset_mint = self.initial_asset_mint,
+            # proportion_taken = self.proportion_taken,
+            tag = str(tag),
+        )
+
         env = MarketEnvironmentWithState(
             agents=[
                 market_manager,
@@ -228,6 +242,7 @@ class CurveMarketMaker(Scenario):
                 sensitive_mo_trader,
                 auctionpass1,
                 auctionpass2,
+                info_trader,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,

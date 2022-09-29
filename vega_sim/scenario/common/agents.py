@@ -1481,7 +1481,7 @@ class InformedTrader(StateAgentWithWallet):
         market_name: str = None,
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
-        proportion_taken: float = 0.5,
+        proportion_taken: float = 0.8,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)

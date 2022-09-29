@@ -36,6 +36,10 @@ AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 # Terminate the market and send settlment price
 TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 
+# informed trader wallet
+INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
+
+
 
 class OptimalMarketMaker(StateAgentWithWallet):
     def __init__(
