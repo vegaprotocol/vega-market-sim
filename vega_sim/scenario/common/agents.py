@@ -1656,8 +1656,10 @@ class MomentumTrader(StateAgentWithWallet):
         duration: Optional[float] = 120,
         offset_levels: int = 10,
         tag: str = "",
+        key_name: str = None
     ):
         super().__init__(wallet_name, wallet_pass)
+        self.key_name = key_name
         self.market_name = market_name
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
@@ -1741,6 +1743,7 @@ class MomentumTrader(StateAgentWithWallet):
                     volume=volume,
                     wait=False,
                     fill_or_kill=False,
+                    key_name=self.key_name,
                 )
             else:
                 best_bid, best_ask = self.vega.best_prices(market_id=self.market_id)
@@ -1760,6 +1763,7 @@ class MomentumTrader(StateAgentWithWallet):
                     price=price,
                     expires_at=expires_at,
                     wait=False,
+                    key_name=self.key_name,
                 )
 
     def _MACD(self):
