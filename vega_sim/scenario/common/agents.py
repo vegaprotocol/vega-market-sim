@@ -74,8 +74,10 @@ class MarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
+        key_name: str = None,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
+        self.key_name = key_name
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -152,6 +154,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name
             )
 
 
