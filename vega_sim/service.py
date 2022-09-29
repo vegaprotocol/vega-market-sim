@@ -1377,18 +1377,21 @@ class VegaService(ABC):
 
     def get_trades(
         self,
-        party_id: Optional[str] = None,
-        market_id: Optional[str] = None,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
         order_id: Optional[str] = None,
     ) -> List[data.Trade]:
         """Loads executed trades for a given query of party/market/specific order from
         data node. Converts values to proper decimal output.
 
         Args:
-            party_id:
-                optional str, Restrict to trades for a specific party
             market_id:
-                optional str, Restrict to trades on a specific market
+                str, Restrict to trades on a specific market
+            wallet_name:
+                optional str, Restrict to trades for a specific wallet
+            key_name:
+                optional str, Select a different key to the default within a given wallet
             order_id:
                 optional str, Restrict to trades for a specific order
 
@@ -1403,7 +1406,7 @@ class VegaService(ABC):
         return data.get_trades(
             self.trading_data_client_v2,
             data_client_v1=self.trading_data_client,
-            party_id=party_id,
+            party_id=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             order_id=order_id,
             market_asset_decimals_map={market_id: asset_dp}

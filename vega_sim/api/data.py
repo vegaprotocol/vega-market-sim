@@ -697,8 +697,8 @@ def margin_levels(
 def get_trades(
     data_client: vac.VegaTradingDataClientV2,
     data_client_v1: vac.VegaTradingDataClient,
+    market_id: str,
     party_id: Optional[str] = None,
-    market_id: Optional[str] = None,
     order_id: Optional[str] = None,
     market_price_decimals_map: Optional[Dict[str, int]] = None,
     market_position_decimals_map: Optional[Dict[str, int]] = None,
