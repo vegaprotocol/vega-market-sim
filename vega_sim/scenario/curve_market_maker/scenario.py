@@ -108,6 +108,7 @@ class CurveMarketMaker(Scenario):
         self.market_maker_base_order_size = market_maker_base_order_size
         self.market_maker_tick_spacing = market_maker_tick_spacing
         self.market_maker_max_order = market_maker_max_order
+        self.proportion_taken = self.proportion_taken
 
     def _generate_price_process(
         self,
@@ -230,7 +231,7 @@ class CurveMarketMaker(Scenario):
             market_name = market_name,
             asset_name = asset_name,
             initial_asset_mint = self.initial_asset_mint,
-            # proportion_taken = self.proportion_taken,
+            proportion_taken = self.proportion_taken,
             tag = str(tag),
         )
 

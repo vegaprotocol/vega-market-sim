@@ -48,6 +48,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
         wallet_pass: str,
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
+        informed_wallet_name: str,
+        informed_wallet_pass: str,
         price_process: List[float],
         initial_asset_mint: float = 1000000,
         spread: float = 0.002,

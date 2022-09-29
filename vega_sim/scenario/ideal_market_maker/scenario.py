@@ -84,6 +84,7 @@ class IdealMarketMaker(Scenario):
         self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
         self.state_extraction_fn = state_extraction_fn
+        self.proportion_taken = self.proportion_taken
 
     def set_up_background_market(
         self,
@@ -197,7 +198,7 @@ class IdealMarketMaker(Scenario):
             market_name = market_name,
             asset_name = asset_name,
             initial_asset_mint = self.initial_asset_mint,
-            # proportion_taken = self.proportion_taken,
+            proportion_taken = self.proportion_taken,
             tag = str(tag),
         )
 

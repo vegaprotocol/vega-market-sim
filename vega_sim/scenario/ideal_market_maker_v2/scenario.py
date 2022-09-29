@@ -98,6 +98,7 @@ class IdealMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.settle_at_end = settle_at_end
+        self.proportion_taken = self.proportion_taken
 
     def _generate_price_process(
         self,
