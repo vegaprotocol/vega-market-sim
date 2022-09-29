@@ -30,7 +30,7 @@ LIQUIDITY = WalletConfig("liquidity", "liquiditypass")
 TERMINATE_WALLET = WalletConfig("terminate", "terminate")
 
 # informed trader wallet
-INFORMEDT_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
+INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
 
 
 class OptimalMarketMaker(StateAgentWithWallet):
@@ -780,12 +780,12 @@ class InformedTrader(StateAgentWithWallet):
         price_process: List[float],
         market_name: str = None,
         asset_name: str = None,
-        initial_asset_info_trader_mint: float = 1e8,
-        proportion_taken: float = 0.5,
+        initial_asset_mint: float = 1e8,
+        proportion_taken: float = 0.8,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
-        self.initial_asset_infor_trader_mint = initial_asset_info_trader_mint
+        self.initial_asset_mint = initial_asset_mint
         self.price_process = price_process
         self.current_step = 0
         self.sim_length = len(price_process)
