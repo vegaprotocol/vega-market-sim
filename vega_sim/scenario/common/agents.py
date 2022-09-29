@@ -154,7 +154,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
-                key_name=self.key_name
+                key_name=self.key_name,
             )
 
 
@@ -1287,7 +1287,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         spread: Optional[float] = None,
         mean: Optional[float] = 2.0,
         sigma: Optional[float] = 1.0,
-        key_name: str = None
+        key_name: str = None,
     ):
         """Init the object and class attributes.
 
@@ -1656,7 +1656,7 @@ class MomentumTrader(StateAgentWithWallet):
         duration: Optional[float] = 120,
         offset_levels: int = 10,
         tag: str = "",
-        key_name: str = None
+        key_name: str = None,
     ):
         super().__init__(wallet_name, wallet_pass)
         self.key_name = key_name
