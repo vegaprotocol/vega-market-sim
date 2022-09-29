@@ -57,6 +57,7 @@ def replay_run_context(
                     curr_acct = party_account(
                         pub_key=pub_key,
                         asset_id=asset,
+                        market_id=None,
                         data_client=vega.trading_data_client,
                     ).general
 
@@ -74,6 +75,7 @@ def replay_run_context(
                         post_acct = party_account(
                             pub_key=pub_key,
                             asset_id=asset,
+                            market_id=None,
                             data_client=vega.trading_data_client,
                         ).general
                         if post_acct > curr_acct:
