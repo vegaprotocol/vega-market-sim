@@ -199,7 +199,7 @@ class IdealMarketMaker(Scenario):
             market_name = self.market_name,
             asset_name = self.asset_name,
             initial_asset_mint = self.initial_asset_mint,
-            proportion_taken = self.proportion_taken,
+            # proportion_taken = self.proportion_taken,
             tag = str(tag),
         )
 
