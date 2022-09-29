@@ -1287,6 +1287,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         spread: Optional[float] = None,
         mean: Optional[float] = 2.0,
         sigma: Optional[float] = 1.0,
+        key_name: str = None
     ):
         """Init the object and class attributes.
 
@@ -1330,6 +1331,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         """
 
         super().__init__(wallet_name + str(tag), wallet_pass)
+        self.key_name = key_name
 
         self.current_step = 0
 
@@ -1457,6 +1459,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             wait=False,
             time_in_force=time_in_force,
             expires_at=expires_at,
+            key_name=self.key_name,
         )
 
     def _cancel_order(self, vega_state: VegaState):
@@ -1472,6 +1475,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 order_id=order.id,
+                key_name=self.key_name,
             )
 
 
