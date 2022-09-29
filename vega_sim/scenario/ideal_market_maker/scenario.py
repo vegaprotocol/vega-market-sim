@@ -59,6 +59,7 @@ class IdealMarketMaker(Scenario):
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
+        proportion_taken: float = 0.8,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -84,7 +85,7 @@ class IdealMarketMaker(Scenario):
         self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
         self.state_extraction_fn = state_extraction_fn
-        self.proportion_taken = self.proportion_taken
+        self.proportion_taken = proportion_taken
 
     def set_up_background_market(
         self,

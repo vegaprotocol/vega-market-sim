@@ -63,6 +63,7 @@ class IdealMarketMaker(Scenario):
         price_process_fn: Optional[Callable[[None], List[float]]] = None,
         market_order_trader_base_order_size: float = 1,
         settle_at_end: bool = True,
+        proportion_taken: float = 0.8,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -98,7 +99,7 @@ class IdealMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.settle_at_end = settle_at_end
-        self.proportion_taken = self.proportion_taken
+        self.proportion_taken = proportion_taken
 
     def _generate_price_process(
         self,

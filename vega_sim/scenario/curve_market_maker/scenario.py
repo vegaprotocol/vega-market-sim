@@ -70,6 +70,7 @@ class CurveMarketMaker(Scenario):
         market_maker_base_order_size: float = 0.1,
         market_maker_tick_spacing: float = 1,
         market_maker_max_order: float = 200,
+        proportion_taken: float = 0.8,
     ):
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
@@ -108,7 +109,7 @@ class CurveMarketMaker(Scenario):
         self.market_maker_base_order_size = market_maker_base_order_size
         self.market_maker_tick_spacing = market_maker_tick_spacing
         self.market_maker_max_order = market_maker_max_order
-        self.proportion_taken = self.proportion_taken
+        self.proportion_taken = proportion_taken
 
     def _generate_price_process(
         self,
