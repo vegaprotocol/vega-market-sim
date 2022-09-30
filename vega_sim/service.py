@@ -187,7 +187,7 @@ class VegaService(ABC):
             channel = grpc.insecure_channel(
                 self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
             )
-            grpc.channel_ready_future(channel).result(timeout=10)
+            grpc.channel_ready_future(channel).result(timeout=30)
             self._trading_data_client = vac.VegaTradingDataClient(
                 self.data_node_grpc_url,
                 channel=channel,
@@ -200,7 +200,7 @@ class VegaService(ABC):
             channel = grpc.insecure_channel(
                 self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
             )
-            grpc.channel_ready_future(channel).result(timeout=10)
+            grpc.channel_ready_future(channel).result(timeout=30)
             self._trading_data_client_v2 = vac.VegaTradingDataClientV2(
                 self.data_node_grpc_url,
                 channel=channel,
