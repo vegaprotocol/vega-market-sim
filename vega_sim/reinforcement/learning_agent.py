@@ -525,12 +525,15 @@ class LearningAgent(StateAgentWithWallet):
 
         pbar = tqdm(total=n_epochs)
         for epoch in range(n_epochs):
-            for i, (
-                batch_state,
-                batch_action_discrete,
-                batch_action_volume,
-                batch_reward,
-                batch_next_state,
+            for (
+                i,
+                (
+                    batch_state,
+                    batch_action_discrete,
+                    batch_action_volume,
+                    batch_reward,
+                    batch_next_state,
+                ),
             ) in enumerate(dataloader):
                 next_state_terminal = torch.isnan(
                     batch_next_state

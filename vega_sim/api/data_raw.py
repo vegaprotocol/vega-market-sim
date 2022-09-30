@@ -287,3 +287,18 @@ def margin_levels(
         request_func=lambda x: data_client.ListMarginLevels(x).margin_levels,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+def get_trades(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    party_id: Optional[str] = None,
+    order_id: Optional[str] = None,
+) -> List[vega_protos.vega.Trade]:
+    return unroll_v2_pagination(
+        data_node_protos_v2.trading_data.ListTradesRequest(
+            market_id=market_id, party_id=party_id, order_id=order_id
+        ),
+        request_func=lambda x: data_client.ListTrades(x).trades,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

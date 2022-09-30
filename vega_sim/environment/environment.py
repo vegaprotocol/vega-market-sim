@@ -20,7 +20,7 @@ For examples of this setup, see examples/agent_market.
 
 """
 
-
+import time
 import datetime
 import logging
 import random
@@ -28,6 +28,7 @@ from collections import namedtuple
 from typing import Any, Callable, Dict, List, Optional
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
+from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
 
@@ -215,7 +216,7 @@ class MarketEnvironment:
                         f" {(end_time - start_time) / self.block_length_seconds} blocks"
                         " produced this step"
                     )
-                    vega.forward(f"{to_forward}s")
+                    vega.wait_fn(to_forward)
                 start_time = end_time
 
             if (
@@ -359,6 +360,84 @@ class MarketEnvironmentWithState(MarketEnvironment):
     def step(self, vega: VegaService) -> None:
         vega.wait_for_datanode_sync()
         state = self.state_func(vega)
+        for agent in (
+            sorted(self.agents, key=lambda _: random.random())
+            if self.random_agent_ordering
+            else self.agents
+        ):
+            agent.step(state)
+
+
+class NetworkEnvironment(MarketEnvironmentWithState):
+    def __init__(
+        self,
+        agents: List[StateAgent],
+        n_steps: int = -1,
+        step_length_seconds: int = 5,
+        random_agent_ordering: bool = True,
+        vega_service: Optional[VegaServiceNetwork] = None,
+        state_func: Optional[Callable[[VegaService], VegaState]] = None,
+        state_extraction_fn: Optional[
+            Callable[[VegaServiceNetwork, List[Agent]], Any]
+        ] = None,
+        state_extraction_freq: int = 10,
+    ):
+        super().__init__(
+            agents=agents,
+            n_steps=n_steps,
+            random_agent_ordering=random_agent_ordering,
+            step_length_seconds=step_length_seconds,
+            vega_service=vega_service,
+            state_extraction_fn=state_extraction_fn,
+            state_extraction_freq=state_extraction_freq,
+        )
+        self.state_func = (
+            state_func if state_func is not None else self._default_state_extraction
+        )
+
+    def run(self):
+
+        if self._vega is None:
+            with VegaServiceNetwork(
+                use_full_vega_wallet=True,
+            ) as vega:
+                return self._run(vega)
+        else:
+            return self._run(self._vega)
+
+    def _run(self, vega):
+
+        state_values = []
+
+        # Initialise agents without minting assets
+        for agent in self.agents:
+            agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
+
+        i = 0
+        # A negative self.n_steps will loop indefinitely
+        while i != self.n_steps:
+            i += 1
+            self.step(vega)
+
+            if (
+                self._state_extraction_fn is not None
+                and i % self._state_extraction_freq == 0
+            ):
+                state_values.append(self._state_extraction_fn(vega, self.agents))
+
+            time.sleep(self.step_length_seconds)
+
+        for agent in self.agents:
+            agent.finalise()
+
+        if self._state_extraction_fn is not None:
+            state_values.append(self._state_extraction_fn(vega, self.agents))
+            return state_values
+
+    def step(self, vega: VegaServiceNetwork) -> None:
+        t = time.time()
+        state = self.state_func(vega)
+        logging.debug(f"Get state took {time.time() - t} seconds.")
         for agent in (
             sorted(self.agents, key=lambda _: random.random())
             if self.random_agent_ordering

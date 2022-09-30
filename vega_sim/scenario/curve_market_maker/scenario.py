@@ -9,9 +9,7 @@ from vega_sim.scenario.common.utils.price_process import (
 )
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import (
-    RW_model,
-)
+from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
@@ -20,12 +18,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     TRADER_WALLET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    INFORMED_WALLET,
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
     OpenAuctionPass,
     ExponentialShapedMarketMaker,
     PriceSensitiveMarketOrderTrader,
+    InformedTrader,
 )
 
 
@@ -69,6 +69,7 @@ class CurveMarketMaker(Scenario):
         market_maker_base_order_size: float = 0.1,
         market_maker_tick_spacing: float = 1,
         market_maker_max_order: float = 200,
+        proportion_taken: float = 0.8,
     ):
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
@@ -109,6 +110,7 @@ class CurveMarketMaker(Scenario):
         self.market_maker_base_order_size = market_maker_base_order_size
         self.market_maker_tick_spacing = market_maker_tick_spacing
         self.market_maker_max_order = market_maker_max_order
+        self.proportion_taken = proportion_taken
 
     def _generate_price_process(
         self,
@@ -224,6 +226,18 @@ class CurveMarketMaker(Scenario):
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=str(tag),
         )
+
+        info_trader = InformedTrader(
+            wallet_name=INFORMED_WALLET.name,
+            wallet_pass=INFORMED_WALLET.passphrase,
+            price_process=price_process,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
+            proportion_taken=self.proportion_taken,
+            tag=str(tag),
+        )
+
         env = MarketEnvironmentWithState(
             agents=[
                 market_manager,
@@ -232,6 +246,7 @@ class CurveMarketMaker(Scenario):
                 sensitive_mo_trader,
                 auctionpass1,
                 auctionpass2,
+                info_trader,
             ],
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,

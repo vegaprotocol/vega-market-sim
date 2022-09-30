@@ -5,9 +5,7 @@ from typing import Any, Callable, List, Optional, Tuple, Dict
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import (
-    RW_model,
-)
+from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.comprehensive_market.agents import (
@@ -16,6 +14,7 @@ from vega_sim.scenario.comprehensive_market.agents import (
     AUCTION2_WALLET,
     TERMINATE_WALLET,
     create_agent_wallets,
+    INFORMED_WALLET,
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
@@ -24,6 +23,7 @@ from vega_sim.scenario.common.agents import (
     LimitOrderTrader,
     MomentumTrader,
     OpenAuctionPass,
+    InformedTrader,
 )
 
 
@@ -304,6 +304,17 @@ class ComprehensiveMarket(Scenario):
             block_length_seconds=self.block_length_seconds,
             state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
+        )
+
+        info_trader = InformedTrader(
+            wallet_name=INFORMED_WALLET.name,
+            wallet_pass=INFORMED_WALLET.passphrase,
+            price_process=price_process,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
+            proportion_taken=self.proportion_taken,
+            tag=str(tag),
         )
         return env
 

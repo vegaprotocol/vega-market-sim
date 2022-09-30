@@ -1,10 +1,12 @@
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
+import os
+import dotenv
 import inflection
 import requests
 from google.protobuf.json_format import MessageToDict
-from vega_sim.wallet.base import Wallet
+from vega_sim.wallet.base import Wallet, VEGA_DEFAULT_KEY_NAME
 
 WALLET_CREATION_URL = "{wallet_server_url}/api/v1/wallets"
 WALLET_LOGIN_URL = "{wallet_server_url}/api/v1/auth/token"
@@ -23,6 +25,11 @@ class VegaWallet(Wallet):
         self.wallet_url = wallet_url
         self.login_tokens = {}
         self.pub_keys = {}
+
+        dotenv.load_dotenv()
+        self.vega_default_key_name = os.environ.get(
+            "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
+        )
 
     def create_wallet(
         self,
@@ -57,11 +64,12 @@ class VegaWallet(Wallet):
         token = response.json()["token"]
 
         self.login_tokens[name] = token
-        self.pub_keys[name] = self.generate_keypair(
+        self.generate_keypair(
             token,
             passphrase,
-            metadata=[{"name": "default_key"}],
+            metadata=[{"name": self.vega_default_key_name}],
         )
+        self.pub_keys[name] = self.get_keypairs(wallet_name=name)
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -81,7 +89,7 @@ class VegaWallet(Wallet):
         )
         response.raise_for_status()
         self.login_tokens[name] = response.json()["token"]
-        self.pub_keys[name] = self.get_keypairs(name)[0]["pub"]
+        self.pub_keys[name] = self.get_keypairs(name)
         return self.login_tokens[name]
 
     def generate_keypair(
@@ -115,23 +123,32 @@ class VegaWallet(Wallet):
             json=req,
         )
         response.raise_for_status()
-        return response.json()["key"]["pub"]
+        return list(response.json()["key"]["pub"])
 
-    def get_keypairs(self, wallet_name: str) -> Dict:
+    def get_keypairs(self, wallet_name: str) -> dict:
         headers = {"Authorization": f"Bearer {self.login_tokens[wallet_name]}"}
         response = requests.get(
             WALLET_KEY_URL.format(wallet_server_url=self.wallet_url), headers=headers
         )
         response.raise_for_status()
-        return response.json()["keys"]
+        return {key["name"]: key["pub"] for key in response.json()["keys"]}
 
-    def submit_transaction(self, name: str, transaction: Any, transaction_type: str):
+    def submit_transaction(
+        self,
+        name: str,
+        transaction: Any,
+        transaction_type: str,
+        key_name: Optional[int] = None,
+    ):
+
+        pub_key = self.public_key(name=name, key_name=key_name)
+
         headers = {"Authorization": f"Bearer {self.login_tokens[name]}"}
         submission = {
             inflection.camelize(
                 transaction_type, uppercase_first_letter=False
             ): MessageToDict(transaction),
-            "pubKey": self.pub_keys[name],
+            "pubKey": pub_key,
             "propagate": True,
         }
 
@@ -140,14 +157,20 @@ class VegaWallet(Wallet):
         response = requests.post(url, headers=headers, json=submission)
         response.raise_for_status()
 
-    def public_key(self, name: str) -> str:
-        """Return the public key associated with a given wallet name.
+    def public_key(self, name: str, key_name: Optional[str] = None) -> str:
+        """Return a public key for the given wallet name and key name.
 
         Args:
-            name:
-                str, The name to use for the wallet
+            name (str):
+                Name of the wallet.
+            key_name (str):
+                Name of the key. Defaults to None.
 
         Returns:
             str, public key
         """
-        return self.pub_keys[name]
+
+        if key_name is None:
+            return self.pub_keys[name][self.vega_default_key_name]
+        else:
+            return self.pub_keys[name][key_name]

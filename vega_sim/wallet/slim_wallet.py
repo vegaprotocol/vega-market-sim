@@ -1,8 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum, auto
+from io import BufferedWriter
 from typing import Any
 from logging import getLogger
 
 import os
+import dotenv
 import numpy as np
 from nacl.encoding import HexEncoder
 from nacl.signing import SigningKey
@@ -14,8 +17,17 @@ import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
 import vega_sim.proto.vega.commands.v1.transaction_pb2 as transaction_proto
 import vega_sim.proto.vega.commands.v1.signature_pb2 as signature_proto
 from vega_sim.wallet.vega_wallet import VegaWallet
+from vega_sim.wallet.base import VEGA_DEFAULT_KEY_NAME
 
 logger = getLogger(__name__)
+
+TRANSACTION_LEN_BYTES = 8
+
+
+class TransactionType(Enum):
+    TX = auto()
+    STEP = auto()
+    MINT = auto()
 
 
 class SlimWallet(Wallet):
@@ -25,6 +37,9 @@ class SlimWallet(Wallet):
         height_update_frequency: int = 500,
         full_wallet: Optional[VegaWallet] = None,
         full_wallet_default_pass: str = "passwd",
+        store_transactions: bool = False,
+        log_dir: Optional[str] = None,
+        tx_output: Optional[BufferedWriter] = None,
     ):
         """Creates a wallet to running key generation internally
         and directly sending transactions to the Core node
@@ -44,6 +59,10 @@ class SlimWallet(Wallet):
                 str, default 'passwd', If full wallet is passed, the password used
                     when creating dummy accounts if none are passed.
                     Use this password to log in to the Vega Console
+            store_transactions:
+                bool, default False, If True will store every transaction sent into
+                    a file, allowing replay of the chain without going through full
+                    logic of actors etc
         """
         self.core_client = core_client
         self.keys = {}
@@ -59,6 +78,10 @@ class SlimWallet(Wallet):
         self.vega_wallet = full_wallet
         self.full_wallet_default_pass = full_wallet_default_pass
 
+        self.store_transactions = store_transactions
+        self.log_dir = log_dir
+        self.tx_file = tx_output
+
         # If it turns out that customising these is useful it's trivial to
         # make a parameter
         self.num_sigs_to_create = 1000000
@@ -66,6 +89,11 @@ class SlimWallet(Wallet):
 
         self._create_nonces()
         self._create_sigs()
+
+        dotenv.load_dotenv()
+        self.vega_default_key_name = os.environ.get(
+            "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
+        )
 
     def _create_sigs(self):
         self.sigs = [os.urandom(6).hex() for _ in range(self.num_sigs_to_create)]
@@ -96,15 +124,19 @@ class SlimWallet(Wallet):
         """
         if self.vega_wallet is None:
             self.keys[name] = SigningKey.generate()
-            self.pub_keys[name] = (
-                self.keys[name].verify_key.encode(encoder=HexEncoder).decode()
-            )
+            self.pub_keys[name] = {
+                self.vega_default_key_name: self.keys[name]
+                .verify_key.encode(encoder=HexEncoder)
+                .decode()
+            }
         else:
             self.vega_wallet.create_wallet(
                 name=name,
                 passphrase=kwargs.get("passphrase", self.full_wallet_default_pass),
             )
-            self.pub_keys[name] = self.vega_wallet.public_key(name)
+            self.pub_keys[name] = {
+                self.vega_default_key_name: self.vega_wallet.public_key(name)
+            }
 
     def login(self, name: str, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
@@ -116,12 +148,20 @@ class SlimWallet(Wallet):
         if name not in self.keys:
             self.create_wallet(name=name)
 
-    def submit_transaction(self, name: str, transaction: Any, transaction_type: str):
+    def submit_transaction(
+        self,
+        name: str,
+        transaction: Any,
+        transaction_type: str,
+        key_name: Optional[str] = None,
+    ):
         # if self.remaining_until_height_update <= 0:
         #     self.block_height = self.core_client.LastBlockHeight(
         #         core_proto.LastBlockHeightRequest()
         #     ).height
         #     self.remaining_until_height_update = self.height_update_frequency
+
+        pub_key = self.public_key(name=name, key_name=key_name)
 
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
@@ -138,7 +178,7 @@ class SlimWallet(Wallet):
                 algo="vega/ed25519",
                 version=1,
             ),
-            pub_key=self.pub_keys[name],
+            pub_key=pub_key,
             version=3,
             pow=transaction_proto.ProofOfWork(
                 tid=None,
@@ -148,19 +188,37 @@ class SlimWallet(Wallet):
         request = core_proto.SubmitTransactionRequest(
             tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_ASYNC
         )
+        if self.store_transactions:
+            bin_repr = request.SerializeToString()
+
+            self.tx_file.write(
+                (TransactionType.TX.value).to_bytes(TRANSACTION_LEN_BYTES, "big")
+            )
+            self.tx_file.write(len(bin_repr).to_bytes(TRANSACTION_LEN_BYTES, "big"))
+            self.tx_file.write(bin_repr)
 
         submit_future = self.core_client.SubmitTransaction.future(request)
         self.pool.submit(lambda: submit_future.result())
         self.remaining_until_height_update -= 1
 
-    def public_key(self, name: str) -> str:
-        """Return the public key associated with a given wallet name.
+    def submit_raw_transaction(self, transaction: core_proto.SubmitTransactionRequest):
+        submit_future = self.core_client.SubmitTransaction.future(transaction)
+        self.pool.submit(lambda: submit_future.result())
+
+    def public_key(self, name: str, key_name: Optional[str] = None) -> str:
+        """Return a public key for the given wallet name and key name.
 
         Args:
-            name:
-                str, The name to use for the wallet
+            name (str):
+                Name of the wallet.
+            key_name (str):
+                Name of the key. Defaults to None.
 
         Returns:
             str, public key
         """
-        return self.pub_keys[name]
+
+        if key_name is None:
+            return self.pub_keys[name][self.vega_default_key_name]
+        else:
+            return self.pub_keys[name][key_name]

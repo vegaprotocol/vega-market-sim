@@ -29,6 +29,9 @@ LIQUIDITY = WalletConfig("liquidity", "liquiditypass")
 # Terminate the market and send settlment price
 TERMINATE_WALLET = WalletConfig("terminate", "terminate")
 
+# informed trader wallet
+INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
+
 
 class OptimalMarketMaker(StateAgentWithWallet):
     def __init__(
@@ -37,6 +40,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
         wallet_pass: str,
         terminate_wallet_name: str,
         terminate_wallet_pass: str,
+        informed_wallet_name: str,
+        informed_wallet_pass: str,
         price_process: List[float],
         spread: float = 0.00002,
         num_steps: int = 180,
@@ -776,7 +781,7 @@ class InformedTrader(StateAgentWithWallet):
         market_name: str = None,
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
-        proportion_taken: float = 0.5,
+        proportion_taken: float = 0.8,
         tag: str = "",
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
