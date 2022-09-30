@@ -209,14 +209,14 @@ def _position_from_proto(
 def positions_by_market(
     pub_key: str,
     market_id: str,
-    price_decimals: int,
+    position_decimals: int,
     asset_decimals: int,
     data_client: vac.VegaTradingDataClient,
 ) -> List[vega_protos.vega.Position]:
     """Output positions of a party."""
     return [
         _position_from_proto(
-            pos, price_decimals=price_decimals, asset_decimals=asset_decimals
+            pos, position_decimals=position_decimals, asset_decimals=asset_decimals
         )
         for pos in data_raw.positions_by_market(
             pub_key=pub_key, market_id=market_id, data_client=data_client
