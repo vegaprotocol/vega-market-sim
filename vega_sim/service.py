@@ -889,7 +889,7 @@ class VegaService(ABC):
             self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             data_client=self.trading_data_client,
-            price_decimals=self.market_price_decimals[market_id],
+            asset_decimals=self.asset_decimals[self.market_to_asset[market_id]],
             position_decimals=self.market_pos_decimals[market_id],
         )
 

@@ -189,14 +189,16 @@ def _order_from_proto(
 
 
 def _position_from_proto(
-    position: vega_protos.vega.Position, price_decimals: int, position_decimals: int
+    position: vega_protos.vega.Position,
+    position_decimals: int,
+    asset_decimals: int,
 ) -> Position:
     return Position(
         party_id=position.party_id,
         market_id=position.market_id,
         open_volume=num_from_padded_int(position.open_volume, position_decimals),
-        realised_pnl=num_from_padded_int(position.open_volume, price_decimals),
-        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, price_decimals),
+        realised_pnl=num_from_padded_int(position.open_volume, asset_decimals),
+        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, asset_decimals),
         average_entry_price=num_from_padded_int(
             position.average_entry_price, position_decimals
         ),
@@ -208,13 +210,13 @@ def positions_by_market(
     pub_key: str,
     market_id: str,
     price_decimals: int,
-    position_decimals: int,
+    asset_decimals: int,
     data_client: vac.VegaTradingDataClient,
 ) -> List[vega_protos.vega.Position]:
     """Output positions of a party."""
     return [
         _position_from_proto(
-            pos, price_decimals=price_decimals, position_decimals=position_decimals
+            pos, price_decimals=price_decimals, asset_decimals=asset_decimals
         )
         for pos in data_raw.positions_by_market(
             pub_key=pub_key, market_id=market_id, data_client=data_client
