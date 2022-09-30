@@ -65,7 +65,7 @@ if __name__ == "__main__":
         vega.wait_fn(10)
         vega.wait_for_total_catchup()
 
-        market_decimals=2
+        market_decimals = 2
         vega.create_simple_market(
             market_name="XYZ:DAI_Mar22",
             proposal_wallet=MM_WALLET.name,
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
 
         market_id = vega.all_markets()[0].id
-        
+
         vega.submit_simple_liquidity(
             wallet_name=MM_WALLET.name,
             market_id=market_id,
@@ -90,11 +90,11 @@ if __name__ == "__main__":
         )
 
         mid_price = 100
-        price_delta=10**(-market_decimals+1)
-        for i in range(0,22):
+        price_delta = 10 ** (-market_decimals + 1)
+        for i in range(0, 22):
             if i == 1:
-                continue # widen the spread
-            size = 1 if i==0 else exp(-0.075*i+9)
+                continue  # widen the spread
+            size = 1 if i == 0 else exp(-0.075 * i + 9)
             vega.submit_order(
                 trading_wallet=MM_WALLET.name,
                 market_id=market_id,
@@ -102,7 +102,7 @@ if __name__ == "__main__":
                 order_type="TYPE_LIMIT",
                 side="SIDE_SELL",
                 volume=size,
-                price=mid_price+i*price_delta
+                price=mid_price + i * price_delta,
             )
             vega.submit_order(
                 trading_wallet=MM_WALLET2.name,
@@ -111,23 +111,24 @@ if __name__ == "__main__":
                 order_type="TYPE_LIMIT",
                 side="SIDE_BUY",
                 volume=size,
-                price=mid_price-i*price_delta
+                price=mid_price - i * price_delta,
             )
-        
-        matching_price = mid_price+price_delta
+
+        matching_price = mid_price + price_delta
         vega.submit_order(
-                trading_wallet=TRADER_WALLET.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=1,
-                price=matching_price
-            )
-        
+            trading_wallet=TRADER_WALLET.name,
+            market_id=market_id,
+            time_in_force="TIME_IN_FORCE_GTC",
+            order_type="TYPE_LIMIT",
+            side="SIDE_SELL",
+            volume=1,
+            price=matching_price,
+        )
+
         msg = "\nPausing for screenshot. Press \033]8;;{}\033\\{}\033]8;;\033\\ to continue.\n".format(
             "https://ux.stackexchange.com/questions/54461/should-i-use-the-name-enter-or-return-key",
-            "Enter/Return")
+            "Enter/Return",
+        )
         input(msg)
 
         vega.submit_order(
@@ -137,7 +138,7 @@ if __name__ == "__main__":
             order_type="TYPE_LIMIT",
             side="SIDE_BUY",
             volume=1,
-            price=matching_price
+            price=matching_price,
         )
         vega.wait_fn(2)
         input(msg)
