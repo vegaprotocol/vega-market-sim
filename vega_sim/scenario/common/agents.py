@@ -74,8 +74,10 @@ class MarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
+        key_name: str = None,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
+        self.key_name = key_name
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -152,6 +154,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )
 
 
@@ -1284,6 +1287,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         spread: Optional[float] = None,
         mean: Optional[float] = 2.0,
         sigma: Optional[float] = 1.0,
+        key_name: str = None,
     ):
         """Init the object and class attributes.
 
@@ -1327,6 +1331,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         """
 
         super().__init__(wallet_name + str(tag), wallet_pass)
+        self.key_name = key_name
 
         self.current_step = 0
 
@@ -1454,6 +1459,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             wait=False,
             time_in_force=time_in_force,
             expires_at=expires_at,
+            key_name=self.key_name,
         )
 
     def _cancel_order(self, vega_state: VegaState):
@@ -1469,6 +1475,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 trading_wallet=self.wallet_name,
                 market_id=self.market_id,
                 order_id=order.id,
+                key_name=self.key_name,
             )
 
 
@@ -1649,8 +1656,10 @@ class MomentumTrader(StateAgentWithWallet):
         duration: Optional[float] = 120,
         offset_levels: int = 10,
         tag: str = "",
+        key_name: str = None,
     ):
         super().__init__(wallet_name, wallet_pass)
+        self.key_name = key_name
         self.market_name = market_name
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
@@ -1734,6 +1743,7 @@ class MomentumTrader(StateAgentWithWallet):
                     volume=volume,
                     wait=False,
                     fill_or_kill=False,
+                    key_name=self.key_name,
                 )
             else:
                 best_bid, best_ask = self.vega.best_prices(market_id=self.market_id)
@@ -1753,6 +1763,7 @@ class MomentumTrader(StateAgentWithWallet):
                     price=price,
                     expires_at=expires_at,
                     wait=False,
+                    key_name=self.key_name,
                 )
 
     def _MACD(self):
