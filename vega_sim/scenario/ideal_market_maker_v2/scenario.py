@@ -15,12 +15,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    INFORMED_WALLET,
     OptimalMarketMaker,
 )
 from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
+    InformedTrader,
 )
 
 
@@ -97,7 +99,7 @@ class IdealMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.settle_at_end = settle_at_end
-        proportion_taken=self.proportion_taken,
+        self.proportion_taken = proportion_taken
 
     def _generate_price_process(
         self,
@@ -208,6 +210,17 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
+            tag=str(tag),
+        )
+
+        info_trader = InformedTrader(
+            wallet_name=INFORMED_WALLET.name,
+            wallet_pass=INFORMED_WALLET.passphrase,
+            price_process=price_process,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
+            proportion_taken=self.proportion_taken,
             tag=str(tag),
         )
 
