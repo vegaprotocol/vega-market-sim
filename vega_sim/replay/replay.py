@@ -2,6 +2,7 @@ import argparse
 import logging
 import time
 from contextlib import contextmanager
+from vega_sim.api.data import party_account
 
 import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
 from vega_sim.api.faucet import mint
@@ -26,6 +27,7 @@ def replay_run_context(
             vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
             while next_tx_type:
+                time.sleep(0.01)
                 vega.wait_for_total_catchup()
                 tx_type = TransactionType._value2member_map_[
                     int.from_bytes(next_tx_type, "big")
@@ -36,9 +38,6 @@ def replay_run_context(
                     tx = tx_history.read(int_len)
                     transaction = core_proto.SubmitTransactionRequest()
                     transaction.ParseFromString(tx)
-
-                    # input_data = transaction_proto.InputData()
-                    # input_data.ParseFromString(transaction.tx.input_data)
                     vega.wallet.submit_raw_transaction(transaction)
                 elif tx_type == TransactionType.STEP:
                     steps = tx_history.read(TRANSACTION_LEN_BYTES)
@@ -50,20 +49,38 @@ def replay_run_context(
                     asset_len = int.from_bytes(
                         tx_history.read(TRANSACTION_LEN_BYTES), "big"
                     )
-                    pub_key = tx_history.read(pub_key_len)
-                    asset = tx_history.read(asset_len)
+                    pub_key = tx_history.read(pub_key_len).decode("utf-8")
+                    asset = tx_history.read(asset_len).decode("utf-8")
                     amount = int.from_bytes(
                         tx_history.read(TRANSACTION_LEN_BYTES), "big"
                     )
+                    curr_acct = party_account(
+                        pub_key=pub_key,
+                        asset_id=asset,
+                        market_id=None,
+                        data_client=vega.trading_data_client,
+                    ).general
+
                     mint(
-                        pub_key.decode("utf-8"),
-                        asset.decode("utf-8"),
+                        pub_key,
+                        asset,
                         amount,
                         faucet_url=vega.faucet_url,
                     )
                     vega.wait_fn(1)
+                    vega.wait_for_core_catchup()
+                    for i in range(500):
+                        vega.wait_fn(1)
+                        time.sleep(0.0005 * 1.01**i)
+                        post_acct = party_account(
+                            pub_key=pub_key,
+                            asset_id=asset,
+                            market_id=None,
+                            data_client=vega.trading_data_client,
+                        ).general
+                        if post_acct > curr_acct:
+                            break
                 next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
-
             yield vega
 
 

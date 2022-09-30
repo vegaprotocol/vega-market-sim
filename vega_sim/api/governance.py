@@ -421,11 +421,19 @@ def _make_and_wait_for_proposal(
     )
     logger.debug("Waiting for proposal acceptance")
 
-    time_forward_fn()
-    proposal = wait_for_acceptance(
-        proposal.reference,
-        lambda p: _proposal_loader(p, data_client),
-    )
+    # Allow one failure, forward once more
+    try:
+        time_forward_fn()
+        proposal = wait_for_acceptance(
+            proposal.reference,
+            lambda p: _proposal_loader(p, data_client),
+        )
+    except ProposalNotAcceptedError:
+        time_forward_fn()
+        proposal = wait_for_acceptance(
+            proposal.reference,
+            lambda p: _proposal_loader(p, data_client),
+        )
 
     prop_state = enum_to_str(
         vega_protos.governance.Proposal.State, proposal.proposal.state
