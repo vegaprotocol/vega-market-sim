@@ -368,9 +368,10 @@ def best_prices(
         else market_price_decimals(market_id=market_id, data_client=data_client)
     )
 
-    return num_from_padded_int(
-        mkt_data.best_static_bid_price, mkt_price_dp
-    ), num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp)
+    return (
+        num_from_padded_int(mkt_data.best_static_bid_price, mkt_price_dp),
+        num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp),
+    )
 
 
 def open_orders_by_market(

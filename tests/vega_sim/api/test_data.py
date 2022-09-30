@@ -42,9 +42,7 @@ from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
     add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
 )
-from vega_sim.proto.vega.api.v1.core_pb2_grpc import (
-    add_CoreServiceServicer_to_server,
-)
+from vega_sim.proto.vega.api.v1.core_pb2_grpc import add_CoreServiceServicer_to_server
 
 
 def test_party_account(trading_data_servicer_and_port):

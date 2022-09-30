@@ -11,6 +11,7 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
 from vega_sim.scenario.common.agents import (
     MomentumTrader,
     MarketOrderTrader,
+    InformedTrader,
 )
 
 
@@ -33,6 +34,7 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LiquifeeAccount",
     "InfrafeeAccount",
     "Total Traded Notional",
+    "Informed Trader Notional",
     "Target Stake",
     "Market Open Interest",
     "Market Trading mode",
@@ -72,6 +74,15 @@ def _ideal_market_maker_single_data_extraction(
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
         )
     ][0]
+
+    # informed_agent = [
+    #     agent
+    #     for agent in agents
+    #     if isinstance(
+    #         agent,
+    #         (InformedTrader),
+    #     )
+    # ][0]
 
     general_lp, margin_lp, bond_lp = vega.party_account(
         wallet_name=mm_agent.wallet_name,
@@ -141,6 +152,7 @@ def _ideal_market_maker_single_data_extraction(
         "LiquifeeAccount": liquifee,
         "InfrafeeAccount": infrafee,
         "Total Traded Notional": traded_notional,
+        "Informed Trader Notional": traded_notional,
         "Market Trading mode": trading_mode,
         "Market State": market_state,
     }

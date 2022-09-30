@@ -5,12 +5,8 @@ from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker.utils.price_process import (
-    RW_model,
-)
-from vega_sim.scenario.ideal_market_maker.environments import (
-    MarketEnvironment,
-)
+from vega_sim.scenario.ideal_market_maker.utils.price_process import RW_model
+from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.ideal_market_maker.agents import (
     MM_WALLET,
@@ -19,12 +15,14 @@ from vega_sim.scenario.ideal_market_maker.agents import (
     RANDOM_WALLET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    INFORMED_WALLET,
     LIQUIDITY,
     OptimalLiquidityProvider,
     OptimalMarketMaker,
     MarketOrderTrader,
     LimitOrderTrader,
     OpenAuctionPass,
+    InformedTrader,
 )
 
 
@@ -57,6 +55,7 @@ class IdealMarketMaker(Scenario):
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
+        proportion_taken: float = 0.8,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -82,6 +81,7 @@ class IdealMarketMaker(Scenario):
         self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
         self.state_extraction_fn = state_extraction_fn
+        self.proportion_taken = proportion_taken
 
     def set_up_background_market(
         self,
@@ -188,6 +188,17 @@ class IdealMarketMaker(Scenario):
             commitamount=self.lp_commitamount,
         )
 
+        info_trader = InformedTrader(
+            wallet_name=INFORMED_WALLET.name,
+            wallet_pass=INFORMED_WALLET.passphrase,
+            price_process=price_process,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
+            proportion_taken=self.proportion_taken,
+            tag=str(tag),
+        )
+
         env = MarketEnvironment(
             base_agents=[
                 market_maker,
@@ -195,7 +206,8 @@ class IdealMarketMaker(Scenario):
                 randomtrader,
                 auctionpass1,
                 auctionpass2,
-                # liquidityprovider,
+                info_trader,
+                liquidityprovider,
             ],
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,

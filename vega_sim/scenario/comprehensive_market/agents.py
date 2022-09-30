@@ -12,6 +12,9 @@ AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 # Set up the wallet for market termination
 TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 
+# informed trader wallet
+INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
+
 
 def create_agent_wallets(n: int = 1, prefix: str = "agent"):
     """Function creates a list of n WalletConfig tuples for use in a scenario"""

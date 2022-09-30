@@ -5,9 +5,7 @@ from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import (
-    RW_model,
-)
+from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
@@ -17,12 +15,14 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
+    INFORMED_WALLET,
     OptimalMarketMaker,
 )
 from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
+    InformedTrader,
 )
 
 
@@ -63,6 +63,7 @@ class IdealMarketMaker(Scenario):
         price_process_fn: Optional[Callable[[None], List[float]]] = None,
         market_order_trader_base_order_size: float = 1,
         settle_at_end: bool = True,
+        proportion_taken: float = 0.8,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -98,6 +99,7 @@ class IdealMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.settle_at_end = settle_at_end
+        self.proportion_taken = proportion_taken
 
     def _generate_price_process(
         self,
@@ -208,6 +210,17 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
+            tag=str(tag),
+        )
+
+        info_trader = InformedTrader(
+            wallet_name=INFORMED_WALLET.name,
+            wallet_pass=INFORMED_WALLET.passphrase,
+            price_process=price_process,
+            market_name=market_name,
+            asset_name=asset_name,
+            initial_asset_mint=self.initial_asset_mint,
+            proportion_taken=self.proportion_taken,
             tag=str(tag),
         )
 
