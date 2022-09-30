@@ -118,6 +118,7 @@ class VegaService(ABC):
         self._market_price_decimals = None
         self._market_pos_decimals = None
         self._asset_decimals = None
+        self._market_to_asset = None
         self.seconds_per_block = seconds_per_block
 
         self.order_thread = None
@@ -153,6 +154,16 @@ class VegaService(ABC):
                 )
             )
         return self._asset_decimals
+
+    @property
+    def market_to_asset(self) -> str:
+        if self._market_to_asset is None:
+            self._market_to_asset = DecimalsCache(
+                lambda market_id: data_raw.market_info(
+                    market_id=market_id, data_client=self.trading_data_client
+                ).tradable_instrument.instrument.future.settlement_asset
+            )
+        return self._market_to_asset
 
     @property
     def data_node_rest_url(self) -> str:
@@ -878,7 +889,7 @@ class VegaService(ABC):
             self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             data_client=self.trading_data_client,
-            price_decimals=self.market_price_decimals[market_id],
+            asset_decimals=self.asset_decimals[self.market_to_asset[market_id]],
             position_decimals=self.market_pos_decimals[market_id],
         )
 
@@ -1362,4 +1373,45 @@ class VegaService(ABC):
             self.trading_data_client,
             party_id=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
+        )
+
+    def get_trades(
+        self,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
+        order_id: Optional[str] = None,
+    ) -> List[data.Trade]:
+        """Loads executed trades for a given query of party/market/specific order from
+        data node. Converts values to proper decimal output.
+
+        Args:
+            market_id:
+                str, Restrict to trades on a specific market
+            wallet_name:
+                optional str, Restrict to trades for a specific wallet
+            key_name:
+                optional str, Select a different key to the default within a given wallet
+            order_id:
+                optional str, Restrict to trades for a specific order
+
+        Returns:
+            List[Trade], list of formatted trade objects which match the required
+                restrictions.
+        """
+        if market_id is not None:
+            self.market_pos_decimals[market_id]
+            self.market_price_decimals[market_id]
+            asset_dp = self.asset_decimals[self.market_to_asset[market_id]]
+        return data.get_trades(
+            self.trading_data_client_v2,
+            data_client_v1=self.trading_data_client,
+            party_id=self.wallet.public_key(wallet_name, key_name),
+            market_id=market_id,
+            order_id=order_id,
+            market_asset_decimals_map={market_id: asset_dp}
+            if market_id is not None
+            else None,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_price_decimals_map=self.market_price_decimals,
         )

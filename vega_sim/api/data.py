@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import DefaultDict, Iterable, List, Optional, Tuple
+from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
@@ -80,6 +80,73 @@ class OrdersBySide:
     asks: List[Order]
 
 
+@dataclass
+class Fee:
+    maker_fee: float
+    infrastructure_fee: float
+    liquidity_fee: float
+
+
+@dataclass
+class Trade:
+    id: str
+    market_id: str
+    price: float
+    size: float
+    buyer: str
+    seller: str
+    aggressor: vega_protos.vega.Side
+    buy_order: str
+    sell_order: str
+    timestamp: int
+    trade_type: vega_protos.vega.Trade.Type
+    buyer_fee: Fee
+    seller_fee: Fee
+    buyer_auction_batch: int
+    seller_auction_batch: int
+
+
+def _trade_from_proto(
+    trade: vega_protos.vega.Trade,
+    price_decimals: int,
+    position_decimals: int,
+    asset_decimals: int,
+) -> Trade:
+    return Trade(
+        id=trade.id,
+        market_id=trade.market_id,
+        price=num_from_padded_int(trade.price, price_decimals),
+        size=num_from_padded_int(trade.size, position_decimals),
+        buyer=trade.buyer,
+        seller=trade.seller,
+        aggressor=trade.aggressor,
+        buy_order=trade.buy_order,
+        sell_order=trade.sell_order,
+        timestamp=trade.timestamp,
+        trade_type=trade.type,
+        buyer_fee=Fee(
+            maker_fee=num_from_padded_int(trade.buyer_fee.maker_fee, asset_decimals),
+            infrastructure_fee=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee, asset_decimals
+            ),
+            liquidity_fee=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee, asset_decimals
+            ),
+        ),
+        seller_fee=Fee(
+            maker_fee=num_from_padded_int(trade.seller_fee.maker_fee, asset_decimals),
+            infrastructure_fee=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee, asset_decimals
+            ),
+            liquidity_fee=num_from_padded_int(
+                trade.seller_fee.liquidity_fee, asset_decimals
+            ),
+        ),
+        buyer_auction_batch=trade.buyer_auction_batch,
+        seller_auction_batch=trade.seller_auction_batch,
+    )
+
+
 def _margin_level_from_proto(
     margin_level: vega_protos.vega.MarginLevels, asset_decimals: int
 ) -> MarginLevels:
@@ -122,14 +189,16 @@ def _order_from_proto(
 
 
 def _position_from_proto(
-    position: vega_protos.vega.Position, price_decimals: int, position_decimals: int
+    position: vega_protos.vega.Position,
+    position_decimals: int,
+    asset_decimals: int,
 ) -> Position:
     return Position(
         party_id=position.party_id,
         market_id=position.market_id,
         open_volume=num_from_padded_int(position.open_volume, position_decimals),
-        realised_pnl=num_from_padded_int(position.open_volume, price_decimals),
-        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, price_decimals),
+        realised_pnl=num_from_padded_int(position.open_volume, asset_decimals),
+        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, asset_decimals),
         average_entry_price=num_from_padded_int(
             position.average_entry_price, position_decimals
         ),
@@ -140,14 +209,14 @@ def _position_from_proto(
 def positions_by_market(
     pub_key: str,
     market_id: str,
-    price_decimals: int,
     position_decimals: int,
+    asset_decimals: int,
     data_client: vac.VegaTradingDataClient,
 ) -> List[vega_protos.vega.Position]:
     """Output positions of a party."""
     return [
         _position_from_proto(
-            pos, price_decimals=price_decimals, position_decimals=position_decimals
+            pos, position_decimals=position_decimals, asset_decimals=asset_decimals
         )
         for pos in data_raw.positions_by_market(
             pub_key=pub_key, market_id=market_id, data_client=data_client
@@ -625,3 +694,51 @@ def margin_levels(
             _margin_level_from_proto(margin, asset_decimals=asset_dp[margin.asset])
         )
     return res_margins
+
+
+def get_trades(
+    data_client: vac.VegaTradingDataClientV2,
+    data_client_v1: vac.VegaTradingDataClient,
+    market_id: str,
+    party_id: Optional[str] = None,
+    order_id: Optional[str] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> List[Trade]:
+    base_trades = data_raw.get_trades(
+        data_client=data_client,
+        party_id=party_id,
+        market_id=market_id,
+        order_id=order_id,
+    )
+    market_price_decimals_map = market_price_decimals_map or {}
+    market_position_decimals_map = market_position_decimals_map or {}
+    market_asset_decimals_map = market_asset_decimals_map or {}
+
+    res_trades = []
+    for trade in base_trades:
+        if trade.market_id not in market_price_decimals_map:
+            market_price_decimals_map[trade.market_id] = market_price_decimals(
+                market_id=trade.market_id, data_client=data_client_v1
+            )
+        if trade.market_id not in market_position_decimals_map:
+            market_position_decimals_map[trade.market_id] = market_position_decimals(
+                market_id=trade.market_id, data_client=data_client_v1
+            )
+        if trade.market_id not in market_asset_decimals_map:
+            market_asset_decimals_map[trade.market_id] = asset_decimals(
+                asset_id=data_raw.market_info(
+                    market_id=market_id, data_client=data_client_v1
+                ).tradable_instrument.instrument.future.settlement_asset,
+                data_client=data_client_v1,
+            )
+        res_trades.append(
+            _trade_from_proto(
+                trade,
+                price_decimals=market_price_decimals_map[trade.market_id],
+                position_decimals=market_position_decimals_map[trade.market_id],
+                asset_decimals=market_asset_decimals_map[trade.market_id],
+            )
+        )
+    return res_trades

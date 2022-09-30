@@ -16,6 +16,7 @@ from vega_sim.api.data_raw import (
     all_market_accounts,
     all_markets,
     asset_info,
+    get_trades,
     infrastructure_fee_accounts,
     liquidity_provisions,
     market_accounts,
@@ -600,5 +601,57 @@ def test_market_limits(trading_data_v2_servicer_and_port):
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = margin_levels(party_id="party", market_id="market", data_client=data_client)
+
+    assert res == [expected]
+
+
+def test_get_trades(trading_data_v2_servicer_and_port):
+    expected = vega_protos.vega.Trade(
+        id="t1",
+        market_id="m1",
+        price="100",
+        size=10,
+        buyer="b1",
+        seller="s1",
+        aggressor=vega_protos.vega.SIDE_BUY,
+        buy_order="bo1",
+        sell_order="so1",
+        timestamp=100,
+        type=vega_protos.vega.Trade.TYPE_DEFAULT,
+        buyer_fee=vega_protos.vega.Fee(
+            maker_fee="100", infrastructure_fee="12", liquidity_fee="14"
+        ),
+        seller_fee=vega_protos.vega.Fee(
+            maker_fee="200", infrastructure_fee="122", liquidity_fee="144"
+        ),
+        buyer_auction_batch=100,
+        seller_auction_batch=96,
+    )
+
+    def ListTrades(self, request, context):
+        return data_node_protos_v2.trading_data.ListTradesResponse(
+            trades=data_node_protos_v2.trading_data.TradeConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.TradeEdge(
+                        cursor="cursor",
+                        node=expected,
+                    )
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListTrades = ListTrades
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = get_trades(party_id="party", market_id="market", data_client=data_client)
 
     assert res == [expected]
