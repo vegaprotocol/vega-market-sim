@@ -200,7 +200,7 @@ def _position_from_proto(
         realised_pnl=num_from_padded_int(position.open_volume, asset_decimals),
         unrealised_pnl=num_from_padded_int(position.unrealised_pnl, asset_decimals),
         average_entry_price=num_from_padded_int(
-            position.average_entry_price, position_decimals
+            position.average_entry_price, price_decimals
         ),
         updated_at=position.updated_at,
     )
