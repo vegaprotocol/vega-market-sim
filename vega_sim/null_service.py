@@ -381,7 +381,21 @@ def manage_vega_processes(
     processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
 
     if run_wallet:
-        time.sleep(8)
+        for _ in range(3000):
+            try:
+                requests.get(
+                    f"http://localhost:{port_config.get(Ports.DATA_NODE_REST)}/time"
+                ).raise_for_status()
+                requests.get(
+                    f"http://localhost:{port_config.get(Ports.CORE_REST)}/blockchain/height"
+                ).raise_for_status()
+                break
+            except (
+                MaxRetryError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.HTTPError,
+            ):
+                time.sleep(0.1)
         wallet_args = [
             vega_wallet_path,
             "service",
