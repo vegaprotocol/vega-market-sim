@@ -9,9 +9,7 @@ from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
     Granularity,
 )
-from vega_sim.parameter_test.parameter.loggers import (
-    momentum_trader_data_extraction,
-)
+from vega_sim.parameter_test.parameter.loggers import momentum_trader_data_extraction
 
 scenario = ComprehensiveMarket(
     num_steps=670,

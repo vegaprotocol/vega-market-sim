@@ -40,7 +40,6 @@ TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
 
 
-
 class OptimalMarketMaker(StateAgentWithWallet):
     def __init__(
         self,
