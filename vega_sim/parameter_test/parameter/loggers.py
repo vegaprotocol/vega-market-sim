@@ -75,14 +75,14 @@ def _ideal_market_maker_single_data_extraction(
         )
     ][0]
 
-    informed_agent = [
-        agent
-        for agent in agents
-        if isinstance(
-            agent,
-            (InformedTrader),
-        )
-    ][0]
+    # informed_agent = [
+    #     agent
+    #     for agent in agents
+    #     if isinstance(
+    #         agent,
+    #         (InformedTrader),
+    #     )
+    # ][0]
 
     general_lp, margin_lp, bond_lp = vega.party_account(
         wallet_name=mm_agent.wallet_name,
