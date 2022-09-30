@@ -936,7 +936,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.liquidity_commitment_fn = liquidity_commitment_fn
 
         self.current_step = 0
-        self.mid_price = None
+        self.curr_price = None
         self.prev_price = None
 
         self.tag = tag
@@ -982,7 +982,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
-        self.prev_price = self.mid_price
+        self.prev_price = self.curr_price
         self.curr_price = next(self.price_process_generator)
 
         # Each step, MM posts optimal bid/ask depths
@@ -1162,7 +1162,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 q_lower=self.q_lower,
                 mdp=self.mdp,
                 kappa=self.market_kappa,
-                lmbda=self.market_order_arrival_rate,
+                Lambda=self.market_order_arrival_rate,
                 alpha=self.alpha,
                 phi=self.phi,
             )

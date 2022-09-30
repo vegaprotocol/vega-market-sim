@@ -23,9 +23,13 @@ def plot_simulation(
     """Plot the states of a learning_agent in the simulation"""
     sars = states_to_sarsa(simulation)
     reward = np.array([_sars[2] for _sars in sars])
-    next_price = np.array([_sars[0].next_price for _sars in sars])
+    next_price_list = [_sars[0].next_price for _sars in sars]
+    next_price_list.insert(0,next_price_list[0])
+    next_price = np.array(next_price_list)
     best_bid = np.array([_sars[0].bid_prices[0] for _sars in sars])
+    best_bid[-1] = best_bid[-2] # because at settlement it's `0` and messes up the plot
     best_ask = np.array([_sars[0].ask_prices[0] for _sars in sars])
+    best_ask[-1] = best_ask[-2] # because at settlement it's `0` and messes up the plot
     position = np.array([_sars[0].position for _sars in sars])
     margin_balance = np.array([_sars[0].margin_balance for _sars in sars])
     general_balance = np.array([_sars[0].general_balance for _sars in sars])
@@ -42,19 +46,19 @@ def plot_simulation(
     spec = fig.add_gridspec(3, 2)
 
     ax0 = fig.add_subplot(spec[0, 0])
-    ax0.plot(best_bid, label="best bid")
-    ax0.plot(best_ask, label="best ask")
-    ax0.plot(next_price, label="next_price")
+    ax0.plot(best_bid,  label="best bid")
+    ax0.plot(best_ask,  label="best ask")
+    ax0.plot(next_price,  label="next_price")
     ax0.legend()
 
     ax1 = fig.add_subplot(spec[0, 1])
-    ax1.plot(position, label="position")
+    ax1.plot(position, 'x', label="position")
     ax1.legend()
 
     ax2 = fig.add_subplot(spec[1, 0])
-    ax2.plot(margin_balance, label="margin balance")
-    ax2.plot(general_balance, label="general balance")
-    ax2.plot(total_balance, label="total balance")
+    ax2.plot(margin_balance, 'x', label="margin balance")
+    ax2.plot(general_balance, '.', label="general balance")
+    ax2.plot(total_balance, '.', label="total balance")
     ax2.set_yscale("log")
     ax2.legend()
 

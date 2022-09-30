@@ -1,3 +1,4 @@
+from argparse import ArgumentTypeError
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
@@ -38,6 +39,7 @@ WALLET = WalletConfig("learner", "learner")
 
 @dataclass
 class LAMarketState:
+    step: int
     position: float
     margin_balance: float
     general_balance: float
@@ -49,11 +51,13 @@ class LAMarketState:
     ask_volumes: List[float]
     trading_fee: float
     next_price: float
+    settlement_price: float
 
     def to_array(self):
 
         l = (
             [
+                self.step,
                 self.position,
                 self.margin_balance,
                 self.general_balance,
@@ -61,6 +65,7 @@ class LAMarketState:
                 int(self.market_active),
                 self.trading_fee,
                 self.next_price,
+                self.settlement_price,
             ]
             + self.bid_prices
             + self.ask_prices
@@ -104,12 +109,24 @@ def states_to_sarsa(
     states: List[Tuple[LAMarketState, Action]]
 ) -> List[Tuple[LAMarketState, Action, float, LAMarketState, Action]]:
     res = []
-    for i in range(len(states)):
+    for i in range(len(states)-1):
         pres_state = states[i]
         next_state = states[i + 1] if i < len(states) - 1 else np.nan  # None
-        prev_state = states[i - 1] if i > 0 else np.nan  # None
-        if pres_state[0].margin_balance + pres_state[0].general_balance <= 0:
-            reward = -10
+        # prev_state = states[i - 1] if i > 0 else np.nan  # None
+        # if pres_state[0].margin_balance + pres_state[0].general_balance <= 0:
+        #     reward = -10
+        #     res.append(
+        #         (
+        #             pres_state[0],
+        #             pres_state[1],
+        #             reward,
+        #             next_state[0] if next_state is not np.nan else np.nan,
+        #             next_state[1] if next_state is not np.nan else np.nan,
+        #         )
+        #     )
+        #     break
+        if next_state is not np.nan and (next_state[0].margin_balance + next_state[0].general_balance <= 0):
+            reward = -1e12
             res.append(
                 (
                     pres_state[0],
@@ -120,18 +137,28 @@ def states_to_sarsa(
                 )
             )
             break
+
+        # reward = (
+        #     (pres_state[0].general_balance + pres_state[0].margin_balance)
+        #     - (prev_state[0].general_balance + prev_state[0].margin_balance)
+        #     if prev_state is not np.nan
+        #     else 0
+        # )
+        
         reward = (
-            (pres_state[0].general_balance + pres_state[0].margin_balance)
-            - (prev_state[0].general_balance + prev_state[0].margin_balance)
-            if prev_state is not np.nan
+            (next_state[0].general_balance + next_state[0].margin_balance)
+            - (pres_state[0].general_balance + pres_state[0].margin_balance)
+            if next_state is not np.nan
             else 0
         )
+
         if next_state is not np.nan:
             res.append(
                 (pres_state[0], pres_state[1], reward, next_state[0], next_state[1])
             )
         else:
-            res[-1] = (res[-1][0], res[-1][1], reward + res[-1][2], np.nan, np.nan)
+            #res[-1] = (res[-1][0], res[-1][1], reward + res[-1][2], np.nan, np.nan)
+            res.append((pres_state[0], pres_state[1], reward, np.nan, np.nan))
     return res
 
 
@@ -145,11 +172,12 @@ class LearningAgent(StateAgentWithWallet):
         wallet_name: str,
         wallet_pass: str,
         market_name: str,
+        position_decimals: int,
+        exploitation: float, # set this to 0 for full exploration and 1 for full exploitation
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
         self.base_wallet_name = wallet_name
 
-        self.price_process = None
         self.step_num = 0
 
         self.device = device
@@ -160,7 +188,7 @@ class LearningAgent(StateAgentWithWallet):
 
         # Dimensions of state and action
         self.num_levels = num_levels
-        state_dim = 7 + 4 * self.num_levels  # from MarketState
+        state_dim = 9 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
         # Q func
         self.q_func = FFN_Q(
@@ -192,6 +220,10 @@ class LearningAgent(StateAgentWithWallet):
         # logfile
         self.logfile = logfile
         self.market_name = market_name
+        self.position_decimals = position_decimals
+        if exploitation < 0 or exploitation > 1:
+            raise Exception("Need 0.0 <= exploitation <= 1.0")
+        self.exploitation = exploitation
 
     def set_market_tag(self, tag: str):
         self.tag = tag
@@ -314,12 +346,15 @@ class LearningAgent(StateAgentWithWallet):
 
     def state(self, vega: VegaServiceNull) -> LAMarketState:
         position = self.vega.positions_by_market(self.wallet_name, self.market_id)
+        # position = (
+        #     num_from_padded_int(
+        #         position[0].open_volume, vega.market_pos_decimals[self.market_id]
+        #     )
+        #     if position
+        #     else 0
+        # )
         position = (
-            num_from_padded_int(
-                position[0].open_volume, vega.market_pos_decimals[self.market_id]
-            )
-            if position
-            else 0
+            position[0].open_volume if position else 0
         )
         account = self.vega.party_account(
             wallet_name=self.wallet_name,
@@ -329,8 +364,16 @@ class LearningAgent(StateAgentWithWallet):
         book_state = self.vega.market_depth(
             self.market_id, num_levels=self.num_levels
         )  # make num_levels as a parameter?
+
+        ext_price=self.price_process[self.step_num]
+        bid_prices=[level.price for level in book_state.buys] + [0] * max(0, self.num_levels - len(book_state.buys))
+        ask_prices=[level.price for level in book_state.sells] + [0] * max(0, self.num_levels - len(book_state.sells))
+        if (bid_prices[0] > 0 and bid_prices[0] >= ext_price) or (ask_prices[0] > 0 and ask_prices[0] <= ext_price):
+            print("best_buy "+str(bid_prices[0])+" ext price "+str(ext_price)+" best ask "+str(ask_prices[0]) )
+
         market_info = vega.market_info(market_id=self.market_id)
         return LAMarketState(
+            step=self.step_num,
             position=position,
             margin_balance=account.margin,
             general_balance=account.general,
@@ -350,14 +393,23 @@ class LearningAgent(StateAgentWithWallet):
             if self.price_process is not None
             and len(self.price_process) > self.step_num + 1
             else np.nan,
+            settlement_price=self.price_process[-1]
         )
 
-    def step(self, vega_state: VegaState, random: bool = False):
+    def finalise(self):
+        learning_state = self.state(self.vega)
+        self.latest_action = Action(True, True, 0.0)
+        self.latest_state = learning_state
+        self.step_num += 1
+
+        return super().finalise()
+
+    def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
         if learning_state.margin_balance + learning_state.general_balance <= 0:
             return 0
         else:
-            self.latest_action = self._step(learning_state, random)
+            self.latest_action = self._step(learning_state)
             self.latest_state = learning_state
 
             if self.latest_action.buy or self.latest_action.sell:
@@ -375,25 +427,37 @@ class LearningAgent(StateAgentWithWallet):
 
             self.step_num += 1
 
-    def _step(self, vega_state: LAMarketState, random: bool = False) -> Action:
-        if random:
-            # random policy
-            choice = np.random.choice([0, 1, 2])
-            volume = 1
-        else:
-            # learned policy
-            state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
-            state = torch.from_numpy(state).float()  # .to(self.device)
+    # def _step(self, vega_state: LAMarketState) -> Action:
+    #     u = np.random.uniform(0,1)
+    #     if u > self.exploitation:
+    #         # random policy
+    #         choice = np.random.choice([0, 1, 2])
+    #         volume = np.random.lognormal(mean=1.0,sigma=2.0)*10**(-self.position_decimals)
+    #     else:
+    #         # learned policy
+    #         state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
+    #         state = torch.from_numpy(state).float()  # .to(self.device)
 
-            with torch.no_grad():
-                soft_action = self.sample_action(state=state, sim=True)
-            choice = int(soft_action.c.item())
-            if choice == 0:  # choice = 0 --> sell
-                volume = soft_action.volume_sell.item()
-            elif choice == 1:  # choice = 1 --> buy
-                volume = soft_action.volume_buy.item()
-            else:
-                volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
+    #         with torch.no_grad():
+    #             soft_action = self.sample_action(state=state, sim=True)
+    #         choice = int(soft_action.c.item())
+    #         if choice == 0:  # choice = 0 --> sell
+    #             volume = soft_action.volume_sell.item()*10**(-self.position_decimals)
+    #         elif choice == 1:  # choice = 1 --> buy
+    #             volume = soft_action.volume_buy.item()*10**(-self.position_decimals)
+    #         else:
+    #             volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
+    #     return Action(buy=choice == 0, sell=choice == 1, volume=volume)
+        # return Action(buy=True, sell=False, volume=1)
+    
+    def _step(self, vega_state: LAMarketState) -> Action:
+        if vega_state.ask_prices[0] < vega_state.settlement_price:
+            choice = 0 # buy
+        elif vega_state.bid_prices[0] > vega_state.settlement_price:
+            choice = 1 # sell 
+        else: 
+            choice = 2 # do nothing
+        volume = 1
         return Action(buy=choice == 0, sell=choice == 1, volume=volume)
 
     def sample_action(

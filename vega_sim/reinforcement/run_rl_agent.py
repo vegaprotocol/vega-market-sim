@@ -14,6 +14,7 @@ from vega_sim.reinforcement.learning_agent import (
 )
 
 from vega_sim.scenario.registry import IdealMarketMakerV2
+from vega_sim.scenario.registry import CurveMarketMaker
 
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_model
@@ -27,7 +28,8 @@ def state_fn(
     service: VegaServiceNull, agents: List[Agent]
 ) -> Tuple[LAMarketState, Action]:
     learner = [a for a in agents if isinstance(a, LearningAgent)][0]
-    return (learner.state(service), learner.latest_action)
+    #return (learner.state(service), learner.latest_action)
+    return (learner.latest_state, learner.latest_action)
 
 
 def run_iteration(
@@ -38,17 +40,43 @@ def run_iteration(
     run_with_console=False,
     pause_at_completion=False,
 ):
-    scenario = IdealMarketMakerV2(
+    # scenario = IdealMarketMakerV2(
+    #     market_decimal=3,
+    #     asset_decimal=5,
+    #     market_position_decimal=learning_agent.position_decimals,
+    #     initial_price=1000.00,
+    #     spread=0.002,
+    #     lp_commitamount=100000,
+    #     initial_asset_mint=1e8,
+    #     step_length_seconds=60,
+    #     block_length_seconds=1,
+    #     buy_intensity=10,
+    #     sell_intensity=10,
+    #     q_upper=50,
+    #     q_lower=-50,
+    #     kappa=50,
+    #     sigma=100,
+    #     num_steps=2,
+    #     random_agent_ordering=False,
+    #     market_name=market_name,
+    #     state_extraction_fn=state_fn,
+    # )
+    scenario = CurveMarketMaker(
         market_decimal=3,
         asset_decimal=5,
         market_position_decimal=2,
-        initial_price=1123.11,
-        spread=0.002,
-        lp_commitamount=20000,
-        step_length_seconds=60,
+        initial_price=1000.0,
+        lp_commitamount=100000,
+        initial_asset_mint=1e8,
+        step_length_seconds=1,
         block_length_seconds=1,
-        market_name=market_name,
+        buy_intensity=5,
+        sell_intensity=5,
         state_extraction_fn=state_fn,
+        market_name=market_name,
+        num_steps=2,
+        random_agent_ordering=False,
+        sigma=100,
     )
     env = scenario.set_up_background_market(
         vega=vega,
@@ -58,6 +86,7 @@ def run_iteration(
     env.agents = env.agents + [learning_agent]
 
     learning_agent.set_market_tag(str(step_tag))
+    learning_agent.price_process = scenario.price_process
 
     result = env.run(
         run_with_console=run_with_console,
@@ -72,10 +101,10 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--num-procs", default=1, type=int)
+    parser.add_argument("-n", "--num-procs", default=6, type=int)
     parser.add_argument(
         "--rl-max-it",
-        default=2,
+        default=5,
         type=int,
         help="Number of iterations of policy improvement + policy iterations",
     )
@@ -106,6 +135,9 @@ if __name__ == "__main__":
 
     # set market name
     market_name = "ETH:USD"
+    position_decimals=2
+    initial_price=1000
+
 
     # create the Learning Agent
     learning_agent = LearningAgent(
@@ -116,12 +148,14 @@ if __name__ == "__main__":
         wallet_name=LEARNING_WALLET.name,
         wallet_pass=LEARNING_WALLET.passphrase,
         market_name=market_name,
+        position_decimals=position_decimals,
+        exploitation=0.2
     )
 
     if not args.evaluate:
         # Agent training / evaluation:
         with VegaServiceNull(
-            warn_on_raw_data_access=False, run_with_console=False
+            warn_on_raw_data_access=False, run_with_console=False, retain_log_files=False
         ) as vega:
             vega.wait_for_total_catchup()
             # TRAINING OF AGENT
@@ -147,12 +181,13 @@ if __name__ == "__main__":
 
             learning_agent.save(args.results_dir)
 
-    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False) as vega:
+    with VegaServiceNull(warn_on_raw_data_access=False, run_with_console=False, retain_log_files=False) as vega:
         time.sleep(2)
         # EVALUATION OF AGENT
         learning_agent.load(args.results_dir)
         for it in range(10):
             learning_agent.clear_memory()
+            learning_agent.exploitation = 1.0
             result = run_iteration(
                 learning_agent=learning_agent,
                 step_tag=it,

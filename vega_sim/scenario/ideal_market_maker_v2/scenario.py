@@ -30,6 +30,7 @@ class IdealMarketMaker(Scenario):
     def __init__(
         self,
         num_steps: int = 120,
+        random_agent_ordering: bool = True,
         dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
@@ -65,6 +66,7 @@ class IdealMarketMaker(Scenario):
         settle_at_end: bool = True,
     ):
         self.num_steps = num_steps
+        self.random_agent_ordering=random_agent_ordering,
         self.dt = dt
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
@@ -98,6 +100,7 @@ class IdealMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.settle_at_end = settle_at_end
+        self.price_process = None
 
     def _generate_price_process(
         self,
@@ -128,6 +131,7 @@ class IdealMarketMaker(Scenario):
             if self.price_process_fn is not None
             else self._generate_price_process(random_state=random_state)
         )
+        self.price_process = price_process
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
@@ -220,6 +224,7 @@ class IdealMarketMaker(Scenario):
                 trader,
             ],
             n_steps=self.num_steps,
+            random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,
             vega_service=vega,
             state_extraction_freq=self.state_extraction_freq,
