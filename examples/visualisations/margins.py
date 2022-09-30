@@ -17,9 +17,6 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         run_with_console=True,
-        start_order_feed=True,
-        retain_log_files=True,
-        store_transactions=True
     ) as vega:
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
