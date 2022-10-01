@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from typing import List, Tuple
 import os
 
 
-from vega_sim.reinforcement.learning_agent import LAMarketState, Action, states_to_sarsa
+from vega_sim.reinforcement.la_market_state import LAMarketState
+from vega_sim.reinforcement.learning_agent_MO_with_vol import Action, states_to_sarsa
 
 
 def action_to_vector(action: Action):
@@ -66,7 +68,7 @@ def plot_simulation(
     scatter = ax3.scatter(t, action_volume, c=action_discr)
     # produce a legend with the unique colors from the scatter
     handles, labels = scatter.legend_elements()
-    labels = ["sell", "buy", "do nothing"]
+    labels = ["buy", "sell", "do nothing"]
     ax3.legend(*(handles, labels), title="Type of action")
     ax3.set_ylabel("volume")
 
@@ -75,4 +77,34 @@ def plot_simulation(
     ax4.legend()
     fig.savefig(os.path.join(results_dir, "sim{}.pdf".format(tag)))
     plt.close()
-    return 0
+
+def plot_learning(results_dir: str, logfile_pol_imp: str, logfile_pol_eval: str):
+    data = pd.read_csv(logfile_pol_imp)
+    
+    plt.figure()
+    plt.plot(data['iteration'],data['loss'])
+    plt.savefig(os.path.join(results_dir, "learn_pol_imp.pdf"))
+    plt.close()
+
+    data = pd.read_csv(logfile_pol_eval)
+    plt.figure()
+    plt.plot(data['iteration'],data['loss'])
+    plt.savefig(os.path.join(results_dir, "learn_pol_eval.pdf"))
+    plt.close()
+
+def plot_pnl(results_dir: str, logfile_pnl: str):
+    data = pd.read_csv(logfile_pnl)
+    pnl = data['pnl'].to_numpy()
+    plt.figure()
+    n, bins, patches = plt.hist(x=pnl, bins=20, color='#0504aa',
+                            alpha=0.7, rwidth=0.85)
+    plt.grid(axis='y', alpha=0.75)
+    plt.xlabel('PnL')
+    plt.ylabel('Frequency')
+    text = "PnL mean="+str(pnl.mean())+" stddev="+str(pnl.std())
+    plt.title(text)
+    maxfreq = n.max()
+    # Set a clean upper y-axis limit.
+    plt.ylim(ymax=np.ceil(maxfreq / 10) * 10 if maxfreq % 10 else maxfreq + 10)
+    plt.savefig(os.path.join(results_dir, "learn_pnl.pdf"))
+    plt.close()
