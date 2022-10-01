@@ -39,9 +39,9 @@ def plot_simulation(
     total_balance = np.array(
         [_sars[0].margin_balance + _sars[0].general_balance for _sars in sars]
     )
-    action_discr = np.array([action_to_vector(_sars[1]) for _sars in sars])
-    action_volume = np.array([_sars[1].volume for _sars in sars])
-    t = np.linspace(1, len(action_volume), len(action_volume))
+    # action_discr = np.array([action_to_vector(_sars[1]) for _sars in sars])
+    # action_volume = np.array([_sars[1].volume for _sars in sars])
+    # t = np.linspace(1, len(action_volume), len(action_volume))
 
     fig, ax = plt.subplots(nrows=2, ncols=2, figsize=(12, 8))
     fig = plt.figure(figsize=(12, 12))
@@ -64,13 +64,13 @@ def plot_simulation(
     ax2.set_yscale("log")
     ax2.legend()
 
-    ax3 = fig.add_subplot(spec[1, 1])
-    scatter = ax3.scatter(t, action_volume, c=action_discr)
+    # ax3 = fig.add_subplot(spec[1, 1])
+    # scatter = ax3.scatter(t, action_volume, c=action_discr)
     # produce a legend with the unique colors from the scatter
-    handles, labels = scatter.legend_elements()
-    labels = ["buy", "sell", "do nothing"]
-    ax3.legend(*(handles, labels), title="Type of action")
-    ax3.set_ylabel("volume")
+    # handles, labels = scatter.legend_elements()
+    # labels = ["buy", "sell", "do nothing"]
+    # ax3.legend(*(handles, labels), title="Type of action")
+    # ax3.set_ylabel("volume")
 
     ax4 = fig.add_subplot(spec[2, :])
     ax4.plot(reward.cumsum(), label="cumulative reward")

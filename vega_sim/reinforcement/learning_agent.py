@@ -69,21 +69,21 @@ class LearningAgent(StateAgentWithWallet):
 
         # Dimensions of state and action
         self.num_levels = num_levels
-        state_dim = 7 + 4 * self.num_levels  # from MarketState
+        self.state_dim = 7 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
         # Q func
         self.q_func = FFN_Q(
-            state_dim=state_dim,
+            state_dim=self.state_dim,
         )
         self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
         # policy
         self.policy_volume = FFN_Params_Normal(
-            n_in=state_dim,
+            n_in=self.state_dim,
             n_distr=2,
-            hidden_sizes=[32],
+            hidden_sizes=[128],
         )
         self.policy_discr = FFN(
-            sizes=[state_dim, 32, action_discrete_dim],
+            sizes=[self.state_dim, 32, action_discrete_dim],
             activation=nn.Tanh,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
@@ -251,74 +251,6 @@ class LearningAgent(StateAgentWithWallet):
     def step(self, vega_state: VegaState):
         pass
     
-    def policy_eval(
-        self,
-        batch_size: int,
-        n_epochs: int,
-    ):
-
-        toggle(self.policy_discr, to=False)
-        toggle(self.policy_volume, to=False)
-        toggle(self.q_func, to=True)
-
-        dataloader = self.create_dataloader(batch_size=batch_size)
-
-        pbar = tqdm(total=n_epochs)
-        for epoch in range(n_epochs):
-            for (
-                i,
-                (
-                    batch_state,
-                    batch_action_discrete,
-                    batch_action_volume,
-                    batch_reward,
-                    batch_next_state,
-                ),
-            ) in enumerate(dataloader):
-                next_state_terminal = torch.isnan(
-                    batch_next_state
-                ).float()  # shape (batch_size, dim_state)
-                batch_next_state[next_state_terminal.eq(True)] = batch_state[
-                    next_state_terminal.eq(True)
-                ]
-                self.optimizer_q.zero_grad()
-                # differentiate between sell and buy volumes for the q_func
-                volume_sell = batch_action_volume.clone()
-                volume_sell[batch_action_discrete.ne(0)] = 0
-                volume_buy = batch_action_volume.clone()
-                volume_buy[batch_action_discrete.ne(1)] = 0
-
-                pred = torch.gather(
-                    self.q_func(batch_state, volume_sell, volume_buy),
-                    dim=1,
-                    index=batch_action_discrete,
-                )
-
-                with torch.no_grad():
-                    v = self.v_func(batch_next_state)
-                    target = (
-                        batch_reward
-                        + (1 - next_state_terminal.mean(1, keepdim=True))
-                        * self.discount_factor
-                        * v
-                    )
-                loss = torch.pow(pred - target, 2).mean()
-                loss.backward()
-                self.optimizer_q.step()
-            self.losses["q"].append(loss.item())
-            # logging loss
-            with open(self.logfile_pol_eval, "a") as f:
-                f.write(
-                    "{},{:.5f}\n".format(
-                        epoch+self.lerningIteration*n_epochs, loss.item()
-                    )
-                )
-            pbar.update(1)
-        return 0
-
-    def v_func(self, state, n_mc=50):
-        pass
-
     def save(self, results_dir: str):
         pass
 

@@ -1,4 +1,3 @@
-from argparse import ArgumentTypeError
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
@@ -10,15 +9,17 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
+from vega_sim.reinforcement.learning_agent import AbstractAction, LearningAgent
 
 from vega_sim.reinforcement.networks import (
     Softmax,
     FFN,
     FFN_Params_Normal,
-    FFN_Q,
+    FFN_fix_fol_Q,
 )
 from vega_sim.reinforcement.helpers import apply_funcs, to_torch, toggle
-from vega_sim.reinforcement.la_market_state import LAMarketState 
+from vega_sim.reinforcement.la_market_state import LAMarketState
+
 from vega_sim.reinforcement.distributions import (
     lognorm_sample,
     lognorm_logprob,
@@ -79,13 +80,14 @@ def states_to_sarsa(
             if next_state is not np.nan
             else 0
         )
+        reward -= 0.05 * pres_state[0].position * pres_state[0].position
         res.append(
                 (pres_state[0], pres_state[1], reward, next_state[0], next_state[1])
         )
     return res
 
 
-class LearningAgentFixedVol(StateAgentWithWallet):
+class LearningAgentFixedVol(LearningAgent):
     def __init__(
         self,
         device: str,
@@ -101,101 +103,23 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         position_decimals: int,
         exploitation: float, # set this to 0 for full exploration and 1 for full exploitation
     ):
-        super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
-
-        self.step_num = 0
-        self.device = device
-        self.discount_factor = discount_factor
-        self.initial_balance=initial_balance
-
-        self.memory = defaultdict(list)
-        self.memory_capacity = 10000
-
-        # Dimensions of state and action
-        self.num_levels = num_levels
-        state_dim = 7 + 4 * self.num_levels  # from MarketState
-        action_discrete_dim = 3
-        # Q func
-        self.q_func = FFN_Q(
-            state_dim=state_dim,
+        super().__init__(device=device,
+                            logfile_pol_imp=logfile_pol_imp,
+                            logfile_pol_eval=logfile_pol_eval,
+                            logfile_pnl=logfile_pnl,
+                            discount_factor=discount_factor,
+                            num_levels=num_levels,
+                            wallet_name=wallet_name,
+                            wallet_pass=wallet_pass,
+                            market_name=market_name,
+                            initial_balance=initial_balance,
+                            position_decimals=position_decimals,
+                            exploitation=exploitation,
         )
-        self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
-        # policy
-        self.policy_volume = FFN_Params_Normal(
-            n_in=state_dim,
-            n_distr=2,
-            hidden_sizes=[32],
-        )
-        self.policy_discr = FFN(
-            sizes=[state_dim, 32, action_discrete_dim],
-            activation=nn.Tanh,
-            output_activation=Softmax,
-        )  # this network decides whether to buy/sell/do nothing
-        self.optimizer_pol = torch.optim.RMSprop(
-            list(self.policy_volume.parameters())
-            + list(self.policy_discr.parameters()),
-            lr=0.001,
-        )
-
-        # Coefficients for regularisation
-        self.coefH_discr = 5.0
-        self.coefH_cont = 0.5
-        # losses logger
-        self.losses = defaultdict(list)
-        # logfile
-        self.logfile_pol_imp = logfile_pol_imp
-        with open(self.logfile_pol_imp, "w") as f:
-                f.write("iteration,loss\n")
-        self.logfile_pol_eval = logfile_pol_eval
-        with open(self.logfile_pol_eval, "w") as f:
-                f.write("iteration,loss\n")
-        self.logfile_pnl = logfile_pnl
-        with open(self.logfile_pnl, "w") as f:
-                f.write("iteration,pnl\n")
+        self.volume = 10**(-self.position_decimals)
+        self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
+        self.coefH_discr = 0.5
         
-        
-        self.lerningIteration = 0
-        self.market_name = market_name
-        self.position_decimals = position_decimals
-        if exploitation < 0 or exploitation > 1:
-            raise Exception("Need 0.0 <= exploitation <= 1.0")
-        self.exploitation = exploitation
-        
-    def set_market_tag(self, tag: str):
-        self.tag = tag
-        #self.wallet_name = self.base_wallet_name + str(tag)
-
-    def move_to_device(self):
-        self.q_func.to(self.device)
-        self.policy_volume.to(self.device)
-        self.policy_discr.to(self.device)
-
-    def move_to_cpu(self):
-        self.q_func.to("cpu")
-        self.policy_volume.to("cpu")
-        self.policy_discr.to("cpu")
-
-    def initialise(self, vega: VegaServiceNull):
-        # Initialise wallet
-        super().initialise(vega=vega)
-        self.step_num = 0
-        market_name = self.market_name + f"_{self.tag}"
-
-        # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == market_name
-        ][0]
-        # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI_{self.tag}")
-        # Top up asset
-        self.vega.mint(
-            self.wallet_name,
-            asset=self.tdai_id,
-            amount=self.initial_balance,
-        )
-        self.vega.wait_fn(2)
 
     def _update_memory(
         self,
@@ -218,7 +142,6 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         else:
             self.memory["action_discrete"].append([2])
 
-        self.memory["action_volume"].append([action.volume])
         self.memory["reward"].append([reward])
         if next_state is not np.nan:
             self.memory["next_state"].append(next_state.to_array())
@@ -226,23 +149,6 @@ class LearningAgentFixedVol(StateAgentWithWallet):
             self.memory["next_state"].append(np.nan * np.ones_like(state.to_array()))
 
         return 0
-
-    def update_memory(self, states: List[Tuple[LAMarketState, Action]]):
-        """
-        Updates memory of the agent, and removes old tuples (s,a,r,s) if memory exceeds its capacity
-        """
-        for res in states_to_sarsa(states):
-            self._update_memory(res[0], res[1], res[2], res[3])
-        # remove old tuples if memory exceeds its capaciy
-        for key, value in self.memory.items():
-            if len(self.memory[key]) > self.memory_capacity:
-                first_n = len(self.memory[key]) - self.memory_capacity
-                del self.memory[key][:first_n]
-        return 0
-
-    def clear_memory(self):
-        for key in self.memory.keys():
-            self.memory[key].clear()
 
     def create_dataloader(self, batch_size):
         """
@@ -256,9 +162,6 @@ class LearningAgentFixedVol(StateAgentWithWallet):
             value=self.memory["action_discrete"],
             funcs=(np.array, partial(to_torch, dtype=torch.int64, device=self.device)),
         )
-        dataset_action_volume = apply_funcs(
-            value=self.memory["action_volume"], funcs=(np.array, to_torch_device)
-        )
         dataset_reward = apply_funcs(
             value=self.memory["reward"], funcs=(np.array, to_torch_device)
         )
@@ -270,7 +173,6 @@ class LearningAgentFixedVol(StateAgentWithWallet):
             *(
                 dataset_state,
                 dataset_action_discrete,
-                dataset_action_volume,
                 dataset_reward,
                 dataset_next_state,
             )
@@ -280,71 +182,7 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         )
         return dataloader
 
-    def state(self, vega: VegaServiceNull) -> LAMarketState:
-        position = self.vega.positions_by_market(self.wallet_name, self.market_id)
-        # position = (
-        #     num_from_padded_int(
-        #         position[0].open_volume, vega.market_pos_decimals[self.market_id]
-        #     )
-        #     if position
-        #     else 0
-        # )
-        position = (
-            position[0].open_volume if position else 0
-        )
-        account = self.vega.party_account(
-            wallet_name=self.wallet_name,
-            asset_id=self.tdai_id,
-            market_id=self.market_id,
-        )
-        book_state = self.vega.market_depth(
-            self.market_id, num_levels=self.num_levels
-        )  # make num_levels as a parameter?
-
-        # ext_price=self.price_process[self.step_num]
-        # bid_prices=[level.price for level in book_state.buys] + [0] * max(0, self.num_levels - len(book_state.buys))
-        # ask_prices=[level.price for level in book_state.sells] + [0] * max(0, self.num_levels - len(book_state.sells))
-        # # if (bid_prices[0] > 0 and bid_prices[0] >= ext_price) or (ask_prices[0] > 0 and ask_prices[0] <= ext_price):
-        #     print("best_buy "+str(bid_prices[0])+" ext price "+str(ext_price)+" best ask "+str(ask_prices[0]) )
-
-        market_info = vega.market_info(market_id=self.market_id)
-        return LAMarketState(
-            step=self.step_num,
-            position=position,
-            margin_balance=account.margin,
-            general_balance=account.general,
-            market_in_auction=(not market_info.trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS),
-            bid_prices=[level.price for level in book_state.buys]
-            + [0] * max(0, self.num_levels - len(book_state.buys)),
-            ask_prices=[level.price for level in book_state.sells]
-            + [0] * max(0, self.num_levels - len(book_state.sells)),
-            bid_volumes=[level.volume for level in book_state.buys]
-            + [0] * max(0, self.num_levels - len(book_state.buys)),
-            ask_volumes=[level.volume for level in book_state.sells]
-            + [0] * max(0, self.num_levels - len(book_state.sells)),
-            trading_fee=0,
-            next_price=self.price_process[self.step_num + 1]
-            if self.price_process is not None
-            and len(self.price_process) > self.step_num + 1
-            else np.nan,
-        )
-
-    def finalise(self):
-        learning_state = self.state(self.vega)
-        self.latest_action = Action(True, True, 0.0)
-        self.latest_state = learning_state
-        self.step_num += 1
-        final_pnl = learning_state.general_balance + learning_state.margin_balance - self.initial_balance
-        if learning_state.margin_balance > 0:
-            print("Market should be settled but there is still balance in margin account. What's up?")
-        with open(self.logfile_pnl, "a") as f:
-                f.write(
-                    "{},{:.5f}\n".format(self.lerningIteration, final_pnl)
-                )
-
-        return super().finalise()
-
+    
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
         self.step_num += 1
@@ -362,7 +200,7 @@ class LearningAgentFixedVol(StateAgentWithWallet):
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
                     side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
-                    volume=self.latest_action.volume,
+                    volume=self.volume,
                     wait=False,
                     fill_or_kill=False,
                 )
@@ -375,10 +213,9 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         u1 = np.random.uniform(0,1)
         if u1 > self.exploitation:
             u2 = np.random.uniform(0,1)
-            if u2 > 0.2:
+            if u2 > 0.1:
                 # random policy
                 choice = np.random.choice([0, 1, 2])
-                volume = np.random.lognormal(mean=1.0,sigma=2.0)*10**(-self.position_decimals)
             else:
                 return self._step_heuristic(vega_state=vega_state)
         else:
@@ -387,89 +224,43 @@ class LearningAgentFixedVol(StateAgentWithWallet):
             state = torch.from_numpy(state).float()  # .to(self.device)
 
             with torch.no_grad():
-                soft_action = self.sample_action(state=state, sim=True)
+                soft_action = self.sample_action(state=state)
             choice = int(soft_action.c.item())
-            if choice == 0:  # choice = 0 --> sell
-                volume = soft_action.volume_sell.item()*10**(-self.position_decimals)
-            elif choice == 1:  # choice = 1 --> buy
-                volume = soft_action.volume_buy.item()*10**(-self.position_decimals)
-            else:
-                volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
-        return Action(buy=choice == 0, sell=choice == 1, volume=volume)
+            
+        return Action(buy=choice == 0, sell=choice == 1)
         
     
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
-        volume = 0.0
         if vega_state.position <= 0 and vega_state.ask_prices[0] < vega_state.next_price:
             choice = 0 # buy
-            volume = 0.01
         elif vega_state.position >= 0 and vega_state.bid_prices[0] > vega_state.next_price:
             choice = 1 # sell 
-            volume = 0.01
         else: 
             choice = 2 # do nothing
 
-        return Action(buy=choice == 0, sell=choice == 1, volume=volume)
+        return Action(buy=choice == 0, sell=choice == 1)
 
     def sample_action(
-        self, state: torch.Tensor, sim: bool = True, evaluate: bool = False
+        self, state: torch.Tensor,
     ):
         """
         Sample an action.
 
         Returns
         -------
-        z_sell: torch.Tensor
-            samples from N(0,1) used to sample volume_sell from a lognormal
-        z_buy: torch.Tensor
-            samples from N(0,1) used to sample volume_buy from a lognormal
-        mu: torch.Tensor
-            Tensor of shape (batch_size,2). Each column is mu_{sell} and mu_{buy} of lognormal
-        sigma: torch.Tensor
-            Tensor of shape (batch_size, 2). Each column is sigma_{sell} and sigma_{buy} of lognormal
-        c: torch.Tensor
-            if sim = False, c is a tensor of shape (batch_size, 3) returning the probs of {sell, buy, do nothign}
-            if sim = True, c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
-        mu: torch.Tensor
-            Tensor of shape
-        sigma: torch.Tensor
-            Tensor of shape
-        volume_sell: torch.Tensor
-            Tensor of shape
-        volume_buy: torch.Tensor
-            Tensor of shape
+        c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
         """
         probs = self.policy_discr(state)
-        mu, sigma = self.policy_volume(state)
-        z_sell, volume_sell = lognorm_sample(mu=mu[:, 0], sigma=sigma[:, 0])
-        z_buy, volume_buy = lognorm_sample(mu=mu[:, 1], sigma=sigma[:, 1])
-        if sim:
-            # We are simulating, hence we sample from discr action
-            m = Categorical(probs)
-            c = m.sample()
-        else:
-            c = probs
-        if evaluate:
-            c = torch.max(probs, 1, keepdim=True)[1]
-
-        return SoftAction(
-            z_sell=z_sell,
-            z_buy=z_buy,
-            c=c,
-            mu=mu,
-            sigma=sigma,
-            volume_sell=volume_sell,
-            volume_buy=volume_buy,
-        )
+        m = Categorical(probs)
+        c = m.sample()
+        return SoftActionFixVol(c)
 
     def policy_eval(
         self,
         batch_size: int,
         n_epochs: int,
     ):
-
         toggle(self.policy_discr, to=False)
-        toggle(self.policy_volume, to=False)
         toggle(self.q_func, to=True)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
@@ -481,7 +272,6 @@ class LearningAgentFixedVol(StateAgentWithWallet):
                 (
                     batch_state,
                     batch_action_discrete,
-                    batch_action_volume,
                     batch_reward,
                     batch_next_state,
                 ),
@@ -493,18 +283,9 @@ class LearningAgentFixedVol(StateAgentWithWallet):
                     next_state_terminal.eq(True)
                 ]
                 self.optimizer_q.zero_grad()
-                # differentiate between sell and buy volumes for the q_func
-                volume_sell = batch_action_volume.clone()
-                volume_sell[batch_action_discrete.ne(0)] = 0
-                volume_buy = batch_action_volume.clone()
-                volume_buy[batch_action_discrete.ne(1)] = 0
-
-                pred = torch.gather(
-                    self.q_func(batch_state, volume_sell, volume_buy),
-                    dim=1,
-                    index=batch_action_discrete,
-                )
-
+                
+                pred = self.q_func(batch_state,batch_action_discrete)
+                
                 with torch.no_grad():
                     v = self.v_func(batch_next_state)
                     target = (
@@ -541,26 +322,14 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         n_mc: torch.Tensor
             Number of Monte Carlo samples to calculate
         """
-        batch_size = state.shape[0]
-        # MONTE CARLO to approximate expectations
-        state_mc = state.repeat(n_mc, 1)
-        soft_action = self.sample_action(state_mc, sim=False)
-        z_sell, z_buy, c, mu, sigma, volume_sell, volume_buy = soft_action.unravel()
+        
+        c = self.sample_action(state).unravel().reshape((state.shape[0],1))
+        q = self.q_func(state, c)
 
-        q = self.q_func(state_mc, volume_sell, volume_buy)
-        v = c[:, 0] * (
-            q[:, 0]
-            - self.coefH_discr * torch.log(c[:, 0])
-            - self.coefH_cont
-            * lognorm_logprob(z=z_sell, mu=mu[:, 0], sigma=sigma[:, 0])
-        )
-        v += c[:, 1] * (
-            q[:, 1]
-            - self.coefH_discr * torch.log(c[:, 1])
-            - self.coefH_cont * lognorm_logprob(z=z_buy, mu=mu[:, 1], sigma=sigma[:, 1])
-        )
-        v += c[:, 2] * (q[:, 2] - self.coefH_discr * torch.log(c[:, 2]))
-        v = v.reshape(n_mc, batch_size, -1).mean(0)  # average of Monte Carlo samples
+        probs = self.policy_discr(state)
+        v = probs[0] * (q[0] - self.coefH_discr * torch.log(probs[0]))
+        v += probs[1] * (q[1] - self.coefH_discr * torch.log(probs[1]))
+        v += probs[2] * (q[2] - self.coefH_discr * torch.log(probs[2]))
         self.q_func.train()
         return v
 
@@ -569,47 +338,26 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         KL divergence between pi(.|x) and the unnormalised density exp(Q(x,.)),
         where pi(.|x) is a LogNormal distribution
         """
-        batch_size = state.shape[0]
-        # MONTE CARLO to approximate expectations
-        state_mc = state.repeat(n_mc, 1)
-        soft_action = self.sample_action(state_mc, sim=False)
-        z_sell, z_buy, c, mu, sigma, volume_sell, volume_buy = soft_action.unravel()
+        c = self.sample_action(state).unravel().reshape((state.shape[0],1))
 
-        q = self.q_func(state_mc, volume_sell, volume_buy)
-        d_kl = c[:, 0] * (
-            self.coefH_discr * torch.log(c[:, 0])
-            + self.coefH_cont
-            * lognorm_logprob(z=z_sell, mu=mu[:, 0], sigma=sigma[:, 0])
-            - q[:, 0]
-        )
-        d_kl += c[:, 1] * (
-            self.coefH_discr * torch.log(c[:, 1])
-            + self.coefH_cont * lognorm_logprob(z=z_buy, mu=mu[:, 1], sigma=sigma[:, 1])
-            - q[:, 1]
-        )
-        d_kl += c[:, 2] * (self.coefH_discr * torch.log(c[:, 2]) - q[:, 2])
+        q = self.q_func(state, c)
+        probs = self.policy_discr(state)
+        d_kl = probs[0] * (self.coefH_discr * torch.log(probs[0]) - q[0])
+        d_kl += probs[1] * (self.coefH_discr * torch.log(probs[1]) - q[1])
+        d_kl += probs[2] * (self.coefH_discr * torch.log(probs[2]) - q[2])
 
-        # regularisation. Since the action space is not compact, then Q(x,a) could potentially explode.
-        # To avoid this, I force the parameters of the lognormal not to be very far away from (0,1)
-        reg = c[:, 0] * reg_policy(z_sell, mu=mu[:, 0], sigma=sigma[:, 0])
-        reg += c[:, 1] * reg_policy(z_buy, mu=mu[:, 1], sigma=sigma[:, 1])
-
-        d_kl = (
-            d_kl.reshape(n_mc, batch_size, -1).mean(0).mean()
-            + 0.5 * reg.reshape(n_mc, batch_size, -1).mean(0).mean()
-        )  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
+        d_kl = d_kl.mean()  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
         return d_kl
 
     def policy_improvement(self, batch_size: int, n_epochs: int):
         toggle(self.policy_discr, to=True)
-        toggle(self.policy_volume, to=True)
         toggle(self.q_func, to=False)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
 
         pbar = tqdm(total=n_epochs)
         for epoch in range(n_epochs):
-            for i, (batch_state, _, _, _, _) in enumerate(dataloader):
+            for i, (batch_state, _, _, _) in enumerate(dataloader):
                 self.optimizer_pol.zero_grad()
                 d_kl = self.D_KL(batch_state, n_mc=100).mean()
                 d_kl.backward()
@@ -636,7 +384,6 @@ class LearningAgentFixedVol(StateAgentWithWallet):
             "losses": self.losses,
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
-            "policy_volume": self.policy_volume.state_dict(),
         }
         torch.save(d, filename)
 
@@ -645,4 +392,4 @@ class LearningAgentFixedVol(StateAgentWithWallet):
         d = torch.load(filename, map_location="cpu")
         self.q_func.load_state_dict(d["q"])
         self.policy_discr.load_state_dict(d["policy_discr"])
-        self.policy_volume.load_state_dict(d["policy_volume"])
+        

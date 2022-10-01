@@ -203,9 +203,7 @@ class LearningAgentWithVol(LearningAgent):
     def empty_action(self) -> AbstractAction:
         return Action(True, True, 0.0)
     
-    def finalise(self):
-        return super().finalise()
-
+    
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
         self.step_num += 1
@@ -236,7 +234,7 @@ class LearningAgentWithVol(LearningAgent):
         u1 = np.random.uniform(0,1)
         if u1 > self.exploitation:
             u2 = np.random.uniform(0,1)
-            if u2 > 0.999:
+            if u2 > 0.0:
                 # random policy
                 choice = np.random.choice([0, 1, 2])
                 volume = np.random.lognormal(mean=1.0,sigma=2.0)*10**(-self.position_decimals)

@@ -15,13 +15,12 @@ from vega_sim.reinforcement.learning_agent import (
     WALLET as LEARNING_WALLET,
 )
 from vega_sim.reinforcement.learning_agent_MO_with_vol import LearningAgentWithVol
+from vega_sim.reinforcement.learning_agent_MO import LearningAgentFixedVol
 
 from vega_sim.scenario.registry import IdealMarketMakerV2
 from vega_sim.scenario.registry import CurveMarketMaker
 
 from vega_sim.reinforcement.helpers import set_seed
-from vega_sim.reinforcement.full_market_sim.utils.external_assetprice import RW_model
-from vega_sim.reinforcement.full_market_sim.environments import RLMarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
@@ -100,6 +99,12 @@ if __name__ == "__main__":
         type=int,
         help="If true, do not train and directly run the chosen number of evaluations",
     )
+    parser.add_argument(
+        "--resume_training",
+        default=False,
+        type=bool,
+        help="If true try to load trained state and continue from there",
+    )
     args = parser.parse_args()
 
     # set device
@@ -124,7 +129,7 @@ if __name__ == "__main__":
     initial_price=1000
 
     # create the Learning Agent
-    learning_agent = LearningAgentWithVol(
+    learning_agent = LearningAgentFixedVol(
         device=device,
         logfile_pol_imp=logfile_pol_imp,
         logfile_pol_eval=logfile_pol_eval,
@@ -146,26 +151,27 @@ if __name__ == "__main__":
 
         if args.evaluate == 0:
         # TRAINING OF AGENT
+            if args.resume_training == True:
+                print("Loading neural net weights from: "+args.results_dir)
+                learning_agent.load(args.results_dir)
+            
             for it in range(args.rl_max_it):
                 # simulation of market to get some data
-                try:
-                    learning_agent.move_to_cpu()
-                    _ = run_iteration(
-                        learning_agent=learning_agent,
-                        step_tag=it,
-                        vega=vega,
-                        market_name=market_name,
-                        run_with_console=False,
-                        pause_at_completion=False,
-                    )
-                    # Policy evaluation + Policy improvement
-                    learning_agent.move_to_device()
-                    learning_agent.policy_eval(batch_size=50, n_epochs=10)
-                    learning_agent.policy_improvement(batch_size=50, n_epochs=10)
-                    learning_agent.lerningIteration += 1
-                except:
-                    print("Crashed in iteration {}".format(it))
-                    raise Exception("crashed")
+                
+                learning_agent.move_to_cpu()
+                _ = run_iteration(
+                    learning_agent=learning_agent,
+                    step_tag=it,
+                    vega=vega,
+                    market_name=market_name,
+                    run_with_console=False,
+                    pause_at_completion=False,
+                )
+                # Policy evaluation + Policy improvement
+                learning_agent.move_to_device()
+                learning_agent.policy_eval(batch_size=500, n_epochs=20)
+                learning_agent.policy_improvement(batch_size=500, n_epochs=20)
+                learning_agent.lerningIteration += 1
 
             learning_agent.save(args.results_dir)
             plot_learning(
@@ -176,6 +182,7 @@ if __name__ == "__main__":
             
         else: 
             # EVALUATION OF AGENT
+            print("Loading neural net weights from: "+args.results_dir)
             learning_agent.load(args.results_dir)
             for it in range(args.evaluate):
                 learning_agent.clear_memory()
