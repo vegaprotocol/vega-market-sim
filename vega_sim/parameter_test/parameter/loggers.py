@@ -19,8 +19,12 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "Time Step",
     "LP: General Account",
     "LP: Margin Account",
+    "LP: Margin Rate",
+    "LP: Max Margin",
+    "LP: Max Locked Capital",
     "LP: Bond Account",
     "LP: GeneralPnl",
+    "LP: Return",
     "LP: RealisedPnl",
     "LP: UnrealisedPnl",
     "LP: Position",
@@ -62,6 +66,7 @@ def ideal_market_maker_single_data_extraction(
 def _ideal_market_maker_single_data_extraction(
     vega: VegaServiceNull,
     agents: List[Agent],
+    state_values: List = None,
     additional_data_fns: List[
         Optional[Callable[[VegaServiceNull, List[Agent]], Dict[str, Any]]]
     ] = None,
@@ -89,7 +94,9 @@ def _ideal_market_maker_single_data_extraction(
         asset_id=mm_agent.asset_id,
         market_id=mm_agent.market_id,
     )
-
+    
+    
+   
     position = vega.positions_by_market(
         wallet_name=mm_agent.wallet_name, market_id=mm_agent.market_id
     )
@@ -126,17 +133,38 @@ def _ideal_market_maker_single_data_extraction(
         vega.market_info(market_id=mm_agent.market_id).fees.factors.infrastructure_fee
     )
     traded_notional = round(infrafee / infrafee_rate, 3)
+    margin_rate = float(margin_lp/(margin_lp + bond_lp + general_lp))
+
 
     additional_fns = additional_data_fns if additional_data_fns is not None else []
+
+    if len(state_values) == 0:
+        max_margin = margin_lp
+    else:
+        old_logs = state_values[mm_agent.current_step-2]
+        max_margin = old_logs["LP: Max Margin"]
+        max_margin = max(margin_lp, max_margin)
+
+    if len(state_values) == 0:
+        max_lockedCapital = margin_lp + bond_lp
+    else:
+        old_logs = state_values[mm_agent.current_step-2]
+        max_lockedCapital = old_logs["LP: Max Locked Capital"]
+        max_lockedCapital = max(margin_lp + bond_lp, max_lockedCapital)
+
     base_logs = {
         "Time Step": mm_agent.current_step,
         "LP: General Account": general_lp,
         "LP: Margin Account": margin_lp,
+        "LP: Margin Rate": margin_rate,
         "LP: Bond Account": bond_lp,
         "LP: GeneralPnl": general_lp
         + margin_lp
         + bond_lp
         - mm_agent.initial_asset_mint,
+        "LP: Return": (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)/(max_lockedCapital+0.000000001),
+        "LP: Max Margin": max_margin,
+        "LP: Max Locked Capital": max_lockedCapital,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
@@ -349,3 +377,5 @@ def uninformed_tradingbot_data_extraction(
         "UT: entry price": entry_price,
     }
     return logs
+
+

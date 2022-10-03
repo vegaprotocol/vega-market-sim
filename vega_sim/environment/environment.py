@@ -199,7 +199,7 @@ class MarketEnvironment:
                 self._state_extraction_fn is not None
                 and i % self._state_extraction_freq == 0
             ):
-                state_values.append(self._state_extraction_fn(vega, self.agents))
+                state_values.append(self._state_extraction_fn(vega, self.agents, state_values=state_values))
 
             vega.wait_for_total_catchup()
 
@@ -234,7 +234,7 @@ class MarketEnvironment:
         vega.wait_for_datanode_sync()
 
         if self._state_extraction_fn is not None:
-            state_values.append(self._state_extraction_fn(vega, self.agents))
+            state_values.append(self._state_extraction_fn(vega, self.agents,state_values=state_values))
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 
         if pause_at_completion:
@@ -444,3 +444,4 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             else self.agents
         ):
             agent.step(state)
+
