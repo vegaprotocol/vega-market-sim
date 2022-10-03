@@ -128,10 +128,17 @@ class SlimWallet(Wallet):
         key_name = key_name if key_name is not None else self.vega_default_key_name
 
         if self.vega_wallet is None:
-            self.keys[name] = SigningKey.generate()
-            self.pub_keys[name] = {
-                key_name: self.keys[name].verify_key.encode(encoder=HexEncoder).decode()
-            }
+
+            if name not in self.keys:
+                self.keys[name] = {}
+            if name not in self.pub_keys:
+                self.pub_keys[name] = {}
+
+            self.keys[name][key_name] = SigningKey.generate()
+            self.pub_keys[name][key_name] = (
+                self.keys[name][key_name].verify_key.encode(encoder=HexEncoder).decode()
+            )
+
         else:
             self.vega_wallet.create_wallet(
                 name=name,
