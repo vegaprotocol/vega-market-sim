@@ -42,6 +42,9 @@ class AgentWithWallet(Agent):
                 str, The name to use for this agent's wallet
             wallet_pass:
                 str, The password which this agent uses to log in to the wallet
+            key_name:
+                str, optional, Name of key in wallet for agent to use. Defaults
+                to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
         """
         super().__init__()
         self.wallet_name = wallet_name

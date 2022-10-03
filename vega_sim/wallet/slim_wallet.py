@@ -115,7 +115,12 @@ class SlimWallet(Wallet):
             self._create_nonces()
         return self.nonces[self.nonce_idx]
 
-    def create_wallet(self, name: str, passphrase: str, key_name: str = None) -> None:
+    def create_wallet(
+        self,
+        name: str,
+        passphrase: Optional[str] = None,
+        key_name: Optional[str] = None,
+    ) -> None:
         """Generates a new wallet from a name - passphrase pair in the given vega service.
 
         Args:

@@ -278,6 +278,9 @@ class VegaService(ABC):
                 str, The name of the wallet
             passphrase:
                 str, The login passphrase used when creating the wallet
+             key_name:
+                str, optional, Name of key in wallet for agent to use. Defaults
+                to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
         Returns:
             str, public key associated to this waller
         """

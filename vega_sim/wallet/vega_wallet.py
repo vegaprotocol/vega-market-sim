@@ -1,4 +1,3 @@
-from importlib.metadata import metadata
 import time
 from typing import Any, Dict, List, Optional, Union
 
@@ -32,7 +31,9 @@ class VegaWallet(Wallet):
             "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
         )
 
-    def create_wallet(self, name: str, passphrase: str, key_name: str = None) -> None:
+    def create_wallet(
+        self, name: str, passphrase: str, key_name: Optional[str] = None
+    ) -> None:
         """Generates a new wallet from a name - passphrase pair in the given vega service.
 
         Args:
@@ -126,6 +127,7 @@ class VegaWallet(Wallet):
             json=req,
         )
         response.raise_for_status()
+        return list(response.json()["key"]["pub"])
 
     def get_keypairs(self, wallet_name: str) -> dict:
         headers = {"Authorization": f"Bearer {self.login_tokens[wallet_name]}"}
