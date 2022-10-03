@@ -1084,6 +1084,21 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 new_buy_shape,
             )
 
+        if (
+            liq := self.liquidity_commitment_fn(vega_state)
+            if self.liquidity_commitment_fn is not None
+            else None
+        ) is not None:
+            self.vega.submit_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=liq.amount,
+                fee=liq.fee,
+                buy_specs=liq.buy_specs,
+                sell_specs=liq.sell_specs,
+                is_amendment=True,
+            )
+
     def _submit_order(
         self, side: Union[str, vega_protos.Side], price: float, size: float
     ) -> None:
@@ -1152,6 +1167,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         commitment_amount: float = 6000,
         market_decimal_places: int = 5,
         order_unit_size: float = 10,
+        fee_amount: float = 0.001,
         kappa: float = 1,
         num_levels: int = 25,
         tick_spacing: float = 1,
@@ -1178,18 +1194,14 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             tag=tag,
             shape_fn=self._generate_shape,
             best_price_offset_fn=self._optimal_strategy,
-            liquidity_commitment_fn=lambda _: LiquidityProvision(
-                amount=commitment_amount,
-                fee=0.01,
-                buy_specs=[["PEGGED_REFERENCE_BEST_BID", 5, 1]],
-                sell_specs=[["PEGGED_REFERENCE_BEST_ASK", 5, 1]],
-            ),
+            liquidity_commitment_fn=self._liq_provis,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
         self.num_levels = num_levels
         self.order_unit_size = order_unit_size
         self.max_order_size = max_order_size
+        self.fee_amount = fee_amount
 
         self.num_steps = num_steps
         self.long_horizon_estimate = num_steps >= 200
@@ -1199,6 +1211,8 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         self.market_kappa = market_kappa
         self.alpha = terminal_penalty_parameter
         self.phi = running_penalty_parameter
+
+        self.curr_bids, self.curr_asks = None, None
 
         if not self.long_horizon_estimate:
             self.optimal_bid, self.optimal_ask, _ = a_s_mm_model(
@@ -1222,6 +1236,36 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 alpha=self.alpha,
                 phi=self.phi,
             )
+
+    def _liq_provis(self, state: VegaState) -> LiquidityProvision:
+        buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
+        sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
+
+        if self.curr_asks is not None:
+            next_ask_step = self.curr_asks[-1].price + self.tick_spacing
+            sell_specs = [
+                [
+                    "PEGGED_REFERENCE_MID",
+                    next_ask_step - state.market_state[self.market_id].midprice,
+                    1,
+                ]
+            ]
+        if self.curr_bids is not None:
+            next_bid_step = self.curr_bids[-1].price - self.tick_spacing
+            buy_specs = [
+                [
+                    "PEGGED_REFERENCE_MID",
+                    state.market_state[self.market_id].midprice - next_bid_step,
+                    1,
+                ]
+            ]
+
+        return LiquidityProvision(
+            amount=self.commitment_amount,
+            fee=self.fee_amount,
+            buy_specs=buy_specs,
+            sell_specs=sell_specs,
+        )
 
     def _optimal_strategy(
         self, current_position: float, current_step: int
@@ -1267,13 +1311,15 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         ask_orders = self._calculate_price_volume_levels(
             ask_price_depth, vega_protos.Side.SIDE_SELL
         )
+        self.curr_bids = bid_orders
+        self.curr_asks = ask_orders
         return bid_orders, ask_orders
 
     def _calculate_price_volume_levels(
         self,
         price_depth: float,
         side: Union[str, vega_protos.Side],
-    ) -> ArrayLike:
+    ) -> List[MMOrder]:
         is_buy = side in ["SIDE_BUY", vega_protos.SIDE_BUY]
         mult_factor = -1 if is_buy else 1
 
