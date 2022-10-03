@@ -59,10 +59,11 @@ class FFN_fix_fol_Q(nn.Module):
         super().__init__()
 
         # the dimension of a which is integer in {0,1,2} so 1d
-        self.ffn = FFN(sizes=[state_dim+1, 4096, 1], activation=nn.Tanh)  
-        
+        self.ffn = FFN(sizes=[state_dim + 1, 4096, 1], activation=nn.Tanh)
+
     def forward(self, state: torch.Tensor, a: torch.Tensor):
-        return self.ffn(state,a)
+        return self.ffn(state, a)
+
 
 class FFN_Q(nn.Module):
     """

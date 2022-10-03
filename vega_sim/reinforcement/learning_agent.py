@@ -40,7 +40,6 @@ WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 WALLET = WalletConfig("learner", "learner")
 
 
-
 class LearningAgent(StateAgentWithWallet):
     def __init__(
         self,
@@ -55,14 +54,14 @@ class LearningAgent(StateAgentWithWallet):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
-        exploitation: float, # set this to 0 for full exploration and 1 for full exploitation
+        exploitation: float,  # set this to 0 for full exploration and 1 for full exploitation
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
 
         self.step_num = 0
         self.device = device
         self.discount_factor = discount_factor
-        self.initial_balance=initial_balance
+        self.initial_balance = initial_balance
 
         self.memory = defaultdict(list)
         self.memory_capacity = 10000
@@ -101,25 +100,24 @@ class LearningAgent(StateAgentWithWallet):
         # logfile
         self.logfile_pol_imp = logfile_pol_imp
         with open(self.logfile_pol_imp, "w") as f:
-                f.write("iteration,loss\n")
+            f.write("iteration,loss\n")
         self.logfile_pol_eval = logfile_pol_eval
         with open(self.logfile_pol_eval, "w") as f:
-                f.write("iteration,loss\n")
+            f.write("iteration,loss\n")
         self.logfile_pnl = logfile_pnl
         with open(self.logfile_pnl, "w") as f:
-                f.write("iteration,pnl\n")
-        
-        
+            f.write("iteration,pnl\n")
+
         self.lerningIteration = 0
         self.market_name = market_name
         self.position_decimals = position_decimals
         if exploitation < 0 or exploitation > 1:
             raise Exception("Need 0.0 <= exploitation <= 1.0")
         self.exploitation = exploitation
-        
+
     def set_market_tag(self, tag: str):
         self.tag = tag
-        #self.wallet_name = self.base_wallet_name + str(tag)
+        # self.wallet_name = self.base_wallet_name + str(tag)
 
     def move_to_device(self):
         self.q_func.to(self.device)
@@ -187,10 +185,8 @@ class LearningAgent(StateAgentWithWallet):
 
     def state(self, vega: VegaServiceNull) -> LAMarketState:
         position = self.vega.positions_by_market(self.wallet_name, self.market_id)
-        
-        position = (
-            position[0].open_volume if position else 0
-        )
+
+        position = position[0].open_volume if position else 0
         account = self.vega.party_account(
             wallet_name=self.wallet_name,
             asset_id=self.tdai_id,
@@ -212,8 +208,10 @@ class LearningAgent(StateAgentWithWallet):
             position=position,
             margin_balance=account.margin,
             general_balance=account.general,
-            market_in_auction=(not market_info.trading_mode
-            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS),
+            market_in_auction=(
+                not market_info.trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            ),
             bid_prices=[level.price for level in book_state.buys]
             + [0] * max(0, self.num_levels - len(book_state.buys)),
             ask_prices=[level.price for level in book_state.sells]
@@ -237,20 +235,23 @@ class LearningAgent(StateAgentWithWallet):
         self.latest_action = self.empty_action()
         self.latest_state = learning_state
         self.step_num += 1
-        final_pnl = learning_state.general_balance + learning_state.margin_balance - self.initial_balance
+        final_pnl = (
+            learning_state.general_balance
+            + learning_state.margin_balance
+            - self.initial_balance
+        )
         if learning_state.margin_balance > 0:
-            print("Market should be settled but there is still balance in margin account. What's up?")
+            print(
+                "Market should be settled but there is still balance in margin account. What's up?"
+            )
         with open(self.logfile_pnl, "a") as f:
-                f.write(
-                    "{},{:.5f}\n".format(self.lerningIteration, final_pnl)
-                )
+            f.write("{},{:.5f}\n".format(self.lerningIteration, final_pnl))
 
         return super().finalise()
 
-    
     def step(self, vega_state: VegaState):
         pass
-    
+
     def save(self, results_dir: str):
         pass
 

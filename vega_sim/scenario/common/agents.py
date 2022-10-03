@@ -1583,8 +1583,10 @@ class InformedTrader(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         market_info = self.vega.market_info(market_id=self.market_id)
-        market_in_auction=(not market_info.trading_mode
-                            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS)
+        market_in_auction = (
+            not market_info.trading_mode
+            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        )
         position = self.vega.positions_by_market(
             wallet_name=self.wallet_name, market_id=self.market_id
         )
@@ -1592,7 +1594,7 @@ class InformedTrader(StateAgentWithWallet):
         trade_side = (
             vega_protos.SIDE_BUY if current_position < 0 else vega_protos.SIDE_SELL
         )
-        if (not market_in_auction) and  current_position:
+        if (not market_in_auction) and current_position:
             try:
                 self.vega.submit_market_order(
                     trading_wallet=self.wallet_name,

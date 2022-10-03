@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
@@ -40,7 +39,6 @@ WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 WALLET = WalletConfig("learner", "learner")
 
 
-
 @dataclass
 class Action(AbstractAction):
     buy: bool
@@ -69,15 +67,16 @@ class SoftActionWithVol:
             self.volume_buy,
         )
 
+
 def states_to_sarsa(
     states: List[Tuple[LAMarketState, Action]]
 ) -> List[Tuple[LAMarketState, Action, float, LAMarketState, Action]]:
     res = []
-    for i in range(len(states)-1):
+    for i in range(len(states) - 1):
         pres_state = states[i]
-        next_state = states[i + 1] 
-    
-        if (next_state[0].margin_balance + next_state[0].general_balance <= 0):
+        next_state = states[i + 1]
+
+        if next_state[0].margin_balance + next_state[0].general_balance <= 0:
             reward = -1e12
             res.append(
                 (
@@ -90,18 +89,14 @@ def states_to_sarsa(
             )
             break
 
-    
         reward = (
             (next_state[0].general_balance + next_state[0].margin_balance)
             - (pres_state[0].general_balance + pres_state[0].margin_balance)
             if next_state is not np.nan
             else 0
         )
-        res.append(
-                (pres_state[0], pres_state[1], reward, next_state[0], next_state[1])
-        )
+        res.append((pres_state[0], pres_state[1], reward, next_state[0], next_state[1]))
     return res
-
 
 
 class LearningAgentWithVol(LearningAgent):
@@ -118,20 +113,21 @@ class LearningAgentWithVol(LearningAgent):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
-        exploitation: float, # set this to 0 for full exploration and 1 for full exploitation
+        exploitation: float,  # set this to 0 for full exploration and 1 for full exploitation
     ):
-        super().__init__(device=device,
-                            logfile_pol_imp=logfile_pol_imp,
-                            logfile_pol_eval=logfile_pol_eval,
-                            logfile_pnl=logfile_pnl,
-                            discount_factor=discount_factor,
-                            num_levels=num_levels,
-                            wallet_name=wallet_name,
-                            wallet_pass=wallet_pass,
-                            market_name=market_name,
-                            initial_balance=initial_balance,
-                            position_decimals=position_decimals,
-                            exploitation=exploitation,
+        super().__init__(
+            device=device,
+            logfile_pol_imp=logfile_pol_imp,
+            logfile_pol_eval=logfile_pol_eval,
+            logfile_pnl=logfile_pnl,
+            discount_factor=discount_factor,
+            num_levels=num_levels,
+            wallet_name=wallet_name,
+            wallet_pass=wallet_pass,
+            market_name=market_name,
+            initial_balance=initial_balance,
+            position_decimals=position_decimals,
+            exploitation=exploitation,
         )
 
     def _update_memory(
@@ -202,8 +198,7 @@ class LearningAgentWithVol(LearningAgent):
 
     def empty_action(self) -> AbstractAction:
         return Action(True, True, 0.0)
-    
-    
+
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
         self.step_num += 1
@@ -214,7 +209,7 @@ class LearningAgentWithVol(LearningAgent):
             return
         if learning_state.market_in_auction:
             return
-                    
+
         if self.latest_action.buy or self.latest_action.sell:
             try:
                 self.vega.submit_market_order(
@@ -228,16 +223,16 @@ class LearningAgentWithVol(LearningAgent):
             except Exception as e:
                 print(e)
 
-            
-
     def _step(self, vega_state: LAMarketState) -> Action:
-        u1 = np.random.uniform(0,1)
+        u1 = np.random.uniform(0, 1)
         if u1 > self.exploitation:
-            u2 = np.random.uniform(0,1)
+            u2 = np.random.uniform(0, 1)
             if u2 > 0.0:
                 # random policy
                 choice = np.random.choice([0, 1, 2])
-                volume = np.random.lognormal(mean=1.0,sigma=2.0)*10**(-self.position_decimals)
+                volume = np.random.lognormal(mean=1.0, sigma=2.0) * 10 ** (
+                    -self.position_decimals
+                )
             else:
                 return self._step_heuristic(vega_state=vega_state)
         else:
@@ -249,24 +244,31 @@ class LearningAgentWithVol(LearningAgent):
                 soft_action = self.sample_action(state=state, sim=True)
             choice = int(soft_action.c.item())
             if choice == 0:  # choice = 0 --> sell
-                volume = soft_action.volume_sell.item()*10**(-self.position_decimals)
+                volume = soft_action.volume_sell.item() * 10 ** (
+                    -self.position_decimals
+                )
             elif choice == 1:  # choice = 1 --> buy
-                volume = soft_action.volume_buy.item()*10**(-self.position_decimals)
+                volume = soft_action.volume_buy.item() * 10 ** (-self.position_decimals)
             else:
                 volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
         return Action(buy=choice == 0, sell=choice == 1, volume=volume)
-        
-    
+
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
         volume = 0.0
-        if vega_state.position <= 0 and vega_state.ask_prices[0] < vega_state.next_price:
-            choice = 0 # buy
+        if (
+            vega_state.position <= 0
+            and vega_state.ask_prices[0] < vega_state.next_price
+        ):
+            choice = 0  # buy
             volume = 0.01
-        elif vega_state.position >= 0 and vega_state.bid_prices[0] > vega_state.next_price:
-            choice = 1 # sell 
+        elif (
+            vega_state.position >= 0
+            and vega_state.bid_prices[0] > vega_state.next_price
+        ):
+            choice = 1  # sell
             volume = 0.01
-        else: 
-            choice = 2 # do nothing
+        else:
+            choice = 2  # do nothing
 
         return Action(buy=choice == 0, sell=choice == 1, volume=volume)
 
@@ -380,7 +382,7 @@ class LearningAgentWithVol(LearningAgent):
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
                     "{},{:.5f}\n".format(
-                        epoch+self.lerningIteration*n_epochs, loss.item()
+                        epoch + self.lerningIteration * n_epochs, loss.item()
                     )
                 )
             pbar.update(1)
@@ -478,7 +480,7 @@ class LearningAgentWithVol(LearningAgent):
             with open(self.logfile_pol_imp, "a") as f:
                 f.write(
                     "{},{:.4f}\n".format(
-                        epoch+n_epochs*self.lerningIteration, d_kl.item()
+                        epoch + n_epochs * self.lerningIteration, d_kl.item()
                     )
                 )
             pbar.update(1)

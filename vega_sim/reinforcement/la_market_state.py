@@ -3,7 +3,6 @@ from typing import List, Tuple
 import numpy as np
 
 
-
 @dataclass
 class AbstractAction:
     pass
@@ -22,7 +21,6 @@ class LAMarketState:
     ask_volumes: List[float]
     trading_fee: float
     next_price: float
-    
 
     def to_array(self):
         l = (
@@ -43,16 +41,16 @@ class LAMarketState:
         arr = np.nan_to_num(np.array(l))
         return arr
 
-    
+
 def states_to_sarsa(
     states: List[Tuple[LAMarketState, AbstractAction]]
 ) -> List[Tuple[LAMarketState, AbstractAction, float, LAMarketState, AbstractAction]]:
     res = []
-    for i in range(len(states)-1):
+    for i in range(len(states) - 1):
         pres_state = states[i]
-        next_state = states[i + 1] 
-    
-        if (next_state[0].margin_balance + next_state[0].general_balance <= 0):
+        next_state = states[i + 1]
+
+        if next_state[0].margin_balance + next_state[0].general_balance <= 0:
             reward = -1e12
             res.append(
                 (
@@ -65,14 +63,11 @@ def states_to_sarsa(
             )
             break
 
-    
         reward = (
             (next_state[0].general_balance + next_state[0].margin_balance)
             - (pres_state[0].general_balance + pres_state[0].margin_balance)
             if next_state is not np.nan
             else 0
         )
-        res.append(
-                (pres_state[0], pres_state[1], reward, next_state[0], next_state[1])
-        )
+        res.append((pres_state[0], pres_state[1], reward, next_state[0], next_state[1]))
     return res

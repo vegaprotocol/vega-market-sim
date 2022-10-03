@@ -6,10 +6,7 @@ import torch
 import time
 
 from vega_sim.environment.agent import Agent
-from vega_sim.reinforcement.la_market_state import (
-    LAMarketState, 
-    AbstractAction
-)
+from vega_sim.reinforcement.la_market_state import LAMarketState, AbstractAction
 from vega_sim.reinforcement.learning_agent import (
     LearningAgent,
     WALLET as LEARNING_WALLET,
@@ -64,7 +61,6 @@ def run_iteration(
     )
     # add the learning agaent to the environement's list of agents
     env.agents = env.agents + [learning_agent]
-    
 
     learning_agent.set_market_tag(str(step_tag))
     learning_agent.price_process = scenario.price_process
@@ -75,7 +71,7 @@ def run_iteration(
     )
     # Update the memory of the learning agent with the simulated data
     learning_agent.update_memory(result)
-    
+
     return result
 
 
@@ -91,6 +87,7 @@ if __name__ == "__main__":
         help="Number of iterations of policy improvement + policy iterations",
     )
     parser.add_argument("--use_cuda", action="store_true", default=False)
+    parser.add_argument("--use_mps", action="store_true", default=False)
     parser.add_argument("--device", default=0, type=int)
     parser.add_argument("--results_dir", default="numerical_results", type=str)
     parser.add_argument(
@@ -110,6 +107,11 @@ if __name__ == "__main__":
     # set device
     if torch.cuda.is_available() and args.use_cuda:
         device = "cuda:{}".format(args.device)
+    elif torch.backends.mps.is_available() and args.use_mps:
+        device = torch.device("mps")
+        print(
+            "WARNING: as of today this will likely crash due to mps not implementing all required functionality."
+        )
     else:
         device = "cpu"
 
@@ -125,8 +127,8 @@ if __name__ == "__main__":
 
     # set market name
     market_name = "ETH:USD"
-    position_decimals=2
-    initial_price=1000
+    position_decimals = 2
+    initial_price = 1000
 
     # create the Learning Agent
     learning_agent = LearningAgentFixedVol(
@@ -141,23 +143,23 @@ if __name__ == "__main__":
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        exploitation=0.0
+        exploitation=0.0,
     )
 
     with VegaServiceNull(
-            warn_on_raw_data_access=False, run_with_console=False, retain_log_files=True
+        warn_on_raw_data_access=False, run_with_console=False, retain_log_files=True
     ) as vega:
         vega.wait_for_total_catchup()
 
         if args.evaluate == 0:
-        # TRAINING OF AGENT
+            # TRAINING OF AGENT
             if args.resume_training == True:
-                print("Loading neural net weights from: "+args.results_dir)
+                print("Loading neural net weights from: " + args.results_dir)
                 learning_agent.load(args.results_dir)
-            
+
             for it in range(args.rl_max_it):
                 # simulation of market to get some data
-                
+
                 learning_agent.move_to_cpu()
                 _ = run_iteration(
                     learning_agent=learning_agent,
@@ -175,14 +177,14 @@ if __name__ == "__main__":
 
             learning_agent.save(args.results_dir)
             plot_learning(
-                results_dir=args.results_dir, 
-                logfile_pol_eval=logfile_pol_eval, 
-                logfile_pol_imp=logfile_pol_imp
-                )
-            
-        else: 
+                results_dir=args.results_dir,
+                logfile_pol_eval=logfile_pol_eval,
+                logfile_pol_imp=logfile_pol_imp,
+            )
+
+        else:
             # EVALUATION OF AGENT
-            print("Loading neural net weights from: "+args.results_dir)
+            print("Loading neural net weights from: " + args.results_dir)
             learning_agent.load(args.results_dir)
             for it in range(args.evaluate):
                 learning_agent.clear_memory()
@@ -196,6 +198,5 @@ if __name__ == "__main__":
                     pause_at_completion=False,
                 )
                 plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
-        
+
         plot_pnl(results_dir=args.results_dir, logfile_pnl=logfile_pnl)
-                
