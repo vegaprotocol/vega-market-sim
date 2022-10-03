@@ -1585,7 +1585,7 @@ class InformedTrader(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
-        market_info = self.vega.market_info(market_id=self.market_id)
+        trading_mode = vega_state.market_state[self.market_id].trading_mode
         market_in_auction = (
             not market_info.trading_mode
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
