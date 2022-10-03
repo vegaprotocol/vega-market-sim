@@ -48,6 +48,7 @@ LiquidityProvision = namedtuple(
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class MarketRegime:
     spread: float
@@ -1213,7 +1214,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 q_lower=self.q_lower,
                 mdp=self.mdp,
                 kappa=self.market_kappa,
-                lmbda=self.market_order_arrival_rate,
+                Lambda=self.market_order_arrival_rate,
                 alpha=self.alpha,
                 phi=self.phi,
             )
@@ -1222,7 +1223,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 q_upper=self.q_upper,
                 q_lower=self.q_lower,
                 kappa=self.market_kappa,
-                lmbda=self.market_order_arrival_rate,
+                Lambda=self.market_order_arrival_rate,
                 alpha=self.alpha,
                 phi=self.phi,
             )
@@ -1587,7 +1588,7 @@ class InformedTrader(StateAgentWithWallet):
     def step(self, vega_state: VegaState):
         trading_mode = vega_state.market_state[self.market_id].trading_mode
         market_in_auction = (
-            not market_info.trading_mode
+            not trading_mode
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
         )
         position = self.vega.positions_by_market(

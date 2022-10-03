@@ -67,7 +67,7 @@ class IdealMarketMaker(Scenario):
         proportion_taken: float = 0.8,
     ):
         self.num_steps = num_steps
-        self.random_agent_ordering = (random_agent_ordering,)
+        self.random_agent_ordering = random_agent_ordering
         self.dt = dt
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
