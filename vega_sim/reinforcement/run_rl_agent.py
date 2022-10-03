@@ -145,7 +145,7 @@ if __name__ == "__main__":
     )
 
     with VegaServiceNull(
-            warn_on_raw_data_access=False, run_with_console=False, retain_log_files=False
+            warn_on_raw_data_access=False, run_with_console=False, retain_log_files=True
     ) as vega:
         vega.wait_for_total_catchup()
 
@@ -169,8 +169,8 @@ if __name__ == "__main__":
                 )
                 # Policy evaluation + Policy improvement
                 learning_agent.move_to_device()
-                learning_agent.policy_eval(batch_size=500, n_epochs=20)
-                learning_agent.policy_improvement(batch_size=500, n_epochs=20)
+                learning_agent.policy_eval(batch_size=5000, n_epochs=100)
+                learning_agent.policy_improvement(batch_size=5000, n_epochs=100)
                 learning_agent.lerningIteration += 1
 
             learning_agent.save(args.results_dir)

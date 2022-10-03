@@ -118,7 +118,7 @@ class LearningAgentFixedVol(LearningAgent):
         )
         self.volume = 10**(-self.position_decimals)
         self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
-        self.coefH_discr = 0.5
+        self.coefH_discr = 0.1
         
 
     def _update_memory(
@@ -211,7 +211,8 @@ class LearningAgentFixedVol(LearningAgent):
 
     def _step(self, vega_state: LAMarketState) -> Action:
         u1 = np.random.uniform(0,1)
-        if u1 > self.exploitation:
+        # if u1 > self.exploitation:
+        if u1 > 2.0:
             u2 = np.random.uniform(0,1)
             if u2 > 0.1:
                 # random policy
@@ -276,12 +277,13 @@ class LearningAgentFixedVol(LearningAgent):
                     batch_next_state,
                 ),
             ) in enumerate(dataloader):
-                next_state_terminal = torch.isnan(
-                    batch_next_state
-                ).float()  # shape (batch_size, dim_state)
-                batch_next_state[next_state_terminal.eq(True)] = batch_state[
-                    next_state_terminal.eq(True)
-                ]
+                # next_state_terminal = torch.isnan(batch_next_state).float()  # shape (batch_size, dim_state)
+                # batch_next_state[next_state_terminal.eq(True)] = batch_state[
+                #     next_state_terminal.eq(True)
+                # ]
+                next_state_terminal = torch.isnan(batch_next_state)  # shape (batch_size, dim_state)
+                next_state_termina_idx = next_state_terminal.eq(True)
+                batch_next_state[next_state_terminal] = batch_state[next_state_terminal].float()
                 self.optimizer_q.zero_grad()
                 
                 pred = self.q_func(batch_state,batch_action_discrete)
@@ -290,7 +292,7 @@ class LearningAgentFixedVol(LearningAgent):
                     v = self.v_func(batch_next_state)
                     target = (
                         batch_reward
-                        + (1 - next_state_terminal.mean(1, keepdim=True))
+                        + (1 - next_state_terminal.float().mean(1, keepdim=True))
                         * self.discount_factor
                         * v
                     )

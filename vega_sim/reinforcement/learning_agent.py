@@ -80,7 +80,7 @@ class LearningAgent(StateAgentWithWallet):
         self.policy_volume = FFN_Params_Normal(
             n_in=self.state_dim,
             n_distr=2,
-            hidden_sizes=[128],
+            hidden_sizes=[4096],
         )
         self.policy_discr = FFN(
             sizes=[self.state_dim, 32, action_discrete_dim],
