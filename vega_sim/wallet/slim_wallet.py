@@ -115,28 +115,30 @@ class SlimWallet(Wallet):
             self._create_nonces()
         return self.nonces[self.nonce_idx]
 
-    def create_wallet(self, name: str, **kwargs) -> None:
+    def create_wallet(self, name: str, passphrase: str, key_name: str = None) -> None:
         """Generates a new wallet from a name - passphrase pair in the given vega service.
 
         Args:
             name:
                 str, The name to use for the wallet
         """
+        passphrase = (
+            passphrase if passphrase is not None else self.full_wallet_default_pass
+        )
+        key_name = key_name if key_name is not None else self.vega_default_key_name
+
         if self.vega_wallet is None:
             self.keys[name] = SigningKey.generate()
             self.pub_keys[name] = {
-                self.vega_default_key_name: self.keys[name]
-                .verify_key.encode(encoder=HexEncoder)
-                .decode()
+                key_name: self.keys[name].verify_key.encode(encoder=HexEncoder).decode()
             }
         else:
             self.vega_wallet.create_wallet(
                 name=name,
-                passphrase=kwargs.get("passphrase", self.full_wallet_default_pass),
+                passphrase=passphrase,
+                key_name=key_name,
             )
-            self.pub_keys[name] = {
-                self.vega_default_key_name: self.vega_wallet.public_key(name)
-            }
+            self.pub_keys[name] = {key_name: self.vega_wallet.public_key(name)}
 
     def login(self, name: str, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
