@@ -65,9 +65,10 @@ class VegaWallet(Wallet):
             passphrase=passphrase,
             metadata=[
                 {
-                    "name": key_name
+                    "key": "name",
+                    "value": key_name
                     if key_name is not None
-                    else self.vega_default_key_name
+                    else self.vega_default_key_name,
                 }
             ],
         )

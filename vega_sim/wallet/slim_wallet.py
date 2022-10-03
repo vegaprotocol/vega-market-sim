@@ -127,12 +127,12 @@ class SlimWallet(Wallet):
         )
         key_name = key_name if key_name is not None else self.vega_default_key_name
 
-        if self.vega_wallet is None:
+        if name not in self.keys:
+            self.keys[name] = {}
+        if name not in self.pub_keys:
+            self.pub_keys[name] = {}
 
-            if name not in self.keys:
-                self.keys[name] = {}
-            if name not in self.pub_keys:
-                self.pub_keys[name] = {}
+        if self.vega_wallet is None:
 
             self.keys[name][key_name] = SigningKey.generate()
             self.pub_keys[name][key_name] = (
@@ -145,7 +145,7 @@ class SlimWallet(Wallet):
                 passphrase=passphrase,
                 key_name=key_name,
             )
-            self.pub_keys[name] = {key_name: self.vega_wallet.public_key(name)}
+            self.pub_keys[name][key_name] = self.vega_wallet.public_key(name, key_name)
 
     def login(self, name: str, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
