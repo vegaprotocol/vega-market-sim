@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from venv import create
 
+import logging
+
 import numpy as np
 from math import exp
 
@@ -44,6 +46,7 @@ LiquidityProvision = namedtuple(
     "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
 )
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class MarketRegime:
@@ -1210,7 +1213,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 q_lower=self.q_lower,
                 mdp=self.mdp,
                 kappa=self.market_kappa,
-                Lambda=self.market_order_arrival_rate,
+                lmbda=self.market_order_arrival_rate,
                 alpha=self.alpha,
                 phi=self.phi,
             )
@@ -1219,7 +1222,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 q_upper=self.q_upper,
                 q_lower=self.q_lower,
                 kappa=self.market_kappa,
-                Lambda=self.market_order_arrival_rate,
+                lmbda=self.market_order_arrival_rate,
                 alpha=self.alpha,
                 phi=self.phi,
             )
@@ -1605,7 +1608,7 @@ class InformedTrader(StateAgentWithWallet):
                     fill_or_kill=False,
                 )
             except OrderRejectedError:
-                print("Order rejected.")
+                logger.debug("Order rejected")
 
         order_book = self.vega.market_depth(market_id=self.market_id)
 
@@ -1638,7 +1641,7 @@ class InformedTrader(StateAgentWithWallet):
                     fill_or_kill=False,
                 )
             except OrderRejectedError:
-                print("Order rejected.")
+                logger.debug("Order rejected")
 
 
 class LiquidityProvider(StateAgentWithWallet):
