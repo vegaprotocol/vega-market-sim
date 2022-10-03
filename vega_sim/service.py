@@ -268,7 +268,9 @@ class VegaService(ABC):
         """
         return self.wallet.login(name=name, passphrase=passphrase)
 
-    def create_wallet(self, name: str, passphrase: str) -> str:
+    def create_wallet(
+        self, name: str, passphrase: str, key_name: Optional[str] = None
+    ) -> str:
         """Logs in to existing wallet in the given vega service.
 
         Args:
@@ -279,7 +281,9 @@ class VegaService(ABC):
         Returns:
             str, public key associated to this waller
         """
-        return self.wallet.create_wallet(name=name, passphrase=passphrase)
+        return self.wallet.create_wallet(
+            name=name, passphrase=passphrase, key_name=key_name
+        )
 
     def mint(
         self,
