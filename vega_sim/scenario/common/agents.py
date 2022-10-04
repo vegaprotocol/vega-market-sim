@@ -118,6 +118,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
         self.pdp = self.vega.market_pos_decimals.get(self.market_id, {})
@@ -897,6 +898,7 @@ class MarketManager(StateAgentWithWallet):
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
 
+        print(self.key_name)
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.minimum.probabilityOfTrading.lpOrders",
@@ -923,6 +925,7 @@ class MarketManager(StateAgentWithWallet):
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
             key_name=self.key_name,
+            termination_key=self.terminate_key_name,
         )
         self.vega.wait_fn(5)
 
@@ -1077,7 +1080,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         for order in (
             vega_state.market_state.get(self.market_id, {})
-            .orders.get(self.vega.wallet.public_key(self.wallet_name), {})
+            .orders.get(
+                self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
+            )
             .values()
         ):
             if order.side == vega_protos.SIDE_BUY:
@@ -1174,6 +1179,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
                     order_id=order.id,
+                    key_name=self.key_name,
                 )
 
 
@@ -1517,6 +1523,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(2)
 
@@ -1869,6 +1876,7 @@ class MomentumTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
