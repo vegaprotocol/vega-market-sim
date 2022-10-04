@@ -139,12 +139,12 @@ def _ideal_market_maker_single_data_extraction(
     additional_fns = additional_data_fns if additional_data_fns is not None else []
 
     if len(state_values) == 0:
-        max_lockedCapital = margin_lp + bond_lp
+        max_locked_capital = margin_lp + bond_lp
         max_margin = margin_lp
     else:
         old_logs = state_values[mm_agent.current_step-2]
-        max_lockedCapital = old_logs["LP: Max Locked Capital"]
-        max_lockedCapital = max(margin_lp + bond_lp, max_lockedCapital)
+        max_locked_capital = old_logs["LP: Max Locked Capital"]
+        max_locked_capital = max(margin_lp + bond_lp, max_locked_capital)
         max_margin = old_logs["LP: Max Margin"]
         max_margin = max(margin_lp, max_margin)
 
@@ -158,9 +158,9 @@ def _ideal_market_maker_single_data_extraction(
         + margin_lp
         + bond_lp
         - mm_agent.initial_asset_mint,
-        "LP: Return": (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)/(max_lockedCapital+0.000000001),
+        "LP: Return": (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)/(max_locked_capital+0.000000001),
         "LP: Max Margin": max_margin,
-        "LP: Max Locked Capital": max_lockedCapital,
+        "LP: Max Locked Capital": max_locked_capital,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
