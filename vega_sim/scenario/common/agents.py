@@ -748,8 +748,9 @@ class OpenAuctionPass(StateAgentWithWallet):
         initial_price: float = 0.3,
         opening_auction_trade_amount: float = 1,
         tag: str = "",
+        key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.side = side
         self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
@@ -782,6 +783,7 @@ class OpenAuctionPass(StateAgentWithWallet):
                 self.wallet_name,
                 asset=asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
@@ -795,6 +797,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             volume=self.opening_auction_trade_amount,
             price=self.initial_price,
             wait=False,
+            key_name=self.key_name,
         )
 
     def step(self, vega_state: VegaState):
