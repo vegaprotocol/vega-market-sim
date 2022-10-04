@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from venv import create
 
+import logging
+
 import numpy as np
 from math import exp
 
@@ -25,7 +27,7 @@ from vega_sim.proto.vega import (
     vega as vega_protos,
 )
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
-
+from vega_sim.api.trading import OrderRejectedError
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -43,6 +45,8 @@ MMOrder = namedtuple("MMOrder", ["size", "price"])
 LiquidityProvision = namedtuple(
     "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -928,6 +932,7 @@ class MarketManager(StateAgentWithWallet):
             self.vega.settle_market(
                 self.terminate_wallet_name, self.settlement_price, self.market_id
             )
+            self.vega.wait_for_total_catchup()
 
 
 class ShapedMarketMaker(StateAgentWithWallet):
@@ -977,7 +982,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.liquidity_commitment_fn = liquidity_commitment_fn
 
         self.current_step = 0
-        self.mid_price = None
+        self.curr_price = None
         self.prev_price = None
 
         self.tag = tag
@@ -1029,7 +1034,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
-        self.prev_price = self.mid_price
+        self.prev_price = self.curr_price
         self.curr_price = next(self.price_process_generator)
 
         # Each step, MM posts optimal bid/ask depths
@@ -1223,7 +1228,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 q_lower=self.q_lower,
                 mdp=self.mdp,
                 kappa=self.market_kappa,
-                lmbda=self.market_order_arrival_rate,
+                Lambda=self.market_order_arrival_rate,
                 alpha=self.alpha,
                 phi=self.phi,
             )
@@ -1627,6 +1632,11 @@ class InformedTrader(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
+        trading_mode = vega_state.market_state[self.market_id].trading_mode
+        market_in_auction = (
+            not trading_mode
+            == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        )
         position = self.vega.positions_by_market(
             wallet_name=self.wallet_name, market_id=self.market_id
         )
@@ -1634,15 +1644,18 @@ class InformedTrader(StateAgentWithWallet):
         trade_side = (
             vega_protos.SIDE_BUY if current_position < 0 else vega_protos.SIDE_SELL
         )
-        if current_position:
-            self.vega.submit_market_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=trade_side,
-                volume=np.abs(current_position),
-                wait=True,
-                fill_or_kill=False,
-            )
+        if (not market_in_auction) and current_position:
+            try:
+                self.vega.submit_market_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    side=trade_side,
+                    volume=np.abs(current_position),
+                    wait=True,
+                    fill_or_kill=False,
+                )
+            except OrderRejectedError:
+                logger.debug("Order rejected")
 
         order_book = self.vega.market_depth(market_id=self.market_id)
 
@@ -1664,15 +1677,18 @@ class InformedTrader(StateAgentWithWallet):
 
         volume = round(self.proportion_taken * volume, self.pdp)
 
-        if volume:
-            self.vega.submit_market_order(
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=trade_side,
-                volume=volume,
-                wait=False,
-                fill_or_kill=False,
-            )
+        if (not market_in_auction) and volume:
+            try:
+                self.vega.submit_market_order(
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    side=trade_side,
+                    volume=volume,
+                    wait=False,
+                    fill_or_kill=False,
+                )
+            except OrderRejectedError:
+                logger.debug("Order rejected")
 
 
 class LiquidityProvider(StateAgentWithWallet):

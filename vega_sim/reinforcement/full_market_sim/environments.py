@@ -1,11 +1,11 @@
-from vega_sim.reinforcement.learning_agent import LearningAgent
+from vega_sim.reinforcement.learning_agent_MO_with_vol import LearningAgentWithVol
 
 from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.service import VegaService
 
 
 class RLMarketEnvironment(MarketEnvironment):
-    def add_learning_agent(self, agent: LearningAgent):
+    def add_learning_agent(self, agent: LearningAgentWithVol):
         self.learning_agent = agent
         self.agents = self._base_agents + [agent]
 

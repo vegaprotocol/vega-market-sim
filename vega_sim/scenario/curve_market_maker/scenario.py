@@ -33,6 +33,7 @@ class CurveMarketMaker(Scenario):
     def __init__(
         self,
         num_steps: int = 120,
+        random_agent_ordering: bool = True,
         dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
@@ -74,6 +75,7 @@ class CurveMarketMaker(Scenario):
             raise Exception("Model currently requires buy_intensity == sell_intensity")
 
         self.num_steps = num_steps
+        self.random_agent_ordering = random_agent_ordering
         self.dt = dt
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
@@ -100,6 +102,7 @@ class CurveMarketMaker(Scenario):
         self.asset_name = "tDAI" if asset_name is None else asset_name
         self.settle_at_end = settle_at_end
         self.price_process_fn = price_process_fn
+        self.price_process = None
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.sensitive_price_taker_half_life = sensitive_price_taker_half_life
@@ -138,6 +141,7 @@ class CurveMarketMaker(Scenario):
             if self.price_process_fn is not None
             else self._generate_price_process(random_state=random_state)
         )
+        self.price_process = price_process
         self.initial_price = (
             self.initial_price if self.initial_price is not None else price_process[0]
         )
@@ -245,6 +249,7 @@ class CurveMarketMaker(Scenario):
                 info_trader,
             ],
             n_steps=self.num_steps,
+            random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,
             vega_service=vega,
             state_extraction_freq=self.state_extraction_freq,

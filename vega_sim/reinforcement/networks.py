@@ -42,6 +42,29 @@ class FFN(nn.Module):
         return self.net(x)
 
 
+class FFN_fix_fol_Q(nn.Module):
+    """
+    Specific class for Q-func of trader
+    """
+
+    def __init__(
+        self,
+        state_dim: int,
+    ):
+        """
+        I create as many sub-networks as possible discrete actions that the agent can take.
+        The input of each network is the continuous part of the action (i.e. the volume).
+        The output of each network is the q-func applied to the state, the volume and that particular discrete action
+        """
+        super().__init__()
+
+        # the dimension of a which is integer in {0,1,2} so 1d
+        self.ffn = FFN(sizes=[state_dim + 1, 4096, 1], activation=nn.Tanh)
+
+    def forward(self, state: torch.Tensor, a: torch.Tensor):
+        return self.ffn(state, a)
+
+
 class FFN_Q(nn.Module):
     """
     Specific class for Q-func of trader
