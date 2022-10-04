@@ -94,9 +94,7 @@ def _ideal_market_maker_single_data_extraction(
         asset_id=mm_agent.asset_id,
         market_id=mm_agent.market_id,
     )
-    
-    
-   
+
     position = vega.positions_by_market(
         wallet_name=mm_agent.wallet_name, market_id=mm_agent.market_id
     )
@@ -133,8 +131,7 @@ def _ideal_market_maker_single_data_extraction(
         vega.market_info(market_id=mm_agent.market_id).fees.factors.infrastructure_fee
     )
     traded_notional = round(infrafee / infrafee_rate, 3)
-    margin_rate = float(margin_lp/(margin_lp + bond_lp + general_lp))
-
+    margin_rate = float(margin_lp / (margin_lp + bond_lp + general_lp))
 
     additional_fns = additional_data_fns if additional_data_fns is not None else []
 
@@ -142,7 +139,7 @@ def _ideal_market_maker_single_data_extraction(
         max_locked_capital = margin_lp + bond_lp
         max_margin = margin_lp
     else:
-        old_logs = state_values[mm_agent.current_step-2]
+        old_logs = state_values[mm_agent.current_step - 2]
         max_locked_capital = old_logs["LP: Max Locked Capital"]
         max_locked_capital = max(margin_lp + bond_lp, max_locked_capital)
         max_margin = old_logs["LP: Max Margin"]
@@ -158,7 +155,8 @@ def _ideal_market_maker_single_data_extraction(
         + margin_lp
         + bond_lp
         - mm_agent.initial_asset_mint,
-        "LP: Return": (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)/(max_locked_capital+0.000000001),
+        "LP: Return": (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
+        / (max_locked_capital + 0.000000001),
         "LP: Max Margin": max_margin,
         "LP: Max Locked Capital": max_locked_capital,
         "LP: RealisedPnl": realised_pnl_lp,
@@ -373,5 +371,3 @@ def uninformed_tradingbot_data_extraction(
         "UT: entry price": entry_price,
     }
     return logs
-
-
