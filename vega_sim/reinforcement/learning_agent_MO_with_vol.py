@@ -224,33 +224,19 @@ class LearningAgentWithVol(LearningAgent):
                 print(e)
 
     def _step(self, vega_state: LAMarketState) -> Action:
-        u1 = np.random.uniform(0, 1)
-        if u1 > self.exploitation:
-            u2 = np.random.uniform(0, 1)
-            if u2 > 0.0:
-                # random policy
-                choice = np.random.choice([0, 1, 2])
-                volume = np.random.lognormal(mean=1.0, sigma=2.0) * 10 ** (
-                    -self.position_decimals
-                )
-            else:
-                return self._step_heuristic(vega_state=vega_state)
-        else:
-            # learned policy
-            state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
-            state = torch.from_numpy(state).float()  # .to(self.device)
+        # learned policy
+        state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
+        state = torch.from_numpy(state).float()  # .to(self.device)
 
-            with torch.no_grad():
-                soft_action = self.sample_action(state=state, sim=True)
-            choice = int(soft_action.c.item())
-            if choice == 0:  # choice = 0 --> sell
-                volume = soft_action.volume_sell.item() * 10 ** (
-                    -self.position_decimals
-                )
-            elif choice == 1:  # choice = 1 --> buy
-                volume = soft_action.volume_buy.item() * 10 ** (-self.position_decimals)
-            else:
-                volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
+        with torch.no_grad():
+            soft_action = self.sample_action(state=state, sim=True)
+        choice = int(soft_action.c.item())
+        if choice == 0:  # choice = 0 --> sell
+            volume = soft_action.volume_sell.item() * 10 ** (-self.position_decimals)
+        elif choice == 1:  # choice = 1 --> buy
+            volume = soft_action.volume_buy.item() * 10 ** (-self.position_decimals)
+        else:
+            volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
         return Action(buy=choice == 0, sell=choice == 1, volume=volume)
 
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
@@ -300,8 +286,12 @@ class LearningAgentWithVol(LearningAgent):
         volume_buy: torch.Tensor
             Tensor of shape
         """
-        probs = self.policy_discr(state)
-        mu, sigma = self.policy_volume(state)
+        probs = self.policy_discr(
+            state
+        )  # this is the FFN returning probabilities for the 3 actions
+        mu, sigma = self.policy_volume(
+            state
+        )  # this is the FFN returning statistics for volume distribution
         z_sell, volume_sell = lognorm_sample(mu=mu[:, 0], sigma=sigma[:, 0])
         z_buy, volume_buy = lognorm_sample(mu=mu[:, 1], sigma=sigma[:, 1])
         if sim:

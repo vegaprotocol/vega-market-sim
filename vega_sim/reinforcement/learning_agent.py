@@ -79,7 +79,7 @@ class LearningAgent(StateAgentWithWallet):
         self.policy_volume = FFN_Params_Normal(
             n_in=self.state_dim,
             n_distr=2,
-            hidden_sizes=[4096],
+            hidden_sizes=[32],
         )
         self.policy_discr = FFN(
             sizes=[self.state_dim, 32, action_discrete_dim],
@@ -93,7 +93,7 @@ class LearningAgent(StateAgentWithWallet):
         )
 
         # Coefficients for regularisation
-        self.coefH_discr = 5.0
+        self.coefH_discr = 0.5
         self.coefH_cont = 0.5
         # losses logger
         self.losses = defaultdict(list)
