@@ -185,8 +185,9 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
+        key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -223,6 +224,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
 
@@ -281,6 +283,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )
 
 
