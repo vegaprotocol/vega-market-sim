@@ -816,10 +816,13 @@ class MarketManager(StateAgentWithWallet):
         commitment_amount: Optional[float] = None,
         settlement_price: Optional[float] = None,
         tag: str = "",
+        key_name: str = None,
+        terminate_key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.terminate_wallet_name = terminate_wallet_name + str(tag)
         self.terminate_wallet_pass = terminate_wallet_pass
+        self.terminate_key_name = terminate_key_name
 
         self.adp = asset_decimal
         self.mdp = market_decimal
@@ -849,14 +852,16 @@ class MarketManager(StateAgentWithWallet):
     ):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega, create_wallet=create_wallet)
-        self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
+        self.vega.create_wallet(
+            self.terminate_wallet_name,
+            self.terminate_wallet_pass,
+            self.terminate_key_name,
+        )
 
         # Faucet vega tokens
         self.vega.wait_for_total_catchup()
         self.vega.mint(
-            self.wallet_name,
-            asset="VOTE",
-            amount=1e4,
+            self.wallet_name, asset="VOTE", amount=1e4, key_name=self.key_name
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -868,6 +873,7 @@ class MarketManager(StateAgentWithWallet):
                 symbol=self.asset_name,
                 decimals=self.adp,
                 max_faucet_amount=5e10,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -879,6 +885,7 @@ class MarketManager(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -887,6 +894,7 @@ class MarketManager(StateAgentWithWallet):
             self.wallet_name,
             "market.liquidity.minimum.probabilityOfTrading.lpOrders",
             "0.001",
+            key_name=self.key_name,
         )
 
         self.vega.wait_for_total_catchup()
@@ -894,6 +902,7 @@ class MarketManager(StateAgentWithWallet):
             self.wallet_name,
             "market.liquidity.stakeToCcySiskas",
             "0.001",
+            key_name=self.key_name,
         )
 
         self.vega.wait_for_total_catchup()
@@ -906,6 +915,7 @@ class MarketManager(StateAgentWithWallet):
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(5)
 
@@ -924,12 +934,16 @@ class MarketManager(StateAgentWithWallet):
                 buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
                 sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
                 is_amendment=False,
+                key_name=self.key_name,
             )
 
     def finalise(self):
         if self.settlement_price is not None:
             self.vega.settle_market(
-                self.terminate_wallet_name, self.settlement_price, self.market_id
+                self.terminate_wallet_name,
+                self.settlement_price,
+                self.market_id,
+                self.terminate_key_name,
             )
             self.vega.wait_for_total_catchup()
 
