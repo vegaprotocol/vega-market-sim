@@ -1,4 +1,5 @@
 from __future__ import annotations
+from curses import keyname
 from dataclasses import dataclass
 from venv import create
 
@@ -982,8 +983,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         market_decimal_places: int = 5,
         asset_decimal_places: int = 0,
         tag: str = "",
+        key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
         self.initial_asset_mint = initial_asset_mint
@@ -1020,6 +1022,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
             self.vega.wait_for_total_catchup()
 
@@ -1043,6 +1046,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 buy_specs=initial_liq.buy_specs,
                 sell_specs=initial_liq.sell_specs,
                 is_amendment=False,
+                key_name=self.key_name,
             )
 
     def step(self, vega_state: VegaState):
@@ -1052,7 +1056,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
 
         current_position = int(position[0].open_volume) if position else 0
@@ -1115,6 +1121,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 buy_specs=liq.buy_specs,
                 sell_specs=liq.sell_specs,
                 is_amendment=True,
+                key_name=self.key_name,
             )
 
     def _submit_order(
@@ -1129,6 +1136,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             volume=size,
             price=price,
             wait=False,
+            key_name=self.key_name,
         )
 
     def _move_side(
@@ -1146,6 +1154,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     order_id=order_to_amend.id,
                     price=order.price,
                     volume_delta=order.size - order_to_amend.remaining,
+                    key_name=self.key_name,
                 )
             else:
                 self._submit_order(
@@ -1198,6 +1207,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         market_kappa: float = 1,
         asset_decimal_places: int = 0,
         tag: str = "",
+        key_name: str = None,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1213,6 +1223,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             shape_fn=self._generate_shape,
             best_price_offset_fn=self._optimal_strategy,
             liquidity_commitment_fn=self._liq_provis,
+            key_name=key_name,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
