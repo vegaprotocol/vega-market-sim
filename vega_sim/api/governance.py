@@ -241,6 +241,7 @@ def propose_future_market(
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
+        key_name=key_name,
     ).proposal.id
 
 
@@ -272,6 +273,7 @@ def propose_network_parameter_change(
         proposal=network_param_update,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
+        key_name=key_name,
     ).proposal.id
 
 
@@ -366,6 +368,7 @@ def propose_asset(
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
+        key_name=key_name,
     ).proposal.id
 
 
