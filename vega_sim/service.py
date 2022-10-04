@@ -309,7 +309,7 @@ class VegaService(ABC):
         """
         asset_decimals = self.asset_decimals[asset]
         curr_acct = self.party_account(
-            wallet_name=wallet_name, asset_id=asset, market_id=None
+            wallet_name=wallet_name, asset_id=asset, market_id=None, key_name=key_name
         ).general
 
         faucet.mint(
@@ -324,7 +324,10 @@ class VegaService(ABC):
             self.wait_fn(1)
             time.sleep(0.0005 * 1.01**i)
             post_acct = self.party_account(
-                wallet_name=wallet_name, asset_id=asset, market_id=None
+                wallet_name=wallet_name,
+                asset_id=asset,
+                market_id=None,
+                key_name=key_name,
             ).general
             if post_acct > curr_acct:
                 return
@@ -393,6 +396,7 @@ class VegaService(ABC):
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
             time_forward_fn=lambda: self.wait_fn(2),
+            key_name=key_name,
         )
         self.wait_fn(1)
         gov.approve_proposal(
@@ -418,6 +422,7 @@ class VegaService(ABC):
         price_monitoring_parameters: Optional[
             vega_protos.markets.PriceMonitoringParameters
         ] = None,
+        key_name: Optional[str] = None,
         termination_key: Optional[str] = None,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
@@ -441,8 +446,10 @@ class VegaService(ABC):
                 PriceMonitoringParameters, A set of parameters determining when the
                     market will drop into a price auction. If not passed defaults
                     to a very permissive setup
+            key_name:
+                Optional[str], name of key proposing market. Defaults to None.
             termination_key:
-                Optional[str], key name stored in metadata. Defaults to None.
+                Optional[str], name of key settling market. Defaults to None.
 
         """
         additional_kwargs = {}
@@ -460,6 +467,7 @@ class VegaService(ABC):
             market_name=market_name,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
+            key_name=key_name,
             settlement_asset_id=settlement_asset_id,
             data_client=self.trading_data_client,
             termination_pub_key=self.wallet.public_key(
@@ -478,6 +486,7 @@ class VegaService(ABC):
             proposal_id=proposal_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
+            key_name=key_name,
         )
         self.wait_fn(110)
 
@@ -725,7 +734,7 @@ class VegaService(ABC):
         )
 
     def update_network_parameter(
-        self, proposal_wallet: str, parameter: str, new_value: str
+        self, proposal_wallet: str, parameter: str, new_value: str, key_name: str = None
     ):
         """Updates a network parameter by first proposing and then voting to approve
         the change, followed by advancing the network time period forwards.
@@ -740,6 +749,8 @@ class VegaService(ABC):
                 str, the parameter to change
             new_value:
                 str, the new value to set
+            key_name:
+                str, optional, the wallet key proposing the change
         Returns:
             str, the ID of the proposal
         """
@@ -754,11 +765,13 @@ class VegaService(ABC):
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             time_forward_fn=lambda: self.wait_fn(2),
+            key_name=key_name,
         )
         gov.approve_proposal(
             proposal_id=proposal_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
+            key_name=key_name,
         )
         self.wait_fn(110)
 
@@ -1171,6 +1184,7 @@ class VegaService(ABC):
             else self.has_liquidity_provision(
                 market_id=market_id,
                 wallet_name=wallet_name,
+                key_name=key_name,
             )
         )
 
