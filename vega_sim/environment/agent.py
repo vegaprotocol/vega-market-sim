@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, Tuple, Dict
+from typing import Any, Tuple, Dict, Optional
 
 from vega_sim.service import VegaService
 
@@ -27,6 +27,7 @@ class AgentWithWallet(Agent):
         self,
         wallet_name: str,
         wallet_pass: str,
+        key_name: Optional[str] = None,
     ):
         """Agent for use in environments as specified in environment.py.
         To extend, the crucial function to implement is the step function which will
@@ -41,10 +42,14 @@ class AgentWithWallet(Agent):
                 str, The name to use for this agent's wallet
             wallet_pass:
                 str, The password which this agent uses to log in to the wallet
+            key_name:
+                str, optional, Name of key in wallet for agent to use. Defaults
+                to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
         """
         super().__init__()
         self.wallet_name = wallet_name
         self.wallet_pass = wallet_pass
+        self.key_name = key_name
 
     def step(self, vega: VegaService):
         pass
@@ -52,7 +57,11 @@ class AgentWithWallet(Agent):
     def initialise(self, vega: VegaService, create_wallet: bool = True):
         super().initialise(vega=vega)
         if create_wallet:
-            self.vega.create_wallet(name=self.wallet_name, passphrase=self.wallet_pass)
+            self.vega.create_wallet(
+                name=self.wallet_name,
+                passphrase=self.wallet_pass,
+                key_name=self.key_name,
+            )
         else:
             self.vega.login(name=self.wallet_name, passphrase=self.wallet_pass)
 

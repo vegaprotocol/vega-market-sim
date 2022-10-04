@@ -82,8 +82,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         base_order_size: float = 1,
         key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
-        self.key_name = key_name
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -1425,8 +1424,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 Standard deviation of the log-normal distribution.
         """
 
-        super().__init__(wallet_name + str(tag), wallet_pass)
-        self.key_name = key_name
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
 
         self.current_step = 0
 
@@ -1782,8 +1780,7 @@ class MomentumTrader(StateAgentWithWallet):
         tag: str = "",
         key_name: str = None,
     ):
-        super().__init__(wallet_name, wallet_pass)
-        self.key_name = key_name
+        super().__init__(wallet_name, wallet_pass, key_name)
         self.market_name = market_name
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
