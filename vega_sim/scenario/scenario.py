@@ -11,5 +11,6 @@ class Scenario(abc.ABC):
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
         random_state: Optional[np.random.RandomState] = None,
+        network: Optional[str] = None,
     ):
         pass

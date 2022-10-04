@@ -2,8 +2,10 @@ import argparse
 import logging
 
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.registry import SCENARIOS
 from vega_sim.scenario.scenario import Scenario
+from vega_sim.service import VegaService
 
 
 def main():
@@ -14,6 +16,7 @@ def main():
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
     parser.add_argument("--store", action="store_true")
+    parser.add_argument("--network")
     parser.add_argument(
         "-p",
         "--pause_every_n_steps",
@@ -30,17 +33,27 @@ def main():
 
     scenario.pause_every_n_steps = args.pause_every_n_steps
 
-    with VegaServiceNull(
-        run_with_console=args.console,
-        launch_graphql=args.graphql,
-        warn_on_raw_data_access=False,
-        seconds_per_block=scenario.block_length_seconds,
-        transactions_per_block=100,
-        retain_log_files=True,
-        use_full_vega_wallet=False,
-        store_transactions=args.store,
-    ) as vega:
-        scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
+    if args.network == "nullchain" or args.network is None:
+        with VegaServiceNull(
+            run_with_console=args.console,
+            launch_graphql=args.graphql,
+            warn_on_raw_data_access=False,
+            seconds_per_block=scenario.block_length_seconds,
+            transactions_per_block=100,
+            retain_log_files=True,
+            use_full_vega_wallet=False,
+            store_transactions=args.store,
+        ) as vega:
+            scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
+    else:
+        with VegaServiceNetwork(
+            network=args.network,
+            automatic_consent=True,
+            no_version_check=True,
+        ) as vega:
+            scenario.run_iteration(
+                vega=vega, network=args.network, pause_at_completion=args.pause
+            )
 
 
 if __name__ == "__main__":
