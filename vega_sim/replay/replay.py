@@ -1,5 +1,6 @@
 import argparse
 import logging
+import string
 import time
 from contextlib import contextmanager
 from vega_sim.api.data import party_account
@@ -91,8 +92,9 @@ def replay_run(
     console: bool = False,
     graphql: bool = False,
     pause_at_end: bool = False,
+    retain_log_files: bool = False,
 ):
-    with replay_run(replay_path=replay_path, console=console, graphql=graphql) as vega:
+    with replay_run(replay_path=replay_path, console=console, graphql=graphql,retain_log_files=retain_log_files) as vega:
         if pause_at_end:
             input("Pausing at completion. Press Return to continue")
 
@@ -103,17 +105,24 @@ if __name__ == "__main__":
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
-
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--retain_log_files", action="store_true")
+
+    parser.add_argument(
+        "--dir",
+        default="",
+        type=string,
+        help="The vega-sim log dir containing the replay log",
+    )
 
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
-    replay = "/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-poxse766/"
     replay_run(
-        replay_path=replay,
+        replay_path=args.dir,
         console=args.console,
         graphql=args.graphql,
         pause_at_end=args.pause,
+        retain_log_files=args.retain_log_files
     )
