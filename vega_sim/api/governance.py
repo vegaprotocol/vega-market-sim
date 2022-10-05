@@ -199,10 +199,10 @@ def propose_future_market(
                 future=vega_protos.governance.FutureProduct(
                     settlement_asset=settlement_asset_id,
                     quote_name=future_asset,
-                    oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
+                    oracle_spec_for_settlement_data=oracle_spec_for_settlement_price,
                     oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
                     oracle_spec_binding=vega_protos.markets.OracleSpecToFutureBinding(
-                        settlement_price_property=f"price.{future_asset}.value",
+                        settlement_data_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
                     ),
                     settlement_data_decimals=price_decimals,
