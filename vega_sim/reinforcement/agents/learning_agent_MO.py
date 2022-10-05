@@ -9,13 +9,13 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
-from vega_sim.reinforcement.learning_agent import AbstractAction, LearningAgent
+from vega_sim.reinforcement.agents.learning_agent import AbstractAction, LearningAgent
 
 from vega_sim.reinforcement.networks import (
     Softmax,
     FFN,
     FFN_Params_Normal,
-    FFN_Q,
+    FFN_fix_fol_Q,
 )
 from vega_sim.reinforcement.helpers import apply_funcs, to_torch, toggle
 from vega_sim.reinforcement.la_market_state import LAMarketState
@@ -40,32 +40,17 @@ WALLET = WalletConfig("learner", "learner")
 
 
 @dataclass
-class Action(AbstractAction):
+class Action:
     buy: bool
     sell: bool
-    volume: float
 
 
 @dataclass
-class SoftActionWithVol:
-    z_sell: torch.Tensor  # sample from N(mu_sell, sigma_sell) to generate selling volume from lognormal
-    z_buy: torch.Tensor  # sample from N(mu_buy, sigma_buy) to generate buying volume from lognormal
+class SoftActionFixVol:
     c: torch.Tensor  # sell / buy / do nothing probabilities if training. If simulating, value in {0,1,2} indicating sampled action
-    mu: torch.Tensor  # [mu_sell, mu_buy]
-    sigma: torch.Tensor  # [sigma_sell, sigma_buy]
-    volume_sell: torch.Tensor  # sampled volume sell
-    volume_buy: torch.Tensor  # sampled volume buy
 
     def unravel(self):
-        return (
-            self.z_sell,
-            self.z_buy,
-            self.c,
-            self.mu,
-            self.sigma,
-            self.volume_sell,
-            self.volume_buy,
-        )
+        return self.c
 
 
 def states_to_sarsa(
@@ -95,11 +80,12 @@ def states_to_sarsa(
             if next_state is not np.nan
             else 0
         )
+        reward -= 0.05 * pres_state[0].position * pres_state[0].position
         res.append((pres_state[0], pres_state[1], reward, next_state[0], next_state[1]))
     return res
 
 
-class LearningAgentWithVol(LearningAgent):
+class LearningAgentFixedVol(LearningAgent):
     def __init__(
         self,
         device: str,
@@ -129,6 +115,9 @@ class LearningAgentWithVol(LearningAgent):
             position_decimals=position_decimals,
             exploitation=exploitation,
         )
+        self.volume = 10 ** (-self.position_decimals)
+        self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
+        self.coefH_discr = 0.1
 
     def _update_memory(
         self,
@@ -151,7 +140,6 @@ class LearningAgentWithVol(LearningAgent):
         else:
             self.memory["action_discrete"].append([2])
 
-        self.memory["action_volume"].append([action.volume])
         self.memory["reward"].append([reward])
         if next_state is not np.nan:
             self.memory["next_state"].append(next_state.to_array())
@@ -172,9 +160,6 @@ class LearningAgentWithVol(LearningAgent):
             value=self.memory["action_discrete"],
             funcs=(np.array, partial(to_torch, dtype=torch.int64, device=self.device)),
         )
-        dataset_action_volume = apply_funcs(
-            value=self.memory["action_volume"], funcs=(np.array, to_torch_device)
-        )
         dataset_reward = apply_funcs(
             value=self.memory["reward"], funcs=(np.array, to_torch_device)
         )
@@ -186,7 +171,6 @@ class LearningAgentWithVol(LearningAgent):
             *(
                 dataset_state,
                 dataset_action_discrete,
-                dataset_action_volume,
                 dataset_reward,
                 dataset_next_state,
             )
@@ -195,9 +179,6 @@ class LearningAgentWithVol(LearningAgent):
             dataset, batch_size=batch_size, shuffle=True
         )
         return dataloader
-
-    def empty_action(self) -> AbstractAction:
-        return Action(True, True, 0.0)
 
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
@@ -216,7 +197,7 @@ class LearningAgentWithVol(LearningAgent):
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
                     side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
-                    volume=self.latest_action.volume,
+                    volume=self.volume,
                     wait=False,
                     fill_or_kill=False,
                 )
@@ -225,14 +206,12 @@ class LearningAgentWithVol(LearningAgent):
 
     def _step(self, vega_state: LAMarketState) -> Action:
         u1 = np.random.uniform(0, 1)
-        if u1 > self.exploitation:
+        # if u1 > self.exploitation:
+        if u1 > 2.0:
             u2 = np.random.uniform(0, 1)
-            if u2 > 0.0:
+            if u2 > 0.1:
                 # random policy
                 choice = np.random.choice([0, 1, 2])
-                volume = np.random.lognormal(mean=1.0, sigma=2.0) * 10 ** (
-                    -self.position_decimals
-                )
             else:
                 return self._step_heuristic(vega_state=vega_state)
         else:
@@ -241,96 +220,49 @@ class LearningAgentWithVol(LearningAgent):
             state = torch.from_numpy(state).float()  # .to(self.device)
 
             with torch.no_grad():
-                soft_action = self.sample_action(state=state, sim=True)
+                soft_action = self.sample_action(state=state)
             choice = int(soft_action.c.item())
-            if choice == 0:  # choice = 0 --> sell
-                volume = soft_action.volume_sell.item() * 10 ** (
-                    -self.position_decimals
-                )
-            elif choice == 1:  # choice = 1 --> buy
-                volume = soft_action.volume_buy.item() * 10 ** (-self.position_decimals)
-            else:
-                volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
-        return Action(buy=choice == 0, sell=choice == 1, volume=volume)
+
+        return Action(buy=choice == 0, sell=choice == 1)
 
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
-        volume = 0.0
         if (
             vega_state.position <= 0
             and vega_state.ask_prices[0] < vega_state.next_price
         ):
             choice = 0  # buy
-            volume = 0.01
         elif (
             vega_state.position >= 0
             and vega_state.bid_prices[0] > vega_state.next_price
         ):
             choice = 1  # sell
-            volume = 0.01
         else:
             choice = 2  # do nothing
 
-        return Action(buy=choice == 0, sell=choice == 1, volume=volume)
+        return Action(buy=choice == 0, sell=choice == 1)
 
     def sample_action(
-        self, state: torch.Tensor, sim: bool = True, evaluate: bool = False
+        self,
+        state: torch.Tensor,
     ):
         """
         Sample an action.
 
         Returns
         -------
-        z_sell: torch.Tensor
-            samples from N(0,1) used to sample volume_sell from a lognormal
-        z_buy: torch.Tensor
-            samples from N(0,1) used to sample volume_buy from a lognormal
-        mu: torch.Tensor
-            Tensor of shape (batch_size,2). Each column is mu_{sell} and mu_{buy} of lognormal
-        sigma: torch.Tensor
-            Tensor of shape (batch_size, 2). Each column is sigma_{sell} and sigma_{buy} of lognormal
-        c: torch.Tensor
-            if sim = False, c is a tensor of shape (batch_size, 3) returning the probs of {sell, buy, do nothign}
-            if sim = True, c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
-        mu: torch.Tensor
-            Tensor of shape
-        sigma: torch.Tensor
-            Tensor of shape
-        volume_sell: torch.Tensor
-            Tensor of shape
-        volume_buy: torch.Tensor
-            Tensor of shape
+        c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
         """
         probs = self.policy_discr(state)
-        mu, sigma = self.policy_volume(state)
-        z_sell, volume_sell = lognorm_sample(mu=mu[:, 0], sigma=sigma[:, 0])
-        z_buy, volume_buy = lognorm_sample(mu=mu[:, 1], sigma=sigma[:, 1])
-        if sim:
-            # We are simulating, hence we sample from discr action
-            m = Categorical(probs)
-            c = m.sample()
-        else:
-            c = probs
-        if evaluate:
-            c = torch.max(probs, 1, keepdim=True)[1]
-
-        return SoftActionWithVol(
-            z_sell=z_sell,
-            z_buy=z_buy,
-            c=c,
-            mu=mu,
-            sigma=sigma,
-            volume_sell=volume_sell,
-            volume_buy=volume_buy,
-        )
+        m = Categorical(probs)
+        c = m.sample()
+        return SoftActionFixVol(c)
 
     def policy_eval(
         self,
         batch_size: int,
         n_epochs: int,
     ):
-
         toggle(self.policy_discr, to=False)
-        toggle(self.policy_volume, to=False)
         toggle(self.q_func, to=True)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
@@ -342,35 +274,30 @@ class LearningAgentWithVol(LearningAgent):
                 (
                     batch_state,
                     batch_action_discrete,
-                    batch_action_volume,
                     batch_reward,
                     batch_next_state,
                 ),
             ) in enumerate(dataloader):
+                # next_state_terminal = torch.isnan(batch_next_state).float()  # shape (batch_size, dim_state)
+                # batch_next_state[next_state_terminal.eq(True)] = batch_state[
+                #     next_state_terminal.eq(True)
+                # ]
                 next_state_terminal = torch.isnan(
                     batch_next_state
-                ).float()  # shape (batch_size, dim_state)
-                batch_next_state[next_state_terminal.eq(True)] = batch_state[
-                    next_state_terminal.eq(True)
-                ]
+                )  # shape (batch_size, dim_state)
+                next_state_termina_idx = next_state_terminal.eq(True)
+                batch_next_state[next_state_terminal] = batch_state[
+                    next_state_terminal
+                ].float()
                 self.optimizer_q.zero_grad()
-                # differentiate between sell and buy volumes for the q_func
-                volume_sell = batch_action_volume.clone()
-                volume_sell[batch_action_discrete.ne(0)] = 0
-                volume_buy = batch_action_volume.clone()
-                volume_buy[batch_action_discrete.ne(1)] = 0
 
-                pred = torch.gather(
-                    self.q_func(batch_state, volume_sell, volume_buy),
-                    dim=1,
-                    index=batch_action_discrete,
-                )
+                pred = self.q_func(batch_state, batch_action_discrete)
 
                 with torch.no_grad():
                     v = self.v_func(batch_next_state)
                     target = (
                         batch_reward
-                        + (1 - next_state_terminal.mean(1, keepdim=True))
+                        + (1 - next_state_terminal.float().mean(1, keepdim=True))
                         * self.discount_factor
                         * v
                     )
@@ -402,26 +329,14 @@ class LearningAgentWithVol(LearningAgent):
         n_mc: torch.Tensor
             Number of Monte Carlo samples to calculate
         """
-        batch_size = state.shape[0]
-        # MONTE CARLO to approximate expectations
-        state_mc = state.repeat(n_mc, 1)
-        soft_action = self.sample_action(state_mc, sim=False)
-        z_sell, z_buy, c, mu, sigma, volume_sell, volume_buy = soft_action.unravel()
 
-        q = self.q_func(state_mc, volume_sell, volume_buy)
-        v = c[:, 0] * (
-            q[:, 0]
-            - self.coefH_discr * torch.log(c[:, 0])
-            - self.coefH_cont
-            * lognorm_logprob(z=z_sell, mu=mu[:, 0], sigma=sigma[:, 0])
-        )
-        v += c[:, 1] * (
-            q[:, 1]
-            - self.coefH_discr * torch.log(c[:, 1])
-            - self.coefH_cont * lognorm_logprob(z=z_buy, mu=mu[:, 1], sigma=sigma[:, 1])
-        )
-        v += c[:, 2] * (q[:, 2] - self.coefH_discr * torch.log(c[:, 2]))
-        v = v.reshape(n_mc, batch_size, -1).mean(0)  # average of Monte Carlo samples
+        c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
+        q = self.q_func(state, c)
+
+        probs = self.policy_discr(state)
+        v = probs[0] * (q[0] - self.coefH_discr * torch.log(probs[0]))
+        v += probs[1] * (q[1] - self.coefH_discr * torch.log(probs[1]))
+        v += probs[2] * (q[2] - self.coefH_discr * torch.log(probs[2]))
         self.q_func.train()
         return v
 
@@ -430,47 +345,28 @@ class LearningAgentWithVol(LearningAgent):
         KL divergence between pi(.|x) and the unnormalised density exp(Q(x,.)),
         where pi(.|x) is a LogNormal distribution
         """
-        batch_size = state.shape[0]
-        # MONTE CARLO to approximate expectations
-        state_mc = state.repeat(n_mc, 1)
-        soft_action = self.sample_action(state_mc, sim=False)
-        z_sell, z_buy, c, mu, sigma, volume_sell, volume_buy = soft_action.unravel()
+        c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
 
-        q = self.q_func(state_mc, volume_sell, volume_buy)
-        d_kl = c[:, 0] * (
-            self.coefH_discr * torch.log(c[:, 0])
-            + self.coefH_cont
-            * lognorm_logprob(z=z_sell, mu=mu[:, 0], sigma=sigma[:, 0])
-            - q[:, 0]
-        )
-        d_kl += c[:, 1] * (
-            self.coefH_discr * torch.log(c[:, 1])
-            + self.coefH_cont * lognorm_logprob(z=z_buy, mu=mu[:, 1], sigma=sigma[:, 1])
-            - q[:, 1]
-        )
-        d_kl += c[:, 2] * (self.coefH_discr * torch.log(c[:, 2]) - q[:, 2])
-
-        # regularisation. Since the action space is not compact, then Q(x,a) could potentially explode.
-        # To avoid this, I force the parameters of the lognormal not to be very far away from (0,1)
-        reg = c[:, 0] * reg_policy(z_sell, mu=mu[:, 0], sigma=sigma[:, 0])
-        reg += c[:, 1] * reg_policy(z_buy, mu=mu[:, 1], sigma=sigma[:, 1])
+        q = self.q_func(state, c)
+        probs = self.policy_discr(state)
+        d_kl = probs[0] * (self.coefH_discr * torch.log(probs[0]) - q[0])
+        d_kl += probs[1] * (self.coefH_discr * torch.log(probs[1]) - q[1])
+        d_kl += probs[2] * (self.coefH_discr * torch.log(probs[2]) - q[2])
 
         d_kl = (
-            d_kl.reshape(n_mc, batch_size, -1).mean(0).mean()
-            + 0.5 * reg.reshape(n_mc, batch_size, -1).mean(0).mean()
+            d_kl.mean()
         )  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
         return d_kl
 
     def policy_improvement(self, batch_size: int, n_epochs: int):
         toggle(self.policy_discr, to=True)
-        toggle(self.policy_volume, to=True)
         toggle(self.q_func, to=False)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
 
         pbar = tqdm(total=n_epochs)
         for epoch in range(n_epochs):
-            for i, (batch_state, _, _, _, _) in enumerate(dataloader):
+            for i, (batch_state, _, _, _) in enumerate(dataloader):
                 self.optimizer_pol.zero_grad()
                 d_kl = self.D_KL(batch_state, n_mc=100).mean()
                 d_kl.backward()
@@ -497,7 +393,6 @@ class LearningAgentWithVol(LearningAgent):
             "losses": self.losses,
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
-            "policy_volume": self.policy_volume.state_dict(),
         }
         torch.save(d, filename)
 
@@ -506,4 +401,3 @@ class LearningAgentWithVol(LearningAgent):
         d = torch.load(filename, map_location="cpu")
         self.q_func.load_state_dict(d["q"])
         self.policy_discr.load_state_dict(d["policy_discr"])
-        self.policy_volume.load_state_dict(d["policy_volume"])

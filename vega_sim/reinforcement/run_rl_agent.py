@@ -7,12 +7,14 @@ import time
 
 from vega_sim.environment.agent import Agent
 from vega_sim.reinforcement.la_market_state import LAMarketState, AbstractAction
-from vega_sim.reinforcement.learning_agent import (
+from vega_sim.reinforcement.agents.learning_agent import (
     LearningAgent,
     WALLET as LEARNING_WALLET,
 )
-from vega_sim.reinforcement.learning_agent_MO_with_vol import LearningAgentWithVol
-from vega_sim.reinforcement.learning_agent_MO import LearningAgentFixedVol
+from vega_sim.reinforcement.agents.learning_agent_MO_with_vol import (
+    LearningAgentWithVol,
+)
+from vega_sim.reinforcement.agents.learning_agent_MO import LearningAgentFixedVol
 
 from vega_sim.scenario.registry import IdealMarketMakerV2
 from vega_sim.scenario.registry import CurveMarketMaker
@@ -110,7 +112,8 @@ if __name__ == "__main__":
     elif torch.backends.mps.is_available() and args.use_mps:
         device = torch.device("mps")
         print(
-            "WARNING: as of today this will likely crash due to mps not implementing all required functionality."
+            "WARNING: as of today this will likely crash due to mps not implementing"
+            " all required functionality."
         )
     else:
         device = "cpu"

@@ -1,4 +1,6 @@
-from vega_sim.reinforcement.learning_agent_MO_with_vol import LearningAgentWithVol
+from vega_sim.reinforcement.agents.learning_agent_MO_with_vol import (
+    LearningAgentWithVol,
+)
 
 from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.service import VegaService
