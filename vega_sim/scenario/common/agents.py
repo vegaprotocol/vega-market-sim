@@ -1,5 +1,4 @@
 from __future__ import annotations
-from curses import keyname
 from dataclasses import dataclass
 from venv import create
 
