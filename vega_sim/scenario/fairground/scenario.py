@@ -9,7 +9,7 @@ can be modified to match the users local wallet (required for running on a
 Vega network, not required for running on nullchain).
  
 """
-
+import requests
 import logging
 import numpy as np
 from datetime import datetime, timedelta
@@ -46,30 +46,59 @@ from vega_sim.scenario.fairground.agents import (
 )
 
 
+class LivePrice:
+    """Iterator for getting a live product price process.
+
+    Class is to be used when running the scenario on fairground incentives. The
+    iterator can be passed to the market-maker agent and the price-sensitive
+    agents to give them information regarding the live product price.
+
+    """
+
+    def __init__(self, product: str = "ADAUSDT"):
+        self.product = product
+
+    def __iter__(self):
+        return self
+
+    def __getitem__(self, index):
+        return self._get_price()
+
+    def __next__(self):
+        return self._get_price()
+
+    def _get_price(self):
+        url = f"https://api.binance.com/api/v3/avgPrice?symbol={self.product}"
+        return float(requests.get(url).json()["price"])
+
+
 # Set default scenario arguments
 PRICE_PROCESS_ARGS = {
-    "product": "ETH-USD",
-    "start": "2022-06-01 00:00:00",
+    "binance_product": "ADAUSDT",
+    "coinbase_product": "ADA-USD",
+    "start": "2022-08-01 00:00:00",
     "randomise": False,
 }
 MARKET_MANAGER_ARGS = {
     "initial_mint": 1e08,
-    "commitment_amount": 1e06,
-    "market_name": "ETH Monthly (Historic)",
+    "commitment_amount": 1e02,
+    "market_name": "ADA Monthly (Historic)",
     "asset_name": "tUSD",
-    "adp": 18,
-    "mdp": 5,
-    "pdp": 2,
+    "adp": 4,
+    "mdp": 4,
+    "pdp": 4,
 }
 MARKET_MAKER_ARGS = {
     "initial_asset_mint": 1e08,
-    "commitment_amount": 1e07,
-    "kappa": 2,
-    "num_levels": 10,
-    "tick_spacing": 1,
-    "max_order_size": 200,
-    "inventory_upper_boundary": 20,
-    "inventory_lower_boundary": -20,
+    "commitment_amount": 1e03,
+    "kappa": 1000,
+    "market_kappa": 2000,
+    "market_order_arrival_rate": 400,
+    "num_levels": 20,
+    "tick_spacing": 0.001,
+    "order_unit_size": 100,
+    "inventory_upper_boundary": 80,
+    "inventory_lower_boundary": -80,
 }
 AUCTION_PASS_ARGS = {
     "initial_asset_mint": 1e06,
@@ -79,18 +108,18 @@ AUCTION_PASS_ARGS = {
 }
 RANDOM_MARKET_ORDER_ARG = {
     "initial_asset_mint": 1e06,
-    "buy_intensity": 5,
-    "sell_intensity": 5,
+    "buy_intensity": 1,
+    "sell_intensity": 1,
 }
 MOMENTUM_MARKET_ORDER_ARGS = {
     "initial_asset_mint": 1e06,
     "momentum_strategies": ["MACD", "APO", "RSI", "STOCHRSI", "CPO"],
-    "order_intensity": 500,
+    "order_intensity": 5,
 }
 SENSITIVE_MARKET_ORDER_ARGS = {
     "initial_asset_mint": 1e06,
-    "buy_intensity": 100,
-    "sell_intensity": 100,
+    "buy_intensity": 5,
+    "sell_intensity": 5,
 }
 
 
@@ -115,7 +144,7 @@ class Fairground(Scenario):
     def __init__(
         self,
         block_length_seconds: int = 1,
-        n_steps: int = 60 * 24,
+        n_steps: int = 60 * 24 * 2,
         granularity: Optional[Granularity] = Granularity.MINUTE,
         market_manager_args: Optional[dict] = None,
         market_maker_args: Optional[dict] = None,
@@ -202,7 +231,7 @@ class Fairground(Scenario):
         end = start + timedelta(seconds=self.n_steps * self.granularity.value)
 
         price_process = get_historic_price_series(
-            product_id=self.price_process_args["product"],
+            product_id=self.price_process_args["coinbase_product"],
             granularity=self.granularity,
             start=str(start),
             end=str(end),
@@ -221,10 +250,11 @@ class Fairground(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        self.price_process = self._get_price_process(random_state=random_state)
-
-        # Setup agent for proposing and settling the market
         if (network is None) or (network == "nullchain"):
+
+            self.price_process = self._get_price_process(random_state=random_state)
+
+            # Setup agent for proposing and settling the market
             market_manager = MarketManager(
                 wallet_name=WALLET_NAME,
                 wallet_pass=WALLET_PASS,
@@ -242,6 +272,11 @@ class Fairground(Scenario):
                 settlement_price=self.price_process[-1],
             )
 
+        else:
+            self.price_process = LivePrice(
+                product=self.price_process_args["binance_product"]
+            )
+
         # Setup agent for proving a market for traders
         market_maker = ExponentialShapedMarketMaker(
             wallet_name=WALLET_NAME,
@@ -251,9 +286,11 @@ class Fairground(Scenario):
             asset_name=self.market_manager_args["asset_name"],
             initial_asset_mint=self.market_maker_args["initial_asset_mint"],
             commitment_amount=self.market_maker_args["commitment_amount"],
+            market_kappa=self.market_maker_args["market_kappa"],
+            kappa=self.market_maker_args["kappa"],
             num_levels=self.market_maker_args["num_levels"],
             tick_spacing=self.market_maker_args["tick_spacing"],
-            max_order_size=self.market_maker_args["max_order_size"],
+            order_unit_size=self.market_maker_args["order_unit_size"],
             inventory_lower_boundary=self.market_maker_args["inventory_lower_boundary"],
             inventory_upper_boundary=self.market_maker_args["inventory_upper_boundary"],
             num_steps=self.n_steps,
