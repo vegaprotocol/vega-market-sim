@@ -32,10 +32,8 @@ class VegaWallet(Wallet):
         )
 
     def create_wallet(
-        self,
-        name: str,
-        passphrase: str,
-    ) -> str:
+        self, name: str, passphrase: str, key_name: Optional[str] = None
+    ) -> None:
         """Generates a new wallet from a name - passphrase pair in the given vega service.
 
         Args:
@@ -48,26 +46,32 @@ class VegaWallet(Wallet):
         """
         req = {"wallet": name, "passphrase": passphrase}
 
-        # Wallet now requires a connection to a live vega service during startup,
-        # which can slow initialisation a little
-        for _ in range(5):
-            try:
-                response = requests.post(
-                    WALLET_CREATION_URL.format(wallet_server_url=self.wallet_url),
-                    json=req,
-                )
-                response.raise_for_status()
-                break
-            except requests.exceptions.ConnectionError:
-                time.sleep(1)
+        if name not in self.pub_keys:
+            # Wallet now requires a connection to a live vega service during startup,
+            # which can slow initialisation a little
+            for _ in range(5):
+                try:
+                    response = requests.post(
+                        WALLET_CREATION_URL.format(wallet_server_url=self.wallet_url),
+                        json=req,
+                    )
+                    response.raise_for_status()
+                    self.login_tokens[name] = response.json()["token"]
+                    break
+                except requests.exceptions.ConnectionError:
+                    time.sleep(1)
 
-        token = response.json()["token"]
-
-        self.login_tokens[name] = token
         self.generate_keypair(
-            token,
-            passphrase,
-            metadata=[{"name": self.vega_default_key_name}],
+            token=self.login_tokens[name],
+            passphrase=passphrase,
+            metadata=[
+                {
+                    "key": "name",
+                    "value": key_name
+                    if key_name is not None
+                    else self.vega_default_key_name,
+                }
+            ],
         )
         self.pub_keys[name] = self.get_keypairs(wallet_name=name)
 
@@ -97,7 +101,7 @@ class VegaWallet(Wallet):
         token: str,
         passphrase: str,
         metadata: Optional[List[Dict[str, str]]] = None,
-    ) -> str:
+    ) -> None:
         """Generates a keypair for given token validated wallet.
 
         Args:
