@@ -147,7 +147,10 @@ if __name__ == "__main__":
     )
 
     with VegaServiceNull(
-        warn_on_raw_data_access=False, run_with_console=False, retain_log_files=True
+        warn_on_raw_data_access=False, 
+        run_with_console=False, 
+        retain_log_files=True,
+        store_transactions=True,
     ) as vega:
         vega.wait_for_total_catchup()
 
