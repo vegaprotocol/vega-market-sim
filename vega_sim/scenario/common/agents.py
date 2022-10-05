@@ -898,7 +898,6 @@ class MarketManager(StateAgentWithWallet):
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
 
-        print(self.key_name)
         self.vega.update_network_parameter(
             self.wallet_name,
             "market.liquidity.minimum.probabilityOfTrading.lpOrders",
@@ -1366,7 +1365,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
 
         levels = np.arange(0, self.tick_spacing * self.num_levels, self.tick_spacing)
         cumulative_vol = np.exp(self.kappa * levels)
-        scaled_vol = (1 / cumulative_vol[0]) * cumulative_vol
+        scaled_vol = (1 / cumulative_vol[0]) * cumulative_vol * self.order_unit_size
 
         base_price = self.curr_price + mult_factor * price_depth
         level_price = np.arange(
