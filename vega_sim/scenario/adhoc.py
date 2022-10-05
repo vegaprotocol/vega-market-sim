@@ -16,7 +16,7 @@ def main():
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
     parser.add_argument("--store", action="store_true")
-    parser.add_argument("--network")
+    parser.add_argument("--network", default="nullchain")
     parser.add_argument(
         "-p",
         "--pause_every_n_steps",
@@ -33,7 +33,7 @@ def main():
 
     scenario.pause_every_n_steps = args.pause_every_n_steps
 
-    if args.network == "nullchain" or args.network is None:
+    if args.network == "nullchain":
         with VegaServiceNull(
             run_with_console=args.console,
             launch_graphql=args.graphql,

@@ -250,7 +250,7 @@ class Fairground(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        if (network is None) or (network == "nullchain"):
+        if network == "nullchain":
 
             self.price_process = self._get_price_process(random_state=random_state)
 
@@ -389,7 +389,7 @@ class Fairground(Scenario):
         random_state: Optional[np.random.RandomState] = None,
         network: Optional[str] = None,
     ):
-        if (network is None) or (network == "nullchain"):
+        if network == "nullchain":
             env = MarketEnvironmentWithState(
                 agents=self._setup(
                     vega=vega, random_state=random_state, network=network
