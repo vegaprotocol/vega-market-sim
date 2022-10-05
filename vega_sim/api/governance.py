@@ -165,7 +165,7 @@ def propose_future_market(
         else _default_price_monitoring_parameters()
     )
 
-    oracle_spec_for_settlement_price = oracles_protos.spec.OracleSpecConfiguration(
+    oracle_spec_for_settlement_data = oracles_protos.spec.OracleSpecConfiguration(
         pub_keys=[termination_pub_key],
         filters=[
             oracles_protos.spec.Filter(
@@ -199,7 +199,7 @@ def propose_future_market(
                 future=vega_protos.governance.FutureProduct(
                     settlement_asset=settlement_asset_id,
                     quote_name=future_asset,
-                    oracle_spec_for_settlement_data=oracle_spec_for_settlement_price,
+                    oracle_spec_for_settlement_data=oracle_spec_for_settlement_data,
                     oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
                     oracle_spec_binding=vega_protos.markets.OracleSpecToFutureBinding(
                         settlement_data_property=f"price.{future_asset}.value",
