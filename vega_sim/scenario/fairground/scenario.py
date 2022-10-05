@@ -22,6 +22,7 @@ from vega_sim.environment.environment import (
     MarketEnvironmentWithState,
     NetworkEnvironment,
 )
+from vega_sim.environment.agent import Agent
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
     Granularity,
@@ -243,7 +244,7 @@ class Fairground(Scenario):
         self,
         vega: VegaService,
         random_state: Optional[np.random.RandomState] = None,
-        network: Optional[str] = None,
+        network: Optional[str] = "nullchain",
     ):
 
         random_state = (
@@ -273,6 +274,8 @@ class Fairground(Scenario):
             )
 
         else:
+
+            market_manager = Agent()
             self.price_process = LivePrice(
                 product=self.price_process_args["binance_product"]
             )
@@ -412,10 +415,7 @@ class Fairground(Scenario):
                 vega_service=vega,
                 step_length_seconds=self.granularity.value,
             )
-            env.run(
-                run_with_console=run_with_console,
-                pause_at_completion=pause_at_completion,
-            )
+            env.run()
 
 
 if __name__ == "__main__":

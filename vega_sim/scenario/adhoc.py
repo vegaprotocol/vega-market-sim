@@ -16,7 +16,11 @@ def main():
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
     parser.add_argument("--store", action="store_true")
-    parser.add_argument("--network", default="nullchain")
+    parser.add_argument(
+        "--network",
+        choices=["nullchain", "fairground", "stagnet3"],
+        default="nullchain",
+    )
     parser.add_argument(
         "-p",
         "--pause_every_n_steps",
