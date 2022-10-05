@@ -15,6 +15,7 @@ def replay_run_context(
     replay_path: str,
     console: bool = False,
     graphql: bool = False,
+    retain_log_files: bool = False,
 ):
     with open(f"{replay_path}/replay/transactions", "rb") as tx_history:
         tx_per_block = int.from_bytes(tx_history.read(TRANSACTION_LEN_BYTES), "big")
@@ -23,6 +24,7 @@ def replay_run_context(
             run_with_console=console,
             transactions_per_block=tx_per_block,
             warn_on_raw_data_access=False,
+            retain_log_files=retain_log_files,
         ) as vega:
             vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
