@@ -91,9 +91,9 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
     curr_fut = curr_inst.future
     curr_fut_prod = vega_protos.governance.UpdateFutureProduct(
         quote_name=curr_fut.quote_name,
-        oracle_spec_for_settlement_price=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-            pub_keys=curr_fut.oracle_spec_for_settlement_price.pub_keys,
-            filters=curr_fut.oracle_spec_for_settlement_price.filters,
+        oracle_spec_for_settlement_data=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
+            pub_keys=curr_fut.oracle_spec_for_settlement_data.pub_keys,
+            filters=curr_fut.oracle_spec_for_settlement_data.filters,
         ),
         oracle_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
             pub_keys=curr_fut.oracle_spec_for_trading_termination.pub_keys,
