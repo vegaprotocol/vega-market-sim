@@ -60,7 +60,7 @@ def main():
             no_version_check=True,
         ) as vega:
             scenario.run_iteration(
-                vega=vega, network=args.network, pause_at_completion=args.pause
+                vega=vega, network=Network[args.network], pause_at_completion=args.pause
             )
 
 
