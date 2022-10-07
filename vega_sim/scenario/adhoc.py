@@ -48,7 +48,9 @@ def main():
             use_full_vega_wallet=False,
             store_transactions=args.store,
         ) as vega:
-            scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
+            scenario.run_iteration(
+                vega=vega, network=args.network, pause_at_completion=args.pause
+            )
     else:
         with VegaServiceNetwork(
             network=args.network,

@@ -9,8 +9,8 @@ class Scenario(abc.ABC):
     def run_iteration(
         self,
         vega: VegaServiceNull,
+        network: str,
         pause_at_completion: bool = False,
         random_state: Optional[np.random.RandomState] = None,
-        network: Optional[str] = "nullchain",
     ):
         pass

@@ -243,8 +243,8 @@ class Fairground(Scenario):
     def _setup(
         self,
         vega: VegaService,
+        network: str,
         random_state: Optional[np.random.RandomState] = None,
-        network: Optional[str] = "nullchain",
     ):
 
         random_state = (
@@ -386,12 +386,15 @@ class Fairground(Scenario):
 
     def run_iteration(
         self,
+        network: str,
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,
-        network: Optional[str] = None,
     ):
+
+        agents = self._setup(vega=vega, random_state=random_state, network=network)
+
         if network == "nullchain":
             env = MarketEnvironmentWithState(
                 agents=self._setup(
@@ -408,9 +411,6 @@ class Fairground(Scenario):
             )
         else:
             env = NetworkEnvironment(
-                agents=self._setup(
-                    vega=vega, random_state=random_state, network=network
-                ),
                 n_steps=self.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.granularity.value,
