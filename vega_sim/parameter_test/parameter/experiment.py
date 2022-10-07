@@ -79,9 +79,7 @@ def _run_parameter_iteration(
             PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
         )
 
-        res = scenario.run_iteration(
-            vega=vega, random_state=random_state
-        )
+        res = scenario.run_iteration(vega=vega, random_state=random_state)
 
         return res
 
