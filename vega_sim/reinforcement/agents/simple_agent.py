@@ -7,6 +7,9 @@ class SimpleAgent(AgentWithWallet):
         self,
         wallet_name: str,
         wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        initial_balance: float,
     ):
         """Agent to extend with custom logic. A barebones skeleton which will
         currently faucet itself some tokens but then do nothing.
@@ -18,6 +21,30 @@ class SimpleAgent(AgentWithWallet):
                 str, The password which this agent uses to log in to the wallet
         """
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.initial_balance = initial_balance
+
+    def initialise(self, vega: VegaService):
+        # Initialise wallet
+        super().initialise(vega=vega, create_wallet=True)
+
+        # Get market id
+        self.market_id = [
+            m.id
+            for m in self.vega.all_markets()
+            if m.tradable_instrument.instrument.name == self.market_name
+        ][0]
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        # Top up asset
+        self.vega.mint(
+            self.wallet_name,
+            asset=self.asset_id,
+            amount=self.initial_balance,
+        )
+        self.vega.wait_fn(2)
 
     def step(self, vega: VegaService):
         """This function is called once each loop through of the simulation.
@@ -31,7 +58,7 @@ class SimpleAgent(AgentWithWallet):
                 network itself. Use this to query for the current state of
                 the world
         """
-        pass
+        import pdb
 
-    def initialise(self, vega: VegaService):
-        super().initialise(vega=vega, create_wallet=True)
+        pdb.set_trace()
+        pass

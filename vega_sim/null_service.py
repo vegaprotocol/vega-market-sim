@@ -420,9 +420,7 @@ def manage_vega_processes(
                 "NX_VEGA_URL": (
                     f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/query"
                 ),
-                "NX_VEGA_WALLET_URL": (
-                    f"http://localhost:{port_config[Ports.WALLET]}/api/v1"
-                ),
+                "NX_VEGA_WALLET_URL": f"http://localhost:{port_config[Ports.WALLET]}",
                 "NX_VEGA_ENV": "CUSTOM",
                 "NX_PORT": f"{port_config[Ports.CONSOLE]}",
                 "NODE_ENV": "development",
