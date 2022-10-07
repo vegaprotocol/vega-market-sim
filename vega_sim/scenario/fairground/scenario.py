@@ -137,7 +137,7 @@ class Fairground(Scenario):
     • MomentumTrader agents which provide trades.
     • PriceSensitiveMarketOrder agents which provide trades.
 
-    • MarketManger agent which proposes and settles a market (only required
+    • MarketManager agent which proposes and settles a market (only required
       when scenario is run on a local nullchain network).
 
     """
