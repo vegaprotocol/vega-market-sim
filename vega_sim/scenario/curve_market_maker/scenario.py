@@ -263,6 +263,7 @@ class CurveMarketMaker(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNull,
+        network: str,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,
@@ -321,5 +322,6 @@ if __name__ == "__main__":
     ) as vega:
         scenario.run_iteration(
             vega=vega,
+            network="nullchain",
             pause_at_completion=True,
         )

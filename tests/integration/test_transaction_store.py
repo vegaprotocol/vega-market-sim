@@ -17,7 +17,7 @@ def _test_transaction_store():
         store_transactions=True,
     ) as vega:
         scenario = SCENARIOS["historic_ideal_market_maker_v2"]()
-        scenario.run_iteration(vega=vega)
+        scenario.run_iteration(vega=vega, network="nullchain")
         log_dir = vega.log_dir
 
         market_id = vega.all_markets()[0].id

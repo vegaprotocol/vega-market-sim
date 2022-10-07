@@ -104,6 +104,7 @@ class Fairground(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNetwork,
+        network: str,
         random_state: Optional[np.random.RandomState] = None,
     ):
         env = self.set_up_background_market(
@@ -133,4 +134,4 @@ if __name__ == "__main__":
         automatic_consent=True,
         no_version_check=True,
     ) as vega:
-        scenario.run_iteration(vega=vega)
+        scenario.run_iteration(vega=vega, network="nullchain")
