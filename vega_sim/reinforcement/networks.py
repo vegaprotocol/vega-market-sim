@@ -87,7 +87,7 @@ class FFN_Q(nn.Module):
         self.ffn_buy = FFN(
             sizes=[state_dim + 1, 32, 1], activation=nn.Tanh
         )  # +action_cont_dim is for the volume
-        self.ffn_do_nothing = FFN(sizes=[state_dim, 1024, 1024, 1024, 1], activation=nn.Tanh)
+        self.ffn_do_nothing = FFN(sizes=[state_dim, 32, 1], activation=nn.Tanh)
 
     def forward(
         self, state: torch.Tensor, volume_sell: torch.Tensor, volume_buy: torch.Tensor
