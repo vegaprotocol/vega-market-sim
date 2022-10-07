@@ -808,9 +808,9 @@ class VegaService(ABC):
             curr_fut = curr_inst.future
             curr_fut_prod = UpdateFutureProduct(
                 quote_name=curr_fut.quote_name,
-                oracle_spec_for_settlement_price=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-                    pub_keys=curr_fut.oracle_spec_for_settlement_price.pub_keys,
-                    filters=curr_fut.oracle_spec_for_settlement_price.filters,
+                oracle_spec_for_settlement_data=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
+                    pub_keys=curr_fut.oracle_spec_for_settlement_data.pub_keys,
+                    filters=curr_fut.oracle_spec_for_settlement_data.filters,
                 ),
                 oracle_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
                     pub_keys=curr_fut.oracle_spec_for_trading_termination.pub_keys,
@@ -874,7 +874,7 @@ class VegaService(ABC):
         future_inst = data_raw.market_info(
             market_id, data_client=self.trading_data_client
         ).tradable_instrument.instrument.future
-        oracle_name = future_inst.oracle_spec_for_settlement_price.filters[0].key.name
+        oracle_name = future_inst.oracle_spec_for_settlement_data.filters[0].key.name
 
         logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
