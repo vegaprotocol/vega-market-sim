@@ -54,7 +54,7 @@ class LearningAgent(StateAgentWithWallet):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
-        exploitation: float,  # set this to 0 for full exploration and 1 for full exploitation
+        inventory_penalty: float = 0.0,
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
 
@@ -93,28 +93,20 @@ class LearningAgent(StateAgentWithWallet):
         )
 
         # Coefficients for regularisation
-        self.coefH_discr = 0.5
-        self.coefH_cont = 0.5
+        self.coefH_discr = 1.0
+        self.coefH_cont = 1.0
         # losses logger
         self.losses = defaultdict(list)
         # logfile
         self.logfile_pol_imp = logfile_pol_imp
-        with open(self.logfile_pol_imp, "w") as f:
-            f.write("iteration,loss\n")
         self.logfile_pol_eval = logfile_pol_eval
-        with open(self.logfile_pol_eval, "w") as f:
-            f.write("iteration,loss\n")
         self.logfile_pnl = logfile_pnl
-        with open(self.logfile_pnl, "w") as f:
-            f.write("iteration,pnl\n")
-
+        
         self.lerningIteration = 0
         self.market_name = market_name
         self.position_decimals = position_decimals
-        if exploitation < 0 or exploitation > 1:
-            raise Exception("Need 0.0 <= exploitation <= 1.0")
-        self.exploitation = exploitation
-
+        self.inventory_penalty = inventory_penalty
+        
     def set_market_tag(self, tag: str):
         self.tag = tag
         # self.wallet_name = self.base_wallet_name + str(tag)
@@ -164,7 +156,7 @@ class LearningAgent(StateAgentWithWallet):
         """
         Updates memory of the agent, and removes old tuples (s,a,r,s) if memory exceeds its capacity
         """
-        for res in states_to_sarsa(states):
+        for res in states_to_sarsa(states,inventory_penalty=self.inventory_penalty):
             self._update_memory(res[0], res[1], res[2], res[3])
         # remove old tuples if memory exceeds its capaciy
         for key, value in self.memory.items():
@@ -231,19 +223,26 @@ class LearningAgent(StateAgentWithWallet):
         pass
 
     def finalise(self):
-        learning_state = self.state(self.vega)
-        self.latest_action = self.empty_action()
-        self.latest_state = learning_state
-        self.step_num += 1
-        final_pnl = (
-            learning_state.general_balance
-            + learning_state.margin_balance
-            - self.initial_balance
-        )
-        if learning_state.margin_balance > 0:
+        numTries = 3  
+        for i in range(0,numTries):
+            self.latest_state = self.state(self.vega)
+            if self.latest_state.margin_balance == 0:
+                break 
+            self.vega.forward('1s')
+            self.vega.wait_for_total_catchup()
+
+        if self.latest_state.margin_balance > 0:
             print(
                 "Market should be settled but there is still balance in margin account. What's up?"
             )
+        
+        self.latest_action = self.empty_action()
+        self.step_num += 1
+        final_pnl = (
+            self.latest_state.general_balance
+            + self.latest_state.margin_balance
+            - self.initial_balance
+        )
         with open(self.logfile_pnl, "a") as f:
             f.write("{},{:.5f}\n".format(self.lerningIteration, final_pnl))
 

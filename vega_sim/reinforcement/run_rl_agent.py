@@ -24,7 +24,7 @@ from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
 
 
 def state_fn(
-    service: VegaServiceNull, agents: List[Agent]
+    service: VegaServiceNull, agents: List[Agent], state_values=None,
 ) -> Tuple[LAMarketState, AbstractAction]:
     learner = [a for a in agents if isinstance(a, LearningAgent)][0]
     return (learner.latest_state, learner.latest_action)
@@ -96,12 +96,9 @@ if __name__ == "__main__":
         type=int,
         help="If true, do not train and directly run the chosen number of evaluations",
     )
-    parser.add_argument(
-        "--resume_training",
-        default=False,
-        type=bool,
-        help="If true try to load trained state and continue from there",
-    )
+    parser.add_argument("--resume_training", action="store_true")
+    parser.add_argument("--plot_every_step", action="store_true")
+        
     args = parser.parse_args()
 
     # set device
@@ -136,14 +133,14 @@ if __name__ == "__main__":
         logfile_pol_imp=logfile_pol_imp,
         logfile_pol_eval=logfile_pol_eval,
         logfile_pnl=logfile_pnl,
-        discount_factor=0.99,
-        num_levels=2,
+        discount_factor=0.95,
+        num_levels=5,
         wallet_name=LEARNING_WALLET.name,
         wallet_pass=LEARNING_WALLET.passphrase,
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        exploitation=0.0,
+        inventory_penalty=.10
     )
 
     with VegaServiceNull(
@@ -159,10 +156,18 @@ if __name__ == "__main__":
             if args.resume_training == True:
                 print("Loading neural net weights from: " + args.results_dir)
                 learning_agent.load(args.results_dir)
+            else:
+                with open(logfile_pol_imp, "w") as f:
+                    f.write("iteration,loss\n")
+                with open(logfile_pol_eval, "w") as f:
+                    f.write("iteration,loss,kl_coeff_disc,kl_coeff_cont\n")
+                with open(logfile_pnl, "w") as f:
+                    f.write("iteration,pnl\n")
+
 
             for it in range(args.rl_max_it):
                 # simulation of market to get some data
-
+                
                 learning_agent.move_to_cpu()
                 _ = run_iteration(
                     learning_agent=learning_agent,
@@ -172,13 +177,24 @@ if __name__ == "__main__":
                     run_with_console=False,
                     pause_at_completion=False,
                 )
+            
+                
                 # Policy evaluation + Policy improvement
                 learning_agent.move_to_device()
-                learning_agent.policy_eval(batch_size=5000, n_epochs=100)
-                learning_agent.policy_improvement(batch_size=5000, n_epochs=100)
-                learning_agent.lerningIteration += 1
+                learning_agent.policy_eval(batch_size=5000, n_epochs=20)
+                learning_agent.policy_improvement(batch_size=5000, n_epochs=10)
+                
+                # save in case environment chooses to crash
+                learning_agent.save(args.results_dir)
 
-            learning_agent.save(args.results_dir)
+                if args.plot_every_step:
+                    plot_learning(
+                        results_dir=args.results_dir,
+                        logfile_pol_eval=logfile_pol_eval,
+                        logfile_pol_imp=logfile_pol_imp,
+                    )        
+
+            
             plot_learning(
                 results_dir=args.results_dir,
                 logfile_pol_eval=logfile_pol_eval,
@@ -189,9 +205,14 @@ if __name__ == "__main__":
             # EVALUATION OF AGENT
             print("Loading neural net weights from: " + args.results_dir)
             learning_agent.load(args.results_dir)
+            learning_agent.lerningIteration = 0
+            with open(logfile_pnl, "w") as f:
+                    f.write("iteration,pnl\n")
+
             for it in range(args.evaluate):
                 learning_agent.clear_memory()
                 learning_agent.exploitation = 1.0
+                
                 result = run_iteration(
                     learning_agent=learning_agent,
                     step_tag=it,
@@ -201,5 +222,7 @@ if __name__ == "__main__":
                     pause_at_completion=False,
                 )
                 plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
+                learning_agent.lerningIteration += 1
+
 
         plot_pnl(results_dir=args.results_dir, logfile_pnl=logfile_pnl)

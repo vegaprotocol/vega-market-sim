@@ -42,8 +42,11 @@ class LAMarketState:
         return arr
 
 
+
+
 def states_to_sarsa(
-    states: List[Tuple[LAMarketState, AbstractAction]]
+    states: List[Tuple[LAMarketState, AbstractAction]],
+    inventory_penalty: float = 0.0,
 ) -> List[Tuple[LAMarketState, AbstractAction, float, LAMarketState, AbstractAction]]:
     res = []
     for i in range(len(states) - 1):
@@ -69,5 +72,6 @@ def states_to_sarsa(
             if next_state is not np.nan
             else 0
         )
+        reward -= inventory_penalty * pres_state[0].position * pres_state[0].position
         res.append((pres_state[0], pres_state[1], reward, next_state[0], next_state[1]))
     return res
