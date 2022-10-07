@@ -594,9 +594,9 @@ class VegaServiceNull(VegaService):
             amount:
                 float, the amount of asset to mint
         """
-        super().mint(wallet_name=wallet_name, asset=asset, amount=amount)
         if self.store_transactions:
             self._store_mint(wallet_name=wallet_name, asset=asset, amount=amount)
+        super().mint(wallet_name=wallet_name, asset=asset, amount=amount)
 
     @property
     def wallet(self) -> Wallet:
