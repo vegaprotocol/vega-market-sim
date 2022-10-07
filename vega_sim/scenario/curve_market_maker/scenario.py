@@ -322,6 +322,5 @@ if __name__ == "__main__":
     ) as vega:
         scenario.run_iteration(
             vega=vega,
-            network="nullchain",
             pause_at_completion=True,
         )

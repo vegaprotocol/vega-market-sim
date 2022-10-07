@@ -134,4 +134,4 @@ if __name__ == "__main__":
         automatic_consent=True,
         no_version_check=True,
     ) as vega:
-        scenario.run_iteration(vega=vega, network="nullchain")
+        scenario.run_iteration(vega=vega)

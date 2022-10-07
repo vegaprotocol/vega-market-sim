@@ -279,4 +279,4 @@ if __name__ == "__main__":
         run_with_console=True,
         seconds_per_block=40,  # Heuristic
     ) as vega:
-        scenario.run_iteration(vega=vega, network="nullchain", pause_at_completion=True)
+        scenario.run_iteration(vega=vega, pause_at_completion=True)
