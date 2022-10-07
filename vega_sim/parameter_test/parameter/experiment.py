@@ -80,7 +80,7 @@ def _run_parameter_iteration(
         )
 
         res = scenario.run_iteration(
-            vega=vega, network="nullchain", random_state=random_state
+            vega=vega, random_state=random_state
         )
 
         return res

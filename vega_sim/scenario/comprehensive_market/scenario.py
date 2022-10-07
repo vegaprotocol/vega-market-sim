@@ -321,7 +321,7 @@ class ComprehensiveMarket(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNull,
-        network: str,
+        network: Optional[str] = None,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,

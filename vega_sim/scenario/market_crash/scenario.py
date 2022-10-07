@@ -240,7 +240,7 @@ class MarketCrash(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNull,
-        network: str,
+        network: Optional[str] = None,
         pause_at_completion: bool = False,
         tag: Optional[str] = None,
         random_state: Optional[np.random.RandomState] = None,

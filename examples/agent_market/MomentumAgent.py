@@ -53,7 +53,6 @@ if __name__ == "__main__":
     ) as vega:
         results = scenario.run_iteration(
             vega=vega,
-            network="nullchain",
             pause_at_completion=False,
         )
 

@@ -34,7 +34,7 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
     )
 
     scenario.run_iteration(
-        vega=vega, network="nullchain", pause_at_completion=False, tag="_iter"
+        vega=vega, pause_at_completion=False, tag="_iter"
     )
 
     asset_id = vega.find_asset_id(symbol="tDAI_iter")
