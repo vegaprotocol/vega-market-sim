@@ -76,34 +76,13 @@ class LearningAgent(StateAgentWithWallet):
         self.initial_balance = initial_balance
 
         self.memory = defaultdict(list)
-        self.memory_capacity = 10000
+        self.memory_capacity = 100_000
 
         # Dimensions of state and action
         self.num_levels = num_levels
         self.state_dim = 7 + 4 * self.num_levels  # from MarketState
-        action_discrete_dim = 3
-        # Q func
-        self.q_func = FFN_Q(
-            state_dim=self.state_dim,
-        )
-        self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
-        # policy
-        self.policy_volume = FFN_Params_Normal(
-            n_in=self.state_dim,
-            n_distr=2,
-            hidden_sizes=[32],
-        )
-        self.policy_discr = FFN(
-            sizes=[self.state_dim, 32, action_discrete_dim],
-            activation=nn.Tanh,
-            output_activation=Softmax,
-        )  # this network decides whether to buy/sell/do nothing
-        self.optimizer_pol = torch.optim.RMSprop(
-            list(self.policy_volume.parameters())
-            + list(self.policy_discr.parameters()),
-            lr=0.001,
-        )
-
+        
+        
         # Coefficients for regularisation
         self.coefH_discr = 1.0
         self.coefH_cont = 1.0
@@ -121,17 +100,15 @@ class LearningAgent(StateAgentWithWallet):
         
     def set_market_tag(self, tag: str):
         self.tag = tag
-        # self.wallet_name = self.base_wallet_name + str(tag)
+    
 
+    @abstractmethod
     def move_to_device(self):
-        self.q_func.to(self.device)
-        self.policy_volume.to(self.device)
-        self.policy_discr.to(self.device)
+        pass
 
+    @abstractmethod
     def move_to_cpu(self):
-        self.q_func.to("cpu")
-        self.policy_volume.to("cpu")
-        self.policy_discr.to("cpu")
+        pass
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet

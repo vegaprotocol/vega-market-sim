@@ -88,8 +88,33 @@ class LearningAgentFixedVol(LearningAgent):
             inventory_penalty=inventory_penalty,
         )
         self.volume = 10 ** (-self.position_decimals)
+
+        # Dimensions of state and action
+        self.num_levels = num_levels
+        self.state_dim = 7 + 4 * self.num_levels  # from MarketState
+        action_discrete_dim = 3
+        
+        # NN for Q-fun and its optimizer
         self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
-        self.coefH_discr = 0.1
+        self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.1)
+
+        # NN for policy and its optimizer
+        self.policy_discr = FFN(
+            sizes=[self.state_dim, 1024, 1024, 1024, action_discrete_dim],
+            activation=nn.Tanh,
+            output_activation=Softmax,
+        )  # this network decides whether to buy/sell/do nothing
+        self.optimizer_pol = torch.optim.RMSprop(list(self.policy_discr.parameters()), lr=0.1)
+
+        
+
+    def move_to_device(self):
+        self.q_func.to(self.device)
+        self.policy_discr.to(self.device)
+
+    def move_to_cpu(self):
+        self.q_func.to("cpu")
+        self.policy_discr.to("cpu")
 
     def _update_memory(
         self,
@@ -239,7 +264,7 @@ class LearningAgentFixedVol(LearningAgent):
         toggle(self.q_func, to=True)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
-
+        
         pbar = tqdm(total=n_epochs)
         for epoch in range(n_epochs):
             for (

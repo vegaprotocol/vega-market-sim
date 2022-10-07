@@ -124,7 +124,7 @@ if __name__ == "__main__":
     initial_price = 1000
 
     # create the Learning Agent
-    learning_agent = LearningAgentFixedVol(
+    learning_agent = LearningAgentWithVol(
         device=device,
         logfile_pol_imp=logfile_pol_imp,
         logfile_pol_eval=logfile_pol_eval,
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        inventory_penalty=.10
+        inventory_penalty=2.0
     )
 
     with VegaServiceNull(
@@ -177,8 +177,8 @@ if __name__ == "__main__":
                 
                 # Policy evaluation + Policy improvement
                 learning_agent.move_to_device()
-                learning_agent.policy_eval(batch_size=5000, n_epochs=10)
-                learning_agent.policy_improvement(batch_size=5000, n_epochs=5)
+                learning_agent.policy_eval(batch_size=20000, n_epochs=10)
+                learning_agent.policy_improvement(batch_size=100_000, n_epochs=10)
                 
                 # save in case environment chooses to crash
                 learning_agent.save(args.results_dir)

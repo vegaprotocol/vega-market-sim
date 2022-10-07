@@ -103,6 +103,48 @@ class LearningAgentWithVol(LearningAgent):
             inventory_penalty=inventory_penalty,
         )
 
+        # Dimensions of state and action
+        self.num_levels = num_levels
+        self.state_dim = 7 + 4 * self.num_levels  # from MarketState
+        action_discrete_dim = 3
+        
+        # NN and optimizer for Q func
+        self.q_func = FFN_Q(
+            state_dim=self.state_dim,
+        )
+        self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
+        
+        # NN for policy and its optimizer
+        self.policy_discr = FFN(
+            sizes=[self.state_dim, 1024,1024,1024, action_discrete_dim],
+            activation=nn.Tanh,
+            output_activation=Softmax,
+        )  # this network decides whether to buy/sell/do nothing
+        
+        # NN for volume
+        self.policy_volume = FFN_Params_Normal(
+            n_in=self.state_dim,
+            n_distr=2,
+            hidden_sizes=[32],
+        )
+
+        # And the optimizer needs to include this too
+        self.optimizer_pol = torch.optim.RMSprop(
+            list(self.policy_volume.parameters())
+            + list(self.policy_discr.parameters()),
+            lr=0.001,
+        )
+    
+    def move_to_device(self):
+        self.q_func.to(self.device)
+        self.policy_volume.to(self.device)
+        self.policy_discr.to(self.device)
+
+    def move_to_cpu(self):
+        self.q_func.to("cpu")
+        self.policy_volume.to("cpu")
+        self.policy_discr.to("cpu")
+
     def _update_memory(
         self,
         state: LAMarketState,
