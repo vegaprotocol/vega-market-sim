@@ -11,6 +11,8 @@ import torch.nn as nn
 from torch.distributions.categorical import Categorical
 from vega_sim.reinforcement.learning_agent import AbstractAction, LearningAgent
 
+import pickle
+
 from vega_sim.reinforcement.networks import (
     Softmax,
     FFN,
@@ -53,36 +55,6 @@ class SoftActionFixVol:
         return self.c
 
 
-def states_to_sarsa(
-    states: List[Tuple[LAMarketState, Action]]
-) -> List[Tuple[LAMarketState, Action, float, LAMarketState, Action]]:
-    res = []
-    for i in range(len(states) - 1):
-        pres_state = states[i]
-        next_state = states[i + 1]
-
-        if next_state[0].margin_balance + next_state[0].general_balance <= 0:
-            reward = -1e12
-            res.append(
-                (
-                    pres_state[0],
-                    pres_state[1],
-                    reward,
-                    next_state[0] if next_state is not np.nan else np.nan,
-                    next_state[1] if next_state is not np.nan else np.nan,
-                )
-            )
-            break
-
-        reward = (
-            (next_state[0].general_balance + next_state[0].margin_balance)
-            - (pres_state[0].general_balance + pres_state[0].margin_balance)
-            if next_state is not np.nan
-            else 0
-        )
-        reward -= 0.05 * pres_state[0].position * pres_state[0].position
-        res.append((pres_state[0], pres_state[1], reward, next_state[0], next_state[1]))
-    return res
 
 
 class LearningAgentFixedVol(LearningAgent):
@@ -99,7 +71,7 @@ class LearningAgentFixedVol(LearningAgent):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
-        exploitation: float,  # set this to 0 for full exploration and 1 for full exploitation
+        inventory_penalty: float = 1.0,
     ):
         super().__init__(
             device=device,
@@ -113,7 +85,7 @@ class LearningAgentFixedVol(LearningAgent):
             market_name=market_name,
             initial_balance=initial_balance,
             position_decimals=position_decimals,
-            exploitation=exploitation,
+            inventory_penalty=inventory_penalty,
         )
         self.volume = 10 ** (-self.position_decimals)
         self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
@@ -180,6 +152,10 @@ class LearningAgentFixedVol(LearningAgent):
         )
         return dataloader
 
+    def empty_action(self) -> AbstractAction:
+        return Action(False,False)
+
+
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
         self.step_num += 1
@@ -205,24 +181,14 @@ class LearningAgentFixedVol(LearningAgent):
                 print(e)
 
     def _step(self, vega_state: LAMarketState) -> Action:
-        u1 = np.random.uniform(0, 1)
-        # if u1 > self.exploitation:
-        if u1 > 2.0:
-            u2 = np.random.uniform(0, 1)
-            if u2 > 0.1:
-                # random policy
-                choice = np.random.choice([0, 1, 2])
-            else:
-                return self._step_heuristic(vega_state=vega_state)
-        else:
-            # learned policy
-            state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
-            state = torch.from_numpy(state).float()  # .to(self.device)
+        # learned policy
+        state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
+        state = torch.from_numpy(state).float()  # .to(self.device)
 
-            with torch.no_grad():
-                soft_action = self.sample_action(state=state)
-            choice = int(soft_action.c.item())
-
+        with torch.no_grad():
+            soft_action = self.sample_action(state=state, sim=True)
+        choice = int(soft_action.c.item())
+        
         return Action(buy=choice == 0, sell=choice == 1)
 
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
@@ -244,6 +210,8 @@ class LearningAgentFixedVol(LearningAgent):
     def sample_action(
         self,
         state: torch.Tensor,
+        sim: bool = True,
+        evaluate: bool = False,
     ):
         """
         Sample an action.
@@ -253,8 +221,13 @@ class LearningAgentFixedVol(LearningAgent):
         c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
         """
         probs = self.policy_discr(state)
-        m = Categorical(probs)
-        c = m.sample()
+        if sim:
+            m = Categorical(probs)
+            c = m.sample()
+        else: 
+            c = probs
+        if evaluate:
+            c = torch.max(probs, 1, keepdim=True)[1]
         return SoftActionFixVol(c)
 
     def policy_eval(
@@ -278,17 +251,12 @@ class LearningAgentFixedVol(LearningAgent):
                     batch_next_state,
                 ),
             ) in enumerate(dataloader):
-                # next_state_terminal = torch.isnan(batch_next_state).float()  # shape (batch_size, dim_state)
-                # batch_next_state[next_state_terminal.eq(True)] = batch_state[
-                #     next_state_terminal.eq(True)
-                # ]
                 next_state_terminal = torch.isnan(
                     batch_next_state
-                )  # shape (batch_size, dim_state)
-                next_state_termina_idx = next_state_terminal.eq(True)
-                batch_next_state[next_state_terminal] = batch_state[
-                    next_state_terminal
-                ].float()
+                ).float()  # shape (batch_size, dim_state)
+                batch_next_state[next_state_terminal.eq(True)] = batch_state[
+                    next_state_terminal.eq(True)
+                ]
                 self.optimizer_q.zero_grad()
 
                 pred = self.q_func(batch_state, batch_action_discrete)
@@ -308,14 +276,17 @@ class LearningAgentFixedVol(LearningAgent):
             # logging loss
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
-                    "{},{:.5f}\n".format(
-                        epoch + self.lerningIteration * n_epochs, loss.item()
+                    "{},{:.2e},{:.3f},{:.3f}\n".format(
+                        epoch + self.lerningIteration * n_epochs, 
+                        loss.item(),
+                        self.coefH_discr,
+                        self.coefH_cont,
                     )
                 )
             pbar.update(1)
         return 0
 
-    def v_func(self, state, n_mc=50):
+    def v_func(self, state):
         """
         v(x) = E[q(x,A)] = E[q(x,A)|C=0]p(C=0) + E[q(x,A)|C=1]p(C=1) + E[q(x)|C=2]p(C=2)
 
@@ -340,7 +311,7 @@ class LearningAgentFixedVol(LearningAgent):
         self.q_func.train()
         return v
 
-    def D_KL(self, state, n_mc):
+    def D_KL(self, state):
         """
         KL divergence between pi(.|x) and the unnormalised density exp(Q(x,.)),
         where pi(.|x) is a LogNormal distribution
@@ -368,7 +339,7 @@ class LearningAgentFixedVol(LearningAgent):
         for epoch in range(n_epochs):
             for i, (batch_state, _, _, _) in enumerate(dataloader):
                 self.optimizer_pol.zero_grad()
-                d_kl = self.D_KL(batch_state, n_mc=100).mean()
+                d_kl = self.D_KL(batch_state).mean()
                 d_kl.backward()
                 # nn.utils.clip_grad_norm_(self.policy_volume.parameters(), max_norm=1.)
                 self.optimizer_pol.step()
@@ -382,9 +353,9 @@ class LearningAgentFixedVol(LearningAgent):
             pbar.update(1)
 
         # update the coefficients for the next run
-        self.coefH_discr = max(self.coefH_discr * 0.99, 0.1)
-        self.coefH_cont = max(self.coefH_cont * 0.99, 0.1)
-
+        self.coefH_discr = max(self.coefH_discr * 0.99, 0.05)
+        self.coefH_cont = max(self.coefH_cont * 0.99, 0.05)
+        self.lerningIteration += 1
         return 0
 
     def save(self, results_dir: str):
@@ -393,11 +364,29 @@ class LearningAgentFixedVol(LearningAgent):
             "losses": self.losses,
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
+            "iteration":self.lerningIteration,
+            "coefH_discr":self.coefH_discr,
+            "coefH_cont":self.coefH_cont,
         }
         torch.save(d, filename)
+
+        filename_for_memory = os.path.join(results_dir, "memory.pickle")
+        with open(filename_for_memory, 'wb') as f:
+            pickle.dump(self.memory, f)
 
     def load(self, results_dir: str):
         filename = os.path.join(results_dir, "agent.pth.tar")
         d = torch.load(filename, map_location="cpu")
         self.q_func.load_state_dict(d["q"])
         self.policy_discr.load_state_dict(d["policy_discr"])
+
+        self.lerningIteration = d["iteration"]
+        self.coefH_discr = d["coefH_discr"]
+        self.coefH_cont = d["coefH_cont"]
+
+
+        filename_for_memory = os.path.join(results_dir, "memory.pickle")
+        with open(filename_for_memory, 'rb') as f:
+            memory = pickle.load(f)
+        self.memory = memory
+        

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
@@ -29,6 +30,7 @@ from vega_sim.reinforcement.distributions import (
 
 from vega_sim.api.helpers import num_from_padded_int
 
+from vega_sim.environment.agent import Agent
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
@@ -40,7 +42,15 @@ WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 WALLET = WalletConfig("learner", "learner")
 
 
+def state_fn(
+    service: VegaServiceNull, agents: List[Agent], state_values=None,
+) -> Tuple[LAMarketState, AbstractAction]:
+    learner = [a for a in agents if isinstance(a, LearningAgent)][0]
+    return (learner.latest_state, learner.latest_action)
+
+
 class LearningAgent(StateAgentWithWallet):
+    @abstractmethod
     def __init__(
         self,
         device: str,
@@ -59,6 +69,8 @@ class LearningAgent(StateAgentWithWallet):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
 
         self.step_num = 0
+        self.latest_state = None
+        self.latest_action = None
         self.device = device
         self.discount_factor = discount_factor
         self.initial_balance = initial_balance
@@ -169,6 +181,7 @@ class LearningAgent(StateAgentWithWallet):
         for key in self.memory.keys():
             self.memory[key].clear()
 
+    @abstractmethod
     def create_dataloader(self, batch_size):
         """
         creates dataset and dataloader for training.
@@ -219,6 +232,7 @@ class LearningAgent(StateAgentWithWallet):
             else np.nan,
         )
 
+    @abstractmethod
     def empty_action(self) -> AbstractAction:
         pass
 
@@ -247,12 +261,15 @@ class LearningAgent(StateAgentWithWallet):
             f.write("{},{:.5f}\n".format(self.lerningIteration, final_pnl))
 
         return super().finalise()
-
+    
+    @abstractmethod
     def step(self, vega_state: VegaState):
         pass
-
+    
+    @abstractmethod
     def save(self, results_dir: str):
         pass
-
+    
+    @abstractmethod
     def load(self, results_dir: str):
         pass

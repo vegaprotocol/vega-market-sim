@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Tuple
 import numpy as np
 
+from vega_sim.environment.agent import Agent
 
 @dataclass
 class AbstractAction:

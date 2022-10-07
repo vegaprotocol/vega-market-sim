@@ -5,11 +5,12 @@ import os
 import torch
 import time
 
-from vega_sim.environment.agent import Agent
+
 from vega_sim.reinforcement.la_market_state import LAMarketState, AbstractAction
 from vega_sim.reinforcement.learning_agent import (
     LearningAgent,
     WALLET as LEARNING_WALLET,
+    state_fn,
 )
 from vega_sim.reinforcement.learning_agent_MO_with_vol import LearningAgentWithVol
 from vega_sim.reinforcement.learning_agent_MO import LearningAgentFixedVol
@@ -23,11 +24,6 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
 
 
-def state_fn(
-    service: VegaServiceNull, agents: List[Agent], state_values=None,
-) -> Tuple[LAMarketState, AbstractAction]:
-    learner = [a for a in agents if isinstance(a, LearningAgent)][0]
-    return (learner.latest_state, learner.latest_action)
 
 
 def run_iteration(
@@ -128,7 +124,7 @@ if __name__ == "__main__":
     initial_price = 1000
 
     # create the Learning Agent
-    learning_agent = LearningAgentWithVol(
+    learning_agent = LearningAgentFixedVol(
         device=device,
         logfile_pol_imp=logfile_pol_imp,
         logfile_pol_eval=logfile_pol_eval,
@@ -181,8 +177,8 @@ if __name__ == "__main__":
                 
                 # Policy evaluation + Policy improvement
                 learning_agent.move_to_device()
-                learning_agent.policy_eval(batch_size=5000, n_epochs=20)
-                learning_agent.policy_improvement(batch_size=5000, n_epochs=10)
+                learning_agent.policy_eval(batch_size=5000, n_epochs=10)
+                learning_agent.policy_improvement(batch_size=5000, n_epochs=5)
                 
                 # save in case environment chooses to crash
                 learning_agent.save(args.results_dir)

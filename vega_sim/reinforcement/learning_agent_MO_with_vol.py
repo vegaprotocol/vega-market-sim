@@ -354,7 +354,7 @@ class LearningAgentWithVol(LearningAgent):
             pbar.update(1)
         return 0
 
-    def v_func(self, state, n_mc=100):
+    def v_func(self, state, n_mc=1000):
         """
         v(x) = E[q(x,A)] = E[q(x,A)|C=0]p(C=0) + E[q(x,A)|C=1]p(C=1) + E[q(x)|C=2]p(C=2)
 
@@ -423,8 +423,9 @@ class LearningAgentWithVol(LearningAgent):
 
         d_kl = (
             d_kl.reshape(n_mc, batch_size, -1).mean(0).mean()
-            + 0.5 * reg.reshape(n_mc, batch_size, -1).mean(0).mean()
+            + 0.5 * self.coefH_cont * reg.reshape(n_mc, batch_size, -1).mean(0).mean()
         )  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
+
         return d_kl
 
     def policy_improvement(self, batch_size: int, n_epochs: int):
