@@ -9,6 +9,7 @@ from vega_sim.scenario.scenario import Scenario
 
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.scenario.constants import Network
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
@@ -240,7 +241,7 @@ class MarketCrash(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNull,
-        network: Optional[str] = None,
+        network: Optional[Network] = None,
         pause_at_completion: bool = False,
         tag: Optional[str] = None,
         random_state: Optional[np.random.RandomState] = None,

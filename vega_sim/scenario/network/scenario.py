@@ -15,7 +15,7 @@ from vega_sim.environment.agent import Agent
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.environment import NetworkEnvironment
 from vega_sim.network_service import VegaServiceNetwork
-
+from vega_sim.scenario.constants import Network
 from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     LimitOrderTrader,
@@ -104,7 +104,7 @@ class Fairground(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNetwork,
-        network: Optional[str] = None,
+        network: Optional[Network] = None,
         random_state: Optional[np.random.RandomState] = None,
     ):
         env = self.set_up_background_market(
