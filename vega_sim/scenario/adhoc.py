@@ -1,6 +1,8 @@
 import argparse
 import logging
 
+from vega_sim.scenario.constants import Network
+
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.registry import SCENARIOS
@@ -18,8 +20,8 @@ def main():
     parser.add_argument("--store", action="store_true")
     parser.add_argument(
         "--network",
-        choices=["nullchain", "fairground", "stagnet1", "stagnet3"],
-        default="nullchain",
+        choices=[network.name for network in Network],
+        default=Network.NULLCHAIN.name,
     )
     parser.add_argument(
         "-p",
@@ -37,7 +39,7 @@ def main():
 
     scenario.pause_every_n_steps = args.pause_every_n_steps
 
-    if args.network == "nullchain":
+    if Network[args.network] == Network.NULLCHAIN:
         with VegaServiceNull(
             run_with_console=args.console,
             launch_graphql=args.graphql,
@@ -49,11 +51,11 @@ def main():
             store_transactions=args.store,
         ) as vega:
             scenario.run_iteration(
-                vega=vega, network=args.network, pause_at_completion=args.pause
+                vega=vega, network=Network[args.network], pause_at_completion=args.pause
             )
     else:
         with VegaServiceNetwork(
-            network=args.network,
+            network=Network[args.network],
             automatic_consent=True,
             no_version_check=True,
         ) as vega:

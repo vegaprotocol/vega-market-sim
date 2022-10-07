@@ -15,9 +15,11 @@ import numpy as np
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
+from vega_sim.scenario.constants import Network
+
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.null_service import VegaService
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.environment.environment import (
     MarketEnvironmentWithState,
     NetworkEnvironment,
@@ -242,8 +244,7 @@ class Fairground(Scenario):
 
     def _setup(
         self,
-        vega: VegaService,
-        network: str,
+        network: Network,
         random_state: Optional[np.random.RandomState] = None,
     ):
 
@@ -251,7 +252,7 @@ class Fairground(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        if network == "nullchain":
+        if network == Network.NULLCHAIN:
 
             self.price_process = self._get_price_process(random_state=random_state)
 
@@ -386,20 +387,18 @@ class Fairground(Scenario):
 
     def run_iteration(
         self,
-        network: str,
-        vega: VegaServiceNull,
+        network: Network,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
         pause_at_completion: bool = False,
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,
     ):
 
-        agents = self._setup(vega=vega, random_state=random_state, network=network)
+        agents = self._setup(network=network, random_state=random_state)
 
-        if network == "nullchain":
+        if network == Network.NULLCHAIN:
             env = MarketEnvironmentWithState(
-                agents=self._setup(
-                    vega=vega, random_state=random_state, network=network
-                ),
+                agents=agents,
                 n_steps=self.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.granularity.value,
@@ -411,6 +410,7 @@ class Fairground(Scenario):
             )
         else:
             env = NetworkEnvironment(
+                agents=agents,
                 n_steps=self.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.granularity.value,
