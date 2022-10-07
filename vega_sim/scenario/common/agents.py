@@ -117,6 +117,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
         self.pdp = self.vega.market_pos_decimals.get(self.market_id, {})
@@ -184,8 +185,9 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
+        key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -222,6 +224,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
 
@@ -280,6 +283,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )
 
 
@@ -747,8 +751,9 @@ class OpenAuctionPass(StateAgentWithWallet):
         initial_price: float = 0.3,
         opening_auction_trade_amount: float = 1,
         tag: str = "",
+        key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.side = side
         self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
@@ -781,6 +786,7 @@ class OpenAuctionPass(StateAgentWithWallet):
                 self.wallet_name,
                 asset=asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
@@ -794,6 +800,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             volume=self.opening_auction_trade_amount,
             price=self.initial_price,
             wait=False,
+            key_name=self.key_name,
         )
 
     def step(self, vega_state: VegaState):
@@ -816,10 +823,13 @@ class MarketManager(StateAgentWithWallet):
         commitment_amount: Optional[float] = None,
         settlement_price: Optional[float] = None,
         tag: str = "",
+        key_name: str = None,
+        terminate_key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.terminate_wallet_name = terminate_wallet_name + str(tag)
         self.terminate_wallet_pass = terminate_wallet_pass
+        self.terminate_key_name = terminate_key_name
 
         self.adp = asset_decimal
         self.mdp = market_decimal
@@ -849,14 +859,16 @@ class MarketManager(StateAgentWithWallet):
     ):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega, create_wallet=create_wallet)
-        self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
+        self.vega.create_wallet(
+            self.terminate_wallet_name,
+            self.terminate_wallet_pass,
+            self.terminate_key_name,
+        )
 
         # Faucet vega tokens
         self.vega.wait_for_total_catchup()
         self.vega.mint(
-            self.wallet_name,
-            asset="VOTE",
-            amount=1e4,
+            self.wallet_name, asset="VOTE", amount=1e4, key_name=self.key_name
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -868,6 +880,7 @@ class MarketManager(StateAgentWithWallet):
                 symbol=self.asset_name,
                 decimals=self.adp,
                 max_faucet_amount=5e10,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -879,6 +892,7 @@ class MarketManager(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -887,6 +901,7 @@ class MarketManager(StateAgentWithWallet):
             self.wallet_name,
             "market.liquidity.minimum.probabilityOfTrading.lpOrders",
             "0.001",
+            key_name=self.key_name,
         )
 
         self.vega.wait_for_total_catchup()
@@ -894,6 +909,7 @@ class MarketManager(StateAgentWithWallet):
             self.wallet_name,
             "market.liquidity.stakeToCcySiskas",
             "0.001",
+            key_name=self.key_name,
         )
 
         self.vega.wait_for_total_catchup()
@@ -906,6 +922,8 @@ class MarketManager(StateAgentWithWallet):
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
+            key_name=self.key_name,
+            termination_key=self.terminate_key_name,
         )
         self.vega.wait_fn(5)
 
@@ -924,12 +942,16 @@ class MarketManager(StateAgentWithWallet):
                 buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
                 sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
                 is_amendment=False,
+                key_name=self.key_name,
             )
 
     def finalise(self):
         if self.settlement_price is not None:
             self.vega.settle_market(
-                self.terminate_wallet_name, self.settlement_price, self.market_id
+                self.terminate_wallet_name,
+                self.settlement_price,
+                self.market_id,
+                self.terminate_key_name,
             )
             self.vega.wait_for_total_catchup()
 
@@ -968,8 +990,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         market_decimal_places: int = 5,
         asset_decimal_places: int = 0,
         tag: str = "",
+        key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
         self.initial_asset_mint = initial_asset_mint
@@ -1006,6 +1029,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
             self.vega.wait_for_total_catchup()
 
@@ -1029,6 +1053,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 buy_specs=initial_liq.buy_specs,
                 sell_specs=initial_liq.sell_specs,
                 is_amendment=False,
+                key_name=self.key_name,
             )
 
     def step(self, vega_state: VegaState):
@@ -1038,7 +1063,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
 
         current_position = int(position[0].open_volume) if position else 0
@@ -1051,7 +1078,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         for order in (
             vega_state.market_state.get(self.market_id, {})
-            .orders.get(self.vega.wallet.public_key(self.wallet_name), {})
+            .orders.get(
+                self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
+            )
             .values()
         ):
             if order.side == vega_protos.SIDE_BUY:
@@ -1101,6 +1130,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 buy_specs=liq.buy_specs,
                 sell_specs=liq.sell_specs,
                 is_amendment=True,
+                key_name=self.key_name,
             )
 
     def _submit_order(
@@ -1115,6 +1145,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             volume=size,
             price=price,
             wait=False,
+            key_name=self.key_name,
         )
 
     def _move_side(
@@ -1132,6 +1163,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     order_id=order_to_amend.id,
                     price=order.price,
                     volume_delta=order.size - order_to_amend.remaining,
+                    key_name=self.key_name,
                 )
             else:
                 self._submit_order(
@@ -1145,6 +1177,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
                     order_id=order.id,
+                    key_name=self.key_name,
                 )
 
 
@@ -1184,6 +1217,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         market_kappa: float = 1,
         asset_decimal_places: int = 0,
         tag: str = "",
+        key_name: str = None,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1199,6 +1233,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             shape_fn=self._generate_shape,
             best_price_offset_fn=self._optimal_strategy,
             liquidity_commitment_fn=self._liq_provis,
+            key_name=key_name,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
@@ -1329,7 +1364,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
 
         levels = np.arange(0, self.tick_spacing * self.num_levels, self.tick_spacing)
         cumulative_vol = np.exp(self.kappa * levels)
-        scaled_vol = (1 / cumulative_vol[0]) * cumulative_vol
+        scaled_vol = (1 / cumulative_vol[0]) * cumulative_vol * self.order_unit_size
 
         base_price = self.curr_price + mult_factor * price_depth
         level_price = np.arange(
@@ -1486,6 +1521,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(2)
 
@@ -1838,6 +1874,7 @@ class MomentumTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
