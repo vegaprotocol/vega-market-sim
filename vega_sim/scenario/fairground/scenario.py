@@ -134,7 +134,7 @@ class Fairground(Scenario):
     the following features:
 
     • ExponentialShapedMarketMaker agent which provides a market for traders
-    • OpenAuctionPass agents which provide a constant best bid and ask
+    • OpenAuctionPass agents which provide an initial best bid and ask
     • MarketOrderTrader agents which provide trades.
     • MomentumTrader agents which provide trades.
     • PriceSensitiveMarketOrder agents which provide trades.
