@@ -18,7 +18,7 @@ def main():
     parser.add_argument("--store", action="store_true")
     parser.add_argument(
         "--network",
-        choices=["nullchain", "fairground", "stagnet3"],
+        choices=["nullchain", "fairground", "stagnet1", "stagnet3"],
         default="nullchain",
     )
     parser.add_argument(
