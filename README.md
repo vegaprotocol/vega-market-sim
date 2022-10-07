@@ -16,14 +16,20 @@ Market Simulator is still under active development and so may change notably ove
 
 ## Setup
 
+If you are on MacOS, ensure you have the command line developer tools installed to be able to run `make`. Presently this is done by running `xcode-select --install`
+
+If you are on Windows, you are likely best off running through WSL.
+
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
   - Clone the repository to your local drive
   - Install the latest version of [Golang](https://go.dev)
   - Run `make` to automatically pull install dependencies
     - If you have your own instances of the various service to run from elsewhere, you can skip this step
   - Install the package into your local environment. 
-    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install`. 
- -  Then run your environment.
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install` (or `poetry install --all-extras` to cover all optional extras too). 
+ -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
+ -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
+ -  You're good now.
 
 ### Setup if you're using `conda` as your python package manager
 
@@ -104,9 +110,10 @@ To support the above mentioned parameter tests, and to allow for more complex ca
 
 ### Momentum Agent
 
+
 One of the agents provided in the scenarios is momentum agent that can currently follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. A comprehensive scenario for momentum agent tests is in `vega_sim.scenario.comprehensive_market.scenario`, where mutileple momentum agents with different momentum strategies can be tested. 
 
-To run momentum agents, start by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
+To run momentum agents, you must first install the TA-Lib libraries. The instructions [here](https://github.com/mrjbq7/ta-lib#dependencies) are likely a good start. Follow this by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
 
 ```
 ComprehensiveMarket(

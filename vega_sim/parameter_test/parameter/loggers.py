@@ -26,7 +26,6 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LP: GeneralPnl",
     "LP: Return Over LockedCapital",
     "LP: Annualised Return Over LockedCapital",
-    "LP: Absolute Return",
     "LP: Relative Return",
     "LP: Annualised Relative Return",
     "LP: RealisedPnl",
@@ -163,26 +162,20 @@ def _ideal_market_maker_single_data_extraction(
             general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
         )
         / (max_locked_capital + 0.000000001),
-        "LP: Annualised Return Over LockedCapital": pow(
-            1.0
-            + (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
-            / (max_locked_capital + 0.000000001),
-            365,
-        ),
-        "LP: Absolute Return": general_lp
-        + margin_lp
-        + bond_lp
-        - mm_agent.initial_asset_mint,
+        "LP: Annualised Return Over LockedCapital": (
+            general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
+        )
+        * 365
+        / (max_locked_capital + 0.000000001),
         "LP: Relative Return": (
             general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
         )
         / (mm_agent.initial_asset_mint + 0.00000001),
-        "LP: Annualised Relative Return": pow(
-            1.0
-            + (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
-            / (mm_agent.initial_asset_mint + 0.00000001),
-            365,
-        ),
+        "LP: Annualised Relative Return": (
+            general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
+        )
+        * 365
+        / (mm_agent.initial_asset_mint + 0.00000001),
         "LP: Max Margin": max_margin,
         "LP: Max Locked Capital": max_locked_capital,
         "LP: RealisedPnl": realised_pnl_lp,

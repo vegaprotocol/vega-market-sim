@@ -565,11 +565,13 @@ class VegaServiceNull(VegaService):
         )
         self.tx_file.write((wait_multiple).to_bytes(TRANSACTION_LEN_BYTES, "big"))
 
-    def _store_mint(self, wallet_name: str, asset: str, amount: float) -> None:
+    def _store_mint(
+        self, wallet_name: str, asset: str, amount: float, key_name: str = None
+    ) -> None:
         self.tx_file.write(
             (TransactionType.MINT.value).to_bytes(TRANSACTION_LEN_BYTES, "big")
         )
-        pub_key_bytes = self.wallet.public_key(wallet_name).encode()
+        pub_key_bytes = self.wallet.public_key(wallet_name, key_name).encode()
         asset_bytes = asset.encode()
         asset_decimals = self.asset_decimals[asset]
 
@@ -583,7 +585,9 @@ class VegaServiceNull(VegaService):
             )
         )
 
-    def mint(self, wallet_name: str, asset: str, amount: float) -> None:
+    def mint(
+        self, wallet_name: str, asset: str, amount: float, key_name: str = None
+    ) -> None:
         """Mints a given amount of requested asset into the associated wallet
 
         Args:
@@ -593,10 +597,17 @@ class VegaServiceNull(VegaService):
                 str, The ID of the asset to mint
             amount:
                 float, the amount of asset to mint
+            key_name:
+                str, The key in the wallet
         """
         if self.store_transactions:
-            self._store_mint(wallet_name=wallet_name, asset=asset, amount=amount)
-        super().mint(wallet_name=wallet_name, asset=asset, amount=amount)
+            self._store_mint(
+                wallet_name=wallet_name, asset=asset, amount=amount, key_name=key_name
+            )
+
+        super().mint(
+            wallet_name=wallet_name, asset=asset, amount=amount, key_name=key_name
+        )
 
     @property
     def wallet(self) -> Wallet:

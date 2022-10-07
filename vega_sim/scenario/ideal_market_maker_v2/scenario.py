@@ -8,6 +8,7 @@ from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.scenario.constants import Network
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
@@ -251,6 +252,7 @@ class IdealMarketMaker(Scenario):
     def run_iteration(
         self,
         vega: VegaServiceNull,
+        network: Optional[Network] = None,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,
