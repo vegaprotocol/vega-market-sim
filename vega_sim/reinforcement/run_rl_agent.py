@@ -14,6 +14,7 @@ from vega_sim.reinforcement.learning_agent import (
 )
 from vega_sim.reinforcement.learning_agent_MO_with_vol import LearningAgentWithVol
 from vega_sim.reinforcement.learning_agent_MO import LearningAgentFixedVol
+from vega_sim.reinforcement.learning_agent_heuristic import LearningAgentHeuristic
 
 from vega_sim.scenario.registry import IdealMarketMakerV2
 from vega_sim.scenario.registry import CurveMarketMaker
@@ -124,19 +125,19 @@ if __name__ == "__main__":
     initial_price = 1000
 
     # create the Learning Agent
-    learning_agent = LearningAgentWithVol(
+    learning_agent = LearningAgentHeuristic(
         device=device,
         logfile_pol_imp=logfile_pol_imp,
         logfile_pol_eval=logfile_pol_eval,
         logfile_pnl=logfile_pnl,
-        discount_factor=0.95,
-        num_levels=5,
+        discount_factor=0.8,
+        num_levels=1,
         wallet_name=LEARNING_WALLET.name,
         wallet_pass=LEARNING_WALLET.passphrase,
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        inventory_penalty=2.0
+        inventory_penalty=1.0
     )
 
     with VegaServiceNull(

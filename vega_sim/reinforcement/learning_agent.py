@@ -78,9 +78,6 @@ class LearningAgent(StateAgentWithWallet):
         self.memory = defaultdict(list)
         self.memory_capacity = 100_000
 
-        # Dimensions of state and action
-        self.num_levels = num_levels
-        self.state_dim = 7 + 4 * self.num_levels  # from MarketState
         
         
         # Coefficients for regularisation
@@ -185,11 +182,15 @@ class LearningAgent(StateAgentWithWallet):
         #     print("best_buy "+str(bid_prices[0])+" ext price "+str(ext_price)+" best ask "+str(ask_prices[0]) )
 
         market_info = vega.market_info(market_id=self.market_id)
+        fee = ( 
+            float(market_info.fees.factors.liquidity_fee) 
+            + float(market_info.fees.factors.maker_fee) 
+            + float(market_info.fees.factors.infrastructure_fee)
+        )
         return LAMarketState(
             step=self.step_num,
             position=position,
-            margin_balance=account.margin,
-            general_balance=account.general,
+            full_balance=account.margin+account.general,
             market_in_auction=(
                 not market_info.trading_mode
                 == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
@@ -202,7 +203,7 @@ class LearningAgent(StateAgentWithWallet):
             + [0] * max(0, self.num_levels - len(book_state.buys)),
             ask_volumes=[level.volume for level in book_state.sells]
             + [0] * max(0, self.num_levels - len(book_state.sells)),
-            trading_fee=0,
+            trading_fee=fee,
             next_price=self.price_process[self.step_num + 1]
             if self.price_process is not None
             and len(self.price_process) > self.step_num + 1
@@ -215,25 +216,27 @@ class LearningAgent(StateAgentWithWallet):
 
     def finalise(self):
         numTries = 3  
+        account = None 
         for i in range(0,numTries):
+            account = self.vega.party_account(
+                wallet_name=self.wallet_name,
+                asset_id=self.tdai_id,
+                market_id=self.market_id,
+            )
             self.latest_state = self.state(self.vega)
-            if self.latest_state.margin_balance == 0:
+            if account.margin == 0:
                 break 
             self.vega.forward('1s')
             self.vega.wait_for_total_catchup()
 
-        if self.latest_state.margin_balance > 0:
+        if account.margin > 0:
             print(
                 "Market should be settled but there is still balance in margin account. What's up?"
             )
         
         self.latest_action = self.empty_action()
         self.step_num += 1
-        final_pnl = (
-            self.latest_state.general_balance
-            + self.latest_state.margin_balance
-            - self.initial_balance
-        )
+        final_pnl = self.latest_state.full_balance - self.initial_balance
         with open(self.logfile_pnl, "a") as f:
             f.write("{},{:.5f}\n".format(self.lerningIteration, final_pnl))
 

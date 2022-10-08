@@ -13,8 +13,7 @@ class AbstractAction:
 class LAMarketState:
     step: int
     position: float
-    margin_balance: float
-    general_balance: float
+    full_balance: float
     market_in_auction: bool
     bid_prices: List[float]
     ask_prices: List[float]
@@ -28,8 +27,7 @@ class LAMarketState:
             [
                 self.step,
                 self.position,
-                self.margin_balance,
-                self.general_balance,
+                self.full_balance,
                 int(self.market_in_auction),
                 self.trading_fee,
                 self.next_price,
@@ -54,7 +52,7 @@ def states_to_sarsa(
         pres_state = states[i]
         next_state = states[i + 1]
 
-        if next_state[0].margin_balance + next_state[0].general_balance <= 0:
+        if next_state[0].full_balance <= 0:
             reward = -1e12
             res.append(
                 (
@@ -68,8 +66,7 @@ def states_to_sarsa(
             break
 
         reward = (
-            (next_state[0].general_balance + next_state[0].margin_balance)
-            - (pres_state[0].general_balance + pres_state[0].margin_balance)
+            next_state[0].full_balance - pres_state[0].full_balance 
             if next_state is not np.nan
             else 0
         )
