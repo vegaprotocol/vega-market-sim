@@ -600,13 +600,14 @@ class VegaServiceNull(VegaService):
             key_name:
                 str, The key in the wallet
         """
-        super().mint(
-            wallet_name=wallet_name, asset=asset, amount=amount, key_name=key_name
-        )
         if self.store_transactions:
             self._store_mint(
                 wallet_name=wallet_name, asset=asset, amount=amount, key_name=key_name
             )
+
+        super().mint(
+            wallet_name=wallet_name, asset=asset, amount=amount, key_name=key_name
+        )
 
     @property
     def wallet(self) -> Wallet:

@@ -2,7 +2,6 @@ import argparse
 import logging
 import time
 from contextlib import contextmanager
-from vega_sim.api.data import party_account
 
 import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
 from vega_sim.api.faucet import mint
@@ -23,11 +22,14 @@ def replay_run_context(
             run_with_console=console,
             transactions_per_block=tx_per_block,
             warn_on_raw_data_access=False,
+            store_transactions=True,
+            retain_log_files=True,
         ) as vega:
             vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
+
             while next_tx_type:
-                time.sleep(0.01)
+                time.sleep(0.001)
                 vega.wait_for_total_catchup()
                 tx_type = TransactionType._value2member_map_[
                     int.from_bytes(next_tx_type, "big")
@@ -39,9 +41,11 @@ def replay_run_context(
                     transaction = core_proto.SubmitTransactionRequest()
                     transaction.ParseFromString(tx)
                     vega.wallet.submit_raw_transaction(transaction)
+
                 elif tx_type == TransactionType.STEP:
                     steps = tx_history.read(TRANSACTION_LEN_BYTES)
                     vega.wait_fn(int.from_bytes(steps, "big"))
+
                 elif tx_type == TransactionType.MINT:
                     pub_key_len = int.from_bytes(
                         tx_history.read(TRANSACTION_LEN_BYTES), "big"
@@ -54,32 +58,12 @@ def replay_run_context(
                     amount = int.from_bytes(
                         tx_history.read(TRANSACTION_LEN_BYTES), "big"
                     )
-                    curr_acct = party_account(
-                        pub_key=pub_key,
-                        asset_id=asset,
-                        market_id=None,
-                        data_client=vega.trading_data_client,
-                    ).general
-
                     mint(
                         pub_key,
                         asset,
                         amount,
                         faucet_url=vega.faucet_url,
                     )
-                    vega.wait_fn(1)
-                    vega.wait_for_core_catchup()
-                    for i in range(500):
-                        vega.wait_fn(1)
-                        time.sleep(0.0005 * 1.01**i)
-                        post_acct = party_account(
-                            pub_key=pub_key,
-                            asset_id=asset,
-                            market_id=None,
-                            data_client=vega.trading_data_client,
-                        ).general
-                        if post_acct > curr_acct:
-                            break
                 next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
             yield vega
 
@@ -90,7 +74,9 @@ def replay_run(
     graphql: bool = False,
     pause_at_end: bool = False,
 ):
-    with replay_run(replay_path=replay_path, console=console, graphql=graphql) as vega:
+    with replay_run_context(
+        replay_path=replay_path, console=console, graphql=graphql
+    ) as vega:
         if pause_at_end:
             input("Pausing at completion. Press Return to continue")
 
@@ -108,7 +94,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
-    replay = "/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-poxse766/"
+    replay = "/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-wxrt33vu"
     replay_run(
         replay_path=replay,
         console=args.console,
