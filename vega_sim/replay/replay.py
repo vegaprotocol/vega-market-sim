@@ -24,6 +24,8 @@ def replay_run_context(
             warn_on_raw_data_access=False,
             store_transactions=True,
             retain_log_files=True,
+            store_transactions=True,
+            retain_log_files=True,
         ) as vega:
             vega.wait_for_total_catchup()
             next_tx_type = tx_history.read(TRANSACTION_LEN_BYTES)
