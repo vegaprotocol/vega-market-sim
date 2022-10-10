@@ -7,8 +7,8 @@ from vega_sim.replay import replay
 from vega_sim.scenario.registry import SCENARIOS
 
 
-# @pytest.mark.integration
-def _test_transaction_store():
+@pytest.mark.integration
+def test_transaction_store():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         start_order_feed=True,
