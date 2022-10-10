@@ -284,7 +284,11 @@ class LearningAgentFixedVol(LearningAgent):
                 ]
                 self.optimizer_q.zero_grad()
 
-                pred = self.q_func(batch_state, batch_action_discrete)
+                pred = torch.gather(
+                    self.q_func(batch_state),
+                    dim=1,
+                    index=batch_action_discrete,
+                )
 
                 with torch.no_grad():
                     v = self.v_func(batch_next_state)
@@ -326,13 +330,13 @@ class LearningAgentFixedVol(LearningAgent):
             Number of Monte Carlo samples to calculate
         """
 
-        c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
-        q = self.q_func(state, c)
-
-        probs = self.policy_discr(state)
-        v = probs[0] * (q[0] - self.coefH_discr * torch.log(probs[0]))
-        v += probs[1] * (q[1] - self.coefH_discr * torch.log(probs[1]))
-        v += probs[2] * (q[2] - self.coefH_discr * torch.log(probs[2]))
+        
+        q = self.q_func(state)
+        soft_action = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
+        c = soft_action.unravel()
+        v = c[0] * (q[0] - self.coefH_discr * torch.log(c[0]))
+        v += c[1] * (q[1] - self.coefH_discr * torch.log(c[1]))
+        v += c[2] * (q[2] - self.coefH_discr * torch.log(c[2]))
         self.q_func.train()
         return v
 
@@ -343,11 +347,13 @@ class LearningAgentFixedVol(LearningAgent):
         """
         c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
 
-        q = self.q_func(state, c)
-        probs = self.policy_discr(state)
-        d_kl = probs[0] * (self.coefH_discr * torch.log(probs[0]) - q[0])
-        d_kl += probs[1] * (self.coefH_discr * torch.log(probs[1]) - q[1])
-        d_kl += probs[2] * (self.coefH_discr * torch.log(probs[2]) - q[2])
+        q = self.q_func(state)
+        soft_action = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
+        c = soft_action.unravel()
+        
+        d_kl = c[0] * (self.coefH_discr * torch.log(c[0]) - q[0])
+        d_kl += c[1] * (self.coefH_discr * torch.log(c[1]) - q[1])
+        d_kl += c[2] * (self.coefH_discr * torch.log(c[2]) - q[2])
 
         d_kl = (
             d_kl.mean()

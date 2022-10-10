@@ -125,7 +125,7 @@ if __name__ == "__main__":
     initial_price = 1000
 
     # create the Learning Agent
-    learning_agent = LearningAgentWithVol(
+    learning_agent = LearningAgentFixedVol(
         device=device,
         logfile_pol_imp=logfile_pol_imp,
         logfile_pol_eval=logfile_pol_eval,
