@@ -1,3 +1,30 @@
+"""
+A simple agent framework which you can extend with some custom logic.
+
+As-is, this agent will faucet itself some tokens in the setup phase
+and then do nothing for the rest of the trading session.
+
+Fill in your own logic into the `step` function to make them trade
+however you'd like.
+
+Below, we have a range of helpful functions to get you started, 
+copy and paste these into your code to 
+
+### Pull best bid/ask prices
+
+### Place a Limit Order
+
+### Place a Market Order
+
+### Cancel an Order
+
+### Retrieve current position
+
+### Retrieve current orders
+
+"""
+
+
 from vega_sim.environment.agent import AgentWithWallet
 from vega_sim.service import VegaService
 
