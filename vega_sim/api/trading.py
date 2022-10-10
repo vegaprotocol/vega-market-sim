@@ -289,6 +289,7 @@ def submit_simple_liquidity(
     delta_buy: int,
     delta_sell: int,
     is_amendment: bool = False,
+    key_name: Optional[str] = None,
 ):
     """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
 
@@ -321,6 +322,7 @@ def submit_simple_liquidity(
         buy_specs=[(reference_buy, delta_buy, 1)],
         sell_specs=[(reference_sell, delta_sell, 1)],
         is_amendment=is_amendment,
+        key_name=key_name,
     )
 
 
