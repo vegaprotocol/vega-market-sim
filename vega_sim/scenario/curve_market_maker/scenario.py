@@ -133,8 +133,8 @@ class CurveMarketMaker(Scenario):
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironmentWithState:
         # Set up market name and settlement asset
-        market_name = self.market_name + f"_{tag}"
-        asset_name = self.asset_name + f"_{tag}"
+        market_name = self.market_name + (f"_{tag}" if tag else "")
+        asset_name = self.asset_name + (f"_{tag}" if tag else "")
 
         price_process = (
             self.price_process_fn()

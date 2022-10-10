@@ -15,6 +15,7 @@ def run_iteration(
     learning_agent: SimpleAgent,
     vega,
     market_name: str,
+    asset_name: str,
     run_with_console=False,
     pause_at_completion=False,
 ):
@@ -30,6 +31,7 @@ def run_iteration(
         buy_intensity=5,
         sell_intensity=5,
         market_name=market_name,
+        asset_name=asset_name,
         num_steps=50,
         random_agent_ordering=False,
         sigma=100,
@@ -57,6 +59,7 @@ if __name__ == "__main__":
 
     # set market name
     market_name = "ETH:USD"
+    asset_name = "tDAI"
 
     # create the Learning Agent
     agent = SimpleAgent(
@@ -64,7 +67,7 @@ if __name__ == "__main__":
         wallet_pass=LEARNING_WALLET.passphrase,
         initial_balance=100_000,
         market_name=market_name,
-        exploitation=0.0,
+        asset_name=asset_name,
     )
 
     with VegaServiceNull(
@@ -76,4 +79,5 @@ if __name__ == "__main__":
             market_name=market_name,
             run_with_console=False,
             pause_at_completion=False,
+            asset_name=asset_name,
         )
