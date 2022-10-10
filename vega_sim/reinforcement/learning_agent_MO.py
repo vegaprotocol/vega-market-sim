@@ -100,7 +100,7 @@ class LearningAgentFixedVol(LearningAgent):
 
         # NN for policy and its optimizer
         self.policy_discr = FFN(
-            sizes=[self.state_dim, 1024, 512, action_discrete_dim],
+            sizes=[self.state_dim, 64, action_discrete_dim],
             activation=nn.Tanh,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
@@ -301,7 +301,7 @@ class LearningAgentFixedVol(LearningAgent):
             # logging loss
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
-                    "{},{:.2e},{:.3f},{:.3f}\n".format(
+                    "{},{:.2e},{:.2e},{:.2e}\n".format(
                         epoch + self.lerningIteration * n_epochs, 
                         loss.item(),
                         self.coefH_discr,
@@ -378,8 +378,8 @@ class LearningAgentFixedVol(LearningAgent):
             pbar.update(1)
 
         # update the coefficients for the next run
-        self.coefH_discr = max(self.coefH_discr * 0.99, 0.05)
-        self.coefH_cont = max(self.coefH_cont * 0.99, 0.05)
+        self.coefH_discr = max(self.coefH_discr * 0.99, 1e-10)
+        self.coefH_cont = max(self.coefH_cont * 0.99, 1e-10)
         self.lerningIteration += 1
         return 0
 
@@ -391,7 +391,6 @@ class LearningAgentFixedVol(LearningAgent):
             "policy_discr": self.policy_discr.state_dict(),
             "iteration":self.lerningIteration,
             "coefH_discr":self.coefH_discr,
-            "coefH_cont":self.coefH_cont,
         }
         torch.save(d, filename)
 
@@ -407,8 +406,6 @@ class LearningAgentFixedVol(LearningAgent):
 
         self.lerningIteration = d["iteration"]
         self.coefH_discr = d["coefH_discr"]
-        self.coefH_cont = d["coefH_cont"]
-
 
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
         with open(filename_for_memory, 'rb') as f:

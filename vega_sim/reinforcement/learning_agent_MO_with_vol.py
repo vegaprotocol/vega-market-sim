@@ -105,7 +105,7 @@ class LearningAgentWithVol(LearningAgent):
 
         # Dimensions of state and action
         self.num_levels = num_levels
-        self.state_dim = 7 + 4 * self.num_levels  # from MarketState
+        self.state_dim = 6 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
         
         # NN and optimizer for Q func
@@ -220,7 +220,7 @@ class LearningAgentWithVol(LearningAgent):
         self.latest_action = self._step(learning_state)
         self.latest_state = learning_state
 
-        if learning_state.margin_balance + learning_state.general_balance <= 0:
+        if learning_state.full_balance <= 0:
             return
         if learning_state.market_in_auction:
             return

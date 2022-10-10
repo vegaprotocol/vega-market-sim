@@ -40,8 +40,34 @@ class LAMarketState:
         arr = np.nan_to_num(np.array(l))
         return arr
 
-
-
+    @staticmethod
+    def from_array(arr: np.array, num_lvls: int):
+        step = arr[0]
+        pos = arr[1]
+        balance = arr[2]
+        auction = arr[3]
+        fees = arr[4]
+        next_p = arr[5]
+        offset = 6
+        bid_prices = arr[offset:(offset+num_lvls)]
+        offset = offset+num_lvls+1
+        ask_prices = arr[offset:(offset+num_lvls)]
+        offset = offset+num_lvls+1
+        bid_volumes = arr[offset:(offset+num_lvls)]
+        offset = offset+num_lvls+1
+        ask_volumes = arr[offset:(offset+num_lvls)]
+        return LAMarketState(
+            step=step,
+            position=pos,
+            full_balance=balance,
+            auction=auction,
+            fees=fees,
+            next_price=next_p,
+            bid_prices=bid_prices,
+            ask_prices=ask_prices,
+            bid_volumes=bid_volumes,
+            ask_volumes=ask_volumes,
+        )
 
 def states_to_sarsa(
     states: List[Tuple[LAMarketState, AbstractAction]],

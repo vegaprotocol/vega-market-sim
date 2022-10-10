@@ -98,7 +98,13 @@ class LearningAgentHeuristic(LearningAgent):
         self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
         self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.01)
 
-        # only learning Q function for a fixed policy; no need for a network for actions
+        self.policy_discr = FFN(
+            sizes=[self.state_dim, 1024, 512, action_discrete_dim],
+            activation=nn.Tanh,
+            output_activation=Softmax,
+        )  # this network decides whether to buy/sell/do nothing
+        self.optimizer_pol = torch.optim.RMSprop(list(self.policy_discr.parameters()), lr=0.001)
+
         
 
     def move_to_device(self):
@@ -221,8 +227,69 @@ class LearningAgentHeuristic(LearningAgent):
         sim: bool = True,
         evaluate: bool = False,
     ):
-        c = self._step_heuristic(state)
+        """
+        Sample an action.
+
+        Returns
+        -------
+        c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
+        """
+        probs = self.policy_discr(state)
+        if sim:
+            m = Categorical(probs)
+            c = m.sample()
+        else: 
+            c = probs
+        if evaluate:
+            c = torch.max(probs, 1, keepdim=True)[1]
         return SoftActionFixVol(c)
+
+    def D_KL(self, state):
+        """
+        KL divergence between pi(.|x) and the unnormalised density exp(Q(x,.)),
+        where pi(.|x) is a LogNormal distribution
+        """
+        c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
+
+        q = self.q_func(state, c)
+        probs = self.policy_discr(state)
+        d_kl = probs[0] * (self.coefH_discr * torch.log(probs[0]) - q[0])
+        d_kl += probs[1] * (self.coefH_discr * torch.log(probs[1]) - q[1])
+        d_kl += probs[2] * (self.coefH_discr * torch.log(probs[2]) - q[2])
+
+        d_kl = (
+            d_kl.mean()
+        )  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
+        return d_kl
+
+    def policy_improvement(self, batch_size: int, n_epochs: int):
+        toggle(self.policy_discr, to=True)
+        toggle(self.q_func, to=False)
+
+        dataloader = self.create_dataloader(batch_size=batch_size)
+
+        pbar = tqdm(total=n_epochs)
+        for epoch in range(n_epochs):
+            for i, (batch_state, _, _, _) in enumerate(dataloader):
+                self.optimizer_pol.zero_grad()
+                d_kl = self.D_KL(batch_state).mean()
+                d_kl.backward()
+                # nn.utils.clip_grad_norm_(self.policy_volume.parameters(), max_norm=1.)
+                self.optimizer_pol.step()
+            self.losses["d_kl"].append(d_kl.item())
+            with open(self.logfile_pol_imp, "a") as f:
+                f.write(
+                    "{},{:.4f}\n".format(
+                        epoch + n_epochs * self.lerningIteration, d_kl.item()
+                    )
+                )
+            pbar.update(1)
+
+        # update the coefficients for the next run
+        self.coefH_discr = max(self.coefH_discr * 0.99, 1e-10)
+        self.coefH_cont = max(self.coefH_cont * 0.99, 1e-10)
+        self.lerningIteration += 1
+        return 0
 
     
     def policy_eval(
@@ -279,9 +346,10 @@ class LearningAgentHeuristic(LearningAgent):
                 )
             pbar.update(1)
         
-        self.lerningIteration += 1
+        
         return 0
 
+    
     def v_func(self, state):
         """
         v(x) = E[q(x,A)] = E[q(x,A)|C=0]p(C=0) + E[q(x,A)|C=1]p(C=1) + E[q(x)|C=2]p(C=2)
@@ -297,26 +365,24 @@ class LearningAgentHeuristic(LearningAgent):
             Number of Monte Carlo samples to calculate
         """
 
-        c0 = torch.zeros([state.shape[0],1])
-        c1 = torch.ones([state.shape[0],1])
-        c2 = 2*torch.ones([state.shape[0],1])
-        q0 = self.q_func(state, c0)
-        q1 = self.q_func(state, c1)
-        q2 = self.q_func(state, c2)
-        q = torch.cat([q0,q1,q2],1)
-        v = torch.max(q,1).values
+        c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
+        q = self.q_func(state, c)
+
+        probs = self.policy_discr(state)
+        v = probs[0] * (q[0] - self.coefH_discr * torch.log(probs[0]))
+        v += probs[1] * (q[1] - self.coefH_discr * torch.log(probs[1]))
+        v += probs[2] * (q[2] - self.coefH_discr * torch.log(probs[2]))
         self.q_func.train()
         return v
-
     
-    def policy_improvement(self, batch_size: int, n_epochs: int):
-        return 0
+   
 
     def save(self, results_dir: str):
         filename = os.path.join(results_dir, "agent.pth.tar")
         d = {
             "losses": self.losses,
             "q": self.q_func.state_dict(),
+            "policy_discr": self.policy_discr.state_dict(),
             "iteration":self.lerningIteration,
             "coefH_discr":self.coefH_discr,
         }
@@ -330,6 +396,8 @@ class LearningAgentHeuristic(LearningAgent):
         filename = os.path.join(results_dir, "agent.pth.tar")
         d = torch.load(filename, map_location="cpu")
         self.q_func.load_state_dict(d["q"])
+        self.policy_discr.load_state_dict(d["policy_discr"])
+
         self.lerningIteration = d["iteration"]
         self.coefH_discr = d["coefH_discr"]
 
