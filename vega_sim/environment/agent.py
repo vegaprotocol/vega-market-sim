@@ -15,7 +15,9 @@ class Agent(ABC):
     def step(self, vega: VegaService):
         pass
 
-    def initialise(self, vega: VegaService):
+    def initialise(
+        self, vega: VegaService, create_wallet: bool = False, mint_wallet: bool = False
+    ):
         self.vega = vega
 
     def finalise(self):

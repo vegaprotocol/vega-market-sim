@@ -234,3 +234,4 @@ if __name__ == "__main__":
             settlement_price=100,
             market_id=market_id,
         )
+        input("Press Enter to finish")
