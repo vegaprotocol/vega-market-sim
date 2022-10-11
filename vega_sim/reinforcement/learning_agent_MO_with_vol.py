@@ -70,8 +70,6 @@ class SoftActionWithVol:
         )
 
 
-
-
 class LearningAgentWithVol(LearningAgent):
     def __init__(
         self,
@@ -107,20 +105,20 @@ class LearningAgentWithVol(LearningAgent):
         self.num_levels = num_levels
         self.state_dim = 6 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
-        
+
         # NN and optimizer for Q func
         self.q_func = FFN_Q(
             state_dim=self.state_dim,
         )
         self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
-        
+
         # NN for policy and its optimizer
         self.policy_discr = FFN(
-            sizes=[self.state_dim, 1024,1024,1024, action_discrete_dim],
+            sizes=[self.state_dim, 1024, 1024, 1024, action_discrete_dim],
             activation=nn.Tanh,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
-        
+
         # NN for volume
         self.policy_volume = FFN_Params_Normal(
             n_in=self.state_dim,
@@ -134,7 +132,7 @@ class LearningAgentWithVol(LearningAgent):
             + list(self.policy_discr.parameters()),
             lr=0.001,
         )
-    
+
     def move_to_device(self):
         self.q_func.to(self.device)
         self.policy_volume.to(self.device)
@@ -387,7 +385,7 @@ class LearningAgentWithVol(LearningAgent):
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
                     "{},{:.2e},{:.3f},{:.3f}\n".format(
-                        epoch + self.lerningIteration * n_epochs, 
+                        epoch + self.lerningIteration * n_epochs,
                         loss.item(),
                         self.coefH_discr,
                         self.coefH_cont,
@@ -507,14 +505,14 @@ class LearningAgentWithVol(LearningAgent):
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
             "policy_volume": self.policy_volume.state_dict(),
-            "iteration":self.lerningIteration,
-            "coefH_discr":self.coefH_discr,
-            "coefH_cont":self.coefH_cont,
+            "iteration": self.lerningIteration,
+            "coefH_discr": self.coefH_discr,
+            "coefH_cont": self.coefH_cont,
         }
         torch.save(d, filename)
 
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
-        with open(filename_for_memory, 'wb') as f:
+        with open(filename_for_memory, "wb") as f:
             pickle.dump(self.memory, f)
 
     def load(self, results_dir: str):
@@ -527,9 +525,7 @@ class LearningAgentWithVol(LearningAgent):
         self.coefH_discr = d["coefH_discr"]
         self.coefH_cont = d["coefH_cont"]
 
-
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
-        with open(filename_for_memory, 'rb') as f:
+        with open(filename_for_memory, "rb") as f:
             memory = pickle.load(f)
         self.memory = memory
-        

@@ -43,7 +43,9 @@ WALLET = WalletConfig("learner", "learner")
 
 
 def state_fn(
-    service: VegaServiceNull, agents: List[Agent], state_values=None,
+    service: VegaServiceNull,
+    agents: List[Agent],
+    state_values=None,
 ) -> Tuple[LAMarketState, AbstractAction]:
     learner = [a for a in agents if isinstance(a, LearningAgent)][0]
     return (learner.latest_state, learner.latest_action)
@@ -78,8 +80,6 @@ class LearningAgent(StateAgentWithWallet):
         self.memory = defaultdict(list)
         self.memory_capacity = 100_000
 
-        
-        
         # Coefficients for regularisation
         self.coefH_discr = 1.0
         self.coefH_cont = 0.01
@@ -89,15 +89,14 @@ class LearningAgent(StateAgentWithWallet):
         self.logfile_pol_imp = logfile_pol_imp
         self.logfile_pol_eval = logfile_pol_eval
         self.logfile_pnl = logfile_pnl
-        
+
         self.lerningIteration = 0
         self.market_name = market_name
         self.position_decimals = position_decimals
         self.inventory_penalty = inventory_penalty
-        
+
     def set_market_tag(self, tag: str):
         self.tag = tag
-    
 
     @abstractmethod
     def move_to_device(self):
@@ -142,7 +141,7 @@ class LearningAgent(StateAgentWithWallet):
         """
         Updates memory of the agent, and removes old tuples (s,a,r,s) if memory exceeds its capacity
         """
-        for res in states_to_sarsa(states,inventory_penalty=self.inventory_penalty):
+        for res in states_to_sarsa(states, inventory_penalty=self.inventory_penalty):
             self._update_memory(res[0], res[1], res[2], res[3])
         # remove old tuples if memory exceeds its capaciy
         for key, value in self.memory.items():
@@ -176,23 +175,30 @@ class LearningAgent(StateAgentWithWallet):
         )  # make num_levels as a parameter?
 
         market_info = vega.market_info(market_id=self.market_id)
-        fee = ( 
-            float(market_info.fees.factors.liquidity_fee) 
-            + float(market_info.fees.factors.maker_fee) 
+        fee = (
+            float(market_info.fees.factors.liquidity_fee)
+            + float(market_info.fees.factors.maker_fee)
             + float(market_info.fees.factors.infrastructure_fee)
         )
         init_price = self.price_process[0]
-        next_price = (self.price_process[self.step_num + 1] 
-                        if self.price_process is not None and len(self.price_process) > self.step_num + 1 
-                        else np.nan)
+        next_price = (
+            self.price_process[self.step_num + 1]
+            if self.price_process is not None
+            and len(self.price_process) > self.step_num + 1
+            else np.nan
+        )
         next_price /= init_price
-        bid_prices = [level.price / init_price for level in book_state.buys] + [0] * max(0, self.num_levels - len(book_state.buys))
-        ask_prices = [level.price / init_price for level in book_state.sells] + [0] * max(0, self.num_levels - len(book_state.sells))
+        bid_prices = [level.price / init_price for level in book_state.buys] + [
+            0
+        ] * max(0, self.num_levels - len(book_state.buys))
+        ask_prices = [level.price / init_price for level in book_state.sells] + [
+            0
+        ] * max(0, self.num_levels - len(book_state.sells))
 
         return LAMarketState(
             step=self.step_num,
             position=position,
-            full_balance=(account.margin+account.general)/self.initial_balance,
+            full_balance=(account.margin + account.general) / self.initial_balance,
             market_in_auction=(
                 not market_info.trading_mode
                 == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
@@ -212,9 +218,9 @@ class LearningAgent(StateAgentWithWallet):
         pass
 
     def finalise(self):
-        numTries = 3  
-        account = None 
-        for i in range(0,numTries):
+        numTries = 3
+        account = None
+        for i in range(0, numTries):
             account = self.vega.party_account(
                 wallet_name=self.wallet_name,
                 asset_id=self.tdai_id,
@@ -222,15 +228,15 @@ class LearningAgent(StateAgentWithWallet):
             )
             self.latest_state = self.state(self.vega)
             if account.margin == 0:
-                break 
-            self.vega.forward('1s')
+                break
+            self.vega.forward("1s")
             self.vega.wait_for_total_catchup()
 
         if account.margin > 0:
             print(
                 "Market should be settled but there is still balance in margin account. What's up?"
             )
-        
+
         self.latest_action = self.empty_action()
         self.step_num += 1
         # final_pnl = self.latest_state.full_balance - self.initial_balance
@@ -239,15 +245,15 @@ class LearningAgent(StateAgentWithWallet):
             f.write("{},{:.8f}\n".format(self.lerningIteration, final_pnl))
 
         return super().finalise()
-    
+
     @abstractmethod
     def step(self, vega_state: VegaState):
         pass
-    
+
     @abstractmethod
     def save(self, results_dir: str):
         pass
-    
+
     @abstractmethod
     def load(self, results_dir: str):
         pass

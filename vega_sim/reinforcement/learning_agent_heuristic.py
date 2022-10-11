@@ -55,8 +55,6 @@ class SoftActionFixVol:
         return self.c
 
 
-
-
 class LearningAgentHeuristic(LearningAgent):
     def __init__(
         self,
@@ -93,7 +91,7 @@ class LearningAgentHeuristic(LearningAgent):
         self.num_levels = num_levels
         self.state_dim = 6 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
-        
+
         # NN for Q-fun and its optimizer
         self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
         self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.01)
@@ -103,17 +101,15 @@ class LearningAgentHeuristic(LearningAgent):
             activation=nn.Tanh,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
-        self.optimizer_pol = torch.optim.RMSprop(list(self.policy_discr.parameters()), lr=0.001)
-
-        
+        self.optimizer_pol = torch.optim.RMSprop(
+            list(self.policy_discr.parameters()), lr=0.001
+        )
 
     def move_to_device(self):
         self.q_func.to(self.device)
-        
 
     def move_to_cpu(self):
         self.q_func.to("cpu")
-        
 
     def _update_memory(
         self,
@@ -177,8 +173,7 @@ class LearningAgentHeuristic(LearningAgent):
         return dataloader
 
     def empty_action(self) -> AbstractAction:
-        return Action(False,False)
-
+        return Action(False, False)
 
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
@@ -204,7 +199,6 @@ class LearningAgentHeuristic(LearningAgent):
             except Exception as e:
                 print(e)
 
-    
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
         if (
             vega_state.position <= 0
@@ -238,7 +232,7 @@ class LearningAgentHeuristic(LearningAgent):
         if sim:
             m = Categorical(probs)
             c = m.sample()
-        else: 
+        else:
             c = probs
         if evaluate:
             c = torch.max(probs, 1, keepdim=True)[1]
@@ -291,7 +285,6 @@ class LearningAgentHeuristic(LearningAgent):
         self.lerningIteration += 1
         return 0
 
-    
     def policy_eval(
         self,
         batch_size: int,
@@ -300,7 +293,7 @@ class LearningAgentHeuristic(LearningAgent):
         toggle(self.q_func, to=True)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
-        
+
         pbar = tqdm(total=n_epochs)
         for epoch in range(n_epochs):
             for (
@@ -338,18 +331,16 @@ class LearningAgentHeuristic(LearningAgent):
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
                     "{},{:.2e},{:.3f},{:.3f}\n".format(
-                        epoch + self.lerningIteration * n_epochs, 
+                        epoch + self.lerningIteration * n_epochs,
                         loss.item(),
                         self.coefH_discr,
                         self.coefH_cont,
                     )
                 )
             pbar.update(1)
-        
-        
+
         return 0
 
-    
     def v_func(self, state):
         """
         v(x) = E[q(x,A)] = E[q(x,A)|C=0]p(C=0) + E[q(x,A)|C=1]p(C=1) + E[q(x)|C=2]p(C=2)
@@ -374,8 +365,6 @@ class LearningAgentHeuristic(LearningAgent):
         v += probs[2] * (q[2] - self.coefH_discr * torch.log(probs[2]))
         self.q_func.train()
         return v
-    
-   
 
     def save(self, results_dir: str):
         filename = os.path.join(results_dir, "agent.pth.tar")
@@ -383,13 +372,13 @@ class LearningAgentHeuristic(LearningAgent):
             "losses": self.losses,
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
-            "iteration":self.lerningIteration,
-            "coefH_discr":self.coefH_discr,
+            "iteration": self.lerningIteration,
+            "coefH_discr": self.coefH_discr,
         }
         torch.save(d, filename)
 
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
-        with open(filename_for_memory, 'wb') as f:
+        with open(filename_for_memory, "wb") as f:
             pickle.dump(self.memory, f)
 
     def load(self, results_dir: str):
@@ -402,7 +391,6 @@ class LearningAgentHeuristic(LearningAgent):
         self.coefH_discr = d["coefH_discr"]
 
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
-        with open(filename_for_memory, 'rb') as f:
+        with open(filename_for_memory, "rb") as f:
             memory = pickle.load(f)
         self.memory = memory
-        

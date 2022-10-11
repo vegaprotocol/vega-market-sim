@@ -4,6 +4,7 @@ import numpy as np
 
 from vega_sim.environment.agent import Agent
 
+
 @dataclass
 class AbstractAction:
     pass
@@ -38,7 +39,7 @@ class LAMarketState:
             + self.ask_volumes
         )
         arr = np.nan_to_num(np.array(l))
-        norm_factor = max(1e-12,  np.linalg.norm(arr))
+        norm_factor = max(1e-12, np.linalg.norm(arr))
         arr = arr / norm_factor
         return arr
 
@@ -51,13 +52,13 @@ class LAMarketState:
         fees = arr[4]
         next_p = arr[5]
         offset = 6
-        bid_prices = arr[offset:(offset+num_lvls)]
-        offset = offset+num_lvls+1
-        ask_prices = arr[offset:(offset+num_lvls)]
-        offset = offset+num_lvls+1
-        bid_volumes = arr[offset:(offset+num_lvls)]
-        offset = offset+num_lvls+1
-        ask_volumes = arr[offset:(offset+num_lvls)]
+        bid_prices = arr[offset : (offset + num_lvls)]
+        offset = offset + num_lvls + 1
+        ask_prices = arr[offset : (offset + num_lvls)]
+        offset = offset + num_lvls + 1
+        bid_volumes = arr[offset : (offset + num_lvls)]
+        offset = offset + num_lvls + 1
+        ask_volumes = arr[offset : (offset + num_lvls)]
         return LAMarketState(
             step=step,
             position=pos,
@@ -70,6 +71,7 @@ class LAMarketState:
             bid_volumes=bid_volumes,
             ask_volumes=ask_volumes,
         )
+
 
 def states_to_sarsa(
     states: List[Tuple[LAMarketState, AbstractAction]],
@@ -94,7 +96,7 @@ def states_to_sarsa(
             break
 
         reward = (
-            next_state[0].full_balance - pres_state[0].full_balance 
+            next_state[0].full_balance - pres_state[0].full_balance
             if next_state is not np.nan
             else 0
         )

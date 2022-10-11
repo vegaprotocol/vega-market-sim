@@ -110,5 +110,5 @@ if __name__ == "__main__":
         console=args.console,
         graphql=args.graphql,
         pause_at_end=args.pause,
-        retain_log_files=args.retain_log_files
+        retain_log_files=args.retain_log_files,
     )

@@ -47,9 +47,6 @@ class Action:
     sell: bool
 
 
-
-
-
 class LearningAgentFixedVol(LearningAgent):
     def __init__(
         self,
@@ -86,7 +83,7 @@ class LearningAgentFixedVol(LearningAgent):
         self.num_levels = num_levels
         self.state_dim = 6 + 4 * self.num_levels  # from MarketState
         action_discrete_dim = 3
-        
+
         # NN for Q-fun and its optimizer
         self.q_func = FFN_fix_fol_Q(state_dim=self.state_dim)
         self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.01)
@@ -97,9 +94,9 @@ class LearningAgentFixedVol(LearningAgent):
             activation=nn.ReLU,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
-        self.optimizer_pol = torch.optim.RMSprop(list(self.policy_discr.parameters()), lr=0.001)
-
-        
+        self.optimizer_pol = torch.optim.RMSprop(
+            list(self.policy_discr.parameters()), lr=0.001
+        )
 
     def move_to_device(self):
         self.q_func.to(self.device)
@@ -171,8 +168,7 @@ class LearningAgentFixedVol(LearningAgent):
         return dataloader
 
     def empty_action(self) -> AbstractAction:
-        return Action(False,False)
-
+        return Action(False, False)
 
     def step(self, vega_state: VegaState):
         learning_state = self.state(self.vega)
@@ -206,7 +202,7 @@ class LearningAgentFixedVol(LearningAgent):
         with torch.no_grad():
             c = self.sample_action(state=state, sim=True)
         choice = int(c.item())
-        
+
         return Action(buy=choice == 0, sell=choice == 1)
 
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
@@ -238,12 +234,12 @@ class LearningAgentFixedVol(LearningAgent):
         -------
         c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
         """
-        
+
         probs = self.policy_discr(state)
         if sim:
             m = Categorical(probs)
             c = m.sample()
-        else: 
+        else:
             c = probs
         if evaluate:
             c = torch.max(probs, 1, keepdim=True)[1]
@@ -258,7 +254,7 @@ class LearningAgentFixedVol(LearningAgent):
         toggle(self.q_func, to=True)
 
         dataloader = self.create_dataloader(batch_size=batch_size)
-        
+
         pbar = tqdm(total=n_epochs)
         for epoch in range(n_epochs):
             for (
@@ -300,7 +296,7 @@ class LearningAgentFixedVol(LearningAgent):
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
                     "{},{:.2e},{:.2e},{:.2e}\n".format(
-                        epoch + self.lerningIteration * n_epochs, 
+                        epoch + self.lerningIteration * n_epochs,
                         loss.item(),
                         self.coefH_discr,
                         self.coefH_cont,
@@ -324,13 +320,14 @@ class LearningAgentFixedVol(LearningAgent):
             Number of Monte Carlo samples to calculate
         """
 
-        
         q = self.q_func(state)
-        c = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
-        
-        v = c[:,0] * (q[:,0] - self.coefH_discr * torch.log(c[:,0]))
-        v += c[:,1] * (q[:,1] - self.coefH_discr * torch.log(c[:,1]))
-        v += c[:,2] * (q[:,2] - self.coefH_discr * torch.log(c[:,2]))
+        c = self.sample_action(
+            state, sim=False
+        )  # .unravel().reshape((state.shape[0], 1))
+
+        v = c[:, 0] * (q[:, 0] - self.coefH_discr * torch.log(c[:, 0]))
+        v += c[:, 1] * (q[:, 1] - self.coefH_discr * torch.log(c[:, 1]))
+        v += c[:, 2] * (q[:, 2] - self.coefH_discr * torch.log(c[:, 2]))
         self.q_func.train()
         return v
 
@@ -339,15 +336,16 @@ class LearningAgentFixedVol(LearningAgent):
         KL divergence between pi(.|x) and the unnormalised density exp(Q(x,.)),
         where pi(.|x) is a LogNormal distribution
         """
-        #c = self.sample_action(state).reshape((state.shape[0], 1))
+        # c = self.sample_action(state).reshape((state.shape[0], 1))
 
         q = self.q_func(state)
-        c = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
-        
-        
-        d_kl = c[:,0] * (self.coefH_discr * torch.log(c[:,0]) - q[:,0])
-        d_kl += c[:,1] * (self.coefH_discr * torch.log(c[:,1]) - q[:,1])
-        d_kl += c[:,2] * (self.coefH_discr * torch.log(c[:,2]) - q[:,2])
+        c = self.sample_action(
+            state, sim=False
+        )  # .unravel().reshape((state.shape[0], 1))
+
+        d_kl = c[:, 0] * (self.coefH_discr * torch.log(c[:, 0]) - q[:, 0])
+        d_kl += c[:, 1] * (self.coefH_discr * torch.log(c[:, 1]) - q[:, 1])
+        d_kl += c[:, 2] * (self.coefH_discr * torch.log(c[:, 2]) - q[:, 2])
 
         return d_kl
 
@@ -386,13 +384,13 @@ class LearningAgentFixedVol(LearningAgent):
             "losses": self.losses,
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
-            "iteration":self.lerningIteration,
-            "coefH_discr":self.coefH_discr,
+            "iteration": self.lerningIteration,
+            "coefH_discr": self.coefH_discr,
         }
         torch.save(d, filename)
 
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
-        with open(filename_for_memory, 'wb') as f:
+        with open(filename_for_memory, "wb") as f:
             pickle.dump(self.memory, f)
 
     def load(self, results_dir: str):
@@ -405,7 +403,6 @@ class LearningAgentFixedVol(LearningAgent):
         self.coefH_discr = d["coefH_discr"]
 
         filename_for_memory = os.path.join(results_dir, "memory.pickle")
-        with open(filename_for_memory, 'rb') as f:
+        with open(filename_for_memory, "rb") as f:
             memory = pickle.load(f)
         self.memory = memory
-        

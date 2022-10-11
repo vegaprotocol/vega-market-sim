@@ -25,8 +25,6 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
 
 
-
-
 def run_iteration(
     learning_agent: LearningAgent,
     step_tag: int,
@@ -96,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("--resume_training", action="store_true")
     parser.add_argument("--plot_every_step", action="store_true")
     parser.add_argument("--plot_only", action="store_true")
-        
+
     args = parser.parse_args()
 
     # set device
@@ -117,15 +115,14 @@ if __name__ == "__main__":
     logfile_pol_eval = os.path.join(args.results_dir, "learning_pol_eval.csv")
     logfile_pnl = os.path.join(args.results_dir, "learning_pnl.csv")
 
-
     if args.plot_only:
         plot_learning(
-                results_dir=args.results_dir,
-                logfile_pol_eval=logfile_pol_eval,
-                logfile_pol_imp=logfile_pol_imp,
-            )
+            results_dir=args.results_dir,
+            logfile_pol_eval=logfile_pol_eval,
+            logfile_pol_imp=logfile_pol_imp,
+        )
         plot_pnl(results_dir=args.results_dir, logfile_pnl=logfile_pnl)
-        exit(0) 
+        exit(0)
 
     # set seed for results replication
     set_seed(1)
@@ -148,12 +145,12 @@ if __name__ == "__main__":
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        inventory_penalty=0.1
+        inventory_penalty=0.1,
     )
 
     with VegaServiceNull(
-        warn_on_raw_data_access=False, 
-        run_with_console=False, 
+        warn_on_raw_data_access=False,
+        run_with_console=False,
         retain_log_files=True,
         store_transactions=True,
     ) as vega:
@@ -172,10 +169,9 @@ if __name__ == "__main__":
                 with open(logfile_pnl, "w") as f:
                     f.write("iteration,pnl\n")
 
-
             for it in range(args.rl_max_it):
                 # simulation of market to get some data
-                
+
                 learning_agent.move_to_cpu()
                 _ = run_iteration(
                     learning_agent=learning_agent,
@@ -185,13 +181,12 @@ if __name__ == "__main__":
                     run_with_console=False,
                     pause_at_completion=False,
                 )
-            
-                
+
                 # Policy evaluation + Policy improvement
                 learning_agent.move_to_device()
                 learning_agent.policy_eval(batch_size=20000, n_epochs=10)
                 learning_agent.policy_improvement(batch_size=100_000, n_epochs=10)
-                
+
                 # save in case environment chooses to crash
                 learning_agent.save(args.results_dir)
 
@@ -200,10 +195,7 @@ if __name__ == "__main__":
                         results_dir=args.results_dir,
                         logfile_pol_eval=logfile_pol_eval,
                         logfile_pol_imp=logfile_pol_imp,
-                    )        
-
-            
-            
+                    )
 
         else:
             # EVALUATION OF AGENT
@@ -211,12 +203,12 @@ if __name__ == "__main__":
             learning_agent.load(args.results_dir)
             learning_agent.lerningIteration = 0
             with open(logfile_pnl, "w") as f:
-                    f.write("iteration,pnl\n")
+                f.write("iteration,pnl\n")
 
             for it in range(args.evaluate):
                 learning_agent.clear_memory()
                 learning_agent.exploitation = 1.0
-                
+
                 result = run_iteration(
                     learning_agent=learning_agent,
                     step_tag=it,
@@ -226,9 +218,8 @@ if __name__ == "__main__":
                     pause_at_completion=False,
                 )
                 if args.plot_every_step:
-                    plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
-                
+                    plot_simulation(
+                        simulation=result, results_dir=args.results_dir, tag=it
+                    )
+
                 learning_agent.lerningIteration += 1
-
-
-        

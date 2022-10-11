@@ -34,10 +34,8 @@ def plot_simulation(
     best_ask = np.array([_sars[0].ask_prices[0] for _sars in sars])
     best_ask[-1] = best_ask[-2]  # because at settlement it's `0` and messes up the plot
     position = np.array([_sars[0].position for _sars in sars])
-    
-    total_balance = np.array(
-        [_sars[0].full_balance for _sars in sars]
-    )
+
+    total_balance = np.array([_sars[0].full_balance for _sars in sars])
     # action_discr = np.array([action_to_vector(_sars[1]) for _sars in sars])
     # action_volume = np.array([_sars[1].volume for _sars in sars])
     # t = np.linspace(1, len(action_volume), len(action_volume))
@@ -77,7 +75,7 @@ def plot_simulation(
 
 
 def plot_learning(results_dir: str, logfile_pol_imp: str, logfile_pol_eval: str):
-    
+
     data = pd.read_csv(logfile_pol_imp)
     plt.figure()
     plt.plot(data["iteration"], data["loss"])
@@ -107,8 +105,8 @@ def plot_pnl(results_dir: str, logfile_pnl: str):
     plt.xlabel("PnL")
     plt.ylabel("Frequency")
     conf = 0.975
-    err_bar =  norm.ppf(conf)*pnl.std()/len(pnl)
-    text = str(pnl.mean()-err_bar) + " < PnL < " + str(pnl.mean()+err_bar) 
+    err_bar = norm.ppf(conf) * pnl.std() / len(pnl)
+    text = str(pnl.mean() - err_bar) + " < PnL < " + str(pnl.mean() + err_bar)
     plt.title(text)
     maxfreq = n.max()
     # Set a clean upper y-axis limit.
