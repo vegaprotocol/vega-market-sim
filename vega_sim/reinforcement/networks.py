@@ -58,11 +58,20 @@ class FFN_fix_fol_Q(nn.Module):
         """
         super().__init__()
 
-        # the dimension of a which is integer in {0,1,2} so 1d
-        self.ffn = FFN(sizes=[state_dim + 1, 4096, 1], activation=nn.Tanh)
+        self.ffn_sell = FFN(
+            sizes=[state_dim, 4096, 1], activation=nn.ReLU
+        )  # +action_cont_dim is for the volume
+        self.ffn_buy = FFN(
+            sizes=[state_dim, 4096, 1], activation=nn.ReLU
+        )  # +action_cont_dim is for the volume
+        self.ffn_do_nothing = FFN(sizes=[state_dim, 4096, 1], activation=nn.ReLU)
 
-    def forward(self, state: torch.Tensor, a: torch.Tensor):
-        return self.ffn(state, a)
+    def forward(self, state: torch.Tensor):
+        output = []
+        output.append(self.ffn_sell(state))
+        output.append(self.ffn_buy(state))
+        output.append(self.ffn_do_nothing(state))
+        return torch.cat(output, -1)
 
 
 class FFN_Q(nn.Module):

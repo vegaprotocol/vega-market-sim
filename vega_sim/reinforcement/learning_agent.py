@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
@@ -29,6 +30,7 @@ from vega_sim.reinforcement.distributions import (
 
 from vega_sim.api.helpers import num_from_padded_int
 
+from vega_sim.environment.agent import Agent
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
@@ -40,7 +42,17 @@ WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 WALLET = WalletConfig("learner", "learner")
 
 
+def state_fn(
+    service: VegaServiceNull,
+    agents: List[Agent],
+    state_values=None,
+) -> Tuple[LAMarketState, AbstractAction]:
+    learner = [a for a in agents if isinstance(a, LearningAgent)][0]
+    return (learner.latest_state, learner.latest_action)
+
+
 class LearningAgent(StateAgentWithWallet):
+    @abstractmethod
     def __init__(
         self,
         device: str,
@@ -54,80 +66,45 @@ class LearningAgent(StateAgentWithWallet):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
-        exploitation: float,  # set this to 0 for full exploration and 1 for full exploitation
+        inventory_penalty: float = 0.0,
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
 
         self.step_num = 0
+        self.latest_state = None
+        self.latest_action = None
         self.device = device
         self.discount_factor = discount_factor
         self.initial_balance = initial_balance
 
         self.memory = defaultdict(list)
-        self.memory_capacity = 10000
-
-        # Dimensions of state and action
-        self.num_levels = num_levels
-        self.state_dim = 7 + 4 * self.num_levels  # from MarketState
-        action_discrete_dim = 3
-        # Q func
-        self.q_func = FFN_Q(
-            state_dim=self.state_dim,
-        )
-        self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
-        # policy
-        self.policy_volume = FFN_Params_Normal(
-            n_in=self.state_dim,
-            n_distr=2,
-            hidden_sizes=[4096],
-        )
-        self.policy_discr = FFN(
-            sizes=[self.state_dim, 32, action_discrete_dim],
-            activation=nn.Tanh,
-            output_activation=Softmax,
-        )  # this network decides whether to buy/sell/do nothing
-        self.optimizer_pol = torch.optim.RMSprop(
-            list(self.policy_volume.parameters())
-            + list(self.policy_discr.parameters()),
-            lr=0.001,
-        )
+        self.memory_capacity = 100_000
 
         # Coefficients for regularisation
-        self.coefH_discr = 5.0
-        self.coefH_cont = 0.5
+        self.coefH_discr = 1.0
+        self.coefH_cont = 0.01
         # losses logger
         self.losses = defaultdict(list)
         # logfile
         self.logfile_pol_imp = logfile_pol_imp
-        with open(self.logfile_pol_imp, "w") as f:
-            f.write("iteration,loss\n")
         self.logfile_pol_eval = logfile_pol_eval
-        with open(self.logfile_pol_eval, "w") as f:
-            f.write("iteration,loss\n")
         self.logfile_pnl = logfile_pnl
-        with open(self.logfile_pnl, "w") as f:
-            f.write("iteration,pnl\n")
 
         self.lerningIteration = 0
         self.market_name = market_name
         self.position_decimals = position_decimals
-        if exploitation < 0 or exploitation > 1:
-            raise Exception("Need 0.0 <= exploitation <= 1.0")
-        self.exploitation = exploitation
+        self.inventory_penalty = inventory_penalty
 
     def set_market_tag(self, tag: str):
         self.tag = tag
-        # self.wallet_name = self.base_wallet_name + str(tag)
 
+    @abstractmethod
     def move_to_device(self):
-        self.q_func.to(self.device)
-        self.policy_volume.to(self.device)
-        self.policy_discr.to(self.device)
+        pass
 
+    @abstractmethod
     def move_to_cpu(self):
-        self.q_func.to("cpu")
-        self.policy_volume.to("cpu")
-        self.policy_discr.to("cpu")
+        pass
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -164,7 +141,7 @@ class LearningAgent(StateAgentWithWallet):
         """
         Updates memory of the agent, and removes old tuples (s,a,r,s) if memory exceeds its capacity
         """
-        for res in states_to_sarsa(states):
+        for res in states_to_sarsa(states, inventory_penalty=self.inventory_penalty):
             self._update_memory(res[0], res[1], res[2], res[3])
         # remove old tuples if memory exceeds its capaciy
         for key, value in self.memory.items():
@@ -177,6 +154,7 @@ class LearningAgent(StateAgentWithWallet):
         for key in self.memory.keys():
             self.memory[key].clear()
 
+    @abstractmethod
     def create_dataloader(self, batch_size):
         """
         creates dataset and dataloader for training.
@@ -196,64 +174,86 @@ class LearningAgent(StateAgentWithWallet):
             self.market_id, num_levels=self.num_levels
         )  # make num_levels as a parameter?
 
-        # ext_price=self.price_process[self.step_num]
-        # bid_prices=[level.price for level in book_state.buys] + [0] * max(0, self.num_levels - len(book_state.buys))
-        # ask_prices=[level.price for level in book_state.sells] + [0] * max(0, self.num_levels - len(book_state.sells))
-        # # if (bid_prices[0] > 0 and bid_prices[0] >= ext_price) or (ask_prices[0] > 0 and ask_prices[0] <= ext_price):
-        #     print("best_buy "+str(bid_prices[0])+" ext price "+str(ext_price)+" best ask "+str(ask_prices[0]) )
-
         market_info = vega.market_info(market_id=self.market_id)
+        fee = (
+            float(market_info.fees.factors.liquidity_fee)
+            + float(market_info.fees.factors.maker_fee)
+            + float(market_info.fees.factors.infrastructure_fee)
+        )
+        init_price = self.price_process[0]
+        next_price = (
+            self.price_process[self.step_num + 1]
+            if self.price_process is not None
+            and len(self.price_process) > self.step_num + 1
+            else np.nan
+        )
+        next_price /= init_price
+        bid_prices = [level.price / init_price for level in book_state.buys] + [
+            0
+        ] * max(0, self.num_levels - len(book_state.buys))
+        ask_prices = [level.price / init_price for level in book_state.sells] + [
+            0
+        ] * max(0, self.num_levels - len(book_state.sells))
+
         return LAMarketState(
             step=self.step_num,
             position=position,
-            margin_balance=account.margin,
-            general_balance=account.general,
+            full_balance=(account.margin + account.general) / self.initial_balance,
             market_in_auction=(
                 not market_info.trading_mode
                 == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
             ),
-            bid_prices=[level.price for level in book_state.buys]
-            + [0] * max(0, self.num_levels - len(book_state.buys)),
-            ask_prices=[level.price for level in book_state.sells]
-            + [0] * max(0, self.num_levels - len(book_state.sells)),
+            bid_prices=bid_prices,
+            ask_prices=ask_prices,
             bid_volumes=[level.volume for level in book_state.buys]
             + [0] * max(0, self.num_levels - len(book_state.buys)),
             ask_volumes=[level.volume for level in book_state.sells]
             + [0] * max(0, self.num_levels - len(book_state.sells)),
-            trading_fee=0,
-            next_price=self.price_process[self.step_num + 1]
-            if self.price_process is not None
-            and len(self.price_process) > self.step_num + 1
-            else np.nan,
+            trading_fee=fee,
+            next_price=next_price,
         )
 
+    @abstractmethod
     def empty_action(self) -> AbstractAction:
         pass
 
     def finalise(self):
-        learning_state = self.state(self.vega)
-        self.latest_action = self.empty_action()
-        self.latest_state = learning_state
-        self.step_num += 1
-        final_pnl = (
-            learning_state.general_balance
-            + learning_state.margin_balance
-            - self.initial_balance
-        )
-        if learning_state.margin_balance > 0:
+        numTries = 3
+        account = None
+        for i in range(0, numTries):
+            account = self.vega.party_account(
+                wallet_name=self.wallet_name,
+                asset_id=self.tdai_id,
+                market_id=self.market_id,
+            )
+            self.latest_state = self.state(self.vega)
+            if account.margin == 0:
+                break
+            self.vega.forward("1s")
+            self.vega.wait_for_total_catchup()
+
+        if account.margin > 0:
             print(
                 "Market should be settled but there is still balance in margin account. What's up?"
             )
+
+        self.latest_action = self.empty_action()
+        self.step_num += 1
+        # final_pnl = self.latest_state.full_balance - self.initial_balance
+        final_pnl = self.latest_state.full_balance - 1.0
         with open(self.logfile_pnl, "a") as f:
-            f.write("{},{:.5f}\n".format(self.lerningIteration, final_pnl))
+            f.write("{},{:.8f}\n".format(self.lerningIteration, final_pnl))
 
         return super().finalise()
 
+    @abstractmethod
     def step(self, vega_state: VegaState):
         pass
 
+    @abstractmethod
     def save(self, results_dir: str):
         pass
 
+    @abstractmethod
     def load(self, results_dir: str):
         pass

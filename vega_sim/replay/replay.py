@@ -1,5 +1,6 @@
 import argparse
 import logging
+import string
 import time
 from contextlib import contextmanager
 
@@ -14,6 +15,7 @@ def replay_run_context(
     replay_path: str,
     console: bool = False,
     graphql: bool = False,
+    retain_log_files: bool = False,
 ):
     with open(f"{replay_path}/replay/transactions", "rb") as tx_history:
         tx_per_block = int.from_bytes(tx_history.read(TRANSACTION_LEN_BYTES), "big")
@@ -73,6 +75,7 @@ def replay_run(
     console: bool = False,
     graphql: bool = False,
     pause_at_end: bool = False,
+    retain_log_files: bool = False,
 ):
     with replay_run_context(
         replay_path=replay_path, console=console, graphql=graphql
@@ -87,8 +90,15 @@ if __name__ == "__main__":
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
-
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--retain_log_files", action="store_true")
+
+    parser.add_argument(
+        "--dir",
+        default="",
+        type=string,
+        help="The vega-sim log dir containing the replay log",
+    )
 
     args = parser.parse_args()
 
@@ -96,8 +106,9 @@ if __name__ == "__main__":
 
     replay = "/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-wxrt33vu"
     replay_run(
-        replay_path=replay,
+        replay_path=args.dir,
         console=args.console,
         graphql=args.graphql,
         pause_at_end=args.pause,
+        retain_log_files=args.retain_log_files,
     )
