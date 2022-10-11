@@ -81,7 +81,7 @@ class LearningAgent(StateAgentWithWallet):
         
         
         # Coefficients for regularisation
-        self.coefH_discr = 0.1
+        self.coefH_discr = 1.0
         self.coefH_cont = 0.01
         # losses logger
         self.losses = defaultdict(list)
@@ -175,39 +175,36 @@ class LearningAgent(StateAgentWithWallet):
             self.market_id, num_levels=self.num_levels
         )  # make num_levels as a parameter?
 
-        # ext_price=self.price_process[self.step_num]
-        # bid_prices=[level.price for level in book_state.buys] + [0] * max(0, self.num_levels - len(book_state.buys))
-        # ask_prices=[level.price for level in book_state.sells] + [0] * max(0, self.num_levels - len(book_state.sells))
-        # # if (bid_prices[0] > 0 and bid_prices[0] >= ext_price) or (ask_prices[0] > 0 and ask_prices[0] <= ext_price):
-        #     print("best_buy "+str(bid_prices[0])+" ext price "+str(ext_price)+" best ask "+str(ask_prices[0]) )
-
         market_info = vega.market_info(market_id=self.market_id)
         fee = ( 
             float(market_info.fees.factors.liquidity_fee) 
             + float(market_info.fees.factors.maker_fee) 
             + float(market_info.fees.factors.infrastructure_fee)
         )
+        init_price = self.price_process[0]
+        next_price = (self.price_process[self.step_num + 1] 
+                        if self.price_process is not None and len(self.price_process) > self.step_num + 1 
+                        else np.nan)
+        next_price /= init_price
+        bid_prices = [level.price / init_price for level in book_state.buys] + [0] * max(0, self.num_levels - len(book_state.buys))
+        ask_prices = [level.price / init_price for level in book_state.sells] + [0] * max(0, self.num_levels - len(book_state.sells))
+
         return LAMarketState(
             step=self.step_num,
             position=position,
-            full_balance=account.margin+account.general,
+            full_balance=(account.margin+account.general)/self.initial_balance,
             market_in_auction=(
                 not market_info.trading_mode
                 == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
             ),
-            bid_prices=[level.price for level in book_state.buys]
-            + [0] * max(0, self.num_levels - len(book_state.buys)),
-            ask_prices=[level.price for level in book_state.sells]
-            + [0] * max(0, self.num_levels - len(book_state.sells)),
+            bid_prices=bid_prices,
+            ask_prices=ask_prices,
             bid_volumes=[level.volume for level in book_state.buys]
             + [0] * max(0, self.num_levels - len(book_state.buys)),
             ask_volumes=[level.volume for level in book_state.sells]
             + [0] * max(0, self.num_levels - len(book_state.sells)),
             trading_fee=fee,
-            next_price=self.price_process[self.step_num + 1]
-            if self.price_process is not None
-            and len(self.price_process) > self.step_num + 1
-            else np.nan,
+            next_price=next_price,
         )
 
     @abstractmethod
@@ -236,9 +233,10 @@ class LearningAgent(StateAgentWithWallet):
         
         self.latest_action = self.empty_action()
         self.step_num += 1
-        final_pnl = self.latest_state.full_balance - self.initial_balance
+        # final_pnl = self.latest_state.full_balance - self.initial_balance
+        final_pnl = self.latest_state.full_balance - 1.0
         with open(self.logfile_pnl, "a") as f:
-            f.write("{},{:.5f}\n".format(self.lerningIteration, final_pnl))
+            f.write("{},{:.8f}\n".format(self.lerningIteration, final_pnl))
 
         return super().finalise()
     

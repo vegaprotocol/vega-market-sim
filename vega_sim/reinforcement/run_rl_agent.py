@@ -95,6 +95,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--resume_training", action="store_true")
     parser.add_argument("--plot_every_step", action="store_true")
+    parser.add_argument("--plot_only", action="store_true")
         
     args = parser.parse_args()
 
@@ -115,6 +116,16 @@ if __name__ == "__main__":
     logfile_pol_imp = os.path.join(args.results_dir, "learning_pol_imp.csv")
     logfile_pol_eval = os.path.join(args.results_dir, "learning_pol_eval.csv")
     logfile_pnl = os.path.join(args.results_dir, "learning_pnl.csv")
+
+
+    if args.plot_only:
+        plot_learning(
+                results_dir=args.results_dir,
+                logfile_pol_eval=logfile_pol_eval,
+                logfile_pol_imp=logfile_pol_imp,
+            )
+        plot_pnl(results_dir=args.results_dir, logfile_pnl=logfile_pnl)
+        exit(0) 
 
     # set seed for results replication
     set_seed(1)
@@ -137,7 +148,7 @@ if __name__ == "__main__":
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        inventory_penalty=0.5
+        inventory_penalty=0.1
     )
 
     with VegaServiceNull(
@@ -192,11 +203,7 @@ if __name__ == "__main__":
                     )        
 
             
-            plot_learning(
-                results_dir=args.results_dir,
-                logfile_pol_eval=logfile_pol_eval,
-                logfile_pol_imp=logfile_pol_imp,
-            )
+            
 
         else:
             # EVALUATION OF AGENT
@@ -218,8 +225,10 @@ if __name__ == "__main__":
                     run_with_console=False,
                     pause_at_completion=False,
                 )
-                plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
+                if args.plot_every_step:
+                    plot_simulation(simulation=result, results_dir=args.results_dir, tag=it)
+                
                 learning_agent.lerningIteration += 1
 
 
-        plot_pnl(results_dir=args.results_dir, logfile_pnl=logfile_pnl)
+        

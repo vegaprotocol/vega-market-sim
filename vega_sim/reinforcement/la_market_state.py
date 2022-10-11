@@ -38,6 +38,8 @@ class LAMarketState:
             + self.ask_volumes
         )
         arr = np.nan_to_num(np.array(l))
+        norm_factor = max(1e-12,  np.linalg.norm(arr))
+        arr = arr / norm_factor
         return arr
 
     @staticmethod

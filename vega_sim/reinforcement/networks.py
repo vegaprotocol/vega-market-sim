@@ -59,12 +59,12 @@ class FFN_fix_fol_Q(nn.Module):
         super().__init__()
 
         self.ffn_sell = FFN(
-            sizes=[state_dim, 32, 1], activation=nn.Tanh
+            sizes=[state_dim, 4096, 1], activation=nn.ReLU
         )  # +action_cont_dim is for the volume
         self.ffn_buy = FFN(
-            sizes=[state_dim, 32, 1], activation=nn.Tanh
+            sizes=[state_dim, 4096, 1], activation=nn.ReLU
         )  # +action_cont_dim is for the volume
-        self.ffn_do_nothing = FFN(sizes=[state_dim, 32, 1], activation=nn.Tanh)
+        self.ffn_do_nothing = FFN(sizes=[state_dim, 4096, 1], activation=nn.ReLU)
 
     def forward(self, state: torch.Tensor):
         output = []

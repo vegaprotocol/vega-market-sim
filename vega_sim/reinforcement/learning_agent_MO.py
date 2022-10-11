@@ -93,8 +93,8 @@ class LearningAgentFixedVol(LearningAgent):
 
         # NN for policy and its optimizer
         self.policy_discr = FFN(
-            sizes=[self.state_dim, 64, action_discrete_dim],
-            activation=nn.Tanh,
+            sizes=[self.state_dim, 4096, action_discrete_dim],
+            activation=nn.ReLU,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
         self.optimizer_pol = torch.optim.RMSprop(list(self.policy_discr.parameters()), lr=0.001)
@@ -238,6 +238,7 @@ class LearningAgentFixedVol(LearningAgent):
         -------
         c is a tensor of shape (batch_size, 1) returning the sampled action from {sell, buy, do nothing} (i.e. c is filled with values from {0,1,2})
         """
+        
         probs = self.policy_discr(state)
         if sim:
             m = Categorical(probs)
