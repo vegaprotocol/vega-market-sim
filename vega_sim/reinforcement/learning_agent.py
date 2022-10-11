@@ -81,7 +81,7 @@ class LearningAgent(StateAgentWithWallet):
         
         
         # Coefficients for regularisation
-        self.coefH_discr = 0.001
+        self.coefH_discr = 0.1
         self.coefH_cont = 0.01
         # losses logger
         self.losses = defaultdict(list)

@@ -47,13 +47,6 @@ class Action:
     sell: bool
 
 
-@dataclass
-class SoftActionFixVol:
-    c: torch.Tensor  # sell / buy / do nothing probabilities if training. If simulating, value in {0,1,2} indicating sampled action
-
-    def unravel(self):
-        return self.c
-
 
 
 
@@ -211,8 +204,8 @@ class LearningAgentFixedVol(LearningAgent):
         state = torch.from_numpy(state).float()  # .to(self.device)
 
         with torch.no_grad():
-            soft_action = self.sample_action(state=state, sim=True)
-        choice = int(soft_action.c.item())
+            c = self.sample_action(state=state, sim=True)
+        choice = int(c.item())
         
         return Action(buy=choice == 0, sell=choice == 1)
 
@@ -253,7 +246,7 @@ class LearningAgentFixedVol(LearningAgent):
             c = probs
         if evaluate:
             c = torch.max(probs, 1, keepdim=True)[1]
-        return SoftActionFixVol(c)
+        return c
 
     def policy_eval(
         self,
@@ -332,11 +325,11 @@ class LearningAgentFixedVol(LearningAgent):
 
         
         q = self.q_func(state)
-        soft_action = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
-        c = soft_action.unravel()
-        v = c[0] * (q[0] - self.coefH_discr * torch.log(c[0]))
-        v += c[1] * (q[1] - self.coefH_discr * torch.log(c[1]))
-        v += c[2] * (q[2] - self.coefH_discr * torch.log(c[2]))
+        c = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
+        
+        v = c[:,0] * (q[:,0] - self.coefH_discr * torch.log(c[:,0]))
+        v += c[:,1] * (q[:,1] - self.coefH_discr * torch.log(c[:,1]))
+        v += c[:,2] * (q[:,2] - self.coefH_discr * torch.log(c[:,2]))
         self.q_func.train()
         return v
 
@@ -345,19 +338,16 @@ class LearningAgentFixedVol(LearningAgent):
         KL divergence between pi(.|x) and the unnormalised density exp(Q(x,.)),
         where pi(.|x) is a LogNormal distribution
         """
-        c = self.sample_action(state).unravel().reshape((state.shape[0], 1))
+        #c = self.sample_action(state).reshape((state.shape[0], 1))
 
         q = self.q_func(state)
-        soft_action = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
-        c = soft_action.unravel()
+        c = self.sample_action(state,sim=False) #.unravel().reshape((state.shape[0], 1))
         
-        d_kl = c[0] * (self.coefH_discr * torch.log(c[0]) - q[0])
-        d_kl += c[1] * (self.coefH_discr * torch.log(c[1]) - q[1])
-        d_kl += c[2] * (self.coefH_discr * torch.log(c[2]) - q[2])
+        
+        d_kl = c[:,0] * (self.coefH_discr * torch.log(c[:,0]) - q[:,0])
+        d_kl += c[:,1] * (self.coefH_discr * torch.log(c[:,1]) - q[:,1])
+        d_kl += c[:,2] * (self.coefH_discr * torch.log(c[:,2]) - q[:,2])
 
-        d_kl = (
-            d_kl.mean()
-        )  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
         return d_kl
 
     def policy_improvement(self, batch_size: int, n_epochs: int):

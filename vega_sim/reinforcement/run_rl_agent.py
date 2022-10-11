@@ -137,7 +137,7 @@ if __name__ == "__main__":
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
-        inventory_penalty=1.0
+        inventory_penalty=0.5
     )
 
     with VegaServiceNull(
