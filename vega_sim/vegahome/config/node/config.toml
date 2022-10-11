@@ -199,7 +199,7 @@ UlimitNOFile = 8192
 
 [Snapshot]
   Level = "Info"
-  KeepRecent = 10
+  KeepRecent = 1000
   RetryLimit = 5
   Storage = "GOLevelDB"
   DBPath = ""

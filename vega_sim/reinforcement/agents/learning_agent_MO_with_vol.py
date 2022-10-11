@@ -11,6 +11,8 @@ import torch.nn as nn
 from torch.distributions.categorical import Categorical
 from vega_sim.reinforcement.agents.learning_agent import AbstractAction, LearningAgent
 
+import pickle
+
 from vega_sim.reinforcement.networks import (
     Softmax,
     FFN,
@@ -18,7 +20,7 @@ from vega_sim.reinforcement.networks import (
     FFN_Q,
 )
 from vega_sim.reinforcement.helpers import apply_funcs, to_torch, toggle
-from vega_sim.reinforcement.la_market_state import LAMarketState
+from vega_sim.reinforcement.la_market_state import LAMarketState, states_to_sarsa
 
 from vega_sim.reinforcement.distributions import (
     lognorm_sample,
@@ -68,37 +70,6 @@ class SoftActionWithVol:
         )
 
 
-def states_to_sarsa(
-    states: List[Tuple[LAMarketState, Action]]
-) -> List[Tuple[LAMarketState, Action, float, LAMarketState, Action]]:
-    res = []
-    for i in range(len(states) - 1):
-        pres_state = states[i]
-        next_state = states[i + 1]
-
-        if next_state[0].margin_balance + next_state[0].general_balance <= 0:
-            reward = -1e12
-            res.append(
-                (
-                    pres_state[0],
-                    pres_state[1],
-                    reward,
-                    next_state[0] if next_state is not np.nan else np.nan,
-                    next_state[1] if next_state is not np.nan else np.nan,
-                )
-            )
-            break
-
-        reward = (
-            (next_state[0].general_balance + next_state[0].margin_balance)
-            - (pres_state[0].general_balance + pres_state[0].margin_balance)
-            if next_state is not np.nan
-            else 0
-        )
-        res.append((pres_state[0], pres_state[1], reward, next_state[0], next_state[1]))
-    return res
-
-
 class LearningAgentWithVol(LearningAgent):
     def __init__(
         self,
@@ -113,7 +84,7 @@ class LearningAgentWithVol(LearningAgent):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
-        exploitation: float,  # set this to 0 for full exploration and 1 for full exploitation
+        inventory_penalty: float = 0.05,
     ):
         super().__init__(
             device=device,
@@ -127,8 +98,50 @@ class LearningAgentWithVol(LearningAgent):
             market_name=market_name,
             initial_balance=initial_balance,
             position_decimals=position_decimals,
-            exploitation=exploitation,
+            inventory_penalty=inventory_penalty,
         )
+
+        # Dimensions of state and action
+        self.num_levels = num_levels
+        self.state_dim = 6 + 4 * self.num_levels  # from MarketState
+        action_discrete_dim = 3
+
+        # NN and optimizer for Q func
+        self.q_func = FFN_Q(
+            state_dim=self.state_dim,
+        )
+        self.optimizer_q = torch.optim.RMSprop(self.q_func.parameters(), lr=0.001)
+
+        # NN for policy and its optimizer
+        self.policy_discr = FFN(
+            sizes=[self.state_dim, 1024, 1024, 1024, action_discrete_dim],
+            activation=nn.Tanh,
+            output_activation=Softmax,
+        )  # this network decides whether to buy/sell/do nothing
+
+        # NN for volume
+        self.policy_volume = FFN_Params_Normal(
+            n_in=self.state_dim,
+            n_distr=2,
+            hidden_sizes=[32],
+        )
+
+        # And the optimizer needs to include this too
+        self.optimizer_pol = torch.optim.RMSprop(
+            list(self.policy_volume.parameters())
+            + list(self.policy_discr.parameters()),
+            lr=0.001,
+        )
+
+    def move_to_device(self):
+        self.q_func.to(self.device)
+        self.policy_volume.to(self.device)
+        self.policy_discr.to(self.device)
+
+    def move_to_cpu(self):
+        self.q_func.to("cpu")
+        self.policy_volume.to("cpu")
+        self.policy_discr.to("cpu")
 
     def _update_memory(
         self,
@@ -205,7 +218,7 @@ class LearningAgentWithVol(LearningAgent):
         self.latest_action = self._step(learning_state)
         self.latest_state = learning_state
 
-        if learning_state.margin_balance + learning_state.general_balance <= 0:
+        if learning_state.full_balance <= 0:
             return
         if learning_state.market_in_auction:
             return
@@ -224,33 +237,19 @@ class LearningAgentWithVol(LearningAgent):
                 print(e)
 
     def _step(self, vega_state: LAMarketState) -> Action:
-        u1 = np.random.uniform(0, 1)
-        if u1 > self.exploitation:
-            u2 = np.random.uniform(0, 1)
-            if u2 > 0.0:
-                # random policy
-                choice = np.random.choice([0, 1, 2])
-                volume = np.random.lognormal(mean=1.0, sigma=2.0) * 10 ** (
-                    -self.position_decimals
-                )
-            else:
-                return self._step_heuristic(vega_state=vega_state)
-        else:
-            # learned policy
-            state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
-            state = torch.from_numpy(state).float()  # .to(self.device)
+        # learned policy
+        state = vega_state.to_array().reshape(1, -1)  # adding batch_dimension
+        state = torch.from_numpy(state).float()  # .to(self.device)
 
-            with torch.no_grad():
-                soft_action = self.sample_action(state=state, sim=True)
-            choice = int(soft_action.c.item())
-            if choice == 0:  # choice = 0 --> sell
-                volume = soft_action.volume_sell.item() * 10 ** (
-                    -self.position_decimals
-                )
-            elif choice == 1:  # choice = 1 --> buy
-                volume = soft_action.volume_buy.item() * 10 ** (-self.position_decimals)
-            else:
-                volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
+        with torch.no_grad():
+            soft_action = self.sample_action(state=state, sim=True)
+        choice = int(soft_action.c.item())
+        if choice == 0:  # choice = 0 --> sell
+            volume = soft_action.volume_sell.item() * 10 ** (-self.position_decimals)
+        elif choice == 1:  # choice = 1 --> buy
+            volume = soft_action.volume_buy.item() * 10 ** (-self.position_decimals)
+        else:
+            volume = 0  # choice=2, hence do nothing, hence volume is irrelevant
         return Action(buy=choice == 0, sell=choice == 1, volume=volume)
 
     def _step_heuristic(self, vega_state: LAMarketState) -> Action:
@@ -300,8 +299,12 @@ class LearningAgentWithVol(LearningAgent):
         volume_buy: torch.Tensor
             Tensor of shape
         """
-        probs = self.policy_discr(state)
-        mu, sigma = self.policy_volume(state)
+        probs = self.policy_discr(
+            state
+        )  # this is the FFN returning probabilities for the 3 actions
+        mu, sigma = self.policy_volume(
+            state
+        )  # this is the FFN returning statistics for volume distribution
         z_sell, volume_sell = lognorm_sample(mu=mu[:, 0], sigma=sigma[:, 0])
         z_buy, volume_buy = lognorm_sample(mu=mu[:, 1], sigma=sigma[:, 1])
         if sim:
@@ -380,14 +383,17 @@ class LearningAgentWithVol(LearningAgent):
             # logging loss
             with open(self.logfile_pol_eval, "a") as f:
                 f.write(
-                    "{},{:.5f}\n".format(
-                        epoch + self.lerningIteration * n_epochs, loss.item()
+                    "{},{:.2e},{:.3f},{:.3f}\n".format(
+                        epoch + self.lerningIteration * n_epochs,
+                        loss.item(),
+                        self.coefH_discr,
+                        self.coefH_cont,
                     )
                 )
             pbar.update(1)
         return 0
 
-    def v_func(self, state, n_mc=50):
+    def v_func(self, state, n_mc=1000):
         """
         v(x) = E[q(x,A)] = E[q(x,A)|C=0]p(C=0) + E[q(x,A)|C=1]p(C=1) + E[q(x)|C=2]p(C=2)
 
@@ -456,8 +462,9 @@ class LearningAgentWithVol(LearningAgent):
 
         d_kl = (
             d_kl.reshape(n_mc, batch_size, -1).mean(0).mean()
-            + 0.5 * reg.reshape(n_mc, batch_size, -1).mean(0).mean()
+            + 0.5 * self.coefH_cont * reg.reshape(n_mc, batch_size, -1).mean(0).mean()
         )  # Average of Monte Carlo samples. Doing one extra unnecessary step for clarity
+
         return d_kl
 
     def policy_improvement(self, batch_size: int, n_epochs: int):
@@ -485,9 +492,9 @@ class LearningAgentWithVol(LearningAgent):
             pbar.update(1)
 
         # update the coefficients for the next run
-        self.coefH_discr = max(self.coefH_discr * 0.99, 0.1)
-        self.coefH_cont = max(self.coefH_cont * 0.99, 0.1)
-
+        self.coefH_discr = max(self.coefH_discr * 0.99, 0.05)
+        self.coefH_cont = max(self.coefH_cont * 0.99, 0.05)
+        self.lerningIteration += 1
         return 0
 
     def save(self, results_dir: str):
@@ -497,8 +504,15 @@ class LearningAgentWithVol(LearningAgent):
             "q": self.q_func.state_dict(),
             "policy_discr": self.policy_discr.state_dict(),
             "policy_volume": self.policy_volume.state_dict(),
+            "iteration": self.lerningIteration,
+            "coefH_discr": self.coefH_discr,
+            "coefH_cont": self.coefH_cont,
         }
         torch.save(d, filename)
+
+        filename_for_memory = os.path.join(results_dir, "memory.pickle")
+        with open(filename_for_memory, "wb") as f:
+            pickle.dump(self.memory, f)
 
     def load(self, results_dir: str):
         filename = os.path.join(results_dir, "agent.pth.tar")
@@ -506,3 +520,11 @@ class LearningAgentWithVol(LearningAgent):
         self.q_func.load_state_dict(d["q"])
         self.policy_discr.load_state_dict(d["policy_discr"])
         self.policy_volume.load_state_dict(d["policy_volume"])
+        self.lerningIteration = d["iteration"]
+        self.coefH_discr = d["coefH_discr"]
+        self.coefH_cont = d["coefH_cont"]
+
+        filename_for_memory = os.path.join(results_dir, "memory.pickle")
+        with open(filename_for_memory, "rb") as f:
+            memory = pickle.load(f)
+        self.memory = memory

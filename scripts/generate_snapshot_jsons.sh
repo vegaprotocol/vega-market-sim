@@ -1,0 +1,2 @@
+vegatools snapshotdb --db-path=/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-wxrt33vu/vegahome/state/node/snapshots/ --block-height=600 --out=snapshot_base.json
+vegatools snapshotdb --db-path=/var/folders/yj/cjhtlxn90wldd1hvw5lkxnrc0000gn/T/vega-sim-0m7zmvwm/vegahome/state/node/snapshots/ --block-height=600 --out=snapshot_replay.json

@@ -5,6 +5,7 @@ from vega_sim.scenario.ideal_market_maker.scenario import IdealMarketMaker
 from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
 )
+from vega_sim.scenario.fairground.scenario import Fairground
 from vega_sim.scenario.market_crash.scenario import MarketCrash
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
@@ -136,4 +137,5 @@ SCENARIOS = {
         opening_auction_trade_amount=0.0001,
         market_order_trader_base_order_size=0.01,
     ),
+    "fairground": lambda: Fairground(),
 }

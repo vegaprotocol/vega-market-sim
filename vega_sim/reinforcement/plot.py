@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from typing import List, Tuple
+from scipy.stats import norm
 import os
 
 
-from vega_sim.reinforcement.la_market_state import LAMarketState
-from vega_sim.reinforcement.learning_agent_MO_with_vol import Action, states_to_sarsa
+from vega_sim.reinforcement.la_market_state import LAMarketState, states_to_sarsa
+from vega_sim.reinforcement.learning_agent_MO_with_vol import Action
 
 
 def action_to_vector(action: Action):
@@ -33,12 +34,8 @@ def plot_simulation(
     best_ask = np.array([_sars[0].ask_prices[0] for _sars in sars])
     best_ask[-1] = best_ask[-2]  # because at settlement it's `0` and messes up the plot
     position = np.array([_sars[0].position for _sars in sars])
-    margin_balance = np.array([_sars[0].margin_balance for _sars in sars])
-    general_balance = np.array([_sars[0].general_balance for _sars in sars])
 
-    total_balance = np.array(
-        [_sars[0].margin_balance + _sars[0].general_balance for _sars in sars]
-    )
+    total_balance = np.array([_sars[0].full_balance for _sars in sars])
     # action_discr = np.array([action_to_vector(_sars[1]) for _sars in sars])
     # action_volume = np.array([_sars[1].volume for _sars in sars])
     # t = np.linspace(1, len(action_volume), len(action_volume))
@@ -58,8 +55,6 @@ def plot_simulation(
     ax1.legend()
 
     ax2 = fig.add_subplot(spec[1, 0])
-    ax2.plot(margin_balance, "x", label="margin balance")
-    ax2.plot(general_balance, ".", label="general balance")
     ax2.plot(total_balance, ".", label="total balance")
     ax2.set_yscale("log")
     ax2.legend()
@@ -80,16 +75,23 @@ def plot_simulation(
 
 
 def plot_learning(results_dir: str, logfile_pol_imp: str, logfile_pol_eval: str):
-    data = pd.read_csv(logfile_pol_imp)
 
+    data = pd.read_csv(logfile_pol_imp)
     plt.figure()
     plt.plot(data["iteration"], data["loss"])
+    plt.ylabel("KL(policy|e^Q)")
+    plt.xlabel("Iteration")
+    plt.title("Policy improvement")
+
     plt.savefig(os.path.join(results_dir, "learn_pol_imp.pdf"))
     plt.close()
 
     data = pd.read_csv(logfile_pol_eval)
     plt.figure()
-    plt.plot(data["iteration"], data["loss"])
+    plt.plot(data["iteration"], np.log(data["loss"]))
+    plt.ylabel("log: Bellman error est")
+    plt.xlabel("Iteration")
+    plt.title("Q-function estimation")
     plt.savefig(os.path.join(results_dir, "learn_pol_eval.pdf"))
     plt.close()
 
@@ -102,7 +104,9 @@ def plot_pnl(results_dir: str, logfile_pnl: str):
     plt.grid(axis="y", alpha=0.75)
     plt.xlabel("PnL")
     plt.ylabel("Frequency")
-    text = "PnL mean=" + str(pnl.mean()) + " stddev=" + str(pnl.std())
+    conf = 0.975
+    err_bar = norm.ppf(conf) * pnl.std() / len(pnl)
+    text = str(pnl.mean() - err_bar) + " < PnL < " + str(pnl.mean() + err_bar)
     plt.title(text)
     maxfreq = n.max()
     # Set a clean upper y-axis limit.

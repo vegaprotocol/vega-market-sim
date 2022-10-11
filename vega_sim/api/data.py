@@ -197,7 +197,7 @@ def _position_from_proto(
         party_id=position.party_id,
         market_id=position.market_id,
         open_volume=num_from_padded_int(position.open_volume, position_decimals),
-        realised_pnl=num_from_padded_int(position.open_volume, asset_decimals),
+        realised_pnl=num_from_padded_int(position.realised_pnl, asset_decimals),
         unrealised_pnl=num_from_padded_int(position.unrealised_pnl, asset_decimals),
         average_entry_price=num_from_padded_int(
             position.average_entry_price, position_decimals
