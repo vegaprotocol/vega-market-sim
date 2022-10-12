@@ -7,7 +7,7 @@ import os
 
 
 from vega_sim.reinforcement.la_market_state import LAMarketState, states_to_sarsa
-from vega_sim.reinforcement.learning_agent_MO_with_vol import Action
+from vega_sim.reinforcement.agents.learning_agent_MO_with_vol import Action
 
 
 def action_to_vector(action: Action):

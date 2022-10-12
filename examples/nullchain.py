@@ -29,6 +29,7 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         run_with_console=False,
+        launch_graphql=False,
         start_order_feed=True,
         retain_log_files=True,
         use_full_vega_wallet=False,
@@ -229,6 +230,8 @@ if __name__ == "__main__":
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Margin levels are: {margin_levels}")
         vega.forward("10s")
+
+        input("Pausing to observe the market, press Enter to continue.")
         vega.settle_market(
             settlement_wallet=TERMINATE_WALLET.name,
             settlement_price=100,

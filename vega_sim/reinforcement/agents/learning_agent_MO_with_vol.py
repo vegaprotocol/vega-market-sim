@@ -9,7 +9,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.distributions.categorical import Categorical
-from vega_sim.reinforcement.learning_agent import AbstractAction, LearningAgent
+from vega_sim.reinforcement.agents.learning_agent import AbstractAction, LearningAgent
 
 import pickle
 
@@ -331,7 +331,6 @@ class LearningAgentWithVol(LearningAgent):
         batch_size: int,
         n_epochs: int,
     ):
-
         toggle(self.policy_discr, to=False)
         toggle(self.policy_volume, to=False)
         toggle(self.q_func, to=True)
