@@ -140,7 +140,6 @@ class SimpleAgent(AgentWithWallet):
             amount=self.initial_balance,
         )
         self.vega.wait_fn(2)
-        self.last_mid = None
 
     def step(self, vega: VegaService):
         """This function is called once each loop through of the simulation.
