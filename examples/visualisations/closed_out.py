@@ -101,7 +101,7 @@ if __name__ == "__main__":
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
-            side="SIDE_BUY",
+            side="SIDE_SELL",
             volume=100,
             price=500,
         )
@@ -111,7 +111,7 @@ if __name__ == "__main__":
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
-            side="SIDE_SELL",
+            side="SIDE_BUY",
             volume=100,
             price=500,
         )
