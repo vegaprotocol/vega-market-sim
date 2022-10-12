@@ -224,7 +224,7 @@ def provide_liquidity(
     """Submits a default liquidity provision to the specified market.
 
     Function uses AUX_PARTY_C to make a default liquidity submission pegged close to the
-    best-ask and best-bid with zero fee to the specified market. 
+    best-ask and best-bid with zero fee to the specified market.
 
     Args:
         vega (VegaServiceNull):
