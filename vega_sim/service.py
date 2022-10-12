@@ -926,6 +926,7 @@ class VegaService(ABC):
             market_id=market_id,
             data_client=self.trading_data_client,
             asset_decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            price_decimals=self.market_price_decimals[market_id],
             position_decimals=self.market_pos_decimals[market_id],
         )
 

@@ -66,12 +66,14 @@ self.vega.cancel_order(
 )
 
 ### Retrieve Current Position & PnL (Profit & Loss)
-position = self.vega.positions_by_market(
+positions = self.vega.positions_by_market(
     wallet_name=self.wallet_name, market_id=self.market_id
-)[0]
-volume = position.volume
-pnl = position.realised_pnl + position.unrealised_pnl
-entry_price = position.average_entry_price
+)
+if len(positions) > 0:
+    position = positions[0]
+    volume = position.open_volume
+    pnl = position.realised_pnl + position.unrealised_pnl
+    entry_price = position.average_entry_price
 
 ### Retrieve Current Orders
 orders = self.vega.orders_for_party_from_feed(
@@ -138,6 +140,7 @@ class SimpleAgent(AgentWithWallet):
             amount=self.initial_balance,
         )
         self.vega.wait_fn(2)
+        self.last_mid = None
 
     def step(self, vega: VegaService):
         """This function is called once each loop through of the simulation.
