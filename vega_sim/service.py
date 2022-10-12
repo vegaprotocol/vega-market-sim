@@ -1062,6 +1062,7 @@ class VegaService(ABC):
         delta_buy: float,
         delta_sell: float,
         is_amendment: Optional[bool] = None,
+        key_name: Optional[str] = None,
     ):
         """Submit/Amend a simple liquidity commitment (LP) with a single amount on each side.
 
@@ -1098,6 +1099,7 @@ class VegaService(ABC):
             else self.has_liquidity_provision(
                 market_id=market_id,
                 wallet_name=wallet_name,
+                key_name=key_name,
             )
         )
         return trading.submit_simple_liquidity(
@@ -1113,6 +1115,7 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
+            key_name=key_name,
         )
 
     def has_liquidity_provision(
