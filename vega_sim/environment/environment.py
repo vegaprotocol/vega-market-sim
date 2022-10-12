@@ -232,6 +232,13 @@ class MarketEnvironment:
                     " state. Press Enter to continue"
                 )
 
+        logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
+
+        if pause_at_completion:
+            input(
+                "Environment run completed. Pausing to allow inspection of state."
+                " Press Enter to continue"
+            )
         for agent in self.agents:
             agent.finalise()
         vega.wait_for_core_catchup()
@@ -240,13 +247,6 @@ class MarketEnvironment:
         if self._state_extraction_fn is not None:
             state_values.append(
                 self._state_extraction_fn(vega, self.agents, state_values=state_values)
-            )
-        logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
-
-        if pause_at_completion:
-            input(
-                "Environment run completed. Pausing to allow inspection of state."
-                " Press Enter to continue"
             )
         if self._state_extraction_fn is not None:
             return state_values
@@ -402,7 +402,6 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         )
 
     def run(self):
-
         if self._vega is None:
             with VegaServiceNetwork(
                 use_full_vega_wallet=True,
@@ -412,7 +411,6 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             return self._run(self._vega)
 
     def _run(self, vega):
-
         state_values = []
 
         # Initialise agents without minting assets

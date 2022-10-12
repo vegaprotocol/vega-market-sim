@@ -77,7 +77,6 @@ if __name__ == "__main__":
             learning_agent=agent,
             vega=vega,
             market_name=market_name,
-            run_with_console=False,
-            pause_at_completion=False,
+            pause_at_completion=True,
             asset_name=asset_name,
         )
