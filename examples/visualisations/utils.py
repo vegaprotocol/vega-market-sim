@@ -13,8 +13,7 @@ use of the functions, the following parties are setup.
 """
 
 from collections import namedtuple
-from curses import KEY_A1
-from typing import Optional, List
+from typing import Optional, Tuple
 from vega_sim.null_service import VegaServiceNull
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "wallet_pass", "key_name"])
@@ -44,11 +43,19 @@ def continuous_market(
     price: float,
     spread: float,
 ):
-    """_summary_
+    """Creates a default market and exits the auction into continuous trading.
+
+    Function creates auxiliary parties required to propose assets, a market, and
+    provide liquidity as well as constructs an order-book to exit the auction at the
+    specified mark-price.
 
     Args:
         vega (VegaServiceNull):
-            _description_
+            Service running core, datanode, and wallet processes.
+        price (float):
+            Mark-price at the exit of the auction.
+        spread (float):
+            Difference between the best-bid and best-ask on the order-book.
     """
 
     create_auxiliary_parties(vega=vega)
@@ -75,6 +82,15 @@ def continuous_market(
 def create_auxiliary_parties(
     vega: VegaServiceNull,
 ):
+    """Creates the default auxiliary parties.
+
+    Function creates wallet and keys for 5 default auxiliary parties who each have
+    individual responsibilities in proposing and managing the market.
+
+    Args:
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
+    """
     for party in [AUX_PARTY_A, AUX_PARTY_B, AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E]:
         vega.create_wallet(
             name=party.wallet_name,
@@ -86,10 +102,14 @@ def create_auxiliary_parties(
 def mint_governance_asset(
     vega: VegaServiceNull,
 ):
-    """_summary_
+    """Mints the governance asset to the required default auxiliary parties.
+
+    Function mints the VOTE asset to AUX_PARTY_A and AUX_PARTY_B who are responsible for
+    proposing and settling the market respectively.
 
     Args:
-        vega (VegaServiceNull): _description_
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
     """
 
     for party in [AUX_PARTY_A, AUX_PARTY_B]:
@@ -106,11 +126,16 @@ def mint_settlement_asset(
     vega: VegaServiceNull,
     asset_id: str,
 ):
-    """_summary_
+    """Mints the settlement asset to the required default auxiliary parties.
+
+    Function mints the specified settlement asset to AUX_PARTY_A, AUX_PARTY_B,
+    AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E.
 
     Args:
-        vega (VegaServiceNull): _description_
-        asset_id (str): _description_
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
+        asset_id (str):
+            Settlement asset id.
     """
 
     for party in [AUX_PARTY_A, AUX_PARTY_B, AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E]:
@@ -125,14 +150,19 @@ def mint_settlement_asset(
 
 def propose_asset(
     vega: VegaServiceNull,
-):
-    """_summary_
+) -> str:
+    """Creates a settlement asset and returns the asset id.
+
+    Function uses AUX_PARTY_A to create the default asset fDAI, identifies it's asset
+    id and returns it.
 
     Args:
-        vega (VegaServiceNull): _description_
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
 
     Returns:
-        _type_: _description_
+        str:
+            Settlement asset id.
     """
     vega.create_asset(
         wallet_name=AUX_PARTY_A.wallet_name,
@@ -149,15 +179,18 @@ def propose_asset(
 def propose_market(
     vega: VegaServiceNull,
     asset_id: str,
-):
-    """_summary_
+) -> str:
+    """Creates a market and returns the market id.
 
     Args:
-        vega (VegaServiceNull): _description_
-        asset_id (str): _description_
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
+        asset_id (str):
+            Settlement asset id.
 
     Returns:
-        _type_: _description_
+        str:
+            Market id.
     """
     vega.update_network_parameter(
         proposal_wallet=AUX_PARTY_A.wallet_name,
@@ -184,29 +217,63 @@ def propose_market(
     return vega.all_markets()[0].id
 
 
+def provide_liquidity(
+    vega: VegaServiceNull,
+    market_id: str,
+):
+    """Submits a default liquidity provision to the specified market.
+
+    Function uses AUX_PARTY_C to make a default liquidity submission pegged close to the
+    best-ask and best-bid with zero fee to the specified market. 
+
+    Args:
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
+        market_id (str):
+            Market id.
+    """
+    vega.submit_simple_liquidity(
+        wallet_name=AUX_PARTY_C.wallet_name,
+        key_name=AUX_PARTY_C.key_name,
+        market_id=market_id,
+        is_amendment=False,
+        commitment_amount=10000,
+        fee=0.00,
+        reference_buy="PEGGED_REFERENCE_BEST_BID",
+        reference_sell="PEGGED_REFERENCE_BEST_ASK",
+        delta_buy=1,
+        delta_sell=1,
+    )
+
+
 def exit_auction(
     vega: VegaServiceNull,
     market_id: str,
     price: Optional[float] = 1000.000,
     spread: Optional[float] = 2.000,
     volume: Optional[int] = 1,
-):
-    """_summary_
+) -> Tuple[str, str]:
+    """Exits the market opening auction.
+
+    Function uses AUX_PARTY_D and AUX_PARTY_E to place a best-ask and a best-bid
+    respectively at the specified price and spread. Then the same parties place
+    crossing orders to exit the auction at the specified price.
 
     Args:
         vega (VegaServiceNull):
-            _description_
+            Service running core, datanode, and wallet processes.
         market_id (str):
-            _description_
+            Market id.
         price (Optional[float], optional):
-            _description_. Defaults to 1000.000.
+            Price to exit auction at. Defaults to 1000.000.
         spread (Optional[float], optional):
-            _description_. Defaults to 2.000.
+            Spread of best-bid and best-ask on order book. Defaults to 2.000.
         volume (Optional[int], optional):
-            _description_. Defaults to 1.
+            Volume to post at the best-bid and best-ask. Defaults to 1.
 
     Returns:
-        _type_: _description_
+        Tuple[str, str]:
+            Tuple containing the best_ask_id str and the best_bid_id str.
     """
     vega.submit_order(
         trading_wallet=AUX_PARTY_D.wallet_name,
@@ -276,47 +343,32 @@ def exit_auction(
     return best_ask_id, best_bid_id
 
 
-def provide_liquidity(
-    vega: VegaServiceNull,
-    market_id: str,
-):
-    """_summary_
-
-    Args:
-        vega (VegaServiceNull): _description_
-        market_id (str): _description_
-    """
-    vega.submit_simple_liquidity(
-        wallet_name=AUX_PARTY_C.wallet_name,
-        key_name=AUX_PARTY_C.key_name,
-        market_id=market_id,
-        is_amendment=False,
-        commitment_amount=10000,
-        fee=0.00,
-        reference_buy="PEGGED_REFERENCE_BEST_BID",
-        reference_sell="PEGGED_REFERENCE_BEST_ASK",
-        delta_buy=1,
-        delta_sell=1,
-    )
-
-
 def move_market(
     vega: VegaServiceNull,
     market_id: str,
-    best_bid_id: str,
     best_ask_id: str,
+    best_bid_id: str,
     price: int,
     spread: float,
 ):
-    """_summary_
+    """Moves market to new specified price and updates the order-book spread.
+
+    Function uses AUX_PARTY_D and AUX_PARTY_E to update the best-ask and best-bid prices
+    and then submit crossing orders at the new specified price.
 
     Args:
-        vega (VegaServiceNull): _description_
-        market_id (str): _description_
-        best_bid_id (str): _description_
-        best_ask_id (str): _description_
-        price (int): _description_
-        spread (float): _description_
+        vega (VegaServiceNull):
+            Service running core, datanode, and wallet processes.
+        market_id (str):
+            Market id.
+        best_ask_id (str):
+            Order id of best-ask.
+        best_bid_id (str):
+            Order id of best-bid.
+        price (int):
+            Price to move market to.
+        spread (float):
+            Spread between best-ask and best-bid at new price level.
     """
 
     market_data = vega.market_data(market_id=market_id)
@@ -386,7 +438,6 @@ def move_market(
 
 
 if __name__ == "__main__":
-    """_summary_"""
 
     with VegaServiceNull(
         run_with_console=True,
