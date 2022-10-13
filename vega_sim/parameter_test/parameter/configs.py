@@ -206,16 +206,16 @@ BOND_PENALTY_FACTOR_IDEAL_v2 = SingleParameterExperiment(
             ]
         ),
     ),
-    runs_per_scenario=2,
+    runs_per_scenario=8,
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
     ],
 )
 
 TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
-    name="TauScaling_Curve",
-    parameter_to_vary="market.liquidity.probabilityOfTrading.tau.scaling",
-    values=["1", "10", "100"],
+    name="TargetStakeScaling",
+    parameter_to_vary="market.stake.target.scalingFactor",
+    values=["0.001", "0.1", "1", "10", "100", "10000"],
     scenario=CurveMarketMaker(
         market_name="ETH",
         asset_name="USD",
@@ -236,8 +236,8 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
         sell_intensity=100,
         q_upper=30,
         q_lower=-30,
-        market_maker_curve_kappa=0.2,
-        market_maker_assumed_market_kappa=0.2,
+        market_maker_curve_kappa=0.02,
+        market_maker_assumed_market_kappa=0.02,
         sensitive_price_taker_half_life=20,
         opening_auction_trade_amount=0.0001,
         market_order_trader_base_order_size=0.01,
@@ -249,7 +249,7 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
             ]
         ),
     ),
-    runs_per_scenario=2,
+    runs_per_scenario=8,
     additional_parameters_to_set=[
         ("market.liquidity.targetstake.triggering.ratio", "1")
     ],
