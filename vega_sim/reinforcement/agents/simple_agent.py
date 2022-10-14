@@ -153,4 +153,28 @@ class SimpleAgent(AgentWithWallet):
                 network itself. Use this to query for the current state of
                 the world
         """
+        best_bid, best_ask = self.vega.best_prices(self.market_id)
+        print(f"best bid {best_bid}, best ask {best_ask}")
+        self.vega.submit_market_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            # https://docs.vega.xyz/docs/mainnet/grpc/vega/vega.proto#side
+            side="SIDE_BUY",
+            volume=1.0,
+            # If this is true, function waits for confirmation and returns the order_id
+            wait=False,
+            # If this is true, order errors if the entire volume cannot be traded.
+            # Otherwise, whatever can be traded will be.
+            fill_or_kill=False,
+        )
+        positions = self.vega.positions_by_market(
+            wallet_name=self.wallet_name, market_id=self.market_id
+        )
+        if len(positions) > 0:
+            position = positions[0]
+            volume = position.open_volume
+            pnl = position.realised_pnl + position.unrealised_pnl
+            entry_price = position.average_entry_price
+            print(f"We have a position of {volume} and made {pnl}")
+
         pass

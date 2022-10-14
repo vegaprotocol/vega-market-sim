@@ -114,8 +114,8 @@ class LearningAgentWithVol(LearningAgent):
 
         # NN for policy and its optimizer
         self.policy_discr = FFN(
-            sizes=[self.state_dim, 1024, 1024, 1024, action_discrete_dim],
-            activation=nn.Tanh,
+            sizes=[self.state_dim, 4096, action_discrete_dim],
+            activation=nn.ReLU,
             output_activation=Softmax,
         )  # this network decides whether to buy/sell/do nothing
 
@@ -123,7 +123,7 @@ class LearningAgentWithVol(LearningAgent):
         self.policy_volume = FFN_Params_Normal(
             n_in=self.state_dim,
             n_distr=2,
-            hidden_sizes=[32],
+            hidden_sizes=[4096],
         )
 
         # And the optimizer needs to include this too
