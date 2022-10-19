@@ -162,6 +162,40 @@ def infrastructure_fee_accounts(
     ).accounts
 
 
+def list_orders(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    party_id: str,
+    live_only: bool = True,
+) -> List[vega_protos.vega.Orders]:
+    """Gets a list of Orders for the specified market and party.
+
+    Function queries the datanode for a response of orders for the specified market_id
+    and party_id and state (defaults to live orders only). The function then unrolls
+    pagination and returns a list of Orders.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading_data_client_V2.
+        market_id (str):
+            Id for market to return orders from.
+        party_id (str):
+            Id for party to return orders from.
+        live_only (bool, optional):
+            Whether to only return live orders. Defaults to True.
+
+    Returns:
+        _type_: _description_
+    """
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListOrdersRequest(
+            market_id=market_id, party_id=party_id, live_only=live_only
+        ),
+        request_func=lambda x: data_client.ListOrders(x).orders,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
 def order_status(
     order_id: str, data_client: vac.VegaTradingDataClient, version: int = 0
 ) -> Optional[vega_protos.vega.Order]:
