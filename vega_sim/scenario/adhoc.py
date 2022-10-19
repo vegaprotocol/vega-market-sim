@@ -51,16 +51,19 @@ def main():
             store_transactions=args.store,
         ) as vega:
             scenario.run_iteration(
-                vega=vega, network=Network[args.network], pause_at_completion=args.pause
+                vega=vega,
+                network=Network[args.network],
+                pause_at_completion=args.pause,
             )
     else:
         with VegaServiceNetwork(
-            network=Network[args.network],
+            network=Network[args.network].value,
             automatic_consent=True,
             no_version_check=True,
         ) as vega:
             scenario.run_iteration(
-                vega=vega, network=Network[args.network], pause_at_completion=args.pause
+                vega=vega,
+                network=Network[args.network],
             )
 
 
