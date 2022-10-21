@@ -239,10 +239,10 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         best_bid, best_ask = self.vega.best_prices(self.market_id)
 
         will_buy = self.random_state.rand() < np.exp(
-            -1 * self.probability_decay * abs(best_bid - self.curr_price)
+            -1 * self.probability_decay * max([best_ask - self.curr_price, 0])
         )
         will_sell = self.random_state.rand() < np.exp(
-            -1 * self.probability_decay * abs(best_ask - self.curr_price)
+            -1 * self.probability_decay * max([self.curr_price - best_bid, 0])
         )
 
         if buy_first and will_buy:
