@@ -299,6 +299,7 @@ class Fairground(Scenario):
             inventory_upper_boundary=self.market_maker_args["inventory_upper_boundary"],
             num_steps=self.n_steps,
             price_process_generator=iter(self.price_process),
+            orders_from_stream=False,
         )
 
         # Setup agents for passing opening auction

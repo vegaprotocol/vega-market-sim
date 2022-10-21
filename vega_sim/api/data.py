@@ -414,6 +414,70 @@ def open_orders_by_market(
     return OrdersBySide(bids, asks)
 
 
+def list_orders(
+    data_client: vac.VegaTradingDataClient,
+    data_client_v2: vac.VegaTradingDataClientV2,
+    market_id: str,
+    party_id: str,
+    price_decimals: Optional[int] = None,
+    position_decimals: Optional[int] = None,
+    live_only: Optional[bool] = True,
+) -> List[Order]:
+    """Return a list of converted orders for the specified market and party.
+
+    Args:
+        data_client (vac.VegaTradingDataClient):
+            An instantiated gRPC trading_data_client.
+        data_client_v2 (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading_data_client_V2.
+        market_id (str):
+            Id of market to return orders for.
+        party_id (str):
+            Id of party to return orders for.
+        price_decimals (Optional[int], optional):
+            Market price decimal places. Defaults to None.
+        position_decimals (Optional[int], optional):
+            Market position decimal places. Defaults to None.
+        live_only (Optional[bool], optional):
+            Whether to only return live orders. Defaults to True.
+
+    Returns:
+        List[Order]:
+            A list of converted orders.
+    """
+    orders = data_raw.list_orders(
+        data_client=data_client_v2,
+        party_id=party_id,
+        market_id=market_id,
+        live_only=live_only,
+    )
+
+    mkt_price_dp = (
+        DefaultDict(lambda: price_decimals) if price_decimals is not None else {}
+    )
+    mkt_pos_dp = (
+        DefaultDict(lambda: position_decimals) if position_decimals is not None else {}
+    )
+
+    output_orders = []
+    for order in orders:
+        if price_decimals is None and order.market_id not in mkt_price_dp:
+            mkt_pos_dp[order.market_id] = market_position_decimals(
+                market_id=order.market_id, data_client=data_client
+            )
+            mkt_price_dp[order.market_id] = market_price_decimals(
+                market_id=order.market_id, data_client=data_client
+            )
+
+        converted_order = _order_from_proto(
+            order,
+            price_decimals=mkt_price_dp[order.market_id],
+            position_decimals=mkt_pos_dp[order.market_id],
+        )
+        output_orders.append(converted_order)
+    return output_orders
+
+
 def all_orders(
     market_id: str,
     data_client: vac.VegaTradingDataClient,

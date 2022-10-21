@@ -991,6 +991,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         asset_decimal_places: int = 0,
         tag: str = "",
         key_name: str = None,
+        orders_from_stream: Optional[bool] = True,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.price_process_generator = price_process_generator
@@ -1011,6 +1012,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
+
+        self.orders_from_stream = orders_from_stream
 
     def initialise(
         self,
@@ -1076,13 +1079,23 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         curr_buy_orders, curr_sell_orders = [], []
 
-        for order in (
-            vega_state.market_state.get(self.market_id, {})
-            .orders.get(
-                self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
+        if self.orders_from_stream:
+            orders = (
+                vega_state.market_state.get(self.market_id, {})
+                .orders.get(
+                    self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
+                )
+                .values()
             )
-            .values()
-        ):
+        else:
+            orders = self.vega.list_orders(
+                wallet_name=self.wallet_name,
+                key_name=self.key_name,
+                market_id=self.market_id,
+                live_only=True,
+            )
+
+        for order in orders:
             if order.side == vega_protos.SIDE_BUY:
                 curr_buy_orders.append(order)
             else:
@@ -1218,6 +1231,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         asset_decimal_places: int = 0,
         tag: str = "",
         key_name: str = None,
+        orders_from_stream: Optional[bool] = True,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1234,6 +1248,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             best_price_offset_fn=self._optimal_strategy,
             liquidity_commitment_fn=self._liq_provis,
             key_name=key_name,
+            orders_from_stream=orders_from_stream,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing

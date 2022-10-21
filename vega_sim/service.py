@@ -1416,6 +1416,37 @@ class VegaService(ABC):
             market_id=market_id,
         )
 
+    def list_orders(
+        self,
+        wallet_name: str,
+        key_name: str,
+        market_id: str,
+        live_only: Optional[bool] = True,
+    ) -> List[data.Order]:
+        """Return a list of orders for the specified market and party.
+
+        Args:
+            wallet_name (str):
+            Name of wallet to return orders for.
+            key_name (str):
+            Name of key to return orders for.
+            market_id:
+                Id of market to return orders from.
+            live_only (Optional[bool], optional):
+                Whether to return only live orders. Defaults to True.
+
+        Returns:
+            List[data.Order]:
+                List of orders for the specified market and party.
+        """
+        return data.list_orders(
+            data_client=self.trading_data_client,
+            data_client_v2=self.trading_data_client_v2,
+            market_id=market_id,
+            party_id=self.wallet.public_key(name=wallet_name, key_name=key_name),
+            live_only=live_only,
+        )
+
     def get_trades(
         self,
         market_id: str,
