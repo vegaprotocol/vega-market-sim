@@ -353,7 +353,12 @@ def manage_vega_processes(
 
     # chainID is set in ./vegahome/genesis.json
     dataNodeProcess = _popen_process(
-        [data_node_path, "node", "--chainID=CUSTOM", "--home=" + tmp_vega_home],
+        [
+            data_node_path,
+            "start",
+            "--home=" + tmp_vega_home,
+            "--chainID=CUSTOM",
+        ],
         dir_root=tmp_vega_dir,
         log_name="data_node",
     )
