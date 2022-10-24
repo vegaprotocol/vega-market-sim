@@ -1640,6 +1640,7 @@ class InformedTrader(StateAgentWithWallet):
         initial_asset_mint: float = 1e8,
         proportion_taken: float = 0.8,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
@@ -1650,6 +1651,7 @@ class InformedTrader(StateAgentWithWallet):
         self.proportion_taken = proportion_taken
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
+        self.key_name = key_name
 
     def initialise(
         self,
@@ -1675,6 +1677,7 @@ class InformedTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=tDAI_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
@@ -1687,7 +1690,9 @@ class InformedTrader(StateAgentWithWallet):
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
         )
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
         current_position = int(position[0].open_volume) if position else 0
         trade_side = (
@@ -1702,6 +1707,7 @@ class InformedTrader(StateAgentWithWallet):
                     volume=np.abs(current_position),
                     wait=True,
                     fill_or_kill=False,
+                    key_name=self.key_name,
                 )
             except OrderRejectedError:
                 logger.debug("Order rejected")
@@ -1735,6 +1741,7 @@ class InformedTrader(StateAgentWithWallet):
                     volume=volume,
                     wait=False,
                     fill_or_kill=False,
+                    key_name=self.key_name,
                 )
             except OrderRejectedError:
                 logger.debug("Order rejected")
