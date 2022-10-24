@@ -6,6 +6,7 @@ from vega_sim.parameter_test.parameter.loggers import (
     tau_scaling_additional_data,
     limit_order_book,
 )
+from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
 from vega_sim.scenario.curve_market_maker.scenario import CurveMarketMaker
 from vega_sim.scenario.registry import IdealMarketMaker, IdealMarketMakerV2
 from vega_sim.parameter_test.parameter.loggers import (
@@ -259,6 +260,35 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
     ],
 )
 
+MARKET_PARAMETER_DEMO = SingleParameterExperiment(
+    name="MarketParameterDemo",
+    parameter_to_vary="liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+    values=[1, 10, 100],
+    scenario=ConfigurableMarket(
+        market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
+        market_code="ETH:USD",
+        asset_name="tUSD",
+        asset_dp=18,
+        num_steps=60 * 24,
+        state_extraction_fn=ideal_market_maker_single_data_extraction(
+            additional_data_fns=[
+                tau_scaling_additional_data,
+                target_stake_additional_data,
+                limit_order_book,
+            ]
+        ),
+    ),
+    runs_per_scenario=2,
+    additional_parameters_to_set=[
+        ("market.liquidity.targetstake.triggering.ratio", "1")
+    ],
+    data_extraction=[
+        (FILE_PATTERN, BASE_IDEAL_MM_CSV_HEADERS),
+        (FILE_PATTERN_LOB, LOB_CSV_HEADERS),
+    ],
+    market_parameter=True,
+)
+
 
 CONFIGS = [
     TARGET_STAKE_SCALING_FACTOR_IDEAL,
@@ -267,4 +297,5 @@ CONFIGS = [
     TARGET_STAKE_SCALING_FACTOR_IDEAL_v2,
     BOND_PENALTY_FACTOR_IDEAL_v2,
     TAU_SCALING_FACTOR_IDEAL_CURVE,
+    MARKET_PARAMETER_DEMO,
 ]
