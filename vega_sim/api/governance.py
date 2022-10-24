@@ -18,6 +18,7 @@ from vega_sim.api.helpers import (
     forward,
 )
 from vega_sim.api.data import find_asset_id
+from vega_sim.api.market import MarketConfig
 from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
@@ -70,6 +71,64 @@ def get_blockchain_time(data_client: vac.VegaTradingDataClient) -> int:
         data_node_protos.trading_data.GetVegaTimeRequest()
     ).timestamp
     return int(blockchain_time / 1e9)
+
+
+def propose_market_from_config(
+    data_client,
+    wallet: Wallet,
+    proposal_wallet_name: str,
+    market_config: MarketConfig,
+    closing_time: str,
+    enactment_time: str,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+    governance_asset: Optional[str] = "VOTE",
+    proposal_key_name: Optional[str] = None,
+) -> str:
+
+    # Make sure Vega network has governance asset
+    vote_asset_id = find_asset_id(
+        governance_asset, raise_on_missing=True, data_client=data_client
+    )
+    pub_key = wallet.public_key(proposal_wallet_name, proposal_key_name)
+
+    # Request accounts for party and check governance asset balance
+    party_accounts = data_client.PartyAccounts(
+        data_node_protos.trading_data.PartyAccountsRequest(
+            party_id=pub_key, asset=vote_asset_id
+        )
+    ).accounts
+
+    voting_balance = 0
+    for account in party_accounts:
+        if account.asset == vote_asset_id:
+            voting_balance = account.balance
+            break
+
+    if voting_balance == 0:
+        raise LowBalanceError(
+            f"Public key {pub_key} is missing governance token {governance_asset}"
+        )
+
+    # Build NewMarketConfiguration proto
+    changes = market_config.build()
+
+    # Build ProposalTerms proto
+    proposal = _build_generic_proposal(
+        pub_key=pub_key,
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    proposal.terms.new_market.CopyFrom(changes)
+
+    return _make_and_wait_for_proposal(
+        wallet=wallet,
+        wallet_name=proposal_wallet_name,
+        key_name=proposal_key_name,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+    ).proposal.id
 
 
 def propose_future_market(
