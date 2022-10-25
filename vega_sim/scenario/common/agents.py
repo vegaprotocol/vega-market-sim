@@ -1621,7 +1621,7 @@ class LimitOrderTrader(StateAgentWithWallet):
 
     def _cancel_order(self, vega_state: VegaState):
         orders = vega_state.market_state.get(self.market_id, {}).orders.get(
-            self.vega.wallet.public_key(self.wallet_name), {}
+            self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
         )
 
         if len(orders) > 0:
