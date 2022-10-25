@@ -81,6 +81,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
         key_name: str = None,
+        step_bias: Optional[float] = 0,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.initial_asset_mint = initial_asset_mint
@@ -93,6 +94,7 @@ class MarketOrderTrader(StateAgentWithWallet):
             random_state if random_state is not None else np.random.RandomState()
         )
         self.base_order_size = base_order_size
+        self.step_bias = step_bias
 
     def initialise(
         self,
@@ -125,6 +127,10 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.adp = self.vega.asset_decimals.get(self.asset_id, {})
 
     def step(self, vega_state: VegaState):
+
+        if self.random_state.rand() > self.step_bias:
+            return
+
         buy_first = self.random_state.choice([0, 1])
 
         buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
@@ -229,6 +235,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
+
         self.curr_price = next(self.price_process_generator)
 
         buy_first = self.random_state.choice([0, 1])
