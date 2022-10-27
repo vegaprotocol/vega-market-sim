@@ -142,7 +142,6 @@ SCENARIOS = {
     ),
     "fairground": lambda: Fairground(),
     "configurable_market": lambda: ConfigurableMarket(
-        market_config=MarketConfig(),
         market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
         market_code="ETH:USD",
         asset_name="tUSD",
