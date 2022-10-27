@@ -171,11 +171,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         vega.submit_liquidity(
             wallet_name=self.wallet_name,
@@ -332,11 +328,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         super().initialise(vega=vega)
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -406,11 +398,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -568,11 +556,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -641,11 +625,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
         super().initialise(vega=vega)
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -797,11 +777,7 @@ class InformedTrader(StateAgentWithWallet):
         super().initialise(vega=vega)
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)

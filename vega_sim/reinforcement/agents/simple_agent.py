@@ -126,11 +126,8 @@ class SimpleAgent(AgentWithWallet):
         super().initialise(vega=vega, create_wallet=True)
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
