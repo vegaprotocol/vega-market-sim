@@ -1206,6 +1206,25 @@ class VegaService(ABC):
             key_name=key_name,
         )
 
+    def find_market_id(self, name: str, raise_on_missing: bool = False) -> str:
+        """Looks up the Market ID of a given market name
+
+        Args:
+            name:
+                str, the name of the market to look for
+            raise_on_missing:
+                bool, whether to raise an Error or silently return if the market does
+                not exist
+
+        Returns:
+            str, the ID of the market
+        """
+        return data.find_market_id(
+            name=name,
+            raise_on_missing=raise_on_missing,
+            data_client=self.trading_data_client,
+        )
+
     def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:
         """Looks up the Asset ID of a given asset name
 
