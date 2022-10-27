@@ -1,3 +1,56 @@
+"""market.py
+
+Module contains classes to build a MarketConfig object containing market parameters
+which can be passed to service methods or market manager agents to propose markets.
+
+A MarketConfig class has the following attributes which can be set:
+
+• decimal_places
+• position_decimal_places
+• meta_data
+• price_monitoring_parameters.horizon
+• price_monitoring_parameters.probability
+• price_monitoring_parameters.auction_extension
+• liquidity_monitoring_parameters.triggering_ratio
+• liquidity_monitoring_parameters.auction_extension
+• liquidity_monitoring_parameters.target_stake_parameters.time_window
+• liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
+• log_normal.tau
+• log_normal.risk_aversion_parameters
+• log_normal.params.mu
+• log_normal.params.r
+• log_normal.params.sigma
+• instrument.name
+• instrument.code
+• instrument.future.settlement_asset
+• instrument.future.quote_name
+• instrument.future.settlement_data_decimals
+• instrument.future.terminating_key
+
+
+Examples:
+
+    A default MarketConfig object can be built with the following:
+
+    $ market_config = MarketConfig("default")
+
+
+    Pre-configured liquidity monitoring parameters can be loaded with the following:
+
+    $ market_config = market_config.liquidity_monitoring_parameters.load("strict")
+
+
+    Individual market parameter settings can be set with the following:
+
+    $ market_config = market_config.set("decimal_places", 4)
+
+
+    The NewMarketConfiguration proto can be built with the following:
+
+    $ new_market_configuration_proto = market_config.build()
+
+"""
+
 import functools
 import logging
 
