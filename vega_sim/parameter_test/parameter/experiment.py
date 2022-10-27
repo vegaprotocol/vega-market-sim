@@ -5,7 +5,7 @@ import os
 import pathlib
 from dataclasses import dataclass
 from random import random
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from vega_sim.null_service import VegaServiceNull
@@ -91,7 +91,7 @@ def _run_parameter_iteration(
 def _run_market_parameter_iteration(
     scenario: Scenario,
     parameter_to_vary: str,
-    value: str | int | float,
+    value: Union[str, int, float],
     random_state: Optional[np.random.RandomState],
 ) -> Any:
 
