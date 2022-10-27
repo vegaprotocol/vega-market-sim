@@ -207,9 +207,6 @@ class MarketEnvironment:
 
             vega.wait_for_total_catchup()
 
-            if self.transactions_per_block > 1:
-                vega.wait_fn(1)
-
             if self.step_length_seconds is not None:
                 end_time = vega.get_blockchain_time()
                 to_forward = max(0, self.step_length_seconds - (end_time - start_time))
@@ -220,8 +217,8 @@ class MarketEnvironment:
                         f" {(end_time - start_time) / self.block_length_seconds} blocks"
                         " produced this step"
                     )
-                    vega.wait_fn(to_forward)
-                start_time = end_time
+                    vega.wait_fn(to_forward / self.block_length_seconds)
+                start_time = vega.get_blockchain_time()
 
             if (
                 self._pause_every_n_steps is not None
