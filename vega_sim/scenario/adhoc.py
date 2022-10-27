@@ -45,7 +45,11 @@ def main():
             launch_graphql=args.graphql,
             warn_on_raw_data_access=False,
             seconds_per_block=scenario.block_length_seconds,
-            transactions_per_block=100,
+            transactions_per_block=(
+                scenario.transactions_per_block
+                if hasattr(scenario, "transactions_per_block")
+                else 100
+            ),
             retain_log_files=True,
             use_full_vega_wallet=False,
             store_transactions=args.store,
