@@ -14,6 +14,10 @@ class MissingAssetError(Exception):
     pass
 
 
+class MissingMarketError(Exception):
+    pass
+
+
 logger = logging.Logger(__name__)
 
 
@@ -266,6 +270,49 @@ def party_account(
             bond = num_from_padded_int(float(account.balance), asset_dp)
 
     return AccountData(general, margin, bond)
+
+
+def find_market_id(
+    name: str, data_client: vac.VegaTradingDataClient, raise_on_missing: bool = False
+) -> str:
+    """Looks up the Market ID of a given market name
+
+    Args:
+        symbol:
+            str, The symbol of the asset to look up
+        data_client:
+            VegaTradingDataClient, the gRPC data client
+        raise_on_missing:
+            bool, whether to raise an Error or silently return
+                if the asset does not exist
+
+    Returns:
+        str, the ID of the asset
+    """
+    markets = data_raw.all_markets(data_client=data_client)
+
+    acceptable_states = [
+        vega_protos.markets.Market.STATE_PENDING,
+        vega_protos.markets.Market.STATE_ACTIVE,
+        vega_protos.markets.Market.STATE_SUSPENDED,
+    ]
+
+    market_ids = {}
+
+    for market in markets:
+
+        if market.tradable_instrument.instrument.name == name:
+            if market.state in acceptable_states:
+                market_ids[market.id] = market.market_timestamps.pending
+
+    if len(market_ids) > 0:
+        return max(market_ids, key=market_ids.get)
+
+    if raise_on_missing:
+        raise MissingMarketError(
+            f"{name} market not found on specified Vega network, "
+            + "please propose and create this market first"
+        )
 
 
 def find_asset_id(
