@@ -912,7 +912,7 @@ class MarketManager(StateAgentWithWallet):
             key_name=self.key_name,
             termination_key=self.terminate_key_name,
         )
-        self.vega.wait_fn(5)
+        self.vega.wait_for_total_catchup()
 
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)

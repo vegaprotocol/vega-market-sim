@@ -191,7 +191,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 position_decimals=self.market_position_decimal,
                 future_asset=self.asset_name,
             )
-            self.vega.wait_fn(5)
+            self.vega.wait_for_total_catchup()
 
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
