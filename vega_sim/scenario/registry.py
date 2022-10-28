@@ -1,3 +1,4 @@
+from vega_sim.api.market import MarketConfig
 from vega_sim.scenario.common.agents import ShapedMarketMaker
 from vega_sim.scenario.comprehensive_market.scenario import ComprehensiveMarket
 from vega_sim.scenario.curve_market_maker.scenario import CurveMarketMaker
@@ -8,6 +9,8 @@ from vega_sim.scenario.ideal_market_maker_v2.scenario import (
 from vega_sim.scenario.multi_market.scenario import VegaLoadTest
 from vega_sim.scenario.fairground.scenario import Fairground
 from vega_sim.scenario.market_crash.scenario import MarketCrash
+from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
+
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
     Granularity,
@@ -139,6 +142,13 @@ SCENARIOS = {
         market_order_trader_base_order_size=0.01,
     ),
     "fairground": lambda: Fairground(),
+    "configurable_market": lambda: ConfigurableMarket(
+        market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
+        market_code="ETH:USD",
+        asset_name="tUSD",
+        asset_dp=18,
+        num_steps=60 * 24,
+    ),
     "vega_load_test": lambda: VegaLoadTest(
         num_steps=15 * 24 * 30,
         granularity=Granularity.FIFTEEN_MINUTE,
