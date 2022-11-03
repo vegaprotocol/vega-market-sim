@@ -159,7 +159,7 @@ class MarketMaker(StateAgentWithWallet):
             termination_wallet=self.terminate_wallet_name,
             liquidity_commitment=liquidity_commitment,
         )
-        self.vega.forward("2s")
+        self.vega.wait_for_total_catchup()
 
         self.market_id = self.vega.all_markets()[0].id
 

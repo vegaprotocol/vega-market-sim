@@ -96,10 +96,13 @@ def _ideal_market_maker_single_data_extraction(
         wallet_name=mm_agent.wallet_name,
         asset_id=mm_agent.asset_id,
         market_id=mm_agent.market_id,
+        key_name=mm_agent.key_name,
     )
 
     position = vega.positions_by_market(
-        wallet_name=mm_agent.wallet_name, market_id=mm_agent.market_id
+        wallet_name=mm_agent.wallet_name,
+        market_id=mm_agent.market_id,
+        key_name=mm_agent.key_name,
     )
     if not position:
         realised_pnl_lp = 0

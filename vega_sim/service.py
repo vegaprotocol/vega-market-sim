@@ -16,6 +16,7 @@ import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
+import vega_sim.api.market as market
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
@@ -404,6 +405,34 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             wallet=self.wallet,
             key_name=key_name,
+        )
+        self.wait_fn(110)
+
+    def create_market_from_config(
+        self,
+        proposal_wallet_name: str,
+        market_config: market.MarketConfig,
+        proposal_key_name: Optional[str] = None,
+    ):
+
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+
+        proposal_id = gov.propose_market_from_config(
+            wallet=self.wallet,
+            data_client=self.trading_data_client,
+            proposal_wallet_name=proposal_wallet_name,
+            proposal_key_name=proposal_key_name,
+            market_config=market_config,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 90,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+
+        gov.approve_proposal(
+            proposal_id=proposal_id,
+            wallet=self.wallet,
+            wallet_name=proposal_wallet_name,
+            key_name=proposal_key_name,
         )
         self.wait_fn(110)
 
@@ -1204,6 +1233,25 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             is_amendment=is_amendment,
             key_name=key_name,
+        )
+
+    def find_market_id(self, name: str, raise_on_missing: bool = False) -> str:
+        """Looks up the Market ID of a given market name
+
+        Args:
+            name:
+                str, the name of the market to look for
+            raise_on_missing:
+                bool, whether to raise an Error or silently return if the market does
+                not exist
+
+        Returns:
+            str, the ID of the market
+        """
+        return data.find_market_id(
+            name=name,
+            raise_on_missing=raise_on_missing,
+            data_client=self.trading_data_client,
         )
 
     def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:

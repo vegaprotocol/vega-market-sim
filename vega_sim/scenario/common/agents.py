@@ -81,6 +81,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
         key_name: str = None,
+        step_bias: Optional[float] = 0,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.initial_asset_mint = initial_asset_mint
@@ -93,6 +94,7 @@ class MarketOrderTrader(StateAgentWithWallet):
             random_state if random_state is not None else np.random.RandomState()
         )
         self.base_order_size = base_order_size
+        self.step_bias = step_bias
 
     def initialise(
         self,
@@ -103,11 +105,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -125,6 +123,10 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.adp = self.vega.asset_decimals.get(self.asset_id, {})
 
     def step(self, vega_state: VegaState):
+
+        if self.random_state.rand() > self.step_bias:
+            return
+
         buy_first = self.random_state.choice([0, 1])
 
         buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
@@ -210,11 +212,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -229,6 +227,7 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
+
         self.curr_price = next(self.price_process_generator)
 
         buy_first = self.random_state.choice([0, 1])
@@ -328,11 +327,7 @@ class BackgroundMarket(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -565,11 +560,7 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -771,11 +762,7 @@ class OpenAuctionPass(StateAgentWithWallet):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.vega.wait_for_total_catchup()
         # Get asset id
@@ -925,14 +912,10 @@ class MarketManager(StateAgentWithWallet):
             key_name=self.key_name,
             termination_key=self.terminate_key_name,
         )
-        self.vega.wait_fn(5)
+        self.vega.wait_for_total_catchup()
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
         if self.commitment_amount:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
@@ -1037,11 +1020,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             self.vega.wait_for_total_catchup()
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         if (
             initial_liq := self.liquidity_commitment_fn(None)
@@ -1524,11 +1503,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         """
 
         super().initialise(vega=vega, create_wallet=create_wallet)
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         if mint_wallet:
@@ -1614,7 +1589,7 @@ class LimitOrderTrader(StateAgentWithWallet):
 
     def _cancel_order(self, vega_state: VegaState):
         orders = vega_state.market_state.get(self.market_id, {}).orders.get(
-            self.vega.wallet.public_key(self.wallet_name), {}
+            self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
         )
 
         if len(orders) > 0:
@@ -1640,6 +1615,7 @@ class InformedTrader(StateAgentWithWallet):
         initial_asset_mint: float = 1e8,
         proportion_taken: float = 0.8,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
@@ -1650,6 +1626,7 @@ class InformedTrader(StateAgentWithWallet):
         self.proportion_taken = proportion_taken
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
+        self.key_name = key_name
 
     def initialise(
         self,
@@ -1661,11 +1638,7 @@ class InformedTrader(StateAgentWithWallet):
         super().initialise(vega=vega, create_wallet=create_wallet)
 
         # Get market id
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         # Get asset id
         tDAI_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -1675,6 +1648,7 @@ class InformedTrader(StateAgentWithWallet):
                 self.wallet_name,
                 asset=tDAI_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
@@ -1687,7 +1661,9 @@ class InformedTrader(StateAgentWithWallet):
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
         )
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
         current_position = int(position[0].open_volume) if position else 0
         trade_side = (
@@ -1702,6 +1678,7 @@ class InformedTrader(StateAgentWithWallet):
                     volume=np.abs(current_position),
                     wait=True,
                     fill_or_kill=False,
+                    key_name=self.key_name,
                 )
             except OrderRejectedError:
                 logger.debug("Order rejected")
@@ -1735,6 +1712,7 @@ class InformedTrader(StateAgentWithWallet):
                     volume=volume,
                     wait=False,
                     fill_or_kill=False,
+                    key_name=self.key_name,
                 )
             except OrderRejectedError:
                 logger.debug("Order rejected")
@@ -1774,11 +1752,7 @@ class LiquidityProvider(StateAgentWithWallet):
     ):
         super().initialise(vega=vega, create_wallet=create_wallet)
 
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         if mint_wallet:
             self.vega.mint(
@@ -1877,11 +1851,7 @@ class MomentumTrader(StateAgentWithWallet):
     ):
         super().initialise(vega=vega, create_wallet=create_wallet)
 
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         if mint_wallet:
