@@ -30,6 +30,7 @@ def main():
         type=int,
     )
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--wallet", action="store_true")
 
     args = parser.parse_args()
 
@@ -51,7 +52,7 @@ def main():
                 else 100
             ),
             retain_log_files=True,
-            use_full_vega_wallet=False,
+            use_full_vega_wallet=args.wallet,
             store_transactions=args.store,
         ) as vega:
             scenario.run_iteration(
