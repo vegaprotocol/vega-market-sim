@@ -254,14 +254,14 @@ def market_depth(
     max_depth: Optional[int] = None,
 ) -> Optional[vega_protos.vega.MarketDepth]:
     return data_client.GetLatestMarketDepth(
-        data_node_protos.trading_data.GetLatestMarketDepthRequest(
+        data_node_protos_v2.trading_data.GetLatestMarketDepthRequest(
             market_id=market_id, max_depth=max_depth
         )
     )
 
 
 def liquidity_provisions(
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Optional[List[vega_protos.vega.LiquidityProvision]]:
@@ -278,12 +278,16 @@ def liquidity_provisions(
     Returns:
         List[LiquidityProvision], list of liquidity provisions (if any exist)
     """
-    return data_client.LiquidityProvisions(
-        data_node_protos.trading_data.LiquidityProvisionsRequest(
-            market=market_id,
-            party=party_id,
-        )
-    ).liquidity_provisions
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListLiquidityProvisionsRequest(
+            market_id=market_id,
+            party_id=party_id,
+        ),
+        request_func=lambda x: data_client.ListLiquidityProvisions(
+            x
+        ).liquidity_provisions,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
 
 
 def order_subscription(

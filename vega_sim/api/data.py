@@ -649,10 +649,10 @@ def market_depth(
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
 ) -> Optional[MarketDepth]:
-    mkt_depth = data_client.MarketDepth(
-        data_node_protos.trading_data.MarketDepthRequest(
-            market_id=market_id, max_depth=max_depth
-        )
+    mkt_depth = data_raw.market_depth(
+        data_client=data_client,
+        market_id=market_id,
+        max_depth=max_depth,
     )
     if mkt_depth is None:
         return mkt_depth
@@ -740,7 +740,7 @@ def order_subscription(
 
 
 def has_liquidity_provision(
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     party_id: str,
 ) -> bool:

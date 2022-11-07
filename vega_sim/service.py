@@ -1155,7 +1155,7 @@ class VegaService(ABC):
         key_name: Optional[str] = None,
     ):
         return data.has_liquidity_provision(
-            self.trading_data_client,
+            self.trading_data_client_v2,
             market_id,
             party_id=self.wallet.public_key(wallet_name, key_name),
         )
@@ -1355,7 +1355,7 @@ class VegaService(ABC):
             List[LiquidityProvision], list of liquidity provisions (if any exist)
         """
         return data_raw.liquidity_provisions(
-            self.trading_data_client, market_id=market_id, party_id=party_id
+            self.trading_data_client_v2, market_id=market_id, party_id=party_id
         )
 
     def party_liquidity_provisions(
