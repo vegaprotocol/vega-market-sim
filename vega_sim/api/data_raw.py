@@ -92,7 +92,7 @@ def market_info(
 
 def asset_info(
     asset_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> vac.vega.assets.Asset:
     """Returns information on a given asset selected by its ID
 
@@ -105,8 +105,8 @@ def asset_info(
     Returns:
         vega.assets.Asset, Object containing data about the requested asset
     """
-    return data_client.AssetByID(
-        data_node_protos.trading_data.AssetByIDRequest(id=asset_id)
+    return data_client.GetAsset(
+        data_node_protos_v2.trading_data.GetAssetRequest(asset_id=asset_id)
     ).asset
 
 
@@ -149,6 +149,26 @@ def market_accounts(
     return MarketAccount(
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_INSURANCE],
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY],
+    )
+
+
+def party_accounts(
+    asset_id: str,
+    party_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+):
+
+    account_filter = data_node_protos_v2.trading_data.AccountFilter(
+        asset_id=asset_id,
+        party_ids=[party_id],
+    )
+
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListAccountsRequest(
+            filter=account_filter
+        ),
+        request_func=lambda x: data_client.ListAccounts(x).accounts,
+        extraction_func=lambda res: [i.account for i in res.edges],
     )
 
 

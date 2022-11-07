@@ -151,7 +151,7 @@ class VegaService(ABC):
         if self._asset_decimals is None:
             self._asset_decimals = DecimalsCache(
                 lambda asset_id: data.asset_decimals(
-                    asset_id=asset_id, data_client=self.trading_data_client
+                    asset_id=asset_id, data_client=self.trading_data_client_v2
                 )
             )
         return self._asset_decimals
@@ -943,7 +943,7 @@ class VegaService(ABC):
             self.wallet.public_key(wallet_name, key_name),
             asset_id=asset_id,
             market_id=market_id,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
         )
 
     def positions_by_market(

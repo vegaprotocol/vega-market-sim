@@ -237,16 +237,16 @@ def party_account(
     pub_key: str,
     asset_id: str,
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     asset_dp: Optional[int] = None,
 ) -> AccountData:
     """Output money in general accounts/margin accounts/bond accounts (if exists)
     of a party."""
-    account_req = data_node_protos.trading_data.PartyAccountsRequest(
+    accounts = data_raw.party_accounts(
+        data_client=data_client,
         party_id=pub_key,
-        asset=asset_id,
+        asset_id=asset_id,
     )
-    accounts = data_client.PartyAccounts(account_req).accounts
 
     asset_dp = (
         asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
@@ -387,7 +387,7 @@ def market_position_decimals(
 
 def asset_decimals(
     asset_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> int:
     """Returns the number of decimal places a specified asset uses for price.
 
