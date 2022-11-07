@@ -137,7 +137,7 @@ def all_market_accounts(
 def market_accounts(
     asset_id: str,
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> MarketAccount:
     """
     Output liquidity fee account/ insurance pool in the market
