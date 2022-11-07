@@ -1001,7 +1001,7 @@ class VegaService(ABC):
         Output infrastructure fee accounts
         """
         return data_raw.infrastructure_fee_accounts(
-            asset_id=asset_id, data_client=self.trading_data_client
+            asset_id=asset_id, data_client=self.trading_data_client_v2
         )
 
     @raw_data

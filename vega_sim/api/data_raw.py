@@ -166,14 +166,26 @@ def market_data(
 
 def infrastructure_fee_accounts(
     asset_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> List[vega_protos.vega.Account]:
     """
     Output infrastructure fee accounts
     """
-    return data_client.FeeInfrastructureAccounts(
-        data_node_protos.trading_data.FeeInfrastructureAccountsRequest(asset=asset_id)
-    ).accounts
+
+    account_filter = data_node_protos_v2.trading_data.AccountFilter(
+        asset_id=asset_id,
+        account_types=[
+            vega_protos.vega.AccountType.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
+        ],
+    )
+
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListAccountsRequest(
+            filter=account_filter
+        ),
+        request_func=lambda x: data_client.ListAccounts(x).accounts,
+        extraction_func=lambda res: [i.account for i in res.edges],
+    )
 
 
 def list_orders(
