@@ -648,7 +648,7 @@ def order_status_by_reference(
 def market_account(
     market_id: str,
     account_type: vega_protos.vega.AccountType,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> float:
     """
     Returns the current asset value in the Market's fee account

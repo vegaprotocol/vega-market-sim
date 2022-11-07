@@ -1016,7 +1016,7 @@ class VegaService(ABC):
         return data_raw.market_accounts(
             asset_id=asset_id,
             market_id=market_id,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
         )
 
     def market_account(
@@ -1039,7 +1039,7 @@ class VegaService(ABC):
         return data.market_account(
             market_id=market_id,
             account_type=account_type,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
         )
 
     def best_prices(

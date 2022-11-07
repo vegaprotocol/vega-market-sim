@@ -112,16 +112,24 @@ def asset_info(
 def all_market_accounts(
     asset_id: str,
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> Dict[vega_protos.vega.AccountType, MarketAccount]:
     """
     Output liquidity fee account/ insurance pool in the market
     """
-    accounts = data_client.MarketAccounts(
-        data_node_protos.trading_data.MarketAccountsRequest(
-            asset=asset_id, market_id=market_id
-        )
-    ).accounts
+
+    account_filter = data_node_protos_v2.trading_data.AccountFilter(
+        asset_id=asset_id,
+        market_ids=[market_id],
+    )
+
+    accounts = unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListAccountsRequest(
+            filter=account_filter
+        ),
+        request_func=lambda x: data_client.ListAccounts(x).accounts,
+        extraction_func=lambda res: [i.account for i in res.edges],
+    )
 
     return {account.type: account for account in accounts}
 
