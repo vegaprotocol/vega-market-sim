@@ -250,11 +250,11 @@ def order_status(
 
 def market_depth(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     max_depth: Optional[int] = None,
 ) -> Optional[vega_protos.vega.MarketDepth]:
-    return data_client.MarketDepth(
-        data_node_protos.trading_data.MarketDepthRequest(
+    return data_client.GetLatestMarketDepth(
+        data_node_protos.trading_data.GetLatestMarketDepthRequest(
             market_id=market_id, max_depth=max_depth
         )
     )

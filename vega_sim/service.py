@@ -1064,7 +1064,7 @@ class VegaService(ABC):
     def market_depth(self, market_id: str, num_levels: int = 5) -> data.MarketDepth:
         return data.market_depth(
             market_id=market_id,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             max_depth=num_levels,
             price_decimals=self.market_price_decimals[market_id],
             position_decimals=self.market_pos_decimals[market_id],

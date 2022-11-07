@@ -644,7 +644,7 @@ def market_account(
 
 def market_depth(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     max_depth: Optional[int] = None,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
