@@ -1292,7 +1292,7 @@ class VegaService(ABC):
             Optional[vega.Order], the requested Order object or None if nothing found
         """
         return data_raw.order_status(
-            order_id=order_id, data_client=self.trading_data_client, version=version
+            order_id=order_id, data_client=self.trading_data_client_v2, version=version
         )
 
     def order_status_by_reference(

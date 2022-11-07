@@ -223,7 +223,7 @@ def list_orders(
 
 
 def order_status(
-    order_id: str, data_client: vac.VegaTradingDataClient, version: int = 0
+    order_id: str, data_client: vac.VegaTradingDataClientV2, version: int = 0
 ) -> Optional[vega_protos.vega.Order]:
     """Loads information about a specific order identified by the ID.
     Optionally return historic order versions.
@@ -241,8 +241,8 @@ def order_status(
     Returns:
         Optional[vega.Order], the requested Order object or None if nothing found
     """
-    return data_client.OrderByID(
-        data_node_protos.trading_data.OrderByIDRequest(
+    return data_client.GetOrder(
+        data_node_protos_v2.trading_data.GetOrderRequest(
             order_id=order_id, version=version
         )
     ).order
