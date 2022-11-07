@@ -1295,29 +1295,6 @@ class VegaService(ABC):
             order_id=order_id, data_client=self.trading_data_client_v2, version=version
         )
 
-    def order_status_by_reference(
-        self,
-        reference: str,
-        market_id: str,
-    ) -> Optional[vega_protos.vega.Order]:
-        """Loads information about a specific order identified by the reference
-
-        Args:
-            reference:
-                str, the order reference as specified by Vega when originally placed
-                    or assigned by Vega
-            market_id:
-                str, the ID of the market on which the order was placed
-        Returns:
-            Optional[vega.Order], the requested Order object or None if nothing found
-        """
-        return data.order_status_by_reference(
-            reference=reference,
-            data_client=self.trading_data_client,
-            price_decimals=self.market_price_decimals[market_id],
-            position_decimals=self.market_pos_decimals[market_id],
-        )
-
     def order_status_from_feed(
         self, live_only: bool = True
     ) -> Dict[str, Dict[str, Dict[str, data.Order]]]:

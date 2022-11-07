@@ -613,38 +613,6 @@ def order_book_by_market(
     return OrderBook(bids, asks)
 
 
-def order_status_by_reference(
-    reference: str,
-    data_client: vac.VegaTradingDataClient,
-    price_decimals: Optional[int] = None,
-    position_decimals: Optional[int] = None,
-) -> Optional[vega_protos.vega.Order]:
-    """Loads information about a specific order identified by the reference.
-    Optionally return historic order versions.
-
-    Args:
-        reference:
-            str, the order reference as specified by Vega when originally placed
-                or assigned by Vega
-        data_client:
-            VegaTradingDataClient, an instantiated gRPC trading data client
-        price_decimals:
-            int, the decimal precision used when specifying prices on the market
-        position_decimals:
-            int, the decimal precision used when specifying positions on the market
-
-    Returns:
-        Optional[vega.Order], the requested Order object or None if nothing found
-    """
-    return _order_from_proto(
-        data_raw.order_status_by_reference(
-            reference=reference, data_client=data_client
-        ),
-        price_decimals=price_decimals,
-        position_decimals=position_decimals,
-    )
-
-
 def market_account(
     market_id: str,
     account_type: vega_protos.vega.AccountType,

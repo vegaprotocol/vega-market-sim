@@ -25,7 +25,6 @@ from vega_sim.api.data_raw import (
     order_status,
     positions_by_market,
     order_subscription,
-    order_status_by_reference,
     margin_levels,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
@@ -368,27 +367,6 @@ def test_order_status(trading_data_servicer_and_port):
 
     data_client = VegaTradingDataClient(f"localhost:{port}")
     res = order_status(order_id="foo", data_client=data_client)
-
-    assert res == expected
-
-
-def test_order_status_by_reference(trading_data_servicer_and_port):
-    expected = vega_protos.vega.Order(id="foo", reference="foo")
-
-    def OrderByReference(self, request, context):
-        return data_node_protos.trading_data.OrderByReferenceResponse(
-            order=vega_protos.vega.Order(
-                id=request.reference, reference=request.reference
-            )
-        )
-
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.OrderByReference = OrderByReference
-
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
-
-    data_client = VegaTradingDataClient(f"localhost:{port}")
-    res = order_status_by_reference(reference="foo", data_client=data_client)
 
     assert res == expected
 

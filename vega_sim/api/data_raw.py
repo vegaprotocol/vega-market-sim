@@ -248,26 +248,6 @@ def order_status(
     ).order
 
 
-def order_status_by_reference(
-    reference: str, data_client: vac.VegaTradingDataClient
-) -> Optional[vega_protos.vega.Order]:
-    """Loads information about a specific order identified by the reference.
-    Optionally return historic order versions.
-
-    Args:
-        reference:
-            str, the order reference as specified by Vega when originally placed
-                or assigned by Vega
-        data_client:
-            VegaTradingDataClient, an instantiated gRPC trading data client
-    Returns:
-        Optional[vega.Order], the requested Order object or None if nothing found
-    """
-    return data_client.OrderByReference(
-        data_node_protos.trading_data.OrderByReferenceRequest(reference=reference)
-    ).order
-
-
 def market_depth(
     market_id: str,
     data_client: vac.VegaTradingDataClient,
