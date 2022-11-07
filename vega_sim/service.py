@@ -966,7 +966,7 @@ class VegaService(ABC):
         """
         Output market info.
         """
-        return data_raw.all_markets(data_client=self.trading_data_client)
+        return data_raw.all_markets(data_client=self.trading_data_client_v2)
 
     @raw_data
     def market_info(
@@ -1251,7 +1251,7 @@ class VegaService(ABC):
         return data.find_market_id(
             name=name,
             raise_on_missing=raise_on_missing,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
         )
 
     def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:

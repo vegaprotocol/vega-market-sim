@@ -273,7 +273,7 @@ def party_account(
 
 
 def find_market_id(
-    name: str, data_client: vac.VegaTradingDataClient, raise_on_missing: bool = False
+    name: str, data_client: vac.VegaTradingDataClientV2, raise_on_missing: bool = False
 ) -> str:
     """Looks up the Market ID of a given market name
 

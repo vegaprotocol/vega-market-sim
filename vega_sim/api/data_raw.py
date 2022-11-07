@@ -71,8 +71,11 @@ def all_markets(
     """
     Output market info.
     """
-    market_req = data_node_protos.trading_data.MarketsRequest()
-    return data_client.Markets(market_req).markets
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListMarketsRequest(),
+        request_func=lambda x: data_client.ListMarkets(x).markets,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
 
 
 def market_info(
