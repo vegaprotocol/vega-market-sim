@@ -9,6 +9,10 @@ from typing import Callable, List, Optional, Tuple, Union
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 
+import vega_sim.api.data as data
+import vega_sim.api.data_raw as data_raw
+
+
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
@@ -28,7 +32,7 @@ class OrderRejectedError(Exception):
 
 def submit_order(
     wallet_name: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     wallet: Wallet,
     market_id: str,
     order_type: Union[vega_protos.vega.Order.Type, str],
@@ -138,27 +142,29 @@ def submit_order(
 
     if wait:
 
-        def _proposal_loader(order_ref: str) -> vega_protos.vega.Order:
-            order_ref_request = (
-                data_node_protos_v2.trading_data.OrderByReferenceRequest(
-                    reference=order_ref
-                )
+        def _proposal_loader(
+            order_ref: str, market_id: str, data_client: vac.VegaTradingDataClientV2
+        ) -> vega_protos.vega.Order:
+            orders = data_raw.list_orders(
+                market_id=market_id,
+                reference=order_ref,
+                data_client=data_client,
+                live_only=False,
             )
-            return data_client.OrderByReference(order_ref_request).order
+            return orders[0]
 
-        # Allow one failure, forward once more
         try:
             time_forward_fn()
             logger.debug("Waiting for proposal acceptance")
             response = wait_for_acceptance(
                 order_ref,
-                _proposal_loader,
+                lambda r: _proposal_loader(r, market_id, data_client),
             )
         except ProposalNotAcceptedError:
             time_forward_fn()
             response = wait_for_acceptance(
                 order_ref,
-                _proposal_loader,
+                lambda r: _proposal_loader(r, market_id, data_client),
             )
         order_status = enum_to_str(vega_protos.vega.Order.Status, response.status)
 

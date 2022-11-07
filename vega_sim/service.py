@@ -635,7 +635,7 @@ class VegaService(ABC):
         return trading.submit_order(
             wallet=self.wallet,
             wallet_name=trading_wallet,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             market_id=market_id,
             order_type=order_type,
             time_in_force=time_in_force,

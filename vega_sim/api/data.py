@@ -464,13 +464,14 @@ def open_orders_by_market(
 
 def list_orders(
     data_client: vac.VegaTradingDataClientV2,
-    market_id: str,
-    party_id: str,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+    reference: Optional[str] = None,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
     live_only: Optional[bool] = True,
 ) -> List[Order]:
-    """Return a list of converted orders for the specified market and party.
+    """Return a list of converted orders for the specified market, party, and reference.
 
     Args:
         data_client (vac.VegaTradingDataClient):
@@ -481,6 +482,8 @@ def list_orders(
             Id of market to return orders for.
         party_id (str):
             Id of party to return orders for.
+        reference (str):
+            References to return orders for.
         price_decimals (Optional[int], optional):
             Market price decimal places. Defaults to None.
         position_decimals (Optional[int], optional):
@@ -496,6 +499,7 @@ def list_orders(
         data_client=data_client,
         party_id=party_id,
         market_id=market_id,
+        reference=reference,
         live_only=live_only,
     )
 

@@ -200,8 +200,9 @@ def infrastructure_fee_accounts(
 
 def list_orders(
     data_client: vac.VegaTradingDataClientV2,
-    market_id: str,
-    party_id: str,
+    market_id: str = None,
+    party_id: str = None,
+    reference: str = None,
     live_only: bool = True,
 ) -> List[vega_protos.vega.Orders]:
     """Gets a list of Orders for the specified market and party.
@@ -223,10 +224,19 @@ def list_orders(
     Returns:
         _type_: _description_
     """
+
+    request = data_node_protos_v2.trading_data.ListOrdersRequest(live_only=live_only)
+
+    for attr, val in [
+        ("market_id", market_id),
+        ("party_id", party_id),
+        ("reference", reference),
+    ]:
+        if val is not None:
+            setattr(request, attr, val)
+
     return unroll_v2_pagination(
-        base_request=data_node_protos_v2.trading_data.ListOrdersRequest(
-            market_id=market_id, party_id=party_id, live_only=live_only
-        ),
+        base_request=request,
         request_func=lambda x: data_client.ListOrders(x).orders,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
