@@ -347,7 +347,7 @@ def find_asset_id(
 
 def market_price_decimals(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> int:
     """Returns the number of decimal places a specified market uses for price units.
 
@@ -367,7 +367,7 @@ def market_price_decimals(
 
 def market_position_decimals(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> int:
     """Returns the number of decimal places a specified market uses for position units.
 
@@ -407,7 +407,7 @@ def asset_decimals(
 
 def best_prices(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
 ) -> Tuple[float, float]:
     """
@@ -462,8 +462,7 @@ def open_orders_by_market(
 
 
 def list_orders(
-    data_client: vac.VegaTradingDataClient,
-    data_client_v2: vac.VegaTradingDataClientV2,
+    data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     party_id: str,
     price_decimals: Optional[int] = None,
@@ -493,7 +492,7 @@ def list_orders(
             A list of converted orders.
     """
     orders = data_raw.list_orders(
-        data_client=data_client_v2,
+        data_client=data_client,
         party_id=party_id,
         market_id=market_id,
         live_only=live_only,

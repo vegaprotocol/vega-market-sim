@@ -131,7 +131,7 @@ class VegaService(ABC):
         if self._market_price_decimals is None:
             self._market_price_decimals = DecimalsCache(
                 lambda market_id: data.market_price_decimals(
-                    market_id=market_id, data_client=self.trading_data_client
+                    market_id=market_id, data_client=self.trading_data_client_v2
                 )
             )
         return self._market_price_decimals
@@ -141,7 +141,7 @@ class VegaService(ABC):
         if self._market_pos_decimals is None:
             self._market_pos_decimals = DecimalsCache(
                 lambda market_id: data.market_position_decimals(
-                    market_id=market_id, data_client=self.trading_data_client
+                    market_id=market_id, data_client=self.trading_data_client_v2
                 )
             )
         return self._market_pos_decimals
@@ -161,7 +161,7 @@ class VegaService(ABC):
         if self._market_to_asset is None:
             self._market_to_asset = DecimalsCache(
                 lambda market_id: data_raw.market_info(
-                    market_id=market_id, data_client=self.trading_data_client
+                    market_id=market_id, data_client=self.trading_data_client_v2
                 ).tradable_instrument.instrument.future.settlement_asset
             )
         return self._market_to_asset
@@ -914,7 +914,7 @@ class VegaService(ABC):
         key_name: Optional[str] = None,
     ):
         future_inst = data_raw.market_info(
-            market_id, data_client=self.trading_data_client
+            market_id, data_client=self.trading_data_client_v2
         ).tradable_instrument.instrument.future
         oracle_name = future_inst.oracle_spec_for_settlement_data.filters[0].key.name
 
@@ -977,7 +977,7 @@ class VegaService(ABC):
         Output market info.
         """
         return data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         )
 
     @raw_data
@@ -989,7 +989,7 @@ class VegaService(ABC):
         Output market info.
         """
         return data_raw.market_data(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         )
 
     @raw_data
@@ -1050,7 +1050,7 @@ class VegaService(ABC):
         Output the best static bid price and best static ask price in current market.
         """
         return data.best_prices(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         )
 
     def order_book_by_market(
@@ -1117,11 +1117,11 @@ class VegaService(ABC):
                 float, the offset from reference point for the sell side of LP
         """
         asset_id = data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         ).tradable_instrument.instrument.future.settlement_asset
 
         market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         )
         is_amendment = (
             is_amendment
@@ -1198,11 +1198,11 @@ class VegaService(ABC):
                 optional, str name of key in wallet to use
         """
         asset_id = data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         ).tradable_instrument.instrument.future.settlement_asset
 
         market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         )
 
         buy_specs = [
@@ -1390,7 +1390,7 @@ class VegaService(ABC):
     ):
         self.order_queue = data.order_subscription(
             self.core_client,
-            self.trading_data_client,
+            self.trading_data_client_v2,
             market_id=market_id,
             party_id=party_id,
         )
@@ -1465,8 +1465,7 @@ class VegaService(ABC):
                 List of orders for the specified market and party.
         """
         return data.list_orders(
-            data_client=self.trading_data_client,
-            data_client_v2=self.trading_data_client_v2,
+            data_client=self.trading_data_client_v2,
             market_id=market_id,
             party_id=self.wallet.public_key(name=wallet_name, key_name=key_name),
             live_only=live_only,

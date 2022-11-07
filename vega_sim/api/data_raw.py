@@ -80,13 +80,14 @@ def all_markets(
 
 def market_info(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> vega_protos.markets.Market:
     """
     Output market info.
     """
-    market_req = data_node_protos.trading_data.MarketByIDRequest(market_id=market_id)
-    return data_client.MarketByID(market_req).market
+    return data_client.GetMarket(
+        data_node_protos_v2.trading_data.GetMarketRequest(market_id=market_id)
+    ).market
 
 
 def asset_info(
@@ -153,15 +154,14 @@ def market_accounts(
 
 def market_data(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> vega_protos.vega.MarketData:
     """
     Output market info.
     """
-    market_req = data_node_protos.trading_data.MarketDataByIDRequest(
-        market_id=market_id
-    )
-    return data_client.MarketDataByID(market_req).market_data
+    return data_client.GetLatestMarketData(
+        data_node_protos_v2.trading_data.GetLatestMarketDataRequest(market_id=market_id)
+    ).market_data
 
 
 def infrastructure_fee_accounts(
