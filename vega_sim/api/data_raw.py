@@ -52,14 +52,17 @@ def unroll_v2_pagination(
 def positions_by_market(
     pub_key: str,
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> List[vega_protos.vega.Position]:
     """Output positions of a party."""
-    positions_req = data_node_protos.trading_data.PositionsByPartyRequest(
-        party_id=pub_key,
-        market_id=market_id,
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListPositionsRequest(
+            party_id=pub_key,
+            market_id=market_id,
+        ),
+        request_func=lambda x: data_client.ListPositions(x).positions,
+        extraction_func=lambda res: [i.node for i in res.edges],
     )
-    return data_client.PositionsByParty(positions_req).positions
 
 
 def all_markets(

@@ -217,7 +217,7 @@ def positions_by_market(
     position_decimals: int,
     asset_decimals: int,
     price_decimals: int,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> List[Position]:
     """Output positions of a party."""
     return [
