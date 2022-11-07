@@ -3,9 +3,10 @@ import json
 import logging
 from typing import Callable, Optional
 
-
+import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
+
 import vega_sim.proto.vega as vega_protos
 from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 import vega_sim.proto.vega.oracles.v1 as oracles_protos
@@ -32,12 +33,13 @@ class LowBalanceError(Exception):
 
 def _proposal_loader(
     proposal_ref: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> bool:
-    request = data_node_protos.trading_data.GetProposalByReferenceRequest(
-        reference=proposal_ref
+    request = data_node_protos_v2.trading_data.GetGovernanceDataRequest(
+        reference=proposal_ref,
     )
-    return data_client.GetProposalByReference(request).data
+    response = data_client.GetGovernanceData(request)
+    return response.data
 
 
 def _default_risk_model() -> vega_protos.markets.LogNormalRiskModel:
@@ -65,16 +67,16 @@ def _default_price_monitoring_parameters() -> (
     )
 
 
-def get_blockchain_time(data_client: vac.VegaTradingDataClient) -> int:
+def get_blockchain_time(data_client: vac.VegaTradingDataClientV2) -> int:
     """Returns blockchain time in seconds since the epoch"""
     blockchain_time = data_client.GetVegaTime(
-        data_node_protos.trading_data.GetVegaTimeRequest()
+        data_node_protos_v2.trading_data.GetVegaTimeRequest()
     ).timestamp
     return int(blockchain_time / 1e9)
 
 
 def propose_market_from_config(
-    data_client,
+    data_client: vac.VegaTradingDataClientV2,
     wallet: Wallet,
     proposal_wallet_name: str,
     market_config: MarketConfig,
@@ -92,11 +94,9 @@ def propose_market_from_config(
     pub_key = wallet.public_key(proposal_wallet_name, proposal_key_name)
 
     # Request accounts for party and check governance asset balance
-    party_accounts = data_client.PartyAccounts(
-        data_node_protos.trading_data.PartyAccountsRequest(
-            party_id=pub_key, asset=vote_asset_id
-        )
-    ).accounts
+    party_accounts = data_raw.party_accounts(
+        data_client=data_client, asset_id=vote_asset_id, party_id=pub_key
+    )
 
     voting_balance = 0
     for account in party_accounts:
@@ -136,7 +136,7 @@ def propose_future_market(
     wallet_name: str,
     wallet: Wallet,
     settlement_asset_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     termination_pub_key: str,
     governance_asset: str = "VOTE",
     future_asset: str = "BTC",
@@ -199,12 +199,9 @@ def propose_future_market(
     pub_key = wallet.public_key(wallet_name, key_name)
 
     # Request accounts for party and check governance asset balance
-
-    party_accounts = data_client.PartyAccounts(
-        data_node_protos.trading_data.PartyAccountsRequest(
-            party_id=pub_key, asset=vote_asset_id
-        )
-    ).accounts
+    party_accounts = data_raw.party_accounts(
+        data_client=data_client, asset_id=vote_asset_id, party_id=pub_key
+    )
 
     voting_balance = 0
     for account in party_accounts:
@@ -311,7 +308,7 @@ def propose_network_parameter_change(
     wallet: Wallet,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    data_client: Optional[vac.VegaTradingDataClient] = None,
+    data_client: Optional[vac.VegaTradingDataClientV2] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
     key_name: Optional[str] = None,
 ):
@@ -388,7 +385,7 @@ def propose_asset(
     name: str,
     symbol: str,
     decimals: int,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     quantum: int = 1,
     max_faucet_amount: int = 10e9,
     closing_time: Optional[int] = None,
@@ -433,7 +430,7 @@ def propose_asset(
 
 def _build_generic_proposal(
     pub_key: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
 ) -> commands_protos.commands.ProposalSubmission:
@@ -471,7 +468,7 @@ def _make_and_wait_for_proposal(
     wallet_name: str,
     wallet: Wallet,
     proposal: commands_protos.commands.ProposalSubmission,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     time_forward_fn: Optional[Callable[[], None]] = None,
     key_name: Optional[str] = None,
 ) -> ProposalSubmission:

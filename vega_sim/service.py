@@ -382,7 +382,7 @@ class VegaService(ABC):
             key_name:
                 optionaL, str, name of key in wallet to use
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
 
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
@@ -392,7 +392,7 @@ class VegaService(ABC):
             decimals=decimals,
             max_faucet_amount=max_faucet_amount * 10**decimals,
             quantum=quantum,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
@@ -415,11 +415,11 @@ class VegaService(ABC):
         proposal_key_name: Optional[str] = None,
     ):
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
 
         proposal_id = gov.propose_market_from_config(
             wallet=self.wallet,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             proposal_wallet_name=proposal_wallet_name,
             proposal_key_name=proposal_key_name,
             market_config=market_config,
@@ -485,7 +485,7 @@ class VegaService(ABC):
         if future_asset is not None:
             additional_kwargs["future_asset"] = future_asset
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
 
         risk_model = vega_protos.markets.LogNormalRiskModel(
             risk_aversion_parameter=risk_aversion,
@@ -498,7 +498,7 @@ class VegaService(ABC):
             wallet_name=proposal_wallet,
             key_name=key_name,
             settlement_asset_id=settlement_asset_id,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             termination_pub_key=self.wallet.public_key(
                 termination_wallet, termination_key
             ),
@@ -783,14 +783,14 @@ class VegaService(ABC):
         Returns:
             str, the ID of the proposal
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
             value=new_value,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             time_forward_fn=lambda: self.wait_fn(2),
@@ -1270,7 +1270,7 @@ class VegaService(ABC):
         return data.find_asset_id(
             symbol=symbol,
             raise_on_missing=raise_on_missing,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
         )
 
     @raw_data

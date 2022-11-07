@@ -7,7 +7,8 @@ from time import time
 from typing import Callable, List, Optional, Tuple, Union
 
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
+
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
@@ -97,7 +98,7 @@ def submit_order(
 
     if expires_at is None:
         blockchain_time = data_client.GetVegaTime(
-            data_node_protos.trading_data.GetVegaTimeRequest()
+            data_node_protos_v2.trading_data.GetVegaTimeRequest()
         ).timestamp
         expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
 
@@ -138,8 +139,10 @@ def submit_order(
     if wait:
 
         def _proposal_loader(order_ref: str) -> vega_protos.vega.Order:
-            order_ref_request = data_node_protos.trading_data.OrderByReferenceRequest(
-                reference=order_ref
+            order_ref_request = (
+                data_node_protos_v2.trading_data.OrderByReferenceRequest(
+                    reference=order_ref
+                )
             )
             return data_client.OrderByReference(order_ref_request).order
 

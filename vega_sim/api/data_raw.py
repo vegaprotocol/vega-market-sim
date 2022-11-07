@@ -4,7 +4,6 @@ from collections import namedtuple
 from typing import Callable, Dict, Iterable, List, Optional, TypeVar
 
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
@@ -14,23 +13,6 @@ MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
 T = TypeVar("T")
 S = TypeVar("S")
 U = TypeVar("U")
-
-
-def unroll_pagination(
-    base_request: S, extraction_func: Callable[[S], List[T]], step_size: int = 50
-) -> List[T]:
-    skip = 0
-    base_request.pagination.CopyFrom(
-        data_node_protos.trading_data.Pagination(skip=skip, limit=step_size)
-    )
-    curr_list = extraction_func(base_request)
-    full_list = curr_list
-    while len(curr_list) == step_size:
-        skip += step_size
-        base_request.pagination.skip = skip
-        curr_list = extraction_func(base_request)
-        full_list.extend(curr_list)
-    return full_list
 
 
 def unroll_v2_pagination(
@@ -88,6 +70,14 @@ def market_info(
     return data_client.GetMarket(
         data_node_protos_v2.trading_data.GetMarketRequest(market_id=market_id)
     ).market
+
+
+def list_assets(data_client: vac.VegaTradingDataClientV2):
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListAssetsRequest(),
+        request_func=lambda x: data_client.ListAssets(x).assets,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
 
 
 def asset_info(
