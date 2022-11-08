@@ -82,37 +82,55 @@ def core_servicer_and_port():
     return server, port, MockCoreServicer
 
 
-def test_positions_by_market(trading_data_servicer_and_port):
-    def PositionsByParty(self, request, context):
-        return data_node_protos.trading_data.PositionsByPartyResponse(
-            positions=[
-                vega_protos.vega.Position(
-                    market_id=request.market_id,
-                    party_id=request.party_id,
-                    open_volume=1,
-                    realised_pnl="100",
+def test_positions_by_market(trading_data_v2_servicer_and_port):
+    def ListPositions(self, request, context):
+
+        return data_node_protos_v2.trading_data.ListPositionsResponse(
+            positions=data_node_protos_v2.trading_data.PositionConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.vega.Position(
-                    market_id=request.market_id,
-                    party_id=request.party_id,
-                    open_volume=2,
-                    realised_pnl="200",
-                ),
-                vega_protos.vega.Position(
-                    market_id=request.market_id,
-                    party_id=request.party_id,
-                    open_volume=3,
-                    realised_pnl="300",
-                ),
-            ]
+                edges=[
+                    data_node_protos_v2.trading_data.PositionEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Position(
+                            market_id=request.market_id,
+                            party_id=request.party_id,
+                            open_volume=1,
+                            realised_pnl="100",
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.PositionEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Position(
+                            market_id=request.market_id,
+                            party_id=request.party_id,
+                            open_volume=2,
+                            realised_pnl="200",
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.PositionEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Position(
+                            market_id=request.market_id,
+                            party_id=request.party_id,
+                            open_volume=3,
+                            realised_pnl="300",
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.PositionsByParty = PositionsByParty
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListPositions = ListPositions
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = positions_by_market("PUB_KEY", market_id="MARK_ID", data_client=data_client)
 
     assert len(res) == 3
