@@ -786,7 +786,6 @@ def margin_levels(
 
 def get_trades(
     data_client: vac.VegaTradingDataClientV2,
-    data_client_v1: vac.VegaTradingDataClient,
     market_id: str,
     party_id: Optional[str] = None,
     order_id: Optional[str] = None,
@@ -808,18 +807,18 @@ def get_trades(
     for trade in base_trades:
         if trade.market_id not in market_price_decimals_map:
             market_price_decimals_map[trade.market_id] = market_price_decimals(
-                market_id=trade.market_id, data_client=data_client_v1
+                market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_position_decimals_map:
             market_position_decimals_map[trade.market_id] = market_position_decimals(
-                market_id=trade.market_id, data_client=data_client_v1
+                market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
             market_asset_decimals_map[trade.market_id] = asset_decimals(
                 asset_id=data_raw.market_info(
-                    market_id=market_id, data_client=data_client_v1
+                    market_id=market_id, data_client=data_client
                 ).tradable_instrument.instrument.future.settlement_asset,
-                data_client=data_client_v1,
+                data_client=data_client,
             )
         res_trades.append(
             _trade_from_proto(

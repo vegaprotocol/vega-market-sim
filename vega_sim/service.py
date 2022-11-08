@@ -1500,7 +1500,7 @@ class VegaService(ABC):
             asset_dp = self.asset_decimals[self.market_to_asset[market_id]]
         return data.get_trades(
             self.trading_data_client_v2,
-            data_client_v1=self.trading_data_client,
+            data_client_v1=self.trading_data_client_v2,
             party_id=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             order_id=order_id,
