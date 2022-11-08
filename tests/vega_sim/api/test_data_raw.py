@@ -430,20 +430,20 @@ def test_infrastructure_fee_accounts(trading_data_v2_servicer_and_port):
     assert res[0] == expected
 
 
-def test_order_status(trading_data_servicer_and_port):
+def test_order_status(trading_data_v2_servicer_and_port):
     expected = vega_protos.vega.Order(id="foo")
 
-    def OrderByID(self, request, context):
-        return data_node_protos.trading_data.OrderByIDResponse(
+    def GetOrder(self, request, context):
+        return data_node_protos_v2.trading_data.GetOrderResponse(
             order=vega_protos.vega.Order(id=request.order_id)
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.OrderByID = OrderByID
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetOrder = GetOrder
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = order_status(order_id="foo", data_client=data_client)
 
     assert res == expected
