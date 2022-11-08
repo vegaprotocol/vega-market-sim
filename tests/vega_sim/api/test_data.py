@@ -45,39 +45,55 @@ from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
 from vega_sim.proto.vega.api.v1.core_pb2_grpc import add_CoreServiceServicer_to_server
 
 
-def test_party_account(trading_data_servicer_and_port):
-    def PartyAccounts(self, request, context):
-        return data_node_protos.trading_data.PartyAccountsResponse(
-            accounts=[
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="1051",
-                    type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+def test_party_account(trading_data_v2_servicer_and_port):
+    def ListAccounts(self, request, context):
+        return data_node_protos_v2.trading_data.ListAccountsResponse(
+            accounts=data_node_protos_v2.trading_data.AccountsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="2041",
-                    type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
-                ),
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="5235",
-                    type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-                ),
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="6423",
-                    type=vega_protos.vega.ACCOUNT_TYPE_MARGIN,
-                ),
-            ]
+                edges=[
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            balance="1051",
+                            type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            balance="2041",
+                            type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            balance="5235",
+                            type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            balance="6423",
+                            type=vega_protos.vega.ACCOUNT_TYPE_MARGIN,
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.PartyAccounts = PartyAccounts
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAccounts = ListAccounts
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = party_account(
         "PUB_KEY",
         asset_id="a1",
