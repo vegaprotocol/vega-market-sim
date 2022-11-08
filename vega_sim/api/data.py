@@ -765,7 +765,6 @@ def has_liquidity_provision(
 
 def margin_levels(
     data_client: vac.VegaTradingDataClientV2,
-    data_client_v1: vac.VegaTradingDataClient,
     party_id: str,
     market_id: Optional[str] = None,
 ) -> List[MarginLevels]:
@@ -777,7 +776,7 @@ def margin_levels(
     for margin in margins:
         if margin.asset not in asset_dp:
             asset_dp[margin.asset] = asset_decimals(
-                asset_id=margin.asset, data_client=data_client_v1
+                asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
             _margin_level_from_proto(margin, asset_decimals=asset_dp[margin.asset])

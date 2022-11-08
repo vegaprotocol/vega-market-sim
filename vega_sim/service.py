@@ -1436,7 +1436,6 @@ class VegaService(ABC):
     ) -> List[data.MarginLevels]:
         return data.margin_levels(
             self.trading_data_client_v2,
-            self.trading_data_client,
             party_id=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
         )
