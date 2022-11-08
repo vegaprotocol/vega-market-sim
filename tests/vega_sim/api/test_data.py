@@ -741,7 +741,6 @@ def test_get_trades(
         party_id="party",
         market_id="market",
         data_client=data_client,
-        data_client_v1=None,
     )
 
     assert res == expected
