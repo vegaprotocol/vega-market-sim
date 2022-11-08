@@ -369,22 +369,22 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-def test_market_data(trading_data_servicer_and_port):
+def test_market_data(trading_data_v2_servicer_and_port):
     expected = vega_protos.vega.MarketData(mid_price="100", market="foobar")
 
-    def MarketDataByID(self, request, context):
-        return data_node_protos.trading_data.MarketDataByIDResponse(
+    def GetLatestMarketData(self, request, context):
+        return data_node_protos_v2.trading_data.GetLatestMarketDataResponse(
             market_data=vega_protos.vega.MarketData(
                 mid_price="100", market=request.market_id
             )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.MarketDataByID = MarketDataByID
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetLatestMarketData = GetLatestMarketData
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = market_data(market_id="foobar", data_client=data_client)
 
     assert res == expected
