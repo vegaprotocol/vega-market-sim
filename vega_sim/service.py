@@ -244,7 +244,7 @@ class VegaService(ABC):
         return self._core_client
 
     def wait_for_datanode_sync(self) -> None:
-        wait_for_datanode_sync(self.trading_data_client, self.core_client)
+        wait_for_datanode_sync(self.trading_data_client_v2, self.core_client)
 
     def wait_for_core_catchup(self) -> None:
         wait_for_core_catchup(self.core_client)
@@ -841,7 +841,7 @@ class VegaService(ABC):
                 " market"
             )
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
+        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
 
         current_market = self.market_info(market_id=market_id)
 
