@@ -290,7 +290,7 @@ def test_all_market_accounts(trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-def test_market_accounts(trading_data_servicer_and_port):
+def test_market_accounts(trading_data_v2_servicer_and_port):
     expected = MarketAccount(
         vega_protos.vega.Account(
             id="ins",
@@ -306,42 +306,62 @@ def test_market_accounts(trading_data_servicer_and_port):
         ),
     )
 
-    def MarketAccounts(self, request, context):
-        return data_node_protos.trading_data.MarketAccountsResponse(
-            accounts=[
-                vega_protos.vega.Account(
-                    id="a1",
-                    asset=request.asset,
-                    market_id=request.market_id,
-                    type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+    def ListAccounts(self, request, context):
+        return data_node_protos_v2.trading_data.ListAccountsResponse(
+            accounts=data_node_protos_v2.trading_data.AccountsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.vega.Account(
-                    id="a2",
-                    asset=request.asset,
-                    market_id=request.market_id,
-                    type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-                ),
-                vega_protos.vega.Account(
-                    id="liq",
-                    asset=request.asset,
-                    market_id=request.market_id,
-                    type=vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY,
-                ),
-                vega_protos.vega.Account(
-                    id="ins",
-                    asset=request.asset,
-                    market_id=request.market_id,
-                    type=vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
-                ),
-            ]
+                edges=[
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            id="a1",
+                            asset=request.filter.asset_id,
+                            market_id=request.filter.market_ids[0],
+                            type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            id="a2",
+                            asset=request.filter.asset_id,
+                            market_id=request.filter.market_ids[0],
+                            type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            id="liq",
+                            asset=request.filter.asset_id,
+                            market_id=request.filter.market_ids[0],
+                            type=vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=vega_protos.vega.Account(
+                            id="ins",
+                            asset=request.filter.asset_id,
+                            market_id=request.filter.market_ids[0],
+                            type=vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.MarketAccounts = MarketAccounts
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAccounts = ListAccounts
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = market_accounts(
         market_id="market1", asset_id="asset1", data_client=data_client
     )
