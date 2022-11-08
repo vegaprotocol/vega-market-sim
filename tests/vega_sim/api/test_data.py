@@ -645,7 +645,6 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
         party_id="party",
         market_id="market",
         data_client=data_client,
-        data_client_v1=None,
     )
 
     assert res == expected
