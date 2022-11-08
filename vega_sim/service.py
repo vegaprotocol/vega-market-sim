@@ -666,7 +666,7 @@ class VegaService(ABC):
 
     def get_blockchain_time(self) -> int:
         """Returns blockchain time in seconds since the epoch"""
-        return gov.get_blockchain_time(self.trading_data_client)
+        return gov.get_blockchain_time(self.trading_data_client_v2)
 
     def amend_order(
         self,
@@ -1058,7 +1058,7 @@ class VegaService(ABC):
         market_id: str,
     ) -> data.OrderBook:
         return data.order_book_by_market(
-            market_id=market_id, data_client=self.trading_data_client
+            market_id=market_id, data_client=self.trading_data_client_v2
         )
 
     def market_depth(self, market_id: str, num_levels: int = 5) -> data.MarketDepth:
