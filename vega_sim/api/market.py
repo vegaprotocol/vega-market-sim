@@ -57,7 +57,7 @@ import logging
 from typing import Optional
 
 import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.oracles.v1 as oracles_protos
+import vega_sim.proto.vega.data.v1 as oracles_protos
 
 
 def rsetattr(obj, attr, val):
@@ -73,15 +73,12 @@ def rgetattr(obj, attr, *args):
 
 
 class Config:
-
     OPTS = {}
 
     def __init__(self, opt: Optional[str] = None) -> None:
-
         self.load(opt=opt)
 
     def load(self, opt: Optional[str] = None):
-
         if opt is None:
             opt = list(self.OPTS.keys())[0]
             logging.debug(f"No 'opt' arg given. Using default value '{opt}'.")
@@ -93,7 +90,6 @@ class Config:
 
 
 class MarketConfig(Config):
-
     OPTS = {
         "default": {
             "decimal_places": 4,
@@ -107,7 +103,6 @@ class MarketConfig(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.decimal_places = self.OPTS[opt]["decimal_places"]
@@ -141,7 +136,6 @@ class MarketConfig(Config):
 
 
 class PriceMonitoringParameters(Config):
-
     OPTS = {
         "default": {
             "horizon": 24 * 3600,
@@ -151,7 +145,6 @@ class PriceMonitoringParameters(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.horizon = self.OPTS[opt]["horizon"]
@@ -171,7 +164,6 @@ class PriceMonitoringParameters(Config):
 
 
 class LiquidityMonitoringParameters(Config):
-
     OPTS = {
         "default": {
             "triggering_ratio": 0.7,
@@ -181,7 +173,6 @@ class LiquidityMonitoringParameters(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.triggering_ratio = self.OPTS[opt]["triggering_ratio"]
@@ -200,7 +191,6 @@ class LiquidityMonitoringParameters(Config):
 
 
 class TargetStakeParameters(Config):
-
     OPTS = {
         "default": {
             "time_window": 60 * 60,
@@ -209,7 +199,6 @@ class TargetStakeParameters(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.time_window = self.OPTS[opt]["time_window"]
@@ -223,7 +212,6 @@ class TargetStakeParameters(Config):
 
 
 class LogNormalRiskModel(Config):
-
     OPTS = {
         "default": {
             "risk_aversion_parameter": 0.01,
@@ -233,7 +221,6 @@ class LogNormalRiskModel(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.risk_aversion_parameter = self.OPTS[opt]["risk_aversion_parameter"]
@@ -250,7 +237,6 @@ class LogNormalRiskModel(Config):
 
 
 class LogNormalModelParams(Config):
-
     OPTS = {
         "default": {
             "mu": 0,
@@ -263,7 +249,6 @@ class LogNormalModelParams(Config):
         super().__init__(opt)
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.mu = self.OPTS[opt]["mu"]
@@ -279,7 +264,6 @@ class LogNormalModelParams(Config):
 
 
 class InstrumentConfiguration(Config):
-
     OPTS = {
         "default": {
             "name": None,
@@ -289,7 +273,6 @@ class InstrumentConfiguration(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.name = self.OPTS[opt]["name"]
@@ -303,7 +286,6 @@ class InstrumentConfiguration(Config):
 
 
 class FutureProduct(Config):
-
     OPTS = {
         "default": {
             "settlement_asset": None,
@@ -314,7 +296,6 @@ class FutureProduct(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-
         opt = super().load(opt=opt)
 
         self.settlement_asset = self.OPTS[opt]["settlement_asset"]
@@ -323,7 +304,6 @@ class FutureProduct(Config):
         self.terminating_key = self.OPTS[opt]["terminating_key"]
 
     def build(self):
-
         if None in [
             self.settlement_asset,
             self.quote_name,
@@ -342,21 +322,31 @@ class FutureProduct(Config):
                 f"MarketConfig has not been updated with settlement asset information."
             )
 
-        oracle_spec_for_settlement_data = oracles_protos.spec.OracleSpecConfiguration(
-            pub_keys=[self.terminating_key],
-            filters=[
-                oracles_protos.spec.Filter(
-                    key=oracles_protos.spec.PropertyKey(
-                        name=f"price.{self.quote_name}.value",
-                        type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                    ),
-                    conditions=[],
-                )
-            ],
+        data_source_spec_for_settlement_data = (
+            oracles_protos.spec.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"price.{self.quote_name}.value",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                        ),
+                        conditions=[],
+                    )
+                ],
+            )
         )
-        oracle_spec_for_trading_termination = (
-            oracles_protos.spec.OracleSpecConfiguration(
-                pub_keys=[self.terminating_key],
+        data_source_spec_for_trading_termination = (
+            oracles_protos.spec.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
+                    )
+                ],
                 filters=[
                     oracles_protos.spec.Filter(
                         key=oracles_protos.spec.PropertyKey(
@@ -368,7 +358,7 @@ class FutureProduct(Config):
                 ],
             )
         )
-        oracle_spec_binding = vega_protos.markets.OracleSpecToFutureBinding(
+        data_source_spec_binding = vega_protos.markets.DataSourceSpecToFutureBinding(
             settlement_data_property=f"price.{self.quote_name}.value",
             trading_termination_property="trading.terminated",
         )
@@ -376,8 +366,8 @@ class FutureProduct(Config):
         return vega_protos.governance.FutureProduct(
             settlement_asset=self.settlement_asset,
             quote_name=self.quote_name,
-            oracle_spec_for_settlement_data=oracle_spec_for_settlement_data,
-            oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
-            oracle_spec_binding=oracle_spec_binding,
+            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+            data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
+            data_source_spec_binding=data_source_spec_binding,
             settlement_data_decimals=self.settlement_data_decimals,
         )

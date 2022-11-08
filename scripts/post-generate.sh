@@ -9,7 +9,7 @@ for x in \
 	vega/checkpoint/v1 \
 	vega/commands/v1 \
 	vega/events/v1 \
-	vega/oracles/v1 \
+	vega/data/v1 \
 	vega/snapshot/v1 \
 	vega/wallet/v1
 do
@@ -53,7 +53,7 @@ for x in \
 	vega/checkpoint \
 	vega/commands \
 	vega/events \
-	vega/oracles \
+	vega/data \
 	vega/snapshot \
 	vega/wallet
 do
@@ -95,7 +95,7 @@ for x in \
 	vega/checkpoint \
 	vega/commands \
 	vega/events \
-	vega/oracles \
+	vega/data \
 	vega/snapshot \
 	vega/wallet
 do
@@ -106,7 +106,7 @@ find "$generated_dir/vega" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in
 	-e 's#^from vega import ([a-z_]*)_pb2 as #from . import \1_pb2 as #' \
 	-e 's#^from vega.commands.v1 import#from .commands.v1 import#' \
 	-e 's#^from vega.events.v1 import#from .events.v1 import#' \
-	-e 's#^from vega.oracles.v1 import#from .oracles.v1 import#' \
+	-e 's#^from vega.data.v1 import#from .data.v1 import#' \
 	-e 's#^from vega.snapshot.v1 import#from .snapshot.v1 import#' \
 	-e 's#^from vega.wallet.v1 import#from .wallet.v1 import#' \
 	-e 's#^from vega.checkpoint.v1 import#from .checkpoint.v1 import#' \
@@ -117,7 +117,7 @@ find "$generated_dir/vega/api" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed 
 	-e 's#^from vega.api import #from . import #' \
 	-e 's#^from vega.commands.v1 import#from ..commands.v1 import#' \
 	-e 's#^from vega.events.v1 import#from ..events.v1 import#' \
-	-e 's#^from vega.oracles.v1 import#from ..oracles.v1 import#' \
+	-e 's#^from vega.data.v1 import#from ..data.v1 import#' \
 	-e 's#^from vega.snapshot.v1 import#from ..snapshot.v1 import#' \
 	-e 's#^from vega.wallet.v1 import#from ..wallet.v1 import#' \
 	-e 's#^from vega.checkpoint.v1 import#from ..checkpoint.v1 import#' \
@@ -128,26 +128,26 @@ find \
 	"$generated_dir/vega/checkpoint/v1" \
 	"$generated_dir/vega/commands/v1" \
 	"$generated_dir/vega/events/v1" \
-	"$generated_dir/vega/oracles/v1" \
+	"$generated_dir/vega/data/v1" \
 	"$generated_dir/vega/snapshot/v1" \
 	"$generated_dir/vega/wallet/v1" \
 	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from ... import \1_pb2 as#' \
-	-e 's#^from vega.(api.v1|commands.v1|events.v1|oracles.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ...\1 import #' \
+	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ...\1 import #' \
 	-e 's#^import ([a-z_]*_pb2) as #from ... import \1 as #'
 
 find \
 	"$generated_dir/data_node/api/v1" \
 	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from ....vega import \1_pb2 as#' \
-	-e 's#^from vega.(api.v1|commands.v1|events.v1|oracles.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ....vega.\1 import #' \
+	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ....vega.\1 import #' \
 	-e 's#^from data_node.(api.v1) import #from ...\1 import #'
 
 find \
 	"$generated_dir/data_node/api/v2" \
 	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from ....vega import \1_pb2 as#' \
-	-e 's#^from vega.(api.v1|commands.v1|events.v1|oracles.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ....vega.\1 import #' \
+	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ....vega.\1 import #' \
 	-e 's#^from data_node.(api.v2) import #from ...\1 import #'
 
 find "$generated_dir" -name '*.py' -print0 | xargs -0r sed --in-place -re 's#[ \t]+$##'

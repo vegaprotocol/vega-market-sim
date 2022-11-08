@@ -414,7 +414,6 @@ class VegaService(ABC):
         market_config: market.MarketConfig,
         proposal_key_name: Optional[str] = None,
     ):
-
         blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client)
 
         proposal_id = gov.propose_market_from_config(
@@ -850,15 +849,15 @@ class VegaService(ABC):
             curr_fut = curr_inst.future
             curr_fut_prod = UpdateFutureProduct(
                 quote_name=curr_fut.quote_name,
-                oracle_spec_for_settlement_data=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-                    pub_keys=curr_fut.oracle_spec_for_settlement_data.pub_keys,
-                    filters=curr_fut.oracle_spec_for_settlement_data.filters,
+                data_source_spec_for_settlement_data=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
+                    pub_keys=curr_fut.data_source_spec_for_settlement_data.config.pub_keys,
+                    filters=curr_fut.data_source_spec_for_settlement_data.config.filters,
                 ),
-                oracle_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-                    pub_keys=curr_fut.oracle_spec_for_trading_termination.pub_keys,
-                    filters=curr_fut.oracle_spec_for_trading_termination.filters,
+                data_source_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
+                    pub_keys=curr_fut.data_source_spec_for_trading_termination.config.pub_keys,
+                    filters=curr_fut.data_source_spec_for_trading_termination.config.filters,
                 ),
-                oracle_spec_binding=curr_fut.oracle_spec_binding,
+                data_source_spec_binding=curr_fut.data_source_spec_binding,
                 settlement_data_decimals=curr_fut.settlement_data_decimals,
             )
             updated_instrument = UpdateInstrumentConfiguration(
@@ -916,7 +915,9 @@ class VegaService(ABC):
         future_inst = data_raw.market_info(
             market_id, data_client=self.trading_data_client
         ).tradable_instrument.instrument.future
-        oracle_name = future_inst.oracle_spec_for_settlement_data.filters[0].key.name
+        oracle_name = future_inst.data_source_spec_for_settlement_data.config.filters[
+            0
+        ].key.name
 
         logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 

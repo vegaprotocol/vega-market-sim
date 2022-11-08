@@ -183,7 +183,7 @@ TAU_SCALING_FACTOR_IDEAL_v2 = SingleParameterExperiment(
 BOND_PENALTY_FACTOR_IDEAL_v2 = SingleParameterExperiment(
     name="BondPenalty_v2",
     parameter_to_vary="market.liquidity.bondPenaltyParameter",
-    values=["0.5", "10", "50"],
+    values=["0.0", "0.5", "1.0"],
     scenario=IdealMarketMakerV2(
         market_decimal=3,
         asset_decimal=5,
@@ -262,7 +262,9 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
 
 MARKET_PARAMETER_DEMO = SingleParameterExperiment(
     name="MarketParameterDemo",
-    parameter_to_vary="liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+    parameter_to_vary=(
+        "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor"
+    ),
     values=[1, 10, 100],
     scenario=ConfigurableMarket(
         market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
