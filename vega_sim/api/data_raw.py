@@ -48,7 +48,7 @@ def positions_by_market(
 
 
 def all_markets(
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> List[vega_protos.markets.Market]:
     """
     Output market info.
@@ -90,7 +90,7 @@ def asset_info(
         asset_id:
             str, The ID of the asset requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         vega.assets.Asset, Object containing data about the requested asset
@@ -252,7 +252,7 @@ def order_status(
         order_id:
             str, the order identifier as specified by Vega when originally placed
         data_client:
-            VegaTradingDataClient, an instantiated gRPC trading data client
+            VegaTradingDataClientV2, an instantiated gRPC trading data client
         version:
             int, Optional, Version of the order:
                 - Set `version` to 0 for most recent version of the order
@@ -289,7 +289,7 @@ def liquidity_provisions(
 
     Args:
         data_client:
-            VegaTradingDataClient, an instantiated gRPC trading data client
+            VegaTradingDataClientV2, an instantiated gRPC trading data client
         market_id:
             Optional[str], the ID of the market from which to pull liquidity provisions
         party_id:

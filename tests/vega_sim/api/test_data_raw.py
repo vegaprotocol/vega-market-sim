@@ -3,7 +3,6 @@ import pytest
 from concurrent.futures import ThreadPoolExecutor
 from vega_sim.grpc.client import (
     VegaCoreClient,
-    VegaTradingDataClient,
     VegaTradingDataClientV2,
 )
 from vega_sim.null_service import find_free_port

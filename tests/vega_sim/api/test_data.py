@@ -33,7 +33,6 @@ from vega_sim.api.data import (
 )
 from vega_sim.grpc.client import (
     VegaCoreClient,
-    VegaTradingDataClient,
     VegaTradingDataClientV2,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (

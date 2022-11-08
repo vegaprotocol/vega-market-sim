@@ -281,7 +281,7 @@ def find_market_id(
         symbol:
             str, The symbol of the asset to look up
         data_client:
-            VegaTradingDataClient, the gRPC data client
+            VegaTradingDataClientV2, the gRPC data client
         raise_on_missing:
             bool, whether to raise an Error or silently return
                 if the asset does not exist
@@ -326,7 +326,7 @@ def find_asset_id(
         symbol:
             str, The symbol of the asset to look up
         data_client:
-            VegaTradingDataClient, the gRPC data client
+            VegaTradingDataClientV2, the gRPC data client
         raise_on_missing:
             bool, whether to raise an Error or silently return
                 if the asset does not exist
@@ -356,7 +356,7 @@ def market_price_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         int, The number of decimal places the market uses
@@ -376,7 +376,7 @@ def market_position_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         int, The number of decimal places the market uses for positions
@@ -396,7 +396,7 @@ def asset_decimals(
         asset_id:
             str, The ID of the asset requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         int, The number of decimal places the asset uses
@@ -440,7 +440,7 @@ def open_orders_by_market(
         market_id:
             str, ID for the market to load
         data_client:
-            VegaTradingDataClient, instantiated gRPC client
+            VegaTradingDataClientV2, instantiated gRPC client
 
     Returns:
         OrdersBySide, Live orders segregated by side
@@ -474,10 +474,8 @@ def list_orders(
     """Return a list of converted orders for the specified market, party, and reference.
 
     Args:
-        data_client (vac.VegaTradingDataClient):
-            An instantiated gRPC trading_data_client.
-        data_client_v2 (vac.VegaTradingDataClientV2):
-            An instantiated gRPC trading_data_client_V2.
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading_data_client_v2.
         market_id (str):
             Id of market to return orders for.
         party_id (str):
@@ -543,7 +541,7 @@ def all_orders(
         market_id:
             str, ID for the market to load
         data_client:
-            VegaTradingDataClient, instantiated gRPC client
+            VegaTradingDataClientV2, instantiated gRPC client
         open_only:
             bool, default False, whether to only return still
                 open orders
@@ -693,7 +691,7 @@ def market_depth(
 
 def order_subscription(
     data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[Order]:

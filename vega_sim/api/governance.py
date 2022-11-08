@@ -165,7 +165,7 @@ def propose_future_market(
         settlement_asset_id:
             str, the asset id the market will use for settlement
         data_client:
-            VegaTradingDataClient, an instantiated gRPC client for interacting with the
+            VegaTradingDataClientV2, an instantiated gRPC client for interacting with the
                 Vega data node
         termination_pub_key:
             str, the public key of the oracle to be used for trading termination

@@ -55,7 +55,7 @@ def submit_order(
         wallet_name:
             str, the wallet name performing the action
         data_client:
-            VegaTradingDataClient, a gRPC data client to the vega data node
+            VegaTradingDataClientV2, a gRPC data client to the vega data node
         wallet:
             Wallet, wallet client
         pub_key:
