@@ -114,37 +114,54 @@ def test_party_account(trading_data_v2_servicer_and_port):
         assert res2 == res
 
 
-def test_find_asset_id(trading_data_servicer_and_port):
-    def Assets(self, request, context):
-        return data_node_protos.trading_data.AssetsResponse(
-            assets=[
-                vega_protos.assets.Asset(
-                    id="asset1_id",
-                    details=vega_protos.assets.AssetDetails(
-                        name="asset1", symbol="A1", decimals=5
-                    ),
+def test_find_asset_id(trading_data_v2_servicer_and_port):
+    def ListAssets(self, request, context):
+        return data_node_protos_v2.trading_data.ListAssetsResponse(
+            assets=data_node_protos_v2.trading_data.AssetsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.assets.Asset(
-                    id="asset2_id",
-                    details=vega_protos.assets.AssetDetails(
-                        name="asset2", symbol="A2", decimals=5
+                edges=[
+                    data_node_protos_v2.trading_data.AssetEdge(
+                        cursor="cursor",
+                        node=vega_protos.assets.Asset(
+                            id="asset1_id",
+                            details=vega_protos.assets.AssetDetails(
+                                name="asset1", symbol="A1", decimals=5
+                            ),
+                        ),
                     ),
-                ),
-                vega_protos.assets.Asset(
-                    id="asset3_id",
-                    details=vega_protos.assets.AssetDetails(
-                        name="asset3", symbol="A3", decimals=5
+                    data_node_protos_v2.trading_data.AssetEdge(
+                        cursor="cursor",
+                        node=vega_protos.assets.Asset(
+                            id="asset2_id",
+                            details=vega_protos.assets.AssetDetails(
+                                name="asset2", symbol="A2", decimals=5
+                            ),
+                        ),
                     ),
-                ),
-            ]
+                    data_node_protos_v2.trading_data.AssetEdge(
+                        cursor="cursor",
+                        node=vega_protos.assets.Asset(
+                            id="asset3_id",
+                            details=vega_protos.assets.AssetDetails(
+                                name="asset3", symbol="A3", decimals=5
+                            ),
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.Assets = Assets
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAssets = ListAssets
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = find_asset_id(symbol="A2", data_client=data_client)
     assert res == "asset2_id"
 
