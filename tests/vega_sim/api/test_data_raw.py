@@ -212,18 +212,18 @@ def test_market_info(trading_data_v2_servicer_and_port):
     assert res.state == vega_protos.markets.Market.State.STATE_ACTIVE
 
 
-def test_asset_info(trading_data_servicer_and_port):
-    def AssetByID(self, request, context):
-        return data_node_protos.trading_data.AssetByIDResponse(
-            asset=vega_protos.assets.Asset(id=request.id)
+def test_asset_info(trading_data_v2_servicer_and_port):
+    def GetAsset(self, request, context):
+        return data_node_protos_v2.trading_data.GetAssetResponse(
+            asset=vega_protos.assets.Asset(id=request.asset_id)
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.AssetByID = AssetByID
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetAsset = GetAsset
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = asset_info(asset_id="foobar", data_client=data_client)
 
     assert res.id == "foobar"
