@@ -449,22 +449,33 @@ def test_order_status(trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-def test_liquidity_provisions(trading_data_servicer_and_port):
-    def LiquidityProvisions(self, request, context):
-        return data_node_protos.trading_data.LiquidityProvisionsResponse(
-            liquidity_provisions=[
-                vega_protos.vega.LiquidityProvision(
-                    market_id=request.market, party_id=request.party
-                )
-            ]
+def test_liquidity_provisions(trading_data_v2_servicer_and_port):
+    def ListLiquidityProvisions(self, request, context):
+        return data_node_protos_v2.trading_data.ListLiquidityProvisionsResponse(
+            liquidity_provisions=data_node_protos_v2.trading_data.LiquidityProvisionsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.LiquidityProvisionsEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.LiquidityProvision(
+                            market_id=request.market_id, party_id=request.party_id
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.LiquidityProvisions = LiquidityProvisions
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListLiquidityProvisions = ListLiquidityProvisions
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = liquidity_provisions(
         market_id="MARKET", party_id="PARTY", data_client=data_client
     )
