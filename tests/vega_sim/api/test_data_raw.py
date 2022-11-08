@@ -189,9 +189,9 @@ def test_all_markets(trading_data_v2_servicer_and_port):
     )
 
 
-def test_market_info(trading_data_servicer_and_port):
-    def MarketByID(self, request, context):
-        return data_node_protos.trading_data.MarketByIDResponse(
+def test_market_info(trading_data_v2_servicer_and_port):
+    def GetMarket(self, request, context):
+        return data_node_protos_v2.trading_data.GetMarketResponse(
             market=vega_protos.markets.Market(
                 id=request.market_id,
                 decimal_places=5,
@@ -200,12 +200,12 @@ def test_market_info(trading_data_servicer_and_port):
             )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.MarketByID = MarketByID
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetMarket = GetMarket
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = market_info(market_id="foobar", data_client=data_client)
 
     assert res.id == "foobar"
