@@ -319,6 +319,9 @@ class VegaService(ABC):
             num_to_padded_int(amount, asset_decimals),
             faucet_url=self.faucet_url,
         )
+        import pdb
+
+        pdb.set_trace()
         self.wait_fn(1)
         self.wait_for_core_catchup()
         for i in range(500):
