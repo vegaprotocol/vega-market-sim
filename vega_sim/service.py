@@ -894,7 +894,7 @@ class VegaService(ABC):
             market_id=market_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
             time_forward_fn=lambda: self.wait_fn(2),

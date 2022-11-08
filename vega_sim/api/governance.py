@@ -340,7 +340,7 @@ def propose_market_update(
     market_update: vega_protos.governance.UpdateMarketConfiguration,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
-    data_client: Optional[vac.VegaTradingDataClient] = None,
+    data_client: Optional[vac.VegaTradingDataClientV2] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
     key_name: Optional[str] = None,
 ) -> str:
