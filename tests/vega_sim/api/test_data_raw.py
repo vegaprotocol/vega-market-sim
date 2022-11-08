@@ -138,31 +138,46 @@ def test_positions_by_market(trading_data_v2_servicer_and_port):
     assert res[0].party_id == "PUB_KEY"
 
 
-def test_all_markets(trading_data_servicer_and_port):
-    def AllMarkets(self, request, context):
-        return data_node_protos.trading_data.MarketsResponse(
-            markets=[
-                vega_protos.markets.Market(
-                    id="foobar",
-                    decimal_places=5,
-                    trading_mode=vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS,
-                    state=vega_protos.markets.Market.State.STATE_ACTIVE,
+def test_all_markets(trading_data_v2_servicer_and_port):
+    def ListMarkets(self, request, context):
+
+        return data_node_protos_v2.trading_data.ListMarketsResponse(
+            markets=data_node_protos_v2.trading_data.MarketConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.markets.Market(
-                    id="foobar2",
-                    decimal_places=5,
-                    trading_mode=vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS,
-                    state=vega_protos.markets.Market.State.STATE_SUSPENDED,
-                ),
-            ]
+                edges=[
+                    data_node_protos_v2.trading_data.MarketEdge(
+                        cursor="cursor",
+                        node=vega_protos.markets.Market(
+                            id="foobar",
+                            decimal_places=5,
+                            trading_mode=vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS,
+                            state=vega_protos.markets.Market.State.STATE_ACTIVE,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.MarketEdge(
+                        cursor="cursor",
+                        node=vega_protos.markets.Market(
+                            id="foobar2",
+                            decimal_places=5,
+                            trading_mode=vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS,
+                            state=vega_protos.markets.Market.State.STATE_SUSPENDED,
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.Markets = AllMarkets
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListMarkets = ListMarkets
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = all_markets(data_client=data_client)
     market_map = {m.id: m for m in res}
 
