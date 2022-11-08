@@ -586,7 +586,7 @@ def all_orders(
 
 def order_book_by_market(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> OrderBook:
     """
     Output state of order book for a given market.
