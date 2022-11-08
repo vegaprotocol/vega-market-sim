@@ -261,15 +261,15 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
 )
 
 MARKET_PARAMETER_DEMO = SingleParameterExperiment(
-    name="MarketParameterDemo",
-    parameter_to_vary="liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
-    values=[1, 10, 100],
+    name="MarketParameterDemo_Quantum",
+    parameter_to_vary="liquidity_monitoring_parameters.min_LpStake_Quantum.Multiple",
+    values=[0.000001, 0.1, 1, 100, 10000000000],
     scenario=ConfigurableMarket(
         market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
         market_code="ETH:USD",
         asset_name="tUSD",
         asset_dp=18,
-        num_steps=60 * 24,
+        num_steps=12 * 24,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
