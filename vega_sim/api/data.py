@@ -429,7 +429,7 @@ def best_prices(
 
 def open_orders_by_market(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
 ) -> OrdersBySide:
@@ -531,7 +531,7 @@ def list_orders(
 
 def all_orders(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
     open_only: bool = False,
@@ -551,9 +551,9 @@ def all_orders(
     Returns:
         OrdersBySide, Live orders segregated by side
     """
-    orders = data_raw.unroll_pagination(
-        data_node_protos_v2.trading_data.OrdersByMarketRequest(market_id=market_id),
-        lambda x: data_client.OrdersByMarket(x).orders,
+    orders = data_raw.list_orders(
+        market_id=market_id,
+        data_client=data_client,
     )
 
     mkt_price_dp = (

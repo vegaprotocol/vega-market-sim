@@ -1076,7 +1076,7 @@ class VegaService(ABC):
     ) -> data.OrderBook:
         return data.open_orders_by_market(
             market_id=market_id,
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             price_decimals=self.market_price_decimals[market_id],
             position_decimals=self.market_pos_decimals[market_id],
         )
@@ -1400,7 +1400,7 @@ class VegaService(ABC):
             [market_id] if market_id is not None else [m.id for m in self.all_markets()]
         ):
             base_orders.extend(
-                data.all_orders(market_id=m_id, data_client=self.trading_data_client)
+                data.all_orders(market_id=m_id, data_client=self.trading_data_client_v2)
             )
 
         with self.orders_lock:
