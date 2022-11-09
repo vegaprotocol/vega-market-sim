@@ -1445,6 +1445,7 @@ class VegaService(ABC):
         wallet_name: str,
         key_name: str,
         market_id: str,
+        reference: Optional[str] = None,
         live_only: Optional[bool] = True,
     ) -> List[data.Order]:
         """Return a list of orders for the specified market and party.
@@ -1467,6 +1468,7 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             market_id=market_id,
             party_id=self.wallet.public_key(name=wallet_name, key_name=key_name),
+            reference=reference,
             live_only=live_only,
         )
 
