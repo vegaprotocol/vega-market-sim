@@ -33,7 +33,7 @@ if __name__ == "__main__":
         start_order_feed=True,
         retain_log_files=True,
         use_full_vega_wallet=False,
-        # store_transactions=True,
+        store_transactions=True,
     ) as vega:
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
@@ -136,61 +136,61 @@ if __name__ == "__main__":
         #         price=100 + 0.25 * i,
         #     )
 
-        for wallet in [MM_WALLET, MM_WALLET2]:
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_BUY",
-                volume=10,
-                price=99.5,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_BUY",
-                volume=10,
-                price=99,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_BUY",
-                volume=10,
-                price=98,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=10,
-                price=101,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=10,
-                price=102,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=10,
-                price=103,
-            )
+        # for wallet in [MM_WALLET, MM_WALLET2]:
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_BUY",
+        #         volume=10,
+        #         price=99.5,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_BUY",
+        #         volume=10,
+        #         price=99,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_BUY",
+        #         volume=10,
+        #         price=98,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_SELL",
+        #         volume=10,
+        #         price=101,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_SELL",
+        #         volume=10,
+        #         price=102,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_SELL",
+        #         volume=10,
+        #         price=103,
+        #     )
 
         to_cancel = vega.submit_order(
             trading_wallet=MM_WALLET.name,

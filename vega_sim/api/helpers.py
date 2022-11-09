@@ -124,6 +124,9 @@ def wait_for_acceptance(
         time.sleep(0.001)
 
     if not submission_accepted:
+        import pdb
+
+        pdb.set_trace()
         raise ProposalNotAcceptedError(
             "The market did not accept the proposal within the specified time"
         )

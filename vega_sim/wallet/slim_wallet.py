@@ -21,14 +21,6 @@ from vega_sim.wallet.base import VEGA_DEFAULT_KEY_NAME
 
 logger = getLogger(__name__)
 
-TRANSACTION_LEN_BYTES = 8
-
-
-class TransactionType(Enum):
-    TX = auto()
-    STEP = auto()
-    MINT = auto()
-
 
 class SlimWallet(Wallet):
     def __init__(
@@ -39,7 +31,6 @@ class SlimWallet(Wallet):
         full_wallet_default_pass: str = "passwd",
         store_transactions: bool = False,
         log_dir: Optional[str] = None,
-        tx_output: Optional[BufferedWriter] = None,
     ):
         """Creates a wallet to running key generation internally
         and directly sending transactions to the Core node
@@ -80,7 +71,6 @@ class SlimWallet(Wallet):
 
         self.store_transactions = store_transactions
         self.log_dir = log_dir
-        self.tx_file = tx_output
 
         # If it turns out that customising these is useful it's trivial to
         # make a parameter
@@ -138,7 +128,6 @@ class SlimWallet(Wallet):
             self.pub_keys[name] = {}
 
         if self.vega_wallet is None:
-
             self.keys[name][key_name] = SigningKey.generate()
             self.pub_keys[name][key_name] = (
                 self.keys[name][key_name].verify_key.encode(encoder=HexEncoder).decode()
@@ -202,14 +191,6 @@ class SlimWallet(Wallet):
         request = core_proto.SubmitTransactionRequest(
             tx=trans, type=core_proto.SubmitTransactionRequest.Type.TYPE_ASYNC
         )
-        if self.store_transactions:
-            bin_repr = request.SerializeToString()
-
-            self.tx_file.write(
-                (TransactionType.TX.value).to_bytes(TRANSACTION_LEN_BYTES, "big")
-            )
-            self.tx_file.write(len(bin_repr).to_bytes(TRANSACTION_LEN_BYTES, "big"))
-            self.tx_file.write(bin_repr)
 
         submit_future = self.core_client.SubmitTransaction.future(request)
         self.pool.submit(lambda: submit_future.result())

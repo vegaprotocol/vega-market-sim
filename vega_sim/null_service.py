@@ -382,9 +382,16 @@ def manage_vega_processes(
         "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
         "--home=" + tmp_vega_home,
     ]
+
     if store_transactions:
+        replay_file = (
+            replay_from_path
+            if replay_from_path is not None
+            else tmp_vega_home + "/replay"
+        )
         vega_args.extend(
             [
+                f"--blockchain.nullchain.replay-file={replay_file}",
                 "--blockchain.nullchain.record",
             ]
         )
