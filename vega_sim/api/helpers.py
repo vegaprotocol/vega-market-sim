@@ -5,8 +5,8 @@ import time
 from typing import Any, Optional, TypeVar, Union, Callable
 
 import requests
-from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClient
-from vega_sim.proto.data_node.api.v1.trading_data_pb2 import GetVegaTimeRequest
+from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
+from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 
 
 T = TypeVar("T")
@@ -50,7 +50,7 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
 
 
 def wait_for_datanode_sync(
-    trading_data_client: VegaTradingDataClient,
+    trading_data_client: VegaTradingDataClientV2,
     core_data_client: VegaCoreClient,
     max_retries: int = 650,
 ) -> None:
