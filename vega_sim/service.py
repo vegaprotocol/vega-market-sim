@@ -1452,12 +1452,14 @@ class VegaService(ABC):
 
         Args:
             wallet_name (str):
-            Name of wallet to return orders for.
+                Name of wallet to return orders for.
             key_name (str):
-            Name of key to return orders for.
-            market_id:
+                Name of key to return orders for.
+            market_id (str):
                 Id of market to return orders from.
-            live_only (Optional[bool], optional):
+            reference (Optional[str]):
+                Reference of matching orders to return.
+            live_only (Optional[bool]):
                 Whether to return only live orders. Defaults to True.
 
         Returns:
