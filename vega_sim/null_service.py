@@ -30,9 +30,7 @@ from vega_sim.api.helpers import num_to_padded_int
 from vega_sim.service import VegaService
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.slim_wallet import (
-    TRANSACTION_LEN_BYTES,
     SlimWallet,
-    TransactionType,
 )
 from vega_sim.wallet.vega_wallet import VegaWallet
 
