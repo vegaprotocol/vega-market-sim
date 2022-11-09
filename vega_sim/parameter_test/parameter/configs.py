@@ -269,7 +269,7 @@ MARKET_PARAMETER_DEMO = SingleParameterExperiment(
         market_code="ETH:USD",
         asset_name="tUSD",
         asset_dp=18,
-        num_steps=60 * 24,
+        num_steps=60,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
