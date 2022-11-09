@@ -1,24 +1,22 @@
-import base64
 import json
 import logging
 from typing import Callable, Optional
 
-
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.vega as vega_protos
-from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
-import vega_sim.proto.vega.data.v1 as oracles_protos
 import vega_sim.proto.vega.commands.v1 as commands_protos
+import vega_sim.proto.vega.data.v1 as oracles_protos
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
+from vega_sim.api.data import find_asset_id
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
+    enum_to_str,
     generate_id,
     wait_for_acceptance,
-    enum_to_str,
-    forward,
 )
-from vega_sim.api.data import find_asset_id
 from vega_sim.api.market import MarketConfig
+from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 from vega_sim.wallet.base import Wallet
 
 logger = logging.getLogger(__name__)
@@ -223,40 +221,44 @@ def propose_future_market(
         else _default_price_monitoring_parameters()
     )
 
-    data_source_spec_for_settlement_data = (
-        oracles_protos.spec.DataSourceSpecConfiguration(
-            signers=[
-                oracles_protos.data.Signer(
-                    pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
-                )
-            ],
-            filters=[
-                oracles_protos.spec.Filter(
-                    key=oracles_protos.spec.PropertyKey(
-                        name=f"price.{future_asset}.value",
-                        type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                    ),
-                    conditions=[],
-                )
-            ],
+    data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"price.{future_asset}.value",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                        ),
+                        conditions=[],
+                    )
+                ],
+            )
         )
     )
-    data_source_spec_for_trading_termination = (
-        oracles_protos.spec.DataSourceSpecConfiguration(
-            signers=[
-                oracles_protos.data.Signer(
-                    pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
-                )
-            ],
-            filters=[
-                oracles_protos.spec.Filter(
-                    key=oracles_protos.spec.PropertyKey(
-                        name="trading.terminated",
-                        type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                    ),
-                    conditions=[],
-                )
-            ],
+    data_source_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name="trading.terminated",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
+                        ),
+                        conditions=[],
+                    )
+                ],
+            )
         )
     )
 

@@ -1,12 +1,12 @@
 from __future__ import annotations
-from curses import keyname
 
-from dataclasses import dataclass
 import logging
 import threading
 import time
 from abc import ABC
 from collections import defaultdict
+from curses import keyname
+from dataclasses import dataclass
 from functools import wraps
 from queue import Queue
 from typing import Dict, List, Optional, Tuple, Union
@@ -20,6 +20,8 @@ import vega_sim.api.market as market
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.data.v1 as oracles_protos
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 from vega_sim.api.helpers import (
     forward,
     num_to_padded_int,
@@ -847,16 +849,27 @@ class VegaService(ABC):
         if updated_instrument is None:
             curr_inst = current_market.tradable_instrument.instrument
             curr_fut = curr_inst.future
+            oracle_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
+                external=data_source_protos.DataSourceDefinitionExternal(
+                    oracle=data_source_protos.DataSourceSpecConfiguration(
+                        signers=curr_fut.data_source_spec_for_settlement_data.data.external.oracle.signers,
+                        filters=curr_fut.data_source_spec_for_settlement_data.data.external.oracle.filters,
+                    )
+                )
+            )
+
+            oracle_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
+                external=data_source_protos.DataSourceDefinitionExternal(
+                    oracle=data_source_protos.DataSourceSpecConfiguration(
+                        signers=curr_fut.data_source_spec_for_trading_termination.data.external.oracle.signers,
+                        filters=curr_fut.data_source_spec_for_trading_termination.data.external.oracle.filters,
+                    )
+                )
+            )
             curr_fut_prod = UpdateFutureProduct(
                 quote_name=curr_fut.quote_name,
-                data_source_spec_for_settlement_data=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-                    pub_keys=curr_fut.data_source_spec_for_settlement_data.config.pub_keys,
-                    filters=curr_fut.data_source_spec_for_settlement_data.config.filters,
-                ),
-                data_source_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-                    pub_keys=curr_fut.data_source_spec_for_trading_termination.config.pub_keys,
-                    filters=curr_fut.data_source_spec_for_trading_termination.config.filters,
-                ),
+                data_source_spec_for_settlement_data=oracle_spec_for_settlement_data,
+                data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
                 data_source_spec_binding=curr_fut.data_source_spec_binding,
                 settlement_data_decimals=curr_fut.settlement_data_decimals,
             )
@@ -915,7 +928,7 @@ class VegaService(ABC):
         future_inst = data_raw.market_info(
             market_id, data_client=self.trading_data_client
         ).tradable_instrument.instrument.future
-        oracle_name = future_inst.data_source_spec_for_settlement_data.config.filters[
+        oracle_name = future_inst.data_source_spec_for_settlement_data.data.external.oracle.filters[
             0
         ].key.name
 

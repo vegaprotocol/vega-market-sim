@@ -53,11 +53,11 @@ Examples:
 
 import functools
 import logging
-
 from typing import Optional
 
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data.v1 as oracles_protos
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 
 
 def rsetattr(obj, attr, val):
@@ -322,40 +322,44 @@ class FutureProduct(Config):
                 f"MarketConfig has not been updated with settlement asset information."
             )
 
-        data_source_spec_for_settlement_data = (
-            oracles_protos.spec.DataSourceSpecConfiguration(
-                signers=[
-                    oracles_protos.data.Signer(
-                        pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
-                    )
-                ],
-                filters=[
-                    oracles_protos.spec.Filter(
-                        key=oracles_protos.spec.PropertyKey(
-                            name=f"price.{self.quote_name}.value",
-                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                        ),
-                        conditions=[],
-                    )
-                ],
+        data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
+            external=data_source_protos.DataSourceDefinitionExternal(
+                oracle=data_source_protos.DataSourceSpecConfiguration(
+                    signers=[
+                        oracles_protos.data.Signer(
+                            pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
+                        )
+                    ],
+                    filters=[
+                        oracles_protos.spec.Filter(
+                            key=oracles_protos.spec.PropertyKey(
+                                name=f"price.{self.quote_name}.value",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
             )
         )
-        data_source_spec_for_trading_termination = (
-            oracles_protos.spec.DataSourceSpecConfiguration(
-                signers=[
-                    oracles_protos.data.Signer(
-                        pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
-                    )
-                ],
-                filters=[
-                    oracles_protos.spec.Filter(
-                        key=oracles_protos.spec.PropertyKey(
-                            name="trading.terminated",
-                            type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                        ),
-                        conditions=[],
-                    )
-                ],
+        data_source_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
+            external=data_source_protos.DataSourceDefinitionExternal(
+                oracle=data_source_protos.DataSourceSpecConfiguration(
+                    signers=[
+                        oracles_protos.data.Signer(
+                            pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
+                        )
+                    ],
+                    filters=[
+                        oracles_protos.spec.Filter(
+                            key=oracles_protos.spec.PropertyKey(
+                                name="trading.terminated",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
             )
         )
         data_source_spec_binding = vega_protos.markets.DataSourceSpecToFutureBinding(
