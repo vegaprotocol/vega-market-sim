@@ -15,7 +15,6 @@ A MarketConfig class has the following attributes which can be set:
 • liquidity_monitoring_parameters.auction_extension
 • liquidity_monitoring_parameters.target_stake_parameters.time_window
 • liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
-• liquidity_monitoring_parameters.min_LpStake_Quantum.Multiple
 • log_normal.tau
 • log_normal.risk_aversion_parameters
 • log_normal.params.mu
@@ -178,7 +177,6 @@ class LiquidityMonitoringParameters(Config):
             "triggering_ratio": 0.7,
             "auction_extension": 0,
             "target_stake_parameters": "default",
-            "min_LpStake_Quantum": "default",
         }
     }
 
@@ -193,16 +191,11 @@ class LiquidityMonitoringParameters(Config):
             opt=self.OPTS[opt]["target_stake_parameters"]
         )
 
-        self.min_LpStake_Quantum = minLpStakeQuantum(
-            opt=self.OPTS[opt]["min_LpStake_Quantum"]
-        )
-
     def build(self):
         return vega_protos.markets.LiquidityMonitoringParameters(
             triggering_ratio=self.triggering_ratio,
             auction_extension=self.auction_extension,
             target_stake_parameters=self.target_stake_parameters.build(),
-            min_LpStake_Quantum=self.min_LpStake_Quantum.build(),
         )
 
 
@@ -226,26 +219,6 @@ class TargetStakeParameters(Config):
         return vega_protos.markets.TargetStakeParameters(
             time_window=self.time_window,
             scaling_factor=self.scaling_factor,
-        )
-
-
-class minLpStakeQuantum(Config):
-
-    OPTS = {
-        "default": {
-            "Multiple": 1,
-        }
-    }
-
-    def load(self, opt: Optional[str] = None):
-
-        opt = super().load(opt=opt)
-
-        self.Multiple = self.OPTS[opt]["Multiple"]
-
-    def build(self):
-        return vega_protos.markets.minLpStakeQuantum(
-            Multiple=self.Multiple,
         )
 
 
