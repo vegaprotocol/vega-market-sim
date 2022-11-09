@@ -34,5 +34,3 @@ COPY ./examples ./examples
 COPY ./pyproject.toml ./pyproject.toml
 
 RUN pip install -e .
-
-USER vega
