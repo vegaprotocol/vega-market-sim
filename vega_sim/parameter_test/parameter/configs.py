@@ -261,7 +261,36 @@ TAU_SCALING_FACTOR_IDEAL_CURVE = SingleParameterExperiment(
 )
 
 MARKET_PARAMETER_DEMO = SingleParameterExperiment(
-    name="MarketParameterDemo_Quantum",
+    name="MarketParameterDemo",
+    parameter_to_vary="liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+    values=[1, 10, 100],
+    scenario=ConfigurableMarket(
+        market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
+        market_code="ETH:USD",
+        asset_name="tUSD",
+        asset_dp=18,
+        num_steps=60,
+        state_extraction_fn=ideal_market_maker_single_data_extraction(
+            additional_data_fns=[
+                tau_scaling_additional_data,
+                target_stake_additional_data,
+                limit_order_book,
+            ]
+        ),
+    ),
+    runs_per_scenario=2,
+    additional_parameters_to_set=[
+        ("market.liquidity.targetstake.triggering.ratio", "1")
+    ],
+    data_extraction=[
+        (FILE_PATTERN, BASE_IDEAL_MM_CSV_HEADERS),
+        (FILE_PATTERN_LOB, LOB_CSV_HEADERS),
+    ],
+    market_parameter=True,
+)
+
+MIN_LP_STAKE_QUANTUM_DEMO = SingleParameterExperiment(
+    name="MIN_LP_STAKE_QUANTUM_DEMO",
     parameter_to_vary="market.liquidityProvision.minLpStakeQuantumMultiple",
     values=["0.000001", "0.1", "1", "100", "10000000000"],
     scenario=CurveMarketMaker(
@@ -317,4 +346,5 @@ CONFIGS = [
     BOND_PENALTY_FACTOR_IDEAL_v2,
     TAU_SCALING_FACTOR_IDEAL_CURVE,
     MARKET_PARAMETER_DEMO,
+    MIN_LP_STAKE_QUANTUM_DEMO,
 ]
