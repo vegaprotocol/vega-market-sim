@@ -291,54 +291,6 @@ MARKET_PARAMETER_DEMO = SingleParameterExperiment(
     market_parameter=True,
 )
 
-MIN_LP_STAKE_QUANTUM_DEMO = SingleParameterExperiment(
-    name="MIN_LP_STAKE_QUANTUM_DEMO",
-    parameter_to_vary="market.liquidityProvision.minLpStakeQuantumMultiple",
-    values=["0.000001", "0.1", "1", "100", "10000000000"],
-    scenario=CurveMarketMaker(
-        market_name="ETH",
-        asset_name="USD",
-        num_steps=290,
-        market_decimal=2,
-        asset_decimal=4,
-        market_position_decimal=4,
-        # price_process_fn=lambda: get_historic_price_series(
-        #     product_id="ETH-USD", granularity=Granularity.HOUR
-        # ).values,
-        initial_price=1500,
-        lp_commitamount=250_000,
-        initial_asset_mint=10_000_000,
-        # step_length_seconds=60,
-        # step_length_seconds=Granularity.HOUR.value,
-        block_length_seconds=1,
-        buy_intensity=100,
-        sell_intensity=100,
-        q_upper=30,
-        q_lower=-30,
-        market_maker_curve_kappa=0.2,
-        market_maker_assumed_market_kappa=0.2,
-        sensitive_price_taker_half_life=20,
-        opening_auction_trade_amount=0.0001,
-        market_order_trader_base_order_size=0.01,
-        state_extraction_fn=ideal_market_maker_single_data_extraction(
-            additional_data_fns=[
-                tau_scaling_additional_data,
-                target_stake_additional_data,
-                limit_order_book,
-            ]
-        ),
-    ),
-    runs_per_scenario=2,
-    additional_parameters_to_set=[
-        ("market.liquidity.targetstake.triggering.ratio", "1")
-    ],
-    data_extraction=[
-        (FILE_PATTERN, BASE_IDEAL_MM_CSV_HEADERS),
-        (FILE_PATTERN_LOB, LOB_CSV_HEADERS),
-    ],
-    market_parameter=False,
-)
-
 
 CONFIGS = [
     TARGET_STAKE_SCALING_FACTOR_IDEAL,
@@ -348,5 +300,4 @@ CONFIGS = [
     BOND_PENALTY_FACTOR_IDEAL_v2,
     TAU_SCALING_FACTOR_IDEAL_CURVE,
     MARKET_PARAMETER_DEMO,
-    MIN_LP_STAKE_QUANTUM_DEMO,
 ]
