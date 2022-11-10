@@ -92,7 +92,6 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
     curr_inst = pre_market.tradable_instrument.instrument
     curr_fut = curr_inst.future
 
-
     oracle_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
         external=data_source_protos.DataSourceDefinitionExternal(
             oracle=data_source_protos.DataSourceSpecConfiguration(
