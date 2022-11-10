@@ -83,7 +83,6 @@ def core_servicer_and_port():
 
 def test_positions_by_market(trading_data_v2_servicer_and_port):
     def ListPositions(self, request, context):
-
         return data_node_protos_v2.trading_data.ListPositionsResponse(
             positions=data_node_protos_v2.trading_data.PositionConnection(
                 page_info=data_node_protos_v2.trading_data.PageInfo(
@@ -139,7 +138,6 @@ def test_positions_by_market(trading_data_v2_servicer_and_port):
 
 def test_all_markets(trading_data_v2_servicer_and_port):
     def ListMarkets(self, request, context):
-
         return data_node_protos_v2.trading_data.ListMarketsResponse(
             markets=data_node_protos_v2.trading_data.MarketConnection(
                 page_info=data_node_protos_v2.trading_data.PageInfo(
@@ -230,14 +228,14 @@ def test_asset_info(trading_data_v2_servicer_and_port):
 
 def test_all_market_accounts(trading_data_v2_servicer_and_port):
     expected = {
-        vega_protos.vega.ACCOUNT_TYPE_BOND: vega_protos.vega.Account(
-            id="a1",
+        vega_protos.vega.ACCOUNT_TYPE_BOND: data_node_protos_v2.trading_data.AccountBalance(
+            owner="a1",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_BOND,
         ),
-        vega_protos.vega.ACCOUNT_TYPE_GENERAL: vega_protos.vega.Account(
-            id="a2",
+        vega_protos.vega.ACCOUNT_TYPE_GENERAL: data_node_protos_v2.trading_data.AccountBalance(
+            owner="a2",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
@@ -256,8 +254,8 @@ def test_all_market_accounts(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="a1",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="a1",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
                             type=vega_protos.vega.ACCOUNT_TYPE_BOND,
@@ -265,8 +263,8 @@ def test_all_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="a2",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="a2",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
                             type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
@@ -291,14 +289,14 @@ def test_all_market_accounts(trading_data_v2_servicer_and_port):
 
 def test_market_accounts(trading_data_v2_servicer_and_port):
     expected = MarketAccount(
-        vega_protos.vega.Account(
-            id="ins",
+        data_node_protos_v2.trading_data.AccountBalance(
+            owner="ins",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
         ),
-        vega_protos.vega.Account(
-            id="liq",
+        data_node_protos_v2.trading_data.AccountBalance(
+            owner="liq",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY,
@@ -317,8 +315,8 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="a1",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="a1",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
                             type=vega_protos.vega.ACCOUNT_TYPE_BOND,
@@ -326,8 +324,8 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="a2",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="a2",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
                             type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
@@ -335,8 +333,8 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="liq",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="liq",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
                             type=vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY,
@@ -344,8 +342,8 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="ins",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="ins",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
                             type=vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
@@ -390,8 +388,8 @@ def test_market_data(trading_data_v2_servicer_and_port):
 
 
 def test_infrastructure_fee_accounts(trading_data_v2_servicer_and_port):
-    expected = vega_protos.vega.Account(
-        id="inf",
+    expected = data_node_protos_v2.trading_data.AccountBalance(
+        owner="inf",
         asset="asset1",
         type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
     )
@@ -408,8 +406,8 @@ def test_infrastructure_fee_accounts(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=vega_protos.vega.Account(
-                            id="inf",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            owner="inf",
                             asset=request.filter.asset_id,
                             type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
                         ),
