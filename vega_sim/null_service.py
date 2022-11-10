@@ -352,7 +352,12 @@ def manage_vega_processes(
     )
 
     dataNodeProcess = _popen_process(
-        [data_node_path, "node", "--home=" + tmp_vega_home],
+        [
+            data_node_path,
+            "start",
+            "--home=" + tmp_vega_home,
+            "--chainID=CUSTOM",
+        ],
         dir_root=tmp_vega_dir,
         log_name="data_node",
     )
@@ -689,7 +694,7 @@ class VegaServiceNull(VegaService):
         if block_on_startup:
             # Wait for startup
             started = False
-            for _ in range(3000):
+            for _ in range(600):
                 try:
                     requests.get(
                         f"http://localhost:{self.data_node_rest_port}/time"

@@ -61,10 +61,15 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsResponse.FromString,
         )
-        self.GetBalanceHistory = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetBalanceHistory",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.FromString,
+        self.ListLedgerEntries = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListLedgerEntries",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.FromString,
+        )
+        self.ListBalanceChanges = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListBalanceChanges",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesResponse.FromString,
         )
         self.GetLatestMarketData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetLatestMarketData",
@@ -136,15 +141,15 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.FromString,
         )
-        self.GetERC20MultiSigSignerAddedBundles = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerAddedBundles",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.FromString,
+        self.ListERC20MultiSigSignerAddedBundles = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListERC20MultiSigSignerAddedBundles",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesResponse.FromString,
         )
-        self.GetERC20MultiSigSignerRemovedBundles = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerRemovedBundles",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.FromString,
+        self.ListERC20MultiSigSignerRemovedBundles = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListERC20MultiSigSignerRemovedBundles",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesResponse.FromString,
         )
         self.GetERC20ListAssetBundle = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetERC20ListAssetBundle",
@@ -386,6 +391,46 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeResponse.FromString,
         )
+        self.GetProtocolUpgradeStatus = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetProtocolUpgradeStatus",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusResponse.FromString,
+        )
+        self.ListProtocolUpgradeProposals = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListProtocolUpgradeProposals",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.FromString,
+        )
+        self.GetMostRecentDeHistorySegment = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetMostRecentDeHistorySegment",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentResponse.FromString,
+        )
+        self.ListAllDeHistorySegments = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListAllDeHistorySegments",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.FromString,
+        )
+        self.FetchDeHistorySegment = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/FetchDeHistorySegment",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentResponse.FromString,
+        )
+        self.GetActiveDeHistoryPeerAddresses = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
+        )
+        self.CopyHistorySegmentToFile = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/CopyHistorySegmentToFile",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.FromString,
+        )
+        self.Ping = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/Ping",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingResponse.FromString,
+        )
 
 
 class TradingDataServiceServicer(object):
@@ -410,7 +455,8 @@ class TradingDataServiceServicer(object):
     def Info(self, request, context):
         """Info
 
-        Retrieve informations about this dataa
+        Retrieves information about the data-node.
+        Response contains a semver formatted version of the data node and the commit hash, from which the data-node was built,
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -464,10 +510,41 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetBalanceHistory(self, request, context):
+    def ListLedgerEntries(self, request, context):
+        """LedgerEntries
+
+        Get ledger entries by asset, market, party, account type, transfer type within the given date range.
+        This query requests and sums number of the ledger entries of a given subset of accounts, specified via the 'filter' argument.
+        It returns a timeseries (implemented as a list of AggregateLedgerEntry structs), with a row for every time
+        the summed ledger entries of the set of specified accounts changes.
+        Listed queries should be limited to a single party from each side only. If no or more than one parties are provided
+        for sending and receiving accounts - the query returns error.
+
+        Entries can be queried by:
+        - listing ledger entries with filtering on the sending account (market_id, asset_id, account_type)
+        - listing ledger entries with filtering on the receiving account (market_id, asset_id, account_type)
+        - listing ledger entries with filtering on the sending AND receiving account
+        - listing ledger entries with filtering on the transfer type (on top of above filters or as a standalone option)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListBalanceChanges(self, request, context):
         """Balances
 
-        Get an aggregated list of the changes in balances in a set of accounts over time
+        `ListBalanceChanges` is for querying the change in account balances over a period of time.
+
+        An account is defined a 4-tuple of (asset_id, type, party_id, market_id).
+        - Every account has associated asset and type.
+        - Certain account types (for example, the global reward pool) do not have an associated party.
+        These are denoted by the special party identifier '*'
+        - Certain account types do not have an associated market (for example general party accounts)
+        These are denoted by the special market identifier '!'
+
+        `ListBalanceChangesRequest` will return a list of
+        `(vega_time, asset_id, account_type, party_id, market_id, balance)`
+        With a row for each block at which a given account's balance changes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -492,7 +569,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetLatestMarketDepth(self, request, context):
-        """Market Detph
+        """Market Depth
 
         Get the latest market depth for a given market
         """
@@ -584,19 +661,19 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetERC20MultiSigSignerAddedBundles(self, request, context):
+    def ListERC20MultiSigSignerAddedBundles(self, request, context):
         """ERC20 add signer bundle
 
-        Get the signature bundle to add a particular validator to the signer list of the multisig contract
+        List the signature bundle to add a particular validator to the signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetERC20MultiSigSignerRemovedBundles(self, request, context):
+    def ListERC20MultiSigSignerRemovedBundles(self, request, context):
         """ERC20 remove signer bundle
 
-        Get the signatures bundle to remove a particular validator from signer list of the multisig contract
+        List the signatures bundle to remove a particular validator from signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1016,6 +1093,79 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def GetProtocolUpgradeStatus(self, request, context):
+        """Protocol Upgrade status"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListProtocolUpgradeProposals(self, request, context):
+        """List protocol upgrades proposals, optionally filtering on status or approver."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetMostRecentDeHistorySegment(self, request, context):
+        """Decentralized History
+
+        Decentralised History allows the data-node to reach out to peer nodes to fetch the most recent history, as well as
+        older history if desired, such that it can quickly get itself up to the latest block height of the network and start
+        to consume events for the latest block from the Vega core.
+        See https://github.com/vegaprotocol/vega/tree/develop/datanode/dehistory/README.md for a full description of Decentralised History
+
+        Get most recent decentralized history segment
+
+        Get the networks most recently history segment
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListAllDeHistorySegments(self, request, context):
+        """List all decentralized history segments
+
+        List all history segments stored by this node
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def FetchDeHistorySegment(self, request, context):
+        """Fetch decentralized history segment
+
+        Fetch a history segment from another peer in the network
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetActiveDeHistoryPeerAddresses(self, request, context):
+        """Get active decentralized history peer addresses
+
+        List the addresses of all active decentralized history peers
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def CopyHistorySegmentToFile(self, request, context):
+        """Copy history segment to file
+
+        Copy history segment data to a target file
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def Ping(self, request, context):
+        """Ping
+
+        Ping the datanode
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_TradingDataServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -1064,10 +1214,15 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsResponse.SerializeToString,
         ),
-        "GetBalanceHistory": grpc.unary_unary_rpc_method_handler(
-            servicer.GetBalanceHistory,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.SerializeToString,
+        "ListLedgerEntries": grpc.unary_unary_rpc_method_handler(
+            servicer.ListLedgerEntries,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.SerializeToString,
+        ),
+        "ListBalanceChanges": grpc.unary_unary_rpc_method_handler(
+            servicer.ListBalanceChanges,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesResponse.SerializeToString,
         ),
         "GetLatestMarketData": grpc.unary_unary_rpc_method_handler(
             servicer.GetLatestMarketData,
@@ -1139,15 +1294,15 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.SerializeToString,
         ),
-        "GetERC20MultiSigSignerAddedBundles": grpc.unary_unary_rpc_method_handler(
-            servicer.GetERC20MultiSigSignerAddedBundles,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.SerializeToString,
+        "ListERC20MultiSigSignerAddedBundles": grpc.unary_unary_rpc_method_handler(
+            servicer.ListERC20MultiSigSignerAddedBundles,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesResponse.SerializeToString,
         ),
-        "GetERC20MultiSigSignerRemovedBundles": grpc.unary_unary_rpc_method_handler(
-            servicer.GetERC20MultiSigSignerRemovedBundles,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.SerializeToString,
+        "ListERC20MultiSigSignerRemovedBundles": grpc.unary_unary_rpc_method_handler(
+            servicer.ListERC20MultiSigSignerRemovedBundles,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesResponse.SerializeToString,
         ),
         "GetERC20ListAssetBundle": grpc.unary_unary_rpc_method_handler(
             servicer.GetERC20ListAssetBundle,
@@ -1388,6 +1543,46 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetVegaTime,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeResponse.SerializeToString,
+        ),
+        "GetProtocolUpgradeStatus": grpc.unary_unary_rpc_method_handler(
+            servicer.GetProtocolUpgradeStatus,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusResponse.SerializeToString,
+        ),
+        "ListProtocolUpgradeProposals": grpc.unary_unary_rpc_method_handler(
+            servicer.ListProtocolUpgradeProposals,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.SerializeToString,
+        ),
+        "GetMostRecentDeHistorySegment": grpc.unary_unary_rpc_method_handler(
+            servicer.GetMostRecentDeHistorySegment,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentResponse.SerializeToString,
+        ),
+        "ListAllDeHistorySegments": grpc.unary_unary_rpc_method_handler(
+            servicer.ListAllDeHistorySegments,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.SerializeToString,
+        ),
+        "FetchDeHistorySegment": grpc.unary_unary_rpc_method_handler(
+            servicer.FetchDeHistorySegment,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentResponse.SerializeToString,
+        ),
+        "GetActiveDeHistoryPeerAddresses": grpc.unary_unary_rpc_method_handler(
+            servicer.GetActiveDeHistoryPeerAddresses,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.SerializeToString,
+        ),
+        "CopyHistorySegmentToFile": grpc.unary_unary_rpc_method_handler(
+            servicer.CopyHistorySegmentToFile,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.SerializeToString,
+        ),
+        "Ping": grpc.unary_unary_rpc_method_handler(
+            servicer.Ping,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -1662,7 +1857,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetBalanceHistory(
+    def ListLedgerEntries(
         request,
         target,
         options=(),
@@ -1677,9 +1872,38 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetBalanceHistory",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetBalanceHistoryResponse.FromString,
+            "/datanode.api.v2.TradingDataService/ListLedgerEntries",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListBalanceChanges(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListBalanceChanges",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -2097,7 +2321,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetERC20MultiSigSignerAddedBundles(
+    def ListERC20MultiSigSignerAddedBundles(
         request,
         target,
         options=(),
@@ -2112,9 +2336,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerAddedBundles",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerAddedBundlesResponse.FromString,
+            "/datanode.api.v2.TradingDataService/ListERC20MultiSigSignerAddedBundles",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -2126,7 +2350,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetERC20MultiSigSignerRemovedBundles(
+    def ListERC20MultiSigSignerRemovedBundles(
         request,
         target,
         options=(),
@@ -2141,9 +2365,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetERC20MultiSigSignerRemovedBundles",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20MultiSigSignerRemovedBundlesResponse.FromString,
+            "/datanode.api.v2.TradingDataService/ListERC20MultiSigSignerRemovedBundles",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -3536,6 +3760,238 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetVegaTime",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetProtocolUpgradeStatus(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetProtocolUpgradeStatus",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListProtocolUpgradeProposals(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListProtocolUpgradeProposals",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetMostRecentDeHistorySegment(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetMostRecentDeHistorySegment",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListAllDeHistorySegments(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListAllDeHistorySegments",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def FetchDeHistorySegment(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/FetchDeHistorySegment",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetActiveDeHistoryPeerAddresses(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def CopyHistorySegmentToFile(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/CopyHistorySegmentToFile",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def Ping(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/Ping",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.PingResponse.FromString,
             options,
             channel_credentials,
             insecure,
