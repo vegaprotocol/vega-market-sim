@@ -14,6 +14,11 @@ import vega_sim.api.data_raw as data_raw
 
 
 import vega_sim.proto.vega as vega_protos
+from vega_sim.proto.vega.commands.v1.commands_pb2 import (
+    OrderCancellation,
+    OrderAmendment,
+    OrderSubmission,
+)
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
     enum_to_str,
@@ -112,7 +117,7 @@ def submit_order(
         else order_ref
     )
 
-    order_data = vega_protos.commands.v1.commands.OrderSubmission(
+    order_data = OrderSubmission(
         market_id=market_id,
         # price is an integer. For example 123456 is a price of 1.23456,
         # assuming 5 decimal places.
@@ -228,7 +233,7 @@ def amend_order(
         else vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_UNSPECIFIED
     )
 
-    order_data = vega_protos.commands.v1.commands.OrderAmendment(
+    order_data = OrderAmendment(
         market_id=market_id,
         order_id=order_id,
         # price is an integer. For example 123456 is a price of 1.23456,
@@ -275,7 +280,7 @@ def cancel_order(
             str, Identifier of the order to cancel
     """
     wallet.submit_transaction(
-        transaction=vega_protos.commands.v1.commands.OrderCancellation(
+        transaction=OrderCancellation(
             order_id=order_id,
             market_id=market_id,
         ),
@@ -408,3 +413,235 @@ def submit_liquidity(
         key_name=key_name,
     )
     logger.debug(f"Submitted liquidity on market {market_id}")
+
+
+def pegged_order(
+    reference: vega_protos.vega.PeggedReference,
+    offset: str,
+) -> vega_protos.vega.PeggedOrder:
+    """Creates a Vega PeggedOrder object.
+
+    Args:
+        reference (vega_protos.vega.PeggedReference):
+            Reference to offset price from.
+        offset (str):
+            Value to offset price from reference.
+
+    Returns:
+        vega_protos.vega.PeggedOrder:
+            The created Vega PeggedOrder object.
+    """
+    return vega_protos.vega.PeggedOrder(
+        reference=reference,
+        offset=offset,
+    )
+
+
+def order_amendment(
+    order_id: str,
+    market_id: str,
+    price: str,
+    size_delta: int,
+    expires_at: Optional[int] = None,
+    time_in_force: Optional[vega_protos.vega.Order.TimeInForce] = None,
+    pegged_offset: Optional[str] = None,
+    pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
+) -> OrderAmendment:
+    """Creates a Vega OrderAmendment object.
+
+    Args:
+        order_id (str):
+            Id of order to amend.
+        market_id (str):
+            Id of market containing order to amend.
+        price (str):
+            New price of the order.
+        size_delta (int):
+            Amount to change the order size by.
+        expires_at (Optional[int]):
+            Timestamp of order expiry. Defaults to None.
+        time_in_force (Optional[vega_protos.vega.Order.TimeInForce]):
+            New time_in_force option for order. Defaults to None.
+        pegged_offset (Optional[str]):
+            New amount to offset order price by from reference. Defaults to None.
+        pegged_reference (Optional[vega_protos.vega.PeggedReference]):
+            New reference to offset order price from. Defaults to None.
+
+    Returns:
+        OrderAmendment:
+            The created Vega OrderAmendment object.
+    """
+
+    time_in_force = (
+        time_in_force
+        if time_in_force is not None
+        else vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_UNSPECIFIED
+    )
+
+    time_in_force = get_enum(time_in_force, vega_protos.vega.Order.TimeInForce)
+
+    if pegged_reference is not None:
+        pegged_reference = get_enum(time_in_force, vega_protos.vega.PeggedReference)
+
+    command = OrderAmendment(
+        order_id=order_id,
+        market_id=market_id,
+        size_delta=size_delta,
+        time_in_force=time_in_force,
+    )
+
+    # Update OrderSubmission object with optional fields if specified
+    for attr, val in [
+        ("price", price),
+        ("expires_at", expires_at),
+        ("pegged_offset", pegged_offset),
+        ("pegged_reference", pegged_reference),
+    ]:
+        if val is not None:
+            setattr(command, attr, val)
+
+    # Return the created and updated OrderSubmission object
+    return command
+
+
+def order_cancellation(
+    order_id: str,
+    market_id: str,
+) -> OrderCancellation:
+    """Creates a Vega OrderCancellation object.
+
+    Args:
+        order_id (str):
+            Id of order to cancel.
+        market_id (str):
+            Id of market containing order to cancel.
+
+    Returns:
+        OrderCancellation:
+            The created Vega OrderCancellation object.
+    """
+    return OrderCancellation(
+        order_id=order_id,
+        market_id=market_id,
+    )
+
+
+def order_submission(
+    data_client: vac.VegaTradingDataClient,
+    market_id: str,
+    size: int,
+    side: Union[vega_protos.vega.Side, str],
+    time_in_force: Union[vega_protos.vega.Order.TimeInForce, str],
+    order_type: Union[vega_protos.vega.Order.Type, str],
+    expires_at: Optional[int] = None,
+    reference: Optional[str] = None,
+    price: Optional[str] = None,
+    pegged_order: Optional[Union[vega_protos.PeggedOrder, str]] = None,
+) -> OrderSubmission:
+    """Creates a Vega OrderSubmission object.
+
+    Args:
+        data_client (vac.VegaTradingDataClient):
+            Client for trading data api.
+        market_id (str):
+            Id of market to place order in.
+        size (int):
+            Size of order to be placed.
+        side (Union[vega_protos.vega.Side, str]):
+            Side of order to be placed, "SIDE_BUY" or "SIDE_SELL".
+        time_in_force (Union[vega_protos.vega.Order.TimeInForce, str]):
+            Time in force option for order.
+        order_type (Union[vega_protos.vega.Order.Type, str]):
+            Type of order, "TYPE_LIMIT" or "TYPE_MARKET".
+        expires_at (Optional[int]):
+            Determines timestamp at which order expires, only required for orders of
+            "TYPE_LIMIT" and "TIME_IN_FORCE_GTT". Defaults to None.
+        reference (Optional[str]):
+            Reference id to use for order. Defaults to None.
+        price (Optional[str]):
+            Price to place order at, only required for "TYPE_LIMIT". Defaults to None.
+        pegged_order (Optional[Union[vega_protos.PeggedOrder, str]]):
+            PeggedOrder object defining whether order is pegged. Defaults to None.
+
+    Returns:
+        OrderSubmission:
+            The created Vega OrderSubmission object.
+    """
+
+    side = get_enum(side, vega_protos.vega.Side)
+    order_type = get_enum(order_type, vega_protos.vega.Order.Type)
+    time_in_force = get_enum(time_in_force, vega_protos.vega.Order.TimeInForce)
+
+    # Ensure no expires_at field set if TIF is not TIME_IN_FORCE_GTT
+    if time_in_force != vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTT:
+        expires_at = None
+    # Ensure an expires_at field set if TIF is TIME_IN_FORCE_GTT
+    elif expires_at is None:
+        blockchain_time = data_client.GetVegaTime(
+            data_node_protos_v2.trading_data.GetVegaTimeRequest()
+        ).timestamp
+        expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
+
+    reference = str(uuid.uuid4()) if reference is None else reference
+
+    # Create OrderSubmission object with required fields
+    command = OrderSubmission(
+        market_id=market_id,
+        size=size,
+        side=side,
+        time_in_force=time_in_force,
+        type=order_type,
+    )
+
+    # Update OrderSubmission object with optional fields if specified
+    for attr, val in [
+        ("price", price),
+        ("expires_at", expires_at),
+        ("reference", reference),
+        ("pegged_order", pegged_order),
+    ]:
+        if val is not None:
+            setattr(command, attr, val)
+
+    # Return the created and updated OrderSubmission object
+    return command
+
+
+def batch_market_instructions(
+    wallet: Wallet,
+    wallet_name: str,
+    key_name: Optional[str] = None,
+    amendments: Optional[List[OrderAmendment]] = [],
+    submissions: Optional[List[OrderSubmission]] = [],
+    cancellations: Optional[List[OrderCancellation]] = [],
+):
+    """Submits a batch of market instructions.
+
+    Args:
+        wallet (Wallet):
+            Wallet client used to submit transaction.
+        wallet_name (str):
+            Name of wallet to submit transaction.
+        key_name (Optional[str], optional):
+            Name of key to submit transaction. Defaults to None.
+        amendments (Optional[List[OrderAmendment]]):
+            List of OrderAmendment objects to process sequentially. Defaults to [].
+        submissions (Optional[List[OrderSubmission]]):
+            List of OrderSubmission objects to process sequentially. Defaults to [].
+        cancellations (Optional[ List[OrderCancellation] ]):
+            List of OrderCancellation objects to process sequentially. Defaults to [].
+    """
+
+    command = vega_protos.commands.v1.commands.BatchMarketInstructions(
+        submissions=submissions, amendments=amendments, cancellations=cancellations
+    )
+
+    wallet.submit_transaction(
+        transaction=command,
+        name=wallet_name,
+        transaction_type="batch_market_instructions",
+        key_name=key_name,
+    )
+    logger.debug(
+        f"Submitted a batch of {len(cancellations)} cancellation, {len(amendments)} amendment, and {len(submissions)} submission instructions."
+    )

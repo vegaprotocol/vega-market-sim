@@ -9,7 +9,7 @@ from curses import keyname
 from dataclasses import dataclass
 from functools import wraps
 from queue import Queue
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Any
 
 import grpc
 import vega_sim.api.data as data
@@ -27,6 +27,11 @@ from vega_sim.api.helpers import (
     num_to_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
+)
+from vega_sim.proto.vega.commands.v1.commands_pb2 import (
+    OrderCancellation,
+    OrderAmendment,
+    OrderSubmission,
 )
 from vega_sim.proto.vega.governance_pb2 import (
     UpdateFutureProduct,
@@ -1528,3 +1533,288 @@ class VegaService(ABC):
             market_position_decimals_map=self.market_pos_decimals,
             market_price_decimals_map=self.market_price_decimals,
         )
+
+    def create_order_amendment(
+        self,
+        order_id: str,
+        market_id: str,
+        price: Optional[float] = None,
+        size_delta: Optional[float] = None,
+        expires_at: Optional[int] = None,
+        time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
+        pegged_offset: Optional[float] = None,
+        pegged_reference: Optional[Union[vega_protos.vega.PeggedReference, str]] = None,
+    ) -> OrderAmendment:
+        """Creates a Vega OrderAmendment object.
+
+        Method can be used to create a Vega OrderCancellation object of which multiples
+        can be passed in a list to submit batch market instructions.
+
+        Args:
+            order_id (str):
+                Id of order to amend.
+            market_id (str):
+                Id of market containing order to amend.
+            price (Optional[float], optional):
+                New price of order. Defaults to None (no change).
+            size_delta (Optional[float]):
+                Amount to amend order size by. Defaults to None (no change).
+            expires_at (Optional[int]):
+                New expiry timestamp for order. Defaults to None (no change).
+            time_in_force (Optional[Union[vega_protos.vega.Order.TimeInForce, str]]):
+                New time_in_force for order. Defaults to None (no change).
+            pegged_offset (Optional[float]):
+                New value to offset price by for order. Defaults to None (no change).
+            pegged_reference (Optional[Union[vega_protos.vega.PeggedReference, str]]):
+                New reference for offset for order. Defaults to None (no change).
+
+        Returns:
+            OrderAmendment:
+                The created Vega OrderAmendment object
+        """
+
+        price = (
+            price
+            if price is None
+            else str(
+                num_to_padded_int(
+                    to_convert=price, decimals=self.market_price_decimals[market_id]
+                )
+            )
+        )
+
+        pegged_offset = (
+            pegged_offset
+            if pegged_offset is None
+            else str(
+                num_to_padded_int(
+                    to_convert=pegged_offset,
+                    decimals=self.market_price_decimals[market_id],
+                )
+            )
+        )
+
+        size_delta = (
+            size_delta
+            if size_delta is None
+            else num_to_padded_int(
+                to_convert=size_delta, decimals=self.market_pos_decimals[market_id]
+            )
+        )
+
+        return trading.order_amendment(
+            order_id=order_id,
+            market_id=market_id,
+            price=price,
+            size_delta=size_delta,
+            expires_at=expires_at,
+            time_in_force=time_in_force,
+            pegged_offset=pegged_offset,
+            pegged_reference=pegged_reference,
+        )
+
+    def create_order_cancellation(
+        self,
+        order_id: str,
+        market_id: str,
+    ) -> OrderCancellation:
+        """Returns a Vega OrderCancellation object
+
+        Method can be used to create a Vega OrderCancellation object of which multiples
+        can be passed in a list to submit batch market instructions.
+
+        Args:
+            order_id (str):
+                Id of order to cancel.
+            market_id (str):
+                Id of market containing order to cancel.
+
+        Returns:
+            OrderCancellation:
+                The created OrderCancellation object
+        """
+        return trading.order_cancellation(
+            order_id=order_id,
+            market_id=market_id,
+        )
+
+    def create_order_submission(
+        self,
+        market_id: str,
+        size: float,
+        side: Union[vega_protos.vega.Side, str],
+        order_type: Optional[Union[vega_protos.vega.Order.Type, str]],
+        time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]],
+        price: Optional[float] = None,
+        expires_at: Optional[int] = None,
+        reference: Optional[str] = None,
+        pegged_reference: Optional[str] = None,
+        pegged_offset: Optional[float] = None,
+    ) -> OrderSubmission:
+        """Returns a Vega OrderSubmission object
+
+        Method can be used to create a Vega OrderSubmission object of which multiples
+        can be combined in a list to submit batch market instructions.
+
+        Args:
+            market_id (str):
+                Id of market to place order in.
+            size (float):
+                Size of order.
+            side (Union[vega_protos.vega.Side, str]):
+                Side of order, "SIDE_BUY" or "SIDE_SELL".
+            order_type (Optional[Union[vega_protos.vega.Order.Type, str]]):
+                Type of order, "TYPE_MARKET" or "TYPE_LIMIT".
+            time_in_force (Optional[Union[vega_protos.vega.Order.TimeInForce, str]]):
+                Time in force of order, determines how long order remains active.
+            price (Optional[float]):
+                Price of order, not required for "TYPE_LIMIT" orders. Defaults to None.
+            expires_at (Optional[int]):
+                Determines timestamp at which order expires, only required for orders of
+                "TYPE_LIMIT" and "TIME_IN_FORCE_GTT". Defaults to None.
+            reference (Optional[str]):
+                Reference to assign to order. Defaults to None.
+            pegged_reference (Optional[str]):
+                Reference for price offset for order. Defaults to None.
+            pegged_offset (Optional[float]):
+                Value for price offset from reference for order. Defaults to None.
+
+        Returns:
+            OrderSubmission:
+                The created Vega OrderSubmission object
+        """
+
+        price = (
+            price
+            if price is None
+            else str(
+                num_to_padded_int(
+                    to_convert=price, decimals=self.market_price_decimals[market_id]
+                )
+            )
+        )
+        pegged_offset = (
+            pegged_offset
+            if pegged_offset is None
+            else str(
+                num_to_padded_int(
+                    to_convert=pegged_offset,
+                    decimals=self.market_price_decimals[market_id],
+                )
+            )
+        )
+        size = (
+            size
+            if size is None
+            else num_to_padded_int(
+                to_convert=size, decimals=self.market_pos_decimals[market_id]
+            )
+        )
+        if (pegged_offset is not None) and (pegged_reference is not None):
+            pegged_order = trading.build_pegged_order(
+                pegged_offset=pegged_offset,
+                pegged_reference=pegged_reference,
+            )
+        else:
+            pegged_order = None
+
+        return trading.order_submission(
+            data_client=self.trading_data_client,
+            market_id=market_id,
+            price=price,
+            size=size,
+            side=side,
+            time_in_force=time_in_force,
+            expires_at=expires_at,
+            order_type=order_type,
+            reference=reference,
+            pegged_order=pegged_order,
+        )
+
+    def submit_instructions(
+        self,
+        wallet_name: str,
+        key_name: Optional[str] = None,
+        cancellations: Optional[List[OrderCancellation]] = None,
+        amendments: Optional[List[OrderAmendment]] = None,
+        submissions: Optional[List[OrderSubmission]] = None,
+    ):
+        """Submits a batch of market instructions to be processed sequentially.
+
+        Method allows lists of order cancellations, order amendments, and order
+        submissions to be submitted as a batch and processed sequentially in the
+        order cancellations, amendments, then submissions.
+
+        If the number of cancellation, amendment, and submission instructions exceed
+        the network parameter spam.protection.max.batchSize, the function will submit
+        the instructions in multiple batches adhering to the above rules.
+
+        Args:
+            wallet_name (str):
+                Name of wallet to submit transaction from.
+            key_name (Optional[str], optional):
+                Name of key to submit transaction from. Defaults to None.
+            cancellations (Optional[ List[OrderCancellation] ]):
+                List of OrderCancellation objects to submit. Defaults to None.
+            amendments (Optional[ List[OrderAmendment] ]):
+                List of OrderAmendment objects to submit. Defaults to None.
+            submissions (Optional[ List[OrderSubmission] ]):
+                List of OrderSubmission objects to submit. Defaults to None.
+        """
+
+        max_batch_size = int(
+            self.get_network_parameter(key="spam.protection.max.batchSize")
+        )
+
+        instructions = cancellations + amendments + submissions
+
+        batch_of_cancellations = []
+        batch_of_amendments = []
+        batch_of_submissions = []
+
+        for i, instruction in enumerate(instructions):
+
+            if isinstance(instruction, OrderCancellation):
+                batch_of_cancellations.append(instruction)
+            elif isinstance(instruction, OrderAmendment):
+                batch_of_amendments.append(instruction)
+            elif isinstance(instruction, OrderSubmission):
+                batch_of_submissions.append(instruction)
+            else:
+                raise ValueError(f"Invalid instruction type {type(instruction)}.")
+
+            if (
+                len(batch_of_cancellations)
+                + len(batch_of_amendments)
+                + len(batch_of_submissions)
+                == max_batch_size
+            ) or (i == len(instructions) - 1):
+
+                trading.batch_market_instructions(
+                    wallet=self.wallet,
+                    wallet_name=wallet_name,
+                    key_name=key_name,
+                    cancellations=batch_of_cancellations,
+                    amendments=batch_of_amendments,
+                    submissions=batch_of_submissions,
+                )
+
+                batch_of_cancellations = []
+                batch_of_amendments = []
+                batch_of_submissions = []
+
+    def get_network_parameter(self, key: str) -> Any:
+        """Returns the value of the specified network parameter.
+
+        Args:
+            key (str):
+                The key identifying the network parameter.
+
+        Returns:
+            Any:
+                The value of the specified network parameter.
+        """
+        return data.get_network_parameter(
+            data_client=self.trading_data_client_v2,
+            key=key,
+        ).value
