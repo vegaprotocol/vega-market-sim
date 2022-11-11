@@ -13,23 +13,13 @@ _sym_db = _symbol_database.Default()
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x17vega/data/v1/data.proto\x12\x0cvega.data.v1"&\n\nETHAddress\x12\x18\n\x07\x61\x64\x64ress\x18\x01'
-    b' \x01(\tR\x07\x61\x64\x64ress"\x1a\n\x06PubKey\x12\x10\n\x03key\x18\x01'
-    b' \x01(\tR\x03key"\x80\x01\n\x06Signer\x12/\n\x07pub_key\x18\x01'
-    b" \x01(\x0b\x32\x14.vega.data.v1.PubKeyH\x00R\x06pubKey\x12;\n\x0b\x65th_address\x18\x02"
-    b' \x01(\x0b\x32\x18.vega.data.v1.ETHAddressH\x00R\nethAddressB\x08\n\x06signer"4\n\x08Property\x12\x12\n\x04name\x18\x01'
-    b" \x01(\tR\x04name\x12\x14\n\x05value\x18\x02"
-    b' \x01(\tR\x05value"\xaf\x01\n\x04\x44\x61ta\x12.\n\x07signers\x18\x01'
-    b" \x03(\x0b\x32\x14.vega.data.v1.SignerR\x07signers\x12*\n\x04\x64\x61ta\x18\x02"
-    b" \x03(\x0b\x32\x16.vega.data.v1.PropertyR\x04\x64\x61ta\x12(\n\x10matched_spec_ids\x18\x03"
-    b" \x03(\tR\x0ematchedSpecIds\x12!\n\x0c\x62roadcast_at\x18\x04"
-    b' \x01(\x03R\x0b\x62roadcastAt"6\n\x0c\x45xternalData\x12&\n\x04\x64\x61ta\x18\x01'
-    b" \x01(\x0b\x32\x12.vega.data.v1.DataR\x04\x64\x61taB/Z-code.vegaprotocol.io/vega/protos/vega/data/v1b\x06proto3"
+    b'\n\x17vega/data/v1/data.proto\x12\x0cvega.data.v1"&\n\nETHAddress\x12\x18\n\x07\x61\x64\x64ress\x18\x01 \x01(\tR\x07\x61\x64\x64ress"\x1a\n\x06PubKey\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key"\x80\x01\n\x06Signer\x12/\n\x07pub_key\x18\x01 \x01(\x0b\x32\x14.vega.data.v1.PubKeyH\x00R\x06pubKey\x12;\n\x0b\x65th_address\x18\x02 \x01(\x0b\x32\x18.vega.data.v1.ETHAddressH\x00R\nethAddressB\x08\n\x06signer"4\n\x08Property\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value"\xaf\x01\n\x04\x44\x61ta\x12.\n\x07signers\x18\x01 \x03(\x0b\x32\x14.vega.data.v1.SignerR\x07signers\x12*\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x16.vega.data.v1.PropertyR\x04\x64\x61ta\x12(\n\x10matched_spec_ids\x18\x03 \x03(\tR\x0ematchedSpecIds\x12!\n\x0c\x62roadcast_at\x18\x04 \x01(\x03R\x0b\x62roadcastAt"6\n\x0c\x45xternalData\x12&\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x12.vega.data.v1.DataR\x04\x64\x61taB/Z-code.vegaprotocol.io/vega/protos/vega/data/v1b\x06proto3'
 )
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.data.v1.data_pb2", globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
+
     DESCRIPTOR._options = None
     DESCRIPTOR._serialized_options = b"Z-code.vegaprotocol.io/vega/protos/vega/data/v1"
     _ETHADDRESS._serialized_start = 41
