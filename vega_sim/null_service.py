@@ -327,7 +327,7 @@ def manage_vega_processes(
     retain_log_files: bool = False,
     log_dir: Optional[str] = None,
     replay_from_path: Optional[str] = None,
-    store_transactions: bool = False,
+    store_transactions: bool = True,
 ) -> None:
     logging.basicConfig(level=logging.INFO)
     port_config = port_config if port_config is not None else {}
