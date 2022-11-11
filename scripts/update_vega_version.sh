@@ -1,7 +1,12 @@
 current_env=`cat .env`
 vega_tag=`git ls-remote https://github.com/vegaprotocol/vega HEAD | awk '{ print $1 }'`
 echo "VEGA_SIM_VEGA_TAG=${vega_tag}
-VEGA_SIM_CONSOLE_TAG=master" > .env
+VEGA_SIM_CONSOLE_TAG=develop
+VEGA_DEFAULT_KEY_NAME='Key 1'
+VEGA_SIM_NETWORKS_INTERNAL_TAG=main
+VEGA_SIM_NETWORKS_TAG=master
+VEGA_USER_WALLET_NAME='NETWORK_TRADERS'
+VEGA_USER_WALLET_PASS='PASSPHRASE'" > .env
 
 make
 make proto

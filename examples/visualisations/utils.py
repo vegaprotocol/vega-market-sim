@@ -198,12 +198,14 @@ def propose_market(
         parameter="market.fee.factors.infrastructureFee",
         new_value="0.0",
     )
+    vega.wait_for_total_catchup()
     vega.update_network_parameter(
         proposal_wallet=AUX_PARTY_A.wallet_name,
         key_name=AUX_PARTY_A.key_name,
         parameter="market.fee.factors.makerFee",
         new_value="0.0",
     )
+    vega.wait_for_total_catchup()
     vega.create_simple_market(
         market_name="XYZ:DAI Visualisation Example",
         proposal_wallet=AUX_PARTY_A.wallet_name,

@@ -33,7 +33,6 @@ from vega_sim.api.data import (
 )
 from vega_sim.grpc.client import (
     VegaCoreClient,
-    VegaTradingDataClient,
     VegaTradingDataClientV2,
 )
 from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
@@ -45,39 +44,55 @@ from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
 from vega_sim.proto.vega.api.v1.core_pb2_grpc import add_CoreServiceServicer_to_server
 
 
-def test_party_account(trading_data_servicer_and_port):
-    def PartyAccounts(self, request, context):
-        return data_node_protos.trading_data.PartyAccountsResponse(
-            accounts=[
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="1051",
-                    type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+def test_party_account(trading_data_v2_servicer_and_port):
+    def ListAccounts(self, request, context):
+        return data_node_protos_v2.trading_data.ListAccountsResponse(
+            accounts=data_node_protos_v2.trading_data.AccountsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="2041",
-                    type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
-                ),
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="5235",
-                    type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-                ),
-                vega_protos.vega.Account(
-                    market_id=request.market_id,
-                    balance="6423",
-                    type=vega_protos.vega.ACCOUNT_TYPE_MARGIN,
-                ),
-            ]
+                edges=[
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            balance="1051",
+                            type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            balance="2041",
+                            type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            balance="5235",
+                            type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.AccountEdge(
+                        cursor="cursor",
+                        account=data_node_protos_v2.trading_data.AccountBalance(
+                            balance="6423",
+                            type=vega_protos.vega.ACCOUNT_TYPE_MARGIN,
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.PartyAccounts = PartyAccounts
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAccounts = ListAccounts
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = party_account(
         "PUB_KEY",
         asset_id="a1",
@@ -98,37 +113,54 @@ def test_party_account(trading_data_servicer_and_port):
         assert res2 == res
 
 
-def test_find_asset_id(trading_data_servicer_and_port):
-    def Assets(self, request, context):
-        return data_node_protos.trading_data.AssetsResponse(
-            assets=[
-                vega_protos.assets.Asset(
-                    id="asset1_id",
-                    details=vega_protos.assets.AssetDetails(
-                        name="asset1", symbol="A1", decimals=5
-                    ),
+def test_find_asset_id(trading_data_v2_servicer_and_port):
+    def ListAssets(self, request, context):
+        return data_node_protos_v2.trading_data.ListAssetsResponse(
+            assets=data_node_protos_v2.trading_data.AssetsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.assets.Asset(
-                    id="asset2_id",
-                    details=vega_protos.assets.AssetDetails(
-                        name="asset2", symbol="A2", decimals=5
+                edges=[
+                    data_node_protos_v2.trading_data.AssetEdge(
+                        cursor="cursor",
+                        node=vega_protos.assets.Asset(
+                            id="asset1_id",
+                            details=vega_protos.assets.AssetDetails(
+                                name="asset1", symbol="A1", decimals=5
+                            ),
+                        ),
                     ),
-                ),
-                vega_protos.assets.Asset(
-                    id="asset3_id",
-                    details=vega_protos.assets.AssetDetails(
-                        name="asset3", symbol="A3", decimals=5
+                    data_node_protos_v2.trading_data.AssetEdge(
+                        cursor="cursor",
+                        node=vega_protos.assets.Asset(
+                            id="asset2_id",
+                            details=vega_protos.assets.AssetDetails(
+                                name="asset2", symbol="A2", decimals=5
+                            ),
+                        ),
                     ),
-                ),
-            ]
+                    data_node_protos_v2.trading_data.AssetEdge(
+                        cursor="cursor",
+                        node=vega_protos.assets.Asset(
+                            id="asset3_id",
+                            details=vega_protos.assets.AssetDetails(
+                                name="asset3", symbol="A3", decimals=5
+                            ),
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.Assets = Assets
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAssets = ListAssets
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = find_asset_id(symbol="A2", data_client=data_client)
     assert res == "asset2_id"
 
@@ -181,138 +213,167 @@ def test_best_prices(mkt_data_mock):
     assert ask_res == pytest.approx(2.12)
 
 
-def test_open_orders_by_market(trading_data_servicer_and_port):
-    def OrdersByMarket(self, request, context):
-        return data_node_protos.trading_data.OrdersByMarketResponse(
-            orders=[
-                vega_protos.vega.Order(
-                    id="id1",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_BUY,
-                    price="10100",
-                    size=101,
-                    remaining=101,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party1",
-                    updated_at=1653266950,
-                    version=1,
+def test_open_orders_by_market(trading_data_v2_servicer_and_port):
+    def ListOrders(self, request, context):
+        return data_node_protos_v2.trading_data.ListOrdersResponse(
+            orders=data_node_protos_v2.trading_data.OrderConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
                 ),
-                vega_protos.vega.Order(
-                    id="id2",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_CANCELLED,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_BUY,
-                    price="10100",
-                    size=101,
-                    remaining=101,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party1",
-                    updated_at=1653266950,
-                    version=1,
-                ),
-                vega_protos.vega.Order(
-                    id="id3",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_FILLED,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_BUY,
-                    price="10100",
-                    size=101,
-                    remaining=0,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party1",
-                    updated_at=1653266950,
-                    version=1,
-                ),
-                vega_protos.vega.Order(
-                    id="id4",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_BUY,
-                    price="10110",
-                    size=101,
-                    remaining=101,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party1",
-                    updated_at=1653266950,
-                    version=1,
-                ),
-                vega_protos.vega.Order(
-                    id="id5",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_BUY,
-                    price="10100",
-                    size=101,
-                    remaining=101,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party2",
-                    updated_at=1653266950,
-                    version=1,
-                ),
-                vega_protos.vega.Order(
-                    id="id6",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_SELL,
-                    price="10400",
-                    size=111,
-                    remaining=121,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party1",
-                    updated_at=1653266950,
-                    version=1,
-                ),
-                vega_protos.vega.Order(
-                    id="id7",
-                    market_id="market",
-                    status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-                    reference="ref1",
-                    side=vega_protos.vega.SIDE_SELL,
-                    price="10100",
-                    size=101,
-                    remaining=101,
-                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-                    type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-                    created_at=1653266950,
-                    expires_at=1653276950,
-                    party_id="party1",
-                    updated_at=1653266950,
-                    version=1,
-                ),
-            ]
+                edges=[
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id1",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_BUY,
+                            price="10100",
+                            size=101,
+                            remaining=101,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party1",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id2",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_CANCELLED,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_BUY,
+                            price="10100",
+                            size=101,
+                            remaining=101,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party1",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id3",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_FILLED,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_BUY,
+                            price="10100",
+                            size=101,
+                            remaining=0,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party1",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id4",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_BUY,
+                            price="10110",
+                            size=101,
+                            remaining=101,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party1",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id5",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_BUY,
+                            price="10100",
+                            size=101,
+                            remaining=101,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party2",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id6",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_SELL,
+                            price="10400",
+                            size=111,
+                            remaining=121,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party1",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.OrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.Order(
+                            id="id7",
+                            market_id="market",
+                            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
+                            reference="ref1",
+                            side=vega_protos.vega.SIDE_SELL,
+                            price="10100",
+                            size=101,
+                            remaining=101,
+                            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                            created_at=1653266950,
+                            expires_at=1653276950,
+                            party_id="party1",
+                            updated_at=1653266950,
+                            version=1,
+                        ),
+                    ),
+                ],
+            )
         )
 
-    server, port, mock_servicer = trading_data_servicer_and_port
-    mock_servicer.OrdersByMarket = OrdersByMarket
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListOrders = ListOrders
 
-    add_TradingDataServiceServicer_to_server(mock_servicer(), server)
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
-    data_client = VegaTradingDataClient(f"localhost:{port}")
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
 
     res = open_orders_by_market(
         market_id="MARK1",
@@ -612,7 +673,6 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
         party_id="party",
         market_id="market",
         data_client=data_client,
-        data_client_v1=None,
     )
 
     assert res == expected
@@ -709,7 +769,6 @@ def test_get_trades(
         party_id="party",
         market_id="market",
         data_client=data_client,
-        data_client_v1=None,
     )
 
     assert res == expected

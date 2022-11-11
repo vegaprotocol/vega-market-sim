@@ -5,7 +5,7 @@ from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v1 as data_node_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.helpers import num_from_padded_int
 
@@ -217,7 +217,7 @@ def positions_by_market(
     position_decimals: int,
     asset_decimals: int,
     price_decimals: int,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> List[Position]:
     """Output positions of a party."""
     return [
@@ -237,16 +237,16 @@ def party_account(
     pub_key: str,
     asset_id: str,
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     asset_dp: Optional[int] = None,
 ) -> AccountData:
     """Output money in general accounts/margin accounts/bond accounts (if exists)
     of a party."""
-    account_req = data_node_protos.trading_data.PartyAccountsRequest(
+    accounts = data_raw.party_accounts(
+        data_client=data_client,
         party_id=pub_key,
-        asset=asset_id,
+        asset_id=asset_id,
     )
-    accounts = data_client.PartyAccounts(account_req).accounts
 
     asset_dp = (
         asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
@@ -273,7 +273,7 @@ def party_account(
 
 
 def find_market_id(
-    name: str, data_client: vac.VegaTradingDataClient, raise_on_missing: bool = False
+    name: str, data_client: vac.VegaTradingDataClientV2, raise_on_missing: bool = False
 ) -> str:
     """Looks up the Market ID of a given market name
 
@@ -281,7 +281,7 @@ def find_market_id(
         symbol:
             str, The symbol of the asset to look up
         data_client:
-            VegaTradingDataClient, the gRPC data client
+            VegaTradingDataClientV2, the gRPC data client
         raise_on_missing:
             bool, whether to raise an Error or silently return
                 if the asset does not exist
@@ -316,7 +316,9 @@ def find_market_id(
 
 
 def find_asset_id(
-    symbol: str, data_client: vac.VegaTradingDataClient, raise_on_missing: bool = False
+    symbol: str,
+    data_client: vac.VegaTradingDataClientV2,
+    raise_on_missing: bool = False,
 ) -> str:
     """Looks up the Asset ID of a given asset name
 
@@ -324,7 +326,7 @@ def find_asset_id(
         symbol:
             str, The symbol of the asset to look up
         data_client:
-            VegaTradingDataClient, the gRPC data client
+            VegaTradingDataClientV2, the gRPC data client
         raise_on_missing:
             bool, whether to raise an Error or silently return
                 if the asset does not exist
@@ -332,8 +334,7 @@ def find_asset_id(
     Returns:
         str, the ID of the asset
     """
-    asset_request = data_node_protos.trading_data.AssetsRequest()
-    assets = data_client.Assets(asset_request).assets
+    assets = data_raw.list_assets(data_client=data_client)
     # Find settlement asset
     for asset in assets:
         if asset.details.symbol == symbol:
@@ -347,7 +348,7 @@ def find_asset_id(
 
 def market_price_decimals(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> int:
     """Returns the number of decimal places a specified market uses for price units.
 
@@ -355,7 +356,7 @@ def market_price_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         int, The number of decimal places the market uses
@@ -367,7 +368,7 @@ def market_price_decimals(
 
 def market_position_decimals(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> int:
     """Returns the number of decimal places a specified market uses for position units.
 
@@ -375,7 +376,7 @@ def market_position_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         int, The number of decimal places the market uses for positions
@@ -387,7 +388,7 @@ def market_position_decimals(
 
 def asset_decimals(
     asset_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> int:
     """Returns the number of decimal places a specified asset uses for price.
 
@@ -395,7 +396,7 @@ def asset_decimals(
         asset_id:
             str, The ID of the asset requested
         data_client:
-            VegaTradingDataClient, an instantiated gRPC data client
+            VegaTradingDataClientV2, an instantiated gRPC data client
 
     Returns:
         int, The number of decimal places the asset uses
@@ -407,7 +408,7 @@ def asset_decimals(
 
 def best_prices(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
 ) -> Tuple[float, float]:
     """
@@ -428,7 +429,7 @@ def best_prices(
 
 def open_orders_by_market(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
 ) -> OrdersBySide:
@@ -439,7 +440,7 @@ def open_orders_by_market(
         market_id:
             str, ID for the market to load
         data_client:
-            VegaTradingDataClient, instantiated gRPC client
+            VegaTradingDataClientV2, instantiated gRPC client
 
     Returns:
         OrdersBySide, Live orders segregated by side
@@ -462,25 +463,25 @@ def open_orders_by_market(
 
 
 def list_orders(
-    data_client: vac.VegaTradingDataClient,
-    data_client_v2: vac.VegaTradingDataClientV2,
-    market_id: str,
-    party_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+    reference: Optional[str] = None,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
     live_only: Optional[bool] = True,
 ) -> List[Order]:
-    """Return a list of converted orders for the specified market and party.
+    """Return a list of converted orders for the specified market, party, and reference.
 
     Args:
-        data_client (vac.VegaTradingDataClient):
-            An instantiated gRPC trading_data_client.
-        data_client_v2 (vac.VegaTradingDataClientV2):
-            An instantiated gRPC trading_data_client_V2.
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading_data_client_v2.
         market_id (str):
             Id of market to return orders for.
         party_id (str):
             Id of party to return orders for.
+        reference (str):
+            References to return orders for.
         price_decimals (Optional[int], optional):
             Market price decimal places. Defaults to None.
         position_decimals (Optional[int], optional):
@@ -493,9 +494,10 @@ def list_orders(
             A list of converted orders.
     """
     orders = data_raw.list_orders(
-        data_client=data_client_v2,
+        data_client=data_client,
         party_id=party_id,
         market_id=market_id,
+        reference=reference,
         live_only=live_only,
     )
 
@@ -527,7 +529,7 @@ def list_orders(
 
 def all_orders(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
     open_only: bool = False,
@@ -539,7 +541,7 @@ def all_orders(
         market_id:
             str, ID for the market to load
         data_client:
-            VegaTradingDataClient, instantiated gRPC client
+            VegaTradingDataClientV2, instantiated gRPC client
         open_only:
             bool, default False, whether to only return still
                 open orders
@@ -547,9 +549,9 @@ def all_orders(
     Returns:
         OrdersBySide, Live orders segregated by side
     """
-    orders = data_raw.unroll_pagination(
-        data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
-        lambda x: data_client.OrdersByMarket(x).orders,
+    orders = data_raw.list_orders(
+        market_id=market_id,
+        data_client=data_client,
     )
 
     mkt_price_dp = (
@@ -582,15 +584,15 @@ def all_orders(
 
 def order_book_by_market(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> OrderBook:
     """
     Output state of order book for a given market.
     """
 
-    orders = data_raw.unroll_pagination(
-        data_node_protos.trading_data.OrdersByMarketRequest(market_id=market_id),
-        lambda x: data_client.OrdersByMarket(x).orders,
+    orders = data_raw.list_orders(
+        market_id=market_id,
+        data_client=data_client,
     )
 
     mkt_price_dp = market_price_decimals(market_id=market_id, data_client=data_client)
@@ -613,42 +615,10 @@ def order_book_by_market(
     return OrderBook(bids, asks)
 
 
-def order_status_by_reference(
-    reference: str,
-    data_client: vac.VegaTradingDataClient,
-    price_decimals: Optional[int] = None,
-    position_decimals: Optional[int] = None,
-) -> Optional[vega_protos.vega.Order]:
-    """Loads information about a specific order identified by the reference.
-    Optionally return historic order versions.
-
-    Args:
-        reference:
-            str, the order reference as specified by Vega when originally placed
-                or assigned by Vega
-        data_client:
-            VegaTradingDataClient, an instantiated gRPC trading data client
-        price_decimals:
-            int, the decimal precision used when specifying prices on the market
-        position_decimals:
-            int, the decimal precision used when specifying positions on the market
-
-    Returns:
-        Optional[vega.Order], the requested Order object or None if nothing found
-    """
-    return _order_from_proto(
-        data_raw.order_status_by_reference(
-            reference=reference, data_client=data_client
-        ),
-        price_decimals=price_decimals,
-        position_decimals=position_decimals,
-    )
-
-
 def market_account(
     market_id: str,
     account_type: vega_protos.vega.AccountType,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
 ) -> float:
     """
     Returns the current asset value in the Market's fee account
@@ -676,15 +646,15 @@ def market_account(
 
 def market_depth(
     market_id: str,
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     max_depth: Optional[int] = None,
     price_decimals: Optional[int] = None,
     position_decimals: Optional[int] = None,
 ) -> Optional[MarketDepth]:
-    mkt_depth = data_client.MarketDepth(
-        data_node_protos.trading_data.MarketDepthRequest(
-            market_id=market_id, max_depth=max_depth
-        )
+    mkt_depth = data_raw.market_depth(
+        data_client=data_client,
+        market_id=market_id,
+        max_depth=max_depth,
     )
     if mkt_depth is None:
         return mkt_depth
@@ -721,7 +691,7 @@ def market_depth(
 
 def order_subscription(
     data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[Order]:
@@ -772,7 +742,7 @@ def order_subscription(
 
 
 def has_liquidity_provision(
-    data_client: vac.VegaTradingDataClient,
+    data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     party_id: str,
 ) -> bool:
@@ -793,7 +763,6 @@ def has_liquidity_provision(
 
 def margin_levels(
     data_client: vac.VegaTradingDataClientV2,
-    data_client_v1: vac.VegaTradingDataClient,
     party_id: str,
     market_id: Optional[str] = None,
 ) -> List[MarginLevels]:
@@ -805,7 +774,7 @@ def margin_levels(
     for margin in margins:
         if margin.asset not in asset_dp:
             asset_dp[margin.asset] = asset_decimals(
-                asset_id=margin.asset, data_client=data_client_v1
+                asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
             _margin_level_from_proto(margin, asset_decimals=asset_dp[margin.asset])
@@ -815,7 +784,6 @@ def margin_levels(
 
 def get_trades(
     data_client: vac.VegaTradingDataClientV2,
-    data_client_v1: vac.VegaTradingDataClient,
     market_id: str,
     party_id: Optional[str] = None,
     order_id: Optional[str] = None,
@@ -837,18 +805,18 @@ def get_trades(
     for trade in base_trades:
         if trade.market_id not in market_price_decimals_map:
             market_price_decimals_map[trade.market_id] = market_price_decimals(
-                market_id=trade.market_id, data_client=data_client_v1
+                market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_position_decimals_map:
             market_position_decimals_map[trade.market_id] = market_position_decimals(
-                market_id=trade.market_id, data_client=data_client_v1
+                market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
             market_asset_decimals_map[trade.market_id] = asset_decimals(
                 asset_id=data_raw.market_info(
-                    market_id=market_id, data_client=data_client_v1
+                    market_id=market_id, data_client=data_client
                 ).tradable_instrument.instrument.future.settlement_asset,
-                data_client=data_client_v1,
+                data_client=data_client,
             )
         res_trades.append(
             _trade_from_proto(
