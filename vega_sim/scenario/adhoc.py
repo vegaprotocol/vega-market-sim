@@ -17,7 +17,6 @@ def main():
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
-    parser.add_argument("--store", action="store_true")
     parser.add_argument(
         "--network",
         choices=[network.name for network in Network],
@@ -52,7 +51,6 @@ def main():
             ),
             retain_log_files=True,
             use_full_vega_wallet=False,
-            store_transactions=args.store,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
