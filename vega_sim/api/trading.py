@@ -481,7 +481,7 @@ def order_amendment(
     time_in_force = get_enum(time_in_force, vega_protos.vega.Order.TimeInForce)
 
     if pegged_reference is not None:
-        pegged_reference = get_enum(time_in_force, vega_protos.vega.PeggedReference)
+        pegged_reference = get_enum(pegged_reference, vega_protos.vega.PeggedReference)
 
     command = OrderAmendment(
         order_id=order_id,
