@@ -1768,6 +1768,8 @@ class VegaService(ABC):
 
         instructions = cancellations + amendments + submissions
 
+        batch_size = 0
+
         batch_of_cancellations = []
         batch_of_amendments = []
         batch_of_submissions = []
@@ -1781,13 +1783,14 @@ class VegaService(ABC):
             elif isinstance(instruction, OrderSubmission):
                 batch_of_submissions.append(instruction)
             else:
+                batch_size += -1
                 raise ValueError(f"Invalid instruction type {type(instruction)}.")
 
+            batch_size += 1
+
             if (
-                len(batch_of_cancellations)
-                + len(batch_of_amendments)
-                + len(batch_of_submissions)
-                == max_batch_size
+                batch_size
+                >= max_batch_size
             ) or (i == len(instructions) - 1):
 
                 trading.batch_market_instructions(
@@ -1798,6 +1801,8 @@ class VegaService(ABC):
                     amendments=batch_of_amendments,
                     submissions=batch_of_submissions,
                 )
+
+                batch_size = 0
 
                 batch_of_cancellations = []
                 batch_of_amendments = []
