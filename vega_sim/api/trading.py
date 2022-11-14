@@ -250,11 +250,14 @@ def cancel_order(
         order_id:
             str, Identifier of the order to cancel
     """
+
+    order_data = order_cancellation(
+        order_id=order_id,
+        market_id=market_id,
+    )
+
     wallet.submit_transaction(
-        transaction=OrderCancellation(
-            order_id=order_id,
-            market_id=market_id,
-        ),
+        transaction=order_data,
         name=wallet_name,
         transaction_type="order_cancellation",
         key_name=key_name,
