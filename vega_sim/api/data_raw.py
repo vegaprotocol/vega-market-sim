@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import namedtuple
-from typing import Callable, Dict, Iterable, List, Optional, TypeVar
+from typing import Callable, Dict, Iterable, List, Optional, TypeVar, Union
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -366,3 +366,24 @@ def get_trades(
         request_func=lambda x: data_client.ListTrades(x).trades,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+def get_network_parameter(
+    data_client: vac.VegaTradingDataClientV2,
+    key: str,
+) -> Union[str, int, float]:
+    """Returns the value of the specified network parameter.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            Instantiated gRPC client
+        key (str):
+            The key identifying the network parameter.
+
+    Returns:
+        Any:
+            The value of the specified network parameter.
+    """
+    return data_client.GetNetworkParameter(
+        data_node_protos_v2.trading_data.GetNetworkParameterRequest(key=key),
+    ).network_parameter

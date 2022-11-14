@@ -1825,7 +1825,7 @@ class VegaService(ABC):
                 If an invalid to_type arg is specified (i.e. not str, int, or float).
         """
 
-        raw_val = data_raw.get_network_parameter(
+        raw_val = data.get_network_parameter(
             data_client=self.trading_data_client_v2,
             key=key,
         ).value

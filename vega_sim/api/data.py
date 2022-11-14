@@ -827,24 +827,3 @@ def get_trades(
             )
         )
     return res_trades
-
-
-def get_network_parameter(
-    data_client: vac.VegaTradingDataClientV2,
-    key: str,
-) -> Any:
-    """Returns the value of the specified network parameter.
-
-    Args:
-        data_client (vac.VegaTradingDataClientV2):
-            Instantiated gRPC client
-        key (str):
-            The key identifying the network parameter.
-
-    Returns:
-        Any:
-            The value of the specified network parameter.
-    """
-    return data_client.GetNetworkParameter(
-        data_node_protos_v2.trading_data.GetNetworkParameterRequest(key=key),
-    ).network_parameter
