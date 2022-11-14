@@ -1277,6 +1277,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         elif state is not None:
             est_mid_price = state.market_state[self.market_id].midprice
         else:
+            est_mid_price = None
             buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
             sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
 
