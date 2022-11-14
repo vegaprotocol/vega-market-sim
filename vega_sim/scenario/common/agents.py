@@ -1274,12 +1274,17 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
         sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
 
+        if (self.curr_asks is not None) and (self.curr_bids is not None):
+            est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
+        elif state is not None:
+            est_mid_price = state.market_state[self.market_id].midprice
+
         if self.curr_asks is not None:
             next_ask_step = self.curr_asks[-1].price + self.tick_spacing
             sell_specs = [
                 [
                     "PEGGED_REFERENCE_MID",
-                    next_ask_step - state.market_state[self.market_id].midprice,
+                    next_ask_step - est_mid_price,
                     1,
                 ]
             ]
@@ -1288,7 +1293,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             buy_specs = [
                 [
                     "PEGGED_REFERENCE_MID",
-                    state.market_state[self.market_id].midprice - next_bid_step,
+                    est_mid_price - next_bid_step,
                     1,
                 ]
             ]
