@@ -1762,8 +1762,8 @@ class VegaService(ABC):
                 List of OrderSubmission objects to submit. Defaults to None.
         """
 
-        max_batch_size = int(
-            self.get_network_parameter(key="spam.protection.max.batchSize")
+        max_batch_size = self.get_network_parameter(
+            key="spam.protection.max.batchSize", to_type="int"
         )
 
         instructions = cancellations + amendments + submissions
@@ -1788,10 +1788,7 @@ class VegaService(ABC):
 
             batch_size += 1
 
-            if (
-                batch_size
-                >= max_batch_size
-            ) or (i == len(instructions) - 1):
+            if (batch_size >= max_batch_size) or (i == len(instructions) - 1):
 
                 trading.batch_market_instructions(
                     wallet=self.wallet,
@@ -1808,18 +1805,38 @@ class VegaService(ABC):
                 batch_of_amendments = []
                 batch_of_submissions = []
 
-    def get_network_parameter(self, key: str) -> Any:
+    def get_network_parameter(
+        self, key: str, to_type: Optional[Union[str, int, float]] = None
+    ) -> Union[str, int, float]:
         """Returns the value of the specified network parameter.
 
         Args:
             key (str):
                 The key identifying the network parameter.
+            to_type (str, float, int, optional):
+                Type to convert raw value to. Defaults to type of raw value.
 
         Returns:
             Any:
-                The value of the specified network parameter.
+                The value of the specified network parameter in the specified type.
+
+        Raises:
+            ValueError:
+                If an invalid to_type arg is specified (i.e. not str, int, or float).
         """
-        return data.get_network_parameter(
+
+        raw_val = data_raw.get_network_parameter(
             data_client=self.trading_data_client_v2,
             key=key,
         ).value
+
+        if to_type is None:
+            return raw_val
+        elif to_type is "str":
+            return str(raw_val)
+        elif to_type is "int":
+            return int(raw_val)
+        elif to_type is "float":
+            return float(raw_val)
+        else:
+            raise ValueError(f"Invalid value '{to_type}' specified for 'to_type' arg.")
