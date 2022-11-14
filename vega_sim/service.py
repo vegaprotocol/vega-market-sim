@@ -647,9 +647,11 @@ class VegaService(ABC):
             time_in_force=time_in_force,
             side=side,
             volume=submit_volume,
-            price=num_to_padded_int(
-                price,
-                self.market_price_decimals[market_id],
+            price=str(
+                num_to_padded_int(
+                    price,
+                    self.market_price_decimals[market_id],
+                )
             )
             if price is not None
             else None,

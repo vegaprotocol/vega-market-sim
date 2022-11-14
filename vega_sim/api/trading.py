@@ -44,7 +44,7 @@ def submit_order(
     time_in_force: Union[vega_protos.vega.Order.TimeInForce, str],
     side: Union[vega_protos.vega.Side, str],
     volume: float,
-    price: Optional[float] = None,
+    price: Optional[str] = None,
     expires_at: Optional[int] = None,
     pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
     wait: bool = True,
@@ -79,7 +79,7 @@ def submit_order(
         volume:
             float, volume of the order
         price:
-            float, price of the order
+            str, price of the order
         expires_at:
             int, Optional timestamp for when the order will expire, in
             nanoseconds since the epoch,
@@ -101,38 +101,21 @@ def submit_order(
     Returns:
         Optional[str], Order ID if wait is True, otherwise None
     """
-    # Login wallet
-    time_in_force = get_enum(time_in_force, vega_protos.vega.Order)
-    side = get_enum(side, vega_protos.vega.Side)
 
-    if expires_at is None:
-        blockchain_time = data_client.GetVegaTime(
-            data_node_protos_v2.trading_data.GetVegaTimeRequest()
-        ).timestamp
-        expires_at = int(blockchain_time + 120 * 1e9)  # expire in 2 minutes
-
-    order_ref = (
-        f"{wallet.public_key(wallet_name, key_name)}-{uuid.uuid4()}"
-        if order_ref is None
-        else order_ref
-    )
-
-    order_data = OrderSubmission(
+    order_data = order_submission(
+        data_client=data_client,
         market_id=market_id,
-        # price is an integer. For example 123456 is a price of 1.23456,
-        # assuming 5 decimal places.
-        side=side,
         size=volume,
+        side=side,
         time_in_force=time_in_force,
-        type=order_type,
+        order_type=order_type,
+        expires_at=expires_at,
         reference=order_ref,
+        price=price,
+        pegged_order=pegged_order,
     )
-    if pegged_order is not None:
-        order_data.pegged_order.CopyFrom(pegged_order)
-    if price is not None:
-        order_data.price = str(price)
-    if time_in_force == vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_UNSPECIFIED:
-        order_data.expires_at = expires_at
+
+    print(order_data)
 
     # Sign the transaction with an order submission command
     # Note: Setting propagate to true will also submit to a Vega node
@@ -162,13 +145,13 @@ def submit_order(
             time_forward_fn()
             logger.debug("Waiting for proposal acceptance")
             response = wait_for_acceptance(
-                order_ref,
+                order_data.reference,
                 lambda r: _proposal_loader(r, market_id, data_client),
             )
         except ProposalNotAcceptedError:
             time_forward_fn()
             response = wait_for_acceptance(
-                order_ref,
+                order_data.reference,
                 lambda r: _proposal_loader(r, market_id, data_client),
             )
         order_status = enum_to_str(vega_protos.vega.Order.Status, response.status)
