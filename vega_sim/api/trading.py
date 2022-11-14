@@ -115,8 +115,6 @@ def submit_order(
         pegged_order=pegged_order,
     )
 
-    print(order_data)
-
     # Sign the transaction with an order submission command
     # Note: Setting propagate to true will also submit to a Vega node
     wallet.submit_transaction(
