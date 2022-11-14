@@ -572,10 +572,12 @@ def order_submission(
         ("price", price),
         ("expires_at", expires_at),
         ("reference", reference),
-        ("pegged_order", pegged_order),
     ]:
         if val is not None:
             setattr(command, attr, val)
+
+    if pegged_order is not None:
+        command.pegged_order.CopyFrom(pegged_order)
 
     # Return the created and updated OrderSubmission object
     return command
