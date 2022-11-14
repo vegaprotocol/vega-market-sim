@@ -720,9 +720,11 @@ class VegaService(ABC):
             wallet_name=trading_wallet,
             market_id=market_id,
             order_id=order_id,
-            price=num_to_padded_int(
-                price,
-                self.market_price_decimals[market_id],
+            price=str(
+                num_to_padded_int(
+                    price,
+                    self.market_price_decimals[market_id],
+                )
             )
             if price is not None
             else None,

@@ -173,7 +173,7 @@ def amend_order(
     wallet: Wallet,
     market_id: str,
     order_id: str,
-    price: Optional[float] = None,
+    price: Optional[str] = None,
     expires_at: Optional[int] = None,
     pegged_offset: Optional[str] = None,
     pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
@@ -199,7 +199,7 @@ def amend_order(
         volume_delta:
             float, change in volume of the order
         price:
-            float, price of the order
+            str, price of the order
         time_in_force:
             vega.Order.TimeInForce or str, The time in force setting for the order
                 (Only valid options for market are TIME_IN_FORCE_IOC and
@@ -209,29 +209,17 @@ def amend_order(
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
     """
-    # Login wallet
-    time_in_force = (
-        time_in_force
-        if time_in_force is not None
-        else vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_UNSPECIFIED
-    )
 
-    order_data = OrderAmendment(
-        market_id=market_id,
+    order_data = order_amendment(
         order_id=order_id,
-        # price is an integer. For example 123456 is a price of 1.23456,
-        # assuming 5 decimal places.
+        market_id=market_id,
+        price=price,
         size_delta=volume_delta,
+        expires_at=expires_at,
         time_in_force=time_in_force,
+        pegged_offset=pegged_offset,
+        pegged_reference=pegged_reference,
     )
-    for name, val in [
-        ("expires_at", expires_at),
-        ("pegged_offset", pegged_offset),
-        ("pegged_reference", pegged_reference),
-        ("price", str(price) if price is not None else None),
-    ]:
-        if val is not None:
-            setattr(order_data, name, val)
 
     wallet.submit_transaction(
         transaction=order_data,
