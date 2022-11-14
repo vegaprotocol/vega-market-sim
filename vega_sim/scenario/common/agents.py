@@ -1271,13 +1271,14 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             )
 
     def _liq_provis(self, state: VegaState) -> LiquidityProvision:
-        buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
-        sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
 
         if (self.curr_asks is not None) and (self.curr_bids is not None):
             est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
         elif state is not None:
             est_mid_price = state.market_state[self.market_id].midprice
+        else:
+            buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
+            sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
 
         if self.curr_asks is not None:
             next_ask_step = self.curr_asks[-1].price + self.tick_spacing
