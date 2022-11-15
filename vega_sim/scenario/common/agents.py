@@ -1146,31 +1146,55 @@ class ShapedMarketMaker(StateAgentWithWallet):
         orders: List[Order],
         new_shape: List[MMOrder],
     ) -> None:
+
+        amendments = []
+        submissions = []
+        cancellations = []
+
         for i, order in enumerate(new_shape):
             if i < len(orders):
                 order_to_amend = orders[i]
-                self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
+
+                transaction = self.vega.create_order_amendment(
                     market_id=self.market_id,
                     order_id=order_to_amend.id,
                     price=order.price,
-                    volume_delta=order.size - order_to_amend.remaining,
-                    key_name=self.key_name,
+                    size_delta=order.size - order_to_amend.remaining,
                 )
+
+                amendments.append(transaction)
+
             else:
-                self._submit_order(
-                    side,
-                    order.price,
-                    order.size,
+
+                transaction = self.vega.create_order_submission(
+                    market_id=self.market_id,
+                    price=order.price,
+                    size=order.size,
+                    order_type="TYPE_LIMIT",
+                    time_in_force="TIME_IN_FORCE_GTC",
+                    side=side,
                 )
+
+                submissions.append(transaction)
+
         if len(orders) > len(new_shape):
             for order in orders[len(new_shape) :]:
-                self.vega.cancel_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
+
+                transaction = self.vega.create_order_cancellation(
                     order_id=order.id,
-                    key_name=self.key_name,
+                    market_id=self.market_id,
                 )
+
+                cancellations.append(transaction)
+
+        if submissions is not []:
+            self.vega.submit_instructions(
+                wallet_name=self.wallet_name,
+                key_name=self.key_name,
+                amendments=amendments,
+                submissions=submissions,
+                cancellations=cancellations,
+            )
 
 
 class ExponentialShapedMarketMaker(ShapedMarketMaker):
