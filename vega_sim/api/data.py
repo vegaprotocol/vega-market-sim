@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
+from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple, Any
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
