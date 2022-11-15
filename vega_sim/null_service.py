@@ -521,7 +521,7 @@ class VegaServiceNull(VegaService):
         start_order_feed: bool = True,
         retain_log_files: bool = False,
         launch_graphql: bool = False,
-        store_transactions: bool = False,
+        store_transactions: bool = True,
         replay_from_path: Optional[str] = None,
     ):
         super().__init__(
