@@ -1837,11 +1837,11 @@ class VegaService(ABC):
 
         if to_type is None:
             return raw_val
-        elif to_type is "str":
+        elif to_type == "str":
             return str(raw_val)
-        elif to_type is "int":
+        elif to_type == "int":
             return int(raw_val)
-        elif to_type is "float":
+        elif to_type == "float":
             return float(raw_val)
         else:
             raise ValueError(f"Invalid value '{to_type}' specified for 'to_type' arg.")
