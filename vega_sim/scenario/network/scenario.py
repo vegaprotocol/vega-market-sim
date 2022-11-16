@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
     with VegaServiceNetwork(
         network=("fairground" if args.network is None else args.network),
-        automatic_consent=True,
-        no_version_check=True,
+        run_with_wallet=True,
+        run_with_console=True,
     ) as vega:
         scenario.run_iteration(vega=vega)

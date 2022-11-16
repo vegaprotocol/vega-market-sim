@@ -25,60 +25,28 @@ Todo:
     • Test all market sim agents are compatible.
 """
 
-import subprocess
-import logging
 import toml
+import time
+import signal
+import logging
+import tempfile
+import subprocess
+import webbrowser
+import multiprocessing
 
-from os import getcwd, path
+from typing import Optional
 
+from os import getcwd, path, environ
+
+from vega_sim import vega_bin_path
 from vega_sim.service import VegaService
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.vega_wallet import VegaWallet
+from vega_sim.null_service import find_free_port, _popen_process
 
 from vega_sim.constants import DATA_NODE_GRPC_PORT
 
-
-def start_wallet_service(
-    network: str,
-    automatic_consent: bool = True,
-    no_version_check: bool = False,
-) -> subprocess.Popen:
-    """Starts a subprocess running a wallet service connected to a network.
-    Function uses the local install of vega wallet to start a wallet service
-    connected to the specified network. By default the automatic-consent flag
-    is enabled and the no-version-check flag is disabled.
-
-    Args:
-        network (str):
-            Name of the network config file to use to run the service.
-        automatic_consent (bool, optional):
-            Run the service with the --automatic-consent flag. Default is True.
-        no_version_check (bool, optional):
-            Run the service with the --no_version_check flag. Default is False.
-    Returns:
-
-        process (subprocess.Popen):
-
-            A process running the wallet service which can be killed.
-    """
-
-    args = [
-        "vega",
-        "wallet",
-        "service",
-        "run",
-        "--network",
-        network,
-    ]
-
-    if automatic_consent:
-        args.append("--automatic-consent")
-    if no_version_check:
-        args.append("--no-version-check")
-
-    process = subprocess.Popen(args=args)
-
-    return process
+logger = logging.getLogger(__name__)
 
 
 def add_network_config(
@@ -113,55 +81,158 @@ def add_network_config(
     subprocess.call(args=args)
 
 
+def manage_vega_processes(
+    network: str,
+    vega_console_path: str,
+    vega_console_port: int,
+    data_node_query_url: str,
+    wallet_url: str,
+    run_with_wallet: Optional[bool] = True,
+    run_with_console: Optional[bool] = True,
+    log_dir: Optional[str] = None,
+):
+
+    processes = []
+
+    tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
+
+    if run_with_wallet:
+        vegaWalletProcess = _popen_process(
+            popen_args=[
+                "vega",
+                "wallet",
+                "service",
+                "run",
+                "--network",
+                network,
+                "--automatic-consent",
+                "--no-version-check",
+            ],
+            dir_root=tmp_vega_dir,
+            log_name="vegawallet",
+        )
+        processes.append(vegaWalletProcess)
+
+    if run_with_console:
+        env_copy = environ.copy()
+        env_copy.update(
+            {
+                "NX_VEGA_URL": data_node_query_url,
+                "NX_VEGA_WALLET_URL": wallet_url,
+                "NX_VEGA_ENV": "CUSTOM",
+                "NX_PORT": f"{vega_console_port}",
+            }
+        )
+
+        vegaConsoleProcess = _popen_process(
+            popen_args=[
+                "yarn",
+                "--cwd",
+                vega_console_path,
+                "nx",
+                "serve",
+                "--port",
+                f"{vega_console_port}",
+                "-o",
+                "trading",
+            ],
+            dir_root=tmp_vega_dir,
+            log_name="console",
+            env=env_copy,
+        )
+        processes.append(vegaConsoleProcess)
+
+    signal.sigwait([signal.SIGKILL, signal.SIGTERM])
+    for process in processes:
+        process.terminate()
+    for process in processes:
+        return_code = process.poll()
+        if return_code is not None:
+            continue
+        time.sleep(5)
+        process.kill()
+
+
 class VegaServiceNetwork(VegaService):
     """Class for handling services for communicating with a Vega network."""
 
     def __init__(
         self,
         network: str,
-        automatic_consent: bool = True,
-        no_version_check: bool = False,
+        run_with_wallet: bool = True,
+        run_with_console: bool = True,
     ):
         """Method initialises the class.
 
         Args:
-
             network (str):
                 Defines which network to connect service to.
-            automatic_consent (bool, optional):
-                Whether to run the vega wallet service with the
-                --automatic-consent flag. Default value is True.
-            no_version_check (bool, optional):
-                Whether to run the vega wallet service with the
-                --automatic-consent flag. Default value is False.
+            run_with_wallet (bool, optional):
+                Defines whether to start a wallet process.
+            run_with_console (bool, optional):
+                Defines whether to start a console process.
         """
 
         # Run init method inherited from VegaService with network arguments.
         super().__init__(can_control_time=False, warn_on_raw_data_access=False)
 
         self.network = network
-        self.automatic_consent = automatic_consent
-        self.no_version_check = no_version_check
+        self.run_with_wallet = run_with_wallet
+        self.run_with_console = run_with_console
 
         self._wallet = None
         self._wallet_url = None
         self._data_node_grpc_url = None
+        self._data_node_query_url = None
         self._network_config = None
 
+        self.vega_console_path = path.join(vega_bin_path, "console")
+
+        self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
+
     def __enter__(self):
-        """Defines behaviour when class entered by a with statement.
-        Special attributes starts the process running the wallet service.
-        """
-        self.process = start_wallet_service(
-            self.network, self.automatic_consent, self.no_version_check
-        )
+        """Defines behaviour when class entered by a with statement."""
+        self.start()
+
         return self
 
     def __exit__(self, type, value, traceback):
-        """Defines behaviour when class exited by a with statement.
-        Special attribute kills the process running the wallet service.
-        """
-        self.process.kill()
+        """Defines behaviour when class exited by a with statement."""
+        self.stop()
+
+    def start(self):
+
+        ctx = multiprocessing.get_context()
+        vega_console_port = find_free_port()
+        self.proc = ctx.Process(
+            target=manage_vega_processes,
+            kwargs={
+                "network": self.network,
+                "log_dir": self.log_dir,
+                "run_with_wallet": self.run_with_wallet,
+                "run_with_console": self.run_with_console,
+                "vega_console_path": self.vega_console_path,
+                "vega_console_port": vega_console_port,
+                "data_node_query_url": self.data_node_query_url,
+                "wallet_url": self.wallet_url,
+            },
+        )
+        self.proc.start()
+
+        if self.run_with_console:
+            logger.info(
+                "Vega Running. Console launched at"
+                f" http://localhost:{vega_console_port}"
+            )
+            webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
+
+    def stop(self) -> None:
+
+        super().stop()
+        if self.proc is None:
+            logger.info("Stop called but nothing to stop")
+        else:
+            self.proc.terminate()
 
     def wait_fn(self, wait_multiple: float = 1) -> None:
         """Overrides redundant parent method."""
@@ -229,6 +300,13 @@ class VegaServiceNetwork(VegaService):
         return self._data_node_grpc_url
 
     @property
+    def data_node_query_url(self) -> str:
+        if self._data_node_query_url is None:
+            url = self.network_config["API"]["GraphQL"]["Hosts"][1]
+            self._data_node_query_url = url
+        return self._data_node_query_url
+
+    @property
     def wallet_url(self) -> str:
         if self._wallet_url is None:
             self._wallet_url = (
@@ -265,8 +343,8 @@ if __name__ == "__main__":
     # Create a service connected to the fairground network.
     with VegaServiceNetwork(
         network="fairground",
-        automatic_consent=True,
-        no_version_check=True,
+        run_with_wallet=True,
+        run_with_console=True,
     ) as vega:
 
         # Show all the markets on the network
@@ -279,8 +357,8 @@ if __name__ == "__main__":
     # Create a service connected to the stagnet3 network.
     with VegaServiceNetwork(
         network="stagnet3",
-        automatic_consent=True,
-        no_version_check=True,
+        run_with_wallet=True,
+        run_with_console=True,
     ) as vega:
 
         # Show all the markets on the network

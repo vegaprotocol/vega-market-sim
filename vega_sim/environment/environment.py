@@ -402,6 +402,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         if self._vega is None:
             with VegaServiceNetwork(
                 use_full_vega_wallet=True,
+                run_with_wallet = True,
+                run_with_console = True,
             ) as vega:
                 return self._run(vega)
         else:
