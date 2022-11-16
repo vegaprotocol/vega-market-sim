@@ -27,6 +27,7 @@ from vega_sim.environment.environment import (
 from vega_sim.environment.agent import Agent
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
+    LivePrice,
     Granularity,
 )
 from vega_sim.scenario.common.agents import (
@@ -47,32 +48,6 @@ from vega_sim.scenario.fairground.agents import (
     MOMENTUM_MARKET_ORDER_AGENT_KEYS,
     SENSITIVE_MARKET_ORDER_AGENT_KEYS,
 )
-
-
-class LivePrice:
-    """Iterator for getting a live product price process.
-
-    Class is to be used when running the scenario on fairground incentives. The
-    iterator can be passed to the market-maker agent and the price-sensitive
-    agents to give them information regarding the live product price.
-
-    """
-
-    def __init__(self, product: str = "ADAUSDT"):
-        self.product = product
-
-    def __iter__(self):
-        return self
-
-    def __getitem__(self, index):
-        return self._get_price()
-
-    def __next__(self):
-        return self._get_price()
-
-    def _get_price(self):
-        url = f"https://api.binance.com/api/v3/avgPrice?symbol={self.product}"
-        return float(requests.get(url).json()["price"])
 
 
 # Set default scenario arguments
