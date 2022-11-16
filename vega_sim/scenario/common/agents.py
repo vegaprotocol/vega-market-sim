@@ -81,7 +81,7 @@ class MarketOrderTrader(StateAgentWithWallet):
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
         key_name: str = None,
-        step_bias: Optional[float] = 0,
+        step_bias: Optional[float] = 1,
     ):
         super().__init__(wallet_name + str(tag), wallet_pass, key_name)
         self.initial_asset_mint = initial_asset_mint
