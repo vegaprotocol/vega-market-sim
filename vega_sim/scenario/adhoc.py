@@ -20,7 +20,7 @@ def main():
     parser.add_argument(
         "--network",
         choices=[network.name for network in Network],
-        default=Network.NULLCHAIN.name,
+        default=Network.nullchain.name,
     )
     parser.add_argument(
         "-p",
@@ -38,7 +38,7 @@ def main():
 
     scenario.pause_every_n_steps = args.pause_every_n_steps
 
-    if Network[args.network] == Network.NULLCHAIN:
+    if Network[args.network] == Network.nullchain:
         with VegaServiceNull(
             run_with_console=args.console,
             launch_graphql=args.graphql,

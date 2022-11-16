@@ -1,8 +1,9 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class Network(Enum):
-    NULLCHAIN = "nullchain"
-    STAGNET1 = "vegawallet-stagnet1"
-    STAGNET3 = "stagnet3"
-    FAIRGROUND = "fairground"
+    nullchain = "nullchain"
+    stagnet1 = "stagnet1"
+    stagnet2 = "stagnet2"
+    stagnet3 = "stagnet3"
+    fairground = "fairground"
