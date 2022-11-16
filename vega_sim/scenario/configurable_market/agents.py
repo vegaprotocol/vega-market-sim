@@ -39,6 +39,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         market_config: Optional[MarketConfig] = None,
         tag: Optional[str] = None,
         settlement_price: Optional[float] = None,
+        initial_mint: Optional[float] = 1e9,
     ):
 
         self.wallet_name = proposal_wallet_name
@@ -55,7 +56,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         self.asset_dp = asset_dp
         self.asset_name = asset_name
 
-        self.initial_mint = 1e09
+        self.initial_mint = initial_mint
 
         self.market_config = (
             market_config if market_config is not None else MarketConfig()
@@ -79,12 +80,14 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         )
 
         self.vega.wait_for_total_catchup()
-        self.vega.mint(
-            self.wallet_name, asset="VOTE", amount=1e4, key_name=self.key_name
-        )
+        if mint_wallet:
+            self.vega.mint(
+                self.wallet_name, asset="VOTE", amount=1e4, key_name=self.key_name
+            )
 
         self.vega.wait_for_total_catchup()
-        if mint_wallet:
+
+        if self.vega.find_asset_id(symbol=self.asset_name) is None:
             self.vega.create_asset(
                 self.wallet_name,
                 name=self.asset_name,
@@ -106,34 +109,31 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 key_name=self.key_name,
             )
 
-        # Add market information and asset information to market config
-        self.market_config.set("instrument.name", self.market_name)
-        self.market_config.set("instrument.code", self.market_code)
-        self.market_config.set("instrument.future.settlement_asset", self.asset_id)
-        self.market_config.set("instrument.future.quote_name", self.asset_name)
-        self.market_config.set(
-            "instrument.future.settlement_data_decimals", self.asset_dp
-        )
-        self.market_config.set(
-            "instrument.future.terminating_key",
-            self.vega.wallet.public_key(
-                self.termination_wallet_name, self.termination_key_name
-            ),
-        )
+        if self.vega.find_market_id(name=self.market_name) is None:
+            # Add market information and asset information to market config
+            self.market_config.set("instrument.name", self.market_name)
+            self.market_config.set("instrument.code", self.market_code)
+            self.market_config.set("instrument.future.settlement_asset", self.asset_id)
+            self.market_config.set("instrument.future.quote_name", self.asset_name)
+            self.market_config.set(
+                "instrument.future.settlement_data_decimals", self.asset_dp
+            )
+            self.market_config.set(
+                "instrument.future.terminating_key",
+                self.vega.wallet.public_key(
+                    self.termination_wallet_name, self.termination_key_name
+                ),
+            )
+
+            self.vega.wait_for_total_catchup()
+            self.vega.create_market_from_config(
+                proposal_wallet_name=self.wallet_name,
+                proposal_key_name=self.key_name,
+                market_config=self.market_config,
+            )
 
         self.vega.wait_for_total_catchup()
-        self.vega.create_market_from_config(
-            proposal_wallet_name=self.wallet_name,
-            proposal_key_name=self.key_name,
-            market_config=self.market_config,
-        )
-
-        self.vega.wait_for_total_catchup()
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
     def finalise(self):
         if self.settlement_price is not None:
