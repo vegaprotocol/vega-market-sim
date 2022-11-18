@@ -20,6 +20,7 @@ For examples of this setup, see examples/agent_market.
 
 """
 
+import grpc
 import time
 import datetime
 import logging
@@ -384,6 +385,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             Callable[[VegaServiceNetwork, List[Agent]], Any]
         ] = None,
         state_extraction_freq: int = 10,
+        raise_datanode_errors: Optional[bool] = True,
+        raise_step_errors: Optional[bool] = True,
     ):
         super().__init__(
             agents=agents,
@@ -398,6 +401,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             state_func if state_func is not None else self._default_state_extraction
         )
 
+        self.raise_datanode_errors = raise_datanode_errors
+        self.raise_step_errors = raise_step_errors
+
     def run(self):
         if self._vega is None:
             with VegaServiceNetwork(
@@ -409,8 +415,11 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         else:
             return self._run(self._vega)
 
-    def _run(self, vega):
+    def _run(self, vega: VegaServiceNetwork):
         state_values = []
+
+        # Initial datanode connection check
+        vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
         # Initialise agents without minting assets
         for agent in self.agents:
@@ -419,8 +428,11 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
+
+            vega.check_datanode(raise_on_error=self.raise_datanode_errors)
+
             i += 1
-            self.step(vega)
+            self.step(vega, raise_on_error=self.raise_step_errors)
 
             if (
                 self._state_extraction_fn is not None
@@ -437,7 +449,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             state_values.append(self._state_extraction_fn(vega, self.agents))
             return state_values
 
-    def step(self, vega: VegaServiceNetwork) -> None:
+    def step(self, vega: VegaServiceNetwork, raise_on_error) -> None:
         t = time.time()
         state = self.state_func(vega)
         logging.debug(f"Get state took {time.time() - t} seconds.")
@@ -446,4 +458,11 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             if self.random_agent_ordering
             else self.agents
         ):
-            agent.step(state)
+            try:
+                agent.step(state)
+            except:
+                msg = f"Agent '{agent.key_name}' failed to step."
+                if raise_on_error:
+                    raise RuntimeError(msg)
+                else:
+                    logging.warning(msg)

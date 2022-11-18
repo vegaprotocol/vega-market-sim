@@ -1845,3 +1845,7 @@ class VegaService(ABC):
             return float(raw_val)
         else:
             raise ValueError(f"Invalid value '{to_type}' specified for 'to_type' arg.")
+
+    def ping_datanode(self):
+        """Ping datanode endpoint to check health of connection"""
+        data.ping(data_client=self.trading_data_client_v2)
