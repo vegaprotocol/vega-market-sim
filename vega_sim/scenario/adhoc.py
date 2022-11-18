@@ -59,9 +59,9 @@ def main():
             )
     else:
         with VegaServiceNetwork(
-            network=Network[args.network].value,
-            automatic_consent=True,
-            no_version_check=True,
+            network=Network[args.network],
+            run_with_wallet=True,
+            run_with_console=True,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
