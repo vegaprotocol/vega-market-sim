@@ -31,6 +31,7 @@ import time
 import signal
 import logging
 import tempfile
+import itertools
 import subprocess
 import webbrowser
 import multiprocessing
@@ -190,8 +191,6 @@ class VegaServiceNetwork(VegaService):
         self._data_node_query_url = None
         self._network_config = None
 
-        self.datanode_index = 0
-
         self.vega_console_path = path.join(vega_bin_path, "console")
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
@@ -303,14 +302,14 @@ class VegaServiceNetwork(VegaService):
     @property
     def data_node_grpc_url(self) -> str:
         if self._data_node_grpc_url is None:
-            url = self.network_config["API"]["GRPC"]["Hosts"][self.datanode_index]
+            url = self.network_config["API"]["GRPC"]["Hosts"][0]
             self._data_node_grpc_url = f"{url.split(':')[0]}:{DATA_NODE_GRPC_PORT}"
         return self._data_node_grpc_url
 
     @property
     def data_node_query_url(self) -> str:
         if self._data_node_query_url is None:
-            url = self.network_config["API"]["GraphQL"]["Hosts"][self.datanode_index]
+            url = self.network_config["API"]["GraphQL"]["Hosts"][0]
             self._data_node_query_url = url
         return self._data_node_query_url
 
@@ -359,21 +358,22 @@ class VegaServiceNetwork(VegaService):
             self.ping_datanode()
             return
 
-        except grpc.FutureTimeoutError:
-            # Unable to connect to datanode
-            msg = f"Connection to endpoint {self._data_node_grpc_url} timed out."
+        except grpc.FutureTimeoutError as e:
             if raise_on_error:
-                raise RuntimeError(msg)
+                raise e
             else:
-                logging.warning(msg)
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                )
                 self.switch_datanode()
 
-        except grpc._channel._InactiveRpcError:
-            msg = f"Connection to endpoint {self._data_node_grpc_url} in active."
+        except grpc._channel._InactiveRpcError as e:
             if raise_on_error:
-                raise RuntimeError(msg)
+                raise e
             else:
-                logging.warning(msg)
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
                 self.switch_datanode()
 
     def switch_datanode(self, max_attempts: Optional[int] = -1):
@@ -386,17 +386,10 @@ class VegaServiceNetwork(VegaService):
         """
 
         attempts = 0
-        while attempts != max_attempts:
+        for url in itertools.cycle(self.network_config["API"]["GRPC"]["Hosts"]):
             attempts += 1
 
             try:
-                self.datanode_index += 1
-                if self.datanode_index >= len(
-                    self.network_config["API"]["GRPC"]["Hosts"]
-                ):
-                    self.datanode_index = 0
-
-                url = self.network_config["API"]["GRPC"]["Hosts"][self.datanode_index]
                 self._data_node_grpc_url = f"{url.split(':')[0]}:{DATA_NODE_GRPC_PORT}"
 
                 logging.debug(f"Switched to endpoint {self._data_node_grpc_url}")
@@ -417,7 +410,10 @@ class VegaServiceNetwork(VegaService):
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
                 )
 
-        raise grpc.FutureTimeoutError
+            if attempts == max_attempts:
+                break
+
+        raise Exception("Unable to establish connection to a data-node.")
 
 
 if __name__ == "__main__":

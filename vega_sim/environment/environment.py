@@ -417,7 +417,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
     def _run(self, vega: VegaServiceNetwork):
         state_values = []
-
+        
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
@@ -432,7 +432,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
             i += 1
-            self.step(vega, raise_on_error=self.raise_step_errors)
+            self.step(vega)
 
             if (
                 self._state_extraction_fn is not None
@@ -449,7 +449,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             state_values.append(self._state_extraction_fn(vega, self.agents))
             return state_values
 
-    def step(self, vega: VegaServiceNetwork, raise_on_error) -> None:
+    def step(self, vega: VegaServiceNetwork) -> None:
         t = time.time()
         state = self.state_func(vega)
         logging.debug(f"Get state took {time.time() - t} seconds.")
@@ -460,9 +460,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         ):
             try:
                 agent.step(state)
-            except:
+            except Exception as e:
                 msg = f"Agent '{agent.key_name}' failed to step."
-                if raise_on_error:
-                    raise RuntimeError(msg)
+                if self.raise_step_errors:
+                    raise e(msg)
                 else:
                     logging.warning(msg)
