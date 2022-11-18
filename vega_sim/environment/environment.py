@@ -20,6 +20,7 @@ For examples of this setup, see examples/agent_market.
 
 """
 
+import grpc
 import time
 import datetime
 import logging
@@ -384,6 +385,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             Callable[[VegaServiceNetwork, List[Agent]], Any]
         ] = None,
         state_extraction_freq: int = 10,
+        raise_datanode_errors: Optional[bool] = True,
+        raise_step_errors: Optional[bool] = True,
     ):
         super().__init__(
             agents=agents,
@@ -398,6 +401,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             state_func if state_func is not None else self._default_state_extraction
         )
 
+        self.raise_datanode_errors = raise_datanode_errors
+        self.raise_step_errors = raise_step_errors
+
     def run(self):
         if self._vega is None:
             with VegaServiceNetwork(
@@ -409,8 +415,11 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         else:
             return self._run(self._vega)
 
-    def _run(self, vega):
+    def _run(self, vega: VegaServiceNetwork):
         state_values = []
+
+        # Initial datanode connection check
+        vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
         # Initialise agents without minting assets
         for agent in self.agents:
@@ -419,6 +428,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
+
+            vega.check_datanode(raise_on_error=self.raise_datanode_errors)
+
             i += 1
             self.step(vega)
 
@@ -446,4 +458,11 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             if self.random_agent_ordering
             else self.agents
         ):
-            agent.step(state)
+            try:
+                agent.step(state)
+            except Exception as e:
+                msg = f"Agent '{agent.key_name}' failed to step."
+                if self.raise_step_errors:
+                    raise e(msg)
+                else:
+                    logging.warning(msg)

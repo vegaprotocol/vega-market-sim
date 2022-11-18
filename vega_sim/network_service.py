@@ -25,11 +25,13 @@ Todo:
     • Test all market sim agents are compatible.
 """
 
+import grpc
 import toml
 import time
 import signal
 import logging
 import tempfile
+import itertools
 import subprocess
 import webbrowser
 import multiprocessing
@@ -37,6 +39,8 @@ import multiprocessing
 from typing import Optional
 
 from os import getcwd, path, environ
+
+import vega_sim.grpc.client as vac
 
 from vega_sim import vega_bin_path
 from vega_sim.service import VegaService
@@ -298,14 +302,14 @@ class VegaServiceNetwork(VegaService):
     @property
     def data_node_grpc_url(self) -> str:
         if self._data_node_grpc_url is None:
-            url = self.network_config["API"]["GRPC"]["Hosts"][1]
+            url = self.network_config["API"]["GRPC"]["Hosts"][0]
             self._data_node_grpc_url = f"{url.split(':')[0]}:{DATA_NODE_GRPC_PORT}"
         return self._data_node_grpc_url
 
     @property
     def data_node_query_url(self) -> str:
         if self._data_node_query_url is None:
-            url = self.network_config["API"]["GraphQL"]["Hosts"][1]
+            url = self.network_config["API"]["GraphQL"]["Hosts"][0]
             self._data_node_query_url = url
         return self._data_node_query_url
 
@@ -336,6 +340,80 @@ class VegaServiceNetwork(VegaService):
             "Parent property overridden as VegaNetworkService does not need a core client.",
         )
         pass
+
+    def check_datanode(self, raise_on_error: Optional[bool] = True):
+        """Checks if the current data-node connection is healthy.
+
+        If the current data-node connection has timed out or the end-point is
+        unresponsive then the service will attempt to establish a connection
+        with a new healthy data-node.
+
+        Args:
+            max_attempts (int, optional):
+                Maximum number of connection attempts to attempt before raising an
+                error. Defaults to -1 (infinite attempts).
+        """
+
+        try:
+            self.ping_datanode()
+            return
+
+        except grpc.FutureTimeoutError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                )
+                self.switch_datanode()
+
+        except grpc._channel._InactiveRpcError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+                self.switch_datanode()
+
+    def switch_datanode(self, max_attempts: Optional[int] = -1):
+        """Attempts to establish a new data-node connection.
+
+        Args:
+            max_attempts (int, optional):
+                Maximum number of connection attempts to attempt before raising an
+                error. Defaults to -1 (infinite attempts).
+        """
+
+        attempts = 0
+        for url in itertools.cycle(self.network_config["API"]["GRPC"]["Hosts"]):
+            attempts += 1
+
+            try:
+                self._data_node_grpc_url = f"{url.split(':')[0]}:{DATA_NODE_GRPC_PORT}"
+
+                logging.debug(f"Switched to endpoint {self._data_node_grpc_url}")
+
+                channel = grpc.insecure_channel(
+                    self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
+                )
+                grpc.channel_ready_future(channel).result(timeout=30)
+                self._trading_data_client_v2 = vac.VegaTradingDataClientV2(
+                    self.data_node_grpc_url,
+                    channel=channel,
+                )
+
+                return
+
+            except grpc.FutureTimeoutError:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                )
+
+            if attempts == max_attempts:
+                break
+
+        raise Exception("Unable to establish connection to a data-node.")
 
 
 if __name__ == "__main__":

@@ -827,3 +827,7 @@ def get_trades(
             )
         )
     return res_trades
+
+
+def ping(data_client: vac.VegaTradingDataClientV2):
+    return data_client.Ping(data_node_protos_v2.trading_data.PingRequest())
