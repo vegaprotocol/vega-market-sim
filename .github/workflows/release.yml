@@ -10,7 +10,7 @@ on:
 
 jobs:
   release:
-    name: Release 
+    name: Release
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -48,9 +48,9 @@ jobs:
         run: poetry install --no-interaction
       #----------------------------------------------
 
-    - name: Python Semantic Release
-      uses: relekang/python-semantic-release@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        repository_username: __token__
-        repository_password: ${{ secrets.PYPI_TOKEN }}
+      - name: Python Semantic Release
+        uses: relekang/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          repository_username: __token__
+          repository_password: ${{ secrets.PYPI_TOKEN }}
