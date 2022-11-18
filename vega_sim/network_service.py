@@ -45,6 +45,7 @@ from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.null_service import find_free_port, _popen_process
 
 from vega_sim.constants import DATA_NODE_GRPC_PORT
+from vega_sim.scenario.constants import Network
 
 logger = logging.getLogger(__name__)
 
@@ -158,14 +159,14 @@ class VegaServiceNetwork(VegaService):
 
     def __init__(
         self,
-        network: str,
+        network: Network,
         run_with_wallet: bool = True,
         run_with_console: bool = True,
     ):
         """Method initialises the class.
 
         Args:
-            network (str):
+            network (Network):
                 Defines which network to connect service to.
             run_with_wallet (bool, optional):
                 Defines whether to start a wallet process.
@@ -207,7 +208,7 @@ class VegaServiceNetwork(VegaService):
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
-                "network": self.network,
+                "network": self.network.value,
                 "log_dir": self.log_dir,
                 "run_with_wallet": self.run_with_wallet,
                 "run_with_console": self.run_with_console,
@@ -267,16 +268,16 @@ class VegaServiceNetwork(VegaService):
                 "vega_sim",
                 "bin",
                 "networks-internal",
-                self.network,
-                f"{self.network}.toml",
+                self.network.name.lower(),
+                f"{self.network.value}.toml",
             )
             internal_path = path.join(
                 getcwd(),
                 "vega_sim",
                 "bin",
                 "networks",
-                self.network,
-                f"{self.network}.toml",
+                self.network.name.lower(),
+                f"{self.network.value}.toml",
             )
 
             if path.exists(public_path):
@@ -288,7 +289,9 @@ class VegaServiceNetwork(VegaService):
                 add_network_config(internal_path)
 
             else:
-                raise ValueError(f"ERROR! {self.network} network does not exist")
+                raise ValueError(
+                    f"ERROR! {self.network.name.lower()} network does not exist"
+                )
 
         return self._network_config
 
@@ -342,7 +345,7 @@ if __name__ == "__main__":
 
     # Create a service connected to the fairground network.
     with VegaServiceNetwork(
-        network="fairground",
+        network=Network.FAIRGROUND,
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:
@@ -356,7 +359,7 @@ if __name__ == "__main__":
 
     # Create a service connected to the stagnet3 network.
     with VegaServiceNetwork(
-        network="stagnet3",
+        network=Network.FAIRGROUND,
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:

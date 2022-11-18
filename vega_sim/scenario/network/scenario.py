@@ -130,7 +130,9 @@ if __name__ == "__main__":
     )
 
     with VegaServiceNetwork(
-        network=("fairground" if args.network is None else args.network),
+        network=(
+            Network["FAIRGROUND"] if args.network is None else Network[args.network]
+        ),
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:
