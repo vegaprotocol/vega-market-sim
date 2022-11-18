@@ -4,8 +4,9 @@ description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
 
-[tool.semantic-release]
+[tool.semantic_release]
 version_variable = "vega_sim/__init__.py:__version__"
+version_source = "tag"
 
 [tool.setuptools]
 zip-safe = false
