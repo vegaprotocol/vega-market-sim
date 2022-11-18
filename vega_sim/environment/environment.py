@@ -417,7 +417,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
     def _run(self, vega: VegaServiceNetwork):
         state_values = []
-        
+
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
