@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional, Tuple, Dict
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
+from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
@@ -32,7 +32,6 @@ class ComprehensiveMarket(Scenario):
     def __init__(
         self,
         num_steps: int = 1000,
-        dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
         market_position_decimal: int = 2,
@@ -76,7 +75,6 @@ class ComprehensiveMarket(Scenario):
         num_momentum_agents: int = 1,
     ):
         self.num_steps = num_steps
-        self.dt = dt
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
         self.market_position_decimal = market_position_decimal
@@ -141,15 +139,12 @@ class ComprehensiveMarket(Scenario):
         self,
         random_state: Optional[np.random.RandomState] = None,
     ):
-        _, price_process = RW_model(
-            T=self.num_steps * self.dt,
-            dt=self.dt,
-            mdp=self.market_decimal,
+        return random_walk(
+            num_steps=self.num_steps,
             sigma=self.sigma,
-            Midprice=self.initial_price,
+            starting_price=self.initial_price,
             random_state=random_state,
         )
-        return price_process
 
     def set_up_background_market(
         self,

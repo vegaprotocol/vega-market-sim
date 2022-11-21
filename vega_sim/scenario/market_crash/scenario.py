@@ -67,6 +67,7 @@ class MarketCrash(Scenario):
         ] = None,
         pause_every_n_steps: Optional[int] = None,
         trim_to_min: Optional[float] = None,
+        price_process_fn: Optional[Callable] = None,
     ):
         self.num_steps = num_steps
         self.dt = dt
@@ -100,6 +101,7 @@ class MarketCrash(Scenario):
         self.num_noise_traders = num_noise_traders
         self.settle_at_end = settle_at_end
         self.initial_asset_mint = initial_asset_mint
+        self.price_process_fn = price_process_fn
 
     def _generate_price_process(
         self,
@@ -127,7 +129,11 @@ class MarketCrash(Scenario):
         self.market_name = f"BTC:DAI_{tag}"
         self.asset_name = f"tDAI{tag}"
 
-        self.price_process = self._generate_price_process()
+        self.price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process()
+        )
 
         market_maker = MarketManager(
             wallet_name=MM_WALLET.name,

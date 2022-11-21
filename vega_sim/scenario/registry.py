@@ -7,7 +7,6 @@ from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
 )
 from vega_sim.scenario.multi_market.scenario import VegaLoadTest
-from vega_sim.scenario.fairground.scenario import Fairground
 from vega_sim.scenario.market_crash.scenario import MarketCrash
 from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
 
@@ -141,7 +140,6 @@ SCENARIOS = {
         opening_auction_trade_amount=0.0001,
         market_order_trader_base_order_size=0.01,
     ),
-    "fairground": lambda: Fairground(),
     "configurable_market": lambda: ConfigurableMarket(
         market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
         market_code="ETH:USD",

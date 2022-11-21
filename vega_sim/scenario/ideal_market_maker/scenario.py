@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker.utils.price_process import RW_model
+from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
@@ -31,7 +31,6 @@ class IdealMarketMaker(Scenario):
     def __init__(
         self,
         num_steps: int = 120,
-        dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
         market_position_decimal: int = 0,
@@ -57,9 +56,9 @@ class IdealMarketMaker(Scenario):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         proportion_taken: float = 0.8,
+        price_process_fn: Optional[Callable] = None,
     ):
         self.num_steps = num_steps
-        self.dt = dt
         self.market_name = market_name
         self.asset_name = asset_name
         self.market_decimal = market_decimal
@@ -83,6 +82,18 @@ class IdealMarketMaker(Scenario):
         self.step_length_seconds = step_length_seconds
         self.state_extraction_fn = state_extraction_fn
         self.proportion_taken = proportion_taken
+        self.price_process_fn = price_process_fn
+
+    def _generate_price_process(
+        self,
+        random_state: Optional[np.random.RandomState] = None,
+    ):
+        return random_walk(
+            num_steps=self.num_steps,
+            sigma=self.sigma,
+            starting_price=self.initial_price,
+            random_state=random_state,
+        )
 
     def set_up_background_market(
         self,
@@ -90,17 +101,15 @@ class IdealMarketMaker(Scenario):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironment:
-        _, price_process = RW_model(
-            T=self.num_steps * self.dt,
-            dt=self.dt,
-            mdp=self.market_decimal,
-            sigma=self.sigma,
-            Midprice=self.initial_price,
-            random_state=random_state,
-        )
 
         market_name = self.market_name + f"_{tag}" if tag else self.market_name
         asset_name = self.asset_name + f"_{tag}" if tag else self.asset_name
+
+        price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(random_state=random_state)
+        )
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,

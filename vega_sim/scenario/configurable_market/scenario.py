@@ -11,7 +11,6 @@ from vega_sim.scenario.common.utils.price_process import (
 )
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
@@ -53,6 +52,7 @@ class ConfigurableMarket(Scenario):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         settle_at_end: bool = True,
+        price_process_fn: Optional[Callable] = None,
     ):
 
         # Simulation settings
@@ -61,6 +61,7 @@ class ConfigurableMarket(Scenario):
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
+        self.price_process_fn = price_process_fn
 
         # Logging options
         self.state_extraction_freq = state_extraction_freq
@@ -112,7 +113,11 @@ class ConfigurableMarket(Scenario):
         market_name = self.market_name
         asset_name = self.asset_name
 
-        price_process = self._generate_price_process(random_state=random_state)
+        price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(random_state=random_state)
+        )
 
         market_manager = ConfigurableMarketManager(
             proposal_wallet_name=PROPOSAL_PARTY.wallet_name,
