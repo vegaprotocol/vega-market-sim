@@ -56,6 +56,7 @@ class IdealMarketMaker(Scenario):
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
         proportion_taken: float = 0.8,
+        price_process_fn: Optional[Callable] = None,
     ):
         self.num_steps = num_steps
         self.market_name = market_name
@@ -81,6 +82,18 @@ class IdealMarketMaker(Scenario):
         self.step_length_seconds = step_length_seconds
         self.state_extraction_fn = state_extraction_fn
         self.proportion_taken = proportion_taken
+        self.price_process_fn = price_process_fn
+
+    def _generate_price_process(
+        self,
+        random_state: Optional[np.random.RandomState] = None,
+    ):
+        return random_walk(
+            num_steps=self.num_steps,
+            sigma=self.sigma,
+            starting_price=self.initial_price,
+            random_state=random_state,
+        )
 
     def set_up_background_market(
         self,
@@ -88,15 +101,15 @@ class IdealMarketMaker(Scenario):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironment:
-        price_process = random_walk(
-            num_steps=self.num_steps,
-            sigma=self.sigma,
-            starting_price=self.initial_price,
-            random_state=random_state,
-        )
 
         market_name = self.market_name + f"_{tag}" if tag else self.market_name
         asset_name = self.asset_name + f"_{tag}" if tag else self.asset_name
+
+        price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(random_state=random_state)
+        )
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
