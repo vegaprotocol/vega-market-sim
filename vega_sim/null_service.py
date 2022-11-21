@@ -5,13 +5,11 @@ import functools
 from io import BufferedWriter
 import logging
 import multiprocessing
-from optparse import Option
 import os
 import shutil
 import signal
 import socket
 import subprocess
-import sys
 import tempfile
 import time
 import webbrowser
@@ -26,7 +24,6 @@ import toml
 from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
-from vega_sim.api.helpers import num_to_padded_int
 from vega_sim.service import VegaService
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.slim_wallet import (
@@ -341,7 +338,13 @@ def manage_vega_processes(
         )
     if port_config.get(Ports.CONSOLE):
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
-    shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
+
+    dest_dir = f"{tmp_vega_dir}/vegahome"
+    shutil.copytree(vega_home_path, dest_dir)
+    for dirpath, _, filenames in os.walk(dest_dir):
+        os.utime(dirpath, None)
+        for file in filenames:
+            os.utime(os.path.join(dirpath, file), None)
 
     tmp_vega_home = tmp_vega_dir + "/vegahome"
     _update_node_config(
