@@ -140,5 +140,5 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
  - Update `.env`'s `VEGA_SIM_VEGA_TAG` to reflect the last commit within that release
  - Update the `version` parameter in `pyproject.toml` to match the tagged Vega Core release
  - Run `make` followed by a full integration test run
- - Create a commit containing these changes, then a pull request into `develop`
+ - Create a branch containing these changes, then a pull request into `develop`
  - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the same specification as in `pyproject.toml` (e.g. `v0.62.5`) to trigger the deployment process.
