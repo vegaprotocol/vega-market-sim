@@ -1,4 +1,4 @@
-name: Release new version
+name: Release new version to test
 
 on:
   push:
