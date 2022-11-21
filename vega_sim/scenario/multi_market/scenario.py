@@ -38,7 +38,7 @@ import argparse
 import logging
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Callable
 from vega_sim.scenario.common.utils.price_process import (
     Granularity,
     get_historic_price_series,
@@ -110,6 +110,7 @@ class VegaLoadTest(Scenario):
         market_b_args: Optional[dict] = None,
         market_c_args: Optional[dict] = None,
         initial_asset_mint=1e9,
+        price_process_fn: Optional[Callable] = None,
     ):
 
         self.num_steps = num_steps
@@ -143,6 +144,8 @@ class VegaLoadTest(Scenario):
             trades_per_second / self.num_mo_traders_per_market
         ) * self.granularity.value
 
+        self.price_process_fn = price_process_fn
+
     def _generate_price_process(self, asset: str) -> list:
 
         start = datetime.strptime(self.start_date, "%Y-%m-%d %H:%M:%S")
@@ -163,14 +166,20 @@ class VegaLoadTest(Scenario):
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironmentWithState:
 
-        market_a_price_process = self._generate_price_process(
-            asset=self.market_a_args["oracle"]
+        market_a_price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(asset=self.market_a_args["oracle"])
         )
-        market_b_price_process = self._generate_price_process(
-            asset=self.market_b_args["oracle"]
+        market_b_price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(asset=self.market_a_args["oracle"])
         )
-        market_c_price_process = self._generate_price_process(
-            asset=self.market_c_args["oracle"]
+        market_c_price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process(asset=self.market_a_args["oracle"])
         )
 
         # Create MarketManager agents
