@@ -42,7 +42,7 @@ def random_walk(
     random_state_set = random_state is not None
     random_state = random_state if random_state_set else np.random.RandomState()
 
-    S = np.zeros(num_steps)
+    S = np.zeros(num_steps + 1)
     S[0] = starting_price
 
     for _ in range(100):
