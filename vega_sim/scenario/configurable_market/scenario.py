@@ -11,7 +11,6 @@ from vega_sim.scenario.common.utils.price_process import (
 )
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import RW_model
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network

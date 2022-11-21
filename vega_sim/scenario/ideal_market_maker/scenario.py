@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker.utils.price_process import RW_model
+from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
@@ -31,7 +31,6 @@ class IdealMarketMaker(Scenario):
     def __init__(
         self,
         num_steps: int = 120,
-        dt: float = 1 / 60 / 24 / 365.25,
         market_decimal: int = 5,
         asset_decimal: int = 5,
         market_position_decimal: int = 0,
@@ -59,7 +58,6 @@ class IdealMarketMaker(Scenario):
         proportion_taken: float = 0.8,
     ):
         self.num_steps = num_steps
-        self.dt = dt
         self.market_name = market_name
         self.asset_name = asset_name
         self.market_decimal = market_decimal
@@ -90,12 +88,10 @@ class IdealMarketMaker(Scenario):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironment:
-        _, price_process = RW_model(
-            T=self.num_steps * self.dt,
-            dt=self.dt,
-            mdp=self.market_decimal,
+        price_process = random_walk(
+            num_steps=self.num_steps,
             sigma=self.sigma,
-            Midprice=self.initial_price,
+            starting_price=self.initial_price,
             random_state=random_state,
         )
 
