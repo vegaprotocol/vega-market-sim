@@ -110,7 +110,6 @@ To support the above mentioned parameter tests, and to allow for more complex ca
 
 ### Momentum Agent
 
-
 One of the agents provided in the scenarios is momentum agent that can currently follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. A comprehensive scenario for momentum agent tests is in `vega_sim.scenario.comprehensive_market.scenario`, where mutileple momentum agents with different momentum strategies can be tested. 
 
 To run momentum agents, you must first install the TA-Lib libraries. The instructions [here](https://github.com/mrjbq7/ta-lib#dependencies) are likely a good start. Follow this by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
@@ -132,3 +131,14 @@ ComprehensiveMarket(
   ],  
 )
 ```
+
+## Release Process
+
+Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/vega/releases/), to provide a snapshot of working code for each release cutoff. To build and release a Vega Market Sim package, follow these steps:
+
+ - Check [releases](https://github.com/vegaprotocol/vega/releases/) for the release tag you wish to target
+ - Update `.env`'s `VEGA_SIM_VEGA_TAG` to reflect the last commit within that release
+ - Update the `version` parameter in `pyproject.toml` to match the tagged Vega Core release
+ - Run `make` followed by a full integration test run
+ - Create a branch containing these changes, then a pull request into `develop`
+ - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the same specification as in `pyproject.toml` (e.g. `v0.62.5`) to trigger the deployment process.
