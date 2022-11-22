@@ -46,9 +46,9 @@ def random_walk(
     S[0] = starting_price
 
     for _ in range(100):
-        dW = random_state.randn(num_steps)
+        dW = random_state.randn(num_steps + 1)
         # Simulate external midprice
-        for i in range(1, num_steps):
+        for i in range(1, len(S)):
             S[i] = S[i - 1] + drift + sigma * dW[i]
 
         # market decimal place
