@@ -1,6 +1,6 @@
 import pytest
 
-from tests.integration.utils.fixtures import vega_service_with_order_feed
+from tests.integration.utils.fixtures import vega_service, vega_service_pool
 from vega_sim.null_service import VegaServiceNull
 
 
@@ -8,8 +8,8 @@ from vega_sim.scenario.market_crash.scenario import MarketCrash
 
 
 @pytest.mark.integration
-def test_crash(vega_service_with_order_feed: VegaServiceNull):
-    vega = vega_service_with_order_feed
+def test_crash(vega_service: VegaServiceNull):
+    vega = vega_service
 
     scenario = MarketCrash(
         num_steps=400,

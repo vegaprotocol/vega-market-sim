@@ -3,6 +3,7 @@ import pytest
 from tests.integration.utils.fixtures import (
     build_basic_market,
     vega_service,
+    vega_service_pool,
     MM_WALLET,
     AUCTION1 as TRADER_1_WALLET,
     AUCTION2 as TRADER_2_WALLET,

@@ -2,6 +2,8 @@ from collections import namedtuple
 
 import pytest
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.null_service_pool import VegaServiceNullPool
+
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -129,12 +131,12 @@ def build_basic_market(
     vega.wait_for_total_catchup()
 
 
-@pytest.fixture
-def vega_service():
-    with VegaServiceNull(
+@pytest.fixture(scope="session")
+def vega_service_pool():
+    with VegaServiceNullPool(
+        num_instances=3,
         warn_on_raw_data_access=False,
         run_with_console=False,
-        start_order_feed=False,
         retain_log_files=True,
         transactions_per_block=1,
     ) as vega:
@@ -142,18 +144,15 @@ def vega_service():
 
 
 @pytest.fixture
-def vega_service_with_order_feed():
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        run_with_console=False,
-        start_order_feed=True,
-        retain_log_files=True,
-        transactions_per_block=1,
-    ) as vega:
-        yield vega
+def vega_service(vega_service_pool: VegaServiceNullPool):
+    vega_service = vega_service_pool.get_instance()
+    yield vega_service
+    vega_service.stop()
 
 
 @pytest.fixture
-def vega_service_with_market(vega_service):
+def vega_service_with_market(vega_service_pool: VegaServiceNullPool):
+    vega_service = vega_service_pool.get_instance()
     build_basic_market(vega_service, initial_price=0.3)
-    return vega_service
+    yield vega_service
+    vega_service.stop()

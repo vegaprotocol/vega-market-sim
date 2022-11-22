@@ -2,6 +2,7 @@ import pytest
 
 from tests.integration.utils.fixtures import (
     vega_service_with_market,
+    vega_service_pool,
     vega_service,
     create_and_faucet_wallet,
     WalletConfig,

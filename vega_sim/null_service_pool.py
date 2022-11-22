@@ -30,7 +30,7 @@ class VegaServiceNullPool:
 
     def get_instance(self):
         to_ret = self.instances[self.next_instance_idx]
-        to_ret.wait_for_ready()
+        to_ret.wait_for_ready(num_attempts=1000)
         if self.start_order_feed:
             to_ret.start_order_monitoring()
 
@@ -57,4 +57,3 @@ if __name__ == "__main__":
             inst = vsp.get_instance()
             print(i)
             inst.stop()
-        print("hello")

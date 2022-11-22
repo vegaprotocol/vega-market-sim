@@ -673,10 +673,10 @@ class VegaServiceNull(VegaService):
         if self._start_order_feed:
             self.start_order_monitoring()
 
-    def wait_for_ready(self):
+    def wait_for_ready(self, num_attempts: int = 600):
         """Waits for startup of the backing processes"""
         started = False
-        for _ in range(600):
+        for _ in range(num_attempts):
             try:
                 requests.get(
                     f"http://localhost:{self.data_node_rest_port}/time"

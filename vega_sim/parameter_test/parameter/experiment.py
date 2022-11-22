@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.null_service_pool import VegaServiceNullPool
 from vega_sim.scenario.scenario import Scenario
 
 from vega_sim.api.market import MarketConfig
@@ -56,36 +57,30 @@ def _run_parameter_iteration(
     scenario: Scenario,
     parameter_to_vary: str,
     value: str,
+    vega: VegaServiceNull,
     additional_parameters_to_set: Optional[Dict[str, str]] = None,
     random_state: Optional[np.random.RandomState] = None,
 ) -> Any:
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        retain_log_files=True,
-        run_with_console=False,
-        transactions_per_block=100,
-        use_full_vega_wallet=False,
-    ) as vega:
-        vega.create_wallet(*PARAMETER_AMEND_WALLET)
-        vega.mint(
-            PARAMETER_AMEND_WALLET[0],
-            asset="VOTE",
-            amount=1e4,
-        )
+    vega.create_wallet(*PARAMETER_AMEND_WALLET)
+    vega.mint(
+        PARAMETER_AMEND_WALLET[0],
+        asset="VOTE",
+        amount=1e4,
+    )
 
-        if additional_parameters_to_set is not None:
-            for param, new_value in additional_parameters_to_set.items():
-                vega.update_network_parameter(
-                    PARAMETER_AMEND_WALLET[0], parameter=param, new_value=new_value
-                )
+    if additional_parameters_to_set is not None:
+        for param, new_value in additional_parameters_to_set.items():
+            vega.update_network_parameter(
+                PARAMETER_AMEND_WALLET[0], parameter=param, new_value=new_value
+            )
 
-        vega.update_network_parameter(
-            PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
-        )
+    vega.update_network_parameter(
+        PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
+    )
 
-        res = scenario.run_iteration(vega=vega, random_state=random_state)
+    res = scenario.run_iteration(vega=vega, random_state=random_state)
 
-        return res
+    return res
 
 
 def _run_market_parameter_iteration(
@@ -93,27 +88,19 @@ def _run_market_parameter_iteration(
     parameter_to_vary: str,
     value: Union[str, int, float],
     random_state: Optional[np.random.RandomState],
+    vega: VegaServiceNull,
 ) -> Any:
+    market_config = MarketConfig("default")
 
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        retain_log_files=True,
-        run_with_console=False,
-        transactions_per_block=100,
-        use_full_vega_wallet=False,
-    ) as vega:
+    market_config.set(parameter_to_vary, value)
 
-        market_config = MarketConfig("default")
+    res = scenario.run_iteration(
+        vega=vega,
+        random_state=random_state,
+        market_config=market_config,
+    )
 
-        market_config.set(parameter_to_vary, value)
-
-        res = scenario.run_iteration(
-            vega=vega,
-            random_state=random_state,
-            market_config=market_config,
-        )
-
-        return res
+    return res
 
 
 def run_single_parameter_experiment(
@@ -123,24 +110,37 @@ def run_single_parameter_experiment(
     random_seeds = [
         np.random.RandomState(i) for i in range(experiment.runs_per_scenario)
     ]
-    for value in experiment.values:
-        results[value] = []
-        for state in copy.deepcopy(random_seeds):
-            if experiment.market_parameter:
-                res = _run_market_parameter_iteration(
-                    scenario=experiment.scenario,
-                    parameter_to_vary=experiment.parameter_to_vary,
-                    value=value,
-                    random_state=state,
-                )
-            else:
-                res = _run_parameter_iteration(
-                    scenario=experiment.scenario,
-                    parameter_to_vary=experiment.parameter_to_vary,
-                    value=value,
-                    random_state=state,
-                )
-            results[value].append(res)
+
+    with VegaServiceNullPool(
+        num_instances=3,
+        warn_on_raw_data_access=False,
+        retain_log_files=True,
+        run_with_console=False,
+        transactions_per_block=100,
+        use_full_vega_wallet=False,
+    ) as vega_pool:
+        for value in experiment.values:
+            results[value] = []
+            for state in copy.deepcopy(random_seeds):
+                vega = vega_pool.get_instance()
+                if experiment.market_parameter:
+                    res = _run_market_parameter_iteration(
+                        scenario=experiment.scenario,
+                        parameter_to_vary=experiment.parameter_to_vary,
+                        value=value,
+                        random_state=state,
+                        vega=vega,
+                    )
+                else:
+                    res = _run_parameter_iteration(
+                        scenario=experiment.scenario,
+                        parameter_to_vary=experiment.parameter_to_vary,
+                        value=value,
+                        random_state=state,
+                        vega=vega,
+                    )
+                results[value].append(res)
+                vega.stop()
 
     return results
 
