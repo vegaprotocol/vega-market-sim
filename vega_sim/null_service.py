@@ -660,33 +660,7 @@ class VegaServiceNull(VegaService):
             )
 
         if block_on_startup:
-            # Wait for startup
-            started = False
-            for _ in range(600):
-                try:
-                    requests.get(
-                        f"http://localhost:{self.data_node_rest_port}/time"
-                    ).raise_for_status()
-                    requests.get(
-                        f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
-                    ).raise_for_status()
-                    if self.run_with_console or self._use_full_vega_wallet:
-                        requests.get(
-                            f"http://localhost:{self.wallet_port}/api/v1/status"
-                        ).raise_for_status()
-
-                    started = True
-                    break
-                except (
-                    MaxRetryError,
-                    requests.exceptions.ConnectionError,
-                    requests.exceptions.HTTPError,
-                ):
-                    time.sleep(0.1)
-            if not started:
-                raise VegaStartupTimeoutError(
-                    "Timed out waiting for Vega simulator to start up"
-                )
+            self.wait_for_ready()
 
         if self.run_with_console:
             webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
@@ -698,6 +672,35 @@ class VegaServiceNull(VegaService):
 
         if self._start_order_feed:
             self.start_order_monitoring()
+
+    def wait_for_ready(self):
+        """Waits for startup of the backing processes"""
+        started = False
+        for _ in range(600):
+            try:
+                requests.get(
+                    f"http://localhost:{self.data_node_rest_port}/time"
+                ).raise_for_status()
+                requests.get(
+                    f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
+                ).raise_for_status()
+                if self.run_with_console or self._use_full_vega_wallet:
+                    requests.get(
+                        f"http://localhost:{self.wallet_port}/api/v1/status"
+                    ).raise_for_status()
+
+                started = True
+                break
+            except (
+                MaxRetryError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.HTTPError,
+            ):
+                time.sleep(0.1)
+        if not started:
+            raise VegaStartupTimeoutError(
+                "Timed out waiting for Vega simulator to start up"
+            )
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod
