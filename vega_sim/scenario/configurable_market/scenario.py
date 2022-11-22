@@ -149,8 +149,6 @@ class ConfigurableMarket(Scenario):
             kappa=1,
             num_levels=25,
             tick_spacing=1,
-            order_unit_size=2,
-            max_order_size=1000,
             inventory_upper_boundary=200,
             inventory_lower_boundary=-200,
             market_kappa=1,

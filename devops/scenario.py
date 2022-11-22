@@ -155,8 +155,6 @@ class DevOpsScenario(Scenario):
             kappa=self.market_maker_args.order_kappa,
             num_levels=self.market_maker_args.order_levels,
             tick_spacing=self.market_maker_args.order_spacing,
-            order_unit_size=self.market_maker_args.order_size,
-            max_order_size=self.market_maker_args.order_clipping,
             inventory_lower_boundary=self.market_maker_args.inventory_lower_boundary,
             inventory_upper_boundary=self.market_maker_args.inventory_upper_boundary,
             fee_amount=self.market_maker_args.fee_amount,

@@ -1307,12 +1307,10 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         asset_name: str = None,
         commitment_amount: float = 6000,
         market_decimal_places: int = 5,
-        order_unit_size: float = 10,
         fee_amount: float = 0.001,
         kappa: float = 1,
         num_levels: int = 25,
         tick_spacing: float = 1,
-        max_order_size: float = 200,
         inventory_upper_boundary: float = 20,
         inventory_lower_boundary: float = -20,
         terminal_penalty_parameter: float = 10**-4,
@@ -1344,8 +1342,6 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         self.kappa = kappa
         self.tick_spacing = tick_spacing
         self.num_levels = num_levels
-        self.order_unit_size = order_unit_size
-        self.max_order_size = max_order_size
         self.fee_amount = fee_amount
 
         self.num_steps = num_steps
@@ -1477,16 +1473,13 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
 
         levels = np.arange(0, self.tick_spacing * self.num_levels, self.tick_spacing)
         cumulative_vol = np.exp(self.kappa * levels)
-        scaled_vol = (1 / cumulative_vol[0]) * cumulative_vol * self.order_unit_size
+        level_vol = (1 / cumulative_vol[0]) * cumulative_vol
 
         base_price = self.curr_price + mult_factor * price_depth
         level_price = np.arange(
             base_price,
             base_price + mult_factor * self.num_levels * self.tick_spacing,
             mult_factor * self.tick_spacing,
-        )
-        level_vol = np.concatenate([scaled_vol[:1], np.diff(scaled_vol)]).clip(
-            max=self.max_order_size
         )
 
         return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
