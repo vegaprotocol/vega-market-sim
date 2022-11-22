@@ -28,6 +28,7 @@ from vega_sim.proto.vega import (
 )
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.api.trading import OrderRejectedError
+from vega_sim.quant.quant import probability_of_trading
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -1055,6 +1056,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
             current_position, self.current_step
         )
         new_buy_shape, new_sell_shape = self.shape_fn(self.bid_depth, self.ask_depth)
+        scaled_buy_shape, scaled_sell_shape = self._scale_orders(
+            buy_shape=new_buy_shape, sell_shape=new_sell_shape
+        )
 
         curr_buy_orders, curr_sell_orders = [], []
 
@@ -1095,18 +1099,18 @@ class ShapedMarketMaker(StateAgentWithWallet):
             self._move_side(
                 vega_protos.SIDE_BUY,
                 curr_buy_orders,
-                new_buy_shape,
+                scaled_buy_shape,
             )
         self._move_side(
             vega_protos.SIDE_SELL,
             curr_sell_orders,
-            new_sell_shape,
+            scaled_sell_shape,
         )
         if first_side == vega_protos.SIDE_SELL:
             self._move_side(
                 vega_protos.SIDE_BUY,
                 curr_buy_orders,
-                new_buy_shape,
+                scaled_buy_shape,
             )
 
         if (
@@ -1124,6 +1128,90 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 is_amendment=True,
                 key_name=self.key_name,
             )
+
+    def _scale_orders(self, buy_shape: List[MMOrder], sell_shape: List[MMOrder]):
+
+        est_midprice = 0.5 * (buy_shape[0].price + sell_shape[0].price)
+
+        instantaneous_liquidity = min(
+            [
+                self._calculate_liquidity(
+                    side=vega_protos.SIDE_BUY,
+                    orders=buy_shape,
+                    midprice=est_midprice,
+                ),
+                self._calculate_liquidity(
+                    side=vega_protos.SIDE_SELL,
+                    orders=sell_shape,
+                    midprice=est_midprice,
+                ),
+            ]
+        )
+
+        # Compute the scaling factor
+        stake_to_ccy_siskas = self.vega.get_network_parameter(
+            "market.liquidity.stakeToCcySiskas",
+            "float",
+        )
+        scaling_factor = (
+            self.commitment_amount * stake_to_ccy_siskas
+        ) / instantaneous_liquidity
+
+        # Scale the shapes
+        scaled_buy_shape = [
+            MMOrder(order.size * scaling_factor, order.price) for order in buy_shape
+        ]
+        scaled_sell_shape = [
+            MMOrder(order.size * scaling_factor, order.price) for order in sell_shape
+        ]
+
+        return scaled_buy_shape, scaled_sell_shape
+
+    def _calculate_liquidity(
+        self, side: vega_protos.side, orders: List[MMOrder], midprice: float
+    ) -> float:
+
+        market_info = self.vega.market_info(market_id=self.market_id)
+        tau = market_info.tradable_instrument.log_normal_risk_model.tau
+        mu = market_info.tradable_instrument.log_normal_risk_model.params.mu
+        sigma = market_info.tradable_instrument.log_normal_risk_model.params.sigma
+
+        tau_scaling = self.vega.get_network_parameter(
+            "market.liquidity.probabilityOfTrading.tau.scaling",
+            "float",
+        )
+        min_probability_of_trading = self.vega.get_network_parameter(
+            "market.liquidity.minimum.probabilityOfTrading.lpOrders",
+            "float",
+        )
+
+        (min_valid_price, max_valid_price) = self.vega.price_bounds(
+            market_id=self.market_id
+        )
+
+        provided_liquidity = 0
+
+        for vol, price in orders:
+
+            p = max(
+                [
+                    min_probability_of_trading,
+                    probability_of_trading(
+                        tau=tau * tau_scaling,
+                        mu=mu,
+                        sigma=sigma,
+                        lower_bound=min_valid_price,
+                        upper_bound=max_valid_price,
+                        best_price=midprice,
+                        price=price,
+                        side=side,
+                    ),
+                ]
+            )
+
+            provided_liquidity += vol * price * p
+
+        return provided_liquidity
 
     def _submit_order(
         self, side: Union[str, vega_protos.Side], price: float, size: float
