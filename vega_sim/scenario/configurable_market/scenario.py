@@ -146,7 +146,7 @@ class ConfigurableMarket(Scenario):
             market_decimal_places=market_config.decimal_places,
             asset_decimal_places=self.asset_decimal,
             num_steps=self.num_steps,
-            kappa=1,
+            kappa=0.3,
             num_levels=25,
             tick_spacing=1,
             inventory_upper_boundary=200,
