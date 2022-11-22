@@ -166,21 +166,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
         if self.set_up_market:
-            self.vega.update_network_parameter(
-                self.wallet_name,
-                "market.liquidity.minimum.probabilityOfTrading.lpOrders",
-                "1e-6",
-            )
-
-            self.vega.wait_for_total_catchup()
-            self.vega.update_network_parameter(
-                self.wallet_name,
-                "market.liquidity.stakeToCcySiskas",
-                "0.001",
-            )
-
-            self.vega.wait_for_datanode_sync()
-
             # Set up a future market
             self.vega.create_simple_market(
                 market_name=self.market_name,
