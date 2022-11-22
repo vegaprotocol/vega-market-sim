@@ -123,7 +123,6 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.adp = self.vega.asset_decimals.get(self.asset_id, {})
 
     def step(self, vega_state: VegaState):
-
         if self.random_state.rand() > self.step_bias:
             return
 
@@ -227,7 +226,6 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
-
         self.curr_price = next(self.price_process_generator)
 
         buy_first = self.random_state.choice([0, 1])
@@ -882,22 +880,6 @@ class MarketManager(StateAgentWithWallet):
                 key_name=self.key_name,
             )
         self.vega.wait_fn(5)
-        self.vega.wait_for_total_catchup()
-
-        self.vega.update_network_parameter(
-            self.wallet_name,
-            "market.liquidity.minimum.probabilityOfTrading.lpOrders",
-            "0.001",
-            key_name=self.key_name,
-        )
-
-        self.vega.wait_for_total_catchup()
-        self.vega.update_network_parameter(
-            self.wallet_name,
-            "market.liquidity.stakeToCcySiskas",
-            "0.001",
-            key_name=self.key_name,
-        )
 
         self.vega.wait_for_total_catchup()
         # Set up a future market
@@ -1146,7 +1128,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         orders: List[Order],
         new_shape: List[MMOrder],
     ) -> None:
-
         amendments = []
         submissions = []
         cancellations = []
@@ -1165,7 +1146,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 amendments.append(transaction)
 
             else:
-
                 transaction = self.vega.create_order_submission(
                     market_id=self.market_id,
                     price=order.price,
@@ -1179,7 +1159,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         if len(orders) > len(new_shape):
             for order in orders[len(new_shape) :]:
-
                 transaction = self.vega.create_order_cancellation(
                     order_id=order.id,
                     market_id=self.market_id,
@@ -1295,7 +1274,6 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             )
 
     def _liq_provis(self, state: VegaState) -> LiquidityProvision:
-
         if (self.curr_asks is not None) and (self.curr_bids is not None):
             est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
         elif state is not None:
