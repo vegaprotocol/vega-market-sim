@@ -10,7 +10,6 @@ mkdir -p "${PROF_DIR}"
 
 docker run \
     --platform linux/amd64 \
-    --name integration_test
     -v "${RESULT_DIR}:/tmp" \
     -v "${PROF_DIR}:/vega_market_sim/prof" \
     vega_sim_test:latest \
