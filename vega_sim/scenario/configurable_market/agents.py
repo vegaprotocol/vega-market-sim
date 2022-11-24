@@ -42,9 +42,11 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         initial_mint: Optional[float] = 1e9,
     ):
 
-        self.wallet_name = proposal_wallet_name
-        self.wallet_pass = proposal_wallet_pass
-        self.key_name = proposal_key_name
+        super().__init__(
+            wallet_name=proposal_wallet_name,
+            wallet_pass=proposal_wallet_pass,
+            key_name=proposal_key_name,
+        )
 
         self.termination_wallet_name = termination_wallet_name
         self.termination_wallet_pass = termination_wallet_pass
