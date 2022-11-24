@@ -107,3 +107,4 @@ test_examples:
 export_reqs:
 	@poetry export  --without-hashes -f requirements.txt -o requirements.txt
 	@poetry export  --without-hashes -f requirements.txt --with dev -o requirements-dev.txt
+	@poetry export  --without-hashes -f requirements.txt --with dev -E learning -o requirements-learning.txt
