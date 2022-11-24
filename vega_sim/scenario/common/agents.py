@@ -977,6 +977,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         key_name: str = None,
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
+        safety_factor: Optional[float] = 1.2,
     ):
         super().__init__(
             wallet_name + str(tag),
@@ -1004,6 +1005,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         self.orders_from_stream = orders_from_stream
 
+        self.safety_factor = safety_factor
         self.state_update_freq = state_update_freq
 
     def initialise(
@@ -1163,8 +1165,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
             ]
         )
 
+
         scaling_factor = (
-            self.commitment_amount * self.stake_to_ccy_siskas
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
         ) / instantaneous_liquidity
 
         # Scale the shapes
