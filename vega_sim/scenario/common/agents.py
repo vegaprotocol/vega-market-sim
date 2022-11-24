@@ -1129,21 +1129,25 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 key_name=self.key_name,
             )
 
-    def _scale_orders(self, buy_shape: List[MMOrder], sell_shape: List[MMOrder]):
-
-        est_midprice = 0.5 * (buy_shape[0].price + sell_shape[0].price)
+    def _scale_orders(
+        self,
+        buy_shape: List[MMOrder],
+        sell_shape: List[MMOrder],
+    ):
 
         instantaneous_liquidity = min(
             [
                 self._calculate_liquidity(
                     side=vega_protos.SIDE_BUY,
                     orders=buy_shape,
-                    midprice=est_midprice,
+                    best_bid_price=buy_shape[0].price,
+                    best_ask_price=sell_shape[0].price,
                 ),
                 self._calculate_liquidity(
                     side=vega_protos.SIDE_SELL,
                     orders=sell_shape,
-                    midprice=est_midprice,
+                    best_bid_price=buy_shape[0].price,
+                    best_ask_price=sell_shape[0].price,
                 ),
             ]
         )
@@ -1168,7 +1172,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
         return scaled_buy_shape, scaled_sell_shape
 
     def _calculate_liquidity(
-        self, side: vega_protos.side, orders: List[MMOrder], midprice: float
+        self,
+        side: vega_protos.side,
+        orders: List[MMOrder],
+        best_bid_price: float,
+        best_ask_price: float,
     ) -> float:
 
         market_info = self.vega.market_info(market_id=self.market_id)
@@ -1197,14 +1205,16 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 [
                     min_probability_of_trading,
                     probability_of_trading(
-                        tau=tau * tau_scaling,
-                        mu=mu,
-                        sigma=sigma,
-                        lower_bound=min_valid_price,
-                        upper_bound=max_valid_price,
-                        best_price=midprice,
                         price=price,
                         side=side,
+                        best_bid_price=best_bid_price,
+                        best_ask_price=best_ask_price,
+                        min_valid_price=min_valid_price,
+                        max_valid_price=max_valid_price,
+                        mu=mu,
+                        tau=tau * tau_scaling,
+                        sigma=sigma,
+                        min_probability_of_trading=min_probability_of_trading,
                     ),
                 ]
             )

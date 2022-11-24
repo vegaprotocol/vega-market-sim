@@ -1,34 +1,89 @@
-from math import log, sqrt, erf
+from math import log, sqrt, exp
+from scipy.stats import lognorm
 
 import vega_sim.proto.vega as vega_protos
 
 
 def probability_of_trading(
-    tau,
-    mu,
-    sigma,
-    lower_bound: float,
-    upper_bound: float,
-    best_price,
-    price,
-    side,
-):
+    side: vega_protos.vega.Side,
+    price: float,
+    best_bid_price: float,
+    best_ask_price: float,
+    min_valid_price: float,
+    max_valid_price: float,
+    mu: float,
+    tau: float,
+    sigma: float,
+    min_probability_of_trading: float,
+) -> float:
+    """Compute the probability of trading of a given order.
+
+    Probability of trading follows the cdf of a lognormal distribution. The distribution
+    is bound between the min_valid_price and the best_bid_price for buy orders, and the
+    best_ask_price and max_valid_price for sell orders. All probabilities are scaled by
+    a half and cannot be lower than the network parameter, min_probability_of_trading.
+
+    Args:
+        side (vega_protos.vega.Side):
+            Side of the order to evaluate.
+        price (float):
+            Price of the order to evaluate.
+        best_bid_price (float):
+            Best bid price on the order book.
+        best_ask_price (float):
+            Best ask price on the order book.
+        min_valid_price (float):
+            Minimum valid price from price monitoring bounds.
+        max_valid_price (float):
+            Maximum valid price from price monitoring bounds.
+        mu (float):
+            Market parameter for the risk model.
+        tau (float):
+            Market parameter for the risk model.
+        sigma (float):
+            Market parameter for the risk model.
+        min_probability_of_trading (float):
+            Network parameter defining the minimum value to return.
+
+    Returns:
+        float:
+            Probability of trading of the order.
+    """
+
+    if price > best_bid_price and price < best_ask_price:
+        return 0.5
+    elif price < min_valid_price or price > max_valid_price:
+        return min_probability_of_trading
+
+    if side == vega_protos.vega.SIDE_BUY:
+
+        best_price = best_bid_price
+
+        lower_bound = min_valid_price
+        upper_bound = best_bid_price
+
+    else:
+
+        best_price = best_ask_price
+
+        lower_bound = best_ask_price
+        upper_bound = max_valid_price
 
     stdev = sigma * sqrt(tau)
     m = log(best_price) + (mu - 0.5 * sigma * sigma) * tau
 
-    if price < lower_bound or price > upper_bound:
-        return 0
+    rv = lognorm(s=stdev, scale=exp(m))
 
-    min = cdf(m, stdev, lower_bound)
-    max = cdf(m, stdev, upper_bound)
+    min = rv.cdf(lower_bound)
+    max = rv.cdf(upper_bound)
     z = max - min
 
     if side == vega_protos.vega.SIDE_BUY:
-        return (cdf(m, stdev, price) - min) / z
+        p = 0.5 * (rv.cdf(price) - min) / z
     else:
-        return (max - cdf(m, stdev, price)) / z
+        p = 0.5 * (max - rv.cdf(price)) / z
 
-
-def cdf(m: float, stdev: float, x: float) -> float:
-    return 0.5 * (1 + erf((log(x) - m) / stdev * sqrt(2)))
+    if p < min_probability_of_trading:
+        return min_probability_of_trading
+    else:
+        return p
