@@ -128,6 +128,12 @@ def build_basic_market(
     )
     vega.wait_for_total_catchup()
 
+    vega.update_network_parameter(
+        proposal_wallet=MM_WALLET.name,
+        parameter="transfer.fee.factor",
+        new_value="0",
+    )
+
 
 @pytest.fixture
 def vega_service():
