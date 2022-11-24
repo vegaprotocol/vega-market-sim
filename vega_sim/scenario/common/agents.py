@@ -1165,7 +1165,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
             ]
         )
 
-
         scaling_factor = (
             self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
         ) / instantaneous_liquidity
