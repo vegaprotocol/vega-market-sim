@@ -70,7 +70,7 @@ def probability_of_trading(
         upper_bound = max_valid_price
 
     stdev = sigma * sqrt(tau)
-    m = log(best_price) + (mu - 0.5 * sigma * sigma) * tau
+    m = log(best_price) + (mu - 0.5 * sigma ** 2) * tau
 
     rv = lognorm(s=stdev, scale=exp(m))
 
