@@ -50,6 +50,12 @@ class AgentWithWallet(Agent):
             key_name:
                 str, optional, Name of key in wallet for agent to use. Defaults
                 to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
+            market_params_update_freq:
+                optional, int, Get the latest market parameters every n steps.
+            network_params_update_freq:
+                optional, int, Get the latest network parameters every n steps.
+            network_params:
+                optional, List[str], List of network parameters to get.
         """
         super().__init__()
         self.wallet_name = wallet_name
