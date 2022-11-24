@@ -230,7 +230,7 @@ def test_price_bounds(mkt_data_mock):
         vega_protos.vega.PriceMonitoringBounds(
             min_valid_price="12000",
             max_valid_price="18000",
-        )
+        ),
     ]
 
     min_valid_price, max_valid_price = price_bounds("mkt", None, 2)
