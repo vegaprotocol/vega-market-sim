@@ -23,6 +23,9 @@ class Agent(ABC):
     def finalise(self):
         pass
 
+    def _update_state(self, current_step: int):
+        pass
+
 
 class AgentWithWallet(Agent):
     def __init__(
@@ -30,9 +33,7 @@ class AgentWithWallet(Agent):
         wallet_name: str,
         wallet_pass: str,
         key_name: Optional[str] = None,
-        market_params_update_freq: Optional[int] = None,
-        network_params_update_freq: Optional[int] = None,
-        network_params: Optional[List[str]] = None,
+        state_update_freq: Optional[int] = None,
     ):
         """Agent for use in environments as specified in environment.py.
         To extend, the crucial function to implement is the step function which will
@@ -50,32 +51,16 @@ class AgentWithWallet(Agent):
             key_name:
                 str, optional, Name of key in wallet for agent to use. Defaults
                 to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
-            market_params_update_freq:
-                optional, int, Get the latest market parameters every n steps.
-            network_params_update_freq:
-                optional, int, Get the latest network parameters every n steps.
-            network_params:
-                optional, List[str], List of network parameters to get.
         """
         super().__init__()
         self.wallet_name = wallet_name
         self.wallet_pass = wallet_pass
         self.key_name = key_name
 
-        self.step_count = 0
-        self.market_params_update_freq = market_params_update_freq
-        self.network_params_update_freq = network_params_update_freq
-
-        self.market_params = None
-        self.network_params = (
-            dict.fromkeys(network_params, None) if network_params is not None else None
-        )
+        self.state_update_freq = state_update_freq
 
     def step(self):
-
-        self.step_count += 1
-        self._update_market_params()
-        self._update_network_params()
+        pass
 
     def initialise(self, vega: VegaService, create_wallet: bool = True):
         super().initialise(vega=vega)
@@ -87,25 +72,6 @@ class AgentWithWallet(Agent):
             )
         else:
             self.vega.login(name=self.wallet_name, passphrase=self.wallet_pass)
-
-    def _update_market_params(self):
-
-        if self.market_params_update_freq is None:
-            return
-
-        if self.step_count % self.market_params_update_freq == 0:
-            self.market_params = self.vega.market_info(market_id=self.market_id)
-
-    def _update_network_params(self):
-
-        if (self.network_params_update_freq) is None or (self.network_params is None):
-            return
-
-        if self.step_count % self.network_params_update_freq == 0:
-            for network_param in self.network_params:
-                self.network_params[network_param] = self.vega.get_network_parameter(
-                    key=network_param, to_type="float"
-                )
 
 
 class StateAgentWithWallet(AgentWithWallet):

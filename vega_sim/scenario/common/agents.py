@@ -976,20 +976,12 @@ class ShapedMarketMaker(StateAgentWithWallet):
         tag: str = "",
         key_name: str = None,
         orders_from_stream: Optional[bool] = True,
-        market_params_update_freq: Optional[int] = None,
-        network_params_update_freq: Optional[int] = None,
+        state_update_freq: Optional[int] = None,
     ):
         super().__init__(
             wallet_name + str(tag),
             wallet_pass,
             key_name,
-            market_params_update_freq,
-            network_params_update_freq,
-            [
-                "market.liquidity.stakeToCcySiskas",
-                "market.liquidity.probabilityOfTrading.tau.scaling",
-                "market.liquidity.minimum.probabilityOfTrading.lpOrders",
-            ],
         )
         self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
@@ -1011,6 +1003,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
 
         self.orders_from_stream = orders_from_stream
+
+        self.state_update_freq = state_update_freq
 
     def initialise(
         self,
@@ -1036,8 +1030,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
-        self._update_market_params()
-        self._update_network_params()
+        self._update_state(current_step=self.current_step)
 
         if (
             initial_liq := self.liquidity_commitment_fn(None)
@@ -1056,9 +1049,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
             )
 
     def step(self, vega_state: VegaState):
-        super().step(vega_state=vega_state)
+        self.current_step += 1
         self.prev_price = self.curr_price
         self.curr_price = next(self.price_process_generator)
+
+        self._update_state(current_step=self.current_step)
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
@@ -1169,8 +1164,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         )
 
         scaling_factor = (
-            self.commitment_amount
-            * self.network_params["market.liquidity.stakeToCcySiskas"]
+            self.commitment_amount * self.stake_to_ccy_siskas
         ) / instantaneous_liquidity
 
         # Scale the shapes
@@ -1191,12 +1185,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         best_ask_price: float,
     ) -> float:
 
-        tau = self.market_params.tradable_instrument.log_normal_risk_model.tau
-        mu = self.market_params.tradable_instrument.log_normal_risk_model.params.mu
-        sigma = (
-            self.market_params.tradable_instrument.log_normal_risk_model.params.sigma
-        )
-
         (min_valid_price, max_valid_price) = self.vega.price_bounds(
             market_id=self.market_id
         )
@@ -1212,15 +1200,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 best_ask_price=best_ask_price,
                 min_valid_price=min_valid_price,
                 max_valid_price=max_valid_price,
-                mu=mu,
-                tau=tau
-                * self.network_params[
-                    "market.liquidity.probabilityOfTrading.tau.scaling"
-                ],
-                sigma=sigma,
-                min_probability_of_trading=self.network_params[
-                    "market.liquidity.minimum.probabilityOfTrading.lpOrders"
-                ],
+                mu=self.mu,
+                tau=self.tau * self.tau_scaling,
+                sigma=self.sigma,
+                min_probability_of_trading=self.min_probability_of_trading,
             )
             provided_liquidity += vol * price * p
 
@@ -1297,6 +1280,29 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 cancellations=cancellations,
             )
 
+    def _update_state(self, current_step: int):
+
+        if self.state_update_freq and current_step % self.state_update_freq == 0:
+
+            market_info = self.vega.market_info(market_id=self.market_id)
+
+            self.tau = market_info.tradable_instrument.log_normal_risk_model.tau
+            self.mu = market_info.tradable_instrument.log_normal_risk_model.params.mu
+            self.sigma = (
+                market_info.tradable_instrument.log_normal_risk_model.params.sigma
+            )
+
+            self.tau_scaling = self.vega.get_network_parameter(
+                key="market.liquidity.probabilityOfTrading.tau.scaling", to_type="float"
+            )
+            self.min_probability_of_trading = self.vega.get_network_parameter(
+                key="market.liquidity.minimum.probabilityOfTrading.lpOrders",
+                to_type="float",
+            )
+            self.stake_to_ccy_siskas = self.vega.get_network_parameter(
+                key="market.liquidity.stakeToCcySiskas", to_type="float"
+            )
+
 
 class ExponentialShapedMarketMaker(ShapedMarketMaker):
     """Utilises the Ideal market maker formulation from
@@ -1334,8 +1340,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         tag: str = "",
         key_name: str = None,
         orders_from_stream: Optional[bool] = True,
-        market_params_update_freq: Optional[int] = None,
-        network_params_update_freq: Optional[int] = None,
+        state_update_freq: Optional[int] = None,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1353,8 +1358,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             liquidity_commitment_fn=self._liq_provis,
             key_name=key_name,
             orders_from_stream=orders_from_stream,
-            market_params_update_freq=market_params_update_freq,
-            network_params_update_freq=network_params_update_freq,
+            state_update_freq=state_update_freq,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
