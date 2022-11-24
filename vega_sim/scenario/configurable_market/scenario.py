@@ -153,8 +153,7 @@ class ConfigurableMarket(Scenario):
             inventory_lower_boundary=-200,
             market_kappa=1,
             market_order_arrival_rate=10,
-            market_params_update_freq=10,
-            network_params_update_freq=10,
+            state_update_freq=10,
         )
 
         sensitive_mo_trader_a = PriceSensitiveMarketOrderTrader(

@@ -161,8 +161,7 @@ class DevOpsScenario(Scenario):
             num_steps=60 * 60 * 24 * 365,
             price_process_generator=iter(self.price_process),
             orders_from_stream=False,
-            market_params_update_freq=10,
-            network_params_update_freq=10,
+            state_update_freq=10,
         )
 
         # Setup agents for passing opening auction

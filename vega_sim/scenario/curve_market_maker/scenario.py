@@ -177,8 +177,7 @@ class CurveMarketMaker(Scenario):
             running_penalty_parameter=self.phi,
             market_order_arrival_rate=self.buy_intensity,
             market_kappa=self.market_kappa,
-            market_params_update_freq=10,
-            network_params_update_freq=10,
+            state_update_freq=10,
         )
 
         sensitive_mo_trader = PriceSensitiveMarketOrderTrader(
