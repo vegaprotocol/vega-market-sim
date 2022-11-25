@@ -142,8 +142,6 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
-    vega.wait_for_total_catchup()
-
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
     vega.wait_for_total_catchup()
     create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e3)
@@ -160,19 +158,63 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
         amount=500,
     )
 
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    vega.wait_fn(10)
 
-    party_a_accounts = vega.party_account(
+    party_a_accounts_t1 = vega.party_account(
         wallet_name=PARTY_A.name,
         asset_id=asset_id,
         market_id=market_id,
     )
-    party_b_accounts = vega.party_account(
+    party_b_accounts_t1 = vega.party_account(
         wallet_name=PARTY_B.name,
         asset_id=asset_id,
         market_id=market_id,
     )
 
-    assert party_a_accounts.general == 500
-    assert party_b_accounts.general == 1500
+    assert party_a_accounts_t1.general == 500
+    assert party_b_accounts_t1.general == 1500
+
+    vega.one_off_transfer(
+        from_wallet_name=PARTY_B.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_wallet_name=PARTY_A.name,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset=asset_id,
+        amount=500,
+        delay=15,
+    )
+
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t2 = vega.party_account(
+        wallet_name=PARTY_A.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+    party_b_accounts_t2 = vega.party_account(
+        wallet_name=PARTY_B.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+
+    assert party_a_accounts_t2.general == 500
+    assert party_b_accounts_t2.general == 1000
+
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t3 = vega.party_account(
+        wallet_name=PARTY_A.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+    party_b_accounts_t3 = vega.party_account(
+        wallet_name=PARTY_B.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+
+    assert party_a_accounts_t3.general == 1000
+    assert party_b_accounts_t3.general == 1000
