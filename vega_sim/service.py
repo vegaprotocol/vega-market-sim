@@ -1861,8 +1861,32 @@ class VegaService(ABC):
         reference: Optional[str] = None,
         from_key_name: Optional[str] = None,
         to_key_name: Optional[str] = None,
-        delay: Optional[int] = 0,
+        delay: Optional[int] = None,
     ):
+        """Submit a one off transfer command.        
+
+        Args:
+            from_wallet_name (str):
+                Name of wallet to transfer from.
+            to_wallet_name (str):
+                Name of wallet to transfer to.
+            from_account_type (vega_protos.vega.AccountType):
+                Type of Vega account to transfer from.
+            to_account_type (vega_protos.vega.AccountType):
+                Type of Vega account to transfer to.
+            asset (str):
+                Id of asset to transfer.
+            amount (float):
+                Amount of asset to transfer.
+            reference (Optional[str], optional):
+                Reference to assign to transfer. Defaults to None.
+            from_key_name (Optional[str], optional):
+                Name of key in wallet to send from. Defaults to None.
+            to_key_name (Optional[str], optional):
+                Name of key in wallet to send to. Defaults to None.
+            delay (Optional[int], optional):
+                Delay in seconds to add before transfer is sent. Defaults to None.
+        """
 
         adp = self.asset_decimals[asset]
 
