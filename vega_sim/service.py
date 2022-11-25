@@ -1863,7 +1863,7 @@ class VegaService(ABC):
         to_key_name: Optional[str] = None,
         delay: Optional[int] = None,
     ):
-        """Submit a one off transfer command.        
+        """Submit a one off transfer command.
 
         Args:
             from_wallet_name (str):
