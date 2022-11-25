@@ -1,1 +1,1 @@
-docker build --platform linux/amd64 --tag=vega_sim_learning:latest -t vegasim_learning .
+docker buildx build --platform linux/amd64 --tag=vega_sim_learning:latest -t vegasim_learning .
