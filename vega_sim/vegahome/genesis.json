@@ -137,6 +137,7 @@
       "spam.protection.max.votes": "3",
       "spam.protection.proposal.min.tokens": "100000000000000000000000",
       "spam.protection.voting.min.tokens": "100000000000000000000",
+      "transfer.fee.factor": "0",
       "validators.delegation.minAmount": "1",
       "validators.epoch.length": "24h0m0s",
       "validators.vote.required": "0.67"

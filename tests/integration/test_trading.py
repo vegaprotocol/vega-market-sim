@@ -4,6 +4,7 @@ from tests.integration.utils.fixtures import (
     vega_service_with_market,
     vega_service,
     create_and_faucet_wallet,
+    ASSET_NAME,
     WalletConfig,
 )
 from vega_sim.null_service import VegaServiceNull
@@ -11,6 +12,8 @@ import vega_sim.proto.vega as vega_protos
 
 
 LIQ = WalletConfig("liq", "liq")
+PARTY_A = WalletConfig("party_a", "party_a")
+PARTY_B = WalletConfig("party_b", "party_b")
 
 
 @pytest.mark.integration
@@ -132,3 +135,86 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
     for vol, exp_vol in zip(ask_volumes, expected_ask_volumes):
         assert vol == exp_vol
+
+
+@pytest.mark.integration
+def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e3)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+
+    vega.one_off_transfer(
+        from_wallet_name=PARTY_A.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_wallet_name=PARTY_B.name,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset=asset_id,
+        amount=500,
+    )
+
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t1 = vega.party_account(
+        wallet_name=PARTY_A.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+    party_b_accounts_t1 = vega.party_account(
+        wallet_name=PARTY_B.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+
+    assert party_a_accounts_t1.general == 500
+    assert party_b_accounts_t1.general == 1500
+
+    vega.one_off_transfer(
+        from_wallet_name=PARTY_B.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_wallet_name=PARTY_A.name,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset=asset_id,
+        amount=500,
+        delay=15,
+    )
+
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t2 = vega.party_account(
+        wallet_name=PARTY_A.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+    party_b_accounts_t2 = vega.party_account(
+        wallet_name=PARTY_B.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+
+    assert party_a_accounts_t2.general == 500
+    assert party_b_accounts_t2.general == 1000
+
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t3 = vega.party_account(
+        wallet_name=PARTY_A.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+    party_b_accounts_t3 = vega.party_account(
+        wallet_name=PARTY_B.name,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+
+    assert party_a_accounts_t3.general == 1000
+    assert party_b_accounts_t3.general == 1000

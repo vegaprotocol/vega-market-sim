@@ -619,3 +619,50 @@ def batch_market_instructions(
     logger.debug(
         f"Submitted a batch of {len(cancellations)} cancellation, {len(amendments)} amendment, and {len(submissions)} submission instructions."
     )
+
+
+def transfer(
+    wallet: Wallet,
+    wallet_name: str,
+    key_name: str,
+    from_account_type: vega_protos.vega.AccountType,
+    to: str,
+    to_account_type: vega_protos.vega.AccountType,
+    asset: str,
+    amount: str,
+    reference: Optional[str] = None,
+    one_off: Optional[vega_protos.commands.v1.commands.OneOffTransfer] = None,
+    recurring: Optional[vega_protos.commands.v1.commands.RecurringTransfer] = None,
+):
+
+    command = vega_protos.commands.v1.commands.Transfer(
+        from_account_type=from_account_type,
+        to=to,
+        to_account_type=to_account_type,
+        asset=asset,
+        amount=amount,
+    )
+
+    if reference is not None:
+        setattr(command, "reference", reference)
+
+    if (one_off is not None) and (recurring is not None):
+        raise ValueError("Both 'one_off' and 'recurring' cannot be specified")
+
+    elif (one_off is None) and (recurring is None):
+        raise ValueError("Both 'one_off' and 'recurring' cannot be None.")
+
+    elif recurring is not None:
+        command.recurring.CopyFrom(recurring)
+
+    else:
+        command.one_off.CopyFrom(one_off)
+
+    wallet.submit_transaction(
+        transaction=command,
+        name=wallet_name,
+        transaction_type="transfer",
+        key_name=key_name,
+    )
+
+    logger.debug(f"Submitted a transfer.")
