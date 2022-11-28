@@ -166,19 +166,18 @@ class CurveMarketMaker(Scenario):
             commitment_amount=self.lp_commitamount,
             market_decimal_places=self.market_decimal,
             asset_decimal_places=self.asset_decimal,
-            order_unit_size=self.market_maker_base_order_size,
             num_steps=self.num_steps,
             num_levels=self.num_lp_levels,
             tag=str(tag),
             kappa=self.curve_kappa,
             tick_spacing=self.market_maker_tick_spacing,
-            max_order_size=self.market_maker_max_order,
             inventory_upper_boundary=self.q_upper,
             inventory_lower_boundary=self.q_lower,
             terminal_penalty_parameter=self.alpha,
             running_penalty_parameter=self.phi,
             market_order_arrival_rate=self.buy_intensity,
             market_kappa=self.market_kappa,
+            state_update_freq=10,
         )
 
         sensitive_mo_trader = PriceSensitiveMarketOrderTrader(

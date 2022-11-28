@@ -22,6 +22,7 @@ from vega_sim.api.data import (
     Trade,
     asset_decimals,
     best_prices,
+    price_bounds,
     find_asset_id,
     get_trades,
     margin_levels,
@@ -211,6 +212,30 @@ def test_best_prices(mkt_data_mock):
     bid_res, ask_res = best_prices("mkt", None, 2)
     assert bid_res == pytest.approx(2.02)
     assert ask_res == pytest.approx(2.12)
+
+
+@patch("vega_sim.api.data_raw.market_data")
+def test_price_bounds(mkt_data_mock):
+    mkt_data = MagicMock()
+    mkt_data_mock.return_value = mkt_data
+    mkt_data.price_monitoring_bounds = [
+        vega_protos.vega.PriceMonitoringBounds(
+            min_valid_price="10000",
+            max_valid_price="20000",
+        ),
+        vega_protos.vega.PriceMonitoringBounds(
+            min_valid_price="11000",
+            max_valid_price="19000",
+        ),
+        vega_protos.vega.PriceMonitoringBounds(
+            min_valid_price="12000",
+            max_valid_price="18000",
+        ),
+    ]
+
+    min_valid_price, max_valid_price = price_bounds("mkt", None, 2)
+    assert min_valid_price == pytest.approx(120)
+    assert max_valid_price == pytest.approx(180)
 
 
 def test_open_orders_by_market(trading_data_v2_servicer_and_port):

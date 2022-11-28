@@ -241,6 +241,7 @@ class VegaLoadTest(Scenario):
             num_steps=self.num_steps,
             tick_spacing=1,
             market_kappa=10,
+            state_update_freq=10,
         )
         market_b_maker = ExponentialShapedMarketMaker(
             wallet_name=MARKET_MAKERS["MARKET_B_MAKER"].wallet_name,
@@ -256,6 +257,7 @@ class VegaLoadTest(Scenario):
             num_steps=self.num_steps,
             tick_spacing=1,
             market_kappa=10,
+            state_update_freq=10,
         )
         market_c_maker = ExponentialShapedMarketMaker(
             wallet_name=MARKET_MAKERS["MARKET_C_MAKER"].wallet_name,
@@ -271,6 +273,7 @@ class VegaLoadTest(Scenario):
             num_steps=self.num_steps,
             tick_spacing=2,
             market_kappa=5,
+            state_update_freq=10,
         )
 
         # Setup agents for passing auction

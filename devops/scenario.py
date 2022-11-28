@@ -155,14 +155,13 @@ class DevOpsScenario(Scenario):
             kappa=self.market_maker_args.order_kappa,
             num_levels=self.market_maker_args.order_levels,
             tick_spacing=self.market_maker_args.order_spacing,
-            order_unit_size=self.market_maker_args.order_size,
-            max_order_size=self.market_maker_args.order_clipping,
             inventory_lower_boundary=self.market_maker_args.inventory_lower_boundary,
             inventory_upper_boundary=self.market_maker_args.inventory_upper_boundary,
             fee_amount=self.market_maker_args.fee_amount,
             num_steps=60 * 60 * 24 * 365,
             price_process_generator=iter(self.price_process),
             orders_from_stream=False,
+            state_update_freq=10,
         )
 
         # Setup agents for passing opening auction

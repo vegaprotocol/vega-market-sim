@@ -146,15 +146,14 @@ class ConfigurableMarket(Scenario):
             market_decimal_places=market_config.decimal_places,
             asset_decimal_places=self.asset_decimal,
             num_steps=self.num_steps,
-            kappa=1,
+            kappa=0.3,
             num_levels=25,
             tick_spacing=1,
-            order_unit_size=2,
-            max_order_size=1000,
             inventory_upper_boundary=200,
             inventory_lower_boundary=-200,
             market_kappa=1,
             market_order_arrival_rate=10,
+            state_update_freq=10,
         )
 
         sensitive_mo_trader_a = PriceSensitiveMarketOrderTrader(

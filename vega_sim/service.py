@@ -1077,6 +1077,17 @@ class VegaService(ABC):
             market_id=market_id, data_client=self.trading_data_client_v2
         )
 
+    def price_bounds(
+        self,
+        market_id: str,
+    ) -> Tuple[int, int]:
+        """
+        Output the tightest price bounds in the current market.
+        """
+        return data.price_bounds(
+            market_id=market_id, data_client=self.trading_data_client_v2
+        )
+
     def order_book_by_market(
         self,
         market_id: str,

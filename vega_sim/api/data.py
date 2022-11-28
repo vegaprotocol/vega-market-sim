@@ -427,6 +427,36 @@ def best_prices(
     )
 
 
+def price_bounds(
+    market_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    price_decimals: Optional[int] = None,
+) -> Tuple[float, float]:
+    """
+    Output the tightest price bounds in current market.
+    """
+    mkt_data = data_raw.market_data(market_id=market_id, data_client=data_client)
+    mkt_price_dp = (
+        price_decimals
+        if price_decimals is not None
+        else market_price_decimals(market_id=market_id, data_client=data_client)
+    )
+
+    lower_bounds = [
+        price_monitoring_bound.min_valid_price
+        for price_monitoring_bound in mkt_data.price_monitoring_bounds
+    ]
+    upper_bounds = [
+        price_monitoring_bound.max_valid_price
+        for price_monitoring_bound in mkt_data.price_monitoring_bounds
+    ]
+
+    return (
+        num_from_padded_int(max(lower_bounds), mkt_price_dp),
+        num_from_padded_int(min(upper_bounds), mkt_price_dp),
+    )
+
+
 def open_orders_by_market(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,

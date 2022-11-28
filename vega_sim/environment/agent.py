@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, Tuple, Dict, Optional
+from typing import Any, Tuple, Dict, Optional, List
 
 from vega_sim.service import VegaService
 
@@ -23,6 +23,9 @@ class Agent(ABC):
     def finalise(self):
         pass
 
+    def _update_state(self, current_step: int):
+        pass
+
 
 class AgentWithWallet(Agent):
     def __init__(
@@ -30,6 +33,7 @@ class AgentWithWallet(Agent):
         wallet_name: str,
         wallet_pass: str,
         key_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
     ):
         """Agent for use in environments as specified in environment.py.
         To extend, the crucial function to implement is the step function which will
@@ -53,7 +57,9 @@ class AgentWithWallet(Agent):
         self.wallet_pass = wallet_pass
         self.key_name = key_name
 
-    def step(self, vega: VegaService):
+        self.state_update_freq = state_update_freq
+
+    def step(self):
         pass
 
     def initialise(self, vega: VegaService, create_wallet: bool = True):
@@ -70,9 +76,9 @@ class AgentWithWallet(Agent):
 
 class StateAgentWithWallet(AgentWithWallet):
     def step(self, vega_state: VegaState):
-        pass
+        super().step()
 
 
 class StateAgent(Agent):
     def step(self, vega_state: VegaState):
-        pass
+        super().step()
