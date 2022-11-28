@@ -75,11 +75,12 @@ class ConfigurableMarketManager(StateAgentWithWallet):
     ):
 
         super().initialise(vega=vega, create_wallet=create_wallet)
-        self.vega.create_wallet(
-            self.termination_wallet_name,
-            self.termination_wallet_pass,
-            self.termination_key_name,
-        )
+        if create_wallet:
+            self.vega.create_wallet(
+                self.termination_wallet_name,
+                self.termination_wallet_pass,
+                self.termination_key_name,
+            )
 
         self.vega.wait_for_total_catchup()
         if mint_wallet:
