@@ -34,5 +34,18 @@ COPY ./examples ./examples
 COPY ./pyproject.toml ./pyproject.toml
 
 RUN pip install -e .
+RUN chmod 777 /vega_market_sim
+
+USER vega
+
+FROM vegasim_base AS vegasim_learning
+
+COPY ./requirements-learning.txt .
+RUN  pip install -r requirements-learning.txt
+
+COPY ./pyproject.toml ./pyproject.toml
+
+RUN pip install -e .
+RUN chmod 777 /vega_market_sim
 
 USER vega

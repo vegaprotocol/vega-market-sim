@@ -326,3 +326,6 @@ UlimitNOFile = 8192
     Password = "vega"
     Database = "vega"
     UseTransactions = false
+
+[DeHistory]
+  Enabled = false
