@@ -1,5 +1,6 @@
 from math import log, sqrt, exp
 from scipy.stats import lognorm
+from typing import Optional
 
 import vega_sim.proto.vega as vega_protos
 
@@ -9,8 +10,8 @@ def probability_of_trading(
     price: float,
     best_bid_price: float,
     best_ask_price: float,
-    min_valid_price: float,
-    max_valid_price: float,
+    min_valid_price: Optional[float],
+    max_valid_price: Optional[float],
     mu: float,
     tau: float,
     sigma: float,
@@ -52,18 +53,21 @@ def probability_of_trading(
 
     if price > best_bid_price and price < best_ask_price:
         return 0.5
-    elif price < min_valid_price or price > max_valid_price:
+    elif (
+        min_valid_price is None
+        or max_valid_price is None
+        or price < min_valid_price
+        or price > max_valid_price
+    ):
         return min_probability_of_trading
 
     if side == vega_protos.vega.SIDE_BUY:
-
         best_price = best_bid_price
 
         lower_bound = min_valid_price
         upper_bound = best_bid_price
 
     else:
-
         best_price = best_ask_price
 
         lower_bound = best_ask_price

@@ -1080,7 +1080,7 @@ class VegaService(ABC):
     def price_bounds(
         self,
         market_id: str,
-    ) -> Tuple[int, int]:
+    ) -> Tuple[Optional[float], Optional[float]]:
         """
         Output the tightest price bounds in the current market.
         """
@@ -1791,7 +1791,6 @@ class VegaService(ABC):
         batch_of_submissions = []
 
         for i, instruction in enumerate(instructions):
-
             if isinstance(instruction, OrderCancellation):
                 batch_of_cancellations.append(instruction)
             elif isinstance(instruction, OrderAmendment):
@@ -1805,7 +1804,6 @@ class VegaService(ABC):
             batch_size += 1
 
             if (batch_size >= max_batch_size) or (i == len(instructions) - 1):
-
                 trading.batch_market_instructions(
                     wallet=self.wallet,
                     wallet_name=wallet_name,

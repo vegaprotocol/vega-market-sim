@@ -28,6 +28,10 @@ from vega_sim.null_service import VegaServiceNull
 
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
 
+from logging import getLogger
+
+logger = getLogger(__name__)
+
 
 def run_iteration(
     learning_agent: LearningAgent,
@@ -106,7 +110,7 @@ if __name__ == "__main__":
         device = "cuda:{}".format(args.device)
     elif torch.backends.mps.is_available() and args.use_mps:
         device = torch.device("mps")
-        print(
+        logger.warn(
             "WARNING: as of today this will likely crash due to mps not implementing"
             " all required functionality."
         )
@@ -162,9 +166,10 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
 
         if args.evaluate == 0:
+            logger.info(f"Running training for {args.rl_max_it} iterations")
             # TRAINING OF AGENT
-            if args.resume_training == True:
-                print("Loading neural net weights from: " + args.results_dir)
+            if args.resume_training:
+                logger.info("Loading neural net weights from: " + args.results_dir)
                 learning_agent.load(args.results_dir)
             else:
                 with open(logfile_pol_imp, "w") as f:
@@ -204,7 +209,7 @@ if __name__ == "__main__":
 
         else:
             # EVALUATION OF AGENT
-            print("Loading neural net weights from: " + args.results_dir)
+            logger.info("Loading neural net weights from: " + args.results_dir)
             learning_agent.load(args.results_dir)
             learning_agent.lerningIteration = 0
             with open(logfile_pnl, "w") as f:
