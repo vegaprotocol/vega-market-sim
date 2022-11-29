@@ -300,7 +300,6 @@ def find_market_id(
     market_ids = {}
 
     for market in markets:
-
         if market.tradable_instrument.instrument.name == name:
             if market.state in acceptable_states:
                 market_ids[market.id] = market.market_timestamps.pending
@@ -431,7 +430,7 @@ def price_bounds(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
-) -> Tuple[float, float]:
+) -> Tuple[Optional[float], Optional[float]]:
     """
     Output the tightest price bounds in current market.
     """
@@ -452,8 +451,8 @@ def price_bounds(
     ]
 
     return (
-        num_from_padded_int(max(lower_bounds), mkt_price_dp),
-        num_from_padded_int(min(upper_bounds), mkt_price_dp),
+        num_from_padded_int(max(lower_bounds), mkt_price_dp) if lower_bounds else None,
+        num_from_padded_int(min(upper_bounds), mkt_price_dp) if upper_bounds else None,
     )
 
 

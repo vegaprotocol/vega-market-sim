@@ -10,4 +10,4 @@ docker run \
     --platform linux/amd64 \
     -v "${RESULT_DIR}:/tmp" \
     vega_sim_learning:latest \
-        python -m vega_sim.reinforcement.run_rl_agent --rl-max-it 1000
+        python -m vega_sim.reinforcement.run_rl_agent --rl-max-it $1
