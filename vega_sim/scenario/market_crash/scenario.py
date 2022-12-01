@@ -69,6 +69,7 @@ class MarketCrash(Scenario):
         trim_to_min: Optional[float] = None,
         price_process_fn: Optional[Callable] = None,
     ):
+        super().__init__()
         self.num_steps = num_steps
         self.dt = dt
         self.market_decimal = market_decimal
@@ -224,15 +225,18 @@ class MarketCrash(Scenario):
             tag=str(tag),
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
+        self.agents = (
+            [
                 market_maker,
                 background_market,
                 auctionpass1,
                 auctionpass2,
             ]
             + noise_traders
-            + position_traders,
+            + position_traders
+        )
+        self.env = MarketEnvironmentWithState(
+            agents=self.agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
@@ -242,23 +246,7 @@ class MarketCrash(Scenario):
             state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        tag: Optional[str] = None,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=tag if tag is not None else str(0), random_state=random_state
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-        )
-        return result
+        return self.env
 
 
 if __name__ == "__main__":
