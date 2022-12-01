@@ -38,7 +38,7 @@ import argparse
 import logging
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 from vega_sim.scenario.common.utils.price_process import (
     Granularity,
     get_historic_price_series,
@@ -56,6 +56,7 @@ from vega_sim.scenario.multi_market.agents import (
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
+    StateAgent,
     OpenAuctionPass,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
@@ -160,11 +161,13 @@ class VegaLoadTest(Scenario):
 
         return list(price_process)
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         market_a_price_process = (
             self.price_process_fn()
             if self.price_process_fn is not None
@@ -461,7 +464,7 @@ class VegaLoadTest(Scenario):
             for i in range(self.num_mo_traders_per_market)
         ]
 
-        self.agents = (
+        return (
             [
                 market_a_manager,
                 market_b_manager,
@@ -483,7 +486,13 @@ class VegaLoadTest(Scenario):
             + market_b_mo_traders
             + market_c_mo_traders
         )
-        self.env = MarketEnvironmentWithState(
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
             agents=self.agents,
             n_steps=self.num_steps,
             random_agent_ordering=False,
@@ -492,7 +501,6 @@ class VegaLoadTest(Scenario):
             step_length_seconds=self.granularity.value,
             block_length_seconds=vega.seconds_per_block,
         )
-        return self.env
 
 
 if __name__ == "__main__":

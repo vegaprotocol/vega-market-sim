@@ -33,6 +33,7 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
     PriceSensitiveMarketOrderTrader,
     InformedTrader,
+    StateAgent,
 )
 
 
@@ -97,12 +98,13 @@ class ConfigurableMarket(Scenario):
 
         return list(price_process)
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
+        tag: str,
         market_config: Optional[MarketConfig] = None,
         random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+    ) -> List[StateAgent]:
         market_config = market_config if market_config is not None else MarketConfig()
 
         random_state = (
@@ -232,7 +234,7 @@ class ConfigurableMarket(Scenario):
             proportion_taken=0.1,
         )
 
-        self.agents = [
+        return [
             market_manager,
             shaped_mm,
             sensitive_mo_trader_a,
@@ -242,7 +244,11 @@ class ConfigurableMarket(Scenario):
             auctionpass2,
             info_trader,
         ]
-        self.env = MarketEnvironmentWithState(
+
+    def configure_environment(
+        self, vega: VegaServiceNull, **kwargs
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
             agents=self.agents,
             n_steps=self.num_steps,
             step_length_seconds=self.granularity.value,
@@ -253,21 +259,3 @@ class ConfigurableMarket(Scenario):
             block_length_seconds=self.block_length_seconds,
             state_extraction_fn=self.state_extraction_fn,
         )
-        return self.env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-        market_config: Optional[MarketConfig] = None,
-    ):
-        self.set_up_background_market(
-            vega=vega, random_state=random_state, market_config=market_config
-        )
-        result = self.env.run(
-            pause_at_completion=pause_at_completion,
-            run_with_console=run_with_console,
-        )
-        return result

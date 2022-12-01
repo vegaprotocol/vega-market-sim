@@ -9,6 +9,7 @@ from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
+from vega_sim.scenario.common.agents import StateAgent
 from vega_sim.scenario.ideal_market_maker.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
@@ -96,12 +97,13 @@ class IdealMarketMaker(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironment:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         market_name = self.market_name + f"_{tag}" if tag else self.market_name
         asset_name = self.asset_name + f"_{tag}" if tag else self.asset_name
 
@@ -209,7 +211,7 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
-        self.agents = [
+        return [
             market_maker,
             tradingbot,
             randomtrader,
@@ -218,7 +220,13 @@ class IdealMarketMaker(Scenario):
             info_trader,
             liquidityprovider,
         ]
-        self.env = MarketEnvironment(
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        **kwargs,
+    ) -> MarketEnvironment:
+        return MarketEnvironment(
             base_agents=self.agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
@@ -228,7 +236,6 @@ class IdealMarketMaker(Scenario):
             block_length_seconds=self.block_length_seconds,
             state_extraction_fn=self.state_extraction_fn,
         )
-        return self.env
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
     PriceSensitiveMarketOrderTrader,
     InformedTrader,
-    Snitch,
+    StateAgent,
 )
 
 
@@ -124,12 +124,13 @@ class CurveMarketMaker(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + (f"_{tag}" if tag else "")
         asset_name = self.asset_name + (f"_{tag}" if tag else "")
@@ -235,7 +236,7 @@ class CurveMarketMaker(Scenario):
             tag=str(tag),
         )
 
-        self.agents = [
+        return [
             market_manager,
             # background_market,
             shaped_mm,
@@ -244,7 +245,13 @@ class CurveMarketMaker(Scenario):
             auctionpass2,
             info_trader,
         ]
-        self.env = MarketEnvironmentWithState(
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
             agents=self.agents,
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,
@@ -256,7 +263,6 @@ class CurveMarketMaker(Scenario):
             state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
-        return self.env
 
 
 if __name__ == "__main__":

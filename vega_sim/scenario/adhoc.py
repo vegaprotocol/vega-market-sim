@@ -57,9 +57,7 @@ def main():
                 network=Network[args.network],
                 pause_at_completion=args.pause,
             )
-            import pdb
 
-            pdb.set_trace()
     else:
         with VegaServiceNetwork(
             network=Network[args.network],

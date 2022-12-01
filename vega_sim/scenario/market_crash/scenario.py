@@ -21,6 +21,7 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
+    StateAgent,
     MarketOrderTrader,
     MultiRegimeBackgroundMarket,
     MarketRegime,
@@ -121,12 +122,13 @@ class MarketCrash(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         self.market_name = f"BTC:DAI_{tag}"
         self.asset_name = f"tDAI{tag}"
 
@@ -225,7 +227,7 @@ class MarketCrash(Scenario):
             tag=str(tag),
         )
 
-        self.agents = (
+        return (
             [
                 market_maker,
                 background_market,
@@ -235,7 +237,15 @@ class MarketCrash(Scenario):
             + noise_traders
             + position_traders
         )
-        self.env = MarketEnvironmentWithState(
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
             agents=self.agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
@@ -246,7 +256,6 @@ class MarketCrash(Scenario):
             state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
-        return self.env
 
 
 if __name__ == "__main__":
