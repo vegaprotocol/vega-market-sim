@@ -639,6 +639,23 @@ class VegaService(ABC):
             else:
                 logger.debug(msg)
                 return
+
+        submit_price = (
+            num_to_padded_int(
+                price,
+                self.market_price_decimals[market_id],
+            )
+            if price is not None
+            else None
+        )
+        if submit_price is not None and submit_price <= 0:
+            msg = "Not submitting order as price is 0 or less."
+            if wait:
+                raise Exception(msg)
+            else:
+                logger.debug(msg)
+                return
+
         return trading.submit_order(
             wallet=self.wallet,
             wallet_name=trading_wallet,
@@ -648,14 +665,7 @@ class VegaService(ABC):
             time_in_force=time_in_force,
             side=side,
             volume=submit_volume,
-            price=str(
-                num_to_padded_int(
-                    price,
-                    self.market_price_decimals[market_id],
-                )
-            )
-            if price is not None
-            else None,
+            price=str(submit_price),
             expires_at=expires_at,
             pegged_order=vega_protos.vega.PeggedOrder(
                 reference=pegged_order.reference,
