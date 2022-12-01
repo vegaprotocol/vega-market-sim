@@ -1478,6 +1478,16 @@ class VegaService(ABC):
             self.trading_data_client_v2,
         )
 
+        base_transfers = []
+
+        base_transfers.extend(
+            data.list_transfers(data_client=self.trading_data_client_v2)
+        )
+
+        with self.transfers_lock:
+            for t in base_transfers:
+                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
+
         self.transfer_thread = threading.Thread(
             target=self._monitor_transfer_stream,
             args=(self.transfer_queue,),
