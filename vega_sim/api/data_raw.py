@@ -310,8 +310,9 @@ def liquidity_provisions(
     )
 
 
-def order_subscription(
+def observe_event_bus(
     data_client: vac.VegaCoreClient,
+    type: Optional[list],
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
@@ -329,13 +330,7 @@ def order_subscription(
         Iterable[List[vega.Order]], Infinite iterable of lists of order updates
     """
     return data_client.ObserveEventBus(
-        iter(
-            [
-                vega_protos.api.v1.core.ObserveEventBusRequest(
-                    type=[events_protos.BUS_EVENT_TYPE_ORDER]
-                )
-            ]
-        )
+        iter([vega_protos.api.v1.core.ObserveEventBusRequest(type=type)])
     )
 
 

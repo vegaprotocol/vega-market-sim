@@ -23,7 +23,7 @@ from vega_sim.api.data_raw import (
     market_info,
     order_status,
     positions_by_market,
-    order_subscription,
+    observe_event_bus,
     margin_levels,
     list_transfers,
 )
@@ -481,7 +481,7 @@ def test_liquidity_provisions(trading_data_v2_servicer_and_port):
     assert res[0].market_id == "MARKET"
 
 
-def test_order_subscription(core_servicer_and_port):
+def test_observe_event_bus(core_servicer_and_port):
     def ObserveEventBus(self, request, context):
         orders = [
             vega_protos.vega.Order(
@@ -616,8 +616,9 @@ def test_order_subscription(core_servicer_and_port):
 
     data_client = VegaCoreClient(f"localhost:{port}")
 
-    queue = order_subscription(
+    queue = observe_event_bus(
         data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_ORDER],
     )
 
     batch_one = next(queue)

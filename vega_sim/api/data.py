@@ -7,6 +7,7 @@ import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 from vega_sim.api.helpers import num_from_padded_int
 
 
@@ -777,8 +778,11 @@ def order_subscription(
         Iterable[Order], Infinite iterable of order updates
     """
 
-    order_stream = data_raw.order_subscription(
-        data_client=data_client, market_id=market_id, party_id=party_id
+    order_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_ORDER],
+        market_id=market_id,
+        party_id=party_id,
     )
 
     def _order_gen(
