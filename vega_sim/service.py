@@ -632,8 +632,8 @@ class VegaService(ABC):
             volume,
             self.market_pos_decimals[market_id],
         )
-        if submit_volume == 0:
-            msg = "Not submitting order as volume is 0"
+        if submit_volume <= 0:
+            msg = "Not submitting order as volume is 0 or less."
             if wait:
                 raise Exception(msg)
             else:
