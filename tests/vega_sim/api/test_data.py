@@ -18,6 +18,7 @@ from vega_sim.api.data import (
     MarginLevels,
     MissingAssetError,
     Order,
+    Transfer,
     OrdersBySide,
     Trade,
     asset_decimals,
@@ -31,6 +32,7 @@ from vega_sim.api.data import (
     open_orders_by_market,
     order_subscription,
     party_account,
+    list_transfers,
 )
 from vega_sim.grpc.client import (
     VegaCoreClient,
@@ -797,3 +799,76 @@ def test_get_trades(
     )
 
     assert res == expected
+
+
+@patch("vega_sim.api.data.asset_decimals")
+def test_list_transfers(
+    mk_asset_decimals,
+    trading_data_v2_servicer_and_port,
+):
+
+    expected = Transfer(
+        id="id1",
+        party_from="party1",
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        party_to="party2",
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset="asset1",
+        amount=1000.0,
+        reference="reference",
+        status=events_protos.Transfer.Status.STATUS_DONE,
+        timestamp=000000000,
+        reason="reason",
+        one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+        recurring=events_protos.RecurringTransfer()
+    )
+
+    node = events_protos.Transfer(
+        id="id1",
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to="party2",
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset="asset1",
+        amount="100000",
+        reference="reference",
+        status=events_protos.Transfer.Status.STATUS_DONE,
+        timestamp=000000000,
+        reason="reason",
+        one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+        recurring=events_protos.RecurringTransfer(),
+    )
+    setattr(node, "from", "party1")
+
+    def ListTransfers(self, request, context):
+        return data_node_protos_v2.trading_data.ListTransfersResponse(
+            transfers=data_node_protos_v2.trading_data.TransferConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.TransferEdge(
+                        cursor="cursor",
+                        node=node,
+                    )
+                ],
+            )
+        )
+
+    mk_asset_decimals.return_value = 2
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListTransfers = ListTransfers
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = list_transfers(
+        data_client=data_client,
+        party_id="party2",
+        direction=data_node_protos_v2.trading_data.TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM,
+    )
+
+    assert res == [expected]
