@@ -813,6 +813,44 @@ def order_subscription(
     return _order_gen(order_stream=order_stream)
 
 
+def transfer_subscription(
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> Iterable[Order]:
+
+    transfer_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_TRANSFER],
+        market_id=market_id,
+        party_id=party_id,
+    )
+
+    def _transfer_gen(
+        transfer_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    ) -> Iterable[Transfer]:
+        asset_dp = {}
+        try:
+            for transfer_list in transfer_stream:
+                for bus_event in transfer_list.events:
+                    transfer = bus_event.transfer
+                    if transfer.asset not in asset_dp:
+                        asset_dp[transfer.asset] = asset_decimals(
+                            asset_id=transfer.asset,
+                            data_client=trading_data_client,
+                        )
+                    yield _transfer_from_proto(
+                        transfer=transfer,
+                        asset_decimals=asset_dp[transfer.asset],
+                    )
+        except Exception as _:
+            logger.info("Transfer subscription closed")
+            return
+
+    return _transfer_gen(transfer_stream=transfer_stream)
+
+
 def has_liquidity_provision(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
