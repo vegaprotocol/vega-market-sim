@@ -113,9 +113,7 @@ if __name__ == "__main__":
             volume=1,
             price=100,
         )
-        import pdb
 
-        pdb.set_trace()
         # for i in range(1, 100, 2):
         #     trader = np.random.choice([MM_WALLET.name, MM_WALLET2.name])
 
