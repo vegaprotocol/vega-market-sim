@@ -316,18 +316,21 @@ def observe_event_bus(
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
-    """Subscribe to a stream of Order updates from the data-node.
-    The stream of orders returned from this function is an iterable which
+    """Subscribe to a stream of event updates from the data-node.
+    The stream of events returned from this function is an iterable which
     does not end and will continue to tick another order update whenever
     one is received.
 
     Args:
+        type:
+            Optional[list], If provided only return events of these types
         market_id:
-            Optional[str], If provided, only update orders from this market
+            Optional[str], If provided, only update events from this market
         party_id:
-            Optional[str], If provided, only update orders from this party
+            Optional[str], If provided, only update events from this party
     Returns:
-        Iterable[List[vega.Order]], Infinite iterable of lists of order updates
+        Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
+            Infinite iterable of lists of events updates
     """
     return data_client.ObserveEventBus(
         iter([vega_protos.api.v1.core.ObserveEventBusRequest(type=type)])
@@ -389,6 +392,20 @@ def list_transfers(
     party_id: Optional[str] = None,
     direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
 ) -> List[events_protos.Transfer]:
+    """Returns a list of raw transfers.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading data client
+        party_id (Optional[str], optional):
+            Public key for the specified party. Defaults to None.
+        direction (Optional[data_node_protos_v2.trading_data.TransferDirection], optional):
+            Direction of transfers to return. Defaults to None.
+
+    Returns:
+        List[events_protos.Transfer]:
+            A list of Vega Transfer proto objects.
+    """
 
     base_request = data_node_protos_v2.trading_data.ListTransfersRequest(
         pubkey=party_id, direction=direction

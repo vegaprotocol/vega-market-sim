@@ -1971,6 +1971,20 @@ class VegaService(ABC):
         key_name: Optional[str] = None,
         direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
     ) -> List[data.Transfer]:
+        """Returns a list of processed transfers.
+
+        Args:
+            wallet_name (Optional[str], optional):
+                Name of wallet to return transfers for. Defaults to None.
+            key_name (Optional[str], optional):
+                Name of key to return transfers for. Defaults to None.
+            direction (Optional[data_node_protos_v2.trading_data.TransferDirection], optional):
+                Direction of transfers to return. Defaults to None.
+
+        Returns:
+            List[Transfer]:
+                A list of processed Transfer objects for the specified party and direction.
+        """
 
         party_id = (
             self.wallet.public_key(name=wallet_name, key_name=key_name)

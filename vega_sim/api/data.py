@@ -948,6 +948,20 @@ def list_transfers(
     party_id: Optional[str] = None,
     direction: data_node_protos_v2.trading_data.TransferDirection = None,
 ) -> List[Transfer]:
+    """Returns a list of processed transfers.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading data client
+        party_id (Optional[str], optional):
+            Public key for the specified party. Defaults to None.
+        direction (Optional[data_node_protos_v2.trading_data.TransferDirection], optional):
+            Direction of transfers to return. Defaults to None.
+
+    Returns:
+        List[Transfer]:
+            A list of processed Transfer objects for the specified party and direction.
+    """
 
     transfers = data_raw.list_transfers(
         data_client=data_client,
