@@ -58,6 +58,7 @@ class IdealMarketMaker(Scenario):
         proportion_taken: float = 0.8,
         price_process_fn: Optional[Callable] = None,
     ):
+        super().__init__()
         self.num_steps = num_steps
         self.market_name = market_name
         self.asset_name = asset_name
@@ -101,7 +102,6 @@ class IdealMarketMaker(Scenario):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironment:
-
         market_name = self.market_name + f"_{tag}" if tag else self.market_name
         asset_name = self.asset_name + f"_{tag}" if tag else self.asset_name
 
@@ -209,16 +209,17 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
-        env = MarketEnvironment(
-            base_agents=[
-                market_maker,
-                tradingbot,
-                randomtrader,
-                auctionpass1,
-                auctionpass2,
-                info_trader,
-                liquidityprovider,
-            ],
+        self.agents = [
+            market_maker,
+            tradingbot,
+            randomtrader,
+            auctionpass1,
+            auctionpass2,
+            info_trader,
+            liquidityprovider,
+        ]
+        self.env = MarketEnvironment(
+            base_agents=self.agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
@@ -227,22 +228,7 @@ class IdealMarketMaker(Scenario):
             block_length_seconds=self.block_length_seconds,
             state_extraction_fn=self.state_extraction_fn,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=str(0), random_state=random_state
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-        )
-        return result
+        return self.env
 
 
 if __name__ == "__main__":
