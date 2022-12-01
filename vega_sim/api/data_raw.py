@@ -388,7 +388,7 @@ def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
     direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
-) -> Union[str, int, float]:
+) -> List[events_protos.Transfer]:
 
     base_request = data_node_protos_v2.trading_data.ListTransfersRequest(
         pubkey=party_id, direction=direction

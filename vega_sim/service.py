@@ -1970,7 +1970,7 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         key_name: Optional[str] = None,
         direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
-    ):
+    ) -> List[data.Transfer]:
 
         party_id = (
             self.wallet.public_key(name=wallet_name, key_name=key_name)

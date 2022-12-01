@@ -947,7 +947,7 @@ def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
     direction: data_node_protos_v2.trading_data.TransferDirection = None,
-):
+) -> List[Transfer]:
 
     transfers = data_raw.list_transfers(
         data_client=data_client,
