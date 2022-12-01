@@ -31,6 +31,7 @@ from vega_sim.api.data import (
     market_price_decimals,
     open_orders_by_market,
     order_subscription,
+    transfer_subscription,
     party_account,
     list_transfers,
 )
@@ -645,6 +646,128 @@ def test_order_subscription(mkt_price_mock, mkt_pos_mock, core_servicer_and_port
     queue = order_subscription(data_client=data_client, trading_data_client=None)
     for order in orders:
         assert order.id == next(queue).id
+
+@patch("vega_sim.api.data.asset_decimals")
+def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
+    
+    mk_asset_decimals.return_value = 1
+    transfers = [
+        events_protos.Transfer(
+            id="id1",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+        events_protos.Transfer(
+            id="id2",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+        events_protos.Transfer(
+            id="id3",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+        events_protos.Transfer(
+            id="id4",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+        events_protos.Transfer(
+            id="id5",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+        events_protos.Transfer(
+            id="id6",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+        events_protos.Transfer(
+            id="id7",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        ),
+    ]
+
+    def ObserveEventBus(self, request, context):
+        for transfer_chunk in [transfers[:3], transfers[3:6], transfers[6:]]:
+            yield vega_protos.api.v1.core.ObserveEventBusResponse(
+                events=[events_protos.BusEvent(transfer=transfer) for transfer in transfer_chunk]
+            )
+
+    server, port, mock_servicer = core_servicer_and_port
+    mock_servicer.ObserveEventBus = ObserveEventBus
+
+    add_CoreServiceServicer_to_server(mock_servicer(), server)
+
+    data_client = VegaCoreClient(f"localhost:{port}")
+
+    queue = transfer_subscription(data_client=data_client, trading_data_client=None)
+    for transfer in transfers:
+        assert transfer.id == next(queue).id
 
 
 @patch("vega_sim.api.data.asset_decimals")
