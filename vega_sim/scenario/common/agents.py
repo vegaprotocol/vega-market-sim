@@ -1180,6 +1180,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         provided_liquidity = 0
 
         for vol, price in orders:
+            if price <= 0:
+                continue
+
             p = probability_of_trading(
                 price=price,
                 side=side,
