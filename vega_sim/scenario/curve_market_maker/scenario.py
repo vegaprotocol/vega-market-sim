@@ -27,6 +27,7 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
     PriceSensitiveMarketOrderTrader,
     InformedTrader,
+    Snitch,
 )
 
 
@@ -242,6 +243,7 @@ class CurveMarketMaker(Scenario):
                 auctionpass1,
                 auctionpass2,
                 info_trader,
+                Snitch(),
             ],
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,
@@ -270,6 +272,9 @@ class CurveMarketMaker(Scenario):
             pause_at_completion=pause_at_completion,
             run_with_console=run_with_console,
         )
+        import pdb
+
+        pdb.set_trace()
         return result
 
 

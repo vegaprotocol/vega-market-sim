@@ -92,7 +92,7 @@ def propose_market_from_config(
     pub_key = wallet.public_key(proposal_wallet_name, proposal_key_name)
 
     # Request accounts for party and check governance asset balance
-    party_accounts = data_raw.party_accounts(
+    party_accounts = data_raw.list_accounts(
         data_client=data_client, asset_id=vote_asset_id, party_id=pub_key
     )
 
@@ -197,7 +197,7 @@ def propose_future_market(
     pub_key = wallet.public_key(wallet_name, key_name)
 
     # Request accounts for party and check governance asset balance
-    party_accounts = data_raw.party_accounts(
+    party_accounts = data_raw.list_accounts(
         data_client=data_client, asset_id=vote_asset_id, party_id=pub_key
     )
 
