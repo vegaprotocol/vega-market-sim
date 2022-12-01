@@ -945,7 +945,7 @@ def ping(data_client: vac.VegaTradingDataClientV2):
 
 def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
-    party_id: str,
+    party_id: Optional[str] = None,
     direction: data_node_protos_v2.trading_data.TransferDirection = None,
 ):
 

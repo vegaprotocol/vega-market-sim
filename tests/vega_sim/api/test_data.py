@@ -647,9 +647,10 @@ def test_order_subscription(mkt_price_mock, mkt_pos_mock, core_servicer_and_port
     for order in orders:
         assert order.id == next(queue).id
 
+
 @patch("vega_sim.api.data.asset_decimals")
 def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
-    
+
     mk_asset_decimals.return_value = 1
     transfers = [
         events_protos.Transfer(
@@ -755,7 +756,10 @@ def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
     def ObserveEventBus(self, request, context):
         for transfer_chunk in [transfers[:3], transfers[3:6], transfers[6:]]:
             yield vega_protos.api.v1.core.ObserveEventBusResponse(
-                events=[events_protos.BusEvent(transfer=transfer) for transfer in transfer_chunk]
+                events=[
+                    events_protos.BusEvent(transfer=transfer)
+                    for transfer in transfer_chunk
+                ]
             )
 
     server, port, mock_servicer = core_servicer_and_port
@@ -943,7 +947,7 @@ def test_list_transfers(
         timestamp=000000000,
         reason="reason",
         one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-        recurring=events_protos.RecurringTransfer()
+        recurring=events_protos.RecurringTransfer(),
     )
 
     node = events_protos.Transfer(
