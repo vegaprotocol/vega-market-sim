@@ -387,3 +387,24 @@ def get_network_parameter(
     return data_client.GetNetworkParameter(
         data_node_protos_v2.trading_data.GetNetworkParameterRequest(key=key),
     ).network_parameter
+
+
+def list_transfers(
+    data_client: vac.VegaTradingDataClientV2,
+    party_id: str,
+    direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+) -> Union[str, int, float]:
+
+    direction = (
+        direction
+        if direction is not None
+        else data_node_protos_v2.trading_data.TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM
+    )
+
+    return unroll_v2_pagination(
+        data_node_protos_v2.trading_data.ListTransfersRequest(
+            pubkey=party_id, direction=direction
+        ),
+        request_func=lambda x: data_client.ListTransfers(x).transfers,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

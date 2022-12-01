@@ -1915,3 +1915,15 @@ class VegaService(ABC):
             reference=reference,
             one_off=one_off,
         )
+
+    def list_transfers(
+        self,
+        wallet_name: str,
+        key_name: Optional[str] = None,
+        direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+    ):
+        return data.list_transfers(
+            data_client=self.trading_data_client_v2,
+            party_id=self.wallet.public_key(name=wallet_name, key_name=key_name),
+            direction=direction,
+        )

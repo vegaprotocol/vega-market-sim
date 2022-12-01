@@ -56,6 +56,24 @@ Position = namedtuple(
         "updated_at",
     ],
 )
+Transfer = namedtuple(
+    "Transfer",
+    [
+        "id",
+        "party_from",
+        "from_account_type",
+        "party_to",
+        "to_account_type",
+        "asset",
+        "amount",
+        "reference",
+        "status",
+        "timestamp",
+        "reason",
+        "one_off",
+        "recurring",
+    ],
+)
 
 MarginLevels = namedtuple(
     "MarginLevels",
@@ -208,6 +226,27 @@ def _position_from_proto(
             position.average_entry_price, price_decimals
         ),
         updated_at=position.updated_at,
+    )
+
+
+def _transfer_from_proto(
+    transfer: vega_protos.vega.Transfer,
+    asset_decimals: int,
+) -> Transfer:
+    return Transfer(
+        id=transfer.id,
+        party_from=getattr(transfer, "from"),
+        from_account_type=transfer.from_account_type,
+        party_to=transfer.to,
+        to_account_type=transfer.to_account_type,
+        asset=transfer.asset,
+        amount=num_from_padded_int(transfer.amount, asset_decimals),
+        reference=transfer.reference,
+        status=transfer.status,
+        timestamp=transfer.timestamp,
+        reason=transfer.reason,
+        one_off=transfer.one_off,
+        recurring=transfer.recurring,
     )
 
 
@@ -860,3 +899,34 @@ def get_trades(
 
 def ping(data_client: vac.VegaTradingDataClientV2):
     return data_client.Ping(data_node_protos_v2.trading_data.PingRequest())
+
+
+def list_transfers(
+    data_client: vac.VegaTradingDataClientV2,
+    party_id: str,
+    direction: data_node_protos_v2.trading_data.TransferDirection = None,
+):
+
+    transfers = data_raw.list_transfers(
+        data_client=data_client,
+        party_id=party_id,
+        direction=direction,
+    )
+
+    asset_dp = {}
+    res_transfers = []
+
+    for transfer in transfers:
+
+        if transfer.asset not in asset_dp:
+            asset_dp[transfer.asset] = asset_decimals(
+                asset_id=transfer.asset, data_client=data_client
+            )
+
+        res_transfers.append(
+            _transfer_from_proto(
+                transfer=transfer, asset_decimals=asset_dp[transfer.asset]
+            )
+        )
+
+    return res_transfers
