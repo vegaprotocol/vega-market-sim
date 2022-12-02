@@ -12,7 +12,7 @@ import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.data_raw import (
     MarketAccount,
-    all_market_accounts,
+    list_accounts,
     all_markets,
     asset_info,
     get_trades,
@@ -227,21 +227,21 @@ def test_asset_info(trading_data_v2_servicer_and_port):
     assert res.id == "foobar"
 
 
-def test_all_market_accounts(trading_data_v2_servicer_and_port):
-    expected = {
-        vega_protos.vega.ACCOUNT_TYPE_BOND: data_node_protos_v2.trading_data.AccountBalance(
+def test_list_accounts(trading_data_v2_servicer_and_port):
+    expected = [
+        data_node_protos_v2.trading_data.AccountBalance(
             owner="a1",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_BOND,
         ),
-        vega_protos.vega.ACCOUNT_TYPE_GENERAL: data_node_protos_v2.trading_data.AccountBalance(
+        data_node_protos_v2.trading_data.AccountBalance(
             owner="a2",
             asset="asset1",
             market_id="market1",
             type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         ),
-    }
+    ]
 
     def ListAccounts(self, request, context):
         return data_node_protos_v2.trading_data.ListAccountsResponse(
@@ -281,9 +281,7 @@ def test_all_market_accounts(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    res = all_market_accounts(
-        market_id="market1", asset_id="asset1", data_client=data_client
-    )
+    res = list_accounts(market_id="market1", asset_id="asset1", data_client=data_client)
 
     assert res == expected
 

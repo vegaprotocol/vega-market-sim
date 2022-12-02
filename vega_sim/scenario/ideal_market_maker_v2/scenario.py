@@ -23,6 +23,7 @@ from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
+    StateAgent,
     InformedTrader,
 )
 
@@ -66,6 +67,7 @@ class IdealMarketMaker(Scenario):
         settle_at_end: bool = True,
         proportion_taken: float = 0.8,
     ):
+        super().__init__()
         self.num_steps = num_steps
         self.random_agent_ordering = random_agent_ordering
         self.market_decimal = market_decimal
@@ -114,12 +116,13 @@ class IdealMarketMaker(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
@@ -224,14 +227,21 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
-                market_maker,
-                background_market,
-                auctionpass1,
-                auctionpass2,
-                trader,
-            ],
+        return [
+            market_maker,
+            background_market,
+            auctionpass1,
+            auctionpass2,
+            trader,
+        ]
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
+            agents=self.agents,
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,
@@ -242,24 +252,6 @@ class IdealMarketMaker(Scenario):
             state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=str(0), random_state=random_state
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-            run_with_console=run_with_console,
-        )
-        return result
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ from tests.vega_sim.api.test_data_raw import (
     trading_data_v2_servicer_and_port,
 )
 from vega_sim.api.data import (
-    AccountData,
+    PartyMarketAccount,
     Fee,
     MarginLevels,
     MissingAssetError,
@@ -105,7 +105,7 @@ def test_party_account(trading_data_v2_servicer_and_port):
         asset_dp=2,
     )
 
-    assert res == AccountData(52.35, 64.23, 10.51)
+    assert res == PartyMarketAccount(52.35, 64.23, 10.51)
 
     with patch("vega_sim.api.data.asset_decimals", lambda asset_id, data_client: 2):
         res2 = party_account(

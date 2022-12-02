@@ -19,7 +19,7 @@ from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
 from vega_sim.environment import VegaState
-from vega_sim.environment.agent import StateAgentWithWallet
+from vega_sim.environment.agent import StateAgentWithWallet, StateAgent
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.proto.vega import (
@@ -31,6 +31,8 @@ from vega_sim.api.trading import OrderRejectedError
 from vega_sim.quant.quant import probability_of_trading
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
+
+SnitchData = namedtuple("SnitchData", ["market_info", "market_data", "accounts"])
 
 # Send selling/buying MOs to hit LP orders
 TRADER_WALLET = WalletConfig("trader", "trader")
@@ -45,6 +47,10 @@ MMOrder = namedtuple("MMOrder", ["size", "price"])
 
 LiquidityProvision = namedtuple(
     "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
+)
+
+SnitchState = namedtuple(
+    "SnitchState", ["market_state", "open_interest", "account_balances"]
 )
 
 logger = logging.getLogger(__name__)
@@ -1129,7 +1135,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         buy_shape: List[MMOrder],
         sell_shape: List[MMOrder],
     ):
-
         instantaneous_liquidity = min(
             [
                 self._calculate_liquidity(
@@ -1168,7 +1173,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         best_bid_price: float,
         best_ask_price: float,
     ) -> float:
-
         (min_valid_price, max_valid_price) = self.vega.price_bounds(
             market_id=self.market_id
         )
@@ -1176,7 +1180,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         provided_liquidity = 0
 
         for vol, price in orders:
-
             if price <= 0:
                 continue
 
@@ -1265,9 +1268,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             )
 
     def _update_state(self, current_step: int):
-
         if self.state_update_freq and current_step % self.state_update_freq == 0:
-
             market_info = self.vega.market_info(market_id=self.market_id)
 
             self.tau = market_info.tradable_instrument.log_normal_risk_model.tau
@@ -2154,3 +2155,21 @@ class MomentumTrader(StateAgentWithWallet):
         else:
             signal = TradeSignal.NOACTION
         return signal
+
+
+class Snitch(StateAgent):
+    def __init__(self):
+        self.states = []
+
+    def step(self, vega_state: VegaState):
+        market_infos = {}
+        market_datas = {}
+        for market in self.vega.all_markets():
+            market_infos[market.id] = self.vega.market_info(market.id)
+            market_datas[market.id] = self.vega.market_data(market.id)
+        accounts = self.vega.list_accounts()
+        self.states.append(
+            SnitchData(
+                market_info=market_infos, market_data=market_datas, accounts=accounts
+            )
+        )

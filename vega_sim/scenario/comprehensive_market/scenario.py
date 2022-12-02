@@ -7,7 +7,7 @@ from vega_sim.environment.agent import Agent
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.environment.environment import MarketEnvironmentWithState
-from vega_sim.null_service import VegaServiceNull
+from vega_sim.null_service import VegaServiceNull, VegaService
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.comprehensive_market.agents import (
     MM_WALLET,
@@ -25,6 +25,7 @@ from vega_sim.scenario.common.agents import (
     MomentumTrader,
     OpenAuctionPass,
     InformedTrader,
+    StateAgent,
 )
 
 
@@ -74,6 +75,7 @@ class ComprehensiveMarket(Scenario):
         num_lo_agents: int = 20,
         num_momentum_agents: int = 1,
     ):
+        super().__init__()
         self.num_steps = num_steps
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
@@ -146,12 +148,12 @@ class ComprehensiveMarket(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+    ) -> List[StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
@@ -282,8 +284,8 @@ class ComprehensiveMarket(Scenario):
             tag=str(tag),
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
+        return (
+            [
                 mm_agent,
                 auctionpass1,
                 auctionpass2,
@@ -291,7 +293,14 @@ class ComprehensiveMarket(Scenario):
             + lp_agents
             + mo_agents
             + lo_agents
-            + momentum_agents,
+            + momentum_agents
+        )
+
+    def configure_environment(
+        self, vega: VegaService, **kwargs
+    ) -> MarketEnvironmentWithState:
+        self.env = MarketEnvironmentWithState(
+            agents=self.agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
@@ -302,34 +311,7 @@ class ComprehensiveMarket(Scenario):
             pause_every_n_steps=self.pause_every_n_steps,
         )
 
-        info_trader = InformedTrader(
-            wallet_name=INFORMED_WALLET.name,
-            wallet_pass=INFORMED_WALLET.passphrase,
-            price_process=price_process,
-            market_name=market_name,
-            asset_name=asset_name,
-            initial_asset_mint=self.initial_asset_mint,
-            proportion_taken=self.proportion_taken,
-            tag=str(tag),
-        )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=str(0), random_state=random_state
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-            run_with_console=run_with_console,
-        )
-        return result
+        return self.env
 
 
 if __name__ == "__main__":

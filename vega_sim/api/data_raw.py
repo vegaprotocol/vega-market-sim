@@ -100,29 +100,30 @@ def asset_info(
     ).asset
 
 
-def all_market_accounts(
-    asset_id: str,
-    market_id: str,
+def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
-) -> Dict[vega_protos.vega.AccountType, MarketAccount]:
+    asset_id: Optional[str] = None,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> List[data_node_protos_v2.trading_data.AccountBalance]:
     """
     Output liquidity fee account/ insurance pool in the market
     """
 
-    account_filter = data_node_protos_v2.trading_data.AccountFilter(
-        asset_id=asset_id,
-        market_ids=[market_id],
-    )
-
-    accounts = unroll_v2_pagination(
+    account_filter = data_node_protos_v2.trading_data.AccountFilter()
+    if party_id is not None:
+        account_filter.party_ids.extend([party_id])
+    if asset_id is not None:
+        account_filter.asset_id = asset_id
+    if market_id is not None:
+        account_filter.market_ids.extend([market_id])
+    return unroll_v2_pagination(
         base_request=data_node_protos_v2.trading_data.ListAccountsRequest(
             filter=account_filter
         ),
         request_func=lambda x: data_client.ListAccounts(x).accounts,
         extraction_func=lambda res: [i.account for i in res.edges],
     )
-
-    return {account.type: account for account in accounts}
 
 
 def market_accounts(
@@ -133,32 +134,13 @@ def market_accounts(
     """
     Output liquidity fee account/ insurance pool in the market
     """
-    account_type_map = all_market_accounts(
+    accounts = list_accounts(
         asset_id=asset_id, market_id=market_id, data_client=data_client
     )
+    account_type_map = {account.type: account for account in accounts}
     return MarketAccount(
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_INSURANCE],
         account_type_map[vega_protos.vega.ACCOUNT_TYPE_FEES_LIQUIDITY],
-    )
-
-
-def party_accounts(
-    asset_id: str,
-    party_id: str,
-    data_client: vac.VegaTradingDataClientV2,
-):
-
-    account_filter = data_node_protos_v2.trading_data.AccountFilter(
-        asset_id=asset_id,
-        party_ids=[party_id],
-    )
-
-    return unroll_v2_pagination(
-        base_request=data_node_protos_v2.trading_data.ListAccountsRequest(
-            filter=account_filter
-        ),
-        request_func=lambda x: data_client.ListAccounts(x).accounts,
-        extraction_func=lambda res: [i.account for i in res.edges],
     )
 
 

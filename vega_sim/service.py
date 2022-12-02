@@ -975,7 +975,7 @@ class VegaService(ABC):
         asset_id: str,
         market_id: str,
         key_name: Optional[str] = None,
-    ) -> data.AccountData:
+    ) -> data.PartyMarketAccount:
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
         return data.party_account(
@@ -983,6 +983,39 @@ class VegaService(ABC):
             asset_id=asset_id,
             market_id=market_id,
             data_client=self.trading_data_client_v2,
+        )
+
+    def list_accounts(
+        self,
+        wallet_name: Optional[str] = None,
+        asset_id: Optional[str] = None,
+        market_id: Optional[str] = None,
+        key_name: Optional[str] = None,
+    ) -> List[data.AccountData]:
+        """Return all accounts across markets matching the supplied filter options
+
+        Args:
+            wallet_name:
+                Optional, default None, Filter down to a specific key from this wallet
+            asset_id:
+                Optional, default None, Filter down to only accounts on this asset
+            market_id:
+                Optional, default None, Filter down to only accounts from this market
+            key_name:
+                Optional, default None, Select non-default key from the selected wallet
+
+        Returns:
+            List[AccountData], cleaned account data for each account
+
+        """
+        return data.list_accounts(
+            data_client=self.trading_data_client_v2,
+            pub_key=self.wallet.public_key(wallet_name, key_name)
+            if wallet_name is not None
+            else None,
+            asset_id=asset_id,
+            market_id=market_id,
+            asset_decimals_map=self.asset_decimals,
         )
 
     def positions_by_market(

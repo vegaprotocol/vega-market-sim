@@ -21,6 +21,7 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
+    StateAgent,
     MarketOrderTrader,
     MultiRegimeBackgroundMarket,
     MarketRegime,
@@ -69,6 +70,7 @@ class MarketCrash(Scenario):
         trim_to_min: Optional[float] = None,
         price_process_fn: Optional[Callable] = None,
     ):
+        super().__init__()
         self.num_steps = num_steps
         self.dt = dt
         self.market_decimal = market_decimal
@@ -120,12 +122,13 @@ class MarketCrash(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         self.market_name = f"BTC:DAI_{tag}"
         self.asset_name = f"tDAI{tag}"
 
@@ -224,15 +227,26 @@ class MarketCrash(Scenario):
             tag=str(tag),
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
+        return (
+            [
                 market_maker,
                 background_market,
                 auctionpass1,
                 auctionpass2,
             ]
             + noise_traders
-            + position_traders,
+            + position_traders
+        )
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
+            agents=self.agents,
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
@@ -242,23 +256,6 @@ class MarketCrash(Scenario):
             state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        tag: Optional[str] = None,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=tag if tag is not None else str(0), random_state=random_state
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-        )
-        return result
 
 
 if __name__ == "__main__":

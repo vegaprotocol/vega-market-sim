@@ -33,6 +33,7 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
     PriceSensitiveMarketOrderTrader,
     InformedTrader,
+    StateAgent,
 )
 
 
@@ -54,6 +55,7 @@ class ConfigurableMarket(Scenario):
         settle_at_end: bool = True,
         price_process_fn: Optional[Callable] = None,
     ):
+        super().__init__()
 
         # Simulation settings
         self.num_steps = num_steps
@@ -79,7 +81,6 @@ class ConfigurableMarket(Scenario):
         self,
         random_state,
     ) -> list:
-
         start = "2021-07-01 00:00:00"
 
         start = datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
@@ -97,13 +98,13 @@ class ConfigurableMarket(Scenario):
 
         return list(price_process)
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
+        tag: str,
         market_config: Optional[MarketConfig] = None,
         random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
-
+    ) -> List[StateAgent]:
         market_config = market_config if market_config is not None else MarketConfig()
 
         random_state = (
@@ -233,17 +234,22 @@ class ConfigurableMarket(Scenario):
             proportion_taken=0.1,
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
-                market_manager,
-                shaped_mm,
-                sensitive_mo_trader_a,
-                sensitive_mo_trader_b,
-                sensitive_mo_trader_c,
-                auctionpass1,
-                auctionpass2,
-                info_trader,
-            ],
+        return [
+            market_manager,
+            shaped_mm,
+            sensitive_mo_trader_a,
+            sensitive_mo_trader_b,
+            sensitive_mo_trader_c,
+            auctionpass1,
+            auctionpass2,
+            info_trader,
+        ]
+
+    def configure_environment(
+        self, vega: VegaServiceNull, **kwargs
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
+            agents=self.agents,
             n_steps=self.num_steps,
             step_length_seconds=self.granularity.value,
             random_agent_ordering=True,
@@ -253,22 +259,3 @@ class ConfigurableMarket(Scenario):
             block_length_seconds=self.block_length_seconds,
             state_extraction_fn=self.state_extraction_fn,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-        market_config: Optional[MarketConfig] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, random_state=random_state, market_config=market_config
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-            run_with_console=run_with_console,
-        )
-        return result

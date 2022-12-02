@@ -1,7 +1,7 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple, Any
+from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
@@ -22,7 +22,11 @@ class MissingMarketError(Exception):
 logger = logging.Logger(__name__)
 
 
-AccountData = namedtuple("AccountData", ["general", "margin", "bond"])
+PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
+AccountData = namedtuple(
+    "AccountData", ["owner", "balance", "asset", "market_id", "type"]
+)
+
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
 Order = namedtuple(
@@ -273,16 +277,55 @@ def positions_by_market(
     ]
 
 
+def list_accounts(
+    data_client: vac.VegaTradingDataClientV2,
+    pub_key: Optional[str] = None,
+    asset_id: Optional[str] = None,
+    market_id: Optional[str] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> List[AccountData]:
+    """Output money in general accounts/margin accounts/bond accounts (if exists)
+    of a party."""
+    accounts = data_raw.list_accounts(
+        data_client=data_client,
+        party_id=pub_key,
+        asset_id=asset_id,
+        market_id=market_id,
+    )
+
+    asset_decimals_map = {} if asset_decimals_map is None else asset_decimals_map
+    output_accounts = []
+    for account in accounts:
+        if account.asset not in asset_decimals_map:
+            asset_decimals_map[account.asset] = asset_decimals(
+                asset_id=account.asset,
+                data_client=data_client,
+            )
+
+        output_accounts.append(
+            AccountData(
+                owner=account.owner,
+                balance=num_from_padded_int(
+                    int(account.balance), asset_decimals_map.setdefault(account.asset)
+                ),
+                asset=account.asset,
+                type=account.type,
+                market_id=account.market_id,
+            )
+        )
+    return output_accounts
+
+
 def party_account(
     pub_key: str,
     asset_id: str,
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
     asset_dp: Optional[int] = None,
-) -> AccountData:
+) -> PartyMarketAccount:
     """Output money in general accounts/margin accounts/bond accounts (if exists)
     of a party."""
-    accounts = data_raw.party_accounts(
+    accounts = data_raw.list_accounts(
         data_client=data_client,
         party_id=pub_key,
         asset_id=asset_id,
@@ -309,7 +352,7 @@ def party_account(
         if account.type == vega_protos.vega.ACCOUNT_TYPE_BOND:
             bond = num_from_padded_int(float(account.balance), asset_dp)
 
-    return AccountData(general, margin, bond)
+    return PartyMarketAccount(general, margin, bond)
 
 
 def find_market_id(
@@ -701,10 +744,10 @@ def market_account(
     Returns:
         float, the current balance in the market's fee asset
     """
-    accounts = data_raw.all_market_accounts(
+    accounts = data_raw.list_accounts(
         asset_id=None, market_id=market_id, data_client=data_client
     )
-    acct = accounts[account_type]
+    acct = {account.type: account for account in accounts}[account_type]
 
     asset_dp = asset_decimals(asset_id=acct.asset, data_client=data_client)
     return num_from_padded_int(

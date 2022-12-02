@@ -38,7 +38,7 @@ import argparse
 import logging
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 from vega_sim.scenario.common.utils.price_process import (
     Granularity,
     get_historic_price_series,
@@ -56,6 +56,7 @@ from vega_sim.scenario.multi_market.agents import (
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
+    StateAgent,
     OpenAuctionPass,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
@@ -112,6 +113,7 @@ class VegaLoadTest(Scenario):
         initial_asset_mint=1e9,
         price_process_fn: Optional[Callable] = None,
     ):
+        super().__init__()
 
         self.num_steps = num_steps
         self.granularity = granularity
@@ -147,7 +149,6 @@ class VegaLoadTest(Scenario):
         self.price_process_fn = price_process_fn
 
     def _generate_price_process(self, asset: str) -> list:
-
         start = datetime.strptime(self.start_date, "%Y-%m-%d %H:%M:%S")
         end = start + timedelta(seconds=self.num_steps * self.granularity.value)
 
@@ -160,12 +161,13 @@ class VegaLoadTest(Scenario):
 
         return list(price_process)
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
-
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         market_a_price_process = (
             self.price_process_fn()
             if self.price_process_fn is not None
@@ -462,8 +464,8 @@ class VegaLoadTest(Scenario):
             for i in range(self.num_mo_traders_per_market)
         ]
 
-        env = MarketEnvironmentWithState(
-            agents=[
+        return (
+            [
                 market_a_manager,
                 market_b_manager,
                 market_c_manager,
@@ -482,7 +484,16 @@ class VegaLoadTest(Scenario):
             + market_c_lo_traders
             + market_a_mo_traders
             + market_b_mo_traders
-            + market_c_mo_traders,
+            + market_c_mo_traders
+        )
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
+            agents=self.agents,
             n_steps=self.num_steps,
             random_agent_ordering=False,
             transactions_per_block=self.transactions_per_block,
@@ -490,26 +501,9 @@ class VegaLoadTest(Scenario):
             step_length_seconds=self.granularity.value,
             block_length_seconds=vega.seconds_per_block,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        network: Optional[Network] = None,
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(vega=vega, random_state=random_state)
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-            run_with_console=run_with_console,
-        )
-        return result
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
