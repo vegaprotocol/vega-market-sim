@@ -172,6 +172,13 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
     )
 
+    all_transfers_t1 = vega.list_transfers(
+        wallet_name=PARTY_A.name,
+    )
+    live_transfers_t1 = vega.transfer_status_from_feed(live_only=True)
+
+    assert len(all_transfers_t1) == 1
+    assert len(live_transfers_t1) == 0
     assert party_a_accounts_t1.general == 500
     assert party_b_accounts_t1.general == 1500
 
@@ -199,6 +206,13 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
     )
 
+    all_transfers_t2 = vega.list_transfers(
+        wallet_name=PARTY_A.name,
+    )
+    live_transfers_t2 = vega.transfer_status_from_feed(live_only=True)
+
+    assert len(all_transfers_t2) == 2
+    assert len(live_transfers_t2) == 1
     assert party_a_accounts_t2.general == 500
     assert party_b_accounts_t2.general == 1000
 
@@ -216,5 +230,12 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
     )
 
+    all_transfers_t3 = vega.list_transfers(
+        wallet_name=PARTY_A.name,
+    )
+    live_transfers_t3 = vega.transfer_status_from_feed(live_only=True)
+
+    assert len(all_transfers_t3) == 2
+    assert len(live_transfers_t3) == 0
     assert party_a_accounts_t3.general == 1000
     assert party_b_accounts_t3.general == 1000

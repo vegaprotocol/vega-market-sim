@@ -21,7 +21,10 @@ import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data.v1 as oracles_protos
+import vega_sim.proto.vega.events.v1 as events_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
+
 from vega_sim.api.helpers import (
     forward,
     num_to_padded_int,
@@ -131,7 +134,9 @@ class VegaService(ABC):
 
         self.order_thread = None
         self.orders_lock = threading.RLock()
+        self.transfers_lock = threading.RLock()
         self._order_state_from_feed = {}
+        self._transfer_state_from_feed = {}
 
     @property
     def market_price_decimals(self) -> int:
@@ -1380,6 +1385,19 @@ class VegaService(ABC):
             .get(party_id, {})
         )
 
+    def transfer_status_from_feed(self, live_only: bool = True):
+
+        datetime = self.get_blockchain_time()
+
+        with self.transfers_lock:
+            transfers_dict = {}
+            for party_id, party_transfers in self._transfer_state_from_feed.items():
+                for transfer_id, transfer in party_transfers.items():
+                    deliver_on = int(transfer.one_off.deliver_on)
+                    if not live_only or (deliver_on != 0 and datetime < deliver_on):
+                        transfers_dict.setdefault(party_id, {})[transfer_id] = transfer
+        return transfers_dict
+
     @raw_data
     def liquidity_provisions(
         self,
@@ -1461,6 +1479,32 @@ class VegaService(ABC):
         )
         self.order_thread.start()
 
+    def start_transfer_monitoring(
+        self,
+    ):
+
+        self.transfer_queue = data.transfer_subscription(
+            self.core_client,
+            self.trading_data_client_v2,
+        )
+
+        base_transfers = []
+
+        base_transfers.extend(
+            data.list_transfers(data_client=self.trading_data_client_v2)
+        )
+
+        with self.transfers_lock:
+            for t in base_transfers:
+                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
+
+        self.transfer_thread = threading.Thread(
+            target=self._monitor_transfer_stream,
+            args=(self.transfer_queue,),
+            daemon=True,
+        )
+        self.transfer_thread.start()
+
     def _monitor_stream(self, trade_stream: Queue[data.Order]):
         for o in trade_stream:
             with self.orders_lock:
@@ -1472,6 +1516,11 @@ class VegaService(ABC):
                     0,
                 ):
                     self._order_state_from_feed[o.market_id][o.party_id][o.id] = o
+
+    def _monitor_transfer_stream(self, transfer_stream: Queue[data.Transfer]):
+        for t in transfer_stream:
+            with self.transfers_lock:
+                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
     def margin_levels(
         self,
@@ -1936,4 +1985,37 @@ class VegaService(ABC):
             amount=str(num_to_padded_int(amount, adp)),
             reference=reference,
             one_off=one_off,
+        )
+
+    def list_transfers(
+        self,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
+        direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+    ) -> List[data.Transfer]:
+        """Returns a list of processed transfers.
+
+        Args:
+            wallet_name (Optional[str], optional):
+                Name of wallet to return transfers for. Defaults to None.
+            key_name (Optional[str], optional):
+                Name of key to return transfers for. Defaults to None.
+            direction (Optional[data_node_protos_v2.trading_data.TransferDirection], optional):
+                Direction of transfers to return. Defaults to None.
+
+        Returns:
+            List[Transfer]:
+                A list of processed Transfer objects for the specified party and direction.
+        """
+
+        party_id = (
+            self.wallet.public_key(name=wallet_name, key_name=key_name)
+            if wallet_name is not None
+            else None
+        )
+
+        return data.list_transfers(
+            data_client=self.trading_data_client_v2,
+            party_id=party_id,
+            direction=direction,
         )

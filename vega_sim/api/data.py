@@ -7,6 +7,7 @@ import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 from vega_sim.api.helpers import num_from_padded_int
 
 
@@ -54,6 +55,24 @@ Position = namedtuple(
         "unrealised_pnl",
         "average_entry_price",
         "updated_at",
+    ],
+)
+Transfer = namedtuple(
+    "Transfer",
+    [
+        "id",
+        "party_from",
+        "from_account_type",
+        "party_to",
+        "to_account_type",
+        "asset",
+        "amount",
+        "reference",
+        "status",
+        "timestamp",
+        "reason",
+        "one_off",
+        "recurring",
     ],
 )
 
@@ -208,6 +227,27 @@ def _position_from_proto(
             position.average_entry_price, price_decimals
         ),
         updated_at=position.updated_at,
+    )
+
+
+def _transfer_from_proto(
+    transfer: vega_protos.vega.Transfer,
+    asset_decimals: int,
+) -> Transfer:
+    return Transfer(
+        id=transfer.id,
+        party_from=getattr(transfer, "from"),
+        from_account_type=transfer.from_account_type,
+        party_to=transfer.to,
+        to_account_type=transfer.to_account_type,
+        asset=transfer.asset,
+        amount=num_from_padded_int(transfer.amount, asset_decimals),
+        reference=transfer.reference,
+        status=transfer.status,
+        timestamp=transfer.timestamp,
+        reason=transfer.reason,
+        one_off=transfer.one_off,
+        recurring=transfer.recurring,
     )
 
 
@@ -738,8 +778,11 @@ def order_subscription(
         Iterable[Order], Infinite iterable of order updates
     """
 
-    order_stream = data_raw.order_subscription(
-        data_client=data_client, market_id=market_id, party_id=party_id
+    order_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_ORDER],
+        market_id=market_id,
+        party_id=party_id,
     )
 
     def _order_gen(
@@ -768,6 +811,44 @@ def order_subscription(
             return
 
     return _order_gen(order_stream=order_stream)
+
+
+def transfer_subscription(
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> Iterable[Order]:
+
+    transfer_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_TRANSFER],
+        market_id=market_id,
+        party_id=party_id,
+    )
+
+    def _transfer_gen(
+        transfer_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    ) -> Iterable[Transfer]:
+        asset_dp = {}
+        try:
+            for transfer_list in transfer_stream:
+                for bus_event in transfer_list.events:
+                    transfer = bus_event.transfer
+                    if transfer.asset not in asset_dp:
+                        asset_dp[transfer.asset] = asset_decimals(
+                            asset_id=transfer.asset,
+                            data_client=trading_data_client,
+                        )
+                    yield _transfer_from_proto(
+                        transfer=transfer,
+                        asset_decimals=asset_dp[transfer.asset],
+                    )
+        except Exception as _:
+            logger.info("Transfer subscription closed")
+            return
+
+    return _transfer_gen(transfer_stream=transfer_stream)
 
 
 def has_liquidity_provision(
@@ -860,3 +941,48 @@ def get_trades(
 
 def ping(data_client: vac.VegaTradingDataClientV2):
     return data_client.Ping(data_node_protos_v2.trading_data.PingRequest())
+
+
+def list_transfers(
+    data_client: vac.VegaTradingDataClientV2,
+    party_id: Optional[str] = None,
+    direction: data_node_protos_v2.trading_data.TransferDirection = None,
+) -> List[Transfer]:
+    """Returns a list of processed transfers.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC trading data client
+        party_id (Optional[str], optional):
+            Public key for the specified party. Defaults to None.
+        direction (Optional[data_node_protos_v2.trading_data.TransferDirection], optional):
+            Direction of transfers to return. Defaults to None.
+
+    Returns:
+        List[Transfer]:
+            A list of processed Transfer objects for the specified party and direction.
+    """
+
+    transfers = data_raw.list_transfers(
+        data_client=data_client,
+        party_id=party_id,
+        direction=direction,
+    )
+
+    asset_dp = {}
+    res_transfers = []
+
+    for transfer in transfers:
+
+        if transfer.asset not in asset_dp:
+            asset_dp[transfer.asset] = asset_decimals(
+                asset_id=transfer.asset, data_client=data_client
+            )
+
+        res_transfers.append(
+            _transfer_from_proto(
+                transfer=transfer, asset_decimals=asset_dp[transfer.asset]
+            )
+        )
+
+    return res_transfers
