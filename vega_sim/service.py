@@ -665,7 +665,7 @@ class VegaService(ABC):
             time_in_force=time_in_force,
             side=side,
             volume=submit_volume,
-            price=str(submit_price),
+            price=str(submit_price) if submit_price is not None else None,
             expires_at=expires_at,
             pegged_order=vega_protos.vega.PeggedOrder(
                 reference=pegged_order.reference,
@@ -1757,7 +1757,7 @@ class VegaService(ABC):
         return trading.order_submission(
             data_client=self.trading_data_client,
             market_id=market_id,
-            price=str(price),
+            price=str(price) if price is not None else None,
             size=size,
             side=side,
             time_in_force=time_in_force,
