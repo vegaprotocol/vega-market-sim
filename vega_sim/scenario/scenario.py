@@ -52,17 +52,19 @@ class Scenario(abc.ABC):
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,
         run_with_snitch: bool = True,
+        tag: Optional[str] = None,
         **kwargs,
     ):
+        tag = tag if tag is not None else ""
         self.agents = self.configure_agents(
-            vega=vega, tag=str(0), random_state=random_state, **kwargs
+            vega=vega, tag=tag, random_state=random_state, **kwargs
         )
 
         if run_with_snitch:
             self.agents.append(Snitch())
 
         self.env = self.configure_environment(
-            vega=vega, tag=str(0), random_state=random_state, **kwargs
+            vega=vega, tag=tag, random_state=random_state, **kwargs
         )
 
         return self.env.run(
