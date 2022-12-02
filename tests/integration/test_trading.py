@@ -15,7 +15,7 @@ LIQ = WalletConfig("liq", "liq")
 PARTY_A = WalletConfig("party_a", "party_a")
 PARTY_B = WalletConfig("party_b", "party_b")
 
-
+@pytest.mark.integration
 def test_submit_market_order(vega_service_with_market: VegaServiceNull):
 
     vega = vega_service_with_market
