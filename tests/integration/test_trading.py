@@ -16,6 +16,43 @@ PARTY_A = WalletConfig("party_a", "party_a")
 PARTY_B = WalletConfig("party_b", "party_b")
 
 
+def test_submit_market_order(vega_service_with_market: VegaServiceNull):
+
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=LIQ)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
+    vega.wait_for_total_catchup()
+
+    vega.submit_liquidity(
+        LIQ.name,
+        market_id=market_id,
+        commitment_amount=100,
+        fee=0.001,
+        buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
+    )
+
+    vega.submit_market_order(
+        trading_wallet=PARTY_A.name,
+        market_id=market_id,
+        volume=1,
+        side="SIDE_BUY",
+    )
+    vega.wait_for_total_catchup()
+
+    positions_pb_t1 = vega.positions_by_market(
+        wallet_name=PARTY_A.name,
+        market_id=market_id,
+    )
+
+    assert positions_pb_t1[0].open_volume == 1
+
+
 @pytest.mark.integration
 def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
