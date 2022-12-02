@@ -70,7 +70,6 @@ class DevOpsScenario(Scenario):
         sensitive_trader_args: SensitiveTraderArgs,
         simulation_args: Optional[SimulationArgs] = None,
     ):
-
         self.binance_code = binance_code
 
         self.market_manager_args = market_manager_args
@@ -87,7 +86,6 @@ class DevOpsScenario(Scenario):
         self,
         random_state,
     ) -> list:
-
         start = datetime.strptime(self.simulation_args.start_date, "%Y-%m-%d %H:%M:%S")
 
         if self.simulation_args.randomise_history:
@@ -107,13 +105,12 @@ class DevOpsScenario(Scenario):
 
         return price_process
 
-    def _setup(
+    def configure_agents(
         self,
         network: Network,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
         random_state: Optional[np.random.RandomState] = None,
     ):
-
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
@@ -242,6 +239,32 @@ class DevOpsScenario(Scenario):
 
         return agents
 
+    def configure_environment(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        network: Network,
+        raise_datanode_errors: Optional[bool] = False,
+        raise_step_errors: Optional[bool] = False,
+    ) -> Union[MarketEnvironmentWithState, NetworkEnvironment]:
+        if network == Network.NULLCHAIN:
+            env = MarketEnvironmentWithState(
+                agents=self.agents,
+                n_steps=self.simulation_args.n_steps,
+                vega_service=vega,
+                step_length_seconds=self.simulation_args.granularity.value,
+                block_length_seconds=1,
+            )
+        else:
+            env = NetworkEnvironment(
+                agents=self.agents,
+                n_steps=-1,
+                vega_service=vega,
+                step_length_seconds=0,
+                raise_datanode_errors=raise_datanode_errors,
+                raise_step_errors=raise_step_errors,
+            )
+        return env
+
     def run_iteration(
         self,
         network: Network,
@@ -252,23 +275,24 @@ class DevOpsScenario(Scenario):
         raise_datanode_errors: Optional[bool] = False,
         raise_step_errors: Optional[bool] = False,
     ):
-
-        agents = self._setup(network=network, vega=vega, random_state=random_state)
+        agents = self.configure_agents(
+            network=network, vega=vega, random_state=random_state
+        )
 
         if network == Network.NULLCHAIN:
-            env = MarketEnvironmentWithState(
+            self.env = MarketEnvironmentWithState(
                 agents=agents,
                 n_steps=self.simulation_args.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.simulation_args.granularity.value,
                 block_length_seconds=1,
             )
-            env.run(
+            self.env.run(
                 run_with_console=run_with_console,
                 pause_at_completion=pause_at_completion,
             )
         else:
-            env = NetworkEnvironment(
+            self.env = NetworkEnvironment(
                 agents=agents,
                 n_steps=-1,
                 vega_service=vega,
@@ -276,4 +300,4 @@ class DevOpsScenario(Scenario):
                 raise_datanode_errors=raise_datanode_errors,
                 raise_step_errors=raise_step_errors,
             )
-            env.run()
+            self.env.run()
