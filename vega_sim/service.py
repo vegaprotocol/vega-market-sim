@@ -1714,11 +1714,13 @@ class VegaService(ABC):
         return trading.order_amendment(
             order_id=order_id,
             market_id=market_id,
-            price=str(price),
+            price=str(price) if price is not None else price,
             size_delta=size_delta,
             expires_at=expires_at,
             time_in_force=time_in_force,
-            pegged_offset=str(pegged_offset),
+            pegged_offset=str(pegged_offset)
+            if pegged_offset is not None
+            else pegged_offset,
             pegged_reference=pegged_reference,
         )
 
