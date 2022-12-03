@@ -59,14 +59,15 @@ def run_iteration(
         random_agent_ordering=False,
         sigma=100,
     )
-    
-    scenario.agents = scenario.configure_agents(vega=vega, tag=str(step_tag), random_state=None)
+
+    scenario.agents = scenario.configure_agents(
+        vega=vega, tag=str(step_tag), random_state=None
+    )
 
     scenario.env = scenario.configure_environment(
         vega=vega,
         tag=str(step_tag),
     )
-
 
     # add the learning agaent to the environement's list of agents
     scenario.env.agents = scenario.env.agents + [learning_agent]
