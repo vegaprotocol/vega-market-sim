@@ -26,6 +26,7 @@ from vega_sim.scenario.registry import CurveMarketMaker
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.null_service import VegaServiceNull
 
+
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
 
 from logging import getLogger
@@ -36,7 +37,7 @@ logger = getLogger(__name__)
 def run_iteration(
     learning_agent: LearningAgent,
     step_tag: int,
-    vega,
+    vega: VegaServiceNull,
     market_name: str,
     run_with_console=False,
     pause_at_completion=False,
@@ -58,17 +59,22 @@ def run_iteration(
         random_agent_ordering=False,
         sigma=100,
     )
-    env = scenario.set_up_background_market(
+    
+    scenario.agents = scenario.configure_agents(vega=vega, tag=str(step_tag), random_state=None)
+
+    scenario.env = scenario.configure_environment(
         vega=vega,
         tag=str(step_tag),
     )
+
+
     # add the learning agaent to the environement's list of agents
-    env.agents = env.agents + [learning_agent]
+    scenario.env.agents = scenario.env.agents + [learning_agent]
 
     learning_agent.set_market_tag(str(step_tag))
     learning_agent.price_process = scenario.price_process
 
-    result = env.run(
+    result = scenario.env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
     )
