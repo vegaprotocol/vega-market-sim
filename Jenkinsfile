@@ -58,7 +58,7 @@ pipeline {
             steps {
                 script {
                     vegaMarketSim ignoreFailure: false,
-                        timeout: 45,
+                        timeout: 90,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH
