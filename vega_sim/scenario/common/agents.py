@@ -966,6 +966,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
         safety_factor: Optional[float] = 1.2,
+        max_order_size: Optional[float] = 10000,
     ):
         super().__init__(
             wallet_name + str(tag),
@@ -995,6 +996,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         self.safety_factor = safety_factor
         self.state_update_freq = state_update_freq
+        self.max_order_size = max_order_size
 
     def initialise(
         self,
@@ -1158,10 +1160,16 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         # Scale the shapes
         scaled_buy_shape = [
-            MMOrder(order.size * scaling_factor, order.price) for order in buy_shape
+            MMOrder(
+                min([order.size * scaling_factor, self.max_order_size]), order.price
+            )
+            for order in buy_shape
         ]
         scaled_sell_shape = [
-            MMOrder(order.size * scaling_factor, order.price) for order in sell_shape
+            MMOrder(
+                min([order.size * scaling_factor, self.max_order_size]), order.price
+            )
+            for order in sell_shape
         ]
 
         return scaled_buy_shape, scaled_sell_shape
@@ -1326,6 +1334,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         key_name: str = None,
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
+        max_order_size: Optional[float] = 10000,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1344,6 +1353,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             key_name=key_name,
             orders_from_stream=orders_from_stream,
             state_update_freq=state_update_freq,
+            max_order_size=max_order_size,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
