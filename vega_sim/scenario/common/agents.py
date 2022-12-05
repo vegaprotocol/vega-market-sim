@@ -966,7 +966,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
         safety_factor: Optional[float] = 1.2,
-        max_order_size: Optional[float] = 10000,
+        max_order_size: float = 10000,
     ):
         super().__init__(
             wallet_name + str(tag),
@@ -1334,7 +1334,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         key_name: str = None,
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
-        max_order_size: Optional[float] = 10000,
+        max_order_size: float = 10000,
     ):
         super().__init__(
             wallet_name=wallet_name,
