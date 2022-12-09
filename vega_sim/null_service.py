@@ -25,7 +25,7 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
-from vega_sim.wallet.base import Wallet
+from vega_sim.wallet.base import Wallet, DEFAULT_WALLET_NAME
 from vega_sim.wallet.slim_wallet import (
     SlimWallet,
 )
@@ -428,6 +428,36 @@ def manage_vega_processes(
                 requests.exceptions.HTTPError,
             ):
                 time.sleep(0.1)
+
+        res1 = subprocess.Popen(
+            [
+                vega_wallet_path,
+                "api-token",
+                "init",
+                f"--home={tmp_vega_home}",
+                f"--passphrase-file={tmp_vega_home}/passphrase-file",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        logger.info("Store generation {}".format(res1.communicate()))
+
+        res = subprocess.Popen(
+            [
+                vega_wallet_path,
+                "api-token",
+                "generate",
+                "--home=" + tmp_vega_home,
+                "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+                "--wallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+                "--wallet-name=" + DEFAULT_WALLET_NAME,
+                "--description=DEFAULT_WALLET",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        logger.info("TOKEN IS {}".format(res.communicate()))
+
         wallet_args = [
             vega_wallet_path,
             "service",
@@ -436,6 +466,8 @@ def manage_vega_processes(
             "local",
             "--home=" + tmp_vega_home,
             "--automatic-consent",
+            "--load-tokens",
+            "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
         ]
 
         vegaWalletProcess = _popen_process(

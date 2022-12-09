@@ -32,11 +32,11 @@ if __name__ == "__main__":
         launch_graphql=False,
         start_order_feed=True,
         retain_log_files=True,
-        use_full_vega_wallet=False,
+        use_full_vega_wallet=True,
         store_transactions=True,
     ) as vega:
         for wallet in wallets:
-            vega.create_wallet(wallet.name, wallet.passphrase)
+            vega.create_key(wallet.name, wallet.passphrase)
 
         vega.mint(
             MM_WALLET.name,

@@ -17,7 +17,7 @@ import vega_sim.proto.vega.api.v1.core_pb2 as core_proto
 import vega_sim.proto.vega.commands.v1.transaction_pb2 as transaction_proto
 import vega_sim.proto.vega.commands.v1.signature_pb2 as signature_proto
 from vega_sim.wallet.vega_wallet import VegaWallet
-from vega_sim.wallet.base import VEGA_DEFAULT_KEY_NAME
+from vega_sim.wallet.base import DEFAULT_WALLET_NAME
 
 logger = getLogger(__name__)
 
@@ -81,8 +81,8 @@ class SlimWallet(Wallet):
         self._create_sigs()
 
         dotenv.load_dotenv()
-        self.vega_default_key_name = os.environ.get(
-            "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
+        self.vega_default_wallet_name = os.environ.get(
+            "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
         )
 
     def _create_sigs(self):
@@ -105,58 +105,69 @@ class SlimWallet(Wallet):
             self._create_nonces()
         return self.nonces[self.nonce_idx]
 
-    def create_wallet(
+    def create_key(
         self,
         name: str,
-        passphrase: Optional[str] = None,
-        key_name: Optional[str] = None,
-    ) -> None:
-        """Generates a new wallet from a name - passphrase pair in the given vega service.
+        passphrase: str,
+        wallet_name: Optional[str] = None,
+    ) -> str:
+        """Generates a new wallet key from a name - passphrase pair in the given vega service.
 
         Args:
             name:
-                str, The name to use for the wallet
+                str, The name to use for the wallet key
+            passphrase:
+                str, The passphrase to use when logging in to created wallet in future
+            wallet_name:
+                str, The wallet to use if not the default
+        Returns:
+            str, login token to use in authenticated requests
         """
         passphrase = (
             passphrase if passphrase is not None else self.full_wallet_default_pass
         )
-        key_name = key_name if key_name is not None else self.vega_default_key_name
+        wallet_name = (
+            wallet_name if wallet_name is not None else self.vega_default_wallet_name
+        )
 
-        if name not in self.keys:
-            self.keys[name] = {}
-        if name not in self.pub_keys:
-            self.pub_keys[name] = {}
+        if wallet_name not in self.keys:
+            self.keys[wallet_name] = {}
+        if wallet_name not in self.pub_keys:
+            self.pub_keys[wallet_name] = {}
 
         if self.vega_wallet is None:
-            self.keys[name][key_name] = SigningKey.generate()
-            self.pub_keys[name][key_name] = (
-                self.keys[name][key_name].verify_key.encode(encoder=HexEncoder).decode()
+            self.keys[wallet_name][name] = SigningKey.generate()
+            self.pub_keys[wallet_name][name] = (
+                self.keys[wallet_name][name]
+                .verify_key.encode(encoder=HexEncoder)
+                .decode()
             )
 
         else:
-            self.vega_wallet.create_wallet(
+            self.vega_wallet.create_key(
                 name=name,
                 passphrase=passphrase,
-                key_name=key_name,
+                wallet_name=wallet_name,
             )
-            self.pub_keys[name][key_name] = self.vega_wallet.public_key(name, key_name)
+            self.pub_keys[wallet_name][name] = self.vega_wallet.public_key(
+                name, wallet_name
+            )
 
-    def login(self, name: str, **kwargs) -> None:
+    def login(self, wallet_name: Optional[str] = None, **kwargs) -> None:
         """Logs in to existing wallet in the given vega service.
 
         Args:
-            name:
+            wallet_name:
                 str, The name of the wallet
         """
-        if name not in self.keys:
-            self.create_wallet(name=name)
+        wallet_name = wallet_name if wallet_name is not None else DEFAULT_WALLET_NAME
 
     def submit_transaction(
         self,
         name: str,
         transaction: Any,
         transaction_type: str,
-        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
     ):
         # if self.remaining_until_height_update <= 0:
         #     self.block_height = self.core_client.LastBlockHeight(
@@ -164,7 +175,7 @@ class SlimWallet(Wallet):
         #     ).height
         #     self.remaining_until_height_update = self.height_update_frequency
 
-        pub_key = self.public_key(name=name, key_name=key_name)
+        pub_key = self.public_key(name=name, wallet_name=wallet_name)
 
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
@@ -200,20 +211,20 @@ class SlimWallet(Wallet):
         submit_future = self.core_client.SubmitTransaction.future(transaction)
         self.pool.submit(lambda: submit_future.result())
 
-    def public_key(self, name: str, key_name: Optional[str] = None) -> str:
+    def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Return a public key for the given wallet name and key name.
 
         Args:
             name (str):
-                Name of the wallet.
-            key_name (str):
-                Name of the key. Defaults to None.
+                Name of the key.
+            wallet_name (str):
+                Name of the wallet. Defaults to None.
 
         Returns:
             str, public key
         """
 
-        if key_name is None:
-            return self.pub_keys[name][self.vega_default_key_name]
+        if wallet_name is None:
+            return self.pub_keys[self.vega_default_wallet_name][name]
         else:
-            return self.pub_keys[name][key_name]
+            return self.pub_keys[wallet_name][name]

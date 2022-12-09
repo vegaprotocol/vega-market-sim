@@ -122,7 +122,7 @@ def list_accounts(
             filter=account_filter
         ),
         request_func=lambda x: data_client.ListAccounts(x).accounts,
-        extraction_func=lambda res: [i.account for i in res.edges],
+        extraction_func=lambda res: [i.node for i in res.edges],
     )
 
 
