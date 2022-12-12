@@ -828,6 +828,7 @@ class VegaService(ABC):
         ] = None,
         updated_simple_model_params: Optional[SimpleModelParams] = None,
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
+        updated_lp_price_range: Optional[float] = None,
         key_name: Optional[int] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
@@ -910,6 +911,9 @@ class VegaService(ABC):
             simple=updated_simple_model_params,
             log_normal=updated_log_normal_risk_model,
             metadata=updated_metadata,
+            lp_price_range=str(updated_lp_price_range)
+            if updated_lp_price_range is not None
+            else None,
         )
 
         proposal_id = gov.propose_market_update(
