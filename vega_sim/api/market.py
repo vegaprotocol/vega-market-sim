@@ -108,7 +108,7 @@ class MarketConfig(Config):
 
         self.decimal_places = self.OPTS[opt]["decimal_places"]
         self.position_decimal_places = self.OPTS[opt]["position_decimal_places"]
-        self.lp_price_range = self.OPTS[opt]["lp_price_range"]
+        self.lp_price_range = str(self.OPTS[opt]["lp_price_range"])
         self.metadata = self.OPTS[opt]["metadata"]
 
         self.instrument = InstrumentConfiguration(opt=self.OPTS[opt]["instrument"])
