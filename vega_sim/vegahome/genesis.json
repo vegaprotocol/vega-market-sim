@@ -140,7 +140,8 @@
       "transfer.fee.factor": "0",
       "validators.delegation.minAmount": "1",
       "validators.epoch.length": "24h0m0s",
-      "validators.vote.required": "0.67"
+      "validators.vote.required": "0.67",
+      "blockchains.ethereumConfig": "{\"network_id\": \"3\", \"chain_id\": \"3\", \"collateral_bridge_contract\": { \"address\": \"0xa6F1E140daC13002Dfd9789D6dBA59117c717D7a\" }, \"confirmations\": 50, \"staking_bridge_contract\": { \"address\": \"0xfce2CC92203A266a9C8e67461ae5067c78f67235\", \"deployment_block_height\": 11001702}, \"multisig_control_contract\": {\"address\": \"0xCF6d41235911184fe6F35D47207813bFF3B91601\", \"deployment_block_height\": 12710009 } }"
     },
     "network_limits": {
       "propose_market_enabled": true,
