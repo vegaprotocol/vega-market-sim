@@ -121,7 +121,6 @@ class VegaService(ABC):
         """
         self._core_client = None
         self._core_state_client = None
-        self._trading_data_client = None
         self._trading_data_client_v2 = None
         self.can_control_time = can_control_time
         self.warn_on_raw_data_access = warn_on_raw_data_access
@@ -204,19 +203,6 @@ class VegaService(ABC):
 
     def wait_fn(self, wait_multiple: float = 1) -> None:
         time.sleep(1 * wait_multiple)
-
-    @property
-    def trading_data_client(self) -> vac.VegaTradingDataClient:
-        if self._trading_data_client is None:
-            channel = grpc.insecure_channel(
-                self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
-            )
-            grpc.channel_ready_future(channel).result(timeout=30)
-            self._trading_data_client = vac.VegaTradingDataClient(
-                self.data_node_grpc_url,
-                channel=channel,
-            )
-        return self._trading_data_client
 
     @property
     def trading_data_client_v2(self) -> vac.VegaTradingDataClientV2:
@@ -1419,7 +1405,6 @@ class VegaService(ABC):
         )
 
     def transfer_status_from_feed(self, live_only: bool = True):
-
         datetime = self.get_blockchain_time()
 
         with self.transfers_lock:
@@ -1515,7 +1500,6 @@ class VegaService(ABC):
     def start_transfer_monitoring(
         self,
     ):
-
         self.transfer_queue = data.transfer_subscription(
             self.core_client,
             self.trading_data_client_v2,
@@ -1839,7 +1823,7 @@ class VegaService(ABC):
             return
 
         return trading.order_submission(
-            data_client=self.trading_data_client,
+            data_client=self.trading_data_client_v2,
             market_id=market_id,
             price=str(price) if price is not None else None,
             size=size,

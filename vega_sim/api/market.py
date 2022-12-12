@@ -99,6 +99,7 @@ class MarketConfig(Config):
             "liquidity_monitoring_parameters": "default",
             "log_normal": "default",
             "instrument": "default",
+            "lp_price_range": 1.0,
         }
     }
 
@@ -107,6 +108,7 @@ class MarketConfig(Config):
 
         self.decimal_places = self.OPTS[opt]["decimal_places"]
         self.position_decimal_places = self.OPTS[opt]["position_decimal_places"]
+        self.lp_price_range = self.OPTS[opt]["lp_price_range"]
         self.metadata = self.OPTS[opt]["metadata"]
 
         self.instrument = InstrumentConfiguration(opt=self.OPTS[opt]["instrument"])
@@ -123,6 +125,7 @@ class MarketConfig(Config):
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=self.decimal_places,
                 position_decimal_places=self.position_decimal_places,
+                lp_price_range=self.lp_price_range,
                 metadata=self.metadata,
                 instrument=self.instrument.build(),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),

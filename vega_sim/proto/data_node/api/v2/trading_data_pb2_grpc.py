@@ -421,11 +421,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
         )
-        self.CopyHistorySegmentToFile = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/CopyHistorySegmentToFile",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.FromString,
-        )
         self.Ping = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Ping",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.SerializeToString,
@@ -1148,15 +1143,6 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def CopyHistorySegmentToFile(self, request, context):
-        """Copy history segment to file
-
-        Copy history segment data to a target file
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
     def Ping(self, request, context):
         """Ping
 
@@ -1573,11 +1559,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetActiveDeHistoryPeerAddresses,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.SerializeToString,
-        ),
-        "CopyHistorySegmentToFile": grpc.unary_unary_rpc_method_handler(
-            servicer.CopyHistorySegmentToFile,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.SerializeToString,
         ),
         "Ping": grpc.unary_unary_rpc_method_handler(
             servicer.Ping,
@@ -3934,35 +3915,6 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def CopyHistorySegmentToFile(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/CopyHistorySegmentToFile",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.FromString,
             options,
             channel_credentials,
             insecure,
