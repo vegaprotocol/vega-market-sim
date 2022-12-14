@@ -866,7 +866,7 @@ class MarketManager(StateAgentWithWallet):
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
-        if mint_wallet:
+        if vega.find_asset_id(symbol=self.asset_name) is None:
             # Create asset
             self.vega.create_asset(
                 self.wallet_name,
