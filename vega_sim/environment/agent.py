@@ -34,6 +34,10 @@ class Agent(ABC):
     def name(self) -> str:
         return self.NAME_BASE + (f"_{self.tag}" if self.tag is not None else {})
 
+    @classmethod
+    def name_from_tag(cls, tag: Optional[str]) -> str:
+        return cls.NAME_BASE + (f"_{tag}" if tag is not None else {})
+
 
 class AgentWithWallet(Agent):
     def __init__(

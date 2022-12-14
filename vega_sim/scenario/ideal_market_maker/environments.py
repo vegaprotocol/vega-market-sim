@@ -44,10 +44,10 @@ class MarketEnvironment(MarketEnvironmentWithState):
         self._base_agents = base_agents
         self.num_agents = len(base_agents)
 
-        self.mm_agent = self.agents[OptimalMarketMaker.name()]
-        self.lo_agent = self.agents[LimitOrderTrader.name()]
-        self.mo_agent = self.agents[MarketOrderTrader.name()]
-        self.olp_agent = self.agents[OptimalLiquidityProvider.name()]
+        self.mm_agent = self.agents[OptimalMarketMaker.name_from_tag()]
+        self.lo_agent = self.agents[LimitOrderTrader.name_from_tag()]
+        self.mo_agent = self.agents[MarketOrderTrader.name_from_tag()]
+        self.olp_agent = self.agents[OptimalLiquidityProvider.name_from_tag()]
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)
