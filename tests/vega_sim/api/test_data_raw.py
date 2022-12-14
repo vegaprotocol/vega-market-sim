@@ -7,7 +7,6 @@ from vega_sim.grpc.client import (
 )
 from vega_sim.null_service import find_free_port
 
-import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.data_raw import (
@@ -27,10 +26,7 @@ from vega_sim.api.data_raw import (
     margin_levels,
     list_transfers,
 )
-from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
-    TradingDataServiceServicer,
-    add_TradingDataServiceServicer_to_server,
-)
+
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
     TradingDataServiceServicer as TradingDataServiceServicerV2,
     add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
@@ -255,7 +251,7 @@ def test_list_accounts(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="a1",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
@@ -264,7 +260,7 @@ def test_list_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="a2",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
@@ -314,7 +310,7 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="a1",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
@@ -323,7 +319,7 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="a2",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
@@ -332,7 +328,7 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="liq",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
@@ -341,7 +337,7 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="ins",
                             asset=request.filter.asset_id,
                             market_id=request.filter.market_ids[0],
@@ -405,7 +401,7 @@ def test_infrastructure_fee_accounts(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             owner="inf",
                             asset=request.filter.asset_id,
                             type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
@@ -722,7 +718,6 @@ def test_get_trades(trading_data_v2_servicer_and_port):
 
 
 def test_list_transfers(trading_data_v2_servicer_and_port):
-
     expected = events_protos.Transfer(
         id="id1",
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,

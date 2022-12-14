@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 import grpc
 import pytest
-import vega_sim.proto.data_node.api.v1 as data_node_protos
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
@@ -39,9 +38,7 @@ from vega_sim.grpc.client import (
     VegaCoreClient,
     VegaTradingDataClientV2,
 )
-from vega_sim.proto.data_node.api.v1.trading_data_pb2_grpc import (
-    add_TradingDataServiceServicer_to_server,
-)
+
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
     add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
 )
@@ -61,28 +58,28 @@ def test_party_account(trading_data_v2_servicer_and_port):
                 edges=[
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             balance="1051",
                             type=vega_protos.vega.ACCOUNT_TYPE_BOND,
                         ),
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             balance="2041",
                             type=vega_protos.vega.ACCOUNT_TYPE_FEES_INFRASTRUCTURE,
                         ),
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             balance="5235",
                             type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
                         ),
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
                         cursor="cursor",
-                        account=data_node_protos_v2.trading_data.AccountBalance(
+                        node=data_node_protos_v2.trading_data.AccountBalance(
                             balance="6423",
                             type=vega_protos.vega.ACCOUNT_TYPE_MARGIN,
                         ),
@@ -650,7 +647,6 @@ def test_order_subscription(mkt_price_mock, mkt_pos_mock, core_servicer_and_port
 
 @patch("vega_sim.api.data.asset_decimals")
 def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
-
     mk_asset_decimals.return_value = 1
     transfers = [
         events_protos.Transfer(
@@ -933,7 +929,6 @@ def test_list_transfers(
     mk_asset_decimals,
     trading_data_v2_servicer_and_port,
 ):
-
     expected = Transfer(
         id="id1",
         party_from="party1",

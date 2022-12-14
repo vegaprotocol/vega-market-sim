@@ -1,6 +1,5 @@
 import grpc
 from abc import ABC
-from vega_sim.proto.data_node.api.v1 import trading_data_grpc
 from vega_sim.proto.data_node.api.v2 import trading_data_grpc as trading_data_grpc_v2
 from vega_sim.proto.vega.api.v1 import core_grpc, corestate_grpc
 
@@ -27,14 +26,6 @@ class GRPCClient(ABC):
 
     def __getattr__(self, funcname):
         return getattr(self._client, funcname)
-
-
-class VegaTradingDataClient(GRPCClient):
-    """
-    The Vega Trading Data Client talks to a back-end node.
-    """
-
-    STUB_CLASS = trading_data_grpc.TradingDataServiceStub
 
 
 class VegaTradingDataClientV2(GRPCClient):

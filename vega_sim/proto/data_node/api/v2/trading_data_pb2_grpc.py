@@ -401,6 +401,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.FromString,
         )
+        self.ListCoreSnapshots = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListCoreSnapshots",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.FromString,
+        )
         self.GetMostRecentDeHistorySegment = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetMostRecentDeHistorySegment",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.SerializeToString,
@@ -420,11 +425,6 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
-        )
-        self.CopyHistorySegmentToFile = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/CopyHistorySegmentToFile",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.FromString,
         )
         self.Ping = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Ping",
@@ -1105,6 +1105,12 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListCoreSnapshots(self, request, context):
+        """List core snapshots taken"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetMostRecentDeHistorySegment(self, request, context):
         """Decentralized History
 
@@ -1143,15 +1149,6 @@ class TradingDataServiceServicer(object):
         """Get active decentralized history peer addresses
 
         List the addresses of all active decentralized history peers
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def CopyHistorySegmentToFile(self, request, context):
-        """Copy history segment to file
-
-        Copy history segment data to a target file
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1554,6 +1551,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.SerializeToString,
         ),
+        "ListCoreSnapshots": grpc.unary_unary_rpc_method_handler(
+            servicer.ListCoreSnapshots,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.SerializeToString,
+        ),
         "GetMostRecentDeHistorySegment": grpc.unary_unary_rpc_method_handler(
             servicer.GetMostRecentDeHistorySegment,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.FromString,
@@ -1573,11 +1575,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetActiveDeHistoryPeerAddresses,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.SerializeToString,
-        ),
-        "CopyHistorySegmentToFile": grpc.unary_unary_rpc_method_handler(
-            servicer.CopyHistorySegmentToFile,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.SerializeToString,
         ),
         "Ping": grpc.unary_unary_rpc_method_handler(
             servicer.Ping,
@@ -3829,6 +3826,35 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def ListCoreSnapshots(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListCoreSnapshots",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def GetMostRecentDeHistorySegment(
         request,
         target,
@@ -3934,35 +3960,6 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def CopyHistorySegmentToFile(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/CopyHistorySegmentToFile",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.CopyHistorySegmentToFileResponse.FromString,
             options,
             channel_credentials,
             insecure,

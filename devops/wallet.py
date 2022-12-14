@@ -33,12 +33,16 @@ import dotenv
 
 from dataclasses import dataclass
 
+DEFAULT_USER_WALLET_NAME = "network_agents"
+DEFAULT_USER_WALLET_PASS = "passphrase"
+
+
 # Set the default wallet_name and wallet_pass in this dataclass
 @dataclass
 class Agent:
     dotenv.load_dotenv()
-    wallet_name: str = os.environ.get("VEGA_USER_WALLET_NAME")
-    wallet_pass: str = os.environ.get("VEGA_USER_WALLET_PASS")
+    wallet_name: str = os.environ.get("VEGA_USER_WALLET_NAME", DEFAULT_USER_WALLET_NAME)
+    wallet_pass: str = os.environ.get("VEGA_USER_WALLET_PASS", DEFAULT_USER_WALLET_PASS)
     key_name: str = None
 
 
