@@ -31,8 +31,6 @@ from vega_sim.scenario.common.agents import (
 
 
 class HedgedMarket(Scenario):
-
-
     def __init__(
         self,
         num_steps: int = 290,
