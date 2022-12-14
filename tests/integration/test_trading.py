@@ -18,7 +18,6 @@ PARTY_B = WalletConfig("party_b", "party_b")
 
 @pytest.mark.integration
 def test_submit_market_order(vega_service_with_market: VegaServiceNull):
-
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
@@ -144,9 +143,9 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
     num_levels = 11
     expected_bid_prices = [0.2995, 0.299, 0.25, 0.245, 0, 0, 0, 0, 0, 0, 0]
-    expected_bid_volumes = [668.0, 383.0, 1.0, 19760.0, 0, 0, 0, 0, 0, 0, 0]
+    expected_bid_volumes = [334.0, 192.0, 1.0, 584.0, 0, 0, 0, 0, 0, 0, 0]
     expected_ask_prices = [0.3005, 0.305, 0.35, 0.3502, 0, 0, 0, 0, 0, 0, 0]
-    expected_ask_volumes = [666.0, 1125.0, 1.0, 171.0, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_volumes = [333.0, 563.0, 1.0, 82.0, 0, 0, 0, 0, 0, 0, 0]
 
     book_state = vega.market_depth(market_id, num_levels=num_levels)
     bid_prices = [level.price for level in book_state.buys] + [0] * max(

@@ -401,6 +401,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.FromString,
         )
+        self.ListCoreSnapshots = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListCoreSnapshots",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.FromString,
+        )
         self.GetMostRecentDeHistorySegment = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetMostRecentDeHistorySegment",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.SerializeToString,
@@ -1100,6 +1105,12 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListCoreSnapshots(self, request, context):
+        """List core snapshots taken"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetMostRecentDeHistorySegment(self, request, context):
         """Decentralized History
 
@@ -1539,6 +1550,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListProtocolUpgradeProposals,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.SerializeToString,
+        ),
+        "ListCoreSnapshots": grpc.unary_unary_rpc_method_handler(
+            servicer.ListCoreSnapshots,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.SerializeToString,
         ),
         "GetMostRecentDeHistorySegment": grpc.unary_unary_rpc_method_handler(
             servicer.GetMostRecentDeHistorySegment,
@@ -3799,6 +3815,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListProtocolUpgradeProposals",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListCoreSnapshots(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListCoreSnapshots",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.FromString,
             options,
             channel_credentials,
             insecure,
