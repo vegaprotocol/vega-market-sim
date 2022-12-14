@@ -247,7 +247,7 @@ class MarketCrash(Scenario):
         **kwargs,
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,

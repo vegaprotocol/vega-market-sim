@@ -44,23 +44,10 @@ class MarketEnvironment(MarketEnvironmentWithState):
         self._base_agents = base_agents
         self.num_agents = len(base_agents)
 
-        self.mm_agent = [
-            agent for agent in self.agents if isinstance(agent, OptimalMarketMaker)
-        ][0]
-
-        self.lo_agent = [
-            agent for agent in self.agents if isinstance(agent, LimitOrderTrader)
-        ][0]
-
-        self.mo_agent = [
-            agent for agent in self.agents if isinstance(agent, MarketOrderTrader)
-        ][0]
-
-        self.olp_agent = [
-            agent
-            for agent in self.agents
-            if isinstance(agent, OptimalLiquidityProvider)
-        ]
+        self.mm_agent = self.agents[OptimalMarketMaker.name()]
+        self.lo_agent = self.agents[LimitOrderTrader.name()]
+        self.mo_agent = self.agents[MarketOrderTrader.name()]
+        self.olp_agent = self.agents[OptimalLiquidityProvider.name()]
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)
