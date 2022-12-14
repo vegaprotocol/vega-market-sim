@@ -4,6 +4,7 @@ from venv import create
 
 import logging
 
+from queue import Queue
 import numpy as np
 from math import exp
 
@@ -43,6 +44,7 @@ BACKGROUND_MARKET = WalletConfig("market", "market")
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
+ITOrder = namedtuple("ITOrder", ["side", "size"])
 MMOrder = namedtuple("MMOrder", ["size", "price"])
 
 LiquidityProvision = namedtuple(
@@ -1741,9 +1743,54 @@ class InformedTrader(StateAgentWithWallet):
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
         proportion_taken: float = 0.8,
+        accuracy: float = 1.0,
+        lookahead: int = 1,
         tag: str = "",
         key_name: Optional[str] = None,
+        random_state: Optional[np.random.RandomState] = None,
     ):
+        """Agent capable of placing informed market orders.
+
+        At each step, the agent is able to lookahead a specified number of steps and
+        determine whether orders currently on the book are profitable to fill. The
+        agent will then fill a specified proportion of those orders. This order will
+        then be recorded in a FIFO queue.
+
+        At each step, if the queue is full, the agent will get an order from the queue
+        and place a market order to close the position created by the original order.
+        Following the above logic, orders should be "closed" n steps after they are
+        placed, i.e. when they are in the money.
+
+        Additionally the accuracy arg can be used to configure the accuracy of the agent
+        (1.0 being well-informed, 0.0 being ill-informed). If the agent is ill-informed
+        it has a random probability of placing its orders on the wrong side.
+
+        Args:
+            wallet_name (str):
+                Name of the wallet.
+            wallet_pass (str):
+                Passphrase for the wallet.
+            price_process (List[float]):
+                List of price history for agent to look-ahead.
+            market_name (str, optional):
+                Name of the market to trade in. Defaults to None.
+            asset_name (str, optional):
+                Name of the settlement asset used in the market. Defaults to None.
+            initial_asset_mint (float, optional):
+                Initial amount of asset to mint. Defaults to 1e8.
+            proportion_taken (float, optional):
+                Proportion of profitable orders filled at each step. Defaults to 0.8.
+            accuracy (float, optional):
+                Accuracy of agent's speculations. Defaults to 1.0.
+            lookahead (int, optional):
+                Number of steps to look ahead. Defaults to 1.
+            tag (str, optional):
+                Market tag. Defaults to "".
+            key_name (Optional[str], optional):
+                Name of key in wallet. Defaults to None.
+            random_state (Optional[np.random.RandomState], optional):
+                RandomState object used to generate randomness. Defaults to None.
+        """
         super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
         self.price_process = price_process
@@ -1754,6 +1801,14 @@ class InformedTrader(StateAgentWithWallet):
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
         self.key_name = key_name
+        self.accuracy = accuracy
+        self.lookahead = lookahead
+        self.current_step = 1
+        self.queue = Queue()
+
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
 
     def initialise(
         self,
@@ -1782,44 +1837,37 @@ class InformedTrader(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
+
+        # Increment the current step
+        self.current_step += 1
+
+        # Skip stepping if the market is in auction
         trading_mode = vega_state.market_state[self.market_id].trading_mode
-        market_in_auction = (
+        if (
             not trading_mode
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        )
-        position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name,
-            market_id=self.market_id,
-            key_name=self.key_name,
-        )
-        current_position = int(position[0].open_volume) if position else 0
-        trade_side = (
-            vega_protos.SIDE_BUY if current_position < 0 else vega_protos.SIDE_SELL
-        )
-        if (not market_in_auction) and current_position:
-            try:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side=trade_side,
-                    volume=np.abs(current_position),
-                    wait=True,
-                    fill_or_kill=False,
-                    key_name=self.key_name,
-                )
-            except OrderRejectedError:
-                logger.debug("Order rejected")
+        ):
+            return
 
-        order_book = self.vega.market_depth(market_id=self.market_id)
+        # If the queue is full, settle an order
+        if self.queue.full():
+            self._settle_order(self.queue.get())
 
+        # Create an order, submit it, and add it to the queue to be settled
+        self.queue.put(self._create_order())
+
+    def _create_order(self) -> ITOrder:
+
+        # Determine the correct side
         price = self.price_process[self.current_step]
-        next_price = self.price_process[self.current_step + 1]
+        next_price = self.price_process[
+            min([self.current_step + self.lookahead + 1, len(self.price_process) - 1])
+        ]
+        side = vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
 
-        trade_side = (
-            vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
-        )
-
-        if price < next_price:
+        # Determine the volume of orders which can be profited from
+        order_book = self.vega.market_depth(market_id=self.market_id)
+        if side == vega_protos.SIDE_BUY:
             volume = sum(
                 [order.volume for order in order_book.sells if order.price < next_price]
             )
@@ -1828,21 +1876,63 @@ class InformedTrader(StateAgentWithWallet):
                 [order.volume for order in order_book.buys if order.price > next_price]
             )
 
-        volume = round(self.proportion_taken * volume, self.pdp)
+        # Determine the size of the order
+        size = round(self.proportion_taken * volume, self.pdp)
 
-        if (not market_in_auction) and volume:
-            try:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side=trade_side,
-                    volume=volume,
-                    wait=False,
-                    fill_or_kill=False,
-                    key_name=self.key_name,
-                )
-            except OrderRejectedError:
-                logger.debug("Order rejected")
+        # Add a random probability the agent speculates the wrong side
+        if self.random_state.rand() <= self.accuracy:
+            side = side
+        else:
+            side = (
+                vega_protos.SIDE_BUY
+                if side == vega_protos.SIDE_SELL
+                else vega_protos.SIDE_SELL
+            )
+
+        # Attempt to submit the order and add it to the queue
+        try:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=side,
+                volume=size,
+                wait=False,
+                fill_or_kill=False,
+                key_name=self.key_name,
+            )
+            return ITOrder(side=side, size=size)
+
+        except OrderRejectedError:
+            logger.debug("Order rejected")
+            return None
+
+    def _settle_order(self, order: ITOrder):
+
+        # If order is blank
+        if order is None:
+            return
+
+        # If original order was a buy, agent sells, and visa versa
+        if order.side == vega_protos.SIDE_BUY:
+            side = vega_protos.SIDE_SELL
+        elif order.side == vega_protos.SIDE_SELL:
+            side = vega_protos.SIDE_BUY
+        else:
+            return
+
+        # Try to settle the order
+        try:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=side,
+                volume=order.volume,
+                wait=True,
+                fill_or_kill=False,
+                key_name=self.key_name,
+            )
+        except OrderRejectedError:
+            logger.debug("Order rejected")
 
 
 class LiquidityProvider(StateAgentWithWallet):
