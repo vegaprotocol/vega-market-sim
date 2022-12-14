@@ -147,6 +147,7 @@ def propose_future_market(
     price_monitoring_parameters: Optional[
         vega_protos.markets.PriceMonitoringParameters
     ] = None,
+    lp_price_range: float = 1,
     key_name: Optional[str] = None,
 ) -> str:
     """Propose a future market as specified user.
@@ -184,6 +185,9 @@ def propose_future_market(
             PriceMonitoringParameters, A set of parameters determining when the market
                 will drop into a price auction. If not passed defaults to a very
                 permissive setup
+        lp_price_range:
+            float, Range allowed for LP price commitments from mid price
+            (e.g. 2 allows mid-price +/- 2 * mid-price )
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
 
@@ -278,6 +282,7 @@ def propose_future_market(
                     settlement_data_decimals=price_decimals,
                 ),
             ),
+            lp_price_range=str(lp_price_range),
             decimal_places=price_decimals,
             position_decimal_places=0
             if position_decimals is None
