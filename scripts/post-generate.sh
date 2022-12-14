@@ -3,7 +3,6 @@
 generated_dir="${GENERATED_DIR:?}"
 
 for x in \
-	data_node/api/v1 \
 	data_node/api/v2 \
 	vega/api/v1 \
 	vega/checkpoint/v1 \
@@ -68,9 +67,9 @@ for x in \
 	data_node/api
 do
 	cat >"$generated_dir/$x/__init__.py" <<EOF
-from . import v1, v2
+from . import v2
 
-__all__ = ["v1", "v2"]
+__all__ = ["v2"]
 EOF
 done
 
@@ -135,13 +134,6 @@ find \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from ... import \1_pb2 as#' \
 	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ...\1 import #' \
 	-e 's#^import ([a-z_]*_pb2) as #from ... import \1 as #'
-
-find \
-	"$generated_dir/data_node/api/v1" \
-	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
-	-e 's#^from vega import ([a-z_]*)_pb2 as#from ....vega import \1_pb2 as#' \
-	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ....vega.\1 import #' \
-	-e 's#^from data_node.(api.v1) import #from ...\1 import #'
 
 find \
 	"$generated_dir/data_node/api/v2" \
