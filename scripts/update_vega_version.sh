@@ -4,9 +4,7 @@ echo "VEGA_SIM_VEGA_TAG=${vega_tag}
 VEGA_SIM_CONSOLE_TAG=develop
 VEGA_DEFAULT_KEY_NAME='Key 1'
 VEGA_SIM_NETWORKS_INTERNAL_TAG=main
-VEGA_SIM_NETWORKS_TAG=master
-VEGA_USER_WALLET_NAME='network_agents'
-VEGA_USER_WALLET_PASS='passphrase'" > .env
+VEGA_SIM_NETWORKS_TAG=master" > .env
 
 make
 make proto
