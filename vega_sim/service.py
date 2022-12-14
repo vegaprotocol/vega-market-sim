@@ -913,7 +913,7 @@ class VegaService(ABC):
             metadata=updated_metadata,
             lp_price_range=str(updated_lp_price_range)
             if updated_lp_price_range is not None
-            else None,
+            else current_market.lp_price_range,
         )
 
         proposal_id = gov.propose_market_update(
