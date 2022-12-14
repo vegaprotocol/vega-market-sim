@@ -9,6 +9,7 @@ from vega_sim.scenario.ideal_market_maker_v2.scenario import (
 from vega_sim.scenario.multi_market.scenario import VegaLoadTest
 from vega_sim.scenario.market_crash.scenario import MarketCrash
 from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
+from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
 
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
@@ -156,4 +157,18 @@ SCENARIOS = {
         orders_per_second=100,
         trades_per_second=1,
     ),
+    "hedged_market": lambda: HedgedMarket(
+        num_steps=24 * 60,
+        step_length_seconds=60,
+        block_length_seconds=1,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD",
+            granularity=Granularity.MINUTE,
+            start="2022-06-12 17:00:00",
+            end="2022-06-13 17:00:00",
+        ).values,
+        int_lock=3 * 60 * 60,
+        ext_lock=5 * 60,
+    ),
 }
+688
