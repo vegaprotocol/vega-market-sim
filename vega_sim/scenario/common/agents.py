@@ -1094,10 +1094,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
         first_side = (
             (
                 vega_protos.SIDE_BUY
-                if self.curr_price < self.prev_price
+                if scaled_sell_shape[0].price < curr_buy_orders[0].price
                 else vega_protos.SIDE_SELL
             )
-            if self.prev_price is not None
+            if (scaled_sell_shape != []) and (curr_buy_orders != [])
             else vega_protos.SIDE_BUY
         )
         if first_side == vega_protos.SIDE_BUY:
@@ -1158,7 +1158,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         scaling_factor = (
             self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
-        ) / instantaneous_liquidity
+        ) / max([instantaneous_liquidity, 1e-9])
 
         # Scale the shapes
         scaled_buy_shape = [
