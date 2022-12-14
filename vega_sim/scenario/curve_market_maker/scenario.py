@@ -127,7 +127,7 @@ class CurveMarketMaker(Scenario):
     def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str,
+        tag: Optional[str],
         random_state: Optional[np.random.RandomState],
         **kwargs,
     ) -> List[StateAgent]:
@@ -155,7 +155,7 @@ class CurveMarketMaker(Scenario):
             market_position_decimal=self.market_position_decimal,
             market_name=market_name,
             asset_name=asset_name,
-            tag=str(tag),
+            tag=str(tag) if tag is not None else None,
             settlement_price=price_process[-1] if self.settle_at_end else None,
         )
 
@@ -171,7 +171,7 @@ class CurveMarketMaker(Scenario):
             asset_decimal_places=self.asset_decimal,
             num_steps=self.num_steps,
             num_levels=self.num_lp_levels,
-            tag=str(tag),
+            tag=str(tag) if tag is not None else None,
             kappa=self.curve_kappa,
             tick_spacing=self.market_maker_tick_spacing,
             inventory_upper_boundary=self.q_upper,
@@ -193,7 +193,7 @@ class CurveMarketMaker(Scenario):
             sell_intensity=self.sell_intensity,
             price_half_life=self.sensitive_price_taker_half_life,
             price_process_generator=iter(price_process),
-            tag=str(tag),
+            tag=str(tag) if tag is not None else None,
             base_order_size=self.market_order_trader_base_order_size,
         )
 
@@ -208,7 +208,7 @@ class CurveMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -222,7 +222,7 @@ class CurveMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
         info_trader = InformedTrader(
@@ -233,18 +233,18 @@ class CurveMarketMaker(Scenario):
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             proportion_taken=self.proportion_taken,
-            tag=str(tag),
+            tag=str(tag) if tag is not None else None,
         )
 
-        return [
+        agents = [
             market_manager,
-            # background_market,
             shaped_mm,
             sensitive_mo_trader,
             auctionpass1,
             auctionpass2,
             info_trader,
         ]
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self,
@@ -252,7 +252,7 @@ class CurveMarketMaker(Scenario):
         **kwargs,
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,

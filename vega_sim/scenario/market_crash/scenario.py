@@ -213,7 +213,7 @@ class MarketCrash(Scenario):
             market_name=self.market_name,
             asset_name=self.asset_name,
             initial_asset_mint=self.initial_asset_mint,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -224,10 +224,10 @@ class MarketCrash(Scenario):
             market_name=self.market_name,
             asset_name=self.asset_name,
             initial_asset_mint=self.initial_asset_mint,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
-        return (
+        agents = (
             [
                 market_maker,
                 background_market,
@@ -237,6 +237,7 @@ class MarketCrash(Scenario):
             + noise_traders
             + position_traders
         )
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self,

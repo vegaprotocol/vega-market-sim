@@ -32,7 +32,9 @@ from vega_sim.quant.quant import probability_of_trading
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
-SnitchData = namedtuple("SnitchData", ["market_info", "market_data", "accounts"])
+MarketHistoryData = namedtuple(
+    "MarketHistoryData", ["at_time", "market_info", "market_data", "accounts"]
+)
 
 # Send selling/buying MOs to hit LP orders
 TRADER_WALLET = WalletConfig("trader", "trader")
@@ -47,10 +49,6 @@ MMOrder = namedtuple("MMOrder", ["size", "price"])
 
 LiquidityProvision = namedtuple(
     "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
-)
-
-SnitchState = namedtuple(
-    "SnitchState", ["market_state", "open_interest", "account_balances"]
 )
 
 logger = logging.getLogger(__name__)
@@ -75,6 +73,8 @@ class TradeSignal(Enum):
 
 
 class MarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "mo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -179,6 +179,8 @@ class MarketOrderTrader(StateAgentWithWallet):
 
 
 class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "price_sensitive_mo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -292,6 +294,8 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
 
 
 class BackgroundMarket(StateAgentWithWallet):
+    NAME_BASE = "background_market"
+
     def __init__(
         self,
         wallet_name: str,
@@ -479,6 +483,8 @@ class BackgroundMarket(StateAgentWithWallet):
 
 
 class MultiRegimeBackgroundMarket(StateAgentWithWallet):
+    NAME_BASE = "multi_regime_background_market"
+
     def __init__(
         self,
         wallet_name: str,
@@ -736,6 +742,8 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
 
 
 class OpenAuctionPass(StateAgentWithWallet):
+    NAME_BASE = "open_auction_pass"
+
     def __init__(
         self,
         wallet_name: str,
@@ -800,6 +808,8 @@ class OpenAuctionPass(StateAgentWithWallet):
 
 
 class MarketManager(StateAgentWithWallet):
+    NAME_BASE = "market_manager"
+
     def __init__(
         self,
         wallet_name: str,
@@ -938,6 +948,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
     (by default an exponential curve). This allows this MM to be the sole liquidity
     source in the market but still to maintain an interesting full LOB.
     """
+
+    NAME_BASE = "shaped_market_maker"
 
     def __init__(
         self,
@@ -1308,6 +1320,8 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
     source in the market but still to maintain an interesting full LOB.
     """
 
+    NAME_BASE = "expon_shaped_market_maker"
+
     def __init__(
         self,
         wallet_name: str,
@@ -1514,6 +1528,8 @@ class LimitOrderTrader(StateAgentWithWallet):
     When submitting an order; the agent choses a price following a lognormal
     distribution where the underlying normal distribution can be adjusted.
     """
+
+    NAME_BASE = "lo_trader"
 
     def __init__(
         self,
@@ -1732,6 +1748,8 @@ class LimitOrderTrader(StateAgentWithWallet):
 
 
 class InformedTrader(StateAgentWithWallet):
+    NAME_BASE = "informed_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -1846,6 +1864,8 @@ class InformedTrader(StateAgentWithWallet):
 
 
 class LiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "liq_provider"
+
     def __init__(
         self,
         wallet_name: str,
@@ -1910,6 +1930,8 @@ class MomentumTrader(StateAgentWithWallet):
     At each step, the trading agent collects future price and trades under
     certain momentum indicator.
     """
+
+    NAME_BASE = "mom_trader"
 
     def __init__(
         self,
@@ -2168,18 +2190,24 @@ class MomentumTrader(StateAgentWithWallet):
 
 
 class Snitch(StateAgent):
+    NAME_BASE = "snitch"
+
     def __init__(self):
         self.states = []
 
     def step(self, vega_state: VegaState):
         market_infos = {}
         market_datas = {}
+        start_time = self.vega.get_blockchain_time()
         for market in self.vega.all_markets():
             market_infos[market.id] = self.vega.market_info(market.id)
             market_datas[market.id] = self.vega.market_data(market.id)
         accounts = self.vega.list_accounts()
         self.states.append(
-            SnitchData(
-                market_info=market_infos, market_data=market_datas, accounts=accounts
+            MarketHistoryData(
+                at_time=start_time,
+                market_info=market_infos,
+                market_data=market_datas,
+                accounts=accounts,
             )
         )

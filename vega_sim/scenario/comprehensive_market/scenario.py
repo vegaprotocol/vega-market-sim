@@ -153,7 +153,7 @@ class ComprehensiveMarket(Scenario):
         vega: VegaServiceNull,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
-    ) -> List[StateAgent]:
+    ) -> Dict[str, StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
@@ -186,7 +186,7 @@ class ComprehensiveMarket(Scenario):
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
-                tag=str(tag),
+                tag=f"{i}_{tag}",
                 commitment_amount=self.lp_commitamount,
                 fee=0.001,
                 offset=self.spread * (i + 1),
@@ -201,7 +201,7 @@ class ComprehensiveMarket(Scenario):
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
-                tag=str(tag),
+                tag=f"{i}_{tag}",
                 buy_intensity=self.market_order_trader_order_intensity,
                 sell_intensity=self.market_order_trader_order_intensity,
                 base_order_size=self.market_order_trader_order_size,
@@ -217,7 +217,7 @@ class ComprehensiveMarket(Scenario):
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
-                tag=str(tag),
+                tag=f"{i}_{tag}",
                 spread=self.spread,
                 price_process=price_process,
                 buy_intensity=self.limit_order_trader_order_intensity,
@@ -251,7 +251,7 @@ class ComprehensiveMarket(Scenario):
                 indicator_threshold=self.momentum_trader_indicator_thresholds[i],
                 send_limit_order=True,
                 offset_levels=20,
-                tag=str(tag),
+                tag=f"{i}_{tag}",
             )
             for i in range(len(self.momentum_wallets))
         ]
@@ -267,7 +267,7 @@ class ComprehensiveMarket(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -281,10 +281,10 @@ class ComprehensiveMarket(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
-        return (
+        agents = (
             [
                 mm_agent,
                 auctionpass1,
@@ -295,12 +295,13 @@ class ComprehensiveMarket(Scenario):
             + lo_agents
             + momentum_agents
         )
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self, vega: VegaService, **kwargs
     ) -> MarketEnvironmentWithState:
         self.env = MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,

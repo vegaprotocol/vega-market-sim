@@ -340,11 +340,11 @@ class MarketEnvironmentWithState(MarketEnvironment):
             state_extraction_freq=state_extraction_freq,
             pause_every_n_steps=pause_every_n_steps,
         )
+
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
         )
 
-    # @staticmethod
     def _default_state_extraction(self, vega: VegaService) -> VegaState:
         market_state = {}
         order_status = vega.order_status_from_feed(live_only=True)
@@ -428,7 +428,6 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
-
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
             i += 1

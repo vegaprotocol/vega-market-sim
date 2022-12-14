@@ -12,6 +12,11 @@ class VegaState:
 
 
 class Agent(ABC):
+    NAME_BASE = "base_agent"
+
+    def __init__(self, tag: Optional[str] = None):
+        self.tag = tag
+
     def step(self, vega: VegaService):
         pass
 
@@ -26,12 +31,16 @@ class Agent(ABC):
     def _update_state(self, current_step: int):
         pass
 
+    def name(self) -> str:
+        return self.NAME_BASE + (f"_{self.tag}" if self.tag is not None else {})
+
 
 class AgentWithWallet(Agent):
     def __init__(
         self,
         wallet_name: str,
         wallet_pass: str,
+        tag: Optional[str] = None,
         key_name: Optional[str] = None,
         state_update_freq: Optional[int] = None,
     ):
@@ -48,12 +57,14 @@ class AgentWithWallet(Agent):
                 str, The name to use for this agent's wallet
             wallet_pass:
                 str, The password which this agent uses to log in to the wallet
+            tag:
+                str, optional, additional tag to add to agent's wallet name
             key_name:
                 str, optional, Name of key in wallet for agent to use. Defaults
                 to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
         """
-        super().__init__()
-        self.wallet_name = wallet_name
+        super().__init__(tag=tag)
+        self.wallet_name = wallet_name + (f"_{tag}" if tag is not None else "")
         self.wallet_pass = wallet_pass
         self.key_name = key_name
 

@@ -169,7 +169,7 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -180,7 +180,7 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
         liquidityprovider = OptimalLiquidityProvider(
@@ -198,6 +198,7 @@ class IdealMarketMaker(Scenario):
             asset_name=asset_name,
             entry_step=5,
             commitamount=self.lp_commitamount,
+            tag=str(tag),
         )
 
         info_trader = InformedTrader(
@@ -211,7 +212,7 @@ class IdealMarketMaker(Scenario):
             tag=str(tag),
         )
 
-        return [
+        agents = [
             market_maker,
             tradingbot,
             randomtrader,
@@ -220,6 +221,7 @@ class IdealMarketMaker(Scenario):
             info_trader,
             liquidityprovider,
         ]
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self,
@@ -227,7 +229,7 @@ class IdealMarketMaker(Scenario):
         **kwargs,
     ) -> MarketEnvironment:
         return MarketEnvironment(
-            base_agents=self.agents,
+            base_agents=list(self.agents.values()),
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,

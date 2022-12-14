@@ -199,7 +199,7 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -213,27 +213,28 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
-        info_trader = InformedTrader(
-            wallet_name=INFORMED_WALLET.name,
-            wallet_pass=INFORMED_WALLET.passphrase,
-            price_process=price_process,
-            market_name=market_name,
-            asset_name=asset_name,
-            initial_asset_mint=self.initial_asset_mint,
-            proportion_taken=self.proportion_taken,
-            tag=str(tag),
-        )
+        # info_trader = InformedTrader(
+        #     wallet_name=INFORMED_WALLET.name,
+        #     wallet_pass=INFORMED_WALLET.passphrase,
+        #     price_process=price_process,
+        #     market_name=market_name,
+        #     asset_name=asset_name,
+        #     initial_asset_mint=self.initial_asset_mint,
+        #     proportion_taken=self.proportion_taken,
+        #     tag=str(tag),
+        # )
 
-        return [
+        agents = [
             market_maker,
             background_market,
             auctionpass1,
             auctionpass2,
             trader,
         ]
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self,
@@ -241,7 +242,7 @@ class IdealMarketMaker(Scenario):
         **kwargs,
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,

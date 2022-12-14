@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
+    parser.add_argument("--output", action="store_true")
     parser.add_argument(
         "--network",
         choices=[network.name for network in Network],
@@ -56,6 +57,7 @@ def main():
                 vega=vega,
                 network=Network[args.network],
                 pause_at_completion=args.pause,
+                output_data=args.output,
             )
 
     else:
