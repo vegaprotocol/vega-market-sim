@@ -1502,6 +1502,298 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
 
 
+class HedgedMarketMaker(ExponentialShapedMarketMaker):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        num_steps: int,
+        price_process_generator: Iterable[float],
+        initial_asset_mint: float = 1000000,
+        market_name: str = None,
+        external_market_name: str = None,
+        asset_name: str = None,
+        commitment_amount: float = 6000,
+        market_decimal_places: int = 5,
+        fee_amount: float = 0.001,
+        kappa: float = 1,
+        num_levels: int = 25,
+        tick_spacing: float = 1,
+        inventory_upper_boundary: float = 20,
+        inventory_lower_boundary: float = -20,
+        terminal_penalty_parameter: float = 10**-4,
+        running_penalty_parameter: float = 5 * 10**-6,
+        market_order_arrival_rate: float = 5,
+        market_kappa: float = 1,
+        asset_decimal_places: int = 0,
+        tag: str = "",
+        key_name: str = None,
+        external_key_name: Optional[float] = "Hedging Key",
+        orders_from_stream: Optional[bool] = True,
+        state_update_freq: Optional[int] = None,
+        profit_margin: Optional[float] = 0.01,
+        internal_delay: int = 60 * 60,
+        external_delay: int = 5 * 60,
+    ):
+        super().__init__(
+            wallet_name=wallet_name,
+            wallet_pass=wallet_pass,
+            num_steps=num_steps,
+            price_process_generator=price_process_generator,
+            initial_asset_mint=initial_asset_mint,
+            market_name=market_name,
+            asset_name=asset_name,
+            commitment_amount=commitment_amount,
+            market_decimal_places=market_decimal_places,
+            fee_amount=fee_amount,
+            kappa=kappa,
+            num_levels=num_levels,
+            tick_spacing=tick_spacing,
+            inventory_upper_boundary=inventory_upper_boundary,
+            inventory_lower_boundary=inventory_lower_boundary,
+            terminal_penalty_parameter=terminal_penalty_parameter,
+            running_penalty_parameter=running_penalty_parameter,
+            market_order_arrival_rate=market_order_arrival_rate,
+            market_kappa=market_kappa,
+            asset_decimal_places=asset_decimal_places,
+            tag=tag,
+            key_name=key_name,
+            orders_from_stream=orders_from_stream,
+            state_update_freq=state_update_freq,
+        )
+
+        self.profit_margin = profit_margin
+
+        self.external_market_name = external_market_name
+        self.external_market_id = None
+
+        self.external_key_name = external_key_name
+        self.internal_delay = internal_delay
+        self.external_delay = external_delay
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
+        # Initialise the parent ExponentialShapedMarketMaker
+        super().initialise(vega, create_wallet, mint_wallet)
+
+        self.external_market_id = self.vega.find_market_id(
+            name=self.external_market_name
+        )
+        self._update_state(current_step=self.current_step)
+
+        if vega.create_wallet:
+            vega.create_wallet(
+                name=self.wallet_name,
+                passphrase=self.wallet_pass,
+                key_name=self.external_key_name,
+            )
+        if mint_wallet:
+            vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.external_key_name,
+            )
+
+    def _update_state(self, current_step: int):
+        super()._update_state(current_step)
+
+        if self.state_update_freq and current_step % self.state_update_freq == 0:
+
+            int_market_info = (
+                self.vega.market_info(market_id=self.market_id)
+                if self.market_id is not None
+                else None
+            )
+            self.int_mkr_fee = (
+                float(int_market_info.fees.factors.maker_fee)
+                if int_market_info is not None
+                else 0
+            )
+            self.int_liq_fee = (
+                float(int_market_info.fees.factors.liquidity_fee)
+                if int_market_info is not None
+                else 0
+            )
+            self.int_inf_fee = (
+                float(int_market_info.fees.factors.infrastructure_fee)
+                if int_market_info is not None
+                else 0
+            )
+
+            ext_market_info = (
+                self.vega.market_info(market_id=self.external_market_id)
+                if self.external_market_id is not None
+                else None
+            )
+            self.ext_mkr_fee = (
+                float(ext_market_info.fees.factors.maker_fee)
+                if ext_market_info is not None
+                else 0
+            )
+            self.ext_liq_fee = (
+                float(ext_market_info.fees.factors.liquidity_fee)
+                if ext_market_info is not None
+                else 0
+            )
+            self.ext_inf_fee = (
+                float(ext_market_info.fees.factors.infrastructure_fee)
+                if ext_market_info is not None
+                else 0
+            )
+
+    def _optimal_strategy(self, current_position, current_step):
+
+        ext_best_bid, ext_best_ask = self.vega.best_prices(
+            market_id=self.external_market_id
+        )
+
+        int_fee = self.int_mkr_fee + self.int_liq_fee
+        ext_fee = self.ext_mkr_fee + self.ext_liq_fee + self.ext_inf_fee
+
+        required_bid_price = (
+            ext_best_bid * (1 - ext_fee) / (1 - int_fee + self.profit_margin)
+        )
+        required_ask_price = (
+            ext_best_ask * (1 + ext_fee) / (1 + int_fee - self.profit_margin)
+        )
+
+        current_bid_depth = self.curr_price - required_bid_price
+        current_ask_depth = required_ask_price - self.curr_price
+
+        return current_bid_depth, current_ask_depth
+
+    def _balance_positions(self):
+
+        # Determine the delta between the position on the internal and external market
+
+        internal_position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        current_int_position = (
+            float(internal_position[0].open_volume) if internal_position != [] else 0
+        )
+        external_position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.external_market_id,
+            key_name=self.external_key_name,
+        )
+        current_ext_position = (
+            float(external_position[0].open_volume) if external_position != [] else 0
+        )
+        position_delta = current_int_position + current_ext_position
+
+        # Hedge the position on the internal market on the external market
+
+        if position_delta == 0:
+            return
+        elif position_delta < 0:
+            side = vega_protos.SIDE_BUY
+        elif position_delta > 0:
+            side = vega_protos.SIDE_SELL
+
+        self.vega.submit_market_order(
+            trading_wallet=self.wallet_name,
+            key_name=self.external_key_name,
+            market_id=self.external_market_id,
+            volume=abs(position_delta),
+            side=side,
+            wait=False,
+            fill_or_kill=False,
+        )
+
+    def _balance_accounts(self):
+
+        # Get the total balance on the internal market (excluding bond)
+        internal_account = self.vega.party_account(
+            wallet_name=self.wallet_name,
+            asset_id=self.asset_id,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        internal_account_balance = internal_account.general + internal_account.margin
+
+        # Get the total balance on the external market (excluding bond)
+        external_account = self.vega.party_account(
+            wallet_name=self.wallet_name,
+            asset_id=self.asset_id,
+            market_id=self.market_id,
+            key_name=self.external_key_name,
+        )
+        external_account_balance = external_account.general + external_account.margin
+
+        # Get the balance currently locked in transfers inbound to the internal market
+        transfers = self.vega.transfer_status_from_feed(live_only=True)
+        internal_transfers_balance = sum(
+            [
+                transfer.amount
+                for transfer in transfers.get(
+                    self.vega.wallet.public_key(
+                        name=self.wallet_name, key_name=self.key_name
+                    ),
+                    {},
+                ).values()
+            ]
+        )
+        # Get the balance currently locked in transfers inbound to the external market
+        external_transfers_balance = sum(
+            [
+                transfer.amount
+                for transfer in transfers.get(
+                    self.vega.wallet.public_key(
+                        name=self.wallet_name, key_name=self.external_key_name
+                    ),
+                    {},
+                ).values()
+            ]
+        )
+
+        # Calculate the difference between the total balance on the markets
+        delta = (internal_account_balance + internal_transfers_balance) - (
+            external_account_balance + external_transfers_balance
+        )
+
+        # Create a transfer to balance the internal and external accounts
+        if abs(delta) < 500:
+            return
+
+        if delta > 0:
+            from_key = self.key_name
+            to_key = self.external_key_name
+            delay = self.internal_delay
+
+        elif delta < 0:
+            from_key = self.external_key_name
+            to_key = self.key_name
+            delay = self.external_delay
+
+        else:
+            return
+
+        self.vega.one_off_transfer(
+            from_wallet_name=self.wallet_name,
+            to_wallet_name=self.wallet_name,
+            from_key_name=from_key,
+            to_key_name=to_key,
+            from_account_type=vega_protos.ACCOUNT_TYPE_GENERAL,
+            to_account_type=vega_protos.ACCOUNT_TYPE_GENERAL,
+            asset=self.asset_id,
+            amount=abs(delta),
+            delay=delay,
+        )
+
+    def step(self, vega_state: VegaState):
+        super().step(vega_state=vega_state)
+        self._balance_positions()
+        self._balance_accounts()
+
+
 class LimitOrderTrader(StateAgentWithWallet):
     """Agent which randomly submits and cancels limit orders.
 
