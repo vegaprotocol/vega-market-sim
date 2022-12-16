@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.scenario import Scenario
+from vega_sim.scenario.scenario import Scenario, MarketHistoryData
 
 from vega_sim.api.market import MarketConfig
 
@@ -58,7 +58,7 @@ def _run_parameter_iteration(
     value: str,
     additional_parameters_to_set: Optional[Dict[str, str]] = None,
     random_state: Optional[np.random.RandomState] = None,
-) -> Any:
+) -> Tuple[List[MarketHistoryData], Any]:
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         retain_log_files=True,
@@ -83,9 +83,9 @@ def _run_parameter_iteration(
             PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
         )
 
-        res = scenario.run_iteration(vega=vega, random_state=random_state)
+        scenario.run_iteration(vega=vega, random_state=random_state)
 
-        return res
+        return (scenario.get_run_data(), scenario.get_additional_run_data())
 
 
 def _run_market_parameter_iteration(
@@ -93,8 +93,7 @@ def _run_market_parameter_iteration(
     parameter_to_vary: str,
     value: Union[str, int, float],
     random_state: Optional[np.random.RandomState],
-) -> Any:
-
+) -> Tuple[List[MarketHistoryData], Any]:
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         retain_log_files=True,
@@ -102,18 +101,17 @@ def _run_market_parameter_iteration(
         transactions_per_block=100,
         use_full_vega_wallet=False,
     ) as vega:
-
         market_config = MarketConfig("default")
 
         market_config.set(parameter_to_vary, value)
 
-        res = scenario.run_iteration(
+        scenario.run_iteration(
             vega=vega,
             random_state=random_state,
             market_config=market_config,
         )
 
-        return res
+        return (scenario.get_run_data(), scenario.get_additional_run_data())
 
 
 def run_single_parameter_experiment(
@@ -127,14 +125,14 @@ def run_single_parameter_experiment(
         results[value] = []
         for state in copy.deepcopy(random_seeds):
             if experiment.market_parameter:
-                res = _run_market_parameter_iteration(
+                (_, res) = _run_market_parameter_iteration(
                     scenario=experiment.scenario,
                     parameter_to_vary=experiment.parameter_to_vary,
                     value=value,
                     random_state=state,
                 )
             else:
-                res = _run_parameter_iteration(
+                (_, res) = _run_parameter_iteration(
                     scenario=experiment.scenario,
                     parameter_to_vary=experiment.parameter_to_vary,
                     value=value,

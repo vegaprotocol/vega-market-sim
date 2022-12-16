@@ -1,18 +1,24 @@
 import abc
 import numpy as np
-from typing import Optional, List
+from typing import Optional, List, Callable, Any, Dict
 
 from vega_sim.null_service import VegaService
 from vega_sim.environment.environment import MarketEnvironment
 from vega_sim.scenario.constants import Network
-from vega_sim.scenario.common.agents import Snitch, StateAgent, MarketHistoryData
+from vega_sim.scenario.common.agents import Snitch, StateAgent, MarketHistoryData, Agent
 from vega_sim.tools.scenario_output import market_data_standard_output
 
 
 class Scenario(abc.ABC):
-    def __init__(self):
+    def __init__(
+        self,
+        state_extraction_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
+    ):
         self.agents = []
         self.env: Optional[MarketEnvironment] = None
+        self.state_extraction_fn = state_extraction_fn
 
     @abc.abstractmethod
     def configure_agents(
@@ -63,7 +69,9 @@ class Scenario(abc.ABC):
         )
 
         if run_with_snitch or output_data:
-            self.agents["snitch"] = Snitch()
+            self.agents["snitch"] = Snitch(
+                agents=self.agents, additional_state_fn=self.state_extraction_fn
+            )
 
         self.env = self.configure_environment(
             vega=vega, tag=tag, random_state=random_state, **kwargs
@@ -84,3 +92,7 @@ class Scenario(abc.ABC):
     def get_run_data(self) -> List[MarketHistoryData]:
         snitch = self.get_snitch()
         return snitch.states if snitch is not None else []
+
+    def get_additional_run_data(self) -> List[MarketHistoryData]:
+        snitch = self.get_snitch()
+        return snitch.additional_states if snitch is not None else []

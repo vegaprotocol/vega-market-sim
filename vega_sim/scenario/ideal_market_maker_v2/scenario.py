@@ -1,14 +1,13 @@
 import argparse
 import logging
 import numpy as np
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Dict
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.constants import Network
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
@@ -16,7 +15,6 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
-    INFORMED_WALLET,
     OptimalMarketMaker,
 )
 from vega_sim.scenario.common.agents import (
@@ -24,7 +22,6 @@ from vega_sim.scenario.common.agents import (
     BackgroundMarket,
     OpenAuctionPass,
     StateAgent,
-    InformedTrader,
 )
 
 
@@ -51,7 +48,6 @@ class IdealMarketMaker(Scenario):
         spread: int = 2,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         buy_intensity: float = 5,
         sell_intensity: float = 5,
         backgroundmarket_tick_spacing: float = 0.002,
@@ -59,7 +55,7 @@ class IdealMarketMaker(Scenario):
         step_length_seconds: int = 1,
         opening_auction_trade_amount: float = 1,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
         price_process_fn: Optional[Callable[[None], List[float]]] = None,
@@ -67,7 +63,7 @@ class IdealMarketMaker(Scenario):
         settle_at_end: bool = True,
         proportion_taken: float = 0.8,
     ):
-        super().__init__()
+        super().__init__(state_extraction_fn=state_extraction_fn)
         self.num_steps = num_steps
         self.random_agent_ordering = random_agent_ordering
         self.market_decimal = market_decimal
@@ -83,9 +79,7 @@ class IdealMarketMaker(Scenario):
         self.spread = spread / 10**self.market_decimal
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
-        self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
-        self.state_extraction_fn = state_extraction_fn
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
@@ -247,10 +241,8 @@ class IdealMarketMaker(Scenario):
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
 

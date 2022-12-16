@@ -1,7 +1,7 @@
 import numpy as np
 
 from datetime import datetime, timedelta
-from typing import Any, Callable, List, Optional, Dict
+from typing import Any, Callable, Optional, Dict
 
 from vega_sim.api.market import MarketConfig
 from vega_sim.environment.agent import Agent
@@ -13,7 +13,6 @@ from vega_sim.scenario.common.utils.price_process import (
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.constants import Network
 
 from vega_sim.scenario.configurable_market.agents import (
     ConfigurableMarketManager,
@@ -48,14 +47,13 @@ class ConfigurableMarket(Scenario):
         granularity: Optional[Granularity] = Granularity.MINUTE,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
         settle_at_end: bool = True,
         price_process_fn: Optional[Callable] = None,
     ):
-        super().__init__()
+        super().__init__(state_extraction_fn=state_extraction_fn)
 
         # Simulation settings
         self.num_steps = num_steps
@@ -64,10 +62,6 @@ class ConfigurableMarket(Scenario):
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
         self.price_process_fn = price_process_fn
-
-        # Logging options
-        self.state_extraction_freq = state_extraction_freq
-        self.state_extraction_fn = state_extraction_fn
 
         # Asset parameters
         self.asset_name = asset_name
@@ -261,7 +255,5 @@ class ConfigurableMarket(Scenario):
             random_agent_ordering=True,
             transactions_per_block=self.block_size,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
         )

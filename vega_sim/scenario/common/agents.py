@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from venv import create
+
 
 import logging
 
@@ -14,13 +14,13 @@ except ImportError:
 
 from enum import Enum
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict
+from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict, Any
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
 from vega_sim.environment import VegaState
-from vega_sim.environment.agent import StateAgentWithWallet, StateAgent
-from vega_sim.null_service import VegaServiceNull
+from vega_sim.environment.agent import StateAgentWithWallet, StateAgent, Agent
+from vega_sim.null_service import VegaServiceNull, VegaService
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.proto.vega import (
     markets as markets_protos,
@@ -1009,6 +1009,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.safety_factor = safety_factor
         self.state_update_freq = state_update_freq
         self.max_order_size = max_order_size
+
+        self.bid_depth = None
+        self.ask_depth = None
 
     def initialise(
         self,
@@ -2192,8 +2195,17 @@ class MomentumTrader(StateAgentWithWallet):
 class Snitch(StateAgent):
     NAME_BASE = "snitch"
 
-    def __init__(self):
+    def __init__(
+        self,
+        agents: Optional[Dict[str, Agent]] = None,
+        additional_state_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
+    ):
         self.states = []
+        self.additional_states = []
+        self.agents = agents
+        self.additional_state_fn = additional_state_fn
 
     def step(self, vega_state: VegaState):
         market_infos = {}
@@ -2211,3 +2223,7 @@ class Snitch(StateAgent):
                 accounts=accounts,
             )
         )
+        if self.additional_state_fn is not None:
+            self.additional_states.append(
+                self.additional_state_fn(self.vega, self.agents)
+            )

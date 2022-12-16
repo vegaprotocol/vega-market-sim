@@ -34,6 +34,8 @@ INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
 
 
 class OptimalMarketMaker(StateAgentWithWallet):
+    NAME_BASE = "optimal_market_maker"
+
     def __init__(
         self,
         wallet_name: str,
@@ -304,6 +306,8 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
 
 class MarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "mo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -364,6 +368,8 @@ class MarketOrderTrader(StateAgentWithWallet):
 
 
 class LimitOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "lo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -533,6 +539,8 @@ class LimitOrderTrader(StateAgentWithWallet):
 
 
 class OpenAuctionPass(StateAgentWithWallet):
+    NAME_BASE = "open_auction"
+
     def __init__(
         self,
         wallet_name: str,
@@ -583,6 +591,8 @@ class OpenAuctionPass(StateAgentWithWallet):
 
 
 class OptimalLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "optimal_liq_prov"
+
     def __init__(
         self,
         wallet_name: str,
@@ -751,6 +761,8 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
 
 
 class InformedTrader(StateAgentWithWallet):
+    NAME_BASE = "informed_trader"
+
     def __init__(
         self,
         wallet_name: str,

@@ -1,7 +1,7 @@
 import argparse
 import logging
 import numpy as np
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Dict
 from vega_sim.environment.agent import Agent
 from vega_sim.scenario.common.utils.price_process import (
     Granularity,
@@ -12,7 +12,6 @@ from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.constants import Network
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
     MM_WALLET,
     TERMINATE_WALLET,
@@ -54,12 +53,11 @@ class CurveMarketMaker(Scenario):
         lp_commitamount: float = 200000,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         buy_intensity: float = 5,
         sell_intensity: float = 5,
         step_length_seconds: int = 1,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
         price_process_fn: Optional[Callable[[None], List[float]]] = None,
         pause_every_n_steps: Optional[int] = None,
@@ -72,7 +70,7 @@ class CurveMarketMaker(Scenario):
         market_maker_max_order: float = 200,
         proportion_taken: float = 0.8,
     ):
-        super().__init__()
+        super().__init__(state_extraction_fn=state_extraction_fn)
         if buy_intensity != sell_intensity:
             raise Exception("Model currently requires buy_intensity == sell_intensity")
 
@@ -91,9 +89,7 @@ class CurveMarketMaker(Scenario):
         self.phi = phi
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
-        self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
-        self.state_extraction_fn = state_extraction_fn
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
@@ -257,10 +253,8 @@ class CurveMarketMaker(Scenario):
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.block_size,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
 

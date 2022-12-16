@@ -1,14 +1,13 @@
 import argparse
 import logging
 import numpy as np
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Dict
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.scenario.ideal_market_maker.environments import MarketEnvironment
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.constants import Network
 from vega_sim.scenario.common.agents import StateAgent
 from vega_sim.scenario.ideal_market_maker.agents import (
     MM_WALLET,
@@ -51,15 +50,14 @@ class IdealMarketMaker(Scenario):
         spread: float = 0.00002,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         step_length_seconds: Optional[int] = None,
-        state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
-        ] = None,
         proportion_taken: float = 0.8,
         price_process_fn: Optional[Callable] = None,
+        state_extraction_fn: Optional[
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
+        ] = None,
     ):
-        super().__init__()
+        super().__init__(state_extraction_fn=state_extraction_fn)
         self.num_steps = num_steps
         self.market_name = market_name
         self.asset_name = asset_name
@@ -80,9 +78,7 @@ class IdealMarketMaker(Scenario):
         self.spread = spread
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
-        self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
-        self.state_extraction_fn = state_extraction_fn
         self.proportion_taken = proportion_taken
         self.price_process_fn = price_process_fn
 
@@ -233,10 +229,8 @@ class IdealMarketMaker(Scenario):
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
         )
 
 

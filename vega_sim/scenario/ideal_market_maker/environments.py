@@ -23,10 +23,6 @@ class MarketEnvironment(MarketEnvironmentWithState):
         transactions_per_block: int = 1,
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
-        state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
-        ] = None,
-        state_extraction_freq: int = 10,
         block_length_seconds: int = 1,
     ):
         super().__init__(
@@ -36,18 +32,32 @@ class MarketEnvironment(MarketEnvironmentWithState):
             transactions_per_block=transactions_per_block,
             step_length_seconds=step_length_seconds,
             vega_service=vega_service,
-            state_extraction_fn=state_extraction_fn,
-            state_extraction_freq=state_extraction_freq,
             state_func=state_func,
             block_length_seconds=block_length_seconds,
         )
         self._base_agents = base_agents
         self.num_agents = len(base_agents)
 
-        self.mm_agent = self.agents[OptimalMarketMaker.name_from_tag()]
-        self.lo_agent = self.agents[LimitOrderTrader.name_from_tag()]
-        self.mo_agent = self.agents[MarketOrderTrader.name_from_tag()]
-        self.olp_agent = self.agents[OptimalLiquidityProvider.name_from_tag()]
+        self.mm_agent = [
+            agent
+            for agent in self.agents
+            if agent.name() == OptimalMarketMaker.name_from_tag()
+        ][0]
+        self.lo_agent = [
+            agent
+            for agent in self.agents
+            if agent.name() == LimitOrderTrader.name_from_tag()
+        ][0]
+        self.mo_agent = [
+            agent
+            for agent in self.agents
+            if agent.name() == MarketOrderTrader.name_from_tag()
+        ][0]
+        self.olp_agent = [
+            agent
+            for agent in self.agents
+            if agent.name() == OptimalLiquidityProvider.name_from_tag()
+        ][0]
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)

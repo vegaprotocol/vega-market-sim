@@ -41,6 +41,8 @@ INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
 
 
 class OptimalMarketMaker(StateAgentWithWallet):
+    NAME_BASE = "optimal_mm"
+
     def __init__(
         self,
         wallet_name: str,

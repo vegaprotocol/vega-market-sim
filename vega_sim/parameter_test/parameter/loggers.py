@@ -11,7 +11,6 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
 from vega_sim.scenario.common.agents import (
     MomentumTrader,
     MarketOrderTrader,
-    InformedTrader,
 )
 
 
@@ -57,9 +56,9 @@ LOB_CSV_HEADERS = [
 
 def ideal_market_maker_single_data_extraction(
     additional_data_fns: Optional[
-        List[Callable[[VegaServiceNull, List[Agent]], Dict[str, Any]]]
+        List[Callable[[VegaServiceNull, Dict[str, Agent]], Dict[str, Any]]]
     ] = None,
-) -> Callable[[VegaServiceNull, List[Agent]], Dict[str, Any]]:
+) -> Callable[[VegaServiceNull, Dict[str, Agent]], Dict[str, Any]]:
     return functools.partial(
         _ideal_market_maker_single_data_extraction,
         additional_data_fns=additional_data_fns,
@@ -68,15 +67,14 @@ def ideal_market_maker_single_data_extraction(
 
 def _ideal_market_maker_single_data_extraction(
     vega: VegaServiceNull,
-    agents: List[Agent],
-    state_values: List = None,
+    agents: Dict[str, Agent],
     additional_data_fns: List[
-        Optional[Callable[[VegaServiceNull, List[Agent]], Dict[str, Any]]]
+        Optional[Callable[[VegaServiceNull, Dict[str, Agent]], Dict[str, Any]]]
     ] = None,
 ) -> Dict[str, Any]:
     mm_agent = [
         agent
-        for agent in agents
+        for agent in agents.values()
         if isinstance(
             agent,
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
@@ -141,15 +139,17 @@ def _ideal_market_maker_single_data_extraction(
 
     additional_fns = additional_data_fns if additional_data_fns is not None else []
 
-    if len(state_values) == 0:
-        max_locked_capital = margin_lp + bond_lp
-        max_margin = margin_lp
-    else:
-        old_logs = state_values[mm_agent.current_step - 2]
-        max_locked_capital = old_logs["LP: Max Locked Capital"]
-        max_locked_capital = max(margin_lp + bond_lp, max_locked_capital)
-        max_margin = old_logs["LP: Max Margin"]
-        max_margin = max(margin_lp, max_margin)
+    # if len(state_values) == 0:
+    #     max_locked_capital = margin_lp + bond_lp
+    #     max_margin = margin_lp
+    # else:
+    #     old_logs = state_values[mm_agent.current_step - 2]
+    #     max_locked_capital = old_logs["LP: Max Locked Capital"]
+    #     max_locked_capital = max(margin_lp + bond_lp, max_locked_capital)
+    #     max_margin = old_logs["LP: Max Margin"]
+    #     max_margin = max(margin_lp, max_margin)
+    max_locked_capital = margin_lp + bond_lp
+    max_margin = margin_lp
 
     base_logs = {
         "Time Step": mm_agent.current_step,
@@ -184,8 +184,12 @@ def _ideal_market_maker_single_data_extraction(
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
-        "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp),
-        "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp),
+        "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp)
+        if mm_agent.bid_depth is not None
+        else None,
+        "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp)
+        if mm_agent.ask_depth is not None
+        else None,
         "External Midprice": mm_agent.price_process[mm_agent.current_step - 1]
         if hasattr(mm_agent, "price_process")
         else None,
@@ -208,9 +212,11 @@ def _ideal_market_maker_single_data_extraction(
 
 def v1_ideal_mm_additional_data(
     vega: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
 ) -> Dict[str, Any]:
-    mm_agent = [agent for agent in agents if isinstance(agent, OptimalMarketMaker)][0]
+    mm_agent = [
+        agent for agent in agents.values() if isinstance(agent, OptimalMarketMaker)
+    ][0]
 
     return {
         "Buying MOs": mm_agent.num_buyMO,
@@ -222,11 +228,11 @@ def v1_ideal_mm_additional_data(
 
 def target_stake_additional_data(
     vega: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
 ) -> Dict[str, Any]:
     mm_agent = [
         agent
-        for agent in agents
+        for agent in agents.values()
         if isinstance(
             agent,
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
@@ -242,11 +248,11 @@ def target_stake_additional_data(
 
 def tau_scaling_additional_data(
     vega: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
 ) -> Dict[str, Any]:
     mm_agent = [
         agent
-        for agent in agents
+        for agent in agents.values()
         if isinstance(
             agent,
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
@@ -263,11 +269,11 @@ def tau_scaling_additional_data(
 
 def limit_order_book(
     vega: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
 ) -> Dict[str, Any]:
     mm_agent = [
         agent
-        for agent in agents
+        for agent in agents.values()
         if isinstance(
             agent,
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
@@ -307,9 +313,11 @@ def limit_order_book(
 
 def momentum_trader_data_extraction(
     vega: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
 ) -> Dict[str, Any]:
-    trader = [agent for agent in agents if isinstance(agent, MomentumTrader)][0]
+    trader = [agent for agent in agents.values() if isinstance(agent, MomentumTrader)][
+        0
+    ]
 
     general, margin, _ = vega.party_account(
         wallet_name=trader.wallet_name,
@@ -358,9 +366,11 @@ def momentum_trader_data_extraction(
 
 def uninformed_tradingbot_data_extraction(
     vega: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
 ) -> Dict[str, Any]:
-    trader = [agent for agent in agents if isinstance(agent, MarketOrderTrader)][0]
+    trader = [
+        agent for agent in agents.values() if isinstance(agent, MarketOrderTrader)
+    ][0]
 
     general, margin, _ = vega.party_account(
         wallet_name=trader.wallet_name,
