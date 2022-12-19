@@ -247,7 +247,6 @@ class MarketCrash(Scenario):
             vega_service=vega,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
 

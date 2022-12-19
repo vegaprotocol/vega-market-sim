@@ -57,7 +57,7 @@ class MarketEnvironment(MarketEnvironmentWithState):
             agent
             for agent in self.agents
             if agent.name() == OptimalLiquidityProvider.name_from_tag()
-        ][0]
+        ]
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)

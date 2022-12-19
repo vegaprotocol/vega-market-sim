@@ -32,7 +32,7 @@ class Agent(ABC):
         pass
 
     def name(self) -> str:
-        return self.NAME_BASE + (f"_{self.tag}" if self.tag is not None else "")
+        return self.NAME_BASE + (f"_{self.tag}" if self.tag else "")
 
     @classmethod
     def name_from_tag(cls, tag: Optional[str] = None) -> str:
