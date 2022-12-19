@@ -1582,47 +1582,30 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
 
         if self.state_update_freq and current_step % self.state_update_freq == 0:
 
-            int_market_info = (
-                self.vega.market_info(market_id=self.market_id)
-                if self.market_id is not None
-                else None
-            )
-            self.int_mkr_fee = (
-                float(int_market_info.fees.factors.maker_fee)
-                if int_market_info is not None
-                else 0
-            )
-            self.int_liq_fee = (
-                float(int_market_info.fees.factors.liquidity_fee)
-                if int_market_info is not None
-                else 0
-            )
-            self.int_inf_fee = (
-                float(int_market_info.fees.factors.infrastructure_fee)
-                if int_market_info is not None
-                else 0
-            )
+            if self.market_id is None:
+                self.int_mkr_fee = 0
+                self.int_liq_fee = 0
+                self.int_inf_fee = 0
+            else:
+                int_market_info = self.vega.market_info(market_id=self.market_id)
+                self.int_mkr_fee = float(int_market_info.fees.factors.maker_fee)
+                self.int_liq_fee = float(int_market_info.fees.factors.liquidity_fee)
+                self.int_inf_fee = float(
+                    int_market_info.fees.factors.infrastructure_fee
+                )
 
-            ext_market_info = (
-                self.vega.market_info(market_id=self.external_market_id)
-                if self.external_market_id is not None
-                else None
-            )
-            self.ext_mkr_fee = (
-                float(ext_market_info.fees.factors.maker_fee)
-                if ext_market_info is not None
-                else 0
-            )
-            self.ext_liq_fee = (
-                float(ext_market_info.fees.factors.liquidity_fee)
-                if ext_market_info is not None
-                else 0
-            )
-            self.ext_inf_fee = (
-                float(ext_market_info.fees.factors.infrastructure_fee)
-                if ext_market_info is not None
-                else 0
-            )
+            if self.external_market_id is None:
+                self.ext_mkr_fee = 0
+                self.ext_liq_fee = 0
+                self.ext_inf_fee = 0
+
+            else:
+                ext_market_info = self.vega.market_info(market_id=self.market_id)
+                self.ext_mkr_fee = float(ext_market_info.fees.factors.maker_fee)
+                self.ext_liq_fee = float(ext_market_info.fees.factors.liquidity_fee)
+                self.ext_inf_fee = float(
+                    ext_market_info.fees.factors.infrastructure_fee
+                )
 
     def _optimal_strategy(self, current_position, current_step):
 
