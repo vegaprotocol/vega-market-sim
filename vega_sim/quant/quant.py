@@ -1,10 +1,17 @@
 from math import log, sqrt, exp
 from scipy.stats import lognorm
 from typing import Optional
+from deprecated import deprecated
 
 import vega_sim.proto.vega as vega_protos
 
 
+@deprecated(
+    reason=(
+        "This function is currently unused, so is unmaintained, but worked correctly"
+        " when last used"
+    )
+)
 def probability_of_trading(
     side: vega_protos.vega.Side,
     price: float,
