@@ -171,4 +171,3 @@ SCENARIOS = {
         ext_lock=5 * 60,
     ),
 }
-688
