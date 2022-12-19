@@ -2095,7 +2095,7 @@ class InformedTrader(StateAgentWithWallet):
         self.key_name = key_name
         self.accuracy = accuracy
         self.lookahead = lookahead
-        self.current_step = 1
+        self.current_step = 0
         self.queue = Queue()
 
         self.random_state = (
