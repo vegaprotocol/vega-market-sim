@@ -95,6 +95,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
             else np.random.RandomState(seed=123)
         )
 
+        self.bid_depth = None
+        self.ask_depth = None
+
         self.long_horizon_estimate = num_steps >= 200
 
         if not self.long_horizon_estimate:

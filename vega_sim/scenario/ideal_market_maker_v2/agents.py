@@ -101,6 +101,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
         self.long_horizon_estimate = num_steps >= 200
 
+        self.bid_depth = None
+        self.ask_depth = None
+
         if not self.long_horizon_estimate:
             self.optimal_bid, self.optimal_ask, _ = A_S_MMmodel(
                 T=self.time / 60 / 24 / 365.25,
