@@ -1137,37 +1137,29 @@ class ShapedMarketMaker(StateAgentWithWallet):
         buy_shape: List[MMOrder],
         sell_shape: List[MMOrder],
     ):
-        instantaneous_liquidity = min(
-            [
-                self._calculate_liquidity(
-                    side=vega_protos.SIDE_BUY,
-                    orders=buy_shape,
-                    best_bid_price=buy_shape[0].price,
-                    best_ask_price=sell_shape[0].price,
-                ),
-                self._calculate_liquidity(
-                    side=vega_protos.SIDE_SELL,
-                    orders=sell_shape,
-                    best_bid_price=buy_shape[0].price,
-                    best_ask_price=sell_shape[0].price,
-                ),
-            ]
+        buy_scaling_factor = (
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
+        ) / self._calculate_liquidity(
+            orders=buy_shape,
         )
 
-        scaling_factor = (
+        sell_scaling_factor = (
             self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
-        ) / instantaneous_liquidity
+        ) / self._calculate_liquidity(
+            orders=sell_shape,
+        )
 
         # Scale the shapes
         scaled_buy_shape = [
             MMOrder(
-                min([order.size * scaling_factor, self.max_order_size]), order.price
+                min([order.size * buy_scaling_factor, self.max_order_size]), order.price
             )
             for order in buy_shape
         ]
         scaled_sell_shape = [
             MMOrder(
-                min([order.size * scaling_factor, self.max_order_size]), order.price
+                min([order.size * sell_scaling_factor, self.max_order_size]),
+                order.price,
             )
             for order in sell_shape
         ]
@@ -1176,34 +1168,15 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def _calculate_liquidity(
         self,
-        side: vega_protos.side,
         orders: List[MMOrder],
-        best_bid_price: float,
-        best_ask_price: float,
     ) -> float:
-        (min_valid_price, max_valid_price) = self.vega.price_bounds(
-            market_id=self.market_id
-        )
-
         provided_liquidity = 0
 
         for vol, price in orders:
             if price <= 0:
                 continue
 
-            p = probability_of_trading(
-                price=price,
-                side=side,
-                best_bid_price=best_bid_price,
-                best_ask_price=best_ask_price,
-                min_valid_price=min_valid_price,
-                max_valid_price=max_valid_price,
-                mu=self.mu,
-                tau=self.tau * self.tau_scaling,
-                sigma=self.sigma,
-                min_probability_of_trading=self.min_probability_of_trading,
-            )
-            provided_liquidity += vol * price * p
+            provided_liquidity += vol * price
 
         return provided_liquidity
 
