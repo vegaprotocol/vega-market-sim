@@ -1653,7 +1653,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
             key_name=self.key_name,
         )
         current_int_position = (
-           internal_position[0].open_volume if internal_position != [] else 0
+            internal_position[0].open_volume if internal_position != [] else 0
         )
         external_position = self.vega.positions_by_market(
             wallet_name=self.wallet_name,
