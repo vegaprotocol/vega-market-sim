@@ -1534,6 +1534,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         profit_margin: Optional[float] = 0.01,
         internal_delay: int = 60 * 60,
         external_delay: int = 5 * 60,
+        transfer_threshold: float = 500,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1570,6 +1571,8 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         self.external_key_name = external_key_name
         self.internal_delay = internal_delay
         self.external_delay = external_delay
+
+        self.transfer_threshold = transfer_threshold
 
     def initialise(
         self,
@@ -1760,7 +1763,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         )
 
         # Create a transfer to balance the internal and external accounts
-        if abs(delta) < 500:
+        if abs(delta) < self.transfer_threshold:
             return
 
         if delta > 0:
@@ -2037,6 +2040,7 @@ class InformedTrader(StateAgentWithWallet):
         proportion_taken: float = 0.8,
         accuracy: float = 1.0,
         lookahead: int = 1,
+        max_abs_position: float = 100,
         tag: str = "",
         key_name: Optional[str] = None,
         random_state: Optional[np.random.RandomState] = None,
@@ -2076,6 +2080,8 @@ class InformedTrader(StateAgentWithWallet):
                 Accuracy of agent's speculations. Defaults to 1.0.
             lookahead (int, optional):
                 Number of steps to look ahead. Defaults to 1.
+            max_abs_position (float, optional):
+                The maximum absolute position the trader can have. Defaults to 100.
             tag (str, optional):
                 Market tag. Defaults to "".
             key_name (Optional[str], optional):
@@ -2095,6 +2101,7 @@ class InformedTrader(StateAgentWithWallet):
         self.key_name = key_name
         self.accuracy = accuracy
         self.lookahead = lookahead
+        self.max_abs_position = max_abs_position
         self.current_step = 0
         self.queue = Queue()
 
@@ -2171,6 +2178,16 @@ class InformedTrader(StateAgentWithWallet):
         # Determine the size of the order
         size = round(self.proportion_taken * volume, self.pdp)
 
+        # Limit order size to not exceed max allowable position
+        position = self.vega.positions_by_market(
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                    key_name=self.key_name,
+                )
+        abs_position = abs(int(position[0].open_volume) if position else 0)
+        if abs_position + size > self.max_abs_position:
+            size = min([0, self.max_abs_position - abs_position])
+
         # Add a random probability the agent speculates the wrong side
         if self.random_state.rand() <= self.accuracy:
             side = side
@@ -2198,7 +2215,7 @@ class InformedTrader(StateAgentWithWallet):
             logger.debug("Order rejected")
             return None
 
-    def _settle_order(self, order: ITOrder):
+    def _close_positions(self, order: ITOrder):
 
         # If order is blank
         if order is None:
