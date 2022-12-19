@@ -48,11 +48,12 @@ class HedgedMarket(Scenario):
         ext_mdp: int = 3,
         ext_pdp: int = 3,
         ext_lock: float = 5 * 60,
-        int_mm_initial_asset_mint: float = 3e5,
+        int_mm_int_key_mint: float = 2e10,
+        int_mm_ext_key_mint: float = 1e10,
         int_mm_commitment_amount: float = 1e5,
         int_mm_profit_margin: float = 0.0000,
         int_mm_max_leverage: float = 10.0,
-        ext_mm_num_levels: int = 25,
+        ext_mm_num_levels: int = 1e10,
         ext_mm_tick_spacing: float = 0.1,
         ext_mm_kappa: float = 1,
         ext_mm_market_kappa: float = 10,
@@ -97,7 +98,8 @@ class HedgedMarket(Scenario):
         self.ext_lock = ext_lock
 
         # Internal market maker properties
-        self.int_mm_initial_asset_mint = int_mm_initial_asset_mint
+        self.int_mm_int_key_mint = int_mm_int_key_mint
+        self.int_mm_ext_key_mint = int_mm_ext_key_mint
         self.int_mm_commitment_amount = int_mm_commitment_amount
         self.int_mm_profit_margin = int_mm_profit_margin
         self.int_mm_max_leverage = int_mm_max_leverage
@@ -176,7 +178,8 @@ class HedgedMarket(Scenario):
             key_name=INT_MARKET_MAKER_KEY_A.key_name,
             external_key_name=INT_MARKET_MAKER_KEY_B.key_name,
             price_process_generator=iter(price_process),
-            initial_asset_mint=self.int_mm_initial_asset_mint,
+            internal_key_mint=self.int_mm_int_key_mint,
+            external_key_mint=self.int_mm_ext_key_mint,
             commitment_amount=self.int_mm_commitment_amount,
             asset_name=self.asset_name,
             asset_decimal_places=self.asset_adp,

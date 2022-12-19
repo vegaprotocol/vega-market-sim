@@ -1482,7 +1482,8 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         wallet_pass: str,
         num_steps: int,
         price_process_generator: Iterable[float],
-        initial_asset_mint: float = 1000000,
+        internal_key_mint: float = 1000000,
+        external_key_mint: float = 1000000,
         market_name: str = None,
         external_market_name: str = None,
         asset_name: str = None,
@@ -1514,7 +1515,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
             wallet_pass=wallet_pass,
             num_steps=num_steps,
             price_process_generator=price_process_generator,
-            initial_asset_mint=initial_asset_mint,
+            initial_asset_mint=internal_key_mint,
             market_name=market_name,
             asset_name=asset_name,
             commitment_amount=commitment_amount,
@@ -1546,6 +1547,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         self.external_delay = external_delay
 
         self.transfer_threshold = transfer_threshold
+        self.external_key_mint = external_key_mint
 
     def initialise(
         self,
@@ -1571,7 +1573,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
             vega.mint(
                 wallet_name=self.wallet_name,
                 asset=self.asset_id,
-                amount=self.initial_asset_mint,
+                amount=self.external_key_mint,
                 key_name=self.external_key_name,
             )
 
