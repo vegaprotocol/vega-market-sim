@@ -249,7 +249,7 @@ class ConfigurableMarket(Scenario):
         self, vega: VegaServiceNull, **kwargs
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             step_length_seconds=self.granularity.value,
             random_agent_ordering=True,
