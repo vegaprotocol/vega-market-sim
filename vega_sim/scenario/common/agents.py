@@ -2202,6 +2202,7 @@ class Snitch(StateAgent):
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
     ):
+        self.tag = None
         self.states = []
         self.additional_states = []
         self.agents = agents
