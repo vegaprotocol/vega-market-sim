@@ -2180,10 +2180,10 @@ class InformedTrader(StateAgentWithWallet):
 
         # Limit order size to not exceed max allowable position
         position = self.vega.positions_by_market(
-                    wallet_name=self.wallet_name,
-                    market_id=self.market_id,
-                    key_name=self.key_name,
-                )
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
         abs_position = abs(int(position[0].open_volume) if position else 0)
         if abs_position + size > self.max_abs_position:
             size = min([0, self.max_abs_position - abs_position])
