@@ -512,7 +512,7 @@ class VegaLoadTest(Scenario):
         **kwargs,
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             random_agent_ordering=False,
             transactions_per_block=self.transactions_per_block,
