@@ -1,17 +1,24 @@
 import abc
 import numpy as np
-from typing import Optional, List
+from typing import Optional, List, Callable, Any, Dict
 
 from vega_sim.null_service import VegaService
 from vega_sim.environment.environment import MarketEnvironment
 from vega_sim.scenario.constants import Network
-from vega_sim.scenario.common.agents import Snitch, StateAgent
+from vega_sim.scenario.common.agents import Snitch, StateAgent, MarketHistoryData, Agent
+from vega_sim.tools.scenario_output import market_data_standard_output
 
 
 class Scenario(abc.ABC):
-    def __init__(self):
+    def __init__(
+        self,
+        state_extraction_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
+    ):
         self.agents = []
         self.env: Optional[MarketEnvironment] = None
+        self.state_extraction_fn = state_extraction_fn
 
     @abc.abstractmethod
     def configure_agents(
@@ -53,6 +60,7 @@ class Scenario(abc.ABC):
         random_state: Optional[np.random.RandomState] = None,
         run_with_snitch: bool = True,
         tag: Optional[str] = None,
+        output_data: bool = False,
         **kwargs,
     ):
         tag = tag if tag is not None else ""
@@ -60,22 +68,31 @@ class Scenario(abc.ABC):
             vega=vega, tag=tag, random_state=random_state, **kwargs
         )
 
-        if run_with_snitch:
-            self.agents.append(Snitch())
+        if run_with_snitch or output_data:
+            self.agents["snitch"] = Snitch(
+                agents=self.agents, additional_state_fn=self.state_extraction_fn
+            )
 
         self.env = self.configure_environment(
             vega=vega, tag=tag, random_state=random_state, **kwargs
         )
 
-        return self.env.run(
+        outputs = self.env.run(
             pause_at_completion=pause_at_completion,
             run_with_console=run_with_console,
         )
+        if output_data:
+            market_data_standard_output(self.get_run_data())
+
+        return outputs
 
     def get_snitch(self) -> Optional[Snitch]:
-        snitch = None
-        for agent in self.agents:
-            if isinstance(agent, Snitch):
-                snitch = agent
+        return self.agents.get("snitch")
 
-        return snitch
+    def get_run_data(self) -> List[MarketHistoryData]:
+        snitch = self.get_snitch()
+        return snitch.states if snitch is not None else []
+
+    def get_additional_run_data(self) -> List[MarketHistoryData]:
+        snitch = self.get_snitch()
+        return snitch.additional_states if snitch is not None else []

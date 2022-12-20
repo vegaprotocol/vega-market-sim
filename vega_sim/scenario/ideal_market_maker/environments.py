@@ -11,6 +11,7 @@ from vega_sim.scenario.ideal_market_maker.agents import (
     OptimalLiquidityProvider,
     InformedTrader,
 )
+from vega_sim.scenario.common.agents import Snitch
 
 
 class MarketEnvironment(MarketEnvironmentWithState):
@@ -23,10 +24,6 @@ class MarketEnvironment(MarketEnvironmentWithState):
         transactions_per_block: int = 1,
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
-        state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
-        ] = None,
-        state_extraction_freq: int = 10,
         block_length_seconds: int = 1,
     ):
         super().__init__(
@@ -36,8 +33,6 @@ class MarketEnvironment(MarketEnvironmentWithState):
             transactions_per_block=transactions_per_block,
             step_length_seconds=step_length_seconds,
             vega_service=vega_service,
-            state_extraction_fn=state_extraction_fn,
-            state_extraction_freq=state_extraction_freq,
             state_func=state_func,
             block_length_seconds=block_length_seconds,
         )
@@ -45,22 +40,29 @@ class MarketEnvironment(MarketEnvironmentWithState):
         self.num_agents = len(base_agents)
 
         self.mm_agent = [
-            agent for agent in self.agents if isinstance(agent, OptimalMarketMaker)
+            agent
+            for agent in self.agents
+            if agent.name() == OptimalMarketMaker.name_from_tag()
         ][0]
-
         self.lo_agent = [
-            agent for agent in self.agents if isinstance(agent, LimitOrderTrader)
+            agent
+            for agent in self.agents
+            if agent.name() == LimitOrderTrader.name_from_tag()
         ][0]
-
         self.mo_agent = [
-            agent for agent in self.agents if isinstance(agent, MarketOrderTrader)
+            agent
+            for agent in self.agents
+            if agent.name() == MarketOrderTrader.name_from_tag()
         ][0]
-
         self.olp_agent = [
             agent
             for agent in self.agents
-            if isinstance(agent, OptimalLiquidityProvider)
+            if agent.name() == OptimalLiquidityProvider.name_from_tag()
         ]
+        snitches = [
+            agent for agent in self.agents if agent.name() == Snitch.name_from_tag()
+        ]
+        self.snitch = snitches[0] if len(snitches) > 0 else None
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)
@@ -83,3 +85,6 @@ class MarketEnvironment(MarketEnvironmentWithState):
         self.lo_agent.step_limitorderask(state)
         self.mo_agent.step_sell(state)
         self.lo_agent.step_limitorderbid(state)
+
+        if self.snitch is not None:
+            self.snitch.step(state)

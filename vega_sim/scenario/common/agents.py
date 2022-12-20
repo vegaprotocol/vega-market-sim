@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from venv import create
+
 
 import logging
 
@@ -15,13 +15,13 @@ except ImportError:
 
 from enum import Enum
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict
+from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict, Any
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order
 
 from vega_sim.environment import VegaState
-from vega_sim.environment.agent import StateAgentWithWallet, StateAgent
-from vega_sim.null_service import VegaServiceNull
+from vega_sim.environment.agent import StateAgentWithWallet, StateAgent, Agent
+from vega_sim.null_service import VegaServiceNull, VegaService
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.proto.vega import (
     markets as markets_protos,
@@ -33,7 +33,9 @@ from vega_sim.quant.quant import probability_of_trading
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
-SnitchData = namedtuple("SnitchData", ["market_info", "market_data", "accounts"])
+MarketHistoryData = namedtuple(
+    "MarketHistoryData", ["at_time", "market_info", "market_data", "accounts"]
+)
 
 # Send selling/buying MOs to hit LP orders
 TRADER_WALLET = WalletConfig("trader", "trader")
@@ -49,10 +51,6 @@ MMOrder = namedtuple("MMOrder", ["size", "price"])
 
 LiquidityProvision = namedtuple(
     "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
-)
-
-SnitchState = namedtuple(
-    "SnitchState", ["market_state", "open_interest", "account_balances"]
 )
 
 logger = logging.getLogger(__name__)
@@ -77,6 +75,8 @@ class TradeSignal(Enum):
 
 
 class MarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "mo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -181,6 +181,8 @@ class MarketOrderTrader(StateAgentWithWallet):
 
 
 class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "price_sensitive_mo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -294,6 +296,8 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
 
 
 class BackgroundMarket(StateAgentWithWallet):
+    NAME_BASE = "background_market"
+
     def __init__(
         self,
         wallet_name: str,
@@ -481,6 +485,8 @@ class BackgroundMarket(StateAgentWithWallet):
 
 
 class MultiRegimeBackgroundMarket(StateAgentWithWallet):
+    NAME_BASE = "multi_regime_background_market"
+
     def __init__(
         self,
         wallet_name: str,
@@ -738,6 +744,8 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
 
 
 class OpenAuctionPass(StateAgentWithWallet):
+    NAME_BASE = "open_auction_pass"
+
     def __init__(
         self,
         wallet_name: str,
@@ -802,6 +810,8 @@ class OpenAuctionPass(StateAgentWithWallet):
 
 
 class MarketManager(StateAgentWithWallet):
+    NAME_BASE = "market_manager"
+
     def __init__(
         self,
         wallet_name: str,
@@ -941,6 +951,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
     source in the market but still to maintain an interesting full LOB.
     """
 
+    NAME_BASE = "shaped_market_maker"
+
     def __init__(
         self,
         wallet_name: str,
@@ -999,6 +1011,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.safety_factor = safety_factor
         self.state_update_freq = state_update_freq
         self.max_order_size = max_order_size
+
+        self.bid_depth = None
+        self.ask_depth = None
 
     def initialise(
         self,
@@ -1282,6 +1297,8 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
     (by default an exponential curve). This allows this MM to be the sole liquidity
     source in the market but still to maintain an interesting full LOB.
     """
+
+    NAME_BASE = "expon_shaped_market_maker"
 
     def __init__(
         self,
@@ -1770,6 +1787,8 @@ class LimitOrderTrader(StateAgentWithWallet):
     distribution where the underlying normal distribution can be adjusted.
     """
 
+    NAME_BASE = "lo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -1987,6 +2006,8 @@ class LimitOrderTrader(StateAgentWithWallet):
 
 
 class InformedTrader(StateAgentWithWallet):
+    NAME_BASE = "informed_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -2203,6 +2224,8 @@ class InformedTrader(StateAgentWithWallet):
 
 
 class LiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "liq_provider"
+
     def __init__(
         self,
         wallet_name: str,
@@ -2267,6 +2290,8 @@ class MomentumTrader(StateAgentWithWallet):
     At each step, the trading agent collects future price and trades under
     certain momentum indicator.
     """
+
+    NAME_BASE = "mom_trader"
 
     def __init__(
         self,
@@ -2525,18 +2550,38 @@ class MomentumTrader(StateAgentWithWallet):
 
 
 class Snitch(StateAgent):
-    def __init__(self):
+    NAME_BASE = "snitch"
+
+    def __init__(
+        self,
+        agents: Optional[Dict[str, Agent]] = None,
+        additional_state_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
+    ):
+        self.tag = None
         self.states = []
+        self.additional_states = []
+        self.agents = agents
+        self.additional_state_fn = additional_state_fn
 
     def step(self, vega_state: VegaState):
         market_infos = {}
         market_datas = {}
+        start_time = self.vega.get_blockchain_time()
         for market in self.vega.all_markets():
             market_infos[market.id] = self.vega.market_info(market.id)
             market_datas[market.id] = self.vega.market_data(market.id)
         accounts = self.vega.list_accounts()
         self.states.append(
-            SnitchData(
-                market_info=market_infos, market_data=market_datas, accounts=accounts
+            MarketHistoryData(
+                at_time=start_time,
+                market_info=market_infos,
+                market_data=market_datas,
+                accounts=accounts,
             )
         )
+        if self.additional_state_fn is not None:
+            self.additional_states.append(
+                self.additional_state_fn(self.vega, self.agents)
+            )

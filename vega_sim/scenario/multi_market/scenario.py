@@ -198,6 +198,7 @@ class VegaLoadTest(Scenario):
             market_decimal=self.market_a_args["mdp"],
             market_position_decimal=self.market_a_args["pdp"],
             settlement_price=market_a_price_process[-1],
+            tag="a",
         )
         market_b_manager = MarketManager(
             wallet_name=MARKET_MANAGERS["MARKET_B_CREATOR"].wallet_name,
@@ -212,6 +213,7 @@ class VegaLoadTest(Scenario):
             market_decimal=self.market_b_args["mdp"],
             market_position_decimal=self.market_b_args["pdp"],
             settlement_price=market_b_price_process[-1],
+            tag="b",
         )
         market_c_manager = MarketManager(
             wallet_name=MARKET_MANAGERS["MARKET_B_CREATOR"].wallet_name,
@@ -226,6 +228,7 @@ class VegaLoadTest(Scenario):
             market_decimal=self.market_c_args["mdp"],
             market_position_decimal=self.market_c_args["pdp"],
             settlement_price=market_c_price_process[-1],
+            tag="c",
         )
 
         #  Create ExponentialShapedMarketMaker agents
@@ -244,6 +247,7 @@ class VegaLoadTest(Scenario):
             tick_spacing=1,
             market_kappa=10,
             state_update_freq=10,
+            tag="a",
         )
         market_b_maker = ExponentialShapedMarketMaker(
             wallet_name=MARKET_MAKERS["MARKET_B_MAKER"].wallet_name,
@@ -260,6 +264,7 @@ class VegaLoadTest(Scenario):
             tick_spacing=1,
             market_kappa=10,
             state_update_freq=10,
+            tag="b",
         )
         market_c_maker = ExponentialShapedMarketMaker(
             wallet_name=MARKET_MAKERS["MARKET_C_MAKER"].wallet_name,
@@ -276,6 +281,7 @@ class VegaLoadTest(Scenario):
             tick_spacing=2,
             market_kappa=5,
             state_update_freq=10,
+            tag="c",
         )
 
         # Setup agents for passing auction
@@ -289,6 +295,7 @@ class VegaLoadTest(Scenario):
             market_name=self.market_a_args["name"],
             asset_name=self.market_a_args["asset"],
             opening_auction_trade_amount=1,
+            tag="a_bid",
         )
         market_a_passer_ask = OpenAuctionPass(
             wallet_name=MARKET_PASSERS["MARKET_A_PASSER_ASK"].wallet_name,
@@ -300,6 +307,7 @@ class VegaLoadTest(Scenario):
             market_name=self.market_a_args["name"],
             asset_name=self.market_a_args["asset"],
             opening_auction_trade_amount=1,
+            tag="a_ask",
         )
         market_b_passer_bid = OpenAuctionPass(
             wallet_name=MARKET_PASSERS["MARKET_B_PASSER_BID"].wallet_name,
@@ -311,6 +319,7 @@ class VegaLoadTest(Scenario):
             market_name=self.market_b_args["name"],
             asset_name=self.market_b_args["asset"],
             opening_auction_trade_amount=1,
+            tag="b_bid",
         )
         market_b_passer_ask = OpenAuctionPass(
             wallet_name=MARKET_PASSERS["MARKET_B_PASSER_ASK"].wallet_name,
@@ -322,6 +331,7 @@ class VegaLoadTest(Scenario):
             market_name=self.market_b_args["name"],
             asset_name=self.market_b_args["asset"],
             opening_auction_trade_amount=1,
+            tag="b_ask",
         )
         market_c_passer_bid = OpenAuctionPass(
             wallet_name=MARKET_PASSERS["MARKET_C_PASSER_BID"].wallet_name,
@@ -333,6 +343,7 @@ class VegaLoadTest(Scenario):
             market_name=self.market_c_args["name"],
             asset_name=self.market_c_args["asset"],
             opening_auction_trade_amount=1,
+            tag="c_bid",
         )
         market_c_passer_ask = OpenAuctionPass(
             wallet_name=MARKET_PASSERS["MARKET_C_PASSER_ASK"].wallet_name,
@@ -344,6 +355,7 @@ class VegaLoadTest(Scenario):
             market_name=self.market_c_args["name"],
             asset_name=self.market_c_args["asset"],
             opening_auction_trade_amount=1,
+            tag="c_ask",
         )
 
         market_a_lo_traders = [
@@ -363,6 +375,7 @@ class VegaLoadTest(Scenario):
                 sell_volume=1,
                 submit_bias=1,
                 cancel_bias=1,
+                tag=str(i),
             )
             for i in range(self.num_lo_traders_per_market)
         ]
@@ -384,6 +397,7 @@ class VegaLoadTest(Scenario):
                 sell_volume=1,
                 submit_bias=1,
                 cancel_bias=1,
+                tag=str(i),
             )
             for i in range(self.num_lo_traders_per_market)
         ]
@@ -405,6 +419,7 @@ class VegaLoadTest(Scenario):
                 sell_volume=1,
                 submit_bias=1,
                 cancel_bias=1,
+                tag=str(i),
             )
             for i in range(self.num_lo_traders_per_market)
         ]
@@ -424,6 +439,7 @@ class VegaLoadTest(Scenario):
                 sell_intensity=10,
                 base_order_size=1,
                 step_bias=self.market_order_trader_step_bias,
+                tag=str(i),
             )
             for i in range(self.num_mo_traders_per_market)
         ]
@@ -442,6 +458,7 @@ class VegaLoadTest(Scenario):
                 sell_intensity=10,
                 base_order_size=1,
                 step_bias=self.market_order_trader_step_bias,
+                tag=str(i),
             )
             for i in range(self.num_mo_traders_per_market)
         ]
@@ -460,11 +477,12 @@ class VegaLoadTest(Scenario):
                 sell_intensity=10,
                 base_order_size=1,
                 step_bias=self.market_order_trader_step_bias,
+                tag=str(i),
             )
             for i in range(self.num_mo_traders_per_market)
         ]
 
-        return (
+        agents = (
             [
                 market_a_manager,
                 market_b_manager,
@@ -486,6 +504,7 @@ class VegaLoadTest(Scenario):
             + market_b_mo_traders
             + market_c_mo_traders
         )
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self,
@@ -493,7 +512,7 @@ class VegaLoadTest(Scenario):
         **kwargs,
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             random_agent_ordering=False,
             transactions_per_block=self.transactions_per_block,

@@ -188,7 +188,6 @@ class HedgedMarket(Scenario):
         state_extraction_freq: int = 1,
         pause_every_n_steps: Optional[int] = None,
     ):
-
         # Simulation properties
         self.num_steps = num_steps
         self.step_length_seconds = step_length_seconds
@@ -251,7 +250,6 @@ class HedgedMarket(Scenario):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
     ) -> MarketEnvironmentWithState:
-
         price_process = (
             self.price_process_fn()
             if self.price_process_fn is not None
@@ -422,19 +420,22 @@ class HedgedMarket(Scenario):
             lookahead=self.int_it_lookahead,
         )
 
-        return [
-            int_market_manager,
-            ext_market_manager,
-            int_market_maker,
-            ext_market_maker,
-            int_auction_pass_bid,
-            int_auction_pass_ask,
-            ext_auction_pass_bid,
-            ext_auction_pass_ask,
-            int_random_trader,
-            ext_random_trader,
-            int_informed_trader,
-        ]
+        return {
+            agent.name(): agent
+            for agent in [
+                int_market_manager,
+                ext_market_manager,
+                int_market_maker,
+                ext_market_maker,
+                int_auction_pass_bid,
+                int_auction_pass_ask,
+                ext_auction_pass_bid,
+                ext_auction_pass_ask,
+                int_random_trader,
+                ext_random_trader,
+                int_informed_trader,
+            ]
+        }
 
     def configure_environment(
         self,
@@ -442,7 +443,7 @@ class HedgedMarket(Scenario):
         **kwargs,
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.transactions_per_block,

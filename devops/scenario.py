@@ -15,7 +15,7 @@ scenario consists of the following agents.
 
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.constants import Network
@@ -24,6 +24,7 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.environment.environment import (
     MarketEnvironmentWithState,
     NetworkEnvironment,
+    Agent,
 )
 from vega_sim.scenario.common.utils.price_process import (
     LivePrice,
@@ -110,7 +111,7 @@ class DevOpsScenario(Scenario):
         network: Network,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
         random_state: Optional[np.random.RandomState] = None,
-    ):
+    ) -> Dict[str, Agent]:
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
@@ -172,6 +173,7 @@ class DevOpsScenario(Scenario):
                 initial_asset_mint=self.auction_trader_args.initial_mint,
                 initial_price=self.price_process[0],
                 side=["SIDE_BUY", "SIDE_SELL"][i],
+                tag=i,
             )
             for i, party in enumerate(AUCTION_TRADER_AGENTS)
         ]
@@ -188,6 +190,7 @@ class DevOpsScenario(Scenario):
                 buy_intensity=self.random_trader_args.order_intensity,
                 sell_intensity=self.random_trader_args.order_intensity,
                 base_order_size=self.random_trader_args.order_volume,
+                tag=i,
             )
             for i, party in enumerate(RANDOM_TRADER_AGENTS)
         ]
@@ -204,6 +207,7 @@ class DevOpsScenario(Scenario):
                 initial_asset_mint=self.momentum_trader_args.initial_mint,
                 order_intensity=self.momentum_trader_args.order_intensity,
                 base_order_size=self.momentum_trader_args.order_volume,
+                tag=i,
             )
             for i, party in enumerate(MOMENTUM_TRADER_AGENTS)
         ]
@@ -222,22 +226,20 @@ class DevOpsScenario(Scenario):
                 sell_intensity=self.sensitive_trader_args.order_intensity[i],
                 base_order_size=self.sensitive_trader_args.order_volume[i],
                 price_half_life=self.sensitive_trader_args.price_half_life[i],
+                tag=i,
             )
             for i, party in enumerate(SENSITIVE_TRADER_AGENTS)
         ]
 
         agents = (
-            [
-                market_manager,
-                market_maker,
-            ]
+            [market_manager, market_maker]
             + auction_pass_agents
             + random_market_order_traders
             + momentum_market_order_traders
             + sensitive_market_order_traders
         )
 
-        return agents
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self,
@@ -256,7 +258,7 @@ class DevOpsScenario(Scenario):
             )
         else:
             env = NetworkEnvironment(
-                agents=self.agents,
+                agents=list(self.agents.values()),
                 n_steps=-1,
                 vega_service=vega,
                 step_length_seconds=0,
@@ -275,13 +277,13 @@ class DevOpsScenario(Scenario):
         raise_datanode_errors: Optional[bool] = False,
         raise_step_errors: Optional[bool] = False,
     ):
-        agents = self.configure_agents(
+        self.agents = self.configure_agents(
             network=network, vega=vega, random_state=random_state
         )
 
         if network == Network.NULLCHAIN:
             self.env = MarketEnvironmentWithState(
-                agents=agents,
+                agents=list(self.agents.values()),
                 n_steps=self.simulation_args.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.simulation_args.granularity.value,
@@ -293,7 +295,7 @@ class DevOpsScenario(Scenario):
             )
         else:
             self.env = NetworkEnvironment(
-                agents=agents,
+                agents=list(self.agents.values()),
                 n_steps=-1,
                 vega_service=vega,
                 step_length_seconds=0,
