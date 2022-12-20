@@ -11,6 +11,7 @@ from vega_sim.scenario.ideal_market_maker.agents import (
     OptimalLiquidityProvider,
     InformedTrader,
 )
+from vega_sim.scenario.common.agents import Snitch
 
 
 class MarketEnvironment(MarketEnvironmentWithState):
@@ -58,6 +59,10 @@ class MarketEnvironment(MarketEnvironmentWithState):
             for agent in self.agents
             if agent.name() == OptimalLiquidityProvider.name_from_tag()
         ]
+        snitches = [
+            agent for agent in self.agents if agent.name() == Snitch.name_from_tag()
+        ]
+        self.snitch = snitches[0] if len(snitches) > 0 else None
 
     def step(self, vega: VegaService):
         state = self.state_func(vega)
@@ -80,3 +85,6 @@ class MarketEnvironment(MarketEnvironmentWithState):
         self.lo_agent.step_limitorderask(state)
         self.mo_agent.step_sell(state)
         self.lo_agent.step_limitorderbid(state)
+
+        if self.snitch is not None:
+            self.snitch.step(state)
