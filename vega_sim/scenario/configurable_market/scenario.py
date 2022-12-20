@@ -81,7 +81,7 @@ class ConfigurableMarket(Scenario):
 
         start = start + timedelta(days=int(random_state.choice(range(90))))
 
-        end = start + timedelta(seconds=self.num_steps * self.granularity.value)
+        end = start + timedelta(seconds=(self.num_steps + 1) * self.granularity.value)
 
         price_process = get_historic_price_series(
             product_id="ETH-USD",

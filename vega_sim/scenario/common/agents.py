@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import logging
 
+from queue import Queue
 import numpy as np
 from math import exp
 
@@ -45,6 +46,7 @@ BACKGROUND_MARKET = WalletConfig("market", "market")
 AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
+ITOrder = namedtuple("ITOrder", ["side", "size"])
 MMOrder = namedtuple("MMOrder", ["size", "price"])
 
 LiquidityProvision = namedtuple(
@@ -874,7 +876,7 @@ class MarketManager(StateAgentWithWallet):
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
-        if mint_wallet:
+        if vega.find_asset_id(symbol=self.asset_name) is None:
             # Create asset
             self.vega.create_asset(
                 self.wallet_name,
@@ -1107,10 +1109,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
         first_side = (
             (
                 vega_protos.SIDE_BUY
-                if self.curr_price < self.prev_price
+                if scaled_sell_shape[0].price < curr_buy_orders[0].price
                 else vega_protos.SIDE_SELL
             )
-            if self.prev_price is not None
+            if (scaled_sell_shape != []) and (curr_buy_orders != [])
             else vega_protos.SIDE_BUY
         )
         if first_side == vega_protos.SIDE_BUY:
@@ -1490,6 +1492,286 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
 
 
+class HedgedMarketMaker(ExponentialShapedMarketMaker):
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        num_steps: int,
+        price_process_generator: Iterable[float],
+        internal_key_mint: float = 1000000,
+        external_key_mint: float = 1000000,
+        market_name: str = None,
+        external_market_name: str = None,
+        asset_name: str = None,
+        commitment_amount: float = 6000,
+        market_decimal_places: int = 5,
+        fee_amount: float = 0.001,
+        kappa: float = 1,
+        num_levels: int = 25,
+        tick_spacing: float = 1,
+        inventory_upper_boundary: float = 20,
+        inventory_lower_boundary: float = -20,
+        terminal_penalty_parameter: float = 10**-4,
+        running_penalty_parameter: float = 5 * 10**-6,
+        market_order_arrival_rate: float = 5,
+        market_kappa: float = 1,
+        asset_decimal_places: int = 0,
+        tag: str = "",
+        key_name: str = None,
+        external_key_name: Optional[float] = "Hedging Key",
+        orders_from_stream: Optional[bool] = True,
+        state_update_freq: Optional[int] = None,
+        profit_margin: Optional[float] = 0.01,
+        internal_delay: int = 60 * 60,
+        external_delay: int = 5 * 60,
+        transfer_threshold: float = 500,
+    ):
+        super().__init__(
+            wallet_name=wallet_name,
+            wallet_pass=wallet_pass,
+            num_steps=num_steps,
+            price_process_generator=price_process_generator,
+            initial_asset_mint=internal_key_mint,
+            market_name=market_name,
+            asset_name=asset_name,
+            commitment_amount=commitment_amount,
+            market_decimal_places=market_decimal_places,
+            fee_amount=fee_amount,
+            kappa=kappa,
+            num_levels=num_levels,
+            tick_spacing=tick_spacing,
+            inventory_upper_boundary=inventory_upper_boundary,
+            inventory_lower_boundary=inventory_lower_boundary,
+            terminal_penalty_parameter=terminal_penalty_parameter,
+            running_penalty_parameter=running_penalty_parameter,
+            market_order_arrival_rate=market_order_arrival_rate,
+            market_kappa=market_kappa,
+            asset_decimal_places=asset_decimal_places,
+            tag=tag,
+            key_name=key_name,
+            orders_from_stream=orders_from_stream,
+            state_update_freq=state_update_freq,
+        )
+
+        self.profit_margin = profit_margin
+
+        self.external_market_name = external_market_name
+        self.external_market_id = None
+
+        self.external_key_name = external_key_name
+        self.internal_delay = internal_delay
+        self.external_delay = external_delay
+
+        self.transfer_threshold = transfer_threshold
+        self.external_key_mint = external_key_mint
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
+        # Initialise the parent ExponentialShapedMarketMaker
+        super().initialise(vega, create_wallet, mint_wallet)
+
+        self.external_market_id = self.vega.find_market_id(
+            name=self.external_market_name
+        )
+        self._update_state(current_step=self.current_step)
+
+        if vega.create_wallet:
+            vega.create_wallet(
+                name=self.wallet_name,
+                passphrase=self.wallet_pass,
+                key_name=self.external_key_name,
+            )
+        if mint_wallet:
+            vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.external_key_mint,
+                key_name=self.external_key_name,
+            )
+
+    def _update_state(self, current_step: int):
+        super()._update_state(current_step)
+
+        if self.state_update_freq and current_step % self.state_update_freq == 0:
+
+            if self.market_id is None:
+                self.int_mkr_fee = 0
+                self.int_liq_fee = 0
+                self.int_inf_fee = 0
+            else:
+                int_market_info = self.vega.market_info(market_id=self.market_id)
+                self.int_mkr_fee = float(int_market_info.fees.factors.maker_fee)
+                self.int_liq_fee = float(int_market_info.fees.factors.liquidity_fee)
+                self.int_inf_fee = float(
+                    int_market_info.fees.factors.infrastructure_fee
+                )
+
+            if self.external_market_id is None:
+                self.ext_mkr_fee = 0
+                self.ext_liq_fee = 0
+                self.ext_inf_fee = 0
+
+            else:
+                ext_market_info = self.vega.market_info(market_id=self.market_id)
+                self.ext_mkr_fee = float(ext_market_info.fees.factors.maker_fee)
+                self.ext_liq_fee = float(ext_market_info.fees.factors.liquidity_fee)
+                self.ext_inf_fee = float(
+                    ext_market_info.fees.factors.infrastructure_fee
+                )
+
+    def _optimal_strategy(self, current_position, current_step):
+
+        ext_best_bid, ext_best_ask = self.vega.best_prices(
+            market_id=self.external_market_id
+        )
+
+        int_fee = self.int_mkr_fee + self.int_liq_fee
+        ext_fee = self.ext_mkr_fee + self.ext_liq_fee + self.ext_inf_fee
+
+        required_bid_price = (
+            ext_best_bid * (1 - ext_fee) / (1 - int_fee + self.profit_margin)
+        )
+        required_ask_price = (
+            ext_best_ask * (1 + ext_fee) / (1 + int_fee - self.profit_margin)
+        )
+
+        current_bid_depth = self.curr_price - required_bid_price
+        current_ask_depth = required_ask_price - self.curr_price
+
+        return current_bid_depth, current_ask_depth
+
+    def _balance_positions(self):
+
+        # Determine the delta between the position on the internal and external market
+
+        internal_position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        current_int_position = (
+            internal_position[0].open_volume if internal_position != [] else 0
+        )
+        external_position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.external_market_id,
+            key_name=self.external_key_name,
+        )
+        current_ext_position = (
+            float(external_position[0].open_volume) if external_position != [] else 0
+        )
+        position_delta = current_int_position + current_ext_position
+
+        # Hedge the position on the internal market on the external market
+
+        if position_delta == 0:
+            return
+        elif position_delta < 0:
+            side = vega_protos.SIDE_BUY
+        elif position_delta > 0:
+            side = vega_protos.SIDE_SELL
+
+        self.vega.submit_market_order(
+            trading_wallet=self.wallet_name,
+            key_name=self.external_key_name,
+            market_id=self.external_market_id,
+            volume=abs(position_delta),
+            side=side,
+            wait=False,
+            fill_or_kill=False,
+        )
+
+    def _balance_accounts(self):
+
+        # Get the total balance on the internal market (excluding bond)
+        internal_account = self.vega.party_account(
+            wallet_name=self.wallet_name,
+            asset_id=self.asset_id,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        internal_account_balance = internal_account.general + internal_account.margin
+
+        # Get the total balance on the external market (excluding bond)
+        external_account = self.vega.party_account(
+            wallet_name=self.wallet_name,
+            asset_id=self.asset_id,
+            market_id=self.market_id,
+            key_name=self.external_key_name,
+        )
+        external_account_balance = external_account.general + external_account.margin
+
+        # Get the balance currently locked in transfers inbound to the internal market
+        transfers = self.vega.transfer_status_from_feed(live_only=True)
+        internal_transfers_balance = sum(
+            [
+                transfer.amount
+                for transfer in transfers.get(
+                    self.vega.wallet.public_key(
+                        name=self.wallet_name, key_name=self.key_name
+                    ),
+                    {},
+                ).values()
+            ]
+        )
+        # Get the balance currently locked in transfers inbound to the external market
+        external_transfers_balance = sum(
+            [
+                transfer.amount
+                for transfer in transfers.get(
+                    self.vega.wallet.public_key(
+                        name=self.wallet_name, key_name=self.external_key_name
+                    ),
+                    {},
+                ).values()
+            ]
+        )
+
+        # Calculate the difference between the total balance on the markets
+        delta = (internal_account_balance + internal_transfers_balance) - (
+            external_account_balance + external_transfers_balance
+        )
+
+        # Create a transfer to balance the internal and external accounts
+        if abs(delta) < self.transfer_threshold:
+            return
+
+        if delta > 0:
+            from_key = self.key_name
+            to_key = self.external_key_name
+            delay = self.internal_delay
+
+        elif delta < 0:
+            from_key = self.external_key_name
+            to_key = self.key_name
+            delay = self.external_delay
+
+        else:
+            return
+
+        self.vega.one_off_transfer(
+            from_wallet_name=self.wallet_name,
+            to_wallet_name=self.wallet_name,
+            from_key_name=from_key,
+            to_key_name=to_key,
+            from_account_type=vega_protos.ACCOUNT_TYPE_GENERAL,
+            to_account_type=vega_protos.ACCOUNT_TYPE_GENERAL,
+            asset=self.asset_id,
+            amount=abs(delta),
+            delay=delay,
+        )
+
+    def step(self, vega_state: VegaState):
+        super().step(vega_state=vega_state)
+        self._balance_positions()
+        self._balance_accounts()
+
+
 class LimitOrderTrader(StateAgentWithWallet):
     """Agent which randomly submits and cancels limit orders.
 
@@ -1735,9 +2017,57 @@ class InformedTrader(StateAgentWithWallet):
         asset_name: str = None,
         initial_asset_mint: float = 1e8,
         proportion_taken: float = 0.8,
+        accuracy: float = 1.0,
+        lookahead: int = 1,
+        max_abs_position: float = 100,
         tag: str = "",
         key_name: Optional[str] = None,
+        random_state: Optional[np.random.RandomState] = None,
     ):
+        """Agent capable of placing informed market orders.
+
+        At each step, the agent is able to lookahead a specified number of steps and
+        determine whether orders currently on the book are profitable to fill. The
+        agent will then fill a specified proportion of those orders. This order will
+        then be recorded in a FIFO queue.
+
+        At each step, if the queue is full, the agent will get an order from the queue
+        and place a market order to close the position created by the original order.
+        Following the above logic, orders should be "closed" n steps after they are
+        placed, i.e. when they are in the money.
+
+        Additionally the accuracy arg can be used to configure the accuracy of the agent
+        (1.0 being well-informed, 0.0 being ill-informed). If the agent is ill-informed
+        it has a random probability of placing its orders on the wrong side.
+
+        Args:
+            wallet_name (str):
+                Name of the wallet.
+            wallet_pass (str):
+                Passphrase for the wallet.
+            price_process (List[float]):
+                List of price history for agent to look-ahead.
+            market_name (str, optional):
+                Name of the market to trade in. Defaults to None.
+            asset_name (str, optional):
+                Name of the settlement asset used in the market. Defaults to None.
+            initial_asset_mint (float, optional):
+                Initial amount of asset to mint. Defaults to 1e8.
+            proportion_taken (float, optional):
+                Proportion of profitable orders filled at each step. Defaults to 0.8.
+            accuracy (float, optional):
+                Accuracy of agent's speculations. Defaults to 1.0.
+            lookahead (int, optional):
+                Number of steps to look ahead. Defaults to 1.
+            max_abs_position (float, optional):
+                The maximum absolute position the trader can have. Defaults to 100.
+            tag (str, optional):
+                Market tag. Defaults to "".
+            key_name (Optional[str], optional):
+                Name of key in wallet. Defaults to None.
+            random_state (Optional[np.random.RandomState], optional):
+                RandomState object used to generate randomness. Defaults to None.
+        """
         super().__init__(wallet_name + str(tag), wallet_pass)
         self.initial_asset_mint = initial_asset_mint
         self.price_process = price_process
@@ -1748,6 +2078,15 @@ class InformedTrader(StateAgentWithWallet):
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
         self.key_name = key_name
+        self.accuracy = accuracy
+        self.lookahead = lookahead
+        self.max_abs_position = max_abs_position
+        self.current_step = 0
+        self.queue = Queue()
+
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
 
     def initialise(
         self,
@@ -1776,44 +2115,37 @@ class InformedTrader(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
+
+        # Increment the current step
+        self.current_step += 1
+
+        # Skip stepping if the market is in auction
         trading_mode = vega_state.market_state[self.market_id].trading_mode
-        market_in_auction = (
+        if (
             not trading_mode
             == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        )
-        position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name,
-            market_id=self.market_id,
-            key_name=self.key_name,
-        )
-        current_position = int(position[0].open_volume) if position else 0
-        trade_side = (
-            vega_protos.SIDE_BUY if current_position < 0 else vega_protos.SIDE_SELL
-        )
-        if (not market_in_auction) and current_position:
-            try:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side=trade_side,
-                    volume=np.abs(current_position),
-                    wait=True,
-                    fill_or_kill=False,
-                    key_name=self.key_name,
-                )
-            except OrderRejectedError:
-                logger.debug("Order rejected")
+        ):
+            return
 
-        order_book = self.vega.market_depth(market_id=self.market_id)
+        # If the queue is full, settle an order
+        if self.queue.full():
+            self._settle_order(self.queue.get())
 
+        # Create an order, submit it, and add it to the queue to be settled
+        self.queue.put(self._create_order())
+
+    def _create_order(self) -> ITOrder:
+
+        # Determine the correct side
         price = self.price_process[self.current_step]
-        next_price = self.price_process[self.current_step + 1]
+        next_price = self.price_process[
+            min([self.current_step + self.lookahead + 1, len(self.price_process) - 1])
+        ]
+        side = vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
 
-        trade_side = (
-            vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
-        )
-
-        if price < next_price:
+        # Determine the volume of orders which can be profited from
+        order_book = self.vega.market_depth(market_id=self.market_id)
+        if side == vega_protos.SIDE_BUY:
             volume = sum(
                 [order.volume for order in order_book.sells if order.price < next_price]
             )
@@ -1822,21 +2154,73 @@ class InformedTrader(StateAgentWithWallet):
                 [order.volume for order in order_book.buys if order.price > next_price]
             )
 
-        volume = round(self.proportion_taken * volume, self.pdp)
+        # Determine the size of the order
+        size = round(self.proportion_taken * volume, self.pdp)
 
-        if (not market_in_auction) and volume:
-            try:
-                self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    side=trade_side,
-                    volume=volume,
-                    wait=False,
-                    fill_or_kill=False,
-                    key_name=self.key_name,
-                )
-            except OrderRejectedError:
-                logger.debug("Order rejected")
+        # Limit order size to not exceed max allowable position
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        abs_position = abs(int(position[0].open_volume) if position else 0)
+        if abs_position + size > self.max_abs_position:
+            size = min([0, self.max_abs_position - abs_position])
+
+        # Add a random probability the agent speculates the wrong side
+        if self.random_state.rand() <= self.accuracy:
+            side = side
+        else:
+            side = (
+                vega_protos.SIDE_BUY
+                if side == vega_protos.SIDE_SELL
+                else vega_protos.SIDE_SELL
+            )
+
+        # Attempt to submit the order and add it to the queue
+        try:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=side,
+                volume=size,
+                wait=False,
+                fill_or_kill=False,
+                key_name=self.key_name,
+            )
+            return ITOrder(side=side, size=size)
+
+        except OrderRejectedError:
+            logger.debug("Order rejected")
+            return None
+
+    def _close_positions(self, order: ITOrder):
+
+        # If order is blank
+        if order is None:
+            return
+
+        # If original order was a buy, agent sells, and visa versa
+        if order.side == vega_protos.SIDE_BUY:
+            side = vega_protos.SIDE_SELL
+        elif order.side == vega_protos.SIDE_SELL:
+            side = vega_protos.SIDE_BUY
+        else:
+            return
+
+        # Try to settle the order
+        try:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=side,
+                volume=order.volume,
+                wait=True,
+                fill_or_kill=False,
+                key_name=self.key_name,
+            )
+        except OrderRejectedError:
+            logger.debug("Order rejected")
 
 
 class LiquidityProvider(StateAgentWithWallet):
