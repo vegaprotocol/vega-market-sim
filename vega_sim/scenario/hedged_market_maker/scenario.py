@@ -151,7 +151,7 @@ class HedgedMarket(Scenario):
         pause_every_n_steps (Optional[int], optional):
             Number of steps to simulate before pausing the simulation. Defaults to None.
     """
-    
+
     def __init__(
         self,
         num_steps: int = 290,
