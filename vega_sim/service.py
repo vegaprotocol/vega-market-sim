@@ -887,7 +887,6 @@ class VegaService(ABC):
                 data_source_spec_for_settlement_data=oracle_spec_for_settlement_data,
                 data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
                 data_source_spec_binding=curr_fut.data_source_spec_binding,
-                settlement_data_decimals=curr_fut.settlement_data_decimals,
             )
             updated_instrument = UpdateInstrumentConfiguration(
                 code=curr_inst.code,
@@ -947,9 +946,11 @@ class VegaService(ABC):
         future_inst = data_raw.market_info(
             market_id, data_client=self.trading_data_client_v2
         ).tradable_instrument.instrument.future
-        oracle_name = future_inst.data_source_spec_for_settlement_data.data.external.oracle.filters[
+
+        filter_key = future_inst.data_source_spec_for_settlement_data.data.external.oracle.filters[
             0
-        ].key.name
+        ].key
+        oracle_name = filter_key.name
 
         logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
@@ -958,7 +959,7 @@ class VegaService(ABC):
             wallet_name=settlement_wallet,
             oracle_name=oracle_name,
             settlement_price=num_to_padded_int(
-                settlement_price, decimals=future_inst.settlement_data_decimals
+                settlement_price, decimals=filter_key.number_decimal_places
             ),
             key_name=key_name,
         )
