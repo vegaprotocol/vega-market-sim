@@ -43,7 +43,7 @@ from os import getcwd, path, environ
 import vega_sim.grpc.client as vac
 
 from vega_sim import vega_bin_path
-from vega_sim.service import VegaService
+from vega_sim.service import VegaService, DatanodeBehindError
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.null_service import find_free_port, _popen_process
@@ -341,7 +341,9 @@ class VegaServiceNetwork(VegaService):
         )
         pass
 
-    def check_datanode(self, raise_on_error: Optional[bool] = True):
+    def check_datanode(
+        self, max_time_diff: int = 30, raise_on_error: Optional[bool] = True
+    ):
         """Checks if the current data-node connection is healthy.
 
         If the current data-node connection has timed out or the end-point is
@@ -349,13 +351,15 @@ class VegaServiceNetwork(VegaService):
         with a new healthy data-node.
 
         Args:
-            max_attempts (int, optional):
-                Maximum number of connection attempts to attempt before raising an
-                error. Defaults to -1 (infinite attempts).
+            max_time_diff (int, optional):
+                Maximum allowable difference between system time and datanode time in
+                seconds. Defaults to 30.
+            raise_on_error (bool, optional):
+                Whether to raise an error if data-node connection unhealthy.
         """
 
         try:
-            self.ping_datanode()
+            self.ping_datanode(max_time_diff=max_time_diff)
             return
 
         except grpc.FutureTimeoutError as e:
@@ -373,6 +377,15 @@ class VegaServiceNetwork(VegaService):
             else:
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+                self.switch_datanode()
+
+        except DatanodeBehindError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
                 self.switch_datanode()
 
@@ -403,11 +416,21 @@ class VegaServiceNetwork(VegaService):
                     channel=channel,
                 )
 
+                # Ping the datanode to check it is not behind
+                self.ping_datanode()
+
                 return
 
             except grpc.FutureTimeoutError:
+                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                )
+
+            except DatanodeBehindError:
+                # Log warning then continue to try next datanode
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
 
             if attempts == max_attempts:
