@@ -2,7 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from functools import partial
 from tqdm import tqdm
@@ -44,10 +44,10 @@ WALLET = WalletConfig("learner", "learner")
 
 def state_fn(
     service: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
     state_values=None,
 ) -> Tuple[LAMarketState, AbstractAction]:
-    learner = [a for a in agents if isinstance(a, LearningAgent)][0]
+    learner = agents["learner"]
     return (learner.latest_state, learner.latest_action)
 
 
@@ -234,7 +234,8 @@ class LearningAgent(StateAgentWithWallet):
 
         if account.margin > 0:
             print(
-                "Market should be settled but there is still balance in margin account. What's up?"
+                "Market should be settled but there is still balance in margin account."
+                " What's up?"
             )
 
         self.latest_action = self.empty_action()

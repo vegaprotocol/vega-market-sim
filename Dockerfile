@@ -28,7 +28,9 @@ FROM vegasim_base AS vegasim_test
 COPY pytest.ini .
 
 COPY ./requirements-dev.txt .
+COPY ./requirements-learning.txt .
 RUN  pip install -r requirements-dev.txt
+RUN  pip install -r requirements-learning.txt
 
 COPY ./examples ./examples
 COPY ./pyproject.toml ./pyproject.toml
