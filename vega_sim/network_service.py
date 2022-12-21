@@ -342,7 +342,7 @@ class VegaServiceNetwork(VegaService):
         pass
 
     def check_datanode(
-        self, max_time_difference: int = 30, raise_on_error: Optional[bool] = True
+        self, max_time_diff: int = 30, raise_on_error: Optional[bool] = True
     ):
         """Checks if the current data-node connection is healthy.
 
@@ -351,7 +351,7 @@ class VegaServiceNetwork(VegaService):
         with a new healthy data-node.
 
         Args:
-            max_time_difference (int, optional):
+            max_time_diff (int, optional):
                 Maximum allowable difference between system time and datanode time in
                 seconds. Defaults to 30.
             raise_on_error (bool, optional):
@@ -359,7 +359,7 @@ class VegaServiceNetwork(VegaService):
         """
 
         try:
-            self.ping_datanode()
+            self.ping_datanode(max_time_diff=max_time_diff)
             return
 
         except grpc.FutureTimeoutError as e:

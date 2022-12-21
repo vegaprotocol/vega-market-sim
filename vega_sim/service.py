@@ -1956,7 +1956,6 @@ class VegaService(ABC):
     def ping_datanode(self, max_time_diff: int = 30):
         """Ping datanode endpoint to check health of connection
 
-
         Args:
             max_time_diff (int, optional):
                 The maximum allowable deviation between the time reported by datanode
