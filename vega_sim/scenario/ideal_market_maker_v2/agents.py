@@ -41,6 +41,8 @@ INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
 
 
 class OptimalMarketMaker(StateAgentWithWallet):
+    NAME_BASE = "optimal_mm"
+
     def __init__(
         self,
         wallet_name: str,
@@ -98,6 +100,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
 
         self.long_horizon_estimate = num_steps >= 200
+
+        self.bid_depth = None
+        self.ask_depth = None
 
         if not self.long_horizon_estimate:
             self.optimal_bid, self.optimal_ask, _ = A_S_MMmodel(

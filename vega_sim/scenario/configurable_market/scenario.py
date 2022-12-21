@@ -1,7 +1,7 @@
 import numpy as np
 
 from datetime import datetime, timedelta
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Optional, Dict
 
 from vega_sim.api.market import MarketConfig
 from vega_sim.environment.agent import Agent
@@ -13,7 +13,6 @@ from vega_sim.scenario.common.utils.price_process import (
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.constants import Network
 
 from vega_sim.scenario.configurable_market.agents import (
     ConfigurableMarketManager,
@@ -48,14 +47,13 @@ class ConfigurableMarket(Scenario):
         granularity: Optional[Granularity] = Granularity.MINUTE,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
         settle_at_end: bool = True,
         price_process_fn: Optional[Callable] = None,
     ):
-        super().__init__()
+        super().__init__(state_extraction_fn=state_extraction_fn)
 
         # Simulation settings
         self.num_steps = num_steps
@@ -64,10 +62,6 @@ class ConfigurableMarket(Scenario):
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
         self.price_process_fn = price_process_fn
-
-        # Logging options
-        self.state_extraction_freq = state_extraction_freq
-        self.state_extraction_fn = state_extraction_fn
 
         # Asset parameters
         self.asset_name = asset_name
@@ -87,7 +81,7 @@ class ConfigurableMarket(Scenario):
 
         start = start + timedelta(days=int(random_state.choice(range(90))))
 
-        end = start + timedelta(seconds=self.num_steps * self.granularity.value)
+        end = start + timedelta(seconds=(self.num_steps + 1) * self.granularity.value)
 
         price_process = get_historic_price_series(
             product_id="ETH-USD",
@@ -104,7 +98,7 @@ class ConfigurableMarket(Scenario):
         tag: str,
         market_config: Optional[MarketConfig] = None,
         random_state: Optional[np.random.RandomState] = None,
-    ) -> List[StateAgent]:
+    ) -> Dict[str, StateAgent]:
         market_config = market_config if market_config is not None else MarketConfig()
 
         random_state = (
@@ -169,6 +163,7 @@ class ConfigurableMarket(Scenario):
             price_half_life=10,
             price_process_generator=iter(price_process),
             base_order_size=1,
+            tag="a",
         )
 
         sensitive_mo_trader_b = PriceSensitiveMarketOrderTrader(
@@ -183,6 +178,7 @@ class ConfigurableMarket(Scenario):
             price_half_life=1,
             price_process_generator=iter(price_process),
             base_order_size=1,
+            tag="b",
         )
 
         sensitive_mo_trader_c = PriceSensitiveMarketOrderTrader(
@@ -197,6 +193,7 @@ class ConfigurableMarket(Scenario):
             price_half_life=0.1,
             price_process_generator=iter(price_process),
             base_order_size=1,
+            tag="c",
         )
 
         auctionpass1 = OpenAuctionPass(
@@ -209,6 +206,7 @@ class ConfigurableMarket(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=1,
+            tag="1",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -221,6 +219,7 @@ class ConfigurableMarket(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=1,
+            tag="2",
         )
 
         info_trader = InformedTrader(
@@ -234,7 +233,7 @@ class ConfigurableMarket(Scenario):
             proportion_taken=0.1,
         )
 
-        return [
+        agents = [
             market_manager,
             shaped_mm,
             sensitive_mo_trader_a,
@@ -244,18 +243,17 @@ class ConfigurableMarket(Scenario):
             auctionpass2,
             info_trader,
         ]
+        return {agent.name(): agent for agent in agents}
 
     def configure_environment(
         self, vega: VegaServiceNull, **kwargs
     ) -> MarketEnvironmentWithState:
         return MarketEnvironmentWithState(
-            agents=self.agents,
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             step_length_seconds=self.granularity.value,
             random_agent_ordering=True,
             transactions_per_block=self.block_size,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
         )

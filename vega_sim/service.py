@@ -661,7 +661,7 @@ class VegaService(ABC):
             side=side,
             volume=submit_volume,
             price=str(submit_price) if submit_price is not None else None,
-            expires_at=expires_at,
+            expires_at=int(expires_at) if expires_at is not None else None,
             pegged_order=vega_protos.vega.PeggedOrder(
                 reference=pegged_order.reference,
                 offset=str(

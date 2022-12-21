@@ -43,6 +43,7 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
         volume=1,
         side="SIDE_BUY",
     )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
     positions_pb_t1 = vega.positions_by_market(
