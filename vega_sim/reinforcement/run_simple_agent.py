@@ -6,6 +6,7 @@ from vega_sim.reinforcement.agents.learning_agent import (
 from vega_sim.reinforcement.agents.simple_agent import SimpleAgent
 
 from vega_sim.scenario.registry import CurveMarketMaker
+from vega_sim.scenario.common.agents import Snitch
 
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.null_service import VegaServiceNull
@@ -36,18 +37,25 @@ def run_iteration(
         random_agent_ordering=False,
         sigma=100,
     )
-    env = scenario.set_up_background_market(
-        vega=vega,
-    )
-    # add the learning agaent to the environement's list of agents
-    env.agents = env.agents + [learning_agent]
 
+    scenario.agents = scenario.configure_agents(vega=vega, random_state=None)
+    # add the learning agaent to the environment's list of agents
     learning_agent.price_process = scenario.price_process
+    scenario.agents["learner"] = learning_agent
 
-    result = env.run(
+    scenario.agents["snitch"] = Snitch(
+        agents=scenario.agents, additional_state_fn=scenario.state_extraction_fn
+    )
+
+    scenario.env = scenario.configure_environment(vega=vega)
+
+    scenario.env.run(
         run_with_console=run_with_console,
         pause_at_completion=pause_at_completion,
     )
+
+    result = scenario.get_additional_run_data()
+
     return result
 
 
