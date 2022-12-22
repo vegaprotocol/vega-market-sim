@@ -236,6 +236,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesResponse.FromString,
         )
+        self.ListEpochRewardSummaries = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListEpochRewardSummaries",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesResponse.FromString,
+        )
         self.ObserveRewards = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveRewards",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsRequest.SerializeToString,
@@ -826,6 +831,12 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListEpochRewardSummaries(self, request, context):
+        """List reward summaries by epoch"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ObserveRewards(self, request, context):
         """subscribe to rewards"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1385,6 +1396,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListRewardSummaries,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesResponse.SerializeToString,
+        ),
+        "ListEpochRewardSummaries": grpc.unary_unary_rpc_method_handler(
+            servicer.ListEpochRewardSummaries,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesResponse.SerializeToString,
         ),
         "ObserveRewards": grpc.unary_stream_rpc_method_handler(
             servicer.ObserveRewards,
@@ -2858,6 +2874,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListRewardSummaries",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListEpochRewardSummaries(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListEpochRewardSummaries",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesResponse.FromString,
             options,
             channel_credentials,
             insecure,

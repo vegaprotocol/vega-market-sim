@@ -24,7 +24,6 @@ A MarketConfig class has the following attributes which can be set:
 • instrument.code
 • instrument.future.settlement_asset
 • instrument.future.quote_name
-• instrument.future.settlement_data_decimals
 • instrument.future.terminating_key
 
 
@@ -293,7 +292,7 @@ class FutureProduct(Config):
         "default": {
             "settlement_asset": None,
             "quote_name": None,
-            "settlement_data_decimals": None,
+            "number_decimal_places": None,
             "terminating_key": None,
         }
     }
@@ -303,26 +302,26 @@ class FutureProduct(Config):
 
         self.settlement_asset = self.OPTS[opt]["settlement_asset"]
         self.quote_name = self.OPTS[opt]["quote_name"]
-        self.settlement_data_decimals = self.OPTS[opt]["settlement_data_decimals"]
+        self.number_decimal_places = self.OPTS[opt]["number_decimal_places"]
         self.terminating_key = self.OPTS[opt]["terminating_key"]
 
     def build(self):
         if None in [
             self.settlement_asset,
             self.quote_name,
-            self.settlement_data_decimals,
+            self.number_decimal_places,
             self.terminating_key,
         ]:
             print(
                 [
                     self.settlement_asset,
                     self.quote_name,
-                    self.settlement_data_decimals,
+                    self.number_decimal_places,
                     self.terminating_key,
                 ]
             )
             raise ValueError(
-                f"MarketConfig has not been updated with settlement asset information."
+                "MarketConfig has not been updated with settlement asset information."
             )
 
         data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
@@ -338,6 +337,7 @@ class FutureProduct(Config):
                             key=oracles_protos.spec.PropertyKey(
                                 name=f"price.{self.quote_name}.value",
                                 type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                                number_decimal_places=self.number_decimal_places,
                             ),
                             conditions=[],
                         )
@@ -376,5 +376,4 @@ class FutureProduct(Config):
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
             data_source_spec_binding=data_source_spec_binding,
-            settlement_data_decimals=self.settlement_data_decimals,
         )

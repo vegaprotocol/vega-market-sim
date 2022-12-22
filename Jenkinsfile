@@ -13,7 +13,7 @@ pipeline {
         timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: 'caafe27f265286e853a8e343cbe9e51b3e41d983',
+        string( name: 'VEGA_VERSION', defaultValue: 'b15cd4777961d43e2f170ab8de2f721078281625',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
@@ -59,9 +59,9 @@ pipeline {
                 script {
                     vegaMarketSim ignoreFailure: false,
                         timeout: 90,
-                        vegaMarketSimBranch: commitHash,
+                        vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
-                        jenkinsSharedLibBranch: params.JENKINS_SHARED_LIB_BRANCH
+                        jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH
                 }
             }
         }
