@@ -95,6 +95,7 @@ def _run(
 
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
+
     logfile_pol_imp = os.path.join(results_dir, "learning_pol_imp.csv")
     logfile_pol_eval = os.path.join(results_dir, "learning_pol_eval.csv")
     logfile_pnl = os.path.join(results_dir, "learning_pnl.csv")
