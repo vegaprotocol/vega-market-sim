@@ -314,9 +314,14 @@ def observe_event_bus(
         Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
             Infinite iterable of lists of events updates
     """
-    return data_client.ObserveEventBus(
-        iter([vega_protos.api.v1.core.ObserveEventBusRequest(type=type)])
-    )
+
+    request = vega_protos.api.v1.core.ObserveEventBusRequest(type=type)
+    if market_id is not None:
+        setattr(request, "market_id", market_id)
+    if party_id is not None:
+        setattr(request, "party_id", party_id)
+
+    return data_client.ObserveEventBus(iter([request]))
 
 
 def margin_levels(
