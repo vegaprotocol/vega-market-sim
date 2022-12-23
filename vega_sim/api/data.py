@@ -824,8 +824,6 @@ def order_subscription(
     order_stream = data_raw.observe_event_bus(
         data_client=data_client,
         type=[events_protos.BUS_EVENT_TYPE_ORDER],
-        market_id=market_id,
-        party_id=party_id,
     )
 
     def _order_gen(
