@@ -129,7 +129,6 @@ if __name__ == "__main__":
             vega=vega, market_id=market_id, price=1000, spread=1, volume=10
         )
         vega.wait_fn(120)
-        input("Pause simulation to allow UI to be inspected.")
 
         # Place trades so open interest is ~200 and target stake is >10000
         utils.move_market(
