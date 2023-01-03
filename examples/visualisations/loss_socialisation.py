@@ -131,6 +131,7 @@ if __name__ == "__main__":
                 best_bid_id=best_bid_id,
                 price=price,
                 spread=10,
+                volume=1,
             )
             vega.wait_for_total_catchup()
             vega.wait_fn(60)
