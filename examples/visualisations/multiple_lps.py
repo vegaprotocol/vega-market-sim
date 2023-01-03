@@ -144,7 +144,7 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
         input(
             "Pause simulation to allow UI to be inspected. "
-            + "Provision from LP_A should be deployed."
+            + "Fee should be updated to 0.01 (1.00%)"
         )
 
         # Place trades so open interest is ~400 and target stake is >20000
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
         input(
             "Pause simulation to allow UI to be inspected. "
-            + "Provision from LP_A and LP_B should be deployed."
+            + "Fee should be updated to 0.02 (2.00%)."
         )
 
         # Place trades so open interest is ~600 and target stake is >30000
@@ -176,5 +176,5 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
         input(
             "Pause simulation to allow UI to be inspected. "
-            + "Provision from LP_A, LP_B, and LP_C should be deployed."
+            + "Fee should be updated to 0.03 (3.00%)"
         )
