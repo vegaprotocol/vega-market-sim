@@ -43,6 +43,7 @@ if __name__ == "__main__":
     with VegaServiceNull(
         run_with_console=args.console,
         warn_on_raw_data_access=False,
+        launch_graphql=True,
     ) as vega:
 
         # Create wallets for auxiliary and example specific parties
@@ -106,8 +107,8 @@ if __name__ == "__main__":
             fee=0.02,
             reference_buy="PEGGED_REFERENCE_MID",
             reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=2,
-            delta_sell=2,
+            delta_buy=5,
+            delta_sell=5,
             is_amendment=False,
         )
         vega.submit_simple_liquidity(
@@ -118,8 +119,8 @@ if __name__ == "__main__":
             fee=0.03,
             reference_buy="PEGGED_REFERENCE_MID",
             reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=3,
-            delta_sell=3,
+            delta_buy=10,
+            delta_sell=10,
             is_amendment=False,
         )
 
@@ -177,5 +178,3 @@ if __name__ == "__main__":
             "Pause simulation to allow UI to be inspected. "
             + "Provision from LP_A, LP_B, and LP_C should be deployed."
         )
-
-        utils.move_market()
