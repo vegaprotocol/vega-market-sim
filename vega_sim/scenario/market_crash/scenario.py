@@ -161,6 +161,7 @@ class MarketCrash(Scenario):
                     buy_intensity=self.noise_buy_intensity,
                     sell_intensity=self.noise_sell_intensity,
                     random_state=random_state,
+                    key_name=f"{tag}_noise_{i}",
                 )
             )
         for i in range(self.num_position_traders):
@@ -175,6 +176,7 @@ class MarketCrash(Scenario):
                     buy_intensity=self.position_taker_buy_intensity,
                     sell_intensity=self.position_taker_sell_intensity,
                     random_state=random_state,
+                    key_name=f"{tag}_pos_{i}",
                 )
             )
 
