@@ -521,8 +521,7 @@ class VegaServiceNull(VegaService):
         transactions_per_block: int = 1,
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
-        start_order_feed: bool = True,
-        start_transfer_feed: bool = True,
+        start_live_feeds: bool = True,
         retain_log_files: bool = False,
         launch_graphql: bool = False,
         store_transactions: bool = True,
@@ -556,8 +555,7 @@ class VegaServiceNull(VegaService):
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
-        self._start_order_feed = start_order_feed
-        self._start_transfer_feed = start_transfer_feed
+        self._start_live_feeds = start_live_feeds
         self.launch_graphql = launch_graphql
         self.replay_from_path = replay_from_path
 
@@ -698,10 +696,8 @@ class VegaServiceNull(VegaService):
                 f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
             )
 
-        if self._start_order_feed:
-            self.start_order_monitoring()
-        if self._start_transfer_feed:
-            self.start_transfer_monitoring()
+        if self._start_live_feeds:
+            self.start_live_feeds()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

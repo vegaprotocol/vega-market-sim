@@ -8,25 +8,25 @@ from vega_sim.null_service import VegaServiceNull
 def test_multiple_instantiation():
     with VegaServiceNull(
         run_with_console=False,
-        start_order_feed=False,
+        start_live_feeds=False,
     ) as _:
         pass
     with VegaServiceNull(
         run_with_console=False,
-        start_order_feed=False,
+        start_live_feeds=False,
     ) as _:
         pass
     with VegaServiceNull(
         run_with_console=False,
-        start_order_feed=False,
+        start_live_feeds=False,
     ) as _:
         pass
     with VegaServiceNull(
         run_with_console=False,
-        start_order_feed=False,
+        start_live_feeds=False,
     ) as _:
         with VegaServiceNull(
             run_with_console=False,
-            start_order_feed=False,
+            start_live_feeds=False,
         ) as _:
             pass
