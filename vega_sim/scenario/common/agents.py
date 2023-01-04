@@ -1630,7 +1630,13 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
             market_id=self.external_market_id
         )
 
-        int_fee = self.int_mkr_fee + self.int_liq_fee
+        fee_share = self.vega.get_liquidity_fee_shares(
+            market_id=self.market_id,
+            wallet_name=self.wallet_name,
+            key_name=self.key_name,
+        )
+
+        int_fee = (self.int_mkr_fee + self.int_liq_fee) * fee_share
         ext_fee = self.ext_mkr_fee + self.ext_liq_fee + self.ext_inf_fee
 
         required_bid_price = (
