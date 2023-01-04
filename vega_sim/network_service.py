@@ -166,6 +166,7 @@ class VegaServiceNetwork(VegaService):
         network: Network,
         run_with_wallet: bool = True,
         run_with_console: bool = True,
+        start_order_feed: bool = True,
     ):
         """Method initialises the class.
 
@@ -184,6 +185,7 @@ class VegaServiceNetwork(VegaService):
         self.network = network
         self.run_with_wallet = run_with_wallet
         self.run_with_console = run_with_console
+        self._start_order_feed = start_order_feed
 
         self._wallet = None
         self._wallet_url = None
@@ -230,6 +232,9 @@ class VegaServiceNetwork(VegaService):
                 f" http://localhost:{vega_console_port}"
             )
             webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
+
+        if self._start_order_feed:
+            self.start_order_monitoring()
 
     def stop(self) -> None:
 

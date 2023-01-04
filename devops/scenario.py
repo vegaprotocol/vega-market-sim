@@ -138,6 +138,7 @@ class DevOpsScenario(Scenario):
             asset_dp=self.market_manager_args.adp,
             initial_mint=self.market_manager_args.initial_mint,
             settlement_price=self.price_process[-1],
+            tag="",
         )
 
         # Setup agent for proving a market for traders
@@ -160,6 +161,7 @@ class DevOpsScenario(Scenario):
             price_process_generator=iter(self.price_process),
             orders_from_stream=False,
             state_update_freq=10,
+            tag="",
         )
 
         # Setup agents for passing opening auction
@@ -173,7 +175,7 @@ class DevOpsScenario(Scenario):
                 initial_asset_mint=self.auction_trader_args.initial_mint,
                 initial_price=self.price_process[0],
                 side=["SIDE_BUY", "SIDE_SELL"][i],
-                tag=i,
+                tag="",
             )
             for i, party in enumerate(AUCTION_TRADER_AGENTS)
         ]
@@ -190,7 +192,7 @@ class DevOpsScenario(Scenario):
                 buy_intensity=self.random_trader_args.order_intensity,
                 sell_intensity=self.random_trader_args.order_intensity,
                 base_order_size=self.random_trader_args.order_volume,
-                tag=i,
+                tag="",
             )
             for i, party in enumerate(RANDOM_TRADER_AGENTS)
         ]
@@ -207,7 +209,7 @@ class DevOpsScenario(Scenario):
                 initial_asset_mint=self.momentum_trader_args.initial_mint,
                 order_intensity=self.momentum_trader_args.order_intensity,
                 base_order_size=self.momentum_trader_args.order_volume,
-                tag=i,
+                tag="",
             )
             for i, party in enumerate(MOMENTUM_TRADER_AGENTS)
         ]
@@ -226,7 +228,7 @@ class DevOpsScenario(Scenario):
                 sell_intensity=self.sensitive_trader_args.order_intensity[i],
                 base_order_size=self.sensitive_trader_args.order_volume[i],
                 price_half_life=self.sensitive_trader_args.price_half_life[i],
-                tag=i,
+                tag="",
             )
             for i, party in enumerate(SENSITIVE_TRADER_AGENTS)
         ]
