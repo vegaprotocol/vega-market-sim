@@ -8,6 +8,7 @@ mkdir -p "${RESULT_DIR}"
 
 docker run \
     --platform linux/amd64 \
-    -v "${WORK_DIR}:/tmp" \
+    -v "${RESULT_DIR}:/tmp" \
+    -v "${WORK_DIR}:/vega_market_sim" \
     vega_sim_test:latest \
          python -m tests.integration.test_plot_gen
