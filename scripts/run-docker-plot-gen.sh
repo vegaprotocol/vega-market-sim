@@ -8,7 +8,7 @@ mkdir -p "${RESULT_DIR}"
 
 docker run \
     --platform linux/amd64 \
-    --name plot_gen
+    --name plot_gen \
     -v "${RESULT_DIR}:/tmp" \
     vega_sim_test:latest \
          python -m tests.integration.test_plot_gen
