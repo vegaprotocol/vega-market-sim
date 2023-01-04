@@ -2058,3 +2058,23 @@ class VegaService(ABC):
             party_id=party_id,
             direction=direction,
         )
+
+    def get_liquidity_fee_shares(
+        self, market_id: str, wallet_name: str, key_name: Optional[str] = None
+    ) -> Union[Dict, float]:
+        """Gets the current liquidity fee share for each party or a specified party.
+
+        Args:
+            market_id (str):
+                Id of market.
+            wallet_name (str):
+                Name of wallet to get public key from.
+            key_name (Optional[str], optional):
+                Name of specific key in wallet to get public key for. Defaults to None.
+        """
+
+        return data.get_liquidity_fee_shares(
+            data_client=self.trading_data_client_v2,
+            market_id=market_id,
+            party_id=self.wallet.public_key(name=wallet_name, key_name=self.key_name),
+        )
