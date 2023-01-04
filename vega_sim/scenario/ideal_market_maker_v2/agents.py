@@ -69,9 +69,12 @@ class OptimalMarketMaker(StateAgentWithWallet):
         commitment_amount: float = 6000,
         settlement_price: Optional[float] = None,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
-        self.terminate_wallet_name = terminate_wallet_name + str(tag)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
+        self.terminate_wallet_name = terminate_wallet_name
         self.terminate_wallet_pass = terminate_wallet_pass
 
         self.price_process = price_process
@@ -93,7 +96,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
         self.current_step = 0
 
-        self.tag = tag
         self.set_up_market = set_up_market
 
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
@@ -146,6 +148,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.wallet_name,
             asset="VOTE",
             amount=1e4,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
@@ -156,6 +159,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.adp,
+                key_name=self.key_name,
             )
             self.vega.wait_fn(5)
             self.vega.wait_for_total_catchup()
@@ -166,6 +170,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.wallet_name,
             asset=self.asset_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(10)
         self.vega.wait_for_total_catchup()
@@ -180,6 +185,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 market_decimals=self.mdp,
                 position_decimals=self.market_position_decimal,
                 future_asset=self.asset_name,
+                key_name=self.key_name,
             )
             self.vega.wait_for_total_catchup()
 
@@ -194,6 +200,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
             sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
             is_amendment=False,
+            key_name=self.key_name,
         )
 
     def optimal_strategy(self, current_position):
@@ -238,7 +245,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
 
         current_position = int(position[0].open_volume) if position else 0
@@ -310,6 +319,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 order_type=vega_protos.Order.Type.TYPE_LIMIT,
                 wait=False,
                 time_in_force=vega_protos.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                key_name=self.key_name,
             )
         else:
             self.vega.amend_order(
@@ -319,4 +329,5 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 pegged_reference=reference,
                 pegged_offset=offset,
                 volume_delta=volume - order.size,
+                key_name=self.key_name,
             )
