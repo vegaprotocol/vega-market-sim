@@ -68,7 +68,7 @@ class AgentWithWallet(Agent):
                 to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
         """
         super().__init__(tag=tag)
-        self.wallet_name = wallet_name + (f"_{tag}" if tag is not None else "")
+        self.wallet_name = wallet_name
         self.wallet_pass = wallet_pass
         self.key_name = key_name
 
