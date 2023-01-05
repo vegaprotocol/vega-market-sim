@@ -114,10 +114,6 @@ class MarketOrderTrader(StateAgentWithWallet):
     ):
         # Initialise wallet
         super().initialise(vega=vega, create_wallet=create_wallet)
-        print(self.wallet_name)
-        print(self.wallet_pass)
-        print(self.key_name)
-        print(self.tag)
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
