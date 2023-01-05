@@ -2088,5 +2088,5 @@ class VegaService(ABC):
         return data.get_liquidity_fee_shares(
             data_client=self.trading_data_client_v2,
             market_id=market_id,
-            party_id=self.wallet.public_key(name=wallet_name, key_name=self.key_name),
+            party_id=self.wallet.public_key(name=wallet_name, key_name=key_name),
         )
