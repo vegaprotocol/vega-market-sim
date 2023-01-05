@@ -421,11 +421,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.FromString,
         )
-        self.FetchDeHistorySegment = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/FetchDeHistorySegment",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentResponse.FromString,
-        )
         self.GetActiveDeHistoryPeerAddresses = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
@@ -970,7 +965,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListNodes(self, request, context):
-        """Node
+        """Nodes list
 
         List information about the nodes on the network
         """
@@ -1142,15 +1137,6 @@ class TradingDataServiceServicer(object):
         """List all decentralized history segments
 
         List all history segments stored by this node
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
-    def FetchDeHistorySegment(self, request, context):
-        """Fetch decentralized history segment
-
-        Fetch a history segment from another peer in the network
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1581,11 +1567,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListAllDeHistorySegments,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.SerializeToString,
-        ),
-        "FetchDeHistorySegment": grpc.unary_unary_rpc_method_handler(
-            servicer.FetchDeHistorySegment,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentResponse.SerializeToString,
         ),
         "GetActiveDeHistoryPeerAddresses": grpc.unary_unary_rpc_method_handler(
             servicer.GetActiveDeHistoryPeerAddresses,
@@ -3947,35 +3928,6 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListAllDeHistorySegments",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def FetchDeHistorySegment(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/FetchDeHistorySegment",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.FetchDeHistorySegmentResponse.FromString,
             options,
             channel_credentials,
             insecure,

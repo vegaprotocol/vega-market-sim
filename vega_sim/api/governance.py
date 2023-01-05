@@ -294,7 +294,7 @@ def propose_future_market(
                 target_stake_parameters=vega_protos.markets.TargetStakeParameters(
                     time_window=3600, scaling_factor=1
                 ),
-                triggering_ratio=0.7,
+                triggering_ratio="0.7",
                 auction_extension=0,
             ),
             price_monitoring_parameters=price_monitoring_parameters,

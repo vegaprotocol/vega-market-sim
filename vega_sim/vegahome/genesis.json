@@ -109,7 +109,7 @@
       "market.liquidity.minimum.probabilityOfTrading.lpOrders": "1e-8",
       "market.liquidity.probabilityOfTrading.tau.scaling": "1",
       "market.liquidity.providers.fee.distributionTimeStep": "0s",
-      "market.liquidity.stakeToCcySiskas": "1",
+      "market.liquidity.stakeToCcyVolume": "1",
       "market.liquidity.targetstake.triggering.ratio": "0",
       "market.liquidityProvision.shapes.maxSize": "100",
       "market.margin.scalingFactors": "{\"search_level\": 1.1, \"initial_margin\": 1.2, \"collateral_release\": 1.4}",

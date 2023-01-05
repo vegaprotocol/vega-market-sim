@@ -168,7 +168,7 @@ class PriceMonitoringParameters(Config):
 class LiquidityMonitoringParameters(Config):
     OPTS = {
         "default": {
-            "triggering_ratio": 0.7,
+            "triggering_ratio": "0.7",
             "auction_extension": 0,
             "target_stake_parameters": "default",
         }
