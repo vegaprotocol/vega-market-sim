@@ -1083,6 +1083,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
             current_position, self.current_step
         )
+        if (self.bid_depth is None) or (self.ask_depth is None):
+            return
+
         new_buy_shape, new_sell_shape = self.shape_fn(self.bid_depth, self.ask_depth)
         scaled_buy_shape, scaled_sell_shape = self._scale_orders(
             buy_shape=new_buy_shape, sell_shape=new_sell_shape
@@ -1637,6 +1640,9 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         ext_best_bid, ext_best_ask = self.vega.best_prices(
             market_id=self.external_market_id
         )
+
+        if (ext_best_bid == 0) or (ext_best_ask == 0):
+            return None, None
 
         fee_share = self.vega.get_liquidity_fee_shares(
             market_id=self.market_id,
