@@ -20,7 +20,9 @@ def unroll_v2_pagination(
     request_func: Callable[[S], T],
     extraction_func: Callable[[S], List[U]],
 ) -> List[T]:
-    base_request.pagination.CopyFrom(data_node_protos_v2.trading_data.Pagination())
+    base_request.pagination.CopyFrom(
+        data_node_protos_v2.trading_data.Pagination(first=1000)
+    )
     response = request_func(base_request)
     full_list = extraction_func(response)
     while response.page_info.has_next_page:
