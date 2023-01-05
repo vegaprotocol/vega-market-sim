@@ -69,6 +69,7 @@ def main():
             warn_on_raw_data_access=False,
             run_with_console=args.console,
             launch_graphql=args.graphql,
+            start_order_feed=False,
         ) as vega:
 
             scenario.run_iteration(
@@ -81,6 +82,7 @@ def main():
 
         with VegaServiceNetwork(
             network=Network[args.network],
+            start_order_feed=False,
         ) as vega:
 
             scenario.run_iteration(

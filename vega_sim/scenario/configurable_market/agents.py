@@ -45,6 +45,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             wallet_name=proposal_wallet_name,
             wallet_pass=proposal_wallet_pass,
             key_name=proposal_key_name,
+            tag=tag,
         )
 
         self.termination_wallet_name = termination_wallet_name
@@ -63,7 +64,6 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig()
         )
 
-        self.tag = tag
         self.settlement_price = settlement_price
 
     def initialise(
