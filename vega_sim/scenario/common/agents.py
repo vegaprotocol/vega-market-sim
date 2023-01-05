@@ -1650,7 +1650,7 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
             key_name=self.key_name,
         )
 
-        int_fee = (self.int_mkr_fee + self.int_liq_fee) * fee_share
+        int_fee = self.int_mkr_fee + self.int_liq_fee * fee_share
         ext_fee = self.ext_mkr_fee + self.ext_liq_fee + self.ext_inf_fee
 
         required_bid_price = (
