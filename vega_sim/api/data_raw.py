@@ -20,7 +20,9 @@ def unroll_v2_pagination(
     request_func: Callable[[S], T],
     extraction_func: Callable[[S], List[U]],
 ) -> List[T]:
-    base_request.pagination.CopyFrom(data_node_protos_v2.trading_data.Pagination())
+    base_request.pagination.CopyFrom(
+        data_node_protos_v2.trading_data.Pagination(first=1000)
+    )
     response = request_func(base_request)
     full_list = extraction_func(response)
     while response.page_info.has_next_page:
@@ -314,9 +316,14 @@ def observe_event_bus(
         Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
             Infinite iterable of lists of events updates
     """
-    return data_client.ObserveEventBus(
-        iter([vega_protos.api.v1.core.ObserveEventBusRequest(type=type)])
-    )
+
+    request = vega_protos.api.v1.core.ObserveEventBusRequest(type=type)
+    if market_id is not None:
+        setattr(request, "market_id", market_id)
+    if party_id is not None:
+        setattr(request, "party_id", party_id)
+
+    return data_client.ObserveEventBus(iter([request]))
 
 
 def margin_levels(

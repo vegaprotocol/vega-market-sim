@@ -96,14 +96,15 @@ class MarketOrderTrader(StateAgentWithWallet):
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
         base_order_size: float = 1,
-        key_name: str = None,
+        key_name: Optional[str] = None,
         step_bias: Optional[float] = 1,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
-        self.tag = tag
         self.market_name = market_name
         self.asset_name = asset_name
         self.random_state = (
@@ -206,11 +207,12 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         base_order_size: float = 1,
         key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
-        self.tag = tag
         self.market_name = market_name
         self.asset_name = asset_name
         self.random_state = (
@@ -320,13 +322,15 @@ class BackgroundMarket(StateAgentWithWallet):
         base_volume_size: float = 0.1,
         order_distribution_kappa: float = 1,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.price_process = price_process
         self.initial_asset_mint = initial_asset_mint
         self.spread = spread
         self.current_step = 0
-        self.tag = tag
         self.tick_spacing = tick_spacing
         self.num_levels_per_side = num_levels_per_side
         self.base_volume_size = base_volume_size
@@ -355,6 +359,7 @@ class BackgroundMarket(StateAgentWithWallet):
                 self.wallet_name,
                 asset=asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(2)
 
@@ -503,6 +508,7 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
         price_process: List[float],
         market_regimes: List[MarketRegime],
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
         """Generate a background market acting differently as time passes.
         Allows specification of varying numbers of non-overlapping regimes
@@ -527,11 +533,14 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
                     a start/end date and are interpreted as a sparse set
             tag:
                 str, a tag which will be added to the wallet name
+            key_name:
+                str, optional, The name of the key in the wallet to use
         """
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.price_process = price_process
         self.current_step = 0
-        self.tag = tag
 
         self.market_name = market_name
         self.asset_name = asset_name
@@ -590,6 +599,7 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
                 self.wallet_name,
                 asset=asset_id,
                 amount=200000,
+                key_name=self.key_name,
             )
         self.vega.wait_fn(2)
 
@@ -766,11 +776,12 @@ class OpenAuctionPass(StateAgentWithWallet):
         tag: str = "",
         key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.side = side
         self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
-        self.tag = tag
         self.market_name = market_name
         self.asset_name = asset_name
         self.opening_auction_trade_amount = opening_auction_trade_amount
@@ -837,8 +848,10 @@ class MarketManager(StateAgentWithWallet):
         key_name: str = None,
         terminate_key_name: str = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
-        self.terminate_wallet_name = terminate_wallet_name + str(tag)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
+        self.terminate_wallet_name = terminate_wallet_name
         self.terminate_wallet_pass = terminate_wallet_pass
         self.terminate_key_name = terminate_key_name
 
@@ -849,7 +862,6 @@ class MarketManager(StateAgentWithWallet):
 
         self.current_step = 0
 
-        self.tag = tag
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
@@ -990,9 +1002,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         max_order_size: float = 10000,
     ):
         super().__init__(
-            wallet_name + str(tag),
-            wallet_pass,
-            key_name,
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
         )
         self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
@@ -1007,8 +1017,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.current_step = 0
         self.curr_price = None
         self.prev_price = None
-
-        self.tag = tag
 
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
@@ -1082,6 +1090,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
             current_position, self.current_step
         )
+        if (self.bid_depth is None) or (self.ask_depth is None):
+            return
+
         new_buy_shape, new_sell_shape = self.shape_fn(self.bid_depth, self.ask_depth)
         scaled_buy_shape, scaled_sell_shape = self._scale_orders(
             buy_shape=new_buy_shape, sell_shape=new_sell_shape
@@ -1162,13 +1173,13 @@ class ShapedMarketMaker(StateAgentWithWallet):
         sell_shape: List[MMOrder],
     ):
         buy_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=buy_shape,
         )
 
         sell_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=sell_shape,
         )
@@ -1289,8 +1300,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 key="market.liquidity.minimum.probabilityOfTrading.lpOrders",
                 to_type="float",
             )
-            self.stake_to_ccy_siskas = self.vega.get_network_parameter(
-                key="market.liquidity.stakeToCcySiskas", to_type="float"
+            self.stake_to_ccy_volume = self.vega.get_network_parameter(
+                key="market.liquidity.stakeToCcyVolume", to_type="float"
             )
 
 
@@ -1635,7 +1646,16 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
             market_id=self.external_market_id
         )
 
-        int_fee = self.int_mkr_fee + self.int_liq_fee
+        if (ext_best_bid == 0) or (ext_best_ask == 0):
+            return None, None
+
+        fee_share = self.vega.get_liquidity_fee_shares(
+            market_id=self.market_id,
+            wallet_name=self.wallet_name,
+            key_name=self.key_name,
+        )
+
+        int_fee = self.int_mkr_fee + self.int_liq_fee * fee_share
         ext_fee = self.ext_mkr_fee + self.ext_liq_fee + self.ext_inf_fee
 
         required_bid_price = (
@@ -1857,7 +1877,9 @@ class LimitOrderTrader(StateAgentWithWallet):
                 Standard deviation of the log-normal distribution.
         """
 
-        super().__init__(wallet_name + str(tag), wallet_pass, key_name)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
 
         self.current_step = 0
 
@@ -1868,7 +1890,6 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.sell_intensity = sell_intensity
         self.buy_volume = buy_volume
         self.sell_volume = sell_volume
-        self.tag = tag
         self.submit_bias = submit_bias
         self.cancel_bias = cancel_bias
         self.random_state = (
@@ -2071,12 +2092,13 @@ class InformedTrader(StateAgentWithWallet):
             random_state (Optional[np.random.RandomState], optional):
                 RandomState object used to generate randomness. Defaults to None.
         """
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.initial_asset_mint = initial_asset_mint
         self.price_process = price_process
         self.current_step = 0
         self.sim_length = len(price_process)
-        self.tag = tag
         self.proportion_taken = proportion_taken
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
@@ -2237,8 +2259,11 @@ class LiquidityProvider(StateAgentWithWallet):
         offset: float = 0.01,
         fee: float = 0.001,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
 
         self.market_name = market_name
         self.asset_name = asset_name
@@ -2266,6 +2291,7 @@ class LiquidityProvider(StateAgentWithWallet):
                 self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_asset_mint,
+                key_name=self.key_name,
             )
             self.vega.wait_fn(2)
 
@@ -2314,13 +2340,14 @@ class MomentumTrader(StateAgentWithWallet):
         tag: str = "",
         key_name: str = None,
     ):
-        super().__init__(wallet_name, wallet_pass, key_name)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.market_name = market_name
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
         self.order_intensity = order_intensity
         self.base_order_size = base_order_size
-        self.tag = tag
         self.trading_proportion = trading_proportion
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()

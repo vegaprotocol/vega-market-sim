@@ -40,11 +40,12 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
 
     vega.wait_for_datanode_sync()
     # check bond and margin for all
-    for wallet_name in [f"trader_iter_pos_{i}" for i in range(2)]:
+    for key_name in [f"_iter_pos_{i}" for i in range(2)]:
         general, margin, bond = vega.party_account(
-            wallet_name=wallet_name,
+            wallet_name="trader",
             asset_id=asset_id,
             market_id=market_id,
+            key_name=key_name,
         )
         assert margin + general <= 200
         assert bond == 0

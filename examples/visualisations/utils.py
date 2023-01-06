@@ -352,6 +352,7 @@ def move_market(
     best_bid_id: str,
     price: int,
     spread: float,
+    volume: float,
 ):
     """Moves market to new specified price and updates the order-book spread.
 
@@ -371,6 +372,8 @@ def move_market(
             Price to move market to.
         spread (float):
             Spread between best-ask and best-bid at new price level.
+        volume (float):
+            Volume to be traded at new price.
     """
 
     market_data = vega.market_data(market_id=market_id)
@@ -422,7 +425,7 @@ def move_market(
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
         side="SIDE_BUY",
-        volume=1,
+        volume=volume,
         price=price,
     )
     vega.wait_for_total_catchup()
@@ -433,7 +436,7 @@ def move_market(
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
         side="SIDE_SELL",
-        volume=1,
+        volume=volume,
         price=price,
     )
     vega.wait_for_total_catchup()

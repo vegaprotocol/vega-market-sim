@@ -1,8 +1,17 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple, Callable, TypeVar
-
+from typing import (
+    DefaultDict,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Callable,
+    TypeVar,
+    Union,
+)
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -826,8 +835,6 @@ def order_subscription(
     order_stream = data_raw.observe_event_bus(
         data_client=data_client,
         type=[events_protos.BUS_EVENT_TYPE_ORDER],
-        market_id=market_id,
-        party_id=party_id,
     )
 
     def _order_gen(
@@ -1092,3 +1099,40 @@ def _stream_gen(
     except:
         logger.info("Order subscription closed")
         return
+
+
+def get_liquidity_fee_shares(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    party_id: Optional[str] = None,
+) -> Union[Dict, float]:
+    """Gets the current liquidity fee share for each party or a specified party.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC data client
+        market_id (str):
+            Id of market to get liquidity fee shares from.
+        party_id (Optional[str], optional):
+            Id of party to get liquidity fee shares for. Defaults to None.
+    """
+
+    market_data = data_raw.market_data(data_client=data_client, market_id=market_id)
+
+    # Calculate share of fees for each LP
+    shares = {
+        lp.party: float(lp.equity_like_share) * float(lp.average_score)
+        for lp in market_data.liquidity_provider_fee_share
+    }
+    total_shares = sum(shares.values())
+
+    # Scale share of fees for each LP pro rata
+    if total_shares != 0:
+        pro_rata_shares = {key: val / total_shares for key, val in shares.items()}
+    else:
+        pro_rata_shares = {key: 1 / len(shares) for key, val in shares.items()}
+
+    if party_id is None:
+        return pro_rata_shares
+    else:
+        return pro_rata_shares[party_id]

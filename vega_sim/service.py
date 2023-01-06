@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from functools import wraps
 from queue import Queue
 from typing import Dict, List, Optional, Tuple, Union, Any
+from itertools import product
 
 import grpc
 import vega_sim.api.data as data
@@ -1486,28 +1487,39 @@ class VegaService(ABC):
 
     def start_order_monitoring(
         self,
-        market_id: Optional[str] = None,
-        party_id: Optional[str] = None,
+        market_ids: Optional[List[str]] = None,
+        party_ids: Optional[List[str]] = None,
+        use_core_client: bool = False,
     ):
-        self.order_queue = data.order_subscription(
-            self.core_client,
-            self.trading_data_client_v2,
-            market_id=market_id,
-            party_id=party_id,
-        )
-        base_orders = []
 
-        for m_id in (
-            [market_id] if market_id is not None else [m.id for m in self.all_markets()]
+        if use_core_client:
+            data_client = self.core_client
+        else:
+            data_client = self.trading_data_client_v2
+
+        self.order_queue = data.order_subscription(
+            data_client,
+            self.trading_data_client_v2,
+        )
+
+        base_orders = []
+        for market_party_tuple in list(
+            product(
+                (market_ids if market_ids is not None else [None]),
+                (party_ids if party_ids is not None else [None]),
+            )
         ):
             base_orders.extend(
-                data.all_orders(market_id=m_id, data_client=self.trading_data_client_v2)
+                data.list_orders(
+                    data_client=self.trading_data_client_v2,
+                    market_id=market_party_tuple[0],
+                    party_id=market_party_tuple[1],
+                    live_only=True,
+                )
             )
 
         with self.orders_lock:
             for order in base_orders:
-                if party_id is not None and order.party_id != party_id:
-                    continue
                 self._order_state_from_feed.setdefault(order.market_id, {}).setdefault(
                     order.party_id, {}
                 )[order.id] = order
@@ -2138,4 +2150,31 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             party_id=party_id,
             direction=direction,
+        )
+
+    def get_liquidity_fee_shares(
+        self,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
+    ) -> Union[Dict, float]:
+        """Gets the current liquidity fee share for each party or a specified party.
+
+        Args:
+            market_id (str):
+                Id of market.
+            wallet_name (Optional[str] = None):
+                Name of wallet to get public key from.
+            key_name (Optional[str], optional):
+                Name of specific key in wallet to get public key for. Defaults to None.
+        """
+
+        return data.get_liquidity_fee_shares(
+            data_client=self.trading_data_client_v2,
+            market_id=market_id,
+            party_id=(
+                self.wallet.public_key(name=wallet_name, key_name=key_name)
+                if wallet_name is not None
+                else None
+            ),
         )
