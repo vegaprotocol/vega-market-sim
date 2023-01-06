@@ -8,7 +8,7 @@ VEGA_SIM_NETWORKS_TAG=master" > .env
 
 make
 make proto
-# pytest -s -v --log-cli-level INFO -m integration
+pytest -s -v --log-cli-level INFO -m integration
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"
