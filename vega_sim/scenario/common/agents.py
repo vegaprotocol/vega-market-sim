@@ -1166,13 +1166,13 @@ class ShapedMarketMaker(StateAgentWithWallet):
         sell_shape: List[MMOrder],
     ):
         buy_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=buy_shape,
         )
 
         sell_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_siskas
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=sell_shape,
         )
@@ -1293,8 +1293,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 key="market.liquidity.minimum.probabilityOfTrading.lpOrders",
                 to_type="float",
             )
-            self.stake_to_ccy_siskas = self.vega.get_network_parameter(
-                key="market.liquidity.stakeToCcySiskas", to_type="float"
+            self.stake_to_ccy_volume = self.vega.get_network_parameter(
+                key="market.liquidity.stakeToCcyVolume", to_type="float"
             )
 
 
@@ -1609,7 +1609,6 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         super()._update_state(current_step)
 
         if self.state_update_freq and current_step % self.state_update_freq == 0:
-
             if self.market_id is None:
                 self.int_mkr_fee = 0
                 self.int_liq_fee = 0
@@ -1636,7 +1635,6 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
                 )
 
     def _optimal_strategy(self, current_position, current_step):
-
         ext_best_bid, ext_best_ask = self.vega.best_prices(
             market_id=self.external_market_id
         )
@@ -1666,7 +1664,6 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         return current_bid_depth, current_ask_depth
 
     def _balance_positions(self):
-
         # Determine the delta between the position on the internal and external market
 
         internal_position = self.vega.positions_by_market(
@@ -1707,7 +1704,6 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         )
 
     def _balance_accounts(self):
-
         # Get the total balance on the internal market (excluding bond)
         internal_account = self.vega.party_account(
             wallet_name=self.wallet_name,
@@ -2137,7 +2133,6 @@ class InformedTrader(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
-
         # Increment the current step
         self.current_step += 1
 
@@ -2157,7 +2152,6 @@ class InformedTrader(StateAgentWithWallet):
         self.queue.put(self._create_order())
 
     def _create_order(self) -> ITOrder:
-
         # Determine the correct side
         price = self.price_process[self.current_step]
         next_price = self.price_process[
@@ -2217,7 +2211,6 @@ class InformedTrader(StateAgentWithWallet):
             return None
 
     def _close_positions(self, order: ITOrder):
-
         # If order is blank
         if order is None:
             return
