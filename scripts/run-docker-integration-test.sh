@@ -8,7 +8,7 @@ mkdir -p "${RESULT_DIR}"
 
 docker run \
     --platform linux/amd64 \
-    -v "${WORK_DIR}:/tmp" \
+    -v "${RESULT_DIR}:/tmp" \
     vega_sim_test:latest \
         pytest -s -v \
             -m integration \

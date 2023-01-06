@@ -64,7 +64,7 @@ UlimitNOFile = 8192
     LogPriceLevelsDebug = false
     LogRemovedOrdersDebug = false
   [Execution.Risk]
-    Level = "Debug"
+    Level = "Info"
     LogMarginUpdate = true
   [Execution.Position]
     Level = "Info"
