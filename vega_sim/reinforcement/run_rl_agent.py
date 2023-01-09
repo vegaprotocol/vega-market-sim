@@ -27,6 +27,7 @@ def run_iteration(
     step_tag: int,
     vega: VegaServiceNull,
     market_name: str,
+    asset_name: str,
     run_with_console=False,
     pause_at_completion=False,
 ):
@@ -46,6 +47,7 @@ def run_iteration(
         num_steps=50,
         random_agent_ordering=False,
         sigma=100,
+        asset_name=asset_name,
     )
 
     scenario.agents = scenario.configure_agents(
@@ -91,6 +93,7 @@ def _run(
 
     # set market name
     market_name = "ETH:USD"
+    asset_name = "tDAI"
     position_decimals = 2
 
     if not os.path.exists(results_dir):
@@ -114,6 +117,7 @@ def _run(
         market_name=market_name,
         position_decimals=position_decimals,
         inventory_penalty=0.1,
+        asset_name=asset_name,
     )
 
     with VegaServiceNull(
@@ -147,6 +151,7 @@ def _run(
                     step_tag=it,
                     vega=vega,
                     market_name=market_name,
+                    asset_name=asset_name,
                     run_with_console=False,
                     pause_at_completion=False,
                 )
