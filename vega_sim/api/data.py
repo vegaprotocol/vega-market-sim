@@ -256,25 +256,74 @@ def _transfer_from_proto(
 
 
 def positions_by_market(
-    pub_key: str,
-    market_id: str,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
     data_client: vac.VegaTradingDataClientV2,
-) -> List[Position]:
+    pub_key: str,
+    market_id: Optional[str] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
-    return [
-        _position_from_proto(
-            pos,
-            position_decimals=position_decimals,
-            asset_decimals=asset_decimals,
-            price_decimals=price_decimals,
+
+    raw_positions = data_raw.positions_by_market(
+        pub_key=pub_key, market_id=market_id, data_client=data_client
+    )
+    if len(raw_positions) == 0:
+        logging.debug(
+            f"No positions to return for pub_key={pub_key}, market_id={market_id}"
         )
-        for pos in data_raw.positions_by_market(
-            pub_key=pub_key, market_id=market_id, data_client=data_client
+        return None
+
+    positions = {}
+    for pos in raw_positions:
+
+        market_info = None
+
+        # Update maps if value does not exist for current market id
+        if pos.market_id not in market_price_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_price_decimals_map[pos.market_id] = int(market_info.decimal_places)
+        if pos.market_id not in market_position_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_position_decimals_map[pos.market_id] = int(
+                market_info.position_decimal_places
+            )
+        if pos.market_id not in market_to_asset_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_to_asset_map[
+                pos.market_id
+            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+
+        # Update maps if value does not exist for current asset id
+        if market_to_asset_map[pos.market_id] not in asset_decimals_map:
+            asset_info = data_raw.asset_info(
+                asset_id=market_to_asset_map[pos.market_id],
+                data_client=data_client,
+            )
+            asset_decimals_map[pos.market_id] = int(asset_info.details.decimals)
+
+        # Convert raw proto into a market-sim Position object
+        positions[pos.market_id] = _position_from_proto(
+            position=pos,
+            price_decimals=market_price_decimals_map[pos.market_id],
+            position_decimals=market_position_decimals_map[pos.market_id],
+            asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
         )
-    ]
+
+    if market_id is None:
+        return positions
+    else:
+        return positions[market_id]
 
 
 def list_accounts(
@@ -297,7 +346,7 @@ def list_accounts(
     output_accounts = []
     for account in accounts:
         if account.asset not in asset_decimals_map:
-            asset_decimals_map[account.asset] = asset_decimals(
+            asset_decimals_map[account.asset] = get_asset_decimals(
                 asset_id=account.asset,
                 data_client=data_client,
             )
@@ -332,7 +381,7 @@ def party_account(
     )
 
     asset_dp = (
-        asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
+        asset_dp if asset_dp is not None else get_asset_decimals(asset_id, data_client)
     )
 
     general, margin, bond = 0, 0, 0  # np.nan, np.nan, np.nan
@@ -458,8 +507,7 @@ def market_position_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClientV2, an instantiated gRPC data client
-
+            VegaTradingDataClientV2,
     Returns:
         int, The number of decimal places the market uses for positions
     """
@@ -468,7 +516,7 @@ def market_position_decimals(
     ).position_decimal_places
 
 
-def asset_decimals(
+def get_asset_decimals(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
 ) -> int:
@@ -749,7 +797,7 @@ def market_account(
     )
     acct = {account.type: account for account in accounts}[account_type]
 
-    asset_dp = asset_decimals(asset_id=acct.asset, data_client=data_client)
+    asset_dp = get_asset_decimals(asset_id=acct.asset, data_client=data_client)
     return num_from_padded_int(
         acct.balance,
         asset_dp,
@@ -877,7 +925,7 @@ def transfer_subscription(
                 for bus_event in transfer_list.events:
                     transfer = bus_event.transfer
                     if transfer.asset not in asset_dp:
-                        asset_dp[transfer.asset] = asset_decimals(
+                        asset_dp[transfer.asset] = get_asset_decimals(
                             asset_id=transfer.asset,
                             data_client=trading_data_client,
                         )
@@ -924,7 +972,7 @@ def margin_levels(
     res_margins = []
     for margin in margins:
         if margin.asset not in asset_dp:
-            asset_dp[margin.asset] = asset_decimals(
+            asset_dp[margin.asset] = get_asset_decimals(
                 asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
@@ -963,7 +1011,7 @@ def get_trades(
                 market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
-            market_asset_decimals_map[trade.market_id] = asset_decimals(
+            market_asset_decimals_map[trade.market_id] = get_asset_decimals(
                 asset_id=data_raw.market_info(
                     market_id=market_id, data_client=data_client
                 ).tradable_instrument.instrument.future.settlement_asset,
@@ -1016,7 +1064,7 @@ def list_transfers(
     for transfer in transfers:
 
         if transfer.asset not in asset_dp:
-            asset_dp[transfer.asset] = asset_decimals(
+            asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
             )
 

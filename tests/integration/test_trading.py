@@ -46,12 +46,12 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    positions_pb_t1 = vega.positions_by_market(
+    position_pb_t1 = vega.positions_by_market(
         wallet_name=PARTY_A.name,
         market_id=market_id,
     )
 
-    assert positions_pb_t1[0].open_volume == 1
+    assert position_pb_t1.open_volume == 1
 
 
 @pytest.mark.integration

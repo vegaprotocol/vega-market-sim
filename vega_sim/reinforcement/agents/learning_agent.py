@@ -164,7 +164,7 @@ class LearningAgent(StateAgentWithWallet):
     def state(self, vega: VegaServiceNull) -> LAMarketState:
         position = self.vega.positions_by_market(self.wallet_name, self.market_id)
 
-        position = position[0].open_volume if position else 0
+        position = position.open_volume if position else 0
         account = self.vega.party_account(
             wallet_name=self.wallet_name,
             asset_id=self.tdai_id,

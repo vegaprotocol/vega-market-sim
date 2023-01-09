@@ -1079,7 +1079,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
             current_position, self.current_step
         )
@@ -1666,21 +1666,19 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
     def _balance_positions(self):
         # Determine the delta between the position on the internal and external market
 
-        internal_position = self.vega.positions_by_market(
+        positions = self.vega.positions_by_market(
             wallet_name=self.wallet_name,
-            market_id=self.market_id,
             key_name=self.key_name,
         )
         current_int_position = (
-            internal_position[0].open_volume if internal_position != [] else 0
-        )
-        external_position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name,
-            market_id=self.external_market_id,
-            key_name=self.external_key_name,
+            float(positions[self.market_id].open_volume)
+            if positions is not None and self.market_id in positions
+            else 0
         )
         current_ext_position = (
-            float(external_position[0].open_volume) if external_position != [] else 0
+            float(positions[self.external_market_id].open_volume)
+            if positions is not None and self.external_market_id in positions
+            else 0
         )
         position_delta = current_int_position + current_ext_position
 
@@ -2179,7 +2177,7 @@ class InformedTrader(StateAgentWithWallet):
             market_id=self.market_id,
             key_name=self.key_name,
         )
-        abs_position = abs(int(position[0].open_volume) if position else 0)
+        abs_position = abs(int(position.open_volume) if position is not None else 0)
         if abs_position + size > self.max_abs_position:
             size = min([0, self.max_abs_position - abs_position])
 
