@@ -250,7 +250,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.optimal_strategy(current_position)
 
         buy_order, sell_order = None, None

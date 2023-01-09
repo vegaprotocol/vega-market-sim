@@ -646,7 +646,7 @@ def test_order_subscription(mkt_price_mock, mkt_pos_mock, core_servicer_and_port
         assert order.id == next(queue).id
 
 
-@patch("vega_sim.api.get_asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
     mk_asset_decimals.return_value = 1
     transfers = [
@@ -771,7 +771,7 @@ def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
         assert transfer.id == next(queue).id
 
 
-@patch("vega_sim.api.get_asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
     expected = [
         MarginLevels(
@@ -829,7 +829,7 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-@patch("vega_sim.api.get_asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 @patch("vega_sim.api.data.market_price_decimals")
 @patch("vega_sim.api.data.market_position_decimals")
 @patch("vega_sim.api.data_raw.market_info")
@@ -925,7 +925,7 @@ def test_get_trades(
     assert res == expected
 
 
-@patch("vega_sim.api.get_asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 def test_list_transfers(
     mk_asset_decimals,
     trading_data_v2_servicer_and_port,
