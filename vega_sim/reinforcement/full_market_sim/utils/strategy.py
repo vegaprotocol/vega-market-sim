@@ -10,7 +10,7 @@ def A_S_MMmodel(
     q_upper: int,
     q_lower: int,
     kappa: int,
-    Lambda: int,
+    lmbda: int,
     alpha: float,
     phi: float,
 ):
@@ -34,7 +34,7 @@ def A_S_MMmodel(
             int, lower bound of the inventory of MM specified in the model
         kappa:
             int, market parameter to represnet the probability of pegged LOs to be hit
-        Lambda:
+        lmbda:
             int, market parameter to represnet the coming rate of MOs
         alpha:
             float, risk aversion parameter to represnet terminal penalty coefficient
@@ -62,9 +62,9 @@ def A_S_MMmodel(
             if j == i:
                 A[i, j] = -kappa * phi * (q_upper - i) ** 2
             elif j == i + 1:
-                A[i, j] = Lambda * np.e**-1
+                A[i, j] = lmbda * np.e**-1
             elif j == i - 1:
-                A[i, j] = Lambda * np.e**-1
+                A[i, j] = lmbda * np.e**-1
 
     # z, (q_upper-q_lower+1)-dim vector, denotes the terminal condition of ODE
     z = np.array(
@@ -103,13 +103,13 @@ def GLFT_approx(
     q_upper: int,
     q_lower: int,
     kappa: int,
-    Lambda: int,
+    lmbda: int,
     alpha: float,
     phi: float,
 ):
     """
     One problem of A_S Market Making model is cannot handle large exponential matrix
-      when terminal time T, or market parameters kappa/Lambda, are large enough.
+      when terminal time T, or market parameters kappa/lmbda, are large enough.
       The GLFT formula is to explore the asymptotic behavior of the optimal strategy,
       assuming T -> infty.
 
@@ -120,7 +120,7 @@ def GLFT_approx(
             int, lower bound of the inventory of MM specified in the model
         kappa:
             int, market parameter to represnet the probability of pegged LOs to be hit
-        Lambda:
+        lmbda:
             int, market parameter to represnet the coming rate of MOs
         alpha:
             float, risk aversion parameter to represnet terminal penalty coefficient
@@ -130,11 +130,11 @@ def GLFT_approx(
 
     # approximation method
     delta_buy_approx = [
-        1 / kappa + (2 * i + 1) * np.sqrt(phi * np.e / Lambda / kappa) / 2
+        1 / kappa + (2 * i + 1) * np.sqrt(phi * np.e / lmbda / kappa) / 2
         for i in range(q_upper - 1, q_lower - 1, -1)
     ]
     delta_sell_approx = [
-        1 / kappa - (2 * i - 1) * np.sqrt(phi * np.e / Lambda / kappa) / 2
+        1 / kappa - (2 * i - 1) * np.sqrt(phi * np.e / lmbda / kappa) / 2
         for i in range(q_upper, q_lower, -1)
     ]
 

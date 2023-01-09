@@ -98,6 +98,15 @@ def build_basic_market(
 
     market_id = vega.all_markets()[0].id
 
+    vega.submit_liquidity(
+        wallet_name=MM_WALLET.name,
+        market_id=market_id,
+        commitment_amount=initial_commitment,
+        fee=0.002,
+        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        is_amendment=False,
+    )
     # Add transactions in the proposed market to pass opening auction at price 0.3
     vega.submit_order(
         trading_wallet=AUCTION1.name,

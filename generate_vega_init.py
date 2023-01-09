@@ -14,7 +14,7 @@ from . import (
     checkpoint,
     commands,
     events,
-    oracles,
+    data,
     snapshot,
     wallet,
 {%- for i in imports %}
@@ -27,7 +27,7 @@ __all__ = [
     "checkpoint",
     "commands",
     "events",
-    "oracles",
+    "data",
     "snapshot",
     "tm",
     "wallet",

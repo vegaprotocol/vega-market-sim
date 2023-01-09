@@ -28,10 +28,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     with VegaServiceNull(
-        run_with_console=True,
+        run_with_console=False,
+        launch_graphql=False,
         start_order_feed=True,
         retain_log_files=True,
-        use_full_vega_wallet=True,
+        use_full_vega_wallet=False,
+        store_transactions=True,
     ) as vega:
         for wallet in wallets:
             vega.create_wallet(wallet.name, wallet.passphrase)
@@ -80,19 +82,19 @@ if __name__ == "__main__":
             settlement_asset_id=tdai_id,
             termination_wallet=TERMINATE_WALLET.name,
             market_decimals=5,
-            liquidity_commitment=vega.build_new_market_liquidity_commitment(
-                asset_id=tdai_id,
-                commitment_amount=10000,
-                fee=0.001,
-                buy_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
-                sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
-                market_decimals=5,
-            ),
         )
         vega.wait_for_total_catchup()
 
         market_id = vega.all_markets()[0].id
-
+        vega.submit_liquidity(
+            wallet_name=MM_WALLET.name,
+            market_id=market_id,
+            commitment_amount=10000,
+            fee=0.001,
+            buy_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
+            sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
+            is_amendment=False,
+        )
         vega.submit_order(
             trading_wallet=MM_WALLET.name,
             market_id=market_id,
@@ -111,6 +113,7 @@ if __name__ == "__main__":
             volume=1,
             price=100,
         )
+
         # for i in range(1, 100, 2):
         #     trader = np.random.choice([MM_WALLET.name, MM_WALLET2.name])
 
@@ -134,61 +137,61 @@ if __name__ == "__main__":
         #         price=100 + 0.25 * i,
         #     )
 
-        for wallet in [MM_WALLET, MM_WALLET2]:
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_BUY",
-                volume=10,
-                price=99.5,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_BUY",
-                volume=10,
-                price=99,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_BUY",
-                volume=10,
-                price=98,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=10,
-                price=101,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=10,
-                price=102,
-            )
-            vega.submit_order(
-                trading_wallet=wallet.name,
-                market_id=market_id,
-                time_in_force="TIME_IN_FORCE_GTC",
-                order_type="TYPE_LIMIT",
-                side="SIDE_SELL",
-                volume=10,
-                price=103,
-            )
+        # for wallet in [MM_WALLET, MM_WALLET2]:
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_BUY",
+        #         volume=10,
+        #         price=99.5,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_BUY",
+        #         volume=10,
+        #         price=99,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_BUY",
+        #         volume=10,
+        #         price=98,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_SELL",
+        #         volume=10,
+        #         price=101,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_SELL",
+        #         volume=10,
+        #         price=102,
+        #     )
+        #     vega.submit_order(
+        #         trading_wallet=wallet.name,
+        #         market_id=market_id,
+        #         time_in_force="TIME_IN_FORCE_GTC",
+        #         order_type="TYPE_LIMIT",
+        #         side="SIDE_SELL",
+        #         volume=10,
+        #         price=103,
+        #     )
 
         to_cancel = vega.submit_order(
             trading_wallet=MM_WALLET.name,
@@ -228,8 +231,11 @@ if __name__ == "__main__":
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Margin levels are: {margin_levels}")
         vega.forward("10s")
+
+        input("Pausing to observe the market, press Enter to continue.")
         vega.settle_market(
             settlement_wallet=TERMINATE_WALLET.name,
             settlement_price=100,
             market_id=market_id,
         )
+        input("Press Enter to finish")

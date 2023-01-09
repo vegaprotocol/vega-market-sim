@@ -7,7 +7,14 @@ all: pull_deps build_deps
 
 ui: pull_deps_ui build_deps_ui
 
+networks: pull_deps_networks build_deps_networks
+
 proto: build_proto black
+
+clean_ui:
+	@echo "Deleting $(EXTERN_DIR)/console and ./vega_sim/bin/console" 
+	@rm -rf "$(EXTERN_DIR)/console"
+	@rm -rf "./vega_sim/bin/console"
 
 pull_deps:
 	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
@@ -39,6 +46,29 @@ build_deps_ui:
 	@mkdir -p ./vega_sim/bin/console
 	@rsync -av ${EXTERN_DIR}/console vega_sim/bin/ --exclude ${EXTERN_DIR}/console/.git
 	@yarn --cwd vega_sim/bin/console install
+
+pull_deps_networks:
+	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
+	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
+	@echo "Downloading Vega networks-internal"
+	@if [ ! -d ./extern/networks-internal ]; then mkdir ./extern/networks-internal; git clone https://github.com/vegaprotocol/networks-internal ${EXTERN_DIR}/networks-internal; fi
+ifneq (${VEGA_SIM_NEWTORKS_TAG},develop)
+	@git -C ${EXTERN_DIR}/networks-internal pull; git -C ${EXTERN_DIR}/networks-internal checkout ${VEGA_SIM_NEWTORKS_TAG}
+else
+	@git -C ${EXTERN_DIR}/networks-internal checkout develop; git -C ${EXTERN_DIR}/networks-internal pull
+endif
+	@if [ ! -d ./extern/networks ]; then mkdir ./extern/networks; git clone https://github.com/vegaprotocol/networks ${EXTERN_DIR}/networks; fi
+ifneq (${VEGA_SIM_NEWTORKS_TAG},develop)
+	@git -C ${EXTERN_DIR}/networks pull; git -C ${EXTERN_DIR}/networks checkout ${VEGA_SIM_NEWTORKS_TAG}
+else
+	@git -C ${EXTERN_DIR}/networks checkout develop; git -C ${EXTERN_DIR}/networks pull
+endif
+
+build_deps_networks:
+	@mkdir -p ./vega_sim/bin/networks-internal
+	@rsync -av ${EXTERN_DIR}/networks-internal vega_sim/bin/ --exclude ${EXTERN_DIR}/networks-internal/.git
+	@mkdir -p ./vega_sim/bin/networks
+	@rsync -av ${EXTERN_DIR}/networks vega_sim/bin/ --exclude ${EXTERN_DIR}/networks/.git
 
 build_proto: pull_deps
 	@rm -rf ./vega_sim/proto
@@ -76,4 +106,5 @@ test_examples:
 
 export_reqs:
 	@poetry export  --without-hashes -f requirements.txt -o requirements.txt
-	@poetry export  --without-hashes -f requirements.txt --dev -o requirements-dev.txt
+	@poetry export  --without-hashes -f requirements.txt --with dev -o requirements-dev.txt
+	@poetry export  --without-hashes -f requirements.txt --with dev -E learning -o requirements-learning.txt

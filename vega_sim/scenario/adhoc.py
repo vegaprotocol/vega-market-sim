@@ -1,9 +1,13 @@
 import argparse
 import logging
 
+from vega_sim.scenario.constants import Network
+
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.registry import SCENARIOS
 from vega_sim.scenario.scenario import Scenario
+from vega_sim.service import VegaService
 
 
 def main():
@@ -13,6 +17,12 @@ def main():
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--graphql", action="store_true")
     parser.add_argument("--pause", action="store_true")
+    parser.add_argument("--output", action="store_true")
+    parser.add_argument(
+        "--network",
+        choices=[network.name for network in Network],
+        default=Network.NULLCHAIN.name,
+    )
     parser.add_argument(
         "-p",
         "--pause_every_n_steps",
@@ -29,16 +39,39 @@ def main():
 
     scenario.pause_every_n_steps = args.pause_every_n_steps
 
-    with VegaServiceNull(
-        run_with_console=args.console,
-        launch_graphql=args.graphql,
-        warn_on_raw_data_access=False,
-        seconds_per_block=scenario.block_length_seconds,
-        transactions_per_block=100,
-        retain_log_files=True,
-        use_full_vega_wallet=False,
-    ) as vega:
-        scenario.run_iteration(vega=vega, pause_at_completion=args.pause)
+    if Network[args.network] == Network.NULLCHAIN:
+        with VegaServiceNull(
+            run_with_console=args.console,
+            launch_graphql=args.graphql,
+            warn_on_raw_data_access=False,
+            seconds_per_block=scenario.block_length_seconds,
+            transactions_per_block=(
+                scenario.transactions_per_block
+                if hasattr(scenario, "transactions_per_block")
+                else 100
+            ),
+            retain_log_files=True,
+            use_full_vega_wallet=False,
+            start_order_feed=False,
+        ) as vega:
+            scenario.run_iteration(
+                vega=vega,
+                network=Network[args.network],
+                pause_at_completion=args.pause,
+                output_data=args.output,
+            )
+
+    else:
+        with VegaServiceNetwork(
+            network=Network[args.network],
+            run_with_wallet=True,
+            run_with_console=True,
+            start_order_feed=False,
+        ) as vega:
+            scenario.run_iteration(
+                vega=vega,
+                network=Network[args.network],
+            )
 
 
 if __name__ == "__main__":

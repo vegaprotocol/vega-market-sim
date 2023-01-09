@@ -26,7 +26,9 @@ from urllib3.exceptions import MaxRetryError
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
 from vega_sim.wallet.base import Wallet
-from vega_sim.wallet.slim_wallet import SlimWallet
+from vega_sim.wallet.slim_wallet import (
+    SlimWallet,
+)
 from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = logging.getLogger(__name__)
@@ -320,12 +322,15 @@ def manage_vega_processes(
     block_duration: str = "1s",
     run_wallet: bool = False,
     retain_log_files: bool = False,
+    log_dir: Optional[str] = None,
+    replay_from_path: Optional[str] = None,
+    store_transactions: bool = True,
 ) -> None:
     logging.basicConfig(level=logging.INFO)
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
-    tmp_vega_dir = tempfile.mkdtemp()
+    tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
     if port_config.get(Ports.DATA_NODE_GRAPHQL):
         logger.info(
@@ -333,7 +338,13 @@ def manage_vega_processes(
         )
     if port_config.get(Ports.CONSOLE) and run_with_console:
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
-    shutil.copytree(vega_home_path, f"{tmp_vega_dir}/vegahome")
+
+    dest_dir = f"{tmp_vega_dir}/vegahome"
+    shutil.copytree(vega_home_path, dest_dir)
+    for dirpath, _, filenames in os.walk(dest_dir):
+        os.utime(dirpath, None)
+        for file in filenames:
+            os.utime(os.path.join(dirpath, file), None)
 
     tmp_vega_home = tmp_vega_dir + "/vegahome"
     _update_node_config(
@@ -344,7 +355,12 @@ def manage_vega_processes(
     )
 
     dataNodeProcess = _popen_process(
-        [data_node_path, "node", "--home=" + tmp_vega_home],
+        [
+            data_node_path,
+            "start",
+            "--home=" + tmp_vega_home,
+            "--chainID=CUSTOM",
+        ],
         dir_root=tmp_vega_dir,
         log_name="data_node",
     )
@@ -360,26 +376,50 @@ def manage_vega_processes(
         dir_root=tmp_vega_dir,
         log_name="faucet",
     )
+
+    vega_args = [
+        vega_path,
+        "start",
+        "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+        "--home=" + tmp_vega_home,
+    ]
+
+    if store_transactions:
+        replay_file = (
+            replay_from_path
+            if replay_from_path is not None
+            else tmp_vega_home + "/replay"
+        )
+        vega_args.extend(
+            [
+                f"--blockchain.nullchain.replay-file={replay_file}",
+                "--blockchain.nullchain.record",
+            ]
+        )
+    if replay_from_path is not None:
+        vega_args.extend(
+            [
+                f"--blockchain.nullchain.replay-file={replay_from_path}",
+                "--blockchain.nullchain.replay",
+            ]
+        )
+
     vegaNodeProcess = _popen_process(
-        [
-            vega_path,
-            "start",
-            "--nodewallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
-            "--home=" + tmp_vega_home,
-        ],
+        vega_args,
         dir_root=tmp_vega_dir,
         log_name="node",
     )
+
     processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
 
     if run_wallet:
         for _ in range(3000):
             try:
                 requests.get(
-                    f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/time"
+                    f"http://localhost:{port_config.get(Ports.DATA_NODE_REST)}/time"
                 ).raise_for_status()
                 requests.get(
-                    f"http://localhost:{port_config[Ports.CORE_REST]}/blockchain/height"
+                    f"http://localhost:{port_config.get(Ports.CORE_REST)}/blockchain/height"
                 ).raise_for_status()
                 break
             except (
@@ -412,9 +452,7 @@ def manage_vega_processes(
                 "NX_VEGA_URL": (
                     f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/query"
                 ),
-                "NX_VEGA_WALLET_URL": (
-                    f"http://localhost:{port_config[Ports.WALLET]}/api/v1"
-                ),
+                "NX_VEGA_WALLET_URL": f"http://localhost:{port_config[Ports.WALLET]}",
                 "NX_VEGA_ENV": "CUSTOM",
                 "NX_PORT": f"{port_config[Ports.CONSOLE]}",
                 "NODE_ENV": "development",
@@ -484,8 +522,11 @@ class VegaServiceNull(VegaService):
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
         start_order_feed: bool = True,
+        start_transfer_feed: bool = True,
         retain_log_files: bool = False,
         launch_graphql: bool = False,
+        store_transactions: bool = True,
+        replay_from_path: Optional[str] = None,
     ):
         super().__init__(
             can_control_time=True,
@@ -511,9 +552,14 @@ class VegaServiceNull(VegaService):
 
         self._wallet = None
         self._use_full_vega_wallet = use_full_vega_wallet
+        self.store_transactions = store_transactions
+
+        self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
         self._start_order_feed = start_order_feed
+        self._start_transfer_feed = start_transfer_feed
         self.launch_graphql = launch_graphql
+        self.replay_from_path = replay_from_path
 
         if port_config is None:
             self._assign_ports()
@@ -532,7 +578,9 @@ class VegaServiceNull(VegaService):
         self.stop()
 
     def wait_fn(self, wait_multiple: float = 1) -> None:
+        self.wait_for_core_catchup()
         self.forward(f"{int(wait_multiple * self.seconds_per_block)}s")
+        self.wait_for_core_catchup()
 
     @property
     def wallet(self) -> Wallet:
@@ -545,6 +593,7 @@ class VegaServiceNull(VegaService):
                     full_wallet=VegaWallet(self.wallet_url)
                     if self.run_with_console
                     else None,
+                    log_dir=self.log_dir,
                 )
         return self._wallet
 
@@ -599,6 +648,9 @@ class VegaServiceNull(VegaService):
                 "block_duration": f"{int(self.seconds_per_block)}s",
                 "run_wallet": self._use_full_vega_wallet or self.run_with_console,
                 "retain_log_files": self.retain_log_files,
+                "log_dir": self.log_dir,
+                "store_transactions": self.store_transactions,
+                "replay_from_path": self.replay_from_path,
             },
         )
         self.proc.start()
@@ -612,7 +664,7 @@ class VegaServiceNull(VegaService):
         if block_on_startup:
             # Wait for startup
             started = False
-            for _ in range(3000):
+            for _ in range(3600):
                 try:
                     requests.get(
                         f"http://localhost:{self.data_node_rest_port}/time"
@@ -620,7 +672,7 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
-                    if self.run_with_console:
+                    if self.run_with_console or self._use_full_vega_wallet:
                         requests.get(
                             f"http://localhost:{self.wallet_port}/api/v1/status"
                         ).raise_for_status()
@@ -648,6 +700,8 @@ class VegaServiceNull(VegaService):
 
         if self._start_order_feed:
             self.start_order_monitoring()
+        if self._start_transfer_feed:
+            self.start_transfer_monitoring()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

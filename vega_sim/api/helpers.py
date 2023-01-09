@@ -5,8 +5,8 @@ import time
 from typing import Any, Optional, TypeVar, Union, Callable
 
 import requests
-from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClient
-from vega_sim.proto.data_node.api.v1.trading_data_pb2 import GetVegaTimeRequest
+from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
+from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 
 
 T = TypeVar("T")
@@ -50,7 +50,7 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
 
 
 def wait_for_datanode_sync(
-    trading_data_client: VegaTradingDataClient,
+    trading_data_client: VegaTradingDataClientV2,
     core_data_client: VegaCoreClient,
     max_retries: int = 650,
 ) -> None:
@@ -90,10 +90,12 @@ def wait_for_core_catchup(
     """
     attempts = 1
     core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    time.sleep(0.0001)
     core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
 
     while core_time != core_time_two:
         core_time = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+        time.sleep(0.0001)
         core_time_two = core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
         attempts += 1
         if attempts >= max_retries:
@@ -105,7 +107,6 @@ def wait_for_core_catchup(
 def wait_for_acceptance(
     submission_ref: str,
     submission_load_func: Callable[[str], T],
-    time_forward_fn: Optional[Callable[[None], None]] = None,
 ) -> T:
     logger.debug("Waiting for proposal acceptance")
     submission_accepted = False
@@ -113,8 +114,6 @@ def wait_for_acceptance(
         try:
             proposal = submission_load_func(submission_ref)
         except:
-            if time_forward_fn is not None:
-                time_forward_fn()
             time.sleep(0.001)
             continue
 
@@ -122,8 +121,6 @@ def wait_for_acceptance(
             logger.debug("Your proposal has been accepted by the network")
             submission_accepted = True
             break
-        if time_forward_fn is not None:
-            time_forward_fn()
         time.sleep(0.001)
 
     if not submission_accepted:

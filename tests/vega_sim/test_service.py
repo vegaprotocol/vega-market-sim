@@ -48,11 +48,15 @@ def test_base_service_wallet_creation(stub_service: StubService):
                 }
             },
         )
+        req_mocker.get(
+            WALLET_KEY_URL.format(wallet_server_url="localhost:TEST_WALLET"),
+            json={"keys": [{"name": "TEST_KEYNAME", "pub": "TEST_PUBLICKEY"}]},
+        )
         stub_service.create_wallet("TEST_NAME", "TEST_PHRASE")
         assert stub_service.wallet.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
         assert (
-            stub_service.wallet.pub_keys["TEST_NAME"]
-            == 'TEST_PHRASE[{"name": "default_key"}]'
+            stub_service.wallet.pub_keys["TEST_NAME"]["TEST_KEYNAME"]
+            == "TEST_PUBLICKEY"
         )
 
 
@@ -74,11 +78,11 @@ def test_base_service_wallet_login(stub_service: StubService):
         )
         req_mocker.get(
             WALLET_KEY_URL.format(wallet_server_url="localhost:TEST_WALLET"),
-            json=lambda req, _: {"keys": 'TEST_PHRASE[{"name": "default_key"}]'},
+            json={"keys": [{"name": "TEST_KEYNAME", "pub": "TEST_PUBLICKEY"}]},
         )
         stub_service.login("TEST_NAME", "TEST_PHRASE")
         assert stub_service.wallet.login_tokens["TEST_NAME"] == "TEST_NAMETEST_PHRASE"
         assert (
-            stub_service.wallet.pub_keys["TEST_NAME"]
-            == 'TEST_PHRASE[{"name": "default_key"}]'
+            stub_service.wallet.pub_keys["TEST_NAME"]["TEST_KEYNAME"]
+            == "TEST_PUBLICKEY"
         )

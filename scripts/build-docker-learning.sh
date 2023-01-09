@@ -1,0 +1,1 @@
+docker buildx build --platform linux/amd64 --tag=vega_sim_learning:latest --target=vegasim_learning .

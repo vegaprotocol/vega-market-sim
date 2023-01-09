@@ -4,11 +4,14 @@ import json
 import os
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from random import random
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.scenario import Scenario
+from vega_sim.scenario.scenario import Scenario, MarketHistoryData
+
+from vega_sim.api.market import MarketConfig
 
 PARAMETER_AMEND_WALLET = ("param", "amend")
 
@@ -35,6 +38,7 @@ class SingleParameterExperiment(Experiment):
     runs_per_scenario: int = 1
     additional_parameters_to_set: Optional[Dict[str, str]] = None
     data_extraction: List[Tuple] = None
+    market_parameter: Optional[bool] = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -54,9 +58,13 @@ def _run_parameter_iteration(
     value: str,
     additional_parameters_to_set: Optional[Dict[str, str]] = None,
     random_state: Optional[np.random.RandomState] = None,
-) -> Any:
+) -> Tuple[List[MarketHistoryData], Any]:
     with VegaServiceNull(
-        warn_on_raw_data_access=False, retain_log_files=True, run_with_console=False
+        warn_on_raw_data_access=False,
+        retain_log_files=True,
+        run_with_console=False,
+        transactions_per_block=100,
+        use_full_vega_wallet=False,
     ) as vega:
         vega.create_wallet(*PARAMETER_AMEND_WALLET)
         vega.mint(
@@ -75,9 +83,35 @@ def _run_parameter_iteration(
             PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
         )
 
-        res = scenario.run_iteration(vega=vega, random_state=random_state)
+        scenario.run_iteration(vega=vega, random_state=random_state)
 
-        return res
+        return (scenario.get_run_data(), scenario.get_additional_run_data())
+
+
+def _run_market_parameter_iteration(
+    scenario: Scenario,
+    parameter_to_vary: str,
+    value: Union[str, int, float],
+    random_state: Optional[np.random.RandomState],
+) -> Tuple[List[MarketHistoryData], Any]:
+    with VegaServiceNull(
+        warn_on_raw_data_access=False,
+        retain_log_files=True,
+        run_with_console=False,
+        transactions_per_block=100,
+        use_full_vega_wallet=False,
+    ) as vega:
+        market_config = MarketConfig("default")
+
+        market_config.set(parameter_to_vary, value)
+
+        scenario.run_iteration(
+            vega=vega,
+            random_state=random_state,
+            market_config=market_config,
+        )
+
+        return (scenario.get_run_data(), scenario.get_additional_run_data())
 
 
 def run_single_parameter_experiment(
@@ -90,14 +124,22 @@ def run_single_parameter_experiment(
     for value in experiment.values:
         results[value] = []
         for state in copy.deepcopy(random_seeds):
-            results[value].append(
-                _run_parameter_iteration(
+            if experiment.market_parameter:
+                (_, res) = _run_market_parameter_iteration(
                     scenario=experiment.scenario,
                     parameter_to_vary=experiment.parameter_to_vary,
                     value=value,
                     random_state=state,
                 )
-            )
+            else:
+                (_, res) = _run_parameter_iteration(
+                    scenario=experiment.scenario,
+                    parameter_to_vary=experiment.parameter_to_vary,
+                    value=value,
+                    random_state=state,
+                )
+            results[value].append(res)
+
     return results
 
 

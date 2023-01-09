@@ -1,8 +1,7 @@
 import argparse
 import logging
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Dict
 from vega_sim.environment.agent import Agent
-from vega_sim.scenario.ideal_market_maker_v2.scenario import IdealMarketMaker
 from vega_sim.scenario.market_crash.price_process import regime_change_random_walk
 
 from vega_sim.scenario.scenario import Scenario
@@ -16,10 +15,10 @@ from vega_sim.scenario.ideal_market_maker_v2.agents import (
     BACKGROUND_MARKET,
     AUCTION1_WALLET,
     AUCTION2_WALLET,
-    OptimalMarketMaker,
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
+    StateAgent,
     MarketOrderTrader,
     MultiRegimeBackgroundMarket,
     MarketRegime,
@@ -51,7 +50,6 @@ class MarketCrash(Scenario):
         spread: float = 0.02,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         position_taker_mint: float = 1000,
         position_taker_buy_intensity: float = 5,
         position_taker_sell_intensity: float = 5,
@@ -62,11 +60,13 @@ class MarketCrash(Scenario):
         step_length_seconds: int = 1,
         settle_at_end: bool = True,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
         trim_to_min: Optional[float] = None,
+        price_process_fn: Optional[Callable] = None,
     ):
+        super().__init__(state_extraction_fn=state_extraction_fn)
         self.num_steps = num_steps
         self.dt = dt
         self.market_decimal = market_decimal
@@ -85,9 +85,7 @@ class MarketCrash(Scenario):
         self.spread = spread
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
-        self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
-        self.state_extraction_fn = state_extraction_fn
         self.position_taker_buy_intensity = position_taker_buy_intensity
         self.position_taker_sell_intensity = position_taker_sell_intensity
         self.noise_buy_intensity = noise_buy_intensity
@@ -99,6 +97,7 @@ class MarketCrash(Scenario):
         self.num_noise_traders = num_noise_traders
         self.settle_at_end = settle_at_end
         self.initial_asset_mint = initial_asset_mint
+        self.price_process_fn = price_process_fn
 
     def _generate_price_process(
         self,
@@ -117,16 +116,21 @@ class MarketCrash(Scenario):
             random_state=random_state,
         )
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         self.market_name = f"BTC:DAI_{tag}"
         self.asset_name = f"tDAI{tag}"
 
-        self.price_process = self._generate_price_process()
+        self.price_process = (
+            self.price_process_fn()
+            if self.price_process_fn is not None
+            else self._generate_price_process()
+        )
 
         market_maker = MarketManager(
             wallet_name=MM_WALLET.name,
@@ -157,6 +161,7 @@ class MarketCrash(Scenario):
                     buy_intensity=self.noise_buy_intensity,
                     sell_intensity=self.noise_sell_intensity,
                     random_state=random_state,
+                    key_name=f"{tag}_noise_{i}",
                 )
             )
         for i in range(self.num_position_traders):
@@ -171,6 +176,7 @@ class MarketCrash(Scenario):
                     buy_intensity=self.position_taker_buy_intensity,
                     sell_intensity=self.position_taker_sell_intensity,
                     random_state=random_state,
+                    key_name=f"{tag}_pos_{i}",
                 )
             )
 
@@ -203,7 +209,7 @@ class MarketCrash(Scenario):
             market_name=self.market_name,
             asset_name=self.asset_name,
             initial_asset_mint=self.initial_asset_mint,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -214,43 +220,37 @@ class MarketCrash(Scenario):
             market_name=self.market_name,
             asset_name=self.asset_name,
             initial_asset_mint=self.initial_asset_mint,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
+        agents = (
+            [
                 market_maker,
                 background_market,
                 auctionpass1,
                 auctionpass2,
             ]
             + noise_traders
-            + position_traders,
+            + position_traders
+        )
+        return {agent.name(): agent for agent in agents}
+
+    def configure_environment(
+        self,
+        vega: VegaServiceNull,
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
+            agents=list(self.agents.values()),
             n_steps=self.num_steps,
             transactions_per_block=self.block_size,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )
-        return env
-
-    def run_iteration(
-        self,
-        vega: VegaServiceNull,
-        pause_at_completion: bool = False,
-        tag: Optional[str] = None,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=tag if tag is not None else str(0), random_state=random_state
-        )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-        )
-        return result
 
 
 if __name__ == "__main__":

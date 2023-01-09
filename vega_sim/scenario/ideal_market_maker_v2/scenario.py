@@ -1,13 +1,11 @@
 import argparse
 import logging
 import numpy as np
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Dict
 from vega_sim.environment.agent import Agent
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.scenario.ideal_market_maker_v2.utils.price_process import (
-    RW_model,
-)
+from vega_sim.scenario.common.utils.price_process import random_walk
 from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.ideal_market_maker_v2.agents import (
@@ -23,6 +21,7 @@ from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     BackgroundMarket,
     OpenAuctionPass,
+    StateAgent,
 )
 
 
@@ -30,7 +29,7 @@ class IdealMarketMaker(Scenario):
     def __init__(
         self,
         num_steps: int = 120,
-        dt: float = 1 / 60 / 24 / 365.25,
+        random_agent_ordering: bool = True,
         market_decimal: int = 5,
         asset_decimal: int = 5,
         market_position_decimal: int = 2,
@@ -44,11 +43,11 @@ class IdealMarketMaker(Scenario):
         q_lower: int = -20,
         alpha: float = 10**-4,
         phi: float = 5 * 10**-6,
+        market_marker_limit_order_size: float = 10,
         lp_commitamount: float = 200000,
         spread: int = 2,
         block_size: int = 1,
         block_length_seconds: int = 1,
-        state_extraction_freq: int = 1,
         buy_intensity: float = 5,
         sell_intensity: float = 5,
         backgroundmarket_tick_spacing: float = 0.002,
@@ -56,15 +55,17 @@ class IdealMarketMaker(Scenario):
         step_length_seconds: int = 1,
         opening_auction_trade_amount: float = 1,
         state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
         pause_every_n_steps: Optional[int] = None,
         price_process_fn: Optional[Callable[[None], List[float]]] = None,
         market_order_trader_base_order_size: float = 1,
         settle_at_end: bool = True,
+        proportion_taken: float = 0.8,
     ):
+        super().__init__(state_extraction_fn=state_extraction_fn)
         self.num_steps = num_steps
-        self.dt = dt
+        self.random_agent_ordering = random_agent_ordering
         self.market_decimal = market_decimal
         self.asset_decimal = asset_decimal
         self.market_position_decimal = market_position_decimal
@@ -78,15 +79,14 @@ class IdealMarketMaker(Scenario):
         self.spread = spread / 10**self.market_decimal
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
-        self.state_extraction_freq = state_extraction_freq
         self.step_length_seconds = step_length_seconds
-        self.state_extraction_fn = state_extraction_fn
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.pause_every_n_steps = pause_every_n_steps
         self.lp_commitamount = lp_commitamount
         self.initial_asset_mint = initial_asset_mint
         self.backgroundmarket_tick_spacing = backgroundmarket_tick_spacing
+        self.market_marker_limit_order_size = market_marker_limit_order_size
         self.backgroundmarket_number_levels_per_side = (
             backgroundmarket_number_levels_per_side
         )
@@ -96,27 +96,27 @@ class IdealMarketMaker(Scenario):
         self.opening_auction_trade_amount = opening_auction_trade_amount
         self.market_order_trader_base_order_size = market_order_trader_base_order_size
         self.settle_at_end = settle_at_end
+        self.price_process = None
+        self.proportion_taken = proportion_taken
 
     def _generate_price_process(
         self,
         random_state: Optional[np.random.RandomState] = None,
     ):
-        _, price_process = RW_model(
-            T=self.num_steps * self.dt,
-            dt=self.dt,
-            mdp=self.market_decimal,
+        return random_walk(
+            num_steps=self.num_steps,
             sigma=self.sigma,
-            Midprice=self.initial_price,
+            starting_price=self.initial_price,
             random_state=random_state,
         )
-        return price_process
 
-    def set_up_background_market(
+    def configure_agents(
         self,
         vega: VegaServiceNull,
-        tag: str = "",
-        random_state: Optional[np.random.RandomState] = None,
-    ) -> MarketEnvironmentWithState:
+        tag: str,
+        random_state: Optional[np.random.RandomState],
+        **kwargs,
+    ) -> List[StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + f"_{tag}"
         asset_name = self.asset_name + f"_{tag}"
@@ -126,6 +126,7 @@ class IdealMarketMaker(Scenario):
             if self.price_process_fn is not None
             else self._generate_price_process(random_state=random_state)
         )
+        self.price_process = price_process
 
         market_maker = OptimalMarketMaker(
             wallet_name=MM_WALLET.name,
@@ -138,6 +139,7 @@ class IdealMarketMaker(Scenario):
             num_steps=self.num_steps,
             market_order_arrival_rate=self.buy_intensity,
             kappa=self.kappa,
+            limit_order_size=self.market_marker_limit_order_size,
             inventory_upper_boundary=self.q_upper,
             inventory_lower_boundary=self.q_lower,
             terminal_penalty_parameter=self.alpha,
@@ -191,7 +193,7 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"1_{tag}",
         )
 
         auctionpass2 = OpenAuctionPass(
@@ -205,43 +207,44 @@ class IdealMarketMaker(Scenario):
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
-            tag=str(tag),
+            tag=f"2_{tag}",
         )
 
-        env = MarketEnvironmentWithState(
-            agents=[
-                market_maker,
-                background_market,
-                auctionpass1,
-                auctionpass2,
-                trader,
-            ],
-            n_steps=self.num_steps,
-            transactions_per_block=self.block_size,
-            vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
-            step_length_seconds=self.step_length_seconds,
-            block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
-            pause_every_n_steps=self.pause_every_n_steps,
-        )
-        return env
+        # info_trader = InformedTrader(
+        #     wallet_name=INFORMED_WALLET.name,
+        #     wallet_pass=INFORMED_WALLET.passphrase,
+        #     price_process=price_process,
+        #     market_name=market_name,
+        #     asset_name=asset_name,
+        #     initial_asset_mint=self.initial_asset_mint,
+        #     proportion_taken=self.proportion_taken,
+        #     tag=str(tag),
+        # )
 
-    def run_iteration(
+        agents = [
+            market_maker,
+            background_market,
+            auctionpass1,
+            auctionpass2,
+            trader,
+        ]
+        return {agent.name(): agent for agent in agents}
+
+    def configure_environment(
         self,
         vega: VegaServiceNull,
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-    ):
-        env = self.set_up_background_market(
-            vega=vega, tag=str(0), random_state=random_state
+        **kwargs,
+    ) -> MarketEnvironmentWithState:
+        return MarketEnvironmentWithState(
+            agents=list(self.agents.values()),
+            n_steps=self.num_steps,
+            random_agent_ordering=self.random_agent_ordering,
+            transactions_per_block=self.block_size,
+            vega_service=vega,
+            step_length_seconds=self.step_length_seconds,
+            block_length_seconds=self.block_length_seconds,
+            pause_every_n_steps=self.pause_every_n_steps,
         )
-        result = env.run(
-            pause_at_completion=pause_at_completion,
-            run_with_console=run_with_console,
-        )
-        return result
 
 
 if __name__ == "__main__":

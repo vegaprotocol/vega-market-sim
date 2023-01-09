@@ -16,14 +16,20 @@ Market Simulator is still under active development and so may change notably ove
 
 ## Setup
 
+If you are on MacOS, ensure you have the command line developer tools installed to be able to run `make`. Presently this is done by running `xcode-select --install`
+
+If you are on Windows, you are likely best off running through WSL.
+
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
   - Clone the repository to your local drive
   - Install the latest version of [Golang](https://go.dev)
   - Run `make` to automatically pull install dependencies
     - If you have your own instances of the various service to run from elsewhere, you can skip this step
   - Install the package into your local environment. 
-    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests.
- -  Then run your environment.
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install` (or `poetry install --all-extras` to cover all optional extras too). 
+ -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
+ -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
+ -  You're good now.
 
 ### Setup if you're using `conda` as your python package manager
 
@@ -49,6 +55,20 @@ Building the console UI is not a necessary component, but can be useful for visu
 
 Examples can be found within the `/examples` folder. A good one to start is `/examples/nullchain.py` which spins up a simple service and proposes a market.
 
+To run the example, start by running `poetry shell` if you're using poetry to activate the environment (If you're using another package manager, a similar command likely exists)
+
+Then, to run the example mentioned above call:
+  `python -m examples.nullchain`
+
+Alternatively, to run a longer and more complex scenario, run:
+
+  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause`
+
+If you've installed the console with `make ui` you can also extend this to visualise what is happening with the `--console` flag:
+
+  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause --console`
+
+
 
 ## Decimal Handling
 
@@ -69,8 +89,56 @@ warn log every time a method which returns something which could/does contain th
 Once code has been written, this flag can be turned off for production runs so as not to flag erroneously.
 
 
-### Reinforcement Learning
+## Reinforcement Learning
 
 The nascent framework for reinforcement learning applications of the Vega Market Sim can be found within `vega_sim.reinforcement`, this includes the beginnings of a 'background market' within the folder `vega_sim.reinforcement.full_market_sim`
 alongside an agent in `vega_sim.reinforcement.learning_agent` which learns from a currently very simple set of inputs (alongside an input of a future price, to make learning on a random walk possible at all!) Usage is new, and the code strucure
 and functionality is liable to change *significantly* in the future, however input is welcomed.
+
+## Parameter Testing
+
+One use of this framework is for testing the effect on Vega core itself of varying the various specified network and market parameters, allowing analysis and comparison and hopefully a more optimal set of parameters. 
+To dig into this use case, the configuration for various existing tests lives in `vega_sim.parameter_test.parameter.configs` and these can be run by finding the parameter test name in that file and calling:
+
+`python -m vega_sim.parameter_test.run -c YOUR_TEST_NAME_HERE`
+
+This will run the configured scenario several times with each configured parameter value before outputting them into the `/parameter_results` folder in the root of the repository.
+
+## Scenarios
+
+To support the above mentioned parameter tests, and to allow for more complex capabilities, a set of scenarios (and agents who act within them) live in `vega_sim.scenario`. We aim here to provide a set of agent primitives which allow one to construct complex interactions and trading scenarios.
+
+### Momentum Agent
+
+One of the agents provided in the scenarios is momentum agent that can currently follow APO/ RSI/ STOCHRSI/ CMO/ MACD momentum strategies. A comprehensive scenario for momentum agent tests is in `vega_sim.scenario.comprehensive_market.scenario`, where mutileple momentum agents with different momentum strategies can be tested. 
+
+To run momentum agents, you must first install the TA-Lib libraries. The instructions [here](https://github.com/mrjbq7/ta-lib#dependencies) are likely a good start. Follow this by running `poetry install -E agents`. Then, run `python examples.agent_market.MomentumAgent.py`, and the performance of momentum agents are shown in the notebook `examples.notebooks.MomentumAgentPerformance`. The agents can be configured in `ComprehensiveMarket`. For example, to run 2 momentum agents with APO and MACD strategies: 
+
+```
+ComprehensiveMarket(
+  num_momentum_agents=2,
+  momentum_trader_strategies=['APO', 'MACD'],
+  momentum_trader_strategy_args=[
+    {
+      "fastperiod": 12,
+      "slowperiod": 26,
+    },
+    {
+      "fastperiod": 14,
+      "slowperiod": 26,
+      "signalperiod": 9,
+    }
+  ],  
+)
+```
+
+## Release Process
+
+Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/vega/releases/), to provide a snapshot of working code for each release cutoff. To build and release a Vega Market Sim package, follow these steps:
+
+ - Check [releases](https://github.com/vegaprotocol/vega/releases/) for the release tag you wish to target
+ - Update `.env`'s `VEGA_SIM_VEGA_TAG` to reflect the last commit within that release
+ - Update the `version` parameter in `pyproject.toml` to match the tagged Vega Core release
+ - Run `make` followed by a full integration test run
+ - Create a branch containing these changes, then a pull request into `develop`
+ - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the same specification as in `pyproject.toml` (e.g. `v0.62.5`) to trigger the deployment process.

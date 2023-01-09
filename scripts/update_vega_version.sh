@@ -1,10 +1,14 @@
 current_env=`cat .env`
 vega_tag=`git ls-remote https://github.com/vegaprotocol/vega HEAD | awk '{ print $1 }'`
 echo "VEGA_SIM_VEGA_TAG=${vega_tag}
-VEGA_SIM_CONSOLE_TAG=master" > .env
+VEGA_SIM_CONSOLE_TAG=develop
+VEGA_DEFAULT_KEY_NAME='Key 1'
+VEGA_SIM_NETWORKS_INTERNAL_TAG=main
+VEGA_SIM_NETWORKS_TAG=master" > .env
 
 make
-pytest -m integration
+make proto
+pytest -s -v --log-cli-level INFO -m integration
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"

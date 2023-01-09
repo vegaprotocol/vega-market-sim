@@ -9,6 +9,8 @@ from tests.integration.utils.fixtures import (
 )
 from vega_sim.null_service import VegaServiceNull
 import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.data.v1 as oracles_protos
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 
 
 LIQ = WalletConfig("liq", "liq")
@@ -32,15 +34,15 @@ def test_update_market_liquidity_monitoring(vega_service_with_market: VegaServic
             target_stake_parameters=vega_protos.markets.TargetStakeParameters(
                 time_window=3600, scaling_factor=1
             ),
-            triggering_ratio=0.6,
+            triggering_ratio="0.6",
             auction_extension=0,
         ),
     )
     vega.wait_for_total_catchup()
     after_market = vega.market_info(market_id)
 
-    assert pre_market.liquidity_monitoring_parameters.triggering_ratio == 0.7
-    assert after_market.liquidity_monitoring_parameters.triggering_ratio == 0.6
+    assert pre_market.liquidity_monitoring_parameters.triggering_ratio == "0.7"
+    assert after_market.liquidity_monitoring_parameters.triggering_ratio == "0.6"
 
 
 @pytest.mark.integration
@@ -89,18 +91,30 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
     pre_market = vega.market_info(market_id)
     curr_inst = pre_market.tradable_instrument.instrument
     curr_fut = curr_inst.future
+
+    oracle_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=curr_fut.data_source_spec_for_settlement_data.data.external.oracle.signers,
+                filters=curr_fut.data_source_spec_for_settlement_data.data.external.oracle.filters,
+            )
+        )
+    )
+
+    oracle_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=curr_fut.data_source_spec_for_trading_termination.data.external.oracle.signers,
+                filters=curr_fut.data_source_spec_for_trading_termination.data.external.oracle.filters,
+            )
+        )
+    )
+
     curr_fut_prod = vega_protos.governance.UpdateFutureProduct(
         quote_name=curr_fut.quote_name,
-        oracle_spec_for_settlement_price=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-            pub_keys=curr_fut.oracle_spec_for_settlement_price.pub_keys,
-            filters=curr_fut.oracle_spec_for_settlement_price.filters,
-        ),
-        oracle_spec_for_trading_termination=vega_protos.oracles.v1.spec.OracleSpecConfiguration(
-            pub_keys=curr_fut.oracle_spec_for_trading_termination.pub_keys,
-            filters=curr_fut.oracle_spec_for_trading_termination.filters,
-        ),
-        oracle_spec_binding=curr_fut.oracle_spec_binding,
-        settlement_price_decimals=curr_fut.settlement_price_decimals,
+        data_source_spec_for_settlement_data=oracle_spec_for_settlement_data,
+        data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
+        data_source_spec_binding=curr_fut.data_source_spec_binding,
     )
     updated_instrument = vega_protos.governance.UpdateInstrumentConfiguration(
         code="BTCUSD",
@@ -133,7 +147,7 @@ def test_update_market_risk(vega_service_with_market: VegaServiceNull):
         MM_WALLET.name,
         market_id=market_id,
         updated_log_normal_risk_model=vega_protos.markets.LogNormalRiskModel(
-            risk_aversion_parameter=0.5,
+            risk_aversion_parameter=0.05,
             tau=1.90128526884173e-06,
             params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.016, sigma=3.0),
         ),
@@ -147,5 +161,5 @@ def test_update_market_risk(vega_service_with_market: VegaServiceNull):
     )
     assert (
         after_market.tradable_instrument.log_normal_risk_model.risk_aversion_parameter
-        == 0.5
+        == 0.05
     )

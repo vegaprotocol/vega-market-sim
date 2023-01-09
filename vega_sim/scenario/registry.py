@@ -1,14 +1,54 @@
+from vega_sim.api.market import MarketConfig
+from vega_sim.scenario.common.agents import ShapedMarketMaker
+from vega_sim.scenario.comprehensive_market.scenario import ComprehensiveMarket
+from vega_sim.scenario.curve_market_maker.scenario import CurveMarketMaker
 from vega_sim.scenario.ideal_market_maker.scenario import IdealMarketMaker
 from vega_sim.scenario.ideal_market_maker_v2.scenario import (
     IdealMarketMaker as IdealMarketMakerV2,
 )
+from vega_sim.scenario.multi_market.scenario import VegaLoadTest
 from vega_sim.scenario.market_crash.scenario import MarketCrash
+from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
+from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
+
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
     Granularity,
 )
 
 SCENARIOS = {
+    "comprehensive_market": lambda: ComprehensiveMarket(
+        market_name="ETH",
+        asset_name="USD",
+        num_steps=12000,
+        market_decimal=2,
+        asset_decimal=4,
+        market_position_decimal=4,
+        initial_price=1000.00,
+        spread=10,
+        lp_commitamount=500_000,
+        initial_asset_mint=10_000_000,
+        step_length_seconds=60,
+        block_length_seconds=1,
+        opening_auction_trade_amount=1,
+        market_order_trader_order_intensity=10,
+        market_order_trader_order_size=0.01,
+        limit_order_trader_quantity=5,
+        limit_order_trader_submit_bias=0.1,
+        limit_order_trader_cancel_bias=0.1,
+        limit_order_trader_order_intensity=10,
+        limit_order_trader_order_size=0.1,
+        limit_order_trader_mean=-5,
+        limit_order_trader_sigma=0.5,
+        limit_order_trader_duration=300,
+        limit_order_trader_time_in_force_opts={
+            "TIME_IN_FORCE_GTC": 0.7,
+            "TIME_IN_FORCE_GTT": 0.3,
+        },
+        num_lp_agents=3,
+        num_mo_agents=5,
+        num_lo_agents=20,
+    ),
     "ideal_market_maker": IdealMarketMaker,
     "ideal_market_maker_v2": lambda: IdealMarketMakerV2(
         num_steps=2000,
@@ -75,5 +115,59 @@ SCENARIOS = {
         backgroundmarket_tick_spacing=0.1,
         backgroundmarket_number_levels_per_side=25,
         market_order_trader_base_order_size=0.01,
+    ),
+    "historic_shaped_market_maker": lambda: CurveMarketMaker(
+        market_name="ETH",
+        asset_name="USD",
+        num_steps=290,
+        market_decimal=2,
+        asset_decimal=4,
+        market_position_decimal=4,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD", granularity=Granularity.HOUR
+        ).values,
+        lp_commitamount=250_000,
+        initial_asset_mint=10_000_000,
+        step_length_seconds=60,
+        # step_length_seconds=Granularity.HOUR.value,
+        block_length_seconds=1,
+        q_upper=30,
+        q_lower=-30,
+        market_maker_curve_kappa=0.2,
+        market_maker_assumed_market_kappa=0.2,
+        buy_intensity=100,
+        sell_intensity=100,
+        sensitive_price_taker_half_life=10,
+        opening_auction_trade_amount=0.0001,
+        market_order_trader_base_order_size=0.01,
+    ),
+    "configurable_market": lambda: ConfigurableMarket(
+        market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
+        market_code="ETH:USD",
+        asset_name="tUSD",
+        asset_dp=18,
+        num_steps=60 * 24,
+    ),
+    "vega_load_test": lambda: VegaLoadTest(
+        num_steps=15 * 24 * 30,
+        granularity=Granularity.FIFTEEN_MINUTE,
+        block_length_seconds=60,
+        transactions_per_block=4000,
+        parties_per_market=200,
+        orders_per_second=100,
+        trades_per_second=1,
+    ),
+    "hedged_market": lambda: HedgedMarket(
+        num_steps=24 * 60,
+        step_length_seconds=60,
+        block_length_seconds=1,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD",
+            granularity=Granularity.MINUTE,
+            start="2022-06-12 17:00:00",
+            end="2022-06-13 17:00:00",
+        ).values,
+        int_lock=3 * 60 * 60,
+        ext_lock=5 * 60,
     ),
 }

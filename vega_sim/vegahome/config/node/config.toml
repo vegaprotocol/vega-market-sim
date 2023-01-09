@@ -16,9 +16,9 @@ UlimitNOFile = 8192
     APMEnabled = true
 
 [Blockchain]
-  Level = "Debug"
+  Level = "Info"
   LogTimeDebug = true
-  LogOrderSubmitDebug = true
+  LogOrderSubmitDebug = false
   LogOrderAmendDebug = false
   LogOrderCancelDebug = false
   ChainProvider = "nullchain"
@@ -43,7 +43,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [CoreAPI]
-  LogLevel = "Debug"
+  LogLevel = "Info"
   Accounts = true
   Assets = true
   NetworkParameters = true
@@ -60,14 +60,14 @@ UlimitNOFile = 8192
 [Execution]
   Level = "Debug"
   [Execution.Matching]
-    Level = "Debug"
+    Level = "Info"
     LogPriceLevelsDebug = false
     LogRemovedOrdersDebug = false
   [Execution.Risk]
     Level = "Info"
     LogMarginUpdate = true
   [Execution.Position]
-    Level = "Debug"
+    Level = "Info"
     LogPositionUpdate = true
   [Execution.Settlement]
     Level = "Info"
@@ -79,8 +79,8 @@ UlimitNOFile = 8192
 [Processor]
   Level = "Debug"
   LogOrderSubmitDebug = true
-  LogOrderAmendDebug = false
-  LogOrderCancelDebug = false
+  LogOrderAmendDebug = true
+  LogOrderCancelDebug = true
   [Processor.Ratelimit]
     Requests = 500
     PerNBlocks = 10
@@ -140,7 +140,7 @@ UlimitNOFile = 8192
     ClefAddress = ""
 
 [Assets]
-  Level = "Debug"
+  Level = "Info"
 
 [Notary]
   Level = "Info"
@@ -157,7 +157,7 @@ UlimitNOFile = 8192
   Level = "Debug"
 
 [Banking]
-  Level = "Debug"
+  Level = "Info"
 
 [Stats]
   Level = "Info"
@@ -195,11 +195,11 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Spam]
-  Level = "Debug"
+  Level = "Info"
 
 [Snapshot]
   Level = "Info"
-  KeepRecent = 10
+  KeepRecent = 1000
   RetryLimit = 5
   Storage = "GOLevelDB"
   DBPath = ""

@@ -135,8 +135,10 @@ dmypy.json
 vega_sim/bin/*
 rl_logs/
 numerical_results/
+run_logs/
 test_logs/
 parameter_results/**/*.csv
+examples/**/*.csv
 parameter_results/**/*.json
 prof/
 *.prof

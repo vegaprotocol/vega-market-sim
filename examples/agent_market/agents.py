@@ -88,8 +88,12 @@ class MarketMaker(StateAgentWithWallet):
         terminate_wallet_pass: str,
         price_process: List[float],
         spread: float = 2,
+        tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.terminate_wallet_name = terminate_wallet_name
         self.terminate_wallet_pass = terminate_wallet_pass
         self.price_process = iter(price_process)
@@ -159,7 +163,7 @@ class MarketMaker(StateAgentWithWallet):
             termination_wallet=self.terminate_wallet_name,
             liquidity_commitment=liquidity_commitment,
         )
-        self.vega.forward("2s")
+        self.vega.wait_for_total_catchup()
 
         self.market_id = self.vega.all_markets()[0].id
 
