@@ -297,7 +297,7 @@ def list_accounts(
     output_accounts = []
     for account in accounts:
         if account.asset not in asset_decimals_map:
-            asset_decimals_map[account.asset] = asset_decimals(
+            asset_decimals_map[account.asset] = get_asset_decimals(
                 asset_id=account.asset,
                 data_client=data_client,
             )
@@ -332,7 +332,7 @@ def party_account(
     )
 
     asset_dp = (
-        asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
+        asset_dp if asset_dp is not None else get_asset_decimals(asset_id, data_client)
     )
 
     general, margin, bond = 0, 0, 0  # np.nan, np.nan, np.nan
@@ -468,7 +468,7 @@ def market_position_decimals(
     ).position_decimal_places
 
 
-def asset_decimals(
+def get_asset_decimals(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
 ) -> int:
@@ -749,7 +749,7 @@ def market_account(
     )
     acct = {account.type: account for account in accounts}[account_type]
 
-    asset_dp = asset_decimals(asset_id=acct.asset, data_client=data_client)
+    asset_dp = get_asset_decimals(asset_id=acct.asset, data_client=data_client)
     return num_from_padded_int(
         acct.balance,
         asset_dp,
@@ -877,7 +877,7 @@ def transfer_subscription(
                 for bus_event in transfer_list.events:
                     transfer = bus_event.transfer
                     if transfer.asset not in asset_dp:
-                        asset_dp[transfer.asset] = asset_decimals(
+                        asset_dp[transfer.asset] = get_asset_decimals(
                             asset_id=transfer.asset,
                             data_client=trading_data_client,
                         )
@@ -924,7 +924,7 @@ def margin_levels(
     res_margins = []
     for margin in margins:
         if margin.asset not in asset_dp:
-            asset_dp[margin.asset] = asset_decimals(
+            asset_dp[margin.asset] = get_asset_decimals(
                 asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
@@ -963,7 +963,7 @@ def get_trades(
                 market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
-            market_asset_decimals_map[trade.market_id] = asset_decimals(
+            market_asset_decimals_map[trade.market_id] = get_asset_decimals(
                 asset_id=data_raw.market_info(
                     market_id=market_id, data_client=data_client
                 ).tradable_instrument.instrument.future.settlement_asset,
@@ -1016,7 +1016,7 @@ def list_transfers(
     for transfer in transfers:
 
         if transfer.asset not in asset_dp:
-            asset_dp[transfer.asset] = asset_decimals(
+            asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
             )
 

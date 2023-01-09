@@ -166,7 +166,7 @@ class VegaService(ABC):
     def asset_decimals(self) -> int:
         if self._asset_decimals is None:
             self._asset_decimals = DecimalsCache(
-                lambda asset_id: data.asset_decimals(
+                lambda asset_id: data.get_asset_decimals(
                     asset_id=asset_id, data_client=self.trading_data_client_v2
                 )
             )
