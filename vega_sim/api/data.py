@@ -256,25 +256,75 @@ def _transfer_from_proto(
 
 
 def positions_by_market(
-    pub_key: str,
-    market_id: str,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
     data_client: vac.VegaTradingDataClientV2,
-) -> List[Position]:
+    pub_key: str,
+    market_id: Optional[str] = None,
+    position_decimals: Optional[int] = None,
+    asset_decimals: Optional[int] = None,
+    price_decimals: Optional[int] = None,
+) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
-    return [
-        _position_from_proto(
-            pos,
-            position_decimals=position_decimals,
-            asset_decimals=asset_decimals,
-            price_decimals=price_decimals,
+
+    raw_positions = data_raw.positions_by_market(
+        pub_key=pub_key, market_id=market_id, data_client=data_client
+    )
+    if len(raw_positions) == 0:
+        logging.debug(
+            f"No positions to return for pub_key={pub_key}, market_id={market_id}"
         )
-        for pos in data_raw.positions_by_market(
-            pub_key=pub_key, market_id=market_id, data_client=data_client
+        return None
+
+    market_price_decimals_map = (
+        {market_id: price_decimals} if market_id is not None else {}
+    )
+    market_position_decimals_map = (
+        {market_id: position_decimals} if market_id is not None else {}
+    )
+    asset_decimals_map = {market_id: asset_decimals} if market_id is not None else {}
+
+    positions = {}
+    for pos in raw_positions:
+
+        market_info = None
+
+        if pos.market_id not in market_price_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_price_decimals_map[pos.market_id] = int(market_info.decimal_places)
+
+        if pos.market_id not in market_position_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_position_decimals_map[pos.market_id] = int(
+                market_info.position_decimal_places
+            )
+
+        if pos.market_id not in asset_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            asset_info = data_raw.asset_info(
+                asset_id=market_info.tradable_instrument.instrument.future.settlement_asset,
+                data_client=data_client,
+            )
+            asset_decimals_map[pos.market_id] = int(asset_info.details.decimals)
+
+        positions[pos.market_id] = _position_from_proto(
+            position=pos,
+            price_decimals=market_price_decimals_map[pos.market_id],
+            position_decimals=market_position_decimals_map[pos.market_id],
+            asset_decimals=asset_decimals_map[pos.market_id],
         )
-    ]
+
+    if market_id is None:
+        return positions
+    else:
+        return positions[market_id]
 
 
 def list_accounts(
@@ -458,8 +508,7 @@ def market_position_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClientV2, an instantiated gRPC data client
-
+            VegaTradingDataClientV2,
     Returns:
         int, The number of decimal places the market uses for positions
     """

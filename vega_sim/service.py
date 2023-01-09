@@ -1015,16 +1015,25 @@ class VegaService(ABC):
         )
 
     def positions_by_market(
-        self, wallet_name: str, market_id: str, key_name: Optional[str] = None
+        self,
+        wallet_name: str,
+        market_id: Optional[str] = None,
+        key_name: Optional[str] = None,
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data.positions_by_market(
-            self.wallet.public_key(wallet_name, key_name),
+            pub_key=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             data_client=self.trading_data_client_v2,
-            asset_decimals=self.asset_decimals[self.market_to_asset[market_id]],
-            price_decimals=self.market_price_decimals[market_id],
-            position_decimals=self.market_pos_decimals[market_id],
+            asset_decimals=self.asset_decimals[self.market_to_asset[market_id]]
+            if market_id is not None
+            else None,
+            price_decimals=self.market_price_decimals[market_id]
+            if market_id is not None
+            else None,
+            position_decimals=self.market_pos_decimals[market_id]
+            if market_id is not None
+            else None,
         )
 
     @raw_data
