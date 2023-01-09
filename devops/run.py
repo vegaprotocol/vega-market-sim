@@ -60,7 +60,6 @@ def main():
     scenario: Scenario = SCENARIOS[args.scenario]()
 
     if Network[args.network] == Network.NULLCHAIN:
-
         with VegaServiceNull(
             seconds_per_block=1,
             transactions_per_block=1000,
@@ -69,9 +68,8 @@ def main():
             warn_on_raw_data_access=False,
             run_with_console=args.console,
             launch_graphql=args.graphql,
-            start_order_feed=False,
+            start_live_feeds=False,
         ) as vega:
-
             scenario.run_iteration(
                 vega=vega,
                 network=Network[args.network],
@@ -79,12 +77,10 @@ def main():
             )
 
     else:
-
         with VegaServiceNetwork(
             network=Network[args.network],
-            start_order_feed=False,
+            start_live_feeds=False,
         ) as vega:
-
             scenario.run_iteration(
                 vega=vega,
                 network=Network[args.network],

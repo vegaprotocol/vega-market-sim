@@ -3,6 +3,9 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.tools.scenario_plots import plot_run_outputs
 
 
+# Not included in pytest runs at all as this 'test' is generating a plot for
+# later visual inspection rather than asserting anything and should only run
+# when someone specifically wants it.
 def generate_trading_plot():
     scen = CurveMarketMaker(
         market_name="ETH",
