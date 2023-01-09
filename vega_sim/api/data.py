@@ -259,9 +259,10 @@ def positions_by_market(
     data_client: vac.VegaTradingDataClientV2,
     pub_key: str,
     market_id: Optional[str] = None,
-    position_decimals: Optional[int] = None,
-    asset_decimals: Optional[int] = None,
-    price_decimals: Optional[int] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
 ) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
 
@@ -274,26 +275,18 @@ def positions_by_market(
         )
         return None
 
-    market_price_decimals_map = (
-        {market_id: price_decimals} if market_id is not None else {}
-    )
-    market_position_decimals_map = (
-        {market_id: position_decimals} if market_id is not None else {}
-    )
-    asset_decimals_map = {market_id: asset_decimals} if market_id is not None else {}
-
     positions = {}
     for pos in raw_positions:
 
         market_info = None
 
+        # Update maps if value does not exist for current market id
         if pos.market_id not in market_price_decimals_map:
             if market_info is None:
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
             market_price_decimals_map[pos.market_id] = int(market_info.decimal_places)
-
         if pos.market_id not in market_position_decimals_map:
             if market_info is None:
                 market_info = data_raw.market_info(
@@ -302,23 +295,29 @@ def positions_by_market(
             market_position_decimals_map[pos.market_id] = int(
                 market_info.position_decimal_places
             )
-
-        if pos.market_id not in asset_decimals_map:
+        if pos.market_id not in market_to_asset_map:
             if market_info is None:
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
+            market_to_asset_map[
+                pos.market_id
+            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+
+        # Update maps if value does not exist for current asset id
+        if market_to_asset_map[pos.market_id] not in asset_decimals_map:
             asset_info = data_raw.asset_info(
-                asset_id=market_info.tradable_instrument.instrument.future.settlement_asset,
+                asset_id=market_to_asset_map[pos.market_id],
                 data_client=data_client,
             )
             asset_decimals_map[pos.market_id] = int(asset_info.details.decimals)
 
+        # Convert raw proto into a market-sim Position object
         positions[pos.market_id] = _position_from_proto(
             position=pos,
             price_decimals=market_price_decimals_map[pos.market_id],
             position_decimals=market_position_decimals_map[pos.market_id],
-            asset_decimals=asset_decimals_map[pos.market_id],
+            asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
         )
 
     if market_id is None:

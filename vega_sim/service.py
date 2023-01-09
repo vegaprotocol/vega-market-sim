@@ -1025,15 +1025,10 @@ class VegaService(ABC):
             pub_key=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             data_client=self.trading_data_client_v2,
-            asset_decimals=self.asset_decimals[self.market_to_asset[market_id]]
-            if market_id is not None
-            else None,
-            price_decimals=self.market_price_decimals[market_id]
-            if market_id is not None
-            else None,
-            position_decimals=self.market_pos_decimals[market_id]
-            if market_id is not None
-            else None,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_to_asset_map=self.market_to_asset,
+            asset_decimals_map=self.asset_decimals,
         )
 
     @raw_data
