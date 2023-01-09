@@ -134,19 +134,6 @@ def vega_service():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         run_with_console=False,
-        start_live_feeds=False,
-        retain_log_files=True,
-        transactions_per_block=1,
-    ) as vega:
-        yield vega
-
-
-@pytest.fixture
-def vega_service_with_order_feed():
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        run_with_console=False,
-        start_live_feeds=True,
         retain_log_files=True,
         transactions_per_block=1,
     ) as vega:
