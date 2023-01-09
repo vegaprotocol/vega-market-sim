@@ -52,7 +52,7 @@ def main():
             ),
             retain_log_files=True,
             use_full_vega_wallet=False,
-            start_order_feed=False,
+            start_live_feeds=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
@@ -66,7 +66,7 @@ def main():
             network=Network[args.network],
             run_with_wallet=True,
             run_with_console=True,
-            start_order_feed=False,
+            start_live_feeds=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
