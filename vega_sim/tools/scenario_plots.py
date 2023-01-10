@@ -64,7 +64,9 @@ def plot_trading_summary(
     trade_df: pd.DataFrame,
     order_book_df: pd.DataFrame,
     price_df: pd.DataFrame,
-):
+) -> None:
+    if any(df.empty for df in (trade_df, order_book_df, price_df)):
+        return
     buys = trade_df[trade_df.aggressor == 1]
     sells = trade_df[trade_df.aggressor == 2]
 
@@ -100,7 +102,9 @@ def plot_trading_summary(
     )
 
 
-def plot_total_traded_volume(ax: Axes, trades_df: pd.DataFrame):
+def plot_total_traded_volume(ax: Axes, trades_df: pd.DataFrame) -> None:
+    if trades_df.empty:
+        return
     ax.set_title("Traded Volume")
     traded = trades_df.groupby(level=0)["size"].sum().cumsum()
 
@@ -120,14 +124,18 @@ def plot_open_notional(
     ax: Axes,
     market_data_df: pd.DataFrame,
     price_df: pd.DataFrame,
-):
+) -> None:
+    if any(df.empty for df in (market_data_df, price_df)):
+        return
     ax.set_title("Open Notional $")
 
     _set_xticks(ax, market_data_df.index)
     ax.plot(market_data_df["open_interest"] * price_df["price"])
 
 
-def plot_spread(ax: Axes, order_book_df: pd.DataFrame):
+def plot_spread(ax: Axes, order_book_df: pd.DataFrame) -> None:
+    if order_book_df.empty:
+        return
     ax.set_title("10s Rolling Avg Spread")
 
     spread_df = (
@@ -143,7 +151,9 @@ def plot_spread(ax: Axes, order_book_df: pd.DataFrame):
     ax.plot(spread_df)
 
 
-def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame):
+def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame) -> None:
+    if accounts_df.empty:
+        return
     ax.set_title("Total Margin Balance")
     grouped_df = (
         accounts_df[accounts_df.type == vega_protos.vega.ACCOUNT_TYPE_MARGIN]
@@ -155,7 +165,9 @@ def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame):
     ax.plot(grouped_df)
 
 
-def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame):
+def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame) -> None:
+    if market_data_df.empty:
+        return
     ax.set_title("Target Stake")
 
     _set_xticks(ax, market_data_df.index)
