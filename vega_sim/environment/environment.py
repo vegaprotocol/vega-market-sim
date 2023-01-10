@@ -138,6 +138,26 @@ class MarketEnvironment:
         else:
             return self._run(self._vega, pause_at_completion=pause_at_completion)
 
+    def _start_order_monitoring(self, vega: VegaService):
+
+        # Get lists of unique market_ids and party_ids to observe
+        market_ids = list(
+            {
+                vega.find_market_id(name=agent.market_name)
+                for agent in self.agents
+                if hasattr(agent, "market_name")
+            }
+        )
+        party_ids = list(
+            {
+                vega.wallet.public_key(agent.wallet_name, agent.key_name)
+                for agent in self.agents
+                if hasattr(agent, "wallet_name")
+            }
+        )
+        # Start order monitoring only observing scenario markets and parties
+        vega.start_order_monitoring(market_ids=market_ids, party_ids=party_ids)
+
     def _run(
         self,
         vega: VegaServiceNull,
@@ -162,6 +182,8 @@ class MarketEnvironment:
             agent.initialise(vega=vega)
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
+
+        self._start_order_monitoring(vega=vega)
 
         start_time = vega.get_blockchain_time()
         for i in range(self.n_steps):
@@ -370,6 +392,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         # Initialise agents without minting assets
         for agent in self.agents:
             agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
+
+        self._start_order_monitoring(vega=vega)
 
         i = 0
         # A negative self.n_steps will loop indefinitely

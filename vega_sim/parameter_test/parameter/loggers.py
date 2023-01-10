@@ -102,16 +102,16 @@ def _ideal_market_maker_single_data_extraction(
         market_id=mm_agent.market_id,
         key_name=mm_agent.key_name,
     )
-    if not position:
+    if position is None:
         realised_pnl_lp = 0
         unrealised_pnl_lp = 0
         inventory_lp = 0
         entry_price = 0
     else:
-        realised_pnl_lp = round(float(position[0].realised_pnl), mm_agent.adp)
-        unrealised_pnl_lp = round(float(position[0].unrealised_pnl), mm_agent.adp)
-        inventory_lp = float(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price) / 10**mm_agent.mdp
+        realised_pnl_lp = round(float(position.realised_pnl), mm_agent.adp)
+        unrealised_pnl_lp = round(float(position.unrealised_pnl), mm_agent.adp)
+        inventory_lp = float(position.open_volume)
+        entry_price = float(position.average_entry_price) / 10**mm_agent.mdp
 
     market_state = vega.market_info(market_id=mm_agent.market_id).state
     market_data = vega.market_data(market_id=mm_agent.market_id)
@@ -329,16 +329,16 @@ def momentum_trader_data_extraction(
         wallet_name=trader.wallet_name, market_id=trader.market_id
     )
 
-    if not position:
+    if position is None:
         realised_pnl = 0
         unrealised_pnl = 0
         inventory = 0
         entry_price = 0
     else:
-        realised_pnl = round(float(position[0].realised_pnl), trader.adp)
-        unrealised_pnl = round(float(position[0].unrealised_pnl), trader.adp)
-        inventory = float(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price) / 10**trader.mdp
+        realised_pnl = round(float(position.realised_pnl), trader.adp)
+        unrealised_pnl = round(float(position.unrealised_pnl), trader.adp)
+        inventory = float(position.open_volume)
+        entry_price = float(position.average_entry_price) / 10**trader.mdp
 
     market_data = vega.market_data(market_id=trader.market_id)
     markprice = float(market_data.mark_price) / 10**trader.mdp
@@ -382,16 +382,16 @@ def uninformed_tradingbot_data_extraction(
         wallet_name=trader.wallet_name, market_id=trader.market_id
     )
 
-    if not position:
+    if position is None:
         realised_pnl = 0
         unrealised_pnl = 0
         inventory = 0
         entry_price = 0
     else:
-        realised_pnl = round(float(position[0].realised_pnl), trader.adp)
-        unrealised_pnl = round(float(position[0].unrealised_pnl), trader.adp)
-        inventory = float(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price) / 10**trader.mdp
+        realised_pnl = round(float(position.realised_pnl), trader.adp)
+        unrealised_pnl = round(float(position.unrealised_pnl), trader.adp)
+        inventory = float(position.open_volume)
+        entry_price = float(position.average_entry_price) / 10**trader.mdp
 
     logs = {
         "UT: General Account": general,

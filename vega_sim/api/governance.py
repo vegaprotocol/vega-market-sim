@@ -223,6 +223,7 @@ def propose_future_market(
         else _default_price_monitoring_parameters()
     )
 
+    price_decimals = 5 if market_decimals is None else market_decimals
     data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
         external=data_source_protos.DataSourceDefinitionExternal(
             oracle=data_source_protos.DataSourceSpecConfiguration(
@@ -236,6 +237,7 @@ def propose_future_market(
                         key=oracles_protos.spec.PropertyKey(
                             name=f"price.{future_asset}.value",
                             type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                            number_decimal_places=price_decimals,
                         ),
                         conditions=[],
                     )
@@ -264,7 +266,6 @@ def propose_future_market(
         )
     )
 
-    price_decimals = 5 if market_decimals is None else market_decimals
     market_proposal = vega_protos.governance.NewMarket(
         changes=vega_protos.governance.NewMarketConfiguration(
             instrument=vega_protos.governance.InstrumentConfiguration(
@@ -279,7 +280,6 @@ def propose_future_market(
                         settlement_data_property=f"price.{future_asset}.value",
                         trading_termination_property="trading.terminated",
                     ),
-                    settlement_data_decimals=price_decimals,
                 ),
             ),
             lp_price_range=str(lp_price_range),
@@ -294,7 +294,7 @@ def propose_future_market(
                 target_stake_parameters=vega_protos.markets.TargetStakeParameters(
                     time_window=3600, scaling_factor=1
                 ),
-                triggering_ratio=0.7,
+                triggering_ratio="0.7",
                 auction_extension=0,
             ),
             price_monitoring_parameters=price_monitoring_parameters,

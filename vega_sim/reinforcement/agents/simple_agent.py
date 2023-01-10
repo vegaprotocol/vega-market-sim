@@ -69,8 +69,7 @@ self.vega.cancel_order(
 positions = self.vega.positions_by_market(
     wallet_name=self.wallet_name, market_id=self.market_id
 )
-if len(positions) > 0:
-    position = positions[0]
+if position is not None:
     volume = position.open_volume
     pnl = position.realised_pnl + position.unrealised_pnl
     entry_price = position.average_entry_price

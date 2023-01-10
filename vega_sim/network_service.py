@@ -43,7 +43,7 @@ from os import getcwd, path, environ
 import vega_sim.grpc.client as vac
 
 from vega_sim import vega_bin_path
-from vega_sim.service import VegaService
+from vega_sim.service import VegaService, DatanodeBehindError
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.null_service import find_free_port, _popen_process
@@ -96,7 +96,6 @@ def manage_vega_processes(
     run_with_console: Optional[bool] = True,
     log_dir: Optional[str] = None,
 ):
-
     processes = []
 
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
@@ -166,6 +165,7 @@ class VegaServiceNetwork(VegaService):
         network: Network,
         run_with_wallet: bool = True,
         run_with_console: bool = True,
+        start_live_feeds: bool = True,
     ):
         """Method initialises the class.
 
@@ -184,6 +184,7 @@ class VegaServiceNetwork(VegaService):
         self.network = network
         self.run_with_wallet = run_with_wallet
         self.run_with_console = run_with_console
+        self._start_live_feeds = start_live_feeds
 
         self._wallet = None
         self._wallet_url = None
@@ -206,7 +207,6 @@ class VegaServiceNetwork(VegaService):
         self.stop()
 
     def start(self):
-
         ctx = multiprocessing.get_context()
         vega_console_port = find_free_port()
         self.proc = ctx.Process(
@@ -231,8 +231,10 @@ class VegaServiceNetwork(VegaService):
             )
             webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
 
-    def stop(self) -> None:
+        if self._start_live_feeds:
+            self.start_order_monitoring()
 
+    def stop(self) -> None:
         super().stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
@@ -242,31 +244,34 @@ class VegaServiceNetwork(VegaService):
     def wait_fn(self, wait_multiple: float = 1) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     def wait_for_datanode_sync(self) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     def wait_for_core_catchup(self) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     def wait_for_total_catchup(self) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     @property
     def network_config(self) -> dict:
         if self._network_config is None:
-
             public_path = path.join(
                 getcwd(),
                 "vega_sim",
@@ -330,18 +335,26 @@ class VegaServiceNetwork(VegaService):
     @property
     def core_state_client(self) -> None:
         logging.debug(
-            "Parent property overridden as VegaNetworkService does not need a core client.",
+            (
+                "Parent property overridden as VegaNetworkService does not need a core"
+                " client."
+            ),
         )
         pass
 
     @property
     def core_client(self) -> None:
         logging.debug(
-            "Parent property overridden as VegaNetworkService does not need a core client.",
+            (
+                "Parent property overridden as VegaNetworkService does not need a core"
+                " client."
+            ),
         )
         pass
 
-    def check_datanode(self, raise_on_error: Optional[bool] = True):
+    def check_datanode(
+        self, max_time_diff: int = 30, raise_on_error: Optional[bool] = True
+    ):
         """Checks if the current data-node connection is healthy.
 
         If the current data-node connection has timed out or the end-point is
@@ -349,13 +362,15 @@ class VegaServiceNetwork(VegaService):
         with a new healthy data-node.
 
         Args:
-            max_attempts (int, optional):
-                Maximum number of connection attempts to attempt before raising an
-                error. Defaults to -1 (infinite attempts).
+            max_time_diff (int, optional):
+                Maximum allowable difference between system time and datanode time in
+                seconds. Defaults to 30.
+            raise_on_error (bool, optional):
+                Whether to raise an error if data-node connection unhealthy.
         """
 
         try:
-            self.ping_datanode()
+            self.ping_datanode(max_time_diff=max_time_diff)
             return
 
         except grpc.FutureTimeoutError as e:
@@ -373,6 +388,15 @@ class VegaServiceNetwork(VegaService):
             else:
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+                self.switch_datanode()
+
+        except DatanodeBehindError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
                 self.switch_datanode()
 
@@ -403,11 +427,21 @@ class VegaServiceNetwork(VegaService):
                     channel=channel,
                 )
 
+                # Ping the datanode to check it is not behind
+                self.ping_datanode()
+
                 return
 
             except grpc.FutureTimeoutError:
+                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                )
+
+            except DatanodeBehindError:
+                # Log warning then continue to try next datanode
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
 
             if attempts == max_attempts:
@@ -427,7 +461,6 @@ if __name__ == "__main__":
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:
-
         # Show all the markets on the network
         markets = vega.all_markets()
         logging.info(markets)
@@ -441,7 +474,6 @@ if __name__ == "__main__":
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:
-
         # Show all the markets on the network
         markets = vega.all_markets()
         logging.info(markets)

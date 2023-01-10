@@ -1,8 +1,17 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple
-
+from typing import (
+    DefaultDict,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Callable,
+    TypeVar,
+    Union,
+)
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -21,6 +30,8 @@ class MissingMarketError(Exception):
 
 logger = logging.Logger(__name__)
 
+T = TypeVar("T")
+S = TypeVar("S")
 
 PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
 AccountData = namedtuple(
@@ -256,25 +267,74 @@ def _transfer_from_proto(
 
 
 def positions_by_market(
-    pub_key: str,
-    market_id: str,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
     data_client: vac.VegaTradingDataClientV2,
-) -> List[Position]:
+    pub_key: str,
+    market_id: Optional[str] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
-    return [
-        _position_from_proto(
-            pos,
-            position_decimals=position_decimals,
-            asset_decimals=asset_decimals,
-            price_decimals=price_decimals,
+
+    raw_positions = data_raw.positions_by_market(
+        pub_key=pub_key, market_id=market_id, data_client=data_client
+    )
+    if len(raw_positions) == 0:
+        logging.debug(
+            f"No positions to return for pub_key={pub_key}, market_id={market_id}"
         )
-        for pos in data_raw.positions_by_market(
-            pub_key=pub_key, market_id=market_id, data_client=data_client
+        return None
+
+    positions = {}
+    for pos in raw_positions:
+
+        market_info = None
+
+        # Update maps if value does not exist for current market id
+        if pos.market_id not in market_price_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_price_decimals_map[pos.market_id] = int(market_info.decimal_places)
+        if pos.market_id not in market_position_decimals_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_position_decimals_map[pos.market_id] = int(
+                market_info.position_decimal_places
+            )
+        if pos.market_id not in market_to_asset_map:
+            if market_info is None:
+                market_info = data_raw.market_info(
+                    market_id=pos.market_id, data_client=data_client
+                )
+            market_to_asset_map[
+                pos.market_id
+            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+
+        # Update maps if value does not exist for current asset id
+        if market_to_asset_map[pos.market_id] not in asset_decimals_map:
+            asset_info = data_raw.asset_info(
+                asset_id=market_to_asset_map[pos.market_id],
+                data_client=data_client,
+            )
+            asset_decimals_map[pos.market_id] = int(asset_info.details.decimals)
+
+        # Convert raw proto into a market-sim Position object
+        positions[pos.market_id] = _position_from_proto(
+            position=pos,
+            price_decimals=market_price_decimals_map[pos.market_id],
+            position_decimals=market_position_decimals_map[pos.market_id],
+            asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
         )
-    ]
+
+    if market_id is None:
+        return positions
+    else:
+        return positions[market_id]
 
 
 def list_accounts(
@@ -297,7 +357,7 @@ def list_accounts(
     output_accounts = []
     for account in accounts:
         if account.asset not in asset_decimals_map:
-            asset_decimals_map[account.asset] = asset_decimals(
+            asset_decimals_map[account.asset] = get_asset_decimals(
                 asset_id=account.asset,
                 data_client=data_client,
             )
@@ -332,7 +392,7 @@ def party_account(
     )
 
     asset_dp = (
-        asset_dp if asset_dp is not None else asset_decimals(asset_id, data_client)
+        asset_dp if asset_dp is not None else get_asset_decimals(asset_id, data_client)
     )
 
     general, margin, bond = 0, 0, 0  # np.nan, np.nan, np.nan
@@ -458,8 +518,7 @@ def market_position_decimals(
         market_id:
             str, The ID of the market requested
         data_client:
-            VegaTradingDataClientV2, an instantiated gRPC data client
-
+            VegaTradingDataClientV2,
     Returns:
         int, The number of decimal places the market uses for positions
     """
@@ -468,7 +527,7 @@ def market_position_decimals(
     ).position_decimal_places
 
 
-def asset_decimals(
+def get_asset_decimals(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
 ) -> int:
@@ -749,7 +808,7 @@ def market_account(
     )
     acct = {account.type: account for account in accounts}[account_type]
 
-    asset_dp = asset_decimals(asset_id=acct.asset, data_client=data_client)
+    asset_dp = get_asset_decimals(asset_id=acct.asset, data_client=data_client)
     return num_from_padded_int(
         acct.balance,
         asset_dp,
@@ -824,8 +883,6 @@ def order_subscription(
     order_stream = data_raw.observe_event_bus(
         data_client=data_client,
         type=[events_protos.BUS_EVENT_TYPE_ORDER],
-        market_id=market_id,
-        party_id=party_id,
     )
 
     def _order_gen(
@@ -862,7 +919,6 @@ def transfer_subscription(
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[Order]:
-
     transfer_stream = data_raw.observe_event_bus(
         data_client=data_client,
         type=[events_protos.BUS_EVENT_TYPE_TRANSFER],
@@ -879,7 +935,7 @@ def transfer_subscription(
                 for bus_event in transfer_list.events:
                     transfer = bus_event.transfer
                     if transfer.asset not in asset_dp:
-                        asset_dp[transfer.asset] = asset_decimals(
+                        asset_dp[transfer.asset] = get_asset_decimals(
                             asset_id=transfer.asset,
                             data_client=trading_data_client,
                         )
@@ -926,7 +982,7 @@ def margin_levels(
     res_margins = []
     for margin in margins:
         if margin.asset not in asset_dp:
-            asset_dp[margin.asset] = asset_decimals(
+            asset_dp[margin.asset] = get_asset_decimals(
                 asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
@@ -965,7 +1021,7 @@ def get_trades(
                 market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
-            market_asset_decimals_map[trade.market_id] = asset_decimals(
+            market_asset_decimals_map[trade.market_id] = get_asset_decimals(
                 asset_id=data_raw.market_info(
                     market_id=market_id, data_client=data_client
                 ).tradable_instrument.instrument.future.settlement_asset,
@@ -1016,9 +1072,8 @@ def list_transfers(
     res_transfers = []
 
     for transfer in transfers:
-
         if transfer.asset not in asset_dp:
-            asset_dp[transfer.asset] = asset_decimals(
+            asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
             )
 
@@ -1029,3 +1084,103 @@ def list_transfers(
         )
 
     return res_transfers
+
+
+def trades_subscription(
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
+) -> Iterable[Trade]:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Returns:
+        Iterable[Trade], Infinite iterable of trade updates
+    """
+
+    trade_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_TRADE],
+    )
+
+    return _stream_gen(
+        stream=trade_stream,
+        trading_data_client=trading_data_client,
+        extraction_fn=lambda evt: evt.trade,
+        conversion_fn=_trade_from_proto,
+    )
+
+
+def _stream_gen(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    trading_data_client: vac.VegaTradingDataClientV2,
+    extraction_fn: Callable[[vega_protos.events.v1.events.BusEvent], T],
+    conversion_fn: Callable[[T, int, int, int], S],
+) -> Iterable[S]:
+    mkt_pos_dp = {}
+    mkt_price_dp = {}
+    mkt_asset_dp = {}
+    try:
+        for stream_event_list in stream:
+            for bus_event in stream_event_list.events:
+                event = extraction_fn(bus_event)
+                if event.market_id not in mkt_pos_dp:
+                    mkt_pos_dp[event.market_id] = market_position_decimals(
+                        market_id=event.market_id, data_client=trading_data_client
+                    )
+                    mkt_price_dp[event.market_id] = market_price_decimals(
+                        market_id=event.market_id, data_client=trading_data_client
+                    )
+                    mkt_asset_dp[event.market_id] = asset_decimals(
+                        asset_id=data_raw.market_info(
+                            market_id=event.market_id, data_client=trading_data_client
+                        ).tradable_instrument.instrument.future.settlement_asset,
+                        data_client=trading_data_client,
+                    )
+                yield conversion_fn(
+                    event,
+                    mkt_price_dp[event.market_id],
+                    mkt_pos_dp[event.market_id],
+                    mkt_asset_dp[event.market_id],
+                )
+    except:
+        logger.info("Order subscription closed")
+        return
+
+
+def get_liquidity_fee_shares(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    party_id: Optional[str] = None,
+) -> Union[Dict, float]:
+    """Gets the current liquidity fee share for each party or a specified party.
+
+    Args:
+        data_client (vac.VegaTradingDataClientV2):
+            An instantiated gRPC data client
+        market_id (str):
+            Id of market to get liquidity fee shares from.
+        party_id (Optional[str], optional):
+            Id of party to get liquidity fee shares for. Defaults to None.
+    """
+
+    market_data = data_raw.market_data(data_client=data_client, market_id=market_id)
+
+    # Calculate share of fees for each LP
+    shares = {
+        lp.party: float(lp.equity_like_share) * float(lp.average_score)
+        for lp in market_data.liquidity_provider_fee_share
+    }
+    total_shares = sum(shares.values())
+
+    # Scale share of fees for each LP pro rata
+    if total_shares != 0:
+        pro_rata_shares = {key: val / total_shares for key, val in shares.items()}
+    else:
+        pro_rata_shares = {key: 1 / len(shares) for key, val in shares.items()}
+
+    if party_id is None:
+        return pro_rata_shares
+    else:
+        return pro_rata_shares[party_id]

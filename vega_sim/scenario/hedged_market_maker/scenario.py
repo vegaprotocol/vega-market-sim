@@ -146,8 +146,6 @@ class HedgedMarket(Scenario):
             Number of transactions allowed per block. Defaults to 1000.
         state_extraction_fn (Optional[ Callable[[VegaServiceNull, List[Agent]], Any] ], optional):
             Defines which states to extract and record. Defaults to None.
-        state_extraction_freq (int, optional):
-            How often to run the state_extraction_fn. Defaults to 1.
         pause_every_n_steps (Optional[int], optional):
             Number of steps to simulate before pausing the simulation. Defaults to None.
     """
@@ -185,9 +183,10 @@ class HedgedMarket(Scenario):
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, List[Agent]], Any]
         ] = None,
-        state_extraction_freq: int = 1,
         pause_every_n_steps: Optional[int] = None,
     ):
+        super().__init__(state_extraction_fn=state_extraction_fn)
+
         # Simulation properties
         self.num_steps = num_steps
         self.step_length_seconds = step_length_seconds
@@ -196,8 +195,6 @@ class HedgedMarket(Scenario):
         self.initial_price = initial_price
         self.random_agent_ordering = random_agent_ordering
         self.transactions_per_block = transactions_per_block
-        self.state_extraction_fn = state_extraction_fn
-        self.state_extraction_freq = state_extraction_freq
         self.pause_every_n_steps = pause_every_n_steps
 
         # Asset properties
@@ -272,6 +269,7 @@ class HedgedMarket(Scenario):
             market_position_decimal=self.int_pdp,
             market_name=self.int_name,
             settlement_price=price_process[-1],
+            tag="internal",
         )
 
         ext_market_manager = MarketManager(
@@ -287,6 +285,7 @@ class HedgedMarket(Scenario):
             market_position_decimal=self.ext_pdp,
             market_name=self.ext_name,
             settlement_price=price_process[-1],
+            tag="external",
         )
 
         int_market_maker = HedgedMarketMaker(
@@ -315,6 +314,7 @@ class HedgedMarket(Scenario):
             external_market_name=self.ext_name,
             internal_delay=self.int_lock,
             external_delay=self.ext_lock,
+            tag="internal",
         )
 
         ext_market_maker = ExponentialShapedMarketMaker(
@@ -337,6 +337,7 @@ class HedgedMarket(Scenario):
             inventory_lower_boundary=-30,
             state_update_freq=60,
             fee_amount=1e-03,
+            tag="external",
         )
 
         int_auction_pass_bid = OpenAuctionPass(
@@ -349,6 +350,7 @@ class HedgedMarket(Scenario):
             market_name=self.int_name,
             asset_name=self.asset_name,
             opening_auction_trade_amount=self.int_pdp,
+            tag="internal_bid",
         )
         int_auction_pass_ask = OpenAuctionPass(
             wallet_name=AUCTION_PASS_ASK.wallet_name,
@@ -360,6 +362,7 @@ class HedgedMarket(Scenario):
             market_name=self.int_name,
             asset_name=self.asset_name,
             opening_auction_trade_amount=self.int_pdp,
+            tag="internal_ask",
         )
         ext_auction_pass_bid = OpenAuctionPass(
             wallet_name=AUCTION_PASS_BID.wallet_name,
@@ -371,6 +374,7 @@ class HedgedMarket(Scenario):
             market_name=self.ext_name,
             asset_name=self.asset_name,
             opening_auction_trade_amount=self.ext_pdp,
+            tag="external_bid",
         )
         ext_auction_pass_ask = OpenAuctionPass(
             wallet_name=AUCTION_PASS_ASK.wallet_name,
@@ -382,6 +386,7 @@ class HedgedMarket(Scenario):
             market_name=self.ext_name,
             asset_name=self.asset_name,
             opening_auction_trade_amount=self.ext_pdp,
+            tag="external_bid",
         )
 
         int_random_trader = MarketOrderTrader(
@@ -394,6 +399,7 @@ class HedgedMarket(Scenario):
             buy_intensity=1 * 10 ** (self.int_pdp),
             sell_intensity=1 * 10 ** (self.int_pdp),
             base_order_size=1 * 10 ** -(self.int_pdp),
+            tag="internal",
         )
         ext_random_trader = MarketOrderTrader(
             wallet_name=EXT_RANDOM_TRADER.wallet_name,
@@ -405,6 +411,7 @@ class HedgedMarket(Scenario):
             buy_intensity=1 * 10 ** (self.ext_pdp),
             sell_intensity=1 * 10 ** (self.ext_pdp),
             base_order_size=1 * 10 ** -(self.ext_pdp),
+            tag="external",
         )
 
         int_informed_trader = InformedTrader(
@@ -448,9 +455,7 @@ class HedgedMarket(Scenario):
             random_agent_ordering=self.random_agent_ordering,
             transactions_per_block=self.transactions_per_block,
             vega_service=vega,
-            state_extraction_freq=self.state_extraction_freq,
             step_length_seconds=self.step_length_seconds,
             block_length_seconds=self.block_length_seconds,
-            state_extraction_fn=self.state_extraction_fn,
             pause_every_n_steps=self.pause_every_n_steps,
         )

@@ -20,7 +20,9 @@ def unroll_v2_pagination(
     request_func: Callable[[S], T],
     extraction_func: Callable[[S], List[U]],
 ) -> List[T]:
-    base_request.pagination.CopyFrom(data_node_protos_v2.trading_data.Pagination())
+    base_request.pagination.CopyFrom(
+        data_node_protos_v2.trading_data.Pagination(first=1000)
+    )
     response = request_func(base_request)
     full_list = extraction_func(response)
     while response.page_info.has_next_page:
@@ -33,15 +35,19 @@ def unroll_v2_pagination(
 
 def positions_by_market(
     pub_key: str,
-    market_id: str,
     data_client: vac.VegaTradingDataClientV2,
+    market_id: Optional[str] = None,
 ) -> List[vega_protos.vega.Position]:
     """Output positions of a party."""
+
+    base_request = data_node_protos_v2.trading_data.ListPositionsRequest(
+        party_id=pub_key,
+    )
+    if market_id is not None:
+        setattr(base_request, "market_id", market_id)
+
     return unroll_v2_pagination(
-        base_request=data_node_protos_v2.trading_data.ListPositionsRequest(
-            party_id=pub_key,
-            market_id=market_id,
-        ),
+        base_request=base_request,
         request_func=lambda x: data_client.ListPositions(x).positions,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
@@ -314,9 +320,14 @@ def observe_event_bus(
         Iterable[vega_protos.api.v1.core.ObserveEventBusResponse]:
             Infinite iterable of lists of events updates
     """
-    return data_client.ObserveEventBus(
-        iter([vega_protos.api.v1.core.ObserveEventBusRequest(type=type)])
-    )
+
+    request = vega_protos.api.v1.core.ObserveEventBusRequest(type=type)
+    if market_id is not None:
+        setattr(request, "market_id", market_id)
+    if party_id is not None:
+        setattr(request, "party_id", party_id)
+
+    return data_client.ObserveEventBus(iter([request]))
 
 
 def margin_levels(

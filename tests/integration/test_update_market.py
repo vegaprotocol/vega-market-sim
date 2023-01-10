@@ -34,15 +34,15 @@ def test_update_market_liquidity_monitoring(vega_service_with_market: VegaServic
             target_stake_parameters=vega_protos.markets.TargetStakeParameters(
                 time_window=3600, scaling_factor=1
             ),
-            triggering_ratio=0.6,
+            triggering_ratio="0.6",
             auction_extension=0,
         ),
     )
     vega.wait_for_total_catchup()
     after_market = vega.market_info(market_id)
 
-    assert pre_market.liquidity_monitoring_parameters.triggering_ratio == 0.7
-    assert after_market.liquidity_monitoring_parameters.triggering_ratio == 0.6
+    assert pre_market.liquidity_monitoring_parameters.triggering_ratio == "0.7"
+    assert after_market.liquidity_monitoring_parameters.triggering_ratio == "0.6"
 
 
 @pytest.mark.integration
@@ -115,7 +115,6 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
         data_source_spec_for_settlement_data=oracle_spec_for_settlement_data,
         data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
         data_source_spec_binding=curr_fut.data_source_spec_binding,
-        settlement_data_decimals=curr_fut.settlement_data_decimals,
     )
     updated_instrument = vega_protos.governance.UpdateInstrumentConfiguration(
         code="BTCUSD",
