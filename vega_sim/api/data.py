@@ -1,8 +1,17 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple, Union
-
+from typing import (
+    DefaultDict,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Callable,
+    TypeVar,
+    Union,
+)
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -21,6 +30,8 @@ class MissingMarketError(Exception):
 
 logger = logging.Logger(__name__)
 
+T = TypeVar("T")
+S = TypeVar("S")
 
 PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
 AccountData = namedtuple(
@@ -908,7 +919,6 @@ def transfer_subscription(
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
 ) -> Iterable[Order]:
-
     transfer_stream = data_raw.observe_event_bus(
         data_client=data_client,
         type=[events_protos.BUS_EVENT_TYPE_TRANSFER],
@@ -1062,7 +1072,6 @@ def list_transfers(
     res_transfers = []
 
     for transfer in transfers:
-
         if transfer.asset not in asset_dp:
             asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
@@ -1075,6 +1084,69 @@ def list_transfers(
         )
 
     return res_transfers
+
+
+def trades_subscription(
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
+) -> Iterable[Trade]:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Returns:
+        Iterable[Trade], Infinite iterable of trade updates
+    """
+
+    trade_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_TRADE],
+    )
+
+    return _stream_gen(
+        stream=trade_stream,
+        trading_data_client=trading_data_client,
+        extraction_fn=lambda evt: evt.trade,
+        conversion_fn=_trade_from_proto,
+    )
+
+
+def _stream_gen(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    trading_data_client: vac.VegaTradingDataClientV2,
+    extraction_fn: Callable[[vega_protos.events.v1.events.BusEvent], T],
+    conversion_fn: Callable[[T, int, int, int], S],
+) -> Iterable[S]:
+    mkt_pos_dp = {}
+    mkt_price_dp = {}
+    mkt_asset_dp = {}
+    try:
+        for stream_event_list in stream:
+            for bus_event in stream_event_list.events:
+                event = extraction_fn(bus_event)
+                if event.market_id not in mkt_pos_dp:
+                    mkt_pos_dp[event.market_id] = market_position_decimals(
+                        market_id=event.market_id, data_client=trading_data_client
+                    )
+                    mkt_price_dp[event.market_id] = market_price_decimals(
+                        market_id=event.market_id, data_client=trading_data_client
+                    )
+                    mkt_asset_dp[event.market_id] = asset_decimals(
+                        asset_id=data_raw.market_info(
+                            market_id=event.market_id, data_client=trading_data_client
+                        ).tradable_instrument.instrument.future.settlement_asset,
+                        data_client=trading_data_client,
+                    )
+                yield conversion_fn(
+                    event,
+                    mkt_price_dp[event.market_id],
+                    mkt_pos_dp[event.market_id],
+                    mkt_asset_dp[event.market_id],
+                )
+    except:
+        logger.info("Order subscription closed")
+        return
 
 
 def get_liquidity_fee_shares(

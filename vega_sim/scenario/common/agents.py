@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 
 import logging
+import datetime
 
 from queue import Queue
 import numpy as np
@@ -17,7 +18,7 @@ from enum import Enum
 from collections import namedtuple
 from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict, Any
 from numpy.typing import ArrayLike
-from vega_sim.api.data import Order
+from vega_sim.api.data import Order, AccountData, MarketDepth, Trade
 
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet, StateAgent, Agent
@@ -29,13 +30,19 @@ from vega_sim.proto.vega import (
 )
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.api.trading import OrderRejectedError
-from vega_sim.quant.quant import probability_of_trading
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
-MarketHistoryData = namedtuple(
-    "MarketHistoryData", ["at_time", "market_info", "market_data", "accounts"]
-)
+
+@dataclass
+class MarketHistoryData:
+    at_time: datetime.datetime
+    market_info: Dict[str, vega_protos.markets.Market]
+    market_data: Dict[str, vega_protos.markets.MarketData]
+    accounts: List[AccountData]
+    market_depth: Dict[str, MarketDepth]
+    trades: Dict[str, List[Trade]]
+
 
 # Send selling/buying MOs to hit LP orders
 TRADER_WALLET = WalletConfig("trader", "trader")
@@ -2582,14 +2589,26 @@ class Snitch(StateAgent):
         self.additional_states = []
         self.agents = agents
         self.additional_state_fn = additional_state_fn
+        self.seen_trades = set()
 
     def step(self, vega_state: VegaState):
         market_infos = {}
         market_datas = {}
+        market_depths = {}
+        market_trades = {}
+
         start_time = self.vega.get_blockchain_time()
         for market in self.vega.all_markets():
             market_infos[market.id] = self.vega.market_info(market.id)
             market_datas[market.id] = self.vega.market_data(market.id)
+            market_depths[market.id] = self.vega.market_depth(market.id, num_levels=50)
+
+        all_trades = self.vega.get_trades_from_stream()
+        for trade in all_trades:
+            if trade.id not in self.seen_trades:
+                self.seen_trades.add(trade.id)
+                market_trades.setdefault(market.id, []).append(trade)
+
         accounts = self.vega.list_accounts()
         self.states.append(
             MarketHistoryData(
@@ -2597,6 +2616,8 @@ class Snitch(StateAgent):
                 market_info=market_infos,
                 market_data=market_datas,
                 accounts=accounts,
+                market_depth=market_depths,
+                trades=market_trades,
             )
         )
         if self.additional_state_fn is not None:

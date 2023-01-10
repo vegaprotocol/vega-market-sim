@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import threading
 import time
+import copy
 from abc import ABC
 from collections import defaultdict
 from curses import keyname
@@ -137,10 +138,15 @@ class VegaService(ABC):
         self.seconds_per_block = seconds_per_block
 
         self.order_thread = None
+        self.transfer_thread = None
+        self.trade_thread = None
+
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
+        self.trades_lock = threading.RLock()
         self._order_state_from_feed = {}
         self._transfer_state_from_feed = {}
+        self._trades_from_feed: List[data.Trade] = []
 
     @property
     def market_price_decimals(self) -> int:
@@ -1478,13 +1484,17 @@ class VegaService(ABC):
             market_id=market_id, party_id=self.wallet.public_key(wallet_name, key_name)
         )
 
+    def start_live_feeds(self):
+        self.start_order_monitoring()
+        self.start_transfer_monitoring()
+        self.start_trade_monitoring()
+
     def start_order_monitoring(
         self,
         market_ids: Optional[List[str]] = None,
         party_ids: Optional[List[str]] = None,
         use_core_client: bool = False,
     ):
-
         if use_core_client:
             data_client = self.core_client
         else:
@@ -1547,6 +1557,26 @@ class VegaService(ABC):
         )
         self.transfer_thread.start()
 
+    def start_trade_monitoring(
+        self,
+    ):
+        self.trade_queue = data.trades_subscription(
+            self.core_client,
+            self.trading_data_client_v2,
+        )
+
+        base_trades = []
+
+        with self.transfers_lock:
+            self._trades_from_feed = base_trades
+
+        self.trade_thread = threading.Thread(
+            target=self._monitor_trade_stream,
+            args=(self.trade_queue,),
+            daemon=True,
+        )
+        self.trade_thread.start()
+
     def _monitor_stream(self, trade_stream: Queue[data.Order]):
         for o in trade_stream:
             with self.orders_lock:
@@ -1563,6 +1593,11 @@ class VegaService(ABC):
         for t in transfer_stream:
             with self.transfers_lock:
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
+
+    def _monitor_trade_stream(self, trade_stream: Queue[data.Trade]):
+        for t in trade_stream:
+            with self.trades_lock:
+                self._trades_from_feed.append(t)
 
     def margin_levels(
         self,
@@ -1610,6 +1645,50 @@ class VegaService(ABC):
             live_only=live_only,
         )
 
+    def get_trades_from_stream(
+        self,
+        market_id: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
+        order_id: Optional[str] = None,
+    ) -> List[data.Trade]:
+        """Loads executed trades for a given query of party/market/specific order from
+        data node. Converts values to proper decimal output.
+
+        Args:
+            market_id:
+                optional str, Restrict to trades on a specific market
+            wallet_name:
+                optional str, Restrict to trades for a specific wallet
+            key_name:
+                optional str, Select a different key to the default within a given wallet
+            order_id:
+                optional str, Restrict to trades for a specific order
+
+        Returns:
+            List[Trade], list of formatted trade objects which match the required
+                restrictions.
+        """
+        party_id = (
+            self.wallet.public_key(wallet_name, key_name)
+            if key_name is not None
+            else None
+        )
+        with self.trades_lock:
+            results = []
+            for trade in self._trades_from_feed:
+                if party_id is not None and party_id not in (trade.buyer, trade.seller):
+                    continue
+                if market_id is not None and trade.market_id != market_id:
+                    continue
+                if order_id is not None and order_id not in (
+                    trade.buy_order,
+                    trade.sell_order,
+                ):
+                    continue
+                results.append(copy.copy(trade))
+        return results
+
     def get_trades(
         self,
         market_id: str,
@@ -1640,8 +1719,9 @@ class VegaService(ABC):
             asset_dp = self.asset_decimals[self.market_to_asset[market_id]]
         return data.get_trades(
             self.trading_data_client_v2,
-            data_client_v1=self.trading_data_client_v2,
-            party_id=self.wallet.public_key(wallet_name, key_name),
+            party_id=self.wallet.public_key(wallet_name, key_name)
+            if key_name is not None
+            else None,
             market_id=market_id,
             order_id=order_id,
             market_asset_decimals_map={market_id: asset_dp}

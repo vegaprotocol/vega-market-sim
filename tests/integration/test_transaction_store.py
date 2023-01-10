@@ -11,7 +11,7 @@ from vega_sim.scenario.registry import SCENARIOS
 def _test_transaction_store():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        start_order_feed=True,
+        start_live_feeds=True,
         retain_log_files=True,
         transactions_per_block=50,
         store_transactions=True,
