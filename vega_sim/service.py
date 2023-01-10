@@ -1491,7 +1491,6 @@ class VegaService(ABC):
         party_ids: Optional[List[str]] = None,
         use_core_client: bool = False,
     ):
-
         if use_core_client:
             data_client = self.core_client
         else:
