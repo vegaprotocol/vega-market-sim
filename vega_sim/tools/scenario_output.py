@@ -108,11 +108,14 @@ def _market_data_standard_output(
     output_path: str = DEFAULT_PATH,
     data_to_row_fn: Callable[[MarketHistoryData], pd.Series] = history_data_to_row,
 ):
-    result_df = pd.DataFrame.from_records(
+    results = list(
         itertools.chain.from_iterable(
             [data_to_row_fn(data=step_data) for step_data in market_history_data],
-        ),
-        index="time",
+        )
+    )
+    result_df = pd.DataFrame.from_records(
+        results,
+        index="time" if len(results) > 0 else None,
     )
     os.makedirs(output_path, exist_ok=True)
 
