@@ -30,7 +30,7 @@ def generate_trading_plot():
         opening_auction_trade_amount=0.0001,
         market_order_trader_base_order_size=0.01,
     )
-    with VegaServiceNull(warn_on_raw_data_access=False) as vega:
+    with VegaServiceNull(warn_on_raw_data_access=False, retain_log_files=True) as vega:
         scen.run_iteration(vega=vega, output_data=True)
         plot = plot_run_outputs()
         plot.savefig("run.jpg")

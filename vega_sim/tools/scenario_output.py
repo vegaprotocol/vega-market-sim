@@ -157,8 +157,10 @@ def load_market_data_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, DATA_FILE_NAME))
-    df["time"] = pd.to_datetime(df.time * 1e9)
-    return df.set_index("time")
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time * 1e9)
+        df = df.set_index("time")
+    return df
 
 
 def load_order_book_df(
@@ -167,8 +169,12 @@ def load_order_book_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     depth_df = pd.read_csv(os.path.join(output_path, run_name, ORDER_BOOK_FILE_NAME))
-    depth_df["time"] = pd.to_datetime(depth_df.time * 1e9)
-    return depth_df[depth_df["time"] != depth_df["time"].min()].set_index("time")
+    if not depth_df.empty:
+        depth_df["time"] = pd.to_datetime(depth_df.time * 1e9)
+        depth_df = depth_df[depth_df["time"] != depth_df["time"].min()].set_index(
+            "time"
+        )
+    return depth_df
 
 
 def load_trades_df(
@@ -177,8 +183,10 @@ def load_trades_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, TRADES_FILE_NAME))
-    df["time"] = pd.to_datetime(df.time)
-    return df.set_index("time")
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time)
+        df = df.set_index("time")
+    return df
 
 
 def load_accounts_df(
@@ -187,5 +195,7 @@ def load_accounts_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, ACCOUNTS_FILE_NAME))
-    df["time"] = pd.to_datetime(df.time * 1e9)
-    return df.set_index("time")
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time * 1e9)
+        df = df.set_index("time")
+    return df
