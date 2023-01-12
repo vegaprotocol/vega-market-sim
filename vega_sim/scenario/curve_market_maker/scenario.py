@@ -129,7 +129,7 @@ class CurveMarketMaker(Scenario):
     ) -> List[StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + (f"_{tag}" if tag else "")
-        asset_name = self.asset_name + (f"_{tag}" if tag else "")
+        asset_name = self.asset_name
 
         price_process = (
             self.price_process_fn()

@@ -61,6 +61,7 @@ class LearningAgentFixedVol(LearningAgent):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
+        asset_name: str,
         inventory_penalty: float = 1.0,
     ):
         super().__init__(
@@ -76,6 +77,7 @@ class LearningAgentFixedVol(LearningAgent):
             initial_balance=initial_balance,
             position_decimals=position_decimals,
             inventory_penalty=inventory_penalty,
+            asset_name=asset_name,
         )
         self.volume = 10 ** (-self.position_decimals)
 

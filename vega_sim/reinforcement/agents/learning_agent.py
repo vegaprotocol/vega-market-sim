@@ -66,6 +66,7 @@ class LearningAgent(StateAgentWithWallet):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
+        asset_name: str,
         inventory_penalty: float = 0.0,
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
@@ -94,6 +95,7 @@ class LearningAgent(StateAgentWithWallet):
         self.market_name = market_name
         self.position_decimals = position_decimals
         self.inventory_penalty = inventory_penalty
+        self.asset_name = asset_name
 
     def set_market_tag(self, tag: str):
         self.tag = tag
@@ -119,7 +121,7 @@ class LearningAgent(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == market_name
         ][0]
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI_{self.tag}")
+        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
