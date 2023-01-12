@@ -288,7 +288,6 @@ def positions_by_market(
 
     positions = {}
     for pos in raw_positions:
-
         market_info = None
 
         # Update maps if value does not exist for current market id
@@ -1132,7 +1131,7 @@ def _stream_gen(
                     mkt_price_dp[event.market_id] = market_price_decimals(
                         market_id=event.market_id, data_client=trading_data_client
                     )
-                    mkt_asset_dp[event.market_id] = asset_decimals(
+                    mkt_asset_dp[event.market_id] = get_asset_decimals(
                         asset_id=data_raw.market_info(
                             market_id=event.market_id, data_client=trading_data_client
                         ).tradable_instrument.instrument.future.settlement_asset,
