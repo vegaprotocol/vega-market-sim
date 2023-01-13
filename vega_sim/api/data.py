@@ -1272,7 +1272,7 @@ def list_ledger_entries(
             Optional[datetime.datetime], Only include transfers occurring before
                 this time
     Returns:
-        List[data_node_protos_v2.trading_data.AggregatedLedgerEntry]
+        List[AggregatedLedgerEntry]
             A list of all transfers matching the requested criteria
     """
     raw_ledger_entries = data_raw.list_ledger_entries(
