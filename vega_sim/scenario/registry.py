@@ -10,6 +10,8 @@ from vega_sim.scenario.multi_market.scenario import VegaLoadTest
 from vega_sim.scenario.market_crash.scenario import MarketCrash
 from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
 from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
+from vega_sim.scenario.parameter_experiment.scenario import ParameterExperiment
+
 
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
@@ -193,4 +195,5 @@ SCENARIOS = {
         int_lock=3 * 60 * 60,
         ext_lock=5 * 60,
     ),
+    "parameter_experiment": lambda: ParameterExperiment(),
 }
