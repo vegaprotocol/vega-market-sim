@@ -20,6 +20,7 @@ from vega_sim.api.data import (
     Transfer,
     OrdersBySide,
     Trade,
+    AggregatedLedgerEntry,
     get_asset_decimals,
     best_prices,
     price_bounds,
@@ -34,6 +35,7 @@ from vega_sim.api.data import (
     party_account,
     list_transfers,
     get_liquidity_fee_shares,
+    list_ledger_entries,
 )
 from vega_sim.grpc.client import (
     VegaCoreClient,
@@ -998,7 +1000,6 @@ def test_list_transfers(
 
 
 def test_get_liquidity_fee_shares(trading_data_v2_servicer_and_port):
-
     expected = {"party1": 0.75, "party2": 0.25}
 
     def GetLatestMarketData(self, request, context):
@@ -1043,3 +1044,70 @@ def test_get_liquidity_fee_shares(trading_data_v2_servicer_and_port):
         market_id="na",
     )
     assert res3 == expected
+
+
+def test_list_ledger_entries(trading_data_v2_servicer_and_port):
+    expected = data_node_protos_v2.trading_data.AggregatedLedgerEntry(
+        timestamp=10000000, quantity="540", asset_id="asset1"
+    )
+
+    def ListLedgerEntries(self, request, context):
+        return data_node_protos_v2.trading_data.ListLedgerEntriesResponse(
+            ledger_entries=data_node_protos_v2.trading_data.AggregatedLedgerEntriesConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.AggregatedLedgerEntriesEdge(
+                        cursor="cursor",
+                        node=expected,
+                    )
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListLedgerEntries = ListLedgerEntries
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = list_ledger_entries(
+        data_client=data_client, asset_id="asset1", asset_decimals_map={"asset1": 1}
+    )
+
+    assert res == [
+        AggregatedLedgerEntry(
+            timestamp=10000000,
+            quantity=54,
+            asset_id="asset1",
+            transfer_type=0,
+            sender_account_type=0,
+            receiver_account_type=0,
+            sender_market_id="",
+            sender_party_id="",
+            receiver_market_id="",
+            receiver_party_id="",
+        )
+    ]
+    res2 = list_ledger_entries(
+        data_client=data_client, asset_id="asset1", asset_decimals_map={"asset1": 2}
+    )
+
+    assert res2 == [
+        AggregatedLedgerEntry(
+            timestamp=10000000,
+            quantity=5.4,
+            asset_id="asset1",
+            transfer_type=0,
+            sender_account_type=0,
+            receiver_account_type=0,
+            sender_market_id="",
+            sender_party_id="",
+            receiver_market_id="",
+            receiver_party_id="",
+        )
+    ]

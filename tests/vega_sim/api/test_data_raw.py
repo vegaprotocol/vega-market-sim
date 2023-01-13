@@ -25,6 +25,7 @@ from vega_sim.api.data_raw import (
     observe_event_bus,
     margin_levels,
     list_transfers,
+    list_ledger_entries,
 )
 
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
@@ -761,6 +762,43 @@ def test_list_transfers(trading_data_v2_servicer_and_port):
         data_client=data_client,
         party_id="party2",
         direction=data_node_protos_v2.trading_data.TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM,
+    )
+
+    assert res == [expected]
+
+
+def test_list_ledger_entries(trading_data_v2_servicer_and_port):
+    expected = data_node_protos_v2.trading_data.AggregatedLedgerEntry(
+        timestamp=10000000, quantity="540", asset_id="asset1"
+    )
+
+    def ListLedgerEntries(self, request, context):
+        return data_node_protos_v2.trading_data.ListLedgerEntriesResponse(
+            ledger_entries=data_node_protos_v2.trading_data.AggregatedLedgerEntriesConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.AggregatedLedgerEntriesEdge(
+                        cursor="cursor",
+                        node=expected,
+                    )
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListLedgerEntries = ListLedgerEntries
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = list_ledger_entries(
+        data_client=data_client,
+        asset_id="asset1",
     )
 
     assert res == [expected]

@@ -1567,7 +1567,7 @@ class VegaService(ABC):
 
         base_trades = []
 
-        with self.transfers_lock:
+        with self.trades_lock:
             self._trades_from_feed = base_trades
 
         self.trade_thread = threading.Thread(
@@ -2181,3 +2181,6 @@ class VegaService(ABC):
                 else None
             ),
         )
+
+    def list_ledger_entries(self, to_account):
+        return data.list_ledger_entries(data_client=self.trading_data_client_v2, to_party_ids=[to_account])

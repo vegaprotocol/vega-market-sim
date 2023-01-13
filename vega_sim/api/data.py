@@ -12,6 +12,7 @@ from typing import (
     TypeVar,
     Union,
 )
+import datetime
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -32,6 +33,7 @@ logger = logging.Logger(__name__)
 
 T = TypeVar("T")
 S = TypeVar("S")
+Acct = list[vega_protos.vega.AccountType]
 
 PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
 AccountData = namedtuple(
@@ -107,6 +109,20 @@ MarginLevels = namedtuple(
 
 
 @dataclass
+class AggregatedLedgerEntry:
+    timestamp: int
+    quantity: float
+    transfer_type: vega_protos.vega.TransferType
+    asset_id: str
+    sender_account_type: vega_protos.vega.AccountType
+    receiver_account_type: vega_protos.vega.AccountType
+    sender_party_id: str
+    receiver_party_id: str
+    sender_market_id: str
+    receiver_market_id: str
+
+
+@dataclass
 class MarketDepth:
     buys: List[PriceLevel]
     sells: List[PriceLevel]
@@ -142,6 +158,24 @@ class Trade:
     seller_fee: Fee
     buyer_auction_batch: int
     seller_auction_batch: int
+
+
+def _aggregated_ledger_entry_from_proto(
+    ledger_entry: data_node_protos_v2.trading_data.AggregatedLedgerEntry,
+    asset_decimals: int,
+) -> AggregatedLedgerEntry:
+    return AggregatedLedgerEntry(
+        timestamp=ledger_entry.timestamp,
+        quantity=num_from_padded_int(ledger_entry.quantity, asset_decimals),
+        transfer_type=ledger_entry.transfer_type,
+        asset_id=ledger_entry.asset_id,
+        sender_account_type=ledger_entry.sender_account_type,
+        receiver_account_type=ledger_entry.receiver_account_type,
+        sender_party_id=ledger_entry.sender_party_id,
+        receiver_party_id=ledger_entry.receiver_party_id,
+        sender_market_id=ledger_entry.sender_market_id,
+        receiver_market_id=ledger_entry.receiver_market_id,
+    )
 
 
 def _trade_from_proto(
@@ -1183,3 +1217,90 @@ def get_liquidity_fee_shares(
         return pro_rata_shares
     else:
         return pro_rata_shares[party_id]
+
+
+def list_ledger_entries(
+    data_client: vac.VegaTradingDataClientV2,
+    close_on_account_filters: bool = False,
+    asset_id: Optional[str] = None,
+    from_party_ids: Optional[List[str]] = None,
+    to_party_ids: Optional[List[str]] = None,
+    from_account_types: Optional[list[vega_protos.vega.AccountType]] = None,
+    from_market_ids: Optional[List[str]] = None,
+    to_market_ids: Optional[List[str]] = None,
+    to_account_types: Optional[list[vega_protos.vega.AccountType]] = None,
+    transfer_types: Optional[list[vega_protos.vega.TransferType]] = None,
+    from_datetime: Optional[datetime.datetime] = None,
+    to_datetime: Optional[datetime.datetime] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> List[AggregatedLedgerEntry]:
+    """Returns a list of ledger entries matching specific filters as provided.
+    These detail every transfer of funds between accounts within the Vega system,
+    including fee/rewards payments and transfers between user margin/general/bond
+    accounts.
+
+    Note: At least one of the from_*/to_* filters, or asset ID, must be specified.
+
+    Args:
+        data_client:
+            vac.VegaTradingDataClientV2, An instantiated gRPC trading data client
+        close_on_account_filters:
+            bool, default False, Whether both 'from' and 'to' filters must both match
+                a given transfer for inclusion. If False, entries matching either
+                'from' or 'to' will also be included.
+        asset_id:
+            Optional[str], filter to only transfers of specific asset ID
+        from_party_ids:
+            Optional[List[str]], Only include transfers from specified parties
+        from_market_ids:
+            Optional[List[str]], Only include transfers from specified markets
+        from_account_types:
+            Optional[List[str]], Only include transfers from specified account types
+        to_party_ids:
+            Optional[List[str]], Only include transfers to specified parties
+        to_market_ids:
+            Optional[List[str]], Only include transfers to specified markets
+        to_account_types:
+            Optional[List[str]], Only include transfers to specified account types
+        transfer_types:
+            Optional[List[vega_protos.vega.AccountType]], Only include transfers
+                of specified types
+        from_datetime:
+            Optional[datetime.datetime], Only include transfers occurring after
+                this time
+        to_datetime:
+            Optional[datetime.datetime], Only include transfers occurring before
+                this time
+    Returns:
+        List[data_node_protos_v2.trading_data.AggregatedLedgerEntry]
+            A list of all transfers matching the requested criteria
+    """
+    raw_ledger_entries = data_raw.list_ledger_entries(
+        data_client=data_client,
+        close_on_account_filters=close_on_account_filters,
+        asset_id=asset_id,
+        from_party_ids=from_party_ids,
+        to_party_ids=to_party_ids,
+        from_account_types=from_account_types,
+        from_market_ids=from_market_ids,
+        to_market_ids=to_market_ids,
+        transfer_types=transfer_types,
+        from_datetime=from_datetime,
+        to_datetime=to_datetime,
+        to_account_types=to_account_types,
+    )
+
+    asset_decimals_map = {} if asset_decimals_map is None else asset_decimals_map
+    ledger_entries = []
+    for entry in raw_ledger_entries:
+        if entry.asset_id not in asset_decimals_map:
+            asset_decimals_map[entry.asset_id] = get_asset_decimals(
+                asset_id=entry.asset_id,
+                data_client=data_client,
+            )
+        ledger_entries.append(
+            _aggregated_ledger_entry_from_proto(
+                entry, asset_decimals=asset_decimals_map[entry.asset_id]
+            )
+        )
+    return ledger_entries
