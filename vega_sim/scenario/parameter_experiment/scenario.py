@@ -39,7 +39,6 @@ from vega_sim.scenario.common.utils.price_process import (
 )
 
 
-
 class ParameterExperiment(Scenario):
     """Class simulates a scenario for use in parameter experiments.
 
@@ -89,7 +88,6 @@ class ParameterExperiment(Scenario):
         self.rt_mint = rt_mint
         self.st_mint = st_mint
         self.it_mint = it_mint
-
 
     def _generate_price_process(
         self,
