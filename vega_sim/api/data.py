@@ -33,7 +33,6 @@ logger = logging.Logger(__name__)
 
 T = TypeVar("T")
 S = TypeVar("S")
-Acct = list[vega_protos.vega.AccountType]
 
 PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
 AccountData = namedtuple(
