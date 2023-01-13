@@ -2184,9 +2184,12 @@ class InformedTrader(StateAgentWithWallet):
             market_id=self.market_id,
             key_name=self.key_name,
         )
-        abs_position = abs(int(position.open_volume) if position is not None else 0)
-        if abs_position + size > self.max_abs_position:
-            size = min([0, self.max_abs_position - abs_position])
+        cur_position = int(position.open_volume) if position is not None else 0
+        new_position = (
+            cur_position + size if side == vega_protos.SIDE_BUY else cur_position - size
+        )
+        if abs(new_position) > self.max_abs_position:
+            size = max([0, self.max_abs_position - abs(cur_position)])
 
         # Add a random probability the agent speculates the wrong side
         if self.random_state.rand() <= self.accuracy:
