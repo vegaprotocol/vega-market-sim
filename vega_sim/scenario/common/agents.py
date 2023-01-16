@@ -1093,11 +1093,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         if (self.bid_depth is None) or (self.ask_depth is None):
             return
 
-        new_buy_shape, new_sell_shape = self.shape_fn(self.bid_depth, self.ask_depth)
-        scaled_buy_shape, scaled_sell_shape = self._scale_orders(
-            buy_shape=new_buy_shape, sell_shape=new_sell_shape
+        scaled_buy_shape, scaled_sell_shape = self.shape_fn(
+            self.bid_depth, self.ask_depth
         )
-
         curr_buy_orders, curr_sell_orders = [], []
 
         if self.orders_from_stream:
@@ -1166,40 +1164,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 is_amendment=True,
                 key_name=self.key_name,
             )
-
-    def _scale_orders(
-        self,
-        buy_shape: List[MMOrder],
-        sell_shape: List[MMOrder],
-    ):
-        buy_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
-        ) / self._calculate_liquidity(
-            orders=buy_shape,
-        )
-
-        sell_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
-        ) / self._calculate_liquidity(
-            orders=sell_shape,
-        )
-
-        # Scale the shapes
-        scaled_buy_shape = [
-            MMOrder(
-                min([order.size * buy_scaling_factor, self.max_order_size]), order.price
-            )
-            for order in buy_shape
-        ]
-        scaled_sell_shape = [
-            MMOrder(
-                min([order.size * sell_scaling_factor, self.max_order_size]),
-                order.price,
-            )
-            for order in sell_shape
-        ]
-
-        return scaled_buy_shape, scaled_sell_shape
 
     def _calculate_liquidity(
         self,
@@ -1404,6 +1368,40 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
                 phi=self.phi,
             )
 
+    def _scale_orders(
+        self,
+        buy_shape: List[MMOrder],
+        sell_shape: List[MMOrder],
+    ):
+        buy_scaling_factor = (
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
+        ) / self._calculate_liquidity(
+            orders=buy_shape,
+        )
+
+        sell_scaling_factor = (
+            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
+        ) / self._calculate_liquidity(
+            orders=sell_shape,
+        )
+
+        # Scale the shapes
+        scaled_buy_shape = [
+            MMOrder(
+                min([order.size * buy_scaling_factor, self.max_order_size]), order.price
+            )
+            for order in buy_shape
+        ]
+        scaled_sell_shape = [
+            MMOrder(
+                min([order.size * sell_scaling_factor, self.max_order_size]),
+                order.price,
+            )
+            for order in sell_shape
+        ]
+
+        return scaled_buy_shape, scaled_sell_shape
+
     def _liq_provis(self, state: VegaState) -> LiquidityProvision:
         if (self.curr_asks is not None) and (self.curr_bids is not None):
             est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
@@ -1486,7 +1484,12 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         )
         self.curr_bids = bid_orders
         self.curr_asks = ask_orders
-        return bid_orders, ask_orders
+
+        scaled_buy_shape, scaled_sell_shape = self._scale_orders(
+            buy_shape=bid_orders, sell_shape=ask_orders
+        )
+
+        return scaled_buy_shape, scaled_sell_shape
 
     def _calculate_price_volume_levels(
         self,

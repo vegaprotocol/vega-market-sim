@@ -797,8 +797,7 @@ def test_list_ledger_entries(trading_data_v2_servicer_and_port):
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
     res = list_ledger_entries(
-        data_client=data_client,
-        asset_id="asset1",
+        data_client=data_client, asset_id="asset1", to_party_ids=["p1", "p2"]
     )
 
     assert res == [expected]
