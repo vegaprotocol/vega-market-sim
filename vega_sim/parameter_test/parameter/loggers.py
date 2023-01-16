@@ -29,6 +29,7 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LP: Annualised Relative Return",
     "LP: RealisedPnl",
     "LP: UnrealisedPnl",
+    "LP: UnrealisedPnl+realisedPnL",
     "LP: Position",
     "LP: Bid",
     "LP: Ask",
@@ -42,6 +43,7 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "Total Traded Notional",
     "Informed Trader Notional",
     "Target Stake",
+    "Supplied Stake",
     "Market Open Interest",
     "Market Trading mode",
     "Market State",
@@ -183,6 +185,7 @@ def _ideal_market_maker_single_data_extraction(
         "LP: Max Locked Capital": max_locked_capital,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
+        "LP: UnrealisedPnl+realisedPnL": (unrealised_pnl_lp + realised_pnl_lp) / 1.0,
         "LP: Position": inventory_lp,
         "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp)
         if mm_agent.bid_depth is not None
@@ -243,6 +246,7 @@ def target_stake_additional_data(
 
     return {
         "Target Stake": float(market_data.target_stake) * scaling,
+        "Supplied Stake": float(market_data.supplied_stake) * scaling,
     }
 
 
