@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import datetime
 from collections import namedtuple
-from typing import Callable, Dict, Iterable, List, Optional, TypeVar, Union
+from typing import Callable, Iterable, List, Optional, TypeVar, Union
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -23,6 +24,7 @@ def unroll_v2_pagination(
     base_request.pagination.CopyFrom(
         data_node_protos_v2.trading_data.Pagination(first=1000)
     )
+
     response = request_func(base_request)
     full_list = extraction_func(response)
     while response.page_info.has_next_page:
@@ -418,5 +420,111 @@ def list_transfers(
     return unroll_v2_pagination(
         base_request=base_request,
         request_func=lambda x: data_client.ListTransfers(x).transfers,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+def list_ledger_entries(
+    data_client: vac.VegaTradingDataClientV2,
+    close_on_account_filters: bool = False,
+    asset_id: Optional[str] = None,
+    from_party_ids: Optional[List[str]] = None,
+    from_market_ids: Optional[List[str]] = None,
+    from_account_types: Optional[List[vega_protos.vega.AccountType]] = None,
+    to_party_ids: Optional[List[str]] = None,
+    to_market_ids: Optional[List[str]] = None,
+    to_account_types: Optional[List[vega_protos.vega.AccountType]] = None,
+    transfer_types: Optional[List[vega_protos.vega.TransferType]] = None,
+    from_datetime: Optional[datetime.datetime] = None,
+    to_datetime: Optional[datetime.datetime] = None,
+) -> List[data_node_protos_v2.trading_data.AggregatedLedgerEntry]:
+    """Returns a list of ledger entries matching specific filters as provided.
+    These detail every transfer of funds between accounts within the Vega system,
+    including fee/rewards payments and transfers between user margin/general/bond
+    accounts.
+
+    Note: At least one of the from_*/to_* filters, or asset ID, must be specified.
+
+    Args:
+        data_client:
+            vac.VegaTradingDataClientV2, An instantiated gRPC trading data client
+        close_on_account_filters:
+            bool, default False, Whether both 'from' and 'to' filters must both match
+                a given transfer for inclusion. If False, entries matching either
+                'from' or 'to' will also be included.
+        asset_id:
+            Optional[str], filter to only transfers of specific asset ID
+        from_party_ids:
+            Optional[List[str]], Only include transfers from specified parties
+        from_market_ids:
+            Optional[List[str]], Only include transfers from specified markets
+        from_account_types:
+            Optional[List[str]], Only include transfers from specified account types
+        to_party_ids:
+            Optional[List[str]], Only include transfers to specified parties
+        to_market_ids:
+            Optional[List[str]], Only include transfers to specified markets
+        to_account_types:
+            Optional[List[str]], Only include transfers to specified account types
+        transfer_types:
+            Optional[List[vega_protos.vega.AccountType]], Only include transfers
+                of specified types
+        from_datetime:
+            Optional[datetime.datetime], Only include transfers occurring after
+                this time
+        to_datetime:
+            Optional[datetime.datetime], Only include transfers occurring before
+                this time
+    Returns:
+        List[data_node_protos_v2.trading_data.AggregatedLedgerEntry]
+            A list of all transfers matching the requested criteria
+    """
+    if all(
+        not x
+        for x in [
+            from_party_ids,
+            to_party_ids,
+            from_account_types,
+            to_account_types,
+            asset_id,
+        ]
+    ):
+        raise Exception("Must specify at least one filter criterion")
+
+    base_request = data_node_protos_v2.trading_data.ListLedgerEntriesRequest(
+        filter=data_node_protos_v2.trading_data.LedgerEntryFilter(
+            close_on_account_filters=close_on_account_filters,
+            account_from_filter=data_node_protos_v2.trading_data.AccountFilter(
+                asset_id=asset_id,
+                party_ids=from_party_ids if from_party_ids is not None else [],
+                market_ids=from_market_ids if from_market_ids is not None else [],
+                account_types=from_account_types
+                if from_account_types is not None
+                else [],
+            ),
+            account_to_filter=data_node_protos_v2.trading_data.AccountFilter(
+                asset_id=asset_id,
+                party_ids=to_party_ids if to_party_ids is not None else [],
+                market_ids=to_market_ids if to_market_ids is not None else [],
+                account_types=to_account_types if to_account_types is not None else [],
+            ),
+            transfer_types=transfer_types,
+        ),
+    )
+    if from_datetime is not None or to_datetime is not None:
+        base_request.date_range.CopyFrom(
+            data_node_protos_v2.trading_data.DateRange(
+                start_timestamp=from_datetime.timestamp() * 1e9
+                if from_datetime is not None
+                else None,
+                end_timestamp=to_datetime.timestamp() * 1e9
+                if to_datetime is not None
+                else None,
+            )
+        )
+
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListLedgerEntries(x).ledger_entries,
         extraction_func=lambda res: [i.node for i in res.edges],
     )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import logging
 import threading
 import time
@@ -22,8 +23,6 @@ import vega_sim.api.market as market
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.data.v1 as oracles_protos
-import vega_sim.proto.vega.events.v1 as events_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 
@@ -1567,7 +1566,7 @@ class VegaService(ABC):
 
         base_trades = []
 
-        with self.transfers_lock:
+        with self.trades_lock:
             self._trades_from_feed = base_trades
 
         self.trade_thread = threading.Thread(
@@ -2180,4 +2179,76 @@ class VegaService(ABC):
                 if wallet_name is not None
                 else None
             ),
+        )
+
+    def list_ledger_entries(
+        self,
+        close_on_account_filters: bool = False,
+        asset_id: Optional[str] = None,
+        from_party_ids: Optional[List[str]] = None,
+        to_party_ids: Optional[List[str]] = None,
+        from_account_types: Optional[list[vega_protos.vega.AccountType]] = None,
+        from_market_ids: Optional[List[str]] = None,
+        to_market_ids: Optional[List[str]] = None,
+        to_account_types: Optional[list[vega_protos.vega.AccountType]] = None,
+        transfer_types: Optional[list[vega_protos.vega.TransferType]] = None,
+        from_datetime: Optional[datetime.datetime] = None,
+        to_datetime: Optional[datetime.datetime] = None,
+    ) -> List[data.AggregatedLedgerEntry]:
+        """Returns a list of ledger entries matching specific filters as provided.
+        These detail every transfer of funds between accounts within the Vega system,
+        including fee/rewards payments and transfers between user margin/general/bond
+        accounts.
+
+        Note: At least one of the from_*/to_* filters, or asset ID, must be specified.
+
+        Args:
+            data_client:
+                vac.VegaTradingDataClientV2, An instantiated gRPC trading data client
+            close_on_account_filters:
+                bool, default False, Whether both 'from' and 'to' filters must both match
+                    a given transfer for inclusion. If False, entries matching either
+                    'from' or 'to' will also be included.
+            asset_id:
+                Optional[str], filter to only transfers of specific asset ID
+            from_party_ids:
+                Optional[List[str]], Only include transfers from specified parties
+            from_market_ids:
+                Optional[List[str]], Only include transfers from specified markets
+            from_account_types:
+                Optional[List[str]], Only include transfers from specified account types
+            to_party_ids:
+                Optional[List[str]], Only include transfers to specified parties
+            to_market_ids:
+                Optional[List[str]], Only include transfers to specified markets
+            to_account_types:
+                Optional[List[str]], Only include transfers to specified account types
+            transfer_types:
+                Optional[List[vega_protos.vega.AccountType]], Only include transfers
+                    of specified types
+            from_datetime:
+                Optional[datetime.datetime], Only include transfers occurring after
+                    this time
+            to_datetime:
+                Optional[datetime.datetime], Only include transfers occurring before
+                    this time
+        Returns:
+            List[data.AggregatedLedgerEntry]
+                A list of all transfers matching the requested criteria
+        """
+
+        return data.list_ledger_entries(
+            data_client=self.trading_data_client_v2,
+            asset_id=asset_id,
+            close_on_account_filters=close_on_account_filters,
+            from_party_ids=from_party_ids,
+            from_market_ids=from_market_ids,
+            from_account_types=from_account_types,
+            to_party_ids=to_party_ids,
+            to_market_ids=to_market_ids,
+            to_account_types=to_account_types,
+            transfer_types=transfer_types,
+            from_datetime=from_datetime,
+            to_datetime=to_datetime,
+            asset_decimals_map=self.asset_decimals,
         )
