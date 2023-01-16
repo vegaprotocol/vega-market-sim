@@ -304,6 +304,86 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
             )
 
 
+class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "price_sensitive_lo_trader"
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        price_process_generator: Iterable[float],
+        initial_asset_mint: float = 1000000,
+        scale: float = 0.5,
+        max_order_size: float = 100,
+        random_state: Optional[np.random.RandomState] = None,
+        key_name: str = None,
+        tag: str = "",
+    ):
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.price_process_generator = price_process_generator
+        self.initial_asset_mint = initial_asset_mint
+        self.scale = scale
+        self.max_order_size = max_order_size
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_wallet=create_wallet)
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_wallet:
+            # Top up asset
+            self.vega.mint(
+                self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+        self.vega.wait_fn(5)
+
+    def step(self, vega_state: VegaState):
+        self.curr_price = next(self.price_process_generator)
+
+        bid_price = self.curr_price + self.random_state.exponential(scale=self.scale)
+        self.place_order(side="SIDE_BUY", price=bid_price)
+
+        ask_price = self.curr_price - self.random_state.exponential(scale=self.scale)
+        self.place_order(side="SIDE_SELL", price=ask_price)
+
+    def place_order(
+        self,
+        side,
+        price,
+    ):
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            key_name=self.key_name,
+            market_id=self.market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_IOC",
+            side=side,
+            volume=self.max_order_size,
+            price=price,
+            wait=False,
+        )
+
+
 class BackgroundMarket(StateAgentWithWallet):
     NAME_BASE = "background_market"
 
@@ -2184,9 +2264,12 @@ class InformedTrader(StateAgentWithWallet):
             market_id=self.market_id,
             key_name=self.key_name,
         )
-        abs_position = abs(int(position.open_volume) if position is not None else 0)
-        if abs_position + size > self.max_abs_position:
-            size = min([0, self.max_abs_position - abs_position])
+        cur_position = int(position.open_volume) if position is not None else 0
+        new_position = (
+            cur_position + size if side == vega_protos.SIDE_BUY else cur_position - size
+        )
+        if abs(new_position) > self.max_abs_position:
+            size = max([0, self.max_abs_position - abs(cur_position)])
 
         # Add a random probability the agent speculates the wrong side
         if self.random_state.rand() <= self.accuracy:

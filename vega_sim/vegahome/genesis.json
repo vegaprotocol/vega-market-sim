@@ -103,7 +103,7 @@
       "market.auction.maximumDuration": "168h0m0s",
       "market.auction.minimumDuration": "1s",
       "market.fee.factors.infrastructureFee": "0.001",
-      "market.fee.factors.makerFee": "0.001",
+      "market.fee.factors.makerFee": "0.0002",
       "market.liquidity.bondPenaltyParameter": "1",
       "market.liquidity.maximumLiquidityFeeFactorLevel": "1",
       "market.liquidity.minimum.probabilityOfTrading.lpOrders": "1e-8",
