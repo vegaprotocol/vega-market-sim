@@ -2687,7 +2687,7 @@ class Snitch(StateAgent):
             market_depths[market.id] = self.vega.market_depth(market.id, num_levels=50)
 
         all_trades = self.vega.get_trades_from_stream(
-            # exclude_trade_ids=self.seen_trades
+            exclude_trade_ids=self.seen_trades
         )
         for trade in all_trades:
             if trade.id not in self.seen_trades:

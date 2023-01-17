@@ -140,7 +140,7 @@ class Fee:
     liquidity_fee: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class Trade:
     id: str
     market_id: str

@@ -1700,7 +1700,7 @@ class VegaService(ABC):
                     continue
                 if exclude_trade_ids is not None and trade.id in exclude_trade_ids:
                     continue
-                results.append(copy.copy(trade))
+                results.append(trade)
         return results
 
     def get_trades(
