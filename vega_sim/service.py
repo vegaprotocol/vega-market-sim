@@ -10,8 +10,8 @@ from collections import defaultdict
 from curses import keyname
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue
-from typing import Dict, List, Optional, Tuple, Union, Any
+from queue import Queue, Empty
+from typing import Dict, List, Optional, Tuple, Union, Any, Generator
 from itertools import product
 
 import grpc
@@ -65,6 +65,12 @@ class LoginError(Exception):
 
 class DatanodeBehindError(Exception):
     pass
+
+
+def _queue_forwarder(source: Generator[Any], sink: Queue[Any]) -> None:
+    while True:
+        for elem in source:
+            sink.put(elem)
 
 
 def raw_data(fn):
@@ -136,16 +142,15 @@ class VegaService(ABC):
         self._market_to_asset = None
         self.seconds_per_block = seconds_per_block
 
-        self.order_thread = None
-        self.transfer_thread = None
-        self.trade_thread = None
-
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
         self.trades_lock = threading.RLock()
         self._order_state_from_feed = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
+
+        self._observation_feeds: List[Queue[Any]] = []
+        self._aggregated_observation_feed: Queue[Any] = Queue()
 
     @property
     def market_price_decimals(self) -> int:
@@ -1396,6 +1401,7 @@ class VegaService(ABC):
 
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
+        return {}
         with self.orders_lock:
             order_dict = {}
             for market_id, party_orders in self._order_state_from_feed.items():
@@ -1415,7 +1421,7 @@ class VegaService(ABC):
         market_id: str,
         live_only: bool = True,
         key_name: Optional[str] = None,
-    ) -> List[data.Order]:
+    ) -> Dict[str, data.Order]:
         party_id = self.wallet.public_key(wallet_name, key_name)
         return (
             self.order_status_from_feed(live_only=live_only)
@@ -1488,18 +1494,24 @@ class VegaService(ABC):
         self.start_transfer_monitoring()
         self.start_trade_monitoring()
 
+        self._merge_streams()
+        self._observation_thread = threading.Thread(
+            target=self._monitor_stream, daemon=True
+        )
+        self._observation_thread.start()
+
     def start_order_monitoring(
         self,
         market_ids: Optional[List[str]] = None,
         party_ids: Optional[List[str]] = None,
         use_core_client: bool = False,
-    ):
+    ) -> Queue:
         if use_core_client:
             data_client = self.core_client
         else:
             data_client = self.trading_data_client_v2
 
-        self.order_queue = data.order_subscription(
+        order_queue = data.order_subscription(
             data_client,
             self.trading_data_client_v2,
         )
@@ -1526,15 +1538,12 @@ class VegaService(ABC):
                     order.party_id, {}
                 )[order.id] = order
 
-        self.order_thread = threading.Thread(
-            target=self._monitor_stream, args=(self.order_queue,), daemon=True
-        )
-        self.order_thread.start()
+        self._observation_feeds.append(order_queue)
 
     def start_transfer_monitoring(
         self,
     ):
-        self.transfer_queue = data.transfer_subscription(
+        transfer_queue = data.transfer_subscription(
             self.core_client,
             self.trading_data_client_v2,
         )
@@ -1548,18 +1557,12 @@ class VegaService(ABC):
         with self.transfers_lock:
             for t in base_transfers:
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
-
-        self.transfer_thread = threading.Thread(
-            target=self._monitor_transfer_stream,
-            args=(self.transfer_queue,),
-            daemon=True,
-        )
-        self.transfer_thread.start()
+        self._observation_feeds.append(transfer_queue)
 
     def start_trade_monitoring(
         self,
     ):
-        self.trade_queue = data.trades_subscription(
+        trade_queue = data.trades_subscription(
             self.core_client,
             self.trading_data_client_v2,
         )
@@ -1568,35 +1571,44 @@ class VegaService(ABC):
 
         with self.trades_lock:
             self._trades_from_feed = base_trades
+        self._observation_feeds.append(trade_queue)
 
-        self.trade_thread = threading.Thread(
-            target=self._monitor_trade_stream,
-            args=(self.trade_queue,),
-            daemon=True,
-        )
-        self.trade_thread.start()
+    def _merge_streams(self) -> None:
+        self._merge_threads = []
+        for feed in self._observation_feeds:
+            merger = threading.Thread(
+                target=_queue_forwarder,
+                args=(feed, self._aggregated_observation_feed),
+                daemon=True,
+            )
+            self._merge_threads.append(merger)
+            merger.start()
 
-    def _monitor_stream(self, trade_stream: Queue[data.Order]):
-        for o in trade_stream:
-            with self.orders_lock:
-                if o.version >= getattr(
-                    self._order_state_from_feed.setdefault(o.market_id, {})
-                    .setdefault(o.party_id, {})
-                    .get(o.id, None),
-                    "version",
-                    0,
-                ):
-                    self._order_state_from_feed[o.market_id][o.party_id][o.id] = o
+    def _monitor_stream(self) -> None:
+        while True:
+            update = self._aggregated_observation_feed.get()
+            if isinstance(update, data.Order):
+                with self.orders_lock:
+                    if update.version >= getattr(
+                        self._order_state_from_feed.setdefault(update.market_id, {})
+                        .setdefault(update.party_id, {})
+                        .get(update.id, None),
+                        "version",
+                        0,
+                    ):
+                        self._order_state_from_feed[update.market_id][update.party_id][
+                            update.id
+                        ] = update
 
-    def _monitor_transfer_stream(self, transfer_stream: Queue[data.Transfer]):
-        for t in transfer_stream:
-            with self.transfers_lock:
-                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
+            if isinstance(update, data.Transfer):
+                with self.transfers_lock:
+                    self._transfer_state_from_feed.setdefault(update.party_to, {})[
+                        update.id
+                    ] = update
 
-    def _monitor_trade_stream(self, trade_stream: Queue[data.Trade]):
-        for t in trade_stream:
-            with self.trades_lock:
-                self._trades_from_feed.append(t)
+            elif isinstance(update, data.Trade):
+                with self.trades_lock:
+                    self._trades_from_feed.append(update)
 
     def margin_levels(
         self,
