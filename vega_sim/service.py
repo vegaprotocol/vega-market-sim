@@ -10,7 +10,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
 from queue import Queue
-from typing import Dict, List, Optional, Tuple, Union, Any, Generator
+from typing import Dict, List, Optional, Tuple, Union, Any, Generator, Set
 from itertools import product
 
 import grpc
@@ -1660,6 +1660,7 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         key_name: Optional[str] = None,
         order_id: Optional[str] = None,
+        exclude_trade_ids: Optional[Set[str]] = None,
     ) -> List[data.Trade]:
         """Loads executed trades for a given query of party/market/specific order from
         data node. Converts values to proper decimal output.
@@ -1673,6 +1674,8 @@ class VegaService(ABC):
                 optional str, Select a different key to the default within a given wallet
             order_id:
                 optional str, Restrict to trades for a specific order
+            exclude_trade_ids:
+                optional set[str], Do not return trades with ID in this set
 
         Returns:
             List[Trade], list of formatted trade objects which match the required
@@ -1694,6 +1697,8 @@ class VegaService(ABC):
                     trade.buy_order,
                     trade.sell_order,
                 ):
+                    continue
+                if exclude_trade_ids is not None and trade.id in exclude_trade_ids:
                     continue
                 results.append(copy.copy(trade))
         return results

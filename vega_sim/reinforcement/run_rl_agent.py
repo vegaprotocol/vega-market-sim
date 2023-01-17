@@ -143,6 +143,7 @@ def _run(
                     f.write("iteration,pnl\n")
 
             for it in range(max_iterations):
+                logger.info(f"Running iteration {it}")
                 # simulation of market to get some data
 
                 learning_agent.move_to_cpu()
