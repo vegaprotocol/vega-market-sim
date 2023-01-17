@@ -7,10 +7,9 @@ import time
 import copy
 from abc import ABC
 from collections import defaultdict
-from curses import keyname
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue, Empty
+from queue import Queue
 from typing import Dict, List, Optional, Tuple, Union, Any, Generator
 from itertools import product
 
@@ -1401,7 +1400,6 @@ class VegaService(ABC):
 
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
-        return {}
         with self.orders_lock:
             order_dict = {}
             for market_id, party_orders in self._order_state_from_feed.items():
@@ -1505,7 +1503,7 @@ class VegaService(ABC):
         market_ids: Optional[List[str]] = None,
         party_ids: Optional[List[str]] = None,
         use_core_client: bool = False,
-    ) -> Queue:
+    ):
         if use_core_client:
             data_client = self.core_client
         else:
