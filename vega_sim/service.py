@@ -4,7 +4,6 @@ import datetime
 import logging
 import threading
 import time
-import copy
 from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
