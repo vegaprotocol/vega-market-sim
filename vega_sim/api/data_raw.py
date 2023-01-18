@@ -494,7 +494,7 @@ def list_ledger_entries(
     base_request = data_node_protos_v2.trading_data.ListLedgerEntriesRequest(
         filter=data_node_protos_v2.trading_data.LedgerEntryFilter(
             close_on_account_filters=close_on_account_filters,
-            account_from_filter=data_node_protos_v2.trading_data.AccountFilter(
+            from_account_filter=data_node_protos_v2.trading_data.AccountFilter(
                 asset_id=asset_id,
                 party_ids=from_party_ids if from_party_ids is not None else [],
                 market_ids=from_market_ids if from_market_ids is not None else [],
@@ -502,7 +502,7 @@ def list_ledger_entries(
                 if from_account_types is not None
                 else [],
             ),
-            account_to_filter=data_node_protos_v2.trading_data.AccountFilter(
+            to_account_filter=data_node_protos_v2.trading_data.AccountFilter(
                 asset_id=asset_id,
                 party_ids=to_party_ids if to_party_ids is not None else [],
                 market_ids=to_market_ids if to_market_ids is not None else [],

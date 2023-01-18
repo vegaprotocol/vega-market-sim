@@ -1085,12 +1085,12 @@ def test_list_ledger_entries(trading_data_v2_servicer_and_port):
             quantity=54,
             asset_id="asset1",
             transfer_type=0,
-            sender_account_type=0,
-            receiver_account_type=0,
-            sender_market_id="",
-            sender_party_id="",
-            receiver_market_id="",
-            receiver_party_id="",
+            from_account_type=0,
+            to_account_type=0,
+            from_account_market_id="",
+            from_account_party_id="",
+            to_account_market_id="",
+            to_account_party_id="",
         )
     ]
     res2 = list_ledger_entries(
@@ -1103,11 +1103,11 @@ def test_list_ledger_entries(trading_data_v2_servicer_and_port):
             quantity=5.4,
             asset_id="asset1",
             transfer_type=0,
-            sender_account_type=0,
-            receiver_account_type=0,
-            sender_market_id="",
-            sender_party_id="",
-            receiver_market_id="",
-            receiver_party_id="",
+            from_account_type=0,
+            to_account_type=0,
+            from_account_market_id="",
+            from_account_party_id="",
+            to_account_market_id="",
+            to_account_party_id="",
         )
     ]
