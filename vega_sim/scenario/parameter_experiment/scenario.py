@@ -91,7 +91,7 @@ class ParameterExperiment(Scenario):
 
     def _generate_price_process(
         self,
-        random_state,
+        random_state: np.random.RandomState,
     ) -> list:
 
         # Select a random start and end datetime
@@ -211,6 +211,7 @@ class ParameterExperiment(Scenario):
             accuracy=0.8,
             max_abs_position=20,
             tag=None,
+            random_state=random_state,
         )
 
         random_traders = [
@@ -225,6 +226,7 @@ class ParameterExperiment(Scenario):
                 buy_intensity=buy_intensity,
                 sell_intensity=sell_intensity,
                 tag=str(i),
+                random_state=random_state,
             )
             for i, (buy_intensity, sell_intensity) in enumerate(
                 [(50, 10), (30, 30), (30, 30), (30, 30), (10, 50)]
@@ -243,6 +245,7 @@ class ParameterExperiment(Scenario):
                 max_order_size=50,
                 scale=0.035,
                 price_process_generator=iter(price_process),
+                random_state=random_state,
             )
             for _ in range(5)
         ]
@@ -261,8 +264,12 @@ class ParameterExperiment(Scenario):
         return {agent.name(): agent for agent in agents}
 
     def configure_environment(
-        self, vega: VegaServiceNull, **kwargs
+        self,
+        vega: VegaServiceNull,
+        random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> MarketEnvironmentWithState:
+
         return MarketEnvironmentWithState(
             agents=list(self.agents.values()),
             n_steps=self.num_steps,
@@ -271,4 +278,5 @@ class ParameterExperiment(Scenario):
             transactions_per_block=self.block_size,
             vega_service=vega,
             block_length_seconds=self.block_length_seconds,
+            random_state=random_state,
         )
