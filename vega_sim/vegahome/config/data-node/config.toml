@@ -327,5 +327,5 @@ UlimitNOFile = 8192
     Database = "vega"
     UseTransactions = false
 
-[DeHistory]
+[NetworkHistory]
   Enabled = false
