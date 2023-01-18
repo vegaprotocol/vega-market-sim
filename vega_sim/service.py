@@ -9,7 +9,7 @@ from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue
+from queue import Queue, Empty
 from typing import Dict, List, Optional, Tuple, Union, Any, Generator
 from itertools import product
 
@@ -67,9 +67,8 @@ class DatanodeBehindError(Exception):
 
 
 def _queue_forwarder(source: Generator[Any], sink: Queue[Any]) -> None:
-    while True:
-        for elem in source:
-            sink.put(elem)
+    for elem in source:
+        sink.put(elem)
 
 
 def raw_data(fn):
@@ -149,7 +148,9 @@ class VegaService(ABC):
         self._trades_from_feed: List[data.Trade] = []
 
         self._observation_feeds: List[Queue[Any]] = []
+        self._observation_thread = None
         self._aggregated_observation_feed: Queue[Any] = Queue()
+        self._kill_thread_sig = threading.Event()
 
     @property
     def market_price_decimals(self) -> int:
@@ -266,7 +267,7 @@ class VegaService(ABC):
         self.wait_for_datanode_sync()
 
     def stop(self) -> None:
-        pass
+        self._kill_thread_sig.set()
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -1493,9 +1494,7 @@ class VegaService(ABC):
         self.start_trade_monitoring()
 
         self._merge_streams()
-        self._observation_thread = threading.Thread(
-            target=self._monitor_stream, daemon=True
-        )
+        self._observation_thread = threading.Thread(target=self._monitor_stream)
         self._observation_thread.start()
 
     def start_order_monitoring(
@@ -1584,29 +1583,35 @@ class VegaService(ABC):
 
     def _monitor_stream(self) -> None:
         while True:
-            update = self._aggregated_observation_feed.get()
-            if isinstance(update, data.Order):
-                with self.orders_lock:
-                    if update.version >= getattr(
-                        self._order_state_from_feed.setdefault(update.market_id, {})
-                        .setdefault(update.party_id, {})
-                        .get(update.id, None),
-                        "version",
-                        0,
-                    ):
-                        self._order_state_from_feed[update.market_id][update.party_id][
+            if self._kill_thread_sig.is_set():
+                return
+            try:
+                update = self._aggregated_observation_feed.get(timeout=1)
+            except Empty:
+                continue
+            else:
+                if isinstance(update, data.Order):
+                    with self.orders_lock:
+                        if update.version >= getattr(
+                            self._order_state_from_feed.setdefault(update.market_id, {})
+                            .setdefault(update.party_id, {})
+                            .get(update.id, None),
+                            "version",
+                            0,
+                        ):
+                            self._order_state_from_feed[update.market_id][
+                                update.party_id
+                            ][update.id] = update
+
+                if isinstance(update, data.Transfer):
+                    with self.transfers_lock:
+                        self._transfer_state_from_feed.setdefault(update.party_to, {})[
                             update.id
                         ] = update
 
-            if isinstance(update, data.Transfer):
-                with self.transfers_lock:
-                    self._transfer_state_from_feed.setdefault(update.party_to, {})[
-                        update.id
-                    ] = update
-
-            elif isinstance(update, data.Trade):
-                with self.trades_lock:
-                    self._trades_from_feed.append(update)
+                elif isinstance(update, data.Trade):
+                    with self.trades_lock:
+                        self._trades_from_feed.append(update)
 
     def margin_levels(
         self,
