@@ -151,7 +151,7 @@ class VegaService(ABC):
         self._order_state_from_feed = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
-        self._ledger_entries_from_feed = []
+        self._ledger_entries_from_feed: List[data.LedgerEntry] = []
 
         self._observation_feeds: List[Queue[Any]] = []
         self._observation_thread = None
@@ -1597,12 +1597,7 @@ class VegaService(ABC):
             self.trading_data_client_v2,
         )
 
-        self.ledger_entries_thread = threading.Thread(
-            target=self._monitor_ledger_entries_stream,
-            args=(self.ledger_entries_queue,),
-            daemon=True,
-        )
-        self.ledger_entries_thread.start()
+        self._observation_feeds.append(self.ledger_entries_queue)
 
     def _monitor_stream(self) -> None:
         while True:
@@ -1636,12 +1631,9 @@ class VegaService(ABC):
                     with self.trades_lock:
                         self._trades_from_feed.append(update)
 
-    def _monitor_ledger_entries_stream(
-        self, ledger_entries_stream: Queue[data.LedgerEntry]
-    ):
-        for l in ledger_entries_stream:
-            with self.ledger_entries_lock:
-                self._ledger_entries_from_feed.append(l)
+                elif isinstance(update, data.LedgerEntry):
+                    with self.ledger_entries_lock:
+                        self._ledger_entries_from_feed.append(update)
 
     def margin_levels(
         self,
