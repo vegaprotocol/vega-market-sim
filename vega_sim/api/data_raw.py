@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from collections import namedtuple
 from typing import Callable, Iterable, List, Optional, TypeVar, Union
 
@@ -8,6 +9,8 @@ import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
+
+logger = logging.getLogger(__name__)
 
 MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
 
@@ -528,3 +531,27 @@ def list_ledger_entries(
         request_func=lambda x: data_client.ListLedgerEntries(x).ledger_entries,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+def market_data_subscription(
+    data_client: vac.VegaCoreClient,
+    market_id: Optional[str] = None,
+) -> Iterable[vega_protos.vega.MarketData]:
+    data_stream = observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_MARKET_DATA],
+        market_id=market_id,
+    )
+
+    def _data_gen(
+        data_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    ) -> Iterable[vega_protos.vega.MarketData]:
+        try:
+            for market_data in data_stream:
+                for market_data_event in market_data.events:
+                    yield market_data_event.market_data
+        except Exception:
+            logger.info("Order subscription closed")
+            return
+
+    return _data_gen(data_stream=data_stream)

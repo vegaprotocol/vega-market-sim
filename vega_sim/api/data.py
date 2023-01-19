@@ -583,11 +583,16 @@ def best_prices(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
+    market_data: Optional[vega_protos.vega.MarketData] = None,
 ) -> Tuple[float, float]:
     """
     Output the best static bid price and best static ask price in current market.
     """
-    mkt_data = data_raw.market_data(market_id=market_id, data_client=data_client)
+    mkt_data = (
+        market_data
+        if market_data is not None
+        else data_raw.market_data(market_id=market_id, data_client=data_client)
+    )
     mkt_price_dp = (
         price_decimals
         if price_decimals is not None
@@ -604,11 +609,16 @@ def price_bounds(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
     price_decimals: Optional[int] = None,
+    market_data: Optional[vega_protos.vega.MarketData] = None,
 ) -> Tuple[Optional[float], Optional[float]]:
     """
     Output the tightest price bounds in current market.
     """
-    mkt_data = data_raw.market_data(market_id=market_id, data_client=data_client)
+    mkt_data = (
+        market_data
+        if market_data is not None
+        else data_raw.market_data(market_id=market_id, data_client=data_client)
+    )
     mkt_price_dp = (
         price_decimals
         if price_decimals is not None
@@ -1185,6 +1195,7 @@ def get_liquidity_fee_shares(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     party_id: Optional[str] = None,
+    market_data: Optional[vega_protos.vega.MarketData] = None,
 ) -> Union[Dict, float]:
     """Gets the current liquidity fee share for each party or a specified party.
 
@@ -1195,9 +1206,15 @@ def get_liquidity_fee_shares(
             Id of market to get liquidity fee shares from.
         party_id (Optional[str], optional):
             Id of party to get liquidity fee shares for. Defaults to None.
+        market_data (Optional[vega_protos.markets.MarketData]):
+            Market data to use. If not passed, loads from data node
     """
 
-    market_data = data_raw.market_data(data_client=data_client, market_id=market_id)
+    market_data = (
+        market_data
+        if market_data is not None
+        else data_raw.market_data(data_client=data_client, market_id=market_id)
+    )
 
     # Calculate share of fees for each LP
     shares = {

@@ -58,8 +58,11 @@ def run_iteration(
     learning_agent.price_process = scenario.price_process
     scenario.agents["learner"] = learning_agent
 
+    # Disabling Snitch for now to speed up training
     scenario.agents["snitch"] = Snitch(
-        agents=scenario.agents, additional_state_fn=scenario.state_extraction_fn
+        agents=scenario.agents,
+        additional_state_fn=scenario.state_extraction_fn,
+        only_extract_additional=True,
     )
 
     scenario.env = scenario.configure_environment(

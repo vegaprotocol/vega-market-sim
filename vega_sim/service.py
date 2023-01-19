@@ -142,8 +142,11 @@ class VegaService(ABC):
 
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
+        self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
-        self._order_state_from_feed = {}
+        self._live_order_state_from_feed = {}
+        self._dead_order_state_from_feed = {}
+        self.market_data_from_feed_store = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
 
@@ -1061,10 +1064,20 @@ class VegaService(ABC):
         )
 
     @raw_data
+    def market_data_from_feed(
+        self,
+        market_id: str,
+    ) -> vega_protos.vega.MarketData:
+        """
+        Output market info.
+        """
+        return self.market_data_from_feed_store.get(market_id, None)
+
+    @raw_data
     def market_data(
         self,
         market_id: str,
-    ) -> vega_protos.markets.MarketData:
+    ) -> vega_protos.vega.MarketData:
         """
         Output market info.
         """
@@ -1130,7 +1143,9 @@ class VegaService(ABC):
         Output the best static bid price and best static ask price in current market.
         """
         return data.best_prices(
-            market_id=market_id, data_client=self.trading_data_client_v2
+            market_id=market_id,
+            data_client=self.trading_data_client_v2,
+            market_data=self.market_data_from_feed(market_id=market_id),
         )
 
     def price_bounds(
@@ -1141,7 +1156,9 @@ class VegaService(ABC):
         Output the tightest price bounds in the current market.
         """
         return data.price_bounds(
-            market_id=market_id, data_client=self.trading_data_client_v2
+            market_id=market_id,
+            data_client=self.trading_data_client_v2,
+            market_data=self.market_data_from_feed(market_id=market_id),
         )
 
     def order_book_by_market(
@@ -1490,6 +1507,7 @@ class VegaService(ABC):
         self.start_order_monitoring()
         self.start_transfer_monitoring()
         self.start_trade_monitoring()
+        self.start_market_data_monitoring()
 
         self._merge_streams()
         self._observation_thread = threading.Thread(
@@ -1536,6 +1554,14 @@ class VegaService(ABC):
                 )[order.id] = order
 
         self._observation_feeds.append(order_queue)
+
+    def start_market_data_monitoring(
+        self,
+    ):
+        data_queue = data_raw.market_data_subscription(
+            self.core_client,
+        )
+        self._observation_feeds.append(data_queue)
 
     def start_transfer_monitoring(
         self,
@@ -1597,7 +1623,7 @@ class VegaService(ABC):
                             update.id
                         ] = update
 
-            if isinstance(update, data.Transfer):
+            elif isinstance(update, data.Transfer):
                 with self.transfers_lock:
                     self._transfer_state_from_feed.setdefault(update.party_to, {})[
                         update.id
@@ -1606,6 +1632,10 @@ class VegaService(ABC):
             elif isinstance(update, data.Trade):
                 with self.trades_lock:
                     self._trades_from_feed.append(update)
+
+            elif isinstance(update, vega_protos.vega.MarketData):
+                with self.market_data_lock:
+                    self.market_data_from_feed_store[update.market] = update
 
     def margin_levels(
         self,
@@ -2193,6 +2223,7 @@ class VegaService(ABC):
                 if wallet_name is not None
                 else None
             ),
+            market_data=self.market_data_from_feed(market_id=market_id),
         )
 
     def list_ledger_entries(
