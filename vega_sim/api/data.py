@@ -122,12 +122,12 @@ class AggregatedLedgerEntry:
     quantity: float
     transfer_type: vega_protos.vega.TransferType
     asset_id: str
-    sender_account_type: vega_protos.vega.AccountType
-    receiver_account_type: vega_protos.vega.AccountType
-    sender_party_id: str
-    receiver_party_id: str
-    sender_market_id: str
-    receiver_market_id: str
+    from_account_type: vega_protos.vega.AccountType
+    to_account_type: vega_protos.vega.AccountType
+    from_account_party_id: str
+    to_account_party_id: str
+    from_account_market_id: str
+    to_account_market_id: str
 
 
 @dataclass
@@ -190,12 +190,12 @@ def _aggregated_ledger_entry_from_proto(
         quantity=num_from_padded_int(ledger_entry.quantity, asset_decimals),
         transfer_type=ledger_entry.transfer_type,
         asset_id=ledger_entry.asset_id,
-        sender_account_type=ledger_entry.sender_account_type,
-        receiver_account_type=ledger_entry.receiver_account_type,
-        sender_party_id=ledger_entry.sender_party_id,
-        receiver_party_id=ledger_entry.receiver_party_id,
-        sender_market_id=ledger_entry.sender_market_id,
-        receiver_market_id=ledger_entry.receiver_market_id,
+        from_account_type=ledger_entry.from_account_type,
+        to_account_type=ledger_entry.to_account_type,
+        from_account_party_id=ledger_entry.from_account_party_id,
+        to_account_party_id=ledger_entry.to_account_party_id,
+        from_account_market_id=ledger_entry.from_account_market_id,
+        to_account_market_id=ledger_entry.to_account_market_id,
     )
 
 
