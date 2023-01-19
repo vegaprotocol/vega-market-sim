@@ -139,13 +139,16 @@ class VegaService(ABC):
         self.order_thread = None
         self.transfer_thread = None
         self.trade_thread = None
+        self.ledger_entries_thread = None
 
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
         self.trades_lock = threading.RLock()
+        self.ledger_entries_lock = threading.RLock()
         self._order_state_from_feed = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
+        self._ledger_entries_from_feed = []
 
     @property
     def market_price_decimals(self) -> int:
@@ -1487,6 +1490,7 @@ class VegaService(ABC):
         self.start_order_monitoring()
         self.start_transfer_monitoring()
         self.start_trade_monitoring()
+        self.start_ledger_entries_monitoring()
 
     def start_order_monitoring(
         self,
@@ -1576,6 +1580,22 @@ class VegaService(ABC):
         )
         self.trade_thread.start()
 
+    def start_ledger_entries_monitoring(
+        self,
+    ):
+
+        self.ledger_entries_queue = data.ledger_entries_subscription(
+            self.core_client,
+            self.trading_data_client_v2,
+        )
+
+        self.ledger_entries_thread = threading.Thread(
+            target=self._monitor_ledger_entries_stream,
+            args=(self.ledger_entries_queue,),
+            daemon=True,
+        )
+        self.ledger_entries_thread.start()
+
     def _monitor_stream(self, trade_stream: Queue[data.Order]):
         for o in trade_stream:
             with self.orders_lock:
@@ -1597,6 +1617,13 @@ class VegaService(ABC):
         for t in trade_stream:
             with self.trades_lock:
                 self._trades_from_feed.append(t)
+
+    def _monitor_ledger_entries_stream(
+        self, ledger_entries_stream: Queue[data.LedgerEntry]
+    ):
+        for l in ledger_entries_stream:
+            with self.ledger_entries_lock:
+                self._ledger_entries_from_feed.append(l)
 
     def margin_levels(
         self,
@@ -1643,6 +1670,43 @@ class VegaService(ABC):
             reference=reference,
             live_only=live_only,
         )
+
+    def get_ledger_entries_from_stream(
+        self,
+        wallet_name_from: Optional[str] = None,
+        key_name_from: Optional[str] = None,
+        wallet_name_to: Optional[str] = None,
+        key_name_to: Optional[str] = None,
+        transfer_type: Optional[str] = None,
+    ) -> List[data.LedgerEntry]:
+
+        results = []
+
+        for ledger_entry in self._ledger_entries_from_feed:
+
+            if (
+                transfer_type is not None
+                and transfer_type != ledger_entry.transfer_type
+            ):
+                continue
+            if (
+                wallet_name_from is not None
+                and self.wallet.public_key(
+                    name=wallet_name_from, key_name=key_name_from
+                )
+                != ledger_entry.from_account.owner
+            ):
+                continue
+            if (
+                wallet_name_to is not None
+                and self.wallet.public_key(name=wallet_name_to, key_name=key_name_to)
+                != ledger_entry.to_account.owner
+            ):
+                continue
+
+            results.append(copy.copy(ledger_entry))
+
+        return results
 
     def get_trades_from_stream(
         self,
