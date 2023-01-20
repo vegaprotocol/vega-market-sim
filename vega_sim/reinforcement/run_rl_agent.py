@@ -279,4 +279,5 @@ if __name__ == "__main__":
         evaluate_only=args.evaluate,
         plot_every_step=args.plot_every_step,
         device=device,
+        recreate_vega_every_n_iterations=1000,
     )
