@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import datetime
 import logging
 import threading
@@ -8,11 +9,12 @@ from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue
-from typing import Dict, List, Optional, Tuple, Union, Any, Generator, Set
 from itertools import product
+from queue import Queue
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import grpc
+
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 import vega_sim.api.faucet as faucet
@@ -20,10 +22,9 @@ import vega_sim.api.governance as gov
 import vega_sim.api.market as market
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
+import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
-import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
-
 from vega_sim.api.helpers import (
     forward,
     num_to_padded_int,
@@ -31,8 +32,8 @@ from vega_sim.api.helpers import (
     wait_for_datanode_sync,
 )
 from vega_sim.proto.vega.commands.v1.commands_pb2 import (
-    OrderCancellation,
     OrderAmendment,
+    OrderCancellation,
     OrderSubmission,
 )
 from vega_sim.proto.vega.governance_pb2 import (
@@ -1417,16 +1418,9 @@ class VegaService(ABC):
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
         with self.orders_lock:
-            order_dict = {}
-            for market_id, party_orders in self._order_state_from_feed.items():
-                for party_id, orders in party_orders.items():
-                    for order_id, order in orders.items():
-                        if not live_only or (
-                            order.status == vega_protos.vega.Order.Status.STATUS_ACTIVE
-                        ):
-                            order_dict.setdefault(market_id, {}).setdefault(
-                                party_id, {}
-                            )[order_id] = order
+            order_dict = copy.copy(self._live_order_state_from_feed)
+            if not live_only:
+                order_dict.update(self._dead_order_state_from_feed)
         return order_dict
 
     def orders_for_party_from_feed(
@@ -1549,9 +1543,9 @@ class VegaService(ABC):
 
         with self.orders_lock:
             for order in base_orders:
-                self._order_state_from_feed.setdefault(order.market_id, {}).setdefault(
-                    order.party_id, {}
-                )[order.id] = order
+                self._live_order_state_from_feed.setdefault(
+                    order.market_id, {}
+                ).setdefault(order.party_id, {})[order.id] = order
 
         self._observation_feeds.append(order_queue)
 
@@ -1613,15 +1607,31 @@ class VegaService(ABC):
             if isinstance(update, data.Order):
                 with self.orders_lock:
                     if update.version >= getattr(
-                        self._order_state_from_feed.setdefault(update.market_id, {})
+                        self._live_order_state_from_feed.setdefault(
+                            update.market_id, {}
+                        )
                         .setdefault(update.party_id, {})
                         .get(update.id, None),
                         "version",
                         0,
                     ):
-                        self._order_state_from_feed[update.market_id][update.party_id][
-                            update.id
-                        ] = update
+                        if (
+                            not update.status
+                            == vega_protos.vega.Order.Status.STATUS_ACTIVE
+                        ):
+                            # If the order is dead, pop any we've seen from live state
+                            self._live_order_state_from_feed[update.market_id][
+                                update.party_id
+                            ].pop(update.id, None)
+
+                            # And add to dead instead
+                            self._dead_order_state_from_feed.setdefault(
+                                update.market_id, {}
+                            ).setdefault(update.party_id, {})[update.id] = update
+                        else:
+                            self._live_order_state_from_feed[update.market_id][
+                                update.party_id
+                            ][update.id] = update
 
             elif isinstance(update, data.Transfer):
                 with self.transfers_lock:

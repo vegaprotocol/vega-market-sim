@@ -550,7 +550,8 @@ def market_data_subscription(
             for market_data in data_stream:
                 for market_data_event in market_data.events:
                     yield market_data_event.market_data
-        except Exception:
+        except Exception as e:
+            print(e)
             logger.info("Order subscription closed")
             return
 
