@@ -157,9 +157,6 @@ class VegaService(ABC):
         self._aggregated_observation_feed: Queue[Any] = Queue()
         self._kill_thread_sig = threading.Event()
 
-        self._observation_feeds: List[Queue[Any]] = []
-        self._aggregated_observation_feed: Queue[Any] = Queue()
-
     @property
     def market_price_decimals(self) -> int:
         if self._market_price_decimals is None:
@@ -1609,7 +1606,6 @@ class VegaService(ABC):
     def start_ledger_entries_monitoring(
         self,
     ):
-
         self.ledger_entries_queue = data.ledger_entries_subscription(
             self.core_client,
             self.trading_data_client_v2,
@@ -1619,53 +1615,60 @@ class VegaService(ABC):
 
     def _monitor_stream(self) -> None:
         while True:
-            update = self._aggregated_observation_feed.get()
-            if isinstance(update, data.Order):
-                with self.orders_lock:
-                    if update.version >= getattr(
-                        self._live_order_state_from_feed.setdefault(
-                            update.market_id, {}
-                        )
-                        .setdefault(update.party_id, {})
-                        .get(update.id, None),
-                        "version",
-                        0,
-                    ):
-                        if (
-                            not update.status
-                            == vega_protos.vega.Order.Status.STATUS_ACTIVE
-                        ):
-                            # If the order is dead, pop any we've seen from live state
-                            self._live_order_state_from_feed[update.market_id][
-                                update.party_id
-                            ].pop(update.id, None)
-
-                            # And add to dead instead
-                            self._dead_order_state_from_feed.setdefault(
+            if self._kill_thread_sig.is_set():
+                return
+            try:
+                update = self._aggregated_observation_feed.get(timeout=1)
+            except Empty:
+                continue
+            else:
+                if isinstance(update, data.Order):
+                    with self.orders_lock:
+                        if update.version >= getattr(
+                            self._live_order_state_from_feed.setdefault(
                                 update.market_id, {}
-                            ).setdefault(update.party_id, {})[update.id] = update
-                        else:
-                            self._live_order_state_from_feed[update.market_id][
-                                update.party_id
-                            ][update.id] = update
+                            )
+                            .setdefault(update.party_id, {})
+                            .get(update.id, None),
+                            "version",
+                            0,
+                        ):
+                            if (
+                                not update.status
+                                == vega_protos.vega.Order.Status.STATUS_ACTIVE
+                            ):
+                                # If the order is dead, pop any we've seen from
+                                # live state
+                                self._live_order_state_from_feed[update.market_id][
+                                    update.party_id
+                                ].pop(update.id, None)
 
-            elif isinstance(update, data.Transfer):
-                with self.transfers_lock:
-                    self._transfer_state_from_feed.setdefault(update.party_to, {})[
-                        update.id
-                    ] = update
+                                # And add to dead instead
+                                self._dead_order_state_from_feed.setdefault(
+                                    update.market_id, {}
+                                ).setdefault(update.party_id, {})[update.id] = update
+                            else:
+                                self._live_order_state_from_feed[update.market_id][
+                                    update.party_id
+                                ][update.id] = update
 
-            elif isinstance(update, data.Trade):
-                with self.trades_lock:
-                    self._trades_from_feed.append(update)
+                elif isinstance(update, data.Transfer):
+                    with self.transfers_lock:
+                        self._transfer_state_from_feed.setdefault(update.party_to, {})[
+                            update.id
+                        ] = update
 
-            elif isinstance(update, vega_protos.vega.MarketData):
-                with self.market_data_lock:
-                    self.market_data_from_feed_store[update.market] = update
+                elif isinstance(update, data.Trade):
+                    with self.trades_lock:
+                        self._trades_from_feed.append(update)
 
-            elif isinstance(update, data.LedgerEntry):
-                with self.ledger_entries_lock:
-                    self._ledger_entries_from_feed.append(update)
+                elif isinstance(update, vega_protos.vega.MarketData):
+                    with self.market_data_lock:
+                        self.market_data_from_feed_store[update.market] = update
+
+                elif isinstance(update, data.LedgerEntry):
+                    with self.ledger_entries_lock:
+                        self._ledger_entries_from_feed.append(update)
 
     def margin_levels(
         self,
@@ -1721,11 +1724,9 @@ class VegaService(ABC):
         key_name_to: Optional[str] = None,
         transfer_type: Optional[str] = None,
     ) -> List[data.LedgerEntry]:
-
         results = []
 
         for ledger_entry in self._ledger_entries_from_feed:
-
             if (
                 transfer_type is not None
                 and transfer_type != ledger_entry.transfer_type
