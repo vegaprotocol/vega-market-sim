@@ -2666,6 +2666,7 @@ class Snitch(StateAgent):
         additional_state_fn: Optional[
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
+        only_extract_additional: bool = False,
     ):
         self.tag = None
         self.states = []
@@ -2673,36 +2674,44 @@ class Snitch(StateAgent):
         self.agents = agents
         self.additional_state_fn = additional_state_fn
         self.seen_trades = set()
+        self.only_extract_additional = only_extract_additional
 
     def step(self, vega_state: VegaState):
-        market_infos = {}
-        market_datas = {}
-        market_depths = {}
-        market_trades = {}
+        if not self.only_extract_additional:
+            market_infos = {}
+            market_datas = {}
+            market_depths = {}
+            market_trades = {}
 
-        start_time = self.vega.get_blockchain_time()
-        for market in self.vega.all_markets():
-            market_infos[market.id] = self.vega.market_info(market.id)
-            market_datas[market.id] = self.vega.market_data(market.id)
-            market_depths[market.id] = self.vega.market_depth(market.id, num_levels=50)
+            start_time = self.vega.get_blockchain_time()
 
-        all_trades = self.vega.get_trades_from_stream()
-        for trade in all_trades:
-            if trade.id not in self.seen_trades:
-                self.seen_trades.add(trade.id)
-                market_trades.setdefault(market.id, []).append(trade)
+            all_markets = self.vega.all_markets()
+            for market in all_markets:
+                market_infos[market.id] = market
+                market_datas[market.id] = self.vega.market_data_from_feed(market.id)
+                market_depths[market.id] = self.vega.market_depth(
+                    market.id, num_levels=50
+                )
 
-        accounts = self.vega.list_accounts()
-        self.states.append(
-            MarketHistoryData(
-                at_time=start_time,
-                market_info=market_infos,
-                market_data=market_datas,
-                accounts=accounts,
-                market_depth=market_depths,
-                trades=market_trades,
+            all_trades = self.vega.get_trades_from_stream(
+                exclude_trade_ids=self.seen_trades
             )
-        )
+            for trade in all_trades:
+                if trade.id not in self.seen_trades:
+                    self.seen_trades.add(trade.id)
+                    market_trades.setdefault(market.id, []).append(trade)
+
+            accounts = self.vega.list_accounts()
+            self.states.append(
+                MarketHistoryData(
+                    at_time=start_time,
+                    market_info=market_infos,
+                    market_data=market_datas,
+                    accounts=accounts,
+                    market_depth=market_depths,
+                    trades=market_trades,
+                )
+            )
         if self.additional_state_fn is not None:
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)

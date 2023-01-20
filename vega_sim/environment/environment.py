@@ -146,7 +146,6 @@ class MarketEnvironment:
             return self._run(self._vega, pause_at_completion=pause_at_completion)
 
     def _start_order_monitoring(self, vega: VegaService):
-
         # Get lists of unique market_ids and party_ids to observe
         market_ids = list(
             {
@@ -331,17 +330,21 @@ class MarketEnvironmentWithState(MarketEnvironment):
         )
 
     def _default_state_extraction(self, vega: VegaService) -> VegaState:
+        if not hasattr(self, "market_decimals_cache"):
+            self.market_decimals_cache = {}
         market_state = {}
         order_status = vega.order_status_from_feed(live_only=True)
-        for market in vega.all_markets():
-            market_info = vega.market_info(market_id=market.id)
-            market_data = vega.market_data(market_id=market.id)
-            market_state[market.id] = MarketState(
-                state=market_info.state,
-                trading_mode=market_info.trading_mode,
+        for market_id, market_data in vega.market_data_from_feed_store.items():
+            if market_id not in self.market_decimals_cache:
+                self.market_decimals_cache[market_id] = vega.market_info(
+                    market_id=market_id
+                ).decimal_places
+            market_state[market_data.market] = MarketState(
+                state=market_data.market_state,
+                trading_mode=market_data.market_trading_mode,
                 midprice=float(market_data.mid_price)
-                / 10 ** int(market_info.decimal_places),
-                orders=order_status.get(market.id, {}),
+                / 10 ** int(self.market_decimals_cache[market_id]),
+                orders=order_status.get(market_data.market, {}),
             )
 
         return VegaState(network_state=(), market_state=market_state)
