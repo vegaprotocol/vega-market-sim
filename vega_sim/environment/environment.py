@@ -20,13 +20,15 @@ For examples of this setup, see examples/agent_market.
 
 """
 
-import grpc
 import time
 import datetime
 import logging
 import random
+
+import numpy as np
+
 from collections import namedtuple
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, List, Optional
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
 from vega_sim.network_service import VegaServiceNetwork
@@ -57,6 +59,7 @@ class MarketEnvironment:
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
         pause_every_n_steps: Optional[int] = None,
+        random_state: np.random.RandomState = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -108,6 +111,10 @@ class MarketEnvironment:
         self.step_length_seconds = step_length_seconds
         self._vega = vega_service
         self._pause_every_n_steps = pause_every_n_steps
+
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
 
     def run(
         self,
@@ -240,7 +247,7 @@ class MarketEnvironment:
 
     def step(self, vega: VegaService) -> None:
         for agent in (
-            sorted(self.agents, key=lambda _: random.random())
+            sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):
@@ -259,6 +266,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
         pause_every_n_steps: Optional[int] = None,
+        random_state: np.random.RandomState = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -314,6 +322,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             step_length_seconds=step_length_seconds,
             vega_service=vega_service,
             pause_every_n_steps=pause_every_n_steps,
+            random_state=random_state,
         )
 
         self.state_func = (
@@ -344,7 +353,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         vega.wait_for_datanode_sync()
         state = self.state_func(vega)
         for agent in (
-            sorted(self.agents, key=lambda _: random.random())
+            sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):
@@ -362,6 +371,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
         raise_datanode_errors: Optional[bool] = True,
         raise_step_errors: Optional[bool] = True,
+        random_state: np.random.RandomState = None,
     ):
         super().__init__(
             agents=agents,
@@ -369,6 +379,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             random_agent_ordering=random_agent_ordering,
             step_length_seconds=step_length_seconds,
             vega_service=vega_service,
+            random_state=random_state,
         )
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
@@ -416,7 +427,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         state = self.state_func(vega)
         logging.debug(f"Get state took {time.time() - t} seconds.")
         for agent in (
-            sorted(self.agents, key=lambda _: random.random())
+            sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):

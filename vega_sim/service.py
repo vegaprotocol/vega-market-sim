@@ -9,8 +9,8 @@ from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
+from queue import Queue, Empty
 from itertools import product
-from queue import Queue
 from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import grpc
@@ -67,9 +67,8 @@ class DatanodeBehindError(Exception):
 
 
 def _queue_forwarder(source: Generator[Any], sink: Queue[Any]) -> None:
-    while True:
-        for elem in source:
-            sink.put(elem)
+    for elem in source:
+        sink.put(elem)
 
 
 def raw_data(fn):
@@ -145,11 +144,18 @@ class VegaService(ABC):
         self.transfers_lock = threading.RLock()
         self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
+        self.ledger_entries_lock = threading.RLock()
         self._live_order_state_from_feed = {}
         self._dead_order_state_from_feed = {}
         self.market_data_from_feed_store = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
+        self._ledger_entries_from_feed: List[data.LedgerEntry] = []
+
+        self._observation_feeds: List[Queue[Any]] = []
+        self._observation_thread = None
+        self._aggregated_observation_feed: Queue[Any] = Queue()
+        self._kill_thread_sig = threading.Event()
 
         self._observation_feeds: List[Queue[Any]] = []
         self._aggregated_observation_feed: Queue[Any] = Queue()
@@ -269,7 +275,7 @@ class VegaService(ABC):
         self.wait_for_datanode_sync()
 
     def stop(self) -> None:
-        pass
+        self._kill_thread_sig.set()
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -1502,11 +1508,10 @@ class VegaService(ABC):
         self.start_transfer_monitoring()
         self.start_trade_monitoring()
         self.start_market_data_monitoring()
-
+        self.start_ledger_entries_monitoring()
+        
         self._merge_streams()
-        self._observation_thread = threading.Thread(
-            target=self._monitor_stream, daemon=True
-        )
+        self._observation_thread = threading.Thread(target=self._monitor_stream)
         self._observation_thread.start()
 
     def start_order_monitoring(
@@ -1601,6 +1606,18 @@ class VegaService(ABC):
             self._merge_threads.append(merger)
             merger.start()
 
+    def start_ledger_entries_monitoring(
+        self,
+    ):
+
+        self.ledger_entries_queue = data.ledger_entries_subscription(
+            self.core_client,
+            self.trading_data_client_v2,
+        )
+
+        self._observation_feeds.append(self.ledger_entries_queue)
+
+
     def _monitor_stream(self) -> None:
         while True:
             update = self._aggregated_observation_feed.get()
@@ -1647,6 +1664,10 @@ class VegaService(ABC):
                 with self.market_data_lock:
                     self.market_data_from_feed_store[update.market] = update
 
+            elif isinstance(update, data.LedgerEntry):
+                with self.ledger_entries_lock:
+                    self._ledger_entries_from_feed.append(update)
+
     def margin_levels(
         self,
         wallet_name: str,
@@ -1692,6 +1713,43 @@ class VegaService(ABC):
             reference=reference,
             live_only=live_only,
         )
+
+    def get_ledger_entries_from_stream(
+        self,
+        wallet_name_from: Optional[str] = None,
+        key_name_from: Optional[str] = None,
+        wallet_name_to: Optional[str] = None,
+        key_name_to: Optional[str] = None,
+        transfer_type: Optional[str] = None,
+    ) -> List[data.LedgerEntry]:
+
+        results = []
+
+        for ledger_entry in self._ledger_entries_from_feed:
+
+            if (
+                transfer_type is not None
+                and transfer_type != ledger_entry.transfer_type
+            ):
+                continue
+            if (
+                wallet_name_from is not None
+                and self.wallet.public_key(
+                    name=wallet_name_from, key_name=key_name_from
+                )
+                != ledger_entry.from_account.owner
+            ):
+                continue
+            if (
+                wallet_name_to is not None
+                and self.wallet.public_key(name=wallet_name_to, key_name=key_name_to)
+                != ledger_entry.to_account.owner
+            ):
+                continue
+
+            results.append(copy.copy(ledger_entry))
+
+        return results
 
     def get_trades_from_stream(
         self,
