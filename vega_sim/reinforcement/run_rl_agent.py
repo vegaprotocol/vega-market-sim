@@ -90,7 +90,7 @@ def _run(
     evaluate_only: bool = False,
     plot_every_step: bool = False,
     device: str = "cpu",
-    recreate_vega_every_n_iterations: int = 3,
+    recreate_vega_every_n_iterations: int = 100,
 ):
     # set seed for results replication
     set_seed(1)
@@ -140,9 +140,6 @@ def _run(
 
         it = 0
         while it <= max_iterations:
-            import time
-
-            time.sleep(5)
             with VegaServiceNull(
                 warn_on_raw_data_access=False,
                 run_with_console=False,

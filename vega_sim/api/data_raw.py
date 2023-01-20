@@ -497,7 +497,7 @@ def list_ledger_entries(
     base_request = data_node_protos_v2.trading_data.ListLedgerEntriesRequest(
         filter=data_node_protos_v2.trading_data.LedgerEntryFilter(
             close_on_account_filters=close_on_account_filters,
-            from_account_filter=data_node_protos_v2.trading_data.AccountFilter(
+            account_from_filter=data_node_protos_v2.trading_data.AccountFilter(
                 asset_id=asset_id,
                 party_ids=from_party_ids if from_party_ids is not None else [],
                 market_ids=from_market_ids if from_market_ids is not None else [],
@@ -505,7 +505,7 @@ def list_ledger_entries(
                 if from_account_types is not None
                 else [],
             ),
-            to_account_filter=data_node_protos_v2.trading_data.AccountFilter(
+            account_to_filter=data_node_protos_v2.trading_data.AccountFilter(
                 asset_id=asset_id,
                 party_ids=to_party_ids if to_party_ids is not None else [],
                 market_ids=to_market_ids if to_market_ids is not None else [],
@@ -550,8 +550,7 @@ def market_data_subscription(
             for market_data in data_stream:
                 for market_data_event in market_data.events:
                     yield market_data_event.market_data
-        except Exception as e:
-            print(e)
+        except Exception:
             logger.info("Order subscription closed")
             return
 
