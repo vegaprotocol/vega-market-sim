@@ -108,6 +108,15 @@ MarginLevels = namedtuple(
 
 
 @dataclass
+class LedgerEntry:
+    from_account: vega_protos.vega.AccountDetails
+    to_account: vega_protos.vega.AccountDetails
+    amount: str
+    transfer_type: vega_protos.vega.TransferType
+    timestamp: int
+
+
+@dataclass
 class AggregatedLedgerEntry:
     timestamp: int
     quantity: float
@@ -157,6 +166,19 @@ class Trade:
     seller_fee: Fee
     buyer_auction_batch: int
     seller_auction_batch: int
+
+
+def _ledger_entry_from_proto(
+    ledger_entry,
+    asset_decimals: int,
+) -> LedgerEntry:
+    return LedgerEntry(
+        from_account=ledger_entry.from_account,
+        to_account=ledger_entry.to_account,
+        amount=num_from_padded_int(ledger_entry.amount, asset_decimals),
+        transfer_type=ledger_entry.type,
+        timestamp=ledger_entry.timestamp,
+    )
 
 
 def _aggregated_ledger_entry_from_proto(
@@ -1142,6 +1164,44 @@ def trades_subscription(
         extraction_fn=lambda evt: evt.trade,
         conversion_fn=_trade_from_proto,
     )
+
+
+def ledger_entries_subscription(
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
+) -> Iterable[AggregatedLedgerEntry]:
+
+    ledger_movements_stream = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=[events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS],
+    )
+
+    def _ledger_entries_gen(
+        ledger_movements_stream: Iterable[
+            vega_protos.api.v1.core.ObserveEventBusResponse
+        ],
+    ) -> Iterable[LedgerEntry]:
+        asset_dp = {}
+        try:
+            for ledger_movement in ledger_movements_stream:
+                for bus_event in ledger_movement.events:
+                    for ledger_movement in bus_event.ledger_movements.ledger_movements:
+                        for ledger_entry in ledger_movement.entries:
+                            asset_id = ledger_entry.from_account.asset_id
+                            if asset_id not in asset_dp:
+                                asset_dp[asset_id] = get_asset_decimals(
+                                    asset_id=asset_id,
+                                    data_client=trading_data_client,
+                                )
+                            yield _ledger_entry_from_proto(
+                                ledger_entry,
+                                asset_decimals=asset_dp[asset_id],
+                            )
+        except Exception as _:
+            logger.info("Ledger entries subscription closed")
+            return
+
+    return _ledger_entries_gen(ledger_movements_stream=ledger_movements_stream)
 
 
 def _stream_gen(
