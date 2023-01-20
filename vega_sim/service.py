@@ -1509,7 +1509,7 @@ class VegaService(ABC):
         self.start_trade_monitoring()
         self.start_market_data_monitoring()
         self.start_ledger_entries_monitoring()
-        
+
         self._merge_streams()
         self._observation_thread = threading.Thread(target=self._monitor_stream)
         self._observation_thread.start()
@@ -1616,7 +1616,6 @@ class VegaService(ABC):
         )
 
         self._observation_feeds.append(self.ledger_entries_queue)
-
 
     def _monitor_stream(self) -> None:
         while True:

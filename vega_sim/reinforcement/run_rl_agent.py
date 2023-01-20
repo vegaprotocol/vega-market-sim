@@ -4,6 +4,7 @@ import os
 from logging import getLogger
 
 import torch
+
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.reinforcement.agents.learning_agent import WALLET as LEARNING_WALLET
 from vega_sim.reinforcement.agents.learning_agent import LearningAgent, state_fn
@@ -16,8 +17,8 @@ from vega_sim.reinforcement.agents.learning_agent_MO_with_vol import (
 )
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
-from vega_sim.scenario.registry import CurveMarketMaker
 from vega_sim.scenario.common.agents import Snitch
+from vega_sim.scenario.registry import CurveMarketMaker
 
 logger = getLogger(__name__)
 
