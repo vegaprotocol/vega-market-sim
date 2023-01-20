@@ -140,10 +140,6 @@ class VegaService(ABC):
         self._market_to_asset = None
         self.seconds_per_block = seconds_per_block
 
-        self.order_thread = None
-        self.transfer_thread = None
-        self.trade_thread = None
-
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
         self.trades_lock = threading.RLock()
