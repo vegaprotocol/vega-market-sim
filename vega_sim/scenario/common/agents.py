@@ -1123,6 +1123,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
         if mint_wallet:
             # Top up asset
+
             self.vega.mint(
                 self.wallet_name,
                 asset=self.asset_id,
