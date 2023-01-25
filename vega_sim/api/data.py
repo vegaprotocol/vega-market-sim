@@ -924,96 +924,6 @@ def market_depth(
     )
 
 
-def order_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-    market_id: Optional[str] = None,
-    party_id: Optional[str] = None,
-) -> Iterable[Order]:
-    """Subscribe to a stream of Order updates from the data-node.
-    The stream of orders returned from this function is an iterable which
-    does not end and will continue to tick another order update whenever
-    one is received.
-
-    Args:
-        market_id:
-            Optional[str], If provided, only update orders from this market
-        party_id:
-            Optional[str], If provided, only update orders from this party
-    Returns:
-        Iterable[Order], Infinite iterable of order updates
-    """
-
-    order_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_ORDER],
-    )
-
-    def _order_gen(
-        order_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    ) -> Iterable[Order]:
-        mkt_pos_dp = {}
-        mkt_price_dp = {}
-        try:
-            for order_list in order_stream:
-                for bus_event in order_list.events:
-                    order = bus_event.order
-                    if order.market_id not in mkt_pos_dp:
-                        mkt_pos_dp[order.market_id] = market_position_decimals(
-                            market_id=order.market_id, data_client=trading_data_client
-                        )
-                        mkt_price_dp[order.market_id] = market_price_decimals(
-                            market_id=order.market_id, data_client=trading_data_client
-                        )
-                    yield _order_from_proto(
-                        order,
-                        mkt_price_dp[order.market_id],
-                        mkt_pos_dp[order.market_id],
-                    )
-        except Exception as _:
-            logger.info("Order subscription closed")
-            return
-
-    return _order_gen(order_stream=order_stream)
-
-
-def transfer_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-    market_id: Optional[str] = None,
-    party_id: Optional[str] = None,
-) -> Iterable[Order]:
-    transfer_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_TRANSFER],
-        market_id=market_id,
-        party_id=party_id,
-    )
-
-    def _transfer_gen(
-        transfer_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    ) -> Iterable[Transfer]:
-        asset_dp = {}
-        try:
-            for transfer_list in transfer_stream:
-                for bus_event in transfer_list.events:
-                    transfer = bus_event.transfer
-                    if transfer.asset not in asset_dp:
-                        asset_dp[transfer.asset] = get_asset_decimals(
-                            asset_id=transfer.asset,
-                            data_client=trading_data_client,
-                        )
-                    yield _transfer_from_proto(
-                        transfer=transfer,
-                        asset_decimals=asset_dp[transfer.asset],
-                    )
-        except Exception as _:
-            logger.info("Transfer subscription closed")
-            return
-
-    return _transfer_gen(transfer_stream=transfer_stream)
-
-
 def has_liquidity_provision(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
@@ -1150,68 +1060,29 @@ def list_transfers(
     return res_transfers
 
 
-def trades_subscription(
-    data_client: vac.VegaCoreClient,
+def ledger_entries_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
     trading_data_client: vac.VegaTradingDataClientV2,
-) -> Iterable[Trade]:
-    """Subscribe to a stream of Order updates from the data-node.
-    The stream of orders returned from this function is an iterable which
-    does not end and will continue to tick another order update whenever
-    one is received.
-
-    Returns:
-        Iterable[Trade], Infinite iterable of trade updates
-    """
-
-    trade_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_TRADE],
-    )
-
-    return _stream_gen(
-        stream=trade_stream,
-        trading_data_client=trading_data_client,
-        extraction_fn=lambda evt: evt.trade,
-        conversion_fn=_trade_from_proto,
-    )
-
-
-def ledger_entries_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-) -> Iterable[AggregatedLedgerEntry]:
-
-    ledger_movements_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS],
-    )
-
-    def _ledger_entries_gen(
-        ledger_movements_stream: Iterable[
-            vega_protos.api.v1.core.ObserveEventBusResponse
-        ],
-    ) -> Iterable[LedgerEntry]:
-        asset_dp = {}
-        try:
-            for ledger_movement in ledger_movements_stream:
-                for bus_event in ledger_movement.events:
-                    for ledger_movement in bus_event.ledger_movements.ledger_movements:
-                        for ledger_entry in ledger_movement.entries:
-                            asset_id = ledger_entry.from_account.asset_id
-                            if asset_id not in asset_dp:
-                                asset_dp[asset_id] = get_asset_decimals(
-                                    asset_id=asset_id,
-                                    data_client=trading_data_client,
-                                )
-                            yield _ledger_entry_from_proto(
-                                ledger_entry,
-                                asset_decimals=asset_dp[asset_id],
+) -> Iterable[LedgerEntry]:
+    asset_dp = {}
+    try:
+        for ledger_movement in stream:
+            for bus_event in ledger_movement.events:
+                for ledger_movement in bus_event.ledger_movements.ledger_movements:
+                    for ledger_entry in ledger_movement.entries:
+                        asset_id = ledger_entry.from_account.asset_id
+                        if asset_id not in asset_dp:
+                            asset_dp[asset_id] = get_asset_decimals(
+                                asset_id=asset_id,
+                                data_client=trading_data_client,
                             )
-        except Exception as _:
-            logger.info("Ledger entries subscription closed")
-            return
-
-    return _ledger_entries_gen(ledger_movements_stream=ledger_movements_stream)
+                        yield _ledger_entry_from_proto(
+                            ledger_entry,
+                            asset_decimals=asset_dp[asset_id],
+                        )
+    except Exception as _:
+        logger.info("Ledger entries subscription closed")
+        return
 
 
 def _stream_gen(
@@ -1380,3 +1251,60 @@ def list_ledger_entries(
             )
         )
     return ledger_entries
+
+
+def trades_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    trading_data_client: vac.VegaTradingDataClientV2,
+) -> Iterable[Trade]:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Returns:
+        Iterable[Trade], Infinite iterable of trade updates
+    """
+    return _stream_gen(
+        stream=stream,
+        trading_data_client=trading_data_client,
+        extraction_fn=lambda evt: evt.trade,
+        conversion_fn=_trade_from_proto,
+    )
+
+
+def order_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    trading_data_client: vac.VegaTradingDataClientV2,
+) -> Iterable[Order]:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Args:
+        market_id:
+            Optional[str], If provided, only update orders from this market
+        party_id:
+            Optional[str], If provided, only update orders from this party
+    Returns:
+        Iterable[Order], Infinite iterable of order updates
+    """
+    return _stream_gen(
+        stream=stream,
+        trading_data_client=trading_data_client,
+        extraction_fn=lambda evt: evt.order,
+        conversion_fn=_order_from_proto,
+    )
+
+
+def transfer_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    trading_data_client: vac.VegaTradingDataClientV2,
+) -> Iterable[Transfer]:
+    return _stream_gen(
+        stream=stream,
+        trading_data_client=trading_data_client,
+        extraction_fn=lambda evt: evt.transfer,
+        conversion_fn=_transfer_from_proto,
+    )
