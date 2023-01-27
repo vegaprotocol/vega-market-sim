@@ -232,7 +232,7 @@ class VegaServiceNetwork(VegaService):
             webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
 
         if self._start_live_feeds:
-            self.start_order_monitoring()
+            self.start_live_feeds()
 
     def stop(self) -> None:
         super().stop()

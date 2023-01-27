@@ -697,7 +697,7 @@ class VegaServiceNull(VegaService):
             )
 
         if self._start_live_feeds:
-            self.start_live_feeds()
+            self.data_cache.start_live_feeds()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

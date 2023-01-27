@@ -1,75 +1,78 @@
 from __future__ import annotations
 
 import copy
-import datetime
 import logging
 import threading
-import time
-from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
 from queue import Queue, Empty
-from itertools import product
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union
-
-import grpc
+from itertools import product, chain
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    Callable,
+)
+from types import GeneratorType
 
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
-import vega_sim.api.faucet as faucet
-import vega_sim.api.governance as gov
-import vega_sim.api.market as market
-import vega_sim.api.trading as trading
+
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
-from vega_sim.api.helpers import (
-    forward,
-    num_to_padded_int,
-    wait_for_core_catchup,
-    wait_for_datanode_sync,
-)
-from vega_sim.proto.vega.commands.v1.commands_pb2 import (
-    OrderAmendment,
-    OrderCancellation,
-    OrderSubmission,
-)
-from vega_sim.proto.vega.governance_pb2 import (
-    UpdateFutureProduct,
-    UpdateInstrumentConfiguration,
-    UpdateMarketConfiguration,
-)
-from vega_sim.proto.vega.markets_pb2 import (
-    LiquidityMonitoringParameters,
-    LogNormalRiskModel,
-    PriceMonitoringParameters,
-    SimpleModelParams,
-)
-from vega_sim.wallet.base import Wallet
+
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class PeggedOrder:
-    reference: vega_protos.vega.PeggedReference
-    offset: float
+def _queue_forwarder(
+    data_client: vac.VegaCoreClient,
+    trading_data_client: vac.VegaTradingDataClientV2,
+    stream_registry: List[
+        Tuple[
+            Any,
+            Callable[
+                [
+                    vega_protos.api.v1.core.ObserveEventBusResponse,
+                    vac.VegaTradingDataClientV2,
+                ],
+                Any,
+            ],
+        ]
+    ],
+    sink: Queue[Any],
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> None:
+    obs = data_raw.observe_event_bus(
+        data_client=data_client,
+        type=list(chain(*[ev[0] for ev in stream_registry])),
+        market_id=market_id,
+        party_id=party_id,
+    )
 
+    handlers = {}
+    for evts, handler in stream_registry:
+        for evt in evts:
+            handlers[evt] = handler
 
-class LoginError(Exception):
-    pass
-
-
-class DatanodeBehindError(Exception):
-    pass
-
-
-def _queue_forwarder(source: Generator[Any], sink: Queue[Any]) -> None:
-    for elem in source:
-        sink.put(elem)
+    try:
+        for o in obs:
+            for event in o.events:
+                output = handlers[event.type](event, trading_data_client)
+                if isinstance(output, (list, GeneratorType)):
+                    for elem in output:
+                        sink.put(elem)
+                else:
+                    sink.put(output)
+    except Exception:
+        logger.debug("Data cache event bus closed")
 
 
 def raw_data(fn):
@@ -99,16 +102,19 @@ class LocalDataCache:
         self,
         event_bus_client: Union[vac.VegaTradingDataClientV2, vac.VegaCoreClient],
         trading_data_client: vac.VegaTradingDataClientV2,
+        market_pos_decimals: Optional[Dict[str, int]] = None,
+        market_price_decimals: Optional[Dict[str, int]] = None,
+        asset_decimals: Optional[Dict[str, int]] = None,
+        market_to_asset: Optional[Dict[str, str]] = None,
     ):
         """ """
-        self._core_client = None
-        self._core_state_client = None
-        self._trading_data_client_v2 = None
+        self._trading_data_client = trading_data_client
+        self._event_bus_client = event_bus_client
 
-        self._market_price_decimals = None
-        self._market_pos_decimals = None
-        self._asset_decimals = None
-        self._market_to_asset = None
+        self._market_price_decimals = market_price_decimals
+        self._market_pos_decimals = market_pos_decimals
+        self._asset_decimals = asset_decimals
+        self._market_to_asset = market_to_asset
 
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
@@ -122,18 +128,16 @@ class LocalDataCache:
         self._trades_from_feed: List[data.Trade] = []
         self._ledger_entries_from_feed: List[data.LedgerEntry] = []
 
-        self._observation_feeds: List[Queue[Any]] = []
         self._observation_thread = None
         self._aggregated_observation_feed: Queue[Any] = Queue()
         self._kill_thread_sig = threading.Event()
 
-        self._event_bus_client = event_bus_client
-        self._trading_data_client = trading_data_client
-
         self.stream_registry = [
             (
                 (events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS,),
-                data.ledger_entries_subscription_handler,
+                lambda evt, tdc: data.ledger_entries_subscription_handler(
+                    evt, tdc, self._asset_decimals
+                ),
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_TRADE,),
@@ -150,7 +154,7 @@ class LocalDataCache:
         ]
 
     def stop(self) -> None:
-        self._kill_thread_sig.set()
+        return
 
     @raw_data
     def market_data_from_feed(
@@ -208,8 +212,22 @@ class LocalDataCache:
         return transfers_dict
 
     def start_live_feeds(self):
-        self._observation_thread = threading.Thread(target=self._monitor_stream)
+        self._observation_thread = threading.Thread(
+            target=self._monitor_stream, daemon=True
+        )
         self._observation_thread.start()
+
+        self._forwarding_thread = threading.Thread(
+            target=_queue_forwarder,
+            args=(
+                self._event_bus_client,
+                self._trading_data_client,
+                self.stream_registry,
+                self._aggregated_observation_feed,
+            ),
+            daemon=True,
+        )
+        self._forwarding_thread.start()
 
     def initialise_order_monitoring(
         self,
@@ -253,8 +271,6 @@ class LocalDataCache:
 
     def _monitor_stream(self) -> None:
         while True:
-            if self._kill_thread_sig.is_set():
-                return
             try:
                 update = self._aggregated_observation_feed.get(timeout=1)
             except Empty:
@@ -310,10 +326,8 @@ class LocalDataCache:
 
     def get_ledger_entries_from_stream(
         self,
-        wallet_name_from: Optional[str] = None,
-        key_name_from: Optional[str] = None,
-        wallet_name_to: Optional[str] = None,
-        key_name_to: Optional[str] = None,
+        party_id_from: Optional[str] = None,
+        party_id_to: Optional[str] = None,
         transfer_type: Optional[str] = None,
     ) -> List[data.LedgerEntry]:
         results = []
@@ -325,18 +339,11 @@ class LocalDataCache:
             ):
                 continue
             if (
-                wallet_name_from is not None
-                and self.wallet.public_key(
-                    name=wallet_name_from, key_name=key_name_from
-                )
-                != ledger_entry.from_account.owner
+                party_id_from is not None
+                and party_id_from != ledger_entry.from_account.owner
             ):
                 continue
-            if (
-                wallet_name_to is not None
-                and self.wallet.public_key(name=wallet_name_to, key_name=key_name_to)
-                != ledger_entry.to_account.owner
-            ):
+            if party_id_to is not None and party_id_to != ledger_entry.to_account.owner:
                 continue
 
             results.append(copy.copy(ledger_entry))
@@ -346,8 +353,7 @@ class LocalDataCache:
     def get_trades_from_stream(
         self,
         market_id: Optional[str] = None,
-        wallet_name: Optional[str] = None,
-        key_name: Optional[str] = None,
+        party_id: Optional[str] = None,
         order_id: Optional[str] = None,
         exclude_trade_ids: Optional[Set[str]] = None,
     ) -> List[data.Trade]:
@@ -357,10 +363,8 @@ class LocalDataCache:
         Args:
             market_id:
                 optional str, Restrict to trades on a specific market
-            wallet_name:
-                optional str, Restrict to trades for a specific wallet
-            key_name:
-                optional str, Select a different key to the default within a given wallet
+            party_id:
+                optional str, Select only trades with a given id
             order_id:
                 optional str, Restrict to trades for a specific order
             exclude_trade_ids:
@@ -370,11 +374,6 @@ class LocalDataCache:
             List[Trade], list of formatted trade objects which match the required
                 restrictions.
         """
-        party_id = (
-            self.wallet.public_key(wallet_name, key_name)
-            if key_name is not None
-            else None
-        )
         with self.trades_lock:
             results = []
             for trade in self._trades_from_feed:
