@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 
 def _queue_forwarder(
     data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
     stream_registry: List[
         Tuple[
             Any,
@@ -65,7 +64,7 @@ def _queue_forwarder(
     try:
         for o in obs:
             for event in o.events:
-                output = handlers[event.type](event, trading_data_client)
+                output = handlers[event.type](event)
                 if isinstance(output, (list, GeneratorType)):
                     for elem in output:
                         sink.put(elem)
@@ -73,19 +72,6 @@ def _queue_forwarder(
                     sink.put(output)
     except Exception:
         logger.debug("Data cache event bus closed")
-
-
-def raw_data(fn):
-    @wraps(fn)
-    def wrapped_fn(self, *args, **kwargs):
-        if self.warn_on_raw_data_access:
-            logger.warn(
-                f"Using function with raw data from data-node {fn.__qualname__}. Be"
-                " wary if prices/positions are not converted from int form"
-            )
-        return fn(self, *args, **kwargs)
-
-    return wrapped_fn
 
 
 class DecimalsCache(defaultdict):
@@ -135,28 +121,49 @@ class LocalDataCache:
         self.stream_registry = [
             (
                 (events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS,),
-                lambda evt, tdc: data.ledger_entries_subscription_handler(
-                    evt, tdc, self._asset_decimals
+                lambda evt: data.ledger_entries_subscription_handler(
+                    evt, self._asset_decimals
                 ),
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_TRADE,),
-                data.trades_subscription_handler,
+                lambda evt: data.trades_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_ORDER,),
-                data.order_subscription_handler,
+                lambda evt: data.order_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
             ),
+            # (
+            #     (events_protos.BUS_EVENT_TYPE_TRANSFER,),
+            #     lambda evt: data.transfer_subscription_handler(
+            #         evt,
+            #         self._market_pos_decimals,
+            #         self._market_price_decimals,
+            #         self._market_to_asset,
+            #         self._asset_decimals,
+            #     ),
+            # ),
             (
-                (events_protos.BUS_EVENT_TYPE_TRANSFER,),
-                data.transfer_subscription_handler,
+                (events_protos.BUS_EVENT_TYPE_MARKET_DATA,),
+                lambda evt: evt.market_data,
             ),
         ]
 
     def stop(self) -> None:
         return
 
-    @raw_data
     def market_data_from_feed(
         self,
         market_id: str,
@@ -221,7 +228,6 @@ class LocalDataCache:
             target=_queue_forwarder,
             args=(
                 self._event_bus_client,
-                self._trading_data_client,
                 self.stream_registry,
                 self._aggregated_observation_feed,
             ),
@@ -323,6 +329,8 @@ class LocalDataCache:
                 elif isinstance(update, data.LedgerEntry):
                     with self.ledger_entries_lock:
                         self._ledger_entries_from_feed.append(update)
+                else:
+                    logger.info(f"Unhandled update {update}")
 
     def get_ledger_entries_from_stream(
         self,

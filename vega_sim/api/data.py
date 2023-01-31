@@ -1067,38 +1067,24 @@ def list_transfers(
 
 def _stream_handler(
     stream_item: vega_protos.api.v1.core.ObserveEventBusResponse,
-    trading_data_client: vac.VegaTradingDataClientV2,
     extraction_fn: Callable[[vega_protos.events.v1.events.BusEvent], T],
     conversion_fn: Callable[[T, int, int, int], S],
     mkt_pos_dp: Optional[Dict[str, int]] = None,
     mkt_price_dp: Optional[Dict[str, int]] = None,
-    mkt_asset_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
 ) -> S:
     mkt_pos_dp = mkt_pos_dp if mkt_pos_dp is not None else {}
     mkt_price_dp = mkt_price_dp if mkt_price_dp is not None else {}
-    mkt_asset_dp = mkt_asset_dp if mkt_asset_dp is not None else {}
+    asset_dp = asset_dp if asset_dp is not None else {}
+    asset_dp = asset_dp if asset_dp is not None else {}
 
     event = extraction_fn(stream_item)
-    if event.market_id not in mkt_pos_dp:
-        mkt_pos_dp[event.market_id] = market_position_decimals(
-            market_id=event.market_id, data_client=trading_data_client
-        )
-    if event.market_id not in mkt_price_dp:
-        mkt_price_dp[event.market_id] = market_price_decimals(
-            market_id=event.market_id, data_client=trading_data_client
-        )
-    if event.market_id not in mkt_asset_dp:
-        mkt_asset_dp[event.market_id] = get_asset_decimals(
-            asset_id=data_raw.market_info(
-                market_id=event.market_id, data_client=trading_data_client
-            ).tradable_instrument.instrument.future.settlement_asset,
-            data_client=trading_data_client,
-        )
     return conversion_fn(
         event,
         mkt_price_dp[event.market_id],
         mkt_pos_dp[event.market_id],
-        mkt_asset_dp[event.market_id],
+        asset_dp[mkt_to_asset[event.market_id]],
     )
 
 
@@ -1235,10 +1221,10 @@ def list_ledger_entries(
 
 def trades_subscription_handler(
     stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    trading_data_client: vac.VegaTradingDataClientV2,
     mkt_pos_dp: Optional[Dict[str, int]] = None,
     mkt_price_dp: Optional[Dict[str, int]] = None,
-    mkt_asset_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
 ) -> Trade:
     """Subscribe to a stream of Order updates from the data-node.
     The stream of orders returned from this function is an iterable which
@@ -1250,21 +1236,21 @@ def trades_subscription_handler(
     """
     return _stream_handler(
         stream_item=stream,
-        trading_data_client=trading_data_client,
         extraction_fn=lambda evt: evt.trade,
         conversion_fn=_trade_from_proto,
         mkt_pos_dp=mkt_pos_dp,
         mkt_price_dp=mkt_price_dp,
-        mkt_asset_dp=mkt_asset_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
     )
 
 
 def order_subscription_handler(
     stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    trading_data_client: vac.VegaTradingDataClientV2,
     mkt_pos_dp: Optional[Dict[str, int]] = None,
     mkt_price_dp: Optional[Dict[str, int]] = None,
-    mkt_asset_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
 ) -> Order:
     """Subscribe to a stream of Order updates from the data-node.
     The stream of orders returned from this function is an iterable which
@@ -1281,47 +1267,41 @@ def order_subscription_handler(
     """
     return _stream_handler(
         stream_item=stream,
-        trading_data_client=trading_data_client,
         extraction_fn=lambda evt: evt.order,
         conversion_fn=_order_from_proto,
         mkt_pos_dp=mkt_pos_dp,
         mkt_price_dp=mkt_price_dp,
-        mkt_asset_dp=mkt_asset_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
     )
 
 
 def transfer_subscription_handler(
     stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    trading_data_client: vac.VegaTradingDataClientV2,
     mkt_pos_dp: Optional[Dict[str, int]] = None,
     mkt_price_dp: Optional[Dict[str, int]] = None,
-    mkt_asset_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
 ) -> Transfer:
     return _stream_handler(
         stream_item=stream,
-        trading_data_client=trading_data_client,
         extraction_fn=lambda evt: evt.transfer,
         conversion_fn=_transfer_from_proto,
         mkt_pos_dp=mkt_pos_dp,
         mkt_price_dp=mkt_price_dp,
-        mkt_asset_dp=mkt_asset_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
     )
 
 
 def ledger_entries_subscription_handler(
     stream_item: vega_protos.api.v1.core.ObserveEventBusResponse,
-    trading_data_client: vac.VegaTradingDataClientV2,
     asset_dp: Optional[Dict[str, int]] = None,
 ) -> Iterable[LedgerEntry]:
     ledger_entries = []
     for ledger_movement in stream_item.ledger_movements.ledger_movements:
         for ledger_entry in ledger_movement.entries:
             asset_id = ledger_entry.from_account.asset_id
-            if asset_id not in asset_dp:
-                asset_dp[asset_id] = get_asset_decimals(
-                    asset_id=asset_id,
-                    data_client=trading_data_client,
-                )
             ledger_entries.append(
                 _ledger_entry_from_proto(
                     ledger_entry,
