@@ -17,7 +17,7 @@ from vega_sim.scenario.comprehensive_market.agents import (
 )
 from vega_sim.scenario.common.agents import (
     MarketManager,
-    LiquidityProvider,
+    SimpleLiquidityProvider,
     MarketOrderTrader,
     LimitOrderTrader,
     MomentumTrader,
