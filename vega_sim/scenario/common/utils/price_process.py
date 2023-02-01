@@ -140,6 +140,7 @@ def get_historic_price_series(
     product_id: str,
     price_component: CoinbaseCandle = CoinbaseCandle.CLOSE,
     granularity: Optional[Granularity] = None,
+    interpolation: str = None,
     start: Optional[str] = None,
     end: Optional[str] = None,
 ) -> pd.Series:
@@ -149,12 +150,26 @@ def get_historic_price_series(
         start=start,
         end=end,
     )
-    return pd.Series(
-        data=[o[price_component.value] for o in ohlcv],
-        index=pd.DatetimeIndex(
-            [pd.to_datetime(o[CoinbaseCandle.TIME.value], unit="s") for o in ohlcv],
-        ),
-    ).sort_index()
+    s = (
+        pd.Series(
+            data=[o[price_component.value] for o in ohlcv],
+            index=pd.DatetimeIndex(
+                [pd.to_datetime(o[CoinbaseCandle.TIME.value], unit="s") for o in ohlcv],
+            ),
+        )
+        .sort_index()
+        .drop_duplicates()
+    )
+
+    if interpolation is not None:
+        s_interpolated = pd.Series(
+            index=pd.date_range(start=s.index[0], end=s.index[-1], freq=interpolation)
+        )
+        s_interpolated.update(s)
+        s_interpolated = s_interpolated.interpolate(method="linear")
+        return s_interpolated
+    else:
+        return s
 
 
 if __name__ == "__main__":
