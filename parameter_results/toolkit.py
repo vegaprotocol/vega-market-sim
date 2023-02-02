@@ -318,9 +318,7 @@ class SingleParameterExperimentTk(NotebookTk):
         fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
         for row in range(rows):
-
             for col in range(cols):
-
                 if rows > 1 and cols > 1:
                     ax = axs[row, col]
                 elif rows > 1:
@@ -754,13 +752,10 @@ class SingleParameterExperimentTk(NotebookTk):
             parameters = self.settings["tested_values"]
 
         for i, parameter in enumerate(parameters):
-
             parameter_index = self.settings["tested_values"].index(parameter)
 
             for j, iteration in enumerate(iterations):
-
                 if iteration == "avg":
-
                     df = self.data_avg[parameter_index]
 
                     for k, variable in enumerate(variables):
@@ -774,7 +769,6 @@ class SingleParameterExperimentTk(NotebookTk):
                         lns.append(ax.plot(xdata, ydata, fmt, label=label))
 
                 else:
-
                     df = self.data_raw[parameter_index][
                         self.data_raw[parameter_index]["Iteration"] == iteration
                     ]

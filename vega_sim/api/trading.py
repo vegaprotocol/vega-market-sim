@@ -634,7 +634,6 @@ def transfer(
     one_off: Optional[vega_protos.commands.v1.commands.OneOffTransfer] = None,
     recurring: Optional[vega_protos.commands.v1.commands.RecurringTransfer] = None,
 ):
-
     command = vega_protos.commands.v1.commands.Transfer(
         from_account_type=from_account_type,
         to=to,

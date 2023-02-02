@@ -75,7 +75,6 @@ def plot_simulation(
 
 
 def plot_learning(results_dir: str, logfile_pol_imp: str, logfile_pol_eval: str):
-
     data = pd.read_csv(logfile_pol_imp)
     plt.figure()
     plt.plot(data["iteration"], data["loss"])
