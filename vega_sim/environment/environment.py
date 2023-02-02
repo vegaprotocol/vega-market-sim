@@ -352,8 +352,8 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 / 10 ** self.market_decimals_cache[market_id],
                 best_ask_price=float(market_data.best_offer_price)
                 / 10 ** self.market_decimals_cache[market_id],
-                min_valid_price=float(vega.price_bounds(market_id=market_id)[0]),
-                max_valid_price=float(vega.price_bounds(market_id=market_id)[1]),
+                min_valid_price=vega.price_bounds(market_id=market_id)[0],
+                max_valid_price=vega.price_bounds(market_id=market_id)[1],
                 orders=order_status.get(market_data.market, {}),
             )
 
