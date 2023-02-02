@@ -119,7 +119,6 @@ class FFN_Params_Normal(nn.Module):
         n_distr: int,
         hidden_sizes: List[int],
     ):
-
         super().__init__()
         self.net = FFN(
             sizes=[n_in] + hidden_sizes, activation=nn.Tanh, output_activation=nn.Tanh

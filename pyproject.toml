@@ -33,7 +33,7 @@ python-dotenv = "^0.21.0"
 deprecated = "^1.2.13"
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.3.0"
+black = "^23.1.0"
 pytest = "^7.1.2"
 requests-mock = "^1.9.3"
 flake8 = "^4.0.1"
