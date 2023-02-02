@@ -43,7 +43,7 @@ TAU_SCALING_FACTOR = SingleParameterExperiment(
     name="TauScalingFactor",
     parameter_type="network",
     parameter_to_vary="market.liquidity.probabilityOfTrading.tau.scaling",
-    values=["1", "10", "100"],
+    values=["10", "100", "1000"],
     scenario=ParameterExperiment(
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
@@ -86,7 +86,6 @@ BOND_PENALTY_PARAMETER = SingleParameterExperiment(
         (FILE_PATTERN_LOB, LOB_CSV_HEADERS),
     ],
 )
-
 
 CONFIGS = [
     TARGET_STAKE_SCALING_FACTOR,

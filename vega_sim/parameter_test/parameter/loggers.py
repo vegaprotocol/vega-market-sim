@@ -32,6 +32,8 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LP: Position",
     "LP: Bid",
     "LP: Ask",
+    "LP: Received Liquidity Fees",
+    "LP: Liquidity Fee Shares",
     "External Midprice",
     "Midprice",
     "Markprice",
@@ -94,6 +96,20 @@ def _ideal_market_maker_single_data_extraction(
         wallet_name=mm_agent.wallet_name,
         asset_id=mm_agent.asset_id,
         market_id=mm_agent.market_id,
+        key_name=mm_agent.key_name,
+    )
+
+    received_liquidity_fees_lp = 0
+    for ledger_entry in vega.get_ledger_entries_from_stream(
+        wallet_name_to=mm_agent.wallet_name,
+        key_name_to=mm_agent.key_name,
+        transfer_type=14,
+    ):
+        received_liquidity_fees_lp += ledger_entry.amount
+
+    liquidity_fee_shares = vega.get_liquidity_fee_shares(
+        market_id=mm_agent.market_id,
+        wallet_name=mm_agent.wallet_name,
         key_name=mm_agent.key_name,
     )
 
@@ -190,6 +206,8 @@ def _ideal_market_maker_single_data_extraction(
         "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp)
         if mm_agent.ask_depth is not None
         else None,
+        "LP: Received Liquidity Fees": received_liquidity_fees_lp,
+        "LP: Liquidity Fee Shares": liquidity_fee_shares,
         "External Midprice": mm_agent.price_process[mm_agent.current_step - 1]
         if hasattr(mm_agent, "price_process")
         else None,

@@ -2326,8 +2326,8 @@ class InformedTrader(StateAgentWithWallet):
             logger.debug("Order rejected")
 
 
-class LiquidityProvider(StateAgentWithWallet):
-    NAME_BASE = "liq_provider"
+class SimpleLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "simple_liq_provider"
 
     def __init__(
         self,
@@ -2335,9 +2335,13 @@ class LiquidityProvider(StateAgentWithWallet):
         wallet_pass: str,
         market_name: str,
         asset_name: str,
+        bid_inner_bound_fn: Callable,
+        bid_outer_bound_fn: Callable,
+        ask_inner_bound_fn: Callable,
+        ask_outer_bound_fn: Callable,
+        offset_proportion: int,
         initial_asset_mint: float,
         commitment_amount: float = 6000,
-        offset: float = 0.01,
         fee: float = 0.001,
         tag: str = "",
         key_name: Optional[str] = None,
@@ -2351,7 +2355,11 @@ class LiquidityProvider(StateAgentWithWallet):
 
         self.initial_asset_mint = initial_asset_mint
 
-        self.offset = offset
+        self.bid_inner_bound_fn = bid_inner_bound_fn
+        self.bid_outer_bound_fn = bid_outer_bound_fn
+        self.ask_inner_bound_fn = ask_inner_bound_fn
+        self.ask_outer_bound_fn = ask_outer_bound_fn
+        self.offset_proportion = offset_proportion
 
         self.fee = fee
 
@@ -2376,17 +2384,66 @@ class LiquidityProvider(StateAgentWithWallet):
             )
             self.vega.wait_fn(2)
 
-        self.vega.wait_for_total_catchup()
-
         self.vega.submit_simple_liquidity(
             wallet_name=self.wallet_name,
             market_id=self.market_id,
+            key_name=self.key_name,
             commitment_amount=self.commitment_amount,
-            fee=0.001,
-            reference_buy="PEGGED_REFERENCE_BEST_BID",
-            reference_sell="PEGGED_REFERENCE_BEST_ASK",
-            delta_buy=self.offset,
-            delta_sell=self.offset,
+            fee=self.fee,
+            reference_buy="PEGGED_REFERENCE_MID",
+            reference_sell="PEGGED_REFERENCE_MID",
+            delta_buy=5,
+            delta_sell=5,
+            is_amendment=False,
+        )
+
+    def step(self, vega_state: VegaState):
+        # Don't amend offset if in auction
+        if (
+            vega_state.market_state[self.market_id].trading_mode
+            != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        ):
+            return
+
+        # Get the lower and upper bounds liquidity can be pegged between
+        bid_inner_bound = self.bid_inner_bound_fn(
+            vega_state=vega_state, market_id=self.market_id
+        )
+        bid_outer_bound = self.bid_outer_bound_fn(
+            vega_state=vega_state, market_id=self.market_id
+        )
+        ask_inner_bound = self.ask_inner_bound_fn(
+            vega_state=vega_state, market_id=self.market_id
+        )
+        ask_outer_bound = self.ask_outer_bound_fn(
+            vega_state=vega_state, market_id=self.market_id
+        )
+
+        bid_price = (
+            bid_inner_bound
+            - (bid_inner_bound - bid_outer_bound) * self.offset_proportion
+        )
+        ask_price = (
+            ask_inner_bound
+            + (ask_outer_bound - ask_inner_bound) * self.offset_proportion
+        )
+
+        # Calculate offsets for the bid and ask pegs from the mid-price
+        bid_offset = vega_state.market_state[self.market_id].midprice - bid_price
+        ask_offset = ask_price - vega_state.market_state[self.market_id].midprice
+
+        # Submit liquidity
+        self.vega.submit_simple_liquidity(
+            wallet_name=self.wallet_name,
+            key_name=self.key_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitment_amount,
+            fee=self.fee,
+            reference_buy="PEGGED_REFERENCE_MID",
+            reference_sell="PEGGED_REFERENCE_MID",
+            delta_buy=bid_offset,
+            delta_sell=ask_offset,
+            is_amendment=True,
         )
 
 
