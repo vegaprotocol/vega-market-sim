@@ -2327,7 +2327,6 @@ class InformedTrader(StateAgentWithWallet):
 
 
 class SimpleLiquidityProvider(StateAgentWithWallet):
-
     NAME_BASE = "simple_liq_provider"
 
     def __init__(
