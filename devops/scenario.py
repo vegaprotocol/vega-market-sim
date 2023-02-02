@@ -70,7 +70,12 @@ class DevOpsScenario(Scenario):
         momentum_trader_args: MomentumTraderArgs,
         sensitive_trader_args: SensitiveTraderArgs,
         simulation_args: Optional[SimulationArgs] = None,
+        state_extraction_fn: Optional[
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
+        ] = None,
     ):
+        super().__init__(state_extraction_fn=state_extraction_fn)
+
         self.binance_code = binance_code
 
         self.market_manager_args = market_manager_args
@@ -108,15 +113,16 @@ class DevOpsScenario(Scenario):
 
     def configure_agents(
         self,
-        network: Network,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
+        tag: str,
         random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> Dict[str, Agent]:
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        if network == Network.NULLCHAIN:
+        if kwargs["network"] == Network.NULLCHAIN:
             self.price_process = self._get_historic_price_process(
                 random_state=random_state
             )
@@ -246,17 +252,19 @@ class DevOpsScenario(Scenario):
     def configure_environment(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
-        network: Network,
-        raise_datanode_errors: Optional[bool] = False,
-        raise_step_errors: Optional[bool] = False,
+        tag: Optional[str] = None,
+        random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> Union[MarketEnvironmentWithState, NetworkEnvironment]:
-        if network == Network.NULLCHAIN:
+        if kwargs["network"] == Network.NULLCHAIN:
             env = MarketEnvironmentWithState(
-                agents=self.agents,
+                agents=list(self.agents.values()),
                 n_steps=self.simulation_args.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.simulation_args.granularity.value,
                 block_length_seconds=1,
+                random_state=random_state,
+                transactions_per_block=100,
             )
         else:
             env = NetworkEnvironment(
@@ -264,44 +272,8 @@ class DevOpsScenario(Scenario):
                 n_steps=-1,
                 vega_service=vega,
                 step_length_seconds=0,
-                raise_datanode_errors=raise_datanode_errors,
-                raise_step_errors=raise_step_errors,
+                raise_datanode_errors=kwargs["raise_datanode_errors"],
+                raise_step_errors=kwargs["raise_step_errors"],
+                random_state=random_state,
             )
         return env
-
-    def run_iteration(
-        self,
-        network: Network,
-        vega: Union[VegaServiceNull, VegaServiceNetwork],
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-        raise_datanode_errors: Optional[bool] = False,
-        raise_step_errors: Optional[bool] = False,
-    ):
-        self.agents = self.configure_agents(
-            network=network, vega=vega, random_state=random_state
-        )
-
-        if network == Network.NULLCHAIN:
-            self.env = MarketEnvironmentWithState(
-                agents=list(self.agents.values()),
-                n_steps=self.simulation_args.n_steps,
-                vega_service=vega,
-                step_length_seconds=self.simulation_args.granularity.value,
-                block_length_seconds=1,
-            )
-            self.env.run(
-                run_with_console=run_with_console,
-                pause_at_completion=pause_at_completion,
-            )
-        else:
-            self.env = NetworkEnvironment(
-                agents=list(self.agents.values()),
-                n_steps=-1,
-                vega_service=vega,
-                step_length_seconds=0,
-                raise_datanode_errors=raise_datanode_errors,
-                raise_step_errors=raise_step_errors,
-            )
-            self.env.run()
