@@ -100,7 +100,6 @@ class ParameterExperiment(Scenario):
         self,
         random_state: np.random.RandomState,
     ) -> list:
-
         # Select a random start and end datetime
         start = datetime.strptime(
             "2022-01-01 00:00:00", "%Y-%m-%d %H:%M:%S"
@@ -277,7 +276,6 @@ class ParameterExperiment(Scenario):
         random_state: Optional[np.random.RandomState] = None,
         **kwargs,
     ) -> MarketEnvironmentWithState:
-
         return MarketEnvironmentWithState(
             agents=list(self.agents.values()),
             n_steps=self.num_steps,

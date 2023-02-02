@@ -2,7 +2,7 @@ appnope==0.1.3 ; python_version >= "3.9" and python_version < "3.11" and platfor
 asttokens==2.2.1 ; python_version >= "3.9" and python_version < "3.11"
 attrs==22.1.0 ; python_version >= "3.9" and python_version < "3.11"
 backcall==0.2.0 ; python_version >= "3.9" and python_version < "3.11"
-black==22.12.0 ; python_version >= "3.9" and python_version < "3.11"
+black==23.1.0 ; python_version >= "3.9" and python_version < "3.11"
 certifi==2022.12.7 ; python_version >= "3.9" and python_version < "3.11"
 cffi==1.15.1 ; python_version >= "3.9" and python_version < "3.11"
 charset-normalizer==2.1.1 ; python_version >= "3.9" and python_version < "3.11"

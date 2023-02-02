@@ -1180,7 +1180,6 @@ def ledger_entries_subscription(
     data_client: vac.VegaCoreClient,
     trading_data_client: vac.VegaTradingDataClientV2,
 ) -> Iterable[AggregatedLedgerEntry]:
-
     ledger_movements_stream = data_raw.observe_event_bus(
         data_client=data_client,
         type=[events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS],
