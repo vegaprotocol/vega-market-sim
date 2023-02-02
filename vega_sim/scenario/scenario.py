@@ -27,7 +27,7 @@ class Scenario(abc.ABC):
         tag: str,
         random_state: Optional[np.random.RandomState],
         **kwargs,
-    ) -> List[StateAgent]:
+    ) -> Dict[str, StateAgent]:
         pass
 
     @abc.abstractmethod
