@@ -49,7 +49,8 @@ class ParameterExperiment(Scenario):
 
     def __init__(
         self,
-        num_steps: int = 360,
+        num_steps: int = 600,
+        step_length_seconds=10,
         granularity: Optional[Granularity] = Granularity.MINUTE,
         block_size: int = 100,
         block_length_seconds: int = 1,
@@ -70,7 +71,13 @@ class ParameterExperiment(Scenario):
 
         # Simulation settings
         self.num_steps = num_steps
+        self.step_length_seconds = step_length_seconds
         self.granularity = granularity
+        self.interpolation = (
+            f"{step_length_seconds}S"
+            if step_length_seconds < granularity.value
+            else None
+        )
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
@@ -103,6 +110,7 @@ class ParameterExperiment(Scenario):
         price_process = get_historic_price_series(
             product_id="ETH-USD",
             granularity=self.granularity,
+            interpolation=self.interpolation,
             start=str(start),
             end=str(end),
         )
@@ -271,7 +279,7 @@ class ParameterExperiment(Scenario):
         return MarketEnvironmentWithState(
             agents=list(self.agents.values()),
             n_steps=self.num_steps,
-            step_length_seconds=self.granularity.value,
+            step_length_seconds=self.step_length_seconds,
             random_agent_ordering=True,
             transactions_per_block=self.block_size,
             vega_service=vega,
