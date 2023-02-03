@@ -276,8 +276,8 @@ class DevOpsScenario(Scenario):
                 n_steps=-1,
                 vega_service=vega,
                 step_length_seconds=0,
-                raise_datanode_errors=kwargs["raise_datanode_errors"],
-                raise_step_errors=kwargs["raise_step_errors"],
+                raise_datanode_errors=kwargs.get("raise_datanode_errors", False),
+                raise_step_errors=kwargs.get("raise_step_errors", False),
                 random_state=random_state,
             )
         return env
