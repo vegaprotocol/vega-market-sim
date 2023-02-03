@@ -44,7 +44,7 @@ def main():
         "-n",
         "--network",
         choices=[network.name for network in Network],
-        default=Network.NULLCHAIN.name,
+        default=Network.FAIRGROUND.name,
     )
 
     parser.add_argument("-s", "--scenario")

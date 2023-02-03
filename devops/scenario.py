@@ -126,7 +126,7 @@ class DevOpsScenario(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        if kwargs["network"] == Network.NULLCHAIN:
+        if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
             self.price_process = self._get_historic_price_process(
                 random_state=random_state
             )
@@ -260,7 +260,7 @@ class DevOpsScenario(Scenario):
         random_state: Optional[np.random.RandomState] = None,
         **kwargs,
     ) -> Union[MarketEnvironmentWithState, NetworkEnvironment]:
-        if kwargs["network"] == Network.NULLCHAIN:
+        if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
             env = MarketEnvironmentWithState(
                 agents=list(self.agents.values()),
                 n_steps=self.simulation_args.n_steps,
