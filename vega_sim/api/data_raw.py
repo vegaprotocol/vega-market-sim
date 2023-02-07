@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import datetime
 import logging
 from collections import namedtuple
 from typing import Callable, Iterable, List, Optional, TypeVar, Union
+import datetime
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -165,6 +165,27 @@ def market_data(
     return data_client.GetLatestMarketData(
         data_node_protos_v2.trading_data.GetLatestMarketDataRequest(market_id=market_id)
     ).market_data
+
+
+def market_data_history(
+    market_id: str,
+    start: datetime.datetime,
+    end: datetime.datetime,
+    data_client: vac.VegaTradingDataClientV2,
+) -> List[vega_protos.vega.MarketData]:
+    """
+    Output market data history.
+    """
+
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.GetMarketDataHistoryByIDRequest(
+            market_id=market_id,
+            start_timestamp=int(start.timestamp() * 1e9),
+            end_timestamp=int(end.timestamp() * 1e9),
+        ),
+        request_func=lambda x: data_client.GetMarketDataHistoryByID(x).market_data,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
 
 
 def infrastructure_fee_accounts(
