@@ -4,6 +4,7 @@ from tests.integration.utils.fixtures import (
     vega_service_with_market,
     vega_service,
     create_and_faucet_wallet,
+    vega_service_with_high_volume_with_market,
     ASSET_NAME,
     WalletConfig,
 )
@@ -176,8 +177,8 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
 
 @pytest.mark.integration
-def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
-    vega = vega_service_with_market
+def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaServiceNull):
+    vega = vega_service_with_high_volume_with_market
     market_id = vega.all_markets()[0].id
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
