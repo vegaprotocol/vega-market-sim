@@ -526,11 +526,13 @@ class VegaServiceNull(VegaService):
         launch_graphql: bool = False,
         store_transactions: bool = True,
         replay_from_path: Optional[str] = None,
+        listen_for_high_volume_stream_updates: bool = False,
     ):
         super().__init__(
             can_control_time=True,
             warn_on_raw_data_access=warn_on_raw_data_access,
             seconds_per_block=seconds_per_block,
+            listen_for_high_volume_stream_updates=listen_for_high_volume_stream_updates,
         )
         self.retain_log_files = retain_log_files
 

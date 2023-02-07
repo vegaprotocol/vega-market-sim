@@ -1079,7 +1079,6 @@ def list_transfers(
             asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
             )
-
         res_transfers.append(
             _transfer_from_proto(
                 transfer=transfer,
@@ -1101,16 +1100,18 @@ def _stream_handler(
 ) -> S:
     mkt_pos_dp = mkt_pos_dp if mkt_pos_dp is not None else {}
     mkt_price_dp = mkt_price_dp if mkt_price_dp is not None else {}
-    asset_dp = asset_dp if asset_dp is not None else {}
+    mkt_to_asset = mkt_to_asset if mkt_to_asset is not None else {}
     asset_dp = asset_dp if asset_dp is not None else {}
 
     event = extraction_fn(stream_item)
+    market_id = getattr(event, "market_id", None)
+    asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset.get(market_id)))
     return conversion_fn(
         event,
         DecimalSpec(
-            price_decimals=mkt_price_dp[event.market_id],
-            position_decimals=mkt_pos_dp[event.market_id],
-            asset_decimals=asset_dp[mkt_to_asset[event.market_id]],
+            price_decimals=mkt_price_dp.get(market_id),
+            position_decimals=mkt_pos_dp.get(market_id),
+            asset_decimals=asset_decimals,
         ),
     )
 

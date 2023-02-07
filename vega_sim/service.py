@@ -1446,8 +1446,17 @@ class VegaService(ABC):
             party_id=party_id, market_id=market_id, live_only=live_only
         )
 
-    def transfer_status_from_feed(self, live_only: bool = True):
-        return self.data_cache.transfer_status_from_feed(live_only=live_only)
+    def transfer_status_from_feed(
+        self, live_only: bool = True, blockchain_time: Optional[int] = None
+    ):
+        blockchain_time = (
+            blockchain_time
+            if blockchain_time is not None or not live_only
+            else self.get_blockchain_time()
+        )
+        return self.data_cache.transfer_status_from_feed(
+            live_only=live_only, blockchain_time=blockchain_time
+        )
 
     @raw_data
     def liquidity_provisions(

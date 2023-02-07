@@ -136,6 +136,7 @@ def vega_service():
         run_with_console=False,
         retain_log_files=True,
         transactions_per_block=1,
+        listen_for_high_volume_stream_updates=True,
     ) as vega:
         yield vega
 

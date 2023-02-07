@@ -221,6 +221,9 @@ class LocalDataCache:
         return transfers_dict
 
     def start_live_feeds(self, start_high_load_feeds: bool = False):
+        self.initialise_order_monitoring()
+        self.initialise_transfer_monitoring()
+
         self._observation_thread = threading.Thread(
             target=self._monitor_stream, daemon=True
         )
