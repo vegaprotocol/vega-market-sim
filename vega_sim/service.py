@@ -1584,22 +1584,12 @@ class VegaService(ABC):
             if key_name is not None
             else None
         )
-        with self.trades_lock:
-            results = []
-            for trade in self._trades_from_feed:
-                if party_id is not None and party_id not in (trade.buyer, trade.seller):
-                    continue
-                if market_id is not None and trade.market_id != market_id:
-                    continue
-                if order_id is not None and order_id not in (
-                    trade.buy_order,
-                    trade.sell_order,
-                ):
-                    continue
-                if exclude_trade_ids is not None and trade.id in exclude_trade_ids:
-                    continue
-                results.append(trade)
-        return results
+        return self.data_cache.get_trades_from_stream(
+            market_id=market_id,
+            party_id=party_id,
+            order_id=order_id,
+            exclude_trade_ids=exclude_trade_ids,
+        )
 
     def get_trades(
         self,

@@ -67,9 +67,9 @@ def _queue_forwarder(
                 output = handlers[event.type](event)
                 if isinstance(output, (list, GeneratorType)):
                     for elem in output:
-                        sink.put(elem)
+                        sink.put(elem, block=False)
                 else:
-                    sink.put(output)
+                    sink.put(output, block=False)
     except Exception:
         logger.debug("Data cache event bus closed")
 
@@ -145,19 +145,21 @@ class LocalDataCache:
                     self._asset_decimals,
                 ),
             ),
-            # (
-            #     (events_protos.BUS_EVENT_TYPE_TRANSFER,),
-            #     lambda evt: data.transfer_subscription_handler(
-            #         evt,
-            #         self._market_pos_decimals,
-            #         self._market_price_decimals,
-            #         self._market_to_asset,
-            #         self._asset_decimals,
-            #     ),
-            # ),
             (
                 (events_protos.BUS_EVENT_TYPE_MARKET_DATA,),
                 lambda evt: evt.market_data,
+            ),
+        ]
+        self._high_load_stream_registry = [
+            (
+                (events_protos.BUS_EVENT_TYPE_TRANSFER,),
+                lambda evt: data.transfer_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
             ),
         ]
 
@@ -218,7 +220,7 @@ class LocalDataCache:
                         transfers_dict.setdefault(party_id, {})[transfer_id] = transfer
         return transfers_dict
 
-    def start_live_feeds(self):
+    def start_live_feeds(self, start_high_load_feeds: bool = False):
         self._observation_thread = threading.Thread(
             target=self._monitor_stream, daemon=True
         )
@@ -228,7 +230,8 @@ class LocalDataCache:
             target=_queue_forwarder,
             args=(
                 self._event_bus_client,
-                self.stream_registry,
+                self.stream_registry
+                + (self._high_load_stream_registry if start_high_load_feeds else []),
                 self._aggregated_observation_feed,
             ),
             daemon=True,

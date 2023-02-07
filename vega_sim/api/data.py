@@ -108,6 +108,13 @@ MarginLevels = namedtuple(
 
 
 @dataclass
+class DecimalSpec:
+    position_decimals: Optional[int] = None
+    price_decimals: Optional[int] = None
+    asset_decimals: Optional[int] = None
+
+
+@dataclass
 class LedgerEntry:
     from_account: vega_protos.vega.AccountDetails
     to_account: vega_protos.vega.AccountDetails
@@ -183,11 +190,13 @@ def _ledger_entry_from_proto(
 
 def _aggregated_ledger_entry_from_proto(
     ledger_entry: data_node_protos_v2.trading_data.AggregatedLedgerEntry,
-    asset_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> AggregatedLedgerEntry:
     return AggregatedLedgerEntry(
         timestamp=ledger_entry.timestamp,
-        quantity=num_from_padded_int(ledger_entry.quantity, asset_decimals),
+        quantity=num_from_padded_int(
+            ledger_entry.quantity, decimal_spec.asset_decimals
+        ),
         transfer_type=ledger_entry.transfer_type,
         asset_id=ledger_entry.asset_id,
         from_account_type=ledger_entry.from_account_type,
@@ -201,15 +210,13 @@ def _aggregated_ledger_entry_from_proto(
 
 def _trade_from_proto(
     trade: vega_protos.vega.Trade,
-    price_decimals: int,
-    position_decimals: int,
-    asset_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> Trade:
     return Trade(
         id=trade.id,
         market_id=trade.market_id,
-        price=num_from_padded_int(trade.price, price_decimals),
-        size=num_from_padded_int(trade.size, position_decimals),
+        price=num_from_padded_int(trade.price, decimal_spec.price_decimals),
+        size=num_from_padded_int(trade.size, decimal_spec.position_decimals),
         buyer=trade.buyer,
         seller=trade.seller,
         aggressor=trade.aggressor,
@@ -218,21 +225,25 @@ def _trade_from_proto(
         timestamp=trade.timestamp,
         trade_type=trade.type,
         buyer_fee=Fee(
-            maker_fee=num_from_padded_int(trade.buyer_fee.maker_fee, asset_decimals),
+            maker_fee=num_from_padded_int(
+                trade.buyer_fee.maker_fee, decimal_spec.asset_decimals
+            ),
             infrastructure_fee=num_from_padded_int(
-                trade.buyer_fee.infrastructure_fee, asset_decimals
+                trade.buyer_fee.infrastructure_fee, decimal_spec.asset_decimals
             ),
             liquidity_fee=num_from_padded_int(
-                trade.buyer_fee.liquidity_fee, asset_decimals
+                trade.buyer_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
         ),
         seller_fee=Fee(
-            maker_fee=num_from_padded_int(trade.seller_fee.maker_fee, asset_decimals),
+            maker_fee=num_from_padded_int(
+                trade.seller_fee.maker_fee, decimal_spec.asset_decimals
+            ),
             infrastructure_fee=num_from_padded_int(
-                trade.seller_fee.infrastructure_fee, asset_decimals
+                trade.seller_fee.infrastructure_fee, decimal_spec.asset_decimals
             ),
             liquidity_fee=num_from_padded_int(
-                trade.seller_fee.liquidity_fee, asset_decimals
+                trade.seller_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
         ),
         buyer_auction_batch=trade.buyer_auction_batch,
@@ -241,16 +252,20 @@ def _trade_from_proto(
 
 
 def _margin_level_from_proto(
-    margin_level: vega_protos.vega.MarginLevels, asset_decimals: int
+    margin_level: vega_protos.vega.MarginLevels, decimal_spec: DecimalSpec
 ) -> MarginLevels:
     return MarginLevels(
         maintenance_margin=num_from_padded_int(
-            margin_level.maintenance_margin, asset_decimals
+            margin_level.maintenance_margin, decimal_spec.asset_decimals
         ),
-        search_level=num_from_padded_int(margin_level.search_level, asset_decimals),
-        initial_margin=num_from_padded_int(margin_level.initial_margin, asset_decimals),
+        search_level=num_from_padded_int(
+            margin_level.search_level, decimal_spec.asset_decimals
+        ),
+        initial_margin=num_from_padded_int(
+            margin_level.initial_margin, decimal_spec.asset_decimals
+        ),
         collateral_release_level=num_from_padded_int(
-            margin_level.collateral_release_level, asset_decimals
+            margin_level.collateral_release_level, decimal_spec.asset_decimals
         ),
         party_id=margin_level.party_id,
         market_id=margin_level.market_id,
@@ -261,18 +276,16 @@ def _margin_level_from_proto(
 
 def _order_from_proto(
     order: vega_protos.vega.Order,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> Order:
     return Order(
         id=order.id,
-        price=num_from_padded_int(order.price, price_decimals),
-        size=num_from_padded_int(order.size, position_decimals),
+        price=num_from_padded_int(order.price, decimal_spec.price_decimals),
+        size=num_from_padded_int(order.size, decimal_spec.position_decimals),
         reference=order.reference,
         side=order.side,
         status=order.status,
-        remaining=num_from_padded_int(order.remaining, position_decimals),
+        remaining=num_from_padded_int(order.remaining, decimal_spec.position_decimals),
         time_in_force=order.time_in_force,
         order_type=order.type,
         created_at=order.created_at,
@@ -286,28 +299,29 @@ def _order_from_proto(
 
 def _position_from_proto(
     position: vega_protos.vega.Position,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> Position:
     return Position(
         party_id=position.party_id,
         market_id=position.market_id,
-        open_volume=num_from_padded_int(position.open_volume, position_decimals),
-        realised_pnl=num_from_padded_int(position.realised_pnl, asset_decimals),
-        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, asset_decimals),
+        open_volume=num_from_padded_int(
+            position.open_volume, decimal_spec.position_decimals
+        ),
+        realised_pnl=num_from_padded_int(
+            position.realised_pnl, decimal_spec.asset_decimals
+        ),
+        unrealised_pnl=num_from_padded_int(
+            position.unrealised_pnl, decimal_spec.asset_decimals
+        ),
         average_entry_price=num_from_padded_int(
-            position.average_entry_price, price_decimals
+            position.average_entry_price, decimal_spec.price_decimals
         ),
         updated_at=position.updated_at,
     )
 
 
 def _transfer_from_proto(
-    transfer: vega_protos.vega.Transfer,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
+    transfer: vega_protos.vega.Transfer, decimal_spec: DecimalSpec
 ) -> Transfer:
     return Transfer(
         id=transfer.id,
@@ -316,7 +330,7 @@ def _transfer_from_proto(
         party_to=transfer.to,
         to_account_type=transfer.to_account_type,
         asset=transfer.asset,
-        amount=num_from_padded_int(transfer.amount, asset_decimals),
+        amount=num_from_padded_int(transfer.amount, decimal_spec.asset_decimals),
         reference=transfer.reference,
         status=transfer.status,
         timestamp=transfer.timestamp,
@@ -385,9 +399,11 @@ def positions_by_market(
         # Convert raw proto into a market-sim Position object
         positions[pos.market_id] = _position_from_proto(
             position=pos,
-            price_decimals=market_price_decimals_map[pos.market_id],
-            position_decimals=market_position_decimals_map[pos.market_id],
-            asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
+            decimal_spec=DecimalSpec(
+                price_decimals=market_price_decimals_map[pos.market_id],
+                position_decimals=market_position_decimals_map[pos.market_id],
+                asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
+            ),
         )
 
     if market_id is None:
@@ -760,8 +776,10 @@ def list_orders(
 
         converted_order = _order_from_proto(
             order,
-            price_decimals=mkt_price_dp[order.market_id],
-            position_decimals=mkt_pos_dp[order.market_id],
+            decimal_spec=DecimalSpec(
+                price_decimals=mkt_price_dp[order.market_id],
+                position_decimals=mkt_pos_dp[order.market_id],
+            ),
         )
         output_orders.append(converted_order)
     return output_orders
@@ -815,8 +833,10 @@ def all_orders(
             continue
         converted_order = _order_from_proto(
             order,
-            price_decimals=mkt_price_dp[order.market_id],
-            position_decimals=mkt_pos_dp[order.market_id],
+            DecimalSpec(
+                price_decimals=mkt_price_dp[order.market_id],
+                position_decimals=mkt_pos_dp[order.market_id],
+            ),
         )
         output_orders.append(converted_order)
     return output_orders
@@ -965,7 +985,9 @@ def margin_levels(
                 asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
-            _margin_level_from_proto(margin, asset_decimals=asset_dp[margin.asset])
+            _margin_level_from_proto(
+                margin, DecimalSpec(asset_decimals=asset_dp[margin.asset])
+            )
         )
     return res_margins
 
@@ -1009,9 +1031,11 @@ def get_trades(
         res_trades.append(
             _trade_from_proto(
                 trade,
-                price_decimals=market_price_decimals_map[trade.market_id],
-                position_decimals=market_position_decimals_map[trade.market_id],
-                asset_decimals=market_asset_decimals_map[trade.market_id],
+                DecimalSpec(
+                    price_decimals=market_price_decimals_map[trade.market_id],
+                    position_decimals=market_position_decimals_map[trade.market_id],
+                    asset_decimals=market_asset_decimals_map[trade.market_id],
+                ),
             )
         )
     return res_trades
@@ -1058,7 +1082,8 @@ def list_transfers(
 
         res_transfers.append(
             _transfer_from_proto(
-                transfer=transfer, asset_decimals=asset_dp[transfer.asset]
+                transfer=transfer,
+                decimal_spec=DecimalSpec(asset_decimals=asset_dp[transfer.asset]),
             )
         )
 
@@ -1082,9 +1107,11 @@ def _stream_handler(
     event = extraction_fn(stream_item)
     return conversion_fn(
         event,
-        mkt_price_dp[event.market_id],
-        mkt_pos_dp[event.market_id],
-        asset_dp[mkt_to_asset[event.market_id]],
+        DecimalSpec(
+            price_decimals=mkt_price_dp[event.market_id],
+            position_decimals=mkt_pos_dp[event.market_id],
+            asset_decimals=asset_dp[mkt_to_asset[event.market_id]],
+        ),
     )
 
 
@@ -1213,7 +1240,7 @@ def list_ledger_entries(
             )
         ledger_entries.append(
             _aggregated_ledger_entry_from_proto(
-                entry, asset_decimals=asset_decimals_map[entry.asset_id]
+                entry, DecimalSpec(asset_decimals=asset_decimals_map[entry.asset_id])
             )
         )
     return ledger_entries
