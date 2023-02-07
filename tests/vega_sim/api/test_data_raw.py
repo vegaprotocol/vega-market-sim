@@ -1,7 +1,7 @@
 import grpc
 import pytest
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+import datetime
 from vega_sim.grpc.client import (
     VegaCoreClient,
     VegaTradingDataClientV2,
@@ -414,7 +414,7 @@ def test_market_data_history(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    some_date = datetime(2023, 1, 1)
+    some_date = datetime.datetime(2023, 1, 1)
     res = market_data_history(
         market_id="foobar", start=some_date, end=some_date, data_client=data_client
     )

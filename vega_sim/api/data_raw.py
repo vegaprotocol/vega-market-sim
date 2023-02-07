@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections import namedtuple
 from typing import Callable, Iterable, List, Optional, TypeVar, Union
-from datetime import datetime
+import datetime
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -169,8 +169,8 @@ def market_data(
 
 def market_data_history(
     market_id: str,
-    start: datetime,
-    end: datetime,
+    start: datetime.datetime,
+    end: datetime.datetime,
     data_client: vac.VegaTradingDataClientV2,
 ) -> List[vega_protos.vega.MarketData]:
     """
