@@ -401,24 +401,26 @@ def test_market_data_history(trading_data_v2_servicer_and_port):
                     data_node_protos_v2.trading_data.MarketDataEdge(
                         cursor="cursor",
                         node=vega_protos.vega.MarketData(
-                            mid_price="100", 
-                            market=request.market_id
-                            ),
+                            mid_price="100", market=request.market_id
                         ),
+                    ),
                 ],
             ),
         )
-        
+
     server, port, mock_servicer = trading_data_v2_servicer_and_port
     mock_servicer.GetMarketDataHistoryByID = GetMarketDataHistoryByID
 
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    some_date=datetime(2023,1,1)
-    res = market_data_history(market_id="foobar", start=some_date, end=some_date, data_client=data_client)
+    some_date = datetime(2023, 1, 1)
+    res = market_data_history(
+        market_id="foobar", start=some_date, end=some_date, data_client=data_client
+    )
 
     assert res[0] == expected
+
 
 def test_infrastructure_fee_accounts(trading_data_v2_servicer_and_port):
     expected = data_node_protos_v2.trading_data.AccountBalance(
