@@ -99,6 +99,7 @@ class VegaService(ABC):
         can_control_time: bool = False,
         warn_on_raw_data_access: bool = True,
         seconds_per_block: int = 1,
+        listen_for_high_volume_stream_updates: bool = False,
     ):
         """A generic service for accessing a set of Vega processes.
 
@@ -122,10 +123,17 @@ class VegaService(ABC):
                     converted by the user.
                     (e.g. 10.1 with decimal places set to 2 would be 1010)
             seconds_per_block:
-                int, default 1, How long each block represents in seconds. For a nullchain
-                    service this can be known exactly, for anything else it will be an
-                    estimate. Used for waiting/forwarding time and determining how far
-                    forwards to place proposals starting/ending.
+                int, default 1, How long each block represents in seconds. For a
+                    nullchain service this can be known exactly, for anything
+                    else it will be an estimate. Used for waiting/forwarding time
+                    and determining how far forwards to place proposals
+                    starting/ending.
+            listen_for_high_volume_stream_updates:
+                bool, default False, Whether to listen for high volume stream updates.
+                    These are generally less necessary, but contain large numbers of
+                    updates per block, such as all ledger transactions. For a network
+                    running at ~1s/block these are likely to be fine, but can be a
+                    hindrance working at full nullchain speed.
 
         """
         self._core_client = None
@@ -139,6 +147,9 @@ class VegaService(ABC):
         self._market_pos_decimals = None
         self._asset_decimals = None
         self._market_to_asset = None
+        self._listen_for_high_volume_stream_updates = (
+            listen_for_high_volume_stream_updates
+        )
         self.seconds_per_block = seconds_per_block
 
     @property
@@ -192,7 +203,9 @@ class VegaService(ABC):
                 self.asset_decimals,
                 self.market_to_asset,
             )
-            self._local_data_cache.start_live_feeds()
+            self._local_data_cache.start_live_feeds(
+                start_high_load_feeds=self._listen_for_high_volume_stream_updates
+            )
         return self._local_data_cache
 
     @property
