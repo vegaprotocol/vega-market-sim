@@ -31,6 +31,7 @@ from vega_sim.scenario.common.agents import (
     PriceSensitiveLimitOrderTrader,
     InformedTrader,
     StateAgent,
+    SimpleLiquidityProvider,
 )
 
 from vega_sim.scenario.common.utils.price_process import (
@@ -42,14 +43,15 @@ from vega_sim.scenario.common.utils.price_process import (
 class ParameterExperiment(Scenario):
     """Class simulates a scenario for use in parameter experiments.
 
-    The default values for the ParameterExperiment scenario are to simulate a daily
-    ETH:USD future with trading activity in five minute steps.
+    The default values for the ParameterExperiment scenario are to simulate an hours
+    trading activity in 10 second intervals.
 
     """
 
     def __init__(
         self,
-        num_steps: int = 360,
+        num_steps: int = 600,
+        step_length_seconds=10,
         granularity: Optional[Granularity] = Granularity.MINUTE,
         block_size: int = 100,
         block_length_seconds: int = 1,
@@ -62,15 +64,21 @@ class ParameterExperiment(Scenario):
         market_code: str = "ETHUSD",
         asset_name: str = "ETH",
         asset_dp: str = 18,
-        rt_mint: int = 10_000,
-        it_mint: int = 10_000,
+        rt_mint: int = 100_000,
+        it_mint: int = 100_000,
         st_mint: int = 1_000_000,
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
         # Simulation settings
         self.num_steps = num_steps
+        self.step_length_seconds = step_length_seconds
         self.granularity = granularity
+        self.interpolation = (
+            f"{step_length_seconds}S"
+            if step_length_seconds < granularity.value
+            else None
+        )
         self.block_size = block_size
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
@@ -93,7 +101,6 @@ class ParameterExperiment(Scenario):
         self,
         random_state: np.random.RandomState,
     ) -> list:
-
         # Select a random start and end datetime
         start = datetime.strptime(
             "2022-01-01 00:00:00", "%Y-%m-%d %H:%M:%S"
@@ -104,6 +111,7 @@ class ParameterExperiment(Scenario):
         price_process = get_historic_price_series(
             product_id="ETH-USD",
             granularity=self.granularity,
+            interpolation=self.interpolation,
             start=str(start),
             end=str(end),
         )
@@ -153,9 +161,9 @@ class ParameterExperiment(Scenario):
             wallet_pass="pass",
             key_name="market_maker",
             price_process_generator=iter(price_process),
-            initial_asset_mint=1e9,
-            commitment_amount=500_000,
-            fee_amount=0.0003,
+            initial_asset_mint=1e10,
+            commitment_amount=1_000_000,
+            fee_amount=0.001,
             market_name=market_name,
             asset_name=asset_name,
             market_decimal_places=market_config.decimal_places,
@@ -170,7 +178,35 @@ class ParameterExperiment(Scenario):
             market_order_arrival_rate=0.5,
             state_update_freq=10,
             tag=None,
+            orders_from_stream=True,
         )
+
+        simple_liquidity_providers = [
+            SimpleLiquidityProvider(
+                wallet_name="vega",
+                wallet_pass="pass",
+                key_name="simple_lp_c",
+                market_name=market_name,
+                asset_name=asset_name,
+                initial_asset_mint=1e10,
+                commitment_amount=100_000,
+                bid_inner_bound_fn=lambda vega_state, market_id: vega_state.market_state[
+                    market_id
+                ].midprice,
+                bid_outer_bound_fn=lambda vega_state, market_id: vega_state.market_state[
+                    market_id
+                ].min_valid_price,
+                ask_inner_bound_fn=lambda vega_state, market_id: vega_state.market_state[
+                    market_id
+                ].midprice,
+                ask_outer_bound_fn=lambda vega_state, market_id: vega_state.market_state[
+                    market_id
+                ].max_valid_price,
+                offset_proportion=0.06,
+                fee=0.001,
+            )
+            for i, offset in enumerate([0.02, 0.04, 0.06])
+        ]
 
         # Create fixed auction pass agents
         open_auction_pass_bid = OpenAuctionPass(
@@ -258,6 +294,7 @@ class ParameterExperiment(Scenario):
                 open_auction_pass_ask,
                 informed_trader,
             ]
+            + simple_liquidity_providers
             + sensitive_traders
             + random_traders
         )
@@ -269,11 +306,10 @@ class ParameterExperiment(Scenario):
         random_state: Optional[np.random.RandomState] = None,
         **kwargs,
     ) -> MarketEnvironmentWithState:
-
         return MarketEnvironmentWithState(
             agents=list(self.agents.values()),
             n_steps=self.num_steps,
-            step_length_seconds=self.granularity.value,
+            step_length_seconds=self.step_length_seconds,
             random_agent_ordering=True,
             transactions_per_block=self.block_size,
             vega_service=vega,

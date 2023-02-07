@@ -31,7 +31,6 @@ TRADER_B = PartyConfig(
 )
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--debug", action="store_true")
@@ -45,7 +44,6 @@ if __name__ == "__main__":
         warn_on_raw_data_access=False,
         launch_graphql=True,
     ) as vega:
-
         # Create wallets for auxiliary and example specific parties
         utils.create_auxiliary_parties(vega=vega)
         vega.create_wallet(

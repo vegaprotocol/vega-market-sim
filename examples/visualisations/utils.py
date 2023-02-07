@@ -443,12 +443,10 @@ def move_market(
 
 
 if __name__ == "__main__":
-
     with VegaServiceNull(
         run_with_console=True,
         warn_on_raw_data_access=False,
     ) as vega:
-
         market_id, asset_id, best_ask_id, best_bid_id = continuous_market(
             vega=vega, price=500, spread=10
         )

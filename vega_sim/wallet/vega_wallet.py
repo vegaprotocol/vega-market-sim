@@ -144,7 +144,6 @@ class VegaWallet(Wallet):
         transaction_type: str,
         key_name: Optional[int] = None,
     ):
-
         pub_key = self.public_key(name=name, key_name=key_name)
 
         headers = {"Authorization": f"Bearer {self.login_tokens[name]}"}

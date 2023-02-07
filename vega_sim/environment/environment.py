@@ -43,8 +43,12 @@ MarketState = namedtuple(
         "state",
         "trading_mode",
         "midprice",
+        "best_bid_price",
+        "best_ask_price",
+        "min_valid_price",
+        "max_valid_price",
         "orders",
-    ],  # "order_book"]
+    ],
 )
 
 
@@ -345,6 +349,12 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 trading_mode=market_data.market_trading_mode,
                 midprice=float(market_data.mid_price)
                 / 10 ** int(self.market_decimals_cache[market_id]),
+                best_bid_price=float(market_data.best_bid_price)
+                / 10 ** self.market_decimals_cache[market_id],
+                best_ask_price=float(market_data.best_offer_price)
+                / 10 ** self.market_decimals_cache[market_id],
+                min_valid_price=vega.price_bounds(market_id=market_id)[0],
+                max_valid_price=vega.price_bounds(market_id=market_id)[1],
                 orders=order_status.get(market_data.market, {}),
             )
 
@@ -389,18 +399,26 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         self.raise_datanode_errors = raise_datanode_errors
         self.raise_step_errors = raise_step_errors
 
-    def run(self):
+    def run(
+        self,
+        run_with_console: bool = False,
+        pause_at_completion: bool = False,
+    ):
         if self._vega is None:
             with VegaServiceNetwork(
                 use_full_vega_wallet=True,
                 run_with_wallet=True,
-                run_with_console=True,
+                run_with_console=run_with_console,
             ) as vega:
                 return self._run(vega)
         else:
-            return self._run(self._vega)
+            return self._run(self._vega, pause_at_completion=pause_at_completion)
 
-    def _run(self, vega: VegaServiceNetwork) -> None:
+    def _run(
+        self,
+        vega: VegaServiceNetwork,
+        pause_at_completion: bool = False,
+    ) -> None:
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
@@ -422,6 +440,12 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
         for agent in self.agents:
             agent.finalise()
+
+        if pause_at_completion:
+            input(
+                "Environment run completed. Pausing to allow inspection of state."
+                " Press Enter to continue"
+            )
 
     def step(self, vega: VegaServiceNetwork) -> None:
         t = time.time()

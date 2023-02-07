@@ -27,7 +27,7 @@ class Scenario(abc.ABC):
         tag: str,
         random_state: Optional[np.random.RandomState],
         **kwargs,
-    ) -> List[StateAgent]:
+    ) -> Dict[str, StateAgent]:
         pass
 
     @abc.abstractmethod
@@ -54,7 +54,6 @@ class Scenario(abc.ABC):
     def run_iteration(
         self,
         vega: VegaService,
-        network: Optional[Network] = None,
         pause_at_completion: bool = False,
         run_with_console: bool = False,
         random_state: Optional[np.random.RandomState] = None,
