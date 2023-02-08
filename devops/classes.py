@@ -43,8 +43,9 @@ class AuctionTraderArgs:
 
 @dataclass
 class RandomTraderArgs:
-    order_intensity: int
-    order_volume: float
+    order_intensity: List[int]
+    order_volume: List[float]
+    step_bias: List[float]
     initial_mint: Optional[int] = MAX_FAUCET
 
 

@@ -133,123 +133,138 @@ class DevOpsScenario(Scenario):
         else:
             self.price_process = LivePrice(product=self.binance_code)
 
-        # Setup agent for proposing and settling the market
-        market_manager = ConfigurableMarketManager(
-            proposal_wallet_name=MARKET_CREATOR_AGENT.wallet_name,
-            proposal_wallet_pass=MARKET_CREATOR_AGENT.wallet_pass,
-            proposal_key_name=MARKET_CREATOR_AGENT.key_name,
-            termination_wallet_name=MARKET_SETTLER_AGENT.wallet_name,
-            termination_wallet_pass=MARKET_SETTLER_AGENT.wallet_pass,
-            termination_key_name=MARKET_SETTLER_AGENT.key_name,
-            market_config=MarketConfig(),
-            market_name=self.market_manager_args.market_name,
-            market_code=self.market_manager_args.market_code,
-            asset_name=self.market_manager_args.asset_name,
-            asset_dp=self.market_manager_args.adp,
-            initial_mint=self.market_manager_args.initial_mint,
-            settlement_price=self.price_process[-1],
-            tag=None,
-        )
-
-        # Setup agent for proving a market for traders
-        market_maker = ExponentialShapedMarketMaker(
-            wallet_name=MARKET_MAKER_AGENT.wallet_name,
-            wallet_pass=MARKET_MAKER_AGENT.wallet_pass,
-            key_name=MARKET_MAKER_AGENT.key_name,
-            market_name=self.market_manager_args.market_name,
-            asset_name=self.market_manager_args.asset_name,
-            initial_asset_mint=self.market_maker_args.initial_mint,
-            commitment_amount=self.market_maker_args.commitment_amount,
-            market_kappa=self.market_maker_args.market_kappa,
-            kappa=self.market_maker_args.order_kappa,
-            num_levels=self.market_maker_args.order_levels,
-            tick_spacing=self.market_maker_args.order_spacing,
-            inventory_lower_boundary=self.market_maker_args.inventory_lower_boundary,
-            inventory_upper_boundary=self.market_maker_args.inventory_upper_boundary,
-            fee_amount=self.market_maker_args.fee_amount,
-            num_steps=60 * 60 * 24 * 365,
-            price_process_generator=iter(self.price_process),
-            orders_from_stream=False,
-            state_update_freq=10,
-            tag=None,
-        )
-
-        # Setup agents for passing opening auction
-        auction_pass_agents = [
-            OpenAuctionPass(
-                wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
-                key_name=party.key_name,
+        if kwargs.get("run_background", True):
+            # Setup agent for proposing and settling the market
+            market_manager = ConfigurableMarketManager(
+                proposal_wallet_name=MARKET_CREATOR_AGENT.wallet_name,
+                proposal_wallet_pass=MARKET_CREATOR_AGENT.wallet_pass,
+                proposal_key_name=MARKET_CREATOR_AGENT.key_name,
+                termination_wallet_name=MARKET_SETTLER_AGENT.wallet_name,
+                termination_wallet_pass=MARKET_SETTLER_AGENT.wallet_pass,
+                termination_key_name=MARKET_SETTLER_AGENT.key_name,
+                market_config=MarketConfig(),
                 market_name=self.market_manager_args.market_name,
+                market_code=self.market_manager_args.market_code,
                 asset_name=self.market_manager_args.asset_name,
-                initial_asset_mint=self.auction_trader_args.initial_mint,
-                initial_price=self.price_process[0],
-                side=["SIDE_BUY", "SIDE_SELL"][i],
-                tag="",
+                asset_dp=self.market_manager_args.adp,
+                initial_mint=self.market_manager_args.initial_mint,
+                settlement_price=self.price_process[-1],
+                tag=None,
             )
-            for i, party in enumerate(AUCTION_TRADER_AGENTS)
-        ]
 
-        # Setup agents for placing random market orders
-        random_market_order_traders = [
-            MarketOrderTrader(
-                wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
-                key_name=party.key_name,
+            # Setup agent for proving a market for traders
+            market_maker = ExponentialShapedMarketMaker(
+                wallet_name=MARKET_MAKER_AGENT.wallet_name,
+                wallet_pass=MARKET_MAKER_AGENT.wallet_pass,
+                key_name=MARKET_MAKER_AGENT.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
-                initial_asset_mint=self.random_trader_args.initial_mint,
-                buy_intensity=self.random_trader_args.order_intensity,
-                sell_intensity=self.random_trader_args.order_intensity,
-                base_order_size=self.random_trader_args.order_volume,
-                tag=i,
-            )
-            for i, party in enumerate(RANDOM_TRADER_AGENTS)
-        ]
-
-        # Setup agents for placing momentum based market orders
-        momentum_market_order_traders = [
-            MomentumTrader(
-                wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
-                key_name=party.key_name,
-                market_name=self.market_manager_args.market_name,
-                asset_name=self.market_manager_args.asset_name,
-                momentum_strategy=["MACD", "APO", "RSI", "STOCHRSI", "CPO"][i],
-                initial_asset_mint=self.momentum_trader_args.initial_mint,
-                order_intensity=self.momentum_trader_args.order_intensity,
-                base_order_size=self.momentum_trader_args.order_volume,
-                tag=i,
-            )
-            for i, party in enumerate(MOMENTUM_TRADER_AGENTS)
-        ]
-
-        # Setup agents for placing price-sensitive market orders
-        sensitive_market_order_traders = [
-            PriceSensitiveMarketOrderTrader(
-                wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
-                key_name=party.key_name,
-                market_name=self.market_manager_args.market_name,
-                asset_name=self.market_manager_args.asset_name,
+                initial_asset_mint=self.market_maker_args.initial_mint,
+                commitment_amount=self.market_maker_args.commitment_amount,
+                market_kappa=self.market_maker_args.market_kappa,
+                kappa=self.market_maker_args.order_kappa,
+                num_levels=self.market_maker_args.order_levels,
+                tick_spacing=self.market_maker_args.order_spacing,
+                inventory_lower_boundary=self.market_maker_args.inventory_lower_boundary,
+                inventory_upper_boundary=self.market_maker_args.inventory_upper_boundary,
+                fee_amount=self.market_maker_args.fee_amount,
+                num_steps=60 * 60 * 24 * 365,
                 price_process_generator=iter(self.price_process),
-                initial_asset_mint=self.sensitive_trader_args.initial_mint,
-                buy_intensity=self.sensitive_trader_args.order_intensity[i],
-                sell_intensity=self.sensitive_trader_args.order_intensity[i],
-                base_order_size=self.sensitive_trader_args.order_volume[i],
-                price_half_life=self.sensitive_trader_args.price_half_life[i],
-                tag=i,
+                orders_from_stream=False,
+                state_update_freq=10,
+                tag=None,
             )
-            for i, party in enumerate(SENSITIVE_TRADER_AGENTS)
-        ]
 
-        agents = (
-            [market_manager, market_maker]
-            + auction_pass_agents
-            + random_market_order_traders
-            + momentum_market_order_traders
-            + sensitive_market_order_traders
-        )
+            # Setup agents for passing opening auction
+            auction_pass_agents = [
+                OpenAuctionPass(
+                    wallet_name=party.wallet_name,
+                    wallet_pass=party.wallet_pass,
+                    key_name=party.key_name,
+                    market_name=self.market_manager_args.market_name,
+                    asset_name=self.market_manager_args.asset_name,
+                    initial_asset_mint=self.auction_trader_args.initial_mint,
+                    initial_price=self.price_process[0],
+                    side=["SIDE_BUY", "SIDE_SELL"][i],
+                    tag=i,
+                )
+                for i, party in enumerate(AUCTION_TRADER_AGENTS)
+            ]
+
+            # Setup agents for placing random market orders
+            random_market_order_traders = [
+                MarketOrderTrader(
+                    wallet_name=party.wallet_name,
+                    wallet_pass=party.wallet_pass,
+                    key_name=party.key_name,
+                    market_name=self.market_manager_args.market_name,
+                    asset_name=self.market_manager_args.asset_name,
+                    initial_asset_mint=self.random_trader_args.initial_mint,
+                    buy_intensity=self.random_trader_args.order_intensity[i],
+                    sell_intensity=self.random_trader_args.order_intensity[i],
+                    base_order_size=self.random_trader_args.order_volume[i],
+                    step_bias=self.random_trader_args.step_bias[i],
+                    tag=i,
+                )
+                for i, party in enumerate(RANDOM_TRADER_AGENTS)
+            ]
+
+            # Setup agents for placing momentum based market orders
+            momentum_market_order_traders = [
+                MomentumTrader(
+                    wallet_name=party.wallet_name,
+                    wallet_pass=party.wallet_pass,
+                    key_name=party.key_name,
+                    market_name=self.market_manager_args.market_name,
+                    asset_name=self.market_manager_args.asset_name,
+                    momentum_strategy=["MACD", "APO", "RSI", "STOCHRSI", "CPO"][i],
+                    initial_asset_mint=self.momentum_trader_args.initial_mint,
+                    order_intensity=self.momentum_trader_args.order_intensity,
+                    base_order_size=self.momentum_trader_args.order_volume,
+                    tag=i,
+                )
+                for i, party in enumerate(MOMENTUM_TRADER_AGENTS)
+            ]
+
+            # Setup agents for placing price-sensitive market orders
+            sensitive_market_order_traders = [
+                PriceSensitiveMarketOrderTrader(
+                    wallet_name=party.wallet_name,
+                    wallet_pass=party.wallet_pass,
+                    key_name=party.key_name,
+                    market_name=self.market_manager_args.market_name,
+                    asset_name=self.market_manager_args.asset_name,
+                    price_process_generator=iter(self.price_process),
+                    initial_asset_mint=self.sensitive_trader_args.initial_mint,
+                    buy_intensity=self.sensitive_trader_args.order_intensity[i],
+                    sell_intensity=self.sensitive_trader_args.order_intensity[i],
+                    base_order_size=self.sensitive_trader_args.order_volume[i],
+                    price_half_life=self.sensitive_trader_args.price_half_life[i],
+                    tag=i,
+                )
+                for i, party in enumerate(SENSITIVE_TRADER_AGENTS)
+            ]
+
+            agents = (
+                [market_manager, market_maker]
+                + auction_pass_agents
+                + random_market_order_traders
+                + momentum_market_order_traders
+                + sensitive_market_order_traders
+            )
+
+        else:
+            agents = []
+
+        if kwargs.get("agent", None) is not None:
+            # If a market and asset were not specified, use scenario config values
+            if kwargs["agent"].market_name is None:
+                kwargs["agent"].market_name = self.market_manager_args.market_name
+            if kwargs["agent"].asset_name is None:
+                kwargs["agent"].asset_name = self.market_manager_args.asset_name
+            # kwargs["agent"].tag = "agent"
+
+            agents.append(kwargs.get("agent", None))
 
         return {agent.name(): agent for agent in agents}
 
