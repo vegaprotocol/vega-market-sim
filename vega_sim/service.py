@@ -1068,6 +1068,18 @@ class VegaService(ABC):
         )
 
     @raw_data
+    def asset_info(
+        self,
+        asset_id: str,
+    ) -> vega_protos.assets.AssetDetails:
+        """
+        Output asset info.
+        """
+        return data_raw.asset_info(
+            asset_id=asset_id, data_client=self.trading_data_client_v2
+        )
+
+    @raw_data
     def market_data_from_feed(
         self,
         market_id: str,
