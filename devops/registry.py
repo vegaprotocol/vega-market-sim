@@ -5,6 +5,9 @@ Module contains preconfigured scenarios.
 """
 
 from devops.scenario import DevOpsScenario
+
+from vega_sim.scenario.common.agents import ArbitrageLiquidityProvider
+
 from devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
@@ -125,4 +128,18 @@ SCENARIOS = {
             randomise_history=False,
         ),
     ),
+}
+
+AGENTS = {
+    "arbitrage_liquidity_provider": lambda: ArbitrageLiquidityProvider(
+        wallet_name=None,
+        wallet_pass=None,
+        key_name=None,
+        market_name=None,
+        asset_name=None,
+        initial_asset_mint=1500,
+        commitment_ratio=0.8,
+        safety_factor=0.1,
+        fee=0.001,
+    )
 }

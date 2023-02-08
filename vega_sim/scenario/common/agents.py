@@ -2773,3 +2773,161 @@ class Snitch(StateAgent):
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)
             )
+
+
+class ArbitrageLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "arbitrage_liquidity_provider"
+
+    def __init__(
+        self,
+        wallet_name: str,
+        wallet_pass: str,
+        market_name: str,
+        asset_name: str,
+        initial_asset_mint: float = 1e5,
+        commitment_ratio: float = 0.8,
+        fee: float = 0.001,
+        safety_factor: float = 0.1,
+        state_update_freq=60,
+        tag: str = "",
+        key_name: str = None,
+    ):
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.initial_asset_mint = initial_asset_mint
+
+        self.curr_step = 0
+        self.state_update_freq = state_update_freq
+
+        self.fee = fee
+        self.safety_factor = safety_factor
+
+        self.commitment_ratio = commitment_ratio
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
+        super().initialise(vega=vega, create_wallet=create_wallet)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_wallet:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+
+        int_market_info = self.vega.market_info(market_id=self.market_id)
+        if self.market_id is None:
+            self.mkr_fee = 0
+            self.liq_fee = 0
+            self.inf_fee = 0
+        else:
+            int_market_info = self.vega.market_info(market_id=self.market_id)
+            self.mkr_fee = float(int_market_info.fees.factors.maker_fee)
+            self.liq_fee = float(int_market_info.fees.factors.liquidity_fee)
+            self.inf_fee = float(int_market_info.fees.factors.infrastructure_fee)
+
+        self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+        # Increment step
+        self.curr_step += 1
+
+        # Determine best-bid-price and best-ask-price
+        self.best_bid_price, self.best_ask_price = self.vega.best_prices(
+            market_id=self.market_id
+        )
+
+        # Determine fees
+        if self.state_update_freq and self.curr_step % self.state_update_freq == 0:
+            if self.market_id is None:
+                self.mkr_fee = 0
+                self.liq_fee = 0
+                self.inf_fee = 0
+            else:
+                int_market_info = self.vega.market_info(market_id=self.market_id)
+                self.mkr_fee = float(int_market_info.fees.factors.maker_fee)
+                self.liq_fee = float(int_market_info.fees.factors.liquidity_fee)
+                self.inf_fee = float(int_market_info.fees.factors.infrastructure_fee)
+        self.total_fees = self.mkr_fee + self.liq_fee + self.inf_fee
+
+        # Calculate the bid_depth and ask_depth
+        bid_offset = self.best_bid_price * self.total_fees * (1 + self.safety_factor)
+        ask_offset = self.best_ask_price * self.total_fees * (1 + self.safety_factor)
+
+        # Update the liquidity commitment
+        buy_specs = [
+            [
+                "PEGGED_REFERENCE_BEST_BID",
+                bid_offset,
+                1,
+            ]
+        ]
+        sell_specs = [
+            [
+                "PEGGED_REFERENCE_BEST_ASK",
+                ask_offset,
+                1,
+            ]
+        ]
+
+        # Determine current account balance
+        party_market_account = self.vega.party_account(
+            wallet_name=self.wallet_name,
+            key_name=self.key_name,
+            asset_id=self.asset_id,
+            market_id=self.market_id,
+        )
+
+        total = (
+            party_market_account.general
+            + party_market_account.margin
+            + party_market_account.bond
+        )
+
+        self.vega.submit_liquidity(
+            wallet_name=self.wallet_name,
+            key_name=self.key_name,
+            market_id=self.market_id,
+            commitment_amount=total * self.commitment_ratio,
+            fee=self.fee,
+            buy_specs=buy_specs,
+            sell_specs=sell_specs,
+        )
+
+        # Dump any position with market orders
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            key_name=self.key_name,
+            market_id=self.market_id,
+        )
+
+        open_volume = position.open_volume if position is not None else 0
+
+        if open_volume > 0:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                key_name=self.key_name,
+                market_id=self.market_id,
+                side="SIDE_SELL",
+                volume=abs(open_volume),
+            )
+
+        elif open_volume < 0:
+            self.vega.submit_market_order(
+                trading_wallet=self.wallet_name,
+                key_name=self.key_name,
+                market_id=self.market_id,
+                side="SIDE_BUY",
+                volume=abs(open_volume),
+            )
