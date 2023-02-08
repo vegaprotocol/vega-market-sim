@@ -166,7 +166,7 @@ class MarketEnvironment:
             }
         )
         # Start order monitoring only observing scenario markets and parties
-        vega.start_live_feeds(market_ids=market_ids, party_ids=party_ids)
+        vega.data_cache.start_live_feeds(market_ids=market_ids, party_ids=party_ids)
 
     def _run(
         self,

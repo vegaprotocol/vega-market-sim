@@ -578,9 +578,12 @@ def market_price_decimals(
     Returns:
         int, The number of decimal places the market uses
     """
-    return data_raw.market_info(
+    res = data_raw.market_info(
         market_id=market_id, data_client=data_client
     ).decimal_places
+    if res is None:
+        print("DP", res)
+    return res
 
 
 def market_position_decimals(
@@ -1109,8 +1112,8 @@ def _stream_handler(
     return conversion_fn(
         event,
         DecimalSpec(
-            price_decimals=mkt_price_dp.get(market_id),
-            position_decimals=mkt_pos_dp.get(market_id),
+            price_decimals=mkt_price_dp[market_id],
+            position_decimals=mkt_pos_dp[market_id],
             asset_decimals=asset_decimals,
         ),
     )

@@ -66,11 +66,6 @@ class DatanodeBehindError(Exception):
     pass
 
 
-def _queue_forwarder(source: Generator[Any], sink: Queue[Any]) -> None:
-    for elem in source:
-        sink.put(elem)
-
-
 def raw_data(fn):
     @wraps(fn)
     def wrapped_fn(self, *args, **kwargs):
@@ -1162,6 +1157,7 @@ class VegaService(ABC):
             market_id=market_id,
             data_client=self.trading_data_client_v2,
             market_data=self.data_cache.market_data_from_feed(market_id=market_id),
+            price_decimals=self.market_price_decimals[market_id],
         )
 
     def price_bounds(
@@ -1175,6 +1171,7 @@ class VegaService(ABC):
             market_id=market_id,
             data_client=self.trading_data_client_v2,
             market_data=self.data_cache.market_data_from_feed(market_id=market_id),
+            price_decimals=self.market_price_decimals[market_id],
         )
 
     def order_book_by_market(
@@ -1321,13 +1318,8 @@ class VegaService(ABC):
             key_name:
                 optional, str name of key in wallet to use
         """
-        asset_id = data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        ).tradable_instrument.instrument.future.settlement_asset
-
-        market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
+        asset_id = self.market_to_asset[market_id]
+        market_decimals = self.market_price_decimals[market_id]
 
         buy_specs = [
             (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs

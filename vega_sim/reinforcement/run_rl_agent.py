@@ -181,7 +181,8 @@ def _run(
                             logfile_pol_eval=logfile_pol_eval,
                             logfile_pol_imp=logfile_pol_imp,
                         )
-                logger.info("Recreating Vega instance to tidy up")
+                if it >= max_iterations:
+                    logger.info("Recreating Vega instance to tidy up")
 
     else:
         # EVALUATION OF AGENT

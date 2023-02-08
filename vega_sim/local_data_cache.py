@@ -4,8 +4,6 @@ import copy
 import logging
 import threading
 from collections import defaultdict
-from dataclasses import dataclass
-from functools import wraps
 from queue import Queue, Empty
 from itertools import product, chain
 from typing import (
@@ -67,10 +65,10 @@ def _queue_forwarder(
                 output = handlers[event.type](event)
                 if isinstance(output, (list, GeneratorType)):
                     for elem in output:
-                        sink.put(elem, block=False)
+                        sink.put(elem)
                 else:
-                    sink.put(output, block=False)
-    except Exception:
+                    sink.put(output)
+    except Exception as e:
         logger.debug("Data cache event bus closed")
 
 
@@ -120,12 +118,6 @@ class LocalDataCache:
 
         self.stream_registry = [
             (
-                (events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS,),
-                lambda evt: data.ledger_entries_subscription_handler(
-                    evt, self._asset_decimals
-                ),
-            ),
-            (
                 (events_protos.BUS_EVENT_TYPE_TRADE,),
                 lambda evt: data.trades_subscription_handler(
                     evt,
@@ -151,6 +143,12 @@ class LocalDataCache:
             ),
         ]
         self._high_load_stream_registry = [
+            (
+                (events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS,),
+                lambda evt: data.ledger_entries_subscription_handler(
+                    evt, self._asset_decimals
+                ),
+            ),
             (
                 (events_protos.BUS_EVENT_TYPE_TRANSFER,),
                 lambda evt: data.transfer_subscription_handler(
@@ -220,9 +218,20 @@ class LocalDataCache:
                         transfers_dict.setdefault(party_id, {})[transfer_id] = transfer
         return transfers_dict
 
-    def start_live_feeds(self, start_high_load_feeds: bool = False):
-        self.initialise_order_monitoring()
+    def start_live_feeds(
+        self,
+        market_id: Optional[str] = None,
+        party_id: Optional[str] = None,
+        start_high_load_feeds: bool = False,
+    ):
+        self.initialise_order_monitoring(
+            market_ids=[market_id] if market_id is not None else None,
+            party_ids=[party_id] if party_id is not None else None,
+        )
         self.initialise_transfer_monitoring()
+        self.initialise_market_data(
+            market_ids=[market_id] if market_id is not None else None,
+        )
 
         self._observation_thread = threading.Thread(
             target=self._monitor_stream, daemon=True
@@ -236,6 +245,8 @@ class LocalDataCache:
                 self.stream_registry
                 + (self._high_load_stream_registry if start_high_load_feeds else []),
                 self._aggregated_observation_feed,
+                market_id,
+                party_id,
             ),
             daemon=True,
         )
@@ -259,6 +270,12 @@ class LocalDataCache:
                     market_id=market_party_tuple[0],
                     party_id=market_party_tuple[1],
                     live_only=True,
+                    price_decimals=self._market_price_decimals[market_party_tuple[0]]
+                    if market_party_tuple[0] is not None
+                    else None,
+                    position_decimals=self._market_pos_decimals[market_party_tuple[0]]
+                    if market_party_tuple[0] is not None
+                    else None,
                 )
             )
 
@@ -267,6 +284,20 @@ class LocalDataCache:
                 self._live_order_state_from_feed.setdefault(
                     order.market_id, {}
                 ).setdefault(order.party_id, {})[order.id] = order
+
+    def initialise_market_data(
+        self,
+        market_ids: Optional[List[str]] = None,
+    ):
+        if market_ids is None:
+            market_ids = [
+                market.id for market in data_raw.all_markets(self._trading_data_client)
+            ]
+        with self.market_data_lock:
+            for market_id in market_ids:
+                self.market_data_from_feed_store[market_id] = data_raw.market_data(
+                    market_id, data_client=self._trading_data_client
+                )
 
     def initialise_transfer_monitoring(
         self,

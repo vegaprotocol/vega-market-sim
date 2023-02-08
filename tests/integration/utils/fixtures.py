@@ -161,5 +161,5 @@ def vega_service_with_high_volume():
 
 @pytest.fixture
 def vega_service_with_high_volume_with_market(vega_service_with_high_volume):
-    build_basic_market(vega_service, initial_price=0.3)
-    return vega_service
+    build_basic_market(vega_service_with_high_volume, initial_price=0.3)
+    return vega_service_with_high_volume

@@ -4,6 +4,7 @@ from tests.integration.utils.fixtures import (
     vega_service_with_market,
     vega_service,
     create_and_faucet_wallet,
+    vega_service_with_high_volume,
     vega_service_with_high_volume_with_market,
     ASSET_NAME,
     WalletConfig,
