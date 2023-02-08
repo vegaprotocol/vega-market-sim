@@ -581,8 +581,6 @@ def market_price_decimals(
     res = data_raw.market_info(
         market_id=market_id, data_client=data_client
     ).decimal_places
-    if res is None:
-        print("DP", res)
     return res
 
 
@@ -1107,13 +1105,15 @@ def _stream_handler(
     asset_dp = asset_dp if asset_dp is not None else {}
 
     event = extraction_fn(stream_item)
+
     market_id = getattr(event, "market_id", None)
     asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset.get(market_id)))
+
     return conversion_fn(
         event,
         DecimalSpec(
-            price_decimals=mkt_price_dp[market_id],
-            position_decimals=mkt_pos_dp[market_id],
+            price_decimals=mkt_price_dp[market_id] if market_id is not None else None,
+            position_decimals=mkt_pos_dp[market_id] if market_id is not None else None,
             asset_decimals=asset_decimals,
         ),
     )

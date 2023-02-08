@@ -69,6 +69,7 @@ def _queue_forwarder(
                 else:
                     sink.put(output)
     except Exception as e:
+        logger.exception(e)
         logger.debug("Data cache event bus closed")
 
 
@@ -350,6 +351,7 @@ class LocalDataCache:
                                 ][update.id] = update
 
                 elif isinstance(update, data.Transfer):
+                    print(update)
                     with self.transfers_lock:
                         self._transfer_state_from_feed.setdefault(update.party_to, {})[
                             update.id
