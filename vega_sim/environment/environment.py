@@ -30,7 +30,12 @@ import numpy as np
 from collections import namedtuple
 from typing import Any, Callable, List, Optional
 
-from vega_sim.environment.agent import Agent, StateAgent, VegaState
+from vega_sim.environment.agent import (
+    Agent,
+    StateAgent,
+    StateAgentWithWallet,
+    VegaState,
+)
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
@@ -190,6 +195,10 @@ class MarketEnvironment:
 
         for agent in self.agents:
             agent.initialise(vega=vega)
+            if isinstance(agent, StateAgentWithWallet):
+                logging.info(
+                    f"{agent.name()} initialised with public_key = {vega.wallet.public_key(name=agent.wallet_name, key_name=agent.key_name)}"
+                )
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
