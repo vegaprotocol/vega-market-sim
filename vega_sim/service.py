@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import threading
 import time
 from abc import ABC
 from collections import defaultdict
@@ -31,6 +30,7 @@ from vega_sim.api.helpers import (
     wait_for_core_catchup,
     wait_for_datanode_sync,
 )
+from vega_sim.local_data_cache import LocalDataCache
 from vega_sim.proto.vega.commands.v1.commands_pb2 import (
     OrderAmendment,
     OrderCancellation,
@@ -66,11 +66,6 @@ class DatanodeBehindError(Exception):
     pass
 
 
-def _queue_forwarder(source: Generator[Any], sink: Queue[Any]) -> None:
-    for elem in source:
-        sink.put(elem)
-
-
 def raw_data(fn):
     @wraps(fn)
     def wrapped_fn(self, *args, **kwargs):
@@ -99,6 +94,7 @@ class VegaService(ABC):
         can_control_time: bool = False,
         warn_on_raw_data_access: bool = True,
         seconds_per_block: int = 1,
+        listen_for_high_volume_stream_updates: bool = False,
     ):
         """A generic service for accessing a set of Vega processes.
 
@@ -122,15 +118,23 @@ class VegaService(ABC):
                     converted by the user.
                     (e.g. 10.1 with decimal places set to 2 would be 1010)
             seconds_per_block:
-                int, default 1, How long each block represents in seconds. For a nullchain
-                    service this can be known exactly, for anything else it will be an
-                    estimate. Used for waiting/forwarding time and determining how far
-                    forwards to place proposals starting/ending.
+                int, default 1, How long each block represents in seconds. For a
+                    nullchain service this can be known exactly, for anything
+                    else it will be an estimate. Used for waiting/forwarding time
+                    and determining how far forwards to place proposals
+                    starting/ending.
+            listen_for_high_volume_stream_updates:
+                bool, default False, Whether to listen for high volume stream updates.
+                    These are generally less necessary, but contain large numbers of
+                    updates per block, such as all ledger transactions. For a network
+                    running at ~1s/block these are likely to be fine, but can be a
+                    hindrance working at full nullchain speed.
 
         """
         self._core_client = None
         self._core_state_client = None
         self._trading_data_client_v2 = None
+        self._local_data_cache = None
         self.can_control_time = can_control_time
         self.warn_on_raw_data_access = warn_on_raw_data_access
 
@@ -138,24 +142,10 @@ class VegaService(ABC):
         self._market_pos_decimals = None
         self._asset_decimals = None
         self._market_to_asset = None
+        self._listen_for_high_volume_stream_updates = (
+            listen_for_high_volume_stream_updates
+        )
         self.seconds_per_block = seconds_per_block
-
-        self.orders_lock = threading.RLock()
-        self.transfers_lock = threading.RLock()
-        self.market_data_lock = threading.RLock()
-        self.trades_lock = threading.RLock()
-        self.ledger_entries_lock = threading.RLock()
-        self._live_order_state_from_feed = {}
-        self._dead_order_state_from_feed = {}
-        self.market_data_from_feed_store = {}
-        self._transfer_state_from_feed = {}
-        self._trades_from_feed: List[data.Trade] = []
-        self._ledger_entries_from_feed: List[data.LedgerEntry] = []
-
-        self._observation_feeds: List[Queue[Any]] = []
-        self._observation_thread = None
-        self._aggregated_observation_feed: Queue[Any] = Queue()
-        self._kill_thread_sig = threading.Event()
 
     @property
     def market_price_decimals(self) -> int:
@@ -196,6 +186,22 @@ class VegaService(ABC):
                 ).tradable_instrument.instrument.future.settlement_asset
             )
         return self._market_to_asset
+
+    @property
+    def data_cache(self) -> LocalDataCache:
+        if self._local_data_cache is None:
+            self._local_data_cache = LocalDataCache(
+                self.trading_data_client_v2,
+                self.trading_data_client_v2,
+                self.market_pos_decimals,
+                self.market_price_decimals,
+                self.asset_decimals,
+                self.market_to_asset,
+            )
+            self._local_data_cache.start_live_feeds(
+                start_high_load_feeds=self._listen_for_high_volume_stream_updates
+            )
+        return self._local_data_cache
 
     @property
     def data_node_rest_url(self) -> str:
@@ -272,7 +278,8 @@ class VegaService(ABC):
         self.wait_for_datanode_sync()
 
     def stop(self) -> None:
-        self._kill_thread_sig.set()
+        if self._local_data_cache is not None:
+            self._local_data_cache.stop()
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -1075,7 +1082,7 @@ class VegaService(ABC):
         """
         Output market info.
         """
-        return self.market_data_from_feed_store.get(market_id, None)
+        return self.data_cache.market_data_from_feed(market_id)
 
     @raw_data
     def market_data(
@@ -1149,7 +1156,8 @@ class VegaService(ABC):
         return data.best_prices(
             market_id=market_id,
             data_client=self.trading_data_client_v2,
-            market_data=self.market_data_from_feed(market_id=market_id),
+            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
+            price_decimals=self.market_price_decimals[market_id],
         )
 
     def price_bounds(
@@ -1162,7 +1170,8 @@ class VegaService(ABC):
         return data.price_bounds(
             market_id=market_id,
             data_client=self.trading_data_client_v2,
-            market_data=self.market_data_from_feed(market_id=market_id),
+            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
+            price_decimals=self.market_price_decimals[market_id],
         )
 
     def order_book_by_market(
@@ -1309,13 +1318,8 @@ class VegaService(ABC):
             key_name:
                 optional, str name of key in wallet to use
         """
-        asset_id = data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        ).tradable_instrument.instrument.future.settlement_asset
-
-        market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
+        asset_id = self.market_to_asset[market_id]
+        market_decimals = self.market_price_decimals[market_id]
 
         buy_specs = [
             (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
@@ -1420,11 +1424,7 @@ class VegaService(ABC):
 
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
-        with self.orders_lock:
-            order_dict = copy.copy(self._live_order_state_from_feed)
-            if not live_only:
-                order_dict.update(self._dead_order_state_from_feed)
-        return order_dict
+        return self.data_cache.order_status_from_feed(live_only=live_only)
 
     def orders_for_party_from_feed(
         self,
@@ -1434,23 +1434,21 @@ class VegaService(ABC):
         key_name: Optional[str] = None,
     ) -> Dict[str, data.Order]:
         party_id = self.wallet.public_key(wallet_name, key_name)
-        return (
-            self.order_status_from_feed(live_only=live_only)
-            .get(market_id, {})
-            .get(party_id, {})
+        return self.data_cache.orders_for_party_from_feed(
+            party_id=party_id, market_id=market_id, live_only=live_only
         )
 
-    def transfer_status_from_feed(self, live_only: bool = True):
-        datetime = self.get_blockchain_time()
-
-        with self.transfers_lock:
-            transfers_dict = {}
-            for party_id, party_transfers in self._transfer_state_from_feed.items():
-                for transfer_id, transfer in party_transfers.items():
-                    deliver_on = int(transfer.one_off.deliver_on)
-                    if not live_only or (deliver_on != 0 and datetime < deliver_on):
-                        transfers_dict.setdefault(party_id, {})[transfer_id] = transfer
-        return transfers_dict
+    def transfer_status_from_feed(
+        self, live_only: bool = True, blockchain_time: Optional[int] = None
+    ):
+        blockchain_time = (
+            blockchain_time
+            if blockchain_time is not None or not live_only
+            else self.get_blockchain_time()
+        )
+        return self.data_cache.transfer_status_from_feed(
+            live_only=live_only, blockchain_time=blockchain_time
+        )
 
     @raw_data
     def liquidity_provisions(
@@ -1499,176 +1497,6 @@ class VegaService(ABC):
         return self.liquidity_provisions(
             market_id=market_id, party_id=self.wallet.public_key(wallet_name, key_name)
         )
-
-    def start_live_feeds(self):
-        self.start_order_monitoring()
-        self.start_transfer_monitoring()
-        self.start_trade_monitoring()
-        self.start_market_data_monitoring()
-        self.start_ledger_entries_monitoring()
-
-        self._merge_streams()
-        self._observation_thread = threading.Thread(target=self._monitor_stream)
-        self._observation_thread.start()
-
-    def start_order_monitoring(
-        self,
-        market_ids: Optional[List[str]] = None,
-        party_ids: Optional[List[str]] = None,
-        use_core_client: bool = False,
-    ):
-        if use_core_client:
-            data_client = self.core_client
-        else:
-            data_client = self.trading_data_client_v2
-
-        order_queue = data.order_subscription(
-            data_client,
-            self.trading_data_client_v2,
-        )
-
-        base_orders = []
-        for market_party_tuple in list(
-            product(
-                (market_ids if market_ids is not None else [None]),
-                (party_ids if party_ids is not None else [None]),
-            )
-        ):
-            base_orders.extend(
-                data.list_orders(
-                    data_client=self.trading_data_client_v2,
-                    market_id=market_party_tuple[0],
-                    party_id=market_party_tuple[1],
-                    live_only=True,
-                )
-            )
-
-        with self.orders_lock:
-            for order in base_orders:
-                self._live_order_state_from_feed.setdefault(
-                    order.market_id, {}
-                ).setdefault(order.party_id, {})[order.id] = order
-
-        self._observation_feeds.append(order_queue)
-
-    def start_market_data_monitoring(
-        self,
-    ):
-        data_queue = data_raw.market_data_subscription(
-            self.core_client,
-        )
-        self._observation_feeds.append(data_queue)
-
-    def start_transfer_monitoring(
-        self,
-    ):
-        transfer_queue = data.transfer_subscription(
-            self.core_client,
-            self.trading_data_client_v2,
-        )
-
-        base_transfers = []
-
-        base_transfers.extend(
-            data.list_transfers(data_client=self.trading_data_client_v2)
-        )
-
-        with self.transfers_lock:
-            for t in base_transfers:
-                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
-        self._observation_feeds.append(transfer_queue)
-
-    def start_trade_monitoring(
-        self,
-    ):
-        trade_queue = data.trades_subscription(
-            self.core_client,
-            self.trading_data_client_v2,
-        )
-
-        base_trades = []
-
-        with self.trades_lock:
-            self._trades_from_feed = base_trades
-        self._observation_feeds.append(trade_queue)
-
-    def _merge_streams(self) -> None:
-        self._merge_threads = []
-        for feed in self._observation_feeds:
-            merger = threading.Thread(
-                target=_queue_forwarder,
-                args=(feed, self._aggregated_observation_feed),
-                daemon=True,
-            )
-            self._merge_threads.append(merger)
-            merger.start()
-
-    def start_ledger_entries_monitoring(
-        self,
-    ):
-        self.ledger_entries_queue = data.ledger_entries_subscription(
-            self.core_client,
-            self.trading_data_client_v2,
-        )
-
-        self._observation_feeds.append(self.ledger_entries_queue)
-
-    def _monitor_stream(self) -> None:
-        while True:
-            if self._kill_thread_sig.is_set():
-                return
-            try:
-                update = self._aggregated_observation_feed.get(timeout=1)
-            except Empty:
-                continue
-            else:
-                if isinstance(update, data.Order):
-                    with self.orders_lock:
-                        if update.version >= getattr(
-                            self._live_order_state_from_feed.setdefault(
-                                update.market_id, {}
-                            )
-                            .setdefault(update.party_id, {})
-                            .get(update.id, None),
-                            "version",
-                            0,
-                        ):
-                            if (
-                                not update.status
-                                == vega_protos.vega.Order.Status.STATUS_ACTIVE
-                            ):
-                                # If the order is dead, pop any we've seen from
-                                # live state
-                                self._live_order_state_from_feed[update.market_id][
-                                    update.party_id
-                                ].pop(update.id, None)
-
-                                # And add to dead instead
-                                self._dead_order_state_from_feed.setdefault(
-                                    update.market_id, {}
-                                ).setdefault(update.party_id, {})[update.id] = update
-                            else:
-                                self._live_order_state_from_feed[update.market_id][
-                                    update.party_id
-                                ][update.id] = update
-
-                elif isinstance(update, data.Transfer):
-                    with self.transfers_lock:
-                        self._transfer_state_from_feed.setdefault(update.party_to, {})[
-                            update.id
-                        ] = update
-
-                elif isinstance(update, data.Trade):
-                    with self.trades_lock:
-                        self._trades_from_feed.append(update)
-
-                elif isinstance(update, vega_protos.vega.MarketData):
-                    with self.market_data_lock:
-                        self.market_data_from_feed_store[update.market] = update
-
-                elif isinstance(update, data.LedgerEntry):
-                    with self.ledger_entries_lock:
-                        self._ledger_entries_from_feed.append(update)
 
     def margin_levels(
         self,
@@ -1724,32 +1552,19 @@ class VegaService(ABC):
         key_name_to: Optional[str] = None,
         transfer_type: Optional[str] = None,
     ) -> List[data.LedgerEntry]:
-        results = []
-
-        for ledger_entry in self._ledger_entries_from_feed:
-            if (
-                transfer_type is not None
-                and transfer_type != ledger_entry.transfer_type
-            ):
-                continue
-            if (
-                wallet_name_from is not None
-                and self.wallet.public_key(
-                    name=wallet_name_from, key_name=key_name_from
-                )
-                != ledger_entry.from_account.owner
-            ):
-                continue
-            if (
-                wallet_name_to is not None
-                and self.wallet.public_key(name=wallet_name_to, key_name=key_name_to)
-                != ledger_entry.to_account.owner
-            ):
-                continue
-
-            results.append(copy.copy(ledger_entry))
-
-        return results
+        return self.data_cache.get_ledger_entries_from_stream(
+            party_id_from=self.wallet.public_key(
+                name=wallet_name_from, key_name=key_name_from
+            )
+            if wallet_name_from is not None
+            else None,
+            party_id_to=self.wallet.public_key(
+                name=wallet_name_to, key_name=key_name_to
+            )
+            if wallet_name_to is not None
+            else None,
+            transfer_type=transfer_type,
+        )
 
     def get_trades_from_stream(
         self,
@@ -1783,22 +1598,12 @@ class VegaService(ABC):
             if key_name is not None
             else None
         )
-        with self.trades_lock:
-            results = []
-            for trade in self._trades_from_feed:
-                if party_id is not None and party_id not in (trade.buyer, trade.seller):
-                    continue
-                if market_id is not None and trade.market_id != market_id:
-                    continue
-                if order_id is not None and order_id not in (
-                    trade.buy_order,
-                    trade.sell_order,
-                ):
-                    continue
-                if exclude_trade_ids is not None and trade.id in exclude_trade_ids:
-                    continue
-                results.append(trade)
-        return results
+        return self.data_cache.get_trades_from_stream(
+            market_id=market_id,
+            party_id=party_id,
+            order_id=order_id,
+            exclude_trade_ids=exclude_trade_ids,
+        )
 
     def get_trades(
         self,

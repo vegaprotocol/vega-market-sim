@@ -20,7 +20,7 @@ from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict, Any
 from numpy.typing import ArrayLike
 from vega_sim.api.data import Order, AccountData, MarketDepth, Trade
 
-from vega_sim.environment import VegaState
+from vega_sim.environment import VegaState, MarketState
 from vega_sim.environment.agent import StateAgentWithWallet, StateAgent, Agent
 from vega_sim.null_service import VegaServiceNull, VegaService
 from vega_sim.network_service import VegaServiceNetwork
@@ -1182,11 +1182,15 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         if self.orders_from_stream:
             orders = (
-                vega_state.market_state.get(self.market_id, {})
-                .orders.get(
-                    self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
+                (
+                    vega_state.market_state[self.market_id]
+                    .orders.get(
+                        self.vega.wallet.public_key(self.wallet_name, self.key_name), {}
+                    )
+                    .values()
                 )
-                .values()
+                if self.market_id in vega_state.market_state
+                else []
             )
         else:
             orders = self.vega.list_orders(

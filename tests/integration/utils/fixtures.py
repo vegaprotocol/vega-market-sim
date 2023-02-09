@@ -136,6 +136,7 @@ def vega_service():
         run_with_console=False,
         retain_log_files=True,
         transactions_per_block=1,
+        listen_for_high_volume_stream_updates=False,
     ) as vega:
         yield vega
 
@@ -144,3 +145,21 @@ def vega_service():
 def vega_service_with_market(vega_service):
     build_basic_market(vega_service, initial_price=0.3)
     return vega_service
+
+
+@pytest.fixture
+def vega_service_with_high_volume():
+    with VegaServiceNull(
+        warn_on_raw_data_access=False,
+        run_with_console=False,
+        retain_log_files=True,
+        transactions_per_block=1,
+        listen_for_high_volume_stream_updates=True,
+    ) as vega:
+        yield vega
+
+
+@pytest.fixture
+def vega_service_with_high_volume_with_market(vega_service_with_high_volume):
+    build_basic_market(vega_service_with_high_volume, initial_price=0.3)
+    return vega_service_with_high_volume

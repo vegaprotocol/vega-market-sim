@@ -1,10 +1,22 @@
-import pytest
+import functools
+import warnings
 
 from vega_sim.quant.quant import probability_of_trading
 
 import vega_sim.proto.vega as vega_protos
 
 
+def suppress_deprecation(fn):
+    @functools.wraps(fn)
+    def caught_warning_fn(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=DeprecationWarning)
+            return fn(*args, **kwargs)
+
+    return caught_warning_fn
+
+
+@suppress_deprecation
 def test_probability_of_trading_for_buy_order_below_min_valid_price():
     result = probability_of_trading(
         price=1030,
@@ -22,6 +34,7 @@ def test_probability_of_trading_for_buy_order_below_min_valid_price():
     assert result == 0.001
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_buy_order_at_min_valid_price():
     # Test at limit
     result = probability_of_trading(
@@ -40,6 +53,7 @@ def test_probability_of_trading_for_buy_order_at_min_valid_price():
     assert result == 0.001
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_buy_order_at_best_bid_price():
     result = probability_of_trading(
         price=1045,
@@ -57,6 +71,7 @@ def test_probability_of_trading_for_buy_order_at_best_bid_price():
     assert result == 0.5
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_buy_order_above_best_bid_price():
     result = probability_of_trading(
         price=1050,
@@ -74,6 +89,7 @@ def test_probability_of_trading_for_buy_order_above_best_bid_price():
     assert result == 0.5
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_sell_order_above_best_ask_price():
     result = probability_of_trading(
         price=1050,
@@ -91,6 +107,7 @@ def test_probability_of_trading_for_sell_order_above_best_ask_price():
     assert result == 0.5
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_sell_order_at_best_ask_price():
     result = probability_of_trading(
         price=1055,
@@ -108,6 +125,7 @@ def test_probability_of_trading_for_sell_order_at_best_ask_price():
     assert result == 0.5
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_sell_order_at_max_valid_price():
     result = probability_of_trading(
         price=1175,
@@ -125,6 +143,7 @@ def test_probability_of_trading_for_sell_order_at_max_valid_price():
     assert result == 0.001
 
 
+@suppress_deprecation
 def test_probability_of_trading_for_sell_order_above_max_valid_price():
     result = probability_of_trading(
         price=1180,

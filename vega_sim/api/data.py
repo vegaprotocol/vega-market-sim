@@ -108,6 +108,13 @@ MarginLevels = namedtuple(
 
 
 @dataclass
+class DecimalSpec:
+    position_decimals: Optional[int] = None
+    price_decimals: Optional[int] = None
+    asset_decimals: Optional[int] = None
+
+
+@dataclass
 class LedgerEntry:
     from_account: vega_protos.vega.AccountDetails
     to_account: vega_protos.vega.AccountDetails
@@ -183,11 +190,13 @@ def _ledger_entry_from_proto(
 
 def _aggregated_ledger_entry_from_proto(
     ledger_entry: data_node_protos_v2.trading_data.AggregatedLedgerEntry,
-    asset_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> AggregatedLedgerEntry:
     return AggregatedLedgerEntry(
         timestamp=ledger_entry.timestamp,
-        quantity=num_from_padded_int(ledger_entry.quantity, asset_decimals),
+        quantity=num_from_padded_int(
+            ledger_entry.quantity, decimal_spec.asset_decimals
+        ),
         transfer_type=ledger_entry.transfer_type,
         asset_id=ledger_entry.asset_id,
         from_account_type=ledger_entry.from_account_type,
@@ -201,15 +210,13 @@ def _aggregated_ledger_entry_from_proto(
 
 def _trade_from_proto(
     trade: vega_protos.vega.Trade,
-    price_decimals: int,
-    position_decimals: int,
-    asset_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> Trade:
     return Trade(
         id=trade.id,
         market_id=trade.market_id,
-        price=num_from_padded_int(trade.price, price_decimals),
-        size=num_from_padded_int(trade.size, position_decimals),
+        price=num_from_padded_int(trade.price, decimal_spec.price_decimals),
+        size=num_from_padded_int(trade.size, decimal_spec.position_decimals),
         buyer=trade.buyer,
         seller=trade.seller,
         aggressor=trade.aggressor,
@@ -218,21 +225,25 @@ def _trade_from_proto(
         timestamp=trade.timestamp,
         trade_type=trade.type,
         buyer_fee=Fee(
-            maker_fee=num_from_padded_int(trade.buyer_fee.maker_fee, asset_decimals),
+            maker_fee=num_from_padded_int(
+                trade.buyer_fee.maker_fee, decimal_spec.asset_decimals
+            ),
             infrastructure_fee=num_from_padded_int(
-                trade.buyer_fee.infrastructure_fee, asset_decimals
+                trade.buyer_fee.infrastructure_fee, decimal_spec.asset_decimals
             ),
             liquidity_fee=num_from_padded_int(
-                trade.buyer_fee.liquidity_fee, asset_decimals
+                trade.buyer_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
         ),
         seller_fee=Fee(
-            maker_fee=num_from_padded_int(trade.seller_fee.maker_fee, asset_decimals),
+            maker_fee=num_from_padded_int(
+                trade.seller_fee.maker_fee, decimal_spec.asset_decimals
+            ),
             infrastructure_fee=num_from_padded_int(
-                trade.seller_fee.infrastructure_fee, asset_decimals
+                trade.seller_fee.infrastructure_fee, decimal_spec.asset_decimals
             ),
             liquidity_fee=num_from_padded_int(
-                trade.seller_fee.liquidity_fee, asset_decimals
+                trade.seller_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
         ),
         buyer_auction_batch=trade.buyer_auction_batch,
@@ -241,16 +252,20 @@ def _trade_from_proto(
 
 
 def _margin_level_from_proto(
-    margin_level: vega_protos.vega.MarginLevels, asset_decimals: int
+    margin_level: vega_protos.vega.MarginLevels, decimal_spec: DecimalSpec
 ) -> MarginLevels:
     return MarginLevels(
         maintenance_margin=num_from_padded_int(
-            margin_level.maintenance_margin, asset_decimals
+            margin_level.maintenance_margin, decimal_spec.asset_decimals
         ),
-        search_level=num_from_padded_int(margin_level.search_level, asset_decimals),
-        initial_margin=num_from_padded_int(margin_level.initial_margin, asset_decimals),
+        search_level=num_from_padded_int(
+            margin_level.search_level, decimal_spec.asset_decimals
+        ),
+        initial_margin=num_from_padded_int(
+            margin_level.initial_margin, decimal_spec.asset_decimals
+        ),
         collateral_release_level=num_from_padded_int(
-            margin_level.collateral_release_level, asset_decimals
+            margin_level.collateral_release_level, decimal_spec.asset_decimals
         ),
         party_id=margin_level.party_id,
         market_id=margin_level.market_id,
@@ -260,16 +275,17 @@ def _margin_level_from_proto(
 
 
 def _order_from_proto(
-    order: vega_protos.vega.Order, price_decimals: int, position_decimals: int
+    order: vega_protos.vega.Order,
+    decimal_spec: DecimalSpec,
 ) -> Order:
     return Order(
         id=order.id,
-        price=num_from_padded_int(order.price, price_decimals),
-        size=num_from_padded_int(order.size, position_decimals),
+        price=num_from_padded_int(order.price, decimal_spec.price_decimals),
+        size=num_from_padded_int(order.size, decimal_spec.position_decimals),
         reference=order.reference,
         side=order.side,
         status=order.status,
-        remaining=num_from_padded_int(order.remaining, position_decimals),
+        remaining=num_from_padded_int(order.remaining, decimal_spec.position_decimals),
         time_in_force=order.time_in_force,
         order_type=order.type,
         created_at=order.created_at,
@@ -283,26 +299,29 @@ def _order_from_proto(
 
 def _position_from_proto(
     position: vega_protos.vega.Position,
-    position_decimals: int,
-    asset_decimals: int,
-    price_decimals: int,
+    decimal_spec: DecimalSpec,
 ) -> Position:
     return Position(
         party_id=position.party_id,
         market_id=position.market_id,
-        open_volume=num_from_padded_int(position.open_volume, position_decimals),
-        realised_pnl=num_from_padded_int(position.realised_pnl, asset_decimals),
-        unrealised_pnl=num_from_padded_int(position.unrealised_pnl, asset_decimals),
+        open_volume=num_from_padded_int(
+            position.open_volume, decimal_spec.position_decimals
+        ),
+        realised_pnl=num_from_padded_int(
+            position.realised_pnl, decimal_spec.asset_decimals
+        ),
+        unrealised_pnl=num_from_padded_int(
+            position.unrealised_pnl, decimal_spec.asset_decimals
+        ),
         average_entry_price=num_from_padded_int(
-            position.average_entry_price, price_decimals
+            position.average_entry_price, decimal_spec.price_decimals
         ),
         updated_at=position.updated_at,
     )
 
 
 def _transfer_from_proto(
-    transfer: vega_protos.vega.Transfer,
-    asset_decimals: int,
+    transfer: vega_protos.vega.Transfer, decimal_spec: DecimalSpec
 ) -> Transfer:
     return Transfer(
         id=transfer.id,
@@ -311,7 +330,7 @@ def _transfer_from_proto(
         party_to=transfer.to,
         to_account_type=transfer.to_account_type,
         asset=transfer.asset,
-        amount=num_from_padded_int(transfer.amount, asset_decimals),
+        amount=num_from_padded_int(transfer.amount, decimal_spec.asset_decimals),
         reference=transfer.reference,
         status=transfer.status,
         timestamp=transfer.timestamp,
@@ -380,9 +399,11 @@ def positions_by_market(
         # Convert raw proto into a market-sim Position object
         positions[pos.market_id] = _position_from_proto(
             position=pos,
-            price_decimals=market_price_decimals_map[pos.market_id],
-            position_decimals=market_position_decimals_map[pos.market_id],
-            asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
+            decimal_spec=DecimalSpec(
+                price_decimals=market_price_decimals_map[pos.market_id],
+                position_decimals=market_position_decimals_map[pos.market_id],
+                asset_decimals=asset_decimals_map[market_to_asset_map[pos.market_id]],
+            ),
         )
 
     if market_id is None:
@@ -557,9 +578,10 @@ def market_price_decimals(
     Returns:
         int, The number of decimal places the market uses
     """
-    return data_raw.market_info(
+    res = data_raw.market_info(
         market_id=market_id, data_client=data_client
     ).decimal_places
+    return res
 
 
 def market_position_decimals(
@@ -755,8 +777,10 @@ def list_orders(
 
         converted_order = _order_from_proto(
             order,
-            price_decimals=mkt_price_dp[order.market_id],
-            position_decimals=mkt_pos_dp[order.market_id],
+            decimal_spec=DecimalSpec(
+                price_decimals=mkt_price_dp[order.market_id],
+                position_decimals=mkt_pos_dp[order.market_id],
+            ),
         )
         output_orders.append(converted_order)
     return output_orders
@@ -810,8 +834,10 @@ def all_orders(
             continue
         converted_order = _order_from_proto(
             order,
-            price_decimals=mkt_price_dp[order.market_id],
-            position_decimals=mkt_pos_dp[order.market_id],
+            DecimalSpec(
+                price_decimals=mkt_price_dp[order.market_id],
+                position_decimals=mkt_pos_dp[order.market_id],
+            ),
         )
         output_orders.append(converted_order)
     return output_orders
@@ -924,96 +950,6 @@ def market_depth(
     )
 
 
-def order_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-    market_id: Optional[str] = None,
-    party_id: Optional[str] = None,
-) -> Iterable[Order]:
-    """Subscribe to a stream of Order updates from the data-node.
-    The stream of orders returned from this function is an iterable which
-    does not end and will continue to tick another order update whenever
-    one is received.
-
-    Args:
-        market_id:
-            Optional[str], If provided, only update orders from this market
-        party_id:
-            Optional[str], If provided, only update orders from this party
-    Returns:
-        Iterable[Order], Infinite iterable of order updates
-    """
-
-    order_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_ORDER],
-    )
-
-    def _order_gen(
-        order_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    ) -> Iterable[Order]:
-        mkt_pos_dp = {}
-        mkt_price_dp = {}
-        try:
-            for order_list in order_stream:
-                for bus_event in order_list.events:
-                    order = bus_event.order
-                    if order.market_id not in mkt_pos_dp:
-                        mkt_pos_dp[order.market_id] = market_position_decimals(
-                            market_id=order.market_id, data_client=trading_data_client
-                        )
-                        mkt_price_dp[order.market_id] = market_price_decimals(
-                            market_id=order.market_id, data_client=trading_data_client
-                        )
-                    yield _order_from_proto(
-                        order,
-                        mkt_price_dp[order.market_id],
-                        mkt_pos_dp[order.market_id],
-                    )
-        except Exception as _:
-            logger.info("Order subscription closed")
-            return
-
-    return _order_gen(order_stream=order_stream)
-
-
-def transfer_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-    market_id: Optional[str] = None,
-    party_id: Optional[str] = None,
-) -> Iterable[Order]:
-    transfer_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_TRANSFER],
-        market_id=market_id,
-        party_id=party_id,
-    )
-
-    def _transfer_gen(
-        transfer_stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    ) -> Iterable[Transfer]:
-        asset_dp = {}
-        try:
-            for transfer_list in transfer_stream:
-                for bus_event in transfer_list.events:
-                    transfer = bus_event.transfer
-                    if transfer.asset not in asset_dp:
-                        asset_dp[transfer.asset] = get_asset_decimals(
-                            asset_id=transfer.asset,
-                            data_client=trading_data_client,
-                        )
-                    yield _transfer_from_proto(
-                        transfer=transfer,
-                        asset_decimals=asset_dp[transfer.asset],
-                    )
-        except Exception as _:
-            logger.info("Transfer subscription closed")
-            return
-
-    return _transfer_gen(transfer_stream=transfer_stream)
-
-
 def has_liquidity_provision(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
@@ -1050,7 +986,9 @@ def margin_levels(
                 asset_id=margin.asset, data_client=data_client
             )
         res_margins.append(
-            _margin_level_from_proto(margin, asset_decimals=asset_dp[margin.asset])
+            _margin_level_from_proto(
+                margin, DecimalSpec(asset_decimals=asset_dp[margin.asset])
+            )
         )
     return res_margins
 
@@ -1094,9 +1032,11 @@ def get_trades(
         res_trades.append(
             _trade_from_proto(
                 trade,
-                price_decimals=market_price_decimals_map[trade.market_id],
-                position_decimals=market_position_decimals_map[trade.market_id],
-                asset_decimals=market_asset_decimals_map[trade.market_id],
+                DecimalSpec(
+                    price_decimals=market_price_decimals_map[trade.market_id],
+                    position_decimals=market_position_decimals_map[trade.market_id],
+                    asset_decimals=market_asset_decimals_map[trade.market_id],
+                ),
             )
         )
     return res_trades
@@ -1140,114 +1080,43 @@ def list_transfers(
             asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
             )
-
         res_transfers.append(
             _transfer_from_proto(
-                transfer=transfer, asset_decimals=asset_dp[transfer.asset]
+                transfer=transfer,
+                decimal_spec=DecimalSpec(asset_decimals=asset_dp[transfer.asset]),
             )
         )
 
     return res_transfers
 
 
-def trades_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-) -> Iterable[Trade]:
-    """Subscribe to a stream of Order updates from the data-node.
-    The stream of orders returned from this function is an iterable which
-    does not end and will continue to tick another order update whenever
-    one is received.
-
-    Returns:
-        Iterable[Trade], Infinite iterable of trade updates
-    """
-
-    trade_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_TRADE],
-    )
-
-    return _stream_gen(
-        stream=trade_stream,
-        trading_data_client=trading_data_client,
-        extraction_fn=lambda evt: evt.trade,
-        conversion_fn=_trade_from_proto,
-    )
-
-
-def ledger_entries_subscription(
-    data_client: vac.VegaCoreClient,
-    trading_data_client: vac.VegaTradingDataClientV2,
-) -> Iterable[AggregatedLedgerEntry]:
-    ledger_movements_stream = data_raw.observe_event_bus(
-        data_client=data_client,
-        type=[events_protos.BUS_EVENT_TYPE_LEDGER_MOVEMENTS],
-    )
-
-    def _ledger_entries_gen(
-        ledger_movements_stream: Iterable[
-            vega_protos.api.v1.core.ObserveEventBusResponse
-        ],
-    ) -> Iterable[LedgerEntry]:
-        asset_dp = {}
-        try:
-            for ledger_movement in ledger_movements_stream:
-                for bus_event in ledger_movement.events:
-                    for ledger_movement in bus_event.ledger_movements.ledger_movements:
-                        for ledger_entry in ledger_movement.entries:
-                            asset_id = ledger_entry.from_account.asset_id
-                            if asset_id not in asset_dp:
-                                asset_dp[asset_id] = get_asset_decimals(
-                                    asset_id=asset_id,
-                                    data_client=trading_data_client,
-                                )
-                            yield _ledger_entry_from_proto(
-                                ledger_entry,
-                                asset_decimals=asset_dp[asset_id],
-                            )
-        except Exception as _:
-            logger.info("Ledger entries subscription closed")
-            return
-
-    return _ledger_entries_gen(ledger_movements_stream=ledger_movements_stream)
-
-
-def _stream_gen(
-    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
-    trading_data_client: vac.VegaTradingDataClientV2,
+def _stream_handler(
+    stream_item: vega_protos.api.v1.core.ObserveEventBusResponse,
     extraction_fn: Callable[[vega_protos.events.v1.events.BusEvent], T],
     conversion_fn: Callable[[T, int, int, int], S],
-) -> Iterable[S]:
-    mkt_pos_dp = {}
-    mkt_price_dp = {}
-    mkt_asset_dp = {}
-    try:
-        for stream_event_list in stream:
-            for bus_event in stream_event_list.events:
-                event = extraction_fn(bus_event)
-                if event.market_id not in mkt_pos_dp:
-                    mkt_pos_dp[event.market_id] = market_position_decimals(
-                        market_id=event.market_id, data_client=trading_data_client
-                    )
-                    mkt_price_dp[event.market_id] = market_price_decimals(
-                        market_id=event.market_id, data_client=trading_data_client
-                    )
-                    mkt_asset_dp[event.market_id] = get_asset_decimals(
-                        asset_id=data_raw.market_info(
-                            market_id=event.market_id, data_client=trading_data_client
-                        ).tradable_instrument.instrument.future.settlement_asset,
-                        data_client=trading_data_client,
-                    )
-                yield conversion_fn(
-                    event,
-                    mkt_price_dp[event.market_id],
-                    mkt_pos_dp[event.market_id],
-                    mkt_asset_dp[event.market_id],
-                )
-    except:
-        logger.info("Order subscription closed")
-        return
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> S:
+    mkt_pos_dp = mkt_pos_dp if mkt_pos_dp is not None else {}
+    mkt_price_dp = mkt_price_dp if mkt_price_dp is not None else {}
+    mkt_to_asset = mkt_to_asset if mkt_to_asset is not None else {}
+    asset_dp = asset_dp if asset_dp is not None else {}
+
+    event = extraction_fn(stream_item)
+
+    market_id = getattr(event, "market_id", None)
+    asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset.get(market_id)))
+
+    return conversion_fn(
+        event,
+        DecimalSpec(
+            price_decimals=mkt_price_dp[market_id] if market_id is not None else None,
+            position_decimals=mkt_pos_dp[market_id] if market_id is not None else None,
+            asset_decimals=asset_decimals,
+        ),
+    )
 
 
 def get_liquidity_fee_shares(
@@ -1375,7 +1244,99 @@ def list_ledger_entries(
             )
         ledger_entries.append(
             _aggregated_ledger_entry_from_proto(
-                entry, asset_decimals=asset_decimals_map[entry.asset_id]
+                entry, DecimalSpec(asset_decimals=asset_decimals_map[entry.asset_id])
             )
         )
+    return ledger_entries
+
+
+def trades_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> Trade:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Returns:
+        Iterable[Trade], Infinite iterable of trade updates
+    """
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.trade,
+        conversion_fn=_trade_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
+
+
+def order_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> Order:
+    """Subscribe to a stream of Order updates from the data-node.
+    The stream of orders returned from this function is an iterable which
+    does not end and will continue to tick another order update whenever
+    one is received.
+
+    Args:
+        market_id:
+            Optional[str], If provided, only update orders from this market
+        party_id:
+            Optional[str], If provided, only update orders from this party
+    Returns:
+        Iterable[Order], Infinite iterable of order updates
+    """
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.order,
+        conversion_fn=_order_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
+
+
+def transfer_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> Transfer:
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.transfer,
+        conversion_fn=_transfer_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
+
+
+def ledger_entries_subscription_handler(
+    stream_item: vega_protos.api.v1.core.ObserveEventBusResponse,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> Iterable[LedgerEntry]:
+    ledger_entries = []
+    for ledger_movement in stream_item.ledger_movements.ledger_movements:
+        for ledger_entry in ledger_movement.entries:
+            asset_id = ledger_entry.from_account.asset_id
+            ledger_entries.append(
+                _ledger_entry_from_proto(
+                    ledger_entry,
+                    asset_decimals=asset_dp[asset_id],
+                )
+            )
     return ledger_entries

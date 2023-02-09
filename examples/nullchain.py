@@ -30,7 +30,6 @@ if __name__ == "__main__":
     with VegaServiceNull(
         run_with_console=False,
         launch_graphql=False,
-        start_live_feeds=True,
         retain_log_files=True,
         use_full_vega_wallet=False,
         store_transactions=True,
