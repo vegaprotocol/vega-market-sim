@@ -193,7 +193,6 @@ def _find_network_config_toml(
             search_path,
             f"{network.value}.toml",
         )
-        print(full_path)
 
         if path.exists(full_path):
             return full_path
