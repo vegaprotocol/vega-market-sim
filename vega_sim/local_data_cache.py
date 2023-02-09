@@ -68,8 +68,7 @@ def _queue_forwarder(
                         sink.put(elem)
                 else:
                     sink.put(output)
-    except Exception as e:
-        logger.exception(e)
+    except Exception:
         logger.debug("Data cache event bus closed")
 
 
