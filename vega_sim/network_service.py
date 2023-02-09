@@ -7,6 +7,13 @@ Vega Wallet service for communication with the chosen Vega network.
 The VegaServiceNetwork inherits properties and methods from the VegaService
 class. Inherited methods can be used to communicate with the Vega datanode
 and Vega wallet services. Redundant properties and methods are overwritten.
+
+A vegawallet executable should either be in PATH whilst executing, or 
+the VEGA_WALLET_PATH environment variable set to a location of a wallet.
+
+Similarly, specify VEGA_NETWORK_CONFIG for the path to the network config
+of your chosen network
+
 Example:
 
     For an example, try running the below command. It will create a
@@ -71,11 +78,12 @@ def add_network_config(
     """
 
     if not path.exists(network_config_path):
-        raise ValueError(f"No network config file at the specified path.")
+        raise ValueError("No network config file at the specified path.")
+
+    vega_wallet_path = environ.get("VEGA_WALLET_PATH", "vegawallet")
 
     args = [
-        "vega",
-        "wallet",
+        vega_wallet_path,
         "network",
         "import",
         "--from-file",
@@ -157,6 +165,39 @@ def manage_vega_processes(
         process.kill()
 
 
+def _find_network_config_toml(
+    network: Network, config_path: Optional[str] = None
+) -> Optional[str]:
+    search_paths = (
+        [config_path]
+        if config_path is not None
+        else [
+            path.join(
+                getcwd(),
+                "vega_sim",
+                "bin",
+                "networks-internal",
+                network.name.lower(),
+            ),
+            path.join(
+                getcwd(),
+                "vega_sim",
+                "bin",
+                "networks",
+                network.name.lower(),
+            ),
+        ]
+    )
+    for search_path in search_paths:
+        full_path = path.join(
+            search_path,
+            f"{network.value}.toml",
+        )
+
+        if path.exists(full_path):
+            return full_path
+
+
 class VegaServiceNetwork(VegaService):
     """Class for handling services for communicating with a Vega network."""
 
@@ -166,6 +207,8 @@ class VegaServiceNetwork(VegaService):
         run_with_wallet: bool = True,
         run_with_console: bool = True,
         start_live_feeds: bool = True,
+        vega_console_path: Optional[str] = None,
+        network_config_path: Optional[str] = None,
     ):
         """Method initialises the class.
 
@@ -176,6 +219,13 @@ class VegaServiceNetwork(VegaService):
                 Defines whether to start a wallet process.
             run_with_console (bool, optional):
                 Defines whether to start a console process.
+            vega_console_path (str, optional):
+                Path to the directory containing console files if
+                wishing to run a local console
+            network_config_path (str, optional):
+                Path to the directory containing network config files.
+                If not passed will search first the environment variable
+                VEGA_NETWORK_CONFIG then two default paths.
         """
 
         # Run init method inherited from VegaService with network arguments.
@@ -192,7 +242,23 @@ class VegaServiceNetwork(VegaService):
         self._data_node_query_url = None
         self._network_config = None
 
-        self.vega_console_path = path.join(vega_bin_path, "console")
+        self.vega_console_path = (
+            vega_console_path
+            if vega_console_path is not None
+            else path.join(vega_bin_path, "console")
+        )
+        self._base_network_config_path = (
+            network_config_path
+            if network_config_path is not None
+            else environ.get("VEGA_NETWORK_CONFIG")
+        )
+        self._network_config_path = _find_network_config_toml(
+            network=self.network, config_path=self._base_network_config_path
+        )
+        if self._network_config_path is None:
+            raise ValueError(
+                f"ERROR! {self.network.name.lower()} network config could not be found"
+            )
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
@@ -272,36 +338,8 @@ class VegaServiceNetwork(VegaService):
     @property
     def network_config(self) -> dict:
         if self._network_config is None:
-            public_path = path.join(
-                getcwd(),
-                "vega_sim",
-                "bin",
-                "networks-internal",
-                self.network.name.lower(),
-                f"{self.network.value}.toml",
-            )
-            internal_path = path.join(
-                getcwd(),
-                "vega_sim",
-                "bin",
-                "networks",
-                self.network.name.lower(),
-                f"{self.network.value}.toml",
-            )
-
-            if path.exists(public_path):
-                self._network_config = toml.load(public_path)
-                add_network_config(public_path)
-
-            elif path.exists(internal_path):
-                self._network_config = toml.load(internal_path)
-                add_network_config(internal_path)
-
-            else:
-                raise ValueError(
-                    f"ERROR! {self.network.name.lower()} network does not exist"
-                )
-
+            self._network_config = toml.load(self._network_config_path)
+            add_network_config(self._network_config_path)
         return self._network_config
 
     @property
