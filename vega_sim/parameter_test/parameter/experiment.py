@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.scenario.scenario import Scenario
+from vega_sim.scenario.scenario import Scenario, MarketHistoryData
 
 from vega_sim.api.market import MarketConfig
 
@@ -32,11 +32,13 @@ class Experiment:
 
 @dataclass
 class SingleParameterExperiment(Experiment):
+    parameter_type: str
     parameter_to_vary: str
     values: List[str]
     scenario: Scenario
     runs_per_scenario: int = 1
-    additional_parameters_to_set: Optional[Dict[str, str]] = None
+    additional_network_parameters_to_set: Optional[Dict[str, str]] = None
+    additional_market_parameters_to_set: Optional[Dict[str, str]] = None
     data_extraction: List[Tuple] = None
     market_parameter: Optional[bool] = False
 
@@ -47,18 +49,21 @@ class SingleParameterExperiment(Experiment):
             "tested_values": self.values,
             "scenario": self.scenario.__class__.__name__,
             "num_runs": self.runs_per_scenario,
-            "additional_parameters": self.additional_parameters_to_set,
+            "additional_network_parameters": self.additional_network_parameters_to_set,
+            "additional_market_parameters": self.additional_market_parameters_to_set,
             "data_extraction": self.data_extraction,
         }
 
 
 def _run_parameter_iteration(
+    parameter_type: str,
     scenario: Scenario,
     parameter_to_vary: str,
     value: str,
-    additional_parameters_to_set: Optional[Dict[str, str]] = None,
+    additional_network_parameters_to_set: Optional[Dict[str, str]] = None,
+    additional_market_parameters_to_set: Optional[Dict[str, str]] = None,
     random_state: Optional[np.random.RandomState] = None,
-) -> Any:
+) -> Tuple[List[MarketHistoryData], Any]:
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         retain_log_files=True,
@@ -73,47 +78,34 @@ def _run_parameter_iteration(
             amount=1e4,
         )
 
-        if additional_parameters_to_set is not None:
-            for param, new_value in additional_parameters_to_set.items():
+        # Update additional network parameters and the parameter to vary if running a
+        # network parameter experiment.
+        if additional_network_parameters_to_set is not None:
+            for param, new_value in additional_network_parameters_to_set.items():
                 vega.update_network_parameter(
                     PARAMETER_AMEND_WALLET[0], parameter=param, new_value=new_value
                 )
+        if parameter_type == "network":
+            vega.update_network_parameter(
+                PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
+            )
 
-        vega.update_network_parameter(
-            PARAMETER_AMEND_WALLET[0], parameter=parameter_to_vary, new_value=value
-        )
-
-        res = scenario.run_iteration(vega=vega, random_state=random_state)
-
-        return res
-
-
-def _run_market_parameter_iteration(
-    scenario: Scenario,
-    parameter_to_vary: str,
-    value: Union[str, int, float],
-    random_state: Optional[np.random.RandomState],
-) -> Any:
-
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        retain_log_files=True,
-        run_with_console=False,
-        transactions_per_block=100,
-        use_full_vega_wallet=False,
-    ) as vega:
-
+        # Create the MarketObject using vega-sim defaults
         market_config = MarketConfig("default")
 
-        market_config.set(parameter_to_vary, value)
+        # Update additional market parameters and the parameter to vary if running a
+        # market parameter experiment
+        if additional_market_parameters_to_set is not None:
+            for param, new_value in additional_market_parameters_to_set.items():
+                market_config.set(parameter=param, value=new_value)
+        if parameter_type == "market":
+            market_config.set(parameter=parameter_to_vary, value=value)
 
-        res = scenario.run_iteration(
-            vega=vega,
-            random_state=random_state,
-            market_config=market_config,
+        scenario.run_iteration(
+            vega=vega, random_state=random_state, market_config=market_config
         )
 
-        return res
+        return (scenario.get_run_data(), scenario.get_additional_run_data())
 
 
 def run_single_parameter_experiment(
@@ -126,20 +118,15 @@ def run_single_parameter_experiment(
     for value in experiment.values:
         results[value] = []
         for state in copy.deepcopy(random_seeds):
-            if experiment.market_parameter:
-                res = _run_market_parameter_iteration(
-                    scenario=experiment.scenario,
-                    parameter_to_vary=experiment.parameter_to_vary,
-                    value=value,
-                    random_state=state,
-                )
-            else:
-                res = _run_parameter_iteration(
-                    scenario=experiment.scenario,
-                    parameter_to_vary=experiment.parameter_to_vary,
-                    value=value,
-                    random_state=state,
-                )
+            (_, res) = _run_parameter_iteration(
+                parameter_type=experiment.parameter_type,
+                scenario=experiment.scenario,
+                parameter_to_vary=experiment.parameter_to_vary,
+                value=value,
+                random_state=state,
+                additional_network_parameters_to_set=experiment.additional_network_parameters_to_set,
+                additional_market_parameters_to_set=experiment.additional_market_parameters_to_set,
+            )
             results[value].append(res)
 
     return results

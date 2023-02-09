@@ -41,11 +41,11 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         settlement_price: Optional[float] = None,
         initial_mint: Optional[float] = 1e9,
     ):
-
         super().__init__(
             wallet_name=proposal_wallet_name,
             wallet_pass=proposal_wallet_pass,
             key_name=proposal_key_name,
+            tag=tag,
         )
 
         self.termination_wallet_name = termination_wallet_name
@@ -64,7 +64,6 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig()
         )
 
-        self.tag = tag
         self.settlement_price = settlement_price
 
     def initialise(
@@ -73,7 +72,6 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         create_wallet: bool = True,
         mint_wallet: bool = True,
     ):
-
         super().initialise(vega=vega, create_wallet=create_wallet)
         if create_wallet:
             self.vega.create_wallet(
@@ -119,7 +117,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             self.market_config.set("instrument.future.settlement_asset", self.asset_id)
             self.market_config.set("instrument.future.quote_name", self.asset_name)
             self.market_config.set(
-                "instrument.future.settlement_data_decimals", self.asset_dp
+                "instrument.future.number_decimal_places", self.asset_dp
             )
             self.market_config.set(
                 "instrument.future.terminating_key",

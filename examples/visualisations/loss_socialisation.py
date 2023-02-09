@@ -45,7 +45,6 @@ TRADER_B = PartyConfig(
 )
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--console", action="store_true")
     parser.add_argument("--debug", action="store_true")
@@ -58,7 +57,6 @@ if __name__ == "__main__":
         run_with_console=args.console,
         warn_on_raw_data_access=False,
     ) as vega:
-
         # Setup a market and move it into a continuous trading state
         market_id, asset_id, best_ask_id, best_bid_id = continuous_market(
             vega=vega, price=500, spread=10
@@ -131,6 +129,7 @@ if __name__ == "__main__":
                 best_bid_id=best_bid_id,
                 price=price,
                 spread=10,
+                volume=1,
             )
             vega.wait_for_total_catchup()
             vega.wait_fn(60)

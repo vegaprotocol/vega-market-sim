@@ -34,6 +34,8 @@ INFORMED_WALLET = WalletConfig("INFORMED", "INFORMEDpass")
 
 
 class OptimalMarketMaker(StateAgentWithWallet):
+    NAME_BASE = "optimal_mm"
+
     def __init__(
         self,
         wallet_name: str,
@@ -60,8 +62,11 @@ class OptimalMarketMaker(StateAgentWithWallet):
         settlement_price: Optional[float] = None,
         tag: str = "",
         random_state: Optional[np.random.RandomState] = None,
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.terminate_wallet_name = terminate_wallet_name + tag
         self.terminate_wallet_pass = terminate_wallet_pass
 
@@ -84,7 +89,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.settlement_price = (
             self.price_process[-1] if settlement_price is None else settlement_price
         )
-        self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
         self.random_state = (
@@ -92,6 +96,9 @@ class OptimalMarketMaker(StateAgentWithWallet):
             if random_state is not None
             else np.random.RandomState(seed=123)
         )
+
+        self.bid_depth = None
+        self.ask_depth = None
 
         self.long_horizon_estimate = num_steps >= 200
 
@@ -135,6 +142,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.wallet_name,
             asset="VOTE",
             amount=1e4,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(5)
 
@@ -145,6 +153,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             symbol=self.asset_name,
             decimals=self.adp,
             max_faucet_amount=1e20,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(5)
         self.vega.wait_for_total_catchup()
@@ -155,6 +164,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             self.wallet_name,
             asset=self.asset_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         self.vega.wait_for_total_catchup()
 
@@ -167,6 +177,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             market_decimals=self.mdp,
             position_decimals=self.market_position_decimal,
             future_asset=self.asset_name,
+            key_name=self.key_name,
         )
         self.vega.wait_for_total_catchup()
 
@@ -181,6 +192,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
             sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
             is_amendment=False,
+            key_name=self.key_name,
         )
         self.bid_depth, self.ask_depth = self.OptimalStrategy(0)
 
@@ -270,15 +282,18 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 delta_buy=temp_depth,
                 delta_sell=temp_depth,
                 is_amendment=True,
+                key_name=self.key_name,
             )
 
     def step(self, vega_state: VegaState):
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
 
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
 
         self.num_buyMO, self.num_sellMO = self.num_MarketOrders()
@@ -299,11 +314,14 @@ class OptimalMarketMaker(StateAgentWithWallet):
             delta_buy=self.bid_depth,
             delta_sell=self.ask_depth,
             is_amendment=True,
+            key_name=self.key_name,
         )
         self.current_step += 1
 
 
 class MarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "mo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -314,12 +332,14 @@ class MarketOrderTrader(StateAgentWithWallet):
         num_buy_market_order: int = None,
         num_sell_market_order: int = None,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.initial_asset_mint = initial_asset_mint
         self.num_buyMO = num_buy_market_order
         self.num_sellMO = num_sell_market_order
-        self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
 
@@ -337,6 +357,7 @@ class MarketOrderTrader(StateAgentWithWallet):
             self.wallet_name,
             asset=tDAI_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(2)
 
@@ -349,6 +370,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 volume=self.num_buyMO,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )
 
     def step_sell(self, vega_state: VegaState):
@@ -360,10 +382,13 @@ class MarketOrderTrader(StateAgentWithWallet):
                 volume=self.num_sellMO,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )
 
 
 class LimitOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "lo_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -379,8 +404,11 @@ class LimitOrderTrader(StateAgentWithWallet):
         market_name: str = None,
         asset_name: str = None,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.num_post_at_bid = num_post_at_bid
         self.num_post_at_ask = num_post_at_ask
         self.price_process = price_process
@@ -390,7 +418,6 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.adp = asset_decimal
         self.initial_asset_mint = initial_asset_mint
         self.current_step = 0
-        self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
 
@@ -407,6 +434,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             self.wallet_name,
             asset=tDAI_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(2)
 
@@ -419,6 +447,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             volume=1,
             price=round(self.initial_price - self.spread, self.mdp),
             wait=True,
+            key_name=self.key_name,
         )
 
         self.sell_order_id = self.vega.submit_order(
@@ -430,6 +459,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             volume=1,
             price=round(self.initial_price + self.spread, self.mdp),
             wait=True,
+            key_name=self.key_name,
         )
 
     def step_amendprice(self, vega_state: VegaState):
@@ -453,6 +483,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                     new_price - self.spread / 2,
                     self.mdp,
                 ),
+                key_name=self.key_name,
             )
 
         self.vega.amend_order(
@@ -463,6 +494,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 new_price + self.spread / 2,
                 self.mdp,
             ),
+            key_name=self.key_name,
         )
 
         if first_side == vega_protos.SIDE_SELL:
@@ -474,6 +506,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                     new_price - self.spread / 2,
                     self.mdp,
                 ),
+                key_name=self.key_name,
             )
 
     def step_limitorders(self, vega_state: VegaState):
@@ -489,6 +522,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 volume=self.num_post_at_bid - 1,
                 price=self.price_process[self.current_step] - random_delta,
                 wait=False,
+                key_name=self.key_name,
             )
 
         if self.num_post_at_ask > 1:
@@ -503,6 +537,7 @@ class LimitOrderTrader(StateAgentWithWallet):
                 volume=self.num_post_at_ask - 1,
                 price=self.price_process[self.current_step] + random_delta,
                 wait=False,
+                key_name=self.key_name,
             )
 
     def step_limitorderask(self, vega_state: VegaState):
@@ -515,6 +550,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             volume=1,
             price=round(self.price_process[self.current_step] + self.spread, self.mdp),
             wait=True,
+            key_name=self.key_name,
         )
 
     def step_limitorderbid(self, vega_state: VegaState):
@@ -527,12 +563,15 @@ class LimitOrderTrader(StateAgentWithWallet):
             volume=1,
             price=round(self.price_process[self.current_step] - self.spread, self.mdp),
             wait=True,
+            key_name=self.key_name,
         )
 
         self.current_step += 1
 
 
 class OpenAuctionPass(StateAgentWithWallet):
+    NAME_BASE = "open_auction"
+
     def __init__(
         self,
         wallet_name: str,
@@ -543,12 +582,14 @@ class OpenAuctionPass(StateAgentWithWallet):
         initial_asset_mint: float = 1e8,
         initial_price: float = 0.3,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.side = side
         self.initial_price = initial_price
         self.initial_asset_mint = initial_asset_mint
-        self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
 
@@ -565,6 +606,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             self.wallet_name,
             asset=tDAI_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         self.vega.wait_fn(2)
 
@@ -576,6 +618,7 @@ class OpenAuctionPass(StateAgentWithWallet):
             side=self.side,
             volume=1,
             price=self.initial_price,
+            key_name=self.key_name,
         )
 
     def step(self, vega_state: VegaState):
@@ -583,6 +626,8 @@ class OpenAuctionPass(StateAgentWithWallet):
 
 
 class OptimalLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "optimal_liq_prov"
+
     def __init__(
         self,
         wallet_name: str,
@@ -601,8 +646,11 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
         commitamount: float = 100000,
         lp_fee: float = 0.001,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + tag, wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.current_step = 0
         self.initial_asset_mint = initial_asset_mint
         self.entry_step = entry_step
@@ -615,7 +663,6 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
         self.q_lower = inventory_lower_boundary
         self.alpha = terminal_penalty_parameter
         self.phi = running_penalty_parameter
-        self.tag = tag
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
         self.long_horizon_estimate = num_steps >= 200
@@ -634,6 +681,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
             self.wallet_name,
             asset=tDAI_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -642,6 +690,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
             self.wallet_name,
             asset=self.asset_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
         self.vega.wait_for_total_catchup()
 
@@ -724,15 +773,18 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
                 delta_buy=self.bid_depth,
                 delta_sell=self.ask_depth,
                 is_amendment=False,
+                key_name=self.key_name,
             )
             self.current_step += 1
             return
 
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
 
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
 
         self.vega.submit_simple_liquidity(
@@ -745,12 +797,15 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
             delta_buy=self.bid_depth,
             delta_sell=self.ask_depth,
             is_amendment=True,
+            key_name=self.key_name,
         )
 
         self.current_step += 1
 
 
 class InformedTrader(StateAgentWithWallet):
+    NAME_BASE = "informed_trader"
+
     def __init__(
         self,
         wallet_name: str,
@@ -761,13 +816,15 @@ class InformedTrader(StateAgentWithWallet):
         initial_asset_mint: float = 1e8,
         proportion_taken: float = 0.8,
         tag: str = "",
+        key_name: Optional[str] = None,
     ):
-        super().__init__(wallet_name + str(tag), wallet_pass)
+        super().__init__(
+            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
+        )
         self.initial_asset_mint = initial_asset_mint
         self.price_process = price_process
         self.current_step = 0
         self.sim_length = len(price_process)
-        self.tag = tag
         self.proportion_taken = proportion_taken
         self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
         self.asset_name = f"tDAI_{self.tag}" if asset_name is None else asset_name
@@ -786,6 +843,7 @@ class InformedTrader(StateAgentWithWallet):
             self.wallet_name,
             asset=tDAI_id,
             amount=self.initial_asset_mint,
+            key_name=self.key_name,
         )
 
         self.pdp = self.vega._market_pos_decimals.get(self.market_id, {})
@@ -793,9 +851,11 @@ class InformedTrader(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         position = self.vega.positions_by_market(
-            wallet_name=self.wallet_name, market_id=self.market_id
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
         )
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         trade_side = (
             vega_protos.vega.Side.SIDE_BUY
             if current_position < 0
@@ -809,6 +869,7 @@ class InformedTrader(StateAgentWithWallet):
                 volume=current_position,
                 wait=True,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )
 
         order_book = self.vega.market_depth(market_id=self.market_id)
@@ -839,4 +900,5 @@ class InformedTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
+                key_name=self.key_name,
             )

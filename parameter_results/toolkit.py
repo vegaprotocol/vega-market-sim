@@ -223,8 +223,7 @@ class SingleParameterExperimentTk(NotebookTk):
         keys = list(product(variables, iterations))
 
         parameter_value_labels = [
-            f"{self.settings['parameter_tested']}={value}"
-            for value in self.settings["tested_values"]
+            f"param={value}" for value in self.settings["tested_values"]
         ]
         labels = [parameter_value_labels, [""], [""]]
 
@@ -308,8 +307,8 @@ class SingleParameterExperimentTk(NotebookTk):
         labels = [[""], [""], variables]
         labels_right = [[""], [""], variables_right]
 
-        cols = max(self.data_raw[0]["Iteration"]) + 1
-        rows = len(self.settings["tested_values"])
+        cols = len(iterations)
+        rows = len(parameters)
 
         fig, axs = plt.subplots(
             rows,
@@ -319,14 +318,19 @@ class SingleParameterExperimentTk(NotebookTk):
         fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
         for row in range(rows):
-
             for col in range(cols):
-
-                ax = axs[row, col]
+                if rows > 1 and cols > 1:
+                    ax = axs[row, col]
+                elif rows > 1:
+                    ax = axs[row]
+                elif cols > 1:
+                    ax = axs[col]
+                else:
+                    ax = axs
 
                 self._add_plot(
                     ax=ax,
-                    title=f"{self.settings['parameter_tested']}={parameters[row]} // iteration={iterations[col]}",
+                    title=f"param={parameters[row]} // iteration={iterations[col]}",
                     parameters=[parameters[row]],
                     iterations=[iterations[col]],
                     xlabel="Time",
@@ -500,7 +504,9 @@ class SingleParameterExperimentTk(NotebookTk):
         if self.settings["num_runs"] > 1:
             for _ in range(self.num_paravalues):
                 data_avg.append(
-                    self.data_raw[_].groupby(self.data_raw[_]["Time Step"]).mean()
+                    self.data_raw[_]
+                    .groupby(self.data_raw[_]["Time Step"])
+                    .mean(numeric_only=False)
                 )
         else:
             for _ in range(self.num_paravalues):
@@ -746,13 +752,10 @@ class SingleParameterExperimentTk(NotebookTk):
             parameters = self.settings["tested_values"]
 
         for i, parameter in enumerate(parameters):
-
             parameter_index = self.settings["tested_values"].index(parameter)
 
             for j, iteration in enumerate(iterations):
-
                 if iteration == "avg":
-
                     df = self.data_avg[parameter_index]
 
                     for k, variable in enumerate(variables):
@@ -766,7 +769,6 @@ class SingleParameterExperimentTk(NotebookTk):
                         lns.append(ax.plot(xdata, ydata, fmt, label=label))
 
                 else:
-
                     df = self.data_raw[parameter_index][
                         self.data_raw[parameter_index]["Iteration"] == iteration
                     ]

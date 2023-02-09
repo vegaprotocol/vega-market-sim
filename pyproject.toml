@@ -3,7 +3,7 @@ name = "vega_sim"
 description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
-version = "0.62.1"
+version = "0.67.0"
 
 [tool.setuptools]
 zip-safe = false
@@ -30,9 +30,10 @@ grpc-gateway-protoc-gen-openapiv2 = "^0.1.0"
 plotly = {version = "^5.10.0", optional = true}
 TA-Lib = {version = "^0.4.25", optional = true}
 python-dotenv = "^0.21.0"
+deprecated = "^1.2.13"
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.3.0"
+black = "^23.1.0"
 pytest = "^7.1.2"
 requests-mock = "^1.9.3"
 flake8 = "^4.0.1"
@@ -44,8 +45,6 @@ pytest-xdist = "^2.5.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-
 
 [tool.poetry.extras]
 learning = ["matplotlib", "tqdm", "torch"]

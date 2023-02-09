@@ -14,7 +14,6 @@ def A_S_MMmodel(
     alpha: float,
     phi: float,
 ):
-
     """
     Simulate an Market Making Model and output the optimal strategy
       of posting bid/ask depth based on market parameters.

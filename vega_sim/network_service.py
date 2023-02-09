@@ -7,6 +7,13 @@ Vega Wallet service for communication with the chosen Vega network.
 The VegaServiceNetwork inherits properties and methods from the VegaService
 class. Inherited methods can be used to communicate with the Vega datanode
 and Vega wallet services. Redundant properties and methods are overwritten.
+
+A vegawallet executable should either be in PATH whilst executing, or 
+the VEGA_WALLET_PATH environment variable set to a location of a wallet.
+
+Similarly, specify VEGA_NETWORK_CONFIG for the path to the network config
+of your chosen network
+
 Example:
 
     For an example, try running the below command. It will create a
@@ -43,7 +50,7 @@ from os import getcwd, path, environ
 import vega_sim.grpc.client as vac
 
 from vega_sim import vega_bin_path
-from vega_sim.service import VegaService
+from vega_sim.service import VegaService, DatanodeBehindError
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.null_service import find_free_port, _popen_process
@@ -71,11 +78,12 @@ def add_network_config(
     """
 
     if not path.exists(network_config_path):
-        raise ValueError(f"No network config file at the specified path.")
+        raise ValueError("No network config file at the specified path.")
+
+    vega_wallet_path = environ.get("VEGA_WALLET_PATH", "vegawallet")
 
     args = [
-        "vega",
-        "wallet",
+        vega_wallet_path,
         "network",
         "import",
         "--from-file",
@@ -96,7 +104,6 @@ def manage_vega_processes(
     run_with_console: Optional[bool] = True,
     log_dir: Optional[str] = None,
 ):
-
     processes = []
 
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
@@ -158,6 +165,39 @@ def manage_vega_processes(
         process.kill()
 
 
+def _find_network_config_toml(
+    network: Network, config_path: Optional[str] = None
+) -> Optional[str]:
+    search_paths = (
+        [config_path]
+        if config_path is not None
+        else [
+            path.join(
+                getcwd(),
+                "vega_sim",
+                "bin",
+                "networks-internal",
+                network.name.lower(),
+            ),
+            path.join(
+                getcwd(),
+                "vega_sim",
+                "bin",
+                "networks",
+                network.name.lower(),
+            ),
+        ]
+    )
+    for search_path in search_paths:
+        full_path = path.join(
+            search_path,
+            f"{network.value}.toml",
+        )
+
+        if path.exists(full_path):
+            return full_path
+
+
 class VegaServiceNetwork(VegaService):
     """Class for handling services for communicating with a Vega network."""
 
@@ -166,6 +206,8 @@ class VegaServiceNetwork(VegaService):
         network: Network,
         run_with_wallet: bool = True,
         run_with_console: bool = True,
+        vega_console_path: Optional[str] = None,
+        network_config_path: Optional[str] = None,
     ):
         """Method initialises the class.
 
@@ -176,6 +218,13 @@ class VegaServiceNetwork(VegaService):
                 Defines whether to start a wallet process.
             run_with_console (bool, optional):
                 Defines whether to start a console process.
+            vega_console_path (str, optional):
+                Path to the directory containing console files if
+                wishing to run a local console
+            network_config_path (str, optional):
+                Path to the directory containing network config files.
+                If not passed will search first the environment variable
+                VEGA_NETWORK_CONFIG then two default paths.
         """
 
         # Run init method inherited from VegaService with network arguments.
@@ -191,7 +240,23 @@ class VegaServiceNetwork(VegaService):
         self._data_node_query_url = None
         self._network_config = None
 
-        self.vega_console_path = path.join(vega_bin_path, "console")
+        self.vega_console_path = (
+            vega_console_path
+            if vega_console_path is not None
+            else path.join(vega_bin_path, "console")
+        )
+        self._base_network_config_path = (
+            network_config_path
+            if network_config_path is not None
+            else environ.get("VEGA_NETWORK_CONFIG")
+        )
+        self._network_config_path = _find_network_config_toml(
+            network=self.network, config_path=self._base_network_config_path
+        )
+        if self._network_config_path is None:
+            raise ValueError(
+                f"ERROR! {self.network.name.lower()} network config could not be found"
+            )
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
@@ -206,7 +271,6 @@ class VegaServiceNetwork(VegaService):
         self.stop()
 
     def start(self):
-
         ctx = multiprocessing.get_context()
         vega_console_port = find_free_port()
         self.proc = ctx.Process(
@@ -232,7 +296,6 @@ class VegaServiceNetwork(VegaService):
             webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
 
     def stop(self) -> None:
-
         super().stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
@@ -242,61 +305,36 @@ class VegaServiceNetwork(VegaService):
     def wait_fn(self, wait_multiple: float = 1) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     def wait_for_datanode_sync(self) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     def wait_for_core_catchup(self) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     def wait_for_total_catchup(self) -> None:
         """Overrides redundant parent method."""
         logging.debug(
-            "Parent method overridden as VegaNetworkService incapable of controlling time."
+            "Parent method overridden as VegaNetworkService incapable of controlling"
+            " time."
         )
 
     @property
     def network_config(self) -> dict:
         if self._network_config is None:
-
-            public_path = path.join(
-                getcwd(),
-                "vega_sim",
-                "bin",
-                "networks-internal",
-                self.network.name.lower(),
-                f"{self.network.value}.toml",
-            )
-            internal_path = path.join(
-                getcwd(),
-                "vega_sim",
-                "bin",
-                "networks",
-                self.network.name.lower(),
-                f"{self.network.value}.toml",
-            )
-
-            if path.exists(public_path):
-                self._network_config = toml.load(public_path)
-                add_network_config(public_path)
-
-            elif path.exists(internal_path):
-                self._network_config = toml.load(internal_path)
-                add_network_config(internal_path)
-
-            else:
-                raise ValueError(
-                    f"ERROR! {self.network.name.lower()} network does not exist"
-                )
-
+            self._network_config = toml.load(self._network_config_path)
+            add_network_config(self._network_config_path)
         return self._network_config
 
     @property
@@ -330,18 +368,26 @@ class VegaServiceNetwork(VegaService):
     @property
     def core_state_client(self) -> None:
         logging.debug(
-            "Parent property overridden as VegaNetworkService does not need a core client.",
+            (
+                "Parent property overridden as VegaNetworkService does not need a core"
+                " client."
+            ),
         )
         pass
 
     @property
     def core_client(self) -> None:
         logging.debug(
-            "Parent property overridden as VegaNetworkService does not need a core client.",
+            (
+                "Parent property overridden as VegaNetworkService does not need a core"
+                " client."
+            ),
         )
         pass
 
-    def check_datanode(self, raise_on_error: Optional[bool] = True):
+    def check_datanode(
+        self, max_time_diff: int = 30, raise_on_error: Optional[bool] = True
+    ):
         """Checks if the current data-node connection is healthy.
 
         If the current data-node connection has timed out or the end-point is
@@ -349,13 +395,15 @@ class VegaServiceNetwork(VegaService):
         with a new healthy data-node.
 
         Args:
-            max_attempts (int, optional):
-                Maximum number of connection attempts to attempt before raising an
-                error. Defaults to -1 (infinite attempts).
+            max_time_diff (int, optional):
+                Maximum allowable difference between system time and datanode time in
+                seconds. Defaults to 30.
+            raise_on_error (bool, optional):
+                Whether to raise an error if data-node connection unhealthy.
         """
 
         try:
-            self.ping_datanode()
+            self.ping_datanode(max_time_diff=max_time_diff)
             return
 
         except grpc.FutureTimeoutError as e:
@@ -373,6 +421,15 @@ class VegaServiceNetwork(VegaService):
             else:
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+                self.switch_datanode()
+
+        except DatanodeBehindError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
                 self.switch_datanode()
 
@@ -403,11 +460,21 @@ class VegaServiceNetwork(VegaService):
                     channel=channel,
                 )
 
+                # Ping the datanode to check it is not behind
+                self.ping_datanode()
+
                 return
 
             except grpc.FutureTimeoutError:
+                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                )
+
+            except DatanodeBehindError:
+                # Log warning then continue to try next datanode
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
 
             if attempts == max_attempts:
@@ -427,7 +494,6 @@ if __name__ == "__main__":
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:
-
         # Show all the markets on the network
         markets = vega.all_markets()
         logging.info(markets)
@@ -441,7 +507,6 @@ if __name__ == "__main__":
         run_with_wallet=True,
         run_with_console=True,
     ) as vega:
-
         # Show all the markets on the network
         markets = vega.all_markets()
         logging.info(markets)

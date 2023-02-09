@@ -2,7 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 import numpy as np
 from collections import namedtuple, defaultdict
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from functools import partial
 from tqdm import tqdm
@@ -44,10 +44,10 @@ WALLET = WalletConfig("learner", "learner")
 
 def state_fn(
     service: VegaServiceNull,
-    agents: List[Agent],
+    agents: Dict[str, Agent],
     state_values=None,
 ) -> Tuple[LAMarketState, AbstractAction]:
-    learner = [a for a in agents if isinstance(a, LearningAgent)][0]
+    learner = agents["learner"]
     return (learner.latest_state, learner.latest_action)
 
 
@@ -66,6 +66,7 @@ class LearningAgent(StateAgentWithWallet):
         market_name: str,
         initial_balance: int,
         position_decimals: int,
+        asset_name: str,
         inventory_penalty: float = 0.0,
     ):
         super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
@@ -94,6 +95,7 @@ class LearningAgent(StateAgentWithWallet):
         self.market_name = market_name
         self.position_decimals = position_decimals
         self.inventory_penalty = inventory_penalty
+        self.asset_name = asset_name
 
     def set_market_tag(self, tag: str):
         self.tag = tag
@@ -119,7 +121,7 @@ class LearningAgent(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == market_name
         ][0]
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI_{self.tag}")
+        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
             self.wallet_name,
@@ -164,7 +166,7 @@ class LearningAgent(StateAgentWithWallet):
     def state(self, vega: VegaServiceNull) -> LAMarketState:
         position = self.vega.positions_by_market(self.wallet_name, self.market_id)
 
-        position = position[0].open_volume if position else 0
+        position = position.open_volume if position else 0
         account = self.vega.party_account(
             wallet_name=self.wallet_name,
             asset_id=self.tdai_id,
@@ -234,7 +236,8 @@ class LearningAgent(StateAgentWithWallet):
 
         if account.margin > 0:
             print(
-                "Market should be settled but there is still balance in margin account. What's up?"
+                "Market should be settled but there is still balance in margin account."
+                " What's up?"
             )
 
         self.latest_action = self.empty_action()

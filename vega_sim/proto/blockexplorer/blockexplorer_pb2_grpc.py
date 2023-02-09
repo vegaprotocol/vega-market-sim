@@ -24,6 +24,11 @@ class BlockExplorerServiceStub(object):
             request_serializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
         )
+        self.Info = channel.unary_unary(
+            "/blockexplorer.api.v1.BlockExplorerService/Info",
+            request_serializer=blockexplorer_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
+            response_deserializer=blockexplorer_dot_blockexplorer__pb2.InfoResponse.FromString,
+        )
 
 
 class BlockExplorerServiceServicer(object):
@@ -47,6 +52,16 @@ class BlockExplorerServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def Info(self, request, context):
+        """Info
+
+        Retrieves information about the block explorer.
+        Response contains a semver formatted version of the data node and the commit hash, from which the block explorer was built,
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
 
 def add_BlockExplorerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -59,6 +74,11 @@ def add_BlockExplorerServiceServicer_to_server(servicer, server):
             servicer.ListTransactions,
             request_deserializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsRequest.FromString,
             response_serializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsResponse.SerializeToString,
+        ),
+        "Info": grpc.unary_unary_rpc_method_handler(
+            servicer.Info,
+            request_deserializer=blockexplorer_dot_blockexplorer__pb2.InfoRequest.FromString,
+            response_serializer=blockexplorer_dot_blockexplorer__pb2.InfoResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -119,6 +139,35 @@ class BlockExplorerService(object):
             "/blockexplorer.api.v1.BlockExplorerService/ListTransactions",
             blockexplorer_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
             blockexplorer_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def Info(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/blockexplorer.api.v1.BlockExplorerService/Info",
+            blockexplorer_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
+            blockexplorer_dot_blockexplorer__pb2.InfoResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import copy
+import datetime
 import logging
-import threading
 import time
 from abc import ABC
 from collections import defaultdict
-from curses import keyname
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue
-from typing import Dict, List, Optional, Tuple, Union, Any
+from queue import Queue, Empty
+from itertools import product
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import grpc
+
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 import vega_sim.api.faucet as faucet
@@ -19,21 +21,19 @@ import vega_sim.api.governance as gov
 import vega_sim.api.market as market
 import vega_sim.api.trading as trading
 import vega_sim.grpc.client as vac
-import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.data.v1 as oracles_protos
-import vega_sim.proto.vega.events.v1 as events_protos
-import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
-
+import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 from vega_sim.api.helpers import (
     forward,
     num_to_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
 )
+from vega_sim.local_data_cache import LocalDataCache
 from vega_sim.proto.vega.commands.v1.commands_pb2 import (
-    OrderCancellation,
     OrderAmendment,
+    OrderCancellation,
     OrderSubmission,
 )
 from vega_sim.proto.vega.governance_pb2 import (
@@ -59,6 +59,10 @@ class PeggedOrder:
 
 
 class LoginError(Exception):
+    pass
+
+
+class DatanodeBehindError(Exception):
     pass
 
 
@@ -90,6 +94,7 @@ class VegaService(ABC):
         can_control_time: bool = False,
         warn_on_raw_data_access: bool = True,
         seconds_per_block: int = 1,
+        listen_for_high_volume_stream_updates: bool = False,
     ):
         """A generic service for accessing a set of Vega processes.
 
@@ -113,15 +118,23 @@ class VegaService(ABC):
                     converted by the user.
                     (e.g. 10.1 with decimal places set to 2 would be 1010)
             seconds_per_block:
-                int, default 1, How long each block represents in seconds. For a nullchain
-                    service this can be known exactly, for anything else it will be an
-                    estimate. Used for waiting/forwarding time and determining how far
-                    forwards to place proposals starting/ending.
+                int, default 1, How long each block represents in seconds. For a
+                    nullchain service this can be known exactly, for anything
+                    else it will be an estimate. Used for waiting/forwarding time
+                    and determining how far forwards to place proposals
+                    starting/ending.
+            listen_for_high_volume_stream_updates:
+                bool, default False, Whether to listen for high volume stream updates.
+                    These are generally less necessary, but contain large numbers of
+                    updates per block, such as all ledger transactions. For a network
+                    running at ~1s/block these are likely to be fine, but can be a
+                    hindrance working at full nullchain speed.
 
         """
         self._core_client = None
         self._core_state_client = None
         self._trading_data_client_v2 = None
+        self._local_data_cache = None
         self.can_control_time = can_control_time
         self.warn_on_raw_data_access = warn_on_raw_data_access
 
@@ -129,13 +142,10 @@ class VegaService(ABC):
         self._market_pos_decimals = None
         self._asset_decimals = None
         self._market_to_asset = None
+        self._listen_for_high_volume_stream_updates = (
+            listen_for_high_volume_stream_updates
+        )
         self.seconds_per_block = seconds_per_block
-
-        self.order_thread = None
-        self.orders_lock = threading.RLock()
-        self.transfers_lock = threading.RLock()
-        self._order_state_from_feed = {}
-        self._transfer_state_from_feed = {}
 
     @property
     def market_price_decimals(self) -> int:
@@ -161,7 +171,7 @@ class VegaService(ABC):
     def asset_decimals(self) -> int:
         if self._asset_decimals is None:
             self._asset_decimals = DecimalsCache(
-                lambda asset_id: data.asset_decimals(
+                lambda asset_id: data.get_asset_decimals(
                     asset_id=asset_id, data_client=self.trading_data_client_v2
                 )
             )
@@ -176,6 +186,22 @@ class VegaService(ABC):
                 ).tradable_instrument.instrument.future.settlement_asset
             )
         return self._market_to_asset
+
+    @property
+    def data_cache(self) -> LocalDataCache:
+        if self._local_data_cache is None:
+            self._local_data_cache = LocalDataCache(
+                self.trading_data_client_v2,
+                self.trading_data_client_v2,
+                self.market_pos_decimals,
+                self.market_price_decimals,
+                self.asset_decimals,
+                self.market_to_asset,
+            )
+            self._local_data_cache.start_live_feeds(
+                start_high_load_feeds=self._listen_for_high_volume_stream_updates
+            )
+        return self._local_data_cache
 
     @property
     def data_node_rest_url(self) -> str:
@@ -252,7 +278,8 @@ class VegaService(ABC):
         self.wait_for_datanode_sync()
 
     def stop(self) -> None:
-        pass
+        if self._local_data_cache is not None:
+            self._local_data_cache.stop()
 
     def login(self, name: str, passphrase: str) -> str:
         """Logs in to existing wallet in the given vega service.
@@ -658,7 +685,7 @@ class VegaService(ABC):
             side=side,
             volume=submit_volume,
             price=str(submit_price) if submit_price is not None else None,
-            expires_at=expires_at,
+            expires_at=int(expires_at) if expires_at is not None else None,
             pegged_order=vega_protos.vega.PeggedOrder(
                 reference=pegged_order.reference,
                 offset=str(
@@ -830,6 +857,7 @@ class VegaService(ABC):
         updated_simple_model_params: Optional[SimpleModelParams] = None,
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
+        updated_lp_price_range: Optional[float] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -883,7 +911,6 @@ class VegaService(ABC):
                 data_source_spec_for_settlement_data=oracle_spec_for_settlement_data,
                 data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
                 data_source_spec_binding=curr_fut.data_source_spec_binding,
-                settlement_data_decimals=curr_fut.settlement_data_decimals,
             )
             updated_instrument = UpdateInstrumentConfiguration(
                 code=curr_inst.code,
@@ -911,6 +938,9 @@ class VegaService(ABC):
             simple=updated_simple_model_params,
             log_normal=updated_log_normal_risk_model,
             metadata=updated_metadata,
+            lp_price_range=str(updated_lp_price_range)
+            if updated_lp_price_range is not None
+            else current_market.lp_price_range,
         )
 
         proposal_id = gov.propose_market_update(
@@ -942,9 +972,11 @@ class VegaService(ABC):
         future_inst = data_raw.market_info(
             market_id, data_client=self.trading_data_client_v2
         ).tradable_instrument.instrument.future
-        oracle_name = future_inst.data_source_spec_for_settlement_data.data.external.oracle.filters[
+
+        filter_key = future_inst.data_source_spec_for_settlement_data.data.external.oracle.filters[
             0
-        ].key.name
+        ].key
+        oracle_name = filter_key.name
 
         logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
 
@@ -953,7 +985,7 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             oracle_name=oracle_name,
             settlement_price=num_to_padded_int(
-                settlement_price, decimals=future_inst.settlement_data_decimals
+                settlement_price, decimals=filter_key.number_decimal_places
             ),
             key_name=settlement_key,
         )
@@ -1008,16 +1040,20 @@ class VegaService(ABC):
         )
 
     def positions_by_market(
-        self, key_name: str, market_id: str, wallet_name: Optional[str] = None
+        self,
+        wallet_name: str,
+        market_id: Optional[str] = None,
+        key_name: Optional[str] = None,
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data.positions_by_market(
-            self.wallet.public_key(wallet_name=wallet_name, name=key_name),
+            pub_key=self.wallet.public_key(wallet_name, key_name),
             market_id=market_id,
             data_client=self.trading_data_client_v2,
-            asset_decimals=self.asset_decimals[self.market_to_asset[market_id]],
-            price_decimals=self.market_price_decimals[market_id],
-            position_decimals=self.market_pos_decimals[market_id],
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_to_asset_map=self.market_to_asset,
+            asset_decimals_map=self.asset_decimals,
         )
 
     @raw_data
@@ -1042,10 +1078,20 @@ class VegaService(ABC):
         )
 
     @raw_data
+    def market_data_from_feed(
+        self,
+        market_id: str,
+    ) -> vega_protos.vega.MarketData:
+        """
+        Output market info.
+        """
+        return self.data_cache.market_data_from_feed(market_id)
+
+    @raw_data
     def market_data(
         self,
         market_id: str,
-    ) -> vega_protos.markets.MarketData:
+    ) -> vega_protos.vega.MarketData:
         """
         Output market info.
         """
@@ -1111,7 +1157,10 @@ class VegaService(ABC):
         Output the best static bid price and best static ask price in current market.
         """
         return data.best_prices(
-            market_id=market_id, data_client=self.trading_data_client_v2
+            market_id=market_id,
+            data_client=self.trading_data_client_v2,
+            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
+            price_decimals=self.market_price_decimals[market_id],
         )
 
     def price_bounds(
@@ -1122,7 +1171,10 @@ class VegaService(ABC):
         Output the tightest price bounds in the current market.
         """
         return data.price_bounds(
-            market_id=market_id, data_client=self.trading_data_client_v2
+            market_id=market_id,
+            data_client=self.trading_data_client_v2,
+            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
+            price_decimals=self.market_price_decimals[market_id],
         )
 
     def order_book_by_market(
@@ -1272,13 +1324,8 @@ class VegaService(ABC):
             wallet_name:
                 optional, str name of wallet to use
         """
-        asset_id = data_raw.market_info(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        ).tradable_instrument.instrument.future.settlement_asset
-
-        market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
+        asset_id = self.market_to_asset[market_id]
+        market_decimals = self.market_price_decimals[market_id]
 
         buy_specs = [
             (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
@@ -1383,18 +1430,7 @@ class VegaService(ABC):
 
         Returns:
             Dictionary mapping market ID -> Party ID -> Order ID -> Order detaails"""
-        with self.orders_lock:
-            order_dict = {}
-            for market_id, party_orders in self._order_state_from_feed.items():
-                for party_id, orders in party_orders.items():
-                    for order_id, order in orders.items():
-                        if not live_only or (
-                            order.status == vega_protos.vega.Order.Status.STATUS_ACTIVE
-                        ):
-                            order_dict.setdefault(market_id, {}).setdefault(
-                                party_id, {}
-                            )[order_id] = order
-        return order_dict
+        return self.data_cache.order_status_from_feed(live_only=live_only)
 
     def orders_for_party_from_feed(
         self,
@@ -1402,25 +1438,23 @@ class VegaService(ABC):
         market_id: str,
         live_only: bool = True,
         wallet_name: Optional[str] = None,
-    ) -> List[data.Order]:
+    ) -> Dict[str, data.Order]:
         party_id = self.wallet.public_key(wallet_name=wallet_name, name=key_name)
-        return (
-            self.order_status_from_feed(live_only=live_only)
-            .get(market_id, {})
-            .get(party_id, {})
+        return self.data_cache.orders_for_party_from_feed(
+            party_id=party_id, market_id=market_id, live_only=live_only
         )
 
-    def transfer_status_from_feed(self, live_only: bool = True):
-        datetime = self.get_blockchain_time()
-
-        with self.transfers_lock:
-            transfers_dict = {}
-            for party_id, party_transfers in self._transfer_state_from_feed.items():
-                for transfer_id, transfer in party_transfers.items():
-                    deliver_on = int(transfer.one_off.deliver_on)
-                    if not live_only or (deliver_on != 0 and datetime < deliver_on):
-                        transfers_dict.setdefault(party_id, {})[transfer_id] = transfer
-        return transfers_dict
+    def transfer_status_from_feed(
+        self, live_only: bool = True, blockchain_time: Optional[int] = None
+    ):
+        blockchain_time = (
+            blockchain_time
+            if blockchain_time is not None or not live_only
+            else self.get_blockchain_time()
+        )
+        return self.data_cache.transfer_status_from_feed(
+            live_only=live_only, blockchain_time=blockchain_time
+        )
 
     @raw_data
     def liquidity_provisions(
@@ -1473,81 +1507,6 @@ class VegaService(ABC):
             party_id=self.wallet.public_key(wallet_name=wallet_name, name=key_name),
         )
 
-    def start_order_monitoring(
-        self,
-        market_id: Optional[str] = None,
-        party_id: Optional[str] = None,
-    ):
-        self.order_queue = data.order_subscription(
-            self.core_client,
-            self.trading_data_client_v2,
-            market_id=market_id,
-            party_id=party_id,
-        )
-        base_orders = []
-
-        for m_id in (
-            [market_id] if market_id is not None else [m.id for m in self.all_markets()]
-        ):
-            base_orders.extend(
-                data.all_orders(market_id=m_id, data_client=self.trading_data_client_v2)
-            )
-
-        with self.orders_lock:
-            for order in base_orders:
-                if party_id is not None and order.party_id != party_id:
-                    continue
-                self._order_state_from_feed.setdefault(order.market_id, {}).setdefault(
-                    order.party_id, {}
-                )[order.id] = order
-
-        self.order_thread = threading.Thread(
-            target=self._monitor_stream, args=(self.order_queue,), daemon=True
-        )
-        self.order_thread.start()
-
-    def start_transfer_monitoring(
-        self,
-    ):
-        self.transfer_queue = data.transfer_subscription(
-            self.core_client,
-            self.trading_data_client_v2,
-        )
-
-        base_transfers = []
-
-        base_transfers.extend(
-            data.list_transfers(data_client=self.trading_data_client_v2)
-        )
-
-        with self.transfers_lock:
-            for t in base_transfers:
-                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
-
-        self.transfer_thread = threading.Thread(
-            target=self._monitor_transfer_stream,
-            args=(self.transfer_queue,),
-            daemon=True,
-        )
-        self.transfer_thread.start()
-
-    def _monitor_stream(self, trade_stream: Queue[data.Order]):
-        for o in trade_stream:
-            with self.orders_lock:
-                if o.version >= getattr(
-                    self._order_state_from_feed.setdefault(o.market_id, {})
-                    .setdefault(o.party_id, {})
-                    .get(o.id, None),
-                    "version",
-                    0,
-                ):
-                    self._order_state_from_feed[o.market_id][o.party_id][o.id] = o
-
-    def _monitor_transfer_stream(self, transfer_stream: Queue[data.Transfer]):
-        for t in transfer_stream:
-            with self.transfers_lock:
-                self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
-
     def margin_levels(
         self,
         key_name: str = None,
@@ -1594,6 +1553,67 @@ class VegaService(ABC):
             live_only=live_only,
         )
 
+    def get_ledger_entries_from_stream(
+        self,
+        wallet_name_from: Optional[str] = None,
+        key_name_from: Optional[str] = None,
+        wallet_name_to: Optional[str] = None,
+        key_name_to: Optional[str] = None,
+        transfer_type: Optional[str] = None,
+    ) -> List[data.LedgerEntry]:
+        return self.data_cache.get_ledger_entries_from_stream(
+            party_id_from=self.wallet.public_key(
+                name=wallet_name_from, key_name=key_name_from
+            )
+            if wallet_name_from is not None
+            else None,
+            party_id_to=self.wallet.public_key(
+                name=wallet_name_to, key_name=key_name_to
+            )
+            if wallet_name_to is not None
+            else None,
+            transfer_type=transfer_type,
+        )
+
+    def get_trades_from_stream(
+        self,
+        market_id: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
+        order_id: Optional[str] = None,
+        exclude_trade_ids: Optional[Set[str]] = None,
+    ) -> List[data.Trade]:
+        """Loads executed trades for a given query of party/market/specific order from
+        data node. Converts values to proper decimal output.
+
+        Args:
+            market_id:
+                optional str, Restrict to trades on a specific market
+            wallet_name:
+                optional str, Restrict to trades for a specific wallet
+            key_name:
+                optional str, Select a different key to the default within a given wallet
+            order_id:
+                optional str, Restrict to trades for a specific order
+            exclude_trade_ids:
+                optional set[str], Do not return trades with ID in this set
+
+        Returns:
+            List[Trade], list of formatted trade objects which match the required
+                restrictions.
+        """
+        party_id = (
+            self.wallet.public_key(wallet_name, key_name)
+            if key_name is not None
+            else None
+        )
+        return self.data_cache.get_trades_from_stream(
+            market_id=market_id,
+            party_id=party_id,
+            order_id=order_id,
+            exclude_trade_ids=exclude_trade_ids,
+        )
+
     def get_trades(
         self,
         market_id: str,
@@ -1624,8 +1644,9 @@ class VegaService(ABC):
             asset_dp = self.asset_decimals[self.market_to_asset[market_id]]
         return data.get_trades(
             self.trading_data_client_v2,
-            data_client_v1=self.trading_data_client_v2,
-            party_id=self.wallet.public_key(wallet_name=wallet_name, name=key_name),
+            party_id=self.wallet.public_key(wallet_name=wallet_name, name=key_name)
+            if key_name is not None
+            else None,
             market_id=market_id,
             order_id=order_id,
             market_asset_decimals_map={market_id: asset_dp}
@@ -1707,11 +1728,13 @@ class VegaService(ABC):
         return trading.order_amendment(
             order_id=order_id,
             market_id=market_id,
-            price=str(price),
+            price=str(price) if price is not None else price,
             size_delta=size_delta,
             expires_at=expires_at,
             time_in_force=time_in_force,
-            pegged_offset=str(pegged_offset),
+            pegged_offset=str(pegged_offset)
+            if pegged_offset is not None
+            else pegged_offset,
             pegged_reference=pegged_reference,
         )
 
@@ -1952,9 +1975,20 @@ class VegaService(ABC):
         else:
             raise ValueError(f"Invalid value '{to_type}' specified for 'to_type' arg.")
 
-    def ping_datanode(self):
-        """Ping datanode endpoint to check health of connection"""
+    def ping_datanode(self, max_time_diff: int = 30):
+        """Ping datanode endpoint to check health of connection
+
+        Args:
+            max_time_diff (int, optional):
+                The maximum allowable deviation between the time reported by datanode
+                and the time reported by the system in seconds. Defaults to 30
+
+        """
+
+        # Ping datanode then check if it is behind
         data.ping(data_client=self.trading_data_client_v2)
+        if abs(self.get_blockchain_time() - time.time()) > max_time_diff:
+            raise DatanodeBehindError
 
     def one_off_transfer(
         self,
@@ -2044,4 +2078,104 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             party_id=party_id,
             direction=direction,
+        )
+
+    def get_liquidity_fee_shares(
+        self,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+        key_name: Optional[str] = None,
+    ) -> Union[Dict, float]:
+        """Gets the current liquidity fee share for each party or a specified party.
+
+        Args:
+            market_id (str):
+                Id of market.
+            wallet_name (Optional[str] = None):
+                Name of wallet to get public key from.
+            key_name (Optional[str], optional):
+                Name of specific key in wallet to get public key for. Defaults to None.
+        """
+
+        return data.get_liquidity_fee_shares(
+            data_client=self.trading_data_client_v2,
+            market_id=market_id,
+            party_id=(
+                self.wallet.public_key(name=wallet_name, key_name=key_name)
+                if wallet_name is not None
+                else None
+            ),
+            market_data=self.market_data_from_feed(market_id=market_id),
+        )
+
+    def list_ledger_entries(
+        self,
+        close_on_account_filters: bool = False,
+        asset_id: Optional[str] = None,
+        from_party_ids: Optional[List[str]] = None,
+        to_party_ids: Optional[List[str]] = None,
+        from_account_types: Optional[list[vega_protos.vega.AccountType]] = None,
+        from_market_ids: Optional[List[str]] = None,
+        to_market_ids: Optional[List[str]] = None,
+        to_account_types: Optional[list[vega_protos.vega.AccountType]] = None,
+        transfer_types: Optional[list[vega_protos.vega.TransferType]] = None,
+        from_datetime: Optional[datetime.datetime] = None,
+        to_datetime: Optional[datetime.datetime] = None,
+    ) -> List[data.AggregatedLedgerEntry]:
+        """Returns a list of ledger entries matching specific filters as provided.
+        These detail every transfer of funds between accounts within the Vega system,
+        including fee/rewards payments and transfers between user margin/general/bond
+        accounts.
+
+        Note: At least one of the from_*/to_* filters, or asset ID, must be specified.
+
+        Args:
+            data_client:
+                vac.VegaTradingDataClientV2, An instantiated gRPC trading data client
+            close_on_account_filters:
+                bool, default False, Whether both 'from' and 'to' filters must both match
+                    a given transfer for inclusion. If False, entries matching either
+                    'from' or 'to' will also be included.
+            asset_id:
+                Optional[str], filter to only transfers of specific asset ID
+            from_party_ids:
+                Optional[List[str]], Only include transfers from specified parties
+            from_market_ids:
+                Optional[List[str]], Only include transfers from specified markets
+            from_account_types:
+                Optional[List[str]], Only include transfers from specified account types
+            to_party_ids:
+                Optional[List[str]], Only include transfers to specified parties
+            to_market_ids:
+                Optional[List[str]], Only include transfers to specified markets
+            to_account_types:
+                Optional[List[str]], Only include transfers to specified account types
+            transfer_types:
+                Optional[List[vega_protos.vega.AccountType]], Only include transfers
+                    of specified types
+            from_datetime:
+                Optional[datetime.datetime], Only include transfers occurring after
+                    this time
+            to_datetime:
+                Optional[datetime.datetime], Only include transfers occurring before
+                    this time
+        Returns:
+            List[data.AggregatedLedgerEntry]
+                A list of all transfers matching the requested criteria
+        """
+
+        return data.list_ledger_entries(
+            data_client=self.trading_data_client_v2,
+            asset_id=asset_id,
+            close_on_account_filters=close_on_account_filters,
+            from_party_ids=from_party_ids,
+            from_market_ids=from_market_ids,
+            from_account_types=from_account_types,
+            to_party_ids=to_party_ids,
+            to_market_ids=to_market_ids,
+            to_account_types=to_account_types,
+            transfer_types=transfer_types,
+            from_datetime=from_datetime,
+            to_datetime=to_datetime,
+            asset_decimals_map=self.asset_decimals,
         )

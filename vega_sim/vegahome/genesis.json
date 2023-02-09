@@ -103,13 +103,13 @@
       "market.auction.maximumDuration": "168h0m0s",
       "market.auction.minimumDuration": "1s",
       "market.fee.factors.infrastructureFee": "0.001",
-      "market.fee.factors.makerFee": "0.001",
+      "market.fee.factors.makerFee": "0.0002",
       "market.liquidity.bondPenaltyParameter": "1",
       "market.liquidity.maximumLiquidityFeeFactorLevel": "1",
       "market.liquidity.minimum.probabilityOfTrading.lpOrders": "1e-8",
       "market.liquidity.probabilityOfTrading.tau.scaling": "1",
       "market.liquidity.providers.fee.distributionTimeStep": "0s",
-      "market.liquidity.stakeToCcySiskas": "1",
+      "market.liquidity.stakeToCcyVolume": "1",
       "market.liquidity.targetstake.triggering.ratio": "0",
       "market.liquidityProvision.shapes.maxSize": "100",
       "market.margin.scalingFactors": "{\"search_level\": 1.1, \"initial_margin\": 1.2, \"collateral_release\": 1.4}",
@@ -140,7 +140,8 @@
       "transfer.fee.factor": "0",
       "validators.delegation.minAmount": "1",
       "validators.epoch.length": "24h0m0s",
-      "validators.vote.required": "0.67"
+      "validators.vote.required": "0.67",
+      "blockchains.ethereumConfig": "{\"network_id\": \"3\", \"chain_id\": \"3\", \"collateral_bridge_contract\": { \"address\": \"0xa6F1E140daC13002Dfd9789D6dBA59117c717D7a\" }, \"confirmations\": 50, \"staking_bridge_contract\": { \"address\": \"0xfce2CC92203A266a9C8e67461ae5067c78f67235\", \"deployment_block_height\": 11001702}, \"multisig_control_contract\": {\"address\": \"0xCF6d41235911184fe6F35D47207813bFF3B91601\", \"deployment_block_height\": 12710009 } }"
     },
     "network_limits": {
       "propose_market_enabled": true,

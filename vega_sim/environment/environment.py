@@ -20,13 +20,15 @@ For examples of this setup, see examples/agent_market.
 
 """
 
-import grpc
 import time
 import datetime
 import logging
 import random
+
+import numpy as np
+
 from collections import namedtuple
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, List, Optional
 
 from vega_sim.environment.agent import Agent, StateAgent, VegaState
 from vega_sim.network_service import VegaServiceNetwork
@@ -41,8 +43,12 @@ MarketState = namedtuple(
         "state",
         "trading_mode",
         "midprice",
+        "best_bid_price",
+        "best_ask_price",
+        "min_valid_price",
+        "max_valid_price",
         "orders",
-    ],  # "order_book"]
+    ],
 )
 
 
@@ -56,11 +62,8 @@ class MarketEnvironment:
         block_length_seconds: int = 1,
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
-        state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
-        ] = None,
-        state_extraction_freq: int = 10,
         pause_every_n_steps: Optional[int] = None,
+        random_state: np.random.RandomState = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -99,14 +102,6 @@ class MarketEnvironment:
             vega_service:
                 optional, VegaServiceNull, If passed will use this precreated vega
                     service instead of creating one internally.
-            state_extraction_fn:
-                optional, Callable[[VegaServiceNull, List[Agent]], Any],
-                    Optional function which takes a Vega service at a given time
-                    and returns a summary of interesting state values. If passed,
-                    the aggregated result of these will be returned after a run.
-            state_extraction_freq:
-                int, default 10, If state_extraction_fn is passed, how many steps
-                    should be between each call.
             pause_every_n_steps:
                 Optional[int], default None, If passed, simulation will pause every
                     time the passed number of steps elapses waiting on user to press
@@ -119,9 +114,11 @@ class MarketEnvironment:
         self.block_length_seconds = block_length_seconds
         self.step_length_seconds = step_length_seconds
         self._vega = vega_service
-        self._state_extraction_fn = state_extraction_fn
-        self._state_extraction_freq = state_extraction_freq
         self._pause_every_n_steps = pause_every_n_steps
+
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
 
     def run(
         self,
@@ -152,11 +149,30 @@ class MarketEnvironment:
         else:
             return self._run(self._vega, pause_at_completion=pause_at_completion)
 
+    def _start_live_feeds(self, vega: VegaService):
+        # Get lists of unique market_ids and party_ids to observe
+        market_ids = list(
+            {
+                vega.find_market_id(name=agent.market_name)
+                for agent in self.agents
+                if hasattr(agent, "market_name")
+            }
+        )
+        party_ids = list(
+            {
+                vega.wallet.public_key(agent.wallet_name, agent.key_name)
+                for agent in self.agents
+                if hasattr(agent, "wallet_name")
+            }
+        )
+        # Start order monitoring only observing scenario markets and parties
+        vega.data_cache.start_live_feeds(market_ids=market_ids, party_ids=party_ids)
+
     def _run(
         self,
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
-    ) -> Optional[List[Any]]:
+    ) -> None:
         """Run the simulation with specified agents.
 
         Args:
@@ -171,7 +187,6 @@ class MarketEnvironment:
         )
 
         start = datetime.datetime.now()
-        state_values = []
 
         for agent in self.agents:
             agent.initialise(vega=vega)
@@ -195,16 +210,6 @@ class MarketEnvironment:
 
             if core_catchup_seconds > 1:
                 logger.warn(f"Waited {core_catchup_seconds}s for core catchup")
-
-            if (
-                self._state_extraction_fn is not None
-                and i % self._state_extraction_freq == 0
-            ):
-                state_values.append(
-                    self._state_extraction_fn(
-                        vega, self.agents, state_values=state_values
-                    )
-                )
 
             vega.wait_for_total_catchup()
 
@@ -242,16 +247,9 @@ class MarketEnvironment:
         vega.wait_for_core_catchup()
         vega.wait_for_datanode_sync()
 
-        if self._state_extraction_fn is not None:
-            state_values.append(
-                self._state_extraction_fn(vega, self.agents, state_values=state_values)
-            )
-        if self._state_extraction_fn is not None:
-            return state_values
-
     def step(self, vega: VegaService) -> None:
         for agent in (
-            sorted(self.agents, key=lambda _: random.random())
+            sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):
@@ -269,11 +267,8 @@ class MarketEnvironmentWithState(MarketEnvironment):
         block_length_seconds: int = 1,
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
-        state_extraction_fn: Optional[
-            Callable[[VegaServiceNull, List[Agent]], Any]
-        ] = None,
-        state_extraction_freq: int = 10,
         pause_every_n_steps: Optional[int] = None,
+        random_state: np.random.RandomState = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the
@@ -315,14 +310,6 @@ class MarketEnvironmentWithState(MarketEnvironment):
             vega_service:
                 optional, VegaServiceNull, If passed will use this precreated vega
                     service instead of creating one internally.
-            state_extraction_fn:
-                optional, Callable[[VegaServiceNull, List[Agent]], Any],
-                    Optional function which takes a Vega service at a given time
-                    and returns a summary of interesting state values. If passed,
-                    the aggregated result of these will be returned after a run.
-            state_extraction_freq:
-                int, default 10, If state_extraction_fn is passed, how many steps
-                    should be between each call.
             pause_every_n_steps:
                 Optional[int], default None, If passed, simulation will pause every
                     time the passed number of steps elapses waiting on user to press
@@ -336,27 +323,39 @@ class MarketEnvironmentWithState(MarketEnvironment):
             block_length_seconds=block_length_seconds,
             step_length_seconds=step_length_seconds,
             vega_service=vega_service,
-            state_extraction_fn=state_extraction_fn,
-            state_extraction_freq=state_extraction_freq,
             pause_every_n_steps=pause_every_n_steps,
+            random_state=random_state,
         )
+
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
         )
 
-    # @staticmethod
     def _default_state_extraction(self, vega: VegaService) -> VegaState:
+        if not hasattr(self, "market_decimals_cache"):
+            self.market_decimals_cache = {}
         market_state = {}
         order_status = vega.order_status_from_feed(live_only=True)
-        for market in vega.all_markets():
-            market_info = vega.market_info(market_id=market.id)
-            market_data = vega.market_data(market_id=market.id)
-            market_state[market.id] = MarketState(
-                state=market_info.state,
-                trading_mode=market_info.trading_mode,
+        for (
+            market_id,
+            market_data,
+        ) in vega.data_cache.market_data_from_feed_store.items():
+            if market_id not in self.market_decimals_cache:
+                self.market_decimals_cache[market_id] = vega.market_info(
+                    market_id=market_id
+                ).decimal_places
+            market_state[market_data.market] = MarketState(
+                state=market_data.market_state,
+                trading_mode=market_data.market_trading_mode,
                 midprice=float(market_data.mid_price)
-                / 10 ** int(market_info.decimal_places),
-                orders=order_status.get(market.id, {}),
+                / 10 ** int(self.market_decimals_cache[market_id]),
+                best_bid_price=float(market_data.best_bid_price)
+                / 10 ** self.market_decimals_cache[market_id],
+                best_ask_price=float(market_data.best_offer_price)
+                / 10 ** self.market_decimals_cache[market_id],
+                min_valid_price=vega.price_bounds(market_id=market_id)[0],
+                max_valid_price=vega.price_bounds(market_id=market_id)[1],
+                orders=order_status.get(market_data.market, {}),
             )
 
         return VegaState(network_state=(), market_state=market_state)
@@ -365,7 +364,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         vega.wait_for_datanode_sync()
         state = self.state_func(vega)
         for agent in (
-            sorted(self.agents, key=lambda _: random.random())
+            sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):
@@ -381,12 +380,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         random_agent_ordering: bool = True,
         vega_service: Optional[VegaServiceNetwork] = None,
         state_func: Optional[Callable[[VegaService], VegaState]] = None,
-        state_extraction_fn: Optional[
-            Callable[[VegaServiceNetwork, List[Agent]], Any]
-        ] = None,
-        state_extraction_freq: int = 10,
         raise_datanode_errors: Optional[bool] = True,
         raise_step_errors: Optional[bool] = True,
+        random_state: np.random.RandomState = None,
     ):
         super().__init__(
             agents=agents,
@@ -394,8 +390,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             random_agent_ordering=random_agent_ordering,
             step_length_seconds=step_length_seconds,
             vega_service=vega_service,
-            state_extraction_fn=state_extraction_fn,
-            state_extraction_freq=state_extraction_freq,
+            random_state=random_state,
         )
         self.state_func = (
             state_func if state_func is not None else self._default_state_extraction
@@ -404,20 +399,26 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         self.raise_datanode_errors = raise_datanode_errors
         self.raise_step_errors = raise_step_errors
 
-    def run(self):
+    def run(
+        self,
+        run_with_console: bool = False,
+        pause_at_completion: bool = False,
+    ):
         if self._vega is None:
             with VegaServiceNetwork(
                 use_full_vega_wallet=True,
                 run_with_wallet=True,
-                run_with_console=True,
+                run_with_console=run_with_console,
             ) as vega:
                 return self._run(vega)
         else:
-            return self._run(self._vega)
+            return self._run(self._vega, pause_at_completion=pause_at_completion)
 
-    def _run(self, vega: VegaServiceNetwork):
-        state_values = []
-
+    def _run(
+        self,
+        vega: VegaServiceNetwork,
+        pause_at_completion: bool = False,
+    ) -> None:
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
@@ -425,36 +426,33 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         for agent in self.agents:
             agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
 
+        self._start_live_feeds(vega=vega)
+
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
-
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
             i += 1
             self.step(vega)
-
-            if (
-                self._state_extraction_fn is not None
-                and i % self._state_extraction_freq == 0
-            ):
-                state_values.append(self._state_extraction_fn(vega, self.agents))
 
             time.sleep(self.step_length_seconds)
 
         for agent in self.agents:
             agent.finalise()
 
-        if self._state_extraction_fn is not None:
-            state_values.append(self._state_extraction_fn(vega, self.agents))
-            return state_values
+        if pause_at_completion:
+            input(
+                "Environment run completed. Pausing to allow inspection of state."
+                " Press Enter to continue"
+            )
 
     def step(self, vega: VegaServiceNetwork) -> None:
         t = time.time()
         state = self.state_func(vega)
         logging.debug(f"Get state took {time.time() - t} seconds.")
         for agent in (
-            sorted(self.agents, key=lambda _: random.random())
+            sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):

@@ -15,3 +15,8 @@ def test_loss_socialisation():
 @pytest.mark.integration
 def test_margins():
     runpy.run_path("examples/visualisations/margins.py")
+
+
+@pytest.mark.integration
+def test_multiple_lps():
+    runpy.run_path("examples/visualisations/multiple_lps.py")

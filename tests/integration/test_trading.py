@@ -4,6 +4,8 @@ from tests.integration.utils.fixtures import (
     vega_service_with_market,
     vega_service,
     create_and_faucet_wallet,
+    vega_service_with_high_volume,
+    vega_service_with_high_volume_with_market,
     ASSET_NAME,
     WalletConfig,
 )
@@ -18,7 +20,6 @@ PARTY_B = WalletConfig("party_b", "party_b")
 
 @pytest.mark.integration
 def test_submit_market_order(vega_service_with_market: VegaServiceNull):
-
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
@@ -44,14 +45,15 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
         volume=1,
         side="SIDE_BUY",
     )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    positions_pb_t1 = vega.positions_by_market(
+    position_pb_t1 = vega.positions_by_market(
         wallet_name=PARTY_A.name,
         market_id=market_id,
     )
 
-    assert positions_pb_t1[0].open_volume == 1
+    assert position_pb_t1.open_volume == 1
 
 
 @pytest.mark.integration
@@ -144,9 +146,9 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
     num_levels = 11
     expected_bid_prices = [0.2995, 0.299, 0.25, 0.245, 0, 0, 0, 0, 0, 0, 0]
-    expected_bid_volumes = [668.0, 383.0, 1.0, 19760.0, 0, 0, 0, 0, 0, 0, 0]
+    expected_bid_volumes = [334.0, 192.0, 1.0, 584.0, 0, 0, 0, 0, 0, 0, 0]
     expected_ask_prices = [0.3005, 0.305, 0.35, 0.3502, 0, 0, 0, 0, 0, 0, 0]
-    expected_ask_volumes = [666.0, 1125.0, 1.0, 171.0, 0, 0, 0, 0, 0, 0, 0]
+    expected_ask_volumes = [333.0, 563.0, 1.0, 82.0, 0, 0, 0, 0, 0, 0, 0]
 
     book_state = vega.market_depth(market_id, num_levels=num_levels)
     bid_prices = [level.price for level in book_state.buys] + [0] * max(
@@ -176,8 +178,8 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
 
 @pytest.mark.integration
-def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
-    vega = vega_service_with_market
+def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaServiceNull):
+    vega = vega_service_with_high_volume_with_market
     market_id = vega.all_markets()[0].id
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)

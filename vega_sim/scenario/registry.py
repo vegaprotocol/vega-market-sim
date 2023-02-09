@@ -9,6 +9,9 @@ from vega_sim.scenario.ideal_market_maker_v2.scenario import (
 from vega_sim.scenario.multi_market.scenario import VegaLoadTest
 from vega_sim.scenario.market_crash.scenario import MarketCrash
 from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
+from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
+from vega_sim.scenario.parameter_experiment.scenario import ParameterExperiment
+
 
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
@@ -140,6 +143,29 @@ SCENARIOS = {
         opening_auction_trade_amount=0.0001,
         market_order_trader_base_order_size=0.01,
     ),
+    "shaped_market_maker": lambda: CurveMarketMaker(
+        market_name="ETH",
+        asset_name="USD",
+        num_steps=290,
+        market_decimal=2,
+        asset_decimal=4,
+        market_position_decimal=4,
+        initial_price=1000,
+        lp_commitamount=250_000,
+        initial_asset_mint=10_000_000,
+        step_length_seconds=60,
+        # step_length_seconds=Granularity.HOUR.value,
+        block_length_seconds=1,
+        q_upper=30,
+        q_lower=-30,
+        market_maker_curve_kappa=0.2,
+        market_maker_assumed_market_kappa=0.2,
+        buy_intensity=100,
+        sell_intensity=100,
+        sensitive_price_taker_half_life=10,
+        opening_auction_trade_amount=0.0001,
+        market_order_trader_base_order_size=0.01,
+    ),
     "configurable_market": lambda: ConfigurableMarket(
         market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
         market_code="ETH:USD",
@@ -156,4 +182,18 @@ SCENARIOS = {
         orders_per_second=100,
         trades_per_second=1,
     ),
+    "hedged_market": lambda: HedgedMarket(
+        num_steps=24 * 60,
+        step_length_seconds=60,
+        block_length_seconds=1,
+        price_process_fn=lambda: get_historic_price_series(
+            product_id="ETH-USD",
+            granularity=Granularity.MINUTE,
+            start="2022-06-12 17:00:00",
+            end="2022-06-13 17:00:00",
+        ).values,
+        int_lock=3 * 60 * 60,
+        ext_lock=5 * 60,
+    ),
+    "parameter_experiment": lambda: ParameterExperiment(),
 }
