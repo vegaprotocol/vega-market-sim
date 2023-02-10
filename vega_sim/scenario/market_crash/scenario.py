@@ -150,7 +150,6 @@ class MarketCrash(Scenario):
         for i in range(self.num_noise_traders):
             noise_traders.append(
                 MarketOrderTrader(
-                    key_name=TRADER_WALLET.name,
                     market_name=self.market_name,
                     asset_name=self.asset_name,
                     tag=f"{tag}_noise_{i}",
@@ -164,7 +163,6 @@ class MarketCrash(Scenario):
         for i in range(self.num_position_traders):
             position_traders.append(
                 MarketOrderTrader(
-                    key_name=TRADER_WALLET.name,
                     market_name=self.market_name,
                     asset_name=self.asset_name,
                     initial_asset_mint=self.position_taker_mint,
