@@ -350,7 +350,6 @@ class LocalDataCache:
                                 ][update.id] = update
 
                 elif isinstance(update, data.Transfer):
-                    print(update)
                     with self.transfers_lock:
                         self._transfer_state_from_feed.setdefault(update.party_to, {})[
                             update.id

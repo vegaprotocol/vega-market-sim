@@ -1076,6 +1076,9 @@ def list_transfers(
     res_transfers = []
 
     for transfer in transfers:
+        if transfer.status == events_protos.Transfer.Status.STATUS_REJECTED:
+            continue
+
         if transfer.asset not in asset_dp:
             asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
