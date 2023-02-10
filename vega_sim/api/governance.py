@@ -323,16 +323,16 @@ def propose_future_market(
 def propose_network_parameter_change(
     parameter: str,
     value: str,
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClientV2] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ):
     network_param_update = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name, key_name),
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -392,7 +392,7 @@ def approve_proposal(
         transaction=commands_protos.commands.VoteSubmission(
             value=vega_protos.governance.Vote.Value.VALUE_YES, proposal_id=proposal_id
         ),
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="vote_submission",
         key_name=key_name,
     )
@@ -493,7 +493,7 @@ def _make_and_wait_for_proposal(
 ) -> ProposalSubmission:
     wallet.submit_transaction(
         transaction=proposal,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="proposal_submission",
         key_name=key_name,
     )
@@ -562,7 +562,7 @@ def settle_oracle(
 
     wallet.submit_transaction(
         transaction=oracle_submission,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="oracle_data_submission",
         key_name=key_name,
     )
@@ -578,7 +578,7 @@ def settle_oracle(
 
     wallet.submit_transaction(
         transaction=oracle_submission,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="oracle_data_submission",
         key_name=key_name,
     )

@@ -429,7 +429,7 @@ def manage_vega_processes(
             ):
                 time.sleep(0.1)
 
-        res1 = subprocess.Popen(
+        subprocess.Popen(
             [
                 vega_wallet_path,
                 "api-token",
@@ -440,9 +440,8 @@ def manage_vega_processes(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        logger.info("Store generation {}".format(res1.communicate()))
 
-        res = subprocess.Popen(
+        subprocess.Popen(
             [
                 vega_wallet_path,
                 "api-token",
@@ -451,12 +450,11 @@ def manage_vega_processes(
                 "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
                 "--wallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
                 "--wallet-name=" + DEFAULT_WALLET_NAME,
-                "--description=DEFAULT_WALLET",
+                "--description=" + DEFAULT_WALLET_NAME,
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        logger.info("TOKEN IS {}".format(res.communicate()))
 
         wallet_args = [
             vega_wallet_path,
@@ -616,7 +614,14 @@ class VegaServiceNull(VegaService):
     def wallet(self) -> Wallet:
         if self._wallet is None:
             if self._use_full_vega_wallet:
-                self._wallet = VegaWallet(self.wallet_url)
+                self._wallet = VegaWallet(
+                    self.wallet_url,
+                    wallet_path=self.vega_wallet_path,
+                    vega_home_dir=path.join(self.log_dir, "vegahome"),
+                    passphrase_file_path=path.join(
+                        self.log_dir, "vegahome", "passphrase-file"
+                    ),
+                )
             else:
                 self._wallet = SlimWallet(
                     self.core_client,

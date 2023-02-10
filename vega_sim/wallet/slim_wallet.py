@@ -153,18 +153,9 @@ class SlimWallet(Wallet):
                 name, wallet_name
             )
 
-    def login(self, wallet_name: Optional[str] = None, **kwargs) -> None:
-        """Logs in to existing wallet in the given vega service.
-
-        Args:
-            wallet_name:
-                str, The name of the wallet
-        """
-        wallet_name = wallet_name if wallet_name is not None else DEFAULT_WALLET_NAME
-
     def submit_transaction(
         self,
-        name: str,
+        key_name: str,
         transaction: Any,
         transaction_type: str,
         wallet_name: Optional[str] = None,
@@ -175,7 +166,7 @@ class SlimWallet(Wallet):
         #     ).height
         #     self.remaining_until_height_update = self.height_update_frequency
 
-        pub_key = self.public_key(name=name, wallet_name=wallet_name)
+        pub_key = self.public_key(name=key_name, wallet_name=wallet_name)
 
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(

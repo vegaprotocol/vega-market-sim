@@ -28,20 +28,6 @@ class Wallet(ABC):
         pass
 
     @abstractmethod
-    def login(self, name: str, passphrase: str) -> str:
-        """Logs in to existing wallet in the given vega service.
-
-        Args:
-            name:
-                str, The name of the wallet
-            passphrase:
-                str, The login passphrase used when creating the wallet
-        Returns:
-            str, login token to use in authenticated requests
-        """
-        pass
-
-    @abstractmethod
     def submit_transaction(
         self,
         transaction: Any,

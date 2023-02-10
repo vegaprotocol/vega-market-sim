@@ -34,6 +34,9 @@ if __name__ == "__main__":
         use_full_vega_wallet=True,
         store_transactions=True,
     ) as vega:
+        import pdb
+
+        pdb.set_trace()
         for wallet in wallets:
             vega.create_key(wallet.name, wallet.passphrase)
 

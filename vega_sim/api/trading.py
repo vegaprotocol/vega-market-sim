@@ -119,7 +119,7 @@ def submit_order(
     # Note: Setting propagate to true will also submit to a Vega node
     wallet.submit_transaction(
         transaction=order_data,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="order_submission",
         key_name=key_name,
     )
@@ -221,7 +221,7 @@ def amend_order(
 
     wallet.submit_transaction(
         transaction=order_data,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="order_amendment",
         key_name=key_name,
     )
@@ -256,7 +256,7 @@ def cancel_order(
 
     wallet.submit_transaction(
         transaction=order_data,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="order_cancellation",
         key_name=key_name,
     )
@@ -380,7 +380,7 @@ def submit_liquidity(
     )
     wallet.submit_transaction(
         transaction=submission,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type=submission_name,
         key_name=key_name,
     )
@@ -612,12 +612,13 @@ def batch_market_instructions(
 
     wallet.submit_transaction(
         transaction=command,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="batch_market_instructions",
         key_name=key_name,
     )
     logger.debug(
-        f"Submitted a batch of {len(cancellations)} cancellation, {len(amendments)} amendment, and {len(submissions)} submission instructions."
+        f"Submitted a batch of {len(cancellations)} cancellation,"
+        f" {len(amendments)} amendment, and {len(submissions)} submission instructions."
     )
 
 
@@ -659,7 +660,7 @@ def transfer(
 
     wallet.submit_transaction(
         transaction=command,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="transfer",
         key_name=key_name,
     )

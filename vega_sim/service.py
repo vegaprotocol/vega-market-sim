@@ -310,9 +310,7 @@ class VegaService(ABC):
         Returns:
             str, public key associated to this wallet
         """
-        return self.wallet.create_key(
-            wallet_name=wallet_name, passphrase=passphrase, name=name
-        )
+        return self.wallet.create_key(wallet_name=wallet_name, name=name)
 
     def mint(
         self,

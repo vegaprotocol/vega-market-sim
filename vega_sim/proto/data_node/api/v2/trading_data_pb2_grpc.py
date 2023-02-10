@@ -56,6 +56,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsResponse.FromString,
         )
+        self.ListAllPositions = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListAllPositions",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.FromString,
+        )
         self.ObservePositions = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObservePositions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsRequest.SerializeToString,
@@ -431,6 +436,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.FromString,
         )
+        self.NetworkHistoryStatus = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/NetworkHistoryStatus",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryStatusRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryStatusResponse.FromString,
+        )
+        self.NetworkHistoryBootstrapPeers = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/NetworkHistoryBootstrapPeers",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersResponse.FromString,
+        )
         self.Ping = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Ping",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.SerializeToString,
@@ -507,6 +522,16 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListPositions(self, request, context):
+        """Positions (deprecated)
+
+        Get a list of positions by party (public key) using cursor based pagination
+        Deprecated: use ListAllPositions instead
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListAllPositions(self, request, context):
         """Positions
 
         Get a list of positions by party (public key) using cursor based pagination
@@ -528,8 +553,8 @@ class TradingDataServiceServicer(object):
         """Ledger entries
 
         Get ledger entries by asset, market, party, account type, transfer type within the given date range.
-        This query requests and sums number of the ledger entries of a given subset of accounts, specified via the 'filter' argument.
-        It returns a timeseries (implemented as a list of AggregateLedgerEntry structs), with a row for every time
+        This query requests and sums the number of ledger entries from a given subset of accounts, specified via the 'filter' argument.
+        It returns a time series (implemented as a list of AggregateLedgerEntry structs), with a row for every time
         the summed ledger entries of the set of specified accounts changes.
         Listed queries should be limited to a single party from each side only. If no or more than one parties are provided
         for sending and receiving accounts - the query returns error.
@@ -940,7 +965,7 @@ class TradingDataServiceServicer(object):
     def ListAssets(self, request, context):
         """Assets list
 
-        Get a list of assets using cusor based pagination
+        Get a list of assets using cursor based pagination
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1223,6 +1248,26 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def NetworkHistoryStatus(self, request, context):
+        """Network history status
+
+        Retrieves information about the current state of network history
+        Response contains the network history status
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def NetworkHistoryBootstrapPeers(self, request, context):
+        """Network history bootstrap peers
+
+        Retrieves the nodes bootstrap peers
+        Response contains the bootstrap peers
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def Ping(self, request, context):
         """Ping
 
@@ -1274,6 +1319,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListPositions,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsResponse.SerializeToString,
+        ),
+        "ListAllPositions": grpc.unary_unary_rpc_method_handler(
+            servicer.ListAllPositions,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.SerializeToString,
         ),
         "ObservePositions": grpc.unary_stream_rpc_method_handler(
             servicer.ObservePositions,
@@ -1650,6 +1700,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.SerializeToString,
         ),
+        "NetworkHistoryStatus": grpc.unary_unary_rpc_method_handler(
+            servicer.NetworkHistoryStatus,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryStatusRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryStatusResponse.SerializeToString,
+        ),
+        "NetworkHistoryBootstrapPeers": grpc.unary_unary_rpc_method_handler(
+            servicer.NetworkHistoryBootstrapPeers,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersResponse.SerializeToString,
+        ),
         "Ping": grpc.unary_unary_rpc_method_handler(
             servicer.Ping,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.FromString,
@@ -1888,6 +1948,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListPositions",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListAllPositions(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListAllPositions",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -4063,6 +4152,64 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetActiveNetworkHistoryPeerAddresses",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def NetworkHistoryStatus(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/NetworkHistoryStatus",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryStatusRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def NetworkHistoryBootstrapPeers(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/NetworkHistoryBootstrapPeers",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersResponse.FromString,
             options,
             channel_credentials,
             insecure,
