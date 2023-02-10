@@ -10,7 +10,9 @@ UlimitNOFile = 8192
   StreamRetries = 3
   CoreNodeIP = "localhost"
   CoreNodeGRPCPort = "TO_BE_SET"
-
+  [API.RateLimit]
+    Enabled = false
+    
 [Accounts]
   Level = "Info"
 
@@ -84,6 +86,8 @@ UlimitNOFile = 8192
     IP = "0.0.0.0"
     Enabled = true
     APMEnabled = true
+  [Gateway.RateLimits]
+    Enabled = false
 
 [Metrics]
   Level = "Info"
