@@ -31,7 +31,6 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "vega.api.v1.corestate_pb2", globals()
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/vega/protos/vega/api/v1\222A>\022#\n\024Vega core state APIs2\013v0.68.0-dev\032\023lb.testnet.vega.xyz*\002\001\002"
     _ACCOUNT._serialized_start = 200

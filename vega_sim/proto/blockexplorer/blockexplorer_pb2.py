@@ -32,7 +32,6 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "blockexplorer.blockexplorer_pb2", globals()
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     DESCRIPTOR._serialized_options = b"Z5code.vegaprotocol.io/vega/protos/blockexplorer/api/v1\222AB\022'\n\030Vega block explorer APIs2\013v0.68.0-dev\032\023lb.testnet.vega.xyz*\002\001\002"
     _LISTTRANSACTIONSREQUEST_FILTERSENTRY._options = None

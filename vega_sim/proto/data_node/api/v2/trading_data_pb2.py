@@ -35,7 +35,6 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "data_node.api.v2.trading_data_pb2", globals()
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     DESCRIPTOR._serialized_options = b'Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222AK\022"\n\023Vega data node APIs2\013v0.68.0-dev\032!lb.testnet.vega.xyz/datanode/rest*\002\001\002'
     _LISTPOSITIONSREQUEST._options = None

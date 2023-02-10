@@ -29,7 +29,6 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "vega.commands.v1.transaction_pb2", globals()
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
     DESCRIPTOR._serialized_options = (
         b"Z1code.vegaprotocol.io/vega/protos/vega/commands/v1"
