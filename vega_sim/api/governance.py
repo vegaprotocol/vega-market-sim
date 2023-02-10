@@ -89,7 +89,9 @@ def propose_market_from_config(
     vote_asset_id = find_asset_id(
         governance_asset, raise_on_missing=True, data_client=data_client
     )
-    pub_key = wallet.public_key(proposal_wallet_name, proposal_key_name)
+    pub_key = wallet.public_key(
+        wallet_name=proposal_wallet_name, name=proposal_key_name
+    )
 
     # Request accounts for party and check governance asset balance
     party_accounts = data_raw.list_accounts(
@@ -198,7 +200,7 @@ def propose_future_market(
     vote_asset_id = find_asset_id(
         governance_asset, raise_on_missing=True, data_client=data_client
     )
-    pub_key = wallet.public_key(wallet_name, key_name)
+    pub_key = wallet.public_key(wallet_name=wallet_name, name=key_name)
 
     # Request accounts for party and check governance asset balance
     party_accounts = data_raw.list_accounts(
@@ -364,7 +366,7 @@ def propose_market_update(
     key_name: Optional[str] = None,
 ) -> str:
     network_param_update = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name, key_name),
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -423,7 +425,7 @@ def propose_asset(
         ),
     )
     proposal = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name, key_name),
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,

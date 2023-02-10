@@ -26,9 +26,7 @@ class SlimWallet(Wallet):
     def __init__(
         self,
         core_client: VegaCoreClient,
-        height_update_frequency: int = 500,
         full_wallet: Optional[VegaWallet] = None,
-        full_wallet_default_pass: str = "passwd",
         store_transactions: bool = False,
         log_dir: Optional[str] = None,
     ):
@@ -38,18 +36,10 @@ class SlimWallet(Wallet):
         Args:
             core_client:
                 VegaCoreClient, client for vega core interaction
-            height_update_frequency:
-                int, default 500, how frequently to update the block height parameter
-                    for transactions (e.g. 500 will update every 500 calls to
-                    submit_transaction).
             full_wallet:
                 Optional[VegaWallet], optional full wallet backing. This will be used
                     for creating keypairs instead of generating them locally, making it
                     possible to connect to the Console
-            full_wallet_default_pass:
-                str, default 'passwd', If full wallet is passed, the password used
-                    when creating dummy accounts if none are passed.
-                    Use this password to log in to the Vega Console
             store_transactions:
                 bool, default False, If True will store every transaction sent into
                     a file, allowing replay of the chain without going through full
@@ -67,7 +57,6 @@ class SlimWallet(Wallet):
         self.block_height = None
 
         self.vega_wallet = full_wallet
-        self.full_wallet_default_pass = full_wallet_default_pass
 
         self.store_transactions = store_transactions
         self.log_dir = log_dir
@@ -108,24 +97,18 @@ class SlimWallet(Wallet):
     def create_key(
         self,
         name: str,
-        passphrase: str,
         wallet_name: Optional[str] = None,
     ) -> str:
-        """Generates a new wallet key from a name - passphrase pair in the given vega service.
+        """Generates a new wallet key in the given vega service.
 
         Args:
             name:
                 str, The name to use for the wallet key
-            passphrase:
-                str, The passphrase to use when logging in to created wallet in future
             wallet_name:
                 str, The wallet to use if not the default
         Returns:
             str, login token to use in authenticated requests
         """
-        passphrase = (
-            passphrase if passphrase is not None else self.full_wallet_default_pass
-        )
         wallet_name = (
             wallet_name if wallet_name is not None else self.vega_default_wallet_name
         )
@@ -146,7 +129,6 @@ class SlimWallet(Wallet):
         else:
             self.vega_wallet.create_key(
                 name=name,
-                passphrase=passphrase,
                 wallet_name=wallet_name,
             )
             self.pub_keys[wallet_name][name] = self.vega_wallet.public_key(

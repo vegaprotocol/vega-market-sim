@@ -142,10 +142,8 @@ class ParameterExperiment(Scenario):
 
         market_manager = ConfigurableMarketManager(
             proposal_wallet_name="vega",
-            proposal_wallet_pass="pass",
             proposal_key_name="market_proposer",
             termination_wallet_name="vega",
-            termination_wallet_pass="pass",
             termination_key_name="market_settler",
             market_config=market_config,
             market_name=market_name,
@@ -158,7 +156,6 @@ class ParameterExperiment(Scenario):
 
         market_maker = ExponentialShapedMarketMaker(
             wallet_name="vega",
-            wallet_pass="pass",
             key_name="market_maker",
             price_process_generator=iter(price_process),
             initial_asset_mint=1e10,
@@ -184,7 +181,6 @@ class ParameterExperiment(Scenario):
         simple_liquidity_providers = [
             SimpleLiquidityProvider(
                 wallet_name="vega",
-                wallet_pass="pass",
                 key_name="simple_lp_c",
                 market_name=market_name,
                 asset_name=asset_name,
@@ -202,7 +198,7 @@ class ParameterExperiment(Scenario):
                 ask_outer_bound_fn=lambda vega_state, market_id: vega_state.market_state[
                     market_id
                 ].max_valid_price,
-                offset_proportion=0.06,
+                offset_proportion=0.16,
                 fee=0.001,
             )
             for i, offset in enumerate([0.02, 0.04, 0.06])
@@ -211,7 +207,6 @@ class ParameterExperiment(Scenario):
         # Create fixed auction pass agents
         open_auction_pass_bid = OpenAuctionPass(
             wallet_name="vega",
-            wallet_pass="pass",
             key_name="auction_trader_bid",
             side="SIDE_BUY",
             initial_asset_mint=1e9,
@@ -223,7 +218,6 @@ class ParameterExperiment(Scenario):
         )
         open_auction_pass_ask = OpenAuctionPass(
             wallet_name="vega",
-            wallet_pass="pass",
             key_name="auction_trader_ask",
             side="SIDE_SELL",
             initial_asset_mint=1e9,
@@ -236,7 +230,6 @@ class ParameterExperiment(Scenario):
 
         informed_trader = InformedTrader(
             wallet_name="vega",
-            wallet_pass="pass",
             key_name="informed_trade",
             price_process=price_process,
             market_name=market_name,
@@ -253,7 +246,6 @@ class ParameterExperiment(Scenario):
         random_traders = [
             MarketOrderTrader(
                 wallet_name="vega",
-                wallet_pass="pass",
                 key_name=f"random_trader_{i}",
                 market_name=market_name,
                 asset_name=asset_name,
@@ -273,7 +265,6 @@ class ParameterExperiment(Scenario):
         sensitive_traders = [
             PriceSensitiveLimitOrderTrader(
                 wallet_name="vega",
-                wallet_pass="pass",
                 key_name="sensitive_trader",
                 market_name=market_name,
                 asset_name=asset_name,

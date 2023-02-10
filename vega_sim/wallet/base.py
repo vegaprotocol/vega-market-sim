@@ -10,16 +10,13 @@ class Wallet(ABC):
     def create_key(
         self,
         name: str,
-        passphrase: str,
         wallet_name: Optional[str] = None,
     ) -> str:
-        """Generates a new wallet key from a name - passphrase pair in the given vega service.
+        """Generates a new wallet key in the given vega service.
 
         Args:
             name:
                 str, The name to use for the wallet key
-            passphrase:
-                str, The passphrase to use when logging in to created wallet in future
             wallet_name:
                 str, The wallet to use if not the default
         Returns:

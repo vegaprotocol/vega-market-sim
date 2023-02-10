@@ -133,10 +133,8 @@ class MarketCrash(Scenario):
         )
 
         market_maker = MarketManager(
-            wallet_name=MM_WALLET.name,
-            wallet_pass=MM_WALLET.passphrase,
-            terminate_wallet_name=TERMINATE_WALLET.name,
-            terminate_wallet_pass=TERMINATE_WALLET.passphrase,
+            key_name=MM_WALLET.name,
+            terminate_key_name=TERMINATE_WALLET.name,
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
             commitment_amount=60000,
@@ -152,8 +150,7 @@ class MarketCrash(Scenario):
         for i in range(self.num_noise_traders):
             noise_traders.append(
                 MarketOrderTrader(
-                    wallet_name=TRADER_WALLET.name,
-                    wallet_pass=TRADER_WALLET.passphrase,
+                    key_name=TRADER_WALLET.name,
                     market_name=self.market_name,
                     asset_name=self.asset_name,
                     tag=f"{tag}_noise_{i}",
@@ -167,8 +164,7 @@ class MarketCrash(Scenario):
         for i in range(self.num_position_traders):
             position_traders.append(
                 MarketOrderTrader(
-                    wallet_name=TRADER_WALLET.name,
-                    wallet_pass=TRADER_WALLET.passphrase,
+                    key_name=TRADER_WALLET.name,
                     market_name=self.market_name,
                     asset_name=self.asset_name,
                     initial_asset_mint=self.position_taker_mint,
@@ -181,8 +177,7 @@ class MarketCrash(Scenario):
             )
 
         background_market = MultiRegimeBackgroundMarket(
-            wallet_name=BACKGROUND_MARKET.name,
-            wallet_pass=BACKGROUND_MARKET.passphrase,
+            key_name=BACKGROUND_MARKET.name,
             market_name=self.market_name,
             asset_name=self.asset_name,
             market_regimes=[
@@ -202,8 +197,7 @@ class MarketCrash(Scenario):
         )
 
         auctionpass1 = OpenAuctionPass(
-            wallet_name=AUCTION1_WALLET.name,
-            wallet_pass=AUCTION1_WALLET.passphrase,
+            key_name=AUCTION1_WALLET.name,
             side="SIDE_BUY",
             initial_price=self.initial_price,
             market_name=self.market_name,
@@ -213,8 +207,7 @@ class MarketCrash(Scenario):
         )
 
         auctionpass2 = OpenAuctionPass(
-            wallet_name=AUCTION2_WALLET.name,
-            wallet_pass=AUCTION2_WALLET.passphrase,
+            key_name=AUCTION2_WALLET.name,
             side="SIDE_SELL",
             initial_price=self.initial_price,
             market_name=self.market_name,

@@ -294,16 +294,12 @@ class VegaService(ABC):
         """
         return self.wallet.login(name=name, passphrase=passphrase)
 
-    def create_key(
-        self, name: str, passphrase: str, wallet_name: Optional[str] = None
-    ) -> str:
+    def create_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Creates a key within the default wallet.
 
         Args:
             name:
                 str, The name of the key to use
-            passphrase:
-                str, The login passphrase used when creating the wallet
              wallet_name:
                 str, optional, Name of wallet containing key for agent to use. Defaults
                 to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
@@ -552,7 +548,7 @@ class VegaService(ABC):
         fill_or_kill: bool = True,
         wait: bool = True,
         order_ref: Optional[str] = None,
-        wallet_name: Optional[str] = None,
+        trading_wallet: Optional[str] = None,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -578,7 +574,7 @@ class VegaService(ABC):
         """
 
         return self.submit_order(
-            trading_wallet=wallet_name,
+            trading_wallet=trading_wallet,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_FOK" if fill_or_kill else "TIME_IN_FORCE_IOC",
             order_type="TYPE_MARKET",
@@ -1045,7 +1041,7 @@ class VegaService(ABC):
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data.positions_by_market(
-            pub_key=self.wallet.public_key(wallet_name, key_name),
+            pub_key=self.wallet.public_key(wallet_name=wallet_name, name=key_name),
             market_id=market_id,
             data_client=self.trading_data_client_v2,
             market_price_decimals_map=self.market_price_decimals,
@@ -1561,12 +1557,12 @@ class VegaService(ABC):
     ) -> List[data.LedgerEntry]:
         return self.data_cache.get_ledger_entries_from_stream(
             party_id_from=self.wallet.public_key(
-                name=wallet_name_from, key_name=key_name_from
+                wallet_name=wallet_name_from, name=key_name_from
             )
             if wallet_name_from is not None
             else None,
             party_id_to=self.wallet.public_key(
-                name=wallet_name_to, key_name=key_name_to
+                wallet_name=wallet_name_to, name=key_name_to
             )
             if wallet_name_to is not None
             else None,
@@ -1601,7 +1597,7 @@ class VegaService(ABC):
                 restrictions.
         """
         party_id = (
-            self.wallet.public_key(wallet_name, key_name)
+            self.wallet.public_key(wallet_name=wallet_name, name=key_name)
             if key_name is not None
             else None
         )
@@ -2099,7 +2095,7 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             market_id=market_id,
             party_id=(
-                self.wallet.public_key(name=wallet_name, key_name=key_name)
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name)
                 if wallet_name is not None
                 else None
             ),

@@ -58,7 +58,6 @@ class VegaWallet(Wallet):
             id_gen_impl=lambda: iter("1"),
         )
 
-        dotenv.load_dotenv()
         self.vega_default_wallet_name = os.environ.get(
             "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
         )
@@ -212,9 +211,10 @@ class VegaWallet(Wallet):
                         transaction_type, uppercase_first_letter=False
                     ): MessageToDict(transaction)
                 },
-                "sendingMode": "TYPE_SYNC",
+                "sendingMode": "TYPE_ASYNC",
                 "publicKey": pub_key,
             },
+            "id": "request",
         }
 
         url = f"{self.wallet_url}/api/v2/requests"

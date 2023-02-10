@@ -104,6 +104,12 @@ PORT_UPDATERS = {
     ],
     Ports.WALLET: [
         PortUpdateConfig(
+            ("config", "wallet-service", "config.toml"),
+            ["Server"],
+            "Port",
+            lambda port: port,
+        ),
+        PortUpdateConfig(
             ("config", "wallet-service", "networks", "local.toml"),
             [],
             "Port",
@@ -613,8 +619,8 @@ class VegaServiceNull(VegaService):
     @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
-            if self._use_full_vega_wallet:
-                self._wallet = VegaWallet(
+            if self.run_with_console or self._use_full_vega_wallet:
+                full_wallet = VegaWallet(
                     self.wallet_url,
                     wallet_path=self.vega_wallet_path,
                     vega_home_dir=path.join(self.log_dir, "vegahome"),
@@ -623,11 +629,14 @@ class VegaServiceNull(VegaService):
                     ),
                 )
             else:
+                full_wallet = None
+
+            if self._use_full_vega_wallet:
+                self._wallet = full_wallet
+            else:
                 self._wallet = SlimWallet(
                     self.core_client,
-                    full_wallet=VegaWallet(self.wallet_url)
-                    if self.run_with_console
-                    else None,
+                    full_wallet=full_wallet,
                     log_dir=self.log_dir,
                 )
         return self._wallet
@@ -709,7 +718,7 @@ class VegaServiceNull(VegaService):
                     ).raise_for_status()
                     if self.run_with_console or self._use_full_vega_wallet:
                         requests.get(
-                            f"http://localhost:{self.wallet_port}/api/v1/status"
+                            f"http://localhost:{self.wallet_port}/api/v2/health"
                         ).raise_for_status()
 
                     started = True
