@@ -220,17 +220,28 @@ class LocalDataCache:
 
     def start_live_feeds(
         self,
-        market_id: Optional[str] = None,
-        party_id: Optional[str] = None,
+        market_ids: Optional[Union[str, List[str]]] = None,
+        party_ids: Optional[Union[str, List[str]]] = None,
         start_high_load_feeds: bool = False,
     ):
+        market_ids = (
+            (market_ids if isinstance(market_ids, list) else [market_ids])
+            if market_ids is not None
+            else None
+        )
+        party_ids = (
+            (party_ids if isinstance(party_ids, list) else [party_ids])
+            if party_ids is not None
+            else None
+        )
+
         self.initialise_order_monitoring(
-            market_ids=[market_id] if market_id is not None else None,
-            party_ids=[party_id] if party_id is not None else None,
+            market_ids=market_ids,
+            party_ids=party_ids,
         )
         self.initialise_transfer_monitoring()
         self.initialise_market_data(
-            market_ids=[market_id] if market_id is not None else None,
+            market_ids,
         )
 
         self._observation_thread = threading.Thread(
@@ -245,8 +256,12 @@ class LocalDataCache:
                 self.stream_registry
                 + (self._high_load_stream_registry if start_high_load_feeds else []),
                 self._aggregated_observation_feed,
-                market_id,
-                party_id,
+                (market_ids[0] if len(market_ids) == 1 else None)
+                if market_ids is not None
+                else None,
+                (party_ids[0] if len(party_ids) == 1 else None)
+                if party_ids is not None
+                else None,
             ),
             daemon=True,
         )
