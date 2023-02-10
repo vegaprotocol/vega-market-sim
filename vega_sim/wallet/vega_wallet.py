@@ -1,15 +1,11 @@
-import time
 from typing import Any, Dict, List, Optional, Union
 
 import os
-import dotenv
 import inflection
 
 import json
 import subprocess
-import pjrpc
 import requests
-from pjrpc.client.backend import requests as pjrpc_client
 
 from google.protobuf.json_format import MessageToDict
 from vega_sim.wallet.base import Wallet, DEFAULT_WALLET_NAME
@@ -51,12 +47,6 @@ class VegaWallet(Wallet):
 
         self._session = requests.Session()
         self._session.headers.update({"Origin": "https://vega.xyz"})
-
-        self._client = pjrpc_client.Client(
-            WALLET_JSON_RPC_URL.format(wallet_server_url=self.wallet_url),
-            session=self._session,
-            id_gen_impl=lambda: iter("1"),
-        )
 
         self.vega_default_wallet_name = os.environ.get(
             "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
