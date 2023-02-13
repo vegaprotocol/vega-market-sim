@@ -23,7 +23,7 @@ def create_and_faucet_wallet(
     vega: VegaServiceNull, wallet: WalletConfig, amount: float = 1e4
 ):
     asset_id = vega.find_asset_id(symbol=ASSET_NAME)
-    vega.create_wallet(wallet.name, wallet.passphrase)
+    vega.create_key(wallet.name)
     vega.mint(wallet.name, asset_id, amount)
 
 
@@ -37,7 +37,7 @@ def build_basic_market(
 ):
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
-        vega.create_wallet(wallet.name, wallet.passphrase)
+        vega.create_key(wallet.name)
 
     vega.wait_for_total_catchup()
     vega.mint(
@@ -69,16 +69,16 @@ def build_basic_market(
     vega.forward("10s")
     vega.create_simple_market(
         market_name="CRYPTO:BTCDAI/DEC22",
-        proposal_wallet=MM_WALLET.name,
+        proposal_key=MM_WALLET.name,
         settlement_asset_id=asset_id,
-        termination_wallet=TERMINATE_WALLET.name,
+        termination_key=TERMINATE_WALLET.name,
         market_decimals=5,
     )
 
     market_id = vega.all_markets()[0].id
 
     vega.submit_liquidity(
-        wallet_name=MM_WALLET.name,
+        key_name=MM_WALLET.name,
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
@@ -88,7 +88,7 @@ def build_basic_market(
     )
     # Add transactions in the proposed market to pass opening auction at price 0.3
     vega.submit_order(
-        trading_wallet=AUCTION1.name,
+        trading_key=AUCTION1.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -98,7 +98,7 @@ def build_basic_market(
     )
 
     vega.submit_order(
-        trading_wallet=AUCTION2.name,
+        trading_key=AUCTION2.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -108,7 +108,7 @@ def build_basic_market(
     )
 
     vega.submit_order(
-        trading_wallet=TRADER_WALLET.name,
+        trading_key=TRADER_WALLET.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -118,7 +118,7 @@ def build_basic_market(
     )
 
     vega.submit_order(
-        trading_wallet=TRADER_WALLET.name,
+        trading_key=TRADER_WALLET.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",

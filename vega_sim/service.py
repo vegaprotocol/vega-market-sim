@@ -680,16 +680,18 @@ class VegaService(ABC):
             volume=submit_volume,
             price=str(submit_price) if submit_price is not None else None,
             expires_at=int(expires_at) if expires_at is not None else None,
-            pegged_order=vega_protos.vega.PeggedOrder(
-                reference=pegged_order.reference,
-                offset=str(
-                    num_to_padded_int(
-                        pegged_order.offset, self.market_price_decimals[market_id]
-                    )
-                ),
-            )
-            if pegged_order is not None
-            else None,
+            pegged_order=(
+                vega_protos.vega.PeggedOrder(
+                    reference=pegged_order.reference,
+                    offset=str(
+                        num_to_padded_int(
+                            pegged_order.offset, self.market_price_decimals[market_id]
+                        )
+                    ),
+                )
+                if pegged_order is not None
+                else None
+            ),
             wait=wait,
             time_forward_fn=lambda: self.wait_fn(2),
             order_ref=order_ref,
@@ -745,23 +747,27 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             market_id=market_id,
             order_id=order_id,
-            price=str(
-                num_to_padded_int(
-                    price,
-                    self.market_price_decimals[market_id],
+            price=(
+                str(
+                    num_to_padded_int(
+                        price,
+                        self.market_price_decimals[market_id],
+                    )
                 )
-            )
-            if price is not None
-            else None,
+                if price is not None
+                else None
+            ),
             expires_at=expires_at,
-            pegged_offset=str(
-                num_to_padded_int(
-                    pegged_offset,
-                    self.market_price_decimals[market_id],
+            pegged_offset=(
+                str(
+                    num_to_padded_int(
+                        pegged_offset,
+                        self.market_price_decimals[market_id],
+                    )
                 )
-            )
-            if pegged_offset is not None
-            else None,
+                if pegged_offset is not None
+                else None
+            ),
             pegged_reference=pegged_reference,
             volume_delta=num_to_padded_int(
                 volume_delta,
@@ -923,18 +929,24 @@ class VegaService(ABC):
 
         update_configuration = UpdateMarketConfiguration(
             instrument=updated_instrument,
-            price_monitoring_parameters=updated_price_monitoring_parameters
-            if updated_price_monitoring_parameters is not None
-            else current_market.price_monitoring_settings.parameters,
-            liquidity_monitoring_parameters=updated_liquidity_monitoring_parameters
-            if updated_liquidity_monitoring_parameters is not None
-            else current_market.liquidity_monitoring_parameters,
+            price_monitoring_parameters=(
+                updated_price_monitoring_parameters
+                if updated_price_monitoring_parameters is not None
+                else current_market.price_monitoring_settings.parameters
+            ),
+            liquidity_monitoring_parameters=(
+                updated_liquidity_monitoring_parameters
+                if updated_liquidity_monitoring_parameters is not None
+                else current_market.liquidity_monitoring_parameters
+            ),
             simple=updated_simple_model_params,
             log_normal=updated_log_normal_risk_model,
             metadata=updated_metadata,
-            lp_price_range=str(updated_lp_price_range)
-            if updated_lp_price_range is not None
-            else current_market.lp_price_range,
+            lp_price_range=(
+                str(updated_lp_price_range)
+                if updated_lp_price_range is not None
+                else current_market.lp_price_range
+            ),
         )
 
         proposal_id = gov.propose_market_update(
@@ -1025,9 +1037,11 @@ class VegaService(ABC):
         """
         return data.list_accounts(
             data_client=self.trading_data_client_v2,
-            pub_key=self.wallet.public_key(wallet_name=wallet_name, name=key_name)
-            if key_name is not None
-            else None,
+            pub_key=(
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name)
+                if key_name is not None
+                else None
+            ),
             asset_id=asset_id,
             market_id=market_id,
             asset_decimals_map=self.asset_decimals,
@@ -1035,9 +1049,9 @@ class VegaService(ABC):
 
     def positions_by_market(
         self,
-        wallet_name: str,
+        key_name: str,
         market_id: Optional[str] = None,
-        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
     ) -> List[vega_protos.vega.Position]:
         """Output positions of a party."""
         return data.positions_by_market(
@@ -1556,16 +1570,16 @@ class VegaService(ABC):
         transfer_type: Optional[str] = None,
     ) -> List[data.LedgerEntry]:
         return self.data_cache.get_ledger_entries_from_stream(
-            party_id_from=self.wallet.public_key(
-                wallet_name=wallet_name_from, name=key_name_from
-            )
-            if wallet_name_from is not None
-            else None,
-            party_id_to=self.wallet.public_key(
-                wallet_name=wallet_name_to, name=key_name_to
-            )
-            if wallet_name_to is not None
-            else None,
+            party_id_from=(
+                self.wallet.public_key(wallet_name=wallet_name_from, name=key_name_from)
+                if wallet_name_from is not None
+                else None
+            ),
+            party_id_to=(
+                self.wallet.public_key(wallet_name=wallet_name_to, name=key_name_to)
+                if wallet_name_to is not None
+                else None
+            ),
             transfer_type=transfer_type,
         )
 
@@ -1638,14 +1652,16 @@ class VegaService(ABC):
             asset_dp = self.asset_decimals[self.market_to_asset[market_id]]
         return data.get_trades(
             self.trading_data_client_v2,
-            party_id=self.wallet.public_key(wallet_name=wallet_name, name=key_name)
-            if key_name is not None
-            else None,
+            party_id=(
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name)
+                if key_name is not None
+                else None
+            ),
             market_id=market_id,
             order_id=order_id,
-            market_asset_decimals_map={market_id: asset_dp}
-            if market_id is not None
-            else None,
+            market_asset_decimals_map=(
+                {market_id: asset_dp} if market_id is not None else None
+            ),
             market_position_decimals_map=self.market_pos_decimals,
             market_price_decimals_map=self.market_price_decimals,
         )
@@ -1726,9 +1742,9 @@ class VegaService(ABC):
             size_delta=size_delta,
             expires_at=expires_at,
             time_in_force=time_in_force,
-            pegged_offset=str(pegged_offset)
-            if pegged_offset is not None
-            else pegged_offset,
+            pegged_offset=(
+                str(pegged_offset) if pegged_offset is not None else pegged_offset
+            ),
             pegged_reference=pegged_reference,
         )
 

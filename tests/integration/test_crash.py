@@ -43,7 +43,6 @@ def test_crash(vega_service: VegaServiceNull):
     # check bond and margin for all
     for key_name in [f"_iter_pos_{i}" for i in range(2)]:
         general, margin, bond = vega.party_account(
-            wallet_name="trader",
             asset_id=asset_id,
             market_id=market_id,
             key_name=key_name,

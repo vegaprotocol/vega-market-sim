@@ -637,10 +637,11 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
                     )
                 else:
                     market_regime = next_market_regime
-
-                regimes.append(
-                    market_regime
-                ) if market_regime.from_timepoint <= i else regimes.append(None)
+                (
+                    regimes.append(market_regime)
+                    if market_regime.from_timepoint <= i
+                    else regimes.append(None)
+                )
             else:
                 regimes.append(market_regime)
         return regimes
@@ -817,7 +818,7 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
             if i < len(orders):
                 order_to_amend = orders[i]
                 self.vega.amend_order(
-                    trading_wallet=self.wallet_name,
+                    wallet_name=self.wallet_name,
                     trading_key=self.key_name,
                     market_id=self.market_id,
                     order_id=order_to_amend.id,
@@ -929,9 +930,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -1120,9 +1119,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self._update_state(current_step=self.current_step)
 
         if (
-            initial_liq := self.liquidity_commitment_fn(None)
-            if self.liquidity_commitment_fn is not None
-            else None
+            initial_liq := (
+                self.liquidity_commitment_fn(None)
+                if self.liquidity_commitment_fn is not None
+                else None
+            )
         ) is not None:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
@@ -1222,9 +1223,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
             )
 
         if (
-            liq := self.liquidity_commitment_fn(vega_state)
-            if self.liquidity_commitment_fn is not None
-            else None
+            liq := (
+                self.liquidity_commitment_fn(vega_state)
+                if self.liquidity_commitment_fn is not None
+                else None
+            )
         ) is not None:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,

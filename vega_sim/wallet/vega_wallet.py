@@ -45,9 +45,6 @@ class VegaWallet(Wallet):
         self._wallet_home = vega_home_dir
         self._passphrase_file = passphrase_file_path
 
-        self._session = requests.Session()
-        self._session.headers.update({"Origin": "https://vega.xyz"})
-
         self.vega_default_wallet_name = os.environ.get(
             "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
         )
@@ -189,9 +186,7 @@ class VegaWallet(Wallet):
             "Origin": "MarketSim",
             "Authorization": f"VWT {self.login_tokens[wallet_name]}",
         }
-        import pdb
 
-        pdb.set_trace()
         submission = {
             "jsonrpc": "2.0",
             "method": "client.send_transaction",
