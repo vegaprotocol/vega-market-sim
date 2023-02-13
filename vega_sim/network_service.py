@@ -208,6 +208,9 @@ class VegaServiceNetwork(VegaService):
         run_with_console: bool = True,
         vega_console_path: Optional[str] = None,
         network_config_path: Optional[str] = None,
+        wallet_path: Optional[str] = None,
+        vega_home_path: Optional[str] = None,
+        wallet_token_path: Optional[str] = None,
     ):
         """Method initialises the class.
 
@@ -225,6 +228,14 @@ class VegaServiceNetwork(VegaService):
                 Path to the directory containing network config files.
                 If not passed will search first the environment variable
                 VEGA_NETWORK_CONFIG then two default paths.
+                Note: Only needed if creating keys
+            vega_home_path (str, optional):
+                Path to the directory containing wallet binary. Otherwise
+                uses VEGA_HOME environment variable.
+                Note: Only needed if creating keys
+            wallet_token_path (str, optional):
+                Path to the json file containing wallet tokens. Otherwise
+                uses VEGA_WALLET_TOKEN environment variable.
         """
 
         # Run init method inherited from VegaService with network arguments.
@@ -250,6 +261,23 @@ class VegaServiceNetwork(VegaService):
             if network_config_path is not None
             else environ.get("VEGA_NETWORK_CONFIG")
         )
+
+        self._wallet_path = (
+            wallet_path
+            if wallet_path is not None
+            else environ.get("VEGA_WALLET", "vegawallet")
+        )
+
+        self._vega_home = (
+            vega_home_path if vega_home_path is not None else environ.get("VEGA_HOME")
+        )
+
+        self._token_path = (
+            wallet_token_path
+            if wallet_token_path is not None
+            else environ.get("VEGA_WALLET_TOKEN")
+        )
+
         self._network_config_path = _find_network_config_toml(
             network=self.network, config_path=self._base_network_config_path
         )
@@ -362,7 +390,12 @@ class VegaServiceNetwork(VegaService):
     @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
-            self._wallet = VegaWallet(self.wallet_url)
+            self._wallet = VegaWallet.from_json(
+                self._token_path,
+                self.wallet_url,
+                wallet_path=self._wallet_path,
+                vega_home_dir=self._vega_home,
+            )
         return self._wallet
 
     @property

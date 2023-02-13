@@ -22,7 +22,7 @@ class VegaWallet(Wallet):
         wallet_url: str,
         wallet_path: str,
         vega_home_dir: str,
-        passphrase_file_path: str,
+        passphrase_file_path: Optional[str],
     ):
         """Creates a wallet to interact with a full running vegawallet instance
 
@@ -49,7 +49,39 @@ class VegaWallet(Wallet):
             "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
         )
 
+    @classmethod
+    def from_json(
+        cls, json_path: str, wallet_url: str, wallet_path: str, vega_home_dir: str
+    ) -> "VegaWallet":
+        """Creates a wallet to interact with a full running vegawallet instance.
+            Loads tokens from a given json file in the form
+                {
+                    wallet_name_1: token,
+                    wallet_name_2: token
+                }
+            instead of requiring a wallet password
+
+        Args:
+            json_path:
+                str, File containing v2 wallet tokens
+            wallet_url:
+                str, base URL of the wallet service
+            wallet_path:
+                str, path to a wallet binary to call CLI functions from
+            vega_home_dir:
+                str, dir of vega home configuration files
+        """
+        base = cls(
+            wallet_url=wallet_url, wallet_path=wallet_path, vega_home_dir=vega_home_dir
+        )
+
+        with open(json_path, "r") as f:
+            base.login_tokens = json.load(f)
+        return base
+
     def _load_token(self, wallet_name: str):
+        if self._passphrase_file is None:
+            raise Exception("Must set wallet passphrase file path to load tokens")
         cmd = subprocess.run(
             [
                 self._wallet_path,
@@ -84,6 +116,9 @@ class VegaWallet(Wallet):
         Returns:
             str, login token to use in authenticated requests
         """
+        if self._passphrase_file is None:
+            raise Exception("Must set wallet passphrase file path to generate keys")
+
         wallet = (
             wallet_name if wallet_name is not None else self.vega_default_wallet_name
         )
@@ -114,6 +149,8 @@ class VegaWallet(Wallet):
             name:
                 str, The name to use for the wallet
         """
+        if self._passphrase_file is None:
+            raise Exception("Must set wallet passphrase file path to generate wallets")
 
         # First generate the wallet itself
         subprocess.run(
@@ -205,9 +242,7 @@ class VegaWallet(Wallet):
         url = f"{self.wallet_url}/api/v2/requests"
 
         response = requests.post(url, headers=headers, json=submission)
-        import pdb
 
-        pdb.set_trace()
         response.raise_for_status()
 
     def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
