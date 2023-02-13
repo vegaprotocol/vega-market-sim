@@ -619,8 +619,8 @@ class VegaServiceNull(VegaService):
     @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
-            if self.run_with_console or self._use_full_vega_wallet:
-                full_wallet = VegaWallet(
+            if self._use_full_vega_wallet:
+                self._wallet = VegaWallet(
                     self.wallet_url,
                     wallet_path=self.vega_wallet_path,
                     vega_home_dir=path.join(self.log_dir, "vegahome"),
@@ -629,14 +629,9 @@ class VegaServiceNull(VegaService):
                     ),
                 )
             else:
-                full_wallet = None
-
-            if self._use_full_vega_wallet:
-                self._wallet = full_wallet
-            else:
                 self._wallet = SlimWallet(
                     self.core_client,
-                    full_wallet=full_wallet,
+                    full_wallet=None,
                     log_dir=self.log_dir,
                 )
         return self._wallet
@@ -690,7 +685,7 @@ class VegaServiceNull(VegaService):
                 "port_config": port_config,
                 "transactions_per_block": self.transactions_per_block,
                 "block_duration": f"{int(self.seconds_per_block)}s",
-                "run_wallet": self._use_full_vega_wallet or self.run_with_console,
+                "run_wallet": self._use_full_vega_wallet,
                 "retain_log_files": self.retain_log_files,
                 "log_dir": self.log_dir,
                 "store_transactions": self.store_transactions,
@@ -716,7 +711,7 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
-                    if self.run_with_console or self._use_full_vega_wallet:
+                    if self._use_full_vega_wallet:
                         requests.get(
                             f"http://localhost:{self.wallet_port}/api/v2/health"
                         ).raise_for_status()
