@@ -22,7 +22,7 @@ class VegaWallet(Wallet):
         wallet_url: str,
         wallet_path: str,
         vega_home_dir: str,
-        passphrase_file_path: Optional[str],
+        passphrase_file_path: Optional[str] = None,
     ):
         """Creates a wallet to interact with a full running vegawallet instance
 

@@ -109,10 +109,10 @@ def manage_vega_processes(
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
 
     if run_with_wallet:
+        vega_wallet_path = environ.get("VEGA_WALLET_PATH", "vegawallet")
         vegaWalletProcess = _popen_process(
             popen_args=[
-                "vega",
-                "wallet",
+                vega_wallet_path,
                 "service",
                 "run",
                 "--network",
