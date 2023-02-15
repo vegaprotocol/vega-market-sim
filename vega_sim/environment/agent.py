@@ -21,7 +21,7 @@ class Agent(ABC):
         pass
 
     def initialise(
-        self, vega: VegaService, create_key: bool = False, mint_wallet: bool = False
+        self, vega: VegaService, create_key: bool = False, mint_key: bool = False
     ):
         self.vega = vega
 
