@@ -177,7 +177,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             # Set up a future market
             self.vega.create_simple_market(
                 market_name=self.market_name,
-                proposal_wallet=self.wallet_name,
+                wallet_name=self.wallet_name,
                 settlement_asset_id=self.asset_id,
                 termination_key=self.terminate_key_name,
                 termination_wallet_name=self.wallet_name,

@@ -424,7 +424,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
         # Initialise agents without minting assets
         for agent in self.agents:
-            agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
+            agent.initialise(vega=vega, create_key=False, mint_key=False)
 
         self._start_live_feeds(vega=vega)
 
