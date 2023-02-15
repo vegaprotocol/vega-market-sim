@@ -2782,13 +2782,17 @@ class Snitch(StateAgent):
             )
 
 
-class KeyFunder:
+class KeyFunder(Agent):
+    NAME_BASE = "key_funder"
+
     def __init__(
         self,
         keys_to_fund: List[str],
         asset_to_fund: str,
         amount_to_fund: float,
+        tag: Optional[str] = None,
     ):
+        super().__init__(tag=tag)
         self.keys_to_fund = keys_to_fund
         self.amount_to_fund = amount_to_fund
         self.asset_to_fund = asset_to_fund
