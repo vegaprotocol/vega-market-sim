@@ -1,35 +1,35 @@
 from __future__ import annotations
-from dataclasses import dataclass
 
-
-import logging
 import datetime
-
-from queue import Queue
-import numpy as np
+import logging
+from dataclasses import dataclass
 from math import exp
+from queue import Queue
+
+import numpy as np
 
 try:
     import talib
 except ImportError:
     pass  # TA-Lib not installed, but most agents don't need
 
-from enum import Enum
+import time
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict, Any
-from numpy.typing import ArrayLike
-from vega_sim.api.data import Order, AccountData, MarketDepth, Trade
+from enum import Enum
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from vega_sim.environment import VegaState, MarketState
-from vega_sim.environment.agent import StateAgentWithWallet, StateAgent, Agent
-from vega_sim.null_service import VegaServiceNull, VegaService
-from vega_sim.network_service import VegaServiceNetwork
-from vega_sim.proto.vega import (
-    markets as markets_protos,
-    vega as vega_protos,
-)
-from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
+from numpy.typing import ArrayLike
+
+import vega_sim.api.faucet as faucet
+from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
 from vega_sim.api.trading import OrderRejectedError
+from vega_sim.environment import MarketState, VegaState
+from vega_sim.environment.agent import Agent, StateAgent, StateAgentWithWallet
+from vega_sim.network_service import VegaServiceNetwork
+from vega_sim.null_service import VegaService, VegaServiceNull
+from vega_sim.proto.vega import markets as markets_protos
+from vega_sim.proto.vega import vega as vega_protos
+from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -652,10 +652,11 @@ class MultiRegimeBackgroundMarket(StateAgentWithWallet):
                     )
                 else:
                     market_regime = next_market_regime
-
-                regimes.append(
-                    market_regime
-                ) if market_regime.from_timepoint <= i else regimes.append(None)
+                (
+                    regimes.append(market_regime)
+                    if market_regime.from_timepoint <= i
+                    else regimes.append(None)
+                )
             else:
                 regimes.append(market_regime)
         return regimes
@@ -945,9 +946,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -1137,9 +1136,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self._update_state(current_step=self.current_step)
 
         if (
-            initial_liq := self.liquidity_commitment_fn(None)
-            if self.liquidity_commitment_fn is not None
-            else None
+            initial_liq := (
+                self.liquidity_commitment_fn(None)
+                if self.liquidity_commitment_fn is not None
+                else None
+            )
         ) is not None:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
@@ -1236,9 +1237,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
             )
 
         if (
-            liq := self.liquidity_commitment_fn(vega_state)
-            if self.liquidity_commitment_fn is not None
-            else None
+            liq := (
+                self.liquidity_commitment_fn(vega_state)
+                if self.liquidity_commitment_fn is not None
+                else None
+            )
         ) is not None:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
@@ -2777,3 +2780,31 @@ class Snitch(StateAgent):
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)
             )
+
+
+class KeyFunder:
+    def __init__(
+        self,
+        keys_to_fund: List[str],
+        asset_to_fund: str,
+        amount_to_fund: float,
+    ):
+        self.keys_to_fund = keys_to_fund
+        self.amount_to_fund = amount_to_fund
+        self.asset_to_fund = asset_to_fund
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_wallet: bool = True,
+        mint_wallet: bool = True,
+    ):
+        self.vega = vega
+        asset_id = self.vega.find_asset_id(self.asset_to_fund)
+        amount = self.amount_to_fund * 10 ** self.vega.asset_decimals[asset_id]
+        for key in self.keys_to_fund:
+            faucet.mint(key, asset_id, amount=amount, faucet_url=self.vega.faucet_url)
+        time.sleep(1)
+
+    def step(self, vega_state: VegaState):
+        pass

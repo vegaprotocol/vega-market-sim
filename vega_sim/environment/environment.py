@@ -464,3 +464,123 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                     raise e(msg)
                 else:
                     logging.warning(msg)
+
+
+class RealtimeMarketEnvironment(MarketEnvironmentWithState):
+    def __init__(
+        self,
+        agents: List[StateAgent],
+        random_agent_ordering: bool = True,
+        state_func: Optional[Callable[[VegaService], VegaState]] = None,
+        transactions_per_block: int = 1,
+        block_length_seconds: int = 1,
+        step_length_seconds: int = 1,
+        vega_service: Optional[VegaServiceNull] = None,
+        pause_every_n_steps: Optional[int] = None,
+        random_state: np.random.RandomState = None,
+    ):
+        """Set up a Vega protocol environment with some specified agents.
+        Handles the entire Vega setup and environment lifetime process, allowing the
+        user to focus on building the Agents themselves.
+
+        Once an environment has been created, calling the 'run' function will
+        run a complete simulation of the environment lifecycle. The realtime environment
+        aims to progress at a slower state, and so instead of running through all
+        actions and steps as fast as possible will sleep a configurable amount of
+        time between each block. Runs forever until cancelled.
+
+
+        Args:
+            agents:
+                List[StateAgent], a list of instantiated Agent objects which will
+                    interact with the environment
+            random_agent_ordering:
+                bool, default True, In each step, whether the order of agent
+                    steps should be randomised. If False, the order of agents
+                    passed in will be used
+            transactions_per_block:
+                int, default 1, How many transactions should be contained
+                    for each block in the Vega chain. Often this is best set
+                    as the maximum number of actions agents can take per step
+                    to ensure they all happen 'at the same time' per step.
+            block_length_seconds:
+                int, default 1, How many seconds each block on the Vega chain
+                    represents
+            step_length_seconds:
+                Optional[int], default None, How many seconds each step is
+                    taken to represent.
+                    After each round of actions, if time has not advanced at least
+                    this much we will be forwarded to that far in the future
+                    (minus however long the actions did take).
+                    e.g. for a step_length_seconds = 60 if all actions take up 10s
+                    we will forward 50s at the end.
+            vega_service:
+                optional, VegaServiceNull, If passed will use this precreated vega
+                    service instead of creating one internally.
+            pause_every_n_steps:
+                Optional[int], default None, If passed, simulation will pause every
+                    time the passed number of steps elapses waiting on user to press
+                    return. Allows inspection of the simulation at given frequency
+        """
+        super().__init__(
+            agents=agents,
+            n_steps=0,
+            random_agent_ordering=random_agent_ordering,
+            transactions_per_block=transactions_per_block,
+            block_length_seconds=block_length_seconds,
+            step_length_seconds=step_length_seconds,
+            vega_service=vega_service,
+            pause_every_n_steps=pause_every_n_steps,
+            random_state=random_state,
+            state_func=(
+                state_func if state_func is not None else self._default_state_extraction
+            ),
+        )
+
+    def step(self, vega: VegaService) -> None:
+        state = self.state_func(vega)
+        vega.wait_fn(1)
+        for agent in (
+            sorted(self.agents, key=lambda _: self.random_state.random())
+            if self.random_agent_ordering
+            else self.agents
+        ):
+            agent.step(state)
+
+    def _run(
+        self,
+        vega: VegaServiceNull,
+        pause_at_completion: bool = False,
+    ) -> None:
+        """Run the simulation with specified agents.
+
+        Args:
+            pause_at_completion:
+                bool, default False, If True will pause with a keypress-prompt
+                    once the simulation has completed, allowing the final state
+                    to be inspected, either via code or the Console
+        """
+        logger.info(f"Running wallet at: {vega.wallet_url}")
+        logger.info(
+            f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
+        )
+
+        for agent in self.agents:
+            agent.initialise(vega=vega)
+            if self.transactions_per_block > 1:
+                vega.wait_fn(1)
+
+        i = 1
+        while True:
+            i += 1
+            self.step(vega)
+
+            if (
+                self._pause_every_n_steps is not None
+                and i % self._pause_every_n_steps == 0
+            ):
+                input(
+                    f"Environment run at step {i}. Pausing to allow inspection of"
+                    " state. Press Enter to continue"
+                )
+            time.sleep(self.step_length_seconds)

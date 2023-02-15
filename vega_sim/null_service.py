@@ -338,6 +338,10 @@ def manage_vega_processes(
         )
     if port_config.get(Ports.CONSOLE):
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
+    if port_config.get(Ports.DATA_NODE_REST):
+        logger.info(
+            f"Launching Datanode REST at port {port_config.get(Ports.DATA_NODE_REST)}"
+        )
 
     dest_dir = f"{tmp_vega_dir}/vegahome"
     shutil.copytree(vega_home_path, dest_dir)

@@ -530,15 +530,15 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG)
 
     scenario = VegaLoadTest(
-        num_steps=1000,
+        num_steps=10000,
         granularity=Granularity.FIFTEEN_MINUTE,
-        block_length_seconds=60,
+        block_length_seconds=1,
         transactions_per_block=4096,
     )
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=True,
+        run_with_console=False,
         use_full_vega_wallet=False,
         retain_log_files=True,
         launch_graphql=False,
