@@ -50,7 +50,7 @@ class Wallet(ABC):
         name: str,
         wallet_name: Optional[str] = None,
     ) -> str:
-        """Return the public key associated with a given wallet name.
+        """Return the public key associated with a given key name.
 
         Args:
             name:
