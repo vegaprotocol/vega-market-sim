@@ -265,7 +265,7 @@ class VegaServiceNetwork(VegaService):
         self._wallet_path = (
             wallet_path
             if wallet_path is not None
-            else environ.get("VEGA_WALLET", "vegawallet")
+            else environ.get("VEGA_WALLET_PATH", "vegawallet")
         )
 
         self._vega_home = (
@@ -277,6 +277,11 @@ class VegaServiceNetwork(VegaService):
             if wallet_token_path is not None
             else environ.get("VEGA_WALLET_TOKEN")
         )
+        if self._token_path is None:
+            raise Exception(
+                "Either path to tokens JSON must be passed to wallet class or"
+                " VEGA_WALLET_TOKEN environment variable set"
+            )
 
         self._network_config_path = _find_network_config_toml(
             network=self.network, config_path=self._base_network_config_path

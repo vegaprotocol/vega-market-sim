@@ -133,6 +133,8 @@ class VegaWallet(Wallet):
                 self._wallet_home,
                 "--passphrase-file",
                 self._passphrase_file,
+                "--meta",
+                f"name:{name}",
                 "--output",
                 "json",
             ],
@@ -216,7 +218,10 @@ class VegaWallet(Wallet):
 
         response = requests.post(url, headers=headers, json=submission)
         response.raise_for_status()
-        return {key["name"]: key["publicKey"] for key in response.json()["value"]}
+
+        return {
+            key["name"]: key["publicKey"] for key in response.json()["result"]["keys"]
+        }
 
     def submit_transaction(
         self,
