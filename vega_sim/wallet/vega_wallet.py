@@ -197,12 +197,26 @@ class VegaWallet(Wallet):
         self.login_tokens[name] = json.loads(cmd)["token"]
 
     def get_keypairs(self, wallet_name: str) -> dict:
-        headers = {"Authorization": f"Bearer {self.login_tokens[wallet_name]}"}
-        response = requests.get(
-            WALLET_KEY_URL.format(wallet_server_url=self.wallet_url), headers=headers
-        )
+        if wallet_name not in self.login_tokens:
+            self._load_token(wallet_name=wallet_name)
+
+        headers = {
+            "Origin": "MarketSim",
+            "Authorization": f"VWT {self.login_tokens[wallet_name]}",
+        }
+
+        submission = {
+            "jsonrpc": "2.0",
+            "method": "client.list_keys",
+            "params": [],
+            "id": "request",
+        }
+
+        url = f"{self.wallet_url}/api/v2/requests"
+
+        response = requests.post(url, headers=headers, json=submission)
         response.raise_for_status()
-        return {key["name"]: key["pub"] for key in response.json()["keys"]}
+        return {key["name"]: key["publicKey"] for key in response.json()["value"]}
 
     def submit_transaction(
         self,
@@ -257,8 +271,13 @@ class VegaWallet(Wallet):
         Returns:
             str, public key
         """
+        wallet_name = (
+            self.vega_default_wallet_name if wallet_name is None else wallet_name
+        )
 
-        if wallet_name is None:
-            return self.pub_keys[self.vega_default_wallet_name][name]
-        else:
-            return self.pub_keys[wallet_name][name]
+        if wallet_name not in self.pub_keys or name not in self.pub_keys[wallet_name]:
+            self.pub_keys.setdefault(wallet_name, {}).update(
+                self.get_keypairs(wallet_name=wallet_name)
+            )
+
+        return self.pub_keys[wallet_name][name]
