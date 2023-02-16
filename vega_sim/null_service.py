@@ -25,7 +25,7 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
-from vega_sim.wallet.base import Wallet
+from vega_sim.wallet.base import Wallet, DEFAULT_WALLET_NAME
 from vega_sim.wallet.slim_wallet import (
     SlimWallet,
 )
@@ -103,6 +103,12 @@ PORT_UPDATERS = {
         ),
     ],
     Ports.WALLET: [
+        PortUpdateConfig(
+            ("config", "wallet-service", "config.toml"),
+            ["Server"],
+            "Port",
+            lambda port: port,
+        ),
         PortUpdateConfig(
             ("config", "wallet-service", "networks", "local.toml"),
             [],
@@ -438,6 +444,34 @@ def manage_vega_processes(
                 requests.exceptions.HTTPError,
             ):
                 time.sleep(0.1)
+
+        subprocess.Popen(
+            [
+                vega_wallet_path,
+                "api-token",
+                "init",
+                f"--home={tmp_vega_home}",
+                f"--passphrase-file={tmp_vega_home}/passphrase-file",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        subprocess.Popen(
+            [
+                vega_wallet_path,
+                "api-token",
+                "generate",
+                "--home=" + tmp_vega_home,
+                "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+                "--wallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+                "--wallet-name=" + DEFAULT_WALLET_NAME,
+                "--description=" + DEFAULT_WALLET_NAME,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
         wallet_args = [
             vega_wallet_path,
             "service",
@@ -446,6 +480,8 @@ def manage_vega_processes(
             "local",
             "--home=" + tmp_vega_home,
             "--automatic-consent",
+            "--load-tokens",
+            "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
         ]
 
         vegaWalletProcess = _popen_process(
@@ -594,7 +630,14 @@ class VegaServiceNull(VegaService):
     def wallet(self) -> Wallet:
         if self._wallet is None:
             if self._use_full_vega_wallet:
-                self._wallet = VegaWallet(self.wallet_url)
+                self._wallet = VegaWallet(
+                    self.wallet_url,
+                    wallet_path=self.vega_wallet_path,
+                    vega_home_dir=path.join(self.log_dir, "vegahome"),
+                    passphrase_file_path=path.join(
+                        self.log_dir, "vegahome", "passphrase-file"
+                    ),
+                )
             else:
                 self._wallet = SlimWallet(
                     self.core_client,
@@ -680,7 +723,7 @@ class VegaServiceNull(VegaService):
                     ).raise_for_status()
                     if self._use_full_vega_wallet:
                         requests.get(
-                            f"http://localhost:{self.wallet_port}/api/v1/status"
+                            f"http://localhost:{self.wallet_port}/api/v2/health"
                         ).raise_for_status()
 
                     started = True

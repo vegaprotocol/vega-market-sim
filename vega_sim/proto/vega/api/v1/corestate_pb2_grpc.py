@@ -100,7 +100,7 @@ class CoreStateServiceServicer(object):
     def ListNetworkParameters(self, request, context):
         """Network parameters list
 
-        Return a list of network paramters
+        Return a list of network parameters
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")

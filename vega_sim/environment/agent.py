@@ -21,7 +21,7 @@ class Agent(ABC):
         pass
 
     def initialise(
-        self, vega: VegaService, create_wallet: bool = False, mint_wallet: bool = False
+        self, vega: VegaService, create_key: bool = False, mint_key: bool = False
     ):
         self.vega = vega
 
@@ -42,10 +42,9 @@ class Agent(ABC):
 class AgentWithWallet(Agent):
     def __init__(
         self,
-        wallet_name: str,
-        wallet_pass: str,
+        key_name: str,
         tag: Optional[str] = None,
-        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
         state_update_freq: Optional[int] = None,
     ):
         """Agent for use in environments as specified in environment.py.
@@ -57,19 +56,17 @@ class AgentWithWallet(Agent):
         faucet assets to the agent etc.
 
         Args:
-            wallet_name:
-                str, The name to use for this agent's wallet
+            key_name:
+                str, Name of key in wallet for agent to use.
             wallet_pass:
                 str, The password which this agent uses to log in to the wallet
             tag:
                 str, optional, additional tag to add to agent's wallet name
-            key_name:
-                str, optional, Name of key in wallet for agent to use. Defaults
-                to value in the environment variable "VEGA_DEFAULT_KEY_NAME".
+            wallet_name:
+                str, optional, The name to use for this agent's wallet
         """
         super().__init__(tag=tag)
         self.wallet_name = wallet_name
-        self.wallet_pass = wallet_pass
         self.key_name = key_name
 
         self.state_update_freq = state_update_freq
@@ -77,16 +74,13 @@ class AgentWithWallet(Agent):
     def step(self):
         pass
 
-    def initialise(self, vega: VegaService, create_wallet: bool = True):
+    def initialise(self, vega: VegaService, create_key: bool = True):
         super().initialise(vega=vega)
-        if create_wallet:
-            self.vega.create_wallet(
-                name=self.wallet_name,
-                passphrase=self.wallet_pass,
-                key_name=self.key_name,
+        if create_key:
+            self.vega.create_key(
+                wallet_name=self.wallet_name,
+                name=self.key_name,
             )
-        else:
-            self.vega.login(name=self.wallet_name, passphrase=self.wallet_pass)
 
 
 class StateAgentWithWallet(AgentWithWallet):
