@@ -61,10 +61,8 @@ class RealtimeMarket(Scenario):
         for i, market_name in enumerate(self.market_names):
             agents.append(
                 MarketManager(
-                    wallet_name=MM_WALLET.name,
-                    wallet_pass=MM_WALLET.passphrase,
-                    terminate_wallet_name=TERMINATE_WALLET.name,
-                    terminate_wallet_pass=TERMINATE_WALLET.passphrase,
+                    key_name=MM_WALLET.name,
+                    terminate_key_name=TERMINATE_WALLET.name,
                     asset_decimal=self.asset_decimal,
                     market_decimal=self.market_decimal,
                     market_position_decimal=self.market_position_decimal,

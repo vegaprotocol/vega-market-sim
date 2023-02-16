@@ -930,7 +930,9 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount) if commitment_amount is not None else 100
+            else (2 * commitment_amount)
+            if commitment_amount is not None
+            else 100
         )
 
         self.market_name = market_name
@@ -2771,8 +2773,8 @@ class KeyFunder(Agent):
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
-        create_wallet: bool = True,
-        mint_wallet: bool = True,
+        create_key: bool = True,
+        mint_key: bool = True,
     ):
         self.vega = vega
         asset_id = self.vega.find_asset_id(self.asset_to_fund)
