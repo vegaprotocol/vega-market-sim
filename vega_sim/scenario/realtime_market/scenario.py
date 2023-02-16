@@ -109,17 +109,16 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG)
 
     scenario = RealtimeMarket(
-        market_names=[
-            "ETH",
-        ],
-        asset_names=["USD"],
+        market_names=["ETH", "ETH2", "ETH3", "ETH4", "ETH5"],
+        asset_names=["USD", "USD", "USD", "USD", "USD"],
         pubkeys_to_faucet=[
-            "520C6B790113062BA29B6E689694766E3A0DBCBCC4D79E3A43E3F9D21FC3EC7B",
-            "6001C9B8CE0B8577E2D407EC1584FF6E2CCCF84E36404D8274B9DA1B86D31022",
+            "520c6b790113062ba29b6e689694766e3a0dbcbcc4d79e3a43e3f9d21fc3ec7b",
+            "6001c9b8ce0b8577e2d407ec1584ff6e2cccf84e36404d8274b9da1b86d31022",
         ],
         market_decimal=2,
         asset_decimal=4,
         market_position_decimal=4,
+        amount_to_faucet=10_000_000,
     )
 
     with VegaServiceNull(
@@ -129,6 +128,7 @@ if __name__ == "__main__":
         retain_log_files=True,
         launch_graphql=False,
         seconds_per_block=1,  # Heuristic
+        transactions_per_block=2000,
     ) as vega:
         scenario.run_iteration(
             vega=vega,
