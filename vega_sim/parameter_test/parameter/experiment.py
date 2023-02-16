@@ -71,7 +71,7 @@ def _run_parameter_iteration(
         transactions_per_block=100,
         use_full_vega_wallet=False,
     ) as vega:
-        vega.create_wallet(*PARAMETER_AMEND_WALLET)
+        vega.create_key(PARAMETER_AMEND_WALLET[0])
         vega.mint(
             PARAMETER_AMEND_WALLET[0],
             asset="VOTE",

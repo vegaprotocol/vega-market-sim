@@ -160,9 +160,11 @@ class MarketEnvironment:
         )
         party_ids = list(
             {
-                vega.wallet.public_key(agent.wallet_name, agent.key_name)
+                vega.wallet.public_key(
+                    wallet_name=agent.wallet_name, name=agent.key_name
+                )
                 for agent in self.agents
-                if hasattr(agent, "wallet_name")
+                if hasattr(agent, "key_name")
             }
         )
         # Start order monitoring only observing scenario markets and parties
@@ -424,7 +426,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
         # Initialise agents without minting assets
         for agent in self.agents:
-            agent.initialise(vega=vega, create_wallet=False, mint_wallet=False)
+            agent.initialise(vega=vega, create_key=False, mint_key=False)
 
         self._start_live_feeds(vega=vega)
 

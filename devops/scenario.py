@@ -105,10 +105,12 @@ class DevOpsScenario(Scenario):
         price_process = get_historic_price_series(
             product_id=self.simulation_args.coinbase_code,
             granularity=self.simulation_args.granularity,
-            interpolation=f"{self.simulation_args.step_length_seconds}S"
-            if self.simulation_args.step_length_seconds
-            < self.simulation_args.granularity.value
-            else self.simulation_args.granularity.value,
+            interpolation=(
+                f"{self.simulation_args.step_length_seconds}S"
+                if self.simulation_args.step_length_seconds
+                < self.simulation_args.granularity.value
+                else self.simulation_args.granularity.value
+            ),
             start=str(start),
             end=str(end),
         )
@@ -136,10 +138,8 @@ class DevOpsScenario(Scenario):
         # Setup agent for proposing and settling the market
         market_manager = ConfigurableMarketManager(
             proposal_wallet_name=MARKET_CREATOR_AGENT.wallet_name,
-            proposal_wallet_pass=MARKET_CREATOR_AGENT.wallet_pass,
             proposal_key_name=MARKET_CREATOR_AGENT.key_name,
             termination_wallet_name=MARKET_SETTLER_AGENT.wallet_name,
-            termination_wallet_pass=MARKET_SETTLER_AGENT.wallet_pass,
             termination_key_name=MARKET_SETTLER_AGENT.key_name,
             market_config=MarketConfig(),
             market_name=self.market_manager_args.market_name,
@@ -154,7 +154,6 @@ class DevOpsScenario(Scenario):
         # Setup agent for proving a market for traders
         market_maker = ExponentialShapedMarketMaker(
             wallet_name=MARKET_MAKER_AGENT.wallet_name,
-            wallet_pass=MARKET_MAKER_AGENT.wallet_pass,
             key_name=MARKET_MAKER_AGENT.key_name,
             market_name=self.market_manager_args.market_name,
             asset_name=self.market_manager_args.asset_name,
@@ -178,7 +177,6 @@ class DevOpsScenario(Scenario):
         auction_pass_agents = [
             OpenAuctionPass(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -194,7 +192,6 @@ class DevOpsScenario(Scenario):
         random_market_order_traders = [
             MarketOrderTrader(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -211,7 +208,6 @@ class DevOpsScenario(Scenario):
         momentum_market_order_traders = [
             MomentumTrader(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -228,7 +224,6 @@ class DevOpsScenario(Scenario):
         sensitive_market_order_traders = [
             PriceSensitiveMarketOrderTrader(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,

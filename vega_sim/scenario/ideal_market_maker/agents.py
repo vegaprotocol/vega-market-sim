@@ -134,7 +134,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega)
-        self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
+        self.vega.create_key(self.terminate_wallet_name)
 
         # Faucet vega tokens
         self.vega.wait_for_datanode_sync()

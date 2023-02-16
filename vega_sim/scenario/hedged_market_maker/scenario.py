@@ -144,7 +144,8 @@ class HedgedMarket(Scenario):
             Whether to randomly order each agents step action. Defaults to False.
         transactions_per_block (int, optional):
             Number of transactions allowed per block. Defaults to 1000.
-        state_extraction_fn (Optional[ Callable[[VegaServiceNull, List[Agent]], Any] ], optional):
+        state_extraction_fn (Optional[ Callable[[VegaServiceNull, List[Agent]], Any] ]
+            , optional):
             Defines which states to extract and record. Defaults to None.
         pause_every_n_steps (Optional[int], optional):
             Number of steps to simulate before pausing the simulation. Defaults to None.
@@ -258,10 +259,8 @@ class HedgedMarket(Scenario):
 
         int_market_manager = MarketManager(
             wallet_name=MARKET_CREATOR.wallet_name,
-            wallet_pass=MARKET_CREATOR.wallet_pass,
             key_name=MARKET_CREATOR.key_name,
             terminate_wallet_name=MARKET_SETTLER.wallet_name,
-            terminate_wallet_pass=MARKET_SETTLER.wallet_pass,
             terminate_key_name=MARKET_SETTLER.key_name,
             asset_name=self.asset_name,
             asset_decimal=self.asset_adp,
@@ -274,10 +273,8 @@ class HedgedMarket(Scenario):
 
         ext_market_manager = MarketManager(
             wallet_name=MARKET_CREATOR.wallet_name,
-            wallet_pass=MARKET_CREATOR.wallet_pass,
             key_name=MARKET_CREATOR.key_name,
             terminate_wallet_name=MARKET_SETTLER.wallet_name,
-            terminate_wallet_pass=MARKET_SETTLER.wallet_pass,
             terminate_key_name=MARKET_SETTLER.key_name,
             asset_name=self.asset_name,
             asset_decimal=self.asset_adp,
@@ -290,7 +287,6 @@ class HedgedMarket(Scenario):
 
         int_market_maker = HedgedMarketMaker(
             wallet_name=INT_MARKET_MAKER_KEY_A.wallet_name,
-            wallet_pass=INT_MARKET_MAKER_KEY_A.wallet_pass,
             key_name=INT_MARKET_MAKER_KEY_A.key_name,
             external_key_name=INT_MARKET_MAKER_KEY_B.key_name,
             price_process_generator=iter(price_process),
@@ -319,7 +315,6 @@ class HedgedMarket(Scenario):
 
         ext_market_maker = ExponentialShapedMarketMaker(
             wallet_name=EXT_MARKET_MAKER.wallet_name,
-            wallet_pass=EXT_MARKET_MAKER.wallet_pass,
             key_name=EXT_MARKET_MAKER.key_name,
             price_process_generator=iter(price_process),
             initial_asset_mint=1e10,
@@ -342,7 +337,6 @@ class HedgedMarket(Scenario):
 
         int_auction_pass_bid = OpenAuctionPass(
             wallet_name=AUCTION_PASS_BID.wallet_name,
-            wallet_pass=AUCTION_PASS_BID.wallet_pass,
             key_name=AUCTION_PASS_BID.key_name,
             side="SIDE_BUY",
             initial_asset_mint=1e10,
@@ -354,7 +348,6 @@ class HedgedMarket(Scenario):
         )
         int_auction_pass_ask = OpenAuctionPass(
             wallet_name=AUCTION_PASS_ASK.wallet_name,
-            wallet_pass=AUCTION_PASS_ASK.wallet_pass,
             key_name=AUCTION_PASS_ASK.key_name,
             side="SIDE_SELL",
             initial_asset_mint=1e10,
@@ -366,7 +359,6 @@ class HedgedMarket(Scenario):
         )
         ext_auction_pass_bid = OpenAuctionPass(
             wallet_name=AUCTION_PASS_BID.wallet_name,
-            wallet_pass=AUCTION_PASS_BID.wallet_pass,
             key_name=AUCTION_PASS_BID.key_name,
             side="SIDE_BUY",
             initial_asset_mint=1e10,
@@ -378,7 +370,6 @@ class HedgedMarket(Scenario):
         )
         ext_auction_pass_ask = OpenAuctionPass(
             wallet_name=AUCTION_PASS_ASK.wallet_name,
-            wallet_pass=AUCTION_PASS_ASK.wallet_pass,
             key_name=AUCTION_PASS_ASK.key_name,
             side="SIDE_SELL",
             initial_asset_mint=1e10,
@@ -391,7 +382,6 @@ class HedgedMarket(Scenario):
 
         int_random_trader = MarketOrderTrader(
             wallet_name=INT_RANDOM_TRADER.wallet_name,
-            wallet_pass=INT_RANDOM_TRADER.wallet_pass,
             key_name=INT_RANDOM_TRADER.key_name,
             market_name=self.int_name,
             asset_name=self.asset_name,
@@ -403,7 +393,6 @@ class HedgedMarket(Scenario):
         )
         ext_random_trader = MarketOrderTrader(
             wallet_name=EXT_RANDOM_TRADER.wallet_name,
-            wallet_pass=EXT_RANDOM_TRADER.wallet_pass,
             key_name=EXT_RANDOM_TRADER.key_name,
             market_name=self.ext_name,
             asset_name=self.asset_name,
@@ -416,7 +405,6 @@ class HedgedMarket(Scenario):
 
         int_informed_trader = InformedTrader(
             wallet_name=INT_INFORMED_TRADER.wallet_name,
-            wallet_pass=INT_INFORMED_TRADER.wallet_pass,
             key_name=INT_INFORMED_TRADER.key_name,
             asset_name=self.asset_name,
             market_name=self.int_name,
