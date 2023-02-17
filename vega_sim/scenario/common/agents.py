@@ -1,35 +1,35 @@
 from __future__ import annotations
-from dataclasses import dataclass
 
-
-import logging
 import datetime
-
-from queue import Queue
-import numpy as np
+import logging
+from dataclasses import dataclass
 from math import exp
+from queue import Queue
+
+import numpy as np
 
 try:
     import talib
 except ImportError:
     pass  # TA-Lib not installed, but most agents don't need
 
-from enum import Enum
+import time
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional, Tuple, Union, Dict, Any
-from numpy.typing import ArrayLike
-from vega_sim.api.data import Order, AccountData, MarketDepth, Trade
+from enum import Enum
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from vega_sim.environment import VegaState
-from vega_sim.environment.agent import StateAgentWithWallet, StateAgent, Agent
-from vega_sim.null_service import VegaServiceNull, VegaService
-from vega_sim.network_service import VegaServiceNetwork
-from vega_sim.proto.vega import (
-    markets as markets_protos,
-    vega as vega_protos,
-)
-from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
+from numpy.typing import ArrayLike
+
+import vega_sim.api.faucet as faucet
+from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
 from vega_sim.api.trading import OrderRejectedError
+from vega_sim.environment import VegaState
+from vega_sim.environment.agent import Agent, StateAgent, StateAgentWithWallet
+from vega_sim.network_service import VegaServiceNetwork
+from vega_sim.null_service import VegaService, VegaServiceNull
+from vega_sim.proto.vega import markets as markets_protos
+from vega_sim.proto.vega import vega as vega_protos
+from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -2753,3 +2753,35 @@ class Snitch(StateAgent):
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)
             )
+
+
+class KeyFunder(Agent):
+    NAME_BASE = "key_funder"
+
+    def __init__(
+        self,
+        keys_to_fund: List[str],
+        asset_to_fund: str,
+        amount_to_fund: float,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(tag=tag)
+        self.keys_to_fund = keys_to_fund
+        self.amount_to_fund = amount_to_fund
+        self.asset_to_fund = asset_to_fund
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        self.vega = vega
+        asset_id = self.vega.find_asset_id(self.asset_to_fund)
+        amount = self.amount_to_fund * 10 ** self.vega.asset_decimals[asset_id]
+        for key in self.keys_to_fund:
+            faucet.mint(key, asset_id, amount=amount, faucet_url=self.vega.faucet_url)
+        time.sleep(1)
+
+    def step(self, vega_state: VegaState):
+        pass
