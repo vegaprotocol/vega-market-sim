@@ -1590,6 +1590,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             base_price + mult_factor * self.num_levels * self.tick_spacing,
             mult_factor * self.tick_spacing,
         )
+        level_price[level_price < 1 / 10**self.mdp] = 1 / 10**self.mdp
 
         return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
 
