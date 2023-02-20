@@ -61,15 +61,14 @@ class LearningAgent(StateAgentWithWallet):
         logfile_pnl: str,
         discount_factor: float,
         num_levels: int,
-        wallet_name: str,
-        wallet_pass: str,
+        key_name: str,
         market_name: str,
         initial_balance: int,
         position_decimals: int,
         asset_name: str,
         inventory_penalty: float = 0.0,
     ):
-        super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
+        super().__init__(key_name=key_name)
 
         self.step_num = 0
         self.latest_state = None
@@ -124,7 +123,7 @@ class LearningAgent(StateAgentWithWallet):
         self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
-            self.wallet_name,
+            self.key_name,
             asset=self.tdai_id,
             amount=self.initial_balance,
         )
@@ -164,11 +163,11 @@ class LearningAgent(StateAgentWithWallet):
         pass
 
     def state(self, vega: VegaServiceNull) -> LAMarketState:
-        position = self.vega.positions_by_market(self.wallet_name, self.market_id)
+        position = self.vega.positions_by_market(self.key_name, self.market_id)
 
         position = position.open_volume if position else 0
         account = self.vega.party_account(
-            wallet_name=self.wallet_name,
+            key_name=self.key_name,
             asset_id=self.tdai_id,
             market_id=self.market_id,
         )
@@ -224,7 +223,7 @@ class LearningAgent(StateAgentWithWallet):
         account = None
         for i in range(0, numTries):
             account = self.vega.party_account(
-                wallet_name=self.wallet_name,
+                key_name=self.key_name,
                 asset_id=self.tdai_id,
                 market_id=self.market_id,
             )

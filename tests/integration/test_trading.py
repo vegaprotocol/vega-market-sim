@@ -4,6 +4,8 @@ from tests.integration.utils.fixtures import (
     vega_service_with_market,
     vega_service,
     create_and_faucet_wallet,
+    vega_service_with_high_volume,
+    vega_service_with_high_volume_with_market,
     ASSET_NAME,
     WalletConfig,
 )
@@ -38,7 +40,7 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
     )
 
     vega.submit_market_order(
-        trading_wallet=PARTY_A.name,
+        trading_key=PARTY_A.name,
         market_id=market_id,
         volume=1,
         side="SIDE_BUY",
@@ -47,7 +49,7 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     position_pb_t1 = vega.positions_by_market(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
         market_id=market_id,
     )
 
@@ -176,8 +178,8 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
 
 
 @pytest.mark.integration
-def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
-    vega = vega_service_with_market
+def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaServiceNull):
+    vega = vega_service_with_high_volume_with_market
     market_id = vega.all_markets()[0].id
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
@@ -188,9 +190,9 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
     asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
 
     vega.one_off_transfer(
-        from_wallet_name=PARTY_A.name,
+        from_key_name=PARTY_A.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_wallet_name=PARTY_B.name,
+        to_key_name=PARTY_B.name,
         to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=500,
@@ -200,18 +202,18 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     party_a_accounts_t1 = vega.party_account(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
         asset_id=asset_id,
         market_id=market_id,
     )
     party_b_accounts_t1 = vega.party_account(
-        wallet_name=PARTY_B.name,
+        key_name=PARTY_B.name,
         asset_id=asset_id,
         market_id=market_id,
     )
 
     all_transfers_t1 = vega.list_transfers(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
     )
     live_transfers_t1 = vega.transfer_status_from_feed(live_only=True)
 
@@ -221,9 +223,9 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
     assert party_b_accounts_t1.general == 1500
 
     vega.one_off_transfer(
-        from_wallet_name=PARTY_B.name,
+        from_key_name=PARTY_B.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_wallet_name=PARTY_A.name,
+        to_key_name=PARTY_A.name,
         to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=500,
@@ -234,18 +236,18 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     party_a_accounts_t2 = vega.party_account(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
         asset_id=asset_id,
         market_id=market_id,
     )
     party_b_accounts_t2 = vega.party_account(
-        wallet_name=PARTY_B.name,
+        key_name=PARTY_B.name,
         asset_id=asset_id,
         market_id=market_id,
     )
 
     all_transfers_t2 = vega.list_transfers(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
     )
     live_transfers_t2 = vega.transfer_status_from_feed(live_only=True)
 
@@ -258,18 +260,18 @@ def test_one_off_transfer(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     party_a_accounts_t3 = vega.party_account(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
         asset_id=asset_id,
         market_id=market_id,
     )
     party_b_accounts_t3 = vega.party_account(
-        wallet_name=PARTY_B.name,
+        key_name=PARTY_B.name,
         asset_id=asset_id,
         market_id=market_id,
     )
 
     all_transfers_t3 = vega.list_transfers(
-        wallet_name=PARTY_A.name,
+        key_name=PARTY_A.name,
     )
     live_transfers_t3 = vega.transfer_status_from_feed(live_only=True)
 

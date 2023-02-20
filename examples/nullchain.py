@@ -30,13 +30,12 @@ if __name__ == "__main__":
     with VegaServiceNull(
         run_with_console=False,
         launch_graphql=False,
-        start_live_feeds=True,
         retain_log_files=True,
         use_full_vega_wallet=False,
         store_transactions=True,
     ) as vega:
         for wallet in wallets:
-            vega.create_wallet(wallet.name, wallet.passphrase)
+            vega.create_key(wallet.name)
 
         vega.mint(
             MM_WALLET.name,
@@ -78,16 +77,16 @@ if __name__ == "__main__":
 
         vega.create_simple_market(
             market_name="BTC:DAI_Mar22",
-            proposal_wallet=MM_WALLET.name,
+            proposal_key=MM_WALLET.name,
             settlement_asset_id=tdai_id,
-            termination_wallet=TERMINATE_WALLET.name,
+            termination_key=TERMINATE_WALLET.name,
             market_decimals=5,
         )
         vega.wait_for_total_catchup()
 
         market_id = vega.all_markets()[0].id
         vega.submit_liquidity(
-            wallet_name=MM_WALLET.name,
+            key_name=MM_WALLET.name,
             market_id=market_id,
             commitment_amount=10000,
             fee=0.001,
@@ -96,7 +95,7 @@ if __name__ == "__main__":
             is_amendment=False,
         )
         vega.submit_order(
-            trading_wallet=MM_WALLET.name,
+            trading_key=MM_WALLET.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
@@ -105,7 +104,7 @@ if __name__ == "__main__":
             price=100,
         )
         vega.submit_order(
-            trading_wallet=MM_WALLET2.name,
+            trading_key=MM_WALLET2.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
@@ -194,7 +193,7 @@ if __name__ == "__main__":
         #     )
 
         to_cancel = vega.submit_order(
-            trading_wallet=MM_WALLET.name,
+            trading_key=MM_WALLET.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
@@ -207,7 +206,7 @@ if __name__ == "__main__":
         vega.cancel_order(MM_WALLET.name, market_id, to_cancel)
 
         vega.submit_order(
-            trading_wallet=MM_WALLET.name,
+            trading_key=MM_WALLET.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
@@ -217,7 +216,7 @@ if __name__ == "__main__":
             wait=True,
         )
         vega.submit_simple_liquidity(
-            wallet_name=MM_WALLET.name,
+            key_name=MM_WALLET.name,
             market_id=market_id,
             commitment_amount=5000,
             fee=0.002,
@@ -234,7 +233,7 @@ if __name__ == "__main__":
 
         input("Pausing to observe the market, press Enter to continue.")
         vega.settle_market(
-            settlement_wallet=TERMINATE_WALLET.name,
+            settlement_key=TERMINATE_WALLET.name,
             settlement_price=100,
             market_id=market_id,
         )

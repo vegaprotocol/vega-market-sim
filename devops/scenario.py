@@ -105,10 +105,12 @@ class DevOpsScenario(Scenario):
         price_process = get_historic_price_series(
             product_id=self.simulation_args.coinbase_code,
             granularity=self.simulation_args.granularity,
-            interpolation=f"{self.simulation_args.step_length_seconds}S"
-            if self.simulation_args.step_length_seconds
-            < self.simulation_args.granularity.value
-            else self.simulation_args.granularity.value,
+            interpolation=(
+                f"{self.simulation_args.step_length_seconds}S"
+                if self.simulation_args.step_length_seconds
+                < self.simulation_args.granularity.value
+                else self.simulation_args.granularity.value
+            ),
             start=str(start),
             end=str(end),
         )

@@ -122,7 +122,7 @@ class SimpleAgent(AgentWithWallet):
 
     def initialise(self, vega: VegaService):
         # Initialise wallet
-        super().initialise(vega=vega, create_wallet=True)
+        super().initialise(vega=vega, create_key=True)
 
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)

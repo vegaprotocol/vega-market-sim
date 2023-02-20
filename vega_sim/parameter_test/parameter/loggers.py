@@ -100,12 +100,15 @@ def _ideal_market_maker_single_data_extraction(
     )
 
     received_liquidity_fees_lp = 0
-    for ledger_entry in vega.get_ledger_entries_from_stream(
-        wallet_name_to=mm_agent.wallet_name,
-        key_name_to=mm_agent.key_name,
-        transfer_type=14,
+    for ledger_entry in vega.list_ledger_entries(
+        to_party_ids=[
+            vega.wallet.public_key(
+                wallet_name=mm_agent.wallet_name, name=mm_agent.key_name
+            )
+        ],
+        transfer_types=[14],
     ):
-        received_liquidity_fees_lp += ledger_entry.amount
+        received_liquidity_fees_lp += ledger_entry.quantity
 
     liquidity_fee_shares = vega.get_liquidity_fee_shares(
         market_id=mm_agent.market_id,

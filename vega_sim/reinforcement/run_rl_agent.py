@@ -116,8 +116,7 @@ def _run(
         logfile_pnl=logfile_pnl,
         discount_factor=0.8,
         num_levels=1,
-        wallet_name=LEARNING_WALLET.name,
-        wallet_pass=LEARNING_WALLET.passphrase,
+        key_name=LEARNING_WALLET.name,
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
@@ -181,7 +180,8 @@ def _run(
                             logfile_pol_eval=logfile_pol_eval,
                             logfile_pol_imp=logfile_pol_imp,
                         )
-                logger.info("Recreating Vega instance to tidy up")
+                if it >= max_iterations:
+                    logger.info("Recreating Vega instance to tidy up")
 
     else:
         # EVALUATION OF AGENT

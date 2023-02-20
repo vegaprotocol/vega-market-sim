@@ -44,7 +44,7 @@ def test_settlement(vega_service: VegaServiceNull):
     vega.wait_for_datanode_sync()
 
     vega.settle_market(
-        settlement_wallet=TERMINATE_WALLET.name,
+        settlement_key=TERMINATE_WALLET.name,
         settlement_price=settlement_price,
         market_id=market_id,
     )
@@ -54,26 +54,26 @@ def test_settlement(vega_service: VegaServiceNull):
     # check bond and margin for all
     for wallet in wallets:
         general, margin, bond = vega.party_account(
-            wallet_name=wallet.name, asset_id=tdai_id, market_id=market_id
+            key_name=wallet.name, asset_id=tdai_id, market_id=market_id
         )
         assert margin == 0
         assert bond == 0
 
     # LP general
     general, margin, bond = vega.party_account(
-        wallet_name=MM_WALLET.name, asset_id=tdai_id, market_id=market_id
+        key_name=MM_WALLET.name, asset_id=tdai_id, market_id=market_id
     )
     assert general == participants_initial_deposit
 
     # Trader 1 who went long
     general, margin, bond = vega.party_account(
-        wallet_name=TRADER_1_WALLET.name, asset_id=tdai_id, market_id=market_id
+        key_name=TRADER_1_WALLET.name, asset_id=tdai_id, market_id=market_id
     )
     assert general == (participants_initial_deposit + pnl_long)
 
     # Trader 2 who went short
     general, margin, bond = vega.party_account(
-        wallet_name=TRADER_2_WALLET.name, asset_id=tdai_id, market_id=market_id
+        key_name=TRADER_2_WALLET.name, asset_id=tdai_id, market_id=market_id
     )
 
     assert general == (participants_initial_deposit - pnl_long)
