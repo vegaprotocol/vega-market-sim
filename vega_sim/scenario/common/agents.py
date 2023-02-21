@@ -1134,7 +1134,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 fee=initial_liq.fee,
                 buy_specs=initial_liq.buy_specs,
                 sell_specs=initial_liq.sell_specs,
-                is_amendment=False,
                 key_name=self.key_name,
             )
 
