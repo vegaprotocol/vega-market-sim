@@ -449,12 +449,12 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             i += 1
             self.step(vega)
 
-            t_elapsed = time.time() - t_start()
+            t_elapsed = time.time() - t_start
             if t_elapsed <= self.step_length_seconds:
                 time.sleep(self.step_length_seconds - t_elapsed)
             else:
                 logging.warning(
-                    "Environment step taking longer than defined scenario step length"
+                    f"Environment step, {round(t_elapsed,2)}s, taking longer than defined scenario step length, {self.step_length_seconds}s,"
                 )
 
         for agent in self.agents:

@@ -2793,7 +2793,6 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
     def __init__(
         self,
         wallet_name: str,
-        wallet_pass: str,
         market_name: str,
         asset_name: str,
         initial_asset_mint: float = 1e5,
@@ -2804,9 +2803,7 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
         tag: str = "",
         key_name: str = None,
     ):
-        super().__init__(
-            wallet_name=wallet_name, wallet_pass=wallet_pass, key_name=key_name, tag=tag
-        )
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.market_name = market_name
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
@@ -2822,15 +2819,15 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
-        create_wallet: bool = True,
-        mint_wallet: bool = True,
+        create_key: bool = True,
+        mint_key: bool = True,
     ):
-        super().initialise(vega=vega, create_wallet=create_wallet)
+        super().initialise(vega=vega, create_key=create_key)
 
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_wallet:
+        if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
                 asset=self.asset_id,

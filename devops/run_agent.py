@@ -25,6 +25,8 @@ Examples:
 
 """
 
+import os
+import dotenv
 import argparse
 import logging
 
@@ -37,6 +39,7 @@ from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.agent import StateAgentWithWallet
 
 from devops.scenario import DevOpsScenario
+from devops.classes import SimulationArgs
 from devops.registry import SCENARIOS, AGENTS
 
 
@@ -45,9 +48,7 @@ def main():
 
     # Agent flags
     parser.add_argument("-a", "--agent")
-    parser.add_argument("-wn", "--wallet_name")
-    parser.add_argument("-wp", "--wallet_pass")
-    parser.add_argument("-wk", "--wallet_key")
+    parser.add_argument("-k", "--key")
 
     # Target flags
     parser.add_argument(
@@ -82,14 +83,22 @@ def main():
             random_trader_args=None,
             momentum_trader_args=None,
             sensitive_trader_args=None,
-            simulation_args=None,
+            simulation_args=SimulationArgs(
+                n_steps=None,
+                granularity=None,
+                coinbase_code=None,
+                step_length_seconds=2,
+            ),
         )
 
     if args.agent is not None:
         agent: StateAgentWithWallet = AGENTS[args.agent]()
-        agent.wallet_name = args.wallet_name
-        agent.wallet_pass = args.wallet_pass
-        agent.key_name = args.wallet_key
+
+        dotenv.load_dotenv()
+        agent.wallet_name = os.environ.get("VEGA_USER_WALLET_NAME", "")
+        agent.wallet_pass = os.environ.get("VEGA_USER_WALLET_PASS", "")
+
+        agent.key_name = args.key
 
     if Network[args.network] == Network.NULLCHAIN:
         with VegaServiceNull(
@@ -100,7 +109,6 @@ def main():
             warn_on_raw_data_access=False,
             run_with_console=args.console,
             launch_graphql=args.graphql,
-            start_live_feeds=True,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
@@ -113,7 +121,6 @@ def main():
     else:
         with VegaServiceNetwork(
             network=Network[args.network],
-            start_live_feeds=False,
         ) as vega:
             if agent is not None:
                 agent.market_name = args.market
