@@ -19,7 +19,10 @@ if __name__ == "__main__":
         run_with_console=True,
     ) as vega:
         for wallet in wallets:
-            vega.create_wallet(wallet.name, wallet.passphrase)
+            vega.create_key(wallet.name)
+            logging.info(
+                    f"{wallet.name} initialised with public_key = {vega.wallet.public_key(name=wallet.name)}"
+                )
 
         vega.mint(
             MM_WALLET.name,
@@ -68,9 +71,9 @@ if __name__ == "__main__":
         market_decimals = 2
         vega.create_simple_market(
             market_name="XYZ:DAI_Mar22",
-            proposal_wallet=MM_WALLET.name,
+            proposal_key=MM_WALLET.name,
             settlement_asset_id=tdai_id,
-            termination_wallet=MM_WALLET2.name,
+            termination_key=MM_WALLET2.name,
             market_decimals=market_decimals,
         )
         vega.wait_for_total_catchup()
@@ -78,7 +81,7 @@ if __name__ == "__main__":
         market_id = vega.all_markets()[0].id
 
         vega.submit_simple_liquidity(
-            wallet_name=MM_WALLET.name,
+            key_name=MM_WALLET.name,
             market_id=market_id,
             commitment_amount=5000,
             fee=0.001,
@@ -96,7 +99,7 @@ if __name__ == "__main__":
                 continue  # widen the spread
             size = 1 if i == 0 else exp(-0.075 * i + 9)
             vega.submit_order(
-                trading_wallet=MM_WALLET.name,
+                trading_key=MM_WALLET.name,
                 market_id=market_id,
                 time_in_force="TIME_IN_FORCE_GTC",
                 order_type="TYPE_LIMIT",
@@ -105,7 +108,7 @@ if __name__ == "__main__":
                 price=mid_price + i * price_delta,
             )
             vega.submit_order(
-                trading_wallet=MM_WALLET2.name,
+                trading_key=MM_WALLET2.name,
                 market_id=market_id,
                 time_in_force="TIME_IN_FORCE_GTC",
                 order_type="TYPE_LIMIT",
@@ -116,7 +119,7 @@ if __name__ == "__main__":
 
         matching_price = mid_price + price_delta
         vega.submit_order(
-            trading_wallet=TRADER_WALLET.name,
+            trading_key=TRADER_WALLET.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
@@ -132,7 +135,7 @@ if __name__ == "__main__":
         input(msg)
 
         vega.submit_order(
-            trading_wallet=MM_WALLET2.name,
+            trading_key=MM_WALLET2.name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
