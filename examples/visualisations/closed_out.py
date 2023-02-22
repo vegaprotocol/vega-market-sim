@@ -34,14 +34,15 @@ from examples.visualisations.utils import continuous_market, move_market
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "wallet_pass", "key_name"])
 
-WALLET_NAME = "vega"
+WALLET_NAME_A = "trader_A"
+WALLET_NAME_B = "trader_B"
 WALLET_PASS = "pass"
 
 TRADER_A = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Trader A Party"
+    wallet_name=WALLET_NAME_A, wallet_pass=WALLET_PASS, key_name="Trader A Party"
 )
 TRADER_B = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Trader B Party"
+    wallet_name=WALLET_NAME_B, wallet_pass=WALLET_PASS, key_name="Trader B Party"
 )
 
 if __name__ == "__main__":
@@ -63,29 +64,23 @@ if __name__ == "__main__":
         )
 
         # Create wallets and keys for traders
-        vega.create_wallet(
-            name=TRADER_A.wallet_name,
-            passphrase=TRADER_A.wallet_pass,
-            key_name=TRADER_A.key_name,
-        )
-        vega.create_wallet(
-            name=TRADER_B.wallet_name,
-            passphrase=TRADER_B.wallet_pass,
-            key_name=TRADER_B.key_name,
-        )
+        vega.create_key(TRADER_A.wallet_name)
+        logging.info(f"{TRADER_A.wallet_name} initialised with public_key = {vega.wallet.public_key(name=TRADER_A.wallet_name)}")    
+        
+        vega.create_key(name=TRADER_B.wallet_name)
+        logging.info(f"{TRADER_B.wallet_name} initialised with public_key = {vega.wallet.public_key(name=TRADER_B.wallet_name)}")    
+
         vega.wait_for_total_catchup()
         vega.wait_fn(60)
 
         # Mint settlement assets for traders
         vega.mint(
-            wallet_name=TRADER_A.wallet_name,
-            key_name=TRADER_A.key_name,
+            key_name=TRADER_A.wallet_name,
             asset=asset_id,
             amount=20000,
         )
         vega.mint(
-            wallet_name=TRADER_B.wallet_name,
-            key_name=TRADER_B.key_name,
+            key_name=TRADER_B.wallet_name,
             asset=asset_id,
             amount=20000,
         )
@@ -94,8 +89,7 @@ if __name__ == "__main__":
 
         # Open positions for traders
         vega.submit_order(
-            trading_wallet=TRADER_A.wallet_name,
-            key_name=TRADER_A.key_name,
+            trading_key=TRADER_A.wallet_name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
@@ -104,8 +98,7 @@ if __name__ == "__main__":
             price=500,
         )
         vega.submit_order(
-            trading_wallet=TRADER_B.wallet_name,
-            key_name=TRADER_B.key_name,
+            trading_key=TRADER_B.wallet_name,
             market_id=market_id,
             time_in_force="TIME_IN_FORCE_GTC",
             order_type="TYPE_LIMIT",
