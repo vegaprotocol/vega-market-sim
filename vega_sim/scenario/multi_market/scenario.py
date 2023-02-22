@@ -347,9 +347,6 @@ class VegaLoadTest(Scenario):
                 wallet_name=MARKET_TRADERS[
                     f"MARKET_A_TRADER_{str(i).zfill(4)}"
                 ].wallet_name,
-                wallet_pass=MARKET_TRADERS[
-                    f"MARKET_A_TRADER_{str(i).zfill(4)}"
-                ].wallet_pass,
                 key_name=MARKET_TRADERS[f"MARKET_A_TRADER_{str(i).zfill(4)}"].key_name,
                 market_name=self.market_a_args["name"],
                 asset_name=self.market_a_args["asset"],
@@ -359,7 +356,7 @@ class VegaLoadTest(Scenario):
                 sell_volume=1,
                 submit_bias=1,
                 cancel_bias=1,
-                tag=str(i),
+                tag="market_a_" + str(i),
             )
             for i in range(self.num_lo_traders_per_market)
         ]
@@ -369,9 +366,6 @@ class VegaLoadTest(Scenario):
                 wallet_name=MARKET_TRADERS[
                     f"MARKET_A_TRADER_{str(i).zfill(4)}"
                 ].wallet_name,
-                wallet_pass=MARKET_TRADERS[
-                    f"MARKET_A_TRADER_{str(i).zfill(4)}"
-                ].wallet_pass,
                 key_name=MARKET_TRADERS[f"MARKET_A_TRADER_{str(i).zfill(4)}"].key_name,
                 market_name=self.market_a_args["name"],
                 asset_name=self.market_a_args["asset"],
@@ -381,7 +375,7 @@ class VegaLoadTest(Scenario):
                 sell_volume=1,
                 submit_bias=1,
                 cancel_bias=1,
-                tag=str(i),
+                tag="market_b_" + str(i),
             )
             for i in range(self.num_lo_traders_per_market)
         ]
@@ -391,9 +385,6 @@ class VegaLoadTest(Scenario):
                 wallet_name=MARKET_TRADERS[
                     f"MARKET_A_TRADER_{str(i).zfill(4)}"
                 ].wallet_name,
-                wallet_pass=MARKET_TRADERS[
-                    f"MARKET_A_TRADER_{str(i).zfill(4)}"
-                ].wallet_pass,
                 key_name=MARKET_TRADERS[f"MARKET_A_TRADER_{str(i).zfill(4)}"].key_name,
                 market_name=self.market_a_args["name"],
                 asset_name=self.market_a_args["asset"],
@@ -403,7 +394,7 @@ class VegaLoadTest(Scenario):
                 sell_volume=1,
                 submit_bias=1,
                 cancel_bias=1,
-                tag=str(i),
+                tag="market_c_" + str(i),
             )
             for i in range(self.num_lo_traders_per_market)
         ]
@@ -413,9 +404,6 @@ class VegaLoadTest(Scenario):
                 wallet_name=MARKET_TRADERS[
                     f"MARKET_A_TRADER_{str(i).zfill(4)}"
                 ].wallet_name,
-                wallet_pass=MARKET_TRADERS[
-                    f"MARKET_A_TRADER_{str(i).zfill(4)}"
-                ].wallet_pass,
                 key_name=MARKET_TRADERS[f"MARKET_A_TRADER_{str(i).zfill(4)}"].key_name,
                 market_name=self.market_a_args["name"],
                 asset_name=self.market_a_args["asset"],
@@ -423,7 +411,7 @@ class VegaLoadTest(Scenario):
                 sell_intensity=10,
                 base_order_size=1,
                 step_bias=self.market_order_trader_step_bias,
-                tag=str(i),
+                tag="market_a_" + str(i),
             )
             for i in range(self.num_mo_traders_per_market)
         ]
@@ -432,9 +420,6 @@ class VegaLoadTest(Scenario):
                 wallet_name=MARKET_TRADERS[
                     f"MARKET_B_TRADER_{str(i).zfill(4)}"
                 ].wallet_name,
-                wallet_pass=MARKET_TRADERS[
-                    f"MARKET_B_TRADER_{str(i).zfill(4)}"
-                ].wallet_pass,
                 key_name=MARKET_TRADERS[f"MARKET_B_TRADER_{str(i).zfill(4)}"].key_name,
                 market_name=self.market_b_args["name"],
                 asset_name=self.market_b_args["asset"],
@@ -442,7 +427,7 @@ class VegaLoadTest(Scenario):
                 sell_intensity=10,
                 base_order_size=1,
                 step_bias=self.market_order_trader_step_bias,
-                tag=str(i),
+                tag="market_b_" + str(i),
             )
             for i in range(self.num_mo_traders_per_market)
         ]
@@ -451,9 +436,6 @@ class VegaLoadTest(Scenario):
                 wallet_name=MARKET_TRADERS[
                     f"MARKET_C_TRADER_{str(i).zfill(4)}"
                 ].wallet_name,
-                wallet_pass=MARKET_TRADERS[
-                    f"MARKET_C_TRADER_{str(i).zfill(4)}"
-                ].wallet_pass,
                 key_name=MARKET_TRADERS[f"MARKET_C_TRADER_{str(i).zfill(4)}"].key_name,
                 market_name=self.market_c_args["name"],
                 asset_name=self.market_c_args["asset"],
@@ -461,7 +443,7 @@ class VegaLoadTest(Scenario):
                 sell_intensity=10,
                 base_order_size=1,
                 step_bias=self.market_order_trader_step_bias,
-                tag=str(i),
+                tag="market_c_" + str(i),
             )
             for i in range(self.num_mo_traders_per_market)
         ]
