@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import atexit
 import functools
-from io import BufferedWriter
 import logging
 import multiprocessing
 import os
@@ -16,6 +15,7 @@ import webbrowser
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum, auto
+from io import BufferedWriter
 from os import path
 from typing import Dict, List, Optional, Set
 
@@ -25,10 +25,9 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
-from vega_sim.wallet.base import Wallet, DEFAULT_WALLET_NAME
-from vega_sim.wallet.slim_wallet import (
-    SlimWallet,
-)
+from vega_sim.tools.load_binaries import ensure_binaries_exist
+from vega_sim.wallet.base import DEFAULT_WALLET_NAME, Wallet
+from vega_sim.wallet.slim_wallet import SlimWallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = logging.getLogger(__name__)
@@ -581,6 +580,9 @@ class VegaServiceNull(VegaService):
         )
         self.retain_log_files = retain_log_files
 
+        self._using_all_custom_paths = all(
+            [x is not None for x in [vega_path, data_node_path, vega_wallet_path]]
+        )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
         self.vega_wallet_path = vega_wallet_path or path.join(
@@ -682,6 +684,9 @@ class VegaServiceNull(VegaService):
         }
 
     def start(self, block_on_startup: bool = True) -> None:
+        if not self._using_all_custom_paths:
+            ensure_binaries_exist()
+
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()
         self.proc = ctx.Process(
