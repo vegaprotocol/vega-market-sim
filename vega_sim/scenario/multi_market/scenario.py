@@ -98,8 +98,9 @@ MARKET_C_ARGS = {
 class VegaLoadTest(Scenario):
     def __init__(
         self,
-        num_steps: int = 60 * 3,
-        granularity: Granularity = Granularity.MINUTE,
+        num_steps: int = 60 * 24 * 30 * 3,
+        granularity: Granularity = Granularity.HOUR,
+        step_length_seconds: float = 60,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
         parties_per_market: int = 1000,
@@ -116,6 +117,12 @@ class VegaLoadTest(Scenario):
 
         self.num_steps = num_steps
         self.granularity = granularity
+        self.step_length_seconds = step_length_seconds
+        self.interpolation = (
+            f"{step_length_seconds}S"
+            if step_length_seconds < granularity.value
+            else None
+        )
 
         self.block_length_seconds = block_length_seconds
         self.transactions_per_block = transactions_per_block
@@ -149,13 +156,14 @@ class VegaLoadTest(Scenario):
 
     def _generate_price_process(self, asset: str) -> list:
         start = datetime.strptime(self.start_date, "%Y-%m-%d %H:%M:%S")
-        end = start + timedelta(seconds=self.num_steps * self.granularity.value)
+        end = start + timedelta(seconds=self.num_steps * self.step_length_seconds)
 
         price_process = get_historic_price_series(
             product_id=asset,
             granularity=self.granularity,
             start=str(start),
             end=str(end),
+            interpolation=self.interpolation,
         )
 
         return list(price_process)
@@ -167,20 +175,23 @@ class VegaLoadTest(Scenario):
         random_state: Optional[np.random.RandomState],
         **kwargs,
     ) -> List[StateAgent]:
+        logging.info(f"Downloading historical data for Market A.")
         market_a_price_process = (
             self.price_process_fn()
             if self.price_process_fn is not None
             else self._generate_price_process(asset=self.market_a_args["oracle"])
         )
+        logging.info(f"Downloading historical data for Market B.")
         market_b_price_process = (
             self.price_process_fn()
             if self.price_process_fn is not None
-            else self._generate_price_process(asset=self.market_a_args["oracle"])
+            else self._generate_price_process(asset=self.market_b_args["oracle"])
         )
+        logging.info(f"Downloading historical data for Market C.")
         market_c_price_process = (
             self.price_process_fn()
             if self.price_process_fn is not None
-            else self._generate_price_process(asset=self.market_a_args["oracle"])
+            else self._generate_price_process(asset=self.market_c_args["oracle"])
         )
 
         # Create MarketManager agents
@@ -232,10 +243,11 @@ class VegaLoadTest(Scenario):
             initial_asset_mint=self.initial_asset_mint,
             market_name=self.market_a_args["name"],
             asset_name=self.market_a_args["asset"],
-            commitment_amount=1e9,
+            commitment_amount=1e6,
             market_decimal_places=self.market_a_args["mdp"],
             asset_decimal_places=self.market_a_args["adp"],
             num_steps=self.num_steps,
+            kappa=0.2,
             tick_spacing=1,
             market_kappa=10,
             state_update_freq=10,
@@ -248,10 +260,11 @@ class VegaLoadTest(Scenario):
             initial_asset_mint=self.initial_asset_mint,
             market_name=self.market_b_args["name"],
             asset_name=self.market_b_args["asset"],
-            commitment_amount=1e9,
+            commitment_amount=1e6,
             market_decimal_places=self.market_b_args["mdp"],
             asset_decimal_places=self.market_b_args["adp"],
             num_steps=self.num_steps,
+            kappa=0.2,
             tick_spacing=1,
             market_kappa=10,
             state_update_freq=10,
@@ -264,10 +277,11 @@ class VegaLoadTest(Scenario):
             initial_asset_mint=self.initial_asset_mint,
             market_name=self.market_c_args["name"],
             asset_name=self.market_c_args["asset"],
-            commitment_amount=1e9,
+            commitment_amount=1e6,
             market_decimal_places=self.market_c_args["mdp"],
             asset_decimal_places=self.market_c_args["adp"],
             num_steps=self.num_steps,
+            kappa=0.1,
             tick_spacing=2,
             market_kappa=5,
             state_update_freq=10,
@@ -390,8 +404,8 @@ class VegaLoadTest(Scenario):
                 asset_name=self.market_a_args["asset"],
                 buy_intensity=10,
                 sell_intensity=10,
-                buy_volume=1,
-                sell_volume=1,
+                buy_volume=0.1,
+                sell_volume=0.1,
                 submit_bias=1,
                 cancel_bias=1,
                 tag="market_c_" + str(i),
@@ -441,7 +455,7 @@ class VegaLoadTest(Scenario):
                 asset_name=self.market_c_args["asset"],
                 buy_intensity=10,
                 sell_intensity=10,
-                base_order_size=1,
+                base_order_size=0.1,
                 step_bias=self.market_order_trader_step_bias,
                 tag="market_c_" + str(i),
             )
@@ -483,7 +497,7 @@ class VegaLoadTest(Scenario):
             random_agent_ordering=False,
             transactions_per_block=self.transactions_per_block,
             vega_service=vega,
-            step_length_seconds=self.granularity.value,
+            step_length_seconds=self.step_length_seconds,
             block_length_seconds=vega.seconds_per_block,
         )
 
