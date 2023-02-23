@@ -71,6 +71,7 @@ Position = namedtuple(
         "unrealised_pnl",
         "average_entry_price",
         "updated_at",
+        "loss_socialisation_amount",
     ],
 )
 Transfer = namedtuple(
@@ -315,6 +316,10 @@ def _position_from_proto(
         ),
         average_entry_price=num_from_padded_int(
             position.average_entry_price, decimal_spec.price_decimals
+        ),
+        loss_socialisation_amount=num_from_padded_int(
+            position.loss_socialisation_amount,
+            decimal_spec.asset_decimals,
         ),
         updated_at=position.updated_at,
     )
