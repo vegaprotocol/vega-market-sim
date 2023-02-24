@@ -20,7 +20,6 @@ FILES = [DATA_NODE, VEGA_CORE, VEGAWALLET]
 
 
 def download_binaries():
-    version = vega_sim.__version__
     platf = platform.system().lower()
 
     # We have no Windows specific builds, so people have to use WSL to run
@@ -37,7 +36,7 @@ def download_binaries():
             file_name = remote_file.format(platform=platf, chipset=chipset)
             logger.info(f"Downloading {file_name}")
 
-            url = URL_BASE.format(version=version) + file_name
+            url = URL_BASE.format(version=vega_sim.VEGA_VERSION) + file_name
             res = requests.get(url)
             with open(os.path.join(dir, f"{file_name}"), "wb") as f:
                 f.write(res.content)
