@@ -18,8 +18,14 @@ VEGAWALLET = "vegawallet-{platform}-{chipset}64.zip"
 
 FILES = [DATA_NODE, VEGA_CORE, VEGAWALLET]
 
+BIN_NAMES = {
+    DATA_NODE: "data-node",
+    VEGA_CORE: "vega",
+    VEGAWALLET: "vegawallet",
+}
 
-def download_binaries(force: bool = True):
+
+def download_binaries(force: bool = False):
     platf = platform.system().lower()
 
     # We have no Windows specific builds, so people have to use WSL to run
@@ -31,17 +37,24 @@ def download_binaries(force: bool = True):
         shutil.rmtree(vega_sim.vega_bin_path)
 
     with tempfile.TemporaryDirectory() as dir:
-        os.mkdir(vega_sim.vega_bin_path)
+        if not os.path.exists(vega_sim.vega_bin_path):
+            os.mkdir(vega_sim.vega_bin_path)
         for remote_file in FILES:
             file_name = remote_file.format(platform=platf, chipset=chipset)
-            if not os.path.exists(file_name) and not force:
+            if (
+                not os.path.exists(
+                    os.path.join(vega_sim.vega_bin_path, BIN_NAMES[remote_file])
+                )
+            ) or force:
                 logger.info(f"Downloading {file_name}")
 
                 url = URL_BASE.format(version=vega_sim.VEGA_VERSION) + file_name
                 res = requests.get(url)
-                with open(os.path.join(dir, f"{file_name}"), "wb") as f:
+                file_path = os.path.join(dir, f"{file_name}")
+
+                with open(file_path, "wb") as f:
                     f.write(res.content)
-                with zipfile.ZipFile(os.path.join(dir, f"{file_name}"), "r") as zip_ref:
+                with zipfile.ZipFile(file_path, "r") as zip_ref:
                     zip_ref.extractall(vega_sim.vega_bin_path)
 
         for bin_file in os.listdir(vega_sim.vega_bin_path):
