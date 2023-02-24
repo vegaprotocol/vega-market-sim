@@ -7,8 +7,6 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.registry import SCENARIOS
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.service import VegaService
-from vega_sim.tools.load_binaries import ensure_binaries_exist
 
 
 def main():

@@ -571,6 +571,7 @@ class VegaServiceNull(VegaService):
         store_transactions: bool = True,
         replay_from_path: Optional[str] = None,
         listen_for_high_volume_stream_updates: bool = False,
+        check_for_binaries: bool = False,
     ):
         super().__init__(
             can_control_time=True,
@@ -606,6 +607,7 @@ class VegaServiceNull(VegaService):
 
         self.launch_graphql = launch_graphql
         self.replay_from_path = replay_from_path
+        self.check_for_binaries = check_for_binaries
 
         if port_config is None:
             self._assign_ports()
@@ -684,7 +686,7 @@ class VegaServiceNull(VegaService):
         }
 
     def start(self, block_on_startup: bool = True) -> None:
-        if not self._using_all_custom_paths:
+        if self.check_for_binaries and not self._using_all_custom_paths:
             ensure_binaries_exist()
 
         ctx = multiprocessing.get_context()
