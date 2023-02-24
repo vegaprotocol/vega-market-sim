@@ -25,7 +25,7 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
-from vega_sim.tools.load_binaries import ensure_binaries_exist
+from vega_sim.tools.load_binaries import download_binaries
 from vega_sim.wallet.base import DEFAULT_WALLET_NAME, Wallet
 from vega_sim.wallet.slim_wallet import SlimWallet
 from vega_sim.wallet.vega_wallet import VegaWallet
@@ -687,7 +687,7 @@ class VegaServiceNull(VegaService):
 
     def start(self, block_on_startup: bool = True) -> None:
         if self.check_for_binaries and not self._using_all_custom_paths:
-            ensure_binaries_exist()
+            download_binaries()
 
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()

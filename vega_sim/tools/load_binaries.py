@@ -19,7 +19,7 @@ VEGAWALLET = "vegawallet-{platform}-{chipset}64.zip"
 FILES = [DATA_NODE, VEGA_CORE, VEGAWALLET]
 
 
-def download_binaries():
+def download_binaries(force: bool = True):
     platf = platform.system().lower()
 
     # We have no Windows specific builds, so people have to use WSL to run
@@ -27,30 +27,25 @@ def download_binaries():
 
     chipset = platform.processor()
 
-    if os.path.exists(vega_sim.vega_bin_path):
+    if force and os.path.exists(vega_sim.vega_bin_path):
         shutil.rmtree(vega_sim.vega_bin_path)
 
     with tempfile.TemporaryDirectory() as dir:
         os.mkdir(vega_sim.vega_bin_path)
         for remote_file in FILES:
             file_name = remote_file.format(platform=platf, chipset=chipset)
-            logger.info(f"Downloading {file_name}")
+            if not os.path.exists(file_name) and not force:
+                logger.info(f"Downloading {file_name}")
 
-            url = URL_BASE.format(version=vega_sim.VEGA_VERSION) + file_name
-            res = requests.get(url)
-            with open(os.path.join(dir, f"{file_name}"), "wb") as f:
-                f.write(res.content)
-            with zipfile.ZipFile(os.path.join(dir, f"{file_name}"), "r") as zip_ref:
-                zip_ref.extractall(vega_sim.vega_bin_path)
+                url = URL_BASE.format(version=vega_sim.VEGA_VERSION) + file_name
+                res = requests.get(url)
+                with open(os.path.join(dir, f"{file_name}"), "wb") as f:
+                    f.write(res.content)
+                with zipfile.ZipFile(os.path.join(dir, f"{file_name}"), "r") as zip_ref:
+                    zip_ref.extractall(vega_sim.vega_bin_path)
 
         for bin_file in os.listdir(vega_sim.vega_bin_path):
             os.chmod(os.path.join(vega_sim.vega_bin_path, bin_file), 0o775)
-
-
-def ensure_binaries_exist():
-    if not os.path.exists(vega_sim.vega_bin_path):
-        logger.info("Vega Protocol binaries not found, downloading relevant versions")
-        download_binaries()
 
 
 if __name__ == "__main__":
