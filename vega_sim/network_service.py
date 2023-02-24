@@ -528,14 +528,17 @@ class VegaServiceNetwork(VegaService):
 
                 return
 
+            except grpc._channel._InactiveRpcError:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+
             except grpc.FutureTimeoutError:
-                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
                 )
 
             except DatanodeBehindError:
-                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} is behind."
                 )
