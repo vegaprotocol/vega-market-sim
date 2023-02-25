@@ -69,7 +69,7 @@ def _queue_forwarder(
                 else:
                     sink.put(output)
     except Exception:
-        logger.debug("Data cache event bus closed")
+        logger.debug("Data cache event bus closed.")
 
 
 class DecimalsCache(defaultdict):

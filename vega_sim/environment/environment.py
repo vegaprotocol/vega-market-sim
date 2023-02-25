@@ -172,8 +172,6 @@ class MarketEnvironment:
                 if hasattr(agent, "key_name")
             }
         )
-        # Start order monitoring only observing scenario markets and parties
-        vega.data_cache.start_live_feeds(market_ids=market_ids, party_ids=party_ids)
 
     def _run(
         self,

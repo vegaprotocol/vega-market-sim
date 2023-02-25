@@ -65,6 +65,9 @@ class LoginError(Exception):
 class DatanodeBehindError(Exception):
     pass
 
+class DatanodeSlowResponseError(Exception):
+    pass
+
 
 def raw_data(fn):
     @wraps(fn)
@@ -1997,7 +2000,7 @@ class VegaService(ABC):
         else:
             raise ValueError(f"Invalid value '{to_type}' specified for 'to_type' arg.")
 
-    def ping_datanode(self, max_time_diff: int = 30):
+    def ping_datanode(self, max_time_diff: float = 30, max_response_time: float = 0.1):
         """Ping datanode endpoint to check health of connection
 
         Args:
@@ -2007,10 +2010,21 @@ class VegaService(ABC):
 
         """
 
-        # Ping datanode then check if it is behind
+        t = time.time()
         data.ping(data_client=self.trading_data_client_v2)
-        if abs(self.get_blockchain_time() - time.time()) > max_time_diff:
+
+        t_response = abs(time.time() - t)
+        t_delay = abs(self.get_blockchain_time() - t)
+
+        print(t_response)
+
+        if t_response > max_response_time:
+            raise DatanodeSlowResponseError
+
+        if t_delay > max_time_diff:
             raise DatanodeBehindError
+
+        
 
     def one_off_transfer(
         self,
