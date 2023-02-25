@@ -4,6 +4,7 @@ import os
 import inflection
 
 import json
+import logging
 import subprocess
 import requests
 
@@ -217,7 +218,6 @@ class VegaWallet(Wallet):
         url = f"{self.wallet_url}/api/v2/requests"
 
         response = requests.post(url, headers=headers, json=submission)
-        response.raise_for_status()
 
         return {
             key["name"]: key["publicKey"] for key in response.json()["result"]["keys"]
@@ -262,7 +262,11 @@ class VegaWallet(Wallet):
 
         response = requests.post(url, headers=headers, json=submission)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            logging.warning(f"Submission failed, response={response.json()}")
+            raise e
 
     def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Return a public key for the given wallet name and key name.

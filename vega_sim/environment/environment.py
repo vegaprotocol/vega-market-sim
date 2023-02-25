@@ -478,7 +478,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             try:
                 agent.step(state)
             except Exception as e:
-                msg = f"Agent '{agent.key_name}' failed to step."
+                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
                 if self.raise_step_errors:
                     raise e(msg)
                 else:

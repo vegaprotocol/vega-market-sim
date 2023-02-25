@@ -2926,7 +2926,7 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
         if open_volume > 0:
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
-                key_name=self.key_name,
+                trading_key=self.key_name,
                 market_id=self.market_id,
                 side="SIDE_SELL",
                 volume=abs(open_volume),
@@ -2935,7 +2935,7 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
         elif open_volume < 0:
             self.vega.submit_market_order(
                 trading_wallet=self.wallet_name,
-                key_name=self.key_name,
+                trading_key=self.key_name,
                 market_id=self.market_id,
                 side="SIDE_BUY",
                 volume=abs(open_volume),

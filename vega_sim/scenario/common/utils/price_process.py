@@ -205,5 +205,5 @@ class LivePrice:
         return self._get_price()
 
     def _get_price(self):
-        url = f"https://api.binance.us/api/v3/avgPrice?symbol={self.product}"
+        url = f"https://api.binance.com/api/v3/avgPrice?symbol={self.product}"
         return float(requests.get(url).json()["price"])

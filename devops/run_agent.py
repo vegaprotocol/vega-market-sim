@@ -57,14 +57,15 @@ def main():
         choices=[network.name for network in Network],
         default=Network.FAIRGROUND.name,
     )
-    parser.add_argument("-m", "--market")
+    parser.add_argument("-m", "--market_name", default=None, type=str)
+    parser.add_argument("-l", "--step_length_seconds", default=10, type=int)
 
     # Simulation flags
     parser.add_argument("-s", "--scenario")
-    parser.add_argument("-c", "--console", action="store_true")
     parser.add_argument("-p", "--pause", action="store_true")
 
     # Developer flags
+    parser.add_argument("-c", "--console", action="store_true")
     parser.add_argument("-g", "--graphql", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
 
@@ -81,24 +82,23 @@ def main():
             market_maker_args=None,
             auction_trader_args=None,
             random_trader_args=None,
-            momentum_trader_args=None,
             sensitive_trader_args=None,
             simulation_args=SimulationArgs(
                 n_steps=None,
                 granularity=None,
                 coinbase_code=None,
-                step_length_seconds=2,
             ),
         )
+    scenario.market_name = args.market_name
+    scenario.step_length_seconds = args.step_length_seconds
 
     if args.agent is not None:
         agent: StateAgentWithWallet = AGENTS[args.agent]()
 
         dotenv.load_dotenv()
         agent.wallet_name = os.environ.get("VEGA_USER_WALLET_NAME", "")
-        agent.wallet_pass = os.environ.get("VEGA_USER_WALLET_PASS", "")
-
         agent.key_name = args.key
+        agent.market_name = scenario.market_name
 
     if Network[args.network] == Network.NULLCHAIN:
         with VegaServiceNull(
@@ -108,7 +108,6 @@ def main():
             use_full_vega_wallet=False,
             warn_on_raw_data_access=False,
             run_with_console=args.console,
-            launch_graphql=args.graphql,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
@@ -121,12 +120,14 @@ def main():
     else:
         with VegaServiceNetwork(
             network=Network[args.network],
+            run_with_console=args.console,
         ) as vega:
             if agent is not None:
-                agent.market_name = args.market
                 agent.asset_name = vega.asset_info(
                     asset_id=vega.market_info(
-                        vega.find_market_id(name=args.market, raise_on_missing=True)
+                        vega.find_market_id(
+                            name=agent.market_name, raise_on_missing=True
+                        )
                     ).tradable_instrument.instrument.future.settlement_asset
                 ).details.symbol
 

@@ -13,7 +13,6 @@ from devops.classes import (
     MarketManagerArgs,
     AuctionTraderArgs,
     RandomTraderArgs,
-    MomentumTraderArgs,
     SensitiveTraderArgs,
     SimulationArgs,
 )
@@ -52,23 +51,16 @@ SCENARIOS = {
         random_trader_args=RandomTraderArgs(
             order_intensity=[5, 5, 5],
             order_volume=[0.01, 0.1, 1],
-            step_bias=[0.5, 0.3, 0.1],
+            step_bias=[0.333, 0.012, 0.003],
             initial_mint=1e6,
         ),
-        momentum_trader_args=MomentumTraderArgs(
-            order_intensity=10,
-            order_volume=0.05,
-            initial_mint=1e4,
-        ),
         sensitive_trader_args=SensitiveTraderArgs(
-            order_intensity=[10, 10, 10],
-            order_volume=[0.001, 0.01, 0.1],
-            price_half_life=[1, 0.1, 0.01],
+            scale=[10, 10, 10],
+            max_order_size=[0.001, 0.01, 0.1],
             initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
             n_steps=60 * 24 * 6,
-            step_length_seconds=10,
             granularity=Granularity.MINUTE,
             coinbase_code="ETH-USD",
             start_date="2022-11-01 00:00:00",
@@ -108,11 +100,6 @@ SCENARIOS = {
             order_volume=0.001,
             initial_mint=1e4,
         ),
-        momentum_trader_args=MomentumTraderArgs(
-            order_intensity=10,
-            order_volume=0.005,
-            initial_mint=1e4,
-        ),
         sensitive_trader_args=SensitiveTraderArgs(
             order_intensity=[10, 10, 10],
             order_volume=[0.0001, 0.001, 0.01],
@@ -121,7 +108,6 @@ SCENARIOS = {
         ),
         simulation_args=SimulationArgs(
             n_steps=60 * 24 * 6,
-            step_length_seconds=10,
             granularity=Granularity.MINUTE,
             coinbase_code="BTC-USDT",
             start_date="2022-11-01 00:00:00",
@@ -162,11 +148,6 @@ SCENARIOS = {
             step_bias=[1, 1, 1],
             initial_mint=5e4,
         ),
-        momentum_trader_args=MomentumTraderArgs(
-            order_intensity=100,
-            order_volume=1,
-            initial_mint=5e4,
-        ),
         sensitive_trader_args=SensitiveTraderArgs(
             order_intensity=[10, 10, 10],
             order_volume=[1, 10, 100],
@@ -175,7 +156,6 @@ SCENARIOS = {
         ),
         simulation_args=SimulationArgs(
             n_steps=6 * 60,
-            step_length_seconds=5,
             granularity=Granularity.MINUTE,
             coinbase_code="ADA-USDT",
             start_date="2022-11-01 00:00:00",
@@ -216,11 +196,6 @@ SCENARIOS = {
             step_bias=[1, 1, 1],
             initial_mint=5e4,
         ),
-        momentum_trader_args=MomentumTraderArgs(
-            order_intensity=100,
-            order_volume=1,
-            initial_mint=5e4,
-        ),
         sensitive_trader_args=SensitiveTraderArgs(
             order_intensity=[10, 10, 10],
             order_volume=[1, 10, 100],
@@ -229,7 +204,6 @@ SCENARIOS = {
         ),
         simulation_args=SimulationArgs(
             n_steps=6 * 60,
-            step_length_seconds=5,
             granularity=Granularity.MINUTE,
             coinbase_code="ADA-USDT",
             start_date="2023-01-01 00:00:00",

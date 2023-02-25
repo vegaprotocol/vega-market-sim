@@ -125,7 +125,7 @@ def manage_vega_processes(
                 "--automatic-consent",
                 "--load-tokens",
                 "--tokens-passphrase-file",
-                environ.get("VEGA_WALLET_TOKEN_PASS"),
+                environ.get("VEGA_WALLET_TOKENS_PASSPHRASE_FILE"),
                 "--no-version-check",
             ],
             dir_root=tmp_vega_dir,
@@ -243,7 +243,7 @@ class VegaServiceNetwork(VegaService):
                 Note: Only needed if creating keys
             wallet_token_path (str, optional):
                 Path to the json file containing wallet tokens. Otherwise
-                uses VEGA_WALLET_TOKEN environment variable.
+                uses VEGA_WALLET_TOKENS_FILE environment variable.
         """
 
         # Run init method inherited from VegaService with network arguments.
@@ -283,12 +283,12 @@ class VegaServiceNetwork(VegaService):
         self._token_path = (
             wallet_token_path
             if wallet_token_path is not None
-            else environ.get("VEGA_WALLET_TOKEN")
+            else environ.get("VEGA_WALLET_TOKENS_FILE")
         )
         if self._token_path is None:
             raise Exception(
                 "Either path to tokens JSON must be passed to wallet class or"
-                " VEGA_WALLET_TOKEN environment variable set"
+                " VEGA_WALLET_TOKENS_FILE environment variable set"
             )
 
         self._network_config_path = _find_network_config_toml(
@@ -412,9 +412,7 @@ class VegaServiceNetwork(VegaService):
     @property
     def wallet_url(self) -> str:
         if self._wallet_url is None:
-            self._wallet_url = (
-                f"http://{self.network_config['Host']}:{self.network_config['Port']}"
-            )
+            self._wallet_url = f"http://127.0.0.1:1789"
         return self._wallet_url
 
     @property
@@ -467,6 +465,11 @@ class VegaServiceNetwork(VegaService):
 
         try:
             self.ping_datanode(max_time_diff=max_time_diff)
+            for market in self.all_markets():
+                self.market_data(market_id=market.id)
+            logging.debug(
+                f"Connection to endpoint {self._data_node_grpc_url} successful."
+            )
             return
 
         except grpc.FutureTimeoutError as e:
@@ -525,6 +528,11 @@ class VegaServiceNetwork(VegaService):
 
                 # Ping the datanode to check it is not behind
                 self.ping_datanode()
+                for market in self.all_markets():
+                    self.market_data(market_id=market.id)
+                logging.debug(
+                    f"Connection to endpoint {self._data_node_grpc_url} successful."
+                )
 
                 return
 
