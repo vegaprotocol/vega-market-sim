@@ -65,6 +65,7 @@ class LoginError(Exception):
 class DatanodeBehindError(Exception):
     pass
 
+
 class DatanodeSlowResponseError(Exception):
     pass
 
@@ -2023,8 +2024,6 @@ class VegaService(ABC):
 
         if t_delay > max_time_diff:
             raise DatanodeBehindError
-
-        
 
     def one_off_transfer(
         self,
