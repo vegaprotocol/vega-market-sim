@@ -16,26 +16,28 @@ from collections import namedtuple
 from typing import Optional, Tuple
 from vega_sim.null_service import VegaServiceNull
 
-PartyConfig = namedtuple("WalletConfig", ["wallet_name", "wallet_pass", "key_name"])
+
+PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
 
 WALLET_NAME = "auxiliary_parties_wallet"
-WALLET_PASS = "passphrase"
 
-AUX_PARTY_A = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Market Proposer"
-)
-AUX_PARTY_B = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Market Settler"
-)
-AUX_PARTY_C = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Liquidity Provider"
-)
-AUX_PARTY_D = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Asks Provider"
-)
-AUX_PARTY_E = PartyConfig(
-    wallet_name=WALLET_NAME, wallet_pass=WALLET_PASS, key_name="Bids Provider"
-)
+AUX_PARTY_A = PartyConfig(wallet_name=WALLET_NAME, key_name="Market Proposer")
+AUX_PARTY_B = PartyConfig(wallet_name=WALLET_NAME, key_name="Market Settler")
+AUX_PARTY_C = PartyConfig(wallet_name=WALLET_NAME, key_name="Liquidity Provider")
+AUX_PARTY_D = PartyConfig(wallet_name=WALLET_NAME, key_name="Asks Provider")
+AUX_PARTY_E = PartyConfig(wallet_name=WALLET_NAME, key_name="Bids Provider")
+
+
+class Visualisation:
+    def __init__(self, vega: VegaServiceNull):
+        self.vega = vega
+
+    def run(self, pause: bool = False, test: bool = False):
+        pass
+
+    def test(self):
+        self.run(pause=False, test=True)
+        return True
 
 
 def continuous_market(
@@ -92,10 +94,9 @@ def create_auxiliary_parties(
             Service running core, datanode, and wallet processes.
     """
     for party in [AUX_PARTY_A, AUX_PARTY_B, AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E]:
-        vega.create_wallet(
-            name=party.wallet_name,
-            passphrase=party.wallet_pass,
-            key_name=party.key_name,
+        vega.create_key(
+            name=party.key_name,
+            wallet_name=party.wallet_name,
         )
 
 
@@ -193,24 +194,24 @@ def propose_market(
             Market id.
     """
     vega.update_network_parameter(
-        proposal_wallet=AUX_PARTY_A.wallet_name,
-        key_name=AUX_PARTY_A.key_name,
+        wallet_name=AUX_PARTY_A.wallet_name,
+        proposal_key=AUX_PARTY_A.key_name,
         parameter="market.fee.factors.infrastructureFee",
         new_value="0.0",
     )
     vega.wait_for_total_catchup()
     vega.update_network_parameter(
-        proposal_wallet=AUX_PARTY_A.wallet_name,
-        key_name=AUX_PARTY_A.key_name,
+        wallet_name=AUX_PARTY_A.wallet_name,
+        proposal_key=AUX_PARTY_A.key_name,
         parameter="market.fee.factors.makerFee",
         new_value="0.0",
     )
     vega.wait_for_total_catchup()
     vega.create_simple_market(
         market_name="XYZ:DAI Visualisation Example",
-        proposal_wallet=AUX_PARTY_A.wallet_name,
-        key_name=AUX_PARTY_A.key_name,
-        termination_wallet=AUX_PARTY_A.wallet_name,
+        wallet_name=AUX_PARTY_A.wallet_name,
+        proposal_key=AUX_PARTY_A.key_name,
+        termination_wallet_name=AUX_PARTY_A.wallet_name,
         termination_key=AUX_PARTY_A.key_name,
         settlement_asset_id=asset_id,
         market_decimals=3,
@@ -279,7 +280,7 @@ def exit_auction(
     """
     vega.submit_order(
         trading_wallet=AUX_PARTY_D.wallet_name,
-        key_name=AUX_PARTY_D.key_name,
+        trading_key=AUX_PARTY_D.key_name,
         market_id=market_id,
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
@@ -290,7 +291,7 @@ def exit_auction(
     )
     vega.submit_order(
         trading_wallet=AUX_PARTY_E.wallet_name,
-        key_name=AUX_PARTY_E.key_name,
+        trading_key=AUX_PARTY_E.key_name,
         market_id=market_id,
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
@@ -301,7 +302,7 @@ def exit_auction(
     )
     vega.submit_order(
         trading_wallet=AUX_PARTY_D.wallet_name,
-        key_name=AUX_PARTY_E.key_name,
+        trading_key=AUX_PARTY_E.key_name,
         market_id=market_id,
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
@@ -311,7 +312,7 @@ def exit_auction(
     )
     vega.submit_order(
         trading_wallet=AUX_PARTY_E.wallet_name,
-        key_name=AUX_PARTY_E.key_name,
+        trading_key=AUX_PARTY_E.key_name,
         market_id=market_id,
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
@@ -325,7 +326,7 @@ def exit_auction(
         orders.get(market_id, {})
         .get(
             vega.wallet.public_key(
-                name=AUX_PARTY_D.wallet_name, key_name=AUX_PARTY_D.key_name
+                wallet_name=AUX_PARTY_D.wallet_name, name=AUX_PARTY_D.key_name
             ),
             {},
         )
@@ -335,7 +336,7 @@ def exit_auction(
         orders.get(market_id, {})
         .get(
             vega.wallet.public_key(
-                name=AUX_PARTY_E.wallet_name, key_name=AUX_PARTY_E.key_name
+                wallet_name=AUX_PARTY_E.wallet_name, name=AUX_PARTY_E.key_name
             ),
             {},
         )
@@ -384,16 +385,16 @@ def move_market(
     if price > curr_price:
         # Amend best-bid and best-ask
         vega.amend_order(
-            trading_wallet=AUX_PARTY_D.wallet_name,
-            key_name=AUX_PARTY_D.key_name,
+            wallet_name=AUX_PARTY_D.wallet_name,
+            trading_key=AUX_PARTY_D.key_name,
             order_id=best_ask_id,
             market_id=market_id,
             price=price + spread / 2,
         )
         vega.wait_for_total_catchup()
         vega.amend_order(
-            trading_wallet=AUX_PARTY_E.wallet_name,
-            key_name=AUX_PARTY_E.key_name,
+            wallet_name=AUX_PARTY_E.wallet_name,
+            trading_key=AUX_PARTY_E.key_name,
             order_id=best_bid_id,
             market_id=market_id,
             price=price - spread / 2,
@@ -401,16 +402,16 @@ def move_market(
         vega.wait_for_total_catchup()
     else:
         vega.amend_order(
-            trading_wallet=AUX_PARTY_E.wallet_name,
-            key_name=AUX_PARTY_E.key_name,
+            wallet_name=AUX_PARTY_E.wallet_name,
+            trading_key=AUX_PARTY_E.key_name,
             order_id=best_bid_id,
             market_id=market_id,
             price=price - spread / 2,
         )
         vega.wait_for_total_catchup()
         vega.amend_order(
-            trading_wallet=AUX_PARTY_D.wallet_name,
-            key_name=AUX_PARTY_D.key_name,
+            wallet_name=AUX_PARTY_D.wallet_name,
+            trading_key=AUX_PARTY_D.key_name,
             order_id=best_ask_id,
             market_id=market_id,
             price=price + spread / 2,
@@ -420,7 +421,7 @@ def move_market(
     # Move mark-price
     vega.submit_order(
         trading_wallet=AUX_PARTY_D.wallet_name,
-        key_name=AUX_PARTY_D.key_name,
+        trading_key=AUX_PARTY_D.key_name,
         market_id=market_id,
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
@@ -431,7 +432,7 @@ def move_market(
     vega.wait_for_total_catchup()
     vega.submit_order(
         trading_wallet=AUX_PARTY_E.wallet_name,
-        key_name=AUX_PARTY_E.key_name,
+        trading_key=AUX_PARTY_E.key_name,
         market_id=market_id,
         time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",

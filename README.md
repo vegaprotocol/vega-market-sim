@@ -138,7 +138,10 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
 
  - Check [releases](https://github.com/vegaprotocol/vega/releases/) for the release tag you wish to target
  - Update `.env`'s `VEGA_SIM_VEGA_TAG` to reflect the last commit within that release
- - Update the `version` parameter in `pyproject.toml` to match the tagged Vega Core release
+ - Update the `version` parameter in `pyproject.toml`. Poetry's `poetry version` command can help with this by automatically updating the file according to certain rules:
+   - `poetry version patch`: `1.0.0` -> `1.0.1`
+   - `poetry version minor`: `1.0.0` -> `1.1.0`
+   - `poetry version major`: `1.0.0` -> `2.0.0`
  - Run `make` followed by a full integration test run
  - Create a branch containing these changes, then a pull request into `develop`
- - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the same specification as in `pyproject.toml` (e.g. `v0.62.5`) to trigger the deployment process.
+ - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the version of Vega we are matching up to (e.g. `v0.62.5`) to trigger the deployment process.
