@@ -4,12 +4,14 @@ Script used to run vega-market-sim scenarios configure for devops.
 
 Flags:
 
-    -n, --network string    controls which network the scenario is run on
-    -d, --debug             controls whether to log debug messages
+    -s, --scenario          controls which scenario to test/deploy
+    -n, --network           controls which network the scenario should run on
+    -m, --market            controls which market the market should run on
 
-    -c, --console           whether to launch a console (nullchain only)
-    -g, --graphql           whether to launch a graphql playground (nullchain only)
-    -p, --pause             whether to pause a the end of a simulation (nullchain only)
+    -d, --debug             controls whether to log debug messages
+    -c, --console           whether to launch a console
+    -g, --graphql           whether to launch a graphql playground 
+    -p, --pause             whether to pause a the end of a simulation
     
 
 Examples:
@@ -18,10 +20,6 @@ Examples:
 
     $ python -m vega_sim.devops.run -s ETHUSD -n NULLCHAIN -d -c -p
 
-
-    Deploy the tested scenario to the stagnet1 network:
-
-    $ python -m vega_sim.devops.run -s ETHUSD -n STAGNET1 -d
 
 """
 

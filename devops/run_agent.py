@@ -1,27 +1,20 @@
 """run.py
 
-Script used to test vega-market-sim on a nullchain network or run on a live network.
+Script used to run vega-market-sim agents on a nullchain network or on a live network.
 
 Flags:
 
-    -n, --network string    controls which network the scenario is run on
-    -d, --debug             controls whether to log debug messages
+    -a, --agent                 controls which agent to run
+    -k, --key                   controls which key to use
+    -n, --network string        controls which network the agent is run on
+    -m, --market_name           controls which market the agent is run on
+    -l, --step_length_seconds   controls the frequency at which the agent steps
+    -s, --scenario              scenario to use for testing simulations
 
-    -c, --console           whether to launch a console (nullchain only)
-    -g, --graphql           whether to launch a graphql playground (nullchain only)
-    -p, --pause             whether to pause a the end of a simulation (nullchain only)
-    
-
-Examples:
-
-    Test the ETHUSD scenario with a simulation on a nullchain network.
-
-    $ python -m vega_sim.devops.run -s ETHUSD -n NULLCHAIN -d -c -p
-
-
-    Deploy the tested scenario to the stagnet1 network:
-
-    $ python -m vega_sim.devops.run -s ETHUSD -n STAGNET1 -d
+    -d, --debug                 controls whether to log debug messages
+    -c, --console               whether to launch a console
+    -g, --graphql               whether to launch a graphql playground 
+    -p, --pause                 whether to pause a the end of a simulation
 
 """
 
@@ -46,11 +39,10 @@ from devops.registry import SCENARIOS, AGENTS
 def main():
     parser = argparse.ArgumentParser()
 
-    # Agent flags
+    # Simulation / deployment arguments
     parser.add_argument("-a", "--agent")
     parser.add_argument("-k", "--key")
-
-    # Target flags
+    parser.add_argument("-l", "--step_length_seconds", default=10, type=int)
     parser.add_argument(
         "-n",
         "--network",
@@ -58,15 +50,11 @@ def main():
         default=Network.FAIRGROUND.name,
     )
     parser.add_argument("-m", "--market_name", default=None, type=str)
-    parser.add_argument("-l", "--step_length_seconds", default=10, type=int)
-
-    # Simulation flags
     parser.add_argument("-s", "--scenario")
-    parser.add_argument("-p", "--pause", action="store_true")
 
     # Developer flags
+    parser.add_argument("-p", "--pause", action="store_true")
     parser.add_argument("-c", "--console", action="store_true")
-    parser.add_argument("-g", "--graphql", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
 
     args = parser.parse_args()
