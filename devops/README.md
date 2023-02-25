@@ -19,37 +19,43 @@ $ make networks
 ### Wallet Setup
 To run a scenario or agent on an existing vega network, a vega wallet must be setup with long-living API tokens initialised and created for the wallet.
 
-1. First create a wallet:
+1.  Create a wallet:
 
     ```bash
     $ vega wallet create --wallet-nam MY_VEGA_WALLET_NAME
     ```
 
-1. Then initialise long-living API tokens:
+1. Set an environment variable for your wallet name:
+
+    ```
+    export VEGA_USER_WALLET_NAME=MY_VEGA_WALLET_NAME
+    ```
+
+1. Initialise long-living API tokens:
 
     ```bash
     $ vega wallet api-token init
     ```
 
-1. And create a `.text` file containing the chosen tokens-passphrase:
+1. Create a `.text` file containing the chosen tokens-passphrase:
 
     ```text
     MY_VEGA_TOKENS_PASSPHRASE
     ```
 
-1. And set the following environment variable as the path to the `.text` file (this path can be relative to your `vega-market-sim` directory):
+1. Set an environment variable for the path to the `.text` file (this path can be relative to your `vega-market-sim` directory):
 
     ```bash
     $ export VEGA_WALLET_TOKENS_PASSPHRASE_FILE=/path/to/file.text
     ```
 
-1. Then generate an API token for the specific wallet:
+1. Generate an API token for the specific wallet:
 
     ```bash
     $ vega wallet api-token generate --wallet-name MY_VEGA_WALLET_NAME
     ```
 
-1. And create a `.json` file with the following format:
+1. Create a `.json` file with the following format:
 
     ```json
     {
@@ -57,7 +63,7 @@ To run a scenario or agent on an existing vega network, a vega wallet must be se
     }
     ```
 
-1. And set the following environment variable as the path to the `.json` file (this path can be relative to your `vega-market-sim` directory):
+1. Set an environment variable for the path to the `.json` file (this path can be relative to your `vega-market-sim` directory):
 
     ```bash
     export VEGA_WALLET_TOKENS_FILE=/path/to/file.json
