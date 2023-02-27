@@ -1082,8 +1082,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.curr_price = None
         self.prev_price = None
 
-        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
-        self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
+        self.market_name = market_name
+        self.asset_name = asset_name
 
         self.orders_from_stream = orders_from_stream
 

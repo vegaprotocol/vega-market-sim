@@ -6,7 +6,10 @@ Module contains preconfigured scenarios.
 
 from devops.scenario import DevOpsScenario
 
-from vega_sim.scenario.common.agents import ArbitrageLiquidityProvider
+from vega_sim.scenario.common.agents import (
+    ArbitrageLiquidityProvider,
+    ExponentialShapedMarketMaker,
+)
 
 from devops.classes import (
     MarketMakerArgs,
@@ -17,7 +20,7 @@ from devops.classes import (
     SimulationArgs,
 )
 
-from vega_sim.scenario.common.utils.price_process import Granularity
+from vega_sim.scenario.common.utils.price_process import Granularity, LivePrice
 
 SCENARIOS = {
     "ETHUSD": lambda: DevOpsScenario(
@@ -222,5 +225,28 @@ AGENTS = {
         commitment_ratio=0.8,
         safety_factor=0.1,
         fee=0.001,
-    )
+        tag="agent",
+    ),
+    "shaped_market_maker_ethusd": lambda: ExponentialShapedMarketMaker(
+        wallet_name=None,
+        key_name=None,
+        market_name=None,
+        asset_name=None,
+        initial_asset_mint=1e9,
+        commitment_amount=20000,
+        market_kappa=10,
+        kappa=0.3,
+        num_levels=25,
+        tick_spacing=0.5,
+        max_order_size=10000,
+        inventory_lower_boundary=-30,
+        inventory_upper_boundary=30,
+        market_order_arrival_rate=100,
+        fee_amount=0.0005,
+        num_steps=60 * 60 * 24 * 365,
+        price_process_generator=iter(LivePrice(product="ETHDAI")),
+        orders_from_stream=False,
+        state_update_freq=10,
+        tag="agent",
+    ),
 }

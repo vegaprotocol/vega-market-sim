@@ -246,7 +246,9 @@ class DevOpsScenario(Scenario):
                 kwargs["agent"].market_name = self.market_manager_args.market_name
             if kwargs["agent"].asset_name is None:
                 kwargs["agent"].asset_name = self.market_manager_args.asset_name
-            # kwargs["agent"].tag = "agent"
+            # If a sim, overwrite price process
+            if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
+                kwargs["agent"].price_process_generator = iter(self.price_process)
 
             agents.append(kwargs.get("agent", None))
 
