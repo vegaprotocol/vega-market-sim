@@ -353,6 +353,8 @@ class VegaServiceNetwork(VegaService):
                 "Timed out waiting for Vega wallet service"
             )
 
+        self.check_datanode(raise_on_error=False)
+
     def stop(self) -> None:
         super().stop()
         if self.proc is None:
