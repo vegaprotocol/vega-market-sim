@@ -1066,6 +1066,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         state_update_freq: Optional[int] = None,
         safety_factor: Optional[float] = 1.2,
         max_order_size: float = 10000,
+        step_length_seconds: float = 60,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1093,6 +1094,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         self.bid_depth = None
         self.ask_depth = None
+
+        self.step_length_seconds = step_length_seconds
 
     def initialise(
         self,
@@ -1290,21 +1293,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         return provided_liquidity
 
-    def _submit_order(
-        self, side: Union[str, vega_protos.Side], price: float, size: float
-    ) -> None:
-        self.vega.submit_order(
-            trading_key=self.key_name,
-            market_id=self.market_id,
-            order_type="TYPE_LIMIT",
-            time_in_force="TIME_IN_FORCE_GTC",
-            side=side,
-            volume=size,
-            price=price,
-            wait=False,
-            trading_wallet=self.wallet_name,
-        )
-
     def _move_side(
         self,
         side: vega_protos.Side,
@@ -1315,6 +1303,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
         submissions = []
         cancellations = []
 
+        expires_at = int(
+            (self.vega.get_blockchain_time() + 5 * self.step_length_seconds) * 1e09
+        )
+
         for i, order in enumerate(new_shape):
             if i < len(orders):
                 order_to_amend = orders[i]
@@ -1324,6 +1316,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     order_id=order_to_amend.id,
                     price=order.price,
                     size_delta=order.size - order_to_amend.remaining,
+                    expires_at=expires_at,
                 )
 
                 amendments.append(transaction)
@@ -1334,8 +1327,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     price=order.price,
                     size=order.size,
                     order_type="TYPE_LIMIT",
-                    time_in_force="TIME_IN_FORCE_GTC",
+                    time_in_force="TIME_IN_FORCE_GTT",
                     side=side,
+                    expires_at=expires_at,
                 )
 
                 submissions.append(transaction)
@@ -1419,6 +1413,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
         max_order_size: float = 10000,
+        step_length_seconds: float = 60,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1437,6 +1432,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             orders_from_stream=orders_from_stream,
             state_update_freq=state_update_freq,
             max_order_size=max_order_size,
+            step_length_seconds=step_length_seconds,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
