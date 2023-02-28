@@ -174,6 +174,7 @@ class DevOpsScenario(Scenario):
                 orders_from_stream=False,
                 state_update_freq=10,
                 tag=None,
+                step_length_seconds=self.step_length_seconds,
             )
 
             # Setup agents for passing opening auction
@@ -249,6 +250,8 @@ class DevOpsScenario(Scenario):
             # If a sim, overwrite price process
             if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
                 kwargs["agent"].price_process_generator = iter(self.price_process)
+
+            kwargs["agent"].step_length_seconds = self.step_length_seconds
 
             agents.append(kwargs.get("agent", None))
 
