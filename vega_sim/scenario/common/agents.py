@@ -1477,9 +1477,9 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             )
 
     def _liq_provis(self, state: VegaState) -> LiquidityProvision:
-        if (self.curr_asks is not None) and (self.curr_bids is not None):
-            est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
-        elif state is not None:
+        # if (self.curr_asks is not None) and (self.curr_bids is not None):
+        #     est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
+        if state is not None:
             est_mid_price = state.market_state[self.market_id].midprice
         else:
             est_mid_price = None
