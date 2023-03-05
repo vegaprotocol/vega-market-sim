@@ -218,3 +218,19 @@ class OptimalStrategy:
             )
 
         return current_bid_depth, current_ask_depth
+
+
+optimal_strategy = OptimalStrategy(num_steps=1000, 
+                                           market_order_arrival_rate=1.0,
+                                           kappa = 0.3,
+                                           inventory_upper_boundary=30,
+                                           inventory_lower_boundary=-30,
+                                           terminal_penalty_parameter=1.0,
+                                           running_penalty_parameter=1.0,
+                                           market_decimal_places=2)
+        
+[bid_depth, ask_depth] = optimal_strategy.optimal_strategy(0, 0)
+
+print(bid_depth)
+print(ask_depth)
+

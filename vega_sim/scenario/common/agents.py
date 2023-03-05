@@ -1450,7 +1450,7 @@ class BasicMarketMaker(StateAgentWithWallet):
                                            market_order_arrival_rate=self.market_order_arrival_rate,
                                            kappa = self.kappa,
                                            inventory_upper_boundary=self.inventory_upper_boundary,
-                                           inventory_lower_boundary=-self.inventory_lower_boundary,
+                                           inventory_lower_boundary=self.inventory_lower_boundary,
                                            terminal_penalty_parameter=self.terminal_penalty_parameter,
                                            running_penalty_parameter=self.running_penalty_parameter,
                                            market_decimal_places=self.mdp)
