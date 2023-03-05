@@ -29,7 +29,7 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaService, VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.proto.vega import vega as vega_protos
-from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
+from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model, OptimalStrategy
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -1375,6 +1375,187 @@ class ShapedMarketMaker(StateAgentWithWallet):
             self.stake_to_ccy_volume = self.vega.get_network_parameter(
                 key="market.liquidity.stakeToCcyVolume", to_type="float"
             )
+
+
+class BasicMarketMaker(StateAgentWithWallet):
+    """Utilises the Ideal market maker formulation from
+        Algorithmic and High-Frequency Trading by Cartea, Jaimungal and Penalva.
+
+    Posts only vega liquidity provisions
+    """
+
+    NAME_BASE = "basic_market_maker"
+
+    def __init__(
+        self,
+        key_name: str,
+        num_steps: int,
+        price_process_generator: Iterable[float],
+        initial_asset_mint: float = 1000000,
+        market_name: Optional[str] = None,
+        asset_name: Optional[str] = None,
+        commitment_amount: float = 6000,
+        market_decimal_places: int = 5,
+        asset_decimal_places: int = 0,
+        tag: str = "",
+        wallet_name: str = None,
+        orders_from_stream: Optional[bool] = True,
+        state_update_freq: Optional[int] = None,
+        market_order_arrival_rate: float = 1.0,
+        step_length_seconds: Optional[float] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.num_steps = num_steps
+        self.price_process_generator = price_process_generator
+        self.commitment_amount = commitment_amount
+        self.initial_asset_mint = initial_asset_mint
+        self.mdp = market_decimal_places
+        self.adp = asset_decimal_places
+
+        self.current_step = 0
+        self.curr_price = None
+        self.prev_price = None
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.orders_from_stream = orders_from_stream
+
+        self.safety_factor = safety_factor
+        self.state_update_freq = state_update_freq
+        self.max_order_size = max_order_size
+
+        self.bid_depth = None
+        self.ask_depth = None
+
+        self.step_length_seconds = step_length_seconds
+        self.market_order_arrival_rate = market_order_arrival_rate
+
+        self.current_position = 0
+
+
+    def _liq_provis(self, state: VegaState) -> LiquidityProvision:
+        
+        optimal_strategy = OptimalStrategy(num_steps=self.num_steps, 
+                                           market_order_arrival_rate=self.market_order_arrival_rate,
+                                           kappa = 500,
+                                           inventory_upper_boundary=40,
+                                           inventory_lower_boundary=-40,
+                                           terminal_penalty_parameter=1.0,
+                                           running_penalty_parameter=1.0,
+                                           market_decimal_places=self.mdp)
+        
+        [bid_depth, ask_depth] = optimal_strategy.optimal_strategy(self.current_position, self.current_step)
+
+        buy_specs = [["PEGGED_REFERENCE_BEST_BID", bid_depth, 1]]
+        sell_specs = [["PEGGED_REFERENCE_BEST_ASK", ask_depth, 1]]
+
+        return LiquidityProvision(
+            amount=self.commitment_amount,
+            fee=self.fee_amount,
+            buy_specs=buy_specs,
+            sell_specs=sell_specs,
+        )
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet for LP/ Settle Party
+        super().initialise(vega=vega, create_key=create_key)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+            self.vega.wait_for_total_catchup()
+
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        self._update_state(current_step=self.current_step)
+
+        if (
+            initial_liq := (
+                self.liquidity_commitment_fn(None)
+                if self.liquidity_commitment_fn is not None
+                else None
+            )
+        ) is not None:
+            self.vega.submit_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=initial_liq.amount,
+                fee=initial_liq.fee,
+                buy_specs=initial_liq.buy_specs,
+                sell_specs=initial_liq.sell_specs,
+                key_name=self.key_name,
+            )
+
+    def step(self, vega_state: VegaState):
+        self.current_step += 1
+        self.prev_price = self.curr_price
+        self.curr_price = next(self.price_process_generator)
+
+        self._update_state(current_step=self.current_step)
+
+        # Each step, MM posts optimal bid/ask depths
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+
+        self.current_position = int(position.open_volume) if position is not None else 0
+
+        if (
+            liq := (
+                self.liquidity_commitment_fn(vega_state)
+                if self.liquidity_commitment_fn is not None
+                else None
+            )
+        ) is not None:
+            self.vega.submit_liquidity(
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                commitment_amount=liq.amount,
+                fee=liq.fee,
+                buy_specs=liq.buy_specs,
+                sell_specs=liq.sell_specs,
+                is_amendment=True,
+                key_name=self.key_name,
+            )
+
+    
+    def _update_state(self, current_step: int):
+        if self.state_update_freq and current_step % self.state_update_freq == 0:
+            market_info = self.vega.market_info(market_id=self.market_id)
+
+            self.tau = market_info.tradable_instrument.log_normal_risk_model.tau
+            self.mu = market_info.tradable_instrument.log_normal_risk_model.params.mu
+            self.sigma = (
+                market_info.tradable_instrument.log_normal_risk_model.params.sigma
+            )
+
+            self.tau_scaling = self.vega.get_network_parameter(
+                key="market.liquidity.probabilityOfTrading.tau.scaling", to_type="float"
+            )
+            self.min_probability_of_trading = self.vega.get_network_parameter(
+                key="market.liquidity.minimum.probabilityOfTrading.lpOrders",
+                to_type="float",
+            )
+            self.stake_to_ccy_volume = self.vega.get_network_parameter(
+                key="market.liquidity.stakeToCcyVolume", to_type="float"
+            )
+
 
 
 class ExponentialShapedMarketMaker(ShapedMarketMaker):
