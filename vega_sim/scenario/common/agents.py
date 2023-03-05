@@ -1395,6 +1395,7 @@ class BasicMarketMaker(StateAgentWithWallet):
         market_name: Optional[str] = None,
         asset_name: Optional[str] = None,
         commitment_amount: float = 6000,
+        fee_amount: float=0.0005,
         market_decimal_places: int = 5,
         asset_decimal_places: int = 0,
         tag: str = "",
@@ -1413,6 +1414,7 @@ class BasicMarketMaker(StateAgentWithWallet):
         self.num_steps = num_steps
         self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
+        self.fee_amount = fee_amount
         self.initial_asset_mint = initial_asset_mint
         self.mdp = market_decimal_places
         self.adp = asset_decimal_places
