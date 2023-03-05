@@ -1402,6 +1402,11 @@ class BasicMarketMaker(StateAgentWithWallet):
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
         market_order_arrival_rate: float = 1.0,
+        kappa: float = 1.0,
+        inventory_lower_boundary: int =-30,
+        inventory_upper_boundary: int =30,
+        terminal_penalty_parameter: float=1.0,
+        running_penalty_parameter: float=1.0,
         step_length_seconds: Optional[float] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
@@ -1421,28 +1426,31 @@ class BasicMarketMaker(StateAgentWithWallet):
 
         self.orders_from_stream = orders_from_stream
 
-        self.safety_factor = safety_factor
         self.state_update_freq = state_update_freq
-        self.max_order_size = max_order_size
 
         self.bid_depth = None
         self.ask_depth = None
 
         self.step_length_seconds = step_length_seconds
         self.market_order_arrival_rate = market_order_arrival_rate
+        self.kappa = kappa
+        self.inventory_lower_boundary = inventory_lower_boundary
+        self.inventory_upper_boundary = inventory_upper_boundary
+        self.terminal_penalty_parameter = terminal_penalty_parameter
+        self.running_penalty_parameter = running_penalty_parameter
 
         self.current_position = 0
 
 
-    def _liq_provis(self, state: VegaState) -> LiquidityProvision:
+    def _liq_provis(self) -> LiquidityProvision:
         
         optimal_strategy = OptimalStrategy(num_steps=self.num_steps, 
                                            market_order_arrival_rate=self.market_order_arrival_rate,
-                                           kappa = 500,
-                                           inventory_upper_boundary=40,
-                                           inventory_lower_boundary=-40,
-                                           terminal_penalty_parameter=1.0,
-                                           running_penalty_parameter=1.0,
+                                           kappa = self.kappa,
+                                           inventory_upper_boundary=self.inventory_upper_boundary,
+                                           inventory_lower_boundary=-self.inventory_lower_boundary,
+                                           terminal_penalty_parameter=self.terminal_penalty_parameter,
+                                           running_penalty_parameter=self.running_penalty_parameter,
                                            market_decimal_places=self.mdp)
         
         [bid_depth, ask_depth] = optimal_strategy.optimal_strategy(self.current_position, self.current_step)
@@ -1483,14 +1491,8 @@ class BasicMarketMaker(StateAgentWithWallet):
 
         self._update_state(current_step=self.current_step)
 
-        if (
-            initial_liq := (
-                self.liquidity_commitment_fn(None)
-                if self.liquidity_commitment_fn is not None
-                else None
-            )
-        ) is not None:
-            self.vega.submit_liquidity(
+        initial_liq = self._liq_provis()
+        self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
                 commitment_amount=initial_liq.amount,
@@ -1498,13 +1500,11 @@ class BasicMarketMaker(StateAgentWithWallet):
                 buy_specs=initial_liq.buy_specs,
                 sell_specs=initial_liq.sell_specs,
                 key_name=self.key_name,
-            )
+        )
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
-        self.prev_price = self.curr_price
-        self.curr_price = next(self.price_process_generator)
-
+        
         self._update_state(current_step=self.current_step)
 
         # Each step, MM posts optimal bid/ask depths
@@ -1516,14 +1516,8 @@ class BasicMarketMaker(StateAgentWithWallet):
 
         self.current_position = int(position.open_volume) if position is not None else 0
 
-        if (
-            liq := (
-                self.liquidity_commitment_fn(vega_state)
-                if self.liquidity_commitment_fn is not None
-                else None
-            )
-        ) is not None:
-            self.vega.submit_liquidity(
+        liq = self._liq_provis()
+        self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
                 commitment_amount=liq.amount,
@@ -1532,9 +1526,8 @@ class BasicMarketMaker(StateAgentWithWallet):
                 sell_specs=liq.sell_specs,
                 is_amendment=True,
                 key_name=self.key_name,
-            )
+        )
 
-    
     def _update_state(self, current_step: int):
         if self.state_update_freq and current_step % self.state_update_freq == 0:
             market_info = self.vega.market_info(market_id=self.market_id)

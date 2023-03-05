@@ -9,6 +9,7 @@ from devops.scenario import DevOpsScenario
 from vega_sim.scenario.common.agents import (
     ArbitrageLiquidityProvider,
     ExponentialShapedMarketMaker,
+    BasicMarketMaker,
 )
 
 from devops.classes import (
@@ -242,6 +243,26 @@ AGENTS = {
         inventory_lower_boundary=-30,
         inventory_upper_boundary=30,
         market_order_arrival_rate=100,
+        fee_amount=0.0005,
+        num_steps=60 * 60 * 24 * 365,
+        price_process_generator=iter(LivePrice(product="ETHDAI")),
+        orders_from_stream=False,
+        state_update_freq=10,
+        tag="agent",
+    ),
+    "basic_market_maker_ethusd": lambda: BasicMarketMaker(
+        wallet_name=None,
+        key_name=None,
+        market_name=None,
+        asset_name=None,
+        initial_asset_mint=1e9,
+        commitment_amount=20000,
+        market_order_arrival_rate=1.0,
+        kappa=0.3,
+        inventory_lower_boundary=-30,
+        inventory_upper_boundary=30,
+        terminal_penalty_parameter=1.0,
+        running_penalty_parameter=1.0,
         fee_amount=0.0005,
         num_steps=60 * 60 * 24 * 365,
         price_process_generator=iter(LivePrice(product="ETHDAI")),
