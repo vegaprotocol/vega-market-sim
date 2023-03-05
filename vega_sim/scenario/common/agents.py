@@ -1457,8 +1457,8 @@ class BasicMarketMaker(StateAgentWithWallet):
         
         [bid_depth, ask_depth] = optimal_strategy.optimal_strategy(self.current_position, self.current_step)
 
-        buy_specs = [["PEGGED_REFERENCE_MID", bid_depth, 1]]
-        sell_specs = [["PEGGED_REFERENCE_MID", ask_depth, 1]]
+        buy_specs = [["PEGGED_REFERENCE_BEST_BID", bid_depth, 1]]
+        sell_specs = [["PEGGED_REFERENCE_BEST_ASK", ask_depth, 1]]
 
         return LiquidityProvision(
             amount=self.commitment_amount,
@@ -1517,8 +1517,9 @@ class BasicMarketMaker(StateAgentWithWallet):
         )
 
         self.current_position = int(position.open_volume) if position is not None else 0
-
         liq = self._liq_provis()
+        logger.debug(f"Position {self.current_position}, buys: {liq.buy_specs}, sells: {liq.sell_specs}")
+        
         self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
