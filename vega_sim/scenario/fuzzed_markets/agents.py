@@ -171,3 +171,97 @@ class FuzzingAgent(StateAgentWithWallet):
         )
 
 
+class DegenerateTrader(StateAgentWithWallet):
+    NAME_BASE = "degenerate_trader"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        tag: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+        random_state: Optional[RandomState] = None,
+        side: str = "SIDE_BUY",
+        size_factor: float = 0.6,
+        initial_asset_mint: float = 1e5,
+    ):
+        super().__init__(key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.size_factor = size_factor
+        self.side = side
+        self.random_state = random_state if random_state is not None else RandomState()
+        self.initial_asset_mint = initial_asset_mint
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                wallet_name=self.wallet_name,
+            )
+
+        self.vega.wait_fn(5)
+
+    def step(self, vega_state):
+        if (
+            vega_state.market_state[self.market_id].trading_mode
+            != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        ):
+            return
+        if self.random_state.rand() > 0.05:
+            return
+
+        midprice = vega_state.market_state[self.market_id].midprice
+
+        account = self.vega.party_account(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            asset_id=self.asset_id,
+        )
+
+        if account.general + account.margin == 0:
+            self.vega.mint(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                amount=self.initial_asset_mint,
+                asset=self.asset_id,
+            )
+            return
+
+        if account.general > 0:
+            add_to_margin = (
+                account.general + account.margin
+            ) * self.size_factor - account.margin
+            add_to_margin = add_to_margin if add_to_margin > 0 else 0
+
+            risk_factors = self.vega.get_risk_factors(market_id=self.market_id)
+            risk_factor = (
+                risk_factors.long if self.side == "SIDE_BUY" else risk_factors.short
+            )
+
+            size = add_to_margin / (midprice * risk_factor)
+
+            self.vega.submit_market_order(
+                trading_key=self.key_name,
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                side=self.side,
+                volume=size,
+                wait=False,
+            )
+
+
