@@ -99,6 +99,8 @@ class MarketConfig(Config):
             "log_normal": "default",
             "instrument": "default",
             "lp_price_range": 1.0,
+            "linear_slippage_factor": 1e-3,
+            "quadratic_slippage_factor": 1e-3,
         }
     }
 
@@ -108,6 +110,10 @@ class MarketConfig(Config):
         self.decimal_places = self.OPTS[opt]["decimal_places"]
         self.position_decimal_places = self.OPTS[opt]["position_decimal_places"]
         self.lp_price_range = str(self.OPTS[opt]["lp_price_range"])
+        self.linear_slippage_factor = str(self.OPTS[opt]["linear_slippage_factor"])
+        self.quadratic_slippage_factor = str(
+            self.OPTS[opt]["quadratic_slippage_factor"]
+        )
         self.metadata = self.OPTS[opt]["metadata"]
 
         self.instrument = InstrumentConfiguration(opt=self.OPTS[opt]["instrument"])
@@ -130,6 +136,8 @@ class MarketConfig(Config):
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 liquidity_monitoring_parameters=self.liquidity_monitoring_parameters.build(),
                 log_normal=self.log_normal.build(),
+                linear_slippage_factor=self.linear_slippage_factor,
+                quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
 
