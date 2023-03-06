@@ -265,3 +265,83 @@ class DegenerateTrader(StateAgentWithWallet):
             )
 
 
+class DegenerateLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "degenerate_liquidity_provider"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        tag: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+        random_state: Optional[RandomState] = None,
+        commitment_factor: float = 0.5,
+        initial_asset_mint: float = 1e5,
+    ):
+        super().__init__(key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.commitment_factor = commitment_factor
+        self.random_state = random_state if random_state is not None else RandomState()
+        self.initial_asset_mint = initial_asset_mint
+
+        self.commitment_amount = 0
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                wallet_name=self.wallet_name,
+            )
+
+        self.vega.wait_fn(5)
+
+    def step(self, vega_state):
+        if self.random_state.rand() > 0.05:
+            return
+
+        account = self.vega.party_account(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            asset_id=self.asset_id,
+        )
+
+        total_balance = account.general + account.margin + account.bond
+
+        if total_balance == 0:
+            self.vega.mint(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                amount=self.initial_asset_mint,
+                asset=self.asset_id,
+            )
+            return
+
+        if self.commitment_amount < self.commitment_factor * (total_balance):
+            self.commitment_amount = self.commitment_factor * (total_balance)
+
+            self.vega.submit_simple_liquidity(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                fee=0.0001,
+                commitment_amount=self.commitment_amount,
+                reference_buy="PEGGED_REFERENCE_BEST_BID",
+                reference_sell="PEGGED_REFERENCE_BEST_ASK",
+                delta_buy=0,
+                delta_sell=0,
+            )
