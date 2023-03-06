@@ -31,10 +31,13 @@ class FuzzingScenario(Scenario):
         step_length_seconds: float = 60,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
+        n_markets: int = 5,
+        fuzz_market_config: Optional[dict] = None,
     ):
         super().__init__()
 
-        self.fuzz_market_config = None
+        self.n_markets = n_markets
+        self.fuzz_market_config = fuzz_market_config
 
         self.num_steps = num_steps
         self.step_length_seconds = step_length_seconds
@@ -49,8 +52,6 @@ class FuzzingScenario(Scenario):
         random_state: Optional[np.random.RandomState],
         **kwargs,
     ) -> List[StateAgent]:
-        self.n_markets = 5
-
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
