@@ -1066,7 +1066,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         state_update_freq: Optional[int] = None,
         safety_factor: Optional[float] = 1.2,
         max_order_size: float = 10000,
-        step_length_seconds: Optional[float] = None,
+        order_validity_length: Optional[float] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1095,7 +1095,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.bid_depth = None
         self.ask_depth = None
 
-        self.step_length_seconds = step_length_seconds
+        self.order_validity_length = order_validity_length
 
     def initialise(
         self,
@@ -1304,8 +1304,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
         cancellations = []
 
         expires_at = (
-            int((self.vega.get_blockchain_time() + 5 * self.step_length_seconds) * 1e09)
-            if self.step_length_seconds is not None
+            int((self.vega.get_blockchain_time() + self.order_validity_length) * 1e9)
+            if self.order_validity_length is not None
             else None
         )
 
@@ -1317,6 +1317,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     market_id=self.market_id,
                     order_id=order_to_amend.id,
                     price=order.price,
+                    time_in_force="TIME_IN_FORCE_GTT"
+                    if self.order_validity_length is not None
+                    else "TIME_IN_FORCE_GTC",
                     size_delta=order.size - order_to_amend.remaining,
                     expires_at=expires_at,
                 )
@@ -1330,7 +1333,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     size=order.size,
                     order_type="TYPE_LIMIT",
                     time_in_force="TIME_IN_FORCE_GTT"
-                    if self.step_length_seconds is not None
+                    if self.order_validity_length is not None
                     else "TIME_IN_FORCE_GTC",
                     side=side,
                     expires_at=expires_at,
@@ -1417,7 +1420,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
         max_order_size: float = 10000,
-        step_length_seconds: Optional[float] = None,
+        order_validity_length: Optional[float] = None,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1436,7 +1439,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             orders_from_stream=orders_from_stream,
             state_update_freq=state_update_freq,
             max_order_size=max_order_size,
-            step_length_seconds=step_length_seconds,
+            order_validity_length=order_validity_length,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
