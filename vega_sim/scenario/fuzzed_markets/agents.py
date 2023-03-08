@@ -187,6 +187,7 @@ class DegenerateTrader(StateAgentWithWallet):
         side: str = "SIDE_BUY",
         size_factor: float = 0.6,
         initial_asset_mint: float = 1e5,
+        step_bias: float = 0.05,
     ):
         super().__init__(key_name, tag, wallet_name, state_update_freq)
 
@@ -197,6 +198,7 @@ class DegenerateTrader(StateAgentWithWallet):
         self.side = side
         self.random_state = random_state if random_state is not None else RandomState()
         self.initial_asset_mint = initial_asset_mint
+        self.step_bias = step_bias
 
     def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
         super().initialise(vega, create_key)
@@ -222,7 +224,7 @@ class DegenerateTrader(StateAgentWithWallet):
             != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
         ):
             return
-        if self.random_state.rand() > 0.05:
+        if self.random_state.rand() > self.step_bias:
             return
 
         midprice = vega_state.market_state[self.market_id].midprice
@@ -280,6 +282,7 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         commitment_factor: float = 0.5,
         initial_asset_mint: float = 1e5,
+        step_bias: float = 0.05,
     ):
         super().__init__(key_name, tag, wallet_name, state_update_freq)
 
@@ -289,6 +292,7 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
         self.commitment_factor = commitment_factor
         self.random_state = random_state if random_state is not None else RandomState()
         self.initial_asset_mint = initial_asset_mint
+        self.step_bias = step_bias
 
         self.commitment_amount = 0
 
@@ -311,7 +315,7 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def step(self, vega_state):
-        if self.random_state.rand() > 0.05:
+        if self.random_state.rand() > self.step_bias:
             return
 
         account = self.vega.party_account(
