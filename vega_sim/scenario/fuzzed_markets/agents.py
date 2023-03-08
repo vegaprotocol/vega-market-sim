@@ -116,7 +116,8 @@ class FuzzingAgent(StateAgentWithWallet):
                     "PEGGED_REFERENCE_MID",
                     "PEGGED_REFERENCE_BEST_BID",
                     "PEGGED_REFERENCE_BEST_ASK",
-                ]
+                ],
+                p=[0.5, 0.5 / 3, 0.5 / 3, 0.5 / 3],
             ),
             pegged_offset=self.random_state.normal(loc=0, scale=10),
         )
