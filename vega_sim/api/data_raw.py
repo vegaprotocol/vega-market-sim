@@ -576,3 +576,12 @@ def market_data_subscription(
             return
 
     return _data_gen(data_stream=data_stream)
+
+
+def get_risk_factors(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+):
+    return data_client.GetRiskFactors(
+        data_node_protos_v2.trading_data.GetRiskFactorsRequest(market_id=market_id)
+    )

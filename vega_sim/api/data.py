@@ -38,7 +38,7 @@ PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bon
 AccountData = namedtuple(
     "AccountData", ["owner", "balance", "asset", "market_id", "type"]
 )
-
+RiskFactor = namedtuple("RiskFactors", ["market_id", "short", "long"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
 Order = namedtuple(
@@ -1348,3 +1348,17 @@ def ledger_entries_subscription_handler(
                 )
             )
     return ledger_entries
+
+
+def get_risk_factors(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+):
+    raw_risk_factors = data_raw.get_risk_factors(
+        data_client=data_client, market_id=market_id
+    )
+    return RiskFactor(
+        market_id=market_id,
+        short=float(raw_risk_factors.risk_factor.short),
+        long=float(raw_risk_factors.risk_factor.long),
+    )
