@@ -1,6 +1,7 @@
 from vega_sim.environment.agent import StateAgentWithWallet
 from typing import Optional
 from vega_sim.null_service import VegaServiceNull
+from numpy import array
 from numpy.random import RandomState
 from vega_sim.proto.vega import markets as markets_protos
 
@@ -74,11 +75,7 @@ class FuzzingAgent(StateAgentWithWallet):
         )
 
     def create_fuzzed_cancellation(self):
-        if self.live_orders != {}:
-            order_key = self.random_state.choice(list(self.live_orders.keys()))
-            order_id = self.live_orders[order_key].id
-        else:
-            order_id = None
+        order_id = self._select_order_id()
 
         return self.vega.create_order_cancellation(
             order_id=order_id,
@@ -86,11 +83,7 @@ class FuzzingAgent(StateAgentWithWallet):
         )
 
     def create_fuzzed_amendment(self):
-        if self.live_orders != {}:
-            order_key = self.random_state.choice(list(self.live_orders.keys()))
-            order_id = self.live_orders[order_key].id
-        else:
-            order_id = None
+        order_id = self._select_order_id()
 
         return self.vega.create_order_amendment(
             order_id=order_id,
@@ -169,6 +162,13 @@ class FuzzingAgent(StateAgentWithWallet):
             ),
             pegged_offset=self.random_state.normal(loc=0, scale=10),
         )
+
+    def _select_order_id(self):
+        if self.live_orders != {}:
+            order_key = self.random_state.choice(list(self.live_orders.keys()))
+            self.live_orders[order_key].id
+        else:
+            return None
 
 
 class DegenerateTrader(StateAgentWithWallet):
