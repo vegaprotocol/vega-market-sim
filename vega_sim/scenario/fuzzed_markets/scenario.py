@@ -28,10 +28,10 @@ class FuzzingScenario(Scenario):
     def __init__(
         self,
         num_steps: int = 60 * 24 * 30 * 3,
-        step_length_seconds: float = 60,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
         n_markets: int = 5,
+        step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
     ):
         super().__init__()
@@ -40,7 +40,11 @@ class FuzzingScenario(Scenario):
         self.fuzz_market_config = fuzz_market_config
 
         self.num_steps = num_steps
-        self.step_length_seconds = step_length_seconds
+        self.step_length_seconds = (
+            step_length_seconds
+            if step_length_seconds is not None
+            else block_length_seconds
+        )
 
         self.block_length_seconds = block_length_seconds
         self.transactions_per_block = transactions_per_block

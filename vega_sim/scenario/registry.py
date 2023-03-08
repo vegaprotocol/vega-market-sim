@@ -199,8 +199,7 @@ SCENARIOS = {
     ),
     "parameter_experiment": lambda: ParameterExperiment(),
     "fuzz_test": lambda: FuzzingScenario(
-        num_steps=2 * 60 * 12,
-        step_length_seconds=30,
+        num_steps=60 * 60 * 3,
         block_length_seconds=1,
         transactions_per_block=4096,
     ),
