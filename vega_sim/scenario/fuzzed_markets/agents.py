@@ -246,10 +246,10 @@ class DegenerateTrader(StateAgentWithWallet):
             return
 
         if account.general > 0:
-            add_to_margin = (
-                account.general + account.margin
-            ) * self.size_factor - account.margin
-            add_to_margin = add_to_margin if add_to_margin > 0 else 0
+            add_to_margin = max(
+                (account.general + account.margin) * self.size_factor - account.margin,
+                0,
+            )
 
             risk_factors = self.vega.get_risk_factors(market_id=self.market_id)
             risk_factor = (
