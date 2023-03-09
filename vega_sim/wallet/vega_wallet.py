@@ -158,7 +158,6 @@ class VegaWallet(Wallet):
         subprocess.run(
             [
                 self._wallet_path,
-                "wallet",
                 "create",
                 "--wallet",
                 name,
@@ -262,7 +261,12 @@ class VegaWallet(Wallet):
 
         response = requests.post(url, headers=headers, json=submission)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except:
+            import pdb
+
+            pdb.set_trace()
 
     def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Return a public key for the given wallet name and key name.

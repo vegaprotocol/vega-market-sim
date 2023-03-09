@@ -18,7 +18,9 @@ from vega_sim.parameter_test.parameter.experiment import (
 TARGET_STAKE_SCALING_FACTOR = SingleParameterExperiment(
     name="TargetStakeScalingFactor",
     parameter_type="market",
-    parameter_to_vary="liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+    parameter_to_vary=(
+        "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor"
+    ),
     values=[0.5, 5, 50],
     scenario=ParameterExperiment(
         state_extraction_fn=ideal_market_maker_single_data_extraction(
@@ -43,7 +45,7 @@ TAU_SCALING_FACTOR = SingleParameterExperiment(
     name="TauScalingFactor",
     parameter_type="network",
     parameter_to_vary="market.liquidity.probabilityOfTrading.tau.scaling",
-    values=["10", "100", "1000"],
+    values=["1", "10", "1000"],
     scenario=ParameterExperiment(
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[

@@ -31,7 +31,7 @@ if __name__ == "__main__":
         run_with_console=False,
         launch_graphql=False,
         retain_log_files=True,
-        use_full_vega_wallet=False,
+        use_full_vega_wallet=True,
         store_transactions=True,
     ) as vega:
         for wallet in wallets:
