@@ -64,9 +64,9 @@ def test_update_market_price_monitoring(vega_service_with_market: VegaServiceNul
                 vega_protos.markets.PriceMonitoringTrigger(
                     # in seconds, so 24h, the longer the wider bounds
                     horizon=600,
-                    # number close to but below 1 leads to wide bounds
-                    probability="0.8",
-                    # in seconds
+                    # # number close to but below 1 leads to wide bounds
+                    probability="0.91",
+                    # # in seconds
                     auction_extension=5,
                 )
             ]
