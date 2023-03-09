@@ -444,7 +444,7 @@ def manage_vega_processes(
             ):
                 time.sleep(0.1)
 
-        subprocess.Popen(
+        subprocess.run(
             [
                 vega_wallet_path,
                 "api-token",
@@ -452,11 +452,26 @@ def manage_vega_processes(
                 f"--home={tmp_vega_home}",
                 f"--passphrase-file={tmp_vega_home}/passphrase-file",
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
 
-        subprocess.Popen(
+        subprocess.run(
+            [
+                vega_wallet_path,
+                "create",
+                "--wallet",
+                DEFAULT_WALLET_NAME,
+                "--home",
+                tmp_vega_home,
+                "--passphrase-file",
+                tmp_vega_home + "/passphrase-file",
+                "--output",
+                "json",
+            ],
+            capture_output=True,
+        )
+
+        subprocess.run(
             [
                 vega_wallet_path,
                 "api-token",
@@ -467,8 +482,7 @@ def manage_vega_processes(
                 "--wallet-name=" + DEFAULT_WALLET_NAME,
                 "--description=" + DEFAULT_WALLET_NAME,
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
 
         wallet_args = [

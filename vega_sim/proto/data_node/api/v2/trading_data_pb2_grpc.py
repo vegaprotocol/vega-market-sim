@@ -457,7 +457,7 @@ class TradingDataServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ListAccounts(self, request, context):
-        """Accounts
+        """Accounts list
 
         Returns a list of accounts matching the supplied filter, including their current balances.
         If a given account has never had a balance, it will be absent from the list.
@@ -504,7 +504,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListOrderVersions(self, request, context):
-        """Order history
+        """Order history list
 
         List all versions of an order in the order history
         """
@@ -532,7 +532,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListAllPositions(self, request, context):
-        """Positions
+        """Positions list
 
         Get a list of positions by party (public key) using cursor based pagination
         """
@@ -550,7 +550,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListLedgerEntries(self, request, context):
-        """Ledger entries
+        """Ledger entries list
 
         List ledger entries by asset, market, party, account type and transfer type within the given date range.
         This query requests and sums the number of ledger entries from a given subset of accounts, specified via the 'filter' argument.
@@ -570,7 +570,9 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ExportLedgerEntries(self, request, context):
-        """Export ledger entries records ledger entries to a csv file.
+        """Ledger entries export
+
+        Export ledger entries records ledger entries to a csv file.
         May or may not contain a date range - if no date range is provided, list all records for all times.
 
         Ledger entries can be exported by:
@@ -728,7 +730,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListERC20MultiSigSignerAddedBundles(self, request, context):
-        """ERC-20 add signer bundle
+        """ERC-20 list add signer bundle
 
         List the signature bundle to add a particular validator to the signer list of the multisig contract
         """
@@ -1018,7 +1020,7 @@ class TradingDataServiceServicer(object):
     def ListDelegations(self, request, context):
         """Delegation list
 
-        List delegations
+        List the token delegations on the network
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1133,16 +1135,16 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetRiskFactors(self, request, context):
-        """Risk Factors
+        """Risk factors
 
-        Get Risk Factor data for a given market
+        Get risk factor data for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveEventBus(self, request_iterator, context):
-        """Event Bus
+        """Event bus subscription
 
         Subscribe to a stream of events from the core
         """
@@ -1196,7 +1198,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListProtocolUpgradeProposals(self, request, context):
-        """Protocol upgrade proposals
+        """Protocol upgrade proposals list
 
         List protocol upgrade proposals, optionally filtering on status or approver.
         """
@@ -1205,7 +1207,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListCoreSnapshots(self, request, context):
-        """Snapshots
+        """Snapshots list
 
         List core snapshots taken
         """
@@ -1230,16 +1232,16 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListAllNetworkHistorySegments(self, request, context):
-        """Network history all segments
+        """Network history all segments list
 
-        List all history segments stored by this node
+        List all history segments stored by the data node you're connected to
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetActiveNetworkHistoryPeerAddresses(self, request, context):
-        """Network history peer addresses
+        """Network history peer addresses list
 
         List the addresses of all active network history peers
         """
@@ -1260,7 +1262,7 @@ class TradingDataServiceServicer(object):
     def NetworkHistoryBootstrapPeers(self, request, context):
         """Network history bootstrap peers
 
-        Retrieves the nodes bootstrap peers
+        Retrieves the bootstrap peers for data nodes.
         Response contains the bootstrap peers
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
