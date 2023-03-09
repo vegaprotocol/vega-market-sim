@@ -581,6 +581,14 @@ def order_submission(
     return command
 
 
+def build_pegged_order(pegged_reference: str, pegged_offset: int):
+    pegged_reference = get_enum(pegged_reference, vega_protos.vega.PeggedReference)
+
+    return vega_protos.vega.PeggedOrder(
+        reference=pegged_reference, offset=str(pegged_offset)
+    )
+
+
 def batch_market_instructions(
     wallet: Wallet,
     wallet_name: str,

@@ -1847,8 +1847,8 @@ class VegaService(ABC):
         )
         if (pegged_offset is not None) and (pegged_reference is not None):
             pegged_order = trading.build_pegged_order(
-                pegged_offset=pegged_offset,
                 pegged_reference=pegged_reference,
+                pegged_offset=pegged_offset,
             )
         else:
             pegged_order = None
@@ -2188,4 +2188,9 @@ class VegaService(ABC):
             from_datetime=from_datetime,
             to_datetime=to_datetime,
             asset_decimals_map=self.asset_decimals,
+        )
+
+    def get_risk_factors(self, market_id: str):
+        return data.get_risk_factors(
+            data_client=self.trading_data_client_v2, market_id=market_id
         )
