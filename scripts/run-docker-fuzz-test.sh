@@ -9,5 +9,5 @@ mkdir -p "${RESULT_DIR}"
 docker run \
     --platform linux/amd64 \
     -v "${RESULT_DIR}:/tmp" \
-    vega_sim_test:latest \
+    vega_sim_learning:latest \
         python -m vega_sim.scenario.adhoc -s fuzz_test
