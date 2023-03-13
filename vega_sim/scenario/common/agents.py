@@ -1390,7 +1390,6 @@ class BasicMarketMaker(StateAgentWithWallet):
         self,
         key_name: str,
         num_steps: int,
-        price_process_generator: Iterable[float],
         initial_asset_mint: float = 1000000,
         market_name: Optional[str] = None,
         asset_name: Optional[str] = None,
@@ -1398,6 +1397,7 @@ class BasicMarketMaker(StateAgentWithWallet):
         fee_amount: float=0.0005,
         market_decimal_places: int = 5,
         asset_decimal_places: int = 0,
+        position_decimal_places: int = 0,
         tag: str = "",
         wallet_name: str = None,
         orders_from_stream: Optional[bool] = True,
@@ -1412,12 +1412,12 @@ class BasicMarketMaker(StateAgentWithWallet):
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.num_steps = num_steps
-        self.price_process_generator = price_process_generator
         self.commitment_amount = commitment_amount
         self.fee_amount = fee_amount
         self.initial_asset_mint = initial_asset_mint
         self.mdp = market_decimal_places
         self.adp = asset_decimal_places
+        self.pdp = position_decimal_places
 
         self.current_step = 0
         self.curr_price = None
@@ -1456,6 +1456,11 @@ class BasicMarketMaker(StateAgentWithWallet):
                                            market_decimal_places=self.mdp)
         
         [bid_depth, ask_depth] = optimal_strategy.optimal_strategy(self.current_position, self.current_step)
+        if bid_depth <= 0.0:
+            bid_depth = 1.0/self.kappa
+        if ask_depth <= 0.0:
+            ask_depth = 1.0/self.kappa
+
 
         buy_specs = [["PEGGED_REFERENCE_BEST_BID", bid_depth, 1]]
         sell_specs = [["PEGGED_REFERENCE_BEST_ASK", ask_depth, 1]]
@@ -1507,7 +1512,7 @@ class BasicMarketMaker(StateAgentWithWallet):
     def step(self, vega_state: VegaState):
         self.current_step += 1
         
-        self._update_state(current_step=self.current_step)
+        # self._update_state(current_step=self.current_step)
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
@@ -1516,9 +1521,9 @@ class BasicMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        self.current_position = int(position.open_volume) if position is not None else 0
+        self.current_position = int(position.open_volume*10**self.pdp) if position is not None else 0
         liq = self._liq_provis()
-        logger.debug(f"Position {self.current_position}, buys: {liq.buy_specs}, sells: {liq.sell_specs}")
+        logger.debug(f"Position {self.current_position/(10**self.pdp)}, buys: {liq.buy_specs}, sells: {liq.sell_specs}")
         
         self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
@@ -1531,26 +1536,26 @@ class BasicMarketMaker(StateAgentWithWallet):
                 key_name=self.key_name,
         )
 
-    def _update_state(self, current_step: int):
-        if self.state_update_freq and current_step % self.state_update_freq == 0:
-            market_info = self.vega.market_info(market_id=self.market_id)
+    # def _update_state(self, current_step: int):
+    #     if self.state_update_freq and current_step % self.state_update_freq == 0:
+    #         market_info = self.vega.market_info(market_id=self.market_id)
 
-            self.tau = market_info.tradable_instrument.log_normal_risk_model.tau
-            self.mu = market_info.tradable_instrument.log_normal_risk_model.params.mu
-            self.sigma = (
-                market_info.tradable_instrument.log_normal_risk_model.params.sigma
-            )
+    #         self.tau = market_info.tradable_instrument.log_normal_risk_model.tau
+    #         self.mu = market_info.tradable_instrument.log_normal_risk_model.params.mu
+    #         self.sigma = (
+    #             market_info.tradable_instrument.log_normal_risk_model.params.sigma
+    #         )
 
-            self.tau_scaling = self.vega.get_network_parameter(
-                key="market.liquidity.probabilityOfTrading.tau.scaling", to_type="float"
-            )
-            self.min_probability_of_trading = self.vega.get_network_parameter(
-                key="market.liquidity.minimum.probabilityOfTrading.lpOrders",
-                to_type="float",
-            )
-            self.stake_to_ccy_volume = self.vega.get_network_parameter(
-                key="market.liquidity.stakeToCcyVolume", to_type="float"
-            )
+    #         self.tau_scaling = self.vega.get_network_parameter(
+    #             key="market.liquidity.probabilityOfTrading.tau.scaling", to_type="float"
+    #         )
+    #         self.min_probability_of_trading = self.vega.get_network_parameter(
+    #             key="market.liquidity.minimum.probabilityOfTrading.lpOrders",
+    #             to_type="float",
+    #         )
+    #         self.stake_to_ccy_volume = self.vega.get_network_parameter(
+    #             key="market.liquidity.stakeToCcyVolume", to_type="float"
+    #         )
 
 
 
