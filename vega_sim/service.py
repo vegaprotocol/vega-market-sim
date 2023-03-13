@@ -340,8 +340,9 @@ class VegaService(ABC):
         )
 
         self.wait_fn(1)
-        self.wait_for_total_catchup()
+        self.wait_for_core_catchup()
         for i in range(500):
+            self.wait_fn(1)
             time.sleep(0.0005 * 1.01**i)
             post_acct = self.party_account(
                 wallet_name=wallet_name,
@@ -351,7 +352,6 @@ class VegaService(ABC):
             ).general
             if post_acct > curr_acct:
                 return
-            self.wait_fn(1)
 
         raise Exception(
             f"Failure minting asset {asset} for party {wallet_name}. Funds never"

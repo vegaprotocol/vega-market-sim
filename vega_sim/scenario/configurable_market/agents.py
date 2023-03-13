@@ -92,7 +92,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.asset_dp,
-                max_faucet_amount=5e10,
+                max_faucet_amount=1e30,
                 key_name=self.key_name,
             )
 

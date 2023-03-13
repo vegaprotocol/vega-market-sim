@@ -167,7 +167,8 @@ class FuzzingAgent(StateAgentWithWallet):
     def _select_order_id(self):
         if self.live_orders != {}:
             order_key = self.random_state.choice(list(self.live_orders.keys()))
-            self.live_orders[order_key].id
+            order = self.live_orders.get(order_key)
+            return order.id if order is not None else None
         else:
             return None
 
@@ -256,7 +257,7 @@ class DegenerateTrader(StateAgentWithWallet):
                 risk_factors.long if self.side == "SIDE_BUY" else risk_factors.short
             )
 
-            size = add_to_margin / (midprice * risk_factor)
+            size = add_to_margin / (midprice * risk_factor + 1e-20)
 
             self.vega.submit_market_order(
                 trading_key=self.key_name,
