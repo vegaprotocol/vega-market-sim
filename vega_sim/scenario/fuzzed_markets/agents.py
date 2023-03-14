@@ -4,6 +4,7 @@ from vega_sim.null_service import VegaServiceNull
 from numpy import array
 from numpy.random import RandomState
 from vega_sim.proto.vega import markets as markets_protos
+import vega_sim.proto.vega as vega_protos
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -351,3 +352,127 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
                 delta_buy=0,
                 delta_sell=0,
             )
+
+
+class FuzzyLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "fuzzy_liquidity_provider"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        tag: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+        random_state: Optional[RandomState] = None,
+        commitment_factor_min: float = 0.1,
+        commitment_factor_max: float = 0.6,
+        initial_asset_mint: float = 1e5,
+    ):
+        super().__init__(key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.commitment_factor_min = commitment_factor_min
+        self.commitment_factor_max = commitment_factor_max
+        self.random_state = random_state if random_state is not None else RandomState()
+        self.initial_asset_mint = initial_asset_mint
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                wallet_name=self.wallet_name,
+            )
+
+        self.vega.wait_fn(5)
+
+    def _gen_spec(self, side: vega_protos.vega.Side, is_valid: bool):
+        refs = [
+            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_UNSPECIFIED,
+            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
+            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID,
+            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK,
+        ]
+        invalid_ref = (
+            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID
+            if side == vega_protos.vega.SIDE_SELL
+            else vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK
+        )
+        if is_valid:
+            refs = [r for r in refs if r != invalid_ref]
+
+        return (
+            self.random_state.choice(refs),
+            (
+                self.random_state.randint(low=1, high=400)
+                if is_valid
+                else self.random_state.randint(-5, 5)
+            ),
+            self.random_state.randint(low=0, high=4000000),
+        )
+
+    def step(self, vega_state):
+        commitment_factor = (
+            self.random_state.random_sample()
+            * (self.commitment_factor_max - self.commitment_factor_min)
+            + self.commitment_factor_min
+        )
+        account = self.vega.party_account(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            asset_id=self.asset_id,
+        )
+
+        total_balance = account.general + account.margin + account.bond
+
+        if total_balance == 0:
+            self.vega.mint(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                amount=self.initial_asset_mint,
+                asset=self.asset_id,
+            )
+            return
+
+        commitment_amount = commitment_factor * (total_balance)
+
+        valid = self.random_state.choice([1, 0], p=[0.95, 0.05])
+        fee = (
+            self.random_state.random_sample() * 0.05
+            if valid
+            else self.random_state.random_sample() * 200 - 100
+        )
+
+        buy_specs = [
+            self._gen_spec(vega_protos.vega.SIDE_BUY, valid)
+            for _ in range(self.random_state.randint(1, 50))
+        ]
+
+        sell_specs = [
+            self._gen_spec(vega_protos.vega.SIDE_SELL, valid)
+            for _ in range(self.random_state.randint(1, 50))
+        ]
+
+        self.vega.submit_liquidity(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            fee=fee,
+            commitment_amount=commitment_amount,
+            buy_specs=buy_specs,
+            sell_specs=sell_specs,
+            is_amendment=self.random_state.choice([True, False]),
+        )

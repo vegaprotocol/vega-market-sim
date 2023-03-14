@@ -21,6 +21,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
     DegenerateTrader,
     DegenerateLiquidityProvider,
+    FuzzyLiquidityProvider,
 )
 
 
@@ -66,6 +67,7 @@ class FuzzingScenario(Scenario):
         random_traders = []
         fuzz_traders = []
         degenerate_traders = []
+        fuzz_liquidity_providers = []
         degenerate_liquidity_providers = []
 
         self.initial_asset_mint = 1e9
@@ -161,7 +163,7 @@ class FuzzingScenario(Scenario):
             for i_agent in range(10):
                 fuzz_traders.append(
                     FuzzingAgent(
-                        wallet_name=f"FUZZING_TRADERS",
+                        wallet_name="FUZZING_TRADERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
@@ -173,7 +175,7 @@ class FuzzingScenario(Scenario):
                 for i_agent in range(10):
                     degenerate_traders.append(
                         DegenerateTrader(
-                            wallet_name=f"DEGENERATE_TRADERS",
+                            wallet_name="DEGENERATE_TRADERS",
                             key_name=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                             market_name=market_name,
                             asset_name=asset_name,
@@ -187,12 +189,24 @@ class FuzzingScenario(Scenario):
             for i_agent in range(5):
                 degenerate_liquidity_providers.append(
                     DegenerateLiquidityProvider(
-                        wallet_name=f"DEGENERATE_LIQUIDITY_PROVIDERS",
+                        wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
                         initial_asset_mint=5_000,
                         commitment_factor=0.7,
+                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    )
+                )
+
+            for i_agent in range(5):
+                fuzz_liquidity_providers.append(
+                    FuzzyLiquidityProvider(
+                        wallet_name="FUZZY_LIQUIDITY_PROVIDERS",
+                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        market_name=market_name,
+                        asset_name=asset_name,
+                        initial_asset_mint=5_000,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
@@ -205,6 +219,7 @@ class FuzzingScenario(Scenario):
             + fuzz_traders
             + degenerate_traders
             + degenerate_liquidity_providers
+            + fuzz_liquidity_providers
         )
         return {agent.name(): agent for agent in agents}
 
