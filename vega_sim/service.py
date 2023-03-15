@@ -947,6 +947,8 @@ class VegaService(ABC):
                 if updated_lp_price_range is not None
                 else current_market.lp_price_range
             ),
+            linear_slippage_factor=current_market.linear_slippage_factor,
+            quadratic_slippage_factor=current_market.quadratic_slippage_factor,
         )
 
         proposal_id = gov.propose_market_update(
