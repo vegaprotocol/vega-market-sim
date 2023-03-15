@@ -10,6 +10,9 @@ from vega_sim.scenario.multi_market.scenario import VegaLoadTest
 from vega_sim.scenario.market_crash.scenario import MarketCrash
 from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
 from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
+from vega_sim.scenario.parameter_experiment.scenario import ParameterExperiment
+from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
+
 
 from vega_sim.scenario.common.utils.price_process import (
     get_historic_price_series,
@@ -172,11 +175,12 @@ SCENARIOS = {
         num_steps=60 * 24,
     ),
     "vega_load_test": lambda: VegaLoadTest(
-        num_steps=15 * 24 * 30,
-        granularity=Granularity.FIFTEEN_MINUTE,
-        block_length_seconds=60,
+        num_steps=60 * 24,
+        granularity=Granularity.MINUTE,
+        step_length_seconds=60,
+        block_length_seconds=5,
         transactions_per_block=4000,
-        parties_per_market=200,
+        parties_per_market=100,
         orders_per_second=100,
         trades_per_second=1,
     ),
@@ -192,5 +196,11 @@ SCENARIOS = {
         ).values,
         int_lock=3 * 60 * 60,
         ext_lock=5 * 60,
+    ),
+    "parameter_experiment": lambda: ParameterExperiment(),
+    "fuzz_test": lambda: FuzzingScenario(
+        num_steps=60 * 60 * 3,
+        block_length_seconds=1,
+        transactions_per_block=4096,
     ),
 }

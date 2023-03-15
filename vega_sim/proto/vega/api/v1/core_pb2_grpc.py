@@ -59,13 +59,18 @@ class CoreServiceStub(object):
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionResponse.FromString,
         )
+        self.GetSpamStatistics = channel.unary_unary(
+            "/vega.api.v1.CoreService/GetSpamStatistics",
+            request_serializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsRequest.SerializeToString,
+            response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsResponse.FromString,
+        )
 
 
 class CoreServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SubmitTransaction(self, request, context):
-        """Submit Transaction
+        """Submit transaction
 
         Submit a signed transaction
         """
@@ -85,7 +90,7 @@ class CoreServiceServicer(object):
     def Statistics(self, request, context):
         """Statistics
 
-        Get Statistics on Vega
+        Get statistics on Vega
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -103,14 +108,17 @@ class CoreServiceServicer(object):
     def GetVegaTime(self, request, context):
         """Vega time
 
-        Get Time
+        Get current Vega time
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveEventBus(self, request_iterator, context):
-        """Subscribe to a stream of events from the core"""
+        """Events subscription
+
+        Subscribe to a stream of events from the core
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -137,6 +145,15 @@ class CoreServiceServicer(object):
         """Check raw transaction
 
         Check a raw signed transaction
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetSpamStatistics(self, request, context):
+        """Get Spam statistics
+
+        Retrieve the spam statistics for a given party
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -189,6 +206,11 @@ def add_CoreServiceServicer_to_server(servicer, server):
             servicer.CheckRawTransaction,
             request_deserializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionRequest.FromString,
             response_serializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionResponse.SerializeToString,
+        ),
+        "GetSpamStatistics": grpc.unary_unary_rpc_method_handler(
+            servicer.GetSpamStatistics,
+            request_deserializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsRequest.FromString,
+            response_serializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -452,6 +474,35 @@ class CoreService(object):
             "/vega.api.v1.CoreService/CheckRawTransaction",
             vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionRequest.SerializeToString,
             vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetSpamStatistics(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/vega.api.v1.CoreService/GetSpamStatistics",
+            vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsRequest.SerializeToString,
+            vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsResponse.FromString,
             options,
             channel_credentials,
             insecure,

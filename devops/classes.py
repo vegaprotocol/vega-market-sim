@@ -66,6 +66,7 @@ class SensitiveTraderArgs:
 @dataclass
 class SimulationArgs:
     n_steps: int
+    step_length_seconds: float
     granularity: Granularity
     coinbase_code: str
     start_date: Optional[str] = "2022-08-01 00:00:00"

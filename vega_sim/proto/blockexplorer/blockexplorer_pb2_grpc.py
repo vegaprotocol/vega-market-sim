@@ -56,7 +56,7 @@ class BlockExplorerServiceServicer(object):
         """Info
 
         Retrieves information about the block explorer.
-        Response contains a semver formatted version of the data node and the commit hash, from which the block explorer was built,
+        Response contains a semver formatted version of the data node and the commit hash, from which the block explorer was built
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")

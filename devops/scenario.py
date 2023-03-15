@@ -15,7 +15,7 @@ scenario consists of the following agents.
 
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Optional, Union, Dict
+from typing import Optional, Union, Dict, Callable, Any
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.constants import Network
@@ -70,7 +70,12 @@ class DevOpsScenario(Scenario):
         momentum_trader_args: MomentumTraderArgs,
         sensitive_trader_args: SensitiveTraderArgs,
         simulation_args: Optional[SimulationArgs] = None,
+        state_extraction_fn: Optional[
+            Callable[[VegaServiceNull, Dict[str, Agent]], Any]
+        ] = None,
     ):
+        super().__init__(state_extraction_fn=state_extraction_fn)
+
         self.binance_code = binance_code
 
         self.market_manager_args = market_manager_args
@@ -100,6 +105,12 @@ class DevOpsScenario(Scenario):
         price_process = get_historic_price_series(
             product_id=self.simulation_args.coinbase_code,
             granularity=self.simulation_args.granularity,
+            interpolation=(
+                f"{self.simulation_args.step_length_seconds}S"
+                if self.simulation_args.step_length_seconds
+                < self.simulation_args.granularity.value
+                else self.simulation_args.granularity.value
+            ),
             start=str(start),
             end=str(end),
         )
@@ -108,15 +119,16 @@ class DevOpsScenario(Scenario):
 
     def configure_agents(
         self,
-        network: Network,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
+        tag: str,
         random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> Dict[str, Agent]:
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        if network == Network.NULLCHAIN:
+        if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
             self.price_process = self._get_historic_price_process(
                 random_state=random_state
             )
@@ -126,10 +138,8 @@ class DevOpsScenario(Scenario):
         # Setup agent for proposing and settling the market
         market_manager = ConfigurableMarketManager(
             proposal_wallet_name=MARKET_CREATOR_AGENT.wallet_name,
-            proposal_wallet_pass=MARKET_CREATOR_AGENT.wallet_pass,
             proposal_key_name=MARKET_CREATOR_AGENT.key_name,
             termination_wallet_name=MARKET_SETTLER_AGENT.wallet_name,
-            termination_wallet_pass=MARKET_SETTLER_AGENT.wallet_pass,
             termination_key_name=MARKET_SETTLER_AGENT.key_name,
             market_config=MarketConfig(),
             market_name=self.market_manager_args.market_name,
@@ -138,13 +148,12 @@ class DevOpsScenario(Scenario):
             asset_dp=self.market_manager_args.adp,
             initial_mint=self.market_manager_args.initial_mint,
             settlement_price=self.price_process[-1],
-            tag="",
+            tag=None,
         )
 
         # Setup agent for proving a market for traders
         market_maker = ExponentialShapedMarketMaker(
             wallet_name=MARKET_MAKER_AGENT.wallet_name,
-            wallet_pass=MARKET_MAKER_AGENT.wallet_pass,
             key_name=MARKET_MAKER_AGENT.key_name,
             market_name=self.market_manager_args.market_name,
             asset_name=self.market_manager_args.asset_name,
@@ -161,14 +170,13 @@ class DevOpsScenario(Scenario):
             price_process_generator=iter(self.price_process),
             orders_from_stream=False,
             state_update_freq=10,
-            tag="",
+            tag=None,
         )
 
         # Setup agents for passing opening auction
         auction_pass_agents = [
             OpenAuctionPass(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -184,7 +192,6 @@ class DevOpsScenario(Scenario):
         random_market_order_traders = [
             MarketOrderTrader(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -192,7 +199,7 @@ class DevOpsScenario(Scenario):
                 buy_intensity=self.random_trader_args.order_intensity,
                 sell_intensity=self.random_trader_args.order_intensity,
                 base_order_size=self.random_trader_args.order_volume,
-                tag="",
+                tag=i,
             )
             for i, party in enumerate(RANDOM_TRADER_AGENTS)
         ]
@@ -201,7 +208,6 @@ class DevOpsScenario(Scenario):
         momentum_market_order_traders = [
             MomentumTrader(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -209,7 +215,7 @@ class DevOpsScenario(Scenario):
                 initial_asset_mint=self.momentum_trader_args.initial_mint,
                 order_intensity=self.momentum_trader_args.order_intensity,
                 base_order_size=self.momentum_trader_args.order_volume,
-                tag="",
+                tag=i,
             )
             for i, party in enumerate(MOMENTUM_TRADER_AGENTS)
         ]
@@ -218,7 +224,6 @@ class DevOpsScenario(Scenario):
         sensitive_market_order_traders = [
             PriceSensitiveMarketOrderTrader(
                 wallet_name=party.wallet_name,
-                wallet_pass=party.wallet_pass,
                 key_name=party.key_name,
                 market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
@@ -228,7 +233,7 @@ class DevOpsScenario(Scenario):
                 sell_intensity=self.sensitive_trader_args.order_intensity[i],
                 base_order_size=self.sensitive_trader_args.order_volume[i],
                 price_half_life=self.sensitive_trader_args.price_half_life[i],
-                tag="",
+                tag=i,
             )
             for i, party in enumerate(SENSITIVE_TRADER_AGENTS)
         ]
@@ -246,17 +251,19 @@ class DevOpsScenario(Scenario):
     def configure_environment(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
-        network: Network,
-        raise_datanode_errors: Optional[bool] = False,
-        raise_step_errors: Optional[bool] = False,
+        tag: Optional[str] = None,
+        random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> Union[MarketEnvironmentWithState, NetworkEnvironment]:
-        if network == Network.NULLCHAIN:
+        if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
             env = MarketEnvironmentWithState(
-                agents=self.agents,
+                agents=list(self.agents.values()),
                 n_steps=self.simulation_args.n_steps,
                 vega_service=vega,
                 step_length_seconds=self.simulation_args.granularity.value,
                 block_length_seconds=1,
+                random_state=random_state,
+                transactions_per_block=100,
             )
         else:
             env = NetworkEnvironment(
@@ -264,44 +271,8 @@ class DevOpsScenario(Scenario):
                 n_steps=-1,
                 vega_service=vega,
                 step_length_seconds=0,
-                raise_datanode_errors=raise_datanode_errors,
-                raise_step_errors=raise_step_errors,
+                raise_datanode_errors=kwargs.get("raise_datanode_errors", False),
+                raise_step_errors=kwargs.get("raise_step_errors", False),
+                random_state=random_state,
             )
         return env
-
-    def run_iteration(
-        self,
-        network: Network,
-        vega: Union[VegaServiceNull, VegaServiceNetwork],
-        pause_at_completion: bool = False,
-        run_with_console: bool = False,
-        random_state: Optional[np.random.RandomState] = None,
-        raise_datanode_errors: Optional[bool] = False,
-        raise_step_errors: Optional[bool] = False,
-    ):
-        self.agents = self.configure_agents(
-            network=network, vega=vega, random_state=random_state
-        )
-
-        if network == Network.NULLCHAIN:
-            self.env = MarketEnvironmentWithState(
-                agents=list(self.agents.values()),
-                n_steps=self.simulation_args.n_steps,
-                vega_service=vega,
-                step_length_seconds=self.simulation_args.granularity.value,
-                block_length_seconds=1,
-            )
-            self.env.run(
-                run_with_console=run_with_console,
-                pause_at_completion=pause_at_completion,
-            )
-        else:
-            self.env = NetworkEnvironment(
-                agents=list(self.agents.values()),
-                n_steps=-1,
-                vega_service=vega,
-                step_length_seconds=0,
-                raise_datanode_errors=raise_datanode_errors,
-                raise_step_errors=raise_step_errors,
-            )
-            self.env.run()

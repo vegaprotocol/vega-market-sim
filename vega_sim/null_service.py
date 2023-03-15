@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import atexit
 import functools
-from io import BufferedWriter
 import logging
 import multiprocessing
 import os
@@ -16,6 +15,7 @@ import webbrowser
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum, auto
+from io import BufferedWriter
 from os import path
 from typing import Dict, List, Optional, Set
 
@@ -25,10 +25,9 @@ from urllib3.exceptions import MaxRetryError
 
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
-from vega_sim.wallet.base import Wallet
-from vega_sim.wallet.slim_wallet import (
-    SlimWallet,
-)
+from vega_sim.tools.load_binaries import download_binaries
+from vega_sim.wallet.base import DEFAULT_WALLET_NAME, Wallet
+from vega_sim.wallet.slim_wallet import SlimWallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 
 logger = logging.getLogger(__name__)
@@ -103,6 +102,12 @@ PORT_UPDATERS = {
         ),
     ],
     Ports.WALLET: [
+        PortUpdateConfig(
+            ("config", "wallet-service", "config.toml"),
+            ["Server"],
+            "Port",
+            lambda port: port,
+        ),
         PortUpdateConfig(
             ("config", "wallet-service", "networks", "local.toml"),
             [],
@@ -338,6 +343,16 @@ def manage_vega_processes(
         )
     if port_config.get(Ports.CONSOLE):
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
+    if port_config.get(Ports.DATA_NODE_REST):
+        logger.info(
+            f"Launching Datanode REST at port {port_config.get(Ports.DATA_NODE_REST)}"
+        )
+    if port_config.get(Ports.DATA_NODE_GRPC):
+        logger.info(
+            f"Launching Datanode GRPC at port {port_config.get(Ports.DATA_NODE_GRPC)}"
+        )
+    if port_config.get(Ports.CORE_GRPC):
+        logger.info(f"Launching Core GRPC at port {port_config.get(Ports.CORE_GRPC)}")
 
     dest_dir = f"{tmp_vega_dir}/vegahome"
     shutil.copytree(vega_home_path, dest_dir)
@@ -428,6 +443,48 @@ def manage_vega_processes(
                 requests.exceptions.HTTPError,
             ):
                 time.sleep(0.1)
+
+        subprocess.run(
+            [
+                vega_wallet_path,
+                "api-token",
+                "init",
+                f"--home={tmp_vega_home}",
+                f"--passphrase-file={tmp_vega_home}/passphrase-file",
+            ],
+            capture_output=True,
+        )
+
+        subprocess.run(
+            [
+                vega_wallet_path,
+                "create",
+                "--wallet",
+                DEFAULT_WALLET_NAME,
+                "--home",
+                tmp_vega_home,
+                "--passphrase-file",
+                tmp_vega_home + "/passphrase-file",
+                "--output",
+                "json",
+            ],
+            capture_output=True,
+        )
+
+        subprocess.run(
+            [
+                vega_wallet_path,
+                "api-token",
+                "generate",
+                "--home=" + tmp_vega_home,
+                "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+                "--wallet-passphrase-file=" + tmp_vega_home + "/passphrase-file",
+                "--wallet-name=" + DEFAULT_WALLET_NAME,
+                "--description=" + DEFAULT_WALLET_NAME,
+            ],
+            capture_output=True,
+        )
+
         wallet_args = [
             vega_wallet_path,
             "service",
@@ -436,6 +493,8 @@ def manage_vega_processes(
             "local",
             "--home=" + tmp_vega_home,
             "--automatic-consent",
+            "--load-tokens",
+            "--tokens-passphrase-file=" + tmp_vega_home + "/passphrase-file",
         ]
 
         vegaWalletProcess = _popen_process(
@@ -521,19 +580,24 @@ class VegaServiceNull(VegaService):
         transactions_per_block: int = 1,
         seconds_per_block: int = 1,
         use_full_vega_wallet: bool = False,
-        start_live_feeds: bool = True,
         retain_log_files: bool = False,
         launch_graphql: bool = False,
         store_transactions: bool = True,
         replay_from_path: Optional[str] = None,
+        listen_for_high_volume_stream_updates: bool = False,
+        check_for_binaries: bool = False,
     ):
         super().__init__(
             can_control_time=True,
             warn_on_raw_data_access=warn_on_raw_data_access,
             seconds_per_block=seconds_per_block,
+            listen_for_high_volume_stream_updates=listen_for_high_volume_stream_updates,
         )
         self.retain_log_files = retain_log_files
 
+        self._using_all_custom_paths = all(
+            [x is not None for x in [vega_path, data_node_path, vega_wallet_path]]
+        )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
         self.vega_wallet_path = vega_wallet_path or path.join(
@@ -555,9 +619,9 @@ class VegaServiceNull(VegaService):
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
-        self._start_live_feeds = start_live_feeds
         self.launch_graphql = launch_graphql
         self.replay_from_path = replay_from_path
+        self.check_for_binaries = check_for_binaries
 
         if port_config is None:
             self._assign_ports()
@@ -584,13 +648,18 @@ class VegaServiceNull(VegaService):
     def wallet(self) -> Wallet:
         if self._wallet is None:
             if self._use_full_vega_wallet:
-                self._wallet = VegaWallet(self.wallet_url)
+                self._wallet = VegaWallet(
+                    self.wallet_url,
+                    wallet_path=self.vega_wallet_path,
+                    vega_home_dir=path.join(self.log_dir, "vegahome"),
+                    passphrase_file_path=path.join(
+                        self.log_dir, "vegahome", "passphrase-file"
+                    ),
+                )
             else:
                 self._wallet = SlimWallet(
                     self.core_client,
-                    full_wallet=VegaWallet(self.wallet_url)
-                    if self.run_with_console
-                    else None,
+                    full_wallet=None,
                     log_dir=self.log_dir,
                 )
         return self._wallet
@@ -631,6 +700,9 @@ class VegaServiceNull(VegaService):
         }
 
     def start(self, block_on_startup: bool = True) -> None:
+        if self.check_for_binaries and not self._using_all_custom_paths:
+            download_binaries()
+
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()
         self.proc = ctx.Process(
@@ -644,7 +716,7 @@ class VegaServiceNull(VegaService):
                 "port_config": port_config,
                 "transactions_per_block": self.transactions_per_block,
                 "block_duration": f"{int(self.seconds_per_block)}s",
-                "run_wallet": self._use_full_vega_wallet or self.run_with_console,
+                "run_wallet": self._use_full_vega_wallet,
                 "retain_log_files": self.retain_log_files,
                 "log_dir": self.log_dir,
                 "store_transactions": self.store_transactions,
@@ -670,9 +742,9 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
-                    if self.run_with_console or self._use_full_vega_wallet:
+                    if self._use_full_vega_wallet:
                         requests.get(
-                            f"http://localhost:{self.wallet_port}/api/v1/status"
+                            f"http://localhost:{self.wallet_port}/api/v2/health"
                         ).raise_for_status()
 
                     started = True
@@ -695,9 +767,6 @@ class VegaServiceNull(VegaService):
             webbrowser.open(
                 f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
             )
-
-        if self._start_live_feeds:
-            self.start_live_feeds()
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

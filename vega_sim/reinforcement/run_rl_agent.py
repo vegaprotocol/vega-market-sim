@@ -4,6 +4,7 @@ import os
 from logging import getLogger
 
 import torch
+
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.reinforcement.agents.learning_agent import WALLET as LEARNING_WALLET
 from vega_sim.reinforcement.agents.learning_agent import LearningAgent, state_fn
@@ -16,8 +17,8 @@ from vega_sim.reinforcement.agents.learning_agent_MO_with_vol import (
 )
 from vega_sim.reinforcement.helpers import set_seed
 from vega_sim.reinforcement.plot import plot_learning, plot_pnl, plot_simulation
-from vega_sim.scenario.registry import CurveMarketMaker
 from vega_sim.scenario.common.agents import Snitch
+from vega_sim.scenario.registry import CurveMarketMaker
 
 logger = getLogger(__name__)
 
@@ -27,6 +28,7 @@ def run_iteration(
     step_tag: int,
     vega: VegaServiceNull,
     market_name: str,
+    asset_name: str,
     run_with_console=False,
     pause_at_completion=False,
 ):
@@ -46,6 +48,7 @@ def run_iteration(
         num_steps=50,
         random_agent_ordering=False,
         sigma=100,
+        asset_name=asset_name,
     )
 
     scenario.agents = scenario.configure_agents(
@@ -56,8 +59,11 @@ def run_iteration(
     learning_agent.price_process = scenario.price_process
     scenario.agents["learner"] = learning_agent
 
+    # Disabling Snitch for now to speed up training
     scenario.agents["snitch"] = Snitch(
-        agents=scenario.agents, additional_state_fn=scenario.state_extraction_fn
+        agents=scenario.agents,
+        additional_state_fn=scenario.state_extraction_fn,
+        only_extract_additional=True,
     )
 
     scenario.env = scenario.configure_environment(
@@ -85,12 +91,14 @@ def _run(
     evaluate_only: bool = False,
     plot_every_step: bool = False,
     device: str = "cpu",
+    recreate_vega_every_n_iterations: int = 100,
 ):
     # set seed for results replication
     set_seed(1)
 
     # set market name
     market_name = "ETH:USD"
+    asset_name = "tDAI"
     position_decimals = 2
 
     if not os.path.exists(results_dir):
@@ -108,72 +116,87 @@ def _run(
         logfile_pnl=logfile_pnl,
         discount_factor=0.8,
         num_levels=1,
-        wallet_name=LEARNING_WALLET.name,
-        wallet_pass=LEARNING_WALLET.passphrase,
+        key_name=LEARNING_WALLET.name,
         initial_balance=100000,
         market_name=market_name,
         position_decimals=position_decimals,
         inventory_penalty=0.1,
+        asset_name=asset_name,
     )
 
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        run_with_console=False,
-        retain_log_files=True,
-        store_transactions=True,
-    ) as vega:
-        vega.wait_for_total_catchup()
-
-        if not evaluate_only:
-            logger.info(f"Running training for {max_iterations} iterations")
-            # TRAINING OF AGENT
-            if resume_training:
-                logger.info("Loading neural net weights from: " + results_dir)
-                learning_agent.load(results_dir)
-            else:
-                with open(logfile_pol_imp, "w") as f:
-                    f.write("iteration,loss\n")
-                with open(logfile_pol_eval, "w") as f:
-                    f.write("iteration,loss,kl_coeff_disc,kl_coeff_cont\n")
-                with open(logfile_pnl, "w") as f:
-                    f.write("iteration,pnl\n")
-
-            for it in range(max_iterations):
-                # simulation of market to get some data
-
-                learning_agent.move_to_cpu()
-                _ = run_iteration(
-                    learning_agent=learning_agent,
-                    step_tag=it,
-                    vega=vega,
-                    market_name=market_name,
-                    run_with_console=False,
-                    pause_at_completion=False,
-                )
-
-                # Policy evaluation + Policy improvement
-                learning_agent.move_to_device()
-                learning_agent.policy_eval(batch_size=20000, n_epochs=10)
-                learning_agent.policy_improvement(batch_size=100_000, n_epochs=10)
-
-                # save in case environment chooses to crash
-                learning_agent.save(results_dir)
-
-                if plot_every_step:
-                    plot_learning(
-                        results_dir=results_dir,
-                        logfile_pol_eval=logfile_pol_eval,
-                        logfile_pol_imp=logfile_pol_imp,
-                    )
-
+    if not evaluate_only:
+        logger.info(f"Running training for {max_iterations} iterations")
+        # TRAINING OF AGENT
+        if resume_training:
+            logger.info("Loading neural net weights from: " + results_dir)
+            learning_agent.load(results_dir)
         else:
-            # EVALUATION OF AGENT
-            logger.info("Loading neural net weights from: " + args.results_dir)
-            learning_agent.load(args.results_dir)
-            learning_agent.lerningIteration = 0
+            with open(logfile_pol_imp, "w") as f:
+                f.write("iteration,loss\n")
+            with open(logfile_pol_eval, "w") as f:
+                f.write("iteration,loss,kl_coeff_disc,kl_coeff_cont\n")
             with open(logfile_pnl, "w") as f:
                 f.write("iteration,pnl\n")
 
+        it = 0
+        while it <= max_iterations:
+            with VegaServiceNull(
+                warn_on_raw_data_access=False,
+                run_with_console=False,
+                retain_log_files=True,
+                store_transactions=True,
+            ) as vega:
+                for _ in range(recreate_vega_every_n_iterations):
+                    it += 1
+                    if it > max_iterations:
+                        break
+
+                    logger.info(f"Running iteration {it}")
+                    # simulation of market to get some data
+
+                    learning_agent.move_to_cpu()
+
+                    _ = run_iteration(
+                        learning_agent=learning_agent,
+                        step_tag=it,
+                        vega=vega,
+                        market_name=market_name,
+                        asset_name=asset_name,
+                        run_with_console=False,
+                        pause_at_completion=False,
+                    )
+
+                    # Policy evaluation + Policy improvement
+                    learning_agent.move_to_device()
+                    learning_agent.policy_eval(batch_size=20000, n_epochs=10)
+                    learning_agent.policy_improvement(batch_size=100_000, n_epochs=10)
+
+                    # save in case environment chooses to crash
+                    learning_agent.save(results_dir)
+
+                    if plot_every_step:
+                        plot_learning(
+                            results_dir=results_dir,
+                            logfile_pol_eval=logfile_pol_eval,
+                            logfile_pol_imp=logfile_pol_imp,
+                        )
+                if it >= max_iterations:
+                    logger.info("Recreating Vega instance to tidy up")
+
+    else:
+        # EVALUATION OF AGENT
+        logger.info("Loading neural net weights from: " + args.results_dir)
+        learning_agent.load(args.results_dir)
+        learning_agent.lerningIteration = 0
+        with open(logfile_pnl, "w") as f:
+            f.write("iteration,pnl\n")
+
+        with VegaServiceNull(
+            warn_on_raw_data_access=False,
+            run_with_console=False,
+            retain_log_files=True,
+            store_transactions=True,
+        ) as vega:
             for it in range(args.evaluate):
                 learning_agent.clear_memory()
                 learning_agent.exploitation = 1.0
@@ -256,4 +279,5 @@ if __name__ == "__main__":
         evaluate_only=args.evaluate,
         plot_every_step=args.plot_every_step,
         device=device,
+        recreate_vega_every_n_iterations=1000,
     )

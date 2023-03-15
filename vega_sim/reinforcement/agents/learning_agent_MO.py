@@ -56,11 +56,11 @@ class LearningAgentFixedVol(LearningAgent):
         logfile_pnl: str,
         discount_factor: float,
         num_levels: int,
-        wallet_name: str,
-        wallet_pass: str,
+        key_name: str,
         market_name: str,
         initial_balance: int,
         position_decimals: int,
+        asset_name: str,
         inventory_penalty: float = 1.0,
     ):
         super().__init__(
@@ -70,12 +70,12 @@ class LearningAgentFixedVol(LearningAgent):
             logfile_pnl=logfile_pnl,
             discount_factor=discount_factor,
             num_levels=num_levels,
-            wallet_name=wallet_name,
-            wallet_pass=wallet_pass,
+            key_name=key_name,
             market_name=market_name,
             initial_balance=initial_balance,
             position_decimals=position_decimals,
             inventory_penalty=inventory_penalty,
+            asset_name=asset_name,
         )
         self.volume = 10 ** (-self.position_decimals)
 
@@ -184,7 +184,7 @@ class LearningAgentFixedVol(LearningAgent):
         if self.latest_action.buy or self.latest_action.sell:
             try:
                 self.vega.submit_market_order(
-                    trading_wallet=self.wallet_name,
+                    trading_key=self.key_name,
                     market_id=self.market_id,
                     side="SIDE_BUY" if self.latest_action.buy else "SIDE_SELL",
                     volume=self.volume,

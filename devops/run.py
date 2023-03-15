@@ -44,7 +44,7 @@ def main():
         "-n",
         "--network",
         choices=[network.name for network in Network],
-        default=Network.NULLCHAIN.name,
+        default=Network.FAIRGROUND.name,
     )
 
     parser.add_argument("-s", "--scenario")
@@ -64,11 +64,10 @@ def main():
             seconds_per_block=1,
             transactions_per_block=1000,
             retain_log_files=True,
-            use_full_vega_wallet=True,
+            use_full_vega_wallet=False,
             warn_on_raw_data_access=False,
             run_with_console=args.console,
             launch_graphql=args.graphql,
-            start_live_feeds=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
@@ -79,7 +78,6 @@ def main():
     else:
         with VegaServiceNetwork(
             network=Network[args.network],
-            start_live_feeds=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,

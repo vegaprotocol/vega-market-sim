@@ -63,7 +63,8 @@ SCENARIOS = {
             initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
-            n_steps=60 * 24,
+            n_steps=60 * 24 * 6,
+            step_length_seconds=10,
             granularity=Granularity.MINUTE,
             coinbase_code="ETH-USD",
             start_date="2022-11-01 00:00:00",
@@ -115,7 +116,8 @@ SCENARIOS = {
             initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
-            n_steps=60 * 24,
+            n_steps=60 * 24 * 6,
+            step_length_seconds=10,
             granularity=Granularity.MINUTE,
             coinbase_code="BTC-USDT",
             start_date="2022-11-01 00:00:00",

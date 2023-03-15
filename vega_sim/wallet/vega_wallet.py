@@ -1,180 +1,285 @@
-import time
 from typing import Any, Dict, List, Optional, Union
 
 import os
-import dotenv
 import inflection
-import requests
-from google.protobuf.json_format import MessageToDict
-from vega_sim.wallet.base import Wallet, VEGA_DEFAULT_KEY_NAME
 
-WALLET_CREATION_URL = "{wallet_server_url}/api/v1/wallets"
-WALLET_LOGIN_URL = "{wallet_server_url}/api/v1/auth/token"
-WALLET_KEY_URL = "{wallet_server_url}/api/v1/keys"
+import json
+import subprocess
+import requests
+
+from google.protobuf.json_format import MessageToDict
+from vega_sim.wallet.base import Wallet, DEFAULT_WALLET_NAME
+
+WALLET_JSON_RPC_URL = "{wallet_server_url}/api/v2/requests"
+WALLET_CREATION_URL = "{wallet_server_url}/api/v2/wallets"
+WALLET_LOGIN_URL = "{wallet_server_url}/api/v2/auth/token"
+WALLET_KEY_URL = "{wallet_server_url}/api/v2/keys"
 
 
 class VegaWallet(Wallet):
-    def __init__(self, wallet_url: str):
+    def __init__(
+        self,
+        wallet_url: str,
+        wallet_path: str,
+        vega_home_dir: str,
+        passphrase_file_path: Optional[str] = None,
+    ):
         """Creates a wallet to interact with a full running vegawallet instance
 
         Args:
             wallet_url:
                 str, base URL of the wallet service
+            wallet_path:
+                str, path to a wallet binary to call CLI functions from
+            vega_home_dir:
+                str, dir of vega home configuration files
+            passphrase_file_path:
+                str, File containing login passphrase for wallet
 
         """
         self.wallet_url = wallet_url
         self.login_tokens = {}
         self.pub_keys = {}
 
-        dotenv.load_dotenv()
-        self.vega_default_key_name = os.environ.get(
-            "VEGA_DEFAULT_KEY_NAME", VEGA_DEFAULT_KEY_NAME
+        self._wallet_path = wallet_path
+        self._wallet_home = vega_home_dir
+        self._passphrase_file = passphrase_file_path
+
+        self.vega_default_wallet_name = os.environ.get(
+            "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
         )
 
-    def create_wallet(
-        self, name: str, passphrase: str, key_name: Optional[str] = None
-    ) -> None:
-        """Generates a new wallet from a name - passphrase pair in the given vega service.
+    @classmethod
+    def from_json(
+        cls, json_path: str, wallet_url: str, wallet_path: str, vega_home_dir: str
+    ) -> "VegaWallet":
+        """Creates a wallet to interact with a full running vegawallet instance.
+            Loads tokens from a given json file in the form
+                {
+                    wallet_name_1: token,
+                    wallet_name_2: token
+                }
+            instead of requiring a wallet password
+
+        Args:
+            json_path:
+                str, File containing v2 wallet tokens
+            wallet_url:
+                str, base URL of the wallet service
+            wallet_path:
+                str, path to a wallet binary to call CLI functions from
+            vega_home_dir:
+                str, dir of vega home configuration files
+        """
+        base = cls(
+            wallet_url=wallet_url, wallet_path=wallet_path, vega_home_dir=vega_home_dir
+        )
+
+        with open(json_path, "r") as f:
+            base.login_tokens = json.load(f)
+        return base
+
+    def _load_token(self, wallet_name: str):
+        if self._passphrase_file is None:
+            raise Exception("Must set wallet passphrase file path to load tokens")
+        cmd = subprocess.run(
+            [
+                self._wallet_path,
+                "api-token",
+                "list",
+                "--home",
+                self._wallet_home,
+                "--passphrase-file",
+                self._passphrase_file,
+                "--output",
+                "json",
+            ],
+            capture_output=True,
+            universal_newlines=True,
+            encoding="UTF-8",
+        ).stdout
+
+        for data in json.loads(cmd)["tokens"]:
+            if data["description"] == wallet_name:
+                self.login_tokens[wallet_name] = data["token"]
+
+    def create_key(self, name: str, wallet_name: Optional[str] = None) -> None:
+        """Generates a new key in the given vega service.
+
+        Args:
+            name:
+                str, The name to use for the wallet key
+            passphrase:
+                str, The passphrase to use when logging in to created wallet in future
+            wallet_name:
+                str, The wallet to use if not the default
+        Returns:
+            str, login token to use in authenticated requests
+        """
+        if self._passphrase_file is None:
+            raise Exception("Must set wallet passphrase file path to generate keys")
+
+        wallet = (
+            wallet_name if wallet_name is not None else self.vega_default_wallet_name
+        )
+        cmd = subprocess.run(
+            [
+                self._wallet_path,
+                "key",
+                "generate",
+                "--wallet",
+                wallet,
+                "--home",
+                self._wallet_home,
+                "--passphrase-file",
+                self._passphrase_file,
+                "--meta",
+                f"name:{name}",
+                "--output",
+                "json",
+            ],
+            capture_output=True,
+            universal_newlines=True,
+            encoding="UTF-8",
+        ).stdout
+        self.pub_keys.setdefault(wallet, {})[name] = json.loads(cmd)["publicKey"]
+
+    def create_wallet(self, name: str) -> None:
+        """Generates a new wallet in the given vega service.
 
         Args:
             name:
                 str, The name to use for the wallet
-            passphrase:
-                str, The passphrase to use when logging in to created wallet in future
-        Returns:
-            str, login token to use in authenticated requests
         """
-        req = {"wallet": name, "passphrase": passphrase}
+        if self._passphrase_file is None:
+            raise Exception("Must set wallet passphrase file path to generate wallets")
 
-        if name not in self.pub_keys:
-            # Wallet now requires a connection to a live vega service during startup,
-            # which can slow initialisation a little
-            for _ in range(5):
-                try:
-                    response = requests.post(
-                        WALLET_CREATION_URL.format(wallet_server_url=self.wallet_url),
-                        json=req,
-                    )
-                    response.raise_for_status()
-                    self.login_tokens[name] = response.json()["token"]
-                    break
-                except requests.exceptions.ConnectionError:
-                    time.sleep(1)
-
-        self.generate_keypair(
-            token=self.login_tokens[name],
-            passphrase=passphrase,
-            metadata=[
-                {
-                    "key": "name",
-                    "value": key_name
-                    if key_name is not None
-                    else self.vega_default_key_name,
-                }
+        # First generate the wallet itself
+        subprocess.run(
+            [
+                self._wallet_path,
+                "create",
+                "--wallet",
+                name,
+                "--home",
+                self._wallet_home,
+                "--passphrase-file",
+                self._passphrase_file,
+                "--output",
+                "json",
             ],
+            capture_output=True,
+            universal_newlines=True,
+            encoding="UTF-8",
         )
-        self.pub_keys[name] = self.get_keypairs(wallet_name=name)
 
-    def login(self, name: str, passphrase: str) -> str:
-        """Logs in to existing wallet in the given vega service.
+        # Then create a token for it
+        cmd = subprocess.run(
+            [
+                self._wallet_path,
+                "api-token",
+                "generate",
+                "--home",
+                self._wallet_home,
+                "--tokens-passphrase-file",
+                self._passphrase_file,
+                "--wallet-passphrase-file",
+                self._passphrase_file,
+                "--wallet-name",
+                name,
+                "--description",
+                name,
+            ],
+            capture_output=True,
+            universal_newlines=True,
+            encoding="UTF-8",
+        ).stdout
 
-        Args:
-            name:
-                str, The name of the wallet
-            passphrase:
-                str, The login passphrase used when creating the wallet
-        Returns:
-            str, login token to use in authenticated requests
-        """
-        req = {"wallet": name, "passphrase": passphrase}
-        response = requests.post(
-            WALLET_LOGIN_URL.format(wallet_server_url=self.wallet_url),
-            json=req,
-        )
-        response.raise_for_status()
-        self.login_tokens[name] = response.json()["token"]
-        self.pub_keys[name] = self.get_keypairs(name)
-        return self.login_tokens[name]
-
-    def generate_keypair(
-        self,
-        token: str,
-        passphrase: str,
-        metadata: Optional[List[Dict[str, str]]] = None,
-    ) -> None:
-        """Generates a keypair for given token validated wallet.
-
-        Args:
-            token:
-                str, token returned from login to wallet
-            passphrase:
-                str, passphrase used for login to corresponding wallet
-            wallet_url:
-                str, base URL of the wallet service
-            metadata:
-                list[dict], metadata which is stored alongside keys to identify them
-        Returns:
-            str, public key generated
-        """
-        headers = {"Authorization": f"Bearer {token}"}
-        req = {
-            "passphrase": passphrase,
-            "meta": metadata,
-        }
-        response = requests.post(
-            WALLET_KEY_URL.format(wallet_server_url=self.wallet_url),
-            headers=headers,
-            json=req,
-        )
-        response.raise_for_status()
-        return list(response.json()["key"]["pub"])
+        self.login_tokens[name] = json.loads(cmd)["token"]
 
     def get_keypairs(self, wallet_name: str) -> dict:
-        headers = {"Authorization": f"Bearer {self.login_tokens[wallet_name]}"}
-        response = requests.get(
-            WALLET_KEY_URL.format(wallet_server_url=self.wallet_url), headers=headers
-        )
-        response.raise_for_status()
-        return {key["name"]: key["pub"] for key in response.json()["keys"]}
+        if wallet_name not in self.login_tokens:
+            self._load_token(wallet_name=wallet_name)
 
-    def submit_transaction(
-        self,
-        name: str,
-        transaction: Any,
-        transaction_type: str,
-        key_name: Optional[int] = None,
-    ):
-
-        pub_key = self.public_key(name=name, key_name=key_name)
-
-        headers = {"Authorization": f"Bearer {self.login_tokens[name]}"}
-        submission = {
-            inflection.camelize(
-                transaction_type, uppercase_first_letter=False
-            ): MessageToDict(transaction),
-            "pubKey": pub_key,
-            "propagate": True,
+        headers = {
+            "Origin": "MarketSim",
+            "Authorization": f"VWT {self.login_tokens[wallet_name]}",
         }
 
-        url = f"{self.wallet_url}/api/v1/command/sync"
+        submission = {
+            "jsonrpc": "2.0",
+            "method": "client.list_keys",
+            "params": [],
+            "id": "request",
+        }
+
+        url = f"{self.wallet_url}/api/v2/requests"
 
         response = requests.post(url, headers=headers, json=submission)
         response.raise_for_status()
 
-    def public_key(self, name: str, key_name: Optional[str] = None) -> str:
+        return {
+            key["name"]: key["publicKey"] for key in response.json()["result"]["keys"]
+        }
+
+    def submit_transaction(
+        self,
+        key_name: str,
+        transaction: Any,
+        transaction_type: str,
+        wallet_name: Optional[int] = None,
+    ):
+        wallet_name = (
+            wallet_name if wallet_name is not None else self.vega_default_wallet_name
+        )
+        if wallet_name not in self.login_tokens:
+            self._load_token(wallet_name=wallet_name)
+
+        pub_key = self.public_key(wallet_name=wallet_name, name=key_name)
+
+        headers = {
+            "Origin": "MarketSim",
+            "Authorization": f"VWT {self.login_tokens[wallet_name]}",
+        }
+
+        submission = {
+            "jsonrpc": "2.0",
+            "method": "client.send_transaction",
+            "params": {
+                "transaction": {
+                    inflection.camelize(
+                        transaction_type, uppercase_first_letter=False
+                    ): MessageToDict(transaction)
+                },
+                "sendingMode": "TYPE_ASYNC",
+                "publicKey": pub_key,
+            },
+            "id": "request",
+        }
+
+        url = f"{self.wallet_url}/api/v2/requests"
+
+        requests.post(url, headers=headers, json=submission).raise_for_status()
+
+    def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Return a public key for the given wallet name and key name.
 
         Args:
             name (str):
-                Name of the wallet.
-            key_name (str):
-                Name of the key. Defaults to None.
+                Name of the key.
+            wallet_name (str):
+                Name of the wallet. Defaults to None.
 
         Returns:
             str, public key
         """
+        wallet_name = (
+            self.vega_default_wallet_name if wallet_name is None else wallet_name
+        )
 
-        if key_name is None:
-            return self.pub_keys[name][self.vega_default_key_name]
-        else:
-            return self.pub_keys[name][key_name]
+        if wallet_name not in self.pub_keys or name not in self.pub_keys[wallet_name]:
+            self.pub_keys.setdefault(wallet_name, {}).update(
+                self.get_keypairs(wallet_name=wallet_name)
+            )
+
+        return self.pub_keys[wallet_name][name]
