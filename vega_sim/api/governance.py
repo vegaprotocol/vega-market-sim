@@ -301,6 +301,8 @@ def propose_future_market(
             ),
             price_monitoring_parameters=price_monitoring_parameters,
             log_normal=risk_model,
+            linear_slippage_factor="0.001",
+            quadratic_slippage_factor="0",
         ),
     )
 
