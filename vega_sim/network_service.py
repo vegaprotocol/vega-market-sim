@@ -537,7 +537,7 @@ if __name__ == "__main__":
         logging.info(markets)
 
         # Show data for a specific market
-        market = vega.market_data(market_id=markets[0].id)
+        market = vega.get_latest_market_data(market_id=markets[0].id)
 
     # Create a service connected to the stagnet3 network.
     with VegaServiceNetwork(
@@ -550,4 +550,4 @@ if __name__ == "__main__":
         logging.info(markets)
 
         # Show data for a specific market
-        market = vega.market_data(market_id=markets[0].id)
+        market = vega.get_latest_market_data(market_id=markets[0].id)
