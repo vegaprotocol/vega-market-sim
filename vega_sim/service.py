@@ -2126,11 +2126,7 @@ class VegaService(ABC):
                 Name of specific key in wallet to get public key for. Defaults to None.
         """
 
-        market_data = (
-            market_data
-            if market_data is not None
-            else self.get_latest_market_data(market_id=market_id)
-        )
+        market_data = self.get_latest_market_data(market_id=market_id)
 
         # Calculate share of fees for each LP
         shares = {

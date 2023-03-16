@@ -203,6 +203,7 @@ class MarketData:
     supplied_stake: float
     market_value_proxy: float
     price_monitoring_bounds: list
+    liquidity_provider_fee_share: list
     market_state: str
     next_mark_to_market: float
     last_traded_price: float
@@ -214,6 +215,14 @@ class PriceMonitoringBounds:
     max_valid_price: float
     trigger: str
     reference_price: float
+
+
+@dataclass(frozen=True)
+class LiquidityProviderFeeShare:
+    party: str
+    equity_like_share: float
+    average_entry_valuation: float
+    average_score: float
 
 
 def _ledger_entry_from_proto(
@@ -521,6 +530,9 @@ def _market_data_from_proto(
         price_monitoring_bounds=_price_monitoring_bounds_from_proto(
             market_data.price_monitoring_bounds, decimal_spec.price_decimals
         ),
+        liquidity_provider_fee_share=_liquidity_provider_fee_share_from_proto(
+            market_data.liquidity_provider_fee_share, decimal_spec.asset_decimals,
+        ),
         market_state=market_data.market_state,
         next_mark_to_market=market_data.next_mark_to_market,
         last_traded_price=num_from_padded_int(
@@ -552,6 +564,22 @@ def _price_monitoring_bounds_from_proto(
         for individual_bound in price_monitoring_bounds
     ]
 
+def _liquidity_provider_fee_share_from_proto(
+    liquidity_provider_fee_share,
+    asset_decimals,
+) -> List[PriceMonitoringBounds]:
+    return [
+        LiquidityProviderFeeShare(
+            party=individual_liquidity_provider_fee_share.party,
+            equity_like_share=float(individual_liquidity_provider_fee_share.equity_like_share),
+            average_entry_valuation=num_from_padded_int(
+                float(individual_liquidity_provider_fee_share.average_entry_valuation),
+                asset_decimals,
+            ),
+            average_score=float(individual_liquidity_provider_fee_share.equity_like_share),
+        )
+        for individual_liquidity_provider_fee_share in liquidity_provider_fee_share
+    ]
 
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
