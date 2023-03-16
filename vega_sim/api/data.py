@@ -176,6 +176,46 @@ class Trade:
     seller_auction_batch: int
 
 
+@dataclass(frozen=True)
+class MarketData:
+    mark_price: float
+    best_bid_price: float
+    best_bid_volume: float
+    best_offer_price: float
+    best_offer_volume: float
+    best_static_bid_price: float
+    best_static_bid_volume: float
+    best_static_offer_price: float
+    best_static_offer_volume: float
+    mid_price: float
+    static_mid_price: float
+    market_id: str
+    timestamp: str
+    open_interest: float
+    auction_end: str
+    auction_start: str
+    indicative_price: float
+    indicative_volume: float
+    market_trading_mode: str
+    trigger: str
+    extension_trigger: str
+    target_stake: float
+    supplied_stake: float
+    market_value_proxy: float
+    price_monitoring_bounds: list
+    market_state: str
+    next_mark_to_market: float
+    last_traded_price: float
+
+
+@dataclass(frozen=True)
+class PriceMonitoringBounds:
+    min_valid_price: float
+    max_valid_price: float
+    trigger: str
+    reference_price: float
+
+
 def _ledger_entry_from_proto(
     ledger_entry,
     asset_decimals: int,
@@ -416,6 +456,101 @@ def positions_by_market(
     else:
         return positions[market_id]
 
+
+def _market_data_from_proto(
+    market_data: vega_protos.vega.MarketData,
+    decimal_spec: DecimalSpec,
+):
+    return MarketData(
+        mark_price=num_from_padded_int(
+            market_data.mark_price, decimal_spec.price_decimals
+        ),
+        best_bid_price=num_from_padded_int(
+            market_data.best_bid_price, decimal_spec.price_decimals
+        ),
+        best_bid_volume=num_from_padded_int(
+            market_data.best_bid_volume, decimal_spec.position_decimals
+        ),
+        best_offer_price=num_from_padded_int(
+            market_data.best_offer_price, decimal_spec.price_decimals
+        ),
+        best_offer_volume=num_from_padded_int(
+            market_data.best_offer_volume, decimal_spec.position_decimals
+        ),
+        best_static_bid_price=num_from_padded_int(
+            market_data.best_static_bid_price, decimal_spec.price_decimals
+        ),
+        best_static_bid_volume=num_from_padded_int(
+            market_data.best_static_bid_price, decimal_spec.position_decimals
+        ),
+        best_static_offer_price=num_from_padded_int(
+            market_data.best_static_offer_price, decimal_spec.price_decimals
+        ),
+        best_static_offer_volume=num_from_padded_int(
+            market_data.best_static_offer_volume, decimal_spec.position_decimals
+        ),
+        mid_price=num_from_padded_int(
+            market_data.mid_price, decimal_spec.price_decimals
+        ),
+        static_mid_price=num_from_padded_int(
+            market_data.static_mid_price, decimal_spec.price_decimals
+        ),
+        market_id=market_data.market,
+        timestamp=market_data.timestamp,
+        open_interest=market_data.open_interest,
+        auction_end=market_data.auction_end,
+        auction_start=market_data.auction_start,
+        indicative_price=num_from_padded_int(
+            market_data.static_mid_price, decimal_spec.price_decimals
+        ),
+        indicative_volume=num_from_padded_int(
+            market_data.static_mid_price, decimal_spec.price_decimals
+        ),
+        market_trading_mode=market_data.market_trading_mode,
+        trigger=market_data.trigger,
+        extension_trigger=market_data.extension_trigger,
+        target_stake=num_from_padded_int(
+            market_data.target_stake, decimal_spec.asset_decimals
+        ),
+        supplied_stake=num_from_padded_int(
+            market_data.supplied_stake, decimal_spec.asset_decimals
+        ),
+        market_value_proxy=num_from_padded_int(
+            market_data.market_value_proxy, decimal_spec.asset_decimals
+        ),
+        price_monitoring_bounds=_price_monitoring_bounds_from_proto(
+            market_data.price_monitoring_bounds, decimal_spec.price_decimals
+        ),
+        market_state=market_data.market_state,
+        next_mark_to_market=market_data.next_mark_to_market,
+        last_traded_price=num_from_padded_int(
+            market_data.last_traded_price, decimal_spec.price_decimals
+        ),
+    )
+
+
+def _price_monitoring_bounds_from_proto(
+    price_monitoring_bounds,
+    price_decimals: int,
+) -> List[PriceMonitoringBounds]:
+    return [
+        PriceMonitoringBounds(
+            min_valid_price=num_from_padded_int(
+                individual_bound.min_valid_price,
+                price_decimals,
+            ),
+            max_valid_price=num_from_padded_int(
+                individual_bound.max_valid_price,
+                price_decimals,
+            ),
+            trigger=individual_bound.trigger,
+            reference_price=num_from_padded_int(
+                individual_bound.reference_price,
+                price_decimals,
+            ),
+        )
+        for individual_bound in price_monitoring_bounds
+    ]
 
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
@@ -1114,7 +1249,7 @@ def _stream_handler(
 
     event = extraction_fn(stream_item)
 
-    market_id = getattr(event, "market_id", None)
+    market_id = getattr(event, "market_id", getattr(event, "market", None))
     asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset.get(market_id)))
 
     return conversion_fn(
@@ -1349,6 +1484,23 @@ def ledger_entries_subscription_handler(
             )
     return ledger_entries
 
+
+def market_data_subscription_handler(
+    stream_item: vega_protos.api.v1.core.ObserveEventBusResponse,
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+):
+    return _stream_handler(
+        stream_item=stream_item,
+        extraction_fn=lambda evt: evt.market_data,
+        conversion_fn=_market_data_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
 
 def get_risk_factors(
     data_client: vac.VegaTradingDataClientV2,

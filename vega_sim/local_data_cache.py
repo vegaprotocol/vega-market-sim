@@ -139,7 +139,13 @@ class LocalDataCache:
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_MARKET_DATA,),
-                lambda evt: evt.market_data,
+                lambda evt: data.market_data_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
             ),
         ]
         self._high_load_stream_registry = [
@@ -310,8 +316,13 @@ class LocalDataCache:
             ]
         with self.market_data_lock:
             for market_id in market_ids:
-                self.market_data_from_feed_store[market_id] = data_raw.market_data(
-                    market_id, data_client=self._trading_data_client
+                self.market_data_from_feed_store[market_id] = data.get_latest_market_data(
+                    market_id,
+                    data_client=self._trading_data_client,
+                    market_price_decimals_map=self._market_price_decimals,
+                    market_position_decimals_map=self._market_pos_decimals,
+                    asset_decimals_map=self._asset_decimals,
+                    market_to_asset_map=self._market_to_asset,
                 )
 
     def initialise_transfer_monitoring(
@@ -374,9 +385,9 @@ class LocalDataCache:
                     with self.trades_lock:
                         self._trades_from_feed.append(update)
 
-                elif isinstance(update, vega_protos.vega.MarketData):
+                elif isinstance(update, data.MarketData):
                     with self.market_data_lock:
-                        self.market_data_from_feed_store[update.market] = update
+                        self.market_data_from_feed_store[update.market_id] = update
 
                 elif isinstance(update, data.LedgerEntry):
                     with self.ledger_entries_lock:
