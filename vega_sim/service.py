@@ -1098,18 +1098,6 @@ class VegaService(ABC):
         return self.data_cache.market_data_from_feed(market_id)
 
     @raw_data
-    def market_data(
-        self,
-        market_id: str,
-    ) -> vega_protos.vega.MarketData:
-        """
-        Output market info.
-        """
-        return data_raw.market_data(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
-
-    @raw_data
     def infrastructure_fee_accounts(
         self,
         asset_id: str,
@@ -1134,6 +1122,22 @@ class VegaService(ABC):
             asset_id=asset_id,
             market_id=market_id,
             data_client=self.trading_data_client_v2,
+        )
+
+    def get_latest_market_data(
+        self,
+        market_id: str,
+    ) -> vega_protos.vega.MarketData:
+        """
+        Output market info.
+        """
+        return data.get_latest_market_data(
+            market_id=market_id,
+            data_client=self.trading_data_client_v2,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_to_asset_map=self.market_to_asset,
+            asset_decimals_map=self.asset_decimals,
         )
 
     def market_account(

@@ -155,7 +155,7 @@ def market_accounts(
     )
 
 
-def market_data(
+def get_latest_market_data(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
 ) -> vega_protos.vega.MarketData:

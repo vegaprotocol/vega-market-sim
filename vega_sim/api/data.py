@@ -552,6 +552,7 @@ def _price_monitoring_bounds_from_proto(
         for individual_bound in price_monitoring_bounds
     ]
 
+
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
     pub_key: Optional[str] = None,
@@ -1501,6 +1502,59 @@ def market_data_subscription_handler(
         mkt_to_asset=mkt_to_asset,
         asset_dp=asset_dp,
     )
+
+
+def get_latest_market_data(
+    market_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> MarketData:
+    # Get latest market data
+    market_data = data_raw.get_latest_market_data(
+        market_id=market_id, data_client=data_client
+    )
+    # Add decimals to map
+    market_price_decimals_map = (
+        market_price_decimals_map if market_price_decimals_map is not None else {}
+    )
+    if market_id not in market_price_decimals_map:
+        market_price_decimals_map[market_id] = market_price_decimals(
+            market_id=market_id, data_client=data_client
+        )
+    market_position_decimals_map = (
+        market_position_decimals_map if market_position_decimals_map is not None else {}
+    )
+    if market_id not in market_position_decimals_map:
+        market_position_decimals_map[market_id] = market_position_decimals(
+            market_id=market_id, data_client=data_client
+        )
+    market_to_asset_map = market_to_asset_map if market_to_asset_map is not None else {}
+    if market_id not in market_to_asset_map:
+        market_to_asset_map[market_id] = get_asset_decimals(
+            asset_id=data_raw.market_info(
+                market_id=market_id, data_client=data_client
+            ).tradable_instrument.instrument.future.settlement_asset,
+            data_client=data_client,
+        )
+    asset_decimals_map = asset_decimals_map if asset_decimals_map is not None else {}
+    if market_to_asset_map[market_id] not in asset_decimals_map:
+        asset_decimals_map[market_to_asset_map[market_id]] = data_raw.asset_info(
+            asset_id=market_to_asset_map[market_id],
+            data_client=data_client,
+        )
+    # Convert from proto
+    return _market_data_from_proto(
+        market_data=market_data,
+        decimal_spec=DecimalSpec(
+            price_decimals=market_price_decimals_map[market_data.market],
+            position_decimals=market_position_decimals_map[market_data.market],
+            asset_decimals=asset_decimals_map[market_to_asset_map[market_data.market]],
+        ),
+    )
+
 
 def get_risk_factors(
     data_client: vac.VegaTradingDataClientV2,
