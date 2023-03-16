@@ -1431,8 +1431,8 @@ def get_latest_market_data(
         )
     if market_id not in market_to_asset_map:
         market_to_asset_map[market_id] = data_raw.market_info(
-                market_id=market_id, data_client=data_client
-            ).tradable_instrument.instrument.future.settlement_asset
+            market_id=market_id, data_client=data_client
+        ).tradable_instrument.instrument.future.settlement_asset
     if market_to_asset_map[market_id] not in asset_decimals_map:
         asset_decimals_map[market_to_asset_map[market_id]] = get_asset_decimals(
             asset_id=market_to_asset_map[market_id],
@@ -1447,6 +1447,7 @@ def get_latest_market_data(
             asset_decimals=asset_decimals_map[market_to_asset_map[market_data.market]],
         ),
     )
+
 
 def get_risk_factors(
     data_client: vac.VegaTradingDataClientV2,
