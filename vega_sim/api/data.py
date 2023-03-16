@@ -1411,32 +1411,30 @@ def get_latest_market_data(
     market_data = data_raw.get_latest_market_data(
         market_id=market_id, data_client=data_client
     )
-    # Add decimals to map
+
     market_price_decimals_map = (
         market_price_decimals_map if market_price_decimals_map is not None else {}
     )
+    market_position_decimals_map = (
+        market_position_decimals_map if market_position_decimals_map is not None else {}
+    )
+    market_to_asset_map = market_to_asset_map if market_to_asset_map is not None else {}
+    asset_decimals_map = asset_decimals_map if asset_decimals_map is not None else {}
+
     if market_id not in market_price_decimals_map:
         market_price_decimals_map[market_id] = market_price_decimals(
             market_id=market_id, data_client=data_client
         )
-    market_position_decimals_map = (
-        market_position_decimals_map if market_position_decimals_map is not None else {}
-    )
     if market_id not in market_position_decimals_map:
         market_position_decimals_map[market_id] = market_position_decimals(
             market_id=market_id, data_client=data_client
         )
-    market_to_asset_map = market_to_asset_map if market_to_asset_map is not None else {}
     if market_id not in market_to_asset_map:
-        market_to_asset_map[market_id] = get_asset_decimals(
-            asset_id=data_raw.market_info(
+        market_to_asset_map[market_id] = data_raw.market_info(
                 market_id=market_id, data_client=data_client
-            ).tradable_instrument.instrument.future.settlement_asset,
-            data_client=data_client,
-        )
-    asset_decimals_map = asset_decimals_map if asset_decimals_map is not None else {}
+            ).tradable_instrument.instrument.future.settlement_asset
     if market_to_asset_map[market_id] not in asset_decimals_map:
-        asset_decimals_map[market_to_asset_map[market_id]] = data_raw.asset_info(
+        asset_decimals_map[market_to_asset_map[market_id]] = get_asset_decimals(
             asset_id=market_to_asset_map[market_id],
             data_client=data_client,
         )
@@ -1449,7 +1447,6 @@ def get_latest_market_data(
             asset_decimals=asset_decimals_map[market_to_asset_map[market_data.market]],
         ),
     )
-
 
 def get_risk_factors(
     data_client: vac.VegaTradingDataClientV2,
