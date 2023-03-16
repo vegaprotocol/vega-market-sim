@@ -764,67 +764,6 @@ def get_asset_decimals(
     ).details.decimals
 
 
-def best_prices(
-    market_id: str,
-    data_client: vac.VegaTradingDataClientV2,
-    price_decimals: Optional[int] = None,
-    market_data: Optional[vega_protos.vega.MarketData] = None,
-) -> Tuple[float, float]:
-    """
-    Output the best static bid price and best static ask price in current market.
-    """
-    mkt_data = (
-        market_data
-        if market_data is not None
-        else data_raw.market_data(market_id=market_id, data_client=data_client)
-    )
-    mkt_price_dp = (
-        price_decimals
-        if price_decimals is not None
-        else market_price_decimals(market_id=market_id, data_client=data_client)
-    )
-
-    return (
-        num_from_padded_int(mkt_data.best_static_bid_price, mkt_price_dp),
-        num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp),
-    )
-
-
-def price_bounds(
-    market_id: str,
-    data_client: vac.VegaTradingDataClientV2,
-    price_decimals: Optional[int] = None,
-    market_data: Optional[vega_protos.vega.MarketData] = None,
-) -> Tuple[Optional[float], Optional[float]]:
-    """
-    Output the tightest price bounds in current market.
-    """
-    mkt_data = (
-        market_data
-        if market_data is not None
-        else data_raw.market_data(market_id=market_id, data_client=data_client)
-    )
-    mkt_price_dp = (
-        price_decimals
-        if price_decimals is not None
-        else market_price_decimals(market_id=market_id, data_client=data_client)
-    )
-
-    lower_bounds = [
-        price_monitoring_bound.min_valid_price
-        for price_monitoring_bound in mkt_data.price_monitoring_bounds
-    ]
-    upper_bounds = [
-        price_monitoring_bound.max_valid_price
-        for price_monitoring_bound in mkt_data.price_monitoring_bounds
-    ]
-
-    return (
-        num_from_padded_int(max(lower_bounds), mkt_price_dp) if lower_bounds else None,
-        num_from_padded_int(min(upper_bounds), mkt_price_dp) if upper_bounds else None,
-    )
-
-
 def open_orders_by_market(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -1261,50 +1200,6 @@ def _stream_handler(
             asset_decimals=asset_decimals,
         ),
     )
-
-
-def get_liquidity_fee_shares(
-    data_client: vac.VegaTradingDataClientV2,
-    market_id: str,
-    party_id: Optional[str] = None,
-    market_data: Optional[vega_protos.vega.MarketData] = None,
-) -> Union[Dict, float]:
-    """Gets the current liquidity fee share for each party or a specified party.
-
-    Args:
-        data_client (vac.VegaTradingDataClientV2):
-            An instantiated gRPC data client
-        market_id (str):
-            Id of market to get liquidity fee shares from.
-        party_id (Optional[str], optional):
-            Id of party to get liquidity fee shares for. Defaults to None.
-        market_data (Optional[vega_protos.markets.MarketData]):
-            Market data to use. If not passed, loads from data node
-    """
-
-    market_data = (
-        market_data
-        if market_data is not None
-        else data_raw.market_data(data_client=data_client, market_id=market_id)
-    )
-
-    # Calculate share of fees for each LP
-    shares = {
-        lp.party: float(lp.equity_like_share) * float(lp.average_score)
-        for lp in market_data.liquidity_provider_fee_share
-    }
-    total_shares = sum(shares.values())
-
-    # Scale share of fees for each LP pro rata
-    if total_shares != 0:
-        pro_rata_shares = {key: val / total_shares for key, val in shares.items()}
-    else:
-        pro_rata_shares = {key: 1 / len(shares) for key, val in shares.items()}
-
-    if party_id is None:
-        return pro_rata_shares
-    else:
-        return pro_rata_shares[party_id]
 
 
 def list_ledger_entries(

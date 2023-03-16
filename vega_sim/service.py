@@ -1170,11 +1170,13 @@ class VegaService(ABC):
         """
         Output the best static bid price and best static ask price in current market.
         """
-        return data.best_prices(
+        market_data = self.get_latest_market_data(
             market_id=market_id,
-            data_client=self.trading_data_client_v2,
-            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
-            price_decimals=self.market_price_decimals[market_id],
+        )
+
+        return (
+            market_data.best_static_bid_price,
+            market_data.best_static_offer_price,
         )
 
     def price_bounds(
@@ -1184,11 +1186,22 @@ class VegaService(ABC):
         """
         Output the tightest price bounds in the current market.
         """
-        return data.price_bounds(
+        market_data = self.get_latest_market_data(
             market_id=market_id,
-            data_client=self.trading_data_client_v2,
-            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
-            price_decimals=self.market_price_decimals[market_id],
+        )
+
+        lower_bounds = [
+            price_monitoring_bound.min_valid_price
+            for price_monitoring_bound in market_data.price_monitoring_bounds
+        ]
+        upper_bounds = [
+            price_monitoring_bound.max_valid_price
+            for price_monitoring_bound in market_data.price_monitoring_bounds
+        ]
+
+        return (
+            max(lower_bounds) if lower_bounds else None,
+            min(upper_bounds) if upper_bounds else None,
         )
 
     def order_book_by_market(
@@ -2113,16 +2126,31 @@ class VegaService(ABC):
                 Name of specific key in wallet to get public key for. Defaults to None.
         """
 
-        return data.get_liquidity_fee_shares(
-            data_client=self.trading_data_client_v2,
-            market_id=market_id,
-            party_id=(
-                self.wallet.public_key(wallet_name=wallet_name, name=key_name)
-                if wallet_name is not None
-                else None
-            ),
-            market_data=self.market_data_from_feed(market_id=market_id),
+        market_data = (
+            market_data
+            if market_data is not None
+            else self.get_latest_market_data(market_id=market_id)
         )
+
+        # Calculate share of fees for each LP
+        shares = {
+            lp.party: float(lp.equity_like_share) * float(lp.average_score)
+            for lp in market_data.liquidity_provider_fee_share
+        }
+        total_shares = sum(shares.values())
+
+        # Scale share of fees for each LP pro rata
+        if total_shares != 0:
+            pro_rata_shares = {key: val / total_shares for key, val in shares.items()}
+        else:
+            pro_rata_shares = {key: 1 / len(shares) for key, val in shares.items()}
+
+        if key_name is None:
+            return pro_rata_shares
+        else:
+            return pro_rata_shares[
+                self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+            ]
 
     def list_ledger_entries(
         self,
