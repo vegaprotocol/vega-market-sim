@@ -522,9 +522,9 @@ def list_ledger_entries(
                 asset_id=asset_id,
                 party_ids=from_party_ids if from_party_ids is not None else [],
                 market_ids=from_market_ids if from_market_ids is not None else [],
-                account_types=from_account_types
-                if from_account_types is not None
-                else [],
+                account_types=(
+                    from_account_types if from_account_types is not None else []
+                ),
             ),
             to_account_filter=data_node_protos_v2.trading_data.AccountFilter(
                 asset_id=asset_id,
@@ -538,12 +538,14 @@ def list_ledger_entries(
     if from_datetime is not None or to_datetime is not None:
         base_request.date_range.CopyFrom(
             data_node_protos_v2.trading_data.DateRange(
-                start_timestamp=from_datetime.timestamp() * 1e9
-                if from_datetime is not None
-                else None,
-                end_timestamp=to_datetime.timestamp() * 1e9
-                if to_datetime is not None
-                else None,
+                start_timestamp=(
+                    from_datetime.timestamp() * 1e9
+                    if from_datetime is not None
+                    else None
+                ),
+                end_timestamp=(
+                    to_datetime.timestamp() * 1e9 if to_datetime is not None else None
+                ),
             )
         )
 

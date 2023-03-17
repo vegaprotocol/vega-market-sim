@@ -1227,7 +1227,11 @@ def _stream_handler(
     event = extraction_fn(stream_item)
 
     market_id = getattr(event, "market_id", getattr(event, "market", None))
-    asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset[market_id]))
+    asset_decimals = asset_dp.get(
+        getattr(
+            event, "asset", mkt_to_asset[market_id] if market_id is not None else None
+        )
+    )
 
     return conversion_fn(
         event,
