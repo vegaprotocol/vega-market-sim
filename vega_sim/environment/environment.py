@@ -346,18 +346,15 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 self.market_decimals_cache[market_id] = vega.market_info(
                     market_id=market_id
                 ).decimal_places
-            market_state[market_data.market] = MarketState(
+            market_state[market_id] = MarketState(
                 state=market_data.market_state,
                 trading_mode=market_data.market_trading_mode,
-                midprice=float(market_data.mid_price)
-                / 10 ** int(self.market_decimals_cache[market_id]),
-                best_bid_price=float(market_data.best_bid_price)
-                / 10 ** self.market_decimals_cache[market_id],
-                best_ask_price=float(market_data.best_offer_price)
-                / 10 ** self.market_decimals_cache[market_id],
+                midprice=market_data.mid_price,
+                best_bid_price=market_data.best_bid_price,
+                best_ask_price=market_data.best_offer_price,
                 min_valid_price=vega.price_bounds(market_id=market_id)[0],
                 max_valid_price=vega.price_bounds(market_id=market_id)[1],
-                orders=order_status.get(market_data.market, {}),
+                orders=order_status.get(market_id, {}),
             )
 
         return VegaState(network_state=(), market_state=market_state)

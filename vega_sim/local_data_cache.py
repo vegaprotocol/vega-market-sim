@@ -69,7 +69,7 @@ def _queue_forwarder(
                 else:
                     sink.put(output)
     except Exception:
-        logger.debug("Data cache event bus closed")
+        logger.info("Data cache event bus closed")
 
 
 class DecimalsCache(defaultdict):
@@ -139,7 +139,13 @@ class LocalDataCache:
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_MARKET_DATA,),
-                lambda evt: evt.market_data,
+                lambda evt: data.market_data_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
             ),
         ]
         self._high_load_stream_registry = [
@@ -256,12 +262,16 @@ class LocalDataCache:
                 self.stream_registry
                 + (self._high_load_stream_registry if start_high_load_feeds else []),
                 self._aggregated_observation_feed,
-                (market_ids[0] if len(market_ids) == 1 else None)
-                if market_ids is not None
-                else None,
-                (party_ids[0] if len(party_ids) == 1 else None)
-                if party_ids is not None
-                else None,
+                (
+                    (market_ids[0] if len(market_ids) == 1 else None)
+                    if market_ids is not None
+                    else None
+                ),
+                (
+                    (party_ids[0] if len(party_ids) == 1 else None)
+                    if party_ids is not None
+                    else None
+                ),
             ),
             daemon=True,
         )
@@ -285,12 +295,16 @@ class LocalDataCache:
                     market_id=market_party_tuple[0],
                     party_id=market_party_tuple[1],
                     live_only=True,
-                    price_decimals=self._market_price_decimals[market_party_tuple[0]]
-                    if market_party_tuple[0] is not None
-                    else None,
-                    position_decimals=self._market_pos_decimals[market_party_tuple[0]]
-                    if market_party_tuple[0] is not None
-                    else None,
+                    price_decimals=(
+                        self._market_price_decimals[market_party_tuple[0]]
+                        if market_party_tuple[0] is not None
+                        else None
+                    ),
+                    position_decimals=(
+                        self._market_pos_decimals[market_party_tuple[0]]
+                        if market_party_tuple[0] is not None
+                        else None
+                    ),
                 )
             )
 
@@ -310,8 +324,15 @@ class LocalDataCache:
             ]
         with self.market_data_lock:
             for market_id in market_ids:
-                self.market_data_from_feed_store[market_id] = data_raw.market_data(
-                    market_id, data_client=self._trading_data_client
+                self.market_data_from_feed_store[
+                    market_id
+                ] = data.get_latest_market_data(
+                    market_id,
+                    data_client=self._trading_data_client,
+                    market_price_decimals_map=self._market_price_decimals,
+                    market_position_decimals_map=self._market_pos_decimals,
+                    asset_decimals_map=self._asset_decimals,
+                    market_to_asset_map=self._market_to_asset,
                 )
 
     def initialise_transfer_monitoring(
@@ -374,9 +395,9 @@ class LocalDataCache:
                     with self.trades_lock:
                         self._trades_from_feed.append(update)
 
-                elif isinstance(update, vega_protos.vega.MarketData):
+                elif isinstance(update, data.MarketData):
                     with self.market_data_lock:
-                        self.market_data_from_feed_store[update.market] = update
+                        self.market_data_from_feed_store[update.market_id] = update
 
                 elif isinstance(update, data.LedgerEntry):
                     with self.ledger_entries_lock:

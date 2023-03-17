@@ -22,6 +22,7 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
         results.append(
             {
                 "time": data.at_time,
+                "mark_price": market_data.mark_price,
                 "market_id": market_id,
                 "open_interest": market_data.open_interest,
                 "best_bid": market_data.best_bid_price,

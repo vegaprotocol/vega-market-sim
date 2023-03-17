@@ -19,7 +19,7 @@ from vega_sim.api.data_raw import (
     infrastructure_fee_accounts,
     liquidity_provisions,
     market_accounts,
-    market_data,
+    get_latest_market_data,
     market_data_history,
     market_info,
     order_status,
@@ -364,7 +364,7 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-def test_market_data(trading_data_v2_servicer_and_port):
+def test_get_latest_market_data(trading_data_v2_servicer_and_port):
     expected = vega_protos.vega.MarketData(mid_price="100", market="foobar")
 
     def GetLatestMarketData(self, request, context):
@@ -380,7 +380,7 @@ def test_market_data(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    res = market_data(market_id="foobar", data_client=data_client)
+    res = get_latest_market_data(market_id="foobar", data_client=data_client)
 
     assert res == expected
 

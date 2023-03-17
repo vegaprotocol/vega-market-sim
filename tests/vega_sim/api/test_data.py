@@ -20,8 +20,6 @@ from vega_sim.api.data import (
     Trade,
     AggregatedLedgerEntry,
     get_asset_decimals,
-    best_prices,
-    price_bounds,
     find_asset_id,
     get_trades,
     margin_levels,
@@ -30,7 +28,6 @@ from vega_sim.api.data import (
     open_orders_by_market,
     party_account,
     list_transfers,
-    get_liquidity_fee_shares,
     list_ledger_entries,
 )
 from vega_sim.grpc.client import (
@@ -196,43 +193,6 @@ def test_asset_decimals(mkt_info_mock):
     mkt_info_mock.return_value = asset_mock
 
     assert get_asset_decimals("ASSET", None) == 3
-
-
-@patch("vega_sim.api.data_raw.market_data")
-def test_best_prices(mkt_data_mock):
-    mkt_data = MagicMock()
-    mkt_data_mock.return_value = mkt_data
-
-    mkt_data.best_static_bid_price = "202"
-    mkt_data.best_static_offer_price = "212"
-
-    bid_res, ask_res = best_prices("mkt", None, 2)
-    assert bid_res == pytest.approx(2.02)
-    assert ask_res == pytest.approx(2.12)
-
-
-@patch("vega_sim.api.data_raw.market_data")
-def test_price_bounds(mkt_data_mock):
-    mkt_data = MagicMock()
-    mkt_data_mock.return_value = mkt_data
-    mkt_data.price_monitoring_bounds = [
-        vega_protos.vega.PriceMonitoringBounds(
-            min_valid_price="10000",
-            max_valid_price="20000",
-        ),
-        vega_protos.vega.PriceMonitoringBounds(
-            min_valid_price="11000",
-            max_valid_price="19000",
-        ),
-        vega_protos.vega.PriceMonitoringBounds(
-            min_valid_price="12000",
-            max_valid_price="18000",
-        ),
-    ]
-
-    min_valid_price, max_valid_price = price_bounds("mkt", None, 2)
-    assert min_valid_price == pytest.approx(120)
-    assert max_valid_price == pytest.approx(180)
 
 
 def test_open_orders_by_market(trading_data_v2_servicer_and_port):
@@ -721,53 +681,6 @@ def test_list_transfers(
     )
 
     assert res == [expected]
-
-
-def test_get_liquidity_fee_shares(trading_data_v2_servicer_and_port):
-    expected = {"party1": 0.75, "party2": 0.25}
-
-    def GetLatestMarketData(self, request, context):
-        return data_node_protos_v2.trading_data.GetLatestMarketDataResponse(
-            market_data=vega_protos.vega.MarketData(
-                liquidity_provider_fee_share=[
-                    vega_protos.vega.LiquidityProviderFeeShare(
-                        party="party1",
-                        equity_like_share="0.75",
-                        average_entry_valuation="75",
-                        average_score="0.5",
-                    ),
-                    vega_protos.vega.LiquidityProviderFeeShare(
-                        party="party2",
-                        equity_like_share="0.25",
-                        average_entry_valuation="100",
-                        average_score="0.5",
-                    ),
-                ]
-            )
-        )
-
-    server, port, mock_servicer = trading_data_v2_servicer_and_port
-    mock_servicer.GetLatestMarketData = GetLatestMarketData
-
-    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
-
-    data_client = VegaTradingDataClientV2(f"localhost:{port}")
-
-    res1 = get_liquidity_fee_shares(
-        data_client=data_client, market_id="na", party_id="party1"
-    )
-    assert res1 == expected["party1"]
-
-    res2 = get_liquidity_fee_shares(
-        data_client=data_client, market_id="na", party_id="party2"
-    )
-    assert res2 == expected["party2"]
-
-    res3 = get_liquidity_fee_shares(
-        data_client=data_client,
-        market_id="na",
-    )
-    assert res3 == expected
 
 
 def test_list_ledger_entries(trading_data_v2_servicer_and_port):

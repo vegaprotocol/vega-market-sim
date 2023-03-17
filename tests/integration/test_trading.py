@@ -229,7 +229,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
         to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=500,
-        delay=15,
+        delay=50,
     )
 
     vega.wait_fn(10)
@@ -256,7 +256,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     assert party_a_accounts_t2.general == 500
     assert party_b_accounts_t2.general == 1000
 
-    vega.wait_fn(10)
+    vega.wait_fn(100)
     vega.wait_for_total_catchup()
 
     party_a_accounts_t3 = vega.party_account(
