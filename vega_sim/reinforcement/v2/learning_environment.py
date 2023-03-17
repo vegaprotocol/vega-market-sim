@@ -57,7 +57,6 @@ class Environment:
         self._vega.start()
 
     def stop(self):
-        print("stopping")
         self._vega.stop()
 
     def _extract_observation(self, agent_name: str) -> Observation:
