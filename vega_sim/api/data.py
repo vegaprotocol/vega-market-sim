@@ -438,9 +438,9 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
-            market_to_asset_map[
-                pos.market_id
-            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+            market_to_asset_map[pos.market_id] = (
+                market_info.tradable_instrument.instrument.future.settlement_asset
+            )
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -531,7 +531,8 @@ def _market_data_from_proto(
             market_data.price_monitoring_bounds, decimal_spec.price_decimals
         ),
         liquidity_provider_fee_share=_liquidity_provider_fee_share_from_proto(
-            market_data.liquidity_provider_fee_share, decimal_spec.asset_decimals,
+            market_data.liquidity_provider_fee_share,
+            decimal_spec.asset_decimals,
         ),
         market_state=market_data.market_state,
         next_mark_to_market=market_data.next_mark_to_market,
@@ -564,6 +565,7 @@ def _price_monitoring_bounds_from_proto(
         for individual_bound in price_monitoring_bounds
     ]
 
+
 def _liquidity_provider_fee_share_from_proto(
     liquidity_provider_fee_share,
     asset_decimals,
@@ -571,15 +573,20 @@ def _liquidity_provider_fee_share_from_proto(
     return [
         LiquidityProviderFeeShare(
             party=individual_liquidity_provider_fee_share.party,
-            equity_like_share=float(individual_liquidity_provider_fee_share.equity_like_share),
+            equity_like_share=float(
+                individual_liquidity_provider_fee_share.equity_like_share
+            ),
             average_entry_valuation=num_from_padded_int(
                 float(individual_liquidity_provider_fee_share.average_entry_valuation),
                 asset_decimals,
             ),
-            average_score=float(individual_liquidity_provider_fee_share.equity_like_share),
+            average_score=float(
+                individual_liquidity_provider_fee_share.equity_like_share
+            ),
         )
         for individual_liquidity_provider_fee_share in liquidity_provider_fee_share
     ]
+
 
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
@@ -820,8 +827,10 @@ def open_orders_by_market(
         open_only=True,
     )
     for order in orders:
-        bids.append(order) if order.side == vega_protos.vega.SIDE_BUY else asks.append(
-            order
+        (
+            bids.append(order)
+            if order.side == vega_protos.vega.SIDE_BUY
+            else asks.append(order)
         )
 
     return OrdersBySide(bids, asks)
@@ -1218,7 +1227,7 @@ def _stream_handler(
     event = extraction_fn(stream_item)
 
     market_id = getattr(event, "market_id", getattr(event, "market", None))
-    asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset.get(market_id)))
+    asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset[market_id]))
 
     return conversion_fn(
         event,
