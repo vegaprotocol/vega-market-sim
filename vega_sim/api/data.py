@@ -438,9 +438,9 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
-            market_to_asset_map[pos.market_id] = (
-                market_info.tradable_instrument.instrument.future.settlement_asset
-            )
+            market_to_asset_map[
+                pos.market_id
+            ] = market_info.tradable_instrument.instrument.future.settlement_asset
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
