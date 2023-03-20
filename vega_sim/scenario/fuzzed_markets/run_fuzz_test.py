@@ -12,6 +12,7 @@ from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs
 def output_summary(output):
     pass
 
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
@@ -51,4 +52,3 @@ if __name__ == "__main__":
     trading_figs = plot_run_outputs()
     for key, fig in trading_figs.items():
         fig.savefig(f"trading-{key}.jpg")
-
