@@ -1,7 +1,6 @@
 from vega_sim.environment.agent import StateAgentWithWallet
 from typing import Optional
 from vega_sim.null_service import VegaServiceNull
-from numpy import array
 from numpy.random import RandomState
 from vega_sim.proto.vega import markets as markets_protos
 import vega_sim.proto.vega as vega_protos
@@ -219,6 +218,30 @@ class FuzzingAgent(StateAgentWithWallet):
         else:
             return None
 
+    def finalise(self):
+        if not self.__class__.OUTPUTTED:
+            self.__class__.OUTPUTTED = True
+            df = pd.DataFrame.from_dict(self.__class__.MEMORY)
+            mcp = px.colors.sequential.YlGn
+            mcp[0] = "rgb(255,0,0)"
+            df = (
+                df.groupby(list(self.__class__.MEMORY.keys()))
+                .size()
+                .reset_index()
+                .rename(columns={0: "count"})
+            )
+            fig = px.treemap(
+                df,
+                title="Fuzzed Trader Coverage",
+                path=list(self.__class__.MEMORY.keys()),
+                values="count",
+                color="count",
+                color_continuous_scale=mcp,
+            )
+            fig.update_traces(marker=dict(cornerradius=5))
+            fig.write_html("coverage.html")
+            fig.show()
+
 
 class DegenerateTrader(StateAgentWithWallet):
     NAME_BASE = "degenerate_trader"
@@ -347,6 +370,8 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
 
         self.commitment_amount = 0
 
+        self.close_outs = 0
+
     def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
         super().initialise(vega, create_key)
 
@@ -366,9 +391,6 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def step(self, vega_state):
-        if self.random_state.rand() > self.step_bias:
-            return
-
         account = self.vega.party_account(
             key_name=self.key_name,
             wallet_name=self.wallet_name,
@@ -385,6 +407,10 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 asset=self.asset_id,
             )
+            self.close_outs += 1
+            return
+
+        if self.random_state.rand() > self.step_bias:
             return
 
         if self.commitment_amount < self.commitment_factor * (total_balance):
