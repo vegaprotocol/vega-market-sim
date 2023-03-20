@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import grpc
 import logging
 import threading
 import traceback
@@ -58,9 +59,11 @@ def _queue_forwarder(
                         sink.put(elem)
                 else:
                     sink.put(output)
-    except Exception:
-        logger.info("Data cache event bus closed")
-        logger.exception(traceback.print_exc())
+    except grpc._channel._MultiThreadedRendezvous as e:
+        if e.details() == "Socket closed":
+            logger.info("Data cache event bus closed")
+        else:
+            raise e
 
 
 class DecimalsCache(defaultdict):
@@ -315,15 +318,15 @@ class LocalDataCache:
             ]
         with self.market_data_lock:
             for market_id in market_ids:
-                self.market_data_from_feed_store[
-                    market_id
-                ] = data.get_latest_market_data(
-                    market_id,
-                    data_client=self._trading_data_client,
-                    market_price_decimals_map=self._market_price_decimals,
-                    market_position_decimals_map=self._market_pos_decimals,
-                    asset_decimals_map=self._asset_decimals,
-                    market_to_asset_map=self._market_to_asset,
+                self.market_data_from_feed_store[market_id] = (
+                    data.get_latest_market_data(
+                        market_id,
+                        data_client=self._trading_data_client,
+                        market_price_decimals_map=self._market_price_decimals,
+                        market_position_decimals_map=self._market_pos_decimals,
+                        asset_decimals_map=self._asset_decimals,
+                        market_to_asset_map=self._market_to_asset,
+                    )
                 )
 
     def initialise_transfer_monitoring(
