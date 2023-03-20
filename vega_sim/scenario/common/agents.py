@@ -278,30 +278,24 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
             )
 
     def place_order(self, vega_state: VegaState, volume: float, side: vega_protos.Side):
-        try:
-            if (
-                (
-                    vega_state.market_state[self.market_id].trading_mode
-                    == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-                )
-                and vega_state.market_state[self.market_id].state
-                == markets_protos.Market.State.STATE_ACTIVE
-                and volume != 0
-            ):
-                self.vega.submit_market_order(
-                    trading_key=self.key_name,
-                    market_id=self.market_id,
-                    side=side,
-                    volume=volume,
-                    wait=False,
-                    fill_or_kill=False,
-                    trading_wallet=self.wallet_name,
-                )
-        except:
-            import pdb
-
-            pdb.set_trace()
-            a = 4
+        if (
+            (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            )
+            and vega_state.market_state[self.market_id].state
+            == markets_protos.Market.State.STATE_ACTIVE
+            and volume != 0
+        ):
+            self.vega.submit_market_order(
+                trading_key=self.key_name,
+                market_id=self.market_id,
+                side=side,
+                volume=volume,
+                wait=False,
+                fill_or_kill=False,
+                trading_wallet=self.wallet_name,
+            )
 
 
 class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
@@ -936,9 +930,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name

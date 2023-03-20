@@ -438,9 +438,9 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
-            market_to_asset_map[
-                pos.market_id
-            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+            market_to_asset_map[pos.market_id] = (
+                market_info.tradable_instrument.instrument.future.settlement_asset
+            )
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -1229,7 +1229,9 @@ def _stream_handler(
     market_id = getattr(event, "market_id", getattr(event, "market", None))
     asset_decimals = asset_dp.get(
         getattr(
-            event, "asset", mkt_to_asset[market_id] if market_id is not None else None
+            event,
+            "asset",
+            mkt_to_asset[market_id] if market_id is not None else None,
         )
     )
 
