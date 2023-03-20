@@ -6,9 +6,27 @@ from numpy.random import RandomState
 from vega_sim.proto.vega import markets as markets_protos
 import vega_sim.proto.vega as vega_protos
 
+import pandas as pd
+import plotly.express as px
+
 
 class FuzzingAgent(StateAgentWithWallet):
     NAME_BASE = "fuzzing_agent"
+
+    # Set the memory which all instances can modify
+    MEMORY = {
+        key: []
+        for key in (
+            "TRADING_MODE",
+            "COMMAND",
+            "TYPE",
+            "SIDE",
+            "TIME_IN_FORCE",
+            "PEGGED_REFERENCE",
+        )
+    }
+    # Set the output flag which all instances can modify
+    OUTPUTTED = False
 
     def __init__(
         self,
@@ -63,9 +81,9 @@ class FuzzingAgent(StateAgentWithWallet):
 
         self.curr_price = vega_state.market_state[self.market_id].midprice
 
-        submissions = [self.create_fuzzed_submission() for _ in range(20)]
-        amendments = [self.create_fuzzed_amendment() for _ in range(10)]
-        cancellations = [self.create_fuzzed_cancellation() for _ in range(1)]
+        submissions = [self.create_fuzzed_submission(vega_state) for _ in range(20)]
+        amendments = [self.create_fuzzed_amendment(vega_state) for _ in range(10)]
+        cancellations = [self.create_fuzzed_cancellation(vega_state) for _ in range(1)]
 
         self.vega.submit_instructions(
             key_name=self.key_name,
@@ -75,7 +93,7 @@ class FuzzingAgent(StateAgentWithWallet):
             cancellations=cancellations,
         )
 
-    def create_fuzzed_cancellation(self):
+    def create_fuzzed_cancellation(self, vega_state):
         order_id = self._select_order_id()
 
         return self.vega.create_order_cancellation(
@@ -83,7 +101,7 @@ class FuzzingAgent(StateAgentWithWallet):
             market_id=self.market_id,
         )
 
-    def create_fuzzed_amendment(self):
+    def create_fuzzed_amendment(self, vega_state):
         order_id = self._select_order_id()
 
         return self.vega.create_order_amendment(
@@ -123,17 +141,33 @@ class FuzzingAgent(StateAgentWithWallet):
             pegged_offset=self.random_state.normal(loc=0, scale=10),
         )
 
-    def create_fuzzed_submission(self):
-        return self.vega.create_order_submission(
-            market_id=self.market_id,
-            side=self.random_state.choice(
-                a=["SIDE_UNSPECIFIED", "SIDE_BUY", "SIDE_SELL"],
-            ),
-            size=self.random_state.poisson(lam=10),
-            order_type=self.random_state.choice(
-                a=["TYPE_UNSPECIFIED", "TYPE_MARKET", "TYPE_LIMIT"]
-            ),
-            time_in_force=self.random_state.choice(
+    def create_fuzzed_submission(self, vega_state):
+        self.__class__.MEMORY["TRADING_MODE"].append(
+            markets_protos.Market.TradingMode.Name(
+                vega_state.market_state[self.market_id].trading_mode
+            )
+        )
+        self.__class__.MEMORY["COMMAND"].append("ORDER_SUBMISSION")
+        self.__class__.MEMORY["SIDE"].append(
+            self.random_state.choice(
+                a=[
+                    "SIDE_UNSPECIFIED",
+                    "SIDE_BUY",
+                    "SIDE_SELL",
+                ]
+            )
+        )
+        self.__class__.MEMORY["TYPE"].append(
+            self.random_state.choice(
+                a=[
+                    "TYPE_UNSPECIFIED",
+                    "TYPE_MARKET",
+                    "TYPE_LIMIT",
+                ]
+            )
+        )
+        self.__class__.MEMORY["TIME_IN_FORCE"].append(
+            self.random_state.choice(
                 a=[
                     "TIME_IN_FORCE_UNSPECIFIED",
                     "TIME_IN_FORCE_GTC",
@@ -143,7 +177,26 @@ class FuzzingAgent(StateAgentWithWallet):
                     "TIME_IN_FORCE_FOK",
                     "TIME_IN_FORCE_IOC",
                 ]
-            ),
+            )
+        )
+        self.__class__.MEMORY["PEGGED_REFERENCE"].append(
+            self.random_state.choice(
+                a=[
+                    "PEGGED_REFERENCE_UNSPECIFIED",
+                    "PEGGED_REFERENCE_MID",
+                    "PEGGED_REFERENCE_BEST_BID",
+                    "PEGGED_REFERENCE_BEST_ASK",
+                ],
+                p=[0.5, 0.5 / 3, 0.5 / 3, 0.5 / 3],
+            )
+        )
+
+        return self.vega.create_order_submission(
+            market_id=self.market_id,
+            side=self.__class__.MEMORY["SIDE"][-1],
+            size=self.random_state.poisson(lam=10),
+            order_type=self.__class__.MEMORY["TYPE"][-1],
+            time_in_force=self.__class__.MEMORY["TIME_IN_FORCE"][-1],
             price=self.random_state.choice(
                 a=[None, self.random_state.normal(loc=self.curr_price, scale=10)]
             ),
@@ -154,14 +207,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 )
                 * 1e9
             ),
-            pegged_reference=self.random_state.choice(
-                a=[
-                    "PEGGED_REFERENCE_UNSPECIFIED",
-                    "PEGGED_REFERENCE_MID",
-                    "PEGGED_REFERENCE_BEST_BID",
-                    "PEGGED_REFERENCE_BEST_ASK",
-                ]
-            ),
+            pegged_reference=self.__class__.MEMORY["PEGGED_REFERENCE"][-1],
             pegged_offset=self.random_state.normal(loc=0, scale=10),
         )
 
@@ -202,6 +248,8 @@ class DegenerateTrader(StateAgentWithWallet):
         self.initial_asset_mint = initial_asset_mint
         self.step_bias = step_bias
 
+        self.close_outs = 0
+
     def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
         super().initialise(vega, create_key)
 
@@ -221,16 +269,6 @@ class DegenerateTrader(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def step(self, vega_state):
-        if (
-            vega_state.market_state[self.market_id].trading_mode
-            != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ):
-            return
-        if self.random_state.rand() > self.step_bias:
-            return
-
-        midprice = vega_state.market_state[self.market_id].midprice
-
         account = self.vega.party_account(
             key_name=self.key_name,
             wallet_name=self.wallet_name,
@@ -245,7 +283,18 @@ class DegenerateTrader(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 asset=self.asset_id,
             )
+            self.close_outs += 1
             return
+
+        if (
+            vega_state.market_state[self.market_id].trading_mode
+            != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+        ):
+            return
+        if self.random_state.rand() > self.step_bias:
+            return
+
+        midprice = vega_state.market_state[self.market_id].midprice
 
         if account.general > 0:
             add_to_margin = max(
