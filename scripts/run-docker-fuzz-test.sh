@@ -10,4 +10,4 @@ docker run \
     --platform linux/amd64 \
     -v "${RESULT_DIR}:/tmp" \
     vega_sim_learning:latest \
-        python -m vega_sim.scenario.adhoc -s fuzz_test
+        python -m vega_sim.scenario.fuzzed_markets.run_fuzz_test --steps 2*60*24
