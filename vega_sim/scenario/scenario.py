@@ -15,10 +15,12 @@ class Scenario(abc.ABC):
         state_extraction_fn: Optional[
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
+        additional_data_output_fns: Optional[Dict[str, Callable]] = None,
     ):
         self.agents = []
         self.env: Optional[MarketEnvironment] = None
         self.state_extraction_fn = state_extraction_fn
+        self.additional_data_output_fns = additional_data_output_fns
 
     @abc.abstractmethod
     def configure_agents(
@@ -82,6 +84,10 @@ class Scenario(abc.ABC):
         )
         if output_data:
             market_data_standard_output(self.get_run_data())
+            market_data_standard_output(
+                self.get_additional_run_data(),
+                custom_output_fns=self.additional_data_output_fns,
+            )
 
         return outputs
 
