@@ -11,19 +11,13 @@ from vega_sim.reinforcement.v2.agents.puppets import (
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.common.agents import MarketManager
 from vega_sim.reinforcement.v2.rewards import BaseRewarder, REWARD_ENUM_TO_CLASS, Reward
+from vega_sim.reinforcement.v2.states import State, SimpleState
 from vega_sim.null_service import VegaServiceNull
 
 
 @dataclass
-class Observation:
-    balance: float
-    best_bid: float
-    best_ask: float
-
-
-@dataclass
 class StepResult:
-    observation: Observation
+    observation: State
     reward: float
 
 
@@ -32,12 +26,14 @@ class Environment:
         self,
         agents: Dict[str, AgentType],
         agent_to_reward: Dict[str, BaseRewarder],
+        agent_to_state: Dict[str, State],
         scenario: Scenario,
         reset_vega_every_n_runs: int = 100,
         funds_per_run: float = 10_000,
     ):
         self._agents = agents
         self._agent_to_reward_enum = agent_to_reward
+        self._agent_to_state = agent_to_state
         self._agent_to_reward: Dict[str, BaseRewarder] = {}
 
         self._scenario = scenario
@@ -59,18 +55,25 @@ class Environment:
     def stop(self):
         self._vega.stop()
 
-    def _extract_observation(self, agent_name: str) -> Observation:
-        pass
+    def _extract_observation(self, agent_name: str) -> State:
+        return self._agent_to_state[agent_name].from_vega(
+            self._vega,
+            for_key_name=agent_name,
+            market_id=self._market_id,
+            asset_id=self._asset_id,
+        )
 
     def step(self, actions: Dict[str, Action]) -> Dict[str, StepResult]:
         for agent_name, action in actions.items():
             self._puppets[agent_name].set_next_action(action=action)
 
         self._scenario.env.step(self._vega)
+        self._vega.wait_fn(1)
         step_res = {}
         for agent_name, reward_gen in self._agent_to_reward.items():
             step_res[agent_name] = StepResult(
-                observation=None, reward=reward_gen.get_reward(self._vega)
+                observation=self._extract_observation(agent_name),
+                reward=reward_gen.get_reward(self._vega),
             )
         return step_res
 
@@ -130,6 +133,8 @@ class Environment:
             self._agent_to_reward[agent] = REWARD_ENUM_TO_CLASS[reward](
                 agent_key=agent, asset_id=manager.asset_id, market_id=manager.market_id
             )
+        self._market_id = manager.market_id
+        self._asset_id = manager.asset_id
 
 
 if __name__ == "__main__":
@@ -156,9 +161,11 @@ if __name__ == "__main__":
     env = Environment(
         agents={"test_agent_learner": AgentType.MARKET_ORDER},
         agent_to_reward={"test_agent_learner": Reward.PNL},
+        agent_to_state={"test_agent_learner": SimpleState},
         scenario=scenario,
     )
     env.reset()
     for _ in range(10):
         print(env.step({"test_agent_learner": MarketOrderAction(Side.BUY, 1)}))
+
     env.stop()

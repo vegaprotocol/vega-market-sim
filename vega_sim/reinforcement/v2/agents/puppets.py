@@ -68,13 +68,22 @@ class MarketOrderPuppet(Puppet):
 
     def step(self, vega_state: VegaState):
         if self.action is not None:
-            self.vega.submit_market_order(
-                trading_key=self.key_name,
-                market_id=self.market_id,
-                side="SIDE_BUY" if self.action.side == Side.BUY.value else "SIDE_SELL",
-                volume=self.action.volume,
-                wait=False,
-            )
+            try:
+                self.vega.submit_market_order(
+                    trading_key=self.key_name,
+                    market_id=self.market_id,
+                    side=(
+                        "SIDE_BUY"
+                        if self.action.side == Side.BUY.value
+                        else "SIDE_SELL"
+                    ),
+                    volume=self.action.volume,
+                    wait=False,
+                )
+            except:
+                import traceback
+
+                print(traceback.format_exc())
 
 
 AGENT_TYPE_TO_AGENT = {AgentType.MARKET_ORDER: MarketOrderPuppet}
