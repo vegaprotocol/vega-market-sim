@@ -89,11 +89,16 @@ class FuzzingScenario(Scenario):
         num_steps: int = 60 * 24 * 30 * 3,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
-        n_markets: int = 5,
+        n_markets: int = 2,
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
     ):
-        super().__init__()
+        super().__init__(
+            state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
+            additional_data_output_fns={
+                "additional_data.csv": lambda data: additional_data_to_rows(data),
+            },
+        )
 
         self.n_markets = n_markets
         self.fuzz_market_config = fuzz_market_config
@@ -145,7 +150,7 @@ class FuzzingScenario(Scenario):
             # Create fuzzed price process
             price_process = random_walk(
                 num_steps=self.num_steps + 1,
-                sigma=random_state.rand(),
+                sigma=random_state.rand() * 1e1,
                 drift=random_state.rand() * 1e-3,
                 starting_price=1000,
                 decimal_precision=int(market_config.decimal_places),
@@ -238,8 +243,9 @@ class FuzzingScenario(Scenario):
                             market_name=market_name,
                             asset_name=asset_name,
                             side=side,
-                            initial_asset_mint=5_000,
+                            initial_asset_mint=1_000,
                             size_factor=0.7,
+                            step_bias=0.01,
                             tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         )
                     )
@@ -251,8 +257,9 @@ class FuzzingScenario(Scenario):
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
-                        initial_asset_mint=5_000,
+                        initial_asset_mint=1_000,
                         commitment_factor=0.7,
+                        step_bias=0.01,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
