@@ -222,21 +222,29 @@ class FuzzingAgent(StateAgentWithWallet):
         if not self.__class__.OUTPUTTED:
             self.__class__.OUTPUTTED = True
             df = pd.DataFrame.from_dict(self.__class__.MEMORY)
-            mcp = px.colors.sequential.YlGn
-            mcp[0] = "rgb(255,0,0)"
             df = (
                 df.groupby(list(self.__class__.MEMORY.keys()))
                 .size()
                 .reset_index()
                 .rename(columns={0: "count"})
             )
+
+            range_color = (10, 5000)
+            custom_color_scale = [
+                [0, "red"],
+                [range_color[0] / range_color[1], "red"],
+                [range_color[0] / range_color[1], "yellow"],
+                [1, "green"],
+            ]
+
             fig = px.treemap(
                 df,
                 title="Fuzzed Trader Coverage",
                 path=list(self.__class__.MEMORY.keys()),
                 values="count",
                 color="count",
-                color_continuous_scale=mcp,
+                color_continuous_scale=custom_color_scale,
+                range_color=range_color,
             )
             fig.update_traces(marker=dict(cornerradius=5))
             fig.write_html("coverage.html")
