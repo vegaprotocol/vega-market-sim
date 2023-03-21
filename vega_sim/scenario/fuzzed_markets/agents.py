@@ -6,7 +6,6 @@ from vega_sim.proto.vega import markets as markets_protos
 import vega_sim.proto.vega as vega_protos
 
 import pandas as pd
-import plotly.express as px
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -37,6 +36,7 @@ class FuzzingAgent(StateAgentWithWallet):
         state_update_freq: Optional[int] = None,
         initial_asset_mint: float = 1e9,
         random_state: Optional[RandomState] = None,
+        output_plot_on_finalise: bool = False,
     ):
         super().__init__(
             key_name=key_name,
@@ -49,6 +49,7 @@ class FuzzingAgent(StateAgentWithWallet):
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
         self.random_state = random_state if random_state is not None else RandomState()
+        self.output_plot_on_finalise = output_plot_on_finalise
 
     def initialise(
         self, vega: VegaServiceNull, create_key: bool = True, mint_key: bool = True
@@ -141,13 +142,13 @@ class FuzzingAgent(StateAgentWithWallet):
         )
 
     def create_fuzzed_submission(self, vega_state):
-        self.__class__.MEMORY["TRADING_MODE"].append(
+        FuzzingAgent.MEMORY["TRADING_MODE"].append(
             markets_protos.Market.TradingMode.Name(
                 vega_state.market_state[self.market_id].trading_mode
             )
         )
-        self.__class__.MEMORY["COMMAND"].append("ORDER_SUBMISSION")
-        self.__class__.MEMORY["SIDE"].append(
+        FuzzingAgent.MEMORY["COMMAND"].append("ORDER_SUBMISSION")
+        FuzzingAgent.MEMORY["SIDE"].append(
             self.random_state.choice(
                 a=[
                     "SIDE_UNSPECIFIED",
@@ -156,7 +157,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 ]
             )
         )
-        self.__class__.MEMORY["TYPE"].append(
+        FuzzingAgent.MEMORY["TYPE"].append(
             self.random_state.choice(
                 a=[
                     "TYPE_UNSPECIFIED",
@@ -165,7 +166,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 ]
             )
         )
-        self.__class__.MEMORY["TIME_IN_FORCE"].append(
+        FuzzingAgent.MEMORY["TIME_IN_FORCE"].append(
             self.random_state.choice(
                 a=[
                     "TIME_IN_FORCE_UNSPECIFIED",
@@ -178,7 +179,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 ]
             )
         )
-        self.__class__.MEMORY["PEGGED_REFERENCE"].append(
+        FuzzingAgent.MEMORY["PEGGED_REFERENCE"].append(
             self.random_state.choice(
                 a=[
                     "PEGGED_REFERENCE_UNSPECIFIED",
@@ -192,10 +193,10 @@ class FuzzingAgent(StateAgentWithWallet):
 
         return self.vega.create_order_submission(
             market_id=self.market_id,
-            side=self.__class__.MEMORY["SIDE"][-1],
+            side=FuzzingAgent.MEMORY["SIDE"][-1],
             size=self.random_state.poisson(lam=10),
-            order_type=self.__class__.MEMORY["TYPE"][-1],
-            time_in_force=self.__class__.MEMORY["TIME_IN_FORCE"][-1],
+            order_type=FuzzingAgent.MEMORY["TYPE"][-1],
+            time_in_force=FuzzingAgent.MEMORY["TIME_IN_FORCE"][-1],
             price=self.random_state.choice(
                 a=[None, self.random_state.normal(loc=self.curr_price, scale=10)]
             ),
@@ -206,7 +207,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 )
                 * 1e9
             ),
-            pegged_reference=self.__class__.MEMORY["PEGGED_REFERENCE"][-1],
+            pegged_reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
             pegged_offset=self.random_state.normal(loc=0, scale=10),
         )
 
@@ -219,36 +220,39 @@ class FuzzingAgent(StateAgentWithWallet):
             return None
 
     def finalise(self):
-        if not self.__class__.OUTPUTTED:
-            self.__class__.OUTPUTTED = True
-            df = pd.DataFrame.from_dict(self.__class__.MEMORY)
-            df = (
-                df.groupby(list(self.__class__.MEMORY.keys()))
-                .size()
-                .reset_index()
-                .rename(columns={0: "count"})
-            )
+        if self.output_plot_on_finalise:
+            if not FuzzingAgent.OUTPUTTED:
+                import plotly.express as px
 
-            range_color = (10, 5000)
-            custom_color_scale = [
-                [0, "red"],
-                [range_color[0] / range_color[1], "red"],
-                [range_color[0] / range_color[1], "yellow"],
-                [1, "green"],
-            ]
+                FuzzingAgent.OUTPUTTED = True
+                df = pd.DataFrame.from_dict(FuzzingAgent.MEMORY)
+                df = (
+                    df.groupby(list(FuzzingAgent.MEMORY.keys()))
+                    .size()
+                    .reset_index()
+                    .rename(columns={0: "count"})
+                )
 
-            fig = px.treemap(
-                df,
-                title="Fuzzed Trader Coverage",
-                path=list(self.__class__.MEMORY.keys()),
-                values="count",
-                color="count",
-                color_continuous_scale=custom_color_scale,
-                range_color=range_color,
-            )
-            fig.update_traces(marker=dict(cornerradius=5))
-            fig.write_html("coverage.html")
-            fig.show()
+                range_color = (10, 5000)
+                custom_color_scale = [
+                    [0, "red"],
+                    [range_color[0] / range_color[1], "red"],
+                    [range_color[0] / range_color[1], "yellow"],
+                    [1, "green"],
+                ]
+
+                fig = px.treemap(
+                    df,
+                    title="Fuzzed Trader Coverage",
+                    path=list(self.__class__.MEMORY.keys()),
+                    values="count",
+                    color="count",
+                    color_continuous_scale=custom_color_scale,
+                    range_color=range_color,
+                )
+                fig.update_traces(marker=dict(cornerradius=5))
+                fig.write_html("coverage.html")
+                fig.show()
 
 
 class DegenerateTrader(StateAgentWithWallet):
