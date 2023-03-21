@@ -1304,7 +1304,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         cancellations = []
 
         expires_at = (
-            int((self.vega.get_blockchain_time() + self.order_validity_length) * 1e9)
+            int(self.vega.get_blockchain_time() + self.order_validity_length * 1e9)
             if self.order_validity_length is not None
             else None
         )
@@ -2071,7 +2071,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
             price = reference_sell_price - (random_offset - ln_mean)
 
-        expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
+        expires_at = self.vega.get_blockchain_time() + self.duration * 1e9
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,

@@ -1,17 +1,16 @@
 import pytest
 
+import vega_sim.proto.vega as vega_protos
 from tests.integration.utils.fixtures import (
-    vega_service_with_market,
-    vega_service,
-    create_and_faucet_wallet,
-    vega_service_with_high_volume,
-    vega_service_with_high_volume_with_market,
     ASSET_NAME,
     WalletConfig,
+    create_and_faucet_wallet,
+    vega_service,
+    vega_service_with_high_volume,
+    vega_service_with_high_volume_with_market,
+    vega_service_with_market,
 )
 from vega_sim.null_service import VegaServiceNull
-import vega_sim.proto.vega as vega_protos
-
 
 LIQ = WalletConfig("liq", "liq")
 PARTY_A = WalletConfig("party_a", "party_a")
@@ -229,7 +228,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
         to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=500,
-        delay=50,
+        delay=int(100e9),
     )
 
     vega.wait_fn(10)
