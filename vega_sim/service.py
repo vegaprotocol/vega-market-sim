@@ -8,9 +8,9 @@ from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue, Empty
 from itertools import product
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union, Callable
+from queue import Empty, Queue
+from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import grpc
 
