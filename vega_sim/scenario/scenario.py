@@ -84,10 +84,11 @@ class Scenario(abc.ABC):
         )
         if output_data:
             market_data_standard_output(self.get_run_data())
-            market_data_standard_output(
-                self.get_additional_run_data(),
-                custom_output_fns=self.additional_data_output_fns,
-            )
+            if self.additional_data_output_fns is not None:
+                market_data_standard_output(
+                    self.get_additional_run_data(),
+                    custom_output_fns=self.additional_data_output_fns,
+                )
 
         return outputs
 
