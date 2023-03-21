@@ -8,9 +8,9 @@ from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue, Empty
 from itertools import product
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union, Callable
+from queue import Empty, Queue
+from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import grpc
 
@@ -414,7 +414,7 @@ class VegaService(ABC):
             key_name:
                 optionaL, str, name of key in wallet to use
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
@@ -446,7 +446,7 @@ class VegaService(ABC):
         market_config: market.MarketConfig,
         proposal_wallet_name: Optional[str] = None,
     ):
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         proposal_id = gov.propose_market_from_config(
             wallet=self.wallet,
@@ -517,7 +517,7 @@ class VegaService(ABC):
         if future_asset is not None:
             additional_kwargs["future_asset"] = future_asset
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         risk_model = vega_protos.markets.LogNormalRiskModel(
             risk_aversion_parameter=risk_aversion,
@@ -710,9 +710,11 @@ class VegaService(ABC):
             key_name=trading_key,
         )
 
-    def get_blockchain_time(self) -> int:
-        """Returns blockchain time in seconds since the epoch"""
-        return gov.get_blockchain_time(self.trading_data_client_v2)
+    def get_blockchain_time(self, in_seconds: bool = False) -> int:
+        """Returns blockchain time in seconds or nanoseconds since the epoch"""
+        return gov.get_blockchain_time(
+            self.trading_data_client_v2, in_seconds=in_seconds
+        )
 
     def amend_order(
         self,
@@ -835,7 +837,7 @@ class VegaService(ABC):
         Returns:
             str, the ID of the proposal
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
@@ -894,7 +896,7 @@ class VegaService(ABC):
                 " market"
             )
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         current_market = self.market_info(market_id=market_id)
 
@@ -2028,7 +2030,7 @@ class VegaService(ABC):
 
         # Ping datanode then check if it is behind
         data.ping(data_client=self.trading_data_client_v2)
-        if abs(self.get_blockchain_time() - time.time()) > max_time_diff:
+        if abs(self.get_blockchain_time(in_seconds=True) - time.time()) > max_time_diff:
             raise DatanodeBehindError
 
     def one_off_transfer(
@@ -2066,14 +2068,14 @@ class VegaService(ABC):
             to_wallet_name (Optional[str], optional):
                 Name of wallet to transfer to.
             delay (Optional[int], optional):
-                Delay in seconds to add before transfer is sent. Defaults to None.
+                Delay in nanoseconds to add before transfer is sent. Defaults to None.
         """
 
         adp = self.asset_decimals[asset]
 
         one_off = vega_protos.commands.v1.commands.OneOffTransfer()
         if delay is not None:
-            setattr(one_off, "deliver_on", self.get_blockchain_time() + delay)
+            setattr(one_off, "deliver_on", int(self.get_blockchain_time() + delay))
 
         trading.transfer(
             wallet=self.wallet,

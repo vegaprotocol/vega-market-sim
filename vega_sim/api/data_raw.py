@@ -350,8 +350,7 @@ def liquidity_provisions(
     """
     return unroll_v2_pagination(
         base_request=data_node_protos_v2.trading_data.ListLiquidityProvisionsRequest(
-            market_id=market_id,
-            party_id=party_id,
+            market_id=market_id, party_id=party_id, live=True
         ),
         request_func=lambda x: data_client.ListLiquidityProvisions(
             x
