@@ -37,7 +37,7 @@ def generate_trading_plot():
         scen.run_iteration(vega=vega, output_data=True)
         figs = plot_run_outputs()
         for key, value in figs.items():
-            value.savefig(f"{key}.jpg")
+            value.savefig(f"run.jpg")
 
 
 if __name__ == "__main__":
