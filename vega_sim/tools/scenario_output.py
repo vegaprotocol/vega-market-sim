@@ -12,6 +12,7 @@ DATA_FILE_NAME = "market_data.csv"
 ORDER_BOOK_FILE_NAME = "depth_data.csv"
 TRADES_FILE_NAME = "trades.csv"
 ACCOUNTS_FILE_NAME = "accounts.csv"
+FUZZING_FILE_NAME = "additional_data.csv"
 
 
 def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
@@ -24,6 +25,7 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
                 "time": data.at_time,
                 "mark_price": market_data.mark_price,
                 "market_id": market_id,
+                "mark_price": market_data.mark_price,
                 "open_interest": market_data.open_interest,
                 "best_bid": market_data.best_bid_price,
                 "best_offer": market_data.best_offer_price,
@@ -196,6 +198,18 @@ def load_accounts_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, ACCOUNTS_FILE_NAME))
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time * 1e9)
+        df = df.set_index("time")
+    return df
+
+
+def load_fuzzing_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    df = pd.read_csv(os.path.join(output_path, run_name, FUZZING_FILE_NAME))
     if not df.empty:
         df["time"] = pd.to_datetime(df.time * 1e9)
         df = df.set_index("time")

@@ -6,6 +6,22 @@ import vega_sim.proto.vega as vega_protos
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.markers import MarkerStyle
+from matplotlib.gridspec import GridSpec, SubplotSpec, GridSpecFromSubplotSpec
+
+from vega_sim.proto.vega import markets
+
+import numpy as np
+
+
+TRADING_MODE_COLORS = {
+    0: (200 / 255, 200 / 255, 200 / 255),
+    1: (204 / 255, 255 / 255, 15 / 2553),
+    2: (255 / 255, 204 / 255, 153 / 255),
+    3: (153 / 255, 204 / 255, 244 / 255),
+    4: (255 / 255, 133 / 255, 133 / 255),
+    5: (255 / 255, 204 / 255, 255 / 255),
+}
+
 
 """
 Thoughts for plots
@@ -18,6 +34,7 @@ from vega_sim.tools.scenario_output import (
     load_market_data_df,
     load_order_book_df,
     load_trades_df,
+    load_fuzzing_df,
 )
 
 
@@ -174,35 +191,327 @@ def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame) -> None:
     ax.plot(market_data_df["target_stake"])
 
 
-def plot_run_outputs(run_name: Optional[str] = None) -> Figure:
+def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
     order_df = load_order_book_df(run_name=run_name)
     trades_df = load_trades_df(run_name=run_name)
     data_df = load_market_data_df(run_name=run_name)
     accounts_df = load_accounts_df(run_name=run_name)
 
-    mid_df = order_df[order_df.level == 0].groupby("time")[["price"]].sum() / 2
+    figs = {}
 
-    fig = plt.figure(layout="tight", figsize=(8, 10))
+    for market_id in data_df["market_id"].unique():
+        market_order_df = order_df[order_df["market_id"] == market_id]
+        market_trades_df = trades_df[trades_df["market_id"] == market_id]
+        market_data_df = data_df[data_df["market_id"] == market_id]
+        market_accounts_df = accounts_df[accounts_df["market_id"] == market_id]
 
-    ax = plt.subplot(411)
-    ax2 = plt.subplot(423)
-    ax3 = plt.subplot(424)
-    ax4 = plt.subplot(425)
-    ax5 = plt.subplot(426)
-    ax6 = plt.subplot(427)
-    ax7 = plt.subplot(428)
+        market_mid_df = (
+            market_order_df[market_order_df.level == 0].groupby("time")[["price"]].sum()
+            / 2
+        )
 
-    plot_trading_summary(ax, trades_df, order_df, mid_df)
-    plot_total_traded_volume(ax2, trades_df)
-    plot_spread(ax3, order_book_df=order_df)
-    plot_open_interest(ax4, data_df)
-    plot_open_notional(ax5, market_data_df=data_df, price_df=mid_df)
-    plot_margin_totals(ax6, accounts_df=accounts_df)
-    plot_target_stake(ax7, market_data_df=data_df)
+        fig = plt.figure(layout="tight", figsize=(8, 10))
 
-    return fig
+        ax = plt.subplot(411)
+        ax2 = plt.subplot(423)
+        ax3 = plt.subplot(424)
+        ax4 = plt.subplot(425)
+        ax5 = plt.subplot(426)
+        ax6 = plt.subplot(427)
+        ax7 = plt.subplot(428)
+
+        plot_trading_summary(ax, market_trades_df, market_order_df, market_mid_df)
+        plot_total_traded_volume(ax2, market_trades_df)
+        plot_spread(ax3, order_book_df=market_order_df)
+        plot_open_interest(ax4, market_data_df)
+        plot_open_notional(ax5, market_data_df=market_data_df, price_df=market_mid_df)
+        plot_margin_totals(ax6, accounts_df=market_accounts_df)
+        plot_target_stake(ax7, market_data_df=market_data_df)
+
+        figs[market_id] = fig
+
+    return figs
+
+
+def plot_trading_mode(
+    fig: Figure, data_df: pd.DataFrame, ss: Optional[SubplotSpec] = None
+):
+    """Plots the proportion of time spent in different trading modes of a market.
+
+    Args:
+        fig (Figure):
+            The Figure object to which the subplots will be added.
+        data_df (pd.DataFrame):
+            The DataFrame containing market data, including the trading mode of the
+            market at each time step.
+        gs (Optional[SubplotSpec]):
+            An optional SubplotSpec object defining the placement of the subplots. If
+            not specified, a default GridSpec with two rows and one column will be used.
+
+    The function adds two subplots to the Figure object fig. The top subplot shows a
+    step plot with a fill between each step representing the trading mode at the current
+    time step. The bottom subplot shows a stacked area plot of the same information,
+    with each area representing the proportion of time spent in a particular trading
+    mode. The legend in the bottom subplot shows the name of each trading mode.
+
+    TRADING_MODE_COLORS is a dictionary that maps each trading mode to a color used in
+    the plots.
+    """
+
+    if ss is None:
+        gs = GridSpec(
+            nrows=2,
+            ncols=1,
+            height_ratios=[1, 5],
+            hspace=0.1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=2,
+            ncols=1,
+            height_ratios=[1, 5],
+            hspace=0.1,
+        )
+    ax0 = fig.add_subplot(gs[0, 0])
+    ax1 = fig.add_subplot(gs[1, 0])
+
+    ax0.set_title(
+        "Trading Mode Analysis", loc="left", fontsize=12, color=(0.3, 0.3, 0.3)
+    )
+    names = []
+    for name, value in markets.Market.TradingMode.items():
+        names.append(name)
+        series = (data_df["market_trading_mode"] == value).astype(int)
+        ax0.fill_between(
+            series.index,
+            series,
+            step="post",
+            alpha=1,
+            color=TRADING_MODE_COLORS[value],
+            linewidth=0,
+        )
+
+        data_df = data_df.merge(
+            (data_df["market_trading_mode"] == value).cumsum().rename(name),
+            left_index=True,
+            right_index=True,
+        )
+    data_df = data_df[names].divide(data_df[names].sum(axis=1), axis=0)
+
+    ax1.stackplot(
+        data_df.index,
+        *[data_df[name].values for name in names],
+        colors=TRADING_MODE_COLORS.values(),
+    )
+
+    ax0.get_xaxis().set_visible(False)
+    ax0.get_yaxis().set_visible(False)
+
+    ax1.set_ylabel("PROPORTION OF TIME IN MODE")
+    ax1.legend(labels=names, loc="lower right")
+
+
+def plot_price_comparison(
+    fig: Figure,
+    data_df: pd.DataFrame,
+    fuzzing_df: pd.DataFrame,
+    ss: Optional[SubplotSpec],
+):
+    """Plots the external price and mark price along with their respective volatilities.
+
+    Args:
+        fig (Figure):
+            Figure object to plot the data on.
+        fuzzing_df (pd.DataFrame):
+            DataFrame containing fuzzing data.
+        data_df (pd.DataFrame):
+            DataFrame containing market data.
+        ss (Optional[SubplotSpec]):
+            SubplotSpec object representing the position of the subplot on the figure.
+    """
+    if ss is None:
+        gs = GridSpec(
+            nrows=1,
+            ncols=1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=1,
+            ncols=1,
+        )
+    ax0 = fig.add_subplot(gs[0, 0])
+
+    ax0.set_title("Price Analysis", loc="left", fontsize=12, color=(0.3, 0.3, 0.3))
+
+    external_price_series = fuzzing_df["external_price"].replace(0, np.nan)
+    mark_price_series = data_df["mark_price"].replace(0, np.nan)
+
+    ax0.plot(external_price_series)
+    ax0.plot(mark_price_series)
+
+    ep_volatility = external_price_series.var() / external_price_series.size
+    mp_volatility = mark_price_series.var() / mark_price_series.size
+
+    ax0.text(
+        x=0.1,
+        y=0.1,
+        s=f"external-price volatility = {round(ep_volatility, 1)}\nmark-price volatility = {round(mp_volatility, 1)}",
+        fontsize=8,
+        bbox=dict(facecolor="white", alpha=1),
+        transform=ax0.transAxes,
+    )
+
+    ax0.set_ylabel("PRICE")
+    ax0.legend(labels=["external price", "mark price"])
+
+
+def plot_degen_close_outs(
+    fig: Figure,
+    accounts_df: pd.DataFrame,
+    fuzzing_df: pd.DataFrame,
+    ss: Optional[SubplotSpec] = None,
+):
+    """Plots the number of close outs of degen traders and degen liquidity providers.
+
+    Args:
+        fig (matplotlib.figure.Figure):
+            The figure object to plot onto.
+        accounts_df (pandas.DataFrame):
+            A dataframe containing the accounts data.
+        fuzzing_df (pandas.DataFrame):
+            A dataframe containing the fuzzing data.
+        ss (Optional[matplotlib.gridspec.SubplotSpec]):
+            A subplot specification for the plot. Default is None.
+    """
+    if ss is None:
+        gs = GridSpec(
+            nrows=2,
+            ncols=1,
+            height_ratios=[1, 1],
+            hspace=0.15,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=2,
+            ncols=1,
+            height_ratios=[1, 1],
+            hspace=0.15,
+        )
+
+    ax0 = fig.add_subplot(gs[0, 0])
+    ax1 = fig.add_subplot(gs[1, 0])
+
+    ax0.set_title("Close Out Analysis", loc="left", fontsize=12, color=(0.3, 0.3, 0.3))
+
+    insurance_pool_ds = accounts_df["balance"][
+        (accounts_df["party_id"] == "network") & (accounts_df["type"] == 1)
+    ]
+    trader_close_outs_ds = fuzzing_df["trader_close_outs"]
+    liquidity_provider_close_outs_ds = fuzzing_df["liquidity_provider_close_outs"]
+
+    ax0r = ax0.twinx()
+
+    ln0 = ax0r.plot(
+        insurance_pool_ds.index,
+        insurance_pool_ds.values,
+        "b.-",
+        markersize=1,
+        label="insurance pool",
+    )
+    ln1 = ax0.plot(
+        trader_close_outs_ds.index,
+        trader_close_outs_ds.values,
+        "r.-",
+        markersize=1,
+        label="degen trader close outs",
+    )
+
+    lns = ln0 + ln1
+    ax0.legend(handles=lns, labels=[ln.get_label() for ln in lns], loc="upper left")
+
+    ax0.set_ylabel("NB CLOSE OUTS")
+    ax0r.set_ylabel("INSURANCE POOL", position="right")
+    ax0r.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+
+    ax0.get_xaxis().set_visible(False)
+
+    ax1r = ax1.twinx()
+
+    ln3 = ax1r.plot(
+        insurance_pool_ds.index,
+        insurance_pool_ds.values,
+        "b.-",
+        markersize=1,
+        label="insurance pool",
+    )
+    ln4 = ax1.plot(
+        liquidity_provider_close_outs_ds.index,
+        liquidity_provider_close_outs_ds.values,
+        "r.-",
+        markersize=1,
+        label="degen LP close outs",
+    )
+
+    lns = ln3 + ln4
+    ax1.legend(handles=lns, labels=[ln.get_label() for ln in lns], loc="upper left")
+
+    ax1.set_ylabel("NB CLOSE OUTS")
+    ax1r.set_ylabel("INSURANCE POOL", position="right")
+    ax1r.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+
+
+def fuzz_plots(run_name: Optional[str] = None) -> Figure:
+    data_df = load_market_data_df(run_name=run_name)
+    accounts_df = load_accounts_df(run_name=run_name)
+    fuzzing_df = load_fuzzing_df(run_name=run_name)
+
+    markets = data_df.market_id.unique()
+
+    figs = {}
+    for market_id in markets:
+        market_data_df = data_df[data_df["market_id"] == market_id]
+        market_accounts_df = accounts_df[accounts_df["market_id"] == market_id]
+        market_fuzzing_df = fuzzing_df[fuzzing_df["market_id"] == market_id]
+
+        fig = plt.figure(figsize=[8, 10])
+        fig.suptitle(
+            f"Fuzz Testing Plots",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+
+        plt.rcParams.update({"font.size": 8})
+
+        gs = GridSpec(nrows=3, ncols=1, height_ratios=[2, 2, 3], hspace=0.3)
+
+        plot_trading_mode(fig, ss=gs[0, 0], data_df=market_data_df)
+        plot_price_comparison(
+            fig,
+            ss=gs[1, 0],
+            data_df=market_data_df,
+            fuzzing_df=market_fuzzing_df,
+        )
+        plot_degen_close_outs(
+            fig,
+            ss=gs[2, 0],
+            accounts_df=market_accounts_df,
+            fuzzing_df=market_fuzzing_df,
+        )
+
+        figs[market_id] = fig
+
+    return figs
 
 
 if __name__ == "__main__":
-    fig = plot_run_outputs()
-    fig.savefig("output.jpg")
+    figs = fuzz_plots()
+    for key, fig in figs.items():
+        fig.savefig(f"fuzz-{key}.jpg")
+    figs = plot_run_outputs()
+    for key, fig in figs.items():
+        fig.savefig(f"rl-{key}.jpg")

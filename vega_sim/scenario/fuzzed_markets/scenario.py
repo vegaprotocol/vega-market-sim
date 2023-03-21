@@ -24,6 +24,64 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyLiquidityProvider,
 )
 
+import datetime
+from typing import Optional, Dict
+from dataclasses import dataclass
+from vega_sim.scenario.common.agents import ExponentialShapedMarketMaker
+import pandas as pd
+
+
+@dataclass
+class MarketHistoryAdditionalData:
+    at_time: datetime.datetime
+    external_prices: Dict[str, float]
+    trader_close_outs: Dict[str, int]
+    liquidity_provider_close_outs: Dict[str, int]
+
+
+def state_extraction_fn(vega: VegaServiceNull, agents: dict):
+    at_time = vega.get_blockchain_time()
+
+    external_prices = {}
+    trader_close_outs = {}
+    liquidity_provider_close_outs = {}
+
+    for _, agent in agents.items():
+        if isinstance(agent, ExponentialShapedMarketMaker):
+            external_prices[agent.market_id] = agent.curr_price
+        if isinstance(agent, DegenerateTrader):
+            trader_close_outs[agent.market_id] = (
+                trader_close_outs.get(agent.market_id, 0) + agent.close_outs
+            )
+        if isinstance(agent, DegenerateLiquidityProvider):
+            liquidity_provider_close_outs[agent.market_id] = (
+                liquidity_provider_close_outs.get(agent.market_id, 0) + agent.close_outs
+            )
+
+    return MarketHistoryAdditionalData(
+        at_time=at_time,
+        external_prices=external_prices,
+        trader_close_outs=trader_close_outs,
+        liquidity_provider_close_outs=liquidity_provider_close_outs,
+    )
+
+
+def additional_data_to_rows(data) -> List[pd.Series]:
+    results = []
+    for market_id in data.external_prices.keys():
+        results.append(
+            {
+                "time": data.at_time,
+                "market_id": market_id,
+                "external_price": data.external_prices.get(market_id, np.NaN),
+                "trader_close_outs": data.trader_close_outs.get(market_id, 0),
+                "liquidity_provider_close_outs": data.liquidity_provider_close_outs.get(
+                    market_id, 0
+                ),
+            }
+        )
+    return results
+
 
 class FuzzingScenario(Scenario):
     def __init__(
@@ -31,11 +89,16 @@ class FuzzingScenario(Scenario):
         num_steps: int = 60 * 24 * 30 * 3,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
-        n_markets: int = 5,
+        n_markets: int = 2,
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
     ):
-        super().__init__()
+        super().__init__(
+            state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
+            additional_data_output_fns={
+                "additional_data.csv": lambda data: additional_data_to_rows(data),
+            },
+        )
 
         self.n_markets = n_markets
         self.fuzz_market_config = fuzz_market_config
@@ -87,7 +150,7 @@ class FuzzingScenario(Scenario):
             # Create fuzzed price process
             price_process = random_walk(
                 num_steps=self.num_steps + 1,
-                sigma=random_state.rand(),
+                sigma=random_state.rand() * 1e1,
                 drift=random_state.rand() * 1e-3,
                 starting_price=1000,
                 decimal_precision=int(market_config.decimal_places),
@@ -167,6 +230,7 @@ class FuzzingScenario(Scenario):
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
+                        output_plot_on_finalise=True,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
@@ -180,8 +244,9 @@ class FuzzingScenario(Scenario):
                             market_name=market_name,
                             asset_name=asset_name,
                             side=side,
-                            initial_asset_mint=5_000,
+                            initial_asset_mint=1_000,
                             size_factor=0.7,
+                            step_bias=0.01,
                             tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         )
                     )
@@ -193,8 +258,9 @@ class FuzzingScenario(Scenario):
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
-                        initial_asset_mint=5_000,
+                        initial_asset_mint=1_000,
                         commitment_factor=0.7,
+                        step_bias=0.01,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
