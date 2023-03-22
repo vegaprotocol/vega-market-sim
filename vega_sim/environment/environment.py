@@ -363,7 +363,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         return VegaState(network_state=(), market_state=market_state)
 
     def step(self, vega: VegaService) -> None:
-        vega.wait_for_datanode_sync()
+        vega.wait_for_thread_catchup()
         state = self.state_func(vega)
         for agent in (
             sorted(self.agents, key=lambda _: self.random_state.random())
