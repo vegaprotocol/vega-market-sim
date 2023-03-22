@@ -760,6 +760,9 @@ class VegaServiceNull(VegaService):
                     "Timed out waiting for Vega simulator to start up"
                 )
 
+            # Create the data cache and start the live feeds
+            self.data_cache
+
         if self.run_with_console:
             webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
 
