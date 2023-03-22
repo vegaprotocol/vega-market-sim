@@ -167,7 +167,7 @@ class SingleParameterExperimentTk(NotebookTk):
             List of DataFrame objects containing data averaged across iterations.
     """
 
-    def __init__(self, path, dt) -> None:
+    def __init__(self, path, dt, granularity) -> None:
         """Inits object by reading data stored in json and csv files in the given path.
 
         Method loads test settings from the 'run_config.json' and test results from csv
@@ -185,6 +185,7 @@ class SingleParameterExperimentTk(NotebookTk):
         self.path = path
 
         self.dt = dt
+        self.granularity = granularity
 
         self.settings = self._load_settings()
 
@@ -253,7 +254,7 @@ class SingleParameterExperimentTk(NotebookTk):
                         variables=[keys[i][0]],
                         iterations=[keys[i][1]],
                         ylabel=keys[i][0],
-                        xlabel="Time",
+                        xlabel=f"Time [{self.granularity.name}]",
                         title=f"{keys[i][0]} // (iteration={keys[i][1]})",
                         labels=labels,
                     )
@@ -333,7 +334,7 @@ class SingleParameterExperimentTk(NotebookTk):
                     title=f"param={parameters[row]} // iteration={iterations[col]}",
                     parameters=[parameters[row]],
                     iterations=[iterations[col]],
-                    xlabel="Time",
+                    xlabel=f"Time [{self.granularity.name}]",
                     variables=variables,
                     formats=formats,
                     ylabel=ylabel,
@@ -763,7 +764,7 @@ class SingleParameterExperimentTk(NotebookTk):
                             fmt = "-"
                         else:
                             fmt = formats[0][i] + formats[1][j] + formats[2][k]
-                        xdata = df.index * self.dt
+                        xdata = df.index * self.dt / self.granularity.value
                         ydata = df[variable]
                         label = f"{labels[0][i]}  {labels[1][j]}  {labels[2][k]}"
                         lns.append(ax.plot(xdata, ydata, fmt, label=label))
@@ -778,7 +779,7 @@ class SingleParameterExperimentTk(NotebookTk):
                             fmt = "-"
                         else:
                             fmt = formats[0][i] + formats[1][j] + formats[2][k]
-                        xdata = df.index * self.dt
+                        xdata = df.index * self.dt / self.granularity.value
                         ydata = df[variable]
                         label = f"{labels[0][i]}  {labels[1][j]}  {labels[2][k]}"
                         lns.append(ax.plot(xdata, ydata, fmt, label=label))
