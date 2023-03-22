@@ -16,6 +16,7 @@ from vega_sim.scenario.common.agents import (
 
 BASE_IDEAL_MM_CSV_HEADERS = [
     "Time Step",
+    "postgres [GB]",
     "LP: General Account",
     "LP: Margin Account",
     "LP: Margin Rate",
@@ -170,8 +171,11 @@ def _ideal_market_maker_single_data_extraction(
     max_locked_capital = margin_lp + bond_lp
     max_margin = margin_lp
 
+    postgres_size = vega.get_database_size()
+
     base_logs = {
         "Time Step": mm_agent.current_step,
+        "postgres [GB]": postgres_size * 1e-9,
         "LP: General Account": general_lp,
         "LP: Margin Account": margin_lp,
         "LP: Margin Rate": margin_rate,
@@ -215,7 +219,7 @@ def _ideal_market_maker_single_data_extraction(
         if hasattr(mm_agent, "price_process")
         else None,
         "Midprice": mid_price,
-        "Markprice": markprice,
+        "Markprice": markprice if markprice != 0 else None,
         "LP: entry price": entry_price,
         "InsurancePool": insurance,
         "LiquifeeAccount": liquifee,
