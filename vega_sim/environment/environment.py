@@ -48,6 +48,7 @@ MarketState = namedtuple(
         "min_valid_price",
         "max_valid_price",
         "orders",
+        "depth",
     ],
 )
 
@@ -371,6 +372,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 min_valid_price=vega.price_bounds(market_id=market_id)[0],
                 max_valid_price=vega.price_bounds(market_id=market_id)[1],
                 orders=order_status.get(market_id, {}),
+                depth=vega.market_depth(market_id=market_id),
             )
 
         return VegaState(network_state=(), market_state=market_state)
