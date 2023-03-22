@@ -9,6 +9,7 @@ following suite of vega-market-sim agents.
 - RandomMarketOrderTrader:          trades each side of the book every step.
 - PriceSensitiveLimitOrderTrader:   trades on orders close to an external price.
 - InformedTrader:                   trades on orders which will be in-the-money soon.
+- DegenerateTraders:                creates traders who get closed out
 
 """
 
@@ -33,6 +34,8 @@ from vega_sim.scenario.common.agents import (
     StateAgent,
     SimpleLiquidityProvider,
 )
+
+from vega_sim.scenario.fuzzed_markets.agents import DegenerateTrader
 
 from vega_sim.scenario.common.utils.price_process import (
     Granularity,
@@ -64,9 +67,11 @@ class ParameterExperiment(Scenario):
         market_code: str = "ETHUSD",
         asset_name: str = "ETH",
         asset_dp: str = 18,
-        rt_mint: int = 100_000,
-        it_mint: int = 100_000,
+        rt_mint: int = 1_000_000,
+        it_mint: int = 1_000_000,
         st_mint: int = 1_000_000,
+        dt_mint: int = 1000,
+        run_with_degen_agents: bool = True,
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
@@ -96,6 +101,9 @@ class ParameterExperiment(Scenario):
         self.rt_mint = rt_mint
         self.st_mint = st_mint
         self.it_mint = it_mint
+        self.dt_mint = dt_mint
+
+        self.run_with_degen_agents = run_with_degen_agents
 
     def _generate_price_process(
         self,
@@ -174,14 +182,14 @@ class ParameterExperiment(Scenario):
             market_kappa=5,
             market_order_arrival_rate=0.5,
             state_update_freq=10,
-            tag=None,
             orders_from_stream=True,
+            tag=None,
         )
 
         simple_liquidity_providers = [
             SimpleLiquidityProvider(
                 wallet_name="vega",
-                key_name="simple_lp_c",
+                key_name=f"simple_lp_{i}",
                 market_name=market_name,
                 asset_name=asset_name,
                 initial_asset_mint=1e10,
@@ -198,8 +206,9 @@ class ParameterExperiment(Scenario):
                 ask_outer_bound_fn=lambda vega_state, market_id: vega_state.market_state[
                     market_id
                 ].max_valid_price,
-                offset_proportion=0.16,
+                offset_proportion=offset,
                 fee=0.001,
+                tag=str(i),
             )
             for i, offset in enumerate([0.02, 0.04, 0.06])
         ]
@@ -239,8 +248,8 @@ class ParameterExperiment(Scenario):
             lookahead=5,
             accuracy=0.8,
             max_abs_position=20,
-            tag=None,
             random_state=random_state,
+            tag=None,
         )
 
         random_traders = [
@@ -253,19 +262,49 @@ class ParameterExperiment(Scenario):
                 base_order_size=0.1,
                 buy_intensity=buy_intensity,
                 sell_intensity=sell_intensity,
-                tag=str(i),
                 random_state=random_state,
+                step_bias=0.2,
+                tag=str(i),
             )
             for i, (buy_intensity, sell_intensity) in enumerate(
-                [(50, 10), (30, 30), (30, 30), (30, 30), (10, 50)]
+                [(30, 30), (30, 30), (30, 30), (30, 30), (30, 30)]
             )
         ]
+
+        degenerate_traders = (
+            [
+                DegenerateTrader(
+                    wallet_name="vega",
+                    key_name=f"degen_trader_{i}",
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    side=side,
+                    size_factor=size_factor,
+                    initial_asset_mint=self.dt_mint,
+                    step_bias=0.1,
+                    random_state=random_state,
+                    tag=str(i),
+                )
+                for i, (side, size_factor) in enumerate(
+                    [
+                        ("SIDE_BUY", 0.25),
+                        ("SIDE_BUY", 0.50),
+                        ("SIDE_BUY", 0.75),
+                        ("SIDE_SELL", 0.25),
+                        ("SIDE_SELL", 0.50),
+                        ("SIDE_SELL", 0.75),
+                    ]
+                )
+            ]
+            if self.run_with_degen_agents
+            else []
+        )
 
         # Create fixed sensitive_traders
         sensitive_traders = [
             PriceSensitiveLimitOrderTrader(
                 wallet_name="vega",
-                key_name="sensitive_trader",
+                key_name=f"sensitive_trader_{i}",
                 market_name=market_name,
                 asset_name=asset_name,
                 initial_asset_mint=self.st_mint,
@@ -273,8 +312,9 @@ class ParameterExperiment(Scenario):
                 scale=0.035,
                 price_process_generator=iter(price_process),
                 random_state=random_state,
+                tag=str(i),
             )
-            for _ in range(5)
+            for i in range(5)
         ]
 
         agents = (
@@ -288,6 +328,7 @@ class ParameterExperiment(Scenario):
             + simple_liquidity_providers
             + sensitive_traders
             + random_traders
+            + degenerate_traders
         )
         return {agent.name(): agent for agent in agents}
 
