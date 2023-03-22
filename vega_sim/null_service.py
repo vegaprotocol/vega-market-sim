@@ -851,3 +851,19 @@ class VegaServiceNull(VegaService):
             use_full_vega_wallet=self._use_full_vega_wallet,
             warn_on_raw_data_access=self.warn_on_raw_data_access,
         )
+
+    def get_database_size(self):
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(
+            f"{self.log_dir}/vegahome/state/data-node/storage/postgres"
+        ):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                # skip if it is symbolic link
+                if not os.path.islink(fp):
+                    try:
+                        total_size += os.path.getsize(fp)
+                    except FileNotFoundError:
+                        logging.debug(f"No such file or directory: {fp}")
+
+        return total_size
