@@ -211,6 +211,6 @@ def load_fuzzing_df(
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, FUZZING_FILE_NAME))
     if not df.empty:
-        df["time"] = pd.to_datetime(df.time * 1e9)
+        df["time"] = pd.to_datetime(df.time)
         df = df.set_index("time")
     return df
