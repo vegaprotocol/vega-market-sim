@@ -35,7 +35,6 @@ MARGIN_SCALING_FACTORS = SingleParameterExperiment(
             ]
         ),
         run_with_degen_agents=False,
-        wait_for_thread_catchup=True,
     ),
     runs_per_scenario=1,
     additional_market_parameters_to_set={
@@ -64,7 +63,6 @@ MARK_PRICE_UPDATE_FREQUENCY = SingleParameterExperiment(
             ]
         ),
         run_with_degen_agents=False,
-        wait_for_thread_catchup=True,
     ),
     runs_per_scenario=1,
     additional_market_parameters_to_set={
