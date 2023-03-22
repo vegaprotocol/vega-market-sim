@@ -195,6 +195,9 @@ class MarketEnvironment:
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
+        # Wait for threads to catchup to ensure newly created market observed
+        vega.wait_for_thread_catchup()
+
         start_time = vega.get_blockchain_time(in_seconds=True)
         for i in range(self.n_steps):
             self.step(vega)
