@@ -285,9 +285,7 @@ class VegaService(ABC):
     def wait_for_core_catchup(self) -> None:
         wait_for_core_catchup(self.core_client)
 
-    def wait_for_thread_catchup(
-        self, max_retries: int = 1000, threshold: float = 0.001
-    ):
+    def wait_for_thread_catchup(self, max_retries: int = 1000, threshold: float = 0.5):
         self.wait_for_datanode_sync()
         t0 = time.time()
         attempts = 0
