@@ -24,7 +24,7 @@ MARGIN_SCALING_FACTORS = SingleParameterExperiment(
         """{"search_level": 1.001, "initial_margin": 2.000, "collateral_release": 4.000}""",
     ],
     scenario=ParameterExperiment(
-        num_steps=60 * 2,
+        num_steps=60 * 20,
         step_length_seconds=1,
         block_length_seconds=1,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
@@ -52,7 +52,7 @@ MARK_PRICE_UPDATE_FREQUENCY = SingleParameterExperiment(
     parameter_to_vary=("network.markPriceUpdateMaximumFrequency"),
     values=["2s", "10s", "30s", "60s"],
     scenario=ParameterExperiment(
-        num_steps=60 * 2,
+        num_steps=60 * 20,
         step_length_seconds=1,
         block_length_seconds=1,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
@@ -82,7 +82,9 @@ TARGET_STAKE_SCALING_FACTOR = SingleParameterExperiment(
     ),
     values=[0.5, 5, 50],
     scenario=ParameterExperiment(
-        num_steps=60 * 2,
+        num_steps=60 * 20,
+        step_length_seconds=1,
+        block_length_seconds=1,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
@@ -107,6 +109,9 @@ TAU_SCALING_FACTOR = SingleParameterExperiment(
     parameter_to_vary="market.liquidity.probabilityOfTrading.tau.scaling",
     values=["10", "100", "1000"],
     scenario=ParameterExperiment(
+        num_steps=60 * 20,
+        step_length_seconds=1,
+        block_length_seconds=1,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
@@ -131,6 +136,9 @@ BOND_PENALTY_PARAMETER = SingleParameterExperiment(
     parameter_to_vary="market.liquidity.bondPenaltyParameter",
     values=["0.0", "0.5", "1.0"],
     scenario=ParameterExperiment(
+        num_steps=60 * 20,
+        step_length_seconds=1,
+        block_length_seconds=1,
         state_extraction_fn=ideal_market_maker_single_data_extraction(
             additional_data_fns=[
                 tau_scaling_additional_data,
