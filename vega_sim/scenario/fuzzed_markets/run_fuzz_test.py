@@ -1,3 +1,5 @@
+import os
+
 import logging
 import argparse
 
@@ -45,10 +47,12 @@ if __name__ == "__main__":
             output_data=True,
         )
 
+    os.mkdir("fuzz_plots")
+
     fuzz_figs = fuzz_plots()
     for key, fig in fuzz_figs.items():
-        fig.savefig(f"fuzz-{key}.jpg")
+        fig.savefig(f"fuzz_plots/fuzz-{key}.jpg")
 
     trading_figs = plot_run_outputs()
     for key, fig in trading_figs.items():
-        fig.savefig(f"trading-{key}.jpg")
+        fig.savefig(f"fuzz_plots/trading-{key}.jpg")
