@@ -12,12 +12,12 @@ from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs
 
 
 def _run(steps: int = 2880, output: bool = False):
-    
     scenario = FuzzingScenario(
         num_steps=args.steps,
         step_length_seconds=30,
         block_length_seconds=1,
         transactions_per_block=4096,
+        output=output,
     )
 
     with VegaServiceNull(
@@ -34,7 +34,8 @@ def _run(steps: int = 2880, output: bool = False):
         )
 
     if output:
-        os.mkdir("fuzz_plots")
+        if not os.path.exists("fuzz_plots"):
+            os.mkdir("fuzz_plots")
 
         fuzz_figs = fuzz_plots()
         for key, fig in fuzz_figs.items():
@@ -58,5 +59,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     _run(steps=args.steps, output=True)
-
-    
