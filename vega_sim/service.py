@@ -147,19 +147,13 @@ class VegaService(ABC):
         )
         self.seconds_per_block = seconds_per_block
 
-    def _after_total_catchup(self, fn: Callable, *args, **kwargs):
-        self.wait_for_total_catchup()
-        return fn(*args, **kwargs)
-
     @property
     def market_price_decimals(self) -> int:
         if self._market_price_decimals is None:
             self._market_price_decimals = DecimalsCache(
-                lambda market_id: self._after_total_catchup(
-                    data.market_price_decimals,
-                    market_id=market_id,
-                    data_client=self.trading_data_client_v2,
-                )
+                lambda market_id: self.data_cache.market_from_feed(
+                    market_id=market_id
+                ).decimal_places
             )
         return self._market_price_decimals
 
@@ -167,11 +161,9 @@ class VegaService(ABC):
     def market_pos_decimals(self) -> int:
         if self._market_pos_decimals is None:
             self._market_pos_decimals = DecimalsCache(
-                lambda market_id: self._after_total_catchup(
-                    data.market_position_decimals,
-                    market_id=market_id,
-                    data_client=self.trading_data_client_v2,
-                )
+                lambda market_id: self.data_cache.market_from_feed(
+                    market_id=market_id
+                ).position_decimal_places
             )
         return self._market_pos_decimals
 
@@ -179,11 +171,9 @@ class VegaService(ABC):
     def asset_decimals(self) -> int:
         if self._asset_decimals is None:
             self._asset_decimals = DecimalsCache(
-                lambda asset_id: self._after_total_catchup(
-                    data.get_asset_decimals,
-                    asset_id=asset_id,
-                    data_client=self.trading_data_client_v2,
-                )
+                lambda asset_id: self.data_cache.asset_from_feed(
+                    asset_id=asset_id
+                ).details.decimals
             )
         return self._asset_decimals
 
@@ -191,10 +181,8 @@ class VegaService(ABC):
     def market_to_asset(self) -> str:
         if self._market_to_asset is None:
             self._market_to_asset = DecimalsCache(
-                lambda market_id: self._after_total_catchup(
-                    data_raw.market_info,
-                    market_id=market_id,
-                    data_client=self.trading_data_client_v2,
+                lambda market_id: self.data_cache.market_from_feed(
+                    market_id=market_id
                 ).tradable_instrument.instrument.future.settlement_asset
             )
         return self._market_to_asset
