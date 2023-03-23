@@ -195,10 +195,8 @@ class MarketEnvironment:
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
-        vega.wallet._load_token("MarketSim")
-
-        print(f"KEYS ARE {vega.wallet.get_keypairs('MarketSim')}")
-        print(f"TOKENS ARE {vega.wallet.login_tokens}")
+        # Wait for threads to catchup to ensure newly created market observed
+        vega.wait_for_thread_catchup()
 
         start_time = vega.get_blockchain_time(in_seconds=True)
         for i in range(self.n_steps):
@@ -365,7 +363,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
         return VegaState(network_state=(), market_state=market_state)
 
     def step(self, vega: VegaService) -> None:
-        vega.wait_for_datanode_sync()
+        vega.wait_for_thread_catchup()
         state = self.state_func(vega)
         for agent in (
             sorted(self.agents, key=lambda _: self.random_state.random())
