@@ -463,18 +463,18 @@ class LocalDataCache:
                         self._time_update_from_feed = int(update.timestamp)
 
                 elif isinstance(update, vega_protos.markets.Market):
-                    with self.market_data_lock:
-                        self._market_from_feed[update.id] = update
-                        # Trigger save by attempting to get decimal for market
-                        self._market_pos_decimals[update.id]
-                        self._market_price_decimals[update.id]
-                        self._market_to_asset[update.id]
+                    self._market_from_feed[update.id] = update
+                    # Trigger the DecimalCache default factory method by attempting to
+                    # get the decimal precision for the market
+                    self._market_pos_decimals[update.id]
+                    self._market_price_decimals[update.id]
+                    self._market_to_asset[update.id]
 
                 elif isinstance(update, vega_protos.assets.Asset):
-                    with self.trades_lock:
-                        self._asset_from_feed[update.id] = update
-                        # Trigger save by attempting to get decimal for asset
-                        self._asset_decimals[update.id]
+                    self._asset_from_feed[update.id] = update
+                    # Trigger the DecimalCache default factory method by attempting to
+                    # get the decimal precision for the asset
+                    self._asset_decimals[update.id]
 
                 elif update is None:
                     logger.debug("Failed to process event into update.")
