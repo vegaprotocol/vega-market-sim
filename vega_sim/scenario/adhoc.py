@@ -47,10 +47,10 @@ def main():
             transactions_per_block=(
                 scenario.transactions_per_block
                 if hasattr(scenario, "transactions_per_block")
-                else 1
+                else 100
             ),
             retain_log_files=True,
-            use_full_vega_wallet=True,
+            use_full_vega_wallet=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
