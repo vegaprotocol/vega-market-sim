@@ -92,6 +92,7 @@ class FuzzingScenario(Scenario):
         n_markets: int = 2,
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
+        output: bool = True,
     ):
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
@@ -112,6 +113,8 @@ class FuzzingScenario(Scenario):
 
         self.block_length_seconds = block_length_seconds
         self.transactions_per_block = transactions_per_block
+
+        self.output = output
 
     def configure_agents(
         self,
@@ -230,7 +233,7 @@ class FuzzingScenario(Scenario):
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
-                        output_plot_on_finalise=True,
+                        output_plot_on_finalise=self.output,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
