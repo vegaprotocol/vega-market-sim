@@ -13,7 +13,7 @@ from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs
 
 def _run(steps: int = 2880, output: bool = False):
     scenario = FuzzingScenario(
-        num_steps=args.steps,
+        num_steps=steps,
         step_length_seconds=30,
         block_length_seconds=1,
         transactions_per_block=4096,
@@ -30,7 +30,7 @@ def _run(steps: int = 2880, output: bool = False):
         scenario.run_iteration(
             vega=vega,
             network=Network.NULLCHAIN,
-            output_data=True,
+            output_data=output,
         )
 
     if output:
