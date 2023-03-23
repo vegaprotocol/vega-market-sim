@@ -5,6 +5,7 @@ from numpy.random import RandomState
 from vega_sim.proto.vega import markets as markets_protos
 import vega_sim.proto.vega as vega_protos
 
+import os
 import pandas as pd
 
 
@@ -245,7 +246,8 @@ class FuzzingAgent(StateAgentWithWallet):
                     range_color=range_color,
                 )
                 fig.update_traces(marker=dict(cornerradius=5))
-                fig.write_html("coverage.html")
+                os.mkdir("fuzz_plots")
+                fig.write_html("fuzz_plots/coverage.html")
                 fig.show()
 
 
