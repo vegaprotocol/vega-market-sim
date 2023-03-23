@@ -11,22 +11,8 @@ from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs
 
 
-def output_summary(output):
-    pass
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-s",
-        "--steps",
-        default=2 * 60 * 12,
-        type=int,
-    )
-    args = parser.parse_args()
-
+def _run(steps: int = 2880, output: bool = False):
+    
     scenario = FuzzingScenario(
         num_steps=args.steps,
         step_length_seconds=30,
@@ -47,12 +33,30 @@ if __name__ == "__main__":
             output_data=True,
         )
 
-    os.mkdir("fuzz_plots")
+    if output:
+        os.mkdir("fuzz_plots")
 
-    fuzz_figs = fuzz_plots()
-    for key, fig in fuzz_figs.items():
-        fig.savefig(f"fuzz_plots/fuzz-{key}.jpg")
+        fuzz_figs = fuzz_plots()
+        for key, fig in fuzz_figs.items():
+            fig.savefig(f"fuzz_plots/fuzz-{key}.jpg")
 
-    trading_figs = plot_run_outputs()
-    for key, fig in trading_figs.items():
-        fig.savefig(f"fuzz_plots/trading-{key}.jpg")
+        trading_figs = plot_run_outputs()
+        for key, fig in trading_figs.items():
+            fig.savefig(f"fuzz_plots/trading-{key}.jpg")
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s",
+        "--steps",
+        default=2 * 60 * 12,
+        type=int,
+    )
+    args = parser.parse_args()
+
+    _run(steps=args.steps, output=True)
+
+    
