@@ -98,12 +98,16 @@ class LocalDataCache:
         self.time_update_lock = threading.RLock()
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
+        self.asset_lock = threading.RLock()
+        self.market_lock = threading.RLock()
         self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
         self.ledger_entries_lock = threading.RLock()
         self._time_update_from_feed = 0
         self._live_order_state_from_feed = {}
         self._dead_order_state_from_feed = {}
+        self._asset_from_feed = {}
+        self._market_from_feed = {}
         self.market_data_from_feed_store = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
@@ -127,6 +131,14 @@ class LocalDataCache:
                     self._market_to_asset,
                     self._asset_decimals,
                 ),
+            ),
+            (
+                (events_protos.BUS_EVENT_TYPE_ASSET,),
+                lambda evt: evt.asset,
+            ),
+            (
+                (events_protos.BUS_EVENT_TYPE_MARKET_CREATED,),
+                lambda evt: evt.market_created,
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_ORDER,),
@@ -175,6 +187,18 @@ class LocalDataCache:
         self,
     ) -> int:
         return self._time_update_from_feed
+
+    def asset_from_feed(
+        self,
+        asset_id: str,
+    ) -> vega_protos.assets.Asset:
+        return self._asset_from_feed.get(asset_id, None)
+
+    def market_from_feed(
+        self,
+        market_id: str,
+    ) -> vega_protos.markets.Market:
+        return self._market_from_feed.get(market_id, None)
 
     def market_data_from_feed(
         self,
@@ -246,6 +270,8 @@ class LocalDataCache:
             if party_ids is not None
             else None
         )
+        self.initialise_assets()
+        self.initialise_markets()
         self.initialise_time_update_monitoring()
         self.initialise_order_monitoring(
             market_ids=market_ids,
@@ -282,6 +308,22 @@ class LocalDataCache:
             daemon=True,
         )
         self._forwarding_thread.start()
+
+    def initialise_assets(self):
+        base_assets = data_raw.list_assets(data_client=self._trading_data_client)
+
+        with self.asset_lock:
+            for asset in base_assets:
+                self._asset_from_feed[asset.id] = asset
+
+    def initialise_markets(self):
+        base_markets = [
+            market.id for market in data_raw.all_markets(self._trading_data_client)
+        ]
+
+        with self.market_lock:
+            for market in base_markets:
+                self._market_from_feed[market.id] = market
 
     def initialise_time_update_monitoring(self):
         base_time_update = gov.get_blockchain_time(
@@ -419,6 +461,24 @@ class LocalDataCache:
                 elif isinstance(update, events_protos.TimeUpdate):
                     with self.time_update_lock:
                         self._time_update_from_feed = int(update.timestamp)
+
+                elif isinstance(update, vega_protos.markets.Market):
+                    with self.market_data_lock:
+                        self._market_from_feed[update.id] = update
+                        # Trigger save by attempting to get decimal for market
+                        self._market_pos_decimals[update.id]
+                        self._market_price_decimals[update.id]
+                        self._market_to_asset[update.id]
+
+                elif isinstance(update, vega_protos.assets.Asset):
+                    with self.trades_lock:
+                        self._asset_from_feed[update.id] = update
+                        # Trigger save by attempting to get decimal for asset
+                        self._asset_decimals[update.id]
+
+                elif update is None:
+                    logger.debug("Failed to process event into update.")
+
                 else:
                     logger.info(f"Unhandled update {update}")
 
