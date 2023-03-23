@@ -157,9 +157,6 @@ def _run(
 
                     learning_agent.move_to_cpu()
 
-                    # Add time delay between iterations for threads to catch-up
-                    time.sleep(5)
-
                     _ = run_iteration(
                         learning_agent=learning_agent,
                         step_tag=it,
