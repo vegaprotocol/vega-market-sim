@@ -1227,6 +1227,15 @@ def _stream_handler(
     event = extraction_fn(stream_item)
 
     market_id = getattr(event, "market_id", getattr(event, "market", None))
+
+    # Check market creation event observed
+    if (
+        (market_id not in mkt_pos_dp)
+        or (market_id not in mkt_price_dp)
+        or (market_id not in mkt_to_asset)
+    ):
+        return
+
     asset_decimals = asset_dp.get(
         getattr(
             event,
