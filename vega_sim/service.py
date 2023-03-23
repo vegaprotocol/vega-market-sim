@@ -285,6 +285,21 @@ class VegaService(ABC):
     def wait_for_core_catchup(self) -> None:
         wait_for_core_catchup(self.core_client)
 
+    def wait_for_thread_catchup(self, max_retries: int = 1000, threshold: float = 0.5):
+        self.wait_for_datanode_sync()
+        t0 = time.time()
+        attempts = 0
+        while attempts < max_retries:
+            attempts += 1
+            if self.get_blockchain_time() <= self.get_blockchain_time_from_feed():
+                break
+            time.sleep(0.001)
+        t_catchup = time.time() - t0
+        if t_catchup > threshold:
+            logging.warning(f"Thread catchup took {round(t_catchup, 2)}s.")
+        else:
+            logging.debug(f"Thread catchup took {round(t_catchup, 2)}s.")
+
     def wait_for_total_catchup(self) -> None:
         self.wait_for_core_catchup()
         self.wait_for_datanode_sync()
@@ -1457,6 +1472,9 @@ class VegaService(ABC):
         return data_raw.order_status(
             order_id=order_id, data_client=self.trading_data_client_v2, version=version
         )
+
+    def get_blockchain_time_from_feed(self):
+        return self.data_cache.time_update_from_feed()
 
     def order_status_from_feed(
         self, live_only: bool = True

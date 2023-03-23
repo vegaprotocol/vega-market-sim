@@ -13,6 +13,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
+import vega_sim.api.governance as gov
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
@@ -94,11 +95,13 @@ class LocalDataCache:
         self._asset_decimals = asset_decimals
         self._market_to_asset = market_to_asset
 
+        self.time_update_lock = threading.RLock()
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
         self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
         self.ledger_entries_lock = threading.RLock()
+        self._time_update_from_feed = 0
         self._live_order_state_from_feed = {}
         self._dead_order_state_from_feed = {}
         self.market_data_from_feed_store = {}
@@ -111,6 +114,10 @@ class LocalDataCache:
         self._kill_thread_sig = threading.Event()
 
         self.stream_registry = [
+            (
+                (events_protos.BUS_EVENT_TYPE_TIME_UPDATE,),
+                lambda evt: evt.time_update,
+            ),
             (
                 (events_protos.BUS_EVENT_TYPE_TRADE,),
                 lambda evt: data.trades_subscription_handler(
@@ -163,6 +170,11 @@ class LocalDataCache:
 
     def stop(self) -> None:
         return
+
+    def time_update_from_feed(
+        self,
+    ) -> int:
+        return self._time_update_from_feed
 
     def market_data_from_feed(
         self,
@@ -234,7 +246,7 @@ class LocalDataCache:
             if party_ids is not None
             else None
         )
-
+        self.initialise_time_update_monitoring()
         self.initialise_order_monitoring(
             market_ids=market_ids,
             party_ids=party_ids,
@@ -270,6 +282,13 @@ class LocalDataCache:
             daemon=True,
         )
         self._forwarding_thread.start()
+
+    def initialise_time_update_monitoring(self):
+        base_time_update = gov.get_blockchain_time(
+            data_client=self._trading_data_client
+        )
+        with self.time_update_lock:
+            self._time_update_from_feed = base_time_update
 
     def initialise_order_monitoring(
         self,
@@ -396,6 +415,10 @@ class LocalDataCache:
                 elif isinstance(update, data.LedgerEntry):
                     with self.ledger_entries_lock:
                         self._ledger_entries_from_feed.append(update)
+
+                elif isinstance(update, events_protos.TimeUpdate):
+                    with self.time_update_lock:
+                        self._time_update_from_feed = int(update.timestamp)
                 else:
                     logger.info(f"Unhandled update {update}")
 
