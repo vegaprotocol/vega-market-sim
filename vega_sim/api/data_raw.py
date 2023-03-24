@@ -272,15 +272,19 @@ def list_orders(
         _type_: _description_
     """
 
-    request = data_node_protos_v2.trading_data.ListOrdersRequest(live_only=live_only)
+    order_filter = data_node_protos_v2.trading_data.OrderFilter(live_only=live_only)
+
+    if reference is not None:
+        order_filter.reference = reference
 
     for attr, val in [
-        ("market_id", market_id),
-        ("party_id", party_id),
-        ("reference", reference),
+        ("market_ids", [market_id] if market_id is not None else None),
+        ("party_ids", [party_id] if party_id is not None else None),
     ]:
         if val is not None:
-            setattr(request, attr, val)
+            getattr(order_filter, attr).extend(val)
+
+    request = data_node_protos_v2.trading_data.ListOrdersRequest(filter=order_filter)
 
     return unroll_v2_pagination(
         base_request=request,
