@@ -446,6 +446,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersResponse.FromString,
         )
+        self.ListEntities = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListEntities",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
+        )
         self.Ping = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Ping",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.SerializeToString,
@@ -1269,6 +1274,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListEntities(self, request, context):
+        """All entities list
+
+        List all entities created by transaction hash
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def Ping(self, request, context):
         """Ping
 
@@ -1710,6 +1724,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.NetworkHistoryBootstrapPeers,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersResponse.SerializeToString,
+        ),
+        "ListEntities": grpc.unary_unary_rpc_method_handler(
+            servicer.ListEntities,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.SerializeToString,
         ),
         "Ping": grpc.unary_unary_rpc_method_handler(
             servicer.Ping,
@@ -4211,6 +4230,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/NetworkHistoryBootstrapPeers",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.NetworkHistoryBootstrapPeersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListEntities(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListEntities",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
             options,
             channel_credentials,
             insecure,
