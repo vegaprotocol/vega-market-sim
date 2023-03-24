@@ -246,7 +246,10 @@ class FuzzingAgent(StateAgentWithWallet):
                     range_color=range_color,
                 )
                 fig.update_traces(marker=dict(cornerradius=5))
-                os.mkdir("fuzz_plots")
+
+                if not os.path.exists("fuzz_plots"):
+                    os.mkdir("fuzz_plots")
+
                 fig.write_html("fuzz_plots/coverage.html")
                 fig.show()
 
