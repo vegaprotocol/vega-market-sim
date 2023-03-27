@@ -761,6 +761,7 @@ class VegaServiceNull(VegaService):
                 )
 
             # Create the data cache and start the live feeds
+            self.wait_for_datanode_sync()
             self.data_cache
 
         if self.run_with_console:

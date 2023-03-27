@@ -1246,7 +1246,6 @@ def _stream_handler(
     if (asset_id is not None) and (asset_id not in asset_dp):
         return
 
-
     return conversion_fn(
         event,
         DecimalSpec(
