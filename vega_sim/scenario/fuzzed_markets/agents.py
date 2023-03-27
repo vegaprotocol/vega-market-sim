@@ -251,7 +251,6 @@ class FuzzingAgent(StateAgentWithWallet):
                     os.mkdir("fuzz_plots")
 
                 fig.write_html("fuzz_plots/coverage.html")
-                fig.show()
 
 
 class DegenerateTrader(StateAgentWithWallet):
