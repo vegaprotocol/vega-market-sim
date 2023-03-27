@@ -1229,7 +1229,7 @@ def _stream_handler(
     market_id = getattr(event, "market_id", getattr(event, "market", None))
 
     # Check market creation event observed
-    if (
+    if (market_id is not None) and (
         (market_id not in mkt_pos_dp)
         or (market_id not in mkt_price_dp)
         or (market_id not in mkt_to_asset)
