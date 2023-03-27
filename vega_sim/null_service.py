@@ -734,7 +734,7 @@ class VegaServiceNull(VegaService):
         if block_on_startup:
             # Wait for startup
             started = False
-            for _ in range(120):
+            for _ in range(500):
                 try:
                     requests.get(
                         f"http://localhost:{self.data_node_rest_port}/time"
