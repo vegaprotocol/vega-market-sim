@@ -775,7 +775,8 @@ class VegaServiceNull(VegaService):
                     "Timed out waiting for Vega simulator to start up"
                 )
 
-            # Create the data cache and start the live feeds
+            # Create a block before waiting for datanode sync and starting the feeds
+            self.wait_fn(1)
             self.wait_for_datanode_sync()
             self.data_cache
 
