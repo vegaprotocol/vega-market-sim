@@ -743,7 +743,7 @@ class VegaServiceNull(VegaService):
                         self.data_node_grpc_url,
                         options=(("grpc.enable_http_proxy", 0),),
                     )
-                    grpc.channel_ready_future(channel).result(timeout=30)
+                    grpc.channel_ready_future(channel).result(timeout=5)
                     trading_data_client = vac.VegaTradingDataClientV2(
                         self.data_node_grpc_url,
                         channel=channel,
@@ -768,9 +768,11 @@ class VegaServiceNull(VegaService):
                     requests.exceptions.ConnectionError,
                     requests.exceptions.HTTPError,
                     grpc.RpcError,
+                    grpc.FutureTimeoutError,
                 ):
                     time.sleep(0.1)
             if not started:
+                self.stop()
                 raise VegaStartupTimeoutError(
                     "Timed out waiting for Vega simulator to start up"
                 )
