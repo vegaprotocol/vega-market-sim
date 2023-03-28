@@ -779,7 +779,7 @@ class VegaServiceNull(VegaService):
 
             # Create a block before waiting for datanode sync and starting the feeds
             self.wait_fn(1)
-            self.wait_for_datanode_sync()
+            self.wait_for_total_catchup()
             self.data_cache
 
         if self.run_with_console:
