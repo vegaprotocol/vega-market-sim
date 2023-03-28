@@ -1227,20 +1227,31 @@ def _stream_handler(
     event = extraction_fn(stream_item)
 
     market_id = getattr(event, "market_id", getattr(event, "market", None))
-    asset_decimals = asset_dp.get(
-        getattr(
-            event,
-            "asset",
-            mkt_to_asset[market_id] if market_id is not None else None,
-        )
+
+    # Check market creation event observed
+    if (market_id is not None) and (
+        (market_id not in mkt_pos_dp)
+        or (market_id not in mkt_price_dp)
+        or (market_id not in mkt_to_asset)
+    ):
+        return
+
+    asset_id = getattr(
+        event,
+        "asset",
+        mkt_to_asset[market_id] if market_id is not None else None,
     )
+
+    # Check asset creation event observed
+    if (asset_id is not None) and (asset_id not in asset_dp):
+        return
 
     return conversion_fn(
         event,
         DecimalSpec(
             price_decimals=mkt_price_dp[market_id] if market_id is not None else None,
             position_decimals=mkt_pos_dp[market_id] if market_id is not None else None,
-            asset_decimals=asset_decimals,
+            asset_decimals=asset_dp[asset_id],
         ),
     )
 
