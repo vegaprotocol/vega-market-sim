@@ -334,7 +334,10 @@ def manage_vega_processes(
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
 ) -> None:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
+    )
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
@@ -741,7 +744,11 @@ class VegaServiceNull(VegaService):
                 try:
                     channel = grpc.insecure_channel(
                         self.data_node_grpc_url,
-                        options=(("grpc.enable_http_proxy", 0),),
+                        options=(
+                            ("grpc.enable_http_proxy", 0),
+                            ("grpc.max_send_message_length", 1024 * 1024 * 20),
+                            ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                        ),
                     )
                     grpc.channel_ready_future(channel).result(timeout=5)
                     trading_data_client = vac.VegaTradingDataClientV2(

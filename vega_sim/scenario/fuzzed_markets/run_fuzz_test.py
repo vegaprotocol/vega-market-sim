@@ -31,6 +31,7 @@ def _run(steps: int = 2880, output: bool = False):
             vega=vega,
             network=Network.NULLCHAIN,
             output_data=output,
+            log_every_n_steps=100,
         )
 
     if output:
@@ -47,7 +48,10 @@ def _run(steps: int = 2880, output: bool = False):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

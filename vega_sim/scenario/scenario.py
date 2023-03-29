@@ -62,6 +62,7 @@ class Scenario(abc.ABC):
         run_with_snitch: bool = True,
         tag: Optional[str] = None,
         output_data: bool = False,
+        log_every_n_steps: Optional[int] = None,
         **kwargs,
     ):
         tag = tag if tag is not None else ""
@@ -81,6 +82,7 @@ class Scenario(abc.ABC):
         outputs = self.env.run(
             pause_at_completion=pause_at_completion,
             run_with_console=run_with_console,
+            log_every_n_steps=log_every_n_steps,
         )
         if output_data:
             market_data_standard_output(self.get_run_data())

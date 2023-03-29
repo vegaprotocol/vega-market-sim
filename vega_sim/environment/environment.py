@@ -124,6 +124,7 @@ class MarketEnvironment:
         self,
         run_with_console: bool = False,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> Optional[List[Any]]:
         """Run the simulation with specified agents.
 
@@ -145,9 +146,17 @@ class MarketEnvironment:
                 block_duration=f"{int(self.block_length_seconds)}s",
                 use_full_vega_wallet=False,
             ) as vega:
-                return self._run(vega, pause_at_completion=pause_at_completion)
+                return self._run(
+                    vega,
+                    pause_at_completion=pause_at_completion,
+                    log_every_n_steps=log_every_n_steps,
+                )
         else:
-            return self._run(self._vega, pause_at_completion=pause_at_completion)
+            return self._run(
+                self._vega,
+                pause_at_completion=pause_at_completion,
+                log_every_n_steps=log_every_n_steps,
+            )
 
     def _start_live_feeds(self, vega: VegaService):
         # Get lists of unique market_ids and party_ids to observe
@@ -174,6 +183,7 @@ class MarketEnvironment:
         self,
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> None:
         """Run the simulation with specified agents.
 
@@ -182,6 +192,8 @@ class MarketEnvironment:
                 bool, default False, If True will pause with a keypress-prompt
                     once the simulation has completed, allowing the final state
                     to be inspected, either via code or the Console
+            log_every_n_steps:
+                Optional, int, If passed, will log a progress line every n steps
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
         logger.info(
@@ -230,7 +242,8 @@ class MarketEnvironment:
                     )
                     vega.wait_fn(to_forward / self.block_length_seconds)
                 start_time = vega.get_blockchain_time(in_seconds=True)
-
+            if log_every_n_steps is not None and i % log_every_n_steps == 0:
+                logger.info(f"Completed {i} steps")
             if (
                 self._pause_every_n_steps is not None
                 and i % self._pause_every_n_steps == 0
