@@ -22,6 +22,8 @@ class FuzzingAgent(StateAgentWithWallet):
             "SIDE",
             "TIME_IN_FORCE",
             "PEGGED_REFERENCE",
+            "POST_ONLY",
+            "REDUCE_ONLY",
         )
     }
     # Set the output flag which all instances can modify
@@ -188,6 +190,22 @@ class FuzzingAgent(StateAgentWithWallet):
                 p=[0.5, 0.5 / 3, 0.5 / 3, 0.5 / 3],
             )
         )
+        FuzzingAgent.MEMORY["REDUCE_ONLY"].append(
+            self.random_state.choice(
+                a=[
+                    True,
+                    False,
+                ],
+            )
+        )
+        FuzzingAgent.MEMORY["POST_ONLY"].append(
+            self.random_state.choice(
+                a=[
+                    True,
+                    False,
+                ],
+            )
+        )
 
         return self.vega.create_order_submission(
             market_id=self.market_id,
@@ -204,6 +222,8 @@ class FuzzingAgent(StateAgentWithWallet):
             ),
             pegged_reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
             pegged_offset=self.random_state.normal(loc=0, scale=10),
+            reduce_only=FuzzingAgent.MEMORY["REDUCE_ONLY"][-1],
+            post_only=FuzzingAgent.MEMORY["POST_ONLY"][-1],
         )
 
     def _select_order_id(self):

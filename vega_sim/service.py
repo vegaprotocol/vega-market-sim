@@ -584,6 +584,8 @@ class VegaService(ABC):
         wait: bool = True,
         order_ref: Optional[str] = None,
         trading_wallet: Optional[str] = None,
+        reduce_only: bool = False,
+        post_only: bool = False,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -603,6 +605,12 @@ class VegaService(ABC):
                 optional str, reference for later identification of order
             wallet_name:
                 optional str, name of wallet to use
+            reduce_only (bool):
+                Whether the order should only reduce a parties position. Defaults to
+                False.
+            post_only (bool):
+                Whether order should be prevented from trading immediately. Defaults to
+                False.
 
         Returns:
             str, The ID of the order
@@ -618,6 +626,8 @@ class VegaService(ABC):
             wait=wait,
             order_ref=order_ref,
             trading_key=trading_key,
+            reduce_only=reduce_only,
+            post_only=post_only,
         )
 
     def submit_order(
@@ -634,6 +644,8 @@ class VegaService(ABC):
         wait: bool = True,
         order_ref: Optional[str] = None,
         trading_wallet: Optional[str] = None,
+        reduce_only: bool = False,
+        post_only: bool = False,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -671,6 +683,12 @@ class VegaService(ABC):
                 optional str, reference for later identification of order
             key_name:
                 optional str, name of key in wallet to use
+            reduce_only (bool):
+                Whether the order should only reduce a parties position. Defaults to
+                False.
+            post_only (bool):
+                Whether order should be prevented from trading immediately. Defaults to
+                False.
 
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
@@ -731,6 +749,8 @@ class VegaService(ABC):
             time_forward_fn=lambda: self.wait_fn(2),
             order_ref=order_ref,
             key_name=trading_key,
+            reduce_only=reduce_only,
+            post_only=post_only,
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:
@@ -1844,6 +1864,8 @@ class VegaService(ABC):
         reference: Optional[str] = None,
         pegged_reference: Optional[str] = None,
         pegged_offset: Optional[float] = None,
+        reduce_only: bool = False,
+        post_only: bool = False,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -1872,6 +1894,12 @@ class VegaService(ABC):
                 Reference for price offset for order. Defaults to None.
             pegged_offset (Optional[float]):
                 Value for price offset from reference for order. Defaults to None.
+            reduce_only (bool):
+                Whether the order should only reduce a parties position. Defaults to
+                False.
+            post_only (bool):
+                Whether order should be prevented from trading immediately. Defaults to
+                False.
 
         Returns:
             OrderSubmission:
@@ -1932,6 +1960,8 @@ class VegaService(ABC):
             order_type=order_type,
             reference=reference,
             pegged_order=pegged_order,
+            reduce_only=reduce_only,
+            post_only=post_only,
         )
 
     def submit_instructions(
