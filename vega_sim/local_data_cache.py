@@ -192,13 +192,17 @@ class LocalDataCache:
         self,
         asset_id: str,
     ) -> vega_protos.assets.Asset:
-        return self._asset_from_feed.get(asset_id, None)
+        if asset_id not in self._asset_from_feed:
+            self.initialise_assets()
+        return self._asset_from_feed[asset_id]
 
     def market_from_feed(
         self,
         market_id: str,
     ) -> vega_protos.markets.Market:
-        return self._market_from_feed.get(market_id, None)
+        if market_id not in self._market_from_feed:
+            self.initialise_markets()
+        return self._market_from_feed[market_id]
 
     def market_data_from_feed(
         self,
@@ -207,7 +211,7 @@ class LocalDataCache:
         """
         Output market info.
         """
-        return self.market_data_from_feed_store.get(market_id, None)
+        return self.market_data_from_feed_store[market_id]
 
     def order_status_from_feed(
         self, live_only: bool = True

@@ -19,10 +19,13 @@ from io import BufferedWriter
 from os import path
 from typing import Dict, List, Optional, Set
 
+import grpc
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
 
+import vega_sim.api.governance as gov
+import vega_sim.grpc.client as vac
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
 from vega_sim.tools.load_binaries import download_binaries
@@ -736,6 +739,17 @@ class VegaServiceNull(VegaService):
             started = False
             for _ in range(500):
                 try:
+                    channel = grpc.insecure_channel(
+                        self.data_node_grpc_url,
+                        options=(("grpc.enable_http_proxy", 0),),
+                    )
+                    grpc.channel_ready_future(channel).result(timeout=5)
+                    trading_data_client = vac.VegaTradingDataClientV2(
+                        self.data_node_grpc_url,
+                        channel=channel,
+                    )
+                    gov.get_blockchain_time(trading_data_client)
+
                     requests.get(
                         f"http://localhost:{self.data_node_rest_port}/time"
                     ).raise_for_status()
@@ -753,16 +767,20 @@ class VegaServiceNull(VegaService):
                     MaxRetryError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.HTTPError,
+                    grpc.RpcError,
+                    grpc.FutureTimeoutError,
                 ):
                     time.sleep(0.1)
             if not started:
+                self.stop()
                 raise VegaStartupTimeoutError(
                     "Timed out waiting for Vega simulator to start up"
                 )
 
             # Create a block before waiting for datanode sync and starting the feeds
             self.wait_fn(1)
-            self.wait_for_datanode_sync()
+            self.wait_for_total_catchup()
+            self.wait_for_thread_catchup()
             self.data_cache
 
         if self.run_with_console:

@@ -190,6 +190,7 @@ class VegaService(ABC):
     @property
     def data_cache(self) -> LocalDataCache:
         if self._local_data_cache is None:
+            self.wait_for_total_catchup()
             self._local_data_cache = LocalDataCache(
                 self.trading_data_client_v2,
                 self.trading_data_client_v2,
