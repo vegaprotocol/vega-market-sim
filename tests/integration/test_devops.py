@@ -1,0 +1,37 @@
+import pytest
+from devops.scenario import DevOpsScenario
+from devops.registry import SCENARIOS
+
+from vega_sim.null_service import VegaServiceNull
+
+from vega_sim.scenario.common.utils.price_process import random_walk
+
+from vega_sim.scenario.constants import Network
+
+from vega_sim.proto.vega import markets as markets_protos
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    "scenario_to_test",
+    [pytest.param(SCENARIOS[s](), id=s) for s in SCENARIOS],
+)
+def test_devops_scenarios(scenario_to_test: DevOpsScenario):
+    """"""
+
+    scenario_to_test.step_length_seconds = 10
+    scenario_to_test.simulation_args.n_steps = 300
+
+    with VegaServiceNull(
+        seconds_per_block=1,
+        transactions_per_block=1000,
+        retain_log_files=True,
+        use_full_vega_wallet=False,
+        warn_on_raw_data_access=False,
+        run_with_console=False,
+    ) as vega:
+        scenario_to_test.run_iteration(
+            vega=vega,
+            network=Network.NULLCHAIN,
+            run_with_snitch=True,
+        )
