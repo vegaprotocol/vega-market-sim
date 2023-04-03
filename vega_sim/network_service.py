@@ -442,6 +442,9 @@ class VegaServiceNetwork(VegaService):
 
         try:
             self.ping_datanode(max_time_diff=max_time_diff)
+            logging.debug(
+                f"Connection to endpoint {self._data_node_grpc_url} successful."
+            )
             return
 
         except grpc.FutureTimeoutError as e:
@@ -514,11 +517,18 @@ class VegaServiceNetwork(VegaService):
 
                 # Ping the datanode to check it is not behind
                 self.ping_datanode()
+                logging.debug(
+                    f"Connection to endpoint {self._data_node_grpc_url} successful."
+                )
 
                 return
 
+            except grpc._channel._InactiveRpcError:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+
             except grpc.FutureTimeoutError:
-                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
                 )

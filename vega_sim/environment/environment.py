@@ -30,7 +30,12 @@ import numpy as np
 from collections import namedtuple
 from typing import Any, Callable, List, Optional
 
-from vega_sim.environment.agent import Agent, StateAgent, VegaState
+from vega_sim.environment.agent import (
+    Agent,
+    StateAgent,
+    StateAgentWithWallet,
+    VegaState,
+)
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
@@ -204,6 +209,10 @@ class MarketEnvironment:
 
         for agent in self.agents:
             agent.initialise(vega=vega)
+            if isinstance(agent, StateAgentWithWallet):
+                logging.info(
+                    f"{agent.name()} initialised with public_key = {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
+                )
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
@@ -482,7 +491,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             try:
                 agent.step(state)
             except Exception as e:
-                msg = f"Agent '{agent.key_name}' failed to step."
+                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
                 if self.raise_step_errors:
                     raise e(msg)
                 else:
