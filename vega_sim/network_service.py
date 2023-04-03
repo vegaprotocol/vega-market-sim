@@ -123,6 +123,9 @@ def manage_vega_processes(
                 "--network",
                 network,
                 "--automatic-consent",
+                "--load-tokens",
+                "--tokens-passphrase-file",
+                environ.get("VEGA_WALLET_TOKENS_PASSPHRASE_FILE"),
                 "--no-version-check",
             ],
             dir_root=tmp_vega_dir,
@@ -240,7 +243,7 @@ class VegaServiceNetwork(VegaService):
                 Note: Only needed if creating keys
             wallet_token_path (str, optional):
                 Path to the json file containing wallet tokens. Otherwise
-                uses VEGA_WALLET_TOKEN environment variable.
+                uses VEGA_WALLET_TOKENS_FILE environment variable.
         """
 
         # Run init method inherited from VegaService with network arguments.
@@ -280,12 +283,12 @@ class VegaServiceNetwork(VegaService):
         self._token_path = (
             wallet_token_path
             if wallet_token_path is not None
-            else environ.get("VEGA_WALLET_TOKEN")
+            else environ.get("VEGA_WALLET_TOKENS_FILE")
         )
         if self._token_path is None:
             raise Exception(
                 "Either path to tokens JSON must be passed to wallet class or"
-                " VEGA_WALLET_TOKEN environment variable set"
+                " VEGA_WALLET_TOKENS_FILE environment variable set"
             )
 
         self._network_config_path = _find_network_config_toml(
