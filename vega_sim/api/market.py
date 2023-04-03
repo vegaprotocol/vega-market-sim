@@ -100,7 +100,7 @@ class MarketConfig(Config):
             "instrument": "default",
             "lp_price_range": 1.0,
             "linear_slippage_factor": 1e-3,
-            "quadratic_slippage_factor": 1e-3,
+            "quadratic_slippage_factor": 0,
         }
     }
 
