@@ -31,9 +31,9 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.agent import StateAgentWithWallet
 
-from devops.scenario import DevOpsScenario
-from devops.classes import SimulationArgs
-from devops.registry import SCENARIOS, AGENTS
+from vega_sim.devops.scenario import DevOpsScenario
+from vega_sim.devops.classes import SimulationArgs
+from vega_sim.devops.registry import SCENARIOS, AGENTS
 
 
 def main():

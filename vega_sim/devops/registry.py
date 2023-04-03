@@ -4,14 +4,14 @@ Module contains preconfigured scenarios.
 
 """
 
-from devops.scenario import DevOpsScenario
+from vega_sim.devops.scenario import DevOpsScenario
 
 from vega_sim.scenario.common.agents import (
     ArbitrageLiquidityProvider,
     ExponentialShapedMarketMaker,
 )
 
-from devops.classes import (
+from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
     AuctionTraderArgs,

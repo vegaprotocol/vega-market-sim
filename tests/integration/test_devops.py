@@ -1,6 +1,6 @@
 import pytest
-from devops.scenario import DevOpsScenario
-from devops.registry import SCENARIOS
+from vega_sim.devops.scenario import DevOpsScenario
+from vega_sim.devops.registry import SCENARIOS
 
 from vega_sim.null_service import VegaServiceNull
 

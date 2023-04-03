@@ -101,7 +101,7 @@ frequently closed out, market-maker able to control it's position).
 To simulate a scenario run the following command:
 
 ```bash
-$ python -m devops.run_scenario -s SCENARIO_NAME -c
+$ python -m vega_sim.devops.run_scenario -s SCENARIO_NAME -c
 ```
 
 ### Deploying Scenarios
@@ -109,7 +109,7 @@ $ python -m devops.run_scenario -s SCENARIO_NAME -c
 To deploy a scenario to a network, simply define the network and market to deploy too:
 
 ```bash
-$ python -m devops.run_scenario -n NETWORK_NAME -s SCENARIO_NAME -m MARKET_NAME
+$ python -m vega_sim.devops.run_scenario -n NETWORK_NAME -s SCENARIO_NAME -m MARKET_NAME
 ```
 
 ## Agents
@@ -121,12 +121,12 @@ Before deploying an agent to a network, it can be tested in a specific scenario 
 To simulate an agent run the following command:
 
 ```bash
-$ python -m devops.run_agent -a AGENT_NAME -s SCENARIO_NAME
+$ python -m vega_sim.devops.run_agent -a AGENT_NAME -s SCENARIO_NAME
 ```
 ### Deploying Agents
 
 to deploy the agent to a network, define the agent to deploy, the key to use, and the network and market to deploy too:
 
 ```
-$ python -m devops.run_agent -a AGENT_NAME -k MY_VEGA_KEY_NAME -n NETWORK_NAME -m MARKET_NAME
+$ python -m vega_sim.devops.run_agent -a AGENT_NAME -k MY_VEGA_KEY_NAME -n NETWORK_NAME -m MARKET_NAME
 ```

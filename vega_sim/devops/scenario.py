@@ -38,7 +38,7 @@ from vega_sim.scenario.common.agents import (
 )
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
-from devops.wallet import (
+from vega_sim.devops.wallet import (
     MARKET_CREATOR_AGENT,
     MARKET_SETTLER_AGENT,
     MARKET_MAKER_AGENT,
@@ -46,7 +46,7 @@ from devops.wallet import (
     RANDOM_TRADER_AGENTS,
     SENSITIVE_TRADER_AGENTS,
 )
-from devops.classes import (
+from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
     AuctionTraderArgs,
