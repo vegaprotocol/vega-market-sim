@@ -43,30 +43,22 @@ class AuctionTraderArgs:
 
 @dataclass
 class RandomTraderArgs:
-    order_intensity: int
-    order_volume: float
-    initial_mint: Optional[int] = MAX_FAUCET
-
-
-@dataclass
-class MomentumTraderArgs:
-    order_intensity: int
-    order_volume: float
+    order_intensity: List[int]
+    order_volume: List[float]
+    step_bias: List[float]
     initial_mint: Optional[int] = MAX_FAUCET
 
 
 @dataclass
 class SensitiveTraderArgs:
-    order_intensity: List[int]
-    order_volume: List[float]
-    price_half_life: List[float]
+    scale: List[int]
+    max_order_size: List[float]
     initial_mint: Optional[int] = MAX_FAUCET
 
 
 @dataclass
 class SimulationArgs:
     n_steps: int
-    step_length_seconds: float
     granularity: Granularity
     coinbase_code: str
     start_date: Optional[str] = "2022-08-01 00:00:00"
