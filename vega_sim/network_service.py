@@ -50,7 +50,7 @@ from os import getcwd, path, environ
 import vega_sim.grpc.client as vac
 
 from vega_sim import vega_bin_path
-from vega_sim.service import VegaService, DatanodeBehindError
+from vega_sim.service import VegaService, DatanodeBehindError, DatanodeSlowResponseError
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.null_service import find_free_port, _popen_process
@@ -471,6 +471,15 @@ class VegaServiceNetwork(VegaService):
                 )
                 self.switch_datanode()
 
+        except DatanodeSlowResponseError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is slow."
+                )
+                self.switch_datanode()
+
     def switch_datanode(self, max_attempts: Optional[int] = -1):
         """Attempts to establish a new data-node connection.
 
@@ -515,9 +524,13 @@ class VegaServiceNetwork(VegaService):
                 )
 
             except DatanodeBehindError:
-                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} is behind."
+                )
+
+            except DatanodeSlowResponseError:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is slow."
                 )
 
             if attempts == max_attempts:
