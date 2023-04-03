@@ -446,12 +446,20 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
+            t_start = time.time()
+
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
             i += 1
             self.step(vega)
 
-            time.sleep(self.step_length_seconds)
+            t_elapsed = time.time() - t_start
+            if t_elapsed <= self.step_length_seconds:
+                time.sleep(self.step_length_seconds - t_elapsed)
+            else:
+                logging.warning(
+                    f"Environment step, {round(t_elapsed,2)}s, taking longer than defined scenario step length, {self.step_length_seconds}s,"
+                )
 
         for agent in self.agents:
             agent.finalise()
