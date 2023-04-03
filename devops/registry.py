@@ -7,6 +7,7 @@ Module contains preconfigured scenarios.
 from devops.scenario import DevOpsScenario
 
 from vega_sim.scenario.common.agents import (
+    ArbitrageLiquidityProvider,
     ExponentialShapedMarketMaker,
 )
 
@@ -213,6 +214,17 @@ SCENARIOS = {
 }
 
 AGENTS = {
+    "arbitrage_liquidity_provider": lambda: ArbitrageLiquidityProvider(
+        wallet_name=None,
+        key_name=None,
+        market_name=None,
+        asset_name=None,
+        initial_asset_mint=500,
+        commitment_ratio=0.5,
+        safety_factor=0.1,
+        fee=0.001,
+        tag="agent",
+    ),
     "shaped_market_maker_ethusd": lambda: ExponentialShapedMarketMaker(
         wallet_name=None,
         key_name=None,
