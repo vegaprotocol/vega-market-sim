@@ -42,6 +42,7 @@ import itertools
 import subprocess
 import webbrowser
 import multiprocessing
+import requests
 
 from typing import Optional
 
@@ -59,6 +60,10 @@ from vega_sim.constants import DATA_NODE_GRPC_PORT
 from vega_sim.scenario.constants import Network
 
 logger = logging.getLogger(__name__)
+
+
+class VegaWalletStartupTimeoutError(Exception):
+    pass
 
 
 def add_network_config(
@@ -309,7 +314,7 @@ class VegaServiceNetwork(VegaService):
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
-                "network": self.network.value,
+                "network": self.network.name.lower(),
                 "log_dir": self.log_dir,
                 "run_with_wallet": self.run_with_wallet,
                 "run_with_console": self.run_with_console,
@@ -327,6 +332,25 @@ class VegaServiceNetwork(VegaService):
                 f" http://localhost:{vega_console_port}"
             )
             webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
+
+        started = False
+        for _ in range(3600):
+            try:
+                response = requests.get(f"{self.wallet_url}/api/v2/health")
+                response.raise_for_status()
+                started = True
+                break
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.HTTPError,
+            ):
+                time.sleep(0.1)
+        if not started:
+            raise VegaWalletStartupTimeoutError(
+                "Timed out waiting for Vega wallet service"
+            )
+
+        self.check_datanode(raise_on_error=False)
 
     def stop(self) -> None:
         super().stop()
@@ -387,9 +411,7 @@ class VegaServiceNetwork(VegaService):
     @property
     def wallet_url(self) -> str:
         if self._wallet_url is None:
-            self._wallet_url = (
-                f"http://{self.network_config['Host']}:{self.network_config['Port']}"
-            )
+            self._wallet_url = f"http://127.0.0.1:1789"
         return self._wallet_url
 
     @property
