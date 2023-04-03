@@ -1083,8 +1083,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.curr_price = None
         self.prev_price = None
 
-        self.market_name = f"ETH:USD_{self.tag}" if market_name is None else market_name
-        self.asset_name = f"tDAI{self.tag}" if asset_name is None else asset_name
+        self.market_name = market_name
+        self.asset_name = asset_name
 
         self.orders_from_stream = orders_from_stream
 
@@ -1137,7 +1137,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 fee=initial_liq.fee,
                 buy_specs=initial_liq.buy_specs,
                 sell_specs=initial_liq.sell_specs,
-                is_amendment=False,
                 key_name=self.key_name,
             )
 
