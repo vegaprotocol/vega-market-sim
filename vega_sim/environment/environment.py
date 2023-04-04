@@ -211,7 +211,7 @@ class MarketEnvironment:
             agent.initialise(vega=vega)
             if isinstance(agent, StateAgentWithWallet):
                 logging.info(
-                    f"{agent.name()} initialised with public_key = {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
+                    f"{agent.name()}: key = {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
                 )
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
