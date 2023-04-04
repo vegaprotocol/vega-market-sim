@@ -111,7 +111,7 @@ def main():
             run_with_console=args.console,
         ) as vega:
             if agent is not None:
-                agent.asset_name = vega.asset_info(
+                agent.asset_name = vega.data_cache.asset_from_feed(
                     asset_id=vega.market_info(
                         vega.find_market_id(
                             name=agent.market_name, raise_on_missing=True

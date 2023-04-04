@@ -321,9 +321,7 @@ class LocalDataCache:
                 self._asset_from_feed[asset.id] = asset
 
     def initialise_markets(self):
-        base_markets = [
-            market.id for market in data_raw.all_markets(self._trading_data_client)
-        ]
+        base_markets = data_raw.all_markets(self._trading_data_client)
 
         with self.market_lock:
             for market in base_markets:

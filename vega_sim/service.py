@@ -2078,7 +2078,7 @@ class VegaService(ABC):
         else:
             raise ValueError(f"Invalid value '{to_type}' specified for 'to_type' arg.")
 
-    def ping_datanode(self, max_time_diff: float = 30, max_response_time: float = 0.2):
+    def ping_datanode(self, max_time_diff: float = 30, max_response_time: float = 0.5):
         """Ping datanode endpoint to check health of connection
 
         Args:

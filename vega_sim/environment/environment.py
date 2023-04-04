@@ -427,6 +427,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         self,
         run_with_console: bool = False,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ):
         if self._vega is None:
             with VegaServiceNetwork(
@@ -436,12 +437,17 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             ) as vega:
                 return self._run(vega)
         else:
-            return self._run(self._vega, pause_at_completion=pause_at_completion)
+            return self._run(
+                self._vega,
+                pause_at_completion=pause_at_completion,
+                log_every_n_steps=log_every_n_steps,
+            )
 
     def _run(
         self,
         vega: VegaServiceNetwork,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> None:
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
@@ -469,6 +475,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 logging.warning(
                     f"Environment step, {round(t_elapsed,2)}s, taking longer than defined scenario step length, {self.step_length_seconds}s,"
                 )
+            if log_every_n_steps is not None and i % log_every_n_steps == 0:
+                logger.info(f"Completed {i} steps")
 
         for agent in self.agents:
             agent.finalise()
