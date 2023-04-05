@@ -52,8 +52,8 @@ pull_deps_networks:
 	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
 	@echo "Downloading Vega networks-internal"
 	@if [ ! -d ./extern/networks-internal ]; then mkdir ./extern/networks-internal; git clone https://github.com/vegaprotocol/networks-internal ${EXTERN_DIR}/networks-internal; fi
-ifneq (${VEGA_SIM_NETWORKS_TAG},develop)
-	@git -C ${EXTERN_DIR}/networks-internal pull; git -C ${EXTERN_DIR}/networks-internal checkout ${VEGA_SIM_NETWORKS_TAG}
+ifneq (${VEGA_SIM_NETWORKS_INTERNAL_TAG},develop)
+	@git -C ${EXTERN_DIR}/networks-internal pull; git -C ${EXTERN_DIR}/networks-internal checkout ${VEGA_SIM_NETWORKS_INTERNAL_TAG}
 else
 	@git -C ${EXTERN_DIR}/networks-internal checkout develop; git -C ${EXTERN_DIR}/networks-internal pull
 endif

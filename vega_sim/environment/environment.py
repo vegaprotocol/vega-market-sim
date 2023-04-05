@@ -124,6 +124,7 @@ class MarketEnvironment:
         self,
         run_with_console: bool = False,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> Optional[List[Any]]:
         """Run the simulation with specified agents.
 
@@ -145,9 +146,17 @@ class MarketEnvironment:
                 block_duration=f"{int(self.block_length_seconds)}s",
                 use_full_vega_wallet=False,
             ) as vega:
-                return self._run(vega, pause_at_completion=pause_at_completion)
+                return self._run(
+                    vega,
+                    pause_at_completion=pause_at_completion,
+                    log_every_n_steps=log_every_n_steps,
+                )
         else:
-            return self._run(self._vega, pause_at_completion=pause_at_completion)
+            return self._run(
+                self._vega,
+                pause_at_completion=pause_at_completion,
+                log_every_n_steps=log_every_n_steps,
+            )
 
     def _start_live_feeds(self, vega: VegaService):
         # Get lists of unique market_ids and party_ids to observe
@@ -174,6 +183,7 @@ class MarketEnvironment:
         self,
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> None:
         """Run the simulation with specified agents.
 
@@ -182,6 +192,8 @@ class MarketEnvironment:
                 bool, default False, If True will pause with a keypress-prompt
                     once the simulation has completed, allowing the final state
                     to be inspected, either via code or the Console
+            log_every_n_steps:
+                Optional, int, If passed, will log a progress line every n steps
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
         logger.info(
@@ -195,7 +207,10 @@ class MarketEnvironment:
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
-        start_time = vega.get_blockchain_time()
+        # Wait for threads to catchup to ensure newly created market observed
+        vega.wait_for_thread_catchup()
+
+        start_time = vega.get_blockchain_time(in_seconds=True)
         for i in range(self.n_steps):
             self.step(vega)
 
@@ -216,7 +231,7 @@ class MarketEnvironment:
             vega.wait_for_total_catchup()
 
             if self.step_length_seconds is not None:
-                end_time = vega.get_blockchain_time()
+                end_time = vega.get_blockchain_time(in_seconds=True)
                 to_forward = max(0, self.step_length_seconds - (end_time - start_time))
                 if to_forward > 0:
                     logger.debug(
@@ -226,8 +241,9 @@ class MarketEnvironment:
                         " produced this step"
                     )
                     vega.wait_fn(to_forward / self.block_length_seconds)
-                start_time = vega.get_blockchain_time()
-
+                start_time = vega.get_blockchain_time(in_seconds=True)
+            if log_every_n_steps is not None and i % log_every_n_steps == 0:
+                logger.info(f"Completed {i} steps")
             if (
                 self._pause_every_n_steps is not None
                 and i % self._pause_every_n_steps == 0
@@ -346,24 +362,21 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 self.market_decimals_cache[market_id] = vega.market_info(
                     market_id=market_id
                 ).decimal_places
-            market_state[market_data.market] = MarketState(
+            market_state[market_id] = MarketState(
                 state=market_data.market_state,
                 trading_mode=market_data.market_trading_mode,
-                midprice=float(market_data.mid_price)
-                / 10 ** int(self.market_decimals_cache[market_id]),
-                best_bid_price=float(market_data.best_bid_price)
-                / 10 ** self.market_decimals_cache[market_id],
-                best_ask_price=float(market_data.best_offer_price)
-                / 10 ** self.market_decimals_cache[market_id],
+                midprice=market_data.mid_price,
+                best_bid_price=market_data.best_bid_price,
+                best_ask_price=market_data.best_offer_price,
                 min_valid_price=vega.price_bounds(market_id=market_id)[0],
                 max_valid_price=vega.price_bounds(market_id=market_id)[1],
-                orders=order_status.get(market_data.market, {}),
+                orders=order_status.get(market_id, {}),
             )
 
         return VegaState(network_state=(), market_state=market_state)
 
     def step(self, vega: VegaService) -> None:
-        vega.wait_for_datanode_sync()
+        vega.wait_for_thread_catchup()
         state = self.state_func(vega)
         for agent in (
             sorted(self.agents, key=lambda _: self.random_state.random())

@@ -8,9 +8,9 @@ from abc import ABC
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import wraps
-from queue import Queue, Empty
 from itertools import product
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Union
+from queue import Empty, Queue
+from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
 import grpc
 
@@ -151,9 +151,9 @@ class VegaService(ABC):
     def market_price_decimals(self) -> int:
         if self._market_price_decimals is None:
             self._market_price_decimals = DecimalsCache(
-                lambda market_id: data.market_price_decimals(
-                    market_id=market_id, data_client=self.trading_data_client_v2
-                )
+                lambda market_id: self.data_cache.market_from_feed(
+                    market_id=market_id
+                ).decimal_places
             )
         return self._market_price_decimals
 
@@ -161,9 +161,9 @@ class VegaService(ABC):
     def market_pos_decimals(self) -> int:
         if self._market_pos_decimals is None:
             self._market_pos_decimals = DecimalsCache(
-                lambda market_id: data.market_position_decimals(
-                    market_id=market_id, data_client=self.trading_data_client_v2
-                )
+                lambda market_id: self.data_cache.market_from_feed(
+                    market_id=market_id
+                ).position_decimal_places
             )
         return self._market_pos_decimals
 
@@ -171,9 +171,9 @@ class VegaService(ABC):
     def asset_decimals(self) -> int:
         if self._asset_decimals is None:
             self._asset_decimals = DecimalsCache(
-                lambda asset_id: data.get_asset_decimals(
-                    asset_id=asset_id, data_client=self.trading_data_client_v2
-                )
+                lambda asset_id: self.data_cache.asset_from_feed(
+                    asset_id=asset_id
+                ).details.decimals
             )
         return self._asset_decimals
 
@@ -181,8 +181,8 @@ class VegaService(ABC):
     def market_to_asset(self) -> str:
         if self._market_to_asset is None:
             self._market_to_asset = DecimalsCache(
-                lambda market_id: data_raw.market_info(
-                    market_id=market_id, data_client=self.trading_data_client_v2
+                lambda market_id: self.data_cache.market_from_feed(
+                    market_id=market_id
                 ).tradable_instrument.instrument.future.settlement_asset
             )
         return self._market_to_asset
@@ -190,6 +190,7 @@ class VegaService(ABC):
     @property
     def data_cache(self) -> LocalDataCache:
         if self._local_data_cache is None:
+            self.wait_for_total_catchup()
             self._local_data_cache = LocalDataCache(
                 self.trading_data_client_v2,
                 self.trading_data_client_v2,
@@ -234,7 +235,12 @@ class VegaService(ABC):
     def trading_data_client_v2(self) -> vac.VegaTradingDataClientV2:
         if self._trading_data_client_v2 is None:
             channel = grpc.insecure_channel(
-                self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
+                self.data_node_grpc_url,
+                options=(
+                    ("grpc.enable_http_proxy", 0),
+                    ("grpc.max_send_message_length", 1024 * 1024 * 20),
+                    ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                ),
             )
             grpc.channel_ready_future(channel).result(timeout=30)
             self._trading_data_client_v2 = vac.VegaTradingDataClientV2(
@@ -246,7 +252,14 @@ class VegaService(ABC):
     @property
     def core_state_client(self) -> vac.VegaCoreStateClient:
         if self._core_state_client is None:
-            channel = grpc.insecure_channel(self.vega_node_grpc_url)
+            channel = grpc.insecure_channel(
+                self.vega_node_grpc_url,
+                options=(
+                    ("grpc.enable_http_proxy", 0),
+                    ("grpc.max_send_message_length", 1024 * 1024 * 20),
+                    ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                ),
+            )
 
             grpc.channel_ready_future(channel).result(timeout=10)
             self._core_state_client = vac.VegaCoreStateClient(
@@ -258,7 +271,14 @@ class VegaService(ABC):
     @property
     def core_client(self) -> vac.VegaCoreClient:
         if self._core_client is None:
-            channel = grpc.insecure_channel(self.vega_node_grpc_url)
+            channel = grpc.insecure_channel(
+                self.vega_node_grpc_url,
+                options=(
+                    ("grpc.enable_http_proxy", 0),
+                    ("grpc.max_send_message_length", 1024 * 1024 * 20),
+                    ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                ),
+            )
 
             grpc.channel_ready_future(channel).result(timeout=10)
             self._core_client = vac.VegaCoreClient(
@@ -272,6 +292,21 @@ class VegaService(ABC):
 
     def wait_for_core_catchup(self) -> None:
         wait_for_core_catchup(self.core_client)
+
+    def wait_for_thread_catchup(self, max_retries: int = 1000, threshold: float = 0.5):
+        self.wait_for_datanode_sync()
+        t0 = time.time()
+        attempts = 0
+        while attempts < max_retries:
+            attempts += 1
+            if self.get_blockchain_time() <= self.get_blockchain_time_from_feed():
+                break
+            time.sleep(0.001)
+        t_catchup = time.time() - t0
+        if t_catchup > threshold:
+            logging.warning(f"Thread catchup took {round(t_catchup, 2)}s.")
+        else:
+            logging.debug(f"Thread catchup took {round(t_catchup, 2)}s.")
 
     def wait_for_total_catchup(self) -> None:
         self.wait_for_core_catchup()
@@ -402,7 +437,7 @@ class VegaService(ABC):
             key_name:
                 optionaL, str, name of key in wallet to use
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
@@ -434,7 +469,7 @@ class VegaService(ABC):
         market_config: market.MarketConfig,
         proposal_wallet_name: Optional[str] = None,
     ):
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         proposal_id = gov.propose_market_from_config(
             wallet=self.wallet,
@@ -505,7 +540,7 @@ class VegaService(ABC):
         if future_asset is not None:
             additional_kwargs["future_asset"] = future_asset
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         risk_model = vega_protos.markets.LogNormalRiskModel(
             risk_aversion_parameter=risk_aversion,
@@ -549,6 +584,8 @@ class VegaService(ABC):
         wait: bool = True,
         order_ref: Optional[str] = None,
         trading_wallet: Optional[str] = None,
+        reduce_only: bool = False,
+        post_only: bool = False,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -568,6 +605,12 @@ class VegaService(ABC):
                 optional str, reference for later identification of order
             wallet_name:
                 optional str, name of wallet to use
+            reduce_only (bool):
+                Whether the order should only reduce a parties position. Defaults to
+                False.
+            post_only (bool):
+                Whether order should be prevented from trading immediately. Defaults to
+                False.
 
         Returns:
             str, The ID of the order
@@ -583,6 +626,8 @@ class VegaService(ABC):
             wait=wait,
             order_ref=order_ref,
             trading_key=trading_key,
+            reduce_only=reduce_only,
+            post_only=post_only,
         )
 
     def submit_order(
@@ -599,6 +644,8 @@ class VegaService(ABC):
         wait: bool = True,
         order_ref: Optional[str] = None,
         trading_wallet: Optional[str] = None,
+        reduce_only: bool = False,
+        post_only: bool = False,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -636,6 +683,12 @@ class VegaService(ABC):
                 optional str, reference for later identification of order
             key_name:
                 optional str, name of key in wallet to use
+            reduce_only (bool):
+                Whether the order should only reduce a parties position. Defaults to
+                False.
+            post_only (bool):
+                Whether order should be prevented from trading immediately. Defaults to
+                False.
 
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
@@ -696,11 +749,15 @@ class VegaService(ABC):
             time_forward_fn=lambda: self.wait_fn(2),
             order_ref=order_ref,
             key_name=trading_key,
+            reduce_only=reduce_only,
+            post_only=post_only,
         )
 
-    def get_blockchain_time(self) -> int:
-        """Returns blockchain time in seconds since the epoch"""
-        return gov.get_blockchain_time(self.trading_data_client_v2)
+    def get_blockchain_time(self, in_seconds: bool = False) -> int:
+        """Returns blockchain time in seconds or nanoseconds since the epoch"""
+        return gov.get_blockchain_time(
+            self.trading_data_client_v2, in_seconds=in_seconds
+        )
 
     def amend_order(
         self,
@@ -823,7 +880,7 @@ class VegaService(ABC):
         Returns:
             str, the ID of the proposal
         """
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
@@ -882,7 +939,7 @@ class VegaService(ABC):
                 " market"
             )
 
-        blockchain_time_seconds = gov.get_blockchain_time(self.trading_data_client_v2)
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         current_market = self.market_info(market_id=market_id)
 
@@ -1098,18 +1155,6 @@ class VegaService(ABC):
         return self.data_cache.market_data_from_feed(market_id)
 
     @raw_data
-    def market_data(
-        self,
-        market_id: str,
-    ) -> vega_protos.vega.MarketData:
-        """
-        Output market info.
-        """
-        return data_raw.market_data(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
-
-    @raw_data
     def infrastructure_fee_accounts(
         self,
         asset_id: str,
@@ -1134,6 +1179,22 @@ class VegaService(ABC):
             asset_id=asset_id,
             market_id=market_id,
             data_client=self.trading_data_client_v2,
+        )
+
+    def get_latest_market_data(
+        self,
+        market_id: str,
+    ) -> vega_protos.vega.MarketData:
+        """
+        Output market info.
+        """
+        return data.get_latest_market_data(
+            market_id=market_id,
+            data_client=self.trading_data_client_v2,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_to_asset_map=self.market_to_asset,
+            asset_decimals_map=self.asset_decimals,
         )
 
     def market_account(
@@ -1166,11 +1227,13 @@ class VegaService(ABC):
         """
         Output the best static bid price and best static ask price in current market.
         """
-        return data.best_prices(
+        market_data = self.get_latest_market_data(
             market_id=market_id,
-            data_client=self.trading_data_client_v2,
-            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
-            price_decimals=self.market_price_decimals[market_id],
+        )
+
+        return (
+            market_data.best_static_bid_price,
+            market_data.best_static_offer_price,
         )
 
     def price_bounds(
@@ -1180,11 +1243,22 @@ class VegaService(ABC):
         """
         Output the tightest price bounds in the current market.
         """
-        return data.price_bounds(
+        market_data = self.get_latest_market_data(
             market_id=market_id,
-            data_client=self.trading_data_client_v2,
-            market_data=self.data_cache.market_data_from_feed(market_id=market_id),
-            price_decimals=self.market_price_decimals[market_id],
+        )
+
+        lower_bounds = [
+            price_monitoring_bound.min_valid_price
+            for price_monitoring_bound in market_data.price_monitoring_bounds
+        ]
+        upper_bounds = [
+            price_monitoring_bound.max_valid_price
+            for price_monitoring_bound in market_data.price_monitoring_bounds
+        ]
+
+        return (
+            max(lower_bounds) if lower_bounds else None,
+            min(upper_bounds) if upper_bounds else None,
         )
 
     def order_book_by_market(
@@ -1426,6 +1500,9 @@ class VegaService(ABC):
         return data_raw.order_status(
             order_id=order_id, data_client=self.trading_data_client_v2, version=version
         )
+
+    def get_blockchain_time_from_feed(self):
+        return self.data_cache.time_update_from_feed()
 
     def order_status_from_feed(
         self, live_only: bool = True
@@ -1787,6 +1864,8 @@ class VegaService(ABC):
         reference: Optional[str] = None,
         pegged_reference: Optional[str] = None,
         pegged_offset: Optional[float] = None,
+        reduce_only: bool = False,
+        post_only: bool = False,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -1815,6 +1894,12 @@ class VegaService(ABC):
                 Reference for price offset for order. Defaults to None.
             pegged_offset (Optional[float]):
                 Value for price offset from reference for order. Defaults to None.
+            reduce_only (bool):
+                Whether the order should only reduce a parties position. Defaults to
+                False.
+            post_only (bool):
+                Whether order should be prevented from trading immediately. Defaults to
+                False.
 
         Returns:
             OrderSubmission:
@@ -1875,6 +1960,8 @@ class VegaService(ABC):
             order_type=order_type,
             reference=reference,
             pegged_order=pegged_order,
+            reduce_only=reduce_only,
+            post_only=post_only,
         )
 
     def submit_instructions(
@@ -1999,7 +2086,7 @@ class VegaService(ABC):
 
         # Ping datanode then check if it is behind
         data.ping(data_client=self.trading_data_client_v2)
-        if abs(self.get_blockchain_time() - time.time()) > max_time_diff:
+        if abs(self.get_blockchain_time(in_seconds=True) - time.time()) > max_time_diff:
             raise DatanodeBehindError
 
     def one_off_transfer(
@@ -2037,14 +2124,14 @@ class VegaService(ABC):
             to_wallet_name (Optional[str], optional):
                 Name of wallet to transfer to.
             delay (Optional[int], optional):
-                Delay in seconds to add before transfer is sent. Defaults to None.
+                Delay in nanoseconds to add before transfer is sent. Defaults to None.
         """
 
         adp = self.asset_decimals[asset]
 
         one_off = vega_protos.commands.v1.commands.OneOffTransfer()
         if delay is not None:
-            setattr(one_off, "deliver_on", self.get_blockchain_time() + delay)
+            setattr(one_off, "deliver_on", int(self.get_blockchain_time() + delay))
 
         trading.transfer(
             wallet=self.wallet,
@@ -2109,16 +2196,27 @@ class VegaService(ABC):
                 Name of specific key in wallet to get public key for. Defaults to None.
         """
 
-        return data.get_liquidity_fee_shares(
-            data_client=self.trading_data_client_v2,
-            market_id=market_id,
-            party_id=(
-                self.wallet.public_key(wallet_name=wallet_name, name=key_name)
-                if wallet_name is not None
-                else None
-            ),
-            market_data=self.market_data_from_feed(market_id=market_id),
-        )
+        market_data = self.get_latest_market_data(market_id=market_id)
+
+        # Calculate share of fees for each LP
+        shares = {
+            lp.party: float(lp.equity_like_share) * float(lp.average_score)
+            for lp in market_data.liquidity_provider_fee_share
+        }
+        total_shares = sum(shares.values())
+
+        # Scale share of fees for each LP pro rata
+        if total_shares != 0:
+            pro_rata_shares = {key: val / total_shares for key, val in shares.items()}
+        else:
+            pro_rata_shares = {key: 1 / len(shares) for key, val in shares.items()}
+
+        if key_name is None:
+            return pro_rata_shares
+        else:
+            return pro_rata_shares[
+                self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+            ]
 
     def list_ledger_entries(
         self,

@@ -1304,7 +1304,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         cancellations = []
 
         expires_at = (
-            int((self.vega.get_blockchain_time() + self.order_validity_length) * 1e9)
+            int(self.vega.get_blockchain_time() + self.order_validity_length * 1e9)
             if self.order_validity_length is not None
             else None
         )
@@ -1317,9 +1317,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     market_id=self.market_id,
                     order_id=order_to_amend.id,
                     price=order.price,
-                    time_in_force="TIME_IN_FORCE_GTT"
-                    if self.order_validity_length is not None
-                    else "TIME_IN_FORCE_GTC",
+                    time_in_force=(
+                        "TIME_IN_FORCE_GTT"
+                        if self.order_validity_length is not None
+                        else "TIME_IN_FORCE_GTC"
+                    ),
                     size_delta=order.size - order_to_amend.remaining,
                     expires_at=expires_at,
                 )
@@ -1332,9 +1334,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     price=order.price,
                     size=order.size,
                     order_type="TYPE_LIMIT",
-                    time_in_force="TIME_IN_FORCE_GTT"
-                    if self.order_validity_length is not None
-                    else "TIME_IN_FORCE_GTC",
+                    time_in_force=(
+                        "TIME_IN_FORCE_GTT"
+                        if self.order_validity_length is not None
+                        else "TIME_IN_FORCE_GTC"
+                    ),
                     side=side,
                     expires_at=expires_at,
                 )
@@ -2067,7 +2071,7 @@ class LimitOrderTrader(StateAgentWithWallet):
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
             price = reference_sell_price - (random_offset - ln_mean)
 
-        expires_at = (self.vega.get_blockchain_time() + self.duration) * 1e9
+        expires_at = self.vega.get_blockchain_time() + self.duration * 1e9
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,

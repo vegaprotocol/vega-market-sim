@@ -51,6 +51,8 @@ def submit_order(
     time_forward_fn: Optional[Callable[[], None]] = None,
     order_ref: Optional[str] = None,
     key_name: Optional[str] = None,
+    reduce_only: bool = False,
+    post_only: bool = False,
 ) -> Optional[str]:
     """
     Submit orders as specified to required pre-existing market.
@@ -97,6 +99,10 @@ def submit_order(
             optional str, reference for later identification of order
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
+        reduce_only:
+            bool, whether the order should only reduce a parties position.
+        post_only:
+            bool, whether an order should be prevented from trading immediately.
 
     Returns:
         Optional[str], Order ID if wait is True, otherwise None
@@ -113,6 +119,8 @@ def submit_order(
         reference=order_ref,
         price=price,
         pegged_order=pegged_order,
+        reduce_only=reduce_only,
+        post_only=post_only,
     )
 
     # Sign the transaction with an order submission command
@@ -509,6 +517,8 @@ def order_submission(
     reference: Optional[str] = None,
     price: Optional[str] = None,
     pegged_order: Optional[Union[vega_protos.PeggedOrder, str]] = None,
+    reduce_only: bool = False,
+    post_only: bool = False,
 ) -> OrderSubmission:
     """Creates a Vega OrderSubmission object.
 
@@ -534,6 +544,10 @@ def order_submission(
             Price to place order at, only required for "TYPE_LIMIT". Defaults to None.
         pegged_order (Optional[Union[vega_protos.PeggedOrder, str]]):
             PeggedOrder object defining whether order is pegged. Defaults to None.
+        reduce_only (bool):
+            Whether the order should only reduce a parties position. Defaults to False.
+        post_only (bool):
+            Whether order should be prevented trading immediately. Defaults to False.
 
     Returns:
         OrderSubmission:
@@ -563,6 +577,8 @@ def order_submission(
         side=side,
         time_in_force=time_in_force,
         type=order_type,
+        reduce_only=reduce_only,
+        post_only=post_only,
     )
 
     # Update OrderSubmission object with optional fields if specified

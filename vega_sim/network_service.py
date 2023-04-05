@@ -490,7 +490,12 @@ class VegaServiceNetwork(VegaService):
                 logging.debug(f"Switched to endpoint {self._data_node_grpc_url}")
 
                 channel = grpc.insecure_channel(
-                    self.data_node_grpc_url, options=(("grpc.enable_http_proxy", 0),)
+                    self.data_node_grpc_url,
+                    options=(
+                        ("grpc.enable_http_proxy", 0),
+                        ("grpc.max_send_message_length", 1024 * 1024 * 20),
+                        ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                    ),
                 )
                 grpc.channel_ready_future(channel).result(timeout=30)
                 self._trading_data_client_v2 = vac.VegaTradingDataClientV2(
@@ -537,7 +542,7 @@ if __name__ == "__main__":
         logging.info(markets)
 
         # Show data for a specific market
-        market = vega.market_data(market_id=markets[0].id)
+        market = vega.get_latest_market_data(market_id=markets[0].id)
 
     # Create a service connected to the stagnet3 network.
     with VegaServiceNetwork(
@@ -550,4 +555,4 @@ if __name__ == "__main__":
         logging.info(markets)
 
         # Show data for a specific market
-        market = vega.market_data(market_id=markets[0].id)
+        market = vega.get_latest_market_data(market_id=markets[0].id)

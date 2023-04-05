@@ -15,10 +15,12 @@ class Scenario(abc.ABC):
         state_extraction_fn: Optional[
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
+        additional_data_output_fns: Optional[Dict[str, Callable]] = None,
     ):
         self.agents = []
         self.env: Optional[MarketEnvironment] = None
         self.state_extraction_fn = state_extraction_fn
+        self.additional_data_output_fns = additional_data_output_fns
 
     @abc.abstractmethod
     def configure_agents(
@@ -60,6 +62,7 @@ class Scenario(abc.ABC):
         run_with_snitch: bool = True,
         tag: Optional[str] = None,
         output_data: bool = False,
+        log_every_n_steps: Optional[int] = None,
         **kwargs,
     ):
         tag = tag if tag is not None else ""
@@ -79,9 +82,15 @@ class Scenario(abc.ABC):
         outputs = self.env.run(
             pause_at_completion=pause_at_completion,
             run_with_console=run_with_console,
+            log_every_n_steps=log_every_n_steps,
         )
         if output_data:
             market_data_standard_output(self.get_run_data())
+            if self.additional_data_output_fns is not None:
+                market_data_standard_output(
+                    self.get_additional_run_data(),
+                    custom_output_fns=self.additional_data_output_fns,
+                )
 
         return outputs
 

@@ -1,30 +1,22 @@
 from __future__ import annotations
 
 import copy
+import grpc
 import logging
 import threading
+import traceback
 from collections import defaultdict
-from queue import Queue, Empty
-from itertools import product, chain
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    Callable,
-)
+from itertools import chain, product
+from queue import Empty, Queue
 from types import GeneratorType
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
-
+import vega_sim.api.governance as gov
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
-
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +60,11 @@ def _queue_forwarder(
                         sink.put(elem)
                 else:
                     sink.put(output)
-    except Exception:
-        logger.debug("Data cache event bus closed")
+    except grpc._channel._MultiThreadedRendezvous as e:
+        if e.details() == "Socket closed":
+            logger.info("Data cache event bus closed")
+        else:
+            raise e
 
 
 class DecimalsCache(defaultdict):
@@ -100,13 +95,19 @@ class LocalDataCache:
         self._asset_decimals = asset_decimals
         self._market_to_asset = market_to_asset
 
+        self.time_update_lock = threading.RLock()
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
+        self.asset_lock = threading.RLock()
+        self.market_lock = threading.RLock()
         self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
         self.ledger_entries_lock = threading.RLock()
+        self._time_update_from_feed = 0
         self._live_order_state_from_feed = {}
         self._dead_order_state_from_feed = {}
+        self._asset_from_feed = {}
+        self._market_from_feed = {}
         self.market_data_from_feed_store = {}
         self._transfer_state_from_feed = {}
         self._trades_from_feed: List[data.Trade] = []
@@ -118,6 +119,10 @@ class LocalDataCache:
 
         self.stream_registry = [
             (
+                (events_protos.BUS_EVENT_TYPE_TIME_UPDATE,),
+                lambda evt: evt.time_update,
+            ),
+            (
                 (events_protos.BUS_EVENT_TYPE_TRADE,),
                 lambda evt: data.trades_subscription_handler(
                     evt,
@@ -126,6 +131,14 @@ class LocalDataCache:
                     self._market_to_asset,
                     self._asset_decimals,
                 ),
+            ),
+            (
+                (events_protos.BUS_EVENT_TYPE_ASSET,),
+                lambda evt: evt.asset,
+            ),
+            (
+                (events_protos.BUS_EVENT_TYPE_MARKET_CREATED,),
+                lambda evt: evt.market_created,
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_ORDER,),
@@ -139,7 +152,13 @@ class LocalDataCache:
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_MARKET_DATA,),
-                lambda evt: evt.market_data,
+                lambda evt: data.market_data_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
             ),
         ]
         self._high_load_stream_registry = [
@@ -164,6 +183,27 @@ class LocalDataCache:
     def stop(self) -> None:
         return
 
+    def time_update_from_feed(
+        self,
+    ) -> int:
+        return self._time_update_from_feed
+
+    def asset_from_feed(
+        self,
+        asset_id: str,
+    ) -> vega_protos.assets.Asset:
+        if asset_id not in self._asset_from_feed:
+            self.initialise_assets()
+        return self._asset_from_feed[asset_id]
+
+    def market_from_feed(
+        self,
+        market_id: str,
+    ) -> vega_protos.markets.Market:
+        if market_id not in self._market_from_feed:
+            self.initialise_markets()
+        return self._market_from_feed[market_id]
+
     def market_data_from_feed(
         self,
         market_id: str,
@@ -171,7 +211,7 @@ class LocalDataCache:
         """
         Output market info.
         """
-        return self.market_data_from_feed_store.get(market_id, None)
+        return self.market_data_from_feed_store[market_id]
 
     def order_status_from_feed(
         self, live_only: bool = True
@@ -234,7 +274,9 @@ class LocalDataCache:
             if party_ids is not None
             else None
         )
-
+        self.initialise_assets()
+        self.initialise_markets()
+        self.initialise_time_update_monitoring()
         self.initialise_order_monitoring(
             market_ids=market_ids,
             party_ids=party_ids,
@@ -256,16 +298,43 @@ class LocalDataCache:
                 self.stream_registry
                 + (self._high_load_stream_registry if start_high_load_feeds else []),
                 self._aggregated_observation_feed,
-                (market_ids[0] if len(market_ids) == 1 else None)
-                if market_ids is not None
-                else None,
-                (party_ids[0] if len(party_ids) == 1 else None)
-                if party_ids is not None
-                else None,
+                (
+                    (market_ids[0] if len(market_ids) == 1 else None)
+                    if market_ids is not None
+                    else None
+                ),
+                (
+                    (party_ids[0] if len(party_ids) == 1 else None)
+                    if party_ids is not None
+                    else None
+                ),
             ),
             daemon=True,
         )
         self._forwarding_thread.start()
+
+    def initialise_assets(self):
+        base_assets = data_raw.list_assets(data_client=self._trading_data_client)
+
+        with self.asset_lock:
+            for asset in base_assets:
+                self._asset_from_feed[asset.id] = asset
+
+    def initialise_markets(self):
+        base_markets = [
+            market.id for market in data_raw.all_markets(self._trading_data_client)
+        ]
+
+        with self.market_lock:
+            for market in base_markets:
+                self._market_from_feed[market.id] = market
+
+    def initialise_time_update_monitoring(self):
+        base_time_update = gov.get_blockchain_time(
+            data_client=self._trading_data_client
+        )
+        with self.time_update_lock:
+            self._time_update_from_feed = base_time_update
 
     def initialise_order_monitoring(
         self,
@@ -285,12 +354,16 @@ class LocalDataCache:
                     market_id=market_party_tuple[0],
                     party_id=market_party_tuple[1],
                     live_only=True,
-                    price_decimals=self._market_price_decimals[market_party_tuple[0]]
-                    if market_party_tuple[0] is not None
-                    else None,
-                    position_decimals=self._market_pos_decimals[market_party_tuple[0]]
-                    if market_party_tuple[0] is not None
-                    else None,
+                    price_decimals=(
+                        self._market_price_decimals[market_party_tuple[0]]
+                        if market_party_tuple[0] is not None
+                        else None
+                    ),
+                    position_decimals=(
+                        self._market_pos_decimals[market_party_tuple[0]]
+                        if market_party_tuple[0] is not None
+                        else None
+                    ),
                 )
             )
 
@@ -310,8 +383,15 @@ class LocalDataCache:
             ]
         with self.market_data_lock:
             for market_id in market_ids:
-                self.market_data_from_feed_store[market_id] = data_raw.market_data(
-                    market_id, data_client=self._trading_data_client
+                self.market_data_from_feed_store[
+                    market_id
+                ] = data.get_latest_market_data(
+                    market_id,
+                    data_client=self._trading_data_client,
+                    market_price_decimals_map=self._market_price_decimals,
+                    market_position_decimals_map=self._market_pos_decimals,
+                    asset_decimals_map=self._asset_decimals,
+                    market_to_asset_map=self._market_to_asset,
                 )
 
     def initialise_transfer_monitoring(
@@ -374,13 +454,35 @@ class LocalDataCache:
                     with self.trades_lock:
                         self._trades_from_feed.append(update)
 
-                elif isinstance(update, vega_protos.vega.MarketData):
+                elif isinstance(update, data.MarketData):
                     with self.market_data_lock:
-                        self.market_data_from_feed_store[update.market] = update
+                        self.market_data_from_feed_store[update.market_id] = update
 
                 elif isinstance(update, data.LedgerEntry):
                     with self.ledger_entries_lock:
                         self._ledger_entries_from_feed.append(update)
+
+                elif isinstance(update, events_protos.TimeUpdate):
+                    with self.time_update_lock:
+                        self._time_update_from_feed = int(update.timestamp)
+
+                elif isinstance(update, vega_protos.markets.Market):
+                    self._market_from_feed[update.id] = update
+                    # Trigger the DecimalCache default factory method by attempting to
+                    # get the decimal precision for the market
+                    self._market_pos_decimals[update.id]
+                    self._market_price_decimals[update.id]
+                    self._market_to_asset[update.id]
+
+                elif isinstance(update, vega_protos.assets.Asset):
+                    self._asset_from_feed[update.id] = update
+                    # Trigger the DecimalCache default factory method by attempting to
+                    # get the decimal precision for the asset
+                    self._asset_decimals[update.id]
+
+                elif update is None:
+                    logger.debug("Failed to process event into update.")
+
                 else:
                     logger.info(f"Unhandled update {update}")
 
