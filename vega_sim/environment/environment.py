@@ -30,7 +30,12 @@ import numpy as np
 from collections import namedtuple
 from typing import Any, Callable, List, Optional
 
-from vega_sim.environment.agent import Agent, StateAgent, VegaState
+from vega_sim.environment.agent import (
+    Agent,
+    StateAgent,
+    StateAgentWithWallet,
+    VegaState,
+)
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
@@ -206,6 +211,10 @@ class MarketEnvironment:
 
         for agent in self.agents:
             agent.initialise(vega=vega)
+            if isinstance(agent, StateAgentWithWallet):
+                logging.info(
+                    f"{agent.name()}: key = {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
+                )
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
@@ -435,6 +444,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         self,
         run_with_console: bool = False,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ):
         if self._vega is None:
             with VegaServiceNetwork(
@@ -444,12 +454,17 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             ) as vega:
                 return self._run(vega)
         else:
-            return self._run(self._vega, pause_at_completion=pause_at_completion)
+            return self._run(
+                self._vega,
+                pause_at_completion=pause_at_completion,
+                log_every_n_steps=log_every_n_steps,
+            )
 
     def _run(
         self,
         vega: VegaServiceNetwork,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> None:
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
@@ -463,12 +478,22 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
+            t_start = time.time()
+
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
             i += 1
             self.step(vega)
 
-            time.sleep(self.step_length_seconds)
+            t_elapsed = time.time() - t_start
+            if t_elapsed <= self.step_length_seconds:
+                time.sleep(self.step_length_seconds - t_elapsed)
+            else:
+                logging.warning(
+                    f"Environment step, {round(t_elapsed,2)}s, taking longer than defined scenario step length, {self.step_length_seconds}s,"
+                )
+            if log_every_n_steps is not None and i % log_every_n_steps == 0:
+                logger.info(f"Completed {i} steps")
 
         for agent in self.agents:
             agent.finalise()
@@ -491,7 +516,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             try:
                 agent.step(state)
             except Exception as e:
-                msg = f"Agent '{agent.key_name}' failed to step."
+                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
                 if self.raise_step_errors:
                     raise e(msg)
                 else:

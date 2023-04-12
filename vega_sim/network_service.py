@@ -42,6 +42,7 @@ import itertools
 import subprocess
 import webbrowser
 import multiprocessing
+import requests
 
 from typing import Optional
 
@@ -50,7 +51,7 @@ from os import getcwd, path, environ
 import vega_sim.grpc.client as vac
 
 from vega_sim import vega_bin_path
-from vega_sim.service import VegaService, DatanodeBehindError
+from vega_sim.service import VegaService, DatanodeBehindError, DatanodeSlowResponseError
 from vega_sim.wallet.base import Wallet
 from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.null_service import find_free_port, _popen_process
@@ -59,6 +60,10 @@ from vega_sim.constants import DATA_NODE_GRPC_PORT
 from vega_sim.scenario.constants import Network
 
 logger = logging.getLogger(__name__)
+
+
+class VegaWalletStartupTimeoutError(Exception):
+    pass
 
 
 def add_network_config(
@@ -118,6 +123,9 @@ def manage_vega_processes(
                 "--network",
                 network,
                 "--automatic-consent",
+                "--load-tokens",
+                "--tokens-passphrase-file",
+                environ.get("VEGA_WALLET_TOKENS_PASSPHRASE_FILE"),
                 "--no-version-check",
             ],
             dir_root=tmp_vega_dir,
@@ -235,7 +243,7 @@ class VegaServiceNetwork(VegaService):
                 Note: Only needed if creating keys
             wallet_token_path (str, optional):
                 Path to the json file containing wallet tokens. Otherwise
-                uses VEGA_WALLET_TOKEN environment variable.
+                uses VEGA_WALLET_TOKENS_FILE environment variable.
         """
 
         # Run init method inherited from VegaService with network arguments.
@@ -275,12 +283,12 @@ class VegaServiceNetwork(VegaService):
         self._token_path = (
             wallet_token_path
             if wallet_token_path is not None
-            else environ.get("VEGA_WALLET_TOKEN")
+            else environ.get("VEGA_WALLET_TOKENS_FILE")
         )
         if self._token_path is None:
             raise Exception(
                 "Either path to tokens JSON must be passed to wallet class or"
-                " VEGA_WALLET_TOKEN environment variable set"
+                " VEGA_WALLET_TOKENS_FILE environment variable set"
             )
 
         self._network_config_path = _find_network_config_toml(
@@ -309,7 +317,7 @@ class VegaServiceNetwork(VegaService):
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
-                "network": self.network.value,
+                "network": self.network.name.lower(),
                 "log_dir": self.log_dir,
                 "run_with_wallet": self.run_with_wallet,
                 "run_with_console": self.run_with_console,
@@ -327,6 +335,25 @@ class VegaServiceNetwork(VegaService):
                 f" http://localhost:{vega_console_port}"
             )
             webbrowser.open(f"http://localhost:{vega_console_port}/", new=2)
+
+        started = False
+        for _ in range(3600):
+            try:
+                response = requests.get(f"{self.wallet_url}/api/v2/health")
+                response.raise_for_status()
+                started = True
+                break
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.HTTPError,
+            ):
+                time.sleep(0.1)
+        if not started:
+            raise VegaWalletStartupTimeoutError(
+                "Timed out waiting for Vega wallet service"
+            )
+
+        self.check_datanode(raise_on_error=False)
 
     def stop(self) -> None:
         super().stop()
@@ -387,9 +414,7 @@ class VegaServiceNetwork(VegaService):
     @property
     def wallet_url(self) -> str:
         if self._wallet_url is None:
-            self._wallet_url = (
-                f"http://{self.network_config['Host']}:{self.network_config['Port']}"
-            )
+            self._wallet_url = f"http://127.0.0.1:1789"
         return self._wallet_url
 
     @property
@@ -442,6 +467,9 @@ class VegaServiceNetwork(VegaService):
 
         try:
             self.ping_datanode(max_time_diff=max_time_diff)
+            logging.debug(
+                f"Connection to endpoint {self._data_node_grpc_url} successful."
+            )
             return
 
         except grpc.FutureTimeoutError as e:
@@ -468,6 +496,15 @@ class VegaServiceNetwork(VegaService):
             else:
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} is behind."
+                )
+                self.switch_datanode()
+
+        except DatanodeSlowResponseError as e:
+            if raise_on_error:
+                raise e
+            else:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is slow."
                 )
                 self.switch_datanode()
 
@@ -505,19 +542,30 @@ class VegaServiceNetwork(VegaService):
 
                 # Ping the datanode to check it is not behind
                 self.ping_datanode()
+                logging.debug(
+                    f"Connection to endpoint {self._data_node_grpc_url} successful."
+                )
 
                 return
 
+            except grpc._channel._InactiveRpcError:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                )
+
             except grpc.FutureTimeoutError:
-                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} timed out."
                 )
 
             except DatanodeBehindError:
-                # Log warning then continue to try next datanode
                 logging.warning(
                     f"Connection to endpoint {self._data_node_grpc_url} is behind."
+                )
+
+            except DatanodeSlowResponseError:
+                logging.warning(
+                    f"Connection to endpoint {self._data_node_grpc_url} is slow."
                 )
 
             if attempts == max_attempts:
