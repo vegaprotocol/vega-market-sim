@@ -563,7 +563,7 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
             )
             axs[i].plot(totals)
         axs[i].autoscale(enable=True, axis="y")
-        
+
     return fig
 
 
