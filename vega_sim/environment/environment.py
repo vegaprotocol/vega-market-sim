@@ -35,6 +35,8 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
 
+from vega_sim.service import VegaFaucetError
+
 logger = logging.getLogger(__name__)
 
 MarketState = namedtuple(
@@ -212,7 +214,13 @@ class MarketEnvironment:
 
         start_time = vega.get_blockchain_time(in_seconds=True)
         for i in range(self.n_steps):
-            self.step(vega)
+            try:
+                self.step(vega)
+            except VegaFaucetError:
+                logger.exception(
+                    f"Funds from faucet never received. Terminating run at step {i}."
+                )
+                break
 
             # Ensure core is caught up
             core_catchup_start = datetime.datetime.now()
