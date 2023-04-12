@@ -70,6 +70,10 @@ class DatanodeSlowResponseError(Exception):
     pass
 
 
+class VegaFaucetError(Exception):
+    pass
+
+
 def raw_data(fn):
     @wraps(fn)
     def wrapped_fn(self, *args, **kwargs):
@@ -392,7 +396,7 @@ class VegaService(ABC):
                 return
             self.wait_fn(1)
 
-        raise Exception(
+        raise VegaFaucetError(
             f"Failure minting asset {asset} for party {wallet_name}. Funds never"
             " appeared in party account"
         )
