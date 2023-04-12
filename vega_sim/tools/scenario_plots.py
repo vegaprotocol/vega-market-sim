@@ -8,6 +8,13 @@ from matplotlib.figure import Figure
 from matplotlib.markers import MarkerStyle
 from matplotlib.gridspec import GridSpec, SubplotSpec, GridSpecFromSubplotSpec
 
+from vega_sim.scenario.fuzzed_markets.agents import (
+    FuzzingAgent,
+    FuzzyLiquidityProvider,
+    DegenerateTrader,
+    DegenerateLiquidityProvider,
+)
+
 from vega_sim.proto.vega import markets
 
 import numpy as np
@@ -35,6 +42,7 @@ from vega_sim.tools.scenario_output import (
     load_order_book_df,
     load_trades_df,
     load_fuzzing_df,
+    load_agents_df,
 )
 
 
@@ -508,6 +516,57 @@ def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     return figs
 
 
+def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = None):
+    accounts_df = load_accounts_df(run_name=run_name)
+    agents_df = load_agents_df(run_name=run_name)
+
+    fig = plt.figure(figsize=[8, 10])
+    fig.suptitle(
+        f"Agent Account Plots",
+        fontsize=18,
+        fontweight="bold",
+        color=(0.2, 0.2, 0.2),
+    )
+    fig.tight_layout()
+
+    plt.rcParams.update({"font.size": 8})
+
+    agent_types = [
+        FuzzingAgent,
+        FuzzyLiquidityProvider,
+        DegenerateTrader,
+        DegenerateLiquidityProvider,
+    ]
+
+    gs = GridSpec(nrows=len(agent_types), ncols=1, hspace=0.5)
+
+    axs: list[plt.Axes] = []
+
+    for i, agent_type in enumerate(agent_types):
+        axs.append(fig.add_subplot(gs[i, 0]))
+
+        axs[i].set_title(
+            f"Total Account Balance: {agent_type.__name__}",
+            loc="left",
+            fontsize=12,
+            color=(0.3, 0.3, 0.3),
+        )
+
+        agent_keys = agents_df["agent_key"][
+            agents_df["agent_type"] == agent_type.__name__
+        ].to_list()
+        for key in agent_keys:
+            totals = (
+                accounts_df[accounts_df["party_id"] == key]["balance"]
+                .groupby(level=0)
+                .sum()
+            )
+            axs[i].plot(totals)
+        axs[i].autoscale(enable=True, axis="y")
+
+    return fig
+
+
 if __name__ == "__main__":
     figs = fuzz_plots()
     for key, fig in figs.items():
@@ -515,3 +574,5 @@ if __name__ == "__main__":
     figs = plot_run_outputs()
     for key, fig in figs.items():
         fig.savefig(f"rl-{key}.jpg")
+    fig = account_plots()
+    fig.savefig(f"accounts.jpg")

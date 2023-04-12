@@ -8,7 +8,7 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 
-from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs
+from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs, account_plots
 
 
 def _run(steps: int = 2880, output: bool = False):
@@ -45,6 +45,9 @@ def _run(steps: int = 2880, output: bool = False):
         trading_figs = plot_run_outputs()
         for key, fig in trading_figs.items():
             fig.savefig(f"fuzz_plots/trading-{key}.jpg")
+
+        account_fig = account_plots()
+        account_fig.savefig(f"fuzz_plots/accounts-{key}.jpg")
 
 
 if __name__ == "__main__":
