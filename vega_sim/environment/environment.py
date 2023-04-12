@@ -214,7 +214,7 @@ class MarketEnvironment:
 
         start_time = vega.get_blockchain_time(in_seconds=True)
         for i in range(self.n_steps):
-            # TODO: Remove this once fauceting error has been investigated 
+            # TODO: Remove this once fauceting error has been investigated
             try:
                 self.step(vega)
             except VegaFaucetError:
