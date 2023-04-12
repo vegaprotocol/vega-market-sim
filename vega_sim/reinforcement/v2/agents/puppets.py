@@ -1,13 +1,18 @@
+import traceback
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
+from logging import getLogger
 
-from vega_sim.scenario.common.agents import StateAgentWithWallet, VegaState, VegaService
+from vega_sim.scenario.common.agents import StateAgentWithWallet, VegaService, VegaState
+
+logger = getLogger(__name__)
 
 
 class Side(Enum):
     SELL = 0
-    BUY = 1
+    NONE = 1
+    BUY = 2
 
 
 @dataclass
@@ -19,6 +24,11 @@ class Action:
 class MarketOrderAction(Action):
     side: Side
     volume: float
+
+
+@dataclass
+class NoAction(Action):
+    pass
 
 
 class AgentType(Enum):
@@ -67,23 +77,21 @@ class MarketOrderPuppet(Puppet):
         ][0]
 
     def step(self, vega_state: VegaState):
-        if self.action is not None:
+        if (
+            self.action is not None
+            and self.action is not NoAction
+            and self.action.side != Side.NONE
+        ):
             try:
                 self.vega.submit_market_order(
                     trading_key=self.key_name,
                     market_id=self.market_id,
-                    side=(
-                        "SIDE_BUY"
-                        if self.action.side == Side.BUY.value
-                        else "SIDE_SELL"
-                    ),
+                    side=("SIDE_BUY" if self.action.side == Side.BUY else "SIDE_SELL"),
                     volume=self.action.volume,
                     wait=False,
                 )
             except:
-                import traceback
-
-                print(traceback.format_exc())
+                logger.exception(traceback.format_exc())
 
 
 AGENT_TYPE_TO_AGENT = {AgentType.MARKET_ORDER: MarketOrderPuppet}
