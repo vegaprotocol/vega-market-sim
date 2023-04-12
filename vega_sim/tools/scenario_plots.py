@@ -562,18 +562,17 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
                 .sum()
             )
             axs[i].plot(totals)
-        # axs[i].set_ylim(bottom=0)
         axs[i].autoscale(enable=True, axis="y")
-
+        
     return fig
 
 
 if __name__ == "__main__":
-    # figs = fuzz_plots()
-    # for key, fig in figs.items():
-    #     fig.savefig(f"fuzz-{key}.jpg")
-    # figs = plot_run_outputs()
-    # for key, fig in figs.items():
-    #     fig.savefig(f"rl-{key}.jpg")
-    figs = account_plots()
-    plt.show()
+    figs = fuzz_plots()
+    for key, fig in figs.items():
+        fig.savefig(f"fuzz-{key}.jpg")
+    figs = plot_run_outputs()
+    for key, fig in figs.items():
+        fig.savefig(f"rl-{key}.jpg")
+    fig = account_plots()
+    fig.savefig(f"accounts.jpg")
