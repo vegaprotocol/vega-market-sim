@@ -101,10 +101,6 @@ class Scenario(abc.ABC):
     def get_snitch(self) -> Optional[Snitch]:
         return self.agents.get("snitch")
 
-    def get_agents(self) -> dict:
-        snitch = self.get_snitch()
-        return snitch.agents if snitch is not None else {}
-
     def get_run_data(self) -> List[MarketHistoryData]:
         snitch = self.get_snitch()
         return snitch.states if snitch is not None else []
