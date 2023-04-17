@@ -61,23 +61,6 @@ class SimpleState(State):
         return arr
 
 
-#         return cls(
-#             step=self.step_num,
-#             position=position,
-#             full_balance=(account.margin + account.general) / self.initial_balance,
-#             market_in_auction=(
-#                 not market_info.trading_mode
-#                 == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-#             ),
-#             bid_prices=bid_prices,
-#             ask_prices=ask_prices,
-#             bid_volumes=[level.volume for level in book_state.buys]
-#             + [0] * max(0, self.num_levels - len(book_state.buys)),
-#             ask_volumes=[level.volume for level in book_state.sells]
-#             + [0] * max(0, self.num_levels - len(book_state.sells)),
-#             trading_fee=fee,
-#             next_price=next_price,
-#         )
 @dataclass(frozen=True)
 class PriceStateWithFees(State):
     position: float

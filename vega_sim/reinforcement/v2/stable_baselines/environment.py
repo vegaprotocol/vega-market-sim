@@ -114,5 +114,4 @@ class SingleAgentVegaEnv(gym.Env):
         pass
 
     def close(self):
-        print("CLOSE CALLED")
         self.env.stop()
