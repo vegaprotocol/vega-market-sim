@@ -52,7 +52,7 @@ class SlimWallet(Wallet):
         self.nonce_idx = 0
         self.pool = ThreadPoolExecutor(max_workers=5)
 
-        self.height_update_frequency = 500
+        self.height_update_frequency = 0
         self.remaining_until_height_update = 0
         self.block_height = None
 
@@ -142,18 +142,20 @@ class SlimWallet(Wallet):
         transaction_type: str,
         wallet_name: Optional[str] = None,
     ):
-        # if self.remaining_until_height_update <= 0:
-        #     self.block_height = self.core_client.LastBlockHeight(
-        #         core_proto.LastBlockHeightRequest()
-        #     ).height
-        #     self.remaining_until_height_update = self.height_update_frequency
+        if self.remaining_until_height_update <= 0:
+            self.block_height = self.core_client.LastBlockHeight(
+                core_proto.LastBlockHeightRequest()
+            ).height
+            self.remaining_until_height_update = self.height_update_frequency
 
         pub_key = self.public_key(name=key_name, wallet_name=wallet_name)
 
         transaction_info = {transaction_type: transaction}
         input_data = transaction_proto.InputData(
-            nonce=self._next_nonce(),  # block_height=self.block_height,
-            **transaction_info
+            nonce=self._next_nonce(),
+            good_for_blocks=100,
+            block_height=self.block_height,
+            **transaction_info,
         )
 
         serialised = input_data.SerializeToString()

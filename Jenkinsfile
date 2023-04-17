@@ -13,7 +13,7 @@ pipeline {
         timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: '42ec67c184dd92c86d8ab245f3a907daf0c08841',
+        string( name: 'VEGA_VERSION', defaultValue: '1176f5ab9c61561bf3fdf6d1ee36135c5fcb1693',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
