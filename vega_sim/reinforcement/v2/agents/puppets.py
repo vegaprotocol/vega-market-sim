@@ -70,11 +70,7 @@ class Puppet(StateAgentWithWallet):
 class MarketOrderPuppet(Puppet):
     def initialise(self, vega: VegaService, create_wallet: bool = True):
         super().initialise(vega, create_wallet)
-        self.market_id = [
-            m.id
-            for m in self.vega.all_markets()
-            if m.tradable_instrument.instrument.name == self.market_name
-        ][0]
+        self.market_id = self.vega.find_market_id(name=self.market_name)
 
     def step(self, vega_state: VegaState):
         if (
