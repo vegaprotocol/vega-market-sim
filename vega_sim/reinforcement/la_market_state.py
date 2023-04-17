@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import List, Tuple
 import numpy as np
 
-from vega_sim.environment.agent import Agent
-
 
 @dataclass
 class AbstractAction:
@@ -24,21 +22,24 @@ class LAMarketState:
     next_price: float
 
     def to_array(self):
-        l = (
-            [
-                self.step,
-                self.position,
-                self.full_balance,
-                int(self.market_in_auction),
-                self.trading_fee,
-                self.next_price,
-            ]
-            + self.bid_prices
-            + self.ask_prices
-            + self.bid_volumes
-            + self.ask_volumes
+        arr = np.nan_to_num(
+            np.array(
+                (
+                    [
+                        self.step,
+                        self.position,
+                        self.full_balance,
+                        int(self.market_in_auction),
+                        self.trading_fee,
+                        self.next_price,
+                    ]
+                    + self.bid_prices
+                    + self.ask_prices
+                    + self.bid_volumes
+                    + self.ask_volumes
+                )
+            )
         )
-        arr = np.nan_to_num(np.array(l))
         norm_factor = max(1e-12, np.linalg.norm(arr))
         arr = arr / norm_factor
         return arr
