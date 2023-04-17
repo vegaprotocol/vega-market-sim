@@ -43,7 +43,6 @@ PortUpdateConfig = namedtuple(
 class Ports(Enum):
     DATA_NODE_GRPC = auto()
     DATA_NODE_REST = auto()
-    DATA_NODE_GRAPHQL = auto()
     DATA_NODE_POSTGRES = auto()
     FAUCET = auto()
     WALLET = auto()
@@ -80,13 +79,19 @@ PORT_UPDATERS = {
     Ports.DATA_NODE_REST: [
         PortUpdateConfig(
             ("config", "data-node", "config.toml"),
-            ["Gateway", "REST"],
+            ["Gateway"],
             "Port",
             lambda port: port,
         ),
         PortUpdateConfig(
             ("config", "wallet-service", "networks", "local.toml"),
             ["API", "REST"],
+            "Hosts",
+            lambda port: [f"localhost:{port}"],
+        ),
+        PortUpdateConfig(
+            ("config", "wallet-service", "networks", "local.toml"),
+            ["API", "GraphQL"],
             "Hosts",
             lambda port: [f"localhost:{port}"],
         ),
@@ -124,20 +129,6 @@ PORT_UPDATERS = {
             ["Blockchain", "Null"],
             "Port",
             lambda port: port,
-        ),
-    ],
-    Ports.DATA_NODE_GRAPHQL: [
-        PortUpdateConfig(
-            ("config", "data-node", "config.toml"),
-            ["Gateway", "GraphQL"],
-            "Port",
-            lambda port: port,
-        ),
-        PortUpdateConfig(
-            ("config", "wallet-service", "networks", "local.toml"),
-            ["API", "GraphQL"],
-            "Hosts",
-            lambda port: [f"localhost:{port}"],
         ),
     ],
     Ports.CORE_GRPC: [
@@ -343,20 +334,21 @@ def manage_vega_processes(
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
-    if port_config.get(Ports.DATA_NODE_GRAPHQL):
-        logger.info(
-            f"Launching GraphQL node at port {port_config.get(Ports.DATA_NODE_GRAPHQL)}"
-        )
+
     if port_config.get(Ports.CONSOLE):
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
     if port_config.get(Ports.DATA_NODE_REST):
         logger.info(
-            f"Launching Datanode REST at port {port_config.get(Ports.DATA_NODE_REST)}"
+            "Launching Datanode REST + GRAPHQL at port"
+            f" {port_config.get(Ports.DATA_NODE_REST)}"
         )
     if port_config.get(Ports.DATA_NODE_GRPC):
         logger.info(
             f"Launching Datanode GRPC at port {port_config.get(Ports.DATA_NODE_GRPC)}"
         )
+    if port_config.get(Ports.CORE_REST):
+        logger.info(f"Launching Core REST at port {port_config.get(Ports.CORE_REST)}")
+
     if port_config.get(Ports.CORE_GRPC):
         logger.info(f"Launching Core GRPC at port {port_config.get(Ports.CORE_GRPC)}")
 
@@ -515,7 +507,7 @@ def manage_vega_processes(
         env_copy.update(
             {
                 "NX_VEGA_URL": (
-                    f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/query"
+                    f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/query"
                 ),
                 "NX_VEGA_WALLET_URL": f"http://localhost:{port_config[Ports.WALLET]}",
                 "NX_VEGA_ENV": "CUSTOM",
@@ -563,7 +555,6 @@ class VegaServiceNull(VegaService):
         Ports.WALLET: "wallet_port",
         Ports.DATA_NODE_GRPC: "data_node_grpc_port",
         Ports.DATA_NODE_REST: "data_node_rest_port",
-        Ports.DATA_NODE_GRAPHQL: "data_node_graphql_port",
         Ports.DATA_NODE_POSTGRES: "data_node_postgres_port",
         Ports.FAUCET: "faucet_port",
         Ports.VEGA_NODE: "vega_node_port",
@@ -674,7 +665,6 @@ class VegaServiceNull(VegaService):
         self.wallet_port = 0
         self.data_node_rest_port = 0
         self.data_node_grpc_port = 0
-        self.data_node_graphql_port = 0
         self.data_node_postgres_port = 0
         self.faucet_port = 0
         self.vega_node_port = 0
@@ -696,7 +686,6 @@ class VegaServiceNull(VegaService):
             Ports.WALLET: self.wallet_port,
             Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
             Ports.DATA_NODE_REST: self.data_node_rest_port,
-            Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
             Ports.DATA_NODE_POSTGRES: self.data_node_postgres_port,
             Ports.FAUCET: self.faucet_port,
             Ports.VEGA_NODE: self.vega_node_port,
@@ -795,7 +784,7 @@ class VegaServiceNull(VegaService):
 
         if self.launch_graphql:
             webbrowser.open(
-                f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
+                f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/graphql", new=2
             )
 
     # Class internal as at some point the host may vary as well as the port

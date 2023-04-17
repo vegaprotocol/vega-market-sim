@@ -55,7 +55,7 @@ class BlockExplorerServiceServicer(object):
     def Info(self, request, context):
         """Info
 
-        Retrieves information about the block explorer.
+        Get information about the block explorer.
         Response contains a semver formatted version of the data node and the commit hash, from which the block explorer was built
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
