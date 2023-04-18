@@ -507,7 +507,7 @@ def manage_vega_processes(
         env_copy.update(
             {
                 "NX_VEGA_URL": (
-                    f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/query"
+                    f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/graphql"
                 ),
                 "NX_VEGA_WALLET_URL": f"http://localhost:{port_config[Ports.WALLET]}",
                 "NX_VEGA_ENV": "CUSTOM",
