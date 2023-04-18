@@ -419,7 +419,9 @@ def get_trades(
 ) -> List[vega_protos.vega.Trade]:
     return unroll_v2_pagination(
         data_node_protos_v2.trading_data.ListTradesRequest(
-            market_id=market_id, party_id=party_id, order_id=order_id
+            market_ids=[market_id],
+            party_ids=[party_id] if party_id is not None else None,
+            order_ids=[order_id] if order_id is not None else None,
         ),
         request_func=lambda x: data_client.ListTrades(x).trades,
         extraction_func=lambda res: [i.node for i in res.edges],

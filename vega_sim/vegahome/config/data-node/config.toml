@@ -73,17 +73,15 @@ UlimitNOFile = 8192
   Timeout = "5s"
   SubscriptionRetries = 3
   GraphQLPlaygroundEnabled = true
+  Port = "TO_BE_SET"
+  IP = "0.0.0.0"
   [Gateway.Node]
     Port = "TO_BE_SET"
     IP = "0.0.0.0"
   [Gateway.GraphQL]
-    Port = "TO_BE_SET"
-    IP = "0.0.0.0"
     Enabled = true
     ComplexityLimit = 0
   [Gateway.REST]
-    Port = "TO_BE_SET"
-    IP = "0.0.0.0"
     Enabled = true
     APMEnabled = true
   [Gateway.RateLimits]
