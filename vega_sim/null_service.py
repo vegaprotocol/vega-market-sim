@@ -4,6 +4,7 @@ import atexit
 import functools
 import logging
 import multiprocessing
+import psutil
 import os
 import shutil
 import signal
@@ -538,13 +539,20 @@ def manage_vega_processes(
     for process in processes:
         process.terminate()
     for process in processes:
-        return_code = process.poll()
-        if return_code is not None:
-            continue
-        # Could mean 5s wait per process, but we're not holding the outer process
-        # and would really be a symptom of these children taking too long to close
-        time.sleep(5)
-        process.kill()
+        name = psutil.Process(process.pid).name()
+        attempts = 0
+        while process.poll() is None:
+            time.sleep(1)
+            attempts += 1
+            if attempts > 60:
+                logging.warning(
+                    f"Gracefully terminating process timed-out. Killing process {name}."
+                )
+                process.kill()
+        if process.poll() == 0:
+            logging.debug(f"Process {name} terminated.")
+        if process.poll() == -9:
+            logging.debug(f"Process {name} killed.")
 
     if not retain_log_files:
         shutil.rmtree(tmp_vega_dir)
