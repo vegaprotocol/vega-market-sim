@@ -59,9 +59,9 @@ pipeline {
                 script {
                     vegaMarketSim ignoreFailure: false,
                         timeout: 90,
-                        vegaMarketSimBranch: commitHash,
+                        vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
-                        jenkinsSharedLibBranch: params.JENKINS_SHARED_LIB_BRANCH
+                        jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH
                 }
             }
         }
