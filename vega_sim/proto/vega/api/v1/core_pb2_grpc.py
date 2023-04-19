@@ -153,7 +153,7 @@ class CoreServiceServicer(object):
     def GetSpamStatistics(self, request, context):
         """Get Spam statistics
 
-        Retrieve the spam statistics for a given party
+        Get the spam statistics for a given party
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")

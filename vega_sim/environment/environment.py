@@ -203,9 +203,7 @@ class MarketEnvironment:
                 Optional, int, If passed, will log a progress line every n steps
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
-        logger.info(
-            f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
-        )
+        logger.info(f"Running graphql at: http://localhost:{vega.data_node_rest_port}")
 
         start = datetime.datetime.now()
 
@@ -213,7 +211,8 @@ class MarketEnvironment:
             agent.initialise(vega=vega)
             if isinstance(agent, StateAgentWithWallet):
                 logging.info(
-                    f"{agent.name()}: key = {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
+                    f"{agent.name()}: key ="
+                    f" {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
                 )
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
@@ -286,7 +285,8 @@ class MarketEnvironment:
                 agent.step(vega)
             except VegaFaucetError:
                 logger.exception(
-                    f"Agent {agent.name()} failed to step. Funds from faucet never received."
+                    f"Agent {agent.name()} failed to step. Funds from faucet never"
+                    " received."
                 )
                 # Mint forwards blocks, wait for catchup
                 vega.wait_for_total_catchup()
@@ -406,7 +406,8 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 agent.step(state)
             except VegaFaucetError:
                 logger.exception(
-                    f"Agent {agent.name()} failed to step. Funds from faucet never received."
+                    f"Agent {agent.name()} failed to step. Funds from faucet never"
+                    " received."
                 )
                 # Mint forwards blocks, wait for catchup
                 vega.wait_for_total_catchup()
@@ -490,7 +491,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 time.sleep(self.step_length_seconds - t_elapsed)
             else:
                 logging.warning(
-                    f"Environment step, {round(t_elapsed,2)}s, taking longer than defined scenario step length, {self.step_length_seconds}s,"
+                    f"Environment step, {round(t_elapsed,2)}s, taking longer than"
+                    f" defined scenario step length, {self.step_length_seconds}s,"
                 )
             if log_every_n_steps is not None and i % log_every_n_steps == 0:
                 logger.info(f"Completed {i} steps")
@@ -618,9 +620,7 @@ class RealtimeMarketEnvironment(MarketEnvironmentWithState):
                     to be inspected, either via code or the Console
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
-        logger.info(
-            f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
-        )
+        logger.info(f"Running graphql at: http://localhost:{vega.data_node_rest_port}")
 
         for agent in self.agents:
             agent.initialise(vega=vega)
