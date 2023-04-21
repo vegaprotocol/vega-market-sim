@@ -2938,3 +2938,69 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
                 volume=abs(open_volume),
                 fill_or_kill=False,
             )
+
+
+class UncrossAuctionAgent(StateAgentWithWallet):
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        side: str,
+        price_process: list,
+        uncrossing_size: float = 1,
+        initial_asset_mint: float = 1000000,
+        tag: str = "",
+        wallet_name: str = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.side = side
+        self.initial_asset_mint = initial_asset_mint
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.price_process = price_process
+        self.uncrossing_size = uncrossing_size
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        self.vega.wait_for_total_catchup()
+        # Get asset id
+        asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+        self.vega.wait_fn(10)
+        self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+        curr_price = next(self.price_process)
+
+        if vega_state.market_state[self.market_id].trading_mode in [
+            markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
+            markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
+        ]:
+            self.vega.submit_order(
+                trading_key=self.key_name,
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                time_in_force="TIME_IN_FORCE_GTT",
+                side=self.side,
+                volume=self.uncrossing_size,
+                price=curr_price,
+                wait=False,
+            )
