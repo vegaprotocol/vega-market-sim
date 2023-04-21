@@ -8,9 +8,15 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 
-from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs, account_plots, plot_price_monitoring
+from vega_sim.tools.scenario_plots import (
+    fuzz_plots,
+    plot_run_outputs,
+    account_plots,
+    plot_price_monitoring,
+)
 
 from matplotlib import pyplot as plt
+
 
 def _run(steps: int = 2880, output: bool = False):
     scenario = FuzzingScenario(
