@@ -614,8 +614,8 @@ def plot_price_monitoring(run_name: Optional[str] = None):
 
         gs = GridSpec(nrows=1, ncols=1, hspace=0.1)
         ax = fig.add_subplot(
-                gs[0, 0],
-            )
+            gs[0, 0],
+        )
         twinax = ax.twinx()
         twinax.set_ylim(0, 1)
 
