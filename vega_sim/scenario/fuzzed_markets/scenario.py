@@ -83,6 +83,50 @@ def additional_data_to_rows(data) -> List[pd.Series]:
     return results
 
 
+def _create_price_process(
+    random_state: np.random.RandomState, num_steps, decimal_places
+):
+    price_process = [1500]
+
+    while len(price_process) < num_steps:
+        # Add a stable price-process with a random duration of 5-20% of the sim
+        price_process = np.concatenate(
+            (
+                price_process,
+                random_walk(
+                    num_steps=random_state.randint(
+                        int(0.10 * num_steps), int(0.4 * num_steps)
+                    ),
+                    sigma=2,
+                    starting_price=price_process[-1],
+                    decimal_precision=decimal_places,
+                ),
+            )
+        )
+        # Add an unstable price-process with a random duration of 1-5% of the sim
+        price_process = np.concatenate(
+            (
+                price_process,
+                random_walk(
+                    num_steps=random_state.randint(
+                        int(0.01 * num_steps), int(0.1 * num_steps)
+                    ),
+                    sigma=2,
+                    drift=random_state.uniform(-1, 1),
+                    starting_price=price_process[-1],
+                    decimal_precision=decimal_places,
+                ),
+            )
+        )
+
+    # Add spikes to the price monitoring auction
+    spike_at = random_state.randint(0, num_steps, size=3)
+    for i in spike_at:
+        price_process[i] = price_process[i] * random_state.choice([0.95, 1.05])
+
+    return price_process
+
+
 class FuzzingScenario(Scenario):
     def __init__(
         self,
@@ -151,12 +195,10 @@ class FuzzingScenario(Scenario):
                     market_config.set(param=self.fuzz_market_config[param])
 
             # Create fuzzed price process
-            price_process = random_walk(
-                num_steps=self.num_steps + 1,
-                sigma=random_state.rand() * 1e1,
-                drift=random_state.rand() * 1e-3,
-                starting_price=1000,
-                decimal_precision=int(market_config.decimal_places),
+            price_process = _create_price_process(
+                random_state=random_state,
+                num_steps=self.num_steps,
+                decimal_places=int(market_config.decimal_places),
             )
 
             # Create fuzzed market managers
