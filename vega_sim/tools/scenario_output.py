@@ -28,6 +28,7 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
                 "mark_price": market_data.mark_price,
                 "market_id": market_id,
                 "mark_price": market_data.mark_price,
+                "mid_price": market_data.mid_price,
                 "open_interest": market_data.open_interest,
                 "best_bid": market_data.best_bid_price,
                 "best_offer": market_data.best_offer_price,
@@ -37,6 +38,13 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
                 "market_trading_mode": market_data.market_trading_mode,
                 "target_stake": market_data.target_stake,
                 "supplied_stake": market_data.supplied_stake,
+                "price_monitoring_bounds": [
+                    ((bound.min_valid_price, bound.max_valid_price))
+                    for bound in market_data.price_monitoring_bounds
+                ],
+                "indicative_price": market_data.indicative_price,
+                "trigger": market_data.trigger,
+                "extension_trigger": market_data.extension_trigger,
             },
         )
     return results

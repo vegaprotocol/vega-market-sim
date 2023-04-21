@@ -8,7 +8,14 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 
-from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs, account_plots
+from vega_sim.tools.scenario_plots import (
+    fuzz_plots,
+    plot_run_outputs,
+    account_plots,
+    plot_price_monitoring,
+)
+
+from matplotlib import pyplot as plt
 
 
 def _run(steps: int = 2880, output: bool = False):
@@ -38,16 +45,24 @@ def _run(steps: int = 2880, output: bool = False):
         if not os.path.exists("fuzz_plots"):
             os.mkdir("fuzz_plots")
 
+        fuzz_figs = plot_price_monitoring()
+        for key, fig in fuzz_figs.items():
+            fig.savefig(f"fuzz_plots/monitoring-{key}.jpg")
+            plt.close(fig)
+
         fuzz_figs = fuzz_plots()
         for key, fig in fuzz_figs.items():
             fig.savefig(f"fuzz_plots/fuzz-{key}.jpg")
+            plt.close(fig)
 
         trading_figs = plot_run_outputs()
         for key, fig in trading_figs.items():
             fig.savefig(f"fuzz_plots/trading-{key}.jpg")
+            plt.close(fig)
 
         account_fig = account_plots()
         account_fig.savefig(f"fuzz_plots/accounts-{key}.jpg")
+        plt.close(account_fig)
 
 
 if __name__ == "__main__":

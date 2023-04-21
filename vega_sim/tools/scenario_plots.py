@@ -1,8 +1,12 @@
-from typing import Optional
+import os
+import ast
 
-import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.pyplot as plt
 import vega_sim.proto.vega as vega_protos
+
+from typing import Optional
+from collections import defaultdict
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.markers import MarkerStyle
@@ -356,8 +360,9 @@ def plot_price_comparison(
     external_price_series = fuzzing_df["external_price"].replace(0, np.nan)
     mark_price_series = data_df["mark_price"].replace(0, np.nan)
 
-    ax0.plot(external_price_series)
     ax0.plot(mark_price_series)
+    ax0.set_ylim(ax0.get_ylim())
+    ax0.plot(external_price_series, linewidth=0.8, alpha=0.8)
 
     ep_volatility = external_price_series.var() / external_price_series.size
     mp_volatility = mark_price_series.var() / mark_price_series.size
@@ -567,12 +572,140 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
     return fig
 
 
+def plot_price_monitoring(run_name: Optional[str] = None):
+    data_df = load_market_data_df(run_name=run_name)
+
+    market_ids = data_df.market_id.unique()
+
+    figs = {}
+    for market_id in market_ids:
+        market_data_df = data_df[data_df["market_id"] == market_id]
+
+        # Extract the tightest valid prices from the price monitoring valid_prices
+        valid_prices = defaultdict(lambda: [])
+        for index in market_data_df.index:
+            all_bounds = ast.literal_eval(
+                market_data_df.loc[index]["price_monitoring_bounds"]
+            )
+            valid_prices["datetime"].append(index)
+            valid_prices["min_valid_price"].append(np.nan)
+            valid_prices["max_valid_price"].append(np.nan)
+            for _, individual_bound in enumerate(all_bounds):
+                valid_prices["min_valid_price"][-1] = (
+                    individual_bound[0]
+                    if valid_prices["min_valid_price"][-1] is np.nan
+                    else max(individual_bound[0], valid_prices["min_valid_price"][-1])
+                )
+                valid_prices["max_valid_price"][-1] = (
+                    individual_bound[1]
+                    if valid_prices["max_valid_price"][-1] is np.nan
+                    else min(individual_bound[1], valid_prices["max_valid_price"][-1])
+                )
+
+        fig = plt.figure(figsize=[10, 7])
+        fig.suptitle(
+            f"Price Monitoring Analysis",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+        plt.rcParams.update({"font.size": 8})
+
+        gs = GridSpec(nrows=1, ncols=1, hspace=0.1)
+        ax = fig.add_subplot(
+            gs[0, 0],
+        )
+        twinax = ax.twinx()
+        twinax.set_ylim(0, 1)
+
+        # Plot period where auctions triggered (but not extended)
+        series = (market_data_df["trigger"] == 3).astype(int) & (
+            market_data_df["extension_trigger"] != 3
+        ).astype(int)
+        twinax.fill_between(
+            series.index,
+            series,
+            step="post",
+            alpha=0.1,
+            color="r",
+            linewidth=0,
+            label="auction",
+        )
+        # Plot periods where auctions extended
+        series = (market_data_df["extension_trigger"] == 3).astype(int)
+        twinax.fill_between(
+            series.index,
+            series,
+            step="post",
+            alpha=0.1,
+            color="orange",
+            linewidth=0,
+            label="extension",
+        )
+
+        ax.plot(
+            valid_prices["datetime"],
+            valid_prices["min_valid_price"],
+            "r-",
+            linewidth=0.5,
+            alpha=0.4,
+            label="valid price bounds",
+        )
+        ax.plot(
+            valid_prices["datetime"],
+            valid_prices["max_valid_price"],
+            "r-",
+            linewidth=0.5,
+            alpha=0.4,
+            label="_nolegend",
+        )
+
+        ax.plot(
+            market_data_df.index,
+            market_data_df["mark_price"].replace(0, np.nan),
+            "b-",
+            alpha=1.0,
+            label="mark price",
+        )
+        ax.plot(
+            market_data_df.index,
+            market_data_df["mid_price"].replace(0, np.nan),
+            "b-",
+            alpha=0.4,
+            label="mid price",
+        )
+        ax.plot(
+            market_data_df.index,
+            market_data_df["indicative_price"].replace(0, np.nan),
+            "g-",
+            alpha=1.0,
+            label="indicative price",
+        )
+
+        ax.legend(loc="upper left")
+        twinax.legend(loc="lower right")
+
+        ax.set_xlabel("datetime")
+        ax.set_ylabel("price")
+
+        figs[market_id] = fig
+
+    return figs
+
+
 if __name__ == "__main__":
+    dir = "test_plots"
+    if not os.path.exists(dir):
+        os.mkdir(dir)
     figs = fuzz_plots()
-    for key, fig in figs.items():
-        fig.savefig(f"fuzz-{key}.jpg")
+    for i, fig in enumerate(figs.values()):
+        fig.savefig(f"{dir}/fuzz-{i}.jpg")
     figs = plot_run_outputs()
-    for key, fig in figs.items():
-        fig.savefig(f"rl-{key}.jpg")
+    for i, fig in enumerate(figs.values()):
+        fig.savefig(f"{dir}/trading-{i}.jpg")
+    figs = plot_price_monitoring()
+    for i, fig in enumerate(figs.values()):
+        fig.savefig(f"{dir}/monitoring-{i}.jpg")
     fig = account_plots()
-    fig.savefig(f"accounts.jpg")
+    fig.savefig(f"{dir}/accounts.jpg")

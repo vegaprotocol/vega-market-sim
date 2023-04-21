@@ -16,7 +16,7 @@ A MarketConfig class has the following attributes which can be set:
 • liquidity_monitoring_parameters.target_stake_parameters.time_window
 • liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
 • log_normal.tau
-• log_normal.risk_aversion_parameters
+• log_normal.risk_aversion_parameter
 • log_normal.params.mu
 • log_normal.params.r
 • log_normal.params.sigma
@@ -98,7 +98,7 @@ class MarketConfig(Config):
             "liquidity_monitoring_parameters": "default",
             "log_normal": "default",
             "instrument": "default",
-            "lp_price_range": 1.0,
+            "lp_price_range": 0.5,
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
         }
@@ -147,30 +147,36 @@ class MarketConfig(Config):
 
 class PriceMonitoringParameters(Config):
     OPTS = {
-        "default": {
-            "horizon": 24 * 3600,
-            "probability": "0.999999",
-            "auction_extension": 5,
-        }
+        "default": [
+            {
+                "horizon": 900,  # 15 minutes
+                "probability": "0.90001",
+                "auction_extension": 60,
+            },
+            {
+                "horizon": 3600,  # 1 hour
+                "probability": "0.90001",
+                "auction_extension": 300,
+            },
+            {
+                "horizon": 14_400,  # 4 hour
+                "probability": "0.90001",
+                "auction_extension": 900,
+            },
+            {
+                "horizon": 86_400,  # 1 day
+                "probability": "0.90001",
+                "auction_extension": 3600,
+            },
+        ]
     }
 
     def load(self, opt: Optional[str] = None):
         opt = super().load(opt=opt)
-
-        self.horizon = self.OPTS[opt]["horizon"]
-        self.probability = self.OPTS[opt]["probability"]
-        self.auction_extension = self.OPTS[opt]["auction_extension"]
+        self.triggers = self.OPTS[opt]
 
     def build(self):
-        return vega_protos.markets.PriceMonitoringParameters(
-            triggers=[
-                {
-                    "horizon": self.horizon,
-                    "probability": self.probability,
-                    "auction_extension": self.auction_extension,
-                }
-            ]
-        )
+        return vega_protos.markets.PriceMonitoringParameters(triggers=self.triggers)
 
 
 class LiquidityMonitoringParameters(Config):

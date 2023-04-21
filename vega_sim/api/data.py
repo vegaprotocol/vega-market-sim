@@ -510,10 +510,10 @@ def _market_data_from_proto(
         auction_end=market_data.auction_end,
         auction_start=market_data.auction_start,
         indicative_price=num_from_padded_int(
-            market_data.static_mid_price, decimal_spec.price_decimals
+            market_data.indicative_price, decimal_spec.price_decimals
         ),
         indicative_volume=num_from_padded_int(
-            market_data.static_mid_price, decimal_spec.price_decimals
+            market_data.indicative_volume, decimal_spec.price_decimals
         ),
         market_trading_mode=market_data.market_trading_mode,
         trigger=market_data.trigger,
