@@ -50,7 +50,6 @@ def _queue_forwarder(
     for evts, handler in stream_registry:
         for evt in evts:
             handlers[evt] = handler
-
     try:
         for o in obs:
             for event in o.events:
@@ -181,8 +180,10 @@ class LocalDataCache:
         ]
 
     def stop(self) -> None:
-        return
-
+        self._kill_thread_sig.set()
+        self._observation_thread.join()
+        self._forwarding_thread.join()
+        
     def time_update_from_feed(
         self,
     ) -> int:
@@ -406,7 +407,7 @@ class LocalDataCache:
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
     def _monitor_stream(self) -> None:
-        while True:
+        while not self._kill_thread_sig.is_set():
             try:
                 update = self._aggregated_observation_feed.get(timeout=1)
             except Empty:
