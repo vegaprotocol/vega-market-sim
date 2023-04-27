@@ -56,12 +56,14 @@ pipeline {
         stage('Vega Market Sim Tests') {
             steps {
                 script {
-                    vegaMarketSim ignoreFailure: false,
+                    vegaMarketSim (
+                        ignoreFailure: false,
                         timeout: 90,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
                         nodeLabel: params.NODE_LABEL,
+                    )
                 }
             }
         }
