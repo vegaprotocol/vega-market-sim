@@ -60,8 +60,9 @@ def _queue_forwarder(
                 else:
                     sink.put(output)
     except grpc._channel._MultiThreadedRendezvous as e:
-        if e.details() == "Socket closed":
-            logger.info("Data cache event bus closed")
+        if e.details() in ["Channel closed!", "Socket closed"]:
+            logging.debug(f"Thread finished as {e.details}")
+            logger.info("Data cache event bus closed.")
         else:
             raise e
 

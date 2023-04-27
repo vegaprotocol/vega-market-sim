@@ -801,6 +801,9 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
+        self.core_client.stop()
+        self.core_state_client.stop()
+        self.trading_data_client_v2.stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
