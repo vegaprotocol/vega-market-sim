@@ -805,8 +805,9 @@ class VegaServiceNull(VegaService):
             logger.info("Stop called but nothing to stop")
         else:
             self.proc.terminate()
+        if isinstance(self.wallet, SlimWallet):
+            self.wallet.stop()
         super().stop()
-
 
     @property
     def wallet_url(self) -> str:

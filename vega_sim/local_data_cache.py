@@ -183,7 +183,7 @@ class LocalDataCache:
         self._kill_thread_sig.set()
         self._observation_thread.join()
         self._forwarding_thread.join()
-        
+
     def time_update_from_feed(
         self,
     ) -> int:
