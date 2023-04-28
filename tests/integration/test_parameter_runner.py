@@ -6,7 +6,7 @@ from vega_sim.parameter_test.parameter.configs import CONFIGS
 from vega_sim.scenario.common.utils.price_process import random_walk
 
 
-@pytest.mark.integration
+@pytest.mark.scenarios
 @pytest.mark.parametrize(
     "experiment_to_run",
     [pytest.param(c, id=c.name) for c in CONFIGS],

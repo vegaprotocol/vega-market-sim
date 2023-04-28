@@ -11,7 +11,7 @@ from vega_sim.scenario.constants import Network
 from vega_sim.proto.vega import markets as markets_protos
 
 
-@pytest.mark.integration
+@pytest.mark.scenarios
 @pytest.mark.parametrize(
     "scenario_to_test",
     [pytest.param(SCENARIOS[s](), id=s) for s in SCENARIOS],

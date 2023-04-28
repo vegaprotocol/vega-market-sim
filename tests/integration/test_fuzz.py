@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.integration
+@pytest.mark.fuzzing
 def test_fuzz_run():
     # Simply testing that it doesn't error
     import vega_sim.scenario.fuzzed_markets.run_fuzz_test as fuzz
