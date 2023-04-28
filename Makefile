@@ -94,7 +94,7 @@ flake8:
 
 .PHONY: test
 test:
-	@env PYTHONPATH=. pytest -m "not integration" tests/
+	@env PYTHONPATH=. pytest -m "not (integration or scenarios or fuzzing)" tests/
 
 .PHONY: test_integration
 test_integration:
