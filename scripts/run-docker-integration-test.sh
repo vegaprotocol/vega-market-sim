@@ -14,3 +14,21 @@ docker run \
             -m integration \
             --junitxml /tmp/integration-test-results.xml \
             --log-cli-level INFO 
+
+docker run \
+    --platform linux/amd64 \
+    -v "${RESULT_DIR}:/tmp" \
+    vega_sim_test:latest \
+        pytest -s -v \
+            -m scenarios \
+            --junitxml /tmp/scenario-test-results.xml \
+            --log-cli-level INFO
+
+docker run \
+    --platform linux/amd64 \
+    -v "${RESULT_DIR}:/tmp" \
+    vega_sim_test:latest \
+        pytest -s -v \
+            -m fuzzing \
+            --junitxml /tmp/fuzzing-test-results.xml \
+            --log-cli-level INFO 
