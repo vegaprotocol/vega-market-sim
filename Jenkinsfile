@@ -17,7 +17,7 @@ pipeline {
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
-        string( name: 'NODE_LABEL', defaultValue: 's-8vcpu-16gb',
+        string( name: 'NODE_LABEL', defaultValue: 'system-tests',
                 description: 'Node to run market sims' )
     }
     environment {
@@ -28,7 +28,7 @@ pipeline {
     stages {
         stage('Config') {
             agent {
-                label 's-2vcpu-4gb'
+                label 'system-tests'
             }
             steps {
                 sh 'printenv'
