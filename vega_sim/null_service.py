@@ -801,11 +801,16 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
-        super().stop()
+        self.core_client.stop()
+        self.core_state_client.stop()
+        self.trading_data_client_v2.stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
             self.proc.terminate()
+        if isinstance(self.wallet, SlimWallet):
+            self.wallet.stop()
+        super().stop()
 
     @property
     def wallet_url(self) -> str:

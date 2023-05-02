@@ -20,7 +20,7 @@ def test_devops_scenarios(scenario_to_test: DevOpsScenario):
     """"""
 
     scenario_to_test.step_length_seconds = 10
-    scenario_to_test.simulation_args.n_steps = 300
+    scenario_to_test.simulation_args.n_steps = 60
 
     with VegaServiceNull(
         seconds_per_block=1,

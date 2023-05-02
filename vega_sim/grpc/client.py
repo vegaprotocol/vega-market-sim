@@ -30,6 +30,9 @@ class GRPCClient(ABC):
         self.channel = channel
         self._client = self.STUB_CLASS(self.channel)
 
+    def stop(self):
+        self.channel.close()
+
     def __getattr__(self, funcname):
         return getattr(self._client, funcname)
 
