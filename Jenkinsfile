@@ -13,11 +13,11 @@ pipeline {
         timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: '9ea03e445250aa1321f04953aff175e1bc0e5b4a',
+        string( name: 'VEGA_VERSION', defaultValue: '46583a6dbb7653461e058a38f37dbb6792348530',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
-        string( name: 'NODE_LABEL', defaultValue: 's-8vcpu-16gb',
+        string( name: 'NODE_LABEL', defaultValue: 'system-tests',
                 description: 'Node to run market sims' )
     }
     environment {
@@ -28,7 +28,7 @@ pipeline {
     stages {
         stage('Config') {
             agent {
-                label 's-2vcpu-4gb'
+                label 'system-tests'
             }
             steps {
                 sh 'printenv'

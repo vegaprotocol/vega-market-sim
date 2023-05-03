@@ -2,7 +2,9 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from blockexplorer import blockexplorer_pb2 as blockexplorer_dot_blockexplorer__pb2
+from blockexplorer.api.v1 import (
+    blockexplorer_pb2 as blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2,
+)
 
 
 class BlockExplorerServiceStub(object):
@@ -16,18 +18,18 @@ class BlockExplorerServiceStub(object):
         """
         self.GetTransaction = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/GetTransaction",
-            request_serializer=blockexplorer_dot_blockexplorer__pb2.GetTransactionRequest.SerializeToString,
-            response_deserializer=blockexplorer_dot_blockexplorer__pb2.GetTransactionResponse.FromString,
+            request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionRequest.SerializeToString,
+            response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionResponse.FromString,
         )
         self.ListTransactions = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/ListTransactions",
-            request_serializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
-            response_deserializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
+            request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
+            response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
         )
         self.Info = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/Info",
-            request_serializer=blockexplorer_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
-            response_deserializer=blockexplorer_dot_blockexplorer__pb2.InfoResponse.FromString,
+            request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
+            response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoResponse.FromString,
         )
 
 
@@ -67,18 +69,18 @@ def add_BlockExplorerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
         "GetTransaction": grpc.unary_unary_rpc_method_handler(
             servicer.GetTransaction,
-            request_deserializer=blockexplorer_dot_blockexplorer__pb2.GetTransactionRequest.FromString,
-            response_serializer=blockexplorer_dot_blockexplorer__pb2.GetTransactionResponse.SerializeToString,
+            request_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionRequest.FromString,
+            response_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionResponse.SerializeToString,
         ),
         "ListTransactions": grpc.unary_unary_rpc_method_handler(
             servicer.ListTransactions,
-            request_deserializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsRequest.FromString,
-            response_serializer=blockexplorer_dot_blockexplorer__pb2.ListTransactionsResponse.SerializeToString,
+            request_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsRequest.FromString,
+            response_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsResponse.SerializeToString,
         ),
         "Info": grpc.unary_unary_rpc_method_handler(
             servicer.Info,
-            request_deserializer=blockexplorer_dot_blockexplorer__pb2.InfoRequest.FromString,
-            response_serializer=blockexplorer_dot_blockexplorer__pb2.InfoResponse.SerializeToString,
+            request_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoRequest.FromString,
+            response_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -108,8 +110,8 @@ class BlockExplorerService(object):
             request,
             target,
             "/blockexplorer.api.v1.BlockExplorerService/GetTransaction",
-            blockexplorer_dot_blockexplorer__pb2.GetTransactionRequest.SerializeToString,
-            blockexplorer_dot_blockexplorer__pb2.GetTransactionResponse.FromString,
+            blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionRequest.SerializeToString,
+            blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -137,8 +139,8 @@ class BlockExplorerService(object):
             request,
             target,
             "/blockexplorer.api.v1.BlockExplorerService/ListTransactions",
-            blockexplorer_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
-            blockexplorer_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
+            blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
+            blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -166,8 +168,8 @@ class BlockExplorerService(object):
             request,
             target,
             "/blockexplorer.api.v1.BlockExplorerService/Info",
-            blockexplorer_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
-            blockexplorer_dot_blockexplorer__pb2.InfoResponse.FromString,
+            blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
+            blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoResponse.FromString,
             options,
             channel_credentials,
             insecure,
