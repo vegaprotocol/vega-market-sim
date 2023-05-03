@@ -278,3 +278,19 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     assert len(live_transfers_t3) == 0
     assert party_a_accounts_t3.general == 1000
     assert party_b_accounts_t3.general == 1000
+
+
+@pytest.mark.integration
+def test_estimate_position(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    margin, liquidation = vega.estimate_position(
+        market_id=market_id,
+        open_volume=-1,
+        side=["SIDE_SELL", "SIDE_SELL"],
+        price=[1.01, 1.02],
+        remaining=[1, 1],
+        is_market_order=[False, False],
+        collateral_available=1,
+    )

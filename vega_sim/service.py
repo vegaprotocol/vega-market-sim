@@ -25,6 +25,7 @@ import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 from vega_sim.api.helpers import (
+    get_enum,
     forward,
     num_to_padded_int,
     wait_for_core_catchup,
@@ -2308,4 +2309,94 @@ class VegaService(ABC):
     def get_risk_factors(self, market_id: str):
         return data.get_risk_factors(
             data_client=self.trading_data_client_v2, market_id=market_id
+        )
+
+    def estimate_position(
+        self,
+        market_id: str,
+        open_volume: float,
+        side: List[str] = None,
+        price: List[float] = None,
+        remaining: List[float] = None,
+        is_market_order: List[bool] = None,
+        collateral_available: float = None,
+    ) -> Tuple[data.MarginEstimate, data.LiquidationEstimate]:
+        """
+        Estimates the best and worst case margin requirements and liquidation prices.
+
+        For a given market, position size, and optional list of open orders; method
+        will return a best-case and worst-case estimate for the margin requirements. If
+        the optional collateral_available field is specified, the method will also
+        return a best-case and worst-case estimate for the liquidation price.
+
+        Args:
+            self: The object instance.
+            market_id (str): The ID of the market.
+            open_volume (float): The open volume to estimate the position for.
+            side (List[str], optional): List of order sides. Defaults to None.
+            price (List[float], optional): List of order prices. Defaults to None.
+            remaining (List[float], optional): List of order sizes. Defaults to None.
+            is_market_order (List[bool], optional): List of flags defining whether an
+                order is a market order. Defaults to None.
+            collateral_available (float, optional): The amount of available collateral.
+                Defaults to None.
+
+        Returns:
+            Tuple[data.MarginEstimate, data.LiquidationEstimate]: A tuple containing a
+                MarginEstimate dataclass and a LiquidationEstimate dataclass. If no
+                available collateral was specified the LiquidationEstimate fields will
+                all be zero.
+
+        Raises:
+            ValueError: If any of the order info fields are given, all order info fields
+                must be given.
+        """
+
+        # If any order info field is given, all order info fields must be given
+        if any([field is not None for field in [price, remaining, is_market_order]]):
+            if any([field is None for field in [price, remaining, is_market_order]]):
+                raise ValueError(
+                    "All order info fields must be given if at least one is given"
+                )
+            # No exception so handle conversion
+            padded_int_prices = [
+                str(
+                    num_to_padded_int(
+                        individual_price, self.market_price_decimals[market_id]
+                    )
+                )
+                for individual_price in price
+            ]
+            padded_int_remaining = [
+                num_to_padded_int(
+                    individual_remaining, self.market_price_decimals[market_id]
+                )
+                for individual_remaining in remaining
+            ]
+            enum_side = [
+                get_enum(individual_side, vega_protos.vega.Side)
+                for individual_side in side
+            ]
+            orders = list(
+                zip(enum_side, padded_int_prices, padded_int_remaining, is_market_order)
+            )
+        else:
+            orders = None
+
+        return data.estimate_position(
+            data_client=self.trading_data_client_v2,
+            market_id=market_id,
+            open_volume=num_to_padded_int(
+                open_volume, decimals=self.market_pos_decimals[market_id]
+            ),
+            orders=orders,
+            collateral_available=str(
+                num_to_padded_int(
+                    collateral_available,
+                    self.asset_decimals[self.market_to_asset[market_id]],
+                )
+            )
+            if collateral_available is not None
+            else None,
+            asset_decimals=self.asset_decimals,
         )
