@@ -20,3 +20,14 @@ def price_state_with_fees_obs_space(
         ),
         dtype=np.float64,
     )
+
+
+def position_state_with_fees_obs_space(
+    min_position: float = -1000,
+    max_position: float = 1000,
+) -> gym.spaces.Box:
+    return gym.spaces.Box(
+        low=np.array([min_position]),
+        high=np.array([max_position]),
+        dtype=np.float64,
+    )

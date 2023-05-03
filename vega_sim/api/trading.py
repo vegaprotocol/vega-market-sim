@@ -240,7 +240,7 @@ def cancel_order(
     wallet_name: str,
     wallet: Wallet,
     market_id: str,
-    order_id: str,
+    order_id: Optional[str],
     key_name: Optional[str] = None,
 ):
     """

@@ -18,7 +18,7 @@ from vega_sim.tools.scenario_plots import (
 from matplotlib import pyplot as plt
 
 
-def _run(steps: int = 2880, output: bool = False):
+def _run(steps: int = 2880, output: bool = False)
     scenario = FuzzingScenario(
         num_steps=steps,
         step_length_seconds=30,
