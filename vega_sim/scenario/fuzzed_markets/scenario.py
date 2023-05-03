@@ -89,7 +89,7 @@ def _create_price_process(
 ):
     price_process = [1500]
 
-    while len(price_process) < num_steps:
+    while len(price_process) < num_steps + 1:
         # Add a stable price-process with a random duration of 5-20% of the sim
         price_process = np.concatenate(
             (
