@@ -4,7 +4,7 @@ import datetime
 import logging
 from collections import namedtuple
 from functools import wraps
-from typing import Callable, Iterable, List, Optional, TypeVar, Union
+from typing import Callable, Iterable, List, Optional, TypeVar, Union, Tuple
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -634,3 +634,29 @@ def get_risk_factors(
     return data_client.GetRiskFactors(
         data_node_protos_v2.trading_data.GetRiskFactorsRequest(market_id=market_id)
     )
+
+
+@_retry(3)
+def estimate_position(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    open_volume: int,
+    orders: Optional[List[data_node_protos_v2.trading_data.OrderInfo]] = None,
+    collateral_available: Optional[str] = None,
+) -> Tuple[
+    data_node_protos_v2.trading_data.MarginEstimate,
+    data_node_protos_v2.trading_data.LiquidationEstimate,
+]:
+    base_request = data_node_protos_v2.trading_data.EstimatePositionRequest(
+        market_id=market_id,
+        open_volume=open_volume,
+    )
+
+    if orders is not None:
+        [base_request.orders.append(order) for order in orders]
+    if collateral_available is not None:
+        setattr(base_request, "collateral_available", collateral_available)
+
+    response = data_client.EstimatePosition(base_request)
+
+    return response.margin, response.liquidation
