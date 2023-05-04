@@ -2,7 +2,7 @@ import logging
 
 import gymnasium as gym
 from gymnasium import spaces
-from typing import Type
+from typing import Type, Optional
 from enum import Enum
 from stable_baselines3.common.callbacks import BaseCallback
 
@@ -13,7 +13,7 @@ from vega_sim.reinforcement.v2.agents.puppets import (
     AGENT_TYPE_TO_ACTION,
 )
 from vega_sim.reinforcement.v2.learning_environment import Environment
-from vega_sim.reinforcement.v2.rewards import Reward
+from vega_sim.reinforcement.v2.rewards import Reward, REWARD_ENUM_TO_CLASS
 from vega_sim.reinforcement.v2.stable_baselines.states import (
     price_state_with_fees_obs_space,
     position_state_with_fees_obs_space,
@@ -53,6 +53,7 @@ class SingleAgentVegaEnv(gym.Env):
         num_levels_state: int = 5,
         trade_volume: float = 1,
         steps_per_trading_session: int = 1000,
+        terminal_reward_type: Optional[Reward] = None,
     ):
         super().__init__()
         self.num_levels_state = num_levels_state
@@ -62,6 +63,7 @@ class SingleAgentVegaEnv(gym.Env):
         self.steps_per_trading_session = steps_per_trading_session
         self.current_step = 0
         self.learner_name = "learner_1"
+        self.terminal_reward_type = terminal_reward_type
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -79,6 +81,7 @@ class SingleAgentVegaEnv(gym.Env):
             initial_asset_mint=1e8,
             step_length_seconds=1,
             block_length_seconds=1,
+            # market_maker_assumed_market_kappa=0.8,
             buy_intensity=5,
             sell_intensity=5,
             market_name="ETH",
@@ -127,10 +130,22 @@ class SingleAgentVegaEnv(gym.Env):
         )[self.learner_name]
         self.current_step += 1
 
+        is_terminal = self.current_step >= self.steps_per_trading_session
+
+        if is_terminal and self.terminal_reward_type is not None:
+            terminal_reward = REWARD_ENUM_TO_CLASS[self.terminal_reward_type](
+                agent_key=self.learner_name,
+                asset_id=self.env._asset_id,
+                market_id=self.env._market_id,
+            )
+            reward = step_res.reward + self.env.calculate_reward(terminal_reward)
+        else:
+            reward = step_res.reward
+
         return (
             step_res.observation.to_array(),
-            step_res.reward,
-            self.current_step >= self.steps_per_trading_session,
+            reward,
+            is_terminal,
             False,
             {},
         )

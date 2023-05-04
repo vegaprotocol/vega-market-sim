@@ -110,11 +110,7 @@ class AtTouchPuppet(Puppet):
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
     def step(self, vega_state: VegaState):
-        if (
-            self.action is not None
-            and self.action is not NoAction
-            and self.action.side != Side.NONE
-        ):
+        if self.action is not None and self.action is not NoAction:
             try:
                 self.vega.cancel_order(
                     trading_key=self.key_name, market_id=self.market_id
@@ -122,14 +118,18 @@ class AtTouchPuppet(Puppet):
                 self.vega.submit_order(
                     trading_key=self.key_name,
                     market_id=self.market_id,
-                    side=("SIDE_BUY" if self.action.side == Side.BUY else "SIDE_SELL"),
+                    side=(
+                        "SIDE_BUY"
+                        if self.action.side == ForcedSide.BUY
+                        else "SIDE_SELL"
+                    ),
                     volume=self.action.volume,
                     time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
                     order_type=vega_protos.vega.Order.Type.TYPE_LIMIT,
                     pegged_order=PeggedOrder(
                         reference=(
                             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID
-                            if self.action.side == Side.BUY
+                            if self.action.side == ForcedSide.BUY
                             else vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK
                         ),
                         offset=0,

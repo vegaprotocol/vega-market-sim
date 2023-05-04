@@ -74,9 +74,12 @@ class Environment:
         for agent_name, reward_gen in self._agent_to_reward.items():
             step_res[agent_name] = StepResult(
                 observation=self._extract_observation(agent_name),
-                reward=reward_gen.get_reward(self._vega),
+                reward=self.calculate_reward(reward_gen),
             )
         return step_res
+
+    def calculate_reward(self, rewarder: Type[BaseRewarder]) -> float:
+        return rewarder.get_reward(vega=self._vega)
 
     def _reset_vega(self) -> None:
         self._vega.stop()
