@@ -1,6 +1,8 @@
 import pytest
-
+import logging
+from collections import namedtuple
 import vega_sim.proto.vega as vega_protos
+
 from tests.integration.utils.fixtures import (
     ASSET_NAME,
     WalletConfig,
@@ -57,6 +59,21 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
 
 @pytest.mark.integration
 def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
+    WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
+
+    MM_WALLET = WalletConfig("mm", "pin")
+
+    PARTY_A_WALLET = WalletConfig("auction1", "auction1")
+    PARTY__WALLET = WalletConfig("auction2", "auction2")
+
+    TERMINATE_WALLET = WalletConfig("TERMINATE", "TERMINATE")
+
+    TRADER_WALLET = WalletConfig("TRADER", "TRADER")
+
+    ASSET_NAME = "tDAI"
+
+    WALLETS = [MM_WALLET, PARTY_A_WALLET, PARTY_B_WALLET, TERMINATE_WALLET, TRADER_WALLET]
+
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
@@ -294,3 +311,154 @@ def test_estimate_position(vega_service_with_market: VegaServiceNull):
         is_market_order=[False, False],
         collateral_available=1,
     )
+
+@pytest.mark.integration
+def test_liquidation_and_estimate_position(vega_service_with_market: VegaServiceNull):
+
+    vega = vega_service_with_market
+    WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
+
+    MM_WALLET = WalletConfig("mm", "pin")
+
+    PARTY_A_WALLET = WalletConfig("PARTY_A", "pin")
+    PARTY_B_WALLET = WalletConfig("PARTY_A", "pin")
+
+    TERMINATE_WALLET = WalletConfig("TERMINATE", "TERMINATE")
+
+    LIQ_WALLET = WalletConfig("LIQ", "TRADER")
+
+    ASSET_NAME = "tDAI"
+
+    WALLETS = [MM_WALLET, PARTY_A_WALLET, PARTY_B_WALLET, TERMINATE_WALLET, LIQ_WALLET]
+
+    # vega: VegaServiceNull,
+    mint_amount = 10000
+    initial_price = 100
+    initial_volume = 10
+    initial_spread = 10
+    initial_commitment = 1000
+
+    vega.wait_for_total_catchup()
+    for wallet in WALLETS:
+        vega.create_key(wallet.name)
+
+    vega.wait_for_total_catchup()
+    vega.mint(
+        MM_WALLET.name,
+        asset="VOTE",
+        amount=1e4,
+    )
+    vega.forward("10s")
+
+    # Create asset
+    vega.create_asset(
+        MM_WALLET.name,
+        name=ASSET_NAME,
+        symbol=ASSET_NAME,
+        decimals=5,
+        max_faucet_amount=10 * mint_amount * 1e5,
+    )
+    vega.forward("10s")
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
+
+    for wallet in WALLETS:
+        vega.mint(
+            wallet.name,
+            asset=asset_id,
+            amount=mint_amount,
+        )
+    vega.forward("10s")
+    vega.create_simple_market(
+        market_name="CRYPTO:BTCDAI/DEC22",
+        proposal_key=MM_WALLET.name,
+        settlement_asset_id=asset_id,
+        termination_key=TERMINATE_WALLET.name,
+        market_decimals=5,
+    )
+
+    market_id = vega.all_markets()[0].id
+
+    vega.submit_liquidity(
+        key_name=MM_WALLET.name,
+        market_id=market_id,
+        commitment_amount=initial_commitment,
+        fee=0.002,
+        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        is_amendment=False,
+    )
+    # Add transactions in the proposed market to pass opening auction at price 1000
+    vega.submit_order(
+        trading_key=PARTY_A_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=800,
+        volume=initial_volume,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_A_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=1000,
+        volume=initial_volume,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_B_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1000,
+        volume=initial_volume,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_B_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1200,
+        volume=initial_volume,
+    )
+    vega.wait_for_total_catchup()
+
+    #Check order status/ market state after amend
+    print(vega.get_latest_market_data(market_id=market_id))
+
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
+        market_id=market_id,
+        open_volume=1,
+        side=["SIDE_SELL", "SIDE_SELL"],
+        price=[1.01, 1.02],
+        remaining=[1, 1],
+        is_market_order=[False, False],
+        collateral_available=1,
+    )
+
+    market_info = vega.market_info(market_id=market_id)
+    linear_slippage_factor = market_info.linear_slippage_factor
+    quadratic_slippage_factor = market_info.quadratic_slippage_factor
+#     logging.info(
+#             f"linear slippage factor = {linear_slippage_factor}"
+#         )
+    print(f"linear slippage factor = {linear_slippage_factor}")
+    print(f"quadratic slippage factor = {quadratic_slippage_factor}")
+    # assert estimate_margin_open_vol_only.best_case.maintenance_margin == 1
+    input("wait")
+
+
+
+
+
