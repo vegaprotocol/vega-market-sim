@@ -210,7 +210,7 @@ class TargetStakeParameters(Config):
     OPTS = {
         "default": {
             "time_window": 60 * 60,
-            "scaling_factor": 1e-4,
+            "scaling_factor": 1,
         }
     }
 

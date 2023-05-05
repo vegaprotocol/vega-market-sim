@@ -191,6 +191,10 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed market config
             market_config = MarketConfig()
+            market_config.set(
+                "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+                1e-4,
+            )
             if self.fuzz_market_config is not None:
                 for param in self.fuzz_market_config:
                     market_config.set(param=self.fuzz_market_config[param])
