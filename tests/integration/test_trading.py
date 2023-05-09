@@ -314,22 +314,16 @@ def test_estimate_position(vega_service_with_market: VegaServiceNull):
 
 @pytest.mark.integration
 def test_liquidation_and_estimate_position(vega_service_with_market: VegaServiceNull):
-
     vega = vega_service_with_market
     WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
     MM_WALLET = WalletConfig("mm", "pin")
-
-    PARTY_A_WALLET = WalletConfig("PARTY_A", "pin")
-    PARTY_B_WALLET = WalletConfig("PARTY_A", "pin")
-
+    PARTY_A = WalletConfig("party_a", "party_a")
+    PARTY_B = WalletConfig("party_b", "party_b")
     TERMINATE_WALLET = WalletConfig("TERMINATE", "TERMINATE")
-
     LIQ_WALLET = WalletConfig("LIQ", "TRADER")
-
     ASSET_NAME = "tDAI"
-
-    WALLETS = [MM_WALLET, PARTY_A_WALLET, PARTY_B_WALLET, TERMINATE_WALLET, LIQ_WALLET]
+    WALLETS = [MM_WALLET, PARTY_A, PARTY_B, TERMINATE_WALLET, LIQ_WALLET]
 
     # vega: VegaServiceNull,
     mint_amount = 10000
@@ -337,6 +331,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
     initial_volume = 10
     initial_spread = 10
     initial_commitment = 1000
+    collateral_available = 1
 
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
@@ -385,13 +380,13 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
+        buy_specs=[("PEGGED_REFERENCE_MID", 50, 1)],
+        sell_specs=[("PEGGED_REFERENCE_MID",50, 1)],
         is_amendment=False,
     )
     # Add transactions in the proposed market to pass opening auction at price 1000
     vega.submit_order(
-        trading_key=PARTY_A_WALLET.name,
+        trading_key=PARTY_A.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -401,7 +396,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
     )
 
     vega.submit_order(
-        trading_key=PARTY_A_WALLET.name,
+        trading_key=PARTY_A.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -411,7 +406,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
     )
 
     vega.submit_order(
-        trading_key=PARTY_B_WALLET.name,
+        trading_key=PARTY_B.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -421,7 +416,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
     )
 
     vega.submit_order(
-        trading_key=PARTY_B_WALLET.name,
+        trading_key=PARTY_B.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -430,32 +425,60 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
         volume=initial_volume,
     )
     vega.wait_for_total_catchup()
-
-    #Check order status/ market state after amend
+    vega.wait_fn(1)
+    #Check order status/ market state 
     print(vega.get_latest_market_data(market_id=market_id))
 
-    vega.wait_fn(1)
-    vega.wait_for_total_catchup()
+    market_info = vega.market_info(market_id=market_id)
+    linear_slippage_factor = float(market_info.linear_slippage_factor)
+    quadratic_slippage_factor = float(market_info.quadratic_slippage_factor)
+    market_data = vega.get_latest_market_data(market_id=market_id)
+    markprice = market_data.mark_price
 
     estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
-        market_id=market_id,
+        market_id,
         open_volume=1,
         side=["SIDE_SELL", "SIDE_SELL"],
         price=[1.01, 1.02],
         remaining=[1, 1],
         is_market_order=[False, False],
-        collateral_available=1,
+        collateral_available=collateral_available,
     )
 
-    market_info = vega.market_info(market_id=market_id)
-    linear_slippage_factor = market_info.linear_slippage_factor
-    quadratic_slippage_factor = market_info.quadratic_slippage_factor
-#     logging.info(
-#             f"linear slippage factor = {linear_slippage_factor}"
-#         )
-    print(f"linear slippage factor = {linear_slippage_factor}")
-    print(f"quadratic slippage factor = {quadratic_slippage_factor}")
-    # assert estimate_margin_open_vol_only.best_case.maintenance_margin == 1
+    position = namedtuple(
+    "position",
+    [
+        "party_id",
+        "market_id",
+        "open_volume",
+        "realised_pnl",
+        "unrealised_pnl",
+        "average_entry_price",
+        "updated_at",
+        "loss_socialisation_amount",
+    ],
+    )
+    position = vega.positions_by_market(
+        key_name=PARTY_A.name,
+        market_id=market_id,
+    )
+    open_volume = int(position.open_volume) if position is not None else 0
+    risk_factors = vega.get_risk_factors(market_id=market_id)
+    risk_factor = (
+        risk_factors.long if open_volume > 0 else risk_factors.short
+    )
+
+    # print(f"collateral_available = {collateral_available}", type(collateral_available))
+    # print(f"open_volume = {open_volume}", type(open_volume))
+    # print(f"mark_price = {markprice}", type(markprice))
+    # print(f"risk factor = {risk_factor}", type(risk_factor))
+    # print(f"linear slippage factor = {linear_slippage_factor}", type(linear_slippage_factor))
+    # print(f"quadratic slippage factor = {quadratic_slippage_factor}", type(quadratic_slippage_factor))
+    liquidation_price = (collateral_available - open_volume * markprice)/(open_volume * linear_slippage_factor + open_volume**2 * quadratic_slippage_factor + open_volume * risk_factor - open_volume)
+    print(f"liquidation_price = {liquidation_price}")
+
+    #0012-NP-LIPE-001: An estimate is obtained for a long position with no open orders, mark price keeps going down in small increments and the actual liquidation takes place within the estimated range. 
+    assert estimate_liquidation_price_open_vol_only.best_case == liquidation_price
     input("wait")
 
 
