@@ -494,7 +494,7 @@ class TradingDataServiceServicer(object):
     def GetOrder(self, request, context):
         """Get order
 
-        Get the current version of an order, or optionally provide a version ID to retrieve a given version if order was amended.
+        Get an order by its ID. An order's ID will be the SHA3-256 hash of the signature that the order was submitted with
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -540,7 +540,7 @@ class TradingDataServiceServicer(object):
     def ListAllPositions(self, request, context):
         """List positions
 
-        Get a list of positions by party's public key using cursor based pagination
+        Get a list of all of a party's positions
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -549,7 +549,8 @@ class TradingDataServiceServicer(object):
     def ObservePositions(self, request, context):
         """Observe positions
 
-        Subscribe to a stream of positions
+        Subscribe to a stream of position updates. The first messages sent through the stream will contain
+        information about current positions, followed by updates to those positions.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -594,16 +595,6 @@ class TradingDataServiceServicer(object):
         """List balance changes
 
         Get a list of the changes in account balances over a period of time.
-
-        An account is defined as a set of asset_id, type, party_id, and market_id.
-        - Every account has an associated asset and type.
-        - Certain account types such as the global reward pool for example, do not have an associated party.
-        These are denoted by the special party ID 'network'
-        - Certain account types do not have an associated market such as the general party accounts, for example.
-        These are denoted by the special market ID '' (the empty string)
-
-        `ListBalanceChangesRequest` will return a list of `AggregatedBalance` records,
-        with a row for each block at which a given account's balance changes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -666,7 +657,7 @@ class TradingDataServiceServicer(object):
     def GetMarketDataHistoryByID(self, request, context):
         """Get market data history
 
-        Get market data history for a market ID between given dates
+        Get market data history for a market ID from between a given date range
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -675,7 +666,10 @@ class TradingDataServiceServicer(object):
     def ListTransfers(self, request, context):
         """List transfers
 
-        Get a list of transfers to/from/either a public key
+        Get a list of transfers between public keys. A valid value for public key can be one of:
+        - a party ID
+        - "network"
+        - "0000000000000000000000000000000000000000000000000000000000000000", the public key for the global rewards account
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -684,7 +678,7 @@ class TradingDataServiceServicer(object):
     def GetNetworkLimits(self, request, context):
         """Get network limits
 
-        Get the current network limits, for example: is bootstrapping finished, are proposals enabled etc.
+        Get the network limits relating to asset and market creation
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -693,7 +687,7 @@ class TradingDataServiceServicer(object):
     def ListCandleData(self, request, context):
         """List candle data
 
-        Get a list of candle data for a given candle ID. You can get a candle ID from the list candle intervals query
+        Get a list of candle data for a given candle ID. Candle IDs can be obtained by calling list-candle-intervals
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -720,7 +714,7 @@ class TradingDataServiceServicer(object):
     def ListVotes(self, request, context):
         """List votes
 
-        Get a list of votes for a party ID
+        Get a list of votes. A party ID or a proposal ID must be provided.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -729,7 +723,7 @@ class TradingDataServiceServicer(object):
     def ObserveVotes(self, request, context):
         """Observe votes
 
-        Subscribe to a stream of votes
+        Subscribe to a stream of votes cast on a given proposal, or by all votes made by a given party
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -775,16 +769,16 @@ class TradingDataServiceServicer(object):
     def GetERC20WithdrawalApproval(self, request, context):
         """Get ERC20 withdrawal approval
 
-        Get the signature bundle to finalize a withdrawal on ethereum
+        Get the signature bundle to finalise a withdrawal on Ethereum
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetLastTrade(self, request, context):
-        """Get latest trade
+        """Get last trade
 
-        Get latest trade
+        Get the last trade made for a given market.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -811,7 +805,7 @@ class TradingDataServiceServicer(object):
     def GetOracleSpec(self, request, context):
         """Get oracle spec
 
-        Get an oracle spec by ID. Use the oracle spec list to query for oracle spec IDs
+        Get an oracle spec by ID. Oracle spec IDs can be found by querying markets that use them as a data source
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -820,7 +814,7 @@ class TradingDataServiceServicer(object):
     def ListOracleSpecs(self, request, context):
         """List oracle specs
 
-        Get a list of specs for an oracle
+        Get a list of all oracles specs that are defined against all markets
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -829,7 +823,7 @@ class TradingDataServiceServicer(object):
     def ListOracleData(self, request, context):
         """List oracle data
 
-        Get a list of all oracle data
+        Get a list of all oracle data that have been broadcast to any market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -838,7 +832,8 @@ class TradingDataServiceServicer(object):
     def GetMarket(self, request, context):
         """Get market
 
-        Get information about a specific market using its ID. Use the market lists query to get a market's ID
+        Get information about a specific market using its ID. A market's ID will be the same as the ID of the proposal that
+        generated it
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -847,7 +842,7 @@ class TradingDataServiceServicer(object):
     def ListMarkets(self, request, context):
         """List markets
 
-        Get a list of markets using a cursor based pagination
+        Get a list of markets
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -865,7 +860,7 @@ class TradingDataServiceServicer(object):
     def ListParties(self, request, context):
         """List parties
 
-        Get a list of parties. If a party ID is provided, only that party will be returned.
+        Get a list of parties
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -883,7 +878,7 @@ class TradingDataServiceServicer(object):
     def ObserveMarginLevels(self, request, context):
         """Observe margin levels
 
-        Subscribe to a stream of margin levels
+        Subscribe to a stream of margin levels updates
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -944,7 +939,7 @@ class TradingDataServiceServicer(object):
     def GetWithdrawal(self, request, context):
         """Get withdrawal
 
-        Get a withdrawal by its ID. Use the withdrawals list query to get withdrawal IDs
+        Get a withdrawal by its ID. A withdrawal's ID will be the SHA3-256 hash of the signature that the withdrawal was submitted with
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -971,7 +966,7 @@ class TradingDataServiceServicer(object):
     def ListAssets(self, request, context):
         """List assets
 
-        Get a list of assets using cursor based pagination
+        Get a list of assets available on the Vega network
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -980,7 +975,7 @@ class TradingDataServiceServicer(object):
     def ListLiquidityProvisions(self, request, context):
         """List liquidity provisions
 
-        Get a list of liquidity provisions for a given market using a cursor based pagination
+        Get a list of liquidity provisions for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -998,7 +993,7 @@ class TradingDataServiceServicer(object):
     def GetGovernanceData(self, request, context):
         """Get governance data
 
-        Get a single proposal's details
+        Get a single proposal's details either by proposal ID or by reference
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1016,7 +1011,7 @@ class TradingDataServiceServicer(object):
     def ObserveGovernance(self, request, context):
         """Observe governance
 
-        Subscribe to a stream of governance proposals
+        Subscribe to a stream of updates to governance proposals
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1108,7 +1103,7 @@ class TradingDataServiceServicer(object):
     def ListNetworkParameters(self, request, context):
         """List network parameters
 
-        Get a list of the network parameters
+        Get a list of the network parameter keys and their values
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1117,7 +1112,7 @@ class TradingDataServiceServicer(object):
     def GetNetworkParameter(self, request, context):
         """Get network parameter
 
-        Get a single network parameter
+        Get a network parameter's value by its key
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1133,7 +1128,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetStake(self, request, context):
-        """Get Stake
+        """Get stake
 
         Get staking information for a given party
         """
@@ -1189,7 +1184,7 @@ class TradingDataServiceServicer(object):
     def GetVegaTime(self, request, context):
         """Get Vega time
 
-        Get the current time of the network, displayed as a Unix timestamp in nano seconds
+        Get the current time of the network in Unix nanoseconds
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1259,8 +1254,7 @@ class TradingDataServiceServicer(object):
     def GetNetworkHistoryStatus(self, request, context):
         """Network history status
 
-        Get information about the current state of network history
-        Response contains the network history status
+        Get information about the current state of network history's IPFS swarm
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1269,8 +1263,7 @@ class TradingDataServiceServicer(object):
     def GetNetworkHistoryBootstrapPeers(self, request, context):
         """Network history bootstrap peers
 
-        Get the bootstrap peers for data nodes.
-        Response contains the bootstrap peers
+        Get a list of IPFS peers that can be used to initialise a new data node with network history
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1296,7 +1289,7 @@ class TradingDataServiceServicer(object):
         would all fall on segment boundaries and be valid.
 
         The generated CSV file is compressed into a ZIP file and returned, with the file name
-        in the following format: [chain id]-[table name]-[start block]-[end block].zip
+        in the following format: `[chain id]-[table name]-[start block]-[end block].zip`
 
         In gRPC, results are returned in a chunked stream of base64 encoded data.
 
@@ -1329,17 +1322,17 @@ class TradingDataServiceServicer(object):
         file will contain multiple CSV files, with a potentially different set of headers. The
         'version' number of the database schema is part of the in the CSV filename:
 
-        [chain id]-[table name]-[schema version]-[start block]-[end block].zip
+        `[chain id]-[table name]-[schema version]-[start block]-[end block].zip`
 
         For example, a zip file might be called mainnet-sometable-000001-003000.zip
 
-        And contain two CSV files: mainnet-sometable-1-000001-002000.csv:
+        And contain two CSV files: `mainnet-sometable-1-000001-002000.csv`:
 
         timestamp, value
         1, foo
         2, bar
 
-        And mainnet-sometable-2-002001-003000.csv:
+        And `mainnet-sometable-2-002001-003000.csv`:
 
         timestamp, value, extra_value
         3, baz, apple

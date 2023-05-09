@@ -61,7 +61,7 @@
       "replay_attack_threshold": 150
     },
     "network_parameters": {
-      "blockchains.ethereumConfig": "{\"network_id\": \"3\", \"chain_id\": \"3\", \"collateral_bridge_contract\": { \"address\": \"0xa6F1E140daC13002Dfd9789D6dBA59117c717D7a\" }, \"confirmations\": 50, \"staking_bridge_contract\": { \"address\": \"0xfce2CC92203A266a9C8e67461ae5067c78f67235\", \"deployment_block_height\": 11001702}, \"multisig_control_contract\": {\"address\": \"0xCF6d41235911184fe6F35D47207813bFF3B91601\", \"deployment_block_height\": 12710009 } }"
+      "blockchains.ethereumConfig": "{\"network_id\": \"3\", \"chain_id\": \"3\", \"collateral_bridge_contract\": { \"address\": \"0xa6F1E140daC13002Dfd9789D6dBA59117c717D7a\" }, \"confirmations\": 50, \"staking_bridge_contract\": { \"address\": \"0xfce2CC92203A266a9C8e67461ae5067c78f67235\", \"deployment_block_height\": 11001702}, \"multisig_control_contract\": {\"address\": \"0xCF6d41235911184fe6F35D47207813bFF3B91601\", \"deployment_block_height\": 12710009 } }",
       "governance.proposal.asset.maxClose": "8760h0m0s",
       "governance.proposal.asset.maxEnact": "8760h0m0s",
       "governance.proposal.asset.minClose": "1s",
@@ -86,10 +86,10 @@
       "governance.proposal.market.requiredParticipation": "0.00001",
       "governance.proposal.updateAsset.maxClose": "720h",
       "governance.proposal.updateAsset.maxEnact": "720h",
-      "governance.proposal.updateAsset.minClose": "168h",
-      "governance.proposal.updateAsset.minEnact": "168h",
-      "governance.proposal.updateAsset.minProposerBalance": "20000000000000000000000",
-      "governance.proposal.updateAsset.minVoterBalance": "1000000000000000000",
+      "governance.proposal.updateAsset.minClose": "1s",
+      "governance.proposal.updateAsset.minEnact": "1s",
+      "governance.proposal.updateAsset.minProposerBalance": "1",
+      "governance.proposal.updateAsset.minVoterBalance": "1",
       "governance.proposal.updateAsset.requiredMajority": "0.66",
       "governance.proposal.updateAsset.requiredParticipation": "0.09",
       "governance.proposal.updateMarket.maxClose": "8760h0m0s",
@@ -111,9 +111,7 @@
       "governance.proposal.updateNetParam.minVoterBalance": "1",
       "governance.proposal.updateNetParam.requiredMajority": "0.5",
       "governance.proposal.updateNetParam.requiredParticipation": "0.00001",
-      "limits.assets.proposeEnabledFrom": "2100-12-30T00:00:00Z",
       "limits.markets.maxPeggedOrders": "1500",
-      "limits.markets.proposeEnabledFrom": "2100-12-30T00:00:00Z",
       "market.auction.maximumDuration": "168h",
       "market.auction.minimumDuration": "1s",
       "market.fee.factors.infrastructureFee": "0.0005",
