@@ -298,8 +298,8 @@ def test_estimate_position(vega_service_with_market: VegaServiceNull):
     )
 
 @pytest.mark.integration
-def test_liquidation_and_estimate_position(vega_service_with_market: VegaServiceNull):
-    vega = vega_service_with_market
+def test_liquidation_and_estimate_position(vega_service: VegaServiceNull):
+    vega = vega_service
     WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
     MM_WALLET = WalletConfig("mm", "pin")
@@ -314,7 +314,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
     mint_amount = 10000
     initial_volume = 10
     initial_commitment = 1000
-    collateral_available = 1
+    collateral_available = 1000
 
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
@@ -333,7 +333,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
         MM_WALLET.name,
         name=ASSET_NAME,
         symbol=ASSET_NAME,
-        decimals=1,
+        decimals=0,
         max_faucet_amount=10 * mint_amount * 1e5,
     )
     vega.forward("10s")
@@ -350,10 +350,11 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
     vega.forward("10s")
     vega.create_simple_market(
         market_name="CRYPTO:BTCDAI/DEC22",
+        # market_name = vega.find_market_id,
         proposal_key=MM_WALLET.name,
         settlement_asset_id=asset_id,
         termination_key=TERMINATE_WALLET.name,
-        market_decimals=1,
+        market_decimals=0,
     )
 
     market_id = vega.all_markets()[0].id
@@ -420,9 +421,9 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
 
     estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
         market_id,
-        open_volume=1,
-        side=["SIDE_SELL", "SIDE_SELL"],
-        price=[1.01, 1.02],
+        open_volume=10,
+        side=["SIDE_BUY"],
+        price=[800],
         remaining=[1, 1],
         is_market_order=[False, False],
         collateral_available=collateral_available,
@@ -451,18 +452,12 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
         risk_factors.long if open_volume > 0 else risk_factors.short
     )
 
-    # print(f"collateral_available = {collateral_available}", type(collateral_available))
-    # print(f"open_volume = {open_volume}", type(open_volume))
-    # print(f"mark_price = {markprice}", type(markprice))
-    # print(f"risk factor = {risk_factor}", type(risk_factor))
-    # print(f"linear slippage factor = {linear_slippage_factor}", type(linear_slippage_factor))
-    # print(f"quadratic slippage factor = {quadratic_slippage_factor}", type(quadratic_slippage_factor))
     liquidation_price = (collateral_available - open_volume * markprice)/(open_volume * linear_slippage_factor + open_volume**2 * quadratic_slippage_factor + open_volume * risk_factor - open_volume)
     print(f"liquidation_price = {liquidation_price}")
 
     #0012-NP-LIPE-001: An estimate is obtained for a long position with no open orders, mark price keeps going down in small increments and the actual liquidation takes place within the estimated range. 
-    assert estimate_liquidation_price_open_vol_only.best_case == liquidation_price
-    input("wait")
+    assert estimate_liquidation_price_open_vol_only.worst_case.open_volume_only== liquidation_price
+    #input("wait")
 
 
 
