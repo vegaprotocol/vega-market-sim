@@ -59,21 +59,6 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
 
 @pytest.mark.integration
 def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
-    WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
-
-    MM_WALLET = WalletConfig("mm", "pin")
-
-    PARTY_A_WALLET = WalletConfig("auction1", "auction1")
-    PARTY__WALLET = WalletConfig("auction2", "auction2")
-
-    TERMINATE_WALLET = WalletConfig("TERMINATE", "TERMINATE")
-
-    TRADER_WALLET = WalletConfig("TRADER", "TRADER")
-
-    ASSET_NAME = "tDAI"
-
-    WALLETS = [MM_WALLET, PARTY_A_WALLET, PARTY_B_WALLET, TERMINATE_WALLET, TRADER_WALLET]
-
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
@@ -327,9 +312,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
 
     # vega: VegaServiceNull,
     mint_amount = 10000
-    initial_price = 100
     initial_volume = 10
-    initial_spread = 10
     initial_commitment = 1000
     collateral_available = 1
 
@@ -350,7 +333,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
         MM_WALLET.name,
         name=ASSET_NAME,
         symbol=ASSET_NAME,
-        decimals=5,
+        decimals=1,
         max_faucet_amount=10 * mint_amount * 1e5,
     )
     vega.forward("10s")
@@ -370,7 +353,7 @@ def test_liquidation_and_estimate_position(vega_service_with_market: VegaService
         proposal_key=MM_WALLET.name,
         settlement_asset_id=asset_id,
         termination_key=TERMINATE_WALLET.name,
-        market_decimals=5,
+        market_decimals=1,
     )
 
     market_id = vega.all_markets()[0].id
