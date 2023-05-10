@@ -2369,7 +2369,7 @@ class VegaService(ABC):
             ]
             padded_int_remaining = [
                 num_to_padded_int(
-                    individual_remaining, self.market_price_decimals[market_id]
+                    individual_remaining, self.market_pos_decimals[market_id]
                 )
                 for individual_remaining in remaining
             ]
