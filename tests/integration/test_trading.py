@@ -477,7 +477,7 @@ def test_liquidation_and_estimate_position_calculation(vega_service: VegaService
 
    
 @pytest.mark.integration
-def test_liquidation_price_witin_estimate_position_bounds(vega_service: VegaServiceNull):
+def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: VegaServiceNull):
     vega = vega_service
     PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
     WALLET_NAME = "vega"
@@ -527,7 +527,7 @@ def test_liquidation_price_witin_estimate_position_bounds(vega_service: VegaServ
         f"Trader B Party: public_key = {vega.wallet.public_key(name=TRADER_B.key_name, wallet_name=TRADER_B.wallet_name)}"
     )
 
-    # Open positions for traders
+    #0012-NP-LIPE-002: An estimate is obtained for a short position with no open orders, mark price keeps going up in small increments and the actual liquidation takes place within the estimated range. 
     vega.submit_order(
         trading_wallet=TRADER_A.wallet_name,
         trading_key=TRADER_A.key_name,
@@ -588,7 +588,8 @@ def test_liquidation_price_witin_estimate_position_bounds(vega_service: VegaServ
         print(f"{account_TRADER_B} at price {price} = {account_TRADER_B}") 
         print(f"{account_TRADER_B}'s position at price {price} = {trader_b_position.open_volume}") 
         print(f"{account_TRADER_B}'s orders at price {price} = {open_orders_TRADER_B}") 
-        collateral_available = account_TRADER_B.general + account_TRADER_B.bond + account_TRADER_B.margin
+        if price == 663:
+            collateral_available = account_TRADER_B.general + account_TRADER_B.bond + account_TRADER_B.margin
 
         if price == 664:
             # Check Trader B closed out and Trader A position still open
@@ -607,24 +608,23 @@ def test_liquidation_price_witin_estimate_position_bounds(vega_service: VegaServ
             assert trader_b_position.unrealised_pnl < 0
 
     market_info = vega.market_info(market_id=market_id)
-    linear_slippage_factor = float(market_info.linear_slippage_factor)
-    quadratic_slippage_factor = float(market_info.quadratic_slippage_factor)
     market_data = vega.get_latest_market_data(market_id=market_id)
-    markprice = market_data.mark_price
 
     # print(f"market_info = {market_info}", type(market_info))
     print(f"market_data = {market_data}", type(market_data))
+    print(f"market_info = {market_info}", type(market_info))
     print(f"collateral_available = {collateral_available}", type(collateral_available))
     estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
         market_id,
         open_volume=-100,
         side=["SIDE_SELL"],
-        price=[markprice],
+        price=[market_data.mark_price],
         remaining=[0, 0],
         is_market_order=[False, False],
         collateral_available=collateral_available,
     )
     print(f"estimate_liquidation_price_open_vol_only.best_case.open_volume_only = {estimate_liquidation_price_open_vol_only.best_case.open_volume_only}") 
     print(f"estimate_liquidation_price_open_vol_only.worst_case.open_volume_only = {estimate_liquidation_price_open_vol_only.worst_case.open_volume_only}") 
-        
+    assert market_data.mark_price <= round(estimate_liquidation_price_open_vol_only.best_case.open_volume_only/1e5,0)
+    assert market_data.mark_price >= round(estimate_liquidation_price_open_vol_only.worst_case.open_volume_only/1e5,0)
     input("wait")
