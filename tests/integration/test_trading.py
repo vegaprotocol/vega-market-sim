@@ -614,7 +614,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
     print(f"market_data = {market_data}", type(market_data))
     print(f"market_info = {market_info}", type(market_info))
     print(f"collateral_available = {collateral_available}", type(collateral_available))
-    estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
+    estimate_margin, estimate_liquidation_price = vega.estimate_position(
         market_id,
         open_volume=-100,
         side=["SIDE_SELL"],
@@ -623,8 +623,175 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
         is_market_order=[False, False],
         collateral_available=collateral_available,
     )
+    print(f"estimate_liquidation_price.best_case.open_volume_only = {estimate_liquidation_price.best_case.open_volume_only}") 
+    print(f"estimate_liquidation_price.worst_case.open_volume_only = {estimate_liquidation_price.worst_case.open_volume_only}") 
+    assert market_data.mark_price <= round(estimate_liquidation_price.best_case.open_volume_only/1e5,0)
+    assert market_data.mark_price >= round(estimate_liquidation_price.worst_case.open_volume_only/1e5,0)
+
+    #0012-NP-LIPE-006:There's no difference in the estimate for an open volume and that with 0 open volume and market order of the same size. 
+    estimate_margin_with_MO, estimate_liquidation_price_with_MO = vega.estimate_position(
+        market_id,
+        open_volume=0,
+        side=["SIDE_SELL"],
+        price=[market_data.mark_price],
+        remaining=[100, 100],
+        is_market_order=[None, None],
+        collateral_available=collateral_available,
+    )
+    assert estimate_liquidation_price.best_case.open_volume_only == estimate_liquidation_price_with_MO.best_case.including_sell_orders
+    assert estimate_liquidation_price.worst_case.open_volume_only == estimate_liquidation_price_with_MO.worst_case.including_sell_orders
+    input("wait")
+
+
+@pytest.mark.integration
+def test_liquidation_price_witin_estimate_position_bounds_AC001(vega_service: VegaServiceNull):
+    vega = vega_service
+    PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
+    WALLET_NAME = "vega"
+ 
+    TRADER_A = PartyConfig(wallet_name=WALLET_NAME, key_name="Trader A Party")
+    TRADER_B = PartyConfig(wallet_name=WALLET_NAME, key_name="Trader B Party")
+    TRADER_MINT = 20000
+    TRADER_POSITION = 100
+  
+    # Setup a market and move it into a continuous trading state
+    market_id, asset_id, best_ask_id, best_bid_id = continuous_market(
+        vega=vega, price=500, spread=10
+    )
+
+    # Create wallets and keys for traders
+    vega.create_key(
+        name=TRADER_A.key_name,
+        wallet_name=TRADER_A.wallet_name,
+    )
+    vega.create_key(
+        name=TRADER_B.key_name,
+        wallet_name=TRADER_B.wallet_name,
+    )
+    vega.wait_for_total_catchup()
+    vega.wait_fn(60)
+
+    # Mint settlement assets for traders
+    vega.mint(
+        wallet_name=TRADER_A.wallet_name,
+        key_name=TRADER_A.key_name,
+        asset=asset_id,
+        amount=TRADER_MINT,
+    )
+    vega.mint(
+        wallet_name=TRADER_B.wallet_name,
+        key_name=TRADER_B.key_name,
+        asset=asset_id,
+        amount=5000,
+    )
+    vega.wait_for_total_catchup()
+    vega.wait_fn(60)
+
+    logging.info(
+        f"Trader A Party: public_key = {vega.wallet.public_key(name=TRADER_A.key_name, wallet_name=TRADER_A.wallet_name)}"
+    )
+    logging.info(
+        f"Trader B Party: public_key = {vega.wallet.public_key(name=TRADER_B.key_name, wallet_name=TRADER_B.wallet_name)}"
+    )
+
+    #0012-NP-LIPE-001: An estimate is obtained for a long position with no open orders, mark price keeps going down in small increments and the actual liquidation takes place within the estimated range.
+    vega.submit_order(
+        trading_wallet=TRADER_A.wallet_name,
+        trading_key=TRADER_A.key_name,
+        market_id=market_id,
+        time_in_force="TIME_IN_FORCE_GTC",
+        order_type="TYPE_LIMIT",
+        side="SIDE_BUY",
+        volume=TRADER_POSITION,
+        price=500,
+    )
+    vega.submit_order(
+        trading_wallet=TRADER_B.wallet_name,
+        trading_key=TRADER_B.key_name,
+        market_id=market_id,
+        time_in_force="TIME_IN_FORCE_GTC",
+        order_type="TYPE_LIMIT",
+        side="SIDE_SELL",
+        volume=TRADER_POSITION,
+        price=500,
+    )
+    vega.wait_for_total_catchup()
+    vega.wait_fn(60)
+
+    for price in [100, 500]:
+        move_market(
+            vega=vega,
+            market_id=market_id,
+            best_ask_id=best_ask_id,
+            best_bid_id=best_bid_id,
+            price=price,
+            spread=10,
+            volume=1,
+        )
+        vega.wait_for_total_catchup()
+        vega.wait_fn(60)
+
+        trader_a_position = vega.positions_by_market(
+            wallet_name=TRADER_A.wallet_name,
+            key_name=TRADER_A.key_name,
+            market_id=market_id,
+        )
+        trader_b_position = vega.positions_by_market(
+            wallet_name=TRADER_B.wallet_name,
+            key_name=TRADER_B.key_name,
+            market_id=market_id,
+        )
+        account_TRADER_A = vega.party_account(
+                key_name=TRADER_A.key_name,
+                wallet_name=TRADER_A.wallet_name,
+                asset_id=asset_id,  
+                market_id=market_id,   
+        )
+        open_orders_TRADER_A = vega.list_orders(
+                key_name=TRADER_A.key_name,
+                wallet_name=TRADER_A.wallet_name,
+                market_id=market_id,   
+        )
+        print(f"{account_TRADER_A} at price {price} = {account_TRADER_A}") 
+        print(f"{account_TRADER_A}'s position at price {price} = {trader_a_position.open_volume}") 
+        print(f"{account_TRADER_A}'s orders at price {price} = {open_orders_TRADER_A}") 
+        if price == 100:
+            collateral_available = account_TRADER_A.general + account_TRADER_A.bond + account_TRADER_A.margin
+
+        if price == 100:
+            # Check Trader B closed out and Trader A position still open
+            assert trader_a_position.open_volume == TRADER_POSITION
+            assert trader_a_position.unrealised_pnl > 0
+            assert trader_b_position.open_volume == 0
+            assert trader_b_position.unrealised_pnl == 0
+            # Check loss socialisation was not required for close out
+            assert trader_a_position.loss_socialisation_amount == 0
+            assert trader_b_position.loss_socialisation_amount == 0
+        else:
+            # Check Trader A and Trader B positions are still open
+            assert trader_a_position.open_volume == TRADER_POSITION
+            assert trader_a_position.unrealised_pnl > 0
+            assert trader_b_position.open_volume == -TRADER_POSITION                    
+            assert trader_b_position.unrealised_pnl < 0
+
+    market_info = vega.market_info(market_id=market_id)
+    market_data = vega.get_latest_market_data(market_id=market_id)
+
+    # print(f"market_info = {market_info}", type(market_info))
+    print(f"market_data = {market_data}", type(market_data))
+    print(f"market_info = {market_info}", type(market_info))
+    print(f"collateral_available = {collateral_available}", type(collateral_available))
+    estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
+        market_id,
+        open_volume=100,
+        side=["SIDE_BUY"],
+        price=[market_data.mark_price],
+        remaining=[0, 0],
+        is_market_order=[False, False],
+        collateral_available=collateral_available,
+    )
     print(f"estimate_liquidation_price_open_vol_only.best_case.open_volume_only = {estimate_liquidation_price_open_vol_only.best_case.open_volume_only}") 
     print(f"estimate_liquidation_price_open_vol_only.worst_case.open_volume_only = {estimate_liquidation_price_open_vol_only.worst_case.open_volume_only}") 
-    assert market_data.mark_price <= round(estimate_liquidation_price_open_vol_only.best_case.open_volume_only/1e5,0)
-    assert market_data.mark_price >= round(estimate_liquidation_price_open_vol_only.worst_case.open_volume_only/1e5,0)
+    # assert market_data.mark_price <= round(estimate_liquidation_price_open_vol_only.best_case.open_volume_only/1e5,0)
+    # assert market_data.mark_price >= round(estimate_liquidation_price_open_vol_only.worst_case.open_volume_only/1e5,0)
     input("wait")
