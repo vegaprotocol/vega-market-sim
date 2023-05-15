@@ -484,6 +484,7 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
     order_id="best-ask",
     price=90,
 )
+    print(vega.get_latest_market_data(market_id=market_id))
     #change the mark price to closeout PARTY_A
     vega.submit_order(
         trading_key=PARTY_C.name,
