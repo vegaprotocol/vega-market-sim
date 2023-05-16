@@ -5,10 +5,13 @@ WORKDIR /extern
 RUN mkdir /extern/bin
 RUN ls -l
 RUN cd ./vega && CGO_ENABLED=0 go build -o ../bin/ ./... && cd ..
+RUN cd ./vegacapsule && go build -o ../bin/ ./... && cd ..
 
 FROM python:3.10-slim-bullseye AS vegasim_base
 
 RUN useradd -ms /bin/bash vega
+
+ENV PATH="/vega_market_sim/vega_sim/bin:${PATH}"
 
 WORKDIR /vega_market_sim
 
@@ -49,5 +52,8 @@ COPY ./pyproject.toml ./pyproject.toml
 
 RUN pip install -e .
 RUN chmod 777 /vega_market_sim
+RUN chmod 777 /vega_market_sim/vega_sim/bin
 
 USER vega
+
+RUN apt-get update && apt-get install -y docker.io
