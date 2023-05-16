@@ -1,0 +1,61 @@
+GatewayEnabled = true
+[SQLStore]
+  Enabled = true
+  [SQLStore.ConnectionConfig]
+    Database =  "vega{{.NodeNumber}}"
+    Host = "localhost"
+    Password = "vega"
+    Port = 5232
+    UseTransactions = true
+    Username = "vega"
+
+[API]
+  Level = "Info"
+  Port = 3{{ printf "%02d" .NodeNumber }}7
+  CoreNodeGRPCPort = 3{{ printf "%02d" .NodeNumber }}2
+  [API.RateLimit]
+    Enabled = false
+
+[Pprof]
+  Level = "Info"
+  Enabled = true
+  Port = {{ printf "%02d" (add .NodeNumber 60) }}60
+  ProfilesDir = "{{.NodeHomeDir}}"
+
+[Gateway]
+  Level = "Info"
+  Port = 3{{ printf "%02d" .NodeNumber }}8
+  [Gateway.Node]
+    Port = 3{{ printf "%02d" .NodeNumber }}7
+  [Gateway.RateLimit]
+    Enabled = false
+
+[Metrics]
+  Level = "Info"
+  Timeout = "5s"
+  Port = 2{{ printf "%02d" (add .NodeNumber 10) }}2
+  Enabled = true
+
+[Broker]
+  Level = "Info"
+  UseEventFile = false
+  PanicOnError = false
+  [Broker.SocketConfig]
+    Port = 3{{ printf "%02d" .NodeNumber }}5
+
+[NetworkHistory]
+  Level = "Info"
+  Enabled = true
+  WipeOnStartup = true
+  AddSnapshotsToStore = true
+  AddSnapshotsInterval = "5s"
+  [NetworkHistory.Store]
+    IdSeed = "{{ b64enc "system-tests" }}-3479-439f-b7b7-{{.NodeNumber}}"
+    UseIpfsDefaultPeers = true
+    BootstrapPeers = []
+    SwarmPort = 40{{.NodeNumber}}5
+    StartWebUI = false
+    WebUIPort = 50{{.NodeNumber}}5
+  [NetworkHistory.Snapshot]
+    PanicOnSnapshotCreationError = true
+    WaitForCreationLockTimeout = "5s"
