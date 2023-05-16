@@ -9,6 +9,8 @@ ui: pull_deps_ui build_deps_ui
 
 networks: pull_deps_networks build_deps_networks
 
+capsule: pull_deps_capsule build_deps_capsule
+
 proto: build_proto black
 
 clean_ui:
@@ -69,6 +71,21 @@ build_deps_networks:
 	@rsync -av ${EXTERN_DIR}/networks-internal vega_sim/bin/ --exclude ${EXTERN_DIR}/networks-internal/.git
 	@mkdir -p ./vega_sim/bin/networks
 	@rsync -av ${EXTERN_DIR}/networks vega_sim/bin/ --exclude ${EXTERN_DIR}/networks/.git
+
+pull_deps_capsule:
+	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
+	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
+	@echo "Downloading Vega vegacapsule"
+	@if [ ! -d ./extern/vegacapsule ]; then mkdir ./extern/vegacapsule; git clone https://github.com/vegaprotocol/vegacapsule ${EXTERN_DIR}/vegacapsule; fi
+ifneq (${VEGA_SIM_CAPSULE_TAG},main)
+	@git -C ${EXTERN_DIR}/vegacapsule pull; git -C ${EXTERN_DIR}/vegacapsule checkout ${VEGA_SIM_CAPSULE_TAG}
+else
+	@git -C ${EXTERN_DIR}/vegacapsule checkout main; git -C ${EXTERN_DIR}/vegacapsule pull
+endif
+
+build_deps_capsule:
+	@mkdir -p ./vega_sim/bin
+	cd ${EXTERN_DIR}/vegacapsule && go build -o ../../vega_sim/bin/ ./...
 
 build_proto: pull_deps
 	@rm -rf ./vega_sim/proto
