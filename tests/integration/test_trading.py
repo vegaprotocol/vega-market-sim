@@ -387,8 +387,12 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         order_ref="best-ask",
         price=990,
         volume=initial_volume,
+        wait=True,
     )
-
+    order_id_C = vega.list_orders(key_name=PARTY_C.name,
+        market_id=market_id,reference="best-ask")[0].id
+    print(f"order id C = {order_id_C}")
+    
     vega.submit_order(
         trading_key=PARTY_A.name,
         market_id=market_id,
@@ -398,7 +402,6 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         price=1000,
         volume=initial_volume,
     )
-
     vega.submit_order(
         trading_key=PARTY_B.name,
         market_id=market_id,
@@ -408,7 +411,6 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         price=1000,
         volume=initial_volume,
     )
-
     vega.submit_order(
         trading_key=PARTY_B.name,
         market_id=market_id,
@@ -432,11 +434,12 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         market_id=market_id,
     )
     position_PARTY_A = vega.positions_by_market(key_name=PARTY_A.name,
-        # asset_id=asset_id,
         market_id=market_id,
         )
+   
     print(f"party_A_account = {account_PARTY_A}")
     print(f"party_A_position = {position_PARTY_A}")
+    print(f"market before amending at price{market_data.mark_price}= {market_data}")
 
     estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
         market_id,
@@ -479,12 +482,15 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
 
     #increase slippage for PARTY_A
     vega.amend_order(
-    trading_key=PARTY_C.name,
-    market_id=market_id,
-    order_id="best-ask",
-    price=90,
-)
-    print(vega.get_latest_market_data(market_id=market_id))
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_id=order_id_C,
+        price=90,
+    )
+    print(f"order id C = {order_id_C}")
+    vega.wait_for_total_catchup()
+    vega.wait_fn(1)
+    print(f"market after amending order at price {market_data.mark_price} = {market_data}")
     #change the mark price to closeout PARTY_A
     vega.submit_order(
         trading_key=PARTY_C.name,
@@ -492,7 +498,7 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        order_ref="best-ask",
+        order_ref="new_buy_price_to_trade",
         price=999,
         volume=initial_volume,
     )
@@ -502,15 +508,14 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        order_ref="best-ask",
+        order_ref="new_sell_price_to_trade",
         price=999,
         volume=initial_volume,
     )
-
     vega.wait_for_total_catchup()
     vega.wait_fn(1)
     #Check order status/ market state 
-    print(vega.get_latest_market_data(market_id=market_id))
+    print(f"market after amending at new price {market_data.mark_price} = {market_data}")
     account_PARTY_A = vega.party_account(key_name=PARTY_A.name,
         asset_id=asset_id,
         market_id=market_id,
@@ -519,8 +524,8 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         # asset_id=asset_id,
         market_id=market_id,
         )
-    print(f"party_A_account = {account_PARTY_A}")
-    print(f"party_A_position = {position_PARTY_A}")
+    print(f"account_PARTY_A = {account_PARTY_A}")
+    print(f"position_PARTY_A = {position_PARTY_A}")
 
     input("wait")
 
