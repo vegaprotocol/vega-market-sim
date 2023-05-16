@@ -105,6 +105,7 @@ class VegaService(ABC):
         warn_on_raw_data_access: bool = True,
         seconds_per_block: int = 1,
         listen_for_high_volume_stream_updates: bool = False,
+        governance_symbol: Optional[str] = "VOTE",
     ):
         """A generic service for accessing a set of Vega processes.
 
@@ -139,6 +140,10 @@ class VegaService(ABC):
                     updates per block, such as all ledger transactions. For a network
                     running at ~1s/block these are likely to be fine, but can be a
                     hindrance working at full nullchain speed.
+            governance_symbol:
+                str, default "VOTE", allows the symbol of the governance asset to be
+                    defined. This defaults to "VOTE" for nullchain networks but should
+                    be changed (most likely to "VEGA") for other networks.
 
         """
         self._core_client = None
@@ -156,6 +161,8 @@ class VegaService(ABC):
             listen_for_high_volume_stream_updates
         )
         self.seconds_per_block = seconds_per_block
+
+        self.governance_symbol = governance_symbol
 
     @property
     def market_price_decimals(self) -> int:
@@ -455,23 +462,22 @@ class VegaService(ABC):
             name=name,
             symbol=symbol,
             decimals=decimals,
-            max_faucet_amount=max_faucet_amount * 10**decimals,
+            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
             quantum=quantum,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
-            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 10,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 10,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 5,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=key_name,
         )
-        self.wait_fn(1)
         gov.approve_proposal(
             proposal_id=proposal_id,
             wallet_name=wallet_name,
             wallet=self.wallet,
             key_name=key_name,
         )
-        self.wait_fn(110)
+        self.wait_fn(15)
 
     def create_market_from_config(
         self,
@@ -498,7 +504,7 @@ class VegaService(ABC):
             wallet_name=proposal_wallet_name,
             key_name=proposal_key_name,
         )
-        self.wait_fn(110)
+        self.wait_fn(15)
 
     def create_simple_market(
         self,
@@ -569,8 +575,8 @@ class VegaService(ABC):
             ),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 10,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 10,
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
@@ -582,7 +588,7 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             key_name=proposal_key,
         )
-        self.wait_fn(110)
+        self.wait_fn(15)
 
     def submit_market_order(
         self,
@@ -1470,12 +1476,16 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
         )
 
-    def find_asset_id(self, symbol: str, raise_on_missing: bool = False) -> str:
+    def find_asset_id(
+        self, symbol: str, enabled: bool = True, raise_on_missing: bool = False
+    ) -> str:
         """Looks up the Asset ID of a given asset name
 
         Args:
             symbol:
                 str, The symbol of the asset to look up
+            enabled:
+                bool, whether the asset must be enabled for the id to be returned
             raise_on_missing:
                 bool, whether to raise an Error or silently return if the asset
                  does not exist
@@ -1486,6 +1496,7 @@ class VegaService(ABC):
         return data.find_asset_id(
             symbol=symbol,
             raise_on_missing=raise_on_missing,
+            enabled=enabled,
             data_client=self.trading_data_client_v2,
         )
 
@@ -2514,6 +2525,27 @@ class VegaService(ABC):
                 else None
             ),
             asset_decimals=self.asset_decimals,
+        )
+
+    def get_stake(
+        self,
+        party_id: Optional[str] = None,
+    ):
+        asset_id = self.find_asset_id(symbol=self.governance_symbol)
+        return data.get_stake(
+            data_client=self.trading_data_client_v2,
+            party_id=party_id,
+            asset_decimals=self.asset_decimals[asset_id],
+        )
+
+    def get_asset(self, asset_id: str):
+        return data.get_asset(
+            data_client=self.trading_data_client_v2, asset_id=asset_id
+        )
+
+    def list_all_network_history_segments(self):
+        return data_raw.list_all_network_history_segments(
+            data_client=self.trading_data_client_v2
         )
 
     def statistics(self):

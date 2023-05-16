@@ -38,6 +38,7 @@ def _queue_forwarder(
     sink: Queue[Any],
     market_id: Optional[str] = None,
     party_id: Optional[str] = None,
+    kill_thread_sig: Optional[threading.Event()] = None,
 ) -> None:
     obs = data_raw.observe_event_bus(
         data_client=data_client,
@@ -53,6 +54,8 @@ def _queue_forwarder(
     try:
         for o in obs:
             for event in o.events:
+                if kill_thread_sig.is_set():
+                    return
                 output = handlers[event.type](event)
                 if isinstance(output, (list, GeneratorType)):
                     for elem in output:
@@ -310,6 +313,7 @@ class LocalDataCache:
                     if party_ids is not None
                     else None
                 ),
+                self._kill_thread_sig,
             ),
             daemon=True,
         )

@@ -123,6 +123,10 @@ class VegaWallet(Wallet):
         wallet = (
             wallet_name if wallet_name is not None else self.vega_default_wallet_name
         )
+
+        if wallet not in self.pub_keys:
+            self.create_wallet(name=wallet)
+
         cmd = subprocess.run(
             [
                 self._wallet_path,
@@ -190,6 +194,8 @@ class VegaWallet(Wallet):
                 name,
                 "--description",
                 name,
+                "--output",
+                "json",
             ],
             capture_output=True,
             universal_newlines=True,

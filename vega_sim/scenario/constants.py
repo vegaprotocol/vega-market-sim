@@ -9,3 +9,4 @@ class Network(Enum):
     STAGNET3 = "vegawallet-stagnet3"
     FAIRGROUND = "vegawallet-fairground"
     TESTNET2 = "testnet2"
+    CAPSULE = "config"
