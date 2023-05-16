@@ -1,8 +1,9 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, Tuple, Dict, Optional, List
+from typing import Any, Tuple, Dict, Optional, List, Union
 
-from vega_sim.service import VegaService
+from vega_sim.null_service import VegaServiceNull
+from vega_sim.network_service import VegaServiceNetwork
 
 
 @dataclass
@@ -17,11 +18,14 @@ class Agent(ABC):
     def __init__(self, tag: Optional[str] = None):
         self.tag = tag
 
-    def step(self, vega: VegaService):
+    def step(self, vega: Union[VegaServiceNull, VegaServiceNetwork]):
         pass
 
     def initialise(
-        self, vega: VegaService, create_key: bool = False, mint_key: bool = False
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = False,
+        mint_key: bool = False,
     ):
         self.vega = vega
 
@@ -74,7 +78,9 @@ class AgentWithWallet(Agent):
     def step(self):
         pass
 
-    def initialise(self, vega: VegaService, create_key: bool = True):
+    def initialise(
+        self, vega: Union[VegaServiceNull, VegaServiceNetwork], create_key: bool = True
+    ):
         super().initialise(vega=vega)
         if create_key:
             self.vega.create_key(

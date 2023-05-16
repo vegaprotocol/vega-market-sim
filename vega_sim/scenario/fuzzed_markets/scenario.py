@@ -7,7 +7,11 @@ from typing import Optional, List
 from vega_sim.scenario.common.utils.price_process import random_walk
 
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.environment.environment import MarketEnvironmentWithState
+from vega_sim.environment.environment import (
+    MarketEnvironmentWithState,
+    NetworkEnvironment,
+)
+from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
 
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
@@ -168,7 +172,7 @@ class FuzzingScenario(Scenario):
         random_state: Optional[np.random.RandomState],
         **kwargs,
     ) -> List[StateAgent]:
-        random_state = (
+        self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
 
@@ -197,7 +201,7 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed price process
             price_process = _create_price_process(
-                random_state=random_state,
+                random_state=self.random_state,
                 num_steps=self.num_steps,
                 decimal_places=int(market_config.decimal_places),
             )
@@ -205,7 +209,6 @@ class FuzzingScenario(Scenario):
             # Create fuzzed market managers
             market_managers.append(
                 ConfigurableMarketManager(
-                    proposal_wallet_name="MARKET_MANAGER",
                     proposal_key_name="PROPOSAL_KEY",
                     termination_wallet_name="MARKET_MANAGER",
                     termination_key_name="TERMINATION_KEY",
@@ -215,6 +218,7 @@ class FuzzingScenario(Scenario):
                     asset_dp=asset_dp,
                     asset_name=asset_name,
                     settlement_price=price_process[-1],
+                    stake_key=True if kwargs["network"] == Network.CAPSULE else False,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
             )
@@ -351,10 +355,10 @@ class FuzzingScenario(Scenario):
             + market_makers
             + auction_traders
             + random_traders
-            + fuzz_traders
-            + degenerate_traders
-            + degenerate_liquidity_providers
-            + fuzz_liquidity_providers
+            # + fuzz_traders
+            # + degenerate_traders
+            # + degenerate_liquidity_providers
+            # + fuzz_liquidity_providers
         )
         return {agent.name(): agent for agent in agents}
 
@@ -363,15 +367,28 @@ class FuzzingScenario(Scenario):
         vega: VegaServiceNull,
         **kwargs,
     ) -> MarketEnvironmentWithState:
-        return MarketEnvironmentWithState(
-            agents=list(self.agents.values()),
-            n_steps=self.num_steps,
-            random_agent_ordering=False,
-            transactions_per_block=self.transactions_per_block,
-            vega_service=vega,
-            step_length_seconds=self.step_length_seconds,
-            block_length_seconds=vega.seconds_per_block,
-        )
+        if kwargs.get("network", Network.NULLCHAIN) == Network.NULLCHAIN:
+            return MarketEnvironmentWithState(
+                agents=list(self.agents.values()),
+                n_steps=self.num_steps,
+                random_agent_ordering=False,
+                transactions_per_block=self.transactions_per_block,
+                vega_service=vega,
+                step_length_seconds=self.step_length_seconds,
+                block_length_seconds=vega.seconds_per_block,
+            )
+        else:
+            return NetworkEnvironment(
+                agents=list(self.agents.values()),
+                n_steps=self.num_steps,
+                vega_service=vega,
+                step_length_seconds=self.step_length_seconds,
+                raise_datanode_errors=kwargs.get("raise_datanode_errors", False),
+                raise_step_errors=kwargs.get("raise_step_errors", False),
+                random_state=self.random_state,
+                create_keys=True,
+                mint_keys=True,
+            )
 
 
 if __name__ == "__main__":

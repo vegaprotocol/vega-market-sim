@@ -167,13 +167,16 @@ class MarketEnvironment:
 
     def _start_live_feeds(self, vega: VegaService):
         # Get lists of unique market_ids and party_ids to observe
-        market_ids = list(
-            {
-                vega.find_market_id(name=agent.market_name)
+
+        market_ids = [
+            vega.find_market_id(market_name)
+            for market_name in {
+                agent.market_name
                 for agent in self.agents
                 if hasattr(agent, "market_name")
             }
-        )
+        ]
+
         party_ids = list(
             {
                 vega.wallet.public_key(
@@ -425,6 +428,8 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         raise_datanode_errors: Optional[bool] = True,
         raise_step_errors: Optional[bool] = True,
         random_state: np.random.RandomState = None,
+        create_keys: Optional[bool] = False,
+        mint_keys: Optional[bool] = False,
     ):
         super().__init__(
             agents=agents,
@@ -440,6 +445,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
         self.raise_datanode_errors = raise_datanode_errors
         self.raise_step_errors = raise_step_errors
+
+        self.create_keys = create_keys
+        self.mint_keys = mint_keys
 
     def run(
         self,
@@ -472,7 +480,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
         # Initialise agents without minting assets
         for agent in self.agents:
-            agent.initialise(vega=vega, create_key=False, mint_key=False)
+            agent.initialise(
+                vega=vega, create_key=self.create_keys, mint_key=self.mint_keys
+            )
 
         self._start_live_feeds(vega=vega)
 
@@ -498,8 +508,14 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 logger.info(f"Completed {i} steps")
 
         for agent in self.agents:
-            agent.finalise()
-
+            try:
+                agent.finalise()
+            except Exception as e:
+                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
+                if self.raise_step_errors:
+                    raise (e)
+                else:
+                    logging.debug(msg)
         if pause_at_completion:
             input(
                 "Environment run completed. Pausing to allow inspection of state."
@@ -518,11 +534,11 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             try:
                 agent.step(state)
             except Exception as e:
-                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
+                msg = f"Agent '{agent.name()}' failed to step. Error: {e}"
                 if self.raise_step_errors:
                     raise e(msg)
                 else:
-                    logging.warning(msg)
+                    logging.debug(msg)
 
 
 class RealtimeMarketEnvironment(MarketEnvironmentWithState):

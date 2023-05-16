@@ -59,6 +59,8 @@ from vega_sim.null_service import find_free_port, _popen_process
 from vega_sim.constants import DATA_NODE_GRPC_PORT
 from vega_sim.scenario.constants import Network
 
+from vega_sim.api.helpers import num_to_padded_int, num_from_padded_int
+
 logger = logging.getLogger(__name__)
 
 
@@ -218,7 +220,13 @@ class VegaServiceNetwork(VegaService):
         network_config_path: Optional[str] = None,
         wallet_path: Optional[str] = None,
         vega_home_path: Optional[str] = None,
+        wallet_home_path: Optional[str] = None,
         wallet_token_path: Optional[str] = None,
+        wallet_passphrase_path: Optional[str] = None,
+        faucet_url: Optional[bool] = None,
+        load_existing_keys: Optional[bool] = None,
+        governance_symbol: Optional[str] = "VEGA",
+        vegacapsule_bin_path: Optional[str] = "vegacapsule",
     ):
         """Method initialises the class.
 
@@ -247,7 +255,11 @@ class VegaServiceNetwork(VegaService):
         """
 
         # Run init method inherited from VegaService with network arguments.
-        super().__init__(can_control_time=False, warn_on_raw_data_access=False)
+        super().__init__(
+            can_control_time=False,
+            warn_on_raw_data_access=False,
+            governance_symbol=governance_symbol,
+        )
 
         self.network = network
         self.run_with_wallet = run_with_wallet
@@ -257,6 +269,9 @@ class VegaServiceNetwork(VegaService):
         self._wallet_url = None
         self._data_node_grpc_url = None
         self._data_node_query_url = None
+        self._data_node_rest_url = None
+        self._faucet_url = faucet_url
+
         self._network_config = None
 
         self.vega_console_path = (
@@ -279,6 +294,12 @@ class VegaServiceNetwork(VegaService):
         self._vega_home = (
             vega_home_path if vega_home_path is not None else environ.get("VEGA_HOME")
         )
+        self._wallet_home = (
+            wallet_home_path
+            if wallet_home_path is not None
+            else environ.get("WALLET_HOME")
+        )
+        self._passphrase_file_path = wallet_passphrase_path
 
         self._token_path = (
             wallet_token_path
@@ -298,6 +319,18 @@ class VegaServiceNetwork(VegaService):
             raise ValueError(
                 f"ERROR! {self.network.name.lower()} network config could not be found"
             )
+        self._grpc_endpoints = itertools.cycle(
+            self.network_config["API"]["GRPC"]["Hosts"]
+        )
+        self._rest_endpoints = itertools.cycle(
+            self.network_config["API"]["REST"]["Hosts"]
+        )
+        self._graphql_endpoints = itertools.cycle(
+            self.network_config["API"]["GraphQL"]["Hosts"]
+        )
+
+        self.load_existing_keys = load_existing_keys
+        self.vegacapsule_bin_path = vegacapsule_bin_path
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
@@ -394,21 +427,26 @@ class VegaServiceNetwork(VegaService):
     def network_config(self) -> dict:
         if self._network_config is None:
             self._network_config = toml.load(self._network_config_path)
-            add_network_config(self._network_config_path)
+            if self.run_with_wallet:
+                add_network_config(self._network_config_path)
         return self._network_config
 
     @property
     def data_node_grpc_url(self) -> str:
         if self._data_node_grpc_url is None:
-            url = self.network_config["API"]["GRPC"]["Hosts"][0]
-            self._data_node_grpc_url = f"{url.split(':')[0]}:{DATA_NODE_GRPC_PORT}"
+            self._data_node_grpc_url = next(self._grpc_endpoints)
         return self._data_node_grpc_url
+
+    @property
+    def data_node_rest_url(self) -> str:
+        if self._data_node_rest_url is None:
+            self._data_node_rest_url = next(self._rest_endpoints)
+        return self._data_node_rest_url
 
     @property
     def data_node_query_url(self) -> str:
         if self._data_node_query_url is None:
-            url = self.network_config["API"]["GraphQL"]["Hosts"][0]
-            self._data_node_query_url = url
+            self._data_node_query_url = next(self._graphql_endpoints)
         return self._data_node_query_url
 
     @property
@@ -418,14 +456,26 @@ class VegaServiceNetwork(VegaService):
         return self._wallet_url
 
     @property
+    def faucet_url(self) -> str:
+        return self._faucet_url
+
+    @property
     def wallet(self) -> Wallet:
         if self._wallet is None:
-            self._wallet = VegaWallet.from_json(
-                self._token_path,
-                self.wallet_url,
-                wallet_path=self._wallet_path,
-                vega_home_dir=self._vega_home,
-            )
+            if self.load_existing_keys:
+                self._wallet = VegaWallet.from_json(
+                    self._token_path,
+                    self.wallet_url,
+                    wallet_path=self._wallet_path,
+                    vega_home_dir=self._vega_home,
+                )
+            else:
+                self._wallet = VegaWallet(
+                    wallet_url=self.wallet_url,
+                    wallet_path=self._wallet_path,
+                    vega_home_dir=self._wallet_home,
+                    passphrase_file_path=self._passphrase_file_path,
+                )
         return self._wallet
 
     @property
@@ -518,11 +568,11 @@ class VegaServiceNetwork(VegaService):
         """
 
         attempts = 0
-        for url in itertools.cycle(self.network_config["API"]["GRPC"]["Hosts"]):
+        while True:
             attempts += 1
 
             try:
-                self._data_node_grpc_url = f"{url.split(':')[0]}:{DATA_NODE_GRPC_PORT}"
+                self._data_node_grpc_url = next(self._grpc_endpoints)
 
                 logging.debug(f"Switched to endpoint {self._data_node_grpc_url}")
 
@@ -543,35 +593,178 @@ class VegaServiceNetwork(VegaService):
                 # Ping the datanode to check it is not behind
                 self.ping_datanode()
                 logging.debug(
-                    f"Connection to endpoint {self._data_node_grpc_url} successful."
+                    f"Connection to endpoint {self.data_node_grpc_url} successful."
                 )
 
                 return
 
             except grpc._channel._InactiveRpcError:
                 logging.warning(
-                    f"Connection to endpoint {self._data_node_grpc_url} inactive."
+                    f"Connection to endpoint {self.data_node_grpc_url} inactive."
                 )
 
             except grpc.FutureTimeoutError:
                 logging.warning(
-                    f"Connection to endpoint {self._data_node_grpc_url} timed out."
+                    f"Connection to endpoint {self.data_node_grpc_url} timed out."
                 )
 
             except DatanodeBehindError:
                 logging.warning(
-                    f"Connection to endpoint {self._data_node_grpc_url} is behind."
+                    f"Connection to endpoint {self.data_node_grpc_url} is behind."
                 )
 
             except DatanodeSlowResponseError:
                 logging.warning(
-                    f"Connection to endpoint {self._data_node_grpc_url} is slow."
+                    f"Connection to endpoint {self.data_node_grpc_url} is slow."
                 )
 
             if attempts == max_attempts:
                 break
 
         raise Exception("Unable to establish connection to a data-node.")
+
+    def mint(
+        self,
+        key_name: Optional[str],
+        asset: str,
+        amount: float,
+        wallet_name: Optional[str] = None,
+    ) -> None:
+        """Mints a given amount of requested asset into the associated wallet
+
+        Args:
+            wallet_name:
+                str, The name of the wallet
+            asset:
+                str, The ID of the asset to mint
+            amount:
+                float, the amount of asset to mint
+            key_name:
+                Optional[str], key name stored in metadata. Defaults to None.
+        """
+        details = self.get_asset(asset).details
+        is_erc20 = True if details.erc20.contract_address != "" else False
+
+        if is_erc20:
+            self.deposit(
+                symbol=details.symbol,
+                amount=amount,
+                key_name=key_name,
+                wallet_name=wallet_name,
+            )
+        else:
+            max_faucet_amount = num_from_padded_int(
+                details.builtin_asset.max_faucet_amount_mint, details.decimals
+            )
+            super().mint(
+                key_name=key_name,
+                asset=asset,
+                amount=amount if amount < max_faucet_amount else max_faucet_amount,
+                wallet_name=wallet_name,
+            )
+
+    def deposit(
+        self,
+        symbol: str,
+        amount: float,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+    ):
+        """Deposit an amount of a specified ERC20 asset to a a vega key.
+
+        Args:
+            symbol (str): Symbol of the asset to be deposited.
+            amount (float): Amount to be deposited.
+            key_name (str): Name of the key used for the deposit.
+            wallet_name (Optional[str], optional): Name of the wallet. Defaults to the
+                default wallet_name set in the wallet.
+
+        Raises:
+            Exception: Raised if the deposit does not arrive within a fixed time limit.
+        """
+
+        asset_id = self.find_asset_id(symbol=symbol)
+        amount = str(
+            num_to_padded_int(
+                amount,
+                self.asset_decimals[asset_id],
+            )
+        )
+
+        pub_key = self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+        account_before = self.party_account(party_id=pub_key, asset_id=asset_id).general
+
+        args = [
+            self.vegacapsule_bin,
+            "ethereum",
+            "asset",
+            "deposit",
+            "--asset-symbol",
+            symbol,
+            "--amount",
+            amount,
+            "--pubkey",
+            pub_key,
+        ]
+        subprocess.run(args)
+
+        for _ in range(500):
+            if self.party_account(party_id=pub_key, asset_id=asset_id) > account_before:
+                return
+            self.wait_fn(1)
+        raise Exception("Deposit never arrived.")
+
+    def stake(
+        self,
+        amount: float,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+    ):
+        """Stake a specified amount of a governance asset.
+
+        Args:
+            amount (float): The amount to stake.
+            key_name (str): The name of the key used for staking.
+            wallet_name (Optional[str], optional): The name of the wallet. Defaults to
+                the default value set in the wallet.
+
+        Raises:
+            Exception: Raised if the stake does not arrive within a given time limit.
+        """
+        amount = str(
+            num_to_padded_int(
+                amount,
+                self.asset_decimals[self.find_asset_id(symbol=self.governance_symbol)],
+            )
+        )
+
+        pub_key = self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+        stake_before = self.get_stake(party_id=pub_key)
+
+        args = [
+            self.vegacapsule_bin_path,
+            "ethereum",
+            "asset",
+            "stake",
+            "--amount",
+            amount,
+            "--asset-symbol",
+            self.governance_symbol,
+            "--pub-key",
+            pub_key,
+            "--home-path",
+            self._vega_home,
+        ]
+        subprocess.run(args)
+
+        for _ in range(500):
+            if self.get_stake(party_id=pub_key) > stake_before:
+                return
+            self.wait_fn(1)
+        raise Exception("Stake never arrived.")
+
+    def wait_fn(self, wait_multiple: float = 1) -> None:
+        time.sleep(wait_multiple)
 
 
 if __name__ == "__main__":

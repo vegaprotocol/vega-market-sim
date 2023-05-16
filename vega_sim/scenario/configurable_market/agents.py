@@ -38,6 +38,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         tag: Optional[str] = None,
         settlement_price: Optional[float] = None,
         initial_mint: Optional[float] = 1e9,
+        stake_key: bool = False,
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
@@ -62,6 +63,8 @@ class ConfigurableMarketManager(StateAgentWithWallet):
 
         self.settlement_price = settlement_price
 
+        self.stake_key = stake_key
+
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
@@ -82,6 +85,12 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 asset="VOTE",
                 amount=1e4,
                 key_name=self.key_name,
+            )
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
             )
 
         self.vega.wait_for_total_catchup()

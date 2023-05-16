@@ -763,6 +763,7 @@ def find_market_id(
 def find_asset_id(
     symbol: str,
     data_client: vac.VegaTradingDataClientV2,
+    enabled: bool = True,
     raise_on_missing: bool = False,
 ) -> str:
     """Looks up the Asset ID of a given asset name
@@ -783,6 +784,8 @@ def find_asset_id(
     # Find settlement asset
     for asset in assets:
         if asset.details.symbol == symbol:
+            if (enabled) and (asset.status != vega_protos.assets.Asset.STATUS_ENABLED):
+                continue
             return asset.id
     if raise_on_missing:
         raise MissingAssetError(
@@ -1613,3 +1616,19 @@ def estimate_position(
     )
 
     return converted_margin_estimate, converted_liquidation_estimate
+
+
+def get_stake(
+    data_client: vac.trading_data_grpc_v2, party_id: str, asset_decimals: int
+):
+    return num_from_padded_int(
+        data_raw.get_stake(data_client=data_client, party_id=party_id),
+        decimals=asset_decimals,
+    )
+
+
+def get_asset(
+    data_client: vac.trading_data_grpc_v2,
+    asset_id: str,
+):
+    return data_raw.asset_info(data_client=data_client, asset_id=asset_id)
