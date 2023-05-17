@@ -2163,6 +2163,113 @@ class VegaService(ABC):
             one_off=one_off,
         )
 
+    def recurring_transfer(
+        self,
+        from_key_name: str,
+        from_account_type: vega_protos.vega.AccountType,
+        to_account_type: vega_protos.vega.AccountType,
+        asset: str,
+        amount: float,
+        to_key_name: Optional[str] = None,
+        reference: Optional[str] = None,
+        from_wallet_name: Optional[str] = None,
+        to_wallet_name: Optional[str] = None,
+        start_epoch: Optional[int] = None,
+        end_epoch: Optional[int] = None,
+        factor: float = 1,
+        asset_for_metric: Optional[str] = None,
+        metric: Optional[vega_protos.vega.DispatchMetric] = None,
+        markets: Optional[List[str]] = None,
+    ):
+        """Create a recurring transfer of funds.
+
+        Function can be used to setup a recurring transfer of funds between two keys or
+        between a key and a network reward pool. If funding a reward pool, a dispatch
+        strategy can be specified to fund a specific pool.
+        
+        Args:
+            from_key_name (str):
+                The key name of the source account.
+            from_account_type (vega_protos.vega.AccountType):
+                The account type of the source account.
+            to_account_type (vega_protos.vega.AccountType):
+                The account type of the destination account.
+            asset (str):
+                The id of the asset to transfer.
+            amount (float):
+                The amount of the asset to transfer.
+            to_key_name (Optional[str], optional):
+                The key name of the destination account. Defaults to None.
+            reference (Optional[str], optional):
+                A reference string for the transfer. Defaults to None.
+            from_wallet_name (Optional[str], optional):
+                The name of the source wallet. Defaults to None.
+            to_wallet_name (Optional[str], optional):
+                The name of the destination wallet. Defaults to None.
+            start_epoch (Optional[int], optional):
+                The epoch to start the transfer. Defaults to None (next epoch).
+            end_epoch (Optional[int], optional):
+                The epoch to end the transfer. Defaults to None (never ends).
+            factor (float, optional):
+                The factor to adjust the transfer amount by each epoch. Defaults to 1.
+            asset_for_metric (Optional[str], optional):
+                The asset to use for the dispatch metric. Defaults to None.
+            metric (Optional[vega_protos.vega.DispatchMetric], optional):
+                The dispatch metric. Defaults to None.
+            markets (Optional[List[str]], optional):
+                The list of markets to apply the dispatch strategy. Defaults to None.
+
+        Raises:
+            Exception:
+                If a value is provided for one but not all non-optional
+                DispatchStrategy fields.
+
+        Returns:
+            None
+        """
+
+        # Create the RecurringTransfer message
+        recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
+            start_epoch=start_epoch
+            if start_epoch is not None
+            else int(self.statistics().epoch_seq) + 1
+        )
+        # Set the optional RecurringTransfer fields
+        if start_epoch is not None:
+            setattr(recurring_transfer, "start_epoch", start_epoch)
+        if end_epoch is not None:
+            setattr(recurring_transfer, "end_epoch", end_epoch)
+        if factor is not None:
+            setattr(recurring_transfer, "factor", str(factor))
+        if any([val is not None for val in [asset_for_metric, metric, markets]]):
+            if any([val is None for val in [asset_for_metric, metric]]):
+                raise Exception(
+                    "Value for one but not all non-optional DispatchStrategy fields given."
+                )
+            dispatch_strategy = vega_protos.vega.DispatchStrategy(
+                asset_for_metric=asset_for_metric,
+                metric=metric,
+            )
+            # Set the optional DispatchStrategy fields
+            if markets is not None:
+                dispatch_strategy.markets.extend(markets)
+            recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
+
+        trading.transfer(
+            wallet=self.wallet,
+            wallet_name=from_wallet_name,
+            key_name=from_key_name,
+            from_account_type=from_account_type,
+            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+            if to_key_name is not None
+            else "0000000000000000000000000000000000000000000000000000000000000000",
+            to_account_type=to_account_type,
+            asset=asset,
+            amount=str(num_to_padded_int(amount, self.asset_decimals[asset])),
+            reference=reference,
+            recurring=recurring_transfer,
+        )
+
     def list_transfers(
         self,
         wallet_name: Optional[str] = None,

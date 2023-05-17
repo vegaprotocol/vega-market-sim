@@ -648,7 +648,6 @@ def batch_market_instructions(
 
 def transfer(
     wallet: Wallet,
-    wallet_name: str,
     key_name: str,
     from_account_type: vega_protos.vega.AccountType,
     to: str,
@@ -658,14 +657,17 @@ def transfer(
     reference: Optional[str] = None,
     one_off: Optional[vega_protos.commands.v1.commands.OneOffTransfer] = None,
     recurring: Optional[vega_protos.commands.v1.commands.RecurringTransfer] = None,
+    wallet_name: Optional[str] = None,
 ):
+
     command = vega_protos.commands.v1.commands.Transfer(
         from_account_type=from_account_type,
-        to=to,
         to_account_type=to_account_type,
         asset=asset,
         amount=amount,
     )
+    if to is not None:
+        setattr(command, "to", to)
 
     if reference is not None:
         setattr(command, "reference", reference)
