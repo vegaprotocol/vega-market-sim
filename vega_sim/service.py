@@ -2512,3 +2512,5 @@ class VegaService(ABC):
     def statistics(self):
         return statistics(core_data_client=self.core_client)
 
+    def list_assets(self):
+        return self.data_cache._asset_from_feed.values()
