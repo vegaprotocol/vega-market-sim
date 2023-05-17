@@ -3,6 +3,7 @@ import pytest
 import vega_sim.proto.vega as vega_protos
 from tests.integration.utils.fixtures import (
     ASSET_NAME,
+    MM_WALLET,
     WalletConfig,
     create_and_faucet_wallet,
     vega_service,
@@ -294,3 +295,62 @@ def test_estimate_position(vega_service_with_market: VegaServiceNull):
         is_market_order=[False, False],
         collateral_available=1,
     )
+
+
+@pytest.mark.integration
+def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e3)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+
+    vega.update_network_parameter(
+        proposal_key=MM_WALLET.name,
+        parameter="validators.epoch.length",
+        new_value="10m",
+    )
+    vega.wait_for_total_catchup()
+
+    vega.recurring_transfer(
+        from_key_name=PARTY_A.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_key_name=PARTY_B.name,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset=asset_id,
+        amount=500,
+        factor=0.5,
+    )
+
+    party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_b_accounts_t0 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
+
+    assert party_a_accounts_t0[0].balance == 1000
+    assert party_b_accounts_t0[0].balance == 1000
+
+    # Forward one epoch
+    vega.wait_fn(601)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_b_accounts_t1 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
+
+    assert party_a_accounts_t1[0].balance == 500
+    assert party_b_accounts_t1[0].balance == 1500
+
+    # Forward one epoch
+    vega.wait_fn(601)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_b_accounts_t2 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
+
+    assert party_a_accounts_t2[0].balance == 250
+    assert party_b_accounts_t2[0].balance == 1750
+
