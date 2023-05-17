@@ -6,6 +6,8 @@ import itertools
 import os
 import os.path
 
+import vega_sim.proto.vega as vega_protos
+
 DEFAULT_PATH = "./run_logs"
 DEFAULT_RUN_NAME = "latest"
 
@@ -15,6 +17,7 @@ ORDER_BOOK_FILE_NAME = "depth_data.csv"
 TRADES_FILE_NAME = "trades.csv"
 ACCOUNTS_FILE_NAME = "accounts.csv"
 FUZZING_FILE_NAME = "additional_data.csv"
+ASSETS_FILE_NAME = "assets.csv"
 
 
 def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
@@ -183,7 +186,45 @@ def agents_standard_output(
 
     full_path = os.path.join(output_path, run_name)
     os.makedirs(full_path, exist_ok=True)
-    pd.DataFrame.from_dict(results).to_csv(os.path.join(full_path, AGENTS_FILE_NAME))
+    pd.DataFrame.from_dict(results).set_index(
+        "agent_name",
+        drop=True,
+    ).to_csv(os.path.join(full_path, AGENTS_FILE_NAME))
+
+
+def assets_standard_output(
+    assets: List[vega_protos.assets.Asset],
+    run_name: str = DEFAULT_RUN_NAME,
+    output_path: str = DEFAULT_PATH,
+):
+    results = {
+        key: []
+        for key in [
+            "id",
+            "name",
+            "symbol",
+            "decimals",
+            "quantum",
+            "max_faucet_amount_mint",
+            "status",
+        ]
+    }
+    for asset in assets:
+        results["id"].append(asset.id)
+        results["name"].append(asset.details.name)
+        results["symbol"].append(asset.details.symbol)
+        results["decimals"].append(asset.details.decimals)
+        results["quantum"].append(asset.details.quantum)
+        results["max_faucet_amount_mint"].append(
+            asset.details.builtin_asset.max_faucet_amount_mint
+        )
+        results["status"].append(asset.status)
+
+    full_path = os.path.join(output_path, run_name)
+    os.makedirs(full_path, exist_ok=True)
+    pd.DataFrame.from_dict(results).set_index("id", drop=True).to_csv(
+        os.path.join(full_path, ASSETS_FILE_NAME)
+    )
 
 
 def load_agents_df(
@@ -191,8 +232,18 @@ def load_agents_df(
     output_path: str = DEFAULT_PATH,
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
-    return pd.read_csv(os.path.join(output_path, run_name, AGENTS_FILE_NAME)).set_index(
-        "agent_name"
+    return pd.read_csv(
+        os.path.join(output_path, run_name, AGENTS_FILE_NAME), index_col="agent_name"
+    )
+
+
+def load_assets_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    return pd.read_csv(
+        os.path.join(output_path, run_name, ASSETS_FILE_NAME), index_col="id"
     )
 
 

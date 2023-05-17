@@ -9,7 +9,10 @@ from vega_sim.scenario.common.agents import Snitch, StateAgent, MarketHistoryDat
 from vega_sim.tools.scenario_output import (
     market_data_standard_output,
     agents_standard_output,
+    assets_standard_output,
 )
+
+import vega_sim.proto.vega as vega_protos
 
 
 class Scenario(abc.ABC):
@@ -89,6 +92,7 @@ class Scenario(abc.ABC):
         )
         if output_data:
             agents_standard_output(self.agents)
+            assets_standard_output(self.get_assets())
             market_data_standard_output(self.get_run_data())
             if self.additional_data_output_fns is not None:
                 market_data_standard_output(
@@ -100,6 +104,10 @@ class Scenario(abc.ABC):
 
     def get_snitch(self) -> Optional[Snitch]:
         return self.agents.get("snitch")
+
+    def get_assets(self) -> List[vega_protos.assets.Asset]:
+        snitch = self.get_snitch()
+        return snitch.assets if snitch is not None else []
 
     def get_run_data(self) -> List[MarketHistoryData]:
         snitch = self.get_snitch()
