@@ -27,6 +27,7 @@ import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 from vega_sim.api.helpers import (
     get_enum,
     forward,
+    statistics,
     num_to_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
@@ -2400,3 +2401,7 @@ class VegaService(ABC):
             else None,
             asset_decimals=self.asset_decimals,
         )
+
+    def statistics(self):
+        return statistics(core_data_client=self.core_client)
+
