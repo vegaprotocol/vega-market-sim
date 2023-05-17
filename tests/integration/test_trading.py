@@ -331,31 +331,8 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         amount=1e4,
     )
     vega.forward("10s")
-
-    vega.create_asset(
-        MM_WALLET.name,
-        name=ASSET_NAME,
-        symbol=ASSET_NAME,
-        decimals=0,
-        max_faucet_amount=10 * mint_amount * 1e5,
-    )
     vega.wait_for_total_catchup()
     vega.wait_fn(1)
-
-    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
-
-    for wallet in WALLETS:
-        vega.mint(
-            wallet.name,
-            asset=asset_id,
-            amount=mint_amount,
-        )
-    vega.mint(
-        PARTY_A.name,
-        asset=asset_id,
-        amount=collateral_available,
-    )
-    vega.forward("10s")
 
     configWithSlippage = MarketConfig()
     configWithSlippage.load()  # Load the default configuration
@@ -369,7 +346,7 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         termination_key_name="TERMINATE_WALLET ",
         market_name="CRYPTO:BTCDAI/DEC22",
         market_code="MARKET",
-        asset_name="ASSET_NAME",
+        asset_name=ASSET_NAME,
         asset_dp=0,
         proposal_wallet_name="MM_WALLET.name",
         termination_wallet_name="termination_wallet",
@@ -381,6 +358,19 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
 
     # Initialize the manager and create the market
     marketManager.initialise(vega=vega, create_key=True, mint_key=True)
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
+
+    for wallet in WALLETS:
+        vega.mint(
+            wallet.name,
+            asset=asset_id,
+            amount=mint_amount,
+        )
+    vega.mint(
+        PARTY_A.name,
+        asset=asset_id,
+        amount=collateral_available,
+    )
 
     # Wait for the market creation to complete
     marketManager.vega.wait_for_total_catchup()
@@ -408,6 +398,9 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         is_amendment=False,
     )
     # Add transactions in the proposed market to pass opening auction at price 1000
+    print(f"PARTY_C_account = {vega.party_account(key_name=PARTY_C.name, asset_id=asset_id, market_id=market_id)}")
+    print(f"market_info = {vega.market_info(market_id=market_id)}")
+    
     vega.submit_order(
         trading_key=PARTY_C.name,
         market_id=market_id,
