@@ -2761,6 +2761,9 @@ class Snitch(StateAgent):
                 self.additional_state_fn(self.vega, self.agents)
             )
 
+    def finalise(self):
+        self.assets = self.vega.list_assets()
+
 
 class KeyFunder(Agent):
     NAME_BASE = "key_funder"
