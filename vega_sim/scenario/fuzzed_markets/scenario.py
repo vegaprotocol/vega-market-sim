@@ -17,6 +17,7 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
     LimitOrderTrader,
+    RewardFunder,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
@@ -24,6 +25,8 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     DegenerateLiquidityProvider,
     FuzzyLiquidityProvider,
 )
+
+import vega_sim.proto.vega as vega_protos
 
 import datetime
 from typing import Optional, Dict
@@ -180,6 +183,7 @@ class FuzzingScenario(Scenario):
         degenerate_traders = []
         fuzz_liquidity_providers = []
         degenerate_liquidity_providers = []
+        reward_funders = []
 
         self.initial_asset_mint = 1e9
 
@@ -364,6 +368,41 @@ class FuzzingScenario(Scenario):
                     )
                 )
 
+            for i_agent, (account_type, metric) in enumerate(
+                [
+                    (
+                        vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
+                        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
+                    ),
+                    (
+                        vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+                        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
+                    ),
+                    (
+                        vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
+                        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
+                    ),
+                    (
+                        vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
+                        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
+                    ),
+                ]
+            ):
+                reward_funders.append(
+                    RewardFunder(
+                        wallet_name="REWARD_FUNDERS",
+                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        reward_asset_name=str(metric),
+                        initial_mint=1e9,
+                        account_type=account_type,
+                        transfer_amount=100,
+                        asset_for_metric_name=asset_name,
+                        metric=metric,
+                        market_names=[market_name],
+                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    )
+                )
+
         agents = (
             market_managers
             + market_makers
@@ -373,6 +412,7 @@ class FuzzingScenario(Scenario):
             + degenerate_traders
             + degenerate_liquidity_providers
             + fuzz_liquidity_providers
+            + reward_funders
         )
         return {agent.name(): agent for agent in agents}
 
