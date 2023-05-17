@@ -354,3 +354,50 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     assert party_a_accounts_t2[0].balance == 250
     assert party_b_accounts_t2[0].balance == 1750
 
+
+def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+
+    vega.update_network_parameter(
+        proposal_key=MM_WALLET.name,
+        parameter="validators.epoch.length",
+        new_value="10m",
+    )
+    vega.wait_for_total_catchup()
+
+    vega.recurring_transfer(
+        from_key_name=PARTY_A.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+        asset=asset_id,
+        amount=100,
+        factor=1.0,
+    )
+
+    party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+
+    assert party_a_accounts_t0[0].balance == 1000
+
+    # Forward one epoch
+    vega.wait_fn(601)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+
+    assert party_a_accounts_t1[0].balance == 900
+
+    # Forward one epoch
+    vega.wait_fn(601)
+    vega.wait_for_total_catchup()
+
+    party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+
+    assert party_a_accounts_t2[0].balance == 800
