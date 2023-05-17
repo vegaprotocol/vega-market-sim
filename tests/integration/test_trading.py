@@ -359,18 +359,10 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
 
     configWithSlippage = MarketConfig()
     configWithSlippage.load()  # Load the default configuration
-    configWithSlippage.set("linear_slippage_factor", 5e-1)  # Set the linear_slippage_factor to 0.5
-    configWithSlippage.set("quadratic_slippage_factor", 5e-1)  # Set the quadratic_slippage_factor to 0.5
+    configWithSlippage.set("linear_slippage_factor", str(5e-1))  # Set the linear_slippage_factor to 0.5
+    configWithSlippage.set("quadratic_slippage_factor", str(5e-1))  # Set the quadratic_slippage_factor to 0.5
+    configWithSlippage.set("decimal_places", int(0))  # Set the market decimal_places to 0
 
-    # Build the market configuration
-    # market_configuration = config.build()
-    # vega.create_simple_market(
-    #     market_name="CRYPTO:BTCDAI/DEC22",
-    #     proposal_key=MM_WALLET.name,
-    #     settlement_asset_id=asset_id,
-    #     termination_key=TERMINATE_WALLET.name,
-    #     market_decimals=0,    
-    # )
     # Initialize the Market Manager
     marketManager = ConfigurableMarketManager(
         proposal_key_name="MM_WALLET.name",
@@ -383,17 +375,12 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         termination_wallet_name="termination_wallet",
         market_config=configWithSlippage,
         tag="my_tag",
-        settlement_price=10.0,
-        initial_mint=1e5
+        settlement_price=1000.0,
+        initial_mint=1e6
     )
 
     # Initialize the manager and create the market
     marketManager.initialise(vega=vega, create_key=True, mint_key=True)
-    marketManager.vega.create_market_from_config(
-        proposal_wallet_name=MM_WALLET.name,
-        proposal_key_name=MM_WALLET.name,
-        market_config=marketManager.market_config,
-    )
 
     # Wait for the market creation to complete
     marketManager.vega.wait_for_total_catchup()
