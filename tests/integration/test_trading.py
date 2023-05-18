@@ -339,6 +339,7 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
     configWithSlippage.set("linear_slippage_factor", str(1))  # Set the linear_slippage_factor to 0.5
     configWithSlippage.set("quadratic_slippage_factor", str(1))  # Set the quadratic_slippage_factor to 0.5
     configWithSlippage.set("decimal_places", int(0))  # Set the market decimal_places to 0
+    configWithSlippage.set("lp_price_range", str(1))
 
     # Initialize the Market Manager
     marketManager = ConfigurableMarketManager(
@@ -391,7 +392,7 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         sell_specs=[("PEGGED_REFERENCE_BEST_ASK",1000, 1)],
         is_amendment=False,
     )
-    vega.submit_order(
+    order_id_C=vega.submit_order(
         trading_key=PARTY_C.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
@@ -402,7 +403,6 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         volume=initial_volume,
         wait=True,
     )
-    order_id_C = vega.list_orders(key_name=PARTY_C.name, market_id=market_id,reference="best-ask")[0].id
     vega.submit_order(
         trading_key=PARTY_B.name,
         market_id=market_id,
@@ -465,34 +465,21 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         risk_factors.long if open_volume_A > 0 else risk_factors.short
     )
 
-    print(f"open_volume_PARTY_A = {vega.positions_by_market(key_name=PARTY_A.name,market_id=market_id).open_volume}")
-    print(f"linear slippage factor = {market_info.linear_slippage_factor}")
-    input("wait")
     liquidation_price_open_vol_only_best_case = max((collateral_available - open_volume_A * market_data.mark_price)/(open_volume_A * 0 + open_volume_A**2 * 0 + open_volume_A * risk_factor - open_volume_A),0)
     liquidation_price_open_vol_only_worst_case = max((collateral_available - open_volume_A * market_data.mark_price)/(open_volume_A * linear_slippage_factor + open_volume_A**2 * quadratic_slippage_factor + open_volume_A * risk_factor - open_volume_A),0)
     
-    print(f"liquidation_price_open_vol_only_best_case = {liquidation_price_open_vol_only_best_case}")
-    print(f"liquidation_price_open_vol_only_worst_case = {liquidation_price_open_vol_only_worst_case}")
     # #check the calculation of estimate_liquidation_price_open_vol_only.best_case.open_volume_only
     assert round(estimate_liquidation_price_open_vol_only.best_case.open_volume_only,12)== round(liquidation_price_open_vol_only_best_case,12)
     assert round(estimate_liquidation_price_open_vol_only.worst_case.open_volume_only,12)== round(liquidation_price_open_vol_only_worst_case,12)
 
-    #increase slippage for PARTY_A
+    #amend order in order to set the new mark price 
     vega.amend_order(
         trading_key=PARTY_C.name,
         market_id=market_id,
         order_id=order_id_C,
-        price=99,
+        price=985,
         volume_delta=20,
     )
-    # print(f"open_volume_PARTY_A = {vega.positions_by_market(key_name=PARTY_A.name,market_id=market_id).open_volume}")
-    vega.wait_fn(1)
-    vega.wait_for_total_catchup()
-    print(f"market after amending order at price {vega.get_latest_market_data(market_id=market_id)}")
-    print(f"account_PARTY_A = {vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)}")
-    print(f"account_PARTY_C = {vega.party_account(key_name=PARTY_C.name, asset_id=asset_id, market_id=market_id)}")
-    print(f"position_PARTY_A = {vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)}")
-    print(f"position_PARTY_C = {vega.positions_by_market(key_name=PARTY_C.name, market_id=market_id)}")
     #change the mark price to closeout PARTY_A
     vega.submit_order(
         trading_key=PARTY_C.name,
@@ -516,14 +503,13 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
     )
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    #Check order status/ market state 
+    #Check actual liquidation price is within the estimated price bounds
     print(f"market after amending at new price {vega.get_latest_market_data(market_id=market_id)}")
-    print(f"account_PARTY_A = {vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)}")
-    print(f"account_PARTY_C = {vega.party_account(key_name=PARTY_C.name, asset_id=asset_id, market_id=market_id)}")
-    print(f"position_PARTY_A = {vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)}")
-    print(f"position_PARTY_C = {vega.positions_by_market(key_name=PARTY_C.name, market_id=market_id)}")
-
-    input("wait")
+    print(f"account_PARTY_A is closeout since sum of account = {vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id).general+vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id).margin}")
+    assert vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id).general+vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id).margin ==0
+    assert estimate_liquidation_price_open_vol_only.best_case.open_volume_only >= vega.get_latest_market_data(market_id=market_id).mark_price
+    assert estimate_liquidation_price_open_vol_only.worst_case.open_volume_only<= vega.get_latest_market_data(market_id=market_id).mark_price
+   
 
    
 @pytest.mark.integration
