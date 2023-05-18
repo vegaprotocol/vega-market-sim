@@ -184,7 +184,7 @@ class PriceMonitoringParameters(Config):
         "proposal": [
             {
                 "horizon": 60,
-                "probability": "0.9999",
+                "probability": "0.91",
                 "auction_extension": 5,
             },
             {
