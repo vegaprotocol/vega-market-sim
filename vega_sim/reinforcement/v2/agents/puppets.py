@@ -4,7 +4,9 @@ from enum import Enum, auto
 from typing import Optional
 from logging import getLogger
 
+import vega_sim.proto.vega as vega_protos
 from vega_sim.scenario.common.agents import StateAgentWithWallet, VegaService, VegaState
+from vega_sim.service import PeggedOrder
 
 logger = getLogger(__name__)
 
@@ -13,6 +15,11 @@ class Side(Enum):
     SELL = 0
     NONE = 1
     BUY = 2
+
+
+class ForcedSide(Enum):
+    SELL = 0
+    BUY = 1
 
 
 @dataclass
@@ -27,12 +34,19 @@ class MarketOrderAction(Action):
 
 
 @dataclass
+class AtTouchOrderAction(Action):
+    side: ForcedSide
+    volume: float
+
+
+@dataclass
 class NoAction(Action):
     pass
 
 
 class AgentType(Enum):
     MARKET_ORDER = auto()
+    AT_TOUCH = auto()
 
 
 class Puppet(StateAgentWithWallet):
@@ -90,5 +104,47 @@ class MarketOrderPuppet(Puppet):
                 logger.exception(traceback.format_exc())
 
 
-AGENT_TYPE_TO_AGENT = {AgentType.MARKET_ORDER: MarketOrderPuppet}
-AGENT_TYPE_TO_ACTION = {AgentType.MARKET_ORDER: MarketOrderAction}
+class AtTouchPuppet(Puppet):
+    def initialise(self, vega: VegaService, create_wallet: bool = True):
+        super().initialise(vega, create_wallet)
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+    def step(self, vega_state: VegaState):
+        if self.action is not None and self.action is not NoAction:
+            try:
+                self.vega.cancel_order(
+                    trading_key=self.key_name, market_id=self.market_id
+                )
+                self.vega.submit_order(
+                    trading_key=self.key_name,
+                    market_id=self.market_id,
+                    side=(
+                        "SIDE_BUY"
+                        if self.action.side == ForcedSide.BUY
+                        else "SIDE_SELL"
+                    ),
+                    volume=self.action.volume,
+                    time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
+                    order_type=vega_protos.vega.Order.Type.TYPE_LIMIT,
+                    pegged_order=PeggedOrder(
+                        reference=(
+                            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID
+                            if self.action.side == ForcedSide.BUY
+                            else vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK
+                        ),
+                        offset=0,
+                    ),
+                    wait=False,
+                )
+            except:
+                logger.exception(traceback.format_exc())
+
+
+AGENT_TYPE_TO_AGENT = {
+    AgentType.MARKET_ORDER: MarketOrderPuppet,
+    AgentType.AT_TOUCH: AtTouchPuppet,
+}
+AGENT_TYPE_TO_ACTION = {
+    AgentType.MARKET_ORDER: MarketOrderAction,
+    AgentType.AT_TOUCH: AtTouchOrderAction,
+}

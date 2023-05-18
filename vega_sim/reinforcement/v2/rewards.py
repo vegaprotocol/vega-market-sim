@@ -7,6 +7,7 @@ from vega_sim.scenario.common.agents import VegaService
 
 class Reward(Enum):
     PNL = auto()
+    SQ_INVENTORY_PENALTY = auto()
 
 
 class BaseRewarder(ABC):
@@ -45,4 +46,18 @@ class PnlRewarder(BaseRewarder):
         return reward
 
 
-REWARD_ENUM_TO_CLASS = {Reward.PNL: PnlRewarder}
+class SquareInventoryPenalty(BaseRewarder):
+    def get_reward(self, vega: VegaService) -> float:
+        posn = vega.positions_by_market(
+            key_name=self.agent_key,
+            wallet_name=self.agent_wallet,
+            market_id=self.market_id,
+        )
+
+        return (-1 * posn.open_volume**2) if posn is not None else 0
+
+
+REWARD_ENUM_TO_CLASS = {
+    Reward.PNL: PnlRewarder,
+    Reward.SQ_INVENTORY_PENALTY: SquareInventoryPenalty,
+}

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Type, Optional
 from dataclasses import dataclass
 from vega_sim.reinforcement.v2.agents.puppets import (
     AGENT_TYPE_TO_AGENT,
@@ -24,9 +24,9 @@ class StepResult:
 class Environment:
     def __init__(
         self,
-        agents: Dict[str, AgentType],
-        agent_to_reward: Dict[str, BaseRewarder],
-        agent_to_state: Dict[str, State],
+        agents: Dict[str, Type[AgentType]],
+        agent_to_reward: Dict[str, Type[BaseRewarder]],
+        agent_to_state: Dict[str, Type[State]],
         scenario: Scenario,
         reset_vega_every_n_runs: int = 100,
         funds_per_run: float = 10_000,
@@ -63,9 +63,10 @@ class Environment:
             asset_id=self._asset_id,
         )
 
-    def step(self, actions: Dict[str, Action]) -> Dict[str, StepResult]:
+    def step(self, actions: Dict[str, Optional[Action]]) -> Dict[str, StepResult]:
         for agent_name, action in actions.items():
-            self._puppets[agent_name].set_next_action(action=action)
+            if action is not None:
+                self._puppets[agent_name].set_next_action(action=action)
 
         self._scenario.env.step(self._vega)
         self._vega.wait_fn(1)
@@ -73,9 +74,12 @@ class Environment:
         for agent_name, reward_gen in self._agent_to_reward.items():
             step_res[agent_name] = StepResult(
                 observation=self._extract_observation(agent_name),
-                reward=reward_gen.get_reward(self._vega),
+                reward=self.calculate_reward(reward_gen),
             )
         return step_res
+
+    def calculate_reward(self, rewarder: Type[BaseRewarder]) -> float:
+        return rewarder.get_reward(vega=self._vega)
 
     def _reset_vega(self) -> None:
         self._vega.stop()

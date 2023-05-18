@@ -70,7 +70,7 @@ class MarketEnvironment:
         step_length_seconds: Optional[int] = None,
         vega_service: Optional[VegaServiceNull] = None,
         pause_every_n_steps: Optional[int] = None,
-        random_state: np.random.RandomState = None,
+        random_state: Optional[np.random.RandomState] = None,
     ):
         """Set up a Vega protocol environment with some specified agents.
         Handles the entire Vega setup and environment lifetime process, allowing the

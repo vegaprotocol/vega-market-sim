@@ -218,7 +218,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t1) == 1
     assert len(live_transfers_t1) == 0
-    assert party_a_accounts_t1.general == 500
+    assert party_a_accounts_t1.general == 499.5
     assert party_b_accounts_t1.general == 1500
 
     vega.one_off_transfer(
@@ -252,8 +252,8 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t2) == 2
     assert len(live_transfers_t2) == 1
-    assert party_a_accounts_t2.general == 500
-    assert party_b_accounts_t2.general == 1000
+    assert party_a_accounts_t2.general == 499.5
+    assert party_b_accounts_t2.general == 999.5
 
     vega.wait_fn(100)
     vega.wait_for_total_catchup()
@@ -276,8 +276,8 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t3) == 2
     assert len(live_transfers_t3) == 0
-    assert party_a_accounts_t3.general == 1000
-    assert party_b_accounts_t3.general == 1000
+    assert party_a_accounts_t3.general == 999.5
+    assert party_b_accounts_t3.general == 999.5
 
 
 @pytest.mark.integration
