@@ -195,9 +195,10 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed market config
             market_config = MarketConfig()
+            market_config.load("proposal")
             if self.fuzz_market_config is not None:
-                for param in self.fuzz_market_config:
-                    market_config.set(param=self.fuzz_market_config[param])
+                for param, value in self.fuzz_market_config.items():
+                    market_config.set(param, value)
 
             # Create fuzzed price process
             price_process = _create_price_process(

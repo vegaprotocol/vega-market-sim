@@ -54,6 +54,6 @@ RUN pip install -e .
 RUN chmod 777 /vega_market_sim
 RUN chmod 777 /vega_market_sim/vega_sim/bin
 
-USER vega
+FROM docker:dind AS vegasim_dind
 
-RUN apt-get update && apt-get install -y docker.io
+

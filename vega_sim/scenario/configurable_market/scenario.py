@@ -52,6 +52,7 @@ class ConfigurableMarket(Scenario):
         ] = None,
         settle_at_end: bool = True,
         price_process_fn: Optional[Callable] = None,
+        market_config: Optional[MarketConfig] = None,
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
@@ -70,6 +71,7 @@ class ConfigurableMarket(Scenario):
         # Market parameters
         self.market_name = market_name
         self.market_code = market_code
+        self.market_config = market_config
 
     def _generate_price_process(
         self,
@@ -96,10 +98,12 @@ class ConfigurableMarket(Scenario):
         self,
         vega: VegaServiceNull,
         tag: str,
-        market_config: Optional[MarketConfig] = None,
         random_state: Optional[np.random.RandomState] = None,
+        **kwargs
     ) -> Dict[str, StateAgent]:
-        market_config = market_config if market_config is not None else MarketConfig()
+        market_config = (
+            self.market_config if self.market_config is not None else MarketConfig()
+        )
 
         random_state = (
             random_state if random_state is not None else np.random.RandomState()

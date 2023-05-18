@@ -19,6 +19,58 @@ from vega_sim.scenario.common.utils.price_process import (
     Granularity,
 )
 
+mc = MarketConfig()
+
+CONF = {
+    "decimal_places": "1",
+    "price_monitoring_parameters": {
+        "triggers": [
+            {
+                "horizon": "60",
+                "probability": "0.9999",
+                "auction_extension": "5",
+            },
+            {
+                "horizon": "600",
+                "probability": "0.9999",
+                "auction_extension": "30",
+            },
+            {
+                "horizon": "3600",
+                "probability": "0.9999",
+                "auction_extension": "120",
+            },
+            {
+                "horizon": "14400",
+                "probability": "0.9999",
+                "auction_extension": "180",
+            },
+            {
+                "horizon": "43200",
+                "probability": "0.9999",
+                "auction_extension": "300",
+            },
+        ]
+    },
+    "liquidity_monitoring_parameters": {
+        "target_stake_parameters": {"time_window": "3600", "scaling_factor": 1},
+        "triggering_ratio": "0.7",
+        "auction_extension": "1",
+    },
+    "log_normal": {
+        "risk_aversion_parameter": 0.000001,
+        "tau": 0.0001140771161,
+        "params": {"sigma": 1.5},
+    },
+    "position_decimal_places": "4",
+    "lp_price_range": "0.8",
+    "linear_slippage_factor": "0.001",
+    "quadratic_slippage_factor": "0.0",
+}
+for c, v in CONF.items():
+    mc.set(c, v)
+
+
 SCENARIOS = {
     "comprehensive_market": lambda: ComprehensiveMarket(
         market_name="ETH",
@@ -173,6 +225,7 @@ SCENARIOS = {
         asset_name="tUSD",
         asset_dp=18,
         num_steps=60 * 24,
+        market_config=None,
     ),
     "vega_load_test": lambda: VegaLoadTest(
         num_steps=60 * 24,

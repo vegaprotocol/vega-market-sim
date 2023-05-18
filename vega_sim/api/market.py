@@ -101,7 +101,19 @@ class MarketConfig(Config):
             "lp_price_range": 0.5,
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
-        }
+        },
+        "proposal": {
+            "decimal_places": 1,
+            "price_monitoring_parameters": "proposal",
+            "liquidity_monitoring_parameters": "proposal",
+            "log_normal": "proposal",
+            "position_decimal_places": 4,
+            "lp_price_range": 0.8,
+            "linear_slippage_factor": 0.001,
+            "quadratic_slippage_factor": 0.0,
+            "instrument": "default",
+            "metadata": None,
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -168,7 +180,34 @@ class PriceMonitoringParameters(Config):
                 "probability": "0.90001",
                 "auction_extension": 3600,
             },
-        ]
+        ],
+        "proposal": [
+            {
+                "horizon": 60,
+                "probability": "0.9999",
+                "auction_extension": 5,
+            },
+            {
+                "horizon": 600,
+                "probability": "0.9999",
+                "auction_extension": 30,
+            },
+            {
+                "horizon": 3600,
+                "probability": "0.9999",
+                "auction_extension": 120,
+            },
+            {
+                "horizon": 14400,
+                "probability": "0.9999",
+                "auction_extension": 180,
+            },
+            {
+                "horizon": 43200,
+                "probability": "0.9999",
+                "auction_extension": 300,
+            },
+        ],
     }
 
     def load(self, opt: Optional[str] = None):
@@ -185,7 +224,12 @@ class LiquidityMonitoringParameters(Config):
             "triggering_ratio": "0.7",
             "auction_extension": 0,
             "target_stake_parameters": "default",
-        }
+        },
+        "proposal": {
+            "target_stake_parameters": "proposal",
+            "triggering_ratio": "0.7",
+            "auction_extension": 1,
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -211,7 +255,8 @@ class TargetStakeParameters(Config):
         "default": {
             "time_window": 60 * 60,
             "scaling_factor": 1,
-        }
+        },
+        "proposal": {"time_window": 3600, "scaling_factor": 1},
     }
 
     def load(self, opt: Optional[str] = None):
@@ -233,7 +278,12 @@ class LogNormalRiskModel(Config):
             "risk_aversion_parameter": 0.01,
             "tau": 1.90128526884173e-06,
             "params": "default",
-        }
+        },
+        "proposal": {
+            "risk_aversion_parameter": 0.000001,
+            "tau": 0.0001140771161,
+            "params": "proposal",
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -258,7 +308,8 @@ class LogNormalModelParams(Config):
             "mu": 0,
             "r": 0.016,
             "sigma": 3.0,
-        }
+        },
+        "proposal": {"sigma": 1.5, "mu": 0, "r": 0.016},
     }
 
     def __init__(self, opt: Optional[str] = None) -> None:
