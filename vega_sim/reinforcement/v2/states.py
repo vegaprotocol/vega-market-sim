@@ -144,3 +144,34 @@ class PriceStateWithFees(State):
             + [0] * max(0, 5 - len(book_state.sells)),
             trading_fee=fee,
         )
+
+
+@dataclass(frozen=True)
+class PositionOnly(State):
+    position: float
+
+    def to_array(self) -> np.array:
+        return np.nan_to_num(
+            np.array(
+                [
+                    self.position,
+                ]
+            )
+        )
+
+    @classmethod
+    def from_vega(
+        cls,
+        vega: VegaService,
+        for_key_name: str,
+        market_id: str,
+        asset_id: str,
+        for_wallet_name: Optional[str] = None,
+    ) -> "PositionOnly":
+        position = vega.positions_by_market(
+            for_key_name, market_id, wallet_name=for_wallet_name
+        )
+
+        return cls(
+            position=position.open_volume if position else 0,
+        )

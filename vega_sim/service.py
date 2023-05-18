@@ -846,7 +846,7 @@ class VegaService(ABC):
         self,
         trading_key: str,
         market_id: str,
-        order_id: str,
+        order_id: Optional[str] = None,
         wallet_name: Optional[str] = None,
     ):
         """
@@ -1232,7 +1232,7 @@ class VegaService(ABC):
     def best_prices(
         self,
         market_id: str,
-    ) -> Tuple[int, int]:
+    ) -> Tuple[float, float]:
         """
         Output the best static bid price and best static ask price in current market.
         """
