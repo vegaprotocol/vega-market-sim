@@ -431,8 +431,8 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         price=1000,
         volume=initial_volume,
     )
-    vega.wait_for_total_catchup()
     vega.wait_fn(1)
+    vega.wait_for_total_catchup()
     market_info = vega.market_info(market_id=market_id)
     market_data = vega.get_latest_market_data(market_id=market_id)
     #Check order status/ market state 
