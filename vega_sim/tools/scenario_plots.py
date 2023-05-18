@@ -1,6 +1,8 @@
 import os
 import ast
 
+import argparse
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import vega_sim.proto.vega as vega_protos
@@ -47,6 +49,7 @@ from vega_sim.tools.scenario_output import (
     load_trades_df,
     load_fuzzing_df,
     load_agents_df,
+    load_assets_df,
 )
 
 
@@ -694,18 +697,121 @@ def plot_price_monitoring(run_name: Optional[str] = None):
     return figs
 
 
+def reward_plots(run_name: Optional[str] = None):
+    accounts_df = load_accounts_df(run_name=run_name)
+    assets_df = load_assets_df(run_name=run_name)
+    agents_df = load_agents_df(run_name=run_name).set_index("agent_key")
+
+    joined_df = accounts_df.join(agents_df, on="party_id").join(assets_df, on="asset")
+    
+    datetime = joined_df.index.unique()
+
+    fig = plt.figure(figsize=[11.69, 8.27])
+    fig.suptitle(
+        f"Agent Rewards Plots",
+        fontsize=18,
+        fontweight="bold",
+        color=(0.2, 0.2, 0.2),
+    )
+    fig.tight_layout()
+
+    plt.rcParams.update({"font.size": 8})
+
+    gs = GridSpec(nrows=2, ncols=2, hspace=0.4)
+
+    axs: list[plt.Axes] = []
+
+    plots = [
+        (
+            0,
+            0,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID
+            ),
+        ),
+        (
+            0,
+            1,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED
+            ),
+        ),
+        (
+            1,
+            0,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED
+            ),
+        ),
+        (
+            1,
+            1,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE
+            ),
+        ),
+    ]
+
+    for plot in plots:
+        axs.append(fig.add_subplot(gs[plot[0], plot[1]]))
+        axs[-1].set_title(f"Asset: {plot[2]}")
+        accounts_for_asset = joined_df[joined_df.symbol == str(plot[2])]
+        grouped = accounts_for_asset.groupby(["agent_type", "time"])["balance"].sum()
+        for index in grouped.index.get_level_values(0).unique():
+            if index == "RewardFunder":
+                continue
+            series = grouped.loc[index]
+            series = series.reindex(datetime, fill_value=0)
+            axs[-1].plot(
+                series.index, series.values, label=index
+            )
+        plt.xticks(rotation=45)
+        axs[-1].legend()
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--fuzzing", action="store_true")
+    parser.add_argument("-t", "--trading", action="store_true")
+    parser.add_argument("-p", "--monitoring", action="store_true")
+    parser.add_argument("-a", "--accounts", action="store_true")
+    parser.add_argument("-r", "--rewards", action="store_true")
+    parser.add_argument("--all", action="store_true")
+
+    parser.add_argument("--show", action="store_true")
+    parser.add_argument("--save", action="store_true")
+    args = parser.parse_args()
+
     dir = "test_plots"
     if not os.path.exists(dir):
         os.mkdir(dir)
-    figs = fuzz_plots()
-    for i, fig in enumerate(figs.values()):
-        fig.savefig(f"{dir}/fuzz-{i}.jpg")
-    figs = plot_run_outputs()
-    for i, fig in enumerate(figs.values()):
-        fig.savefig(f"{dir}/trading-{i}.jpg")
-    figs = plot_price_monitoring()
-    for i, fig in enumerate(figs.values()):
-        fig.savefig(f"{dir}/monitoring-{i}.jpg")
-    fig = account_plots()
-    fig.savefig(f"{dir}/accounts.jpg")
+
+    if args.fuzzing or args.all:
+        figs = fuzz_plots()
+        for i, fig in enumerate(figs.values()):
+            if args.save:
+                fig.savefig(f"{dir}/fuzz-{i}.jpg")
+
+    if args.trading or args.all:
+        figs = plot_run_outputs()
+        for i, fig in enumerate(figs.values()):
+            if args.save:
+                fig.savefig(f"{dir}/trading-{i}.jpg")
+
+    if args.monitoring or args.all:
+        figs = plot_price_monitoring()
+        for i, fig in enumerate(figs.values()):
+            if args.save:
+                fig.savefig(f"{dir}/monitoring-{i}.jpg")
+
+    if args.accounts or args.all:
+        fig = account_plots()
+        if args.save:
+            fig.savefig(f"{dir}/accounts.jpg")
+
+    if args.rewards or args.all:
+        fig = reward_plots()
+        if args.save:
+            figs.savefig(f"{dir}/rewards.jpg")
+
+    if args.show:
+        plt.show()
