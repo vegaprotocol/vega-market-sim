@@ -220,8 +220,8 @@ SCENARIOS = {
         market_order_trader_base_order_size=0.01,
     ),
     "configurable_market": lambda: ConfigurableMarket(
-        market_name="RESEARCH: Ethereum:USD Q3 (Daily)",
-        market_code="ETH:USD",
+        market_name="RESEARCH: Bitcoin:USD Q3 (Daily)",
+        market_code="BTC:USD",
         asset_name="tUSD",
         asset_dp=18,
         num_steps=60 * 24,

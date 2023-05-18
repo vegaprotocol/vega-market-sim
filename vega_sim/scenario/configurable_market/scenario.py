@@ -79,7 +79,7 @@ class ConfigurableMarket(Scenario):
         self,
         random_state,
     ) -> list:
-        start = "2021-07-01 00:00:00"
+        start = "2022-10-01 00:00:00"
 
         start = datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
 
@@ -88,7 +88,7 @@ class ConfigurableMarket(Scenario):
         end = start + timedelta(seconds=(self.num_steps + 1) * self.granularity.value)
 
         price_process = get_historic_price_series(
-            product_id="ETH-USD",
+            product_id="BTC-USD",
             granularity=self.granularity,
             start=str(start),
             end=str(end),
@@ -107,6 +107,7 @@ class ConfigurableMarket(Scenario):
         market_config = (
             self.market_config if self.market_config is not None else MarketConfig()
         )
+        market_config.load("proposal")
 
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
@@ -139,13 +140,13 @@ class ConfigurableMarket(Scenario):
             key_name=MAKER_PARTY.key_name,
             price_process_generator=iter(price_process),
             initial_asset_mint=1e9,
-            commitment_amount=1e6,
+            commitment_amount=10e6,
             market_name=market_name,
             asset_name=asset_name,
             market_decimal_places=market_config.decimal_places,
             asset_decimal_places=self.asset_decimal,
             num_steps=self.num_steps,
-            kappa=0.3,
+            kappa=0.6,
             num_levels=25,
             tick_spacing=1,
             inventory_upper_boundary=200,
