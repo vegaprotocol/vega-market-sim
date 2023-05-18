@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 
 from collections import namedtuple
 
@@ -38,6 +38,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         tag: Optional[str] = None,
         settlement_price: Optional[float] = None,
         initial_mint: Optional[float] = 1e9,
+        network_parameters: Optional[Dict[str, str]] = None,
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
@@ -59,6 +60,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         self.market_config = (
             market_config if market_config is not None else MarketConfig()
         )
+        self.network_parameters = network_parameters
 
         self.settlement_price = settlement_price
 
@@ -83,8 +85,19 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 amount=1e4,
                 key_name=self.key_name,
             )
-
         self.vega.wait_for_total_catchup()
+
+        # Update network parameters if specified
+        if self.network_parameters is not None:
+            [
+                self.vega.update_network_parameter(
+                    proposal_key=self.key_name,
+                    wallet_name=self.wallet_name,
+                    parameter=key,
+                    new_value=self.network_parameters[key],
+                )
+                for key in self.network_parameters
+            ]
 
         if self.vega.find_asset_id(symbol=self.asset_name) is None:
             self.vega.create_asset(
