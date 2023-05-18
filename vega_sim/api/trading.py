@@ -659,7 +659,6 @@ def transfer(
     recurring: Optional[vega_protos.commands.v1.commands.RecurringTransfer] = None,
     wallet_name: Optional[str] = None,
 ):
-
     command = vega_protos.commands.v1.commands.Transfer(
         from_account_type=from_account_type,
         to_account_type=to_account_type,

@@ -703,7 +703,7 @@ def reward_plots(run_name: Optional[str] = None):
     agents_df = load_agents_df(run_name=run_name).set_index("agent_key")
 
     joined_df = accounts_df.join(agents_df, on="party_id").join(assets_df, on="asset")
-    
+
     datetime = joined_df.index.unique()
 
     fig = plt.figure(figsize=[11.69, 8.27])
@@ -762,11 +762,10 @@ def reward_plots(run_name: Optional[str] = None):
                 continue
             series = grouped.loc[index]
             series = series.reindex(datetime, fill_value=0)
-            axs[-1].plot(
-                series.index, series.values, label=index
-            )
+            axs[-1].plot(series.index, series.values, label=index)
         plt.xticks(rotation=45)
         axs[-1].legend()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

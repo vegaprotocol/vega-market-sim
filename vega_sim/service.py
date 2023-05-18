@@ -2186,7 +2186,7 @@ class VegaService(ABC):
         Function can be used to setup a recurring transfer of funds between two keys or
         between a key and a network reward pool. If funding a reward pool, a dispatch
         strategy can be specified to fund a specific pool.
-        
+
         Args:
             from_key_name (str):
                 The key name of the source account.
