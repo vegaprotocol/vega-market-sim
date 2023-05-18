@@ -371,21 +371,15 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         asset=asset_id,
         amount=collateral_available,
     )
-
     # Wait for the market creation to complete
     marketManager.vega.wait_for_total_catchup()
     market_id = vega.all_markets()[0].id
 
     # Access the updated value
-    print(configWithSlippage.linear_slippage_factor)  # Output: 100
-
-
-    float_string = str(10)
-    # vega.update_market(proposal_key=MM_WALLET.name, market_id=market_id, updated_linear_slippage_factor=float_string.encode('utf-8'), updated_quadratic_slippage_factor=float_string.encode('utf-8'))
+    print(f"linear slippage factor = {configWithSlippage.linear_slippage_factor}")  
     vega.update_network_parameter(
             MM_WALLET.name, parameter="network.markPriceUpdateMaximumFrequency", new_value="0"
         )
-    
     market_id = vega.all_markets()[0].id
 
     vega.submit_liquidity(
@@ -397,10 +391,6 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         sell_specs=[("PEGGED_REFERENCE_BEST_ASK",1000, 1)],
         is_amendment=False,
     )
-    # Add transactions in the proposed market to pass opening auction at price 1000
-    print(f"PARTY_C_account = {vega.party_account(key_name=PARTY_C.name, asset_id=asset_id, market_id=market_id)}")
-    print(f"market_info = {vega.market_info(market_id=market_id)}")
-    
     vega.submit_order(
         trading_key=PARTY_C.name,
         market_id=market_id,
@@ -448,15 +438,13 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
     #Check order status/ market state 
     print(f"{market_info}")
     print(f"market state after auction at price {market_data.mark_price} = {market_data.market_state}")
-
-    linear_slippage_factor = float(market_info.linear_slippage_factor)
-    quadratic_slippage_factor = float(market_info.quadratic_slippage_factor)
-    # vega.get_latest_market_data(market_id=market_id)
-  
     print(f"market state before amending at price{market_data.mark_price}= {market_data.market_state}")
     print(f"account_PARTY_A = {vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)}")
     print(f"position_PARTY_A = {vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)}")
 
+    linear_slippage_factor = float(market_info.linear_slippage_factor)
+    quadratic_slippage_factor = float(market_info.quadratic_slippage_factor)
+  
     estimate_margin_open_vol_only, estimate_liquidation_price_open_vol_only = vega.estimate_position(
         market_id,
         open_volume=10,
@@ -467,19 +455,22 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
         collateral_available=collateral_available,
     )
 
-    # open_volume = int(vega.positions_by_market(key_name=PARTY_A.name,market_id=market_id).open_volume) if vega.positions_by_market(key_name=PARTY_A.name,market_id=market_id).open_volume is not None else 0
-    # risk_factors = vega.get_risk_factors(market_id=market_id)
+    PARTY_A_position = vega.positions_by_market(
+            key_name=PARTY_A.name,
+            market_id=market_id,
+        )
+    open_volume_A = PARTY_A_position.open_volume
+    risk_factors = vega.get_risk_factors(market_id=market_id)
     # risk_factor = (
-    #     risk_factors.long if open_volume > 0 else risk_factors.short
+    #     risk_factors.long if open_volume_A > 0 else risk_factors.short
     # )
 
     # print(f"open_volume_PARTY_A = {vega.positions_by_market(key_name=PARTY_A.name,market_id=market_id).open_volume}")
-    print(f"market_state = {market_data.market_state}")
     input("wait")
-    # liquidation_price_open_vol_only_best_case = (collateral_available - open_volume * market_data.mark_price)/(open_volume * 0 + open_volume**2 * 0 + open_volume * risk_factor - open_volume)
-    # liquidation_price_open_vol_only_worst_case = (collateral_available - open_volume * market_data.mark_price)/(open_volume * linear_slippage_factor + open_volume**2 * quadratic_slippage_factor + open_volume * risk_factor - open_volume)
+    # liquidation_price_open_vol_only_best_case = (collateral_available - open_volume_A * market_data.mark_price)/(open_volume_A * 0 + open_volume_A**2 * 0 + open_volume_A * risk_factor - open_volume_A)
+    # liquidation_price_open_vol_only_worst_case = (collateral_available - open_volume_A * market_data.mark_price)/(open_volume_A * linear_slippage_factor + open_volume_A**2 * quadratic_slippage_factor + open_volume_A * risk_factor - open_volume_A)
     
-    # #check the calculation of estimate_liquidation_price_open_vol_only.best_case.open_volume_only
+    # # #check the calculation of estimate_liquidation_price_open_vol_only.best_case.open_volume_only
     # assert round(estimate_liquidation_price_open_vol_only.best_case.open_volume_only,12)== round(liquidation_price_open_vol_only_best_case,12)
     # assert round(estimate_liquidation_price_open_vol_only.worst_case.open_volume_only,12)== round(liquidation_price_open_vol_only_worst_case,12)
 
