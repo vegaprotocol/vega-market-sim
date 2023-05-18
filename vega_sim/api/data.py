@@ -109,6 +109,25 @@ MarginLevels = namedtuple(
 
 
 @dataclass
+class LiquidationPrice:
+    open_volume_only: float
+    including_buy_orders: float
+    including_sell_orders: float
+
+
+@dataclass
+class MarginEstimate:
+    best_case: MarginLevels
+    worst_case: MarginLevels
+
+
+@dataclass
+class LiquidationEstimate:
+    best_case: LiquidationPrice
+    worst_case: LiquidationPrice
+
+
+@dataclass
 class DecimalSpec:
     position_decimals: Optional[int] = None
     price_decimals: Optional[int] = None
@@ -394,6 +413,39 @@ def _transfer_from_proto(
     )
 
 
+def _margin_estimate_from_proto(
+    margin_estimate: data_node_protos_v2.trading_data.MarginEstimate,
+    decimal_spec: DecimalSpec,
+) -> MarginEstimate:
+    return MarginEstimate(
+        best_case=_margin_level_from_proto(
+            margin_level=margin_estimate.best_case, decimal_spec=decimal_spec
+        ),
+        worst_case=_margin_level_from_proto(
+            margin_level=margin_estimate.worst_case, decimal_spec=decimal_spec
+        ),
+    )
+
+
+def _liquidation_estimate_from_proto(
+    liquidation_estimate: data_node_protos_v2.trading_data.LiquidationEstimate,
+):
+    return LiquidationEstimate(
+        best_case=_liquidation_price_from_proto(liquidation_estimate.best_case),
+        worst_case=_liquidation_price_from_proto(liquidation_estimate.worst_case),
+    )
+
+
+def _liquidation_price_from_proto(
+    liquidation_price: data_node_protos_v2.trading_data.LiquidationPrice,
+):
+    return LiquidationPrice(
+        open_volume_only=float(liquidation_price.open_volume_only),
+        including_buy_orders=float(liquidation_price.including_buy_orders),
+        including_sell_orders=float(liquidation_price.including_sell_orders),
+    )
+
+
 def positions_by_market(
     data_client: vac.VegaTradingDataClientV2,
     pub_key: str,
@@ -510,10 +562,10 @@ def _market_data_from_proto(
         auction_end=market_data.auction_end,
         auction_start=market_data.auction_start,
         indicative_price=num_from_padded_int(
-            market_data.static_mid_price, decimal_spec.price_decimals
+            market_data.indicative_price, decimal_spec.price_decimals
         ),
         indicative_volume=num_from_padded_int(
-            market_data.static_mid_price, decimal_spec.price_decimals
+            market_data.indicative_volume, decimal_spec.price_decimals
         ),
         market_trading_mode=market_data.market_trading_mode,
         trigger=market_data.trigger,
@@ -1515,3 +1567,49 @@ def get_risk_factors(
         short=float(raw_risk_factors.risk_factor.short),
         long=float(raw_risk_factors.risk_factor.long),
     )
+
+
+def estimate_position(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    open_volume: int,
+    orders: Optional[List[Tuple[str, str, int, bool]]] = None,
+    collateral_available: Optional[str] = None,
+    asset_decimals: Optional[Dict[str, int]] = {},
+) -> Tuple[MarginEstimate, LiquidationEstimate,]:
+    if orders is not None:
+        proto_orders = [
+            data_node_protos_v2.trading_data.OrderInfo(
+                side=order[0],
+                price=order[1],
+                remaining=order[2],
+                is_market_order=order[3],
+            )
+            for order in orders
+        ]
+
+    margin_estimate, liquidation_estimate = data_raw.estimate_position(
+        data_client=data_client,
+        market_id=market_id,
+        open_volume=open_volume,
+        orders=proto_orders if orders is not None else None,
+        collateral_available=collateral_available,
+    )
+
+    if margin_estimate.best_case.asset not in asset_decimals:
+        asset_decimals[margin_estimate.best_case.asset] = get_asset_decimals(
+            asset_id=margin_estimate.best_case.market_id, data_client=data_client
+        )
+
+    converted_margin_estimate = _margin_estimate_from_proto(
+        margin_estimate=margin_estimate,
+        decimal_spec=DecimalSpec(
+            asset_decimals=asset_decimals[margin_estimate.best_case.asset]
+        ),
+    )
+
+    converted_liquidation_estimate = _liquidation_estimate_from_proto(
+        liquidation_estimate=liquidation_estimate,
+    )
+
+    return converted_margin_estimate, converted_liquidation_estimate

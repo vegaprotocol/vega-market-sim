@@ -30,10 +30,17 @@ import numpy as np
 from collections import namedtuple
 from typing import Any, Callable, List, Optional
 
-from vega_sim.environment.agent import Agent, StateAgent, VegaState
+from vega_sim.environment.agent import (
+    Agent,
+    StateAgent,
+    StateAgentWithWallet,
+    VegaState,
+)
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
+
+from vega_sim.service import VegaFaucetError
 
 logger = logging.getLogger(__name__)
 
@@ -196,14 +203,17 @@ class MarketEnvironment:
                 Optional, int, If passed, will log a progress line every n steps
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
-        logger.info(
-            f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
-        )
+        logger.info(f"Running graphql at: http://localhost:{vega.data_node_rest_port}")
 
         start = datetime.datetime.now()
 
         for agent in self.agents:
             agent.initialise(vega=vega)
+            if isinstance(agent, StateAgentWithWallet):
+                logging.info(
+                    f"{agent.name()}: key ="
+                    f" {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
+                )
             if self.transactions_per_block > 1:
                 vega.wait_fn(1)
 
@@ -213,7 +223,6 @@ class MarketEnvironment:
         start_time = vega.get_blockchain_time(in_seconds=True)
         for i in range(self.n_steps):
             self.step(vega)
-
             # Ensure core is caught up
             core_catchup_start = datetime.datetime.now()
             vega.wait_for_core_catchup()
@@ -271,7 +280,16 @@ class MarketEnvironment:
             if self.random_agent_ordering
             else self.agents
         ):
-            agent.step(vega)
+            # TODO: Remove this once fauceting error has been investigated
+            try:
+                agent.step(vega)
+            except VegaFaucetError:
+                logger.exception(
+                    f"Agent {agent.name()} failed to step. Funds from faucet never"
+                    " received."
+                )
+                # Mint forwards blocks, wait for catchup
+                vega.wait_for_total_catchup()
 
 
 class MarketEnvironmentWithState(MarketEnvironment):
@@ -383,7 +401,16 @@ class MarketEnvironmentWithState(MarketEnvironment):
             if self.random_agent_ordering
             else self.agents
         ):
-            agent.step(state)
+            # TODO: Remove this once fauceting error has been investigated
+            try:
+                agent.step(state)
+            except VegaFaucetError:
+                logger.exception(
+                    f"Agent {agent.name()} failed to step. Funds from faucet never"
+                    " received."
+                )
+                # Mint forwards blocks, wait for catchup
+                vega.wait_for_total_catchup()
 
 
 class NetworkEnvironment(MarketEnvironmentWithState):
@@ -418,6 +445,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         self,
         run_with_console: bool = False,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ):
         if self._vega is None:
             with VegaServiceNetwork(
@@ -427,12 +455,17 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             ) as vega:
                 return self._run(vega)
         else:
-            return self._run(self._vega, pause_at_completion=pause_at_completion)
+            return self._run(
+                self._vega,
+                pause_at_completion=pause_at_completion,
+                log_every_n_steps=log_every_n_steps,
+            )
 
     def _run(
         self,
         vega: VegaServiceNetwork,
         pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
     ) -> None:
         # Initial datanode connection check
         vega.check_datanode(raise_on_error=self.raise_datanode_errors)
@@ -446,12 +479,23 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
+            t_start = time.time()
+
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
 
             i += 1
             self.step(vega)
 
-            time.sleep(self.step_length_seconds)
+            t_elapsed = time.time() - t_start
+            if t_elapsed <= self.step_length_seconds:
+                time.sleep(self.step_length_seconds - t_elapsed)
+            else:
+                logging.warning(
+                    f"Environment step, {round(t_elapsed,2)}s, taking longer than"
+                    f" defined scenario step length, {self.step_length_seconds}s,"
+                )
+            if log_every_n_steps is not None and i % log_every_n_steps == 0:
+                logger.info(f"Completed {i} steps")
 
         for agent in self.agents:
             agent.finalise()
@@ -474,7 +518,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             try:
                 agent.step(state)
             except Exception as e:
-                msg = f"Agent '{agent.key_name}' failed to step."
+                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
                 if self.raise_step_errors:
                     raise e(msg)
                 else:
@@ -576,9 +620,7 @@ class RealtimeMarketEnvironment(MarketEnvironmentWithState):
                     to be inspected, either via code or the Console
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
-        logger.info(
-            f"Running graphql at: http://localhost:{vega.data_node_graphql_port}"
-        )
+        logger.info(f"Running graphql at: http://localhost:{vega.data_node_rest_port}")
 
         for agent in self.agents:
             agent.initialise(vega=vega)

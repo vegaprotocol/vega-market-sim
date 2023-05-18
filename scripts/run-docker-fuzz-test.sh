@@ -15,4 +15,5 @@ docker run \
         python -m vega_sim.scenario.fuzzed_markets.run_fuzz_test --steps $1
 
 docker cp fuzz_test:/vega_market_sim/fuzz_plots/. .
+docker cp fuzz_test:/vega_market_sim/run_logs/latest/. .
 docker rm fuzz_test

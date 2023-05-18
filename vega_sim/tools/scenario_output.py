@@ -1,3 +1,4 @@
+from vega_sim.environment.agent import Agent, StateAgentWithWallet
 from vega_sim.scenario.common.agents import MarketHistoryData
 from typing import List, Callable, Optional, Dict
 import pandas as pd
@@ -8,6 +9,7 @@ import os.path
 DEFAULT_PATH = "./run_logs"
 DEFAULT_RUN_NAME = "latest"
 
+AGENTS_FILE_NAME = "agents.csv"
 DATA_FILE_NAME = "market_data.csv"
 ORDER_BOOK_FILE_NAME = "depth_data.csv"
 TRADES_FILE_NAME = "trades.csv"
@@ -26,6 +28,7 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
                 "mark_price": market_data.mark_price,
                 "market_id": market_id,
                 "mark_price": market_data.mark_price,
+                "mid_price": market_data.mid_price,
                 "open_interest": market_data.open_interest,
                 "best_bid": market_data.best_bid_price,
                 "best_offer": market_data.best_offer_price,
@@ -35,6 +38,13 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
                 "market_trading_mode": market_data.market_trading_mode,
                 "target_stake": market_data.target_stake,
                 "supplied_stake": market_data.supplied_stake,
+                "price_monitoring_bounds": [
+                    ((bound.min_valid_price, bound.max_valid_price))
+                    for bound in market_data.price_monitoring_bounds
+                ],
+                "indicative_price": market_data.indicative_price,
+                "trigger": market_data.trigger,
+                "extension_trigger": market_data.extension_trigger,
             },
         )
     return results
@@ -152,6 +162,38 @@ def market_data_standard_output(
             output_path=full_path,
             data_to_row_fn=data_fn,
         )
+
+
+def agents_standard_output(
+    agents: Dict[str, Agent],
+    run_name: str = DEFAULT_RUN_NAME,
+    output_path: str = DEFAULT_PATH,
+):
+    results = {
+        key: [] for key in ["agent_name", "agent_type", "agent_tag", "agent_key"]
+    }
+    for name, agent in agents.items():
+        results["agent_name"].append(name)
+        results["agent_tag"].append(agent.tag)
+        results["agent_type"].append(type(agent).__name__)
+        if isinstance(agent, StateAgentWithWallet):
+            results["agent_key"].append(agent._public_key)
+        else:
+            results["agent_key"].append(None)
+
+    full_path = os.path.join(output_path, run_name)
+    os.makedirs(full_path, exist_ok=True)
+    pd.DataFrame.from_dict(results).to_csv(os.path.join(full_path, AGENTS_FILE_NAME))
+
+
+def load_agents_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    return pd.read_csv(os.path.join(output_path, run_name, AGENTS_FILE_NAME)).set_index(
+        "agent_name"
+    )
 
 
 def load_market_data_df(

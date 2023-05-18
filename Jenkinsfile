@@ -13,10 +13,12 @@ pipeline {
         timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: '42ec67c184dd92c86d8ab245f3a907daf0c08841',
+        string( name: 'VEGA_VERSION', defaultValue: 'ae553695aab6ebf72463d4d626bd4bfc3fbd123c',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
+        string( name: 'NODE_LABEL', defaultValue: 'system-tests',
+                description: 'Node to run market sims' )
     }
     environment {
         CGO_ENABLED = 0
@@ -25,7 +27,9 @@ pipeline {
 
     stages {
         stage('Config') {
-            agent any
+            agent {
+                label 'system-tests'
+            }
             steps {
                 sh 'printenv'
                 echo "params=${params}"
@@ -34,22 +38,17 @@ pipeline {
                     params = pr.injectPRParams()
                 }
                 echo "params (after injection)=${params}"
-            }
-        }
-
-        stage('Git clone') {
-            agent any
-            options { retry(3) }
-            steps {
-                dir('vega-market-sim') {
-                    script {
-                        scmVars = checkout(scm)
-                        versionHash = sh (returnStdout: true, script: "echo \"${scmVars.GIT_COMMIT}\"|cut -b1-8").trim()
-                        version = sh (returnStdout: true, script: "git describe --tags 2>/dev/null || echo ${versionHash}").trim()
-                        commitHash = getCommitHash()
+                retry (3) {
+                    dir('vega-market-sim') {
+                        script {
+                            scmVars = checkout(scm)
+                            versionHash = sh (returnStdout: true, script: "echo \"${scmVars.GIT_COMMIT}\"|cut -b1-8").trim()
+                            version = sh (returnStdout: true, script: "git describe --tags 2>/dev/null || echo ${versionHash}").trim()
+                            commitHash = getCommitHash()
+                        }
+                        echo "scmVars=${scmVars}"
+                        echo "commitHash=${commitHash}"
                     }
-                    echo "scmVars=${scmVars}"
-                    echo "commitHash=${commitHash}"
                 }
             }
         }
@@ -57,11 +56,14 @@ pipeline {
         stage('Vega Market Sim Tests') {
             steps {
                 script {
-                    vegaMarketSim ignoreFailure: false,
+                    vegaMarketSim (
+                        ignoreFailure: false,
                         timeout: 90,
                         vegaMarketSimBranch: commitHash,
                         vegaVersion: params.VEGA_VERSION,
-                        jenkinsSharedLibBranch: params.JENKINS_SHARED_LIB_BRANCH
+                        jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
+                        nodeLabel: params.NODE_LABEL,
+                    )
                 }
             }
         }

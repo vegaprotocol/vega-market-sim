@@ -3,7 +3,7 @@ name = "vega_sim"
 description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
-version = "1.0.1"
+version = "1.1.1"
 
 [tool.setuptools]
 zip-safe = false

@@ -1,7 +1,7 @@
 """wallet.py
 
 Module contains agent information variables for each party in the devops scenario. An 
-agent variable contains the wallet name, wallet pass, and key name for an agent.
+agent variable contains the wallet name and key name for an agent.
 
 When deploying a devops scenario to an existing network; A wallet with the following key
 names must exist locally.
@@ -14,17 +14,12 @@ names must exist locally.
     • random_trader_a
     • random_trader_b
     • random_trader_c
-    • momentum_trader_a
-    • momentum_trader_b
-    • momentum_trader_c
-    • momentum_trader_d
-    • momentum_trader_e
     • sensitive_trader_a
     • sensitive_trader_b
     • sensitive_trader_c
 
 The wallet name and wallet passphrase can be modified with the environment variables
-VEGA_USER_WALLET_NAME and VEGA_USER_WALLETS_PASS in the .env file.
+VEGA_USER_WALLET_NAME and VEGA_USER_WALLETS_PASS.
 
 """
 
@@ -33,7 +28,7 @@ import dotenv
 
 from dataclasses import dataclass
 
-DEFAULT_USER_WALLET_NAME = "network_agents"
+DEFAULT_USER_WALLET_NAME = "vega-market-sim"
 DEFAULT_USER_WALLET_PASS = "passphrase"
 
 
@@ -66,15 +61,6 @@ RANDOM_TRADER_AGENTS = [
     Agent(key_name="random_trader_a"),
     Agent(key_name="random_trader_b"),
     Agent(key_name="random_trader_c"),
-]
-
-# Momentum traders provide realistic trades in continuous trading modes
-MOMENTUM_TRADER_AGENTS = [
-    Agent(key_name="momentum_trader_a"),
-    Agent(key_name="momentum_trader_b"),
-    Agent(key_name="momentum_trader_c"),
-    Agent(key_name="momentum_trader_d"),
-    Agent(key_name="momentum_trader_e"),
 ]
 
 # Sensitive traders exploit over-exposed positions in continuous trading modes

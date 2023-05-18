@@ -50,7 +50,6 @@ def _queue_forwarder(
     for evts, handler in stream_registry:
         for evt in evts:
             handlers[evt] = handler
-
     try:
         for o in obs:
             for event in o.events:
@@ -61,8 +60,9 @@ def _queue_forwarder(
                 else:
                     sink.put(output)
     except grpc._channel._MultiThreadedRendezvous as e:
-        if e.details() == "Socket closed":
-            logger.info("Data cache event bus closed")
+        if e.details() in ["Channel closed!", "Socket closed"]:
+            logging.debug(f"Thread finished as {e.details}")
+            logger.info("Data cache event bus closed.")
         else:
             raise e
 
@@ -181,7 +181,9 @@ class LocalDataCache:
         ]
 
     def stop(self) -> None:
-        return
+        self._kill_thread_sig.set()
+        self._observation_thread.join()
+        self._forwarding_thread.join()
 
     def time_update_from_feed(
         self,
@@ -321,9 +323,7 @@ class LocalDataCache:
                 self._asset_from_feed[asset.id] = asset
 
     def initialise_markets(self):
-        base_markets = [
-            market.id for market in data_raw.all_markets(self._trading_data_client)
-        ]
+        base_markets = data_raw.all_markets(self._trading_data_client)
 
         with self.market_lock:
             for market in base_markets:
@@ -408,7 +408,7 @@ class LocalDataCache:
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
     def _monitor_stream(self) -> None:
-        while True:
+        while not self._kill_thread_sig.is_set():
             try:
                 update = self._aggregated_observation_feed.get(timeout=1)
             except Empty:

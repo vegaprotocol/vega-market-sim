@@ -13,9 +13,10 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.scenario.common.agents import (
     StateAgent,
-    OpenAuctionPass,
+    UncrossAuctionAgent,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
+    LimitOrderTrader,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
@@ -83,6 +84,50 @@ def additional_data_to_rows(data) -> List[pd.Series]:
     return results
 
 
+def _create_price_process(
+    random_state: np.random.RandomState, num_steps, decimal_places
+):
+    price_process = [1500]
+
+    while len(price_process) < num_steps + 1:
+        # Add a stable price-process with a random duration of 5-20% of the sim
+        price_process = np.concatenate(
+            (
+                price_process,
+                random_walk(
+                    num_steps=random_state.randint(
+                        int(0.05 * num_steps), int(0.20 * num_steps)
+                    ),
+                    sigma=2,
+                    starting_price=price_process[-1],
+                    decimal_precision=decimal_places,
+                ),
+            )
+        )
+        # Add an unstable price-process with a random duration of 5-10% of the sim
+        price_process = np.concatenate(
+            (
+                price_process,
+                random_walk(
+                    num_steps=random_state.randint(
+                        int(0.05 * num_steps), int(0.10 * num_steps)
+                    ),
+                    sigma=2,
+                    drift=random_state.uniform(-1, 1),
+                    starting_price=price_process[-1],
+                    decimal_precision=decimal_places,
+                ),
+            )
+        )
+
+    # Add spikes to the price monitoring auction
+    spike_at = random_state.randint(0, num_steps, size=3)
+    for i in spike_at:
+        price_process[i] = price_process[i] * random_state.choice([0.95, 1.05])
+
+    return price_process
+
+
 class FuzzingScenario(Scenario):
     def __init__(
         self,
@@ -146,17 +191,19 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed market config
             market_config = MarketConfig()
+            market_config.set(
+                "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+                1e-4,
+            )
             if self.fuzz_market_config is not None:
                 for param in self.fuzz_market_config:
                     market_config.set(param=self.fuzz_market_config[param])
 
             # Create fuzzed price process
-            price_process = random_walk(
-                num_steps=self.num_steps + 1,
-                sigma=random_state.rand() * 1e1,
-                drift=random_state.rand() * 1e-3,
-                starting_price=1000,
-                decimal_precision=int(market_config.decimal_places),
+            price_process = _create_price_process(
+                random_state=random_state,
+                num_steps=self.num_steps,
+                decimal_places=int(market_config.decimal_places),
             )
 
             # Create fuzzed market managers
@@ -188,9 +235,9 @@ class FuzzingScenario(Scenario):
                     market_decimal_places=market_config.decimal_places,
                     asset_decimal_places=asset_name,
                     num_steps=self.num_steps,
-                    kappa=0.6,
-                    tick_spacing=0.1,
-                    market_kappa=20,
+                    kappa=2.4,
+                    tick_spacing=0.05,
+                    market_kappa=50,
                     state_update_freq=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
@@ -198,15 +245,15 @@ class FuzzingScenario(Scenario):
 
             for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"]):
                 auction_traders.append(
-                    OpenAuctionPass(
+                    UncrossAuctionAgent(
                         wallet_name=f"AUCTION_TRADERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_{side}",
                         side=side,
                         initial_asset_mint=self.initial_asset_mint,
-                        initial_price=price_process[0],
+                        price_process=iter(price_process),
                         market_name=market_name,
                         asset_name=asset_name,
-                        opening_auction_trade_amount=1,
+                        uncrossing_size=20,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
@@ -222,6 +269,29 @@ class FuzzingScenario(Scenario):
                         sell_intensity=10,
                         base_order_size=1,
                         step_bias=1,
+                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    )
+                )
+
+            for i_agent in range(5):
+                random_traders.append(
+                    LimitOrderTrader(
+                        wallet_name=f"RANDOM_TRADERS",
+                        key_name=f"LIMIT_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        market_name=market_name,
+                        asset_name=asset_name,
+                        time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
+                        buy_volume=1,
+                        sell_volume=1,
+                        buy_intensity=10,
+                        sell_intensity=10,
+                        submit_bias=1,
+                        cancel_bias=0,
+                        duration=120,
+                        price_process=price_process,
+                        spread=0,
+                        mean=-3,
+                        sigma=0.5,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
@@ -249,7 +319,7 @@ class FuzzingScenario(Scenario):
                             side=side,
                             initial_asset_mint=1_000,
                             size_factor=0.7,
-                            step_bias=0.01,
+                            step_bias=0.1,
                             tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         )
                     )
@@ -258,13 +328,27 @@ class FuzzingScenario(Scenario):
                 degenerate_liquidity_providers.append(
                     DegenerateLiquidityProvider(
                         wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        key_name=f"HIGH_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
                         initial_asset_mint=1_000,
                         commitment_factor=0.7,
-                        step_bias=0.01,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        step_bias=0.1,
+                        tag=f"HIGH_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    )
+                )
+
+            for i_agent in range(45):
+                degenerate_liquidity_providers.append(
+                    DegenerateLiquidityProvider(
+                        wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
+                        key_name=f"LOW_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        market_name=market_name,
+                        asset_name=asset_name,
+                        initial_asset_mint=1_000,
+                        commitment_factor=0.5,
+                        step_bias=0.1,
+                        tag=f"LOW_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
 

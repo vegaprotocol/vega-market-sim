@@ -337,6 +337,7 @@ class DegenerateTrader(StateAgentWithWallet):
                 asset=self.asset_id,
             )
             self.close_outs += 1
+            self.commitment_amount = 0
             return
 
         if (
@@ -438,6 +439,7 @@ class DegenerateLiquidityProvider(StateAgentWithWallet):
                 asset=self.asset_id,
             )
             self.close_outs += 1
+            self.commitment_amount = 0
             return
 
         if self.random_state.rand() > self.step_bias:

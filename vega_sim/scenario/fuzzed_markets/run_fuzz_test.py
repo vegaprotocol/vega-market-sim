@@ -8,10 +8,17 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 
-from vega_sim.tools.scenario_plots import fuzz_plots, plot_run_outputs
+from vega_sim.tools.scenario_plots import (
+    fuzz_plots,
+    plot_run_outputs,
+    account_plots,
+    plot_price_monitoring,
+)
+
+from matplotlib import pyplot as plt
 
 
-def _run(steps: int = 2880, output: bool = False):
+def _run(steps: int = 2880, output: bool = False, output_dir: str = "fuzz_plots"):
     scenario = FuzzingScenario(
         num_steps=steps,
         step_length_seconds=30,
@@ -35,16 +42,27 @@ def _run(steps: int = 2880, output: bool = False):
         )
 
     if output:
-        if not os.path.exists("fuzz_plots"):
-            os.mkdir("fuzz_plots")
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
+        fuzz_figs = plot_price_monitoring()
+        for key, fig in fuzz_figs.items():
+            fig.savefig(f"{output_dir}/monitoring-{key}.jpg")
+            plt.close(fig)
 
         fuzz_figs = fuzz_plots()
         for key, fig in fuzz_figs.items():
-            fig.savefig(f"fuzz_plots/fuzz-{key}.jpg")
+            fig.savefig(f"{output_dir}/fuzz-{key}.jpg")
+            plt.close(fig)
 
         trading_figs = plot_run_outputs()
         for key, fig in trading_figs.items():
-            fig.savefig(f"fuzz_plots/trading-{key}.jpg")
+            fig.savefig(f"{output_dir}/trading-{key}.jpg")
+            plt.close(fig)
+
+        account_fig = account_plots()
+        account_fig.savefig(f"{output_dir}/accounts-{key}.jpg")
+        plt.close(account_fig)
 
 
 if __name__ == "__main__":
