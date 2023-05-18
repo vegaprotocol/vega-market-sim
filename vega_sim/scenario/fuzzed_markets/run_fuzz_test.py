@@ -18,7 +18,7 @@ from vega_sim.tools.scenario_plots import (
 from matplotlib import pyplot as plt
 
 
-def _run(steps: int = 2880, output: bool = False)
+def _run(steps: int = 2880, output: bool = False, output_dir: str = "fuzz_plots"):
     scenario = FuzzingScenario(
         num_steps=steps,
         step_length_seconds=30,
@@ -42,26 +42,26 @@ def _run(steps: int = 2880, output: bool = False)
         )
 
     if output:
-        if not os.path.exists("fuzz_plots"):
-            os.mkdir("fuzz_plots")
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
 
         fuzz_figs = plot_price_monitoring()
         for key, fig in fuzz_figs.items():
-            fig.savefig(f"fuzz_plots/monitoring-{key}.jpg")
+            fig.savefig(f"{output_dir}/monitoring-{key}.jpg")
             plt.close(fig)
 
         fuzz_figs = fuzz_plots()
         for key, fig in fuzz_figs.items():
-            fig.savefig(f"fuzz_plots/fuzz-{key}.jpg")
+            fig.savefig(f"{output_dir}/fuzz-{key}.jpg")
             plt.close(fig)
 
         trading_figs = plot_run_outputs()
         for key, fig in trading_figs.items():
-            fig.savefig(f"fuzz_plots/trading-{key}.jpg")
+            fig.savefig(f"{output_dir}/trading-{key}.jpg")
             plt.close(fig)
 
         account_fig = account_plots()
-        account_fig.savefig(f"fuzz_plots/accounts-{key}.jpg")
+        account_fig.savefig(f"{output_dir}/accounts-{key}.jpg")
         plt.close(account_fig)
 
 

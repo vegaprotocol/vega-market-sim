@@ -89,7 +89,7 @@ def _create_price_process(
 ):
     price_process = [1500]
 
-    while len(price_process) < num_steps:
+    while len(price_process) < num_steps + 1:
         # Add a stable price-process with a random duration of 5-20% of the sim
         price_process = np.concatenate(
             (
@@ -191,6 +191,10 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed market config
             market_config = MarketConfig()
+            market_config.set(
+                "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
+                1e-4,
+            )
             if self.fuzz_market_config is not None:
                 for param in self.fuzz_market_config:
                     market_config.set(param=self.fuzz_market_config[param])
@@ -324,13 +328,27 @@ class FuzzingScenario(Scenario):
                 degenerate_liquidity_providers.append(
                     DegenerateLiquidityProvider(
                         wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        key_name=f"HIGH_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
                         initial_asset_mint=1_000,
                         commitment_factor=0.7,
                         step_bias=0.1,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        tag=f"HIGH_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    )
+                )
+
+            for i_agent in range(45):
+                degenerate_liquidity_providers.append(
+                    DegenerateLiquidityProvider(
+                        wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
+                        key_name=f"LOW_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        market_name=market_name,
+                        asset_name=asset_name,
+                        initial_asset_mint=1_000,
+                        commitment_factor=0.5,
+                        step_bias=0.1,
+                        tag=f"LOW_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
 

@@ -28,6 +28,7 @@ from vega_sim.api.data_raw import (
     margin_levels,
     list_transfers,
     list_ledger_entries,
+    estimate_position,
 )
 
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
@@ -841,3 +842,103 @@ def test_list_ledger_entries(trading_data_v2_servicer_and_port):
     )
 
     assert res == [expected]
+
+
+def test_estimate_position(trading_data_v2_servicer_and_port):
+    expected_market_id = "market"
+
+    expected_margin = data_node_protos_v2.trading_data.MarginEstimate(
+        best_case=vega_protos.vega.MarginLevels(
+            maintenance_margin="100",
+            search_level="200",
+            initial_margin="300",
+            collateral_release_level="400",
+            party_id="party",
+            market_id=expected_market_id,
+            asset="asset",
+            timestamp=0000000000000000000,
+        ),
+        worst_case=vega_protos.vega.MarginLevels(
+            maintenance_margin="100",
+            search_level="200",
+            initial_margin="300",
+            collateral_release_level="400",
+            party_id="party",
+            market_id=expected_market_id,
+            asset="asset",
+            timestamp=0000000000000000000,
+        ),
+    )
+    expected_liquidation = data_node_protos_v2.trading_data.LiquidationEstimate(
+        best_case=data_node_protos_v2.trading_data.LiquidationPrice(
+            open_volume_only="1000",
+            including_buy_orders="2000",
+            including_sell_orders="3000",
+        ),
+        worst_case=data_node_protos_v2.trading_data.LiquidationPrice(
+            open_volume_only="1000",
+            including_buy_orders="2000",
+            including_sell_orders="3000",
+        ),
+    )
+
+    def EstimatePosition(self, request, context):
+        return data_node_protos_v2.trading_data.EstimatePositionResponse(
+            margin=data_node_protos_v2.trading_data.MarginEstimate(
+                best_case=vega_protos.vega.MarginLevels(
+                    maintenance_margin="100",
+                    search_level="200",
+                    initial_margin="300",
+                    collateral_release_level="400",
+                    party_id="party",
+                    market_id=request.market_id,
+                    asset="asset",
+                    timestamp=0000000000000000000,
+                ),
+                worst_case=vega_protos.vega.MarginLevels(
+                    maintenance_margin="100",
+                    search_level="200",
+                    initial_margin="300",
+                    collateral_release_level="400",
+                    party_id="party",
+                    market_id=request.market_id,
+                    asset="asset",
+                    timestamp=0000000000000000000,
+                ),
+            ),
+            liquidation=data_node_protos_v2.trading_data.LiquidationEstimate(
+                best_case=data_node_protos_v2.trading_data.LiquidationPrice(
+                    open_volume_only="1000",
+                    including_buy_orders="2000",
+                    including_sell_orders="3000",
+                ),
+                worst_case=data_node_protos_v2.trading_data.LiquidationPrice(
+                    open_volume_only="1000",
+                    including_buy_orders="2000",
+                    including_sell_orders="3000",
+                ),
+            ),
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.EstimatePosition = EstimatePosition
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    margin, liquidation = estimate_position(
+        data_client=data_client,
+        market_id=expected_market_id,
+        open_volume=1,
+        orders=[
+            data_node_protos_v2.trading_data.OrderInfo(
+                side=vega_protos.vega.SIDE_BUY,
+                price="100",
+                remaining=1,
+                is_market_order=True,
+            )
+        ],
+        collateral_available="1000",
+    )
+    assert margin == expected_margin
+    assert liquidation == expected_liquidation

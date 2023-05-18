@@ -201,3 +201,6 @@ class SlimWallet(Wallet):
             return self.pub_keys[self.vega_default_wallet_name][name]
         else:
             return self.pub_keys[wallet_name][name]
+
+    def stop(self):
+        self.pool.shutdown(wait=True)

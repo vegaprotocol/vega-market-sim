@@ -72,10 +72,10 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.FromString,
         )
-        self.ExportLedgerEntries = channel.unary_unary(
+        self.ExportLedgerEntries = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportLedgerEntries",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesResponse.FromString,
+            response_deserializer=google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
         )
         self.ListBalanceChanges = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListBalanceChanges",
@@ -347,6 +347,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
         )
+        self.EstimatePosition = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/EstimatePosition",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.FromString,
+        )
         self.ListNetworkParameters = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListNetworkParameters",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersRequest.SerializeToString,
@@ -553,18 +558,17 @@ class TradingDataServiceServicer(object):
     def ListLedgerEntries(self, request, context):
         """List ledger entries
 
-        Get a list of ledger entries by asset, market, party, account type and transfer type within the given date range.
+        Get a list of ledger entries within the given date range.
         This query requests and sums the number of ledger entries from a given subset of accounts, specified via the 'filter' argument.
         It returns a time series - implemented as a list of AggregateLedgerEntry structs - with a row for every time
         the summed ledger entries of the set of specified accounts changes.
-        Listed entries should be limited to a single party from each side only. If zero or more than one party is provided
-        for each of the sides - sending and receiving accounts, the query returns an error.
+        Each account filter must contain no more than one party ID.
 
-        Entries can be queried by:
-        - listing ledger entries with filtering on the sending account (market ID, asset ID, account type)
-        - listing ledger entries with filtering on the receiving account (market ID, asset ID, account type)
-        - listing ledger entries with filtering on the sending AND receiving account
-        - listing ledger entries with filtering on the transfer type either in addition to the above filters or as a standalone option
+        Entries can be filtered by:
+        - the sending account (market ID, asset ID, account type)
+        - receiving account (market ID, asset ID, account type)
+        - sending AND receiving account
+        - transfer type either in addition to the above filters or as a standalone option
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -579,6 +583,8 @@ class TradingDataServiceServicer(object):
         Ledger entries can be exported by:
         - export ledger entries for a single party for a given asset within a given time range
         - export ledger entries for a single party for a given asset for all times
+        buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+        buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -895,7 +901,10 @@ class TradingDataServiceServicer(object):
     def ListRewardSummaries(self, request, context):
         """List reward summaries
 
-        Get a list of reward summaries that match the provided criteria. If no filter is provided, all reward summaries will be returned.
+        Get a list of reward summaries where the reward amount is the total rewards received over all epochs
+        per party ID and asset ID.
+        Request parameters are optional party ID and asset ID.
+        If no data is provided, all reward summaries will be returned grouped by party and asset ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -904,7 +913,9 @@ class TradingDataServiceServicer(object):
     def ListEpochRewardSummaries(self, request, context):
         """List epoch reward summaries
 
-        Get a list of reward summaries by epoch.
+        Get a list of reward summaries by epoch for a given range of epochs.
+        The result is filtered by list of asset IDs, market IDs and starting and ending epochs, for which to return rewards.
+        If no data is provided, all reward summaries will be returned, grouped by epochs, market IDs, asset IDs and reward type.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1079,6 +1090,16 @@ class TradingDataServiceServicer(object):
         """Estimate margin
 
         Estimate the margin that would be required for submitting this order
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def EstimatePosition(self, request, context):
+        """Estimate position
+
+        Estimate the margin that would be required for maintaining the specified position.
+        If the optional collateral available argument is supplied, the response also contains the estimate of the liquidation price.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1292,7 +1313,7 @@ class TradingDataServiceServicer(object):
         matching the NULL parameter string is quoted.
 
         For example, with the default settings, a NULL is written as an unquoted empty string,
-        while an empty string data value is written with double quotes ("").
+        while an empty string data value is written with double quotes.
 
         Note that CSV files produced may contain quoted values containing embedded carriage returns and line feeds.
         Thus the files are not strictly one line per table row like text-format files.
@@ -1325,6 +1346,7 @@ class TradingDataServiceServicer(object):
 
         It is worth noting that the schema will not change within a single network history segment.
         buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+        buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1397,10 +1419,10 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.SerializeToString,
         ),
-        "ExportLedgerEntries": grpc.unary_unary_rpc_method_handler(
+        "ExportLedgerEntries": grpc.unary_stream_rpc_method_handler(
             servicer.ExportLedgerEntries,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesResponse.SerializeToString,
+            response_serializer=google_dot_api_dot_httpbody__pb2.HttpBody.SerializeToString,
         ),
         "ListBalanceChanges": grpc.unary_unary_rpc_method_handler(
             servicer.ListBalanceChanges,
@@ -1671,6 +1693,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.EstimateMargin,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.SerializeToString,
+        ),
+        "EstimatePosition": grpc.unary_unary_rpc_method_handler(
+            servicer.EstimatePosition,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.SerializeToString,
         ),
         "ListNetworkParameters": grpc.unary_unary_rpc_method_handler(
             servicer.ListNetworkParameters,
@@ -2120,12 +2147,12 @@ class TradingDataService(object):
         timeout=None,
         metadata=None,
     ):
-        return grpc.experimental.unary_unary(
+        return grpc.experimental.unary_stream(
             request,
             target,
             "/datanode.api.v2.TradingDataService/ExportLedgerEntries",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesResponse.FromString,
+            google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
             options,
             channel_credentials,
             insecure,
@@ -3692,6 +3719,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/EstimateMargin",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def EstimatePosition(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/EstimatePosition",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.FromString,
             options,
             channel_credentials,
             insecure,
