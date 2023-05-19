@@ -84,62 +84,82 @@ def openoracle_oracle(
     instrument_name: str,
     min_price: Optional[int] = None,
     min_timestamp: Optional[int] = None,
-) -> oracles_protos.spec.OracleSpecConfiguration:
-    return oracles_protos.spec.OracleSpecConfiguration(
-        pub_keys=[pub_key],
-        filters=[
-            oracles_protos.spec.Filter(
-                key=oracles_protos.spec.PropertyKey(
-                    name=f"prices.{instrument_name}.value",
-                    type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                ),
-                conditions=[
-                    oracles_protos.spec.Condition(
-                        operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN,
-                        value=str(min_price),
+) -> data_source_protos.DataSourceDefinition:
+    return data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=pub_key)
                     )
-                ]
-                if min_price is not None
-                else [],
-            ),
-            oracles_protos.spec.Filter(
-                key=oracles_protos.spec.PropertyKey(
-                    name=f"prices.{instrument_name}.timestamp",
-                    type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                ),
-                conditions=[
-                    oracles_protos.spec.Condition(
-                        operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN,
-                        value=str(min_timestamp),
-                    )
-                ]
-                if min_timestamp is not None
-                else [],
-            ),
-        ],
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"prices.{instrument_name}.value",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                        ),
+                        conditions=(
+                            [
+                                oracles_protos.spec.Condition(
+                                    operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                                    value=str(min_price),
+                                )
+                            ]
+                            if min_price is not None
+                            else []
+                        ),
+                    ),
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"prices.{instrument_name}.timestamp",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                        ),
+                        conditions=(
+                            [
+                                oracles_protos.spec.Condition(
+                                    operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                                    value=str(min_timestamp),
+                                )
+                            ]
+                            if min_timestamp is not None
+                            else []
+                        ),
+                    ),
+                ],
+            )
+        )
     )
 
 
 def vega_timestamp_termination_oracle(
     pub_key: str,
     timestamp: int,
-) -> oracles_protos.spec.OracleSpecConfiguration:
-    return oracles_protos.spec.OracleSpecConfiguration(
-        pub_keys=[pub_key],
-        filters=[
-            oracles_protos.spec.Filter(
-                key=oracles_protos.spec.PropertyKey(
-                    name="vegaprotocol.builtin.timestamp",
-                    type=oracles_protos.spec.PropertyKey.Type.TYPE_TIMESTAMP,
-                ),
-                conditions=[
-                    oracles_protos.spec.Condition(
-                        operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN_OR_EQUAL,
-                        value=str(timestamp),
+) -> data_source_protos.DataSourceDefinition:
+    return data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=pub_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name="vegaprotocol.builtin.timestamp",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_TIMESTAMP,
+                        ),
+                        conditions=[
+                            oracles_protos.spec.Condition(
+                                operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN_OR_EQUAL,
+                                value=str(timestamp),
+                            )
+                        ],
                     )
                 ],
             )
-        ],
+        )
     )
 
 

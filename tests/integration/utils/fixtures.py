@@ -3,7 +3,7 @@ from typing import Optional
 
 import pytest
 from vega_sim.null_service import VegaServiceNull
-import vega_sim.proto.vega.oracles.v1 as oracles_protos
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -39,10 +39,10 @@ def build_basic_market(
     market_decimals: int = 5,
     settlement_price_decimals: Optional[int] = None,
     oracle_spec_for_settlement_price: Optional[
-        oracles_protos.spec.OracleSpecConfiguration
+        data_source_protos.DataSourceDefinition
     ] = None,
     oracle_spec_for_trading_termination: Optional[
-        oracles_protos.spec.OracleSpecConfiguration
+        data_source_protos.DataSourceDefinition
     ] = None,
 ):
     vega.wait_for_total_catchup()
