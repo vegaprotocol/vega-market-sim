@@ -43,23 +43,16 @@ class AuctionTraderArgs:
 
 @dataclass
 class RandomTraderArgs:
-    order_intensity: int
-    order_volume: float
-    initial_mint: Optional[int] = MAX_FAUCET
-
-
-@dataclass
-class MomentumTraderArgs:
-    order_intensity: int
-    order_volume: float
+    order_intensity: List[int]
+    order_volume: List[float]
+    step_bias: List[float]
     initial_mint: Optional[int] = MAX_FAUCET
 
 
 @dataclass
 class SensitiveTraderArgs:
-    order_intensity: List[int]
-    order_volume: List[float]
-    price_half_life: List[float]
+    scale: List[int]
+    max_order_size: List[float]
     initial_mint: Optional[int] = MAX_FAUCET
 
 

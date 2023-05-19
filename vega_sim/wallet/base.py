@@ -1,41 +1,37 @@
-from abc import ABC
-from typing import Any
+from abc import ABC, abstractmethod
+from typing import Any, Optional
 
 VEGA_DEFAULT_KEY_NAME = "foo"
+DEFAULT_WALLET_NAME = "MarketSim"
 
 
 class Wallet(ABC):
-    def create_wallet(
+    @abstractmethod
+    def create_key(
         self,
         name: str,
-        passphrase: str,
+        wallet_name: Optional[str] = None,
     ) -> str:
-        """Generates a new wallet from a name - passphrase pair in the given vega service.
+        """Generates a new wallet key in the given vega service.
 
         Args:
             name:
-                str, The name to use for the wallet
-            passphrase:
-                str, The passphrase to use when logging in to created wallet in future
+                str, The name to use for the wallet key
+            wallet_name:
+                str, The wallet to use if not the default
         Returns:
             str, login token to use in authenticated requests
         """
         pass
 
-    def login(self, name: str, passphrase: str) -> str:
-        """Logs in to existing wallet in the given vega service.
-
-        Args:
-            name:
-                str, The name of the wallet
-            passphrase:
-                str, The login passphrase used when creating the wallet
-        Returns:
-            str, login token to use in authenticated requests
-        """
-        pass
-
-    def submit_transaction(self, transaction: Any, name: str, transaction_type: str):
+    @abstractmethod
+    def submit_transaction(
+        self,
+        transaction: Any,
+        key_name: str,
+        transaction_type: str,
+        wallet_name: Optional[str],
+    ):
         """Submits a transaction to Vega core via wallet
 
         Args:
@@ -48,8 +44,13 @@ class Wallet(ABC):
         """
         pass
 
-    def public_key(self, name: str) -> str:
-        """Return the public key associated with a given wallet name.
+    @abstractmethod
+    def public_key(
+        self,
+        name: str,
+        wallet_name: Optional[str] = None,
+    ) -> str:
+        """Return the public key associated with a given key name.
 
         Args:
             name:

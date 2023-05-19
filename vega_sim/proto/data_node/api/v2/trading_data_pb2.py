@@ -12,22 +12,24 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from ....vega import vega_pb2 as vega_dot_vega__pb2
-from ....vega import governance_pb2 as vega_dot_governance__pb2
-from ....vega import markets_pb2 as vega_dot_markets__pb2
-from ....vega import assets_pb2 as vega_dot_assets__pb2
-from ....vega import oracle_pb2 as vega_dot_oracle__pb2
-from ....vega.events.v1 import events_pb2 as vega_dot_events_dot_v1_dot_events__pb2
-from ....vega.commands.v1 import (
-    validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2,
-)
+from google.api import field_behavior_pb2 as google_dot_api_dot_field__behavior__pb2
+from google.api import httpbody_pb2 as google_dot_api_dot_httpbody__pb2
 from protoc_gen_openapiv2.options import (
     annotations_pb2 as protoc__gen__openapiv2_dot_options_dot_annotations__pb2,
 )
+from ....vega import assets_pb2 as vega_dot_assets__pb2
+from ....vega.commands.v1 import (
+    validator_commands_pb2 as vega_dot_commands_dot_v1_dot_validator__commands__pb2,
+)
+from ....vega.events.v1 import events_pb2 as vega_dot_events_dot_v1_dot_events__pb2
+from ....vega import governance_pb2 as vega_dot_governance__pb2
+from ....vega import markets_pb2 as vega_dot_markets__pb2
+from ....vega import oracle_pb2 as vega_dot_oracle__pb2
+from ....vega import vega_pb2 as vega_dot_vega__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n#data-node/api/v2/trading_data.proto\x12\x0f\x64\x61tanode.api.v2\x1a\x0fvega/vega.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x11vega/assets.proto\x1a\x11vega/oracle.proto\x1a\x1bvega/events/v1/events.proto\x1a)vega/commands/v1/validator_commands.proto\x1a.protoc-gen-openapiv2/options/annotations.proto"\\\n\x10OffsetPagination\x12\x12\n\x04skip\x18\x01 \x01(\x04R\x04skip\x12\x14\n\x05limit\x18\x02 \x01(\x04R\x05limit\x12\x1e\n\ndescending\x18\x03 \x01(\x08R\ndescending"\xd9\x01\n\nPagination\x12\x19\n\x05\x66irst\x18\x01 \x01(\x05H\x00R\x05\x66irst\x88\x01\x01\x12\x19\n\x05\x61\x66ter\x18\x02 \x01(\tH\x01R\x05\x61\x66ter\x88\x01\x01\x12\x17\n\x04last\x18\x03 \x01(\x05H\x02R\x04last\x88\x01\x01\x12\x1b\n\x06\x62\x65\x66ore\x18\x04 \x01(\tH\x03R\x06\x62\x65\x66ore\x88\x01\x01\x12&\n\x0cnewest_first\x18\x05 \x01(\x08H\x04R\x0bnewestFirst\x88\x01\x01\x42\x08\n\x06_firstB\x08\n\x06_afterB\x07\n\x05_lastB\t\n\x07_beforeB\x0f\n\r_newest_first"\x9c\x01\n\x08PageInfo\x12"\n\rhas_next_page\x18\x01 \x01(\x08R\x0bhasNextPage\x12*\n\x11has_previous_page\x18\x02 \x01(\x08R\x0fhasPreviousPage\x12!\n\x0cstart_cursor\x18\x03 \x01(\tR\x0bstartCursor\x12\x1d\n\nend_cursor\x18\x04 \x01(\tR\tendCursor"\x9a\x01\n\x0e\x41\x63\x63ountBalance\x12\x14\n\x05owner\x18\x02 \x01(\tR\x05owner\x12\x18\n\x07\x62\x61lance\x18\x03 \x01(\tR\x07\x62\x61lance\x12\x14\n\x05\x61sset\x18\x04 \x01(\tR\x05\x61sset\x12\x1b\n\tmarket_id\x18\x05 \x01(\tR\x08marketId\x12%\n\x04type\x18\x06 \x01(\x0e\x32\x11.vega.AccountTypeR\x04type"\x9e\x01\n\x13ListAccountsRequest\x12\x36\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x06\x66ilter\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"W\n\x14ListAccountsResponse\x12?\n\x08\x61\x63\x63ounts\x18\x01 \x01(\x0b\x32#.datanode.api.v2.AccountsConnectionR\x08\x61\x63\x63ounts"\x80\x01\n\x12\x41\x63\x63ountsConnection\x12\x32\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1c.datanode.api.v2.AccountEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"Z\n\x0b\x41\x63\x63ountEdge\x12\x33\n\x04node\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8d\x01\n\x16ObserveAccountsRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12\x19\n\x08party_id\x18\x02 \x01(\tR\x07partyId\x12\x14\n\x05\x61sset\x18\x03 \x01(\tR\x05\x61sset\x12%\n\x04type\x18\x04 \x01(\x0e\x32\x11.vega.AccountTypeR\x04type"\xa6\x01\n\x17ObserveAccountsResponse\x12\x42\n\x08snapshot\x18\x01 \x01(\x0b\x32$.datanode.api.v2.AccountSnapshotPageH\x00R\x08snapshot\x12;\n\x07updates\x18\x02 \x01(\x0b\x32\x1f.datanode.api.v2.AccountUpdatesH\x00R\x07updatesB\n\n\x08response"o\n\x13\x41\x63\x63ountSnapshotPage\x12;\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x08\x61\x63\x63ounts\x12\x1b\n\tlast_page\x18\x02 \x01(\x08R\x08lastPage"M\n\x0e\x41\x63\x63ountUpdates\x12;\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x08\x61\x63\x63ounts"\r\n\x0bInfoRequest"I\n\x0cInfoResponse\x12\x18\n\x07version\x18\x01 \x01(\tR\x07version\x12\x1f\n\x0b\x63ommit_hash\x18\x02 \x01(\tR\ncommitHash"W\n\x0fGetOrderRequest\x12\x19\n\x08order_id\x18\x01 \x01(\tR\x07orderId\x12\x1d\n\x07version\x18\x02 \x01(\x05H\x00R\x07version\x88\x01\x01\x42\n\n\x08_version"5\n\x10GetOrderResponse\x12!\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.OrderR\x05order"\xd1\x01\n\x0bOrderFilter\x12.\n\x08statuses\x18\x01 \x03(\x0e\x32\x12.vega.Order.StatusR\x08statuses\x12&\n\x05types\x18\x02 \x03(\x0e\x32\x10.vega.Order.TypeR\x05types\x12=\n\x0etime_in_forces\x18\x03 \x03(\x0e\x32\x17.vega.Order.TimeInForceR\x0ctimeInForces\x12+\n\x11\x65xclude_liquidity\x18\x04 \x01(\x08R\x10\x65xcludeLiquidity"\xb7\x03\n\x11ListOrdersRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12 \n\tmarket_id\x18\x02 \x01(\tH\x01R\x08marketId\x88\x01\x01\x12!\n\treference\x18\x03 \x01(\tH\x02R\treference\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03R\npagination\x88\x01\x01\x12 \n\tlive_only\x18\x05 \x01(\x08H\x04R\x08liveOnly\x88\x01\x01\x12>\n\ndate_range\x18\x06 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x05R\tdateRange\x88\x01\x01\x12\x39\n\x06\x66ilter\x18\x07 \x01(\x0b\x32\x1c.datanode.api.v2.OrderFilterH\x06R\x06\x66ilter\x88\x01\x01\x42\x0b\n\t_party_idB\x0c\n\n_market_idB\x0c\n\n_referenceB\r\n\x0b_paginationB\x0c\n\n_live_onlyB\r\n\x0b_date_rangeB\t\n\x07_filter"N\n\x12ListOrdersResponse\x12\x38\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnectionR\x06orders"\x86\x01\n\x18ListOrderVersionsRequest\x12\x19\n\x08order_id\x18\x01 \x01(\tR\x07orderId\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"U\n\x19ListOrderVersionsResponse\x12\x38\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnectionR\x06orders"\xbb\x01\n\x14ObserveOrdersRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x12\x30\n\x11\x65xclude_liquidity\x18\x03 \x01(\x08H\x02R\x10\x65xcludeLiquidity\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_idB\x14\n\x12_exclude_liquidity"\xa0\x01\n\x15ObserveOrdersResponse\x12@\n\x08snapshot\x18\x01 \x01(\x0b\x32".datanode.api.v2.OrderSnapshotPageH\x00R\x08snapshot\x12\x39\n\x07updates\x18\x02 \x01(\x0b\x32\x1d.datanode.api.v2.OrderUpdatesH\x00R\x07updatesB\n\n\x08response"U\n\x11OrderSnapshotPage\x12#\n\x06orders\x18\x01 \x03(\x0b\x32\x0b.vega.OrderR\x06orders\x12\x1b\n\tlast_page\x18\x02 \x01(\x08R\x08lastPage"3\n\x0cOrderUpdates\x12#\n\x06orders\x18\x01 \x03(\x0b\x32\x0b.vega.OrderR\x06orders"\x9f\x01\n\x14ListPositionsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"Z\n\x15ListPositionsResponse\x12\x41\n\tpositions\x18\x01 \x01(\x0b\x32#.datanode.api.v2.PositionConnectionR\tpositions"J\n\x0cPositionEdge\x12"\n\x04node\x18\x01 \x01(\x0b\x32\x0e.vega.PositionR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n\x12PositionConnection\x12\x33\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1d.datanode.api.v2.PositionEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"v\n\x17ObservePositionsRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12 \n\tmarket_id\x18\x02 \x01(\tH\x01R\x08marketId\x88\x01\x01\x42\x0b\n\t_party_idB\x0c\n\n_market_id"\xa9\x01\n\x18ObservePositionsResponse\x12\x43\n\x08snapshot\x18\x01 \x01(\x0b\x32%.datanode.api.v2.PositionSnapshotPageH\x00R\x08snapshot\x12<\n\x07updates\x18\x02 \x01(\x0b\x32 .datanode.api.v2.PositionUpdatesH\x00R\x07updatesB\n\n\x08response"a\n\x14PositionSnapshotPage\x12,\n\tpositions\x18\x01 \x03(\x0b\x32\x0e.vega.PositionR\tpositions\x12\x1b\n\tlast_page\x18\x02 \x01(\x08R\x08lastPage"?\n\x0fPositionUpdates\x12,\n\tpositions\x18\x01 \x03(\x0b\x32\x0e.vega.PositionR\tpositions"\xa3\x02\n\x11LedgerEntryFilter\x12\x37\n\x18\x63lose_on_account_filters\x18\x01 \x01(\x08R\x15\x63loseOnAccountFilters\x12N\n\x13\x61\x63\x63ount_from_filter\x18\x02 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x11\x61\x63\x63ountFromFilter\x12J\n\x11\x61\x63\x63ount_to_filter\x18\x03 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x0f\x61\x63\x63ountToFilter\x12\x39\n\x0etransfer_types\x18\x05 \x03(\x0e\x32\x12.vega.TransferTypeR\rtransferTypes"\xdd\x04\n\x15\x41ggregatedLedgerEntry\x12\x1c\n\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\x12\x1a\n\x08quantity\x18\x03 \x01(\tR\x08quantity\x12\x37\n\rtransfer_type\x18\x04 \x01(\x0e\x32\x12.vega.TransferTypeR\x0ctransferType\x12\x1e\n\x08\x61sset_id\x18\x05 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12\x41\n\x13sender_account_type\x18\x06 \x01(\x0e\x32\x11.vega.AccountTypeR\x11senderAccountType\x12\x45\n\x15receiver_account_type\x18\x07 \x01(\x0e\x32\x11.vega.AccountTypeR\x13receiverAccountType\x12+\n\x0fsender_party_id\x18\x08 \x01(\tH\x01R\rsenderPartyId\x88\x01\x01\x12/\n\x11receiver_party_id\x18\t \x01(\tH\x02R\x0freceiverPartyId\x88\x01\x01\x12-\n\x10sender_market_id\x18\n \x01(\tH\x03R\x0esenderMarketId\x88\x01\x01\x12\x31\n\x12receiver_market_id\x18\x0b \x01(\tH\x04R\x10receiverMarketId\x88\x01\x01\x42\x0b\n\t_asset_idB\x12\n\x10_sender_party_idB\x14\n\x12_receiver_party_idB\x13\n\x11_sender_market_idB\x15\n\x13_receiver_market_idJ\x04\x08\x01\x10\x02"\xf6\x01\n\x18ListLedgerEntriesRequest\x12:\n\x06\x66ilter\x18\x01 \x01(\x0b\x32".datanode.api.v2.LedgerEntryFilterR\x06\x66ilter\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x03 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"v\n\x19ListLedgerEntriesResponse\x12Y\n\x0eledger_entries\x18\x01 \x01(\x0b\x32\x32.datanode.api.v2.AggregatedLedgerEntriesConnectionR\rledgerEntries"q\n\x1b\x41ggregatedLedgerEntriesEdge\x12:\n\x04node\x18\x01 \x01(\x0b\x32&.datanode.api.v2.AggregatedLedgerEntryR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x9f\x01\n!AggregatedLedgerEntriesConnection\x12\x42\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32,.datanode.api.v2.AggregatedLedgerEntriesEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xf3\x01\n\x19ListBalanceChangesRequest\x12\x36\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x06\x66ilter\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x06 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"f\n\x1aListBalanceChangesResponse\x12H\n\x08\x62\x61lances\x18\x01 \x01(\x0b\x32,.datanode.api.v2.AggregatedBalanceConnectionR\x08\x62\x61lances"\xac\x02\n\x18GetBalanceHistoryRequest\x12\x36\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x06\x66ilter\x12\x38\n\x08group_by\x18\x02 \x03(\x0e\x32\x1d.datanode.api.v2.AccountFieldR\x07groupBy\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x04 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"e\n\x19GetBalanceHistoryResponse\x12H\n\x08\x62\x61lances\x18\x01 \x01(\x0b\x32,.datanode.api.v2.AggregatedBalanceConnectionR\x08\x62\x61lances"g\n\x15\x41ggregatedBalanceEdge\x12\x36\n\x04node\x18\x01 \x01(\x0b\x32".datanode.api.v2.AggregatedBalanceR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x93\x01\n\x1b\x41ggregatedBalanceConnection\x12<\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32&.datanode.api.v2.AggregatedBalanceEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x9e\x01\n\rAccountFilter\x12\x19\n\x08\x61sset_id\x18\x01 \x01(\tR\x07\x61ssetId\x12\x1b\n\tparty_ids\x18\x02 \x03(\tR\x08partyIds\x12\x1d\n\nmarket_ids\x18\x03 \x03(\tR\tmarketIds\x12\x36\n\raccount_types\x18\x04 \x03(\x0e\x32\x11.vega.AccountTypeR\x0c\x61\x63\x63ountTypes"\xa1\x02\n\x11\x41ggregatedBalance\x12\x1c\n\ttimestamp\x18\x01 \x01(\x03R\ttimestamp\x12\x18\n\x07\x62\x61lance\x18\x02 \x01(\tR\x07\x62\x61lance\x12\x1e\n\x08party_id\x18\x04 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1e\n\x08\x61sset_id\x18\x05 \x01(\tH\x01R\x07\x61ssetId\x88\x01\x01\x12 \n\tmarket_id\x18\x06 \x01(\tH\x02R\x08marketId\x88\x01\x01\x12\x39\n\x0c\x61\x63\x63ount_type\x18\x07 \x01(\x0e\x32\x11.vega.AccountTypeH\x03R\x0b\x61\x63\x63ountType\x88\x01\x01\x42\x0b\n\t_party_idB\x0b\n\t_asset_idB\x0c\n\n_market_idB\x0f\n\r_account_type";\n\x1aObserveMarketsDepthRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds"S\n\x1bObserveMarketsDepthResponse\x12\x34\n\x0cmarket_depth\x18\x01 \x03(\x0b\x32\x11.vega.MarketDepthR\x0bmarketDepth"B\n!ObserveMarketsDepthUpdatesRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds"U\n"ObserveMarketsDepthUpdatesResponse\x12/\n\x06update\x18\x01 \x03(\x0b\x32\x17.vega.MarketDepthUpdateR\x06update":\n\x19ObserveMarketsDataRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds"O\n\x1aObserveMarketsDataResponse\x12\x31\n\x0bmarket_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketDataR\nmarketData"j\n\x1bGetLatestMarketDepthRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12 \n\tmax_depth\x18\x02 \x01(\x04H\x00R\x08maxDepth\x88\x01\x01\x42\x0c\n\n_max_depth"\xda\x01\n\x1cGetLatestMarketDepthResponse\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12"\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevelR\x03\x62uy\x12$\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevelR\x04sell\x12*\n\nlast_trade\x18\x04 \x01(\x0b\x32\x0b.vega.TradeR\tlastTrade\x12\'\n\x0fsequence_number\x18\x05 \x01(\x04R\x0esequenceNumber"\x1d\n\x1bListLatestMarketDataRequest"S\n\x1cListLatestMarketDataResponse\x12\x33\n\x0cmarkets_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketDataR\x0bmarketsData"9\n\x1aGetLatestMarketDataRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId"P\n\x1bGetLatestMarketDataResponse\x12\x31\n\x0bmarket_data\x18\x01 \x01(\x0b\x32\x10.vega.MarketDataR\nmarketData"\xfc\x02\n\x1fGetMarketDataHistoryByIDRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12,\n\x0fstart_timestamp\x18\x02 \x01(\x03H\x00R\x0estartTimestamp\x88\x01\x01\x12(\n\rend_timestamp\x18\x03 \x01(\x03H\x01R\x0c\x65ndTimestamp\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x12W\n\x11offset_pagination\x18\x05 \x01(\x0b\x32!.datanode.api.v2.OffsetPaginationB\x02\x18\x01H\x03R\x10offsetPagination\x88\x01\x01\x42\x12\n\x10_start_timestampB\x10\n\x0e_end_timestampB\r\n\x0b_paginationB\x14\n\x12_offset_pagination"j\n GetMarketDataHistoryByIDResponse\x12\x46\n\x0bmarket_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.MarketDataConnectionR\nmarketData"N\n\x0eMarketDataEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.MarketDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x85\x01\n\x14MarketDataConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.MarketDataEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo":\n\x1bMarketsDataSubscribeRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId"Q\n\x1cMarketsDataSubscribeResponse\x12\x31\n\x0bmarket_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketDataR\nmarketData"\xd1\x01\n\x14ListTransfersRequest\x12\x1b\n\x06pubkey\x18\x01 \x01(\tH\x00R\x06pubkey\x88\x01\x01\x12@\n\tdirection\x18\x02 \x01(\x0e\x32".datanode.api.v2.TransferDirectionR\tdirection\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\t\n\x07_pubkeyB\r\n\x0b_pagination"Z\n\x15ListTransfersResponse\x12\x41\n\ttransfers\x18\x01 \x01(\x0b\x32#.datanode.api.v2.TransferConnectionR\ttransfers"T\n\x0cTransferEdge\x12,\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.events.v1.TransferR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n\x12TransferConnection\x12\x33\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1d.datanode.api.v2.TransferEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x19\n\x17GetNetworkLimitsRequest"G\n\x18GetNetworkLimitsResponse\x12+\n\x06limits\x18\x01 \x01(\x0b\x32\x13.vega.NetworkLimitsR\x06limits"9\n\x1aListCandleIntervalsRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId"M\n\x12IntervalToCandleId\x12\x1a\n\x08interval\x18\x01 \x01(\tR\x08interval\x12\x1b\n\tcandle_id\x18\x02 \x01(\tR\x08\x63\x61ndleId"u\n\x1bListCandleIntervalsResponse\x12V\n\x15interval_to_candle_id\x18\x01 \x03(\x0b\x32#.datanode.api.v2.IntervalToCandleIdR\x12intervalToCandleId"\xa7\x01\n\x06\x43\x61ndle\x12\x14\n\x05start\x18\x01 \x01(\x03R\x05start\x12\x1f\n\x0blast_update\x18\x02 \x01(\x03R\nlastUpdate\x12\x12\n\x04high\x18\x03 \x01(\tR\x04high\x12\x10\n\x03low\x18\x04 \x01(\tR\x03low\x12\x12\n\x04open\x18\x05 \x01(\tR\x04open\x12\x14\n\x05\x63lose\x18\x06 \x01(\tR\x05\x63lose\x12\x16\n\x06volume\x18\x07 \x01(\x04R\x06volume"7\n\x18ObserveCandleDataRequest\x12\x1b\n\tcandle_id\x18\x01 \x01(\tR\x08\x63\x61ndleId"L\n\x19ObserveCandleDataResponse\x12/\n\x06\x63\x61ndle\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.CandleR\x06\x63\x61ndle"\xfb\x01\n\x15ListCandleDataRequest\x12\x1b\n\tcandle_id\x18\x01 \x01(\tR\x08\x63\x61ndleId\x12%\n\x0e\x66rom_timestamp\x18\x02 \x01(\x03R\rfromTimestamp\x12!\n\x0cto_timestamp\x18\x03 \x01(\x03R\x0btoTimestamp\x12*\n\x08interval\x18\x04 \x01(\x0e\x32\x0e.vega.IntervalR\x08interval\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"Y\n\x16ListCandleDataResponse\x12?\n\x07\x63\x61ndles\x18\x01 \x01(\x0b\x32%.datanode.api.v2.CandleDataConnectionR\x07\x63\x61ndles"Q\n\nCandleEdge\x12+\n\x04node\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.CandleR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n\x14\x43\x61ndleDataConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.CandleEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xc6\x01\n\x10ListVotesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12$\n\x0bproposal_id\x18\x02 \x01(\tH\x01R\nproposalId\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\x0b\n\t_party_idB\x0e\n\x0c_proposal_idB\r\n\x0b_pagination"J\n\x11ListVotesResponse\x12\x35\n\x05votes\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.VoteConnectionR\x05votes"B\n\x08VoteEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.VoteR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"y\n\x0eVoteConnection\x12/\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x19.datanode.api.v2.VoteEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"x\n\x13ObserveVotesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12$\n\x0bproposal_id\x18\x02 \x01(\tH\x01R\nproposalId\x88\x01\x01\x42\x0b\n\t_party_idB\x0e\n\x0c_proposal_id"6\n\x14ObserveVotesResponse\x12\x1e\n\x04vote\x18\x01 \x01(\x0b\x32\n.vega.VoteR\x04vote"\xbd\x01\n*ListERC20MultiSigSignerAddedBundlesRequest\x12\x17\n\x07node_id\x18\x01 \x01(\tR\x06nodeId\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x1b\n\tepoch_seq\x18\x03 \x01(\tR\x08\x65pochSeq\x12;\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"|\n+ListERC20MultiSigSignerAddedBundlesResponse\x12M\n\x07\x62undles\x18\x01 \x01(\x0b\x32\x33.datanode.api.v2.ERC20MultiSigSignerAddedConnectionR\x07\x62undles"t\n\x1c\x45RC20MultiSigSignerAddedEdge\x12<\n\x04node\x18\x01 \x01(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerAddedR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n"ERC20MultiSigSignerAddedBundleEdge\x12\x43\n\x04node\x18\x01 \x01(\x0b\x32/.datanode.api.v2.ERC20MultiSigSignerAddedBundleR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\xa7\x01\n"ERC20MultiSigSignerAddedConnection\x12I\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x33.datanode.api.v2.ERC20MultiSigSignerAddedBundleEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xce\x01\n\x1e\x45RC20MultiSigSignerAddedBundle\x12\x1d\n\nnew_signer\x18\x01 \x01(\tR\tnewSigner\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x14\n\x05nonce\x18\x04 \x01(\tR\x05nonce\x12\x1c\n\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\x12\x1e\n\nsignatures\x18\x06 \x01(\tR\nsignatures\x12\x1b\n\tepoch_seq\x18\x03 \x01(\tR\x08\x65pochSeq"\xbf\x01\n,ListERC20MultiSigSignerRemovedBundlesRequest\x12\x17\n\x07node_id\x18\x01 \x01(\tR\x06nodeId\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x1b\n\tepoch_seq\x18\x03 \x01(\tR\x08\x65pochSeq\x12;\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"\x80\x01\n-ListERC20MultiSigSignerRemovedBundlesResponse\x12O\n\x07\x62undles\x18\x01 \x01(\x0b\x32\x35.datanode.api.v2.ERC20MultiSigSignerRemovedConnectionR\x07\x62undles"x\n\x1e\x45RC20MultiSigSignerRemovedEdge\x12>\n\x04node\x18\x01 \x01(\x0b\x32*.vega.events.v1.ERC20MultiSigSignerRemovedR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x85\x01\n$ERC20MultiSigSignerRemovedBundleEdge\x12\x45\n\x04node\x18\x01 \x01(\x0b\x32\x31.datanode.api.v2.ERC20MultiSigSignerRemovedBundleR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\xab\x01\n$ERC20MultiSigSignerRemovedConnection\x12K\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x35.datanode.api.v2.ERC20MultiSigSignerRemovedBundleEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xd0\x01\n ERC20MultiSigSignerRemovedBundle\x12\x1d\n\nold_signer\x18\x01 \x01(\tR\toldSigner\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x14\n\x05nonce\x18\x04 \x01(\tR\x05nonce\x12\x1c\n\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\x12\x1e\n\nsignatures\x18\x06 \x01(\tR\nsignatures\x12\x1b\n\tepoch_seq\x18\x07 \x01(\tR\x08\x65pochSeq";\n\x1eGetERC20ListAssetBundleRequest\x12\x19\n\x08\x61sset_id\x18\x01 \x01(\tR\x07\x61ssetId"\x9e\x01\n\x1fGetERC20ListAssetBundleResponse\x12!\n\x0c\x61sset_source\x18\x01 \x01(\tR\x0b\x61ssetSource\x12"\n\rvega_asset_id\x18\x02 \x01(\tR\x0bvegaAssetId\x12\x14\n\x05nonce\x18\x03 \x01(\tR\x05nonce\x12\x1e\n\nsignatures\x18\x04 \x01(\tR\nsignatures"F\n#GetERC20SetAssetLimitsBundleRequest\x12\x1f\n\x0bproposal_id\x18\x01 \x01(\tR\nproposalId"\xe8\x01\n$GetERC20SetAssetLimitsBundleResponse\x12!\n\x0c\x61sset_source\x18\x01 \x01(\tR\x0b\x61ssetSource\x12"\n\rvega_asset_id\x18\x02 \x01(\tR\x0bvegaAssetId\x12\x14\n\x05nonce\x18\x03 \x01(\tR\x05nonce\x12%\n\x0elifetime_limit\x18\x04 \x01(\tR\rlifetimeLimit\x12\x1c\n\tthreshold\x18\x05 \x01(\tR\tthreshold\x12\x1e\n\nsignatures\x18\x06 \x01(\tR\nsignatures"H\n!GetERC20WithdrawalApprovalRequest\x12#\n\rwithdrawal_id\x18\x01 \x01(\tR\x0cwithdrawalId"\xde\x01\n"GetERC20WithdrawalApprovalResponse\x12!\n\x0c\x61sset_source\x18\x01 \x01(\tR\x0b\x61ssetSource\x12\x16\n\x06\x61mount\x18\x02 \x01(\tR\x06\x61mount\x12\x14\n\x05nonce\x18\x04 \x01(\tR\x05nonce\x12\x1e\n\nsignatures\x18\x05 \x01(\tR\nsignatures\x12%\n\x0etarget_address\x18\x06 \x01(\tR\rtargetAddress\x12\x1a\n\x08\x63reation\x18\x07 \x01(\x03R\x08\x63reationJ\x04\x08\x03\x10\x04"2\n\x13GetLastTradeRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId"9\n\x14GetLastTradeResponse\x12!\n\x05trade\x18\x01 \x01(\x0b\x32\x0b.vega.TradeR\x05trade"\xbd\x02\n\x11ListTradesRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08order_id\x18\x02 \x01(\tH\x01R\x07orderId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x03 \x01(\tH\x02R\x07partyId\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x05 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x04R\tdateRange\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_order_idB\x0b\n\t_party_idB\r\n\x0b_paginationB\r\n\x0b_date_range"N\n\x12ListTradesResponse\x12\x38\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnectionR\x06trades"{\n\x0fTradeConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.TradeEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"D\n\tTradeEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.TradeR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"s\n\x14ObserveTradesRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_id"<\n\x15ObserveTradesResponse\x12#\n\x06trades\x18\x01 \x03(\x0b\x32\x0b.vega.TradeR\x06trades"<\n\x14GetOracleSpecRequest\x12$\n\x0eoracle_spec_id\x18\x01 \x01(\tR\x0coracleSpecId"J\n\x15GetOracleSpecResponse\x12\x31\n\x0boracle_spec\x18\x01 \x01(\x0b\x32\x10.vega.OracleSpecR\noracleSpec"i\n\x16ListOracleSpecsRequest\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"d\n\x17ListOracleSpecsResponse\x12I\n\x0coracle_specs\x18\x01 \x01(\x0b\x32&.datanode.api.v2.OracleSpecsConnectionR\x0boracleSpecs"\xa6\x01\n\x15ListOracleDataRequest\x12)\n\x0eoracle_spec_id\x18\x01 \x01(\tH\x00R\x0coracleSpecId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x11\n\x0f_oracle_spec_idB\r\n\x0b_pagination"`\n\x16ListOracleDataResponse\x12\x46\n\x0boracle_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.OracleDataConnectionR\noracleData"N\n\x0eOracleSpecEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.OracleSpecR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15OracleSpecsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.OracleSpecEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"N\n\x0eOracleDataEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.OracleDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x85\x01\n\x14OracleDataConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.OracleDataEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"/\n\x10GetMarketRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId"9\n\x11GetMarketResponse\x12$\n\x06market\x18\x01 \x01(\x0b\x32\x0c.vega.MarketR\x06market"e\n\x12ListMarketsRequest\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"R\n\x13ListMarketsResponse\x12;\n\x07markets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarketConnectionR\x07markets"F\n\nMarketEdge\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.MarketR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"}\n\x10MarketConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.MarketEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo",\n\x0fGetPartyRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId"5\n\x10GetPartyResponse\x12!\n\x05party\x18\x01 \x01(\x0b\x32\x0b.vega.PartyR\x05party"l\n\x12ListPartiesRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12;\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"Q\n\x13ListPartiesResponse\x12:\n\x07parties\x18\x01 \x01(\x0b\x32 .datanode.api.v2.PartyConnectionR\x07parties"D\n\tPartyEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.PartyR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"{\n\x0fPartyConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.PartyEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"D\n\tOrderEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.OrderR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8e\x01\n\x17ListMarginLevelsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId\x12;\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"b\n\x18ListMarginLevelsResponse\x12\x46\n\rmargin_levels\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarginConnectionR\x0cmarginLevels"g\n\x1aObserveMarginLevelsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12 \n\tmarket_id\x18\x02 \x01(\tH\x00R\x08marketId\x88\x01\x01\x42\x0c\n\n_market_id"V\n\x1bObserveMarginLevelsResponse\x12\x37\n\rmargin_levels\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevelsR\x0cmarginLevels"{\n\x0fOrderConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.OrderEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"L\n\nMarginEdge\x12&\n\x04node\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevelsR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"}\n\x10MarginConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.MarginEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xad\x01\n\x12ListRewardsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x1e\n\x08\x61sset_id\x18\x02 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x0b\n\t_asset_idB\r\n\x0b_pagination"S\n\x13ListRewardsResponse\x12<\n\x07rewards\x18\x01 \x01(\x0b\x32".datanode.api.v2.RewardsConnectionR\x07rewards"F\n\nRewardEdge\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.RewardR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"~\n\x11RewardsConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.RewardEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xc7\x01\n\x1aListRewardSummariesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1e\n\x08\x61sset_id\x18\x02 \x01(\tH\x01R\x07\x61ssetId\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\x0b\n\t_party_idB\x0b\n\t_asset_idB\r\n\x0b_pagination"P\n\x1bListRewardSummariesResponse\x12\x31\n\tsummaries\x18\x01 \x03(\x0b\x32\x13.vega.RewardSummaryR\tsummaries"\xd2\x01\n\x1fListEpochRewardSummariesRequest\x12"\n\nfrom_epoch\x18\x01 \x01(\x04H\x00R\tfromEpoch\x88\x01\x01\x12\x1e\n\x08to_epoch\x18\x02 \x01(\x04H\x01R\x07toEpoch\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\r\n\x0b_from_epochB\x0b\n\t_to_epochB\r\n\x0b_pagination"o\n ListEpochRewardSummariesResponse\x12K\n\tsummaries\x18\x01 \x01(\x0b\x32-.datanode.api.v2.EpochRewardSummaryConnectionR\tsummaries"\x95\x01\n\x1c\x45pochRewardSummaryConnection\x12=\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\'.datanode.api.v2.EpochRewardSummaryEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"^\n\x16\x45pochRewardSummaryEdge\x12,\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.EpochRewardSummaryR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"q\n\x15ObserveRewardsRequest\x12\x1e\n\x08\x61sset_id\x18\x01 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x42\x0b\n\t_asset_idB\x0b\n\t_party_id">\n\x16ObserveRewardsResponse\x12$\n\x06reward\x18\x01 \x01(\x0b\x32\x0c.vega.RewardR\x06reward"#\n\x11GetDepositRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id"=\n\x12GetDepositResponse\x12\'\n\x07\x64\x65posit\x18\x01 \x01(\x0b\x32\r.vega.DepositR\x07\x64\x65posit"\xd0\x01\n\x13ListDepositsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x03 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"W\n\x14ListDepositsResponse\x12?\n\x08\x64\x65posits\x18\x01 \x01(\x0b\x32#.datanode.api.v2.DepositsConnectionR\x08\x64\x65posits"H\n\x0b\x44\x65positEdge\x12!\n\x04node\x18\x01 \x01(\x0b\x32\r.vega.DepositR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x80\x01\n\x12\x44\x65positsConnection\x12\x32\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1c.datanode.api.v2.DepositEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"&\n\x14GetWithdrawalRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id"I\n\x15GetWithdrawalResponse\x12\x30\n\nwithdrawal\x18\x01 \x01(\x0b\x32\x10.vega.WithdrawalR\nwithdrawal"\xd3\x01\n\x16ListWithdrawalsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x03 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"c\n\x17ListWithdrawalsResponse\x12H\n\x0bwithdrawals\x18\x01 \x01(\x0b\x32&.datanode.api.v2.WithdrawalsConnectionR\x0bwithdrawals"N\n\x0eWithdrawalEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.WithdrawalR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15WithdrawalsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.WithdrawalEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo",\n\x0fGetAssetRequest\x12\x19\n\x08\x61sset_id\x18\x01 \x01(\tR\x07\x61ssetId"5\n\x10GetAssetResponse\x12!\n\x05\x61sset\x18\x01 \x01(\x0b\x32\x0b.vega.AssetR\x05\x61sset"\x91\x01\n\x11ListAssetsRequest\x12\x1e\n\x08\x61sset_id\x18\x01 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x0b\n\t_asset_idB\r\n\x0b_pagination"O\n\x12ListAssetsResponse\x12\x39\n\x06\x61ssets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.AssetsConnectionR\x06\x61ssets"D\n\tAssetEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.AssetR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"|\n\x10\x41ssetsConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.AssetEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xff\x01\n\x1eListLiquidityProvisionsRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x12!\n\treference\x18\x03 \x01(\tH\x02R\treference\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03R\npagination\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_idB\x0c\n\n_referenceB\r\n\x0b_pagination"\x84\x01\n\x1fListLiquidityProvisionsResponse\x12\x61\n\x14liquidity_provisions\x18\x01 \x01(\x0b\x32..datanode.api.v2.LiquidityProvisionsConnectionR\x13liquidityProvisions"_\n\x17LiquidityProvisionsEdge\x12,\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.LiquidityProvisionR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x97\x01\n\x1dLiquidityProvisionsConnection\x12>\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32(.datanode.api.v2.LiquidityProvisionsEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x80\x01\n!ObserveLiquidityProvisionsRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_id"q\n"ObserveLiquidityProvisionsResponse\x12K\n\x14liquidity_provisions\x18\x01 \x03(\x0b\x32\x18.vega.LiquidityProvisionR\x13liquidityProvisions"\x81\x01\n\x18GetGovernanceDataRequest\x12$\n\x0bproposal_id\x18\x01 \x01(\tH\x00R\nproposalId\x88\x01\x01\x12!\n\treference\x18\x02 \x01(\tH\x01R\treference\x88\x01\x01\x42\x0e\n\x0c_proposal_idB\x0c\n\n_reference"E\n\x19GetGovernanceDataResponse\x12(\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceDataR\x04\x64\x61ta"\xfa\x04\n\x19ListGovernanceDataRequest\x12@\n\x0eproposal_state\x18\x01 \x01(\x0e\x32\x14.vega.Proposal.StateH\x00R\rproposalState\x88\x01\x01\x12Y\n\rproposal_type\x18\x02 \x01(\x0e\x32/.datanode.api.v2.ListGovernanceDataRequest.TypeH\x01R\x0cproposalType\x88\x01\x01\x12/\n\x11proposer_party_id\x18\x03 \x01(\tH\x02R\x0fproposerPartyId\x88\x01\x01\x12\x32\n\x12proposal_reference\x18\x04 \x01(\tH\x03R\x11proposalReference\x88\x01\x01\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x04R\npagination\x88\x01\x01"\xb7\x01\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0c\n\x08TYPE_ALL\x10\x01\x12\x13\n\x0fTYPE_NEW_MARKET\x10\x02\x12\x16\n\x12TYPE_UPDATE_MARKET\x10\x03\x12\x1b\n\x17TYPE_NETWORK_PARAMETERS\x10\x04\x12\x12\n\x0eTYPE_NEW_ASSET\x10\x05\x12\x16\n\x12TYPE_NEW_FREE_FORM\x10\x06\x12\x15\n\x11TYPE_UPDATE_ASSET\x10\x07\x42\x11\n\x0f_proposal_stateB\x10\n\x0e_proposal_typeB\x14\n\x12_proposer_party_idB\x15\n\x13_proposal_referenceB\r\n\x0b_pagination"g\n\x1aListGovernanceDataResponse\x12I\n\nconnection\x18\x01 \x01(\x0b\x32).datanode.api.v2.GovernanceDataConnectionR\nconnection"V\n\x12GovernanceDataEdge\x12(\n\x04node\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8d\x01\n\x18GovernanceDataConnection\x12\x39\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32#.datanode.api.v2.GovernanceDataEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"G\n\x18ObserveGovernanceRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x42\x0b\n\t_party_id"E\n\x19ObserveGovernanceResponse\x12(\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceDataR\x04\x64\x61ta"\xed\x01\n\x16ListDelegationsRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1c\n\x07node_id\x18\x02 \x01(\tH\x01R\x06nodeId\x88\x01\x01\x12\x1e\n\x08\x65poch_id\x18\x03 \x01(\tH\x02R\x07\x65pochId\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03R\npagination\x88\x01\x01\x42\x0b\n\t_party_idB\n\n\x08_node_idB\x0b\n\t_epoch_idB\r\n\x0b_pagination"c\n\x17ListDelegationsResponse\x12H\n\x0b\x64\x65legations\x18\x01 \x01(\x0b\x32&.datanode.api.v2.DelegationsConnectionR\x0b\x64\x65legations"N\n\x0e\x44\x65legationEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.DelegationR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15\x44\x65legationsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.DelegationEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"r\n\x19ObserveDelegationsRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1c\n\x07node_id\x18\x02 \x01(\tH\x01R\x06nodeId\x88\x01\x01\x42\x0b\n\t_party_idB\n\n\x08_node_id"N\n\x1aObserveDelegationsResponse\x12\x30\n\ndelegation\x18\x01 \x01(\x0b\x32\x10.vega.DelegationR\ndelegation"\x17\n\x15GetNetworkDataRequest"E\n\x16GetNetworkDataResponse\x12+\n\tnode_data\x18\x01 \x01(\x0b\x32\x0e.vega.NodeDataR\x08nodeData" \n\x0eGetNodeRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id"1\n\x0fGetNodeResponse\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.NodeR\x04node"\x93\x01\n\x10ListNodesRequest\x12 \n\tepoch_seq\x18\x01 \x01(\x04H\x00R\x08\x65pochSeq\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x0c\n\n_epoch_seqB\r\n\x0b_pagination"K\n\x11ListNodesResponse\x12\x36\n\x05nodes\x18\x01 \x01(\x0b\x32 .datanode.api.v2.NodesConnectionR\x05nodes"B\n\x08NodeEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.NodeR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"z\n\x0fNodesConnection\x12/\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x19.datanode.api.v2.NodeEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"|\n\x19ListNodeSignaturesRequest\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"g\n\x1aListNodeSignaturesResponse\x12I\n\nsignatures\x18\x01 \x01(\x0b\x32).datanode.api.v2.NodeSignaturesConnectionR\nsignatures"`\n\x11NodeSignatureEdge\x12\x33\n\x04node\x18\x01 \x01(\x0b\x32\x1f.vega.commands.v1.NodeSignatureR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8c\x01\n\x18NodeSignaturesConnection\x12\x38\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32".datanode.api.v2.NodeSignatureEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"-\n\x0fGetEpochRequest\x12\x13\n\x02id\x18\x01 \x01(\x04H\x00R\x02id\x88\x01\x01\x42\x05\n\x03_id"5\n\x10GetEpochResponse\x12!\n\x05\x65poch\x18\x01 \x01(\x0b\x32\x0b.vega.EpochR\x05\x65poch"[\n\x12\x45stimateFeeRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12\x14\n\x05price\x18\x02 \x01(\tR\x05price\x12\x12\n\x04size\x18\x03 \x01(\x04R\x04size"2\n\x13\x45stimateFeeResponse\x12\x1b\n\x03\x66\x65\x65\x18\x02 \x01(\x0b\x32\t.vega.FeeR\x03\x66\x65\x65"\xbf\x01\n\x15\x45stimateMarginRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12\x19\n\x08party_id\x18\x02 \x01(\tR\x07partyId\x12\x1e\n\x04side\x18\x03 \x01(\x0e\x32\n.vega.SideR\x04side\x12$\n\x04type\x18\x04 \x01(\x0e\x32\x10.vega.Order.TypeR\x04type\x12\x12\n\x04size\x18\x05 \x01(\x04R\x04size\x12\x14\n\x05price\x18\x06 \x01(\tR\x05price"Q\n\x16\x45stimateMarginResponse\x12\x37\n\rmargin_levels\x18\x02 \x01(\x0b\x32\x12.vega.MarginLevelsR\x0cmarginLevels"o\n\x1cListNetworkParametersRequest\x12@\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"{\n\x1dListNetworkParametersResponse\x12Z\n\x12network_parameters\x18\x01 \x01(\x0b\x32+.datanode.api.v2.NetworkParameterConnectionR\x11networkParameters".\n\x1aGetNetworkParameterRequest\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key"b\n\x1bGetNetworkParameterResponse\x12\x43\n\x11network_parameter\x18\x01 \x01(\x0b\x32\x16.vega.NetworkParameterR\x10networkParameter"Z\n\x14NetworkParameterEdge\x12*\n\x04node\x18\x01 \x01(\x0b\x32\x16.vega.NetworkParameterR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x91\x01\n\x1aNetworkParameterConnection\x12;\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32%.datanode.api.v2.NetworkParameterEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"Z\n\nCheckpoint\x12\x12\n\x04hash\x18\x01 \x01(\tR\x04hash\x12\x1d\n\nblock_hash\x18\x02 \x01(\tR\tblockHash\x12\x19\n\x08\x61t_block\x18\x03 \x01(\x04R\x07\x61tBlock"i\n\x16ListCheckpointsRequest\x12@\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"c\n\x17ListCheckpointsResponse\x12H\n\x0b\x63heckpoints\x18\x01 \x01(\x0b\x32&.datanode.api.v2.CheckpointsConnectionR\x0b\x63heckpoints"Y\n\x0e\x43heckpointEdge\x12/\n\x04node\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.CheckpointR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15\x43heckpointsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.CheckpointEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"}\n\x0fGetStakeRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"\x94\x01\n\x10GetStakeResponse\x12\x36\n\x17\x63urrent_stake_available\x18\x01 \x01(\tR\x15\x63urrentStakeAvailable\x12H\n\x0estake_linkings\x18\x02 \x01(\x0b\x32!.datanode.api.v2.StakesConnectionR\rstakeLinkings"\\\n\x10StakeLinkingEdge\x12\x30\n\x04node\x18\x01 \x01(\x0b\x32\x1c.vega.events.v1.StakeLinkingR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x83\x01\n\x10StakesConnection\x12\x37\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32!.datanode.api.v2.StakeLinkingEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"4\n\x15GetRiskFactorsRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId"K\n\x16GetRiskFactorsResponse\x12\x31\n\x0brisk_factor\x18\x01 \x01(\x0b\x32\x10.vega.RiskFactorR\nriskFactor"\xa1\x01\n\x16ObserveEventBusRequest\x12\x30\n\x04type\x18\x01 \x03(\x0e\x32\x1c.vega.events.v1.BusEventTypeR\x04type\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId\x12\x19\n\x08party_id\x18\x03 \x01(\tR\x07partyId\x12\x1d\n\nbatch_size\x18\x04 \x01(\x03R\tbatchSize"K\n\x17ObserveEventBusResponse\x12\x30\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x18.vega.events.v1.BusEventR\x06\x65vents"\x1f\n\x1dObserveLedgerMovementsRequest"_\n\x1eObserveLedgerMovementsResponse\x12=\n\x0fledger_movement\x18\x01 \x01(\x0b\x32\x14.vega.LedgerMovementR\x0eledgerMovement"\x94\x01\n\x17ListKeyRotationsRequest\x12\x1c\n\x07node_id\x18\x01 \x01(\tH\x00R\x06nodeId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\n\n\x08_node_idB\r\n\x0b_pagination"`\n\x18ListKeyRotationsResponse\x12\x44\n\trotations\x18\x01 \x01(\x0b\x32&.datanode.api.v2.KeyRotationConnectionR\trotations"Z\n\x0fKeyRotationEdge\x12/\n\x04node\x18\x01 \x01(\x0b\x32\x1b.vega.events.v1.KeyRotationR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x87\x01\n\x15KeyRotationConnection\x12\x36\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32 .datanode.api.v2.KeyRotationEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x9c\x01\n\x1fListEthereumKeyRotationsRequest\x12\x1c\n\x07node_id\x18\x01 \x01(\tH\x00R\x06nodeId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\n\n\x08_node_idB\r\n\x0b_pagination"x\n ListEthereumKeyRotationsResponse\x12T\n\rkey_rotations\x18\x01 \x01(\x0b\x32/.datanode.api.v2.EthereumKeyRotationsConnectionR\x0ckeyRotations"\x98\x01\n\x1e\x45thereumKeyRotationsConnection\x12>\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32(.datanode.api.v2.EthereumKeyRotationEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"j\n\x17\x45thereumKeyRotationEdge\x12\x37\n\x04node\x18\x01 \x01(\x0b\x32#.vega.events.v1.EthereumKeyRotationR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x14\n\x12GetVegaTimeRequest"3\n\x13GetVegaTimeResponse\x12\x1c\n\ttimestamp\x18\x01 \x01(\x03R\ttimestamp"\x89\x01\n\tDateRange\x12,\n\x0fstart_timestamp\x18\x01 \x01(\x03H\x00R\x0estartTimestamp\x88\x01\x01\x12(\n\rend_timestamp\x18\x02 \x01(\x03H\x01R\x0c\x65ndTimestamp\x88\x01\x01\x42\x12\n\x10_start_timestampB\x10\n\x0e_end_timestamp"!\n\x1fGetProtocolUpgradeStatusRequest"8\n GetProtocolUpgradeStatusResponse\x12\x14\n\x05ready\x18\x01 \x01(\x08R\x05ready"\x83\x02\n#ListProtocolUpgradeProposalsRequest\x12J\n\x06status\x18\x01 \x01(\x0e\x32-.vega.events.v1.ProtocolUpgradeProposalStatusH\x00R\x06status\x88\x01\x01\x12$\n\x0b\x61pproved_by\x18\x02 \x01(\tH\x01R\napprovedBy\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\t\n\x07_statusB\x0e\n\x0c_approved_byB\r\n\x0b_pagination"\x98\x01\n$ListProtocolUpgradeProposalsResponse\x12p\n\x1aprotocol_upgrade_proposals\x18\x01 \x01(\x0b\x32\x32.datanode.api.v2.ProtocolUpgradeProposalConnectionR\x18protocolUpgradeProposals"\x9f\x01\n!ProtocolUpgradeProposalConnection\x12\x42\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32,.datanode.api.v2.ProtocolUpgradeProposalEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"o\n\x1bProtocolUpgradeProposalEdge\x12\x38\n\x04node\x18\x01 \x01(\x0b\x32$.vega.events.v1.ProtocolUpgradeEventR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"k\n\x18ListCoreSnapshotsRequest\x12@\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"k\n\x19ListCoreSnapshotsResponse\x12N\n\x0e\x63ore_snapshots\x18\x01 \x01(\x0b\x32\'.datanode.api.v2.CoreSnapshotConnectionR\rcoreSnapshots"\x89\x01\n\x16\x43oreSnapshotConnection\x12\x37\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32!.datanode.api.v2.CoreSnapshotEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"`\n\x10\x43oreSnapshotEdge\x12\x34\n\x04node\x18\x01 \x01(\x0b\x32 .vega.events.v1.CoreSnapshotDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\xd6\x01\n\x0eHistorySegment\x12\x1f\n\x0b\x66rom_height\x18\x01 \x01(\x03R\nfromHeight\x12\x1b\n\tto_height\x18\x02 \x01(\x03R\x08toHeight\x12\x19\n\x08\x63hain_id\x18\x03 \x01(\tR\x07\x63hainId\x12,\n\x12history_segment_id\x18\x04 \x01(\tR\x10historySegmentId\x12=\n\x1bprevious_history_segment_id\x18\x05 \x01(\tR\x18previousHistorySegmentId"&\n$GetMostRecentDeHistorySegmentRequest"\x7f\n%GetMostRecentDeHistorySegmentResponse\x12\x39\n\x07segment\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.HistorySegmentR\x07segment\x12\x1b\n\tswarm_key\x18\x02 \x01(\tR\x08swarmKey"!\n\x1fListAllDeHistorySegmentsRequest"_\n ListAllDeHistorySegmentsResponse\x12;\n\x08segments\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.HistorySegmentR\x08segments"(\n&GetActiveDeHistoryPeerAddressesRequest"L\n\'GetActiveDeHistoryPeerAddressesResponse\x12!\n\x0cip_addresses\x18\x01 \x03(\tR\x0bipAddresses"\r\n\x0bPingRequest"\x0e\n\x0cPingResponse*\xaa\x01\n\x10LedgerEntryField\x12"\n\x1eLEDGER_ENTRY_FIELD_UNSPECIFIED\x10\x00\x12&\n"LEDGER_ENTRY_FIELD_ACCOUNT_FROM_ID\x10\x01\x12$\n LEDGER_ENTRY_FIELD_ACCOUNT_TO_ID\x10\x02\x12$\n LEDGER_ENTRY_FIELD_TRANSFER_TYPE\x10\x03*\xb0\x01\n\x0c\x41\x63\x63ountField\x12\x1d\n\x19\x41\x43\x43OUNT_FIELD_UNSPECIFIED\x10\x00\x12\x14\n\x10\x41\x43\x43OUNT_FIELD_ID\x10\x01\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_PARTY_ID\x10\x02\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_ASSET_ID\x10\x03\x12\x1b\n\x17\x41\x43\x43OUNT_FIELD_MARKET_ID\x10\x04\x12\x16\n\x12\x41\x43\x43OUNT_FIELD_TYPE\x10\x05*\xad\x01\n\x11TransferDirection\x12"\n\x1eTRANSFER_DIRECTION_UNSPECIFIED\x10\x00\x12$\n TRANSFER_DIRECTION_TRANSFER_FROM\x10\x01\x12"\n\x1eTRANSFER_DIRECTION_TRANSFER_TO\x10\x02\x12*\n&TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM\x10\x03\x32\xb4\x45\n\x12TradingDataService\x12[\n\x0cListAccounts\x12$.datanode.api.v2.ListAccountsRequest\x1a%.datanode.api.v2.ListAccountsResponse\x12\x66\n\x0fObserveAccounts\x12\'.datanode.api.v2.ObserveAccountsRequest\x1a(.datanode.api.v2.ObserveAccountsResponse0\x01\x12\x43\n\x04Info\x12\x1c.datanode.api.v2.InfoRequest\x1a\x1d.datanode.api.v2.InfoResponse\x12O\n\x08GetOrder\x12 .datanode.api.v2.GetOrderRequest\x1a!.datanode.api.v2.GetOrderResponse\x12U\n\nListOrders\x12".datanode.api.v2.ListOrdersRequest\x1a#.datanode.api.v2.ListOrdersResponse\x12j\n\x11ListOrderVersions\x12).datanode.api.v2.ListOrderVersionsRequest\x1a*.datanode.api.v2.ListOrderVersionsResponse\x12`\n\rObserveOrders\x12%.datanode.api.v2.ObserveOrdersRequest\x1a&.datanode.api.v2.ObserveOrdersResponse0\x01\x12^\n\rListPositions\x12%.datanode.api.v2.ListPositionsRequest\x1a&.datanode.api.v2.ListPositionsResponse\x12i\n\x10ObservePositions\x12(.datanode.api.v2.ObservePositionsRequest\x1a).datanode.api.v2.ObservePositionsResponse0\x01\x12l\n\x11ListLedgerEntries\x12).datanode.api.v2.ListLedgerEntriesRequest\x1a*.datanode.api.v2.ListLedgerEntriesResponse"\x00\x12o\n\x12ListBalanceChanges\x12*.datanode.api.v2.ListBalanceChangesRequest\x1a+.datanode.api.v2.ListBalanceChangesResponse"\x00\x12p\n\x13GetLatestMarketData\x12+.datanode.api.v2.GetLatestMarketDataRequest\x1a,.datanode.api.v2.GetLatestMarketDataResponse\x12s\n\x14ListLatestMarketData\x12,.datanode.api.v2.ListLatestMarketDataRequest\x1a-.datanode.api.v2.ListLatestMarketDataResponse\x12s\n\x14GetLatestMarketDepth\x12,.datanode.api.v2.GetLatestMarketDepthRequest\x1a-.datanode.api.v2.GetLatestMarketDepthResponse\x12r\n\x13ObserveMarketsDepth\x12+.datanode.api.v2.ObserveMarketsDepthRequest\x1a,.datanode.api.v2.ObserveMarketsDepthResponse0\x01\x12\x87\x01\n\x1aObserveMarketsDepthUpdates\x12\x32.datanode.api.v2.ObserveMarketsDepthUpdatesRequest\x1a\x33.datanode.api.v2.ObserveMarketsDepthUpdatesResponse0\x01\x12o\n\x12ObserveMarketsData\x12*.datanode.api.v2.ObserveMarketsDataRequest\x1a+.datanode.api.v2.ObserveMarketsDataResponse0\x01\x12\x7f\n\x18GetMarketDataHistoryByID\x12\x30.datanode.api.v2.GetMarketDataHistoryByIDRequest\x1a\x31.datanode.api.v2.GetMarketDataHistoryByIDResponse\x12^\n\rListTransfers\x12%.datanode.api.v2.ListTransfersRequest\x1a&.datanode.api.v2.ListTransfersResponse\x12g\n\x10GetNetworkLimits\x12(.datanode.api.v2.GetNetworkLimitsRequest\x1a).datanode.api.v2.GetNetworkLimitsResponse\x12\x61\n\x0eListCandleData\x12&.datanode.api.v2.ListCandleDataRequest\x1a\'.datanode.api.v2.ListCandleDataResponse\x12l\n\x11ObserveCandleData\x12).datanode.api.v2.ObserveCandleDataRequest\x1a*.datanode.api.v2.ObserveCandleDataResponse0\x01\x12p\n\x13ListCandleIntervals\x12+.datanode.api.v2.ListCandleIntervalsRequest\x1a,.datanode.api.v2.ListCandleIntervalsResponse\x12R\n\tListVotes\x12!.datanode.api.v2.ListVotesRequest\x1a".datanode.api.v2.ListVotesResponse\x12]\n\x0cObserveVotes\x12$.datanode.api.v2.ObserveVotesRequest\x1a%.datanode.api.v2.ObserveVotesResponse0\x01\x12\xa0\x01\n#ListERC20MultiSigSignerAddedBundles\x12;.datanode.api.v2.ListERC20MultiSigSignerAddedBundlesRequest\x1a<.datanode.api.v2.ListERC20MultiSigSignerAddedBundlesResponse\x12\xa6\x01\n%ListERC20MultiSigSignerRemovedBundles\x12=.datanode.api.v2.ListERC20MultiSigSignerRemovedBundlesRequest\x1a>.datanode.api.v2.ListERC20MultiSigSignerRemovedBundlesResponse\x12|\n\x17GetERC20ListAssetBundle\x12/.datanode.api.v2.GetERC20ListAssetBundleRequest\x1a\x30.datanode.api.v2.GetERC20ListAssetBundleResponse\x12\x8b\x01\n\x1cGetERC20SetAssetLimitsBundle\x12\x34.datanode.api.v2.GetERC20SetAssetLimitsBundleRequest\x1a\x35.datanode.api.v2.GetERC20SetAssetLimitsBundleResponse\x12\x85\x01\n\x1aGetERC20WithdrawalApproval\x12\x32.datanode.api.v2.GetERC20WithdrawalApprovalRequest\x1a\x33.datanode.api.v2.GetERC20WithdrawalApprovalResponse\x12[\n\x0cGetLastTrade\x12$.datanode.api.v2.GetLastTradeRequest\x1a%.datanode.api.v2.GetLastTradeResponse\x12U\n\nListTrades\x12".datanode.api.v2.ListTradesRequest\x1a#.datanode.api.v2.ListTradesResponse\x12`\n\rObserveTrades\x12%.datanode.api.v2.ObserveTradesRequest\x1a&.datanode.api.v2.ObserveTradesResponse0\x01\x12^\n\rGetOracleSpec\x12%.datanode.api.v2.GetOracleSpecRequest\x1a&.datanode.api.v2.GetOracleSpecResponse\x12\x64\n\x0fListOracleSpecs\x12\'.datanode.api.v2.ListOracleSpecsRequest\x1a(.datanode.api.v2.ListOracleSpecsResponse\x12\x61\n\x0eListOracleData\x12&.datanode.api.v2.ListOracleDataRequest\x1a\'.datanode.api.v2.ListOracleDataResponse\x12R\n\tGetMarket\x12!.datanode.api.v2.GetMarketRequest\x1a".datanode.api.v2.GetMarketResponse\x12X\n\x0bListMarkets\x12#.datanode.api.v2.ListMarketsRequest\x1a$.datanode.api.v2.ListMarketsResponse\x12O\n\x08GetParty\x12 .datanode.api.v2.GetPartyRequest\x1a!.datanode.api.v2.GetPartyResponse\x12X\n\x0bListParties\x12#.datanode.api.v2.ListPartiesRequest\x1a$.datanode.api.v2.ListPartiesResponse\x12g\n\x10ListMarginLevels\x12(.datanode.api.v2.ListMarginLevelsRequest\x1a).datanode.api.v2.ListMarginLevelsResponse\x12r\n\x13ObserveMarginLevels\x12+.datanode.api.v2.ObserveMarginLevelsRequest\x1a,.datanode.api.v2.ObserveMarginLevelsResponse0\x01\x12X\n\x0bListRewards\x12#.datanode.api.v2.ListRewardsRequest\x1a$.datanode.api.v2.ListRewardsResponse\x12p\n\x13ListRewardSummaries\x12+.datanode.api.v2.ListRewardSummariesRequest\x1a,.datanode.api.v2.ListRewardSummariesResponse\x12\x7f\n\x18ListEpochRewardSummaries\x12\x30.datanode.api.v2.ListEpochRewardSummariesRequest\x1a\x31.datanode.api.v2.ListEpochRewardSummariesResponse\x12\x63\n\x0eObserveRewards\x12&.datanode.api.v2.ObserveRewardsRequest\x1a\'.datanode.api.v2.ObserveRewardsResponse0\x01\x12U\n\nGetDeposit\x12".datanode.api.v2.GetDepositRequest\x1a#.datanode.api.v2.GetDepositResponse\x12[\n\x0cListDeposits\x12$.datanode.api.v2.ListDepositsRequest\x1a%.datanode.api.v2.ListDepositsResponse\x12^\n\rGetWithdrawal\x12%.datanode.api.v2.GetWithdrawalRequest\x1a&.datanode.api.v2.GetWithdrawalResponse\x12\x64\n\x0fListWithdrawals\x12\'.datanode.api.v2.ListWithdrawalsRequest\x1a(.datanode.api.v2.ListWithdrawalsResponse\x12O\n\x08GetAsset\x12 .datanode.api.v2.GetAssetRequest\x1a!.datanode.api.v2.GetAssetResponse\x12U\n\nListAssets\x12".datanode.api.v2.ListAssetsRequest\x1a#.datanode.api.v2.ListAssetsResponse\x12|\n\x17ListLiquidityProvisions\x12/.datanode.api.v2.ListLiquidityProvisionsRequest\x1a\x30.datanode.api.v2.ListLiquidityProvisionsResponse\x12\x87\x01\n\x1aObserveLiquidityProvisions\x12\x32.datanode.api.v2.ObserveLiquidityProvisionsRequest\x1a\x33.datanode.api.v2.ObserveLiquidityProvisionsResponse0\x01\x12j\n\x11GetGovernanceData\x12).datanode.api.v2.GetGovernanceDataRequest\x1a*.datanode.api.v2.GetGovernanceDataResponse\x12m\n\x12ListGovernanceData\x12*.datanode.api.v2.ListGovernanceDataRequest\x1a+.datanode.api.v2.ListGovernanceDataResponse\x12l\n\x11ObserveGovernance\x12).datanode.api.v2.ObserveGovernanceRequest\x1a*.datanode.api.v2.ObserveGovernanceResponse0\x01\x12\x64\n\x0fListDelegations\x12\'.datanode.api.v2.ListDelegationsRequest\x1a(.datanode.api.v2.ListDelegationsResponse\x12o\n\x12ObserveDelegations\x12*.datanode.api.v2.ObserveDelegationsRequest\x1a+.datanode.api.v2.ObserveDelegationsResponse0\x01\x12\x61\n\x0eGetNetworkData\x12&.datanode.api.v2.GetNetworkDataRequest\x1a\'.datanode.api.v2.GetNetworkDataResponse\x12L\n\x07GetNode\x12\x1f.datanode.api.v2.GetNodeRequest\x1a .datanode.api.v2.GetNodeResponse\x12R\n\tListNodes\x12!.datanode.api.v2.ListNodesRequest\x1a".datanode.api.v2.ListNodesResponse\x12m\n\x12ListNodeSignatures\x12*.datanode.api.v2.ListNodeSignaturesRequest\x1a+.datanode.api.v2.ListNodeSignaturesResponse\x12O\n\x08GetEpoch\x12 .datanode.api.v2.GetEpochRequest\x1a!.datanode.api.v2.GetEpochResponse\x12X\n\x0b\x45stimateFee\x12#.datanode.api.v2.EstimateFeeRequest\x1a$.datanode.api.v2.EstimateFeeResponse\x12\x61\n\x0e\x45stimateMargin\x12&.datanode.api.v2.EstimateMarginRequest\x1a\'.datanode.api.v2.EstimateMarginResponse\x12v\n\x15ListNetworkParameters\x12-.datanode.api.v2.ListNetworkParametersRequest\x1a..datanode.api.v2.ListNetworkParametersResponse\x12p\n\x13GetNetworkParameter\x12+.datanode.api.v2.GetNetworkParameterRequest\x1a,.datanode.api.v2.GetNetworkParameterResponse\x12\x64\n\x0fListCheckpoints\x12\'.datanode.api.v2.ListCheckpointsRequest\x1a(.datanode.api.v2.ListCheckpointsResponse\x12O\n\x08GetStake\x12 .datanode.api.v2.GetStakeRequest\x1a!.datanode.api.v2.GetStakeResponse\x12\x61\n\x0eGetRiskFactors\x12&.datanode.api.v2.GetRiskFactorsRequest\x1a\'.datanode.api.v2.GetRiskFactorsResponse\x12h\n\x0fObserveEventBus\x12\'.datanode.api.v2.ObserveEventBusRequest\x1a(.datanode.api.v2.ObserveEventBusResponse(\x01\x30\x01\x12{\n\x16ObserveLedgerMovements\x12..datanode.api.v2.ObserveLedgerMovementsRequest\x1a/.datanode.api.v2.ObserveLedgerMovementsResponse0\x01\x12g\n\x10ListKeyRotations\x12(.datanode.api.v2.ListKeyRotationsRequest\x1a).datanode.api.v2.ListKeyRotationsResponse\x12\x7f\n\x18ListEthereumKeyRotations\x12\x30.datanode.api.v2.ListEthereumKeyRotationsRequest\x1a\x31.datanode.api.v2.ListEthereumKeyRotationsResponse\x12X\n\x0bGetVegaTime\x12#.datanode.api.v2.GetVegaTimeRequest\x1a$.datanode.api.v2.GetVegaTimeResponse\x12\x7f\n\x18GetProtocolUpgradeStatus\x12\x30.datanode.api.v2.GetProtocolUpgradeStatusRequest\x1a\x31.datanode.api.v2.GetProtocolUpgradeStatusResponse\x12\x8b\x01\n\x1cListProtocolUpgradeProposals\x12\x34.datanode.api.v2.ListProtocolUpgradeProposalsRequest\x1a\x35.datanode.api.v2.ListProtocolUpgradeProposalsResponse\x12j\n\x11ListCoreSnapshots\x12).datanode.api.v2.ListCoreSnapshotsRequest\x1a*.datanode.api.v2.ListCoreSnapshotsResponse\x12\x8e\x01\n\x1dGetMostRecentDeHistorySegment\x12\x35.datanode.api.v2.GetMostRecentDeHistorySegmentRequest\x1a\x36.datanode.api.v2.GetMostRecentDeHistorySegmentResponse\x12\x7f\n\x18ListAllDeHistorySegments\x12\x30.datanode.api.v2.ListAllDeHistorySegmentsRequest\x1a\x31.datanode.api.v2.ListAllDeHistorySegmentsResponse\x12\x94\x01\n\x1fGetActiveDeHistoryPeerAddresses\x12\x37.datanode.api.v2.GetActiveDeHistoryPeerAddressesRequest\x1a\x38.datanode.api.v2.GetActiveDeHistoryPeerAddressesResponse\x12\x43\n\x04Ping\x12\x1c.datanode.api.v2.PingRequest\x1a\x1d.datanode.api.v2.PingResponseB}Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\x92\x41G\x12\x1e\n\x13Vega data node APIs2\x07v0.65.1\x1a!lb.testnet.vega.xyz/datanode/rest*\x02\x01\x02\x62\x06proto3'
+    b'\n#data-node/api/v2/trading_data.proto\x12\x0f\x64\x61tanode.api.v2\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/httpbody.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a\x11vega/assets.proto\x1a)vega/commands/v1/validator_commands.proto\x1a\x1bvega/events/v1/events.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x11vega/oracle.proto\x1a\x0fvega/vega.proto"\xd9\x01\n\nPagination\x12\x19\n\x05\x66irst\x18\x01 \x01(\x05H\x00R\x05\x66irst\x88\x01\x01\x12\x19\n\x05\x61\x66ter\x18\x02 \x01(\tH\x01R\x05\x61\x66ter\x88\x01\x01\x12\x17\n\x04last\x18\x03 \x01(\x05H\x02R\x04last\x88\x01\x01\x12\x1b\n\x06\x62\x65\x66ore\x18\x04 \x01(\tH\x03R\x06\x62\x65\x66ore\x88\x01\x01\x12&\n\x0cnewest_first\x18\x05 \x01(\x08H\x04R\x0bnewestFirst\x88\x01\x01\x42\x08\n\x06_firstB\x08\n\x06_afterB\x07\n\x05_lastB\t\n\x07_beforeB\x0f\n\r_newest_first"\x9c\x01\n\x08PageInfo\x12"\n\rhas_next_page\x18\x01 \x01(\x08R\x0bhasNextPage\x12*\n\x11has_previous_page\x18\x02 \x01(\x08R\x0fhasPreviousPage\x12!\n\x0cstart_cursor\x18\x03 \x01(\tR\x0bstartCursor\x12\x1d\n\nend_cursor\x18\x04 \x01(\tR\tendCursor"\x9a\x01\n\x0e\x41\x63\x63ountBalance\x12\x14\n\x05owner\x18\x02 \x01(\tR\x05owner\x12\x18\n\x07\x62\x61lance\x18\x03 \x01(\tR\x07\x62\x61lance\x12\x14\n\x05\x61sset\x18\x04 \x01(\tR\x05\x61sset\x12\x1b\n\tmarket_id\x18\x05 \x01(\tR\x08marketId\x12%\n\x04type\x18\x06 \x01(\x0e\x32\x11.vega.AccountTypeR\x04type"\x9e\x01\n\x13ListAccountsRequest\x12\x36\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x06\x66ilter\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"W\n\x14ListAccountsResponse\x12?\n\x08\x61\x63\x63ounts\x18\x01 \x01(\x0b\x32#.datanode.api.v2.AccountsConnectionR\x08\x61\x63\x63ounts"\x80\x01\n\x12\x41\x63\x63ountsConnection\x12\x32\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1c.datanode.api.v2.AccountEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"Z\n\x0b\x41\x63\x63ountEdge\x12\x33\n\x04node\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8d\x01\n\x16ObserveAccountsRequest\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12\x19\n\x08party_id\x18\x02 \x01(\tR\x07partyId\x12\x14\n\x05\x61sset\x18\x03 \x01(\tR\x05\x61sset\x12%\n\x04type\x18\x04 \x01(\x0e\x32\x11.vega.AccountTypeR\x04type"\xa6\x01\n\x17ObserveAccountsResponse\x12\x42\n\x08snapshot\x18\x01 \x01(\x0b\x32$.datanode.api.v2.AccountSnapshotPageH\x00R\x08snapshot\x12;\n\x07updates\x18\x02 \x01(\x0b\x32\x1f.datanode.api.v2.AccountUpdatesH\x00R\x07updatesB\n\n\x08response"o\n\x13\x41\x63\x63ountSnapshotPage\x12;\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x08\x61\x63\x63ounts\x12\x1b\n\tlast_page\x18\x02 \x01(\x08R\x08lastPage"M\n\x0e\x41\x63\x63ountUpdates\x12;\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x08\x61\x63\x63ounts"\r\n\x0bInfoRequest"I\n\x0cInfoResponse\x12\x18\n\x07version\x18\x01 \x01(\tR\x07version\x12\x1f\n\x0b\x63ommit_hash\x18\x02 \x01(\tR\ncommitHash"\\\n\x0fGetOrderRequest\x12\x1e\n\x08order_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07orderId\x12\x1d\n\x07version\x18\x02 \x01(\x05H\x00R\x07version\x88\x01\x01\x42\n\n\x08_version"5\n\x10GetOrderResponse\x12!\n\x05order\x18\x01 \x01(\x0b\x32\x0b.vega.OrderR\x05order"\xbd\x03\n\x0bOrderFilter\x12.\n\x08statuses\x18\x01 \x03(\x0e\x32\x12.vega.Order.StatusR\x08statuses\x12&\n\x05types\x18\x02 \x03(\x0e\x32\x10.vega.Order.TypeR\x05types\x12=\n\x0etime_in_forces\x18\x03 \x03(\x0e\x32\x17.vega.Order.TimeInForceR\x0ctimeInForces\x12+\n\x11\x65xclude_liquidity\x18\x04 \x01(\x08R\x10\x65xcludeLiquidity\x12\x1b\n\tparty_ids\x18\x05 \x03(\tR\x08partyIds\x12\x1d\n\nmarket_ids\x18\x06 \x03(\tR\tmarketIds\x12!\n\treference\x18\x07 \x01(\tH\x00R\treference\x88\x01\x01\x12>\n\ndate_range\x18\x08 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x12 \n\tlive_only\x18\t \x01(\x08H\x02R\x08liveOnly\x88\x01\x01\x42\x0c\n\n_referenceB\r\n\x0b_date_rangeB\x0c\n\n_live_only"\xaa\x01\n\x11ListOrdersRequest\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12\x39\n\x06\x66ilter\x18\x05 \x01(\x0b\x32\x1c.datanode.api.v2.OrderFilterH\x01R\x06\x66ilter\x88\x01\x01\x42\r\n\x0b_paginationB\t\n\x07_filter"N\n\x12ListOrdersResponse\x12\x38\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnectionR\x06orders"\x8b\x01\n\x18ListOrderVersionsRequest\x12\x1e\n\x08order_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07orderId\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"U\n\x19ListOrderVersionsResponse\x12\x38\n\x06orders\x18\x01 \x01(\x0b\x32 .datanode.api.v2.OrderConnectionR\x06orders"\x9a\x01\n\x14ObserveOrdersRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds\x12\x1b\n\tparty_ids\x18\x02 \x03(\tR\x08partyIds\x12\x30\n\x11\x65xclude_liquidity\x18\x03 \x01(\x08H\x00R\x10\x65xcludeLiquidity\x88\x01\x01\x42\x14\n\x12_exclude_liquidity"\xa0\x01\n\x15ObserveOrdersResponse\x12@\n\x08snapshot\x18\x01 \x01(\x0b\x32".datanode.api.v2.OrderSnapshotPageH\x00R\x08snapshot\x12\x39\n\x07updates\x18\x02 \x01(\x0b\x32\x1d.datanode.api.v2.OrderUpdatesH\x00R\x07updatesB\n\n\x08response"U\n\x11OrderSnapshotPage\x12#\n\x06orders\x18\x01 \x03(\x0b\x32\x0b.vega.OrderR\x06orders\x12\x1b\n\tlast_page\x18\x02 \x01(\x08R\x08lastPage"3\n\x0cOrderUpdates\x12#\n\x06orders\x18\x01 \x03(\x0b\x32\x0b.vega.OrderR\x06orders"\xa3\x01\n\x14ListPositionsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01:\x02\x18\x01\x42\r\n\x0b_pagination"^\n\x15ListPositionsResponse\x12\x41\n\tpositions\x18\x01 \x01(\x0b\x32#.datanode.api.v2.PositionConnectionR\tpositions:\x02\x18\x01"M\n\x0fPositionsFilter\x12\x1b\n\tparty_ids\x18\x01 \x03(\tR\x08partyIds\x12\x1d\n\nmarket_ids\x18\x02 \x03(\tR\tmarketIds"\xa4\x01\n\x17ListAllPositionsRequest\x12\x38\n\x06\x66ilter\x18\x01 \x01(\x0b\x32 .datanode.api.v2.PositionsFilterR\x06\x66ilter\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"]\n\x18ListAllPositionsResponse\x12\x41\n\tpositions\x18\x01 \x01(\x0b\x32#.datanode.api.v2.PositionConnectionR\tpositions"J\n\x0cPositionEdge\x12"\n\x04node\x18\x01 \x01(\x0b\x32\x0e.vega.PositionR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n\x12PositionConnection\x12\x33\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1d.datanode.api.v2.PositionEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"v\n\x17ObservePositionsRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12 \n\tmarket_id\x18\x02 \x01(\tH\x01R\x08marketId\x88\x01\x01\x42\x0b\n\t_party_idB\x0c\n\n_market_id"\xa9\x01\n\x18ObservePositionsResponse\x12\x43\n\x08snapshot\x18\x01 \x01(\x0b\x32%.datanode.api.v2.PositionSnapshotPageH\x00R\x08snapshot\x12<\n\x07updates\x18\x02 \x01(\x0b\x32 .datanode.api.v2.PositionUpdatesH\x00R\x07updatesB\n\n\x08response"a\n\x14PositionSnapshotPage\x12,\n\tpositions\x18\x01 \x03(\x0b\x32\x0e.vega.PositionR\tpositions\x12\x1b\n\tlast_page\x18\x02 \x01(\x08R\x08lastPage"?\n\x0fPositionUpdates\x12,\n\tpositions\x18\x01 \x03(\x0b\x32\x0e.vega.PositionR\tpositions"\xa3\x02\n\x11LedgerEntryFilter\x12\x37\n\x18\x63lose_on_account_filters\x18\x01 \x01(\x08R\x15\x63loseOnAccountFilters\x12N\n\x13\x66rom_account_filter\x18\x02 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x11\x66romAccountFilter\x12J\n\x11to_account_filter\x18\x03 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x0ftoAccountFilter\x12\x39\n\x0etransfer_types\x18\x05 \x03(\x0e\x32\x12.vega.TransferTypeR\rtransferTypes"\xd9\x05\n\x15\x41ggregatedLedgerEntry\x12\x1c\n\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\x12\x1a\n\x08quantity\x18\x03 \x01(\tR\x08quantity\x12\x37\n\rtransfer_type\x18\x04 \x01(\x0e\x32\x12.vega.TransferTypeR\x0ctransferType\x12\x1e\n\x08\x61sset_id\x18\x05 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12=\n\x11\x66rom_account_type\x18\x06 \x01(\x0e\x32\x11.vega.AccountTypeR\x0f\x66romAccountType\x12\x39\n\x0fto_account_type\x18\x07 \x01(\x0e\x32\x11.vega.AccountTypeR\rtoAccountType\x12\x36\n\x15\x66rom_account_party_id\x18\x08 \x01(\tH\x01R\x12\x66romAccountPartyId\x88\x01\x01\x12\x32\n\x13to_account_party_id\x18\t \x01(\tH\x02R\x10toAccountPartyId\x88\x01\x01\x12\x38\n\x16\x66rom_account_market_id\x18\n \x01(\tH\x03R\x13\x66romAccountMarketId\x88\x01\x01\x12\x34\n\x14to_account_market_id\x18\x0b \x01(\tH\x04R\x11toAccountMarketId\x88\x01\x01\x12\x30\n\x14\x66rom_account_balance\x18\x0c \x01(\tR\x12\x66romAccountBalance\x12,\n\x12to_account_balance\x18\r \x01(\tR\x10toAccountBalanceB\x0b\n\t_asset_idB\x18\n\x16_from_account_party_idB\x16\n\x14_to_account_party_idB\x19\n\x17_from_account_market_idB\x17\n\x15_to_account_market_idJ\x04\x08\x01\x10\x02"\xf6\x01\n\x18ListLedgerEntriesRequest\x12:\n\x06\x66ilter\x18\x01 \x01(\x0b\x32".datanode.api.v2.LedgerEntryFilterR\x06\x66ilter\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x03 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"\xab\x01\n\x1a\x45xportLedgerEntriesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07partyId\x12\x1e\n\x08\x61sset_id\x18\x02 \x01(\tB\x03\xe0\x41\x02R\x07\x61ssetId\x12>\n\ndate_range\x18\x04 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x00R\tdateRange\x88\x01\x01\x42\r\n\x0b_date_range"v\n\x19ListLedgerEntriesResponse\x12Y\n\x0eledger_entries\x18\x01 \x01(\x0b\x32\x32.datanode.api.v2.AggregatedLedgerEntriesConnectionR\rledgerEntries"q\n\x1b\x41ggregatedLedgerEntriesEdge\x12:\n\x04node\x18\x01 \x01(\x0b\x32&.datanode.api.v2.AggregatedLedgerEntryR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x9f\x01\n!AggregatedLedgerEntriesConnection\x12\x42\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32,.datanode.api.v2.AggregatedLedgerEntriesEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xf3\x01\n\x19ListBalanceChangesRequest\x12\x36\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x06\x66ilter\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x06 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"f\n\x1aListBalanceChangesResponse\x12H\n\x08\x62\x61lances\x18\x01 \x01(\x0b\x32,.datanode.api.v2.AggregatedBalanceConnectionR\x08\x62\x61lances"\xac\x02\n\x18GetBalanceHistoryRequest\x12\x36\n\x06\x66ilter\x18\x01 \x01(\x0b\x32\x1e.datanode.api.v2.AccountFilterR\x06\x66ilter\x12\x38\n\x08group_by\x18\x02 \x03(\x0e\x32\x1d.datanode.api.v2.AccountFieldR\x07groupBy\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x04 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"e\n\x19GetBalanceHistoryResponse\x12H\n\x08\x62\x61lances\x18\x01 \x01(\x0b\x32,.datanode.api.v2.AggregatedBalanceConnectionR\x08\x62\x61lances"g\n\x15\x41ggregatedBalanceEdge\x12\x36\n\x04node\x18\x01 \x01(\x0b\x32".datanode.api.v2.AggregatedBalanceR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x93\x01\n\x1b\x41ggregatedBalanceConnection\x12<\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32&.datanode.api.v2.AggregatedBalanceEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x9e\x01\n\rAccountFilter\x12\x19\n\x08\x61sset_id\x18\x01 \x01(\tR\x07\x61ssetId\x12\x1b\n\tparty_ids\x18\x02 \x03(\tR\x08partyIds\x12\x1d\n\nmarket_ids\x18\x03 \x03(\tR\tmarketIds\x12\x36\n\raccount_types\x18\x04 \x03(\x0e\x32\x11.vega.AccountTypeR\x0c\x61\x63\x63ountTypes"\xa1\x02\n\x11\x41ggregatedBalance\x12\x1c\n\ttimestamp\x18\x01 \x01(\x03R\ttimestamp\x12\x18\n\x07\x62\x61lance\x18\x02 \x01(\tR\x07\x62\x61lance\x12\x1e\n\x08party_id\x18\x04 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1e\n\x08\x61sset_id\x18\x05 \x01(\tH\x01R\x07\x61ssetId\x88\x01\x01\x12 \n\tmarket_id\x18\x06 \x01(\tH\x02R\x08marketId\x88\x01\x01\x12\x39\n\x0c\x61\x63\x63ount_type\x18\x07 \x01(\x0e\x32\x11.vega.AccountTypeH\x03R\x0b\x61\x63\x63ountType\x88\x01\x01\x42\x0b\n\t_party_idB\x0b\n\t_asset_idB\x0c\n\n_market_idB\x0f\n\r_account_type";\n\x1aObserveMarketsDepthRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds"S\n\x1bObserveMarketsDepthResponse\x12\x34\n\x0cmarket_depth\x18\x01 \x03(\x0b\x32\x11.vega.MarketDepthR\x0bmarketDepth"B\n!ObserveMarketsDepthUpdatesRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds"U\n"ObserveMarketsDepthUpdatesResponse\x12/\n\x06update\x18\x01 \x03(\x0b\x32\x17.vega.MarketDepthUpdateR\x06update":\n\x19ObserveMarketsDataRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds"O\n\x1aObserveMarketsDataResponse\x12\x31\n\x0bmarket_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketDataR\nmarketData"o\n\x1bGetLatestMarketDepthRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId\x12 \n\tmax_depth\x18\x02 \x01(\x04H\x00R\x08maxDepth\x88\x01\x01\x42\x0c\n\n_max_depth"\xda\x01\n\x1cGetLatestMarketDepthResponse\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12"\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x10.vega.PriceLevelR\x03\x62uy\x12$\n\x04sell\x18\x03 \x03(\x0b\x32\x10.vega.PriceLevelR\x04sell\x12*\n\nlast_trade\x18\x04 \x01(\x0b\x32\x0b.vega.TradeR\tlastTrade\x12\'\n\x0fsequence_number\x18\x05 \x01(\x04R\x0esequenceNumber"\x1d\n\x1bListLatestMarketDataRequest"S\n\x1cListLatestMarketDataResponse\x12\x33\n\x0cmarkets_data\x18\x01 \x03(\x0b\x32\x10.vega.MarketDataR\x0bmarketsData">\n\x1aGetLatestMarketDataRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId"P\n\x1bGetLatestMarketDataResponse\x12\x31\n\x0bmarket_data\x18\x01 \x01(\x0b\x32\x10.vega.MarketDataR\nmarketData"\x98\x02\n\x1fGetMarketDataHistoryByIDRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId\x12,\n\x0fstart_timestamp\x18\x02 \x01(\x03H\x00R\x0estartTimestamp\x88\x01\x01\x12(\n\rend_timestamp\x18\x03 \x01(\x03H\x01R\x0c\x65ndTimestamp\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\x12\n\x10_start_timestampB\x10\n\x0e_end_timestampB\r\n\x0b_paginationJ\x04\x08\x05\x10\x06"j\n GetMarketDataHistoryByIDResponse\x12\x46\n\x0bmarket_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.MarketDataConnectionR\nmarketData"N\n\x0eMarketDataEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.MarketDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x85\x01\n\x14MarketDataConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.MarketDataEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xd1\x01\n\x14ListTransfersRequest\x12\x1b\n\x06pubkey\x18\x01 \x01(\tH\x00R\x06pubkey\x88\x01\x01\x12@\n\tdirection\x18\x02 \x01(\x0e\x32".datanode.api.v2.TransferDirectionR\tdirection\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\t\n\x07_pubkeyB\r\n\x0b_pagination"Z\n\x15ListTransfersResponse\x12\x41\n\ttransfers\x18\x01 \x01(\x0b\x32#.datanode.api.v2.TransferConnectionR\ttransfers"T\n\x0cTransferEdge\x12,\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.events.v1.TransferR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n\x12TransferConnection\x12\x33\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1d.datanode.api.v2.TransferEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x19\n\x17GetNetworkLimitsRequest"G\n\x18GetNetworkLimitsResponse\x12+\n\x06limits\x18\x01 \x01(\x0b\x32\x13.vega.NetworkLimitsR\x06limits">\n\x1aListCandleIntervalsRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId"M\n\x12IntervalToCandleId\x12\x1a\n\x08interval\x18\x01 \x01(\tR\x08interval\x12\x1b\n\tcandle_id\x18\x02 \x01(\tR\x08\x63\x61ndleId"u\n\x1bListCandleIntervalsResponse\x12V\n\x15interval_to_candle_id\x18\x01 \x03(\x0b\x32#.datanode.api.v2.IntervalToCandleIdR\x12intervalToCandleId"\xa7\x01\n\x06\x43\x61ndle\x12\x14\n\x05start\x18\x01 \x01(\x03R\x05start\x12\x1f\n\x0blast_update\x18\x02 \x01(\x03R\nlastUpdate\x12\x12\n\x04high\x18\x03 \x01(\tR\x04high\x12\x10\n\x03low\x18\x04 \x01(\tR\x03low\x12\x12\n\x04open\x18\x05 \x01(\tR\x04open\x12\x14\n\x05\x63lose\x18\x06 \x01(\tR\x05\x63lose\x12\x16\n\x06volume\x18\x07 \x01(\x04R\x06volume"<\n\x18ObserveCandleDataRequest\x12 \n\tcandle_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08\x63\x61ndleId"L\n\x19ObserveCandleDataResponse\x12/\n\x06\x63\x61ndle\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.CandleR\x06\x63\x61ndle"\xda\x01\n\x15ListCandleDataRequest\x12 \n\tcandle_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08\x63\x61ndleId\x12%\n\x0e\x66rom_timestamp\x18\x02 \x01(\x03R\rfromTimestamp\x12!\n\x0cto_timestamp\x18\x03 \x01(\x03R\x0btoTimestamp\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_paginationJ\x04\x08\x04\x10\x05"Y\n\x16ListCandleDataResponse\x12?\n\x07\x63\x61ndles\x18\x01 \x01(\x0b\x32%.datanode.api.v2.CandleDataConnectionR\x07\x63\x61ndles"Q\n\nCandleEdge\x12+\n\x04node\x18\x01 \x01(\x0b\x32\x17.datanode.api.v2.CandleR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n\x14\x43\x61ndleDataConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.CandleEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xc6\x01\n\x10ListVotesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12$\n\x0bproposal_id\x18\x02 \x01(\tH\x01R\nproposalId\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\x0b\n\t_party_idB\x0e\n\x0c_proposal_idB\r\n\x0b_pagination"J\n\x11ListVotesResponse\x12\x35\n\x05votes\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.VoteConnectionR\x05votes"B\n\x08VoteEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.VoteR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"y\n\x0eVoteConnection\x12/\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x19.datanode.api.v2.VoteEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"x\n\x13ObserveVotesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12$\n\x0bproposal_id\x18\x02 \x01(\tH\x01R\nproposalId\x88\x01\x01\x42\x0b\n\t_party_idB\x0e\n\x0c_proposal_id"6\n\x14ObserveVotesResponse\x12\x1e\n\x04vote\x18\x01 \x01(\x0b\x32\n.vega.VoteR\x04vote"\xbd\x01\n*ListERC20MultiSigSignerAddedBundlesRequest\x12\x17\n\x07node_id\x18\x01 \x01(\tR\x06nodeId\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x1b\n\tepoch_seq\x18\x03 \x01(\tR\x08\x65pochSeq\x12;\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"|\n+ListERC20MultiSigSignerAddedBundlesResponse\x12M\n\x07\x62undles\x18\x01 \x01(\x0b\x32\x33.datanode.api.v2.ERC20MultiSigSignerAddedConnectionR\x07\x62undles"t\n\x1c\x45RC20MultiSigSignerAddedEdge\x12<\n\x04node\x18\x01 \x01(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerAddedR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x01\n"ERC20MultiSigSignerAddedBundleEdge\x12\x43\n\x04node\x18\x01 \x01(\x0b\x32/.datanode.api.v2.ERC20MultiSigSignerAddedBundleR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\xa7\x01\n"ERC20MultiSigSignerAddedConnection\x12I\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x33.datanode.api.v2.ERC20MultiSigSignerAddedBundleEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xce\x01\n\x1e\x45RC20MultiSigSignerAddedBundle\x12\x1d\n\nnew_signer\x18\x01 \x01(\tR\tnewSigner\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x14\n\x05nonce\x18\x04 \x01(\tR\x05nonce\x12\x1c\n\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\x12\x1e\n\nsignatures\x18\x06 \x01(\tR\nsignatures\x12\x1b\n\tepoch_seq\x18\x03 \x01(\tR\x08\x65pochSeq"\xbf\x01\n,ListERC20MultiSigSignerRemovedBundlesRequest\x12\x17\n\x07node_id\x18\x01 \x01(\tR\x06nodeId\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x1b\n\tepoch_seq\x18\x03 \x01(\tR\x08\x65pochSeq\x12;\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"\x80\x01\n-ListERC20MultiSigSignerRemovedBundlesResponse\x12O\n\x07\x62undles\x18\x01 \x01(\x0b\x32\x35.datanode.api.v2.ERC20MultiSigSignerRemovedConnectionR\x07\x62undles"x\n\x1e\x45RC20MultiSigSignerRemovedEdge\x12>\n\x04node\x18\x01 \x01(\x0b\x32*.vega.events.v1.ERC20MultiSigSignerRemovedR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x85\x01\n$ERC20MultiSigSignerRemovedBundleEdge\x12\x45\n\x04node\x18\x01 \x01(\x0b\x32\x31.datanode.api.v2.ERC20MultiSigSignerRemovedBundleR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\xab\x01\n$ERC20MultiSigSignerRemovedConnection\x12K\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x35.datanode.api.v2.ERC20MultiSigSignerRemovedBundleEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xd0\x01\n ERC20MultiSigSignerRemovedBundle\x12\x1d\n\nold_signer\x18\x01 \x01(\tR\toldSigner\x12\x1c\n\tsubmitter\x18\x02 \x01(\tR\tsubmitter\x12\x14\n\x05nonce\x18\x04 \x01(\tR\x05nonce\x12\x1c\n\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\x12\x1e\n\nsignatures\x18\x06 \x01(\tR\nsignatures\x12\x1b\n\tepoch_seq\x18\x07 \x01(\tR\x08\x65pochSeq"@\n\x1eGetERC20ListAssetBundleRequest\x12\x1e\n\x08\x61sset_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07\x61ssetId"\x9e\x01\n\x1fGetERC20ListAssetBundleResponse\x12!\n\x0c\x61sset_source\x18\x01 \x01(\tR\x0b\x61ssetSource\x12"\n\rvega_asset_id\x18\x02 \x01(\tR\x0bvegaAssetId\x12\x14\n\x05nonce\x18\x03 \x01(\tR\x05nonce\x12\x1e\n\nsignatures\x18\x04 \x01(\tR\nsignatures"K\n#GetERC20SetAssetLimitsBundleRequest\x12$\n\x0bproposal_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\nproposalId"\xe8\x01\n$GetERC20SetAssetLimitsBundleResponse\x12!\n\x0c\x61sset_source\x18\x01 \x01(\tR\x0b\x61ssetSource\x12"\n\rvega_asset_id\x18\x02 \x01(\tR\x0bvegaAssetId\x12\x14\n\x05nonce\x18\x03 \x01(\tR\x05nonce\x12%\n\x0elifetime_limit\x18\x04 \x01(\tR\rlifetimeLimit\x12\x1c\n\tthreshold\x18\x05 \x01(\tR\tthreshold\x12\x1e\n\nsignatures\x18\x06 \x01(\tR\nsignatures"M\n!GetERC20WithdrawalApprovalRequest\x12(\n\rwithdrawal_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x0cwithdrawalId"\xde\x01\n"GetERC20WithdrawalApprovalResponse\x12!\n\x0c\x61sset_source\x18\x01 \x01(\tR\x0b\x61ssetSource\x12\x16\n\x06\x61mount\x18\x02 \x01(\tR\x06\x61mount\x12\x14\n\x05nonce\x18\x04 \x01(\tR\x05nonce\x12\x1e\n\nsignatures\x18\x05 \x01(\tR\nsignatures\x12%\n\x0etarget_address\x18\x06 \x01(\tR\rtargetAddress\x12\x1a\n\x08\x63reation\x18\x07 \x01(\x03R\x08\x63reationJ\x04\x08\x03\x10\x04"7\n\x13GetLastTradeRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId"9\n\x14GetLastTradeResponse\x12!\n\x05trade\x18\x01 \x01(\x0b\x32\x0b.vega.TradeR\x05trade"\x8c\x02\n\x11ListTradesRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds\x12\x1b\n\torder_ids\x18\x02 \x03(\tR\x08orderIds\x12\x1b\n\tparty_ids\x18\x03 \x03(\tR\x08partyIds\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x05 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"N\n\x12ListTradesResponse\x12\x38\n\x06trades\x18\x01 \x01(\x0b\x32 .datanode.api.v2.TradeConnectionR\x06trades"{\n\x0fTradeConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.TradeEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"D\n\tTradeEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.TradeR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"R\n\x14ObserveTradesRequest\x12\x1d\n\nmarket_ids\x18\x01 \x03(\tR\tmarketIds\x12\x1b\n\tparty_ids\x18\x02 \x03(\tR\x08partyIds"<\n\x15ObserveTradesResponse\x12#\n\x06trades\x18\x01 \x03(\x0b\x32\x0b.vega.TradeR\x06trades"A\n\x14GetOracleSpecRequest\x12)\n\x0eoracle_spec_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x0coracleSpecId"J\n\x15GetOracleSpecResponse\x12\x31\n\x0boracle_spec\x18\x01 \x01(\x0b\x32\x10.vega.OracleSpecR\noracleSpec"i\n\x16ListOracleSpecsRequest\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"d\n\x17ListOracleSpecsResponse\x12I\n\x0coracle_specs\x18\x01 \x01(\x0b\x32&.datanode.api.v2.OracleSpecsConnectionR\x0boracleSpecs"\xa6\x01\n\x15ListOracleDataRequest\x12)\n\x0eoracle_spec_id\x18\x01 \x01(\tH\x00R\x0coracleSpecId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x11\n\x0f_oracle_spec_idB\r\n\x0b_pagination"`\n\x16ListOracleDataResponse\x12\x46\n\x0boracle_data\x18\x01 \x01(\x0b\x32%.datanode.api.v2.OracleDataConnectionR\noracleData"N\n\x0eOracleSpecEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.OracleSpecR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15OracleSpecsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.OracleSpecEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"N\n\x0eOracleDataEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.OracleDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x85\x01\n\x14OracleDataConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.OracleDataEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"4\n\x10GetMarketRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId"9\n\x11GetMarketResponse\x12$\n\x06market\x18\x01 \x01(\x0b\x32\x0c.vega.MarketR\x06market"\xa7\x01\n\x12ListMarketsRequest\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12,\n\x0finclude_settled\x18\x03 \x01(\x08H\x01R\x0eincludeSettled\x88\x01\x01\x42\r\n\x0b_paginationB\x12\n\x10_include_settled"R\n\x13ListMarketsResponse\x12;\n\x07markets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarketConnectionR\x07markets"F\n\nMarketEdge\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.MarketR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"}\n\x10MarketConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.MarketEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"1\n\x0fGetPartyRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07partyId"5\n\x10GetPartyResponse\x12!\n\x05party\x18\x01 \x01(\x0b\x32\x0b.vega.PartyR\x05party"l\n\x12ListPartiesRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12;\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"Q\n\x13ListPartiesResponse\x12:\n\x07parties\x18\x01 \x01(\x0b\x32 .datanode.api.v2.PartyConnectionR\x07parties"D\n\tPartyEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.PartyR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"{\n\x0fPartyConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.PartyEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"D\n\tOrderEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.OrderR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8e\x01\n\x17ListMarginLevelsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId\x12;\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationR\npagination"b\n\x18ListMarginLevelsResponse\x12\x46\n\rmargin_levels\x18\x01 \x01(\x0b\x32!.datanode.api.v2.MarginConnectionR\x0cmarginLevels"g\n\x1aObserveMarginLevelsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12 \n\tmarket_id\x18\x02 \x01(\tH\x00R\x08marketId\x88\x01\x01\x42\x0c\n\n_market_id"V\n\x1bObserveMarginLevelsResponse\x12\x37\n\rmargin_levels\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevelsR\x0cmarginLevels"{\n\x0fOrderConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.OrderEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"L\n\nMarginEdge\x12&\n\x04node\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevelsR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"}\n\x10MarginConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.MarginEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x8d\x02\n\x12ListRewardsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x1e\n\x08\x61sset_id\x18\x02 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x12"\n\nfrom_epoch\x18\x04 \x01(\x04H\x02R\tfromEpoch\x88\x01\x01\x12\x1e\n\x08to_epoch\x18\x05 \x01(\x04H\x03R\x07toEpoch\x88\x01\x01\x42\x0b\n\t_asset_idB\r\n\x0b_paginationB\r\n\x0b_from_epochB\x0b\n\t_to_epoch"S\n\x13ListRewardsResponse\x12<\n\x07rewards\x18\x01 \x01(\x0b\x32".datanode.api.v2.RewardsConnectionR\x07rewards"F\n\nRewardEdge\x12 \n\x04node\x18\x01 \x01(\x0b\x32\x0c.vega.RewardR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"~\n\x11RewardsConnection\x12\x31\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1b.datanode.api.v2.RewardEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xc7\x01\n\x1aListRewardSummariesRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1e\n\x08\x61sset_id\x18\x02 \x01(\tH\x01R\x07\x61ssetId\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\x0b\n\t_party_idB\x0b\n\t_asset_idB\r\n\x0b_pagination"P\n\x1bListRewardSummariesResponse\x12\x31\n\tsummaries\x18\x01 \x03(\x0b\x32\x13.vega.RewardSummaryR\tsummaries"\xb1\x01\n\x13RewardSummaryFilter\x12\x1b\n\tasset_ids\x18\x01 \x03(\tR\x08\x61ssetIds\x12\x1d\n\nmarket_ids\x18\x02 \x03(\tR\tmarketIds\x12"\n\nfrom_epoch\x18\x03 \x01(\x04H\x00R\tfromEpoch\x88\x01\x01\x12\x1e\n\x08to_epoch\x18\x04 \x01(\x04H\x01R\x07toEpoch\x88\x01\x01\x42\r\n\x0b_from_epochB\x0b\n\t_to_epoch"\xb0\x01\n\x1fListEpochRewardSummariesRequest\x12<\n\x06\x66ilter\x18\x01 \x01(\x0b\x32$.datanode.api.v2.RewardSummaryFilterR\x06\x66ilter\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"o\n ListEpochRewardSummariesResponse\x12K\n\tsummaries\x18\x01 \x01(\x0b\x32-.datanode.api.v2.EpochRewardSummaryConnectionR\tsummaries"\x95\x01\n\x1c\x45pochRewardSummaryConnection\x12=\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\'.datanode.api.v2.EpochRewardSummaryEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"^\n\x16\x45pochRewardSummaryEdge\x12,\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.EpochRewardSummaryR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"q\n\x15ObserveRewardsRequest\x12\x1e\n\x08\x61sset_id\x18\x01 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x42\x0b\n\t_asset_idB\x0b\n\t_party_id">\n\x16ObserveRewardsResponse\x12$\n\x06reward\x18\x01 \x01(\x0b\x32\x0c.vega.RewardR\x06reward"(\n\x11GetDepositRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x02id"=\n\x12GetDepositResponse\x12\'\n\x07\x64\x65posit\x18\x01 \x01(\x0b\x32\r.vega.DepositR\x07\x64\x65posit"\xd0\x01\n\x13ListDepositsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x03 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"W\n\x14ListDepositsResponse\x12?\n\x08\x64\x65posits\x18\x01 \x01(\x0b\x32#.datanode.api.v2.DepositsConnectionR\x08\x64\x65posits"H\n\x0b\x44\x65positEdge\x12!\n\x04node\x18\x01 \x01(\x0b\x32\r.vega.DepositR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x80\x01\n\x12\x44\x65positsConnection\x12\x32\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1c.datanode.api.v2.DepositEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"+\n\x14GetWithdrawalRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x02id"I\n\x15GetWithdrawalResponse\x12\x30\n\nwithdrawal\x18\x01 \x01(\x0b\x32\x10.vega.WithdrawalR\nwithdrawal"\xd3\x01\n\x16ListWithdrawalsRequest\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x12>\n\ndate_range\x18\x03 \x01(\x0b\x32\x1a.datanode.api.v2.DateRangeH\x01R\tdateRange\x88\x01\x01\x42\r\n\x0b_paginationB\r\n\x0b_date_range"c\n\x17ListWithdrawalsResponse\x12H\n\x0bwithdrawals\x18\x01 \x01(\x0b\x32&.datanode.api.v2.WithdrawalsConnectionR\x0bwithdrawals"N\n\x0eWithdrawalEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.WithdrawalR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15WithdrawalsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.WithdrawalEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"1\n\x0fGetAssetRequest\x12\x1e\n\x08\x61sset_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07\x61ssetId"5\n\x10GetAssetResponse\x12!\n\x05\x61sset\x18\x01 \x01(\x0b\x32\x0b.vega.AssetR\x05\x61sset"\x91\x01\n\x11ListAssetsRequest\x12\x1e\n\x08\x61sset_id\x18\x01 \x01(\tH\x00R\x07\x61ssetId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x0b\n\t_asset_idB\r\n\x0b_pagination"O\n\x12ListAssetsResponse\x12\x39\n\x06\x61ssets\x18\x01 \x01(\x0b\x32!.datanode.api.v2.AssetsConnectionR\x06\x61ssets"D\n\tAssetEdge\x12\x1f\n\x04node\x18\x01 \x01(\x0b\x32\x0b.vega.AssetR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"|\n\x10\x41ssetsConnection\x12\x30\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1a.datanode.api.v2.AssetEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\xa1\x02\n\x1eListLiquidityProvisionsRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x12!\n\treference\x18\x03 \x01(\tH\x02R\treference\x88\x01\x01\x12\x17\n\x04live\x18\x04 \x01(\x08H\x03R\x04live\x88\x01\x01\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x04R\npagination\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_idB\x0c\n\n_referenceB\x07\n\x05_liveB\r\n\x0b_pagination"\x84\x01\n\x1fListLiquidityProvisionsResponse\x12\x61\n\x14liquidity_provisions\x18\x01 \x01(\x0b\x32..datanode.api.v2.LiquidityProvisionsConnectionR\x13liquidityProvisions"_\n\x17LiquidityProvisionsEdge\x12,\n\x04node\x18\x01 \x01(\x0b\x32\x18.vega.LiquidityProvisionR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x97\x01\n\x1dLiquidityProvisionsConnection\x12>\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32(.datanode.api.v2.LiquidityProvisionsEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x80\x01\n!ObserveLiquidityProvisionsRequest\x12 \n\tmarket_id\x18\x01 \x01(\tH\x00R\x08marketId\x88\x01\x01\x12\x1e\n\x08party_id\x18\x02 \x01(\tH\x01R\x07partyId\x88\x01\x01\x42\x0c\n\n_market_idB\x0b\n\t_party_id"q\n"ObserveLiquidityProvisionsResponse\x12K\n\x14liquidity_provisions\x18\x01 \x03(\x0b\x32\x18.vega.LiquidityProvisionR\x13liquidityProvisions"\x81\x01\n\x18GetGovernanceDataRequest\x12$\n\x0bproposal_id\x18\x01 \x01(\tH\x00R\nproposalId\x88\x01\x01\x12!\n\treference\x18\x02 \x01(\tH\x01R\treference\x88\x01\x01\x42\x0e\n\x0c_proposal_idB\x0c\n\n_reference"E\n\x19GetGovernanceDataResponse\x12(\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceDataR\x04\x64\x61ta"\xfa\x04\n\x19ListGovernanceDataRequest\x12@\n\x0eproposal_state\x18\x01 \x01(\x0e\x32\x14.vega.Proposal.StateH\x00R\rproposalState\x88\x01\x01\x12Y\n\rproposal_type\x18\x02 \x01(\x0e\x32/.datanode.api.v2.ListGovernanceDataRequest.TypeH\x01R\x0cproposalType\x88\x01\x01\x12/\n\x11proposer_party_id\x18\x03 \x01(\tH\x02R\x0fproposerPartyId\x88\x01\x01\x12\x32\n\x12proposal_reference\x18\x04 \x01(\tH\x03R\x11proposalReference\x88\x01\x01\x12@\n\npagination\x18\x05 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x04R\npagination\x88\x01\x01"\xb7\x01\n\x04Type\x12\x14\n\x10TYPE_UNSPECIFIED\x10\x00\x12\x0c\n\x08TYPE_ALL\x10\x01\x12\x13\n\x0fTYPE_NEW_MARKET\x10\x02\x12\x16\n\x12TYPE_UPDATE_MARKET\x10\x03\x12\x1b\n\x17TYPE_NETWORK_PARAMETERS\x10\x04\x12\x12\n\x0eTYPE_NEW_ASSET\x10\x05\x12\x16\n\x12TYPE_NEW_FREE_FORM\x10\x06\x12\x15\n\x11TYPE_UPDATE_ASSET\x10\x07\x42\x11\n\x0f_proposal_stateB\x10\n\x0e_proposal_typeB\x14\n\x12_proposer_party_idB\x15\n\x13_proposal_referenceB\r\n\x0b_pagination"g\n\x1aListGovernanceDataResponse\x12I\n\nconnection\x18\x01 \x01(\x0b\x32).datanode.api.v2.GovernanceDataConnectionR\nconnection"V\n\x12GovernanceDataEdge\x12(\n\x04node\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8d\x01\n\x18GovernanceDataConnection\x12\x39\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32#.datanode.api.v2.GovernanceDataEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"G\n\x18ObserveGovernanceRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x42\x0b\n\t_party_id"E\n\x19ObserveGovernanceResponse\x12(\n\x04\x64\x61ta\x18\x01 \x01(\x0b\x32\x14.vega.GovernanceDataR\x04\x64\x61ta"\xed\x01\n\x16ListDelegationsRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1c\n\x07node_id\x18\x02 \x01(\tH\x01R\x06nodeId\x88\x01\x01\x12\x1e\n\x08\x65poch_id\x18\x03 \x01(\tH\x02R\x07\x65pochId\x88\x01\x01\x12@\n\npagination\x18\x04 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x03R\npagination\x88\x01\x01\x42\x0b\n\t_party_idB\n\n\x08_node_idB\x0b\n\t_epoch_idB\r\n\x0b_pagination"c\n\x17ListDelegationsResponse\x12H\n\x0b\x64\x65legations\x18\x01 \x01(\x0b\x32&.datanode.api.v2.DelegationsConnectionR\x0b\x64\x65legations"N\n\x0e\x44\x65legationEdge\x12$\n\x04node\x18\x01 \x01(\x0b\x32\x10.vega.DelegationR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15\x44\x65legationsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.DelegationEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"r\n\x19ObserveDelegationsRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tH\x00R\x07partyId\x88\x01\x01\x12\x1c\n\x07node_id\x18\x02 \x01(\tH\x01R\x06nodeId\x88\x01\x01\x42\x0b\n\t_party_idB\n\n\x08_node_id"N\n\x1aObserveDelegationsResponse\x12\x30\n\ndelegation\x18\x01 \x01(\x0b\x32\x10.vega.DelegationR\ndelegation"\x91\x02\n\tNodeBasic\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n\x07pub_key\x18\x02 \x01(\tR\x06pubKey\x12\x1c\n\ntm_pub_key\x18\x03 \x01(\tR\x08tmPubKey\x12)\n\x10\x65thereum_address\x18\x04 \x01(\tR\x0f\x65thereumAddress\x12\x19\n\x08info_url\x18\x05 \x01(\tR\x07infoUrl\x12\x1a\n\x08location\x18\x06 \x01(\tR\x08location\x12(\n\x06status\x18\r \x01(\x0e\x32\x10.vega.NodeStatusR\x06status\x12\x12\n\x04name\x18\x11 \x01(\tR\x04name\x12\x1d\n\navatar_url\x18\x12 \x01(\tR\tavatarUrl"\x17\n\x15GetNetworkDataRequest"E\n\x16GetNetworkDataResponse\x12+\n\tnode_data\x18\x01 \x01(\x0b\x32\x0e.vega.NodeDataR\x08nodeData"%\n\x0eGetNodeRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x02id"1\n\x0fGetNodeResponse\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.NodeR\x04node"\x93\x01\n\x10ListNodesRequest\x12 \n\tepoch_seq\x18\x01 \x01(\x04H\x00R\x08\x65pochSeq\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\x0c\n\n_epoch_seqB\r\n\x0b_pagination"K\n\x11ListNodesResponse\x12\x36\n\x05nodes\x18\x01 \x01(\x0b\x32 .datanode.api.v2.NodesConnectionR\x05nodes"B\n\x08NodeEdge\x12\x1e\n\x04node\x18\x01 \x01(\x0b\x32\n.vega.NodeR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"z\n\x0fNodesConnection\x12/\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x19.datanode.api.v2.NodeEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x81\x01\n\x19ListNodeSignaturesRequest\x12\x13\n\x02id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x02id\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"g\n\x1aListNodeSignaturesResponse\x12I\n\nsignatures\x18\x01 \x01(\x0b\x32).datanode.api.v2.NodeSignaturesConnectionR\nsignatures"`\n\x11NodeSignatureEdge\x12\x33\n\x04node\x18\x01 \x01(\x0b\x32\x1f.vega.commands.v1.NodeSignatureR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x8c\x01\n\x18NodeSignaturesConnection\x12\x38\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32".datanode.api.v2.NodeSignatureEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"-\n\x0fGetEpochRequest\x12\x13\n\x02id\x18\x01 \x01(\x04H\x00R\x02id\x88\x01\x01\x42\x05\n\x03_id"5\n\x10GetEpochResponse\x12!\n\x05\x65poch\x18\x01 \x01(\x0b\x32\x0b.vega.EpochR\x05\x65poch"j\n\x12\x45stimateFeeRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId\x12\x19\n\x05price\x18\x02 \x01(\tB\x03\xe0\x41\x02R\x05price\x12\x17\n\x04size\x18\x03 \x01(\x04\x42\x03\xe0\x41\x02R\x04size"2\n\x13\x45stimateFeeResponse\x12\x1b\n\x03\x66\x65\x65\x18\x02 \x01(\x0b\x32\t.vega.FeeR\x03\x66\x65\x65"\xe1\x01\n\x15\x45stimateMarginRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId\x12\x1e\n\x08party_id\x18\x02 \x01(\tB\x03\xe0\x41\x02R\x07partyId\x12#\n\x04side\x18\x03 \x01(\x0e\x32\n.vega.SideB\x03\xe0\x41\x02R\x04side\x12)\n\x04type\x18\x04 \x01(\x0e\x32\x10.vega.Order.TypeB\x03\xe0\x41\x02R\x04type\x12\x17\n\x04size\x18\x05 \x01(\x04\x42\x03\xe0\x41\x02R\x04size\x12\x19\n\x05price\x18\x06 \x01(\tB\x03\xe0\x41\x02R\x05price:\x02\x18\x01"U\n\x16\x45stimateMarginResponse\x12\x37\n\rmargin_levels\x18\x02 \x01(\x0b\x32\x12.vega.MarginLevelsR\x0cmarginLevels:\x02\x18\x01"o\n\x1cListNetworkParametersRequest\x12@\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"{\n\x1dListNetworkParametersResponse\x12Z\n\x12network_parameters\x18\x01 \x01(\x0b\x32+.datanode.api.v2.NetworkParameterConnectionR\x11networkParameters"3\n\x1aGetNetworkParameterRequest\x12\x15\n\x03key\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x03key"b\n\x1bGetNetworkParameterResponse\x12\x43\n\x11network_parameter\x18\x01 \x01(\x0b\x32\x16.vega.NetworkParameterR\x10networkParameter"Z\n\x14NetworkParameterEdge\x12*\n\x04node\x18\x01 \x01(\x0b\x32\x16.vega.NetworkParameterR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x91\x01\n\x1aNetworkParameterConnection\x12;\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32%.datanode.api.v2.NetworkParameterEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"Z\n\nCheckpoint\x12\x12\n\x04hash\x18\x01 \x01(\tR\x04hash\x12\x1d\n\nblock_hash\x18\x02 \x01(\tR\tblockHash\x12\x19\n\x08\x61t_block\x18\x03 \x01(\x04R\x07\x61tBlock"i\n\x16ListCheckpointsRequest\x12@\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"c\n\x17ListCheckpointsResponse\x12H\n\x0b\x63heckpoints\x18\x01 \x01(\x0b\x32&.datanode.api.v2.CheckpointsConnectionR\x0b\x63heckpoints"Y\n\x0e\x43heckpointEdge\x12/\n\x04node\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.CheckpointR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x86\x01\n\x15\x43heckpointsConnection\x12\x35\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.CheckpointEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x82\x01\n\x0fGetStakeRequest\x12\x1e\n\x08party_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x07partyId\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"\x94\x01\n\x10GetStakeResponse\x12\x36\n\x17\x63urrent_stake_available\x18\x01 \x01(\tR\x15\x63urrentStakeAvailable\x12H\n\x0estake_linkings\x18\x02 \x01(\x0b\x32!.datanode.api.v2.StakesConnectionR\rstakeLinkings"\\\n\x10StakeLinkingEdge\x12\x30\n\x04node\x18\x01 \x01(\x0b\x32\x1c.vega.events.v1.StakeLinkingR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x83\x01\n\x10StakesConnection\x12\x37\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32!.datanode.api.v2.StakeLinkingEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"9\n\x15GetRiskFactorsRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId"K\n\x16GetRiskFactorsResponse\x12\x31\n\x0brisk_factor\x18\x01 \x01(\x0b\x32\x10.vega.RiskFactorR\nriskFactor"\xa1\x01\n\x16ObserveEventBusRequest\x12\x30\n\x04type\x18\x01 \x03(\x0e\x32\x1c.vega.events.v1.BusEventTypeR\x04type\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId\x12\x19\n\x08party_id\x18\x03 \x01(\tR\x07partyId\x12\x1d\n\nbatch_size\x18\x04 \x01(\x03R\tbatchSize"K\n\x17ObserveEventBusResponse\x12\x30\n\x06\x65vents\x18\x01 \x03(\x0b\x32\x18.vega.events.v1.BusEventR\x06\x65vents"\x1f\n\x1dObserveLedgerMovementsRequest"_\n\x1eObserveLedgerMovementsResponse\x12=\n\x0fledger_movement\x18\x01 \x01(\x0b\x32\x14.vega.LedgerMovementR\x0eledgerMovement"\x94\x01\n\x17ListKeyRotationsRequest\x12\x1c\n\x07node_id\x18\x01 \x01(\tH\x00R\x06nodeId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\n\n\x08_node_idB\r\n\x0b_pagination"`\n\x18ListKeyRotationsResponse\x12\x44\n\trotations\x18\x01 \x01(\x0b\x32&.datanode.api.v2.KeyRotationConnectionR\trotations"Z\n\x0fKeyRotationEdge\x12/\n\x04node\x18\x01 \x01(\x0b\x32\x1b.vega.events.v1.KeyRotationR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x87\x01\n\x15KeyRotationConnection\x12\x36\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32 .datanode.api.v2.KeyRotationEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"\x9c\x01\n\x1fListEthereumKeyRotationsRequest\x12\x1c\n\x07node_id\x18\x01 \x01(\tH\x00R\x06nodeId\x88\x01\x01\x12@\n\npagination\x18\x02 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x01R\npagination\x88\x01\x01\x42\n\n\x08_node_idB\r\n\x0b_pagination"x\n ListEthereumKeyRotationsResponse\x12T\n\rkey_rotations\x18\x01 \x01(\x0b\x32/.datanode.api.v2.EthereumKeyRotationsConnectionR\x0ckeyRotations"\x98\x01\n\x1e\x45thereumKeyRotationsConnection\x12>\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32(.datanode.api.v2.EthereumKeyRotationEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"j\n\x17\x45thereumKeyRotationEdge\x12\x37\n\x04node\x18\x01 \x01(\x0b\x32#.vega.events.v1.EthereumKeyRotationR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x14\n\x12GetVegaTimeRequest"3\n\x13GetVegaTimeResponse\x12\x1c\n\ttimestamp\x18\x01 \x01(\x03R\ttimestamp"\x89\x01\n\tDateRange\x12,\n\x0fstart_timestamp\x18\x01 \x01(\x03H\x00R\x0estartTimestamp\x88\x01\x01\x12(\n\rend_timestamp\x18\x02 \x01(\x03H\x01R\x0c\x65ndTimestamp\x88\x01\x01\x42\x12\n\x10_start_timestampB\x10\n\x0e_end_timestamp"!\n\x1fGetProtocolUpgradeStatusRequest"8\n GetProtocolUpgradeStatusResponse\x12\x14\n\x05ready\x18\x01 \x01(\x08R\x05ready"\x83\x02\n#ListProtocolUpgradeProposalsRequest\x12J\n\x06status\x18\x01 \x01(\x0e\x32-.vega.events.v1.ProtocolUpgradeProposalStatusH\x00R\x06status\x88\x01\x01\x12$\n\x0b\x61pproved_by\x18\x02 \x01(\tH\x01R\napprovedBy\x88\x01\x01\x12@\n\npagination\x18\x03 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x02R\npagination\x88\x01\x01\x42\t\n\x07_statusB\x0e\n\x0c_approved_byB\r\n\x0b_pagination"\x98\x01\n$ListProtocolUpgradeProposalsResponse\x12p\n\x1aprotocol_upgrade_proposals\x18\x01 \x01(\x0b\x32\x32.datanode.api.v2.ProtocolUpgradeProposalConnectionR\x18protocolUpgradeProposals"\x9f\x01\n!ProtocolUpgradeProposalConnection\x12\x42\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32,.datanode.api.v2.ProtocolUpgradeProposalEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"o\n\x1bProtocolUpgradeProposalEdge\x12\x38\n\x04node\x18\x01 \x01(\x0b\x32$.vega.events.v1.ProtocolUpgradeEventR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"k\n\x18ListCoreSnapshotsRequest\x12@\n\npagination\x18\x01 \x01(\x0b\x32\x1b.datanode.api.v2.PaginationH\x00R\npagination\x88\x01\x01\x42\r\n\x0b_pagination"k\n\x19ListCoreSnapshotsResponse\x12N\n\x0e\x63ore_snapshots\x18\x01 \x01(\x0b\x32\'.datanode.api.v2.CoreSnapshotConnectionR\rcoreSnapshots"\x89\x01\n\x16\x43oreSnapshotConnection\x12\x37\n\x05\x65\x64ges\x18\x01 \x03(\x0b\x32!.datanode.api.v2.CoreSnapshotEdgeR\x05\x65\x64ges\x12\x36\n\tpage_info\x18\x02 \x01(\x0b\x32\x19.datanode.api.v2.PageInfoR\x08pageInfo"`\n\x10\x43oreSnapshotEdge\x12\x34\n\x04node\x18\x01 \x01(\x0b\x32 .vega.events.v1.CoreSnapshotDataR\x04node\x12\x16\n\x06\x63ursor\x18\x02 \x01(\tR\x06\x63ursor"\x81\x02\n\x0eHistorySegment\x12\x1f\n\x0b\x66rom_height\x18\x01 \x01(\x03R\nfromHeight\x12\x1b\n\tto_height\x18\x02 \x01(\x03R\x08toHeight\x12,\n\x12history_segment_id\x18\x03 \x01(\tR\x10historySegmentId\x12=\n\x1bprevious_history_segment_id\x18\x04 \x01(\tR\x18previousHistorySegmentId\x12)\n\x10\x64\x61tabase_version\x18\x05 \x01(\x03R\x0f\x64\x61tabaseVersion\x12\x19\n\x08\x63hain_id\x18\x06 \x01(\tR\x07\x63hainId"+\n)GetMostRecentNetworkHistorySegmentRequest"\x8d\x01\n*GetMostRecentNetworkHistorySegmentResponse\x12\x39\n\x07segment\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.HistorySegmentR\x07segment\x12$\n\x0eswarm_key_seed\x18\x02 \x01(\tR\x0cswarmKeySeed"&\n$ListAllNetworkHistorySegmentsRequest"d\n%ListAllNetworkHistorySegmentsResponse\x12;\n\x08segments\x18\x01 \x03(\x0b\x32\x1f.datanode.api.v2.HistorySegmentR\x08segments"-\n+GetActiveNetworkHistoryPeerAddressesRequest"Q\n,GetActiveNetworkHistoryPeerAddressesResponse\x12!\n\x0cip_addresses\x18\x01 \x03(\tR\x0bipAddresses" \n\x1eGetNetworkHistoryStatusRequest"\xb0\x01\n\x1fGetNetworkHistoryStatusResponse\x12!\n\x0cipfs_address\x18\x01 \x01(\tR\x0bipfsAddress\x12\x1b\n\tswarm_key\x18\x02 \x01(\tR\x08swarmKey\x12$\n\x0eswarm_key_seed\x18\x03 \x01(\tR\x0cswarmKeySeed\x12\'\n\x0f\x63onnected_peers\x18\x05 \x03(\tR\x0e\x63onnectedPeers"(\n&GetNetworkHistoryBootstrapPeersRequest"R\n\'GetNetworkHistoryBootstrapPeersResponse\x12\'\n\x0f\x62ootstrap_peers\x18\x01 \x03(\tR\x0e\x62ootstrapPeers"\x85\x01\n\x1b\x45xportNetworkHistoryRequest\x12\x1d\n\nfrom_block\x18\x01 \x01(\x03R\tfromBlock\x12\x19\n\x08to_block\x18\x02 \x01(\x03R\x07toBlock\x12,\n\x05table\x18\x03 \x01(\x0e\x32\x16.datanode.api.v2.TableR\x05table"E\n\x13ListEntitiesRequest\x12.\n\x10transaction_hash\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x0ftransactionHash"\xad\r\n\x14ListEntitiesResponse\x12)\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\r.vega.AccountR\x08\x61\x63\x63ounts\x12#\n\x06orders\x18\x02 \x03(\x0b\x32\x0b.vega.OrderR\x06orders\x12,\n\tpositions\x18\x03 \x03(\x0b\x32\x0e.vega.PositionR\tpositions\x12\x38\n\x0eledger_entries\x18\x04 \x03(\x0b\x32\x11.vega.LedgerEntryR\rledgerEntries\x12H\n\x0f\x62\x61lance_changes\x18\x05 \x03(\x0b\x32\x1f.datanode.api.v2.AccountBalanceR\x0e\x62\x61lanceChanges\x12\x36\n\ttransfers\x18\x06 \x03(\x0b\x32\x18.vega.events.v1.TransferR\ttransfers\x12 \n\x05votes\x18\x07 \x03(\x0b\x32\n.vega.VoteR\x05votes\x12~\n$erc20_multi_sig_signer_added_bundles\x18\x08 \x03(\x0b\x32/.datanode.api.v2.ERC20MultiSigSignerAddedBundleR\x1f\x65rc20MultiSigSignerAddedBundles\x12\x84\x01\n&erc20_multi_sig_signer_removed_bundles\x18\t \x03(\x0b\x32\x31.datanode.api.v2.ERC20MultiSigSignerRemovedBundleR!erc20MultiSigSignerRemovedBundles\x12#\n\x06trades\x18\n \x03(\x0b\x32\x0b.vega.TradeR\x06trades\x12\x33\n\x0coracle_specs\x18\x0b \x03(\x0b\x32\x10.vega.OracleSpecR\x0boracleSpecs\x12\x31\n\x0boracle_data\x18\x0c \x03(\x0b\x32\x10.vega.OracleDataR\noracleData\x12&\n\x07markets\x18\r \x03(\x0b\x32\x0c.vega.MarketR\x07markets\x12%\n\x07parties\x18\x0e \x03(\x0b\x32\x0b.vega.PartyR\x07parties\x12\x37\n\rmargin_levels\x18\x0f \x03(\x0b\x32\x12.vega.MarginLevelsR\x0cmarginLevels\x12&\n\x07rewards\x18\x10 \x03(\x0b\x32\x0c.vega.RewardR\x07rewards\x12)\n\x08\x64\x65posits\x18\x11 \x03(\x0b\x32\r.vega.DepositR\x08\x64\x65posits\x12\x32\n\x0bwithdrawals\x18\x12 \x03(\x0b\x32\x10.vega.WithdrawalR\x0bwithdrawals\x12#\n\x06\x61ssets\x18\x13 \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets\x12K\n\x14liquidity_provisions\x18\x14 \x03(\x0b\x32\x18.vega.LiquidityProvisionR\x13liquidityProvisions\x12,\n\tproposals\x18\x15 \x03(\x0b\x32\x0e.vega.ProposalR\tproposals\x12\x32\n\x0b\x64\x65legations\x18\x16 \x03(\x0b\x32\x10.vega.DelegationR\x0b\x64\x65legations\x12\x30\n\x05nodes\x18\x17 \x03(\x0b\x32\x1a.datanode.api.v2.NodeBasicR\x05nodes\x12H\n\x0fnode_signatures\x18\x18 \x03(\x0b\x32\x1f.vega.commands.v1.NodeSignatureR\x0enodeSignatures\x12\x45\n\x12network_parameters\x18\x19 \x03(\x0b\x32\x16.vega.NetworkParameterR\x11networkParameters\x12@\n\rkey_rotations\x18\x1a \x03(\x0b\x32\x1b.vega.events.v1.KeyRotationR\x0ckeyRotations\x12Y\n\x16\x65thereum_key_rotations\x18\x1b \x03(\x0b\x32#.vega.events.v1.EthereumKeyRotationR\x14\x65thereumKeyRotations\x12\x62\n\x1aprotocol_upgrade_proposals\x18\x1c \x03(\x0b\x32$.vega.events.v1.ProtocolUpgradeEventR\x18protocolUpgradeProposals"\r\n\x0bPingRequest"\x0e\n\x0cPingResponse"\x87\x01\n\tOrderInfo\x12\x1e\n\x04side\x18\x01 \x01(\x0e\x32\n.vega.SideR\x04side\x12\x14\n\x05price\x18\x02 \x01(\tR\x05price\x12\x1c\n\tremaining\x18\x03 \x01(\x04R\tremaining\x12&\n\x0fis_market_order\x18\x04 \x01(\x08R\risMarketOrder"\xe6\x01\n\x17\x45stimatePositionRequest\x12 \n\tmarket_id\x18\x01 \x01(\tB\x03\xe0\x41\x02R\x08marketId\x12$\n\x0bopen_volume\x18\x02 \x01(\x03\x42\x03\xe0\x41\x02R\nopenVolume\x12\x32\n\x06orders\x18\x03 \x03(\x0b\x32\x1a.datanode.api.v2.OrderInfoR\x06orders\x12\x36\n\x14\x63ollateral_available\x18\x04 \x01(\tH\x00R\x13\x63ollateralAvailable\x88\x01\x01\x42\x17\n\x15_collateral_available"\x9b\x01\n\x18\x45stimatePositionResponse\x12\x37\n\x06margin\x18\x01 \x01(\x0b\x32\x1f.datanode.api.v2.MarginEstimateR\x06margin\x12\x46\n\x0bliquidation\x18\x02 \x01(\x0b\x32$.datanode.api.v2.LiquidationEstimateR\x0bliquidation"t\n\x0eMarginEstimate\x12\x31\n\nworst_case\x18\x01 \x01(\x0b\x32\x12.vega.MarginLevelsR\tworstCase\x12/\n\tbest_case\x18\x02 \x01(\x0b\x32\x12.vega.MarginLevelsR\x08\x62\x65stCase"\x97\x01\n\x13LiquidationEstimate\x12@\n\nworst_case\x18\x01 \x01(\x0b\x32!.datanode.api.v2.LiquidationPriceR\tworstCase\x12>\n\tbest_case\x18\x02 \x01(\x0b\x32!.datanode.api.v2.LiquidationPriceR\x08\x62\x65stCase"\xa2\x01\n\x10LiquidationPrice\x12(\n\x10open_volume_only\x18\x01 \x01(\tR\x0eopenVolumeOnly\x12\x30\n\x14including_buy_orders\x18\x02 \x01(\tR\x12includingBuyOrders\x12\x32\n\x15including_sell_orders\x18\x03 \x01(\tR\x13includingSellOrders*\xaa\x01\n\x10LedgerEntryField\x12"\n\x1eLEDGER_ENTRY_FIELD_UNSPECIFIED\x10\x00\x12&\n"LEDGER_ENTRY_FIELD_ACCOUNT_FROM_ID\x10\x01\x12$\n LEDGER_ENTRY_FIELD_ACCOUNT_TO_ID\x10\x02\x12$\n LEDGER_ENTRY_FIELD_TRANSFER_TYPE\x10\x03*\xb0\x01\n\x0c\x41\x63\x63ountField\x12\x1d\n\x19\x41\x43\x43OUNT_FIELD_UNSPECIFIED\x10\x00\x12\x14\n\x10\x41\x43\x43OUNT_FIELD_ID\x10\x01\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_PARTY_ID\x10\x02\x12\x1a\n\x16\x41\x43\x43OUNT_FIELD_ASSET_ID\x10\x03\x12\x1b\n\x17\x41\x43\x43OUNT_FIELD_MARKET_ID\x10\x04\x12\x16\n\x12\x41\x43\x43OUNT_FIELD_TYPE\x10\x05*\xad\x01\n\x11TransferDirection\x12"\n\x1eTRANSFER_DIRECTION_UNSPECIFIED\x10\x00\x12$\n TRANSFER_DIRECTION_TRANSFER_FROM\x10\x01\x12"\n\x1eTRANSFER_DIRECTION_TRANSFER_TO\x10\x02\x12*\n&TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM\x10\x03*\xde\x02\n\x05Table\x12\x15\n\x11TABLE_UNSPECIFIED\x10\x00\x12\x12\n\x0eTABLE_BALANCES\x10\x01\x12\x15\n\x11TABLE_CHECKPOINTS\x10\x02\x12\x15\n\x11TABLE_DELEGATIONS\x10\x03\x12\x10\n\x0cTABLE_LEDGER\x10\x04\x12\x10\n\x0cTABLE_ORDERS\x10\x05\x12\x10\n\x0cTABLE_TRADES\x10\x06\x12\x15\n\x11TABLE_MARKET_DATA\x10\x07\x12\x17\n\x13TABLE_MARGIN_LEVELS\x10\x08\x12\x13\n\x0fTABLE_POSITIONS\x10\t\x12\x1e\n\x1aTABLE_LIQUIDITY_PROVISIONS\x10\n\x12\x11\n\rTABLE_MARKETS\x10\x0b\x12\x12\n\x0eTABLE_DEPOSITS\x10\x0c\x12\x15\n\x11TABLE_WITHDRAWALS\x10\r\x12\x10\n\x0cTABLE_BLOCKS\x10\x0e\x12\x11\n\rTABLE_REWARDS\x10\x0f\x32\x94U\n\x12TradingDataService\x12j\n\x0cListAccounts\x12$.datanode.api.v2.ListAccountsRequest\x1a%.datanode.api.v2.ListAccountsResponse"\r\x92\x41\n\n\x08\x41\x63\x63ounts\x12u\n\x0fObserveAccounts\x12\'.datanode.api.v2.ObserveAccountsRequest\x1a(.datanode.api.v2.ObserveAccountsResponse"\r\x92\x41\n\n\x08\x41\x63\x63ounts0\x01\x12Z\n\x04Info\x12\x1c.datanode.api.v2.InfoRequest\x1a\x1d.datanode.api.v2.InfoResponse"\x15\x92\x41\x12\n\x10Node information\x12\\\n\x08GetOrder\x12 .datanode.api.v2.GetOrderRequest\x1a!.datanode.api.v2.GetOrderResponse"\x0b\x92\x41\x08\n\x06Orders\x12\x62\n\nListOrders\x12".datanode.api.v2.ListOrdersRequest\x1a#.datanode.api.v2.ListOrdersResponse"\x0b\x92\x41\x08\n\x06Orders\x12w\n\x11ListOrderVersions\x12).datanode.api.v2.ListOrderVersionsRequest\x1a*.datanode.api.v2.ListOrderVersionsResponse"\x0b\x92\x41\x08\n\x06Orders\x12m\n\rObserveOrders\x12%.datanode.api.v2.ObserveOrdersRequest\x1a&.datanode.api.v2.ObserveOrdersResponse"\x0b\x92\x41\x08\n\x06Orders0\x01\x12q\n\rListPositions\x12%.datanode.api.v2.ListPositionsRequest\x1a&.datanode.api.v2.ListPositionsResponse"\x11\x88\x02\x01\x92\x41\x0b\n\tPositions\x12w\n\x10ListAllPositions\x12(.datanode.api.v2.ListAllPositionsRequest\x1a).datanode.api.v2.ListAllPositionsResponse"\x0e\x92\x41\x0b\n\tPositions\x12y\n\x10ObservePositions\x12(.datanode.api.v2.ObservePositionsRequest\x1a).datanode.api.v2.ObservePositionsResponse"\x0e\x92\x41\x0b\n\tPositions0\x01\x12\x7f\n\x11ListLedgerEntries\x12).datanode.api.v2.ListLedgerEntriesRequest\x1a*.datanode.api.v2.ListLedgerEntriesResponse"\x13\x92\x41\x10\n\x0eLedger entries\x12o\n\x13\x45xportLedgerEntries\x12+.datanode.api.v2.ExportLedgerEntriesRequest\x1a\x14.google.api.HttpBody"\x13\x92\x41\x10\n\x0eLedger entries0\x01\x12|\n\x12ListBalanceChanges\x12*.datanode.api.v2.ListBalanceChangesRequest\x1a+.datanode.api.v2.ListBalanceChangesResponse"\r\x92\x41\n\n\x08\x41\x63\x63ounts\x12~\n\x13GetLatestMarketData\x12+.datanode.api.v2.GetLatestMarketDataRequest\x1a,.datanode.api.v2.GetLatestMarketDataResponse"\x0c\x92\x41\t\n\x07Markets\x12\x81\x01\n\x14ListLatestMarketData\x12,.datanode.api.v2.ListLatestMarketDataRequest\x1a-.datanode.api.v2.ListLatestMarketDataResponse"\x0c\x92\x41\t\n\x07Markets\x12\x81\x01\n\x14GetLatestMarketDepth\x12,.datanode.api.v2.GetLatestMarketDepthRequest\x1a-.datanode.api.v2.GetLatestMarketDepthResponse"\x0c\x92\x41\t\n\x07Markets\x12\x80\x01\n\x13ObserveMarketsDepth\x12+.datanode.api.v2.ObserveMarketsDepthRequest\x1a,.datanode.api.v2.ObserveMarketsDepthResponse"\x0c\x92\x41\t\n\x07Markets0\x01\x12\x95\x01\n\x1aObserveMarketsDepthUpdates\x12\x32.datanode.api.v2.ObserveMarketsDepthUpdatesRequest\x1a\x33.datanode.api.v2.ObserveMarketsDepthUpdatesResponse"\x0c\x92\x41\t\n\x07Markets0\x01\x12}\n\x12ObserveMarketsData\x12*.datanode.api.v2.ObserveMarketsDataRequest\x1a+.datanode.api.v2.ObserveMarketsDataResponse"\x0c\x92\x41\t\n\x07Markets0\x01\x12\x8d\x01\n\x18GetMarketDataHistoryByID\x12\x30.datanode.api.v2.GetMarketDataHistoryByIDRequest\x1a\x31.datanode.api.v2.GetMarketDataHistoryByIDResponse"\x0c\x92\x41\t\n\x07Markets\x12n\n\rListTransfers\x12%.datanode.api.v2.ListTransfersRequest\x1a&.datanode.api.v2.ListTransfersResponse"\x0e\x92\x41\x0b\n\tTransfers\x12u\n\x10GetNetworkLimits\x12(.datanode.api.v2.GetNetworkLimitsRequest\x1a).datanode.api.v2.GetNetworkLimitsResponse"\x0c\x92\x41\t\n\x07Network\x12o\n\x0eListCandleData\x12&.datanode.api.v2.ListCandleDataRequest\x1a\'.datanode.api.v2.ListCandleDataResponse"\x0c\x92\x41\t\n\x07\x43\x61ndles\x12z\n\x11ObserveCandleData\x12).datanode.api.v2.ObserveCandleDataRequest\x1a*.datanode.api.v2.ObserveCandleDataResponse"\x0c\x92\x41\t\n\x07\x43\x61ndles0\x01\x12~\n\x13ListCandleIntervals\x12+.datanode.api.v2.ListCandleIntervalsRequest\x1a,.datanode.api.v2.ListCandleIntervalsResponse"\x0c\x92\x41\t\n\x07\x43\x61ndles\x12\x63\n\tListVotes\x12!.datanode.api.v2.ListVotesRequest\x1a".datanode.api.v2.ListVotesResponse"\x0f\x92\x41\x0c\n\nGovernance\x12n\n\x0cObserveVotes\x12$.datanode.api.v2.ObserveVotesRequest\x1a%.datanode.api.v2.ObserveVotesResponse"\x0f\x92\x41\x0c\n\nGovernance0\x01\x12\xb3\x01\n#ListERC20MultiSigSignerAddedBundles\x12;.datanode.api.v2.ListERC20MultiSigSignerAddedBundlesRequest\x1a<.datanode.api.v2.ListERC20MultiSigSignerAddedBundlesResponse"\x11\x92\x41\x0e\n\x0c\x45RC20 bridge\x12\xb9\x01\n%ListERC20MultiSigSignerRemovedBundles\x12=.datanode.api.v2.ListERC20MultiSigSignerRemovedBundlesRequest\x1a>.datanode.api.v2.ListERC20MultiSigSignerRemovedBundlesResponse"\x11\x92\x41\x0e\n\x0c\x45RC20 bridge\x12\x8f\x01\n\x17GetERC20ListAssetBundle\x12/.datanode.api.v2.GetERC20ListAssetBundleRequest\x1a\x30.datanode.api.v2.GetERC20ListAssetBundleResponse"\x11\x92\x41\x0e\n\x0c\x45RC20 bridge\x12\x9e\x01\n\x1cGetERC20SetAssetLimitsBundle\x12\x34.datanode.api.v2.GetERC20SetAssetLimitsBundleRequest\x1a\x35.datanode.api.v2.GetERC20SetAssetLimitsBundleResponse"\x11\x92\x41\x0e\n\x0c\x45RC20 bridge\x12\x98\x01\n\x1aGetERC20WithdrawalApproval\x12\x32.datanode.api.v2.GetERC20WithdrawalApprovalRequest\x1a\x33.datanode.api.v2.GetERC20WithdrawalApprovalResponse"\x11\x92\x41\x0e\n\x0c\x45RC20 bridge\x12h\n\x0cGetLastTrade\x12$.datanode.api.v2.GetLastTradeRequest\x1a%.datanode.api.v2.GetLastTradeResponse"\x0b\x92\x41\x08\n\x06Trades\x12\x62\n\nListTrades\x12".datanode.api.v2.ListTradesRequest\x1a#.datanode.api.v2.ListTradesResponse"\x0b\x92\x41\x08\n\x06Trades\x12m\n\rObserveTrades\x12%.datanode.api.v2.ObserveTradesRequest\x1a&.datanode.api.v2.ObserveTradesResponse"\x0b\x92\x41\x08\n\x06Trades0\x01\x12q\n\rGetOracleSpec\x12%.datanode.api.v2.GetOracleSpecRequest\x1a&.datanode.api.v2.GetOracleSpecResponse"\x11\x92\x41\x0e\n\x0c\x44\x61ta sources\x12w\n\x0fListOracleSpecs\x12\'.datanode.api.v2.ListOracleSpecsRequest\x1a(.datanode.api.v2.ListOracleSpecsResponse"\x11\x92\x41\x0e\n\x0c\x44\x61ta sources\x12t\n\x0eListOracleData\x12&.datanode.api.v2.ListOracleDataRequest\x1a\'.datanode.api.v2.ListOracleDataResponse"\x11\x92\x41\x0e\n\x0c\x44\x61ta sources\x12`\n\tGetMarket\x12!.datanode.api.v2.GetMarketRequest\x1a".datanode.api.v2.GetMarketResponse"\x0c\x92\x41\t\n\x07Markets\x12\x66\n\x0bListMarkets\x12#.datanode.api.v2.ListMarketsRequest\x1a$.datanode.api.v2.ListMarketsResponse"\x0c\x92\x41\t\n\x07Markets\x12]\n\x08GetParty\x12 .datanode.api.v2.GetPartyRequest\x1a!.datanode.api.v2.GetPartyResponse"\x0c\x92\x41\t\n\x07Parties\x12\x66\n\x0bListParties\x12#.datanode.api.v2.ListPartiesRequest\x1a$.datanode.api.v2.ListPartiesResponse"\x0c\x92\x41\t\n\x07Parties\x12{\n\x10ListMarginLevels\x12(.datanode.api.v2.ListMarginLevelsRequest\x1a).datanode.api.v2.ListMarginLevelsResponse"\x12\x92\x41\x0f\n\rMargin levels\x12\x86\x01\n\x13ObserveMarginLevels\x12+.datanode.api.v2.ObserveMarginLevelsRequest\x1a,.datanode.api.v2.ObserveMarginLevelsResponse"\x12\x92\x41\x0f\n\rMargin levels0\x01\x12\x66\n\x0bListRewards\x12#.datanode.api.v2.ListRewardsRequest\x1a$.datanode.api.v2.ListRewardsResponse"\x0c\x92\x41\t\n\x07Rewards\x12~\n\x13ListRewardSummaries\x12+.datanode.api.v2.ListRewardSummariesRequest\x1a,.datanode.api.v2.ListRewardSummariesResponse"\x0c\x92\x41\t\n\x07Rewards\x12\x8d\x01\n\x18ListEpochRewardSummaries\x12\x30.datanode.api.v2.ListEpochRewardSummariesRequest\x1a\x31.datanode.api.v2.ListEpochRewardSummariesResponse"\x0c\x92\x41\t\n\x07Rewards\x12\x62\n\nGetDeposit\x12".datanode.api.v2.GetDepositRequest\x1a#.datanode.api.v2.GetDepositResponse"\x0b\x92\x41\x08\n\x06\x41ssets\x12h\n\x0cListDeposits\x12$.datanode.api.v2.ListDepositsRequest\x1a%.datanode.api.v2.ListDepositsResponse"\x0b\x92\x41\x08\n\x06\x41ssets\x12k\n\rGetWithdrawal\x12%.datanode.api.v2.GetWithdrawalRequest\x1a&.datanode.api.v2.GetWithdrawalResponse"\x0b\x92\x41\x08\n\x06\x41ssets\x12q\n\x0fListWithdrawals\x12\'.datanode.api.v2.ListWithdrawalsRequest\x1a(.datanode.api.v2.ListWithdrawalsResponse"\x0b\x92\x41\x08\n\x06\x41ssets\x12\\\n\x08GetAsset\x12 .datanode.api.v2.GetAssetRequest\x1a!.datanode.api.v2.GetAssetResponse"\x0b\x92\x41\x08\n\x06\x41ssets\x12\x62\n\nListAssets\x12".datanode.api.v2.ListAssetsRequest\x1a#.datanode.api.v2.ListAssetsResponse"\x0b\x92\x41\x08\n\x06\x41ssets\x12\x97\x01\n\x17ListLiquidityProvisions\x12/.datanode.api.v2.ListLiquidityProvisionsRequest\x1a\x30.datanode.api.v2.ListLiquidityProvisionsResponse"\x19\x92\x41\x16\n\x14Liquidity provisions\x12\xa2\x01\n\x1aObserveLiquidityProvisions\x12\x32.datanode.api.v2.ObserveLiquidityProvisionsRequest\x1a\x33.datanode.api.v2.ObserveLiquidityProvisionsResponse"\x19\x92\x41\x16\n\x14Liquidity provisions0\x01\x12{\n\x11GetGovernanceData\x12).datanode.api.v2.GetGovernanceDataRequest\x1a*.datanode.api.v2.GetGovernanceDataResponse"\x0f\x92\x41\x0c\n\nGovernance\x12~\n\x12ListGovernanceData\x12*.datanode.api.v2.ListGovernanceDataRequest\x1a+.datanode.api.v2.ListGovernanceDataResponse"\x0f\x92\x41\x0c\n\nGovernance\x12}\n\x11ObserveGovernance\x12).datanode.api.v2.ObserveGovernanceRequest\x1a*.datanode.api.v2.ObserveGovernanceResponse"\x0f\x92\x41\x0c\n\nGovernance0\x01\x12r\n\x0fListDelegations\x12\'.datanode.api.v2.ListDelegationsRequest\x1a(.datanode.api.v2.ListDelegationsResponse"\x0c\x92\x41\t\n\x07Network\x12o\n\x0eGetNetworkData\x12&.datanode.api.v2.GetNetworkDataRequest\x1a\'.datanode.api.v2.GetNetworkDataResponse"\x0c\x92\x41\t\n\x07Network\x12Z\n\x07GetNode\x12\x1f.datanode.api.v2.GetNodeRequest\x1a .datanode.api.v2.GetNodeResponse"\x0c\x92\x41\t\n\x07Network\x12`\n\tListNodes\x12!.datanode.api.v2.ListNodesRequest\x1a".datanode.api.v2.ListNodesResponse"\x0c\x92\x41\t\n\x07Network\x12\x80\x01\n\x12ListNodeSignatures\x12*.datanode.api.v2.ListNodeSignaturesRequest\x1a+.datanode.api.v2.ListNodeSignaturesResponse"\x11\x92\x41\x0e\n\x0c\x45RC20 bridge\x12]\n\x08GetEpoch\x12 .datanode.api.v2.GetEpochRequest\x1a!.datanode.api.v2.GetEpochResponse"\x0c\x92\x41\t\n\x07Network\x12\x65\n\x0b\x45stimateFee\x12#.datanode.api.v2.EstimateFeeRequest\x1a$.datanode.api.v2.EstimateFeeResponse"\x0b\x92\x41\x08\n\x06Orders\x12n\n\x0e\x45stimateMargin\x12&.datanode.api.v2.EstimateMarginRequest\x1a\'.datanode.api.v2.EstimateMarginResponse"\x0b\x92\x41\x08\n\x06Orders\x12w\n\x10\x45stimatePosition\x12(.datanode.api.v2.EstimatePositionRequest\x1a).datanode.api.v2.EstimatePositionResponse"\x0e\x92\x41\x0b\n\tPositions\x12\x84\x01\n\x15ListNetworkParameters\x12-.datanode.api.v2.ListNetworkParametersRequest\x1a..datanode.api.v2.ListNetworkParametersResponse"\x0c\x92\x41\t\n\x07Network\x12~\n\x13GetNetworkParameter\x12+.datanode.api.v2.GetNetworkParameterRequest\x1a,.datanode.api.v2.GetNetworkParameterResponse"\x0c\x92\x41\t\n\x07Network\x12r\n\x0fListCheckpoints\x12\'.datanode.api.v2.ListCheckpointsRequest\x1a(.datanode.api.v2.ListCheckpointsResponse"\x0c\x92\x41\t\n\x07Network\x12]\n\x08GetStake\x12 .datanode.api.v2.GetStakeRequest\x1a!.datanode.api.v2.GetStakeResponse"\x0c\x92\x41\t\n\x07Network\x12o\n\x0eGetRiskFactors\x12&.datanode.api.v2.GetRiskFactorsRequest\x1a\'.datanode.api.v2.GetRiskFactorsResponse"\x0c\x92\x41\t\n\x07Markets\x12u\n\x0fObserveEventBus\x12\'.datanode.api.v2.ObserveEventBusRequest\x1a(.datanode.api.v2.ObserveEventBusResponse"\x0b\x92\x41\x08\n\x06\x45vents(\x01\x30\x01\x12\x92\x01\n\x16ObserveLedgerMovements\x12..datanode.api.v2.ObserveLedgerMovementsRequest\x1a/.datanode.api.v2.ObserveLedgerMovementsResponse"\x15\x92\x41\x12\n\x10Ledger movements0\x01\x12u\n\x10ListKeyRotations\x12(.datanode.api.v2.ListKeyRotationsRequest\x1a).datanode.api.v2.ListKeyRotationsResponse"\x0c\x92\x41\t\n\x07Network\x12\x8d\x01\n\x18ListEthereumKeyRotations\x12\x30.datanode.api.v2.ListEthereumKeyRotationsRequest\x1a\x31.datanode.api.v2.ListEthereumKeyRotationsResponse"\x0c\x92\x41\t\n\x07Network\x12\x66\n\x0bGetVegaTime\x12#.datanode.api.v2.GetVegaTimeRequest\x1a$.datanode.api.v2.GetVegaTimeResponse"\x0c\x92\x41\t\n\x07Network\x12\x8d\x01\n\x18GetProtocolUpgradeStatus\x12\x30.datanode.api.v2.GetProtocolUpgradeStatusRequest\x1a\x31.datanode.api.v2.GetProtocolUpgradeStatusResponse"\x0c\x92\x41\t\n\x07Network\x12\x99\x01\n\x1cListProtocolUpgradeProposals\x12\x34.datanode.api.v2.ListProtocolUpgradeProposalsRequest\x1a\x35.datanode.api.v2.ListProtocolUpgradeProposalsResponse"\x0c\x92\x41\t\n\x07Network\x12x\n\x11ListCoreSnapshots\x12).datanode.api.v2.ListCoreSnapshotsRequest\x1a*.datanode.api.v2.ListCoreSnapshotsResponse"\x0c\x92\x41\t\n\x07Network\x12\xb3\x01\n"GetMostRecentNetworkHistorySegment\x12:.datanode.api.v2.GetMostRecentNetworkHistorySegmentRequest\x1a;.datanode.api.v2.GetMostRecentNetworkHistorySegmentResponse"\x14\x92\x41\x11\n\x0fNetwork history\x12\xa4\x01\n\x1dListAllNetworkHistorySegments\x12\x35.datanode.api.v2.ListAllNetworkHistorySegmentsRequest\x1a\x36.datanode.api.v2.ListAllNetworkHistorySegmentsResponse"\x14\x92\x41\x11\n\x0fNetwork history\x12\xb9\x01\n$GetActiveNetworkHistoryPeerAddresses\x12<.datanode.api.v2.GetActiveNetworkHistoryPeerAddressesRequest\x1a=.datanode.api.v2.GetActiveNetworkHistoryPeerAddressesResponse"\x14\x92\x41\x11\n\x0fNetwork history\x12\x92\x01\n\x17GetNetworkHistoryStatus\x12/.datanode.api.v2.GetNetworkHistoryStatusRequest\x1a\x30.datanode.api.v2.GetNetworkHistoryStatusResponse"\x14\x92\x41\x11\n\x0fNetwork history\x12\xaa\x01\n\x1fGetNetworkHistoryBootstrapPeers\x12\x37.datanode.api.v2.GetNetworkHistoryBootstrapPeersRequest\x1a\x38.datanode.api.v2.GetNetworkHistoryBootstrapPeersResponse"\x14\x92\x41\x11\n\x0fNetwork history\x12j\n\x0cListEntities\x12$.datanode.api.v2.ListEntitiesRequest\x1a%.datanode.api.v2.ListEntitiesResponse"\r\x92\x41\n\n\x08\x45xplorer\x12r\n\x14\x45xportNetworkHistory\x12,.datanode.api.v2.ExportNetworkHistoryRequest\x1a\x14.google.api.HttpBody"\x14\x92\x41\x11\n\x0fNetwork history0\x01\x12N\n\x04Ping\x12\x1c.datanode.api.v2.PingRequest\x1a\x1d.datanode.api.v2.PingResponse"\t\x92\x41\x06\n\x04MiscB\xc6\x01Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\x92\x41\x8f\x01\x12\x1e\n\x13Vega data node APIs2\x07v0.71.4\x1a\x1chttps://api.testnet.vega.xyz*\x02\x01\x02\x32\x10\x61pplication/jsonR9\n\x03\x35\x30\x30\x12\x32\n\x18\x41n internal server error\x12\x16\n\x14\x1a\x12.google.rpc.Statusb\x06proto3'
 )
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
@@ -35,545 +37,1054 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "data_node.api.v2.trading_data_pb2", globals()
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-
     DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222AG\022\036\n\023Vega data node APIs2\007v0.65.1\032!lb.testnet.vega.xyz/datanode/rest*\002\001\002"
-    _GETMARKETDATAHISTORYBYIDREQUEST.fields_by_name["offset_pagination"]._options = None
+    DESCRIPTOR._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222A\217\001\022\036\n\023Vega data node APIs2\007v0.71.4\032\034https://api.testnet.vega.xyz*\002\001\0022\020application/jsonR9\n\003500\0222\n\030An internal server error\022\026\n\024\032\022.google.rpc.Status"
+    _GETORDERREQUEST.fields_by_name["order_id"]._options = None
+    _GETORDERREQUEST.fields_by_name["order_id"]._serialized_options = b"\340A\002"
+    _LISTORDERVERSIONSREQUEST.fields_by_name["order_id"]._options = None
+    _LISTORDERVERSIONSREQUEST.fields_by_name[
+        "order_id"
+    ]._serialized_options = b"\340A\002"
+    _LISTPOSITIONSREQUEST._options = None
+    _LISTPOSITIONSREQUEST._serialized_options = b"\030\001"
+    _LISTPOSITIONSRESPONSE._options = None
+    _LISTPOSITIONSRESPONSE._serialized_options = b"\030\001"
+    _EXPORTLEDGERENTRIESREQUEST.fields_by_name["party_id"]._options = None
+    _EXPORTLEDGERENTRIESREQUEST.fields_by_name[
+        "party_id"
+    ]._serialized_options = b"\340A\002"
+    _EXPORTLEDGERENTRIESREQUEST.fields_by_name["asset_id"]._options = None
+    _EXPORTLEDGERENTRIESREQUEST.fields_by_name[
+        "asset_id"
+    ]._serialized_options = b"\340A\002"
+    _GETLATESTMARKETDEPTHREQUEST.fields_by_name["market_id"]._options = None
+    _GETLATESTMARKETDEPTHREQUEST.fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _GETLATESTMARKETDATAREQUEST.fields_by_name["market_id"]._options = None
+    _GETLATESTMARKETDATAREQUEST.fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _GETMARKETDATAHISTORYBYIDREQUEST.fields_by_name["market_id"]._options = None
     _GETMARKETDATAHISTORYBYIDREQUEST.fields_by_name[
-        "offset_pagination"
-    ]._serialized_options = b"\030\001"
-    _LEDGERENTRYFIELD._serialized_start = 31409
-    _LEDGERENTRYFIELD._serialized_end = 31579
-    _ACCOUNTFIELD._serialized_start = 31582
-    _ACCOUNTFIELD._serialized_end = 31758
-    _TRANSFERDIRECTION._serialized_start = 31761
-    _TRANSFERDIRECTION._serialized_end = 31934
-    _OFFSETPAGINATION._serialized_start = 274
-    _OFFSETPAGINATION._serialized_end = 366
-    _PAGINATION._serialized_start = 369
-    _PAGINATION._serialized_end = 586
-    _PAGEINFO._serialized_start = 589
-    _PAGEINFO._serialized_end = 745
-    _ACCOUNTBALANCE._serialized_start = 748
-    _ACCOUNTBALANCE._serialized_end = 902
-    _LISTACCOUNTSREQUEST._serialized_start = 905
-    _LISTACCOUNTSREQUEST._serialized_end = 1063
-    _LISTACCOUNTSRESPONSE._serialized_start = 1065
-    _LISTACCOUNTSRESPONSE._serialized_end = 1152
-    _ACCOUNTSCONNECTION._serialized_start = 1155
-    _ACCOUNTSCONNECTION._serialized_end = 1283
-    _ACCOUNTEDGE._serialized_start = 1285
-    _ACCOUNTEDGE._serialized_end = 1375
-    _OBSERVEACCOUNTSREQUEST._serialized_start = 1378
-    _OBSERVEACCOUNTSREQUEST._serialized_end = 1519
-    _OBSERVEACCOUNTSRESPONSE._serialized_start = 1522
-    _OBSERVEACCOUNTSRESPONSE._serialized_end = 1688
-    _ACCOUNTSNAPSHOTPAGE._serialized_start = 1690
-    _ACCOUNTSNAPSHOTPAGE._serialized_end = 1801
-    _ACCOUNTUPDATES._serialized_start = 1803
-    _ACCOUNTUPDATES._serialized_end = 1880
-    _INFOREQUEST._serialized_start = 1882
-    _INFOREQUEST._serialized_end = 1895
-    _INFORESPONSE._serialized_start = 1897
-    _INFORESPONSE._serialized_end = 1970
-    _GETORDERREQUEST._serialized_start = 1972
-    _GETORDERREQUEST._serialized_end = 2059
-    _GETORDERRESPONSE._serialized_start = 2061
-    _GETORDERRESPONSE._serialized_end = 2114
-    _ORDERFILTER._serialized_start = 2117
-    _ORDERFILTER._serialized_end = 2326
-    _LISTORDERSREQUEST._serialized_start = 2329
-    _LISTORDERSREQUEST._serialized_end = 2768
-    _LISTORDERSRESPONSE._serialized_start = 2770
-    _LISTORDERSRESPONSE._serialized_end = 2848
-    _LISTORDERVERSIONSREQUEST._serialized_start = 2851
-    _LISTORDERVERSIONSREQUEST._serialized_end = 2985
-    _LISTORDERVERSIONSRESPONSE._serialized_start = 2987
-    _LISTORDERVERSIONSRESPONSE._serialized_end = 3072
-    _OBSERVEORDERSREQUEST._serialized_start = 3075
-    _OBSERVEORDERSREQUEST._serialized_end = 3262
-    _OBSERVEORDERSRESPONSE._serialized_start = 3265
-    _OBSERVEORDERSRESPONSE._serialized_end = 3425
-    _ORDERSNAPSHOTPAGE._serialized_start = 3427
-    _ORDERSNAPSHOTPAGE._serialized_end = 3512
-    _ORDERUPDATES._serialized_start = 3514
-    _ORDERUPDATES._serialized_end = 3565
-    _LISTPOSITIONSREQUEST._serialized_start = 3568
-    _LISTPOSITIONSREQUEST._serialized_end = 3727
-    _LISTPOSITIONSRESPONSE._serialized_start = 3729
-    _LISTPOSITIONSRESPONSE._serialized_end = 3819
-    _POSITIONEDGE._serialized_start = 3821
-    _POSITIONEDGE._serialized_end = 3895
-    _POSITIONCONNECTION._serialized_start = 3898
-    _POSITIONCONNECTION._serialized_end = 4027
-    _OBSERVEPOSITIONSREQUEST._serialized_start = 4029
-    _OBSERVEPOSITIONSREQUEST._serialized_end = 4147
-    _OBSERVEPOSITIONSRESPONSE._serialized_start = 4150
-    _OBSERVEPOSITIONSRESPONSE._serialized_end = 4319
-    _POSITIONSNAPSHOTPAGE._serialized_start = 4321
-    _POSITIONSNAPSHOTPAGE._serialized_end = 4418
-    _POSITIONUPDATES._serialized_start = 4420
-    _POSITIONUPDATES._serialized_end = 4483
-    _LEDGERENTRYFILTER._serialized_start = 4486
-    _LEDGERENTRYFILTER._serialized_end = 4777
-    _AGGREGATEDLEDGERENTRY._serialized_start = 4780
-    _AGGREGATEDLEDGERENTRY._serialized_end = 5385
-    _LISTLEDGERENTRIESREQUEST._serialized_start = 5388
-    _LISTLEDGERENTRIESREQUEST._serialized_end = 5634
-    _LISTLEDGERENTRIESRESPONSE._serialized_start = 5636
-    _LISTLEDGERENTRIESRESPONSE._serialized_end = 5754
-    _AGGREGATEDLEDGERENTRIESEDGE._serialized_start = 5756
-    _AGGREGATEDLEDGERENTRIESEDGE._serialized_end = 5869
-    _AGGREGATEDLEDGERENTRIESCONNECTION._serialized_start = 5872
-    _AGGREGATEDLEDGERENTRIESCONNECTION._serialized_end = 6031
-    _LISTBALANCECHANGESREQUEST._serialized_start = 6034
-    _LISTBALANCECHANGESREQUEST._serialized_end = 6277
-    _LISTBALANCECHANGESRESPONSE._serialized_start = 6279
-    _LISTBALANCECHANGESRESPONSE._serialized_end = 6381
-    _GETBALANCEHISTORYREQUEST._serialized_start = 6384
-    _GETBALANCEHISTORYREQUEST._serialized_end = 6684
-    _GETBALANCEHISTORYRESPONSE._serialized_start = 6686
-    _GETBALANCEHISTORYRESPONSE._serialized_end = 6787
-    _AGGREGATEDBALANCEEDGE._serialized_start = 6789
-    _AGGREGATEDBALANCEEDGE._serialized_end = 6892
-    _AGGREGATEDBALANCECONNECTION._serialized_start = 6895
-    _AGGREGATEDBALANCECONNECTION._serialized_end = 7042
-    _ACCOUNTFILTER._serialized_start = 7045
-    _ACCOUNTFILTER._serialized_end = 7203
-    _AGGREGATEDBALANCE._serialized_start = 7206
-    _AGGREGATEDBALANCE._serialized_end = 7495
-    _OBSERVEMARKETSDEPTHREQUEST._serialized_start = 7497
-    _OBSERVEMARKETSDEPTHREQUEST._serialized_end = 7556
-    _OBSERVEMARKETSDEPTHRESPONSE._serialized_start = 7558
-    _OBSERVEMARKETSDEPTHRESPONSE._serialized_end = 7641
-    _OBSERVEMARKETSDEPTHUPDATESREQUEST._serialized_start = 7643
-    _OBSERVEMARKETSDEPTHUPDATESREQUEST._serialized_end = 7709
-    _OBSERVEMARKETSDEPTHUPDATESRESPONSE._serialized_start = 7711
-    _OBSERVEMARKETSDEPTHUPDATESRESPONSE._serialized_end = 7796
-    _OBSERVEMARKETSDATAREQUEST._serialized_start = 7798
-    _OBSERVEMARKETSDATAREQUEST._serialized_end = 7856
-    _OBSERVEMARKETSDATARESPONSE._serialized_start = 7858
-    _OBSERVEMARKETSDATARESPONSE._serialized_end = 7937
-    _GETLATESTMARKETDEPTHREQUEST._serialized_start = 7939
-    _GETLATESTMARKETDEPTHREQUEST._serialized_end = 8045
-    _GETLATESTMARKETDEPTHRESPONSE._serialized_start = 8048
-    _GETLATESTMARKETDEPTHRESPONSE._serialized_end = 8266
-    _LISTLATESTMARKETDATAREQUEST._serialized_start = 8268
-    _LISTLATESTMARKETDATAREQUEST._serialized_end = 8297
-    _LISTLATESTMARKETDATARESPONSE._serialized_start = 8299
-    _LISTLATESTMARKETDATARESPONSE._serialized_end = 8382
-    _GETLATESTMARKETDATAREQUEST._serialized_start = 8384
-    _GETLATESTMARKETDATAREQUEST._serialized_end = 8441
-    _GETLATESTMARKETDATARESPONSE._serialized_start = 8443
-    _GETLATESTMARKETDATARESPONSE._serialized_end = 8523
-    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_start = 8526
-    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_end = 8906
-    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_start = 8908
-    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_end = 9014
-    _MARKETDATAEDGE._serialized_start = 9016
-    _MARKETDATAEDGE._serialized_end = 9094
-    _MARKETDATACONNECTION._serialized_start = 9097
-    _MARKETDATACONNECTION._serialized_end = 9230
-    _MARKETSDATASUBSCRIBEREQUEST._serialized_start = 9232
-    _MARKETSDATASUBSCRIBEREQUEST._serialized_end = 9290
-    _MARKETSDATASUBSCRIBERESPONSE._serialized_start = 9292
-    _MARKETSDATASUBSCRIBERESPONSE._serialized_end = 9373
-    _LISTTRANSFERSREQUEST._serialized_start = 9376
-    _LISTTRANSFERSREQUEST._serialized_end = 9585
-    _LISTTRANSFERSRESPONSE._serialized_start = 9587
-    _LISTTRANSFERSRESPONSE._serialized_end = 9677
-    _TRANSFEREDGE._serialized_start = 9679
-    _TRANSFEREDGE._serialized_end = 9763
-    _TRANSFERCONNECTION._serialized_start = 9766
-    _TRANSFERCONNECTION._serialized_end = 9895
-    _GETNETWORKLIMITSREQUEST._serialized_start = 9897
-    _GETNETWORKLIMITSREQUEST._serialized_end = 9922
-    _GETNETWORKLIMITSRESPONSE._serialized_start = 9924
-    _GETNETWORKLIMITSRESPONSE._serialized_end = 9995
-    _LISTCANDLEINTERVALSREQUEST._serialized_start = 9997
-    _LISTCANDLEINTERVALSREQUEST._serialized_end = 10054
-    _INTERVALTOCANDLEID._serialized_start = 10056
-    _INTERVALTOCANDLEID._serialized_end = 10133
-    _LISTCANDLEINTERVALSRESPONSE._serialized_start = 10135
-    _LISTCANDLEINTERVALSRESPONSE._serialized_end = 10252
-    _CANDLE._serialized_start = 10255
-    _CANDLE._serialized_end = 10422
-    _OBSERVECANDLEDATAREQUEST._serialized_start = 10424
-    _OBSERVECANDLEDATAREQUEST._serialized_end = 10479
-    _OBSERVECANDLEDATARESPONSE._serialized_start = 10481
-    _OBSERVECANDLEDATARESPONSE._serialized_end = 10557
-    _LISTCANDLEDATAREQUEST._serialized_start = 10560
-    _LISTCANDLEDATAREQUEST._serialized_end = 10811
-    _LISTCANDLEDATARESPONSE._serialized_start = 10813
-    _LISTCANDLEDATARESPONSE._serialized_end = 10902
-    _CANDLEEDGE._serialized_start = 10904
-    _CANDLEEDGE._serialized_end = 10985
-    _CANDLEDATACONNECTION._serialized_start = 10988
-    _CANDLEDATACONNECTION._serialized_end = 11117
-    _LISTVOTESREQUEST._serialized_start = 11120
-    _LISTVOTESREQUEST._serialized_end = 11318
-    _LISTVOTESRESPONSE._serialized_start = 11320
-    _LISTVOTESRESPONSE._serialized_end = 11394
-    _VOTEEDGE._serialized_start = 11396
-    _VOTEEDGE._serialized_end = 11462
-    _VOTECONNECTION._serialized_start = 11464
-    _VOTECONNECTION._serialized_end = 11585
-    _OBSERVEVOTESREQUEST._serialized_start = 11587
-    _OBSERVEVOTESREQUEST._serialized_end = 11707
-    _OBSERVEVOTESRESPONSE._serialized_start = 11709
-    _OBSERVEVOTESRESPONSE._serialized_end = 11763
-    _LISTERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_start = 11766
-    _LISTERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_end = 11955
-    _LISTERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_start = 11957
-    _LISTERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_end = 12081
-    _ERC20MULTISIGSIGNERADDEDEDGE._serialized_start = 12083
-    _ERC20MULTISIGSIGNERADDEDEDGE._serialized_end = 12199
-    _ERC20MULTISIGSIGNERADDEDBUNDLEEDGE._serialized_start = 12202
-    _ERC20MULTISIGSIGNERADDEDBUNDLEEDGE._serialized_end = 12331
-    _ERC20MULTISIGSIGNERADDEDCONNECTION._serialized_start = 12334
-    _ERC20MULTISIGSIGNERADDEDCONNECTION._serialized_end = 12501
-    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_start = 12504
-    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_end = 12710
-    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_start = 12713
-    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_end = 12904
-    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_start = 12907
-    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_end = 13035
-    _ERC20MULTISIGSIGNERREMOVEDEDGE._serialized_start = 13037
-    _ERC20MULTISIGSIGNERREMOVEDEDGE._serialized_end = 13157
-    _ERC20MULTISIGSIGNERREMOVEDBUNDLEEDGE._serialized_start = 13160
-    _ERC20MULTISIGSIGNERREMOVEDBUNDLEEDGE._serialized_end = 13293
-    _ERC20MULTISIGSIGNERREMOVEDCONNECTION._serialized_start = 13296
-    _ERC20MULTISIGSIGNERREMOVEDCONNECTION._serialized_end = 13467
-    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_start = 13470
-    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_end = 13678
-    _GETERC20LISTASSETBUNDLEREQUEST._serialized_start = 13680
-    _GETERC20LISTASSETBUNDLEREQUEST._serialized_end = 13739
-    _GETERC20LISTASSETBUNDLERESPONSE._serialized_start = 13742
-    _GETERC20LISTASSETBUNDLERESPONSE._serialized_end = 13900
-    _GETERC20SETASSETLIMITSBUNDLEREQUEST._serialized_start = 13902
-    _GETERC20SETASSETLIMITSBUNDLEREQUEST._serialized_end = 13972
-    _GETERC20SETASSETLIMITSBUNDLERESPONSE._serialized_start = 13975
-    _GETERC20SETASSETLIMITSBUNDLERESPONSE._serialized_end = 14207
-    _GETERC20WITHDRAWALAPPROVALREQUEST._serialized_start = 14209
-    _GETERC20WITHDRAWALAPPROVALREQUEST._serialized_end = 14281
-    _GETERC20WITHDRAWALAPPROVALRESPONSE._serialized_start = 14284
-    _GETERC20WITHDRAWALAPPROVALRESPONSE._serialized_end = 14506
-    _GETLASTTRADEREQUEST._serialized_start = 14508
-    _GETLASTTRADEREQUEST._serialized_end = 14558
-    _GETLASTTRADERESPONSE._serialized_start = 14560
-    _GETLASTTRADERESPONSE._serialized_end = 14617
-    _LISTTRADESREQUEST._serialized_start = 14620
-    _LISTTRADESREQUEST._serialized_end = 14937
-    _LISTTRADESRESPONSE._serialized_start = 14939
-    _LISTTRADESRESPONSE._serialized_end = 15017
-    _TRADECONNECTION._serialized_start = 15019
-    _TRADECONNECTION._serialized_end = 15142
-    _TRADEEDGE._serialized_start = 15144
-    _TRADEEDGE._serialized_end = 15212
-    _OBSERVETRADESREQUEST._serialized_start = 15214
-    _OBSERVETRADESREQUEST._serialized_end = 15329
-    _OBSERVETRADESRESPONSE._serialized_start = 15331
-    _OBSERVETRADESRESPONSE._serialized_end = 15391
-    _GETORACLESPECREQUEST._serialized_start = 15393
-    _GETORACLESPECREQUEST._serialized_end = 15453
-    _GETORACLESPECRESPONSE._serialized_start = 15455
-    _GETORACLESPECRESPONSE._serialized_end = 15529
-    _LISTORACLESPECSREQUEST._serialized_start = 15531
-    _LISTORACLESPECSREQUEST._serialized_end = 15636
-    _LISTORACLESPECSRESPONSE._serialized_start = 15638
-    _LISTORACLESPECSRESPONSE._serialized_end = 15738
-    _LISTORACLEDATAREQUEST._serialized_start = 15741
-    _LISTORACLEDATAREQUEST._serialized_end = 15907
-    _LISTORACLEDATARESPONSE._serialized_start = 15909
-    _LISTORACLEDATARESPONSE._serialized_end = 16005
-    _ORACLESPECEDGE._serialized_start = 16007
-    _ORACLESPECEDGE._serialized_end = 16085
-    _ORACLESPECSCONNECTION._serialized_start = 16088
-    _ORACLESPECSCONNECTION._serialized_end = 16222
-    _ORACLEDATAEDGE._serialized_start = 16224
-    _ORACLEDATAEDGE._serialized_end = 16302
-    _ORACLEDATACONNECTION._serialized_start = 16305
-    _ORACLEDATACONNECTION._serialized_end = 16438
-    _GETMARKETREQUEST._serialized_start = 16440
-    _GETMARKETREQUEST._serialized_end = 16487
-    _GETMARKETRESPONSE._serialized_start = 16489
-    _GETMARKETRESPONSE._serialized_end = 16546
-    _LISTMARKETSREQUEST._serialized_start = 16548
-    _LISTMARKETSREQUEST._serialized_end = 16649
-    _LISTMARKETSRESPONSE._serialized_start = 16651
-    _LISTMARKETSRESPONSE._serialized_end = 16733
-    _MARKETEDGE._serialized_start = 16735
-    _MARKETEDGE._serialized_end = 16805
-    _MARKETCONNECTION._serialized_start = 16807
-    _MARKETCONNECTION._serialized_end = 16932
-    _GETPARTYREQUEST._serialized_start = 16934
-    _GETPARTYREQUEST._serialized_end = 16978
-    _GETPARTYRESPONSE._serialized_start = 16980
-    _GETPARTYRESPONSE._serialized_end = 17033
-    _LISTPARTIESREQUEST._serialized_start = 17035
-    _LISTPARTIESREQUEST._serialized_end = 17143
-    _LISTPARTIESRESPONSE._serialized_start = 17145
-    _LISTPARTIESRESPONSE._serialized_end = 17226
-    _PARTYEDGE._serialized_start = 17228
-    _PARTYEDGE._serialized_end = 17296
-    _PARTYCONNECTION._serialized_start = 17298
-    _PARTYCONNECTION._serialized_end = 17421
-    _ORDEREDGE._serialized_start = 17423
-    _ORDEREDGE._serialized_end = 17491
-    _LISTMARGINLEVELSREQUEST._serialized_start = 17494
-    _LISTMARGINLEVELSREQUEST._serialized_end = 17636
-    _LISTMARGINLEVELSRESPONSE._serialized_start = 17638
-    _LISTMARGINLEVELSRESPONSE._serialized_end = 17736
-    _OBSERVEMARGINLEVELSREQUEST._serialized_start = 17738
-    _OBSERVEMARGINLEVELSREQUEST._serialized_end = 17841
-    _OBSERVEMARGINLEVELSRESPONSE._serialized_start = 17843
-    _OBSERVEMARGINLEVELSRESPONSE._serialized_end = 17929
-    _ORDERCONNECTION._serialized_start = 17931
-    _ORDERCONNECTION._serialized_end = 18054
-    _MARGINEDGE._serialized_start = 18056
-    _MARGINEDGE._serialized_end = 18132
-    _MARGINCONNECTION._serialized_start = 18134
-    _MARGINCONNECTION._serialized_end = 18259
-    _LISTREWARDSREQUEST._serialized_start = 18262
-    _LISTREWARDSREQUEST._serialized_end = 18435
-    _LISTREWARDSRESPONSE._serialized_start = 18437
-    _LISTREWARDSRESPONSE._serialized_end = 18520
-    _REWARDEDGE._serialized_start = 18522
-    _REWARDEDGE._serialized_end = 18592
-    _REWARDSCONNECTION._serialized_start = 18594
-    _REWARDSCONNECTION._serialized_end = 18720
-    _LISTREWARDSUMMARIESREQUEST._serialized_start = 18723
-    _LISTREWARDSUMMARIESREQUEST._serialized_end = 18922
-    _LISTREWARDSUMMARIESRESPONSE._serialized_start = 18924
-    _LISTREWARDSUMMARIESRESPONSE._serialized_end = 19004
-    _LISTEPOCHREWARDSUMMARIESREQUEST._serialized_start = 19007
-    _LISTEPOCHREWARDSUMMARIESREQUEST._serialized_end = 19217
-    _LISTEPOCHREWARDSUMMARIESRESPONSE._serialized_start = 19219
-    _LISTEPOCHREWARDSUMMARIESRESPONSE._serialized_end = 19330
-    _EPOCHREWARDSUMMARYCONNECTION._serialized_start = 19333
-    _EPOCHREWARDSUMMARYCONNECTION._serialized_end = 19482
-    _EPOCHREWARDSUMMARYEDGE._serialized_start = 19484
-    _EPOCHREWARDSUMMARYEDGE._serialized_end = 19578
-    _OBSERVEREWARDSREQUEST._serialized_start = 19580
-    _OBSERVEREWARDSREQUEST._serialized_end = 19693
-    _OBSERVEREWARDSRESPONSE._serialized_start = 19695
-    _OBSERVEREWARDSRESPONSE._serialized_end = 19757
-    _GETDEPOSITREQUEST._serialized_start = 19759
-    _GETDEPOSITREQUEST._serialized_end = 19794
-    _GETDEPOSITRESPONSE._serialized_start = 19796
-    _GETDEPOSITRESPONSE._serialized_end = 19857
-    _LISTDEPOSITSREQUEST._serialized_start = 19860
-    _LISTDEPOSITSREQUEST._serialized_end = 20068
-    _LISTDEPOSITSRESPONSE._serialized_start = 20070
-    _LISTDEPOSITSRESPONSE._serialized_end = 20157
-    _DEPOSITEDGE._serialized_start = 20159
-    _DEPOSITEDGE._serialized_end = 20231
-    _DEPOSITSCONNECTION._serialized_start = 20234
-    _DEPOSITSCONNECTION._serialized_end = 20362
-    _GETWITHDRAWALREQUEST._serialized_start = 20364
-    _GETWITHDRAWALREQUEST._serialized_end = 20402
-    _GETWITHDRAWALRESPONSE._serialized_start = 20404
-    _GETWITHDRAWALRESPONSE._serialized_end = 20477
-    _LISTWITHDRAWALSREQUEST._serialized_start = 20480
-    _LISTWITHDRAWALSREQUEST._serialized_end = 20691
-    _LISTWITHDRAWALSRESPONSE._serialized_start = 20693
-    _LISTWITHDRAWALSRESPONSE._serialized_end = 20792
-    _WITHDRAWALEDGE._serialized_start = 20794
-    _WITHDRAWALEDGE._serialized_end = 20872
-    _WITHDRAWALSCONNECTION._serialized_start = 20875
-    _WITHDRAWALSCONNECTION._serialized_end = 21009
-    _GETASSETREQUEST._serialized_start = 21011
-    _GETASSETREQUEST._serialized_end = 21055
-    _GETASSETRESPONSE._serialized_start = 21057
-    _GETASSETRESPONSE._serialized_end = 21110
-    _LISTASSETSREQUEST._serialized_start = 21113
-    _LISTASSETSREQUEST._serialized_end = 21258
-    _LISTASSETSRESPONSE._serialized_start = 21260
-    _LISTASSETSRESPONSE._serialized_end = 21339
-    _ASSETEDGE._serialized_start = 21341
-    _ASSETEDGE._serialized_end = 21409
-    _ASSETSCONNECTION._serialized_start = 21411
-    _ASSETSCONNECTION._serialized_end = 21535
-    _LISTLIQUIDITYPROVISIONSREQUEST._serialized_start = 21538
-    _LISTLIQUIDITYPROVISIONSREQUEST._serialized_end = 21793
-    _LISTLIQUIDITYPROVISIONSRESPONSE._serialized_start = 21796
-    _LISTLIQUIDITYPROVISIONSRESPONSE._serialized_end = 21928
-    _LIQUIDITYPROVISIONSEDGE._serialized_start = 21930
-    _LIQUIDITYPROVISIONSEDGE._serialized_end = 22025
-    _LIQUIDITYPROVISIONSCONNECTION._serialized_start = 22028
-    _LIQUIDITYPROVISIONSCONNECTION._serialized_end = 22179
-    _OBSERVELIQUIDITYPROVISIONSREQUEST._serialized_start = 22182
-    _OBSERVELIQUIDITYPROVISIONSREQUEST._serialized_end = 22310
-    _OBSERVELIQUIDITYPROVISIONSRESPONSE._serialized_start = 22312
-    _OBSERVELIQUIDITYPROVISIONSRESPONSE._serialized_end = 22425
-    _GETGOVERNANCEDATAREQUEST._serialized_start = 22428
-    _GETGOVERNANCEDATAREQUEST._serialized_end = 22557
-    _GETGOVERNANCEDATARESPONSE._serialized_start = 22559
-    _GETGOVERNANCEDATARESPONSE._serialized_end = 22628
-    _LISTGOVERNANCEDATAREQUEST._serialized_start = 22631
-    _LISTGOVERNANCEDATAREQUEST._serialized_end = 23265
-    _LISTGOVERNANCEDATAREQUEST_TYPE._serialized_start = 22985
-    _LISTGOVERNANCEDATAREQUEST_TYPE._serialized_end = 23168
-    _LISTGOVERNANCEDATARESPONSE._serialized_start = 23267
-    _LISTGOVERNANCEDATARESPONSE._serialized_end = 23370
-    _GOVERNANCEDATAEDGE._serialized_start = 23372
-    _GOVERNANCEDATAEDGE._serialized_end = 23458
-    _GOVERNANCEDATACONNECTION._serialized_start = 23461
-    _GOVERNANCEDATACONNECTION._serialized_end = 23602
-    _OBSERVEGOVERNANCEREQUEST._serialized_start = 23604
-    _OBSERVEGOVERNANCEREQUEST._serialized_end = 23675
-    _OBSERVEGOVERNANCERESPONSE._serialized_start = 23677
-    _OBSERVEGOVERNANCERESPONSE._serialized_end = 23746
-    _LISTDELEGATIONSREQUEST._serialized_start = 23749
-    _LISTDELEGATIONSREQUEST._serialized_end = 23986
-    _LISTDELEGATIONSRESPONSE._serialized_start = 23988
-    _LISTDELEGATIONSRESPONSE._serialized_end = 24087
-    _DELEGATIONEDGE._serialized_start = 24089
-    _DELEGATIONEDGE._serialized_end = 24167
-    _DELEGATIONSCONNECTION._serialized_start = 24170
-    _DELEGATIONSCONNECTION._serialized_end = 24304
-    _OBSERVEDELEGATIONSREQUEST._serialized_start = 24306
-    _OBSERVEDELEGATIONSREQUEST._serialized_end = 24420
-    _OBSERVEDELEGATIONSRESPONSE._serialized_start = 24422
-    _OBSERVEDELEGATIONSRESPONSE._serialized_end = 24500
-    _GETNETWORKDATAREQUEST._serialized_start = 24502
-    _GETNETWORKDATAREQUEST._serialized_end = 24525
-    _GETNETWORKDATARESPONSE._serialized_start = 24527
-    _GETNETWORKDATARESPONSE._serialized_end = 24596
-    _GETNODEREQUEST._serialized_start = 24598
-    _GETNODEREQUEST._serialized_end = 24630
-    _GETNODERESPONSE._serialized_start = 24632
-    _GETNODERESPONSE._serialized_end = 24681
-    _LISTNODESREQUEST._serialized_start = 24684
-    _LISTNODESREQUEST._serialized_end = 24831
-    _LISTNODESRESPONSE._serialized_start = 24833
-    _LISTNODESRESPONSE._serialized_end = 24908
-    _NODEEDGE._serialized_start = 24910
-    _NODEEDGE._serialized_end = 24976
-    _NODESCONNECTION._serialized_start = 24978
-    _NODESCONNECTION._serialized_end = 25100
-    _LISTNODESIGNATURESREQUEST._serialized_start = 25102
-    _LISTNODESIGNATURESREQUEST._serialized_end = 25226
-    _LISTNODESIGNATURESRESPONSE._serialized_start = 25228
-    _LISTNODESIGNATURESRESPONSE._serialized_end = 25331
-    _NODESIGNATUREEDGE._serialized_start = 25333
-    _NODESIGNATUREEDGE._serialized_end = 25429
-    _NODESIGNATURESCONNECTION._serialized_start = 25432
-    _NODESIGNATURESCONNECTION._serialized_end = 25572
-    _GETEPOCHREQUEST._serialized_start = 25574
-    _GETEPOCHREQUEST._serialized_end = 25619
-    _GETEPOCHRESPONSE._serialized_start = 25621
-    _GETEPOCHRESPONSE._serialized_end = 25674
-    _ESTIMATEFEEREQUEST._serialized_start = 25676
-    _ESTIMATEFEEREQUEST._serialized_end = 25767
-    _ESTIMATEFEERESPONSE._serialized_start = 25769
-    _ESTIMATEFEERESPONSE._serialized_end = 25819
-    _ESTIMATEMARGINREQUEST._serialized_start = 25822
-    _ESTIMATEMARGINREQUEST._serialized_end = 26013
-    _ESTIMATEMARGINRESPONSE._serialized_start = 26015
-    _ESTIMATEMARGINRESPONSE._serialized_end = 26096
-    _LISTNETWORKPARAMETERSREQUEST._serialized_start = 26098
-    _LISTNETWORKPARAMETERSREQUEST._serialized_end = 26209
-    _LISTNETWORKPARAMETERSRESPONSE._serialized_start = 26211
-    _LISTNETWORKPARAMETERSRESPONSE._serialized_end = 26334
-    _GETNETWORKPARAMETERREQUEST._serialized_start = 26336
-    _GETNETWORKPARAMETERREQUEST._serialized_end = 26382
-    _GETNETWORKPARAMETERRESPONSE._serialized_start = 26384
-    _GETNETWORKPARAMETERRESPONSE._serialized_end = 26482
-    _NETWORKPARAMETEREDGE._serialized_start = 26484
-    _NETWORKPARAMETEREDGE._serialized_end = 26574
-    _NETWORKPARAMETERCONNECTION._serialized_start = 26577
-    _NETWORKPARAMETERCONNECTION._serialized_end = 26722
-    _CHECKPOINT._serialized_start = 26724
-    _CHECKPOINT._serialized_end = 26814
-    _LISTCHECKPOINTSREQUEST._serialized_start = 26816
-    _LISTCHECKPOINTSREQUEST._serialized_end = 26921
-    _LISTCHECKPOINTSRESPONSE._serialized_start = 26923
-    _LISTCHECKPOINTSRESPONSE._serialized_end = 27022
-    _CHECKPOINTEDGE._serialized_start = 27024
-    _CHECKPOINTEDGE._serialized_end = 27113
-    _CHECKPOINTSCONNECTION._serialized_start = 27116
-    _CHECKPOINTSCONNECTION._serialized_end = 27250
-    _GETSTAKEREQUEST._serialized_start = 27252
-    _GETSTAKEREQUEST._serialized_end = 27377
-    _GETSTAKERESPONSE._serialized_start = 27380
-    _GETSTAKERESPONSE._serialized_end = 27528
-    _STAKELINKINGEDGE._serialized_start = 27530
-    _STAKELINKINGEDGE._serialized_end = 27622
-    _STAKESCONNECTION._serialized_start = 27625
-    _STAKESCONNECTION._serialized_end = 27756
-    _GETRISKFACTORSREQUEST._serialized_start = 27758
-    _GETRISKFACTORSREQUEST._serialized_end = 27810
-    _GETRISKFACTORSRESPONSE._serialized_start = 27812
-    _GETRISKFACTORSRESPONSE._serialized_end = 27887
-    _OBSERVEEVENTBUSREQUEST._serialized_start = 27890
-    _OBSERVEEVENTBUSREQUEST._serialized_end = 28051
-    _OBSERVEEVENTBUSRESPONSE._serialized_start = 28053
-    _OBSERVEEVENTBUSRESPONSE._serialized_end = 28128
-    _OBSERVELEDGERMOVEMENTSREQUEST._serialized_start = 28130
-    _OBSERVELEDGERMOVEMENTSREQUEST._serialized_end = 28161
-    _OBSERVELEDGERMOVEMENTSRESPONSE._serialized_start = 28163
-    _OBSERVELEDGERMOVEMENTSRESPONSE._serialized_end = 28258
-    _LISTKEYROTATIONSREQUEST._serialized_start = 28261
-    _LISTKEYROTATIONSREQUEST._serialized_end = 28409
-    _LISTKEYROTATIONSRESPONSE._serialized_start = 28411
-    _LISTKEYROTATIONSRESPONSE._serialized_end = 28507
-    _KEYROTATIONEDGE._serialized_start = 28509
-    _KEYROTATIONEDGE._serialized_end = 28599
-    _KEYROTATIONCONNECTION._serialized_start = 28602
-    _KEYROTATIONCONNECTION._serialized_end = 28737
-    _LISTETHEREUMKEYROTATIONSREQUEST._serialized_start = 28740
-    _LISTETHEREUMKEYROTATIONSREQUEST._serialized_end = 28896
-    _LISTETHEREUMKEYROTATIONSRESPONSE._serialized_start = 28898
-    _LISTETHEREUMKEYROTATIONSRESPONSE._serialized_end = 29018
-    _ETHEREUMKEYROTATIONSCONNECTION._serialized_start = 29021
-    _ETHEREUMKEYROTATIONSCONNECTION._serialized_end = 29173
-    _ETHEREUMKEYROTATIONEDGE._serialized_start = 29175
-    _ETHEREUMKEYROTATIONEDGE._serialized_end = 29281
-    _GETVEGATIMEREQUEST._serialized_start = 29283
-    _GETVEGATIMEREQUEST._serialized_end = 29303
-    _GETVEGATIMERESPONSE._serialized_start = 29305
-    _GETVEGATIMERESPONSE._serialized_end = 29356
-    _DATERANGE._serialized_start = 29359
-    _DATERANGE._serialized_end = 29496
-    _GETPROTOCOLUPGRADESTATUSREQUEST._serialized_start = 29498
-    _GETPROTOCOLUPGRADESTATUSREQUEST._serialized_end = 29531
-    _GETPROTOCOLUPGRADESTATUSRESPONSE._serialized_start = 29533
-    _GETPROTOCOLUPGRADESTATUSRESPONSE._serialized_end = 29589
-    _LISTPROTOCOLUPGRADEPROPOSALSREQUEST._serialized_start = 29592
-    _LISTPROTOCOLUPGRADEPROPOSALSREQUEST._serialized_end = 29851
-    _LISTPROTOCOLUPGRADEPROPOSALSRESPONSE._serialized_start = 29854
-    _LISTPROTOCOLUPGRADEPROPOSALSRESPONSE._serialized_end = 30006
-    _PROTOCOLUPGRADEPROPOSALCONNECTION._serialized_start = 30009
-    _PROTOCOLUPGRADEPROPOSALCONNECTION._serialized_end = 30168
-    _PROTOCOLUPGRADEPROPOSALEDGE._serialized_start = 30170
-    _PROTOCOLUPGRADEPROPOSALEDGE._serialized_end = 30281
-    _LISTCORESNAPSHOTSREQUEST._serialized_start = 30283
-    _LISTCORESNAPSHOTSREQUEST._serialized_end = 30390
-    _LISTCORESNAPSHOTSRESPONSE._serialized_start = 30392
-    _LISTCORESNAPSHOTSRESPONSE._serialized_end = 30499
-    _CORESNAPSHOTCONNECTION._serialized_start = 30502
-    _CORESNAPSHOTCONNECTION._serialized_end = 30639
-    _CORESNAPSHOTEDGE._serialized_start = 30641
-    _CORESNAPSHOTEDGE._serialized_end = 30737
-    _HISTORYSEGMENT._serialized_start = 30740
-    _HISTORYSEGMENT._serialized_end = 30954
-    _GETMOSTRECENTDEHISTORYSEGMENTREQUEST._serialized_start = 30956
-    _GETMOSTRECENTDEHISTORYSEGMENTREQUEST._serialized_end = 30994
-    _GETMOSTRECENTDEHISTORYSEGMENTRESPONSE._serialized_start = 30996
-    _GETMOSTRECENTDEHISTORYSEGMENTRESPONSE._serialized_end = 31123
-    _LISTALLDEHISTORYSEGMENTSREQUEST._serialized_start = 31125
-    _LISTALLDEHISTORYSEGMENTSREQUEST._serialized_end = 31158
-    _LISTALLDEHISTORYSEGMENTSRESPONSE._serialized_start = 31160
-    _LISTALLDEHISTORYSEGMENTSRESPONSE._serialized_end = 31255
-    _GETACTIVEDEHISTORYPEERADDRESSESREQUEST._serialized_start = 31257
-    _GETACTIVEDEHISTORYPEERADDRESSESREQUEST._serialized_end = 31297
-    _GETACTIVEDEHISTORYPEERADDRESSESRESPONSE._serialized_start = 31299
-    _GETACTIVEDEHISTORYPEERADDRESSESRESPONSE._serialized_end = 31375
-    _PINGREQUEST._serialized_start = 31377
-    _PINGREQUEST._serialized_end = 31390
-    _PINGRESPONSE._serialized_start = 31392
-    _PINGRESPONSE._serialized_end = 31406
-    _TRADINGDATASERVICE._serialized_start = 31937
-    _TRADINGDATASERVICE._serialized_end = 40821
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _LISTCANDLEINTERVALSREQUEST.fields_by_name["market_id"]._options = None
+    _LISTCANDLEINTERVALSREQUEST.fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _OBSERVECANDLEDATAREQUEST.fields_by_name["candle_id"]._options = None
+    _OBSERVECANDLEDATAREQUEST.fields_by_name[
+        "candle_id"
+    ]._serialized_options = b"\340A\002"
+    _LISTCANDLEDATAREQUEST.fields_by_name["candle_id"]._options = None
+    _LISTCANDLEDATAREQUEST.fields_by_name[
+        "candle_id"
+    ]._serialized_options = b"\340A\002"
+    _GETERC20LISTASSETBUNDLEREQUEST.fields_by_name["asset_id"]._options = None
+    _GETERC20LISTASSETBUNDLEREQUEST.fields_by_name[
+        "asset_id"
+    ]._serialized_options = b"\340A\002"
+    _GETERC20SETASSETLIMITSBUNDLEREQUEST.fields_by_name["proposal_id"]._options = None
+    _GETERC20SETASSETLIMITSBUNDLEREQUEST.fields_by_name[
+        "proposal_id"
+    ]._serialized_options = b"\340A\002"
+    _GETERC20WITHDRAWALAPPROVALREQUEST.fields_by_name["withdrawal_id"]._options = None
+    _GETERC20WITHDRAWALAPPROVALREQUEST.fields_by_name[
+        "withdrawal_id"
+    ]._serialized_options = b"\340A\002"
+    _GETLASTTRADEREQUEST.fields_by_name["market_id"]._options = None
+    _GETLASTTRADEREQUEST.fields_by_name["market_id"]._serialized_options = b"\340A\002"
+    _GETORACLESPECREQUEST.fields_by_name["oracle_spec_id"]._options = None
+    _GETORACLESPECREQUEST.fields_by_name[
+        "oracle_spec_id"
+    ]._serialized_options = b"\340A\002"
+    _GETMARKETREQUEST.fields_by_name["market_id"]._options = None
+    _GETMARKETREQUEST.fields_by_name["market_id"]._serialized_options = b"\340A\002"
+    _GETPARTYREQUEST.fields_by_name["party_id"]._options = None
+    _GETPARTYREQUEST.fields_by_name["party_id"]._serialized_options = b"\340A\002"
+    _GETDEPOSITREQUEST.fields_by_name["id"]._options = None
+    _GETDEPOSITREQUEST.fields_by_name["id"]._serialized_options = b"\340A\002"
+    _GETWITHDRAWALREQUEST.fields_by_name["id"]._options = None
+    _GETWITHDRAWALREQUEST.fields_by_name["id"]._serialized_options = b"\340A\002"
+    _GETASSETREQUEST.fields_by_name["asset_id"]._options = None
+    _GETASSETREQUEST.fields_by_name["asset_id"]._serialized_options = b"\340A\002"
+    _GETNODEREQUEST.fields_by_name["id"]._options = None
+    _GETNODEREQUEST.fields_by_name["id"]._serialized_options = b"\340A\002"
+    _LISTNODESIGNATURESREQUEST.fields_by_name["id"]._options = None
+    _LISTNODESIGNATURESREQUEST.fields_by_name["id"]._serialized_options = b"\340A\002"
+    _ESTIMATEFEEREQUEST.fields_by_name["market_id"]._options = None
+    _ESTIMATEFEEREQUEST.fields_by_name["market_id"]._serialized_options = b"\340A\002"
+    _ESTIMATEFEEREQUEST.fields_by_name["price"]._options = None
+    _ESTIMATEFEEREQUEST.fields_by_name["price"]._serialized_options = b"\340A\002"
+    _ESTIMATEFEEREQUEST.fields_by_name["size"]._options = None
+    _ESTIMATEFEEREQUEST.fields_by_name["size"]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST.fields_by_name["market_id"]._options = None
+    _ESTIMATEMARGINREQUEST.fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST.fields_by_name["party_id"]._options = None
+    _ESTIMATEMARGINREQUEST.fields_by_name["party_id"]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST.fields_by_name["side"]._options = None
+    _ESTIMATEMARGINREQUEST.fields_by_name["side"]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST.fields_by_name["type"]._options = None
+    _ESTIMATEMARGINREQUEST.fields_by_name["type"]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST.fields_by_name["size"]._options = None
+    _ESTIMATEMARGINREQUEST.fields_by_name["size"]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST.fields_by_name["price"]._options = None
+    _ESTIMATEMARGINREQUEST.fields_by_name["price"]._serialized_options = b"\340A\002"
+    _ESTIMATEMARGINREQUEST._options = None
+    _ESTIMATEMARGINREQUEST._serialized_options = b"\030\001"
+    _ESTIMATEMARGINRESPONSE._options = None
+    _ESTIMATEMARGINRESPONSE._serialized_options = b"\030\001"
+    _GETNETWORKPARAMETERREQUEST.fields_by_name["key"]._options = None
+    _GETNETWORKPARAMETERREQUEST.fields_by_name["key"]._serialized_options = b"\340A\002"
+    _GETSTAKEREQUEST.fields_by_name["party_id"]._options = None
+    _GETSTAKEREQUEST.fields_by_name["party_id"]._serialized_options = b"\340A\002"
+    _GETRISKFACTORSREQUEST.fields_by_name["market_id"]._options = None
+    _GETRISKFACTORSREQUEST.fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _LISTENTITIESREQUEST.fields_by_name["transaction_hash"]._options = None
+    _LISTENTITIESREQUEST.fields_by_name[
+        "transaction_hash"
+    ]._serialized_options = b"\340A\002"
+    _ESTIMATEPOSITIONREQUEST.fields_by_name["market_id"]._options = None
+    _ESTIMATEPOSITIONREQUEST.fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\340A\002"
+    _ESTIMATEPOSITIONREQUEST.fields_by_name["open_volume"]._options = None
+    _ESTIMATEPOSITIONREQUEST.fields_by_name[
+        "open_volume"
+    ]._serialized_options = b"\340A\002"
+    _TRADINGDATASERVICE.methods_by_name["ListAccounts"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListAccounts"
+    ]._serialized_options = b"\222A\n\n\010Accounts"
+    _TRADINGDATASERVICE.methods_by_name["ObserveAccounts"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveAccounts"
+    ]._serialized_options = b"\222A\n\n\010Accounts"
+    _TRADINGDATASERVICE.methods_by_name["Info"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "Info"
+    ]._serialized_options = b"\222A\022\n\020Node information"
+    _TRADINGDATASERVICE.methods_by_name["GetOrder"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetOrder"
+    ]._serialized_options = b"\222A\010\n\006Orders"
+    _TRADINGDATASERVICE.methods_by_name["ListOrders"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListOrders"
+    ]._serialized_options = b"\222A\010\n\006Orders"
+    _TRADINGDATASERVICE.methods_by_name["ListOrderVersions"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListOrderVersions"
+    ]._serialized_options = b"\222A\010\n\006Orders"
+    _TRADINGDATASERVICE.methods_by_name["ObserveOrders"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveOrders"
+    ]._serialized_options = b"\222A\010\n\006Orders"
+    _TRADINGDATASERVICE.methods_by_name["ListPositions"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListPositions"
+    ]._serialized_options = b"\210\002\001\222A\013\n\tPositions"
+    _TRADINGDATASERVICE.methods_by_name["ListAllPositions"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListAllPositions"
+    ]._serialized_options = b"\222A\013\n\tPositions"
+    _TRADINGDATASERVICE.methods_by_name["ObservePositions"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObservePositions"
+    ]._serialized_options = b"\222A\013\n\tPositions"
+    _TRADINGDATASERVICE.methods_by_name["ListLedgerEntries"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListLedgerEntries"
+    ]._serialized_options = b"\222A\020\n\016Ledger entries"
+    _TRADINGDATASERVICE.methods_by_name["ExportLedgerEntries"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ExportLedgerEntries"
+    ]._serialized_options = b"\222A\020\n\016Ledger entries"
+    _TRADINGDATASERVICE.methods_by_name["ListBalanceChanges"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListBalanceChanges"
+    ]._serialized_options = b"\222A\n\n\010Accounts"
+    _TRADINGDATASERVICE.methods_by_name["GetLatestMarketData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetLatestMarketData"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ListLatestMarketData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListLatestMarketData"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["GetLatestMarketDepth"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetLatestMarketDepth"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ObserveMarketsDepth"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveMarketsDepth"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ObserveMarketsDepthUpdates"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveMarketsDepthUpdates"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ObserveMarketsData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveMarketsData"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["GetMarketDataHistoryByID"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetMarketDataHistoryByID"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ListTransfers"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListTransfers"
+    ]._serialized_options = b"\222A\013\n\tTransfers"
+    _TRADINGDATASERVICE.methods_by_name["GetNetworkLimits"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNetworkLimits"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListCandleData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListCandleData"
+    ]._serialized_options = b"\222A\t\n\007Candles"
+    _TRADINGDATASERVICE.methods_by_name["ObserveCandleData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveCandleData"
+    ]._serialized_options = b"\222A\t\n\007Candles"
+    _TRADINGDATASERVICE.methods_by_name["ListCandleIntervals"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListCandleIntervals"
+    ]._serialized_options = b"\222A\t\n\007Candles"
+    _TRADINGDATASERVICE.methods_by_name["ListVotes"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListVotes"
+    ]._serialized_options = b"\222A\014\n\nGovernance"
+    _TRADINGDATASERVICE.methods_by_name["ObserveVotes"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveVotes"
+    ]._serialized_options = b"\222A\014\n\nGovernance"
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListERC20MultiSigSignerAddedBundles"
+    ]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListERC20MultiSigSignerAddedBundles"
+    ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListERC20MultiSigSignerRemovedBundles"
+    ]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListERC20MultiSigSignerRemovedBundles"
+    ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
+    _TRADINGDATASERVICE.methods_by_name["GetERC20ListAssetBundle"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetERC20ListAssetBundle"
+    ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
+    _TRADINGDATASERVICE.methods_by_name["GetERC20SetAssetLimitsBundle"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetERC20SetAssetLimitsBundle"
+    ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
+    _TRADINGDATASERVICE.methods_by_name["GetERC20WithdrawalApproval"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetERC20WithdrawalApproval"
+    ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
+    _TRADINGDATASERVICE.methods_by_name["GetLastTrade"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetLastTrade"
+    ]._serialized_options = b"\222A\010\n\006Trades"
+    _TRADINGDATASERVICE.methods_by_name["ListTrades"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListTrades"
+    ]._serialized_options = b"\222A\010\n\006Trades"
+    _TRADINGDATASERVICE.methods_by_name["ObserveTrades"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveTrades"
+    ]._serialized_options = b"\222A\010\n\006Trades"
+    _TRADINGDATASERVICE.methods_by_name["GetOracleSpec"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetOracleSpec"
+    ]._serialized_options = b"\222A\016\n\014Data sources"
+    _TRADINGDATASERVICE.methods_by_name["ListOracleSpecs"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListOracleSpecs"
+    ]._serialized_options = b"\222A\016\n\014Data sources"
+    _TRADINGDATASERVICE.methods_by_name["ListOracleData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListOracleData"
+    ]._serialized_options = b"\222A\016\n\014Data sources"
+    _TRADINGDATASERVICE.methods_by_name["GetMarket"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetMarket"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ListMarkets"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListMarkets"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["GetParty"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetParty"
+    ]._serialized_options = b"\222A\t\n\007Parties"
+    _TRADINGDATASERVICE.methods_by_name["ListParties"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListParties"
+    ]._serialized_options = b"\222A\t\n\007Parties"
+    _TRADINGDATASERVICE.methods_by_name["ListMarginLevels"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListMarginLevels"
+    ]._serialized_options = b"\222A\017\n\rMargin levels"
+    _TRADINGDATASERVICE.methods_by_name["ObserveMarginLevels"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveMarginLevels"
+    ]._serialized_options = b"\222A\017\n\rMargin levels"
+    _TRADINGDATASERVICE.methods_by_name["ListRewards"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListRewards"
+    ]._serialized_options = b"\222A\t\n\007Rewards"
+    _TRADINGDATASERVICE.methods_by_name["ListRewardSummaries"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListRewardSummaries"
+    ]._serialized_options = b"\222A\t\n\007Rewards"
+    _TRADINGDATASERVICE.methods_by_name["ListEpochRewardSummaries"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListEpochRewardSummaries"
+    ]._serialized_options = b"\222A\t\n\007Rewards"
+    _TRADINGDATASERVICE.methods_by_name["GetDeposit"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetDeposit"
+    ]._serialized_options = b"\222A\010\n\006Assets"
+    _TRADINGDATASERVICE.methods_by_name["ListDeposits"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListDeposits"
+    ]._serialized_options = b"\222A\010\n\006Assets"
+    _TRADINGDATASERVICE.methods_by_name["GetWithdrawal"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetWithdrawal"
+    ]._serialized_options = b"\222A\010\n\006Assets"
+    _TRADINGDATASERVICE.methods_by_name["ListWithdrawals"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListWithdrawals"
+    ]._serialized_options = b"\222A\010\n\006Assets"
+    _TRADINGDATASERVICE.methods_by_name["GetAsset"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetAsset"
+    ]._serialized_options = b"\222A\010\n\006Assets"
+    _TRADINGDATASERVICE.methods_by_name["ListAssets"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListAssets"
+    ]._serialized_options = b"\222A\010\n\006Assets"
+    _TRADINGDATASERVICE.methods_by_name["ListLiquidityProvisions"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListLiquidityProvisions"
+    ]._serialized_options = b"\222A\026\n\024Liquidity provisions"
+    _TRADINGDATASERVICE.methods_by_name["ObserveLiquidityProvisions"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveLiquidityProvisions"
+    ]._serialized_options = b"\222A\026\n\024Liquidity provisions"
+    _TRADINGDATASERVICE.methods_by_name["GetGovernanceData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetGovernanceData"
+    ]._serialized_options = b"\222A\014\n\nGovernance"
+    _TRADINGDATASERVICE.methods_by_name["ListGovernanceData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListGovernanceData"
+    ]._serialized_options = b"\222A\014\n\nGovernance"
+    _TRADINGDATASERVICE.methods_by_name["ObserveGovernance"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveGovernance"
+    ]._serialized_options = b"\222A\014\n\nGovernance"
+    _TRADINGDATASERVICE.methods_by_name["ListDelegations"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListDelegations"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetNetworkData"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNetworkData"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetNode"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNode"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListNodes"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListNodes"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListNodeSignatures"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListNodeSignatures"
+    ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
+    _TRADINGDATASERVICE.methods_by_name["GetEpoch"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetEpoch"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["EstimateFee"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "EstimateFee"
+    ]._serialized_options = b"\222A\010\n\006Orders"
+    _TRADINGDATASERVICE.methods_by_name["EstimateMargin"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "EstimateMargin"
+    ]._serialized_options = b"\222A\010\n\006Orders"
+    _TRADINGDATASERVICE.methods_by_name["EstimatePosition"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "EstimatePosition"
+    ]._serialized_options = b"\222A\013\n\tPositions"
+    _TRADINGDATASERVICE.methods_by_name["ListNetworkParameters"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListNetworkParameters"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetNetworkParameter"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNetworkParameter"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListCheckpoints"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListCheckpoints"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetStake"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetStake"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetRiskFactors"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetRiskFactors"
+    ]._serialized_options = b"\222A\t\n\007Markets"
+    _TRADINGDATASERVICE.methods_by_name["ObserveEventBus"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveEventBus"
+    ]._serialized_options = b"\222A\010\n\006Events"
+    _TRADINGDATASERVICE.methods_by_name["ObserveLedgerMovements"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ObserveLedgerMovements"
+    ]._serialized_options = b"\222A\022\n\020Ledger movements"
+    _TRADINGDATASERVICE.methods_by_name["ListKeyRotations"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListKeyRotations"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListEthereumKeyRotations"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListEthereumKeyRotations"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetVegaTime"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetVegaTime"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["GetProtocolUpgradeStatus"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetProtocolUpgradeStatus"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListProtocolUpgradeProposals"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListProtocolUpgradeProposals"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name["ListCoreSnapshots"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListCoreSnapshots"
+    ]._serialized_options = b"\222A\t\n\007Network"
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetMostRecentNetworkHistorySegment"
+    ]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetMostRecentNetworkHistorySegment"
+    ]._serialized_options = b"\222A\021\n\017Network history"
+    _TRADINGDATASERVICE.methods_by_name["ListAllNetworkHistorySegments"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListAllNetworkHistorySegments"
+    ]._serialized_options = b"\222A\021\n\017Network history"
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetActiveNetworkHistoryPeerAddresses"
+    ]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetActiveNetworkHistoryPeerAddresses"
+    ]._serialized_options = b"\222A\021\n\017Network history"
+    _TRADINGDATASERVICE.methods_by_name["GetNetworkHistoryStatus"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNetworkHistoryStatus"
+    ]._serialized_options = b"\222A\021\n\017Network history"
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNetworkHistoryBootstrapPeers"
+    ]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "GetNetworkHistoryBootstrapPeers"
+    ]._serialized_options = b"\222A\021\n\017Network history"
+    _TRADINGDATASERVICE.methods_by_name["ListEntities"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ListEntities"
+    ]._serialized_options = b"\222A\n\n\010Explorer"
+    _TRADINGDATASERVICE.methods_by_name["ExportNetworkHistory"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "ExportNetworkHistory"
+    ]._serialized_options = b"\222A\021\n\017Network history"
+    _TRADINGDATASERVICE.methods_by_name["Ping"]._options = None
+    _TRADINGDATASERVICE.methods_by_name[
+        "Ping"
+    ]._serialized_options = b"\222A\006\n\004Misc"
+    _LEDGERENTRYFIELD._serialized_start = 35684
+    _LEDGERENTRYFIELD._serialized_end = 35854
+    _ACCOUNTFIELD._serialized_start = 35857
+    _ACCOUNTFIELD._serialized_end = 36033
+    _TRANSFERDIRECTION._serialized_start = 36036
+    _TRANSFERDIRECTION._serialized_end = 36209
+    _TABLE._serialized_start = 36212
+    _TABLE._serialized_end = 36562
+    _PAGINATION._serialized_start = 335
+    _PAGINATION._serialized_end = 552
+    _PAGEINFO._serialized_start = 555
+    _PAGEINFO._serialized_end = 711
+    _ACCOUNTBALANCE._serialized_start = 714
+    _ACCOUNTBALANCE._serialized_end = 868
+    _LISTACCOUNTSREQUEST._serialized_start = 871
+    _LISTACCOUNTSREQUEST._serialized_end = 1029
+    _LISTACCOUNTSRESPONSE._serialized_start = 1031
+    _LISTACCOUNTSRESPONSE._serialized_end = 1118
+    _ACCOUNTSCONNECTION._serialized_start = 1121
+    _ACCOUNTSCONNECTION._serialized_end = 1249
+    _ACCOUNTEDGE._serialized_start = 1251
+    _ACCOUNTEDGE._serialized_end = 1341
+    _OBSERVEACCOUNTSREQUEST._serialized_start = 1344
+    _OBSERVEACCOUNTSREQUEST._serialized_end = 1485
+    _OBSERVEACCOUNTSRESPONSE._serialized_start = 1488
+    _OBSERVEACCOUNTSRESPONSE._serialized_end = 1654
+    _ACCOUNTSNAPSHOTPAGE._serialized_start = 1656
+    _ACCOUNTSNAPSHOTPAGE._serialized_end = 1767
+    _ACCOUNTUPDATES._serialized_start = 1769
+    _ACCOUNTUPDATES._serialized_end = 1846
+    _INFOREQUEST._serialized_start = 1848
+    _INFOREQUEST._serialized_end = 1861
+    _INFORESPONSE._serialized_start = 1863
+    _INFORESPONSE._serialized_end = 1936
+    _GETORDERREQUEST._serialized_start = 1938
+    _GETORDERREQUEST._serialized_end = 2030
+    _GETORDERRESPONSE._serialized_start = 2032
+    _GETORDERRESPONSE._serialized_end = 2085
+    _ORDERFILTER._serialized_start = 2088
+    _ORDERFILTER._serialized_end = 2533
+    _LISTORDERSREQUEST._serialized_start = 2536
+    _LISTORDERSREQUEST._serialized_end = 2706
+    _LISTORDERSRESPONSE._serialized_start = 2708
+    _LISTORDERSRESPONSE._serialized_end = 2786
+    _LISTORDERVERSIONSREQUEST._serialized_start = 2789
+    _LISTORDERVERSIONSREQUEST._serialized_end = 2928
+    _LISTORDERVERSIONSRESPONSE._serialized_start = 2930
+    _LISTORDERVERSIONSRESPONSE._serialized_end = 3015
+    _OBSERVEORDERSREQUEST._serialized_start = 3018
+    _OBSERVEORDERSREQUEST._serialized_end = 3172
+    _OBSERVEORDERSRESPONSE._serialized_start = 3175
+    _OBSERVEORDERSRESPONSE._serialized_end = 3335
+    _ORDERSNAPSHOTPAGE._serialized_start = 3337
+    _ORDERSNAPSHOTPAGE._serialized_end = 3422
+    _ORDERUPDATES._serialized_start = 3424
+    _ORDERUPDATES._serialized_end = 3475
+    _LISTPOSITIONSREQUEST._serialized_start = 3478
+    _LISTPOSITIONSREQUEST._serialized_end = 3641
+    _LISTPOSITIONSRESPONSE._serialized_start = 3643
+    _LISTPOSITIONSRESPONSE._serialized_end = 3737
+    _POSITIONSFILTER._serialized_start = 3739
+    _POSITIONSFILTER._serialized_end = 3816
+    _LISTALLPOSITIONSREQUEST._serialized_start = 3819
+    _LISTALLPOSITIONSREQUEST._serialized_end = 3983
+    _LISTALLPOSITIONSRESPONSE._serialized_start = 3985
+    _LISTALLPOSITIONSRESPONSE._serialized_end = 4078
+    _POSITIONEDGE._serialized_start = 4080
+    _POSITIONEDGE._serialized_end = 4154
+    _POSITIONCONNECTION._serialized_start = 4157
+    _POSITIONCONNECTION._serialized_end = 4286
+    _OBSERVEPOSITIONSREQUEST._serialized_start = 4288
+    _OBSERVEPOSITIONSREQUEST._serialized_end = 4406
+    _OBSERVEPOSITIONSRESPONSE._serialized_start = 4409
+    _OBSERVEPOSITIONSRESPONSE._serialized_end = 4578
+    _POSITIONSNAPSHOTPAGE._serialized_start = 4580
+    _POSITIONSNAPSHOTPAGE._serialized_end = 4677
+    _POSITIONUPDATES._serialized_start = 4679
+    _POSITIONUPDATES._serialized_end = 4742
+    _LEDGERENTRYFILTER._serialized_start = 4745
+    _LEDGERENTRYFILTER._serialized_end = 5036
+    _AGGREGATEDLEDGERENTRY._serialized_start = 5039
+    _AGGREGATEDLEDGERENTRY._serialized_end = 5768
+    _LISTLEDGERENTRIESREQUEST._serialized_start = 5771
+    _LISTLEDGERENTRIESREQUEST._serialized_end = 6017
+    _EXPORTLEDGERENTRIESREQUEST._serialized_start = 6020
+    _EXPORTLEDGERENTRIESREQUEST._serialized_end = 6191
+    _LISTLEDGERENTRIESRESPONSE._serialized_start = 6193
+    _LISTLEDGERENTRIESRESPONSE._serialized_end = 6311
+    _AGGREGATEDLEDGERENTRIESEDGE._serialized_start = 6313
+    _AGGREGATEDLEDGERENTRIESEDGE._serialized_end = 6426
+    _AGGREGATEDLEDGERENTRIESCONNECTION._serialized_start = 6429
+    _AGGREGATEDLEDGERENTRIESCONNECTION._serialized_end = 6588
+    _LISTBALANCECHANGESREQUEST._serialized_start = 6591
+    _LISTBALANCECHANGESREQUEST._serialized_end = 6834
+    _LISTBALANCECHANGESRESPONSE._serialized_start = 6836
+    _LISTBALANCECHANGESRESPONSE._serialized_end = 6938
+    _GETBALANCEHISTORYREQUEST._serialized_start = 6941
+    _GETBALANCEHISTORYREQUEST._serialized_end = 7241
+    _GETBALANCEHISTORYRESPONSE._serialized_start = 7243
+    _GETBALANCEHISTORYRESPONSE._serialized_end = 7344
+    _AGGREGATEDBALANCEEDGE._serialized_start = 7346
+    _AGGREGATEDBALANCEEDGE._serialized_end = 7449
+    _AGGREGATEDBALANCECONNECTION._serialized_start = 7452
+    _AGGREGATEDBALANCECONNECTION._serialized_end = 7599
+    _ACCOUNTFILTER._serialized_start = 7602
+    _ACCOUNTFILTER._serialized_end = 7760
+    _AGGREGATEDBALANCE._serialized_start = 7763
+    _AGGREGATEDBALANCE._serialized_end = 8052
+    _OBSERVEMARKETSDEPTHREQUEST._serialized_start = 8054
+    _OBSERVEMARKETSDEPTHREQUEST._serialized_end = 8113
+    _OBSERVEMARKETSDEPTHRESPONSE._serialized_start = 8115
+    _OBSERVEMARKETSDEPTHRESPONSE._serialized_end = 8198
+    _OBSERVEMARKETSDEPTHUPDATESREQUEST._serialized_start = 8200
+    _OBSERVEMARKETSDEPTHUPDATESREQUEST._serialized_end = 8266
+    _OBSERVEMARKETSDEPTHUPDATESRESPONSE._serialized_start = 8268
+    _OBSERVEMARKETSDEPTHUPDATESRESPONSE._serialized_end = 8353
+    _OBSERVEMARKETSDATAREQUEST._serialized_start = 8355
+    _OBSERVEMARKETSDATAREQUEST._serialized_end = 8413
+    _OBSERVEMARKETSDATARESPONSE._serialized_start = 8415
+    _OBSERVEMARKETSDATARESPONSE._serialized_end = 8494
+    _GETLATESTMARKETDEPTHREQUEST._serialized_start = 8496
+    _GETLATESTMARKETDEPTHREQUEST._serialized_end = 8607
+    _GETLATESTMARKETDEPTHRESPONSE._serialized_start = 8610
+    _GETLATESTMARKETDEPTHRESPONSE._serialized_end = 8828
+    _LISTLATESTMARKETDATAREQUEST._serialized_start = 8830
+    _LISTLATESTMARKETDATAREQUEST._serialized_end = 8859
+    _LISTLATESTMARKETDATARESPONSE._serialized_start = 8861
+    _LISTLATESTMARKETDATARESPONSE._serialized_end = 8944
+    _GETLATESTMARKETDATAREQUEST._serialized_start = 8946
+    _GETLATESTMARKETDATAREQUEST._serialized_end = 9008
+    _GETLATESTMARKETDATARESPONSE._serialized_start = 9010
+    _GETLATESTMARKETDATARESPONSE._serialized_end = 9090
+    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_start = 9093
+    _GETMARKETDATAHISTORYBYIDREQUEST._serialized_end = 9373
+    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_start = 9375
+    _GETMARKETDATAHISTORYBYIDRESPONSE._serialized_end = 9481
+    _MARKETDATAEDGE._serialized_start = 9483
+    _MARKETDATAEDGE._serialized_end = 9561
+    _MARKETDATACONNECTION._serialized_start = 9564
+    _MARKETDATACONNECTION._serialized_end = 9697
+    _LISTTRANSFERSREQUEST._serialized_start = 9700
+    _LISTTRANSFERSREQUEST._serialized_end = 9909
+    _LISTTRANSFERSRESPONSE._serialized_start = 9911
+    _LISTTRANSFERSRESPONSE._serialized_end = 10001
+    _TRANSFEREDGE._serialized_start = 10003
+    _TRANSFEREDGE._serialized_end = 10087
+    _TRANSFERCONNECTION._serialized_start = 10090
+    _TRANSFERCONNECTION._serialized_end = 10219
+    _GETNETWORKLIMITSREQUEST._serialized_start = 10221
+    _GETNETWORKLIMITSREQUEST._serialized_end = 10246
+    _GETNETWORKLIMITSRESPONSE._serialized_start = 10248
+    _GETNETWORKLIMITSRESPONSE._serialized_end = 10319
+    _LISTCANDLEINTERVALSREQUEST._serialized_start = 10321
+    _LISTCANDLEINTERVALSREQUEST._serialized_end = 10383
+    _INTERVALTOCANDLEID._serialized_start = 10385
+    _INTERVALTOCANDLEID._serialized_end = 10462
+    _LISTCANDLEINTERVALSRESPONSE._serialized_start = 10464
+    _LISTCANDLEINTERVALSRESPONSE._serialized_end = 10581
+    _CANDLE._serialized_start = 10584
+    _CANDLE._serialized_end = 10751
+    _OBSERVECANDLEDATAREQUEST._serialized_start = 10753
+    _OBSERVECANDLEDATAREQUEST._serialized_end = 10813
+    _OBSERVECANDLEDATARESPONSE._serialized_start = 10815
+    _OBSERVECANDLEDATARESPONSE._serialized_end = 10891
+    _LISTCANDLEDATAREQUEST._serialized_start = 10894
+    _LISTCANDLEDATAREQUEST._serialized_end = 11112
+    _LISTCANDLEDATARESPONSE._serialized_start = 11114
+    _LISTCANDLEDATARESPONSE._serialized_end = 11203
+    _CANDLEEDGE._serialized_start = 11205
+    _CANDLEEDGE._serialized_end = 11286
+    _CANDLEDATACONNECTION._serialized_start = 11289
+    _CANDLEDATACONNECTION._serialized_end = 11418
+    _LISTVOTESREQUEST._serialized_start = 11421
+    _LISTVOTESREQUEST._serialized_end = 11619
+    _LISTVOTESRESPONSE._serialized_start = 11621
+    _LISTVOTESRESPONSE._serialized_end = 11695
+    _VOTEEDGE._serialized_start = 11697
+    _VOTEEDGE._serialized_end = 11763
+    _VOTECONNECTION._serialized_start = 11765
+    _VOTECONNECTION._serialized_end = 11886
+    _OBSERVEVOTESREQUEST._serialized_start = 11888
+    _OBSERVEVOTESREQUEST._serialized_end = 12008
+    _OBSERVEVOTESRESPONSE._serialized_start = 12010
+    _OBSERVEVOTESRESPONSE._serialized_end = 12064
+    _LISTERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_start = 12067
+    _LISTERC20MULTISIGSIGNERADDEDBUNDLESREQUEST._serialized_end = 12256
+    _LISTERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_start = 12258
+    _LISTERC20MULTISIGSIGNERADDEDBUNDLESRESPONSE._serialized_end = 12382
+    _ERC20MULTISIGSIGNERADDEDEDGE._serialized_start = 12384
+    _ERC20MULTISIGSIGNERADDEDEDGE._serialized_end = 12500
+    _ERC20MULTISIGSIGNERADDEDBUNDLEEDGE._serialized_start = 12503
+    _ERC20MULTISIGSIGNERADDEDBUNDLEEDGE._serialized_end = 12632
+    _ERC20MULTISIGSIGNERADDEDCONNECTION._serialized_start = 12635
+    _ERC20MULTISIGSIGNERADDEDCONNECTION._serialized_end = 12802
+    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_start = 12805
+    _ERC20MULTISIGSIGNERADDEDBUNDLE._serialized_end = 13011
+    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_start = 13014
+    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESREQUEST._serialized_end = 13205
+    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_start = 13208
+    _LISTERC20MULTISIGSIGNERREMOVEDBUNDLESRESPONSE._serialized_end = 13336
+    _ERC20MULTISIGSIGNERREMOVEDEDGE._serialized_start = 13338
+    _ERC20MULTISIGSIGNERREMOVEDEDGE._serialized_end = 13458
+    _ERC20MULTISIGSIGNERREMOVEDBUNDLEEDGE._serialized_start = 13461
+    _ERC20MULTISIGSIGNERREMOVEDBUNDLEEDGE._serialized_end = 13594
+    _ERC20MULTISIGSIGNERREMOVEDCONNECTION._serialized_start = 13597
+    _ERC20MULTISIGSIGNERREMOVEDCONNECTION._serialized_end = 13768
+    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_start = 13771
+    _ERC20MULTISIGSIGNERREMOVEDBUNDLE._serialized_end = 13979
+    _GETERC20LISTASSETBUNDLEREQUEST._serialized_start = 13981
+    _GETERC20LISTASSETBUNDLEREQUEST._serialized_end = 14045
+    _GETERC20LISTASSETBUNDLERESPONSE._serialized_start = 14048
+    _GETERC20LISTASSETBUNDLERESPONSE._serialized_end = 14206
+    _GETERC20SETASSETLIMITSBUNDLEREQUEST._serialized_start = 14208
+    _GETERC20SETASSETLIMITSBUNDLEREQUEST._serialized_end = 14283
+    _GETERC20SETASSETLIMITSBUNDLERESPONSE._serialized_start = 14286
+    _GETERC20SETASSETLIMITSBUNDLERESPONSE._serialized_end = 14518
+    _GETERC20WITHDRAWALAPPROVALREQUEST._serialized_start = 14520
+    _GETERC20WITHDRAWALAPPROVALREQUEST._serialized_end = 14597
+    _GETERC20WITHDRAWALAPPROVALRESPONSE._serialized_start = 14600
+    _GETERC20WITHDRAWALAPPROVALRESPONSE._serialized_end = 14822
+    _GETLASTTRADEREQUEST._serialized_start = 14824
+    _GETLASTTRADEREQUEST._serialized_end = 14879
+    _GETLASTTRADERESPONSE._serialized_start = 14881
+    _GETLASTTRADERESPONSE._serialized_end = 14938
+    _LISTTRADESREQUEST._serialized_start = 14941
+    _LISTTRADESREQUEST._serialized_end = 15209
+    _LISTTRADESRESPONSE._serialized_start = 15211
+    _LISTTRADESRESPONSE._serialized_end = 15289
+    _TRADECONNECTION._serialized_start = 15291
+    _TRADECONNECTION._serialized_end = 15414
+    _TRADEEDGE._serialized_start = 15416
+    _TRADEEDGE._serialized_end = 15484
+    _OBSERVETRADESREQUEST._serialized_start = 15486
+    _OBSERVETRADESREQUEST._serialized_end = 15568
+    _OBSERVETRADESRESPONSE._serialized_start = 15570
+    _OBSERVETRADESRESPONSE._serialized_end = 15630
+    _GETORACLESPECREQUEST._serialized_start = 15632
+    _GETORACLESPECREQUEST._serialized_end = 15697
+    _GETORACLESPECRESPONSE._serialized_start = 15699
+    _GETORACLESPECRESPONSE._serialized_end = 15773
+    _LISTORACLESPECSREQUEST._serialized_start = 15775
+    _LISTORACLESPECSREQUEST._serialized_end = 15880
+    _LISTORACLESPECSRESPONSE._serialized_start = 15882
+    _LISTORACLESPECSRESPONSE._serialized_end = 15982
+    _LISTORACLEDATAREQUEST._serialized_start = 15985
+    _LISTORACLEDATAREQUEST._serialized_end = 16151
+    _LISTORACLEDATARESPONSE._serialized_start = 16153
+    _LISTORACLEDATARESPONSE._serialized_end = 16249
+    _ORACLESPECEDGE._serialized_start = 16251
+    _ORACLESPECEDGE._serialized_end = 16329
+    _ORACLESPECSCONNECTION._serialized_start = 16332
+    _ORACLESPECSCONNECTION._serialized_end = 16466
+    _ORACLEDATAEDGE._serialized_start = 16468
+    _ORACLEDATAEDGE._serialized_end = 16546
+    _ORACLEDATACONNECTION._serialized_start = 16549
+    _ORACLEDATACONNECTION._serialized_end = 16682
+    _GETMARKETREQUEST._serialized_start = 16684
+    _GETMARKETREQUEST._serialized_end = 16736
+    _GETMARKETRESPONSE._serialized_start = 16738
+    _GETMARKETRESPONSE._serialized_end = 16795
+    _LISTMARKETSREQUEST._serialized_start = 16798
+    _LISTMARKETSREQUEST._serialized_end = 16965
+    _LISTMARKETSRESPONSE._serialized_start = 16967
+    _LISTMARKETSRESPONSE._serialized_end = 17049
+    _MARKETEDGE._serialized_start = 17051
+    _MARKETEDGE._serialized_end = 17121
+    _MARKETCONNECTION._serialized_start = 17123
+    _MARKETCONNECTION._serialized_end = 17248
+    _GETPARTYREQUEST._serialized_start = 17250
+    _GETPARTYREQUEST._serialized_end = 17299
+    _GETPARTYRESPONSE._serialized_start = 17301
+    _GETPARTYRESPONSE._serialized_end = 17354
+    _LISTPARTIESREQUEST._serialized_start = 17356
+    _LISTPARTIESREQUEST._serialized_end = 17464
+    _LISTPARTIESRESPONSE._serialized_start = 17466
+    _LISTPARTIESRESPONSE._serialized_end = 17547
+    _PARTYEDGE._serialized_start = 17549
+    _PARTYEDGE._serialized_end = 17617
+    _PARTYCONNECTION._serialized_start = 17619
+    _PARTYCONNECTION._serialized_end = 17742
+    _ORDEREDGE._serialized_start = 17744
+    _ORDEREDGE._serialized_end = 17812
+    _LISTMARGINLEVELSREQUEST._serialized_start = 17815
+    _LISTMARGINLEVELSREQUEST._serialized_end = 17957
+    _LISTMARGINLEVELSRESPONSE._serialized_start = 17959
+    _LISTMARGINLEVELSRESPONSE._serialized_end = 18057
+    _OBSERVEMARGINLEVELSREQUEST._serialized_start = 18059
+    _OBSERVEMARGINLEVELSREQUEST._serialized_end = 18162
+    _OBSERVEMARGINLEVELSRESPONSE._serialized_start = 18164
+    _OBSERVEMARGINLEVELSRESPONSE._serialized_end = 18250
+    _ORDERCONNECTION._serialized_start = 18252
+    _ORDERCONNECTION._serialized_end = 18375
+    _MARGINEDGE._serialized_start = 18377
+    _MARGINEDGE._serialized_end = 18453
+    _MARGINCONNECTION._serialized_start = 18455
+    _MARGINCONNECTION._serialized_end = 18580
+    _LISTREWARDSREQUEST._serialized_start = 18583
+    _LISTREWARDSREQUEST._serialized_end = 18852
+    _LISTREWARDSRESPONSE._serialized_start = 18854
+    _LISTREWARDSRESPONSE._serialized_end = 18937
+    _REWARDEDGE._serialized_start = 18939
+    _REWARDEDGE._serialized_end = 19009
+    _REWARDSCONNECTION._serialized_start = 19011
+    _REWARDSCONNECTION._serialized_end = 19137
+    _LISTREWARDSUMMARIESREQUEST._serialized_start = 19140
+    _LISTREWARDSUMMARIESREQUEST._serialized_end = 19339
+    _LISTREWARDSUMMARIESRESPONSE._serialized_start = 19341
+    _LISTREWARDSUMMARIESRESPONSE._serialized_end = 19421
+    _REWARDSUMMARYFILTER._serialized_start = 19424
+    _REWARDSUMMARYFILTER._serialized_end = 19601
+    _LISTEPOCHREWARDSUMMARIESREQUEST._serialized_start = 19604
+    _LISTEPOCHREWARDSUMMARIESREQUEST._serialized_end = 19780
+    _LISTEPOCHREWARDSUMMARIESRESPONSE._serialized_start = 19782
+    _LISTEPOCHREWARDSUMMARIESRESPONSE._serialized_end = 19893
+    _EPOCHREWARDSUMMARYCONNECTION._serialized_start = 19896
+    _EPOCHREWARDSUMMARYCONNECTION._serialized_end = 20045
+    _EPOCHREWARDSUMMARYEDGE._serialized_start = 20047
+    _EPOCHREWARDSUMMARYEDGE._serialized_end = 20141
+    _OBSERVEREWARDSREQUEST._serialized_start = 20143
+    _OBSERVEREWARDSREQUEST._serialized_end = 20256
+    _OBSERVEREWARDSRESPONSE._serialized_start = 20258
+    _OBSERVEREWARDSRESPONSE._serialized_end = 20320
+    _GETDEPOSITREQUEST._serialized_start = 20322
+    _GETDEPOSITREQUEST._serialized_end = 20362
+    _GETDEPOSITRESPONSE._serialized_start = 20364
+    _GETDEPOSITRESPONSE._serialized_end = 20425
+    _LISTDEPOSITSREQUEST._serialized_start = 20428
+    _LISTDEPOSITSREQUEST._serialized_end = 20636
+    _LISTDEPOSITSRESPONSE._serialized_start = 20638
+    _LISTDEPOSITSRESPONSE._serialized_end = 20725
+    _DEPOSITEDGE._serialized_start = 20727
+    _DEPOSITEDGE._serialized_end = 20799
+    _DEPOSITSCONNECTION._serialized_start = 20802
+    _DEPOSITSCONNECTION._serialized_end = 20930
+    _GETWITHDRAWALREQUEST._serialized_start = 20932
+    _GETWITHDRAWALREQUEST._serialized_end = 20975
+    _GETWITHDRAWALRESPONSE._serialized_start = 20977
+    _GETWITHDRAWALRESPONSE._serialized_end = 21050
+    _LISTWITHDRAWALSREQUEST._serialized_start = 21053
+    _LISTWITHDRAWALSREQUEST._serialized_end = 21264
+    _LISTWITHDRAWALSRESPONSE._serialized_start = 21266
+    _LISTWITHDRAWALSRESPONSE._serialized_end = 21365
+    _WITHDRAWALEDGE._serialized_start = 21367
+    _WITHDRAWALEDGE._serialized_end = 21445
+    _WITHDRAWALSCONNECTION._serialized_start = 21448
+    _WITHDRAWALSCONNECTION._serialized_end = 21582
+    _GETASSETREQUEST._serialized_start = 21584
+    _GETASSETREQUEST._serialized_end = 21633
+    _GETASSETRESPONSE._serialized_start = 21635
+    _GETASSETRESPONSE._serialized_end = 21688
+    _LISTASSETSREQUEST._serialized_start = 21691
+    _LISTASSETSREQUEST._serialized_end = 21836
+    _LISTASSETSRESPONSE._serialized_start = 21838
+    _LISTASSETSRESPONSE._serialized_end = 21917
+    _ASSETEDGE._serialized_start = 21919
+    _ASSETEDGE._serialized_end = 21987
+    _ASSETSCONNECTION._serialized_start = 21989
+    _ASSETSCONNECTION._serialized_end = 22113
+    _LISTLIQUIDITYPROVISIONSREQUEST._serialized_start = 22116
+    _LISTLIQUIDITYPROVISIONSREQUEST._serialized_end = 22405
+    _LISTLIQUIDITYPROVISIONSRESPONSE._serialized_start = 22408
+    _LISTLIQUIDITYPROVISIONSRESPONSE._serialized_end = 22540
+    _LIQUIDITYPROVISIONSEDGE._serialized_start = 22542
+    _LIQUIDITYPROVISIONSEDGE._serialized_end = 22637
+    _LIQUIDITYPROVISIONSCONNECTION._serialized_start = 22640
+    _LIQUIDITYPROVISIONSCONNECTION._serialized_end = 22791
+    _OBSERVELIQUIDITYPROVISIONSREQUEST._serialized_start = 22794
+    _OBSERVELIQUIDITYPROVISIONSREQUEST._serialized_end = 22922
+    _OBSERVELIQUIDITYPROVISIONSRESPONSE._serialized_start = 22924
+    _OBSERVELIQUIDITYPROVISIONSRESPONSE._serialized_end = 23037
+    _GETGOVERNANCEDATAREQUEST._serialized_start = 23040
+    _GETGOVERNANCEDATAREQUEST._serialized_end = 23169
+    _GETGOVERNANCEDATARESPONSE._serialized_start = 23171
+    _GETGOVERNANCEDATARESPONSE._serialized_end = 23240
+    _LISTGOVERNANCEDATAREQUEST._serialized_start = 23243
+    _LISTGOVERNANCEDATAREQUEST._serialized_end = 23877
+    _LISTGOVERNANCEDATAREQUEST_TYPE._serialized_start = 23597
+    _LISTGOVERNANCEDATAREQUEST_TYPE._serialized_end = 23780
+    _LISTGOVERNANCEDATARESPONSE._serialized_start = 23879
+    _LISTGOVERNANCEDATARESPONSE._serialized_end = 23982
+    _GOVERNANCEDATAEDGE._serialized_start = 23984
+    _GOVERNANCEDATAEDGE._serialized_end = 24070
+    _GOVERNANCEDATACONNECTION._serialized_start = 24073
+    _GOVERNANCEDATACONNECTION._serialized_end = 24214
+    _OBSERVEGOVERNANCEREQUEST._serialized_start = 24216
+    _OBSERVEGOVERNANCEREQUEST._serialized_end = 24287
+    _OBSERVEGOVERNANCERESPONSE._serialized_start = 24289
+    _OBSERVEGOVERNANCERESPONSE._serialized_end = 24358
+    _LISTDELEGATIONSREQUEST._serialized_start = 24361
+    _LISTDELEGATIONSREQUEST._serialized_end = 24598
+    _LISTDELEGATIONSRESPONSE._serialized_start = 24600
+    _LISTDELEGATIONSRESPONSE._serialized_end = 24699
+    _DELEGATIONEDGE._serialized_start = 24701
+    _DELEGATIONEDGE._serialized_end = 24779
+    _DELEGATIONSCONNECTION._serialized_start = 24782
+    _DELEGATIONSCONNECTION._serialized_end = 24916
+    _OBSERVEDELEGATIONSREQUEST._serialized_start = 24918
+    _OBSERVEDELEGATIONSREQUEST._serialized_end = 25032
+    _OBSERVEDELEGATIONSRESPONSE._serialized_start = 25034
+    _OBSERVEDELEGATIONSRESPONSE._serialized_end = 25112
+    _NODEBASIC._serialized_start = 25115
+    _NODEBASIC._serialized_end = 25388
+    _GETNETWORKDATAREQUEST._serialized_start = 25390
+    _GETNETWORKDATAREQUEST._serialized_end = 25413
+    _GETNETWORKDATARESPONSE._serialized_start = 25415
+    _GETNETWORKDATARESPONSE._serialized_end = 25484
+    _GETNODEREQUEST._serialized_start = 25486
+    _GETNODEREQUEST._serialized_end = 25523
+    _GETNODERESPONSE._serialized_start = 25525
+    _GETNODERESPONSE._serialized_end = 25574
+    _LISTNODESREQUEST._serialized_start = 25577
+    _LISTNODESREQUEST._serialized_end = 25724
+    _LISTNODESRESPONSE._serialized_start = 25726
+    _LISTNODESRESPONSE._serialized_end = 25801
+    _NODEEDGE._serialized_start = 25803
+    _NODEEDGE._serialized_end = 25869
+    _NODESCONNECTION._serialized_start = 25871
+    _NODESCONNECTION._serialized_end = 25993
+    _LISTNODESIGNATURESREQUEST._serialized_start = 25996
+    _LISTNODESIGNATURESREQUEST._serialized_end = 26125
+    _LISTNODESIGNATURESRESPONSE._serialized_start = 26127
+    _LISTNODESIGNATURESRESPONSE._serialized_end = 26230
+    _NODESIGNATUREEDGE._serialized_start = 26232
+    _NODESIGNATUREEDGE._serialized_end = 26328
+    _NODESIGNATURESCONNECTION._serialized_start = 26331
+    _NODESIGNATURESCONNECTION._serialized_end = 26471
+    _GETEPOCHREQUEST._serialized_start = 26473
+    _GETEPOCHREQUEST._serialized_end = 26518
+    _GETEPOCHRESPONSE._serialized_start = 26520
+    _GETEPOCHRESPONSE._serialized_end = 26573
+    _ESTIMATEFEEREQUEST._serialized_start = 26575
+    _ESTIMATEFEEREQUEST._serialized_end = 26681
+    _ESTIMATEFEERESPONSE._serialized_start = 26683
+    _ESTIMATEFEERESPONSE._serialized_end = 26733
+    _ESTIMATEMARGINREQUEST._serialized_start = 26736
+    _ESTIMATEMARGINREQUEST._serialized_end = 26961
+    _ESTIMATEMARGINRESPONSE._serialized_start = 26963
+    _ESTIMATEMARGINRESPONSE._serialized_end = 27048
+    _LISTNETWORKPARAMETERSREQUEST._serialized_start = 27050
+    _LISTNETWORKPARAMETERSREQUEST._serialized_end = 27161
+    _LISTNETWORKPARAMETERSRESPONSE._serialized_start = 27163
+    _LISTNETWORKPARAMETERSRESPONSE._serialized_end = 27286
+    _GETNETWORKPARAMETERREQUEST._serialized_start = 27288
+    _GETNETWORKPARAMETERREQUEST._serialized_end = 27339
+    _GETNETWORKPARAMETERRESPONSE._serialized_start = 27341
+    _GETNETWORKPARAMETERRESPONSE._serialized_end = 27439
+    _NETWORKPARAMETEREDGE._serialized_start = 27441
+    _NETWORKPARAMETEREDGE._serialized_end = 27531
+    _NETWORKPARAMETERCONNECTION._serialized_start = 27534
+    _NETWORKPARAMETERCONNECTION._serialized_end = 27679
+    _CHECKPOINT._serialized_start = 27681
+    _CHECKPOINT._serialized_end = 27771
+    _LISTCHECKPOINTSREQUEST._serialized_start = 27773
+    _LISTCHECKPOINTSREQUEST._serialized_end = 27878
+    _LISTCHECKPOINTSRESPONSE._serialized_start = 27880
+    _LISTCHECKPOINTSRESPONSE._serialized_end = 27979
+    _CHECKPOINTEDGE._serialized_start = 27981
+    _CHECKPOINTEDGE._serialized_end = 28070
+    _CHECKPOINTSCONNECTION._serialized_start = 28073
+    _CHECKPOINTSCONNECTION._serialized_end = 28207
+    _GETSTAKEREQUEST._serialized_start = 28210
+    _GETSTAKEREQUEST._serialized_end = 28340
+    _GETSTAKERESPONSE._serialized_start = 28343
+    _GETSTAKERESPONSE._serialized_end = 28491
+    _STAKELINKINGEDGE._serialized_start = 28493
+    _STAKELINKINGEDGE._serialized_end = 28585
+    _STAKESCONNECTION._serialized_start = 28588
+    _STAKESCONNECTION._serialized_end = 28719
+    _GETRISKFACTORSREQUEST._serialized_start = 28721
+    _GETRISKFACTORSREQUEST._serialized_end = 28778
+    _GETRISKFACTORSRESPONSE._serialized_start = 28780
+    _GETRISKFACTORSRESPONSE._serialized_end = 28855
+    _OBSERVEEVENTBUSREQUEST._serialized_start = 28858
+    _OBSERVEEVENTBUSREQUEST._serialized_end = 29019
+    _OBSERVEEVENTBUSRESPONSE._serialized_start = 29021
+    _OBSERVEEVENTBUSRESPONSE._serialized_end = 29096
+    _OBSERVELEDGERMOVEMENTSREQUEST._serialized_start = 29098
+    _OBSERVELEDGERMOVEMENTSREQUEST._serialized_end = 29129
+    _OBSERVELEDGERMOVEMENTSRESPONSE._serialized_start = 29131
+    _OBSERVELEDGERMOVEMENTSRESPONSE._serialized_end = 29226
+    _LISTKEYROTATIONSREQUEST._serialized_start = 29229
+    _LISTKEYROTATIONSREQUEST._serialized_end = 29377
+    _LISTKEYROTATIONSRESPONSE._serialized_start = 29379
+    _LISTKEYROTATIONSRESPONSE._serialized_end = 29475
+    _KEYROTATIONEDGE._serialized_start = 29477
+    _KEYROTATIONEDGE._serialized_end = 29567
+    _KEYROTATIONCONNECTION._serialized_start = 29570
+    _KEYROTATIONCONNECTION._serialized_end = 29705
+    _LISTETHEREUMKEYROTATIONSREQUEST._serialized_start = 29708
+    _LISTETHEREUMKEYROTATIONSREQUEST._serialized_end = 29864
+    _LISTETHEREUMKEYROTATIONSRESPONSE._serialized_start = 29866
+    _LISTETHEREUMKEYROTATIONSRESPONSE._serialized_end = 29986
+    _ETHEREUMKEYROTATIONSCONNECTION._serialized_start = 29989
+    _ETHEREUMKEYROTATIONSCONNECTION._serialized_end = 30141
+    _ETHEREUMKEYROTATIONEDGE._serialized_start = 30143
+    _ETHEREUMKEYROTATIONEDGE._serialized_end = 30249
+    _GETVEGATIMEREQUEST._serialized_start = 30251
+    _GETVEGATIMEREQUEST._serialized_end = 30271
+    _GETVEGATIMERESPONSE._serialized_start = 30273
+    _GETVEGATIMERESPONSE._serialized_end = 30324
+    _DATERANGE._serialized_start = 30327
+    _DATERANGE._serialized_end = 30464
+    _GETPROTOCOLUPGRADESTATUSREQUEST._serialized_start = 30466
+    _GETPROTOCOLUPGRADESTATUSREQUEST._serialized_end = 30499
+    _GETPROTOCOLUPGRADESTATUSRESPONSE._serialized_start = 30501
+    _GETPROTOCOLUPGRADESTATUSRESPONSE._serialized_end = 30557
+    _LISTPROTOCOLUPGRADEPROPOSALSREQUEST._serialized_start = 30560
+    _LISTPROTOCOLUPGRADEPROPOSALSREQUEST._serialized_end = 30819
+    _LISTPROTOCOLUPGRADEPROPOSALSRESPONSE._serialized_start = 30822
+    _LISTPROTOCOLUPGRADEPROPOSALSRESPONSE._serialized_end = 30974
+    _PROTOCOLUPGRADEPROPOSALCONNECTION._serialized_start = 30977
+    _PROTOCOLUPGRADEPROPOSALCONNECTION._serialized_end = 31136
+    _PROTOCOLUPGRADEPROPOSALEDGE._serialized_start = 31138
+    _PROTOCOLUPGRADEPROPOSALEDGE._serialized_end = 31249
+    _LISTCORESNAPSHOTSREQUEST._serialized_start = 31251
+    _LISTCORESNAPSHOTSREQUEST._serialized_end = 31358
+    _LISTCORESNAPSHOTSRESPONSE._serialized_start = 31360
+    _LISTCORESNAPSHOTSRESPONSE._serialized_end = 31467
+    _CORESNAPSHOTCONNECTION._serialized_start = 31470
+    _CORESNAPSHOTCONNECTION._serialized_end = 31607
+    _CORESNAPSHOTEDGE._serialized_start = 31609
+    _CORESNAPSHOTEDGE._serialized_end = 31705
+    _HISTORYSEGMENT._serialized_start = 31708
+    _HISTORYSEGMENT._serialized_end = 31965
+    _GETMOSTRECENTNETWORKHISTORYSEGMENTREQUEST._serialized_start = 31967
+    _GETMOSTRECENTNETWORKHISTORYSEGMENTREQUEST._serialized_end = 32010
+    _GETMOSTRECENTNETWORKHISTORYSEGMENTRESPONSE._serialized_start = 32013
+    _GETMOSTRECENTNETWORKHISTORYSEGMENTRESPONSE._serialized_end = 32154
+    _LISTALLNETWORKHISTORYSEGMENTSREQUEST._serialized_start = 32156
+    _LISTALLNETWORKHISTORYSEGMENTSREQUEST._serialized_end = 32194
+    _LISTALLNETWORKHISTORYSEGMENTSRESPONSE._serialized_start = 32196
+    _LISTALLNETWORKHISTORYSEGMENTSRESPONSE._serialized_end = 32296
+    _GETACTIVENETWORKHISTORYPEERADDRESSESREQUEST._serialized_start = 32298
+    _GETACTIVENETWORKHISTORYPEERADDRESSESREQUEST._serialized_end = 32343
+    _GETACTIVENETWORKHISTORYPEERADDRESSESRESPONSE._serialized_start = 32345
+    _GETACTIVENETWORKHISTORYPEERADDRESSESRESPONSE._serialized_end = 32426
+    _GETNETWORKHISTORYSTATUSREQUEST._serialized_start = 32428
+    _GETNETWORKHISTORYSTATUSREQUEST._serialized_end = 32460
+    _GETNETWORKHISTORYSTATUSRESPONSE._serialized_start = 32463
+    _GETNETWORKHISTORYSTATUSRESPONSE._serialized_end = 32639
+    _GETNETWORKHISTORYBOOTSTRAPPEERSREQUEST._serialized_start = 32641
+    _GETNETWORKHISTORYBOOTSTRAPPEERSREQUEST._serialized_end = 32681
+    _GETNETWORKHISTORYBOOTSTRAPPEERSRESPONSE._serialized_start = 32683
+    _GETNETWORKHISTORYBOOTSTRAPPEERSRESPONSE._serialized_end = 32765
+    _EXPORTNETWORKHISTORYREQUEST._serialized_start = 32768
+    _EXPORTNETWORKHISTORYREQUEST._serialized_end = 32901
+    _LISTENTITIESREQUEST._serialized_start = 32903
+    _LISTENTITIESREQUEST._serialized_end = 32972
+    _LISTENTITIESRESPONSE._serialized_start = 32975
+    _LISTENTITIESRESPONSE._serialized_end = 34684
+    _PINGREQUEST._serialized_start = 34686
+    _PINGREQUEST._serialized_end = 34699
+    _PINGRESPONSE._serialized_start = 34701
+    _PINGRESPONSE._serialized_end = 34715
+    _ORDERINFO._serialized_start = 34718
+    _ORDERINFO._serialized_end = 34853
+    _ESTIMATEPOSITIONREQUEST._serialized_start = 34856
+    _ESTIMATEPOSITIONREQUEST._serialized_end = 35086
+    _ESTIMATEPOSITIONRESPONSE._serialized_start = 35089
+    _ESTIMATEPOSITIONRESPONSE._serialized_end = 35244
+    _MARGINESTIMATE._serialized_start = 35246
+    _MARGINESTIMATE._serialized_end = 35362
+    _LIQUIDATIONESTIMATE._serialized_start = 35365
+    _LIQUIDATIONESTIMATE._serialized_end = 35516
+    _LIQUIDATIONPRICE._serialized_start = 35519
+    _LIQUIDATIONPRICE._serialized_end = 35681
+    _TRADINGDATASERVICE._serialized_start = 36565
+    _TRADINGDATASERVICE._serialized_end = 47465
 # @@protoc_insertion_point(module_scope)

@@ -45,6 +45,8 @@ def num_to_padded_int(to_convert: float, decimals: int) -> float:
 
 
 def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
+    if not to_convert:
+        return 0
     to_convert = int(to_convert) if isinstance(to_convert, str) else to_convert
     return float(to_convert) / 10**decimals
 

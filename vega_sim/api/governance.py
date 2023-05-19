@@ -66,12 +66,17 @@ def _default_price_monitoring_parameters() -> (
     )
 
 
-def get_blockchain_time(data_client: vac.VegaTradingDataClientV2) -> int:
-    """Returns blockchain time in seconds since the epoch"""
+def get_blockchain_time(
+    data_client: vac.VegaTradingDataClientV2, in_seconds: bool = False
+) -> int:
+    """Returns blockchain time in nanoseconds or seconds since the epoch
+
+    Args:
+        in_seconds: bool, if true, return time in seconds rather than nanoseconds"""
     blockchain_time = data_client.GetVegaTime(
         data_node_protos_v2.trading_data.GetVegaTimeRequest()
     ).timestamp
-    return int(blockchain_time / 1e9)
+    return blockchain_time if not in_seconds else int(blockchain_time / 1e9)
 
 
 def openoracle_oracle(
@@ -141,19 +146,21 @@ def vega_timestamp_termination_oracle(
 def propose_market_from_config(
     data_client: vac.VegaTradingDataClientV2,
     wallet: Wallet,
-    proposal_wallet_name: str,
+    proposal_key_name: str,
     market_config: MarketConfig,
     closing_time: str,
     enactment_time: str,
     time_forward_fn: Optional[Callable[[], None]] = None,
     governance_asset: Optional[str] = "VOTE",
-    proposal_key_name: Optional[str] = None,
+    proposal_wallet_name: Optional[str] = None,
 ) -> str:
     # Make sure Vega network has governance asset
     vote_asset_id = find_asset_id(
         governance_asset, raise_on_missing=True, data_client=data_client
     )
-    pub_key = wallet.public_key(proposal_wallet_name, proposal_key_name)
+    pub_key = wallet.public_key(
+        wallet_name=proposal_wallet_name, name=proposal_key_name
+    )
 
     # Request accounts for party and check governance asset balance
     party_accounts = data_raw.list_accounts(
@@ -195,7 +202,7 @@ def propose_market_from_config(
 
 def propose_future_market(
     market_name: str,
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     settlement_asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -219,7 +226,7 @@ def propose_future_market(
     ] = None,
     settlement_price_decimals: Optional[int] = 2,
     lp_price_range: float = 1,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -275,7 +282,7 @@ def propose_future_market(
     vote_asset_id = find_asset_id(
         governance_asset, raise_on_missing=True, data_client=data_client
     )
-    pub_key = wallet.public_key(wallet_name, key_name)
+    pub_key = wallet.public_key(wallet_name=wallet_name, name=key_name)
 
     # Request accounts for party and check governance asset balance
     party_accounts = data_raw.list_accounts(
@@ -374,9 +381,9 @@ def propose_future_market(
             ),
             lp_price_range=str(lp_price_range),
             decimal_places=price_decimals,
-            position_decimal_places=0
-            if position_decimals is None
-            else position_decimals,
+            position_decimal_places=(
+                0 if position_decimals is None else position_decimals
+            ),
             metadata=[
                 f"base:{future_asset}",
             ],
@@ -389,6 +396,8 @@ def propose_future_market(
             ),
             price_monitoring_parameters=price_monitoring_parameters,
             log_normal=risk_model,
+            linear_slippage_factor="0.001",
+            quadratic_slippage_factor="0",
         ),
     )
 
@@ -413,16 +422,16 @@ def propose_future_market(
 def propose_network_parameter_change(
     parameter: str,
     value: str,
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClientV2] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ):
     network_param_update = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name, key_name),
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -444,17 +453,17 @@ def propose_network_parameter_change(
 
 def propose_market_update(
     market_id: str,
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     market_update: vega_protos.governance.UpdateMarketConfiguration,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     data_client: Optional[vac.VegaTradingDataClientV2] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ) -> str:
     network_param_update = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name, key_name),
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -465,6 +474,7 @@ def propose_market_update(
 
     return _make_and_wait_for_proposal(
         wallet_name=wallet_name,
+        key_name=key_name,
         wallet=wallet,
         proposal=network_param_update,
         data_client=data_client,
@@ -473,23 +483,23 @@ def propose_market_update(
 
 
 def approve_proposal(
-    wallet_name: str,
+    key_name: str,
     proposal_id: str,
     wallet: Wallet,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ):
     wallet.submit_transaction(
         transaction=commands_protos.commands.VoteSubmission(
             value=vega_protos.governance.Vote.Value.VALUE_YES, proposal_id=proposal_id
         ),
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="vote_submission",
         key_name=key_name,
     )
 
 
 def propose_asset(
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     name: str,
     symbol: str,
@@ -501,7 +511,7 @@ def propose_asset(
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ) -> str:
     asset_detail = vega_protos.assets.AssetDetails(
         name=name,
@@ -513,7 +523,7 @@ def propose_asset(
         ),
     )
     proposal = _build_generic_proposal(
-        pub_key=wallet.public_key(wallet_name, key_name),
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
         enactment_time=enactment_time,
@@ -521,7 +531,7 @@ def propose_asset(
     proposal.terms.validation_timestamp = (
         validation_time
         if validation_time is not None
-        else get_blockchain_time(data_client) + 10
+        else get_blockchain_time(data_client, in_seconds=True) + 10
     )
 
     proposal.terms.new_asset.CopyFrom(
@@ -553,7 +563,7 @@ def _build_generic_proposal(
                 " ignoring values for those which were"
             )
 
-        blockchain_time_seconds = get_blockchain_time(data_client)
+        blockchain_time_seconds = get_blockchain_time(data_client, in_seconds=True)
 
         closing_time = blockchain_time_seconds + 172800
         enactment_time = blockchain_time_seconds + 172900
@@ -574,16 +584,16 @@ def _build_generic_proposal(
 
 
 def _make_and_wait_for_proposal(
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     proposal: commands_protos.commands.ProposalSubmission,
     data_client: vac.VegaTradingDataClientV2,
     time_forward_fn: Optional[Callable[[], None]] = None,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ) -> ProposalSubmission:
     wallet.submit_transaction(
         transaction=proposal,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="proposal_submission",
         key_name=key_name,
     )
@@ -616,11 +626,11 @@ def _make_and_wait_for_proposal(
 
 
 def settle_oracle(
-    wallet_name: str,
+    key_name: str,
     wallet: Wallet,
     settlement_price: float,
     oracle_name: str,
-    key_name: Optional[str] = None,
+    wallet_name: Optional[str] = None,
 ) -> None:
     """
     Settle the market and send settlement price.
@@ -637,7 +647,7 @@ def settle_oracle(
         oracle_name:
             str, the name of the oracle to settle
         key_name:
-            Optional[str], key name stored in metadata. Defaults to None.
+            str, key name stored in metadata.
 
     """
 
@@ -652,7 +662,7 @@ def settle_oracle(
 
     wallet.submit_transaction(
         transaction=oracle_submission,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="oracle_data_submission",
         key_name=key_name,
     )
@@ -668,7 +678,7 @@ def settle_oracle(
 
     wallet.submit_transaction(
         transaction=oracle_submission,
-        name=wallet_name,
+        wallet_name=wallet_name,
         transaction_type="oracle_data_submission",
         key_name=key_name,
     )

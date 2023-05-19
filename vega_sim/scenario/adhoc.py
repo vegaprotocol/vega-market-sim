@@ -7,7 +7,6 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.registry import SCENARIOS
 from vega_sim.scenario.scenario import Scenario
-from vega_sim.service import VegaService
 
 
 def main():
@@ -52,7 +51,6 @@ def main():
             ),
             retain_log_files=True,
             use_full_vega_wallet=False,
-            start_order_feed=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
@@ -66,7 +64,6 @@ def main():
             network=Network[args.network],
             run_with_wallet=True,
             run_with_console=True,
-            start_order_feed=False,
         ) as vega:
             scenario.run_iteration(
                 vega=vega,

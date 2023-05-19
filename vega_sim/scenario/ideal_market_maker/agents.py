@@ -134,7 +134,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega)
-        self.vega.create_wallet(self.terminate_wallet_name, self.terminate_wallet_pass)
+        self.vega.create_key(self.terminate_wallet_name)
 
         # Faucet vega tokens
         self.vega.wait_for_datanode_sync()
@@ -293,7 +293,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
 
         self.num_buyMO, self.num_sellMO = self.num_MarketOrders()
@@ -784,7 +784,7 @@ class OptimalLiquidityProvider(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.OptimalStrategy(current_position)
 
         self.vega.submit_simple_liquidity(
@@ -855,7 +855,7 @@ class InformedTrader(StateAgentWithWallet):
             market_id=self.market_id,
             key_name=self.key_name,
         )
-        current_position = int(position[0].open_volume) if position else 0
+        current_position = int(position.open_volume) if position is not None else 0
         trade_side = (
             vega_protos.vega.Side.SIDE_BUY
             if current_position < 0

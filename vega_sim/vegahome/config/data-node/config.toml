@@ -10,7 +10,9 @@ UlimitNOFile = 8192
   StreamRetries = 3
   CoreNodeIP = "localhost"
   CoreNodeGRPCPort = "TO_BE_SET"
-
+  [API.RateLimit]
+    Enabled = false
+    
 [Accounts]
   Level = "Info"
 
@@ -58,179 +60,6 @@ UlimitNOFile = 8192
 [Risk]
   Level = "Info"
 
-[Storage]
-  Level = "Info"
-  Timeout = "5s"
-  LogPositionStoreDebug = false
-  [Storage.Accounts]
-    SyncWrites = true
-    TableLoadingMode = "MemoryMap"
-    ValueLogLoadingMode = "MemoryMap"
-    NumVersionsToKeep = 1
-    MaxTableSize = 67108864
-    LevelSizeMultiplier = 2
-    MaxLevels = 10
-    ValueThreshold = 16
-    NumMemtables = 1
-    NumLevelZeroTables = 1
-    NumLevelZeroTablesStall = 2
-    LevelOneSize = 268435456
-    ValueLogFileSize = 1073741823
-    ValueLogMaxEntries = 2500000
-    NumCompactors = 2
-    CompactL0OnClose = true
-    ReadOnly = false
-    Truncate = false
-    LogRotatesToFlush = 2
-    Compression = 1
-    EventLogging = true
-    BlockSize = 4096
-    BloomFalsePositive = 0.01
-    KeepL0InMemory = false
-    MaxCacheSize = 16777216
-    VerifyValueChecksum = false
-    ChecksumVerificationMode = 0
-  [Storage.Candles]
-    SyncWrites = true
-    TableLoadingMode = "MemoryMap"
-    ValueLogLoadingMode = "MemoryMap"
-    NumVersionsToKeep = 1
-    MaxTableSize = 67108864
-    LevelSizeMultiplier = 2
-    MaxLevels = 10
-    ValueThreshold = 16
-    NumMemtables = 1
-    NumLevelZeroTables = 1
-    NumLevelZeroTablesStall = 2
-    LevelOneSize = 268435456
-    ValueLogFileSize = 1073741823
-    ValueLogMaxEntries = 2500000
-    NumCompactors = 2
-    CompactL0OnClose = true
-    ReadOnly = false
-    Truncate = false
-    LogRotatesToFlush = 2
-    Compression = 1
-    EventLogging = true
-    BlockSize = 4096
-    BloomFalsePositive = 0.01
-    KeepL0InMemory = false
-    MaxCacheSize = 16777216
-    VerifyValueChecksum = false
-    ChecksumVerificationMode = 0
-  [Storage.Checkpoints]
-    SyncWrites = true
-    TableLoadingMode = "MemoryMap"
-    ValueLogLoadingMode = "MemoryMap"
-    NumVersionsToKeep = 1
-    MaxTableSize = 67108864
-    LevelSizeMultiplier = 2
-    MaxLevels = 10
-    ValueThreshold = 16
-    NumMemtables = 1
-    NumLevelZeroTables = 1
-    NumLevelZeroTablesStall = 2
-    LevelOneSize = 268435456
-    ValueLogFileSize = 1073741823
-    ValueLogMaxEntries = 2500000
-    NumCompactors = 2
-    CompactL0OnClose = true
-    ReadOnly = false
-    Truncate = false
-    LogRotatesToFlush = 2
-    Compression = 1
-    EventLogging = true
-    BlockSize = 4096
-    BloomFalsePositive = 0.01
-    KeepL0InMemory = false
-    MaxCacheSize = 16777216
-    VerifyValueChecksum = false
-    ChecksumVerificationMode = 0
-  [Storage.Markets]
-    SyncWrites = true
-    TableLoadingMode = "MemoryMap"
-    ValueLogLoadingMode = "MemoryMap"
-    NumVersionsToKeep = 1
-    MaxTableSize = 67108864
-    LevelSizeMultiplier = 2
-    MaxLevels = 10
-    ValueThreshold = 16
-    NumMemtables = 1
-    NumLevelZeroTables = 1
-    NumLevelZeroTablesStall = 2
-    LevelOneSize = 268435456
-    ValueLogFileSize = 1073741823
-    ValueLogMaxEntries = 2500000
-    NumCompactors = 2
-    CompactL0OnClose = true
-    ReadOnly = false
-    Truncate = false
-    LogRotatesToFlush = 2
-    Compression = 1
-    EventLogging = true
-    BlockSize = 4096
-    BloomFalsePositive = 0.01
-    KeepL0InMemory = false
-    MaxCacheSize = 16777216
-    VerifyValueChecksum = false
-    ChecksumVerificationMode = 0
-  [Storage.Orders]
-    SyncWrites = true
-    TableLoadingMode = "MemoryMap"
-    ValueLogLoadingMode = "MemoryMap"
-    NumVersionsToKeep = 1
-    MaxTableSize = 67108864
-    LevelSizeMultiplier = 2
-    MaxLevels = 10
-    ValueThreshold = 16
-    NumMemtables = 1
-    NumLevelZeroTables = 1
-    NumLevelZeroTablesStall = 2
-    LevelOneSize = 268435456
-    ValueLogFileSize = 1073741823
-    ValueLogMaxEntries = 2500000
-    NumCompactors = 2
-    CompactL0OnClose = true
-    ReadOnly = false
-    Truncate = false
-    LogRotatesToFlush = 2
-    Compression = 1
-    EventLogging = true
-    BlockSize = 4096
-    BloomFalsePositive = 0.01
-    KeepL0InMemory = false
-    MaxCacheSize = 16777216
-    VerifyValueChecksum = false
-    ChecksumVerificationMode = 0
-  [Storage.Trades]
-    SyncWrites = true
-    TableLoadingMode = "MemoryMap"
-    ValueLogLoadingMode = "MemoryMap"
-    NumVersionsToKeep = 1
-    MaxTableSize = 67108864
-    LevelSizeMultiplier = 2
-    MaxLevels = 10
-    ValueThreshold = 16
-    NumMemtables = 1
-    NumLevelZeroTables = 1
-    NumLevelZeroTablesStall = 2
-    LevelOneSize = 268435456
-    ValueLogFileSize = 1073741823
-    ValueLogMaxEntries = 2500000
-    NumCompactors = 2
-    CompactL0OnClose = true
-    ReadOnly = false
-    Truncate = false
-    LogRotatesToFlush = 2
-    Compression = 1
-    EventLogging = true
-    BlockSize = 4096
-    BloomFalsePositive = 0.01
-    KeepL0InMemory = false
-    MaxCacheSize = 16777216
-    VerifyValueChecksum = false
-    ChecksumVerificationMode = 0
-
 [Trades]
   Level = "Info"
   PageSizeDefault = 200
@@ -244,19 +73,19 @@ UlimitNOFile = 8192
   Timeout = "5s"
   SubscriptionRetries = 3
   GraphQLPlaygroundEnabled = true
+  Port = "TO_BE_SET"
+  IP = "0.0.0.0"
   [Gateway.Node]
     Port = "TO_BE_SET"
     IP = "0.0.0.0"
   [Gateway.GraphQL]
-    Port = "TO_BE_SET"
-    IP = "0.0.0.0"
     Enabled = true
     ComplexityLimit = 0
   [Gateway.REST]
-    Port = "TO_BE_SET"
-    IP = "0.0.0.0"
     Enabled = true
     APMEnabled = true
+  [Gateway.RateLimits]
+    Enabled = false
 
 [Metrics]
   Level = "Info"
@@ -309,7 +138,7 @@ UlimitNOFile = 8192
 
 [Pprof]
   Level = "Info"
-  Enabled = false
+  Enabled = true
   Port = "TO_BE_SET"
   ProfilesDir = "/tmp"
   BlockProfileRate = 0
@@ -327,5 +156,5 @@ UlimitNOFile = 8192
     Database = "vega"
     UseTransactions = false
 
-[DeHistory]
+[NetworkHistory]
   Enabled = false

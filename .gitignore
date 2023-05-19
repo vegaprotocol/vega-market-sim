@@ -132,6 +132,8 @@ dmypy.json
 .DS_Store
 .vscode/*
 
+*.jpg
+*.html
 vega_sim/bin/*
 rl_logs/
 numerical_results/

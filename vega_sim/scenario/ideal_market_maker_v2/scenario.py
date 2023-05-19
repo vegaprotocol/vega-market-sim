@@ -129,10 +129,8 @@ class IdealMarketMaker(Scenario):
         self.price_process = price_process
 
         market_maker = OptimalMarketMaker(
-            wallet_name=MM_WALLET.name,
-            wallet_pass=MM_WALLET.passphrase,
-            terminate_wallet_name=TERMINATE_WALLET.name,
-            terminate_wallet_pass=TERMINATE_WALLET.passphrase,
+            key_name=MM_WALLET.name,
+            terminate_key_name=TERMINATE_WALLET.name,
             initial_asset_mint=self.initial_asset_mint,
             price_process=price_process,
             spread=self.spread,
@@ -155,8 +153,7 @@ class IdealMarketMaker(Scenario):
         )
 
         trader = MarketOrderTrader(
-            wallet_name=TRADER_WALLET.name,
-            wallet_pass=TRADER_WALLET.passphrase,
+            key_name=TRADER_WALLET.name,
             initial_asset_mint=self.initial_asset_mint,
             market_name=market_name,
             asset_name=asset_name,
@@ -168,8 +165,7 @@ class IdealMarketMaker(Scenario):
         )
 
         background_market = BackgroundMarket(
-            wallet_name=BACKGROUND_MARKET.name,
-            wallet_pass=BACKGROUND_MARKET.passphrase,
+            key_name=BACKGROUND_MARKET.name,
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
@@ -183,8 +179,7 @@ class IdealMarketMaker(Scenario):
         )
 
         auctionpass1 = OpenAuctionPass(
-            wallet_name=AUCTION1_WALLET.name,
-            wallet_pass=AUCTION1_WALLET.passphrase,
+            key_name=AUCTION1_WALLET.name,
             side="SIDE_BUY",
             initial_asset_mint=self.initial_asset_mint,
             initial_price=self.initial_price
@@ -197,8 +192,7 @@ class IdealMarketMaker(Scenario):
         )
 
         auctionpass2 = OpenAuctionPass(
-            wallet_name=AUCTION2_WALLET.name,
-            wallet_pass=AUCTION2_WALLET.passphrase,
+            key_name=AUCTION2_WALLET.name,
             side="SIDE_SELL",
             initial_asset_mint=self.initial_asset_mint,
             initial_price=self.initial_price
@@ -211,8 +205,7 @@ class IdealMarketMaker(Scenario):
         )
 
         # info_trader = InformedTrader(
-        #     wallet_name=INFORMED_WALLET.name,
-        #     wallet_pass=INFORMED_WALLET.passphrase,
+        #     key_name=INFORMED_WALLET.name,
         #     price_process=price_process,
         #     market_name=market_name,
         #     asset_name=asset_name,

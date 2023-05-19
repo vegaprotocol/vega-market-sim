@@ -32,6 +32,8 @@ BASE_IDEAL_MM_CSV_HEADERS = [
     "LP: Position",
     "LP: Bid",
     "LP: Ask",
+    "LP: Received Liquidity Fees",
+    "LP: Liquidity Fee Shares",
     "External Midprice",
     "Midprice",
     "Markprice",
@@ -97,24 +99,41 @@ def _ideal_market_maker_single_data_extraction(
         key_name=mm_agent.key_name,
     )
 
+    received_liquidity_fees_lp = 0
+    for ledger_entry in vega.list_ledger_entries(
+        to_party_ids=[
+            vega.wallet.public_key(
+                wallet_name=mm_agent.wallet_name, name=mm_agent.key_name
+            )
+        ],
+        transfer_types=[14],
+    ):
+        received_liquidity_fees_lp += ledger_entry.quantity
+
+    liquidity_fee_shares = vega.get_liquidity_fee_shares(
+        market_id=mm_agent.market_id,
+        wallet_name=mm_agent.wallet_name,
+        key_name=mm_agent.key_name,
+    )
+
     position = vega.positions_by_market(
         wallet_name=mm_agent.wallet_name,
         market_id=mm_agent.market_id,
         key_name=mm_agent.key_name,
     )
-    if not position:
+    if position is None:
         realised_pnl_lp = 0
         unrealised_pnl_lp = 0
         inventory_lp = 0
         entry_price = 0
     else:
-        realised_pnl_lp = round(float(position[0].realised_pnl), mm_agent.adp)
-        unrealised_pnl_lp = round(float(position[0].unrealised_pnl), mm_agent.adp)
-        inventory_lp = float(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price) / 10**mm_agent.mdp
+        realised_pnl_lp = round(float(position.realised_pnl), mm_agent.adp)
+        unrealised_pnl_lp = round(float(position.unrealised_pnl), mm_agent.adp)
+        inventory_lp = float(position.open_volume)
+        entry_price = float(position.average_entry_price) / 10**mm_agent.mdp
 
     market_state = vega.market_info(market_id=mm_agent.market_id).state
-    market_data = vega.market_data(market_id=mm_agent.market_id)
+    market_data = vega.get_latest_market_data(market_id=mm_agent.market_id)
     markprice = float(market_data.mark_price) / 10**mm_agent.mdp
     mid_price = float(market_data.mid_price) / 10**mm_agent.mdp
     trading_mode = market_data.market_trading_mode
@@ -190,6 +209,8 @@ def _ideal_market_maker_single_data_extraction(
         "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp)
         if mm_agent.ask_depth is not None
         else None,
+        "LP: Received Liquidity Fees": received_liquidity_fees_lp,
+        "LP: Liquidity Fee Shares": liquidity_fee_shares,
         "External Midprice": mm_agent.price_process[mm_agent.current_step - 1]
         if hasattr(mm_agent, "price_process")
         else None,
@@ -238,7 +259,7 @@ def target_stake_additional_data(
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
         )
     ][0]
-    market_data = vega.market_data(market_id=mm_agent.market_id)
+    market_data = vega.get_latest_market_data(market_id=mm_agent.market_id)
     scaling = 1 / 10 ** mm_agent.adp if hasattr(mm_agent, "adp") else 1
 
     return {
@@ -258,7 +279,7 @@ def tau_scaling_additional_data(
             (OptimalMarketMakerV2, OptimalMarketMaker, ExponentialShapedMarketMaker),
         )
     ][0]
-    market_data = vega.market_data(market_id=mm_agent.market_id)
+    market_data = vega.get_latest_market_data(market_id=mm_agent.market_id)
     market_info = vega.market_info(market_id=mm_agent.market_id)
 
     return {
@@ -329,20 +350,20 @@ def momentum_trader_data_extraction(
         wallet_name=trader.wallet_name, market_id=trader.market_id
     )
 
-    if not position:
+    if position is None:
         realised_pnl = 0
         unrealised_pnl = 0
         inventory = 0
         entry_price = 0
     else:
-        realised_pnl = round(float(position[0].realised_pnl), trader.adp)
-        unrealised_pnl = round(float(position[0].unrealised_pnl), trader.adp)
-        inventory = float(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price) / 10**trader.mdp
+        realised_pnl = round(float(position.realised_pnl), trader.adp)
+        unrealised_pnl = round(float(position.unrealised_pnl), trader.adp)
+        inventory = float(position.open_volume)
+        entry_price = float(position.average_entry_price) / 10**trader.mdp
 
-    market_data = vega.market_data(market_id=trader.market_id)
-    markprice = float(market_data.mark_price) / 10**trader.mdp
-    mid_price = float(market_data.mid_price) / 10**trader.mdp
+    market_data = vega.get_latest_market_data(market_id=trader.market_id)
+    markprice = market_data.mark_price
+    mid_price = market_data.mid_price
     trading_mode = market_data.market_trading_mode
 
     market_state = vega.market_info(market_id=trader.market_id).state
@@ -382,16 +403,16 @@ def uninformed_tradingbot_data_extraction(
         wallet_name=trader.wallet_name, market_id=trader.market_id
     )
 
-    if not position:
+    if position is None:
         realised_pnl = 0
         unrealised_pnl = 0
         inventory = 0
         entry_price = 0
     else:
-        realised_pnl = round(float(position[0].realised_pnl), trader.adp)
-        unrealised_pnl = round(float(position[0].unrealised_pnl), trader.adp)
-        inventory = float(position[0].open_volume)
-        entry_price = float(position[0].average_entry_price) / 10**trader.mdp
+        realised_pnl = round(float(position.realised_pnl), trader.adp)
+        unrealised_pnl = round(float(position.unrealised_pnl), trader.adp)
+        inventory = float(position.open_volume)
+        entry_price = float(position.average_entry_price) / 10**trader.mdp
 
     logs = {
         "UT: General Account": general,

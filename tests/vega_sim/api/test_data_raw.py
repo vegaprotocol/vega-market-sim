@@ -1,6 +1,7 @@
 import grpc
 import pytest
 from concurrent.futures import ThreadPoolExecutor
+import datetime
 from vega_sim.grpc.client import (
     VegaCoreClient,
     VegaTradingDataClientV2,
@@ -18,13 +19,16 @@ from vega_sim.api.data_raw import (
     infrastructure_fee_accounts,
     liquidity_provisions,
     market_accounts,
-    market_data,
+    get_latest_market_data,
+    market_data_history,
     market_info,
     order_status,
     positions_by_market,
     observe_event_bus,
     margin_levels,
     list_transfers,
+    list_ledger_entries,
+    estimate_position,
 )
 
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
@@ -361,7 +365,7 @@ def test_market_accounts(trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-def test_market_data(trading_data_v2_servicer_and_port):
+def test_get_latest_market_data(trading_data_v2_servicer_and_port):
     expected = vega_protos.vega.MarketData(mid_price="100", market="foobar")
 
     def GetLatestMarketData(self, request, context):
@@ -377,9 +381,46 @@ def test_market_data(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    res = market_data(market_id="foobar", data_client=data_client)
+    res = get_latest_market_data(market_id="foobar", data_client=data_client)
 
     assert res == expected
+
+
+def test_market_data_history(trading_data_v2_servicer_and_port):
+    expected = vega_protos.vega.MarketData(mid_price="100", market="foobar")
+
+    def GetMarketDataHistoryByID(self, request, context):
+        return data_node_protos_v2.trading_data.GetMarketDataHistoryByIDResponse(
+            market_data=data_node_protos_v2.trading_data.MarketDataConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.MarketDataEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.MarketData(
+                            mid_price="100", market=request.market_id
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetMarketDataHistoryByID = GetMarketDataHistoryByID
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    some_date = datetime.datetime(2023, 1, 1)
+    res = market_data_history(
+        market_id="foobar", start=some_date, end=some_date, data_client=data_client
+    )
+
+    assert res[0] == expected
 
 
 def test_infrastructure_fee_accounts(trading_data_v2_servicer_and_port):
@@ -764,3 +805,140 @@ def test_list_transfers(trading_data_v2_servicer_and_port):
     )
 
     assert res == [expected]
+
+
+def test_list_ledger_entries(trading_data_v2_servicer_and_port):
+    expected = data_node_protos_v2.trading_data.AggregatedLedgerEntry(
+        timestamp=10000000, quantity="540", asset_id="asset1"
+    )
+
+    def ListLedgerEntries(self, request, context):
+        return data_node_protos_v2.trading_data.ListLedgerEntriesResponse(
+            ledger_entries=data_node_protos_v2.trading_data.AggregatedLedgerEntriesConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.AggregatedLedgerEntriesEdge(
+                        cursor="cursor",
+                        node=expected,
+                    )
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListLedgerEntries = ListLedgerEntries
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    res = list_ledger_entries(
+        data_client=data_client,
+        asset_id="asset1",
+    )
+
+    assert res == [expected]
+
+
+def test_estimate_position(trading_data_v2_servicer_and_port):
+    expected_market_id = "market"
+
+    expected_margin = data_node_protos_v2.trading_data.MarginEstimate(
+        best_case=vega_protos.vega.MarginLevels(
+            maintenance_margin="100",
+            search_level="200",
+            initial_margin="300",
+            collateral_release_level="400",
+            party_id="party",
+            market_id=expected_market_id,
+            asset="asset",
+            timestamp=0000000000000000000,
+        ),
+        worst_case=vega_protos.vega.MarginLevels(
+            maintenance_margin="100",
+            search_level="200",
+            initial_margin="300",
+            collateral_release_level="400",
+            party_id="party",
+            market_id=expected_market_id,
+            asset="asset",
+            timestamp=0000000000000000000,
+        ),
+    )
+    expected_liquidation = data_node_protos_v2.trading_data.LiquidationEstimate(
+        best_case=data_node_protos_v2.trading_data.LiquidationPrice(
+            open_volume_only="1000",
+            including_buy_orders="2000",
+            including_sell_orders="3000",
+        ),
+        worst_case=data_node_protos_v2.trading_data.LiquidationPrice(
+            open_volume_only="1000",
+            including_buy_orders="2000",
+            including_sell_orders="3000",
+        ),
+    )
+
+    def EstimatePosition(self, request, context):
+        return data_node_protos_v2.trading_data.EstimatePositionResponse(
+            margin=data_node_protos_v2.trading_data.MarginEstimate(
+                best_case=vega_protos.vega.MarginLevels(
+                    maintenance_margin="100",
+                    search_level="200",
+                    initial_margin="300",
+                    collateral_release_level="400",
+                    party_id="party",
+                    market_id=request.market_id,
+                    asset="asset",
+                    timestamp=0000000000000000000,
+                ),
+                worst_case=vega_protos.vega.MarginLevels(
+                    maintenance_margin="100",
+                    search_level="200",
+                    initial_margin="300",
+                    collateral_release_level="400",
+                    party_id="party",
+                    market_id=request.market_id,
+                    asset="asset",
+                    timestamp=0000000000000000000,
+                ),
+            ),
+            liquidation=data_node_protos_v2.trading_data.LiquidationEstimate(
+                best_case=data_node_protos_v2.trading_data.LiquidationPrice(
+                    open_volume_only="1000",
+                    including_buy_orders="2000",
+                    including_sell_orders="3000",
+                ),
+                worst_case=data_node_protos_v2.trading_data.LiquidationPrice(
+                    open_volume_only="1000",
+                    including_buy_orders="2000",
+                    including_sell_orders="3000",
+                ),
+            ),
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.EstimatePosition = EstimatePosition
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    margin, liquidation = estimate_position(
+        data_client=data_client,
+        market_id=expected_market_id,
+        open_volume=1,
+        orders=[
+            data_node_protos_v2.trading_data.OrderInfo(
+                side=vega_protos.vega.SIDE_BUY,
+                price="100",
+                remaining=1,
+                is_market_order=True,
+            )
+        ],
+        collateral_available="1000",
+    )
+    assert margin == expected_margin
+    assert liquidation == expected_liquidation

@@ -1,40 +1,19 @@
 from abc import abstractmethod
-from dataclasses import dataclass
+from collections import defaultdict, namedtuple
+from typing import Dict, List, Optional, Tuple
+
 import numpy as np
-from collections import namedtuple, defaultdict
-from typing import List, Tuple, Dict
 
-from functools import partial
-from tqdm import tqdm
-
-import torch
-import torch.nn as nn
-from torch.distributions.categorical import Categorical
-
-from vega_sim.reinforcement.networks import (
-    Softmax,
-    FFN,
-    FFN_Params_Normal,
-    FFN_Q,
-)
-from vega_sim.reinforcement.helpers import apply_funcs, to_torch, toggle
-from vega_sim.reinforcement.la_market_state import LAMarketState
-from vega_sim.reinforcement.la_market_state import AbstractAction
-from vega_sim.reinforcement.la_market_state import states_to_sarsa
-
-from vega_sim.reinforcement.distributions import (
-    lognorm_sample,
-    lognorm_logprob,
-    reg_policy,
-)
-
-from vega_sim.api.helpers import num_from_padded_int
-
-from vega_sim.environment.agent import Agent
 from vega_sim.environment import VegaState
-from vega_sim.environment.agent import StateAgentWithWallet
+from vega_sim.environment.agent import Agent, StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
+
+from vega_sim.reinforcement.la_market_state import (
+    AbstractAction,
+    LAMarketState,
+    states_to_sarsa,
+)
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -61,14 +40,14 @@ class LearningAgent(StateAgentWithWallet):
         logfile_pnl: str,
         discount_factor: float,
         num_levels: int,
-        wallet_name: str,
-        wallet_pass: str,
+        key_name: str,
         market_name: str,
         initial_balance: int,
         position_decimals: int,
+        asset_name: str,
         inventory_penalty: float = 0.0,
     ):
-        super().__init__(wallet_name=wallet_name, wallet_pass=wallet_pass)
+        super().__init__(key_name=key_name)
 
         self.step_num = 0
         self.latest_state = None
@@ -94,6 +73,7 @@ class LearningAgent(StateAgentWithWallet):
         self.market_name = market_name
         self.position_decimals = position_decimals
         self.inventory_penalty = inventory_penalty
+        self.asset_name = asset_name
 
     def set_market_tag(self, tag: str):
         self.tag = tag
@@ -105,6 +85,17 @@ class LearningAgent(StateAgentWithWallet):
     @abstractmethod
     def move_to_cpu(self):
         pass
+
+    def learning_step(self, results_dir: Optional[str] = None):
+        # Policy evaluation + Policy improvement
+        self.move_to_device()
+        self.policy_eval(batch_size=20000, n_epochs=10)
+        self.policy_improvement(batch_size=100_000, n_epochs=10)
+
+        if results_dir is not None:
+            # save in case environment chooses to crash
+            self.save(results_dir)
+        self.move_to_cpu()
 
     def initialise(self, vega: VegaServiceNull):
         # Initialise wallet
@@ -119,10 +110,10 @@ class LearningAgent(StateAgentWithWallet):
             if m.tradable_instrument.instrument.name == market_name
         ][0]
         # Get asset id
-        self.tdai_id = self.vega.find_asset_id(symbol=f"tDAI_{self.tag}")
+        self.tdai_id = self.vega.find_asset_id(symbol=self.asset_name)
         # Top up asset
         self.vega.mint(
-            self.wallet_name,
+            self.key_name,
             asset=self.tdai_id,
             amount=self.initial_balance,
         )
@@ -162,11 +153,11 @@ class LearningAgent(StateAgentWithWallet):
         pass
 
     def state(self, vega: VegaServiceNull) -> LAMarketState:
-        position = self.vega.positions_by_market(self.wallet_name, self.market_id)
+        position = self.vega.positions_by_market(self.key_name, self.market_id)
 
-        position = position[0].open_volume if position else 0
+        position = position.open_volume if position else 0
         account = self.vega.party_account(
-            wallet_name=self.wallet_name,
+            key_name=self.key_name,
             asset_id=self.tdai_id,
             market_id=self.market_id,
         )
@@ -222,7 +213,7 @@ class LearningAgent(StateAgentWithWallet):
         account = None
         for i in range(0, numTries):
             account = self.vega.party_account(
-                wallet_name=self.wallet_name,
+                key_name=self.key_name,
                 asset_id=self.tdai_id,
                 market_id=self.market_id,
             )

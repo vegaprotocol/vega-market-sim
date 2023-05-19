@@ -39,10 +39,10 @@ from vega_sim.scenario.common.agents import (
 class ConfigurableMarket(Scenario):
     def __init__(
         self,
-        market_name: str = None,
-        market_code: str = None,
-        asset_name: str = None,
-        asset_dp: str = None,
+        market_name: Optional[str] = None,
+        market_code: Optional[str] = None,
+        asset_name: Optional[str] = None,
+        asset_dp: Optional[str] = None,
         num_steps: int = 120,
         granularity: Optional[Granularity] = Granularity.MINUTE,
         block_size: int = 1,
@@ -52,6 +52,7 @@ class ConfigurableMarket(Scenario):
         ] = None,
         settle_at_end: bool = True,
         price_process_fn: Optional[Callable] = None,
+        pause_every_n_steps: Optional[int] = None,
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
@@ -62,6 +63,7 @@ class ConfigurableMarket(Scenario):
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
         self.price_process_fn = price_process_fn
+        self.pause_every_n_steps = pause_every_n_steps
 
         # Asset parameters
         self.asset_name = asset_name
@@ -88,6 +90,7 @@ class ConfigurableMarket(Scenario):
             granularity=self.granularity,
             start=str(start),
             end=str(end),
+            interpolation=f"{self.granularity.value}s",
         )
 
         return list(price_process)
@@ -98,6 +101,7 @@ class ConfigurableMarket(Scenario):
         tag: str,
         market_config: Optional[MarketConfig] = None,
         random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> Dict[str, StateAgent]:
         market_config = market_config if market_config is not None else MarketConfig()
 
@@ -116,10 +120,8 @@ class ConfigurableMarket(Scenario):
 
         market_manager = ConfigurableMarketManager(
             proposal_wallet_name=PROPOSAL_PARTY.wallet_name,
-            proposal_wallet_pass=PROPOSAL_PARTY.wallet_pass,
             proposal_key_name=PROPOSAL_PARTY.key_name,
             termination_wallet_name=TERMINATION_PARTY.wallet_name,
-            termination_wallet_pass=TERMINATION_PARTY.wallet_pass,
             termination_key_name=TERMINATION_PARTY.key_name,
             market_config=market_config,
             market_name=market_name,
@@ -131,7 +133,6 @@ class ConfigurableMarket(Scenario):
 
         shaped_mm = ExponentialShapedMarketMaker(
             wallet_name=MAKER_PARTY.wallet_name,
-            wallet_pass=MAKER_PARTY.wallet_pass,
             key_name=MAKER_PARTY.key_name,
             price_process_generator=iter(price_process),
             initial_asset_mint=1e9,
@@ -153,7 +154,6 @@ class ConfigurableMarket(Scenario):
 
         sensitive_mo_trader_a = PriceSensitiveMarketOrderTrader(
             wallet_name=SENSITIVE_PARTY_A.wallet_name,
-            wallet_pass=SENSITIVE_PARTY_A.wallet_pass,
             key_name=SENSITIVE_PARTY_A.key_name,
             market_name=market_name,
             asset_name=asset_name,
@@ -168,7 +168,6 @@ class ConfigurableMarket(Scenario):
 
         sensitive_mo_trader_b = PriceSensitiveMarketOrderTrader(
             wallet_name=SENSITIVE_PARTY_B.wallet_name,
-            wallet_pass=SENSITIVE_PARTY_B.wallet_pass,
             key_name=SENSITIVE_PARTY_B.key_name,
             market_name=market_name,
             asset_name=asset_name,
@@ -183,7 +182,6 @@ class ConfigurableMarket(Scenario):
 
         sensitive_mo_trader_c = PriceSensitiveMarketOrderTrader(
             wallet_name=SENSITIVE_PARTY_C.wallet_name,
-            wallet_pass=SENSITIVE_PARTY_C.wallet_pass,
             key_name=SENSITIVE_PARTY_C.key_name,
             market_name=market_name,
             asset_name=asset_name,
@@ -198,7 +196,6 @@ class ConfigurableMarket(Scenario):
 
         auctionpass1 = OpenAuctionPass(
             wallet_name=AUCTION_PARTY_A.wallet_name,
-            wallet_pass=AUCTION_PARTY_A.wallet_pass,
             key_name=AUCTION_PARTY_A.key_name,
             side="SIDE_BUY",
             initial_asset_mint=1e9,
@@ -211,7 +208,6 @@ class ConfigurableMarket(Scenario):
 
         auctionpass2 = OpenAuctionPass(
             wallet_name=AUCTION_PARTY_B.wallet_name,
-            wallet_pass=AUCTION_PARTY_B.wallet_pass,
             key_name=AUCTION_PARTY_B.key_name,
             side="SIDE_SELL",
             initial_asset_mint=1e9,
@@ -224,7 +220,6 @@ class ConfigurableMarket(Scenario):
 
         info_trader = InformedTrader(
             wallet_name=INFORMED_PARTY.wallet_name,
-            wallet_pass=INFORMED_PARTY.wallet_pass,
             key_name=INFORMED_PARTY.key_name,
             price_process=price_process,
             market_name=market_name,
@@ -256,4 +251,5 @@ class ConfigurableMarket(Scenario):
             transactions_per_block=self.block_size,
             vega_service=vega,
             block_length_seconds=self.block_length_seconds,
+            pause_every_n_steps=self.pause_every_n_steps,
         )

@@ -5,6 +5,7 @@ import grpc
 from ...api.v2 import (
     trading_data_pb2 as data__node_dot_api_dot_v2_dot_trading__data__pb2,
 )
+from google.api import httpbody_pb2 as google_dot_api_dot_httpbody__pb2
 
 
 class TradingDataServiceStub(object):
@@ -56,6 +57,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsResponse.FromString,
         )
+        self.ListAllPositions = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListAllPositions",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.FromString,
+        )
         self.ObservePositions = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObservePositions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsRequest.SerializeToString,
@@ -65,6 +71,11 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/ListLedgerEntries",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.FromString,
+        )
+        self.ExportLedgerEntries = channel.unary_stream(
+            "/datanode.api.v2.TradingDataService/ExportLedgerEntries",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.SerializeToString,
+            response_deserializer=google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
         )
         self.ListBalanceChanges = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListBalanceChanges",
@@ -241,11 +252,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesResponse.FromString,
         )
-        self.ObserveRewards = channel.unary_stream(
-            "/datanode.api.v2.TradingDataService/ObserveRewards",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsResponse.FromString,
-        )
         self.GetDeposit = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetDeposit",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositRequest.SerializeToString,
@@ -306,11 +312,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDelegationsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDelegationsResponse.FromString,
         )
-        self.ObserveDelegations = channel.unary_stream(
-            "/datanode.api.v2.TradingDataService/ObserveDelegations",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveDelegationsRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveDelegationsResponse.FromString,
-        )
         self.GetNetworkData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkDataRequest.SerializeToString,
@@ -345,6 +346,11 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/EstimateMargin",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
+        )
+        self.EstimatePosition = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/EstimatePosition",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.FromString,
         )
         self.ListNetworkParameters = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListNetworkParameters",
@@ -411,20 +417,40 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.FromString,
         )
-        self.GetMostRecentDeHistorySegment = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetMostRecentDeHistorySegment",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentResponse.FromString,
+        self.GetMostRecentNetworkHistorySegment = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetMostRecentNetworkHistorySegment",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentResponse.FromString,
         )
-        self.ListAllDeHistorySegments = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/ListAllDeHistorySegments",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.FromString,
+        self.ListAllNetworkHistorySegments = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListAllNetworkHistorySegments",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsResponse.FromString,
         )
-        self.GetActiveDeHistoryPeerAddresses = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
+        self.GetActiveNetworkHistoryPeerAddresses = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetActiveNetworkHistoryPeerAddresses",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.FromString,
+        )
+        self.GetNetworkHistoryStatus = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetNetworkHistoryStatus",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusResponse.FromString,
+        )
+        self.GetNetworkHistoryBootstrapPeers = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetNetworkHistoryBootstrapPeers",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersResponse.FromString,
+        )
+        self.ListEntities = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListEntities",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
+        )
+        self.ExportNetworkHistory = channel.unary_stream(
+            "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
+            response_deserializer=google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
         )
         self.Ping = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Ping",
@@ -437,9 +463,9 @@ class TradingDataServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ListAccounts(self, request, context):
-        """Accounts
+        """List accounts
 
-        Returns a list of accounts matching the supplied filter, including their current balances.
+        Get a list of accounts matching the supplied filter, including their current balances.
         If a given account has never had a balance, it will be absent from the list.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -447,32 +473,35 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ObserveAccounts(self, request, context):
-        """Subscribe to a stream of Accounts"""
+        """Accounts subscription
+
+        Subscribe to a stream of accounts
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def Info(self, request, context):
-        """Info
+        """Data node information
 
-        Retrieves information about the data-node.
-        Response contains a semver formatted version of the data node and the commit hash, from which the data-node was built,
+        Get information about the data node.
+        Response contains a semver formatted version of the data node and the commit hash, from which the data node was built
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetOrder(self, request, context):
-        """Order
+        """Get order
 
-        Gets the current version of an order, or optionally provide a version id to retrieve a given version.
+        Get the current version of an order, or optionally provide a version ID to retrieve a given version if order was amended.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListOrders(self, request, context):
-        """Orders list
+        """List orders
 
         Get a list of orders that match the given filters
         """
@@ -481,95 +510,125 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListOrderVersions(self, request, context):
-        """Order history
+        """List order versions
 
-        List all versions of an order in the order history
+        Get a list of all versions of an order in the order history
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveOrders(self, request, context):
-        """Subscribe to a stream of Orders"""
+        """Observe orders
+
+        Subscribe to a stream of orders
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListPositions(self, request, context):
-        """Positions
+        """Deprecated: List positions
 
-        Get a list of Positions by Party using cursor based pagination
+        Get a list of positions by party's public key using cursor based pagination
+        Deprecated: use ListAllPositions instead
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListAllPositions(self, request, context):
+        """List positions
+
+        Get a list of positions by party's public key using cursor based pagination
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObservePositions(self, request, context):
-        """Subscribe to a stream of Positions"""
+        """Observe positions
+
+        Subscribe to a stream of positions
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListLedgerEntries(self, request, context):
-        """LedgerEntries
+        """List ledger entries
 
-        Get ledger entries by asset, market, party, account type, transfer type within the given date range.
-        This query requests and sums number of the ledger entries of a given subset of accounts, specified via the 'filter' argument.
-        It returns a timeseries (implemented as a list of AggregateLedgerEntry structs), with a row for every time
+        Get a list of ledger entries within the given date range.
+        This query requests and sums the number of ledger entries from a given subset of accounts, specified via the 'filter' argument.
+        It returns a time series - implemented as a list of AggregateLedgerEntry structs - with a row for every time
         the summed ledger entries of the set of specified accounts changes.
-        Listed queries should be limited to a single party from each side only. If no or more than one parties are provided
-        for sending and receiving accounts - the query returns error.
+        Each account filter must contain no more than one party ID.
 
-        Entries can be queried by:
-        - listing ledger entries with filtering on the sending account (market_id, asset_id, account_type)
-        - listing ledger entries with filtering on the receiving account (market_id, asset_id, account_type)
-        - listing ledger entries with filtering on the sending AND receiving account
-        - listing ledger entries with filtering on the transfer type (on top of above filters or as a standalone option)
+        Entries can be filtered by:
+        - the sending account (market ID, asset ID, account type)
+        - receiving account (market ID, asset ID, account type)
+        - sending AND receiving account
+        - transfer type either in addition to the above filters or as a standalone option
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ExportLedgerEntries(self, request, context):
+        """Export ledger entries
+
+        Export ledger entries records ledger entries to a csv file.
+        May or may not contain a date range - if no date range is provided, list all records for all times.
+
+        Ledger entries can be exported by:
+        - export ledger entries for a single party for a given asset within a given time range
+        - export ledger entries for a single party for a given asset for all times
+        buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+        buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListBalanceChanges(self, request, context):
-        """Balances
+        """List balance changes
 
-        `ListBalanceChanges` is for querying the change in account balances over a period of time.
+        Get a list of the changes in account balances over a period of time.
 
-        An account is defined a 4-tuple of (asset_id, type, party_id, market_id).
-        - Every account has associated asset and type.
-        - Certain account types (for example, the global reward pool) do not have an associated party.
-        These are denoted by the special party identifier 'network'
-        - Certain account types do not have an associated market (for example general party accounts)
-        These are denoted by the special market identifier '' (the empty string)
+        An account is defined as a set of asset_id, type, party_id, and market_id.
+        - Every account has an associated asset and type.
+        - Certain account types such as the global reward pool for example, do not have an associated party.
+        These are denoted by the special party ID 'network'
+        - Certain account types do not have an associated market such as the general party accounts, for example.
+        These are denoted by the special market ID '' (the empty string)
 
-        `ListBalanceChangesRequest` will return a list of
-        `(vega_time, asset_id, account_type, party_id, market_id, balance)`
-        With a row for each block at which a given account's balance changes.
+        `ListBalanceChangesRequest` will return a list of `AggregatedBalance` records,
+        with a row for each block at which a given account's balance changes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetLatestMarketData(self, request, context):
-        """Market Data
+        """Get latest market data
 
-        Get the lastest market data for a given market
+        Get the latest market data for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListLatestMarketData(self, request, context):
-        """Market Data list
+        """List latest market data
 
-        Lists the latest market data for every market
+        Get a list of the latest market data for every market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetLatestMarketDepth(self, request, context):
-        """Market Depth
+        """Get latest market depth
 
         Get the latest market depth for a given market
         """
@@ -578,109 +637,124 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ObserveMarketsDepth(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Observe markets depth
+
+        Subscribe to a stream of the latest market depth for a given market
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveMarketsDepthUpdates(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Observe markets depth updates
+
+        Subscribe to a stream of updates on market depth for a given market
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveMarketsData(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Observe markets data
+
+        Subscribe to a stream of data about a given market
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetMarketDataHistoryByID(self, request, context):
-        """Market data history
+        """Get market data history
 
-        Get Market Data History for a Market ID between given dates using a cursor based pagination model
+        Get market data history for a market ID between given dates
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListTransfers(self, request, context):
-        """Transfers list
+        """List transfers
 
-        List Transfers to/from/either a public key using a cursor based pagination model
+        Get a list of transfers to/from/either a public key
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetNetworkLimits(self, request, context):
-        """Network Limits
+        """Get network limits
 
-        Get the current network limits (is bootstrapping finished, are proposals enabled etc..)
+        Get the current network limits, for example: is bootstrapping finished, are proposals enabled etc.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListCandleData(self, request, context):
-        """Candles list
+        """List candle data
 
-        Get candle data for a given candle id
+        Get a list of candle data for a given candle ID. You can get a candle ID from the list candle intervals query
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveCandleData(self, request, context):
-        """Subscribe to a stream of Candle updates"""
+        """Observe candle data
+
+        Subscribe to a stream of candle updates
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListCandleIntervals(self, request, context):
-        """Candle intervals list
+        """List candle intervals
 
-        Get all available intervals for a given market along with the corresponding candle id
+        Get a list of all available intervals for a given market along with the corresponding candle ID
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListVotes(self, request, context):
-        """Votes list
+        """List votes
 
-        Get Votes for a Party ID using a cursor based pagination model
+        Get a list of votes for a party ID
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveVotes(self, request, context):
-        """Subscribe to a stream of votes"""
+        """Observe votes
+
+        Subscribe to a stream of votes
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListERC20MultiSigSignerAddedBundles(self, request, context):
-        """ERC20 add signer bundle
+        """List ERC20 multi-sig signer added bundles
 
-        List the signature bundle to add a particular validator to the signer list of the multisig contract
+        Get a list of the signature bundles to add a particular validator to the signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListERC20MultiSigSignerRemovedBundles(self, request, context):
-        """ERC20 remove signer bundle
+        """List ERC20 multi-sig signer removed bundles
 
-        List the signatures bundle to remove a particular validator from signer list of the multisig contract
+        Get a list of the signature bundles to remove a particular validator from signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetERC20ListAssetBundle(self, request, context):
-        """ERC20 list asset bundle
+        """Get ERC20 list asset bundle
 
         Get the signatures bundle to allowlist an ERC20 token in the collateral bridge
         """
@@ -689,16 +763,17 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetERC20SetAssetLimitsBundle(self, request, context):
-        """ERC20 set asset limit bundle
+        """Get ERC20 set asset limits bundle
 
-        Get the signature bundle to update the token limits (maxLifetimeDeposit and withdrawThreshold) for a given ERC20 token (already allowlisted) in the collateral bridge
+        Get the signature bundle to update the token limits. These are `maxLifetimeDeposit` and `withdrawThreshold` for a given ERC20 token that is
+        already allowlisted in the collateral bridge.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetERC20WithdrawalApproval(self, request, context):
-        """ERC20 withdrawal bundle
+        """Get ERC20 withdrawal approval
 
         Get the signature bundle to finalize a withdrawal on ethereum
         """
@@ -707,76 +782,79 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetLastTrade(self, request, context):
-        """Trade (latest)
+        """Get latest trade
 
-        Get latest Trade
+        Get latest trade
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListTrades(self, request, context):
-        """Trades list
+        """List trades
 
-        Get a list of all trades, optionally filtered by party/market/order using a cursor based pagination model
+        Get a list of all trades, optionally filtered by party/market/order
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveTrades(self, request, context):
-        """Subscribe to a stream of Trades, optionally filtered by party/market"""
+        """Observe trades
+
+        Subscribe to a stream of trades, optionally filtered by party/market
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetOracleSpec(self, request, context):
-        """Oracle Spec
+        """Get oracle spec
 
-        Get an oracle spec by ID.
+        Get an oracle spec by ID. Use the oracle spec list to query for oracle spec IDs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListOracleSpecs(self, request, context):
-        """Oracle Spec list
+        """List oracle specs
 
-        Get the oracle specs
+        Get a list of specs for an oracle
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListOracleData(self, request, context):
-        """Oracle data list
+        """List oracle data
 
-        Get all oracle data
+        Get a list of all oracle data
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetMarket(self, request, context):
-        """Market
+        """Get market
 
-        Get all markets using a cursor based pagination model
+        Get information about a specific market using its ID. Use the market lists query to get a market's ID
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListMarkets(self, request, context):
-        """Markets list
+        """List markets
 
-        Get markets using a cursor based pagination
+        Get a list of markets using a cursor based pagination
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetParty(self, request, context):
-        """Party
+        """Get party
 
         Get a single party
         """
@@ -785,88 +863,95 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListParties(self, request, context):
-        """Parties
+        """List parties
 
-        Get Parties using a cursor based pagination model
+        Get a list of parties. If a party ID is provided, only that party will be returned.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListMarginLevels(self, request, context):
-        """Margin Levels list
+        """List margin levels
 
-        Get Margin Levels using a cursor based pagination model
+        Get a list margin levels that match the provided criteria. If no filter is provided, all margin levels will be returned.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveMarginLevels(self, request, context):
-        """Subscribe to a stream of Margin Levels"""
+        """Observe margin levels
+
+        Subscribe to a stream of margin levels
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListRewards(self, request, context):
-        """Rewards list
+        """List rewards
 
-        Get rewards
+        Get a list of rewards that match the provided criteria. If no filter is provided, all rewards will be returned.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListRewardSummaries(self, request, context):
-        """Reward summaries list
+        """List reward summaries
 
-        Get reward summaries
+        Get a list of reward summaries where the reward amount is the total rewards received over all epochs
+        per party ID and asset ID.
+        Request parameters are optional party ID and asset ID.
+        If no data is provided, all reward summaries will be returned grouped by party and asset ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListEpochRewardSummaries(self, request, context):
-        """List reward summaries by epoch"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        """List epoch reward summaries
 
-    def ObserveRewards(self, request, context):
-        """subscribe to rewards"""
+        Get a list of reward summaries by epoch for a given range of epochs.
+        The result is filtered by list of asset IDs, market IDs and starting and ending epochs, for which to return rewards.
+        If no data is provided, all reward summaries will be returned, grouped by epochs, market IDs, asset IDs and reward type.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetDeposit(self, request, context):
-        """Deposit
+        """Get deposit
 
-        Get a deposit by its identifier
+        Get a deposit by its ID
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListDeposits(self, request, context):
-        """Deposits list
+        """List deposits
 
-        Get a list of deposits for a given party
+        Get a list of deposits for a given party.
+        If a date range is provided, filtering will be based on the last time the deposit
+        has been updated in Vega time.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetWithdrawal(self, request, context):
-        """Withdrawal
+        """Get withdrawal
 
-        Get a withdrawal by its identifier
+        Get a withdrawal by its ID. Use the withdrawals list query to get withdrawal IDs
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListWithdrawals(self, request, context):
-        """Withdrawals list
+        """List withdrawals
 
         Get a list of withdrawals for a given party
         """
@@ -875,79 +960,79 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetAsset(self, request, context):
-        """Asset
+        """Get asset
 
-        Get a single asset using it's identifier
+        Get a single asset using its ID. Use the assets list query to get an asset's ID
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListAssets(self, request, context):
-        """Assets list
+        """List assets
 
-        Get a list of asset using cusor based pagination
+        Get a list of assets using cursor based pagination
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListLiquidityProvisions(self, request, context):
-        """Liquidity Provisions list
+        """List liquidity provisions
 
-        Get a liquidity provision list for a given market using a cursor based pagination
+        Get a list of liquidity provisions for a given market using a cursor based pagination
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveLiquidityProvisions(self, request, context):
-        """Get a liquidity provision subscription for a given market and party"""
+        """Observe liquidity provisions
+
+        Subscribe to a stream of liquidity provision events for a given market and party
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetGovernanceData(self, request, context):
-        """Governance
+        """Get governance data
 
-        Get a single proposal details
+        Get a single proposal's details
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListGovernanceData(self, request, context):
-        """Governance list
+        """List governance data
 
-        List proposals using a cursor based pagination model
+        Get a list of proposals
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveGovernance(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        """Observe governance
 
-    def ListDelegations(self, request, context):
-        """Delegation list
-
-        List delegations
+        Subscribe to a stream of governance proposals
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ObserveDelegations(self, request, context):
-        """subscribe to delegation events"""
+    def ListDelegations(self, request, context):
+        """List delegations
+
+        Get a list of the token delegations on the network
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetNetworkData(self, request, context):
-        """Network data
+        """Get network data
 
         Get data regarding the nodes of the network
         """
@@ -956,7 +1041,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetNode(self, request, context):
-        """Node
+        """Get node
 
         Get information about a given node
         """
@@ -965,27 +1050,27 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListNodes(self, request, context):
-        """Nodes list
+        """List nodes
 
-        List information about the nodes on the network
+        Get a list of the nodes on the network along with the related information.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListNodeSignatures(self, request, context):
-        """Node signatures list
+        """List node signatures
 
-        List an aggregate of signatures from all the nodes of the network
+        Get a list of aggregate signatures from all the nodes of the network
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetEpoch(self, request, context):
-        """Epoch
+        """Get epoch
 
-        Get data for a specific epoch, if id omitted it gets the current epoch
+        Get data for a specific epoch, if ID is omitted, it retrieves the current epoch
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -994,7 +1079,8 @@ class TradingDataServiceServicer(object):
     def EstimateFee(self, request, context):
         """Estimate fee
 
-        Estimate the fee that would incur for submitting this order
+        Estimate the fee that would be incurred for submitting an order
+        with the specified price and size on the market.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1009,17 +1095,27 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ListNetworkParameters(self, request, context):
-        """Network Parameters list
+    def EstimatePosition(self, request, context):
+        """Estimate position
 
-        Get the network parameters
+        Estimate the margin that would be required for maintaining the specified position.
+        If the optional collateral available argument is supplied, the response also contains the estimate of the liquidation price.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListNetworkParameters(self, request, context):
+        """List network parameters
+
+        Get a list of the network parameters
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetNetworkParameter(self, request, context):
-        """Network Parameter
+        """Get network parameter
 
         Get a single network parameter
         """
@@ -1028,34 +1124,34 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListCheckpoints(self, request, context):
-        """Checkpoints list
+        """List checkpoints
 
-        List information about checkpoint generated by the network
+        Get a list of information about checkpoints generated by the network
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetStake(self, request, context):
-        """Stake
+        """Get Stake
 
-        Retrieve staking informations for a given party
+        Get staking information for a given party
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetRiskFactors(self, request, context):
-        """Risk Factors
+        """Get risk factors
 
-        Get Risk Factor data for a given market
+        Get risk factor data for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ObserveEventBus(self, request_iterator, context):
-        """Event Bus
+        """Observe event bus
 
         Subscribe to a stream of events from the core
         """
@@ -1064,88 +1160,193 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ObserveLedgerMovements(self, request, context):
-        """Transfer Responses
+        """Observe ledger movements
 
-        Subscribe to a stream of Transfer Responses
+        Subscribe to a stream of transfer responses
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListKeyRotations(self, request, context):
-        """Key Rotations list
+        """List key rotations
 
-        List all key rotation applied for a given party
+        Get a list of information about Vega key rotations that have been performed by validator nodes
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListEthereumKeyRotations(self, request, context):
-        """Ethereum Key Rotations
+        """List Ethereum key rotations
 
-        List all ethereum key rotation applied for a given party
+        Get a list of information about Ethereum key rotations that have been performed by validator nodes
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetVegaTime(self, request, context):
-        """Vega Time
+        """Get Vega time
 
-        Get the current time of the network
+        Get the current time of the network, displayed as a Unix timestamp in nano seconds
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetProtocolUpgradeStatus(self, request, context):
-        """Protocol Upgrade status"""
+        """Get protocol upgrade status
+
+        Get status of a protocol upgrade
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListProtocolUpgradeProposals(self, request, context):
-        """List protocol upgrades proposals, optionally filtering on status or approver."""
+        """List protocol upgrade proposals
+
+        Get a list of protocol upgrade proposals, optionally filtering on status or approver.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def ListCoreSnapshots(self, request, context):
-        """List core snapshots taken"""
+        """List snapshots
+
+        Get a list of core snapshots taken
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetMostRecentDeHistorySegment(self, request, context):
-        """Decentralized History
+    def GetMostRecentNetworkHistorySegment(self, request, context):
+        """Network History
 
-        Decentralised History allows the data-node to reach out to peer nodes to fetch the most recent history, as well as
+        Network history allows the data node to reach out to peer nodes and fetch the most recent history, as well as
         older history if desired, such that it can quickly get itself up to the latest block height of the network and start
         to consume events for the latest block from the Vega core.
-        See https://github.com/vegaprotocol/vega/tree/develop/datanode/dehistory/README.md for a full description of Decentralised History
+        See https://github.com/vegaprotocol/vega/tree/develop/datanode/networkhistory/README.md for a full description of network history
 
-        Get most recent decentralized history segment
+        Get most recent network history segment
 
-        Get the networks most recently history segment
+        Get the network's most recently history segment
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ListAllDeHistorySegments(self, request, context):
-        """List all decentralized history segments
+    def ListAllNetworkHistorySegments(self, request, context):
+        """List all network history segments
 
-        List all history segments stored by this node
+        Get a list of all history segments stored by the data node currently connected to
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetActiveDeHistoryPeerAddresses(self, request, context):
-        """Get active decentralized history peer addresses
+    def GetActiveNetworkHistoryPeerAddresses(self, request, context):
+        """Get active network history peer addresses
 
-        List the addresses of all active decentralized history peers
+        Get a list of the addresses of all active network history peers
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetNetworkHistoryStatus(self, request, context):
+        """Network history status
+
+        Get information about the current state of network history
+        Response contains the network history status
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetNetworkHistoryBootstrapPeers(self, request, context):
+        """Network history bootstrap peers
+
+        Get the bootstrap peers for data nodes.
+        Response contains the bootstrap peers
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListEntities(self, request, context):
+        """List entities
+
+        Get a list of all entities created by transaction hash
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ExportNetworkHistory(self, request, context):
+        """Export network history as CSV
+
+        Export CSV table data from network history between two block heights.
+
+        The requested block heights must fall on network history segment boundaries, which can
+        be discovered by calling the API to list all network history segments. By default
+        segments contain 1000 blocks. In that case ranges such as (1, 1000), (1001, 2000), (1, 3000)
+        would all fall on segment boundaries and be valid.
+
+        The generated CSV file is compressed into a ZIP file and returned, with the file name
+        in the following format: [chain id]-[table name]-[start block]-[end block].zip
+
+        In gRPC, results are returned in a chunked stream of base64 encoded data.
+
+        Through the REST gateway, the base64 data chunks are decoded and streamed as a
+        `content-type: application/zip` HTTP response.
+
+        The CSV exported data uses a comma as a DELIMITER between fields, and " for QUOTE-ing fields.
+
+        If a value contains any of: DELIMITER, QUOTE, carriage return, or line feed then the whole
+        value is prefixed and suffixed by the QUOTE character and any occurrence within
+        the value of a QUOTE character preceded by another QUOTE.
+
+        A NULL is output as the NULL parameter string and is not quoted, while a non-NULL value
+        matching the NULL parameter string is quoted.
+
+        For example, with the default settings, a NULL is written as an unquoted empty string,
+        while an empty string data value is written with double quotes.
+
+        Note that CSV files produced may contain quoted values containing embedded carriage returns and line feeds.
+        Thus the files are not strictly one line per table row like text-format files.
+
+        The first row of the CSV file is a header that describes the contents of each column
+        in subsequent rows.
+
+        Usually the ZIP file will contain only a single CSV file. However it is possible that
+        the (from_block, to_block) request spans over a range of blocks in which the underlying
+        schema of the database changes. For example, a column may have been added, removed, or renamed.
+
+        If this happens, the CSV file will be split at the point of the schema change and the zip
+        file will contain multiple CSV files, with a potentially different set of headers. The
+        'version' number of the database schema is part of the in the CSV filename:
+
+        [chain id]-[table name]-[schema version]-[start block]-[end block].zip
+
+        For example, a zip file might be called mainnet-sometable-000001-003000.zip
+
+        And contain two CSV files: mainnet-sometable-1-000001-002000.csv:
+
+        timestamp, value
+        1, foo
+        2, bar
+
+        And mainnet-sometable-2-002001-003000.csv:
+
+        timestamp, value, extra_value
+        3, baz, apple
+
+        It is worth noting that the schema will not change within a single network history segment.
+        buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+        buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1154,7 +1355,7 @@ class TradingDataServiceServicer(object):
     def Ping(self, request, context):
         """Ping
 
-        Ping the datanode
+        Ping the data node
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1203,6 +1404,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsResponse.SerializeToString,
         ),
+        "ListAllPositions": grpc.unary_unary_rpc_method_handler(
+            servicer.ListAllPositions,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.SerializeToString,
+        ),
         "ObservePositions": grpc.unary_stream_rpc_method_handler(
             servicer.ObservePositions,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsRequest.FromString,
@@ -1212,6 +1418,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListLedgerEntries,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.SerializeToString,
+        ),
+        "ExportLedgerEntries": grpc.unary_stream_rpc_method_handler(
+            servicer.ExportLedgerEntries,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.FromString,
+            response_serializer=google_dot_api_dot_httpbody__pb2.HttpBody.SerializeToString,
         ),
         "ListBalanceChanges": grpc.unary_unary_rpc_method_handler(
             servicer.ListBalanceChanges,
@@ -1388,11 +1599,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesResponse.SerializeToString,
         ),
-        "ObserveRewards": grpc.unary_stream_rpc_method_handler(
-            servicer.ObserveRewards,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsResponse.SerializeToString,
-        ),
         "GetDeposit": grpc.unary_unary_rpc_method_handler(
             servicer.GetDeposit,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositRequest.FromString,
@@ -1453,11 +1659,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDelegationsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDelegationsResponse.SerializeToString,
         ),
-        "ObserveDelegations": grpc.unary_stream_rpc_method_handler(
-            servicer.ObserveDelegations,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveDelegationsRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveDelegationsResponse.SerializeToString,
-        ),
         "GetNetworkData": grpc.unary_unary_rpc_method_handler(
             servicer.GetNetworkData,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkDataRequest.FromString,
@@ -1492,6 +1693,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.EstimateMargin,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.SerializeToString,
+        ),
+        "EstimatePosition": grpc.unary_unary_rpc_method_handler(
+            servicer.EstimatePosition,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.SerializeToString,
         ),
         "ListNetworkParameters": grpc.unary_unary_rpc_method_handler(
             servicer.ListNetworkParameters,
@@ -1558,20 +1764,40 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.SerializeToString,
         ),
-        "GetMostRecentDeHistorySegment": grpc.unary_unary_rpc_method_handler(
-            servicer.GetMostRecentDeHistorySegment,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentResponse.SerializeToString,
+        "GetMostRecentNetworkHistorySegment": grpc.unary_unary_rpc_method_handler(
+            servicer.GetMostRecentNetworkHistorySegment,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentResponse.SerializeToString,
         ),
-        "ListAllDeHistorySegments": grpc.unary_unary_rpc_method_handler(
-            servicer.ListAllDeHistorySegments,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.SerializeToString,
+        "ListAllNetworkHistorySegments": grpc.unary_unary_rpc_method_handler(
+            servicer.ListAllNetworkHistorySegments,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsResponse.SerializeToString,
         ),
-        "GetActiveDeHistoryPeerAddresses": grpc.unary_unary_rpc_method_handler(
-            servicer.GetActiveDeHistoryPeerAddresses,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.SerializeToString,
+        "GetActiveNetworkHistoryPeerAddresses": grpc.unary_unary_rpc_method_handler(
+            servicer.GetActiveNetworkHistoryPeerAddresses,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.SerializeToString,
+        ),
+        "GetNetworkHistoryStatus": grpc.unary_unary_rpc_method_handler(
+            servicer.GetNetworkHistoryStatus,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusResponse.SerializeToString,
+        ),
+        "GetNetworkHistoryBootstrapPeers": grpc.unary_unary_rpc_method_handler(
+            servicer.GetNetworkHistoryBootstrapPeers,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersResponse.SerializeToString,
+        ),
+        "ListEntities": grpc.unary_unary_rpc_method_handler(
+            servicer.ListEntities,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.SerializeToString,
+        ),
+        "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
+            servicer.ExportNetworkHistory,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.FromString,
+            response_serializer=google_dot_api_dot_httpbody__pb2.HttpBody.SerializeToString,
         ),
         "Ping": grpc.unary_unary_rpc_method_handler(
             servicer.Ping,
@@ -1822,6 +2048,35 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def ListAllPositions(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListAllPositions",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def ObservePositions(
         request,
         target,
@@ -1869,6 +2124,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListLedgerEntries",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ExportLedgerEntries(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ExportLedgerEntries",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.SerializeToString,
+            google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
             options,
             channel_credentials,
             insecure,
@@ -2895,35 +3179,6 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def ObserveRewards(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/ObserveRewards",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveRewardsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def GetDeposit(
         request,
         target,
@@ -3272,35 +3527,6 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def ObserveDelegations(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/ObserveDelegations",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveDelegationsRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveDelegationsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
     def GetNetworkData(
         request,
         target,
@@ -3493,6 +3719,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/EstimateMargin",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def EstimatePosition(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/EstimatePosition",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -3881,7 +4136,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetMostRecentDeHistorySegment(
+    def GetMostRecentNetworkHistorySegment(
         request,
         target,
         options=(),
@@ -3896,9 +4151,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetMostRecentDeHistorySegment",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentDeHistorySegmentResponse.FromString,
+            "/datanode.api.v2.TradingDataService/GetMostRecentNetworkHistorySegment",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -3910,7 +4165,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def ListAllDeHistorySegments(
+    def ListAllNetworkHistorySegments(
         request,
         target,
         options=(),
@@ -3925,9 +4180,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/ListAllDeHistorySegments",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllDeHistorySegmentsResponse.FromString,
+            "/datanode.api.v2.TradingDataService/ListAllNetworkHistorySegments",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -3939,7 +4194,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetActiveDeHistoryPeerAddresses(
+    def GetActiveNetworkHistoryPeerAddresses(
         request,
         target,
         options=(),
@@ -3954,9 +4209,125 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetActiveDeHistoryPeerAddresses",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveDeHistoryPeerAddressesResponse.FromString,
+            "/datanode.api.v2.TradingDataService/GetActiveNetworkHistoryPeerAddresses",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetNetworkHistoryStatus(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetNetworkHistoryStatus",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetNetworkHistoryBootstrapPeers(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetNetworkHistoryBootstrapPeers",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListEntities(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListEntities",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ExportNetworkHistory(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
+            google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
             options,
             channel_credentials,
             insecure,

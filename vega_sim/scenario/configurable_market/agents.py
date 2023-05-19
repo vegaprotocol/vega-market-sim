@@ -26,16 +26,14 @@ INFORMED_PARTY = PartyConfig(WALLET_NAME, WALLET_PASS, "informed_party")
 class ConfigurableMarketManager(StateAgentWithWallet):
     def __init__(
         self,
-        proposal_wallet_name: str,
-        proposal_wallet_pass: str,
-        termination_wallet_name: str,
-        termination_wallet_pass: str,
+        proposal_key_name: str,
+        termination_key_name: str,
         market_name: str,
         market_code: str,
         asset_name: str,
         asset_dp: int,
-        proposal_key_name: Optional[str] = None,
-        termination_key_name: Optional[str] = None,
+        proposal_wallet_name: Optional[str] = None,
+        termination_wallet_name: Optional[str] = None,
         market_config: Optional[MarketConfig] = None,
         tag: Optional[str] = None,
         settlement_price: Optional[float] = None,
@@ -43,13 +41,11 @@ class ConfigurableMarketManager(StateAgentWithWallet):
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
-            wallet_pass=proposal_wallet_pass,
             key_name=proposal_key_name,
             tag=tag,
         )
 
         self.termination_wallet_name = termination_wallet_name
-        self.termination_wallet_pass = termination_wallet_pass
         self.termination_key_name = termination_key_name
 
         self.market_name = market_name
@@ -69,32 +65,34 @@ class ConfigurableMarketManager(StateAgentWithWallet):
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
-        create_wallet: bool = True,
-        mint_wallet: bool = True,
+        create_key: bool = True,
+        mint_key: bool = True,
     ):
-        super().initialise(vega=vega, create_wallet=create_wallet)
-        if create_wallet:
-            self.vega.create_wallet(
-                self.termination_wallet_name,
-                self.termination_wallet_pass,
-                self.termination_key_name,
+        super().initialise(vega=vega, create_key=create_key)
+        if create_key:
+            self.vega.create_key(
+                wallet_name=self.termination_wallet_name,
+                name=self.termination_key_name,
             )
 
         self.vega.wait_for_total_catchup()
-        if mint_wallet:
+        if mint_key:
             self.vega.mint(
-                self.wallet_name, asset="VOTE", amount=1e4, key_name=self.key_name
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
             )
 
         self.vega.wait_for_total_catchup()
 
         if self.vega.find_asset_id(symbol=self.asset_name) is None:
             self.vega.create_asset(
-                self.wallet_name,
+                wallet_name=self.wallet_name,
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.asset_dp,
-                max_faucet_amount=5e10,
+                max_faucet_amount=10_000_000_000,
                 key_name=self.key_name,
             )
 
@@ -102,9 +100,9 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
 
         self.vega.wait_for_total_catchup()
-        if mint_wallet:
+        if mint_key:
             self.vega.mint(
-                self.wallet_name,
+                wallet_name=self.wallet_name,
                 asset=self.asset_id,
                 amount=self.initial_mint,
                 key_name=self.key_name,
@@ -122,7 +120,8 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             self.market_config.set(
                 "instrument.future.terminating_key",
                 self.vega.wallet.public_key(
-                    self.termination_wallet_name, self.termination_key_name
+                    wallet_name=self.termination_wallet_name,
+                    name=self.termination_key_name,
                 ),
             )
 
@@ -139,9 +138,9 @@ class ConfigurableMarketManager(StateAgentWithWallet):
     def finalise(self):
         if self.settlement_price is not None:
             self.vega.settle_market(
-                self.termination_wallet_name,
+                self.termination_key_name,
                 self.settlement_price,
                 self.market_id,
-                self.termination_key_name,
+                self.termination_wallet_name,
             )
             self.vega.wait_for_total_catchup()

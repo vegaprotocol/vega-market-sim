@@ -1,7 +1,5 @@
-from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import MagicMock, patch
 
-import grpc
 import pytest
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
@@ -20,30 +18,29 @@ from vega_sim.api.data import (
     Transfer,
     OrdersBySide,
     Trade,
-    asset_decimals,
-    best_prices,
-    price_bounds,
+    AggregatedLedgerEntry,
+    MarginEstimate,
+    LiquidationEstimate,
+    LiquidationPrice,
+    get_asset_decimals,
     find_asset_id,
     get_trades,
     margin_levels,
     market_position_decimals,
     market_price_decimals,
     open_orders_by_market,
-    order_subscription,
-    transfer_subscription,
     party_account,
     list_transfers,
-    get_liquidity_fee_shares,
+    list_ledger_entries,
+    estimate_position,
 )
 from vega_sim.grpc.client import (
-    VegaCoreClient,
     VegaTradingDataClientV2,
 )
 
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
     add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
 )
-from vega_sim.proto.vega.api.v1.core_pb2_grpc import add_CoreServiceServicer_to_server
 
 
 def test_party_account(trading_data_v2_servicer_and_port):
@@ -105,7 +102,7 @@ def test_party_account(trading_data_v2_servicer_and_port):
 
     assert res == PartyMarketAccount(52.35, 64.23, 10.51)
 
-    with patch("vega_sim.api.data.asset_decimals", lambda asset_id, data_client: 2):
+    with patch("vega_sim.api.data.get_asset_decimals", lambda asset_id, data_client: 2):
         res2 = party_account(
             "PUB_KEY",
             asset_id="a1",
@@ -199,44 +196,7 @@ def test_asset_decimals(mkt_info_mock):
     asset_mock.details.decimals = 3
     mkt_info_mock.return_value = asset_mock
 
-    assert asset_decimals("ASSET", None) == 3
-
-
-@patch("vega_sim.api.data_raw.market_data")
-def test_best_prices(mkt_data_mock):
-    mkt_data = MagicMock()
-    mkt_data_mock.return_value = mkt_data
-
-    mkt_data.best_static_bid_price = "202"
-    mkt_data.best_static_offer_price = "212"
-
-    bid_res, ask_res = best_prices("mkt", None, 2)
-    assert bid_res == pytest.approx(2.02)
-    assert ask_res == pytest.approx(2.12)
-
-
-@patch("vega_sim.api.data_raw.market_data")
-def test_price_bounds(mkt_data_mock):
-    mkt_data = MagicMock()
-    mkt_data_mock.return_value = mkt_data
-    mkt_data.price_monitoring_bounds = [
-        vega_protos.vega.PriceMonitoringBounds(
-            min_valid_price="10000",
-            max_valid_price="20000",
-        ),
-        vega_protos.vega.PriceMonitoringBounds(
-            min_valid_price="11000",
-            max_valid_price="19000",
-        ),
-        vega_protos.vega.PriceMonitoringBounds(
-            min_valid_price="12000",
-            max_valid_price="18000",
-        ),
-    ]
-
-    min_valid_price, max_valid_price = price_bounds("mkt", None, 2)
-    assert min_valid_price == pytest.approx(120)
-    assert max_valid_price == pytest.approx(180)
+    assert get_asset_decimals("ASSET", None) == 3
 
 
 def test_open_orders_by_market(trading_data_v2_servicer_and_port):
@@ -501,277 +461,7 @@ def test_open_orders_by_market(trading_data_v2_servicer_and_port):
     )
 
 
-@patch("vega_sim.api.data.market_position_decimals")
-@patch("vega_sim.api.data.market_price_decimals")
-def test_order_subscription(mkt_price_mock, mkt_pos_mock, core_servicer_and_port):
-    mkt_pos_mock.return_value = 2
-    mkt_price_mock.return_value = 2
-    orders = [
-        vega_protos.vega.Order(
-            id="id1",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_BUY,
-            price="10100",
-            size=101,
-            remaining=101,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party1",
-            updated_at=1653266950,
-            version=1,
-        ),
-        vega_protos.vega.Order(
-            id="id2",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_CANCELLED,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_BUY,
-            price="10100",
-            size=101,
-            remaining=101,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party1",
-            updated_at=1653266950,
-            version=1,
-        ),
-        vega_protos.vega.Order(
-            id="id3",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_FILLED,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_BUY,
-            price="10100",
-            size=101,
-            remaining=0,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party1",
-            updated_at=1653266950,
-            version=1,
-        ),
-        vega_protos.vega.Order(
-            id="id4",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_BUY,
-            price="10110",
-            size=101,
-            remaining=101,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party1",
-            updated_at=1653266950,
-            version=1,
-        ),
-        vega_protos.vega.Order(
-            id="id5",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_BUY,
-            price="10100",
-            size=101,
-            remaining=101,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party2",
-            updated_at=1653266950,
-            version=1,
-        ),
-        vega_protos.vega.Order(
-            id="id6",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_SELL,
-            price="10400",
-            size=111,
-            remaining=121,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party1",
-            updated_at=1653266950,
-            version=1,
-        ),
-        vega_protos.vega.Order(
-            id="id7",
-            market_id="market",
-            status=vega_protos.vega.Order.Status.STATUS_ACTIVE,
-            reference="ref1",
-            side=vega_protos.vega.SIDE_SELL,
-            price="10100",
-            size=101,
-            remaining=101,
-            time_in_force=vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_GTC,
-            type=vega_protos.vega.Order.Type.TYPE_LIMIT,
-            created_at=1653266950,
-            expires_at=1653276950,
-            party_id="party1",
-            updated_at=1653266950,
-            version=1,
-        ),
-    ]
-
-    def ObserveEventBus(self, request, context):
-        for order_chunk in [orders[:3], orders[3:6], orders[6:]]:
-            yield vega_protos.api.v1.core.ObserveEventBusResponse(
-                events=[events_protos.BusEvent(order=order) for order in order_chunk]
-            )
-
-    server, port, mock_servicer = core_servicer_and_port
-    mock_servicer.ObserveEventBus = ObserveEventBus
-
-    add_CoreServiceServicer_to_server(mock_servicer(), server)
-
-    data_client = VegaCoreClient(f"localhost:{port}")
-
-    queue = order_subscription(data_client=data_client, trading_data_client=None)
-    for order in orders:
-        assert order.id == next(queue).id
-
-
-@patch("vega_sim.api.data.asset_decimals")
-def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
-    mk_asset_decimals.return_value = 1
-    transfers = [
-        events_protos.Transfer(
-            id="id1",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-        events_protos.Transfer(
-            id="id2",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-        events_protos.Transfer(
-            id="id3",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-        events_protos.Transfer(
-            id="id4",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-        events_protos.Transfer(
-            id="id5",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-        events_protos.Transfer(
-            id="id6",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-        events_protos.Transfer(
-            id="id7",
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to="party2",
-            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            asset="asset1",
-            amount="100000",
-            reference="reference",
-            status=events_protos.Transfer.Status.STATUS_DONE,
-            timestamp=000000000,
-            reason="reason",
-            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-            recurring=events_protos.RecurringTransfer(),
-        ),
-    ]
-
-    def ObserveEventBus(self, request, context):
-        for transfer_chunk in [transfers[:3], transfers[3:6], transfers[6:]]:
-            yield vega_protos.api.v1.core.ObserveEventBusResponse(
-                events=[
-                    events_protos.BusEvent(transfer=transfer)
-                    for transfer in transfer_chunk
-                ]
-            )
-
-    server, port, mock_servicer = core_servicer_and_port
-    mock_servicer.ObserveEventBus = ObserveEventBus
-
-    add_CoreServiceServicer_to_server(mock_servicer(), server)
-
-    data_client = VegaCoreClient(f"localhost:{port}")
-
-    queue = transfer_subscription(data_client=data_client, trading_data_client=None)
-    for transfer in transfers:
-        assert transfer.id == next(queue).id
-
-
-@patch("vega_sim.api.data.asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
     expected = [
         MarginLevels(
@@ -829,7 +519,7 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
     assert res == expected
 
 
-@patch("vega_sim.api.data.asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 @patch("vega_sim.api.data.market_price_decimals")
 @patch("vega_sim.api.data.market_position_decimals")
 @patch("vega_sim.api.data_raw.market_info")
@@ -925,7 +615,7 @@ def test_get_trades(
     assert res == expected
 
 
-@patch("vega_sim.api.data.asset_decimals")
+@patch("vega_sim.api.data.get_asset_decimals")
 def test_list_transfers(
     mk_asset_decimals,
     trading_data_v2_servicer_and_port,
@@ -997,49 +687,163 @@ def test_list_transfers(
     assert res == [expected]
 
 
-def test_get_liquidity_fee_shares(trading_data_v2_servicer_and_port):
+def test_list_ledger_entries(trading_data_v2_servicer_and_port):
+    expected = data_node_protos_v2.trading_data.AggregatedLedgerEntry(
+        timestamp=10000000, quantity="540", asset_id="asset1"
+    )
 
-    expected = {"party1": 0.75, "party2": 0.25}
-
-    def GetLatestMarketData(self, request, context):
-        return data_node_protos_v2.trading_data.GetLatestMarketDataResponse(
-            market_data=vega_protos.vega.MarketData(
-                liquidity_provider_fee_share=[
-                    vega_protos.vega.LiquidityProviderFeeShare(
-                        party="party1",
-                        equity_like_share="0.75",
-                        average_entry_valuation="75",
-                        average_score="0.5",
-                    ),
-                    vega_protos.vega.LiquidityProviderFeeShare(
-                        party="party2",
-                        equity_like_share="0.25",
-                        average_entry_valuation="100",
-                        average_score="0.5",
-                    ),
-                ]
+    def ListLedgerEntries(self, request, context):
+        return data_node_protos_v2.trading_data.ListLedgerEntriesResponse(
+            ledger_entries=data_node_protos_v2.trading_data.AggregatedLedgerEntriesConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.AggregatedLedgerEntriesEdge(
+                        cursor="cursor",
+                        node=expected,
+                    )
+                ],
             )
         )
 
     server, port, mock_servicer = trading_data_v2_servicer_and_port
-    mock_servicer.GetLatestMarketData = GetLatestMarketData
+    mock_servicer.ListLedgerEntries = ListLedgerEntries
 
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-
-    res1 = get_liquidity_fee_shares(
-        data_client=data_client, market_id="na", party_id="party1"
+    res = list_ledger_entries(
+        data_client=data_client, asset_id="asset1", asset_decimals_map={"asset1": 1}
     )
-    assert res1 == expected["party1"]
 
-    res2 = get_liquidity_fee_shares(
-        data_client=data_client, market_id="na", party_id="party2"
+    assert res == [
+        AggregatedLedgerEntry(
+            timestamp=10000000,
+            quantity=54,
+            asset_id="asset1",
+            transfer_type=0,
+            from_account_type=0,
+            to_account_type=0,
+            from_account_market_id="",
+            from_account_party_id="",
+            to_account_market_id="",
+            to_account_party_id="",
+        )
+    ]
+    res2 = list_ledger_entries(
+        data_client=data_client, asset_id="asset1", asset_decimals_map={"asset1": 2}
     )
-    assert res2 == expected["party2"]
 
-    res3 = get_liquidity_fee_shares(
+    assert res2 == [
+        AggregatedLedgerEntry(
+            timestamp=10000000,
+            quantity=5.4,
+            asset_id="asset1",
+            transfer_type=0,
+            from_account_type=0,
+            to_account_type=0,
+            from_account_market_id="",
+            from_account_party_id="",
+            to_account_market_id="",
+            to_account_party_id="",
+        )
+    ]
+
+
+def test_estimate_position(trading_data_v2_servicer_and_port):
+    expected_market_id = "market"
+
+    expected_margin = MarginEstimate(
+        best_case=MarginLevels(
+            maintenance_margin=10,
+            search_level=20,
+            initial_margin=30,
+            collateral_release_level=40,
+            party_id="party",
+            market_id=expected_market_id,
+            asset="asset",
+            timestamp=0000000000000000000,
+        ),
+        worst_case=MarginLevels(
+            maintenance_margin=10,
+            search_level=20,
+            initial_margin=30,
+            collateral_release_level=40,
+            party_id="party",
+            market_id=expected_market_id,
+            asset="asset",
+            timestamp=0000000000000000000,
+        ),
+    )
+    expected_liquidation = LiquidationEstimate(
+        best_case=LiquidationPrice(
+            open_volume_only=1000.00,
+            including_buy_orders=2000.00,
+            including_sell_orders=3000.00,
+        ),
+        worst_case=LiquidationPrice(
+            open_volume_only=1000.00,
+            including_buy_orders=2000.00,
+            including_sell_orders=3000.00,
+        ),
+    )
+
+    def EstimatePosition(self, request, context):
+        return data_node_protos_v2.trading_data.EstimatePositionResponse(
+            margin=data_node_protos_v2.trading_data.MarginEstimate(
+                best_case=vega_protos.vega.MarginLevels(
+                    maintenance_margin="100",
+                    search_level="200",
+                    initial_margin="300",
+                    collateral_release_level="400",
+                    party_id="party",
+                    market_id=request.market_id,
+                    asset="asset",
+                    timestamp=0000000000000000000,
+                ),
+                worst_case=vega_protos.vega.MarginLevels(
+                    maintenance_margin="100",
+                    search_level="200",
+                    initial_margin="300",
+                    collateral_release_level="400",
+                    party_id="party",
+                    market_id=request.market_id,
+                    asset="asset",
+                    timestamp=0000000000000000000,
+                ),
+            ),
+            liquidation=data_node_protos_v2.trading_data.LiquidationEstimate(
+                best_case=data_node_protos_v2.trading_data.LiquidationPrice(
+                    open_volume_only="1000.00",
+                    including_buy_orders="2000.00",
+                    including_sell_orders="3000.00",
+                ),
+                worst_case=data_node_protos_v2.trading_data.LiquidationPrice(
+                    open_volume_only="1000.00",
+                    including_buy_orders="2000.00",
+                    including_sell_orders="3000.00",
+                ),
+            ),
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.EstimatePosition = EstimatePosition
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    margin, liquidation = estimate_position(
         data_client=data_client,
-        market_id="na",
+        market_id=expected_market_id,
+        open_volume=1,
+        orders=[(vega_protos.vega.SIDE_BUY, "500.00", 1, False)],
+        collateral_available="100",
+        asset_decimals={"asset": 1},
     )
-    assert res3 == expected
+
+    assert margin == expected_margin
+    assert liquidation == expected_liquidation

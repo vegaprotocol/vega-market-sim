@@ -129,7 +129,7 @@ class CurveMarketMaker(Scenario):
     ) -> List[StateAgent]:
         # Set up market name and settlement asset
         market_name = self.market_name + (f"_{tag}" if tag else "")
-        asset_name = self.asset_name + (f"_{tag}" if tag else "")
+        asset_name = self.asset_name
 
         price_process = (
             self.price_process_fn()
@@ -142,10 +142,8 @@ class CurveMarketMaker(Scenario):
         )
 
         market_manager = MarketManager(
-            wallet_name=MM_WALLET.name,
-            wallet_pass=MM_WALLET.passphrase,
-            terminate_wallet_name=TERMINATE_WALLET.name,
-            terminate_wallet_pass=TERMINATE_WALLET.passphrase,
+            key_name=MM_WALLET.name,
+            terminate_key_name=TERMINATE_WALLET.name,
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
             market_position_decimal=self.market_position_decimal,
@@ -156,8 +154,7 @@ class CurveMarketMaker(Scenario):
         )
 
         shaped_mm = ExponentialShapedMarketMaker(
-            wallet_name="expon",
-            wallet_pass="expon",
+            key_name="expon",
             price_process_generator=iter(price_process),
             initial_asset_mint=self.initial_asset_mint,
             market_name=market_name,
@@ -180,8 +177,7 @@ class CurveMarketMaker(Scenario):
         )
 
         sensitive_mo_trader = PriceSensitiveMarketOrderTrader(
-            wallet_name=TRADER_WALLET.name,
-            wallet_pass=TRADER_WALLET.passphrase,
+            key_name=TRADER_WALLET.name,
             market_name=market_name,
             asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
@@ -194,8 +190,7 @@ class CurveMarketMaker(Scenario):
         )
 
         auctionpass1 = OpenAuctionPass(
-            wallet_name=AUCTION1_WALLET.name,
-            wallet_pass=AUCTION1_WALLET.passphrase,
+            key_name=AUCTION1_WALLET.name,
             side="SIDE_BUY",
             initial_asset_mint=self.initial_asset_mint,
             initial_price=self.initial_price
@@ -208,8 +203,7 @@ class CurveMarketMaker(Scenario):
         )
 
         auctionpass2 = OpenAuctionPass(
-            wallet_name=AUCTION2_WALLET.name,
-            wallet_pass=AUCTION2_WALLET.passphrase,
+            key_name=AUCTION2_WALLET.name,
             side="SIDE_SELL",
             initial_asset_mint=self.initial_asset_mint,
             initial_price=self.initial_price
@@ -222,8 +216,7 @@ class CurveMarketMaker(Scenario):
         )
 
         info_trader = InformedTrader(
-            wallet_name=INFORMED_WALLET.name,
-            wallet_pass=INFORMED_WALLET.passphrase,
+            key_name=INFORMED_WALLET.name,
             price_process=price_process,
             market_name=market_name,
             asset_name=asset_name,

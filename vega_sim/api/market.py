@@ -16,7 +16,7 @@ A MarketConfig class has the following attributes which can be set:
 • liquidity_monitoring_parameters.target_stake_parameters.time_window
 • liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
 • log_normal.tau
-• log_normal.risk_aversion_parameters
+• log_normal.risk_aversion_parameter
 • log_normal.params.mu
 • log_normal.params.r
 • log_normal.params.sigma
@@ -52,7 +52,7 @@ Examples:
 
 import functools
 import logging
-from typing import Optional
+from typing import Optional, Union
 
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data.v1 as oracles_protos
@@ -77,15 +77,25 @@ class Config:
     def __init__(self, opt: Optional[str] = None) -> None:
         self.load(opt=opt)
 
-    def load(self, opt: Optional[str] = None):
+    def load(self, opt: Optional[Union[dict, str]] = None) -> dict:
         if opt is None:
             opt = list(self.OPTS.keys())[0]
             logging.debug(f"No 'opt' arg given. Using default value '{opt}'.")
 
-        if opt not in self.OPTS:
-            raise ValueError(f"Invalid 'opt' arg '{opt}' specified.")
+        if isinstance(opt, str):
+            if opt not in self.OPTS:
+                raise ValueError(f"Invalid 'opt' arg '{opt}' specified.")
+            return self.OPTS[opt]
 
-        return opt
+        if isinstance(opt, dict):
+            defaults = self.OPTS["default"]
+            for key in defaults.keys():
+                if key not in opt.keys():
+                    opt[key] = defaults[key]
+            return opt
+
+        else:
+            raise TypeError(f"Invalid type '{type(opt)}' for arg 'opt'.")
 
 
 class MarketConfig(Config):
@@ -98,26 +108,30 @@ class MarketConfig(Config):
             "liquidity_monitoring_parameters": "default",
             "log_normal": "default",
             "instrument": "default",
-            "lp_price_range": 1.0,
+            "lp_price_range": 0.5,
+            "linear_slippage_factor": 1e-3,
+            "quadratic_slippage_factor": 0,
         }
     }
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+        config = super().load(opt=opt)
 
-        self.decimal_places = self.OPTS[opt]["decimal_places"]
-        self.position_decimal_places = self.OPTS[opt]["position_decimal_places"]
-        self.lp_price_range = str(self.OPTS[opt]["lp_price_range"])
-        self.metadata = self.OPTS[opt]["metadata"]
+        self.decimal_places = config["decimal_places"]
+        self.position_decimal_places = config["position_decimal_places"]
+        self.lp_price_range = str(config["lp_price_range"])
+        self.linear_slippage_factor = str(config["linear_slippage_factor"])
+        self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
+        self.metadata = config["metadata"]
 
-        self.instrument = InstrumentConfiguration(opt=self.OPTS[opt]["instrument"])
+        self.instrument = InstrumentConfiguration(opt=config["instrument"])
         self.price_monitoring_parameters = PriceMonitoringParameters(
-            opt=self.OPTS[opt]["price_monitoring_parameters"]
+            opt=config["price_monitoring_parameters"]
         )
         self.liquidity_monitoring_parameters = LiquidityMonitoringParameters(
-            opt=self.OPTS[opt]["liquidity_monitoring_parameters"]
+            opt=config["liquidity_monitoring_parameters"]
         )
-        self.log_normal = LogNormalRiskModel(opt=self.OPTS[opt]["log_normal"])
+        self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
 
     def build(self):
         return vega_protos.governance.NewMarket(
@@ -130,6 +144,8 @@ class MarketConfig(Config):
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 liquidity_monitoring_parameters=self.liquidity_monitoring_parameters.build(),
                 log_normal=self.log_normal.build(),
+                linear_slippage_factor=self.linear_slippage_factor,
+                quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
 
@@ -140,29 +156,37 @@ class MarketConfig(Config):
 class PriceMonitoringParameters(Config):
     OPTS = {
         "default": {
-            "horizon": 24 * 3600,
-            "probability": "0.999999",
-            "auction_extension": 5,
+            "triggers": [
+                {
+                    "horizon": 900,  # 15 minutes
+                    "probability": "0.90001",
+                    "auction_extension": 60,
+                },
+                {
+                    "horizon": 3600,  # 1 hour
+                    "probability": "0.90001",
+                    "auction_extension": 300,
+                },
+                {
+                    "horizon": 14_400,  # 4 hour
+                    "probability": "0.90001",
+                    "auction_extension": 900,
+                },
+                {
+                    "horizon": 86_400,  # 1 day
+                    "probability": "0.90001",
+                    "auction_extension": 3600,
+                },
+            ]
         }
     }
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
-
-        self.horizon = self.OPTS[opt]["horizon"]
-        self.probability = self.OPTS[opt]["probability"]
-        self.auction_extension = self.OPTS[opt]["auction_extension"]
+        config = super().load(opt=opt)
+        self.triggers = config["triggers"]
 
     def build(self):
-        return vega_protos.markets.PriceMonitoringParameters(
-            triggers=[
-                {
-                    "horizon": self.horizon,
-                    "probability": self.probability,
-                    "auction_extension": self.auction_extension,
-                }
-            ]
-        )
+        return vega_protos.markets.PriceMonitoringParameters(triggers=self.triggers)
 
 
 class LiquidityMonitoringParameters(Config):
@@ -175,13 +199,13 @@ class LiquidityMonitoringParameters(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+        config = super().load(opt=opt)
 
-        self.triggering_ratio = self.OPTS[opt]["triggering_ratio"]
-        self.auction_extension = self.OPTS[opt]["auction_extension"]
+        self.triggering_ratio = config["triggering_ratio"]
+        self.auction_extension = config["auction_extension"]
 
         self.target_stake_parameters = TargetStakeParameters(
-            opt=self.OPTS[opt]["target_stake_parameters"]
+            opt=config["target_stake_parameters"]
         )
 
     def build(self):
@@ -201,10 +225,10 @@ class TargetStakeParameters(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+        config = super().load(opt=opt)
 
-        self.time_window = self.OPTS[opt]["time_window"]
-        self.scaling_factor = self.OPTS[opt]["scaling_factor"]
+        self.time_window = config["time_window"]
+        self.scaling_factor = config["scaling_factor"]
 
     def build(self):
         return vega_protos.markets.TargetStakeParameters(
@@ -223,12 +247,12 @@ class LogNormalRiskModel(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+        config = super().load(opt=opt)
 
-        self.risk_aversion_parameter = self.OPTS[opt]["risk_aversion_parameter"]
-        self.tau = self.OPTS[opt]["tau"]
+        self.risk_aversion_parameter = config["risk_aversion_parameter"]
+        self.tau = config["tau"]
 
-        self.params = LogNormalModelParams(opt=self.OPTS[opt]["params"])
+        self.params = LogNormalModelParams(opt=config["params"])
 
     def build(self):
         return vega_protos.markets.LogNormalRiskModel(
@@ -251,11 +275,11 @@ class LogNormalModelParams(Config):
         super().__init__(opt)
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+        config = super().load(opt=opt)
 
-        self.mu = self.OPTS[opt]["mu"]
-        self.r = self.OPTS[opt]["r"]
-        self.sigma = self.OPTS[opt]["sigma"]
+        self.mu = config["mu"]
+        self.r = config["r"]
+        self.sigma = config["sigma"]
 
     def build(self):
         return vega_protos.markets.LogNormalModelParams(
@@ -275,11 +299,11 @@ class InstrumentConfiguration(Config):
     }
 
     def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+        config = super().load(opt=opt)
 
-        self.name = self.OPTS[opt]["name"]
-        self.code = self.OPTS[opt]["code"]
-        self.future = FutureProduct(opt=self.OPTS[opt]["future"])
+        self.name = config["name"]
+        self.code = config["code"]
+        self.future = FutureProduct(opt=config["future"])
 
     def build(self):
         return vega_protos.governance.InstrumentConfiguration(
@@ -297,13 +321,13 @@ class FutureProduct(Config):
         }
     }
 
-    def load(self, opt: Optional[str] = None):
-        opt = super().load(opt=opt)
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
 
-        self.settlement_asset = self.OPTS[opt]["settlement_asset"]
-        self.quote_name = self.OPTS[opt]["quote_name"]
-        self.number_decimal_places = self.OPTS[opt]["number_decimal_places"]
-        self.terminating_key = self.OPTS[opt]["terminating_key"]
+        self.settlement_asset = config["settlement_asset"]
+        self.quote_name = config["quote_name"]
+        self.number_decimal_places = config["number_decimal_places"]
+        self.terminating_key = config["terminating_key"]
 
     def build(self):
         if None in [
@@ -312,14 +336,6 @@ class FutureProduct(Config):
             self.number_decimal_places,
             self.terminating_key,
         ]:
-            print(
-                [
-                    self.settlement_asset,
-                    self.quote_name,
-                    self.number_decimal_places,
-                    self.terminating_key,
-                ]
-            )
             raise ValueError(
                 "MarketConfig has not been updated with settlement asset information."
             )

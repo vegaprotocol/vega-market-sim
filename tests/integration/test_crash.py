@@ -1,6 +1,6 @@
 import pytest
 
-from tests.integration.utils.fixtures import vega_service_with_order_feed
+from tests.integration.utils.fixtures import vega_service
 from vega_sim.null_service import VegaServiceNull
 
 
@@ -8,8 +8,8 @@ from vega_sim.scenario.market_crash.scenario import MarketCrash
 
 
 @pytest.mark.integration
-def test_crash(vega_service_with_order_feed: VegaServiceNull):
-    vega = vega_service_with_order_feed
+def test_crash(vega_service: VegaServiceNull):
+    vega = vega_service
 
     scenario = MarketCrash(
         num_steps=400,
@@ -39,10 +39,10 @@ def test_crash(vega_service_with_order_feed: VegaServiceNull):
     market_id = vega.all_markets()[0].id
 
     vega.wait_for_datanode_sync()
+
     # check bond and margin for all
     for key_name in [f"_iter_pos_{i}" for i in range(2)]:
         general, margin, bond = vega.party_account(
-            wallet_name="trader",
             asset_id=asset_id,
             market_id=market_id,
             key_name=key_name,

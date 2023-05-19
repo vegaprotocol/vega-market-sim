@@ -25,7 +25,7 @@ def create_and_faucet_wallet(
     vega: VegaServiceNull, wallet: WalletConfig, amount: float = 1e4
 ):
     asset_id = vega.find_asset_id(symbol=ASSET_NAME)
-    vega.create_wallet(wallet.name, wallet.passphrase)
+    vega.create_key(wallet.name)
     vega.mint(wallet.name, asset_id, amount)
 
 
@@ -47,7 +47,7 @@ def build_basic_market(
 ):
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
-        vega.create_wallet(wallet.name, wallet.passphrase)
+        vega.create_key(wallet.name)
 
     vega.wait_for_total_catchup()
     vega.mint(
@@ -79,27 +79,19 @@ def build_basic_market(
     vega.forward("10s")
     vega.create_simple_market(
         market_name="CRYPTO:BTCDAI/DEC22",
-        proposal_wallet=MM_WALLET.name,
+        proposal_key=MM_WALLET.name,
         settlement_asset_id=asset_id,
-        termination_wallet=TERMINATE_WALLET.name,
-        market_decimals=market_decimals,
+        termination_key=TERMINATE_WALLET.name,
+        market_decimals=5,
         oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
         oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
         settlement_price_decimals=settlement_price_decimals,
-        liquidity_commitment=vega.build_new_market_liquidity_commitment(
-            asset_id=asset_id,
-            commitment_amount=initial_commitment,
-            fee=0.002,
-            buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-            sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-            market_decimals=5,
-        ),
     )
 
     market_id = vega.all_markets()[0].id
 
     vega.submit_liquidity(
-        wallet_name=MM_WALLET.name,
+        key_name=MM_WALLET.name,
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
@@ -109,7 +101,7 @@ def build_basic_market(
     )
     # Add transactions in the proposed market to pass opening auction at price 0.3
     vega.submit_order(
-        trading_wallet=AUCTION1.name,
+        trading_key=AUCTION1.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -119,7 +111,7 @@ def build_basic_market(
     )
 
     vega.submit_order(
-        trading_wallet=AUCTION2.name,
+        trading_key=AUCTION2.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -129,7 +121,7 @@ def build_basic_market(
     )
 
     vega.submit_order(
-        trading_wallet=TRADER_WALLET.name,
+        trading_key=TRADER_WALLET.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -139,7 +131,7 @@ def build_basic_market(
     )
 
     vega.submit_order(
-        trading_wallet=TRADER_WALLET.name,
+        trading_key=TRADER_WALLET.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
@@ -155,21 +147,9 @@ def vega_service():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         run_with_console=False,
-        start_order_feed=False,
         retain_log_files=True,
         transactions_per_block=1,
-    ) as vega:
-        yield vega
-
-
-@pytest.fixture
-def vega_service_with_order_feed():
-    with VegaServiceNull(
-        warn_on_raw_data_access=False,
-        run_with_console=False,
-        start_order_feed=True,
-        retain_log_files=True,
-        transactions_per_block=1,
+        listen_for_high_volume_stream_updates=False,
     ) as vega:
         yield vega
 
@@ -178,3 +158,21 @@ def vega_service_with_order_feed():
 def vega_service_with_market(vega_service):
     build_basic_market(vega_service, initial_price=0.3)
     return vega_service
+
+
+@pytest.fixture
+def vega_service_with_high_volume():
+    with VegaServiceNull(
+        warn_on_raw_data_access=False,
+        run_with_console=False,
+        retain_log_files=True,
+        transactions_per_block=1,
+        listen_for_high_volume_stream_updates=True,
+    ) as vega:
+        yield vega
+
+
+@pytest.fixture
+def vega_service_with_high_volume_with_market(vega_service_with_high_volume):
+    build_basic_market(vega_service_with_high_volume, initial_price=0.3)
+    return vega_service_with_high_volume
