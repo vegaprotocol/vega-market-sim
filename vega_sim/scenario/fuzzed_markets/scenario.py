@@ -224,7 +224,6 @@ class FuzzingScenario(Scenario):
                     asset_name=asset_name,
                     settlement_price=price_process[-1],
                     tag=f"MARKET_{str(i_market).zfill(3)}",
-                    network_parameters={"validators.epoch.length": "5m"},
                 )
             )
 
