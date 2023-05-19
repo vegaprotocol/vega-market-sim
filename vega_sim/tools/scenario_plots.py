@@ -766,6 +766,8 @@ def reward_plots(run_name: Optional[str] = None):
         plt.xticks(rotation=45)
         axs[-1].legend()
 
+    return fig
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -810,7 +812,7 @@ if __name__ == "__main__":
     if args.rewards or args.all:
         fig = reward_plots()
         if args.save:
-            figs.savefig(f"{dir}/rewards.jpg")
+            fig.savefig(f"{dir}/rewards.jpg")
 
     if args.show:
         plt.show()
