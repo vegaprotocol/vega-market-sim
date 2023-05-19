@@ -2232,7 +2232,7 @@ class VegaService(ABC):
         recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
             start_epoch=start_epoch
             if start_epoch is not None
-            else int(self.statistics().epoch_seq) + 1
+            else int(self.statistics().epoch_seq)
         )
         # Set the optional RecurringTransfer fields
         if start_epoch is not None:
