@@ -393,7 +393,7 @@ class FuzzingScenario(Scenario):
                     RewardFunder(
                         wallet_name="REWARD_FUNDERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                        reward_asset_name=str(metric),
+                        reward_asset_name=vega_protos.vega.DispatchMetric.Name(metric),
                         initial_mint=1e9,
                         account_type=account_type,
                         transfer_amount=100,
