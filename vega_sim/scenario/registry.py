@@ -224,7 +224,7 @@ SCENARIOS = {
         market_code="BTC:USD",
         asset_name="tUSD",
         asset_dp=18,
-        num_steps=60 * 24,
+        num_steps=60 * 24 * 7,
         market_config=None,
     ),
     "vega_load_test": lambda: VegaLoadTest(

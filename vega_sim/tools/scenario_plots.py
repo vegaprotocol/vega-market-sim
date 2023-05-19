@@ -382,7 +382,7 @@ def plot_price_comparison(
     )
 
     ax0.set_ylabel("PRICE")
-    ax0.legend(labels=["external price", "mark price"])
+    ax0.legend(labels=["mark price", "external price"])
 
 
 def plot_degen_close_outs(

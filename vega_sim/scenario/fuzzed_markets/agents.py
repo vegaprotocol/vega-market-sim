@@ -363,14 +363,15 @@ class DegenerateTrader(StateAgentWithWallet):
 
             size = add_to_margin / (midprice * risk_factor + 1e-20)
 
-            self.vega.submit_market_order(
-                trading_key=self.key_name,
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=self.side,
-                volume=size,
-                wait=False,
-            )
+            if size > 0:
+                self.vega.submit_market_order(
+                    trading_key=self.key_name,
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    side=self.side,
+                    volume=size,
+                    wait=False,
+                )
 
 
 class DegenerateLiquidityProvider(StateAgentWithWallet):

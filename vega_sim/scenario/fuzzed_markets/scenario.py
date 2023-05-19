@@ -1,39 +1,40 @@
-from vega_sim.api.market import MarketConfig
-
 import argparse
+import datetime
 import logging
-import numpy as np
-from typing import Optional, List
-from vega_sim.scenario.common.utils.price_process import random_walk
+from dataclasses import dataclass
+from datetime import timedelta
+from typing import Dict, List, Optional
 
-from vega_sim.scenario.scenario import Scenario
+import numpy as np
+import pandas as pd
+
+from vega_sim.api.market import MarketConfig
 from vega_sim.environment.environment import (
     MarketEnvironmentWithState,
     NetworkEnvironment,
 )
-from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
-
-from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.scenario.common.agents import (
+    ExponentialShapedMarketMaker,
+    LimitOrderTrader,
+    MarketOrderTrader,
     StateAgent,
     UncrossAuctionAgent,
-    ExponentialShapedMarketMaker,
-    MarketOrderTrader,
-    LimitOrderTrader,
 )
+from vega_sim.scenario.common.utils.price_process import (
+    Granularity,
+    get_historic_price_series,
+    random_walk,
+)
+from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
+from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.agents import (
-    FuzzingAgent,
-    DegenerateTrader,
     DegenerateLiquidityProvider,
+    DegenerateTrader,
+    FuzzingAgent,
     FuzzyLiquidityProvider,
 )
-
-import datetime
-from typing import Optional, Dict
-from dataclasses import dataclass
-from vega_sim.scenario.common.agents import ExponentialShapedMarketMaker
-import pandas as pd
+from vega_sim.scenario.scenario import Scenario
 
 
 @dataclass
@@ -86,6 +87,28 @@ def additional_data_to_rows(data) -> List[pd.Series]:
             }
         )
     return results
+
+
+def _create_historic_price_process(
+    random_state, num_steps, granularity: Granularity
+) -> list:
+    start = "2022-10-01 00:00:00"
+
+    start = datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+
+    start = start + timedelta(days=int(random_state.choice(range(90))))
+
+    end = start + timedelta(seconds=(num_steps + 1) * granularity.value)
+
+    price_process = get_historic_price_series(
+        product_id="BTC-USD",
+        granularity=granularity,
+        start=str(start),
+        end=str(end),
+        interpolation=f"{granularity.value}s",
+    )
+
+    return list(price_process)
 
 
 def _create_price_process(
@@ -196,19 +219,21 @@ class FuzzingScenario(Scenario):
             # Create fuzzed market config
             market_config = MarketConfig()
             market_config.load("proposal")
-            market_config.set(
-                "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
-                1e-4,
-            )
+
             if self.fuzz_market_config is not None:
                 for param, value in self.fuzz_market_config.items():
                     market_config.set(param, value)
 
             # Create fuzzed price process
-            price_process = _create_price_process(
+            # price_process = _create_price_process(
+            #     random_state=self.random_state,
+            #     num_steps=self.num_steps,
+            #     decimal_places=int(market_config.decimal_places),
+            # )
+            price_process = _create_historic_price_process(
                 random_state=self.random_state,
                 num_steps=self.num_steps,
-                decimal_places=int(market_config.decimal_places),
+                granularity=Granularity.MINUTE,
             )
 
             # Create fuzzed market managers
@@ -236,13 +261,13 @@ class FuzzingScenario(Scenario):
                     initial_asset_mint=self.initial_asset_mint,
                     market_name=market_name,
                     asset_name=asset_name,
-                    commitment_amount=1e6,
+                    commitment_amount=200_000,
                     market_decimal_places=market_config.decimal_places,
                     asset_decimal_places=asset_name,
                     num_steps=self.num_steps,
-                    kappa=2.4,
+                    kappa=0.2,
                     tick_spacing=0.05,
-                    market_kappa=50,
+                    market_kappa=0.05,
                     state_update_freq=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
@@ -267,12 +292,13 @@ class FuzzingScenario(Scenario):
                 random_traders.append(
                     MarketOrderTrader(
                         wallet_name=f"RANDOM_TRADERS",
+                        initial_asset_mint=10_000,
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
-                        buy_intensity=10,
-                        sell_intensity=10,
-                        base_order_size=1,
+                        buy_intensity=5,
+                        sell_intensity=5,
+                        base_order_size=0.1,
                         step_bias=1,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
@@ -288,13 +314,14 @@ class FuzzingScenario(Scenario):
                         time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                         buy_volume=1,
                         sell_volume=1,
-                        buy_intensity=10,
-                        sell_intensity=10,
+                        buy_intensity=1,
+                        sell_intensity=1,
                         submit_bias=1,
                         cancel_bias=0,
                         duration=120,
                         price_process=price_process,
                         spread=0,
+                        initial_asset_mint=10_000,
                         mean=-3,
                         sigma=0.5,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
@@ -323,7 +350,7 @@ class FuzzingScenario(Scenario):
                             asset_name=asset_name,
                             side=side,
                             initial_asset_mint=1_000,
-                            size_factor=0.7,
+                            size_factor=0.55,
                             step_bias=0.1,
                             tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         )
@@ -375,8 +402,8 @@ class FuzzingScenario(Scenario):
             + auction_traders
             + random_traders
             # + fuzz_traders
-            # + degenerate_traders
-            # + degenerate_liquidity_providers
+            + degenerate_traders
+            + degenerate_liquidity_providers
             # + fuzz_liquidity_providers
         )
         return {agent.name(): agent for agent in agents}

@@ -183,16 +183,6 @@ class PriceMonitoringParameters(Config):
         ],
         "proposal": [
             {
-                "horizon": 60,
-                "probability": "0.91",
-                "auction_extension": 5,
-            },
-            {
-                "horizon": 600,
-                "probability": "0.9999",
-                "auction_extension": 30,
-            },
-            {
                 "horizon": 3600,
                 "probability": "0.9999",
                 "auction_extension": 120,
@@ -309,7 +299,7 @@ class LogNormalModelParams(Config):
             "r": 0.016,
             "sigma": 3.0,
         },
-        "proposal": {"sigma": 1.5, "mu": 0, "r": 0.016},
+        "proposal": {"sigma": 1.5, "mu": 0, "r": 0},
     }
 
     def __init__(self, opt: Optional[str] = None) -> None:
