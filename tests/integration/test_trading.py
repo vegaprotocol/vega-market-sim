@@ -358,6 +358,7 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     assert party_b_accounts_t2[0].balance == 1750
 
 
+@pytest.mark.integration
 def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
     vega.wait_for_total_catchup()
