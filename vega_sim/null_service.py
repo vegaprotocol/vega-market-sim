@@ -424,7 +424,11 @@ def manage_vega_processes(
         log_name="node",
     )
 
-    processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
+    processes = {
+        "data-node": dataNodeProcess,
+        "faucet": vegaFaucetProcess,
+        "vega": vegaNodeProcess,
+    }
 
     if run_wallet:
         for _ in range(3000):
@@ -501,7 +505,7 @@ def manage_vega_processes(
             dir_root=tmp_vega_dir,
             log_name="vegawallet",
         )
-        processes.append(vegaWalletProcess)
+        processes["wallet"] = vegaWalletProcess
 
     if run_with_console:
         env_copy = os.environ.copy()
@@ -533,13 +537,12 @@ def manage_vega_processes(
             log_name="console",
             env=env_copy,
         )
-        processes.append(console_process)
+        processes["console"] = console_process
 
     signal.sigwait([signal.SIGKILL, signal.SIGTERM])
-    for process in processes:
+    for process in processes.values():
         process.terminate()
-    for process in processes:
-        name = psutil.Process(process.pid).name()
+    for name, process in processes.items():
         attempts = 0
         while process.poll() is None:
             time.sleep(1)
