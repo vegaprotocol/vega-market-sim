@@ -92,6 +92,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.asset_dp,
+                quantum=int(10 ** (self.asset_dp)),
                 max_faucet_amount=10_000_000_000,
                 key_name=self.key_name,
             )

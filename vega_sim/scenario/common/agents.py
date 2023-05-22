@@ -2761,6 +2761,9 @@ class Snitch(StateAgent):
                 self.additional_state_fn(self.vega, self.agents)
             )
 
+    def finalise(self):
+        self.assets = self.vega.list_assets()
+
 
 class KeyFunder(Agent):
     NAME_BASE = "key_funder"
@@ -3004,3 +3007,97 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                 price=curr_price,
                 wait=False,
             )
+
+
+class RewardFunder(StateAgentWithWallet):
+    NAME_BASE = "reward_funder"
+
+    def __init__(
+        self,
+        key_name: str,
+        reward_asset_name: str,
+        transfer_amount: str,
+        initial_mint: float = 1e9,
+        account_type: Optional[str] = None,
+        asset_for_metric_name: Optional[str] = None,
+        metric: Optional[str] = None,
+        market_names: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.reward_asset_name = reward_asset_name
+        self.transfer_amount = transfer_amount
+        self.initial_mint = initial_mint
+        self.asset_for_metric_name = asset_for_metric_name
+        self.account_type = account_type
+        self.metric = metric
+        self.market_names = market_names
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+
+        # Faucet vega tokens
+        self.vega.wait_for_total_catchup()
+        self.vega.mint(
+            wallet_name=self.wallet_name,
+            asset="VOTE",
+            amount=1e4,
+            key_name=self.key_name,
+        )
+        self.vega.wait_fn(1)
+        self.vega.wait_for_total_catchup()
+
+        if vega.find_asset_id(symbol=self.reward_asset_name) is None:
+            # Create asset
+            self.vega.create_asset(
+                wallet_name=self.wallet_name,
+                name=self.reward_asset_name,
+                symbol=self.reward_asset_name,
+                decimals=18,
+                max_faucet_amount=5e10,
+                key_name=self.key_name,
+            )
+        self.vega.wait_fn(1)
+        self.vega.wait_for_total_catchup()
+        reward_asset_id = self.vega.find_asset_id(symbol=self.reward_asset_name)
+
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=reward_asset_id,
+                amount=self.initial_mint,
+                key_name=self.key_name,
+            )
+        self.vega.wait_fn(1)
+        self.vega.wait_for_total_catchup()
+
+        market_ids = (
+            [self.vega.find_market_id(name) for name in self.market_names]
+            if self.market_names is not None
+            else None
+        )
+        asset_for_metric_id = (
+            self.vega.find_asset_id(self.asset_for_metric_name)
+            if self.asset_for_metric_name is not None
+            else None
+        )
+
+        self.vega.recurring_transfer(
+            from_wallet_name=self.wallet_name,
+            from_key_name=self.key_name,
+            from_account_type=vega_protos.ACCOUNT_TYPE_GENERAL,
+            to_account_type=self.account_type,
+            amount=self.transfer_amount,
+            asset=reward_asset_id,
+            asset_for_metric=asset_for_metric_id,
+            metric=self.metric,
+            markets=market_ids,
+        )

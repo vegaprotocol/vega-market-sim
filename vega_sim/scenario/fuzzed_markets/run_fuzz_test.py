@@ -13,6 +13,7 @@ from vega_sim.tools.scenario_plots import (
     plot_run_outputs,
     account_plots,
     plot_price_monitoring,
+    reward_plots,
 )
 
 from matplotlib import pyplot as plt
@@ -60,8 +61,12 @@ def _run(steps: int = 2880, output: bool = False, output_dir: str = "fuzz_plots"
             fig.savefig(f"{output_dir}/trading-{key}.jpg")
             plt.close(fig)
 
+        reward_fig = reward_plots()
+        reward_fig.savefig(f"{output_dir}/rewards.jpg")
+        plt.close(fig)
+
         account_fig = account_plots()
-        account_fig.savefig(f"{output_dir}/accounts-{key}.jpg")
+        account_fig.savefig(f"{output_dir}/accounts.jpg")
         plt.close(account_fig)
 
 
