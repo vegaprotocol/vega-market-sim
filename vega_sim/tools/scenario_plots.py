@@ -49,6 +49,7 @@ from vega_sim.tools.scenario_output import (
     load_trades_df,
     load_fuzzing_df,
     load_agents_df,
+    load_resource_df,
     load_assets_df,
 )
 
@@ -697,6 +698,69 @@ def plot_price_monitoring(run_name: Optional[str] = None):
     return figs
 
 
+def resource_monitoring_plot(run_name: Optional[str] = None):
+    resource_df = load_resource_df(
+        run_name=run_name,
+    )
+
+    fig = plt.figure(figsize=[11.69, 8.27])
+    fig.suptitle(
+        f"Resource Monitoring",
+        fontsize=18,
+        fontweight="bold",
+        color=(0.2, 0.2, 0.2),
+    )
+    fig.tight_layout()
+    plt.rcParams.update({"font.size": 8})
+    plt.rcParams.update({"axes.formatter.useoffset": False})
+
+    gs = GridSpec(nrows=3, ncols=2, hspace=0.5, wspace=0.3)
+
+    ax0 = fig.add_subplot(
+        gs[0, :],
+    )
+    ax0.set_title("CPU Utilization")
+    ax0.plot(resource_df.index, resource_df.vega_cpu_per, "r", label="vega")
+    ax0.plot(resource_df.index, resource_df.datanode_cpu_per, "b", label="data-node")
+    ax0.legend()
+    ax0.set_xlabel("'vega' datetime")
+    ax0.set_ylabel("CPU [%]")
+
+    ax1 = fig.add_subplot(gs[1, 0], sharex=ax0)
+    ax1.set_title("Memory - RSS (vega)")
+    ax1.plot(resource_df.index, resource_df.vega_mem_rss / 1e9, "r", label="vega")
+    ax1.legend()
+    ax1.set_xlabel("'vega' datetime")
+    ax1.set_ylabel("RSS [GB]")
+
+    ax2 = fig.add_subplot(gs[1, 1], sharex=ax0)
+    ax2.set_title("Memory - RSS (data-node)")
+    ax2.plot(
+        resource_df.index, resource_df.datanode_mem_rss / 1e9, "b", label="data-node"
+    )
+    ax2.legend()
+    ax2.set_xlabel("'vega' datetime")
+    ax2.set_ylabel("RSS [GB]")
+
+    ax3 = fig.add_subplot(gs[2, 0], sharex=ax0)
+    ax3.set_title("Memory - VMS (vega)")
+    ax3.plot(resource_df.index, resource_df.vega_mem_vms / 1e9, "r", label="vega")
+    ax3.legend()
+    ax3.set_xlabel("'vega' datetime")
+    ax3.set_ylabel("VMS [GB]")
+
+    ax4 = fig.add_subplot(gs[2, 1], sharex=ax0)
+    ax4.set_title("Memory - VMS (data-node)")
+    ax4.plot(
+        resource_df.index, resource_df.datanode_mem_vms / 1e9, "b", label="data-node"
+    )
+    ax4.legend()
+    ax4.set_xlabel("'vega' datetime")
+    ax4.set_ylabel("VMS [GB]")
+
+    return fig
+
+
 def reward_plots(run_name: Optional[str] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     assets_df = load_assets_df(run_name=run_name)
@@ -771,11 +835,12 @@ def reward_plots(run_name: Optional[str] = None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--fuzzing", action="store_true")
-    parser.add_argument("-t", "--trading", action="store_true")
-    parser.add_argument("-p", "--monitoring", action="store_true")
-    parser.add_argument("-a", "--accounts", action="store_true")
-    parser.add_argument("-r", "--rewards", action="store_true")
+    parser.add_argument("--fuzzing", action="store_true")
+    parser.add_argument("--trading", action="store_true")
+    parser.add_argument("--monitoring", action="store_true")
+    parser.add_argument("--accounts", action="store_true")
+    parser.add_argument("--rewards", action="store_true")
+    parser.add_argument("--resources", action="store_true")
     parser.add_argument("--all", action="store_true")
 
     parser.add_argument("--show", action="store_true")
@@ -813,6 +878,11 @@ if __name__ == "__main__":
         fig = reward_plots()
         if args.save:
             fig.savefig(f"{dir}/rewards.jpg")
+
+    if args.resources or args.all:
+        fig = resource_monitoring_plot()
+        if args.save:
+            fig.savefig(f"{dir}/resource_monitoring.jpg")
 
     if args.show:
         plt.show()
