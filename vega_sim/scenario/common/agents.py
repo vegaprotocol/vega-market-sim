@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import psutil
+import platform
+
 import datetime
 import logging
 from dataclasses import dataclass
@@ -73,6 +76,17 @@ class MarketRegime:
     order_distribution_sell_kappa: float
     from_timepoint: int  # Inclusive
     thru_timepoint: int  # Inclusive
+
+
+@dataclass
+class ResourceData:
+    at_time: str
+    vega_cpu_per: float
+    vega_mem_rss: float
+    vega_mem_vms: float
+    datanode_cpu_per: float
+    datanode_mem_rss: float
+    datanode_mem_vms: float
 
 
 class TradeSignal(Enum):
@@ -2714,11 +2728,15 @@ class Snitch(StateAgent):
     ):
         self.tag = None
         self.states = []
+        self.resources = []
         self.additional_states = []
         self.agents = agents
         self.additional_state_fn = additional_state_fn
         self.seen_trades = set()
         self.only_extract_additional = only_extract_additional
+        self.process_map: Dict[str, psutil.Process] = {"vega": None, "data-node": None}
+        self.platform = platform.system()
+        self._find_processes()
 
     def step(self, vega_state: VegaState):
         if not self.only_extract_additional:
@@ -2756,10 +2774,65 @@ class Snitch(StateAgent):
                     trades=market_trades,
                 )
             )
+
+            if self.platform == "Linux":
+                mem_vega = (
+                    self.process_map["vega"].memory_full_info()
+                    if self.process_map["vega"] is not None
+                    else 0
+                )
+                mem_datanode = (
+                    self.process_map["data-node"].memory_full_info()
+                    if self.process_map["data-node"] is not None
+                    else 0
+                )
+            elif self.platform == "Darwin":
+                mem_vega = (
+                    self.process_map["vega"].memory_info()
+                    if self.process_map["vega"] is not None
+                    else 0
+                )
+                mem_datanode = (
+                    self.process_map["data-node"].memory_info()
+                    if self.process_map["data-node"] is not None
+                    else 0
+                )
+            else:
+                mem_vega = None
+                mem_datanode = None
+                logging.warning(
+                    "Unable to record memory usage, unsupported operating system"
+                )
+
+            self.resources.append(
+                ResourceData(
+                    at_time=start_time,
+                    vega_cpu_per=self.process_map["vega"].cpu_percent(),
+                    vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
+                    vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
+                    datanode_cpu_per=self.process_map["data-node"].cpu_percent(),
+                    datanode_mem_rss=mem_datanode.rss
+                    if mem_datanode is not None
+                    else 0,
+                    datanode_mem_vms=mem_datanode.vms
+                    if mem_datanode is not None
+                    else 0,
+                )
+            )
         if self.additional_state_fn is not None:
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)
             )
+
+    def _find_processes(self):
+        self.process_map.keys()
+        for p in psutil.process_iter():
+            if (p.name() in self.process_map.keys()) and (
+                p.status() in ["running", "sleeping"]
+            ):
+                if "faucet" in p.cmdline():
+                    continue
+                self.process_map[p.name()] = psutil.Process(p.pid)
 
     def finalise(self):
         self.assets = self.vega.list_assets()
