@@ -17,8 +17,8 @@ from matplotlib.gridspec import GridSpec, SubplotSpec, GridSpecFromSubplotSpec
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
     FuzzyLiquidityProvider,
-    DegenerateTrader,
-    DegenerateLiquidityProvider,
+    RiskyMarketOrderTrader,
+    RiskySimpleLiquidityProvider,
 )
 
 from vega_sim.proto.vega import markets
@@ -383,13 +383,13 @@ def plot_price_comparison(
     ax0.legend(labels=["external price", "mark price"])
 
 
-def plot_degen_close_outs(
+def plot_risky_close_outs(
     fig: Figure,
     accounts_df: pd.DataFrame,
     fuzzing_df: pd.DataFrame,
     ss: Optional[SubplotSpec] = None,
 ):
-    """Plots the number of close outs of degen traders and degen liquidity providers.
+    """Plots the number of close outs of risky traders and risky liquidity providers.
 
     Args:
         fig (matplotlib.figure.Figure):
@@ -442,7 +442,7 @@ def plot_degen_close_outs(
         trader_close_outs_ds.values,
         "r.-",
         markersize=1,
-        label="degen trader close outs",
+        label="risky trader close outs",
     )
 
     lns = ln0 + ln1
@@ -468,7 +468,7 @@ def plot_degen_close_outs(
         liquidity_provider_close_outs_ds.values,
         "r.-",
         markersize=1,
-        label="degen LP close outs",
+        label="risky LP close outs",
     )
 
     lns = ln3 + ln4
@@ -512,7 +512,7 @@ def fuzz_plots(run_name: Optional[str] = None) -> Figure:
             data_df=market_data_df,
             fuzzing_df=market_fuzzing_df,
         )
-        plot_degen_close_outs(
+        plot_risky_close_outs(
             fig,
             ss=gs[2, 0],
             accounts_df=market_accounts_df,
@@ -542,8 +542,8 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
     agent_types = [
         FuzzingAgent,
         FuzzyLiquidityProvider,
-        DegenerateTrader,
-        DegenerateLiquidityProvider,
+        RiskyMarketOrderTrader,
+        RiskySimpleLiquidityProvider,
     ]
 
     gs = GridSpec(nrows=len(agent_types), ncols=1, hspace=0.5)

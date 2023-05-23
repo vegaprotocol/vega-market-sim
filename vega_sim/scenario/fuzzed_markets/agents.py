@@ -273,8 +273,8 @@ class FuzzingAgent(StateAgentWithWallet):
                 fig.write_html("fuzz_plots/coverage.html")
 
 
-class DegenerateTrader(StateAgentWithWallet):
-    NAME_BASE = "degenerate_trader"
+class RiskyMarketOrderTrader(StateAgentWithWallet):
+    NAME_BASE = "risky_market_order_trader"
 
     def __init__(
         self,
@@ -373,8 +373,8 @@ class DegenerateTrader(StateAgentWithWallet):
             )
 
 
-class DegenerateLiquidityProvider(StateAgentWithWallet):
-    NAME_BASE = "degenerate_liquidity_provider"
+class RiskySimpleLiquidityProvider(StateAgentWithWallet):
+    NAME_BASE = "risky_simple_liquidity_provider"
 
     def __init__(
         self,
