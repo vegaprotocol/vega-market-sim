@@ -589,8 +589,8 @@ class VegaService(ABC):
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
-            oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
-            oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
+            data_source_spec_for_settlement_data=oracle_spec_for_settlement_price,
+            data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
             settlement_price_decimals=settlement_price_decimals,
             **additional_kwargs,
         )
