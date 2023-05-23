@@ -930,9 +930,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -1249,16 +1247,28 @@ class ShapedMarketMaker(StateAgentWithWallet):
         buy_shape: List[MMOrder],
         sell_shape: List[MMOrder],
     ):
+        capped_buy_shape = [
+            MMOrder(min([order.size, self.max_order_size]), order.price)
+            for order in buy_shape
+        ]
+        capped_sell_shape = [
+            MMOrder(
+                min([order.size, self.max_order_size]),
+                order.price,
+            )
+            for order in sell_shape
+        ]
+
         buy_scaling_factor = (
             self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
-            orders=buy_shape,
+            orders=capped_buy_shape,
         )
 
         sell_scaling_factor = (
             self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
-            orders=sell_shape,
+            orders=capped_sell_shape,
         )
 
         # Scale the shapes
@@ -2030,6 +2040,10 @@ class LimitOrderTrader(StateAgentWithWallet):
                 self._cancel_order(vega_state=vega_state)
 
     def _submit_order(self, vega_state: VegaState):
+        if self.current_step > len(self.price_process) - 1:
+            print("too long")
+            return
+
         # Calculate reference_buy_price and reference_sell_price of price distribution
         if (self.spread is None) or (self.price_process is None):
             # If agent does not have price_process data, offset orders from best bid/ask
@@ -2311,7 +2325,7 @@ class InformedTrader(StateAgentWithWallet):
                 market_id=self.market_id,
                 side=side,
                 volume=order.volume,
-                wait=True,
+                wait=False,
                 fill_or_kill=False,
                 trading_key=self.key_name,
             )
