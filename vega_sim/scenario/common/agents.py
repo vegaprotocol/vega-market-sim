@@ -2734,9 +2734,12 @@ class Snitch(StateAgent):
         self.additional_state_fn = additional_state_fn
         self.seen_trades = set()
         self.only_extract_additional = only_extract_additional
-        self.process_map: Dict[str, psutil.Process] = {"vega": None, "data-node": None}
+        self.process_map: Dict[str, psutil.Process] = {}
         self.platform = platform.system()
-        self._find_processes()
+
+    def initialise(self, vega: VegaService, **kwargs):
+        self.vega = vega
+        self._create_process_map()
 
     def step(self, vega_state: VegaState):
         if not self.only_extract_additional:
@@ -2778,24 +2781,24 @@ class Snitch(StateAgent):
             if self.platform == "Linux":
                 mem_vega = (
                     self.process_map["vega"].memory_full_info()
-                    if self.process_map["vega"] is not None
-                    else 0
+                    if "vega" in self.process_map
+                    else None
                 )
                 mem_datanode = (
                     self.process_map["data-node"].memory_full_info()
-                    if self.process_map["data-node"] is not None
-                    else 0
+                    if "data-node" in self.process_map
+                    else None
                 )
             elif self.platform == "Darwin":
                 mem_vega = (
                     self.process_map["vega"].memory_info()
-                    if self.process_map["vega"] is not None
-                    else 0
+                    if "vega" in self.process_map
+                    else None
                 )
                 mem_datanode = (
                     self.process_map["data-node"].memory_info()
-                    if self.process_map["data-node"] is not None
-                    else 0
+                    if "data-node" in self.process_map
+                    else None
                 )
             else:
                 mem_vega = None
@@ -2807,10 +2810,14 @@ class Snitch(StateAgent):
             self.resources.append(
                 ResourceData(
                     at_time=start_time,
-                    vega_cpu_per=self.process_map["vega"].cpu_percent(),
+                    vega_cpu_per=self.process_map["vega"].cpu_percent()
+                    if "vega" in self.process_map
+                    else 0,
                     vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
                     vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
-                    datanode_cpu_per=self.process_map["data-node"].cpu_percent(),
+                    datanode_cpu_per=self.process_map["data-node"].cpu_percent()
+                    if "data-node" in self.process_map
+                    else 0,
                     datanode_mem_rss=mem_datanode.rss
                     if mem_datanode is not None
                     else 0,
@@ -2824,15 +2831,9 @@ class Snitch(StateAgent):
                 self.additional_state_fn(self.vega, self.agents)
             )
 
-    def _find_processes(self):
-        self.process_map.keys()
-        for p in psutil.process_iter():
-            if (p.name() in self.process_map.keys()) and (
-                p.status() in ["running", "sleeping"]
-            ):
-                if "faucet" in p.cmdline():
-                    continue
-                self.process_map[p.name()] = psutil.Process(p.pid)
+    def _create_process_map(self):
+        for name, p in self.vega.process_pids.items():
+            self.process_map[name] = psutil.Process(self.vega.process_pids[name])
 
     def finalise(self):
         self.assets = self.vega.list_assets()

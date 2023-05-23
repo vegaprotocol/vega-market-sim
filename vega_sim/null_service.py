@@ -312,6 +312,7 @@ def _update_node_config(
 
 
 def manage_vega_processes(
+    child_conn: multiprocessing.Pipe,
     vega_path: str,
     data_node_path: str,
     vega_wallet_path: str,
@@ -539,6 +540,9 @@ def manage_vega_processes(
         )
         processes["console"] = console_process
 
+    # Send process pid values for resource monitoring
+    child_conn.send({name: process.pid for name, process in processes.items()})
+
     signal.sigwait([signal.SIGKILL, signal.SIGTERM])
     for process in processes.values():
         process.terminate()
@@ -708,12 +712,13 @@ class VegaServiceNull(VegaService):
     def start(self, block_on_startup: bool = True) -> None:
         if self.check_for_binaries and not self._using_all_custom_paths:
             download_binaries()
-
+        parent_conn, child_conn = multiprocessing.Pipe()
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
+                "child_conn": child_conn,
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
@@ -783,6 +788,8 @@ class VegaServiceNull(VegaService):
                 raise VegaStartupTimeoutError(
                     "Timed out waiting for Vega simulator to start up"
                 )
+
+            self.process_pids = parent_conn.recv()
 
             # Create a block before waiting for datanode sync and starting the feeds
             self.wait_fn(1)
