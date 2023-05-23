@@ -21,8 +21,8 @@ from vega_sim.scenario.common.agents import (
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
-    DegenerateTrader,
-    DegenerateLiquidityProvider,
+    RiskyMarketOrderTrader,
+    RiskySimpleLiquidityProvider,
     FuzzyLiquidityProvider,
 )
 
@@ -53,11 +53,11 @@ def state_extraction_fn(vega: VegaServiceNull, agents: dict):
     for _, agent in agents.items():
         if isinstance(agent, ExponentialShapedMarketMaker):
             external_prices[agent.market_id] = agent.curr_price
-        if isinstance(agent, DegenerateTrader):
+        if isinstance(agent, RiskyMarketOrderTrader):
             trader_close_outs[agent.market_id] = (
                 trader_close_outs.get(agent.market_id, 0) + agent.close_outs
             )
-        if isinstance(agent, DegenerateLiquidityProvider):
+        if isinstance(agent, RiskySimpleLiquidityProvider):
             liquidity_provider_close_outs[agent.market_id] = (
                 liquidity_provider_close_outs.get(agent.market_id, 0) + agent.close_outs
             )
@@ -180,9 +180,9 @@ class FuzzingScenario(Scenario):
         auction_traders = []
         random_traders = []
         fuzz_traders = []
-        degenerate_traders = []
+        risky_traders = []
         fuzz_liquidity_providers = []
-        degenerate_liquidity_providers = []
+        risky_liquidity_providers = []
         reward_funders = []
 
         self.initial_asset_mint = 1e9
@@ -314,45 +314,45 @@ class FuzzingScenario(Scenario):
 
             for side in ["SIDE_BUY", "SIDE_SELL"]:
                 for i_agent in range(10):
-                    degenerate_traders.append(
-                        DegenerateTrader(
-                            wallet_name="DEGENERATE_TRADERS",
+                    risky_traders.append(
+                        RiskyMarketOrderTrader(
+                            wallet_name="risky_traders",
                             key_name=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                             market_name=market_name,
                             asset_name=asset_name,
                             side=side,
                             initial_asset_mint=1_000,
-                            size_factor=0.7,
+                            size_factor=0.5,
                             step_bias=0.1,
                             tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         )
                     )
 
             for i_agent in range(5):
-                degenerate_liquidity_providers.append(
-                    DegenerateLiquidityProvider(
-                        wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
-                        key_name=f"HIGH_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                risky_liquidity_providers.append(
+                    RiskySimpleLiquidityProvider(
+                        wallet_name="risky_liquidity_providers",
+                        key_name=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
-                        initial_asset_mint=1_000,
-                        commitment_factor=0.7,
+                        initial_asset_mint=20_000,
+                        commitment_factor=0.5,
                         step_bias=0.1,
-                        tag=f"HIGH_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
 
             for i_agent in range(45):
-                degenerate_liquidity_providers.append(
-                    DegenerateLiquidityProvider(
-                        wallet_name="DEGENERATE_LIQUIDITY_PROVIDERS",
-                        key_name=f"LOW_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                risky_liquidity_providers.append(
+                    RiskySimpleLiquidityProvider(
+                        wallet_name="risky_liquidity_providers",
+                        key_name=f"LOW_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
-                        initial_asset_mint=1_000,
-                        commitment_factor=0.5,
+                        initial_asset_mint=20_000,
+                        commitment_factor=0.3,
                         step_bias=0.1,
-                        tag=f"LOW_DEGEN_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                        tag=f"LOW_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
 
@@ -409,8 +409,8 @@ class FuzzingScenario(Scenario):
             + auction_traders
             + random_traders
             + fuzz_traders
-            + degenerate_traders
-            + degenerate_liquidity_providers
+            + risky_traders
+            + risky_liquidity_providers
             + fuzz_liquidity_providers
             + reward_funders
         )
