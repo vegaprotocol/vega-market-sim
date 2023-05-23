@@ -28,6 +28,7 @@ def next_epoch(vega: VegaServiceNull):
             raise Exception(
                 "Epoch not started after forwarding the duration of two epochs."
             )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
 
