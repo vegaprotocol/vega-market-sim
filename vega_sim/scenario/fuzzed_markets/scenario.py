@@ -322,7 +322,7 @@ class FuzzingScenario(Scenario):
                             asset_name=asset_name,
                             side=side,
                             initial_asset_mint=1_000,
-                            size_factor=0.7,
+                            size_factor=0.5,
                             step_bias=0.1,
                             tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         )
