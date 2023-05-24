@@ -16,9 +16,10 @@ Market Simulator is still under active development and so may change notably ove
 
 ## Setup
 
-If you are on MacOS, ensure you have the command line developer tools installed to be able to run `make`. Presently this is done by running `xcode-select --install`
+### **MacOS**: Ensure that you have the command line developer tools installed. You can install them by running `xcode-select --install` in the terminal.  
 
-If you are on Windows, you are likely best off running through WSL.
+### **Windows**: Please follow the [Windows setup instructions.](##windows-setup)  
+
 
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
   - Clone the repository to your local drive
@@ -53,20 +54,39 @@ Building the console UI is not a necessary component, but can be useful for visu
 
 ## Basic use
 
-Examples can be found within the `/examples` folder. A good one to start is `/examples/nullchain.py` which spins up a simple service and proposes a market.
+Examples can be found within the `/examples` folder. A good one to start is `/examples/nullchain.py` which spins up a simple service and proposes a market.  
 
-To run the example, start by running `poetry shell` if you're using poetry to activate the environment (If you're using another package manager, a similar command likely exists)
+To run the example, start by running `poetry shell` if you're using poetry to activate the environment (If you're using another package manager, a similar command likely exists).  
+
+ **_Ensure you are running these commands in your WSL terminal if using a Windows machine._**
 
 Then, to run the example mentioned above call:
   `python -m examples.nullchain`
 
+  If you've installed the console with `make ui` you can also extend this to visualise what is happening with the `--console` flag:
+
+1. First you have to - Set the `run_with_console` flag to `True` when creating the `VegaServiceNull` class
+2. Run the command
+
+  ```
+  python -m examples.nullchain --console
+  ```
+3. You should a message in the logs saying
+`lynx: Can't access startfile http://localhost:*****/`
+  
+Open this link on your windows machine to see console.
+
 Alternatively, to run a longer and more complex scenario, run:
 
-  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause`
+  ```
+  python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause
+  ```
 
 If you've installed the console with `make ui` you can also extend this to visualise what is happening with the `--console` flag:
 
-  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause --console`
+  ```
+  python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause --console
+  ```
 
 
 
@@ -145,3 +165,311 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
  - Run `make` followed by a full integration test run
  - Create a branch containing these changes, then a pull request into `develop`
  - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the version of Vega we are matching up to (e.g. `v0.62.5`) to trigger the deployment process.
+
+
+## Windows Setup
+
+## 1. Install [WSL]
+To install Windows Subsystem for Linux (WSL) on Windows, follow these steps:
+
+Note: The steps provided here are for Windows 10 version 2004 and later. If you have a different version of Windows, the steps might vary slightly.
+
+1. Open the **Start** menu and search for "Turn Windows features on or off". Open the **Turn Windows features on or off** option from the search results.
+
+2. In the **Windows Features** window that appears, scroll down and locate **Windows Subsystem for Linux**. Check the box next to it.
+
+3. After checking the box, click **OK** and wait for Windows to apply the changes. Your computer might require a restart during this process.
+
+4. Once your computer has restarted, open the Microsoft Store by searching for "Microsoft Store" in the Start menu.
+
+5. In the Microsoft Store, search for the Linux distribution you want to install, such as Ubuntu, Debian, or OpenSUSE. Select the desired distribution from the search results.
+
+6. Click the **Install** button to download and install the Linux distribution.
+
+7. After the installation is complete, you can launch the Linux distribution from the Start menu or by searching for its name.
+
+8. The first time you launch the Linux distribution, it will initialize and set up your Linux environment. This might take a few minutes.
+
+9. Follow the on-screen prompts to create a username and password for your Linux environment.
+
+Once the setup is complete, you will have a functioning Windows Subsystem for Linux (WSL) installation on your Windows system. You can open a Linux terminal and start using Linux commands and tools within the WSL environment.
+  
+## 2. Install 'Make' to your WSL
+1. Open your terminal in Ubuntu.
+
+2. Update the package lists for upgrades and new package installations by running the following command (You may be asked for your password here):
+
+   ```
+   sudo apt update
+   ```
+
+3. Once the package lists are updated, you can install `make` by running the following command:
+
+   ```
+   sudo apt install make
+   ```
+
+4. The package manager will ask for your confirmation to install the package. Type 'Y' and press Enter to proceed with the installation.
+
+5. Ubuntu will download and install the `make` package along with any necessary dependencies.
+
+6. Once the installation is complete, you can verify that `make` is installed by checking its version:
+
+   ```
+   make --version
+   ```
+
+   This command will display the version of `make` installed on your Ubuntu system.
+
+## 3. Install 'Poetry' to your WSL
+To install Poetry on Windows Subsystem for Linux (WSL), you can follow these steps:
+
+1. Update the package lists and upgrade installed packages by running the following command:
+
+    ```
+    sudo apt update
+    ```
+
+2. Install the dependencies required for Poetry using the following command:
+
+   ```
+   sudo apt install python3-pip python3-venv
+   ```
+
+3. Once the dependencies are installed, you can proceed with the installation of Poetry. Use the following command to download and install Poetry:
+
+   ```
+   curl -sSL https://install.python-poetry.org | python3 -
+   ```
+
+4. After the installation is complete, you'll need to close and reopen your terminal or run the command `source $HOME/.poetry/env` to start using Poetry without restarting.
+
+5. Verify the installation by running the following command:
+
+   ```
+   poetry --version
+   ```
+
+   This command will display the version of Poetry installed on your system.
+
+## 4. Clone the Repository
+
+1. Decide on the location where you want to create the new folder for the repository. For example, if you want to create it in your home directory, you can use the following command:
+
+   ```
+   cd ~
+   ```
+
+2. Create a new folder for the repository using the `mkdir` command followed by the desired folder name. For example, to create a folder named "vega-market-sim", use the following command:
+
+   ```
+   mkdir vega-market-sim
+   ```
+
+3. Navigate to the newly created folder using the `cd` command. For example:
+
+   ```
+   cd vega-market-sim
+   ```
+
+4. In your browser, open the repository's page "https://github.com/vegaprotocol/vega-market-sim".
+
+5. Click on the green "Code" button and select the "HTTPS" option to copy the repository URL.
+
+6. In your WSL terminal, use the `git clone` command followed by the repository URL you copied. The command should look like this:
+
+   ```
+   git clone https://github.com/vegaprotocol/vega-market-sim.git
+   ```
+
+## 5. Run make to automatically pull install dependencies 
+1. Run the command:
+
+    ```
+    make
+    ```
+## 6. Install the package into your local environment. 
+1. Run the command:
+  
+    ```
+    poetry shell
+    ```
+2. Run the command:
+ 
+     ```
+    poetry install
+    ```
+   [OPTIONAL] 
+
+    _To include all optional extras use:_
+  
+    ```
+    poetry install --all-extras
+    ```
+
+## 7. Run initial tests
+1. Run the command:
+  
+    ```
+    make test
+    ```
+
+    This will check all the python environment + vega imports are set up correctly, doesn't run Vega yet.
+## 8. Run integration tests
+1. Run the command:
+  
+    ```
+    make test_integration
+    ```
+
+    This will check that everything is set up correctly. Takes about 5 minutes. 
+## 9. Set up Development environment
+   ### 1. Install "Remote - WSL" extension
+1. Launch Visual Studio Code on your Windows machine.
+
+2. Open the Extensions view by clicking on the square icon on the left sidebar or by pressing `Ctrl+Shift+X`.
+
+3. In the Extensions view, search for "Remote - WSL" in the search bar.
+
+4. Look for the "Remote - WSL" extension in the search results. It should be the one published by Microsoft with the ID `ms-vscode-remote.remote-wsl`.
+
+5. Click on the "Install" button next to the "Remote - WSL" extension.
+
+6. Visual Studio Code will begin downloading and installing the extension.
+
+7. Once the installation is complete, you will see an "Open" button instead of "Install". Click on the "Open" button to activate the extension.
+
+8. Open your WSL terminal (ensure you are in the vega-market-sim directory). Run the command
+   ```
+   code .
+   ```
+This will open up a visual studio window connected to your linux environment.
+
+__If visual studio is unable to connect to your environment perform these steps to restart your wsl__
+1. Close Visual studio
+2. Run **COMMAND PROMPT** as admin
+
+
+    Find out which instance of WSL is running
+
+      ```
+      wsl -l --running
+      ```
+
+    Terminate all running instances of WSL
+
+   ```
+   wsl --shutdown
+   ```
+
+    Then simply restart WSL
+   ```
+   wsl 
+   ```
+3. Reopen Visual studio
+4. Open your WSL terminal (ensure you are in the vega-market-sim directory). Run the command
+   ```
+   code .
+   ```
+
+
+## OPTIONAL Setup for the UI
+## 1. Install Node to WSL
+To install NVM (Node Version Manager) and Node.js version 16 in Windows Subsystem for Linux (WSL), follow these steps:
+
+1. Install the required dependencies for NVM using the following command:
+
+   ```
+   sudo apt install curl ca-certificates bash
+   ```
+
+2. Download the NVM installation script using the following command:
+
+   ```
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+   ```
+
+3. Close and reopen your terminal or run the command `source ~/.bashrc` to load the NVM environment variables.
+
+4. Verify that NVM is installed properly by running the following command:
+
+   ```
+   nvm --version
+   ```
+
+5. Install Node.js version 16 using NVM by running the following command:
+
+   ```
+   nvm install 16
+   ```
+
+   This command will download and install Node.js version 16 in your WSL environment.
+
+6. Verify that Node.js is installed successfully by checking its version:
+
+   ```
+   node --version
+   ```
+
+   It should display the version number of Node.js 16.x.
+
+7. To set Node.js 16 as the default version, run the following command:
+
+   ```
+   nvm alias default 16
+   ```
+
+   This will make Node.js version 16 the default version whenever you open a new terminal session.
+## 2. Install Yarn
+To install Yarn on Windows Subsystem for Linux (WSL), you can follow these steps:
+
+1. Update the package lists and upgrade installed packages by running the following commands:
+
+   ```
+   sudo apt update
+   ```
+
+2. Install the necessary dependencies for Yarn using the following command:
+
+   ```
+   sudo apt install curl gnupg2
+   ```
+
+3. Import the Yarn repository's GPG key by running the following command:
+
+   ```
+   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+   ```
+
+4. Add the Yarn repository to the package manager's sources list by executing the following command:
+
+   ```
+   echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+   ```
+
+5. Update the package lists again to include the Yarn repository:
+
+   ```
+   sudo apt update
+   ```
+
+6. Finally, install Yarn by running the following command:
+
+   ```
+   sudo apt install yarn
+   ```
+
+7. Verify that Yarn is installed by checking its version:
+
+    ```
+    yarn --version
+    ```
+
+## 3. Make UI
+1.  Run the command:
+  
+    ```
+    make ui
+    ```
+
+
