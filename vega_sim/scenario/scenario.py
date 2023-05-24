@@ -5,8 +5,16 @@ from typing import Optional, List, Callable, Any, Dict
 from vega_sim.null_service import VegaService
 from vega_sim.environment.environment import MarketEnvironment
 from vega_sim.scenario.constants import Network
-from vega_sim.scenario.common.agents import Snitch, StateAgent, MarketHistoryData, Agent
+from vega_sim.scenario.common.agents import (
+    Snitch,
+    StateAgent,
+    MarketHistoryData,
+    Agent,
+    ResourceData,
+)
 from vega_sim.tools.scenario_output import (
+    agents_standard_output,
+    resources_standard_output,
     market_data_standard_output,
     agents_standard_output,
     assets_standard_output,
@@ -92,6 +100,7 @@ class Scenario(abc.ABC):
         )
         if output_data:
             agents_standard_output(self.agents)
+            resources_standard_output(self.get_resource_data())
             assets_standard_output(self.get_assets())
             market_data_standard_output(self.get_run_data())
             if self.additional_data_output_fns is not None:
@@ -104,6 +113,10 @@ class Scenario(abc.ABC):
 
     def get_snitch(self) -> Optional[Snitch]:
         return self.agents.get("snitch")
+
+    def get_resource_data(self) -> List[ResourceData]:
+        snitch = self.get_snitch()
+        return snitch.resources if snitch is not None else []
 
     def get_assets(self) -> List[vega_protos.assets.Asset]:
         snitch = self.get_snitch()

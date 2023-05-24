@@ -1,5 +1,5 @@
 from vega_sim.environment.agent import Agent, StateAgentWithWallet
-from vega_sim.scenario.common.agents import MarketHistoryData
+from vega_sim.scenario.common.agents import MarketHistoryData, ResourceData
 from typing import List, Callable, Optional, Dict
 import pandas as pd
 import itertools
@@ -17,6 +17,23 @@ ORDER_BOOK_FILE_NAME = "depth_data.csv"
 TRADES_FILE_NAME = "trades.csv"
 ACCOUNTS_FILE_NAME = "accounts.csv"
 FUZZING_FILE_NAME = "additional_data.csv"
+RESOURCES_FILE_NAME = "resources.csv"
+
+
+def resource_data_to_row(data: ResourceData):
+    return [
+        {
+            "time": data.at_time,
+            "vega_cpu_per": data.vega_cpu_per,
+            "vega_mem_rss": data.vega_mem_rss,
+            "vega_mem_vms": data.vega_mem_vms,
+            "datanode_cpu_per": data.datanode_cpu_per,
+            "datanode_mem_rss": data.datanode_mem_rss,
+            "datanode_mem_vms": data.datanode_mem_vms,
+        }
+    ]
+
+
 ASSETS_FILE_NAME = "assets.csv"
 
 
@@ -167,6 +184,32 @@ def market_data_standard_output(
         )
 
 
+def resources_standard_output(
+    resource_data: List[ResourceData],
+    run_name: str = DEFAULT_RUN_NAME,
+    output_path: str = DEFAULT_PATH,
+    custom_output_fns: Optional[
+        Dict[str, List[Callable[[MarketHistoryData], pd.Series]]]
+    ] = None,
+):
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    full_path = os.path.join(output_path, run_name)
+    data_fns = (
+        custom_output_fns
+        if custom_output_fns is not None
+        else {
+            RESOURCES_FILE_NAME: resource_data_to_row,
+        }
+    )
+    for file_name, data_fn in data_fns.items():
+        _market_data_standard_output(
+            market_history_data=resource_data,
+            file_name=file_name,
+            output_path=full_path,
+            data_to_row_fn=data_fn,
+        )
+
+
 def agents_standard_output(
     agents: Dict[str, Agent],
     run_name: str = DEFAULT_RUN_NAME,
@@ -303,6 +346,18 @@ def load_fuzzing_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, FUZZING_FILE_NAME))
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time)
+        df = df.set_index("time")
+    return df
+
+
+def load_resource_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    df = pd.read_csv(os.path.join(output_path, run_name, RESOURCES_FILE_NAME))
     if not df.empty:
         df["time"] = pd.to_datetime(df.time)
         df = df.set_index("time")
