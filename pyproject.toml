@@ -3,7 +3,7 @@ name = "vega_sim"
 description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
-version = "1.0.1"
+version = "1.1.1"
 
 [tool.setuptools]
 zip-safe = false
@@ -18,7 +18,7 @@ inflection = "^0.5.1"
 scipy = "^1.8.1"
 pandas = "^1.4.2"
 numpy = "^1.22.4"
-torch = {version = "1.12.1", optional = true}
+torch = {version = "^1.12.1", optional = true}
 jupyterlab = {version = "^3.4.3", optional = true}
 jupyter = {version = "^1.0.0", optional = true}
 tqdm = {version = "^4.64.0", optional = true}
@@ -27,10 +27,14 @@ snakeviz = {version = "^2.1.1", optional = true}
 pytest-profiling = {version = "^1.7.0", optional = true}
 ipywidgets = {version = "^7.7.1", optional = true}
 grpc-gateway-protoc-gen-openapiv2 = "^0.1.0"
-plotly = {version = "^5.10.0", optional = true}
+plotly = "^5.10.0"
 TA-Lib = {version = "^0.4.25", optional = true}
 python-dotenv = "^0.21.0"
 deprecated = "^1.2.13"
+gymnasium = {version = "^0.28.1", optional = true}
+sb3-contrib = {version = "^2.0.0a1", optional = true}
+stable-baselines3 = {version = "^2.0.0a1", optional = true }
+tensorboard = {version = "^2.12.2", optional = true}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
@@ -46,12 +50,8 @@ pytest-xdist = "^2.5.0"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-
-
-
-
 [tool.poetry.extras]
-learning = ["matplotlib", "tqdm", "torch"]
-jupyter = ["jupyterlab", "jupyter", "matplotlib", "plotly", "ipywidgets"]
+learning = ["matplotlib", "tqdm", "torch", "gymnasium", "stable-baselines3", "tensorboard"]
+jupyter = ["jupyterlab", "jupyter", "matplotlib", "ipywidgets"]
 profile = ["snakeviz", "pytest-profiling"]
 agents = ["TA-Lib"]

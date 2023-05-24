@@ -12,12 +12,12 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from . import data_source_pb2 as vega_dot_data__source__pb2
 from .data.v1 import data_pb2 as vega_dot_data_dot_v1_dot_data__pb2
+from . import data_source_pb2 as vega_dot_data__source__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x11vega/oracle.proto\x12\x04vega\x1a\x16vega/data_source.proto\x1a\x17vega/data/v1/data.proto"e\n\nOracleSpec\x12W\n\x19\x65xternal_data_source_spec\x18\x01 \x01(\x0b\x32\x1c.vega.ExternalDataSourceSpecR\x16\x65xternalDataSourceSpec"M\n\nOracleData\x12?\n\rexternal_data\x18\x01 \x01(\x0b\x32\x1a.vega.data.v1.ExternalDataR\x0c\x65xternalDataB\'Z%code.vegaprotocol.io/vega/protos/vegab\x06proto3'
+    b'\n\x11vega/oracle.proto\x12\x04vega\x1a\x17vega/data/v1/data.proto\x1a\x16vega/data_source.proto"e\n\nOracleSpec\x12W\n\x19\x65xternal_data_source_spec\x18\x01 \x01(\x0b\x32\x1c.vega.ExternalDataSourceSpecR\x16\x65xternalDataSourceSpec"M\n\nOracleData\x12?\n\rexternal_data\x18\x01 \x01(\x0b\x32\x1a.vega.data.v1.ExternalDataR\x0c\x65xternalDataB\'Z%code.vegaprotocol.io/vega/protos/vegab\x06proto3'
 )
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())

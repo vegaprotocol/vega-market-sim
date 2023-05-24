@@ -81,6 +81,9 @@ class AgentWithWallet(Agent):
                 wallet_name=self.wallet_name,
                 name=self.key_name,
             )
+            self._public_key = vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            )
 
 
 class StateAgentWithWallet(AgentWithWallet):

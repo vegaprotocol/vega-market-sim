@@ -377,7 +377,7 @@ def move_market(
             Volume to be traded at new price.
     """
 
-    market_data = vega.market_data(market_id=market_id)
+    market_data = vega.get_latest_market_data(market_id=market_id)
     market_info = vega.market_info(market_id=market_id)
 
     curr_price = int(market_data.mid_price) * 10**-market_info.decimal_places

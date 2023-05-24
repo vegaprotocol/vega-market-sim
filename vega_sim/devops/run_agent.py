@@ -1,4 +1,4 @@
-"""run.py
+"""run_agent.py
 
 Script used to run vega-market-sim agents on a nullchain network or on a live network.
 
@@ -31,9 +31,9 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.agent import StateAgentWithWallet
 
-from devops.scenario import DevOpsScenario
-from devops.classes import SimulationArgs
-from devops.registry import SCENARIOS, AGENTS
+from vega_sim.devops.scenario import DevOpsScenario
+from vega_sim.devops.classes import SimulationArgs
+from vega_sim.devops.registry import SCENARIOS, AGENTS
 
 
 def main():
@@ -111,7 +111,7 @@ def main():
             run_with_console=args.console,
         ) as vega:
             if agent is not None:
-                agent.asset_name = vega.asset_info(
+                agent.asset_name = vega.data_cache.asset_from_feed(
                     asset_id=vega.market_info(
                         vega.find_market_id(
                             name=agent.market_name, raise_on_missing=True
@@ -127,6 +127,7 @@ def main():
                 raise_step_errors=False,
                 agent=agent,
                 run_background=False,
+                run_with_snitch=False,
             )
 
 

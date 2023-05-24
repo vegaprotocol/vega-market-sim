@@ -66,12 +66,17 @@ def _default_price_monitoring_parameters() -> (
     )
 
 
-def get_blockchain_time(data_client: vac.VegaTradingDataClientV2) -> int:
-    """Returns blockchain time in seconds since the epoch"""
+def get_blockchain_time(
+    data_client: vac.VegaTradingDataClientV2, in_seconds: bool = False
+) -> int:
+    """Returns blockchain time in nanoseconds or seconds since the epoch
+
+    Args:
+        in_seconds: bool, if true, return time in seconds rather than nanoseconds"""
     blockchain_time = data_client.GetVegaTime(
         data_node_protos_v2.trading_data.GetVegaTimeRequest()
     ).timestamp
-    return int(blockchain_time / 1e9)
+    return blockchain_time if not in_seconds else int(blockchain_time / 1e9)
 
 
 def propose_market_from_config(
@@ -301,6 +306,8 @@ def propose_future_market(
             ),
             price_monitoring_parameters=price_monitoring_parameters,
             log_normal=risk_model,
+            linear_slippage_factor="0.001",
+            quadratic_slippage_factor="0",
         ),
     )
 
@@ -434,7 +441,7 @@ def propose_asset(
     proposal.terms.validation_timestamp = (
         validation_time
         if validation_time is not None
-        else get_blockchain_time(data_client) + 10
+        else get_blockchain_time(data_client, in_seconds=True) + 10
     )
 
     proposal.terms.new_asset.CopyFrom(
@@ -466,7 +473,7 @@ def _build_generic_proposal(
                 " ignoring values for those which were"
             )
 
-        blockchain_time_seconds = get_blockchain_time(data_client)
+        blockchain_time_seconds = get_blockchain_time(data_client, in_seconds=True)
 
         closing_time = blockchain_time_seconds + 172800
         enactment_time = blockchain_time_seconds + 172900

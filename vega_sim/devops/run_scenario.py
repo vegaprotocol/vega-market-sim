@@ -1,4 +1,4 @@
-"""run.py
+"""run_scenario.py
 
 Script used to run vega-market-sim scenarios configure for devops.
 
@@ -18,7 +18,7 @@ Examples:
 
     Test the ETHUSD scenario with a simulation on a nullchain network.
 
-    $ python -m vega_sim.devops.run -s ETHUSD -n NULLCHAIN -d -c -p
+    $ python -m vega_sim.vega_sim.devops.run -s ETHUSD -n NULLCHAIN -d -c -p
 
 
 """
@@ -31,8 +31,8 @@ from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.network_service import VegaServiceNetwork
 
-from devops.scenario import DevOpsScenario
-from devops.registry import SCENARIOS
+from vega_sim.devops.scenario import DevOpsScenario
+from vega_sim.devops.registry import SCENARIOS
 
 
 def main():
@@ -89,6 +89,7 @@ def main():
                 pause_at_completion=args.pause,
                 raise_datanode_errors=False,
                 raise_step_errors=False,
+                run_with_snitch=False,
             )
 
 

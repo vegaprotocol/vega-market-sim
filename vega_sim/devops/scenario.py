@@ -38,7 +38,7 @@ from vega_sim.scenario.common.agents import (
 )
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
-from devops.wallet import (
+from vega_sim.devops.wallet import (
     MARKET_CREATOR_AGENT,
     MARKET_SETTLER_AGENT,
     MARKET_MAKER_AGENT,
@@ -46,7 +46,7 @@ from devops.wallet import (
     RANDOM_TRADER_AGENTS,
     SENSITIVE_TRADER_AGENTS,
 )
-from devops.classes import (
+from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
     AuctionTraderArgs,
@@ -156,9 +156,7 @@ class DevOpsScenario(Scenario):
             market_maker = ExponentialShapedMarketMaker(
                 wallet_name=MARKET_MAKER_AGENT.wallet_name,
                 key_name=MARKET_MAKER_AGENT.key_name,
-                market_name=self.market_name
-                if self.market_name is not None
-                else self.market_manager_args.market_name,
+                market_name=self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
                 initial_asset_mint=self.market_maker_args.initial_mint,
                 commitment_amount=self.market_maker_args.commitment_amount,
@@ -174,7 +172,6 @@ class DevOpsScenario(Scenario):
                 orders_from_stream=False,
                 state_update_freq=10,
                 tag=None,
-                step_length_seconds=self.step_length_seconds,
             )
 
             # Setup agents for passing opening auction
@@ -251,7 +248,7 @@ class DevOpsScenario(Scenario):
             if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
                 kwargs["agent"].price_process_generator = iter(self.price_process)
 
-            kwargs["agent"].step_length_seconds = self.step_length_seconds
+            kwargs["agent"].order_validity_length = self.step_length_seconds
 
             agents.append(kwargs.get("agent", None))
 

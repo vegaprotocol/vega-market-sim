@@ -4,6 +4,7 @@ import atexit
 import functools
 import logging
 import multiprocessing
+import psutil
 import os
 import shutil
 import signal
@@ -19,10 +20,13 @@ from io import BufferedWriter
 from os import path
 from typing import Dict, List, Optional, Set
 
+import grpc
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
 
+import vega_sim.api.governance as gov
+import vega_sim.grpc.client as vac
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
 from vega_sim.tools.load_binaries import download_binaries
@@ -40,7 +44,6 @@ PortUpdateConfig = namedtuple(
 class Ports(Enum):
     DATA_NODE_GRPC = auto()
     DATA_NODE_REST = auto()
-    DATA_NODE_GRAPHQL = auto()
     DATA_NODE_POSTGRES = auto()
     FAUCET = auto()
     WALLET = auto()
@@ -77,13 +80,19 @@ PORT_UPDATERS = {
     Ports.DATA_NODE_REST: [
         PortUpdateConfig(
             ("config", "data-node", "config.toml"),
-            ["Gateway", "REST"],
+            ["Gateway"],
             "Port",
             lambda port: port,
         ),
         PortUpdateConfig(
             ("config", "wallet-service", "networks", "local.toml"),
             ["API", "REST"],
+            "Hosts",
+            lambda port: [f"localhost:{port}"],
+        ),
+        PortUpdateConfig(
+            ("config", "wallet-service", "networks", "local.toml"),
+            ["API", "GraphQL"],
             "Hosts",
             lambda port: [f"localhost:{port}"],
         ),
@@ -121,20 +130,6 @@ PORT_UPDATERS = {
             ["Blockchain", "Null"],
             "Port",
             lambda port: port,
-        ),
-    ],
-    Ports.DATA_NODE_GRAPHQL: [
-        PortUpdateConfig(
-            ("config", "data-node", "config.toml"),
-            ["Gateway", "GraphQL"],
-            "Port",
-            lambda port: port,
-        ),
-        PortUpdateConfig(
-            ("config", "wallet-service", "networks", "local.toml"),
-            ["API", "GraphQL"],
-            "Hosts",
-            lambda port: [f"localhost:{port}"],
         ),
     ],
     Ports.CORE_GRPC: [
@@ -317,6 +312,7 @@ def _update_node_config(
 
 
 def manage_vega_processes(
+    child_conn: multiprocessing.Pipe,
     vega_path: str,
     data_node_path: str,
     vega_wallet_path: str,
@@ -331,26 +327,30 @@ def manage_vega_processes(
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
 ) -> None:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
+    )
     port_config = port_config if port_config is not None else {}
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
     logger.info(f"Running NullChain from vegahome of {tmp_vega_dir}")
-    if port_config.get(Ports.DATA_NODE_GRAPHQL):
-        logger.info(
-            f"Launching GraphQL node at port {port_config.get(Ports.DATA_NODE_GRAPHQL)}"
-        )
+
     if port_config.get(Ports.CONSOLE):
         logger.info(f"Launching Console at port {port_config.get(Ports.CONSOLE)}")
     if port_config.get(Ports.DATA_NODE_REST):
         logger.info(
-            f"Launching Datanode REST at port {port_config.get(Ports.DATA_NODE_REST)}"
+            "Launching Datanode REST + GRAPHQL at port"
+            f" {port_config.get(Ports.DATA_NODE_REST)}"
         )
     if port_config.get(Ports.DATA_NODE_GRPC):
         logger.info(
             f"Launching Datanode GRPC at port {port_config.get(Ports.DATA_NODE_GRPC)}"
         )
+    if port_config.get(Ports.CORE_REST):
+        logger.info(f"Launching Core REST at port {port_config.get(Ports.CORE_REST)}")
+
     if port_config.get(Ports.CORE_GRPC):
         logger.info(f"Launching Core GRPC at port {port_config.get(Ports.CORE_GRPC)}")
 
@@ -425,7 +425,11 @@ def manage_vega_processes(
         log_name="node",
     )
 
-    processes = [dataNodeProcess, vegaFaucetProcess, vegaNodeProcess]
+    processes = {
+        "data-node": dataNodeProcess,
+        "faucet": vegaFaucetProcess,
+        "vega": vegaNodeProcess,
+    }
 
     if run_wallet:
         for _ in range(3000):
@@ -444,7 +448,7 @@ def manage_vega_processes(
             ):
                 time.sleep(0.1)
 
-        subprocess.Popen(
+        subprocess.run(
             [
                 vega_wallet_path,
                 "api-token",
@@ -452,11 +456,26 @@ def manage_vega_processes(
                 f"--home={tmp_vega_home}",
                 f"--passphrase-file={tmp_vega_home}/passphrase-file",
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
 
-        subprocess.Popen(
+        subprocess.run(
+            [
+                vega_wallet_path,
+                "create",
+                "--wallet",
+                DEFAULT_WALLET_NAME,
+                "--home",
+                tmp_vega_home,
+                "--passphrase-file",
+                tmp_vega_home + "/passphrase-file",
+                "--output",
+                "json",
+            ],
+            capture_output=True,
+        )
+
+        subprocess.run(
             [
                 vega_wallet_path,
                 "api-token",
@@ -467,8 +486,7 @@ def manage_vega_processes(
                 "--wallet-name=" + DEFAULT_WALLET_NAME,
                 "--description=" + DEFAULT_WALLET_NAME,
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
 
         wallet_args = [
@@ -488,14 +506,14 @@ def manage_vega_processes(
             dir_root=tmp_vega_dir,
             log_name="vegawallet",
         )
-        processes.append(vegaWalletProcess)
+        processes["wallet"] = vegaWalletProcess
 
     if run_with_console:
         env_copy = os.environ.copy()
         env_copy.update(
             {
                 "NX_VEGA_URL": (
-                    f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/query"
+                    f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/graphql"
                 ),
                 "NX_VEGA_WALLET_URL": f"http://localhost:{port_config[Ports.WALLET]}",
                 "NX_VEGA_ENV": "CUSTOM",
@@ -520,19 +538,28 @@ def manage_vega_processes(
             log_name="console",
             env=env_copy,
         )
-        processes.append(console_process)
+        processes["console"] = console_process
+
+    # Send process pid values for resource monitoring
+    child_conn.send({name: process.pid for name, process in processes.items()})
 
     signal.sigwait([signal.SIGKILL, signal.SIGTERM])
-    for process in processes:
+    for process in processes.values():
         process.terminate()
-    for process in processes:
-        return_code = process.poll()
-        if return_code is not None:
-            continue
-        # Could mean 5s wait per process, but we're not holding the outer process
-        # and would really be a symptom of these children taking too long to close
-        time.sleep(5)
-        process.kill()
+    for name, process in processes.items():
+        attempts = 0
+        while process.poll() is None:
+            time.sleep(1)
+            attempts += 1
+            if attempts > 60:
+                logging.warning(
+                    f"Gracefully terminating process timed-out. Killing process {name}."
+                )
+                process.kill()
+        if process.poll() == 0:
+            logging.debug(f"Process {name} terminated.")
+        if process.poll() == -9:
+            logging.debug(f"Process {name} killed.")
 
     if not retain_log_files:
         shutil.rmtree(tmp_vega_dir)
@@ -543,7 +570,6 @@ class VegaServiceNull(VegaService):
         Ports.WALLET: "wallet_port",
         Ports.DATA_NODE_GRPC: "data_node_grpc_port",
         Ports.DATA_NODE_REST: "data_node_rest_port",
-        Ports.DATA_NODE_GRAPHQL: "data_node_graphql_port",
         Ports.DATA_NODE_POSTGRES: "data_node_postgres_port",
         Ports.FAUCET: "faucet_port",
         Ports.VEGA_NODE: "vega_node_port",
@@ -654,7 +680,6 @@ class VegaServiceNull(VegaService):
         self.wallet_port = 0
         self.data_node_rest_port = 0
         self.data_node_grpc_port = 0
-        self.data_node_graphql_port = 0
         self.data_node_postgres_port = 0
         self.faucet_port = 0
         self.vega_node_port = 0
@@ -676,7 +701,6 @@ class VegaServiceNull(VegaService):
             Ports.WALLET: self.wallet_port,
             Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
             Ports.DATA_NODE_REST: self.data_node_rest_port,
-            Ports.DATA_NODE_GRAPHQL: self.data_node_graphql_port,
             Ports.DATA_NODE_POSTGRES: self.data_node_postgres_port,
             Ports.FAUCET: self.faucet_port,
             Ports.VEGA_NODE: self.vega_node_port,
@@ -688,12 +712,13 @@ class VegaServiceNull(VegaService):
     def start(self, block_on_startup: bool = True) -> None:
         if self.check_for_binaries and not self._using_all_custom_paths:
             download_binaries()
-
+        parent_conn, child_conn = multiprocessing.Pipe()
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
+                "child_conn": child_conn,
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
@@ -720,8 +745,23 @@ class VegaServiceNull(VegaService):
         if block_on_startup:
             # Wait for startup
             started = False
-            for _ in range(3600):
+            for _ in range(500):
                 try:
+                    channel = grpc.insecure_channel(
+                        self.data_node_grpc_url,
+                        options=(
+                            ("grpc.enable_http_proxy", 0),
+                            ("grpc.max_send_message_length", 1024 * 1024 * 20),
+                            ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                        ),
+                    )
+                    grpc.channel_ready_future(channel).result(timeout=5)
+                    trading_data_client = vac.VegaTradingDataClientV2(
+                        self.data_node_grpc_url,
+                        channel=channel,
+                    )
+                    gov.get_blockchain_time(trading_data_client)
+
                     requests.get(
                         f"http://localhost:{self.data_node_rest_port}/time"
                     ).raise_for_status()
@@ -739,19 +779,30 @@ class VegaServiceNull(VegaService):
                     MaxRetryError,
                     requests.exceptions.ConnectionError,
                     requests.exceptions.HTTPError,
+                    grpc.RpcError,
+                    grpc.FutureTimeoutError,
                 ):
                     time.sleep(0.1)
             if not started:
+                self.stop()
                 raise VegaStartupTimeoutError(
                     "Timed out waiting for Vega simulator to start up"
                 )
+
+            self.process_pids = parent_conn.recv()
+
+            # Create a block before waiting for datanode sync and starting the feeds
+            self.wait_fn(1)
+            self.wait_for_total_catchup()
+            self.wait_for_thread_catchup()
+            self.data_cache
 
         if self.run_with_console:
             webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
 
         if self.launch_graphql:
             webbrowser.open(
-                f"http://localhost:{port_config[Ports.DATA_NODE_GRAPHQL]}/", new=2
+                f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/graphql", new=2
             )
 
     # Class internal as at some point the host may vary as well as the port
@@ -760,11 +811,16 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
-        super().stop()
+        self.core_client.stop()
+        self.core_state_client.stop()
+        self.trading_data_client_v2.stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
             self.proc.terminate()
+        if isinstance(self.wallet, SlimWallet):
+            self.wallet.stop()
+        super().stop()
 
     @property
     def wallet_url(self) -> str:

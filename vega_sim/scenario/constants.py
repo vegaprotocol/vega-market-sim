@@ -8,3 +8,4 @@ class Network(Enum):
     STAGNET2 = "vegawallet-stagnet2"
     STAGNET3 = "vegawallet-stagnet3"
     FAIRGROUND = "vegawallet-fairground"
+    TESTNET2 = "testnet2"

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import datetime
 import logging
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional, TypeVar, Union
-import datetime
+from functools import wraps
+from typing import Callable, Iterable, List, Optional, TypeVar, Union, Tuple
 
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
@@ -17,6 +18,27 @@ MarketAccount = namedtuple("MarketAccount", ["insurance", "liquidity_fee"])
 T = TypeVar("T")
 S = TypeVar("S")
 U = TypeVar("U")
+
+
+def _retry(num_retry_attempts: int = 3):
+    """Automatically retries a function a certain number
+    of times. Swallows any errors raised by earlier attempts
+    and will raise the last one if still failing.
+    """
+
+    def retry_decorator(fn):
+        @wraps(fn)
+        def auto_retry_fn(*args, **kwargs):
+            for i in range(num_retry_attempts):
+                try:
+                    return fn(*args, **kwargs)
+                except Exception as e:
+                    if (i + 1) == num_retry_attempts:
+                        raise e
+
+        return auto_retry_fn
+
+    return retry_decorator
 
 
 def unroll_v2_pagination(
@@ -38,6 +60,7 @@ def unroll_v2_pagination(
     return full_list
 
 
+@_retry(3)
 def positions_by_market(
     pub_key: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -58,6 +81,7 @@ def positions_by_market(
     )
 
 
+@_retry(3)
 def all_markets(
     data_client: vac.VegaTradingDataClientV2,
 ) -> List[vega_protos.markets.Market]:
@@ -71,6 +95,7 @@ def all_markets(
     )
 
 
+@_retry(3)
 def market_info(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -83,6 +108,7 @@ def market_info(
     ).market
 
 
+@_retry(3)
 def list_assets(data_client: vac.VegaTradingDataClientV2):
     return unroll_v2_pagination(
         base_request=data_node_protos_v2.trading_data.ListAssetsRequest(),
@@ -91,6 +117,7 @@ def list_assets(data_client: vac.VegaTradingDataClientV2):
     )
 
 
+@_retry(3)
 def asset_info(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -111,6 +138,7 @@ def asset_info(
     ).asset
 
 
+@_retry(3)
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
     asset_id: Optional[str] = None,
@@ -137,6 +165,7 @@ def list_accounts(
     )
 
 
+@_retry(3)
 def market_accounts(
     asset_id: str,
     market_id: str,
@@ -155,7 +184,8 @@ def market_accounts(
     )
 
 
-def market_data(
+@_retry(3)
+def get_latest_market_data(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
 ) -> vega_protos.vega.MarketData:
@@ -167,6 +197,7 @@ def market_data(
     ).market_data
 
 
+@_retry(3)
 def market_data_history(
     market_id: str,
     start: datetime.datetime,
@@ -188,6 +219,7 @@ def market_data_history(
     )
 
 
+@_retry(3)
 def infrastructure_fee_accounts(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -212,6 +244,7 @@ def infrastructure_fee_accounts(
     )
 
 
+@_retry(3)
 def list_orders(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str = None,
@@ -239,15 +272,19 @@ def list_orders(
         _type_: _description_
     """
 
-    request = data_node_protos_v2.trading_data.ListOrdersRequest(live_only=live_only)
+    order_filter = data_node_protos_v2.trading_data.OrderFilter(live_only=live_only)
+
+    if reference is not None:
+        order_filter.reference = reference
 
     for attr, val in [
-        ("market_id", market_id),
-        ("party_id", party_id),
-        ("reference", reference),
+        ("market_ids", [market_id] if market_id is not None else None),
+        ("party_ids", [party_id] if party_id is not None else None),
     ]:
         if val is not None:
-            setattr(request, attr, val)
+            getattr(order_filter, attr).extend(val)
+
+    request = data_node_protos_v2.trading_data.ListOrdersRequest(filter=order_filter)
 
     return unroll_v2_pagination(
         base_request=request,
@@ -256,6 +293,7 @@ def list_orders(
     )
 
 
+@_retry(3)
 def order_status(
     order_id: str, data_client: vac.VegaTradingDataClientV2, version: int = 0
 ) -> Optional[vega_protos.vega.Order]:
@@ -282,6 +320,7 @@ def order_status(
     ).order
 
 
+@_retry(3)
 def market_depth(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -294,6 +333,7 @@ def market_depth(
     )
 
 
+@_retry(3)
 def liquidity_provisions(
     data_client: vac.VegaTradingDataClientV2,
     market_id: Optional[str] = None,
@@ -314,8 +354,7 @@ def liquidity_provisions(
     """
     return unroll_v2_pagination(
         base_request=data_node_protos_v2.trading_data.ListLiquidityProvisionsRequest(
-            market_id=market_id,
-            party_id=party_id,
+            market_id=market_id, party_id=party_id, live=True
         ),
         request_func=lambda x: data_client.ListLiquidityProvisions(
             x
@@ -356,6 +395,7 @@ def observe_event_bus(
     return data_client.ObserveEventBus(iter([request]))
 
 
+@_retry(3)
 def margin_levels(
     data_client: vac.VegaTradingDataClientV2,
     party_id: str,
@@ -370,6 +410,7 @@ def margin_levels(
     )
 
 
+@_retry(3)
 def get_trades(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
@@ -378,13 +419,16 @@ def get_trades(
 ) -> List[vega_protos.vega.Trade]:
     return unroll_v2_pagination(
         data_node_protos_v2.trading_data.ListTradesRequest(
-            market_id=market_id, party_id=party_id, order_id=order_id
+            market_ids=[market_id],
+            party_ids=[party_id] if party_id is not None else None,
+            order_ids=[order_id] if order_id is not None else None,
         ),
         request_func=lambda x: data_client.ListTrades(x).trades,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
 
 
+@_retry(3)
 def get_network_parameter(
     data_client: vac.VegaTradingDataClientV2,
     key: str,
@@ -406,6 +450,7 @@ def get_network_parameter(
     ).network_parameter
 
 
+@_retry(3)
 def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
@@ -448,6 +493,7 @@ def list_transfers(
     )
 
 
+@_retry(3)
 def list_ledger_entries(
     data_client: vac.VegaTradingDataClientV2,
     close_on_account_filters: bool = False,
@@ -522,9 +568,9 @@ def list_ledger_entries(
                 asset_id=asset_id,
                 party_ids=from_party_ids if from_party_ids is not None else [],
                 market_ids=from_market_ids if from_market_ids is not None else [],
-                account_types=from_account_types
-                if from_account_types is not None
-                else [],
+                account_types=(
+                    from_account_types if from_account_types is not None else []
+                ),
             ),
             to_account_filter=data_node_protos_v2.trading_data.AccountFilter(
                 asset_id=asset_id,
@@ -538,12 +584,14 @@ def list_ledger_entries(
     if from_datetime is not None or to_datetime is not None:
         base_request.date_range.CopyFrom(
             data_node_protos_v2.trading_data.DateRange(
-                start_timestamp=from_datetime.timestamp() * 1e9
-                if from_datetime is not None
-                else None,
-                end_timestamp=to_datetime.timestamp() * 1e9
-                if to_datetime is not None
-                else None,
+                start_timestamp=(
+                    from_datetime.timestamp() * 1e9
+                    if from_datetime is not None
+                    else None
+                ),
+                end_timestamp=(
+                    to_datetime.timestamp() * 1e9 if to_datetime is not None else None
+                ),
             )
         )
 
@@ -576,3 +624,39 @@ def market_data_subscription(
             return
 
     return _data_gen(data_stream=data_stream)
+
+
+@_retry(3)
+def get_risk_factors(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+):
+    return data_client.GetRiskFactors(
+        data_node_protos_v2.trading_data.GetRiskFactorsRequest(market_id=market_id)
+    )
+
+
+@_retry(3)
+def estimate_position(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    open_volume: int,
+    orders: Optional[List[data_node_protos_v2.trading_data.OrderInfo]] = None,
+    collateral_available: Optional[str] = None,
+) -> Tuple[
+    data_node_protos_v2.trading_data.MarginEstimate,
+    data_node_protos_v2.trading_data.LiquidationEstimate,
+]:
+    base_request = data_node_protos_v2.trading_data.EstimatePositionRequest(
+        market_id=market_id,
+        open_volume=open_volume,
+    )
+
+    if orders is not None:
+        [base_request.orders.append(order) for order in orders]
+    if collateral_available is not None:
+        setattr(base_request, "collateral_available", collateral_available)
+
+    response = data_client.EstimatePosition(base_request)
+
+    return response.margin, response.liquidation

@@ -39,10 +39,10 @@ from vega_sim.scenario.common.agents import (
 class ConfigurableMarket(Scenario):
     def __init__(
         self,
-        market_name: str = None,
-        market_code: str = None,
-        asset_name: str = None,
-        asset_dp: str = None,
+        market_name: Optional[str] = None,
+        market_code: Optional[str] = None,
+        asset_name: Optional[str] = None,
+        asset_dp: Optional[str] = None,
         num_steps: int = 120,
         granularity: Optional[Granularity] = Granularity.MINUTE,
         block_size: int = 1,
@@ -52,6 +52,7 @@ class ConfigurableMarket(Scenario):
         ] = None,
         settle_at_end: bool = True,
         price_process_fn: Optional[Callable] = None,
+        pause_every_n_steps: Optional[int] = None,
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
@@ -62,6 +63,7 @@ class ConfigurableMarket(Scenario):
         self.block_length_seconds = block_length_seconds
         self.settle_at_end = settle_at_end
         self.price_process_fn = price_process_fn
+        self.pause_every_n_steps = pause_every_n_steps
 
         # Asset parameters
         self.asset_name = asset_name
@@ -88,6 +90,7 @@ class ConfigurableMarket(Scenario):
             granularity=self.granularity,
             start=str(start),
             end=str(end),
+            interpolation=f"{self.granularity.value}s",
         )
 
         return list(price_process)
@@ -98,6 +101,7 @@ class ConfigurableMarket(Scenario):
         tag: str,
         market_config: Optional[MarketConfig] = None,
         random_state: Optional[np.random.RandomState] = None,
+        **kwargs,
     ) -> Dict[str, StateAgent]:
         market_config = market_config if market_config is not None else MarketConfig()
 
@@ -247,4 +251,5 @@ class ConfigurableMarket(Scenario):
             transactions_per_block=self.block_size,
             vega_service=vega,
             block_length_seconds=self.block_length_seconds,
+            pause_every_n_steps=self.pause_every_n_steps,
         )

@@ -1,21 +1,35 @@
 import pytest
 
+import vega_sim.proto.vega as vega_protos
 from tests.integration.utils.fixtures import (
-    vega_service_with_market,
-    vega_service,
+    ASSET_NAME,
+    MM_WALLET,
+    WalletConfig,
     create_and_faucet_wallet,
+    vega_service,
     vega_service_with_high_volume,
     vega_service_with_high_volume_with_market,
-    ASSET_NAME,
-    WalletConfig,
+    vega_service_with_market,
 )
 from vega_sim.null_service import VegaServiceNull
-import vega_sim.proto.vega as vega_protos
-
 
 LIQ = WalletConfig("liq", "liq")
 PARTY_A = WalletConfig("party_a", "party_a")
 PARTY_B = WalletConfig("party_b", "party_b")
+
+
+def next_epoch(vega: VegaServiceNull):
+    forwards = 0
+    epoch_seq = vega.statistics().epoch_seq
+    while epoch_seq == vega.statistics().epoch_seq:
+        vega.wait_fn(1)
+        forwards += 1
+        if forwards > 2 * 10 * 60:
+            raise Exception(
+                "Epoch not started after forwarding the duration of two epochs."
+            )
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
 
 
 @pytest.mark.integration
@@ -219,7 +233,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t1) == 1
     assert len(live_transfers_t1) == 0
-    assert party_a_accounts_t1.general == 500
+    assert party_a_accounts_t1.general == 499.5
     assert party_b_accounts_t1.general == 1500
 
     vega.one_off_transfer(
@@ -229,7 +243,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
         to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=500,
-        delay=15,
+        delay=int(100e9),
     )
 
     vega.wait_fn(10)
@@ -253,10 +267,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t2) == 2
     assert len(live_transfers_t2) == 1
-    assert party_a_accounts_t2.general == 500
-    assert party_b_accounts_t2.general == 1000
+    assert party_a_accounts_t2.general == 499.5
+    assert party_b_accounts_t2.general == 999.5
 
-    vega.wait_fn(10)
+    vega.wait_fn(100)
     vega.wait_for_total_catchup()
 
     party_a_accounts_t3 = vega.party_account(
@@ -277,5 +291,107 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t3) == 2
     assert len(live_transfers_t3) == 0
-    assert party_a_accounts_t3.general == 1000
-    assert party_b_accounts_t3.general == 1000
+    assert party_a_accounts_t3.general == 999.5
+    assert party_b_accounts_t3.general == 999.5
+
+
+@pytest.mark.integration
+def test_estimate_position(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    margin, liquidation = vega.estimate_position(
+        market_id=market_id,
+        open_volume=-1,
+        side=["SIDE_SELL", "SIDE_SELL"],
+        price=[1.01, 1.02],
+        remaining=[1, 1],
+        is_market_order=[False, False],
+        collateral_available=1,
+    )
+
+
+@pytest.mark.integration
+def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e3)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+
+    vega.recurring_transfer(
+        from_key_name=PARTY_A.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_key_name=PARTY_B.name,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset=asset_id,
+        amount=500,
+        factor=0.5,
+    )
+
+    party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_b_accounts_t0 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
+
+    assert party_a_accounts_t0[0].balance == 1000
+    assert party_b_accounts_t0[0].balance == 1000
+
+    # Forward one epoch
+    next_epoch(vega=vega)
+
+    party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_b_accounts_t1 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
+
+    assert party_a_accounts_t1[0].balance == 499.5
+    assert party_b_accounts_t1[0].balance == 1500
+
+    # Forward one epoch
+    next_epoch(vega=vega)
+
+    party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_b_accounts_t2 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
+
+    assert party_a_accounts_t2[0].balance == 249.25
+    assert party_b_accounts_t2[0].balance == 1750
+
+
+@pytest.mark.integration
+def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+
+    vega.recurring_transfer(
+        from_key_name=PARTY_A.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+        asset=asset_id,
+        amount=100,
+        factor=1.0,
+    )
+
+    party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+
+    assert party_a_accounts_t0[0].balance == 1000
+
+    # Forward one epoch
+    next_epoch(vega=vega)
+
+    party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+
+    assert party_a_accounts_t1[0].balance == 899.9
+
+    # Forward one epoch
+    next_epoch(vega=vega)
+
+    party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+
+    assert party_a_accounts_t2[0].balance == 799.8

@@ -7,6 +7,7 @@ from typing import Any, Optional, TypeVar, Union, Callable
 import requests
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
+from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
 
 
 T = TypeVar("T")
@@ -147,3 +148,7 @@ def forward(time: str, vega_node_url: str) -> None:
 
     req = requests.post(TIME_FORWARD_URL.format(base_url=vega_node_url), json=payload)
     req.raise_for_status()
+
+
+def statistics(core_data_client: VegaCoreClient):
+    return core_data_client.Statistics(StatisticsRequest()).statistics

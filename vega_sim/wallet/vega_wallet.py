@@ -159,7 +159,6 @@ class VegaWallet(Wallet):
         subprocess.run(
             [
                 self._wallet_path,
-                "wallet",
                 "create",
                 "--wallet",
                 name,
@@ -218,6 +217,12 @@ class VegaWallet(Wallet):
         url = f"{self.wallet_url}/api/v2/requests"
 
         response = requests.post(url, headers=headers, json=submission)
+
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            logging.warning(f"Request failed, response={response.json()}")
+            raise e
 
         return {
             key["name"]: key["publicKey"] for key in response.json()["result"]["keys"]

@@ -38,7 +38,7 @@ PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bon
 AccountData = namedtuple(
     "AccountData", ["owner", "balance", "asset", "market_id", "type"]
 )
-
+RiskFactor = namedtuple("RiskFactors", ["market_id", "short", "long"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
 Order = namedtuple(
@@ -109,6 +109,25 @@ MarginLevels = namedtuple(
 
 
 @dataclass
+class LiquidationPrice:
+    open_volume_only: float
+    including_buy_orders: float
+    including_sell_orders: float
+
+
+@dataclass
+class MarginEstimate:
+    best_case: MarginLevels
+    worst_case: MarginLevels
+
+
+@dataclass
+class LiquidationEstimate:
+    best_case: LiquidationPrice
+    worst_case: LiquidationPrice
+
+
+@dataclass
 class DecimalSpec:
     position_decimals: Optional[int] = None
     price_decimals: Optional[int] = None
@@ -174,6 +193,55 @@ class Trade:
     seller_fee: Fee
     buyer_auction_batch: int
     seller_auction_batch: int
+
+
+@dataclass(frozen=True)
+class MarketData:
+    mark_price: float
+    best_bid_price: float
+    best_bid_volume: float
+    best_offer_price: float
+    best_offer_volume: float
+    best_static_bid_price: float
+    best_static_bid_volume: float
+    best_static_offer_price: float
+    best_static_offer_volume: float
+    mid_price: float
+    static_mid_price: float
+    market_id: str
+    timestamp: str
+    open_interest: float
+    auction_end: str
+    auction_start: str
+    indicative_price: float
+    indicative_volume: float
+    market_trading_mode: str
+    trigger: str
+    extension_trigger: str
+    target_stake: float
+    supplied_stake: float
+    market_value_proxy: float
+    price_monitoring_bounds: list
+    liquidity_provider_fee_share: list
+    market_state: str
+    next_mark_to_market: float
+    last_traded_price: float
+
+
+@dataclass(frozen=True)
+class PriceMonitoringBounds:
+    min_valid_price: float
+    max_valid_price: float
+    trigger: str
+    reference_price: float
+
+
+@dataclass(frozen=True)
+class LiquidityProviderFeeShare:
+    party: str
+    equity_like_share: float
+    average_entry_valuation: float
+    average_score: float
 
 
 def _ledger_entry_from_proto(
@@ -345,6 +413,39 @@ def _transfer_from_proto(
     )
 
 
+def _margin_estimate_from_proto(
+    margin_estimate: data_node_protos_v2.trading_data.MarginEstimate,
+    decimal_spec: DecimalSpec,
+) -> MarginEstimate:
+    return MarginEstimate(
+        best_case=_margin_level_from_proto(
+            margin_level=margin_estimate.best_case, decimal_spec=decimal_spec
+        ),
+        worst_case=_margin_level_from_proto(
+            margin_level=margin_estimate.worst_case, decimal_spec=decimal_spec
+        ),
+    )
+
+
+def _liquidation_estimate_from_proto(
+    liquidation_estimate: data_node_protos_v2.trading_data.LiquidationEstimate,
+):
+    return LiquidationEstimate(
+        best_case=_liquidation_price_from_proto(liquidation_estimate.best_case),
+        worst_case=_liquidation_price_from_proto(liquidation_estimate.worst_case),
+    )
+
+
+def _liquidation_price_from_proto(
+    liquidation_price: data_node_protos_v2.trading_data.LiquidationPrice,
+):
+    return LiquidationPrice(
+        open_volume_only=float(liquidation_price.open_volume_only),
+        including_buy_orders=float(liquidation_price.including_buy_orders),
+        including_sell_orders=float(liquidation_price.including_sell_orders),
+    )
+
+
 def positions_by_market(
     data_client: vac.VegaTradingDataClientV2,
     pub_key: str,
@@ -415,6 +516,128 @@ def positions_by_market(
         return positions
     else:
         return positions[market_id]
+
+
+def _market_data_from_proto(
+    market_data: vega_protos.vega.MarketData,
+    decimal_spec: DecimalSpec,
+):
+    return MarketData(
+        mark_price=num_from_padded_int(
+            market_data.mark_price, decimal_spec.price_decimals
+        ),
+        best_bid_price=num_from_padded_int(
+            market_data.best_bid_price, decimal_spec.price_decimals
+        ),
+        best_bid_volume=num_from_padded_int(
+            market_data.best_bid_volume, decimal_spec.position_decimals
+        ),
+        best_offer_price=num_from_padded_int(
+            market_data.best_offer_price, decimal_spec.price_decimals
+        ),
+        best_offer_volume=num_from_padded_int(
+            market_data.best_offer_volume, decimal_spec.position_decimals
+        ),
+        best_static_bid_price=num_from_padded_int(
+            market_data.best_static_bid_price, decimal_spec.price_decimals
+        ),
+        best_static_bid_volume=num_from_padded_int(
+            market_data.best_static_bid_price, decimal_spec.position_decimals
+        ),
+        best_static_offer_price=num_from_padded_int(
+            market_data.best_static_offer_price, decimal_spec.price_decimals
+        ),
+        best_static_offer_volume=num_from_padded_int(
+            market_data.best_static_offer_volume, decimal_spec.position_decimals
+        ),
+        mid_price=num_from_padded_int(
+            market_data.mid_price, decimal_spec.price_decimals
+        ),
+        static_mid_price=num_from_padded_int(
+            market_data.static_mid_price, decimal_spec.price_decimals
+        ),
+        market_id=market_data.market,
+        timestamp=market_data.timestamp,
+        open_interest=market_data.open_interest,
+        auction_end=market_data.auction_end,
+        auction_start=market_data.auction_start,
+        indicative_price=num_from_padded_int(
+            market_data.indicative_price, decimal_spec.price_decimals
+        ),
+        indicative_volume=num_from_padded_int(
+            market_data.indicative_volume, decimal_spec.price_decimals
+        ),
+        market_trading_mode=market_data.market_trading_mode,
+        trigger=market_data.trigger,
+        extension_trigger=market_data.extension_trigger,
+        target_stake=num_from_padded_int(
+            market_data.target_stake, decimal_spec.asset_decimals
+        ),
+        supplied_stake=num_from_padded_int(
+            market_data.supplied_stake, decimal_spec.asset_decimals
+        ),
+        market_value_proxy=num_from_padded_int(
+            market_data.market_value_proxy, decimal_spec.asset_decimals
+        ),
+        price_monitoring_bounds=_price_monitoring_bounds_from_proto(
+            market_data.price_monitoring_bounds, decimal_spec.price_decimals
+        ),
+        liquidity_provider_fee_share=_liquidity_provider_fee_share_from_proto(
+            market_data.liquidity_provider_fee_share,
+            decimal_spec.asset_decimals,
+        ),
+        market_state=market_data.market_state,
+        next_mark_to_market=market_data.next_mark_to_market,
+        last_traded_price=num_from_padded_int(
+            market_data.last_traded_price, decimal_spec.price_decimals
+        ),
+    )
+
+
+def _price_monitoring_bounds_from_proto(
+    price_monitoring_bounds,
+    price_decimals: int,
+) -> List[PriceMonitoringBounds]:
+    return [
+        PriceMonitoringBounds(
+            min_valid_price=num_from_padded_int(
+                individual_bound.min_valid_price,
+                price_decimals,
+            ),
+            max_valid_price=num_from_padded_int(
+                individual_bound.max_valid_price,
+                price_decimals,
+            ),
+            trigger=individual_bound.trigger,
+            reference_price=num_from_padded_int(
+                individual_bound.reference_price,
+                price_decimals,
+            ),
+        )
+        for individual_bound in price_monitoring_bounds
+    ]
+
+
+def _liquidity_provider_fee_share_from_proto(
+    liquidity_provider_fee_share,
+    asset_decimals,
+) -> List[PriceMonitoringBounds]:
+    return [
+        LiquidityProviderFeeShare(
+            party=individual_liquidity_provider_fee_share.party,
+            equity_like_share=float(
+                individual_liquidity_provider_fee_share.equity_like_share
+            ),
+            average_entry_valuation=num_from_padded_int(
+                float(individual_liquidity_provider_fee_share.average_entry_valuation),
+                asset_decimals,
+            ),
+            average_score=float(
+                individual_liquidity_provider_fee_share.equity_like_share
+            ),
+        )
+        for individual_liquidity_provider_fee_share in liquidity_provider_fee_share
+    ]
 
 
 def list_accounts(
@@ -628,67 +851,6 @@ def get_asset_decimals(
     ).details.decimals
 
 
-def best_prices(
-    market_id: str,
-    data_client: vac.VegaTradingDataClientV2,
-    price_decimals: Optional[int] = None,
-    market_data: Optional[vega_protos.vega.MarketData] = None,
-) -> Tuple[float, float]:
-    """
-    Output the best static bid price and best static ask price in current market.
-    """
-    mkt_data = (
-        market_data
-        if market_data is not None
-        else data_raw.market_data(market_id=market_id, data_client=data_client)
-    )
-    mkt_price_dp = (
-        price_decimals
-        if price_decimals is not None
-        else market_price_decimals(market_id=market_id, data_client=data_client)
-    )
-
-    return (
-        num_from_padded_int(mkt_data.best_static_bid_price, mkt_price_dp),
-        num_from_padded_int(mkt_data.best_static_offer_price, mkt_price_dp),
-    )
-
-
-def price_bounds(
-    market_id: str,
-    data_client: vac.VegaTradingDataClientV2,
-    price_decimals: Optional[int] = None,
-    market_data: Optional[vega_protos.vega.MarketData] = None,
-) -> Tuple[Optional[float], Optional[float]]:
-    """
-    Output the tightest price bounds in current market.
-    """
-    mkt_data = (
-        market_data
-        if market_data is not None
-        else data_raw.market_data(market_id=market_id, data_client=data_client)
-    )
-    mkt_price_dp = (
-        price_decimals
-        if price_decimals is not None
-        else market_price_decimals(market_id=market_id, data_client=data_client)
-    )
-
-    lower_bounds = [
-        price_monitoring_bound.min_valid_price
-        for price_monitoring_bound in mkt_data.price_monitoring_bounds
-    ]
-    upper_bounds = [
-        price_monitoring_bound.max_valid_price
-        for price_monitoring_bound in mkt_data.price_monitoring_bounds
-    ]
-
-    return (
-        num_from_padded_int(max(lower_bounds), mkt_price_dp) if lower_bounds else None,
-        num_from_padded_int(min(upper_bounds), mkt_price_dp) if upper_bounds else None,
-    )
-
-
 def open_orders_by_market(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -717,8 +879,10 @@ def open_orders_by_market(
         open_only=True,
     )
     for order in orders:
-        bids.append(order) if order.side == vega_protos.vega.SIDE_BUY else asks.append(
-            order
+        (
+            bids.append(order)
+            if order.side == vega_protos.vega.SIDE_BUY
+            else asks.append(order)
         )
 
     return OrdersBySide(bids, asks)
@@ -1114,61 +1278,34 @@ def _stream_handler(
 
     event = extraction_fn(stream_item)
 
-    market_id = getattr(event, "market_id", None)
-    asset_decimals = asset_dp.get(getattr(event, "asset", mkt_to_asset.get(market_id)))
+    market_id = getattr(event, "market_id", getattr(event, "market", None))
+
+    # Check market creation event observed
+    if (market_id is not None) and (
+        (market_id not in mkt_pos_dp)
+        or (market_id not in mkt_price_dp)
+        or (market_id not in mkt_to_asset)
+    ):
+        return
+
+    asset_id = getattr(
+        event,
+        "asset",
+        mkt_to_asset[market_id] if market_id is not None else None,
+    )
+
+    # Check asset creation event observed
+    if (asset_id is not None) and (asset_id not in asset_dp):
+        return
 
     return conversion_fn(
         event,
         DecimalSpec(
             price_decimals=mkt_price_dp[market_id] if market_id is not None else None,
             position_decimals=mkt_pos_dp[market_id] if market_id is not None else None,
-            asset_decimals=asset_decimals,
+            asset_decimals=asset_dp[asset_id],
         ),
     )
-
-
-def get_liquidity_fee_shares(
-    data_client: vac.VegaTradingDataClientV2,
-    market_id: str,
-    party_id: Optional[str] = None,
-    market_data: Optional[vega_protos.vega.MarketData] = None,
-) -> Union[Dict, float]:
-    """Gets the current liquidity fee share for each party or a specified party.
-
-    Args:
-        data_client (vac.VegaTradingDataClientV2):
-            An instantiated gRPC data client
-        market_id (str):
-            Id of market to get liquidity fee shares from.
-        party_id (Optional[str], optional):
-            Id of party to get liquidity fee shares for. Defaults to None.
-        market_data (Optional[vega_protos.markets.MarketData]):
-            Market data to use. If not passed, loads from data node
-    """
-
-    market_data = (
-        market_data
-        if market_data is not None
-        else data_raw.market_data(data_client=data_client, market_id=market_id)
-    )
-
-    # Calculate share of fees for each LP
-    shares = {
-        lp.party: float(lp.equity_like_share) * float(lp.average_score)
-        for lp in market_data.liquidity_provider_fee_share
-    }
-    total_shares = sum(shares.values())
-
-    # Scale share of fees for each LP pro rata
-    if total_shares != 0:
-        pro_rata_shares = {key: val / total_shares for key, val in shares.items()}
-    else:
-        pro_rata_shares = {key: 1 / len(shares) for key, val in shares.items()}
-
-    if party_id is None:
-        return pro_rata_shares
-    else:
-        return pro_rata_shares[party_id]
 
 
 def list_ledger_entries(
@@ -1348,3 +1485,131 @@ def ledger_entries_subscription_handler(
                 )
             )
     return ledger_entries
+
+
+def market_data_subscription_handler(
+    stream_item: vega_protos.api.v1.core.ObserveEventBusResponse,
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+):
+    return _stream_handler(
+        stream_item=stream_item,
+        extraction_fn=lambda evt: evt.market_data,
+        conversion_fn=_market_data_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
+
+
+def get_latest_market_data(
+    market_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> MarketData:
+    # Get latest market data
+    market_data = data_raw.get_latest_market_data(
+        market_id=market_id, data_client=data_client
+    )
+
+    market_price_decimals_map = (
+        market_price_decimals_map if market_price_decimals_map is not None else {}
+    )
+    market_position_decimals_map = (
+        market_position_decimals_map if market_position_decimals_map is not None else {}
+    )
+    market_to_asset_map = market_to_asset_map if market_to_asset_map is not None else {}
+    asset_decimals_map = asset_decimals_map if asset_decimals_map is not None else {}
+
+    if market_id not in market_price_decimals_map:
+        market_price_decimals_map[market_id] = market_price_decimals(
+            market_id=market_id, data_client=data_client
+        )
+    if market_id not in market_position_decimals_map:
+        market_position_decimals_map[market_id] = market_position_decimals(
+            market_id=market_id, data_client=data_client
+        )
+    if market_id not in market_to_asset_map:
+        market_to_asset_map[market_id] = data_raw.market_info(
+            market_id=market_id, data_client=data_client
+        ).tradable_instrument.instrument.future.settlement_asset
+    if market_to_asset_map[market_id] not in asset_decimals_map:
+        asset_decimals_map[market_to_asset_map[market_id]] = get_asset_decimals(
+            asset_id=market_to_asset_map[market_id],
+            data_client=data_client,
+        )
+    # Convert from proto
+    return _market_data_from_proto(
+        market_data=market_data,
+        decimal_spec=DecimalSpec(
+            price_decimals=market_price_decimals_map[market_data.market],
+            position_decimals=market_position_decimals_map[market_data.market],
+            asset_decimals=asset_decimals_map[market_to_asset_map[market_data.market]],
+        ),
+    )
+
+
+def get_risk_factors(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+):
+    raw_risk_factors = data_raw.get_risk_factors(
+        data_client=data_client, market_id=market_id
+    )
+    return RiskFactor(
+        market_id=market_id,
+        short=float(raw_risk_factors.risk_factor.short),
+        long=float(raw_risk_factors.risk_factor.long),
+    )
+
+
+def estimate_position(
+    data_client: vac.VegaTradingDataClientV2,
+    market_id: str,
+    open_volume: int,
+    orders: Optional[List[Tuple[str, str, int, bool]]] = None,
+    collateral_available: Optional[str] = None,
+    asset_decimals: Optional[Dict[str, int]] = {},
+) -> Tuple[MarginEstimate, LiquidationEstimate,]:
+    if orders is not None:
+        proto_orders = [
+            data_node_protos_v2.trading_data.OrderInfo(
+                side=order[0],
+                price=order[1],
+                remaining=order[2],
+                is_market_order=order[3],
+            )
+            for order in orders
+        ]
+
+    margin_estimate, liquidation_estimate = data_raw.estimate_position(
+        data_client=data_client,
+        market_id=market_id,
+        open_volume=open_volume,
+        orders=proto_orders if orders is not None else None,
+        collateral_available=collateral_available,
+    )
+
+    if margin_estimate.best_case.asset not in asset_decimals:
+        asset_decimals[margin_estimate.best_case.asset] = get_asset_decimals(
+            asset_id=margin_estimate.best_case.market_id, data_client=data_client
+        )
+
+    converted_margin_estimate = _margin_estimate_from_proto(
+        margin_estimate=margin_estimate,
+        decimal_spec=DecimalSpec(
+            asset_decimals=asset_decimals[margin_estimate.best_case.asset]
+        ),
+    )
+
+    converted_liquidation_estimate = _liquidation_estimate_from_proto(
+        liquidation_estimate=liquidation_estimate,
+    )
+
+    return converted_margin_estimate, converted_liquidation_estimate

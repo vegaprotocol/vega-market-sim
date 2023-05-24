@@ -4,15 +4,14 @@ Module contains preconfigured scenarios.
 
 """
 
-from devops.scenario import DevOpsScenario
+from vega_sim.devops.scenario import DevOpsScenario
 
 from vega_sim.scenario.common.agents import (
     ArbitrageLiquidityProvider,
     ExponentialShapedMarketMaker,
-    BasicMarketMaker,
 )
 
-from devops.classes import (
+from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
     AuctionTraderArgs,
@@ -64,7 +63,7 @@ SCENARIOS = {
             initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
-            n_steps=60 * 24 * 6,
+            n_steps=60 * 6,
             granularity=Granularity.MINUTE,
             coinbase_code="ETH-USD",
             start_date="2022-11-01 00:00:00",
@@ -100,18 +99,18 @@ SCENARIOS = {
             initial_mint=1e4,
         ),
         random_trader_args=RandomTraderArgs(
-            order_intensity=5,
-            order_volume=0.001,
-            initial_mint=1e4,
+            order_intensity=[5, 5, 5],
+            order_volume=[0.01, 0.1, 1],
+            step_bias=[0.333, 0.012, 0.003],
+            initial_mint=1e6,
         ),
         sensitive_trader_args=SensitiveTraderArgs(
-            order_intensity=[10, 10, 10],
-            order_volume=[0.0001, 0.001, 0.01],
-            price_half_life=[10, 1, 0.1],
+            scale=[10, 10, 10],
+            max_order_size=[0.001, 0.01, 0.1],
             initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
-            n_steps=60 * 24 * 6,
+            n_steps=60 * 6,
             granularity=Granularity.MINUTE,
             coinbase_code="BTC-USDT",
             start_date="2022-11-01 00:00:00",
@@ -153,10 +152,9 @@ SCENARIOS = {
             initial_mint=5e4,
         ),
         sensitive_trader_args=SensitiveTraderArgs(
-            order_intensity=[10, 10, 10],
-            order_volume=[1, 10, 100],
-            price_half_life=[10, 1, 0.1],
-            initial_mint=5e4,
+            scale=[10, 10, 10],
+            max_order_size=[0.001, 0.01, 0.1],
+            initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
             n_steps=6 * 60,
@@ -201,10 +199,9 @@ SCENARIOS = {
             initial_mint=5e4,
         ),
         sensitive_trader_args=SensitiveTraderArgs(
-            order_intensity=[10, 10, 10],
-            order_volume=[1, 10, 100],
-            price_half_life=[10, 1, 0.1],
-            initial_mint=5e4,
+            scale=[10, 10, 10],
+            max_order_size=[0.001, 0.01, 0.1],
+            initial_mint=1e4,
         ),
         simulation_args=SimulationArgs(
             n_steps=6 * 60,
@@ -223,7 +220,7 @@ AGENTS = {
         market_name=None,
         asset_name=None,
         initial_asset_mint=500,
-        commitment_ratio=0.8,
+        commitment_ratio=0.5,
         safety_factor=0.1,
         fee=0.001,
         tag="agent",
@@ -246,28 +243,6 @@ AGENTS = {
         fee_amount=0.0005,
         num_steps=60 * 60 * 24 * 365,
         price_process_generator=iter(LivePrice(product="ETHDAI")),
-        orders_from_stream=False,
-        state_update_freq=10,
-        tag="agent",
-    ),
-    "basic_market_maker_ethusd": lambda: BasicMarketMaker(
-        wallet_name=None,
-        key_name=None,
-        market_name=None,
-        asset_name=None,
-        position_decimal_places=2,
-        market_decimal_places=2,
-        initial_asset_mint=1e9,
-        commitment_amount=200,
-        market_order_arrival_rate=1.0,
-        #kappa=50.0,
-        kappa=0.001,
-        inventory_lower_boundary=-300,
-        inventory_upper_boundary=300,
-        terminal_penalty_parameter=3.0,
-        running_penalty_parameter=3.0,
-        fee_amount=0.0005,
-        num_steps=60 * 60 * 24 * 365,
         orders_from_stream=False,
         state_update_freq=10,
         tag="agent",
