@@ -71,10 +71,6 @@ Then, to run the example mentioned above call:
   ```
   python -m examples.nullchain --console
   ```
-3. You should a message in the logs saying
-`lynx: Can't access startfile http://localhost:*****/`
-  
-Open this link on your windows machine to see console.
 
 Alternatively, to run a longer and more complex scenario, run:
 
