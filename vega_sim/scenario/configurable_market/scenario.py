@@ -91,7 +91,7 @@ class ConfigurableMarket(Scenario):
             granularity=self.granularity,
             start=str(start),
             end=str(end),
-            interpolation=f"{self.granularity.value}s",
+            # interpolation=f"{self.granularity.value}s",
         )
 
         return list(price_process)
