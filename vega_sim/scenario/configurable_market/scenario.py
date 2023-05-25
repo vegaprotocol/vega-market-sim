@@ -84,14 +84,14 @@ class ConfigurableMarket(Scenario):
 
         start = start + timedelta(days=int(random_state.choice(range(90))))
 
-        end = start + timedelta(seconds=(self.num_steps + 1) * self.granularity.value)
+        end = start + timedelta(seconds=(self.num_steps * 1.1) * self.granularity.value)
 
         price_process = get_historic_price_series(
             product_id="ETH-USD",
             granularity=self.granularity,
             start=str(start),
             end=str(end),
-            # interpolation=f"{self.granularity.value}s",
+            interpolation=f"{self.granularity.value}s",
         )
 
         return list(price_process)
@@ -154,17 +154,17 @@ class ConfigurableMarket(Scenario):
         )
 
         at_the_touch_mm = AtTheTouchMarketMaker(
-                key_name="AT_THE_TOUCH_MM",
-                wallet_name="MM",
-                initial_asset_mint=1e9,
-                market_name=self.market_name,
-                asset_name=self.asset_name,
-                market_decimal_places=market_config.decimal_places,
-                position_decimal_places=market_config.position_decimal_places,
-                asset_decimal_places=self.asset_decimal,
-                peg_offset=10**(-market_config.decimal_places),
-                tag="david",
-                )
+            key_name="AT_THE_TOUCH_MM",
+            wallet_name="MM",
+            initial_asset_mint=1e9,
+            market_name=self.market_name,
+            asset_name=self.asset_name,
+            market_decimal_places=market_config.decimal_places,
+            position_decimal_places=market_config.position_decimal_places,
+            asset_decimal_places=self.asset_decimal,
+            peg_offset=10 ** (-market_config.decimal_places),
+            tag="a",
+        )
 
         sensitive_mo_trader_a = PriceSensitiveMarketOrderTrader(
             wallet_name=SENSITIVE_PARTY_A.wallet_name,
