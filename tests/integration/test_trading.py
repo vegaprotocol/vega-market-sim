@@ -1,6 +1,11 @@
 import pytest
-
+import logging
+from collections import namedtuple
 import vega_sim.proto.vega as vega_protos
+from examples.visualisations.utils import continuous_market,move_market
+from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
+from vega_sim.api.market import MarketConfig
+
 from tests.integration.utils.fixtures import (
     ASSET_NAME,
     MM_WALLET,
