@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 import psutil
 import platform
 
@@ -33,6 +34,7 @@ from vega_sim.null_service import VegaService, VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.proto.vega import vega as vega_protos
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
+from vega_sim.service import PeggedOrder
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -3175,3 +3177,169 @@ class RewardFunder(StateAgentWithWallet):
             metric=self.metric,
             markets=market_ids,
         )
+
+
+class AtTheTouchMarketMaker(StateAgentWithWallet):
+    """Eventually can use the at-the-touch optimal strategy from
+        Algorithmic and High-Frequency Trading by Cartea, Jaimungal and Penalva.
+
+    Posts only pegged limit orders
+    """
+
+    NAME_BASE = "at_the_touch_market_maker"
+
+    def __init__(
+        self,
+        key_name: str,
+        initial_asset_mint: float = 1000000,
+        market_name: Optional[str] = None,
+        asset_name: Optional[str] = None,
+        market_decimal_places: int = 5,
+        asset_decimal_places: int = 0,
+        position_decimal_places: int = 0,
+        tag: str = "",
+        wallet_name: str = None,
+        peg_offset = 1,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.initial_asset_mint = initial_asset_mint
+        self.mdp = market_decimal_places
+        self.adp = asset_decimal_places
+        self.pdp = position_decimal_places
+
+        self.current_step = 0
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.current_position = 0
+        self.order_size = 10**(-position_decimal_places)
+        self.peg_offset = peg_offset
+
+        self.buy_order_reference = None 
+        self.sell_order_reference = None 
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet for LP/ Settle Party
+        super().initialise(vega=vega, create_key=create_key)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+            self.vega.wait_for_total_catchup()
+
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        self._update_state(current_step=self.current_step)
+
+        
+    def step(self, vega_state: VegaState):
+        self.current_step += 1
+        
+        # self._update_state(current_step=self.current_step)
+
+        # Each step, get position
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        new_position = int(position.open_volume*10**self.pdp) if position is not None else 0
+
+        # buy order must have filled because our order is for the minimum position size so we clear the reference
+        if new_position > self.current_position:
+            self.buy_order_reference = None 
+
+        if new_position < self.current_position:
+            self.sell_order_reference = None
+
+        self.current_position = new_position
+
+        # If there is no position we place both buy and sell
+        if self.current_position == 0:
+            if self.buy_order_reference == None:
+                self.buy_order_reference = self.vega.submit_order(wallet_name=self.wallet_name, 
+                                market_id=self.market_id,
+                                order_type="TYPE_LIMIT",
+                                time_in_force="TIME_IN_FORCE_GTC",
+                                side="SIDE_BUY",
+                                volume=self.order_size,
+                                price=None,
+                                expires_at=None,
+                                pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=self.peg_offset),
+                                order_ref=str(uuid.uuid4()),
+                                wait = True,
+                                ),
+            if self.sell_order_reference == None:
+                self.sell_order_reference = self.vega.submit_order(wallet_name=self.wallet_name, 
+                                market_id=self.market_id,
+                                order_type="TYPE_LIMIT",
+                                time_in_force="TIME_IN_FORCE_GTC",
+                                side="SIDE_SELL",
+                                volume=self.order_size,
+                                price=None,
+                                expires_at=None,
+                                pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=self.peg_offset),
+                                order_ref=str(uuid.uuid4()),
+                                wait = True,
+                                ),
+                
+        # If we're long we want to cancel the buy and keep or place the sell
+        elif self.current_position > 0:
+            if self.buy_order_reference != None:
+                self.vega.cancel_order(wallet_name=self.wallet_name,
+                                trading_key=self.key_name, 
+                                market_id=self.market_id,
+                                order_id=self.buy_order_reference
+                                )
+            
+            if self.sell_order_reference == None: 
+                self.sell_order_reference = self.vega.submit_order(wallet_name=self.wallet_name, 
+                                market_id=self.market_id,
+                                order_type="TYPE_LIMIT",
+                                time_in_force="TIME_IN_FORCE_GTC",
+                                side="SIDE_SELL",
+                                volume=self.order_size,
+                                price=None,
+                                expires_at=None,
+                                pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=self.peg_offset),
+                                order_ref=str(uuid.uuid4()),
+                                wait = True,
+                                ),
+            
+            # If we're short we want to cancel the sell and keep or place the buy
+            elif self.current_position < 0:
+                if self.sell_order_reference != None:
+                    self.vega.cancel_order(wallet_name=self.wallet_name,
+                                trading_key=self.key_name, 
+                                market_id=self.market_id,
+                                order_id=self.sell_order_reference
+                                )
+            
+                if self.buy_order_reference == None: 
+                    self.sell_order_reference = self.vega.submit_order(wallet_name=self.wallet_name, 
+                                market_id=self.market_id,
+                                order_type="TYPE_LIMIT",
+                                time_in_force="TIME_IN_FORCE_GTC",
+                                side="SIDE_BUY",
+                                volume=self.order_size,
+                                price=None,
+                                expires_at=None,
+                                pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=self.peg_offset),
+                                order_ref=str(uuid.uuid4()),
+                                wait = True,
+                                ),
+            

@@ -172,7 +172,7 @@ SCENARIOS = {
         market_code="ETH:USD",
         asset_name="tUSD",
         asset_dp=18,
-        num_steps=60 * 24,
+        num_steps=60 * 2,
     ),
     "vega_load_test": lambda: VegaLoadTest(
         num_steps=60 * 24,
