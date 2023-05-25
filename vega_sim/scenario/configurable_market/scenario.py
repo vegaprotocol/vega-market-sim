@@ -33,6 +33,7 @@ from vega_sim.scenario.common.agents import (
     PriceSensitiveMarketOrderTrader,
     InformedTrader,
     StateAgent,
+    AtTheTouchMarketMaker,
 )
 
 
@@ -152,6 +153,19 @@ class ConfigurableMarket(Scenario):
             state_update_freq=10,
         )
 
+        at_the_touch_mm = AtTheTouchMarketMaker(
+                key_name="AT_THE_TOUCH_MM",
+                wallet_name="MM",
+                initial_asset_mint=1e9,
+                market_name=self.market_name,
+                asset_name=self.asset_name,
+                market_decimal_places=market_config.decimal_places,
+                position_decimal_places=market_config.position_decimal_places,
+                asset_decimal_places=self.asset_decimal,
+                peg_offset=10**(-market_config.decimal_places),
+                tag="david",
+                )
+
         sensitive_mo_trader_a = PriceSensitiveMarketOrderTrader(
             wallet_name=SENSITIVE_PARTY_A.wallet_name,
             key_name=SENSITIVE_PARTY_A.key_name,
@@ -237,6 +251,7 @@ class ConfigurableMarket(Scenario):
             auctionpass1,
             auctionpass2,
             info_trader,
+            at_the_touch_mm,
         ]
         return {agent.name(): agent for agent in agents}
 
