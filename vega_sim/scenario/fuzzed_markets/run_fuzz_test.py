@@ -19,7 +19,12 @@ from vega_sim.tools.scenario_plots import (
 from matplotlib import pyplot as plt
 
 
-def _run(steps: int = 2880, output: bool = False, output_dir: str = "fuzz_plots"):
+def _run(
+    steps: int = 2880,
+    console: bool = False,
+    output: bool = False,
+    output_dir: str = "fuzz_plots",
+):
     scenario = FuzzingScenario(
         num_steps=steps,
         step_length_seconds=30,
@@ -34,6 +39,7 @@ def _run(steps: int = 2880, output: bool = False, output_dir: str = "fuzz_plots"
         transactions_per_block=scenario.transactions_per_block,
         retain_log_files=True,
         use_full_vega_wallet=False,
+        run_with_console=console,
     ) as vega:
         scenario.run_iteration(
             vega=vega,
@@ -83,6 +89,7 @@ if __name__ == "__main__":
         default=2 * 60 * 12,
         type=int,
     )
+    parser.add_argument("--console", action="store_true")
     args = parser.parse_args()
 
-    _run(steps=args.steps, output=True)
+    _run(steps=args.steps, console=args.console, output=True)
