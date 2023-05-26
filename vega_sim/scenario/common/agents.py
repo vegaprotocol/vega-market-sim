@@ -3194,19 +3194,16 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         initial_asset_mint: float = 1000000,
         market_name: Optional[str] = None,
         asset_name: Optional[str] = None,
-        market_decimal_places: int = 5,
-        asset_decimal_places: int = 0,
-        position_decimal_places: int = 0,
+        order_size: float = 1,
         tag: str = "",
         wallet_name: str = None,
         peg_offset=1,
         max_position=1,
+        buy_peg_reference: Optional[str] = "PEGGED_REFERENCE_BEST_BID",
+        sell_peg_reference: Optional[str] = "PEGGED_REFERENCE_BEST_ASK",
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.initial_asset_mint = initial_asset_mint
-        self.mdp = market_decimal_places
-        self.adp = asset_decimal_places
-        self.pdp = position_decimal_places
 
         self.current_step = 0
 
@@ -3214,9 +3211,12 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         self.asset_name = asset_name
 
         self.current_position = 0
-        self.order_size = 10 ** (-position_decimal_places)
+        self.order_size = order_size
         self.peg_offset = peg_offset
         self.max_position = max_position
+
+        self.buy_peg_reference = buy_peg_reference
+        self.sell_peg_reference = sell_peg_reference
 
         self.buy_order_reference = None
         self.sell_order_reference = None
@@ -3289,97 +3289,46 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         if not sell_seen:
             self.sell_order_reference = None
 
-        # If there is position within limits we place both buy and sell
-        if (
-            -self.max_position <= self.current_position
-            and self.current_position <= self.max_position
-        ):
-            if self.buy_order_reference is None:
-                self.buy_order_reference = self.vega.submit_order(
-                    trading_wallet=self.wallet_name,
-                    trading_key=self.key_name,
-                    market_id=self.market_id,
-                    order_type="TYPE_LIMIT",
-                    time_in_force="TIME_IN_FORCE_GTC",
-                    side="SIDE_BUY",
-                    volume=self.order_size,
-                    price=None,
-                    expires_at=None,
-                    pegged_order=PeggedOrder(
-                        reference="PEGGED_REFERENCE_MID", offset=self.peg_offset
-                    ),
-                    order_ref=str(uuid.uuid4()),
-                    wait=True,
-                )
-            if self.sell_order_reference is None:
-                self.sell_order_reference = self.vega.submit_order(
-                    trading_wallet=self.wallet_name,
-                    trading_key=self.key_name,
-                    market_id=self.market_id,
-                    order_type="TYPE_LIMIT",
-                    time_in_force="TIME_IN_FORCE_GTC",
-                    side="SIDE_SELL",
-                    volume=self.order_size,
-                    price=None,
-                    expires_at=None,
-                    pegged_order=PeggedOrder(
-                        reference="PEGGED_REFERENCE_MID", offset=self.peg_offset
-                    ),
-                    order_ref=str(uuid.uuid4()),
-                    wait=True,
-                )
+        place_buy = self.current_position < self.max_position
+        place_sell = self.current_position > -self.max_position
 
-        # If we're too long we want to cancel the buy and keep or place the sell
-        elif self.current_position >= self.max_position:
-            if self.buy_order_reference is not None:
-                self.vega.cancel_order(
-                    wallet_name=self.wallet_name,
-                    trading_key=self.key_name,
-                    market_id=self.market_id,
-                    order_id=self.buy_order_reference,
-                )
+        if self.buy_order_reference is None and place_buy:
+            self.buy_order_reference = self._place_order(side="SIDE_BUY")
+        elif self.buy_order_reference is not None and not place_buy:
+            self._cancel_order(order_id="SIDE_BUY")
 
-            if self.sell_order_reference is None:
-                self.sell_order_reference = self.vega.submit_order(
-                    trading_wallet=self.wallet_name,
-                    trading_key=self.key_name,
-                    market_id=self.market_id,
-                    order_type="TYPE_LIMIT",
-                    time_in_force="TIME_IN_FORCE_GTC",
-                    side="SIDE_SELL",
-                    volume=self.order_size,
-                    price=None,
-                    expires_at=None,
-                    pegged_order=PeggedOrder(
-                        reference="PEGGED_REFERENCE_MID", offset=self.peg_offset
-                    ),
-                    order_ref=str(uuid.uuid4()),
-                    wait=True,
-                )
+        if self.sell_order_reference is None and place_sell:
+            self.sell_order_reference = self._place_order(side="SIDE_SELL")
+        elif self.sell_order_reference is not None and not place_sell:
+            self._cancel_order(side="SIDE_SELL")
 
-            # If we're too short we want to cancel the sell and keep or place the buy
-            elif self.current_position <= -self.max_position:
-                if self.sell_order_reference is not None:
-                    self.vega.cancel_order(
-                        wallet_name=self.wallet_name,
-                        trading_key=self.key_name,
-                        market_id=self.market_id,
-                        order_id=self.sell_order_reference,
-                    )
-                if self.buy_order_reference is None:
-                    self.buy_order_reference = self.vega.submit_order(
-                        trading_wallet=self.wallet_name,
-                        trading_key=self.key_name,
-                        market_id=self.market_id,
-                        order_type="TYPE_LIMIT",
-                        time_in_force="TIME_IN_FORCE_GTC",
-                        side="SIDE_BUY",
-                        volume=self.order_size,
-                        price=None,
-                        expires_at=None,
-                        pegged_order=PeggedOrder(
-                            reference="PEGGED_REFERENCE_MID", offset=self.peg_offset
-                        ),
-                        order_ref=str(uuid.uuid4()),
-                        wait=True,
-                    )
+    def _place_order(self, side: str):
+        return self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            trading_key=self.key_name,
+            market_id=self.market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side=side,
+            volume=self.order_size,
+            price=None,
+            expires_at=None,
+            pegged_order=PeggedOrder(
+                reference=self.buy_peg_reference
+                if side == "SIDE_BUY"
+                else self.sell_peg_reference,
+                offset=self.peg_offset,
+            ),
+            order_ref=str(uuid.uuid4()),
+            wait=True,
+        )
+
+    def _cancel_order(self, side: str):
+        self.vega.cancel_order(
+            wallet_name=self.wallet_name,
+            trading_key=self.key_name,
+            market_id=self.market_id,
+            order_id=self.buy_order_reference
+            if side == "SIDE_BUY"
+            else self.sell_order_reference,
+        )

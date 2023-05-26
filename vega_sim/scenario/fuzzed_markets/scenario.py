@@ -256,11 +256,9 @@ class FuzzingScenario(Scenario):
                     initial_asset_mint=1e5,
                     market_name=market_name,
                     asset_name=asset_name,
-                    market_decimal_places=market_config.decimal_places,
-                    position_decimal_places=market_config.position_decimal_places,
-                    asset_decimal_places=asset_dp,
-                    peg_offset=1,
-                    max_position=5 * 10 ** (-market_config.position_decimal_places),
+                    order_size=1,
+                    peg_offset=0.1,
+                    max_position=5,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
             )
