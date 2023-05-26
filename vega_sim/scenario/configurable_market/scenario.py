@@ -162,7 +162,8 @@ class ConfigurableMarket(Scenario):
             market_decimal_places=market_config.decimal_places,
             position_decimal_places=market_config.position_decimal_places,
             asset_decimal_places=self.asset_decimal,
-            peg_offset=10 ** (-market_config.decimal_places),
+            peg_offset=30 * 10 ** (-market_config.decimal_places),
+            max_position=10 * 10 ** (-market_config.position_decimal_places),
             tag="a",
         )
 

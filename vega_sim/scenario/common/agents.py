@@ -3200,6 +3200,7 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         tag: str = "",
         wallet_name: str = None,
         peg_offset=1,
+        max_position=1,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.initial_asset_mint = initial_asset_mint
@@ -3215,6 +3216,7 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         self.current_position = 0
         self.order_size = 10 ** (-position_decimal_places)
         self.peg_offset = peg_offset
+        self.max_position = max_position 
 
         self.buy_order_reference = None
         self.sell_order_reference = None
@@ -3287,8 +3289,8 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         if not sell_seen:
             self.sell_order_reference = None
 
-        # If there is no position we place both buy and sell
-        if self.current_position == 0:
+        # If there is position within limits we place both buy and sell
+        if -self.max_position <= self.current_position and  self.current_position <= self.max_position:
             if self.buy_order_reference is None:
                 self.buy_order_reference = self.vega.submit_order(
                     trading_wallet=self.wallet_name,
@@ -3324,8 +3326,8 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
                     wait=True,
                 )
 
-        # If we're long we want to cancel the buy and keep or place the sell
-        elif self.current_position > 0:
+        # If we're too long we want to cancel the buy and keep or place the sell
+        elif self.current_position >= self.max_position:
             if self.buy_order_reference is not None:
                 self.vega.cancel_order(
                     wallet_name=self.wallet_name,
@@ -3352,8 +3354,8 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
                     wait=True,
                 )
 
-            # If we're short we want to cancel the sell and keep or place the buy
-            elif self.current_position < 0:
+            # If we're too short we want to cancel the sell and keep or place the buy
+            elif self.current_position <= -self.max_position:
                 if self.sell_order_reference is not None:
                     self.vega.cancel_order(
                         wallet_name=self.wallet_name,
