@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 import psutil
 import platform
 
@@ -33,6 +34,9 @@ from vega_sim.null_service import VegaService, VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.proto.vega import vega as vega_protos
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
+from vega_sim.service import PeggedOrder
+
+from vega_sim.api.helpers import get_enum
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -3175,3 +3179,150 @@ class RewardFunder(StateAgentWithWallet):
             metric=self.metric,
             markets=market_ids,
         )
+
+
+class AtTheTouchMarketMaker(StateAgentWithWallet):
+    """Eventually can use the at-the-touch optimal strategy from
+        Algorithmic and High-Frequency Trading by Cartea, Jaimungal and Penalva.
+
+    Posts only pegged limit orders
+    """
+
+    NAME_BASE = "at_the_touch_market_maker"
+
+    def __init__(
+        self,
+        key_name: str,
+        initial_asset_mint: float = 1000000,
+        market_name: Optional[str] = None,
+        asset_name: Optional[str] = None,
+        order_size: float = 1,
+        tag: str = "",
+        wallet_name: str = None,
+        peg_offset=0,
+        max_position=1,
+        buy_peg_reference: Optional[str] = "PEGGED_REFERENCE_BEST_BID",
+        sell_peg_reference: Optional[str] = "PEGGED_REFERENCE_BEST_ASK",
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.initial_asset_mint = initial_asset_mint
+
+        self.current_step = 0
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.current_position = 0
+        self.order_size = order_size
+        self.peg_offset = peg_offset
+        self.max_position = max_position
+
+        self.buy_peg_reference = buy_peg_reference
+        self.sell_peg_reference = sell_peg_reference
+
+        self.buy_order_reference = None
+        self.sell_order_reference = None
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet for LP/ Settle Party
+        super().initialise(vega=vega, create_key=create_key)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+            self.vega.wait_for_total_catchup()
+
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        self._update_state(current_step=self.current_step)
+
+    def step(self, vega_state: VegaState):
+        self.current_step += 1
+
+        # Each step, get position
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+        self.current_position = float(
+            position.open_volume if position is not None else 0
+        )
+
+        # Get a list of live orders for the party
+        orders = list(
+            (
+                vega_state.market_state[self.market_id]
+                .orders.get(
+                    self.vega.wallet.public_key(
+                        wallet_name=self.wallet_name, name=self.key_name
+                    ),
+                    {},
+                )
+                .values()
+            )
+            if self.market_id in vega_state.market_state
+            else []
+        )
+
+        # Check buy_order_reference and sell_order_reference are still live:
+        buys = []
+        sells = []
+        for order in orders:
+            buys.append(order) if order.side == vega_protos.SIDE_BUY else sells.append(
+                order
+            )
+
+        place_buy = self.current_position < self.max_position
+        place_sell = self.current_position > -self.max_position
+
+        if len(buys) == 0 and place_buy:
+            self.buy_order_reference = self._place_order(side="SIDE_BUY")
+        elif len(sells) != 0 and not place_buy:
+            self._cancel_order(orders_to_cancel=buys)
+
+        if len(sells) == 0 and place_sell:
+            self.sell_order_reference = self._place_order(side="SIDE_SELL")
+        elif len(sells) != 0 and not place_sell:
+            self._cancel_order(orders_to_cancel=sells)
+
+    def _place_order(self, side: str):
+        return self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            trading_key=self.key_name,
+            market_id=self.market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side=side,
+            volume=self.order_size,
+            price=None,
+            expires_at=None,
+            pegged_order=PeggedOrder(
+                reference=self.buy_peg_reference
+                if side == "SIDE_BUY"
+                else self.sell_peg_reference,
+                offset=self.peg_offset,
+            ),
+        )
+
+    def _cancel_order(self, orders_to_cancel):
+        for order in orders_to_cancel:
+            self.vega.cancel_order(
+                wallet_name=self.wallet_name,
+                trading_key=self.key_name,
+                market_id=self.market_id,
+                order_id=order.id,
+            )
