@@ -3199,7 +3199,7 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         order_size: float = 1,
         tag: str = "",
         wallet_name: str = None,
-        peg_offset=1,
+        peg_offset=0,
         max_position=1,
         buy_peg_reference: Optional[str] = "PEGGED_REFERENCE_BEST_BID",
         sell_peg_reference: Optional[str] = "PEGGED_REFERENCE_BEST_ASK",

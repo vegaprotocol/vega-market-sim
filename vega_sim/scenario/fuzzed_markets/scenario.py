@@ -257,7 +257,7 @@ class FuzzingScenario(Scenario):
                     market_name=market_name,
                     asset_name=asset_name,
                     order_size=1,
-                    peg_offset=0.1,
+                    peg_offset=0,
                     max_position=5,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
