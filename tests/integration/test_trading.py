@@ -38,6 +38,20 @@ def next_epoch(vega: VegaServiceNull):
     vega.wait_for_total_catchup()
 
 
+def next_epoch(vega: VegaServiceNull):
+    forwards = 0
+    epoch_seq = vega.statistics().epoch_seq
+    while epoch_seq == vega.statistics().epoch_seq:
+        vega.wait_fn(1)
+        forwards += 1
+        if forwards > 2 * 10 * 60:
+            raise Exception(
+                "Epoch not started after forwarding the duration of two epochs."
+            )
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+
 @pytest.mark.integration
 def test_submit_market_order(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
@@ -1344,4 +1358,4 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
     assert(PARTY_A_account.general+PARTY_A_account.margin==0)
     assert(estimate_liquidation_price.best_case.including_buy_orders>=market_data.mark_price)
     assert(estimate_liquidation_price.worst_case.including_buy_orders<=market_data.mark_price)
-   
+
