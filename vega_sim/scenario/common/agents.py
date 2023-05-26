@@ -36,6 +36,8 @@ from vega_sim.proto.vega import vega as vega_protos
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
 
+from vega_sim.api.helpers import get_enum
+
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
 
@@ -3277,30 +3279,25 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         )
 
         # Check buy_order_reference and sell_order_reference are still live:
-        buy_seen = False
-        sell_seen = False
+        buys = []
+        sells = []
         for order in orders:
-            if order.id == self.buy_order_reference:
-                buy_seen = True
-            if order.id == self.sell_order_reference:
-                sell_seen = True
-        if not buy_seen:
-            self.buy_order_reference = None
-        if not sell_seen:
-            self.sell_order_reference = None
+            buys.append(order) if order.side == vega_protos.SIDE_BUY else sells.append(
+                order
+            )
 
         place_buy = self.current_position < self.max_position
         place_sell = self.current_position > -self.max_position
 
-        if self.buy_order_reference is None and place_buy:
+        if len(buys) == 0 and place_buy:
             self.buy_order_reference = self._place_order(side="SIDE_BUY")
-        elif self.buy_order_reference is not None and not place_buy:
-            self._cancel_order(order_id="SIDE_BUY")
+        elif len(sells) != 0 and not place_buy:
+            self._cancel_order(orders_to_cancel=buys)
 
-        if self.sell_order_reference is None and place_sell:
+        if len(sells) == 0 and place_sell:
             self.sell_order_reference = self._place_order(side="SIDE_SELL")
-        elif self.sell_order_reference is not None and not place_sell:
-            self._cancel_order(side="SIDE_SELL")
+        elif len(sells) != 0 and not place_sell:
+            self._cancel_order(orders_to_cancel=sells)
 
     def _place_order(self, side: str):
         return self.vega.submit_order(
@@ -3319,16 +3316,13 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
                 else self.sell_peg_reference,
                 offset=self.peg_offset,
             ),
-            order_ref=str(uuid.uuid4()),
-            wait=True,
         )
 
-    def _cancel_order(self, side: str):
-        self.vega.cancel_order(
-            wallet_name=self.wallet_name,
-            trading_key=self.key_name,
-            market_id=self.market_id,
-            order_id=self.buy_order_reference
-            if side == "SIDE_BUY"
-            else self.sell_order_reference,
-        )
+    def _cancel_order(self, orders_to_cancel):
+        for order in orders_to_cancel:
+            self.vega.cancel_order(
+                wallet_name=self.wallet_name,
+                trading_key=self.key_name,
+                market_id=self.market_id,
+                order_id=order.id,
+            )
