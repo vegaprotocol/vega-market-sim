@@ -165,29 +165,29 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
 
 ## Windows Setup
 
-## 1. Install [WSL]
+### 1. Install [WSL]
    1. [Install Windows Subsystem for Linux (WSL) on Windows](https://learn.microsoft.com/en-us/windows/wsl/install)  
-   2. Install Ubuntu distribution inside WSL.
+   1. Install Ubuntu distribution inside WSL.
   
-## 2. Install 'Make' to your WSL
+### 2. Install 'Make' to your WSL
 
-## 3. Install 'Poetry' to your WSL
+### 3. Install 'Poetry' to your WSL
 
-## 4. Clone the Repository inside your WSL
+### 4. Clone the Repository inside your WSL
 
-## 5. Run make to automatically pull install dependencies 
+### 5. Run make to automatically pull install dependencies 
 1. Run the command:
 
     ```
     make
     ```
-## 6. Install the package into your local environment. 
+### 6. Install the package into your local environment. 
 1. Run the command:
   
     ```
     poetry shell
     ```
-2. Run the command:
+1. Run the command:
  
      ```
     poetry install
@@ -200,7 +200,7 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
     poetry install --all-extras
     ```
 
-## 7. Run initial tests
+### 7. Run initial tests
 1. Run the command:
   
     ```
@@ -209,7 +209,7 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
 
     This will check all the python environment + vega imports are set up correctly, doesn't run Vega yet.  
 
-## 8. Run integration tests
+### 8. Run integration tests
 1. Run the command:
   
     ```
@@ -217,11 +217,11 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
     ```
 
     This will check that everything is set up correctly. Takes about 5 minutes. 
-## 9. Set up Development environment
+### 9. Set up Development environment
    ### 1. Install "Remote - WSL" extension
 1. Install `ms-vscode-remote.remote-wsl` extension
 
-2. Open your WSL terminal (ensure you are in the vega-market-sim directory). Run the command:
+1. Open your WSL terminal (ensure you are in the vega-market-sim directory). Run the command:
    ```
    code .
    ```
