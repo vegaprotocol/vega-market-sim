@@ -16,9 +16,10 @@ Market Simulator is still under active development and so may change notably ove
 
 ## Setup
 
-If you are on MacOS, ensure you have the command line developer tools installed to be able to run `make`. Presently this is done by running `xcode-select --install`
+### **MacOS**: Ensure that you have the command line developer tools installed. You can install them by running `xcode-select --install` in the terminal.  
 
-If you are on Windows, you are likely best off running through WSL.
+### **Windows**: Please follow the [Windows setup instructions.](##windows-setup)  
+
 
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
   - Clone the repository to your local drive
@@ -53,20 +54,35 @@ Building the console UI is not a necessary component, but can be useful for visu
 
 ## Basic use
 
-Examples can be found within the `/examples` folder. A good one to start is `/examples/nullchain.py` which spins up a simple service and proposes a market.
+Examples can be found within the `/examples` folder. A good one to start is `/examples/nullchain.py` which spins up a simple service and proposes a market.  
 
-To run the example, start by running `poetry shell` if you're using poetry to activate the environment (If you're using another package manager, a similar command likely exists)
+To run the example, start by running `poetry shell` if you're using poetry to activate the environment (If you're using another package manager, a similar command likely exists).  
+
+ **_Ensure you are running these commands in your WSL terminal if using a Windows machine._**
 
 Then, to run the example mentioned above call:
   `python -m examples.nullchain`
 
+  If you've installed the console with `make ui` you can also extend this to visualise what is happening with the `--console` flag:
+
+1. First you have to - Set the `run_with_console` flag to `True` when creating the `VegaServiceNull` class
+2. Run the command
+
+  ```
+  python -m examples.nullchain --console
+  ```
+
 Alternatively, to run a longer and more complex scenario, run:
 
-  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause`
+  ```
+  python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause
+  ```
 
 If you've installed the console with `make ui` you can also extend this to visualise what is happening with the `--console` flag:
 
-  `python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause --console`
+  ```
+  python -m vega_sim.scenario.adhoc -s historic_ideal_market_maker_v2 --pause --console
+  ```
 
 
 
@@ -145,3 +161,79 @@ Releases are aligned to Vega core [releases](https://github.com/vegaprotocol/veg
  - Run `make` followed by a full integration test run
  - Create a branch containing these changes, then a pull request into `develop`
  - Use the GitHub [New Release](https://github.com/vegaprotocol/vega-market-sim/releases/new) dialog to create a release. Tag it with the version of Vega we are matching up to (e.g. `v0.62.5`) to trigger the deployment process.
+
+
+## Windows Setup
+
+### 1. Install [WSL]
+   1. [Install Windows Subsystem for Linux (WSL) on Windows](https://learn.microsoft.com/en-us/windows/wsl/install)  
+   1. Install Ubuntu distribution inside WSL.
+  
+### 2. Install 'Make' to your WSL
+
+### 3. Install 'Poetry' to your WSL
+
+### 4. Clone the Repository inside your WSL
+
+### 5. Run make to automatically pull install dependencies 
+1. Run the command:
+
+    ```
+    make
+    ```
+### 6. Install the package into your local environment. 
+1. Run the command:
+  
+    ```
+    poetry shell
+    ```
+1. Run the command:
+ 
+     ```
+    poetry install
+    ```
+   [OPTIONAL] 
+
+    _To include all optional extras use:_
+  
+    ```
+    poetry install --all-extras
+    ```
+
+### 7. Run initial tests
+1. Run the command:
+  
+    ```
+    make test
+    ```
+
+    This will check all the python environment + vega imports are set up correctly, doesn't run Vega yet.  
+
+### 8. Run integration tests
+1. Run the command:
+  
+    ```
+    make test_integration
+    ```
+
+    This will check that everything is set up correctly. Takes about 5 minutes. 
+### 9. Set up Development environment
+   ### 1. Install "Remote - WSL" extension
+1. Install `ms-vscode-remote.remote-wsl` extension
+
+1. Open your WSL terminal (ensure you are in the vega-market-sim directory). Run the command:
+   ```
+   code .
+   ```
+This will open up a visual studio window connected to your linux environment.
+
+## OPTIONAL Setup for the UI
+### 1. Install the following to your WSL
+   NVM 
+   Node 16
+   Yarn
+ ### 2.  Make UI 
+   Run the command:
+   ```
+   make ui
+   ```
