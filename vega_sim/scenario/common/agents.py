@@ -2030,8 +2030,24 @@ class LimitOrderTrader(StateAgentWithWallet):
             vega_state (VegaState):
                 Object describing the state of the network and the market.
         """
-
         self.current_step += 1
+
+        account = self.vega.party_account(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            asset_id=self.asset_id,
+        )
+
+        total_balance = account.general + account.margin + account.bond
+
+        if total_balance == 0:
+            self.vega.mint(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                amount=self.initial_asset_mint,
+                asset=self.asset_id,
+            )
 
         if self.random_state.rand() <= self.submit_bias:
             self._submit_order(vega_state=vega_state)
@@ -2078,13 +2094,21 @@ class LimitOrderTrader(StateAgentWithWallet):
 
         if side == "SIDE_BUY":
             volume = self.buy_volume * self.random_state.poisson(self.buy_intensity)
-            price = reference_buy_price + (random_offset - ln_mean)
+            # price = reference_buy_price + (random_offset - ln_mean)
+            price = reference_sell_price + (random_offset - ln_mean)
 
         elif side == "SIDE_SELL":
             volume = self.sell_volume * self.random_state.poisson(self.sell_intensity)
-            price = reference_sell_price - (random_offset - ln_mean)
+            price = reference_buy_price - (random_offset - ln_mean)
+            # price = reference_sell_price - (random_offset - ln_mean)
 
         expires_at = self.vega.get_blockchain_time() + self.duration * 1e9
+
+        # bounds = self.vega.price_bounds(self.market_id)
+        # if bounds[0] and self.vega.best_prices(self.market_id)[0] < bounds[0]:
+        #     import pdb
+
+        #     pdb.set_trace()
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,

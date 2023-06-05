@@ -182,11 +182,9 @@ class PriceMonitoringParameters(Config):
             },
         ],
         "proposal": [
-            {
-                "horizon": 3600,
-                "probability": "0.9999",
-                "auction_extension": 120,
-            },
+            {"horizon": 60, "probability": "0.9999", "auction_extension": 120},
+            {"horizon": 600, "probability": "0.9999", "auction_extension": 120},
+            {"horizon": 3600, "probability": "0.9999", "auction_extension": 120},
             {
                 "horizon": 14400,
                 "probability": "0.9999",
@@ -198,6 +196,23 @@ class PriceMonitoringParameters(Config):
                 "auction_extension": 300,
             },
         ],
+        # "proposal": [
+        #     {
+        #         "horizon": 3600,
+        #         "probability": "0.9999",
+        #         "auction_extension": 120,
+        #     },
+        #     {
+        #         "horizon": 14400,
+        #         "probability": "0.9999",
+        #         "auction_extension": 180,
+        #     },
+        #     {
+        #         "horizon": 43200,
+        #         "probability": "0.9999",
+        #         "auction_extension": 300,
+        #     },
+        # ],
     }
 
     def load(self, opt: Optional[str] = None):

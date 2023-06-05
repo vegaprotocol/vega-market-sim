@@ -25,6 +25,7 @@ def _run(steps: int = 2880, output: bool = False, output_dir: str = "fuzz_plots"
         block_length_seconds=1,
         transactions_per_block=4096,
         output=output,
+        n_markets=1,
     )
 
     with VegaServiceNull(
