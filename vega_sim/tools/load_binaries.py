@@ -23,7 +23,6 @@ BIN_NAMES = {
     VEGA_CORE: "vega",
     VEGAWALLET: "vegawallet",
 }
-python -m vega_sim.scenario.adhoc -s historic_shaped_market_maker --pause
 
 
 def download_binaries(force: bool = False):
