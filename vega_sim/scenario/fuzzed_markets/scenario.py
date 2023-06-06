@@ -18,6 +18,7 @@ from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     LimitOrderTrader,
     RewardFunder,
+    AtTheTouchMarketMaker,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
@@ -177,6 +178,7 @@ class FuzzingScenario(Scenario):
 
         market_managers = []
         market_makers = []
+        at_touch_market_makers = []
         auction_traders = []
         random_traders = []
         fuzz_traders = []
@@ -237,12 +239,26 @@ class FuzzingScenario(Scenario):
                     asset_name=asset_name,
                     commitment_amount=1e6,
                     market_decimal_places=market_config.decimal_places,
-                    asset_decimal_places=asset_name,
+                    asset_decimal_places=asset_dp,
                     num_steps=self.num_steps,
                     kappa=2.4,
                     tick_spacing=0.05,
                     market_kappa=50,
                     state_update_freq=10,
+                    tag=f"MARKET_{str(i_market).zfill(3)}",
+                )
+            )
+
+            at_touch_market_makers.append(
+                AtTheTouchMarketMaker(
+                    wallet_name=f"AT_THE_TOUCH_MM",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}",
+                    initial_asset_mint=1e5,
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    order_size=1,
+                    peg_offset=0,
+                    max_position=5,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
             )
@@ -406,6 +422,7 @@ class FuzzingScenario(Scenario):
         agents = (
             market_managers
             + market_makers
+            + at_touch_market_makers
             + auction_traders
             + random_traders
             + fuzz_traders
