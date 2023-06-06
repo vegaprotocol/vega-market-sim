@@ -31,6 +31,7 @@ plotly = "^5.10.0"
 TA-Lib = {version = "^0.4.25", optional = true}
 python-dotenv = "^0.21.0"
 deprecated = "^1.2.13"
+psutil = "^5.9.4"
 gymnasium = {version = "^0.28.1", optional = true}
 sb3-contrib = {version = "^2.0.0a1", optional = true}
 stable-baselines3 = {version = "^2.0.0a1", optional = true }
@@ -49,6 +50,7 @@ pytest-xdist = "^2.5.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
 
 [tool.poetry.extras]
 learning = ["matplotlib", "tqdm", "torch", "gymnasium", "stable-baselines3", "tensorboard"]
