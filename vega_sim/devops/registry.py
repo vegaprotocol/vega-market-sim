@@ -9,6 +9,7 @@ from vega_sim.devops.scenario import DevOpsScenario
 from vega_sim.scenario.common.agents import (
     ArbitrageLiquidityProvider,
     ExponentialShapedMarketMaker,
+    AtTheTouchMarketMaker,
 )
 
 from vega_sim.devops.classes import (
@@ -246,5 +247,16 @@ AGENTS = {
         orders_from_stream=False,
         state_update_freq=10,
         tag="agent",
+    ),
+    "basic_at_the_touch_mm_ethusd": lambda: AtTheTouchMarketMaker(
+        wallet_name=None,
+        key_name=None,
+        initial_asset_mint=0,
+        market_name=None,
+        asset_name=None,
+        order_size=0.01,
+        tag="at_touch_mm",
+        peg_offset=0,
+        max_position=0.05,
     ),
 }
