@@ -16,12 +16,32 @@ Market Simulator is still under active development and so may change notably ove
 
 ## Setup
 
-### **MacOS**: Ensure that you have the command line developer tools installed. You can install them by running `xcode-select --install` in the terminal.  
+#### **MacOS**: Ensure that you have the command line developer tools installed. You can install them by running `xcode-select --install` in the terminal.  
 
-### **Windows**: Please follow the [Windows setup instructions.](##windows-setup)  
+#### **Windows**: Please follow the [Windows setup instructions.](##windows-setup)  
 
 
-For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. The full set of steps would then be:
+For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. You can choose to either build the Vega binaries from source (allowing you to investigate or change the internals if you desire) or download prebuilt binaries for your platform.
+
+### Download binaries
+
+  - Clone the repository to your local drive
+  - Install the latest version of [Golang](https://go.dev)
+  - Install the package into your local environment. 
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) 
+    - For Poetry:
+      - Run `poetry shell`
+      - Run `poetry install` (or `poetry install --all-extras` to cover all optional extras too). 
+    - For a pure venv environment:
+      - Run `python3 -m venv ./.venv`
+      - Run `source ./.venv/bin/activate`
+      - Run `python3 -m pip install -r requirements.txt`
+ -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
+ -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
+ -  You're good now.
+  
+### Build Vega from Source
+
   - Clone the repository to your local drive
   - Install the latest version of [Golang](https://go.dev)
   - Run `make` to automatically pull install dependencies
@@ -32,7 +52,7 @@ For the most part the package is fairly self-contained Python, however there are
  -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
  -  You're good now.
 
-### Setup if you're using `conda` as your python package manager
+#### Setup if you're using `conda` as your python package manager
 
 1. Create a new conda environment, perhaps call it `sim` as in `conda create -n sim python=3.10`. 
 2. Activate the new environment `conda activate sim` 
