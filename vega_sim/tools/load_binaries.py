@@ -31,7 +31,7 @@ def download_binaries(force: bool = False):
     # We have no Windows specific builds, so people have to use WSL to run
     platf = "linux" if platf == "windows" else platf
 
-    chipset = platform.processor()
+    chipset = "arm" if "arm" in platform.machine() else "amd"
 
     if force and os.path.exists(vega_sim.vega_bin_path):
         shutil.rmtree(vega_sim.vega_bin_path)
