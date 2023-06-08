@@ -1170,12 +1170,16 @@ def get_trades(
     market_price_decimals_map: Optional[Dict[str, int]] = None,
     market_position_decimals_map: Optional[Dict[str, int]] = None,
     market_asset_decimals_map: Optional[Dict[str, int]] = None,
+    start: Optional[datetime.datetime] = None,
+    end: Optional[datetime.datetime] = None,
 ) -> List[Trade]:
     base_trades = data_raw.get_trades(
         data_client=data_client,
         party_id=party_id,
         market_id=market_id,
         order_id=order_id,
+        start=start,
+        end=end,
     )
     market_price_decimals_map = market_price_decimals_map or {}
     market_position_decimals_map = market_position_decimals_map or {}

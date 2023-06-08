@@ -416,12 +416,18 @@ def get_trades(
     market_id: str,
     party_id: Optional[str] = None,
     order_id: Optional[str] = None,
+    start: Optional[datetime.datetime] = None,
+    end: Optional[datetime.datetime] = None,
 ) -> List[vega_protos.vega.Trade]:
     return unroll_v2_pagination(
         data_node_protos_v2.trading_data.ListTradesRequest(
             market_ids=[market_id],
             party_ids=[party_id] if party_id is not None else None,
             order_ids=[order_id] if order_id is not None else None,
+            date_range=data_node_protos_v2.trading_data.DateRange(
+                start_timestamp=int(start.timestamp() * 1e9) if start is not None else None,
+                end_timestamp=int(end.timestamp() * 1e9) if end is not None else None
+            ),
         ),
         request_func=lambda x: data_client.ListTrades(x).trades,
         extraction_func=lambda res: [i.node for i in res.edges],
