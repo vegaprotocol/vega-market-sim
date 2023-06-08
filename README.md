@@ -26,7 +26,6 @@ For the most part the package is fairly self-contained Python, however there are
 ### Download binaries
 
   - Clone the repository to your local drive
-  - Install the latest version of [Golang](https://go.dev)
   - Install the package into your local environment. 
     - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) 
     - For Poetry:
@@ -36,6 +35,7 @@ For the most part the package is fairly self-contained Python, however there are
       - Run `python3 -m venv ./.venv`
       - Run `source ./.venv/bin/activate`
       - Run `python3 -m pip install -r requirements.txt`
+  - Download the binaries by running `python -m vega_sim.tools.load_binaries` within your Python environment.
  -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
  -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
  -  You're good now.
