@@ -425,8 +425,10 @@ def get_trades(
             party_ids=[party_id] if party_id is not None else None,
             order_ids=[order_id] if order_id is not None else None,
             date_range=data_node_protos_v2.trading_data.DateRange(
-                start_timestamp=int(start.timestamp() * 1e9) if start is not None else None,
-                end_timestamp=int(end.timestamp() * 1e9) if end is not None else None
+                start_timestamp=int(start.timestamp() * 1e9)
+                if start is not None
+                else None,
+                end_timestamp=int(end.timestamp() * 1e9) if end is not None else None,
             ),
         ),
         request_func=lambda x: data_client.ListTrades(x).trades,
