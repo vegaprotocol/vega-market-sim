@@ -202,7 +202,7 @@ if __name__ == "__main__":
             price=100.5,
             wait=True,
         )
-        
+
         to_cancel = vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,
