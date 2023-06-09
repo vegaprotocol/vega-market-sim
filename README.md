@@ -52,17 +52,6 @@ For the most part the package is fairly self-contained Python, however there are
  -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
  -  You're good now.
 
-#### Setup if you're using `conda` as your python package manager
-
-1. Create a new conda environment, perhaps call it `sim` as in `conda create -n sim python=3.10`. 
-2. Activate the new environment `conda activate sim` 
-3. Clone the repo into `mypath/vega-market-sim` and run `make` there. 
-4. Use `conda install --file requirements.txt`.
-5. Run `pytest -s tests/integration/test_trading.py` from `mypath/vega-market-sim`. This should pass; if not one of the steps above didn't work.
-6. If you now want to be able to use the `vega-market-sim` even from other directories, run `conda develop mypath/vega-market-sim`. 
-7. Optional: to have UI, run `make ui`. 
-
-
 
 ### UI
 
