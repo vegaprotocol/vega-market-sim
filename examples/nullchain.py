@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     with VegaServiceNull(
-        run_with_console=False,
+        run_with_console=True,
         launch_graphql=False,
         retain_log_files=True,
         use_full_vega_wallet=True,
@@ -192,6 +192,17 @@ if __name__ == "__main__":
         #         price=103,
         #     )
 
+        vega.submit_order(
+            trading_key=MM_WALLET.name,
+            market_id=market_id,
+            time_in_force="TIME_IN_FORCE_GTC",
+            order_type="TYPE_LIMIT",
+            side="SIDE_SELL",
+            volume=10,
+            price=100.5,
+            wait=True,
+        )
+        
         to_cancel = vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,
@@ -237,4 +248,6 @@ if __name__ == "__main__":
             settlement_price=100,
             market_id=market_id,
         )
+        vega.wait_for_total_catchup()
+        vega.forward("10s")
         input("Press Enter to finish")
