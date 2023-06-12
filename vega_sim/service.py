@@ -488,7 +488,7 @@ class VegaService(ABC):
             proposal_key_name=proposal_key_name,
             market_config=market_config,
             closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 90,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 91,
             time_forward_fn=lambda: self.wait_fn(2),
         )
 
@@ -2230,9 +2230,11 @@ class VegaService(ABC):
 
         # Create the RecurringTransfer message
         recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
-            start_epoch=start_epoch
-            if start_epoch is not None
-            else int(self.statistics().epoch_seq)
+            start_epoch=(
+                start_epoch
+                if start_epoch is not None
+                else int(self.statistics().epoch_seq)
+            )
         )
         # Set the optional RecurringTransfer fields
         if start_epoch is not None:
@@ -2244,7 +2246,8 @@ class VegaService(ABC):
         if any([val is not None for val in [asset_for_metric, metric, markets]]):
             if any([val is None for val in [asset_for_metric, metric]]):
                 raise Exception(
-                    "Value for one but not all non-optional DispatchStrategy fields given."
+                    "Value for one but not all non-optional DispatchStrategy fields"
+                    " given."
                 )
             dispatch_strategy = vega_protos.vega.DispatchStrategy(
                 asset_for_metric=asset_for_metric,
@@ -2260,9 +2263,11 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
-            if to_key_name is not None
-            else "0000000000000000000000000000000000000000000000000000000000000000",
+            to=(
+                self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+                if to_key_name is not None
+                else "0000000000000000000000000000000000000000000000000000000000000000"
+            ),
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, self.asset_decimals[asset])),
@@ -2498,14 +2503,16 @@ class VegaService(ABC):
                 open_volume, decimals=self.market_pos_decimals[market_id]
             ),
             orders=orders,
-            collateral_available=str(
-                num_to_padded_int(
-                    collateral_available,
-                    self.asset_decimals[self.market_to_asset[market_id]],
+            collateral_available=(
+                str(
+                    num_to_padded_int(
+                        collateral_available,
+                        self.asset_decimals[self.market_to_asset[market_id]],
+                    )
                 )
-            )
-            if collateral_available is not None
-            else None,
+                if collateral_available is not None
+                else None
+            ),
             asset_decimals=self.asset_decimals,
         )
 
