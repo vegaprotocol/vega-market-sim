@@ -1109,7 +1109,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         is_market_order=[False, False],
         collateral_available=collateral_available,
     )
-    # AC 0012-NP-LIPE-004: An estimate is obtained for a long position with multiple limit sell order with the absolute value of the total remaining size of the orders less than the open volume. The estimated liquidation price with sell orders is higher than that for the open volume only.
+    # AC 0012-NP-LIPE-004: An estimate is obtained for a long position with multiple limit sell order with the absolute value of the total remaining size of the orders less than the open volume. The estimated liquidation price with sell orders is lower than that for the open volume only.
     assert estimate_liquidation_price.best_case.including_sell_orders <= estimate_liquidation_price.best_case.open_volume_only
     assert estimate_liquidation_price.worst_case.including_sell_orders <= estimate_liquidation_price.worst_case.open_volume_only
   
