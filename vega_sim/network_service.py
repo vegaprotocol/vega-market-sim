@@ -226,7 +226,7 @@ class VegaServiceNetwork(VegaService):
         faucet_url: Optional[bool] = None,
         load_existing_keys: Optional[bool] = None,
         governance_symbol: Optional[str] = "VEGA",
-        vegacapsule_bin_path: Optional[str] = "vegacapsule",
+        vegacapsule_bin_path: Optional[str] = "./vega_sim/bin/vegacapsule",
     ):
         """Method initialises the class.
 

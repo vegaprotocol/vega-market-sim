@@ -15,6 +15,45 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 
 
+class NetworkHistoryDivergenceError(Exception):
+    def __init__(self, from_height, to_height):
+        message = f"Divergence occurred between blocks {from_height} and {to_height}"
+        super().__init__(message)
+
+
+def check_divergence(vega):
+    # Check all data nodes have matching network history segments
+    nodes_checked = set()
+    previous_node_segments = None
+    while vega.data_node_grpc_url not in nodes_checked:
+        # Check the network history segments of the current node match the previous
+        current_node_segments = vega.list_all_network_history_segments()
+        # print(current_node_segments)
+        if previous_node_segments is not None:
+            if previous_node_segments != current_node_segments:
+                from_height, to_height = find_block_range(
+                    current_node_segments, previous_node_segments
+                )
+                raise NetworkHistoryDivergenceError(from_height, to_height)
+        previous_node_segments = current_node_segments
+
+        # Add node to the checked nodes then switch node
+        nodes_checked.add(vega.data_node_grpc_url)
+        vega.switch_datanode()
+
+
+def find_block_range(current_node_segments, previous_node_segments):
+    for i in range(1, len(current_node_segments) + 1):
+        if (
+            current_node_segments[-i].history_segment_id
+            != previous_node_segments[-i].history_segment_id
+        ):
+            return (
+                current_node_segments[-i].from_height,
+                current_node_segments[-i].to_height,
+            )
+
+
 def _terminate_proc(
     proc: subprocess.Popen[bytes], out_file: BufferedWriter, err_file: BufferedWriter
 ) -> None:
@@ -50,52 +89,6 @@ def _run(
     steps: int,
     test_dir: Optional[str] = None,
 ):
-    test_dir = (
-        test_dir
-        if test_dir is not None
-        else os.path.abspath(
-            f"test_logs/{datetime.now().strftime('%Y-%m-%d_%H%M%S')}-capsule"
-        )
-    )
-    if not os.path.exists(test_dir):
-        os.makedirs(test_dir)
-
-    _popen_process(
-        [
-            "vega_sim/bin/vegacapsule",
-            "nomad",
-            "--home-path",
-            f"{test_dir}/vegahome",
-            "--install-path",
-            "./vega_sim/bin",
-        ],
-        dir_root=test_dir,
-        log_name="nomad",
-    )
-    # Sleep to allow nomad server to finish setup
-    time.sleep(10)
-    subprocess.run(
-        [
-            "vega_sim/bin/vegacapsule",
-            "network",
-            "bootstrap",
-            "--config-path",
-            "vega_sim/vegacapsule/config.hcl",
-            "--home-path",
-            f"{test_dir}/vegahome",
-        ]
-    )
-    subprocess.run(
-        [
-            "vega_sim/bin/vegacapsule",
-            "ethereum",
-            "multisig",
-            "init",
-            "--home-path",
-            f"{test_dir}/vegahome",
-        ]
-    )
-
     scenario = FuzzingScenario(
         num_steps=steps,
         step_length_seconds=2,
@@ -123,20 +116,7 @@ def _run(
             log_every_n_steps=100,
         )
 
-        # Check all data nodes have matching network history segments
-        nodes_checked = set()
-        previous_node_segments = None
-        while vega.data_node_grpc_url not in nodes_checked:
-            # Check the network history segments of the current node match the previous
-            current_node_segments = vega.list_all_network_history_segments()
-            # print(current_node_segments)
-            if previous_node_segments is not None:
-                assert previous_node_segments == current_node_segments
-            previous_node_segments = current_node_segments
-
-            # Add node to the checked nodes then switch node
-            nodes_checked.add(vega.data_node_grpc_url)
-            vega.switch_datanode()
+        check_divergence(vega)
 
 
 if __name__ == "__main__":
