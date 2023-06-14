@@ -54,7 +54,7 @@ def _queue_forwarder(
     try:
         for o in obs:
             for event in o.events:
-                if kill_thread_sig.is_set():
+                if (kill_thread_sig is not None) and kill_thread_sig.is_set():
                     return
                 output = handlers[event.type](event)
                 if isinstance(output, (list, GeneratorType)):
@@ -199,7 +199,12 @@ class LocalDataCache:
     ) -> vega_protos.assets.Asset:
         if asset_id not in self._asset_from_feed:
             self.initialise_assets()
-        return self._asset_from_feed[asset_id]
+        try:
+            return self._asset_from_feed[asset_id]
+        except KeyError as e:
+            print(f"Looking for asset id {asset_id}")
+            input("ERROR!")
+            raise e
 
     def market_from_feed(
         self,
