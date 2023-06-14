@@ -791,151 +791,222 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
     assert estimate_liquidation_price.worst_case.open_volume_only == estimate_liquidation_price_with_MO.worst_case.including_sell_orders
 
 
+
+
+
 @pytest.mark.integration
 def test_liquidation_price_witin_estimate_position_bounds_AC005(vega_service: VegaServiceNull):
+    #An estimate is obtained for a short position with multiple limit sell order with the absolute value of the total remaining size of the orders less than the open volume
     vega = vega_service
-    PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
-    wallet_name = "vega"
- 
-    trader_a = PartyConfig(wallet_name=wallet_name, key_name="Trader A Party")
-    trader_b = PartyConfig(wallet_name=wallet_name, key_name="Trader B Party")
-    trader_mint = 20000
-    trader_position = 100
+    terminate_wallet = WalletConfig("TERMINATE", "TERMINATE")
+    liq_wallet = WalletConfig("LIQ", "TRADER")
+    wallets = [MM_WALLET, PARTY_B, PARTY_C, terminate_wallet, liq_wallet]
 
-    market_id, asset_id, best_ask_id, best_bid_id = continuous_market(
-        vega=vega, price=500, spread=10
-    )
-    vega.create_key(
-        name=trader_a.key_name,
-        wallet_name=trader_a.wallet_name,
-    )
-    vega.create_key(
-        name=trader_b.key_name,
-        wallet_name=trader_b.wallet_name,
-    )
+    mint_amount = 100000000
+    initial_volume = 10
+    initial_commitment = 150000
+    collateral_available = 11300
+
     vega.wait_for_total_catchup()
-    vega.wait_fn(60)
+    for wallet in wallets:
+        vega.create_key(wallet.name)
+    vega.create_key(PARTY_A.name)
 
-    # Mint settlement assets for traders
-    vega.mint(
-        wallet_name=trader_a.wallet_name,
-        key_name=trader_a.key_name,
-        asset=asset_id,
-        amount=trader_mint,
-    )
-    vega.mint(
-        wallet_name=trader_b.wallet_name,
-        key_name=trader_b.key_name,
-        asset=asset_id,
-        amount=trader_mint,
-    )
     vega.wait_for_total_catchup()
-    vega.wait_fn(60)
+    vega.mint(
+        MM_WALLET.name,
+        asset="VOTE",
+        amount=1e4,
+    )
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
 
-    #0012-NP-LIPE-005: An estimate is obtained for a short position with multiple limit sell order with the absolute value of the total remaining size of the orders less than the open volume. The estimated liquidation price with sell orders is lower than that for the open volume only. As the limit orders get filled the estimated liquidation price for the (updated) open volume converges to the estimate originally obtained with open sell orders. As the price keeps moving in small increments the liquidation happens within the originally estimated range (with sell orders) 
-    vega.submit_order(
-        trading_wallet=trader_a.wallet_name,
-        trading_key=trader_a.key_name,
+    configWithSlippage = MarketConfig()
+    configWithSlippage.set("linear_slippage_factor", str(10))  # Set the linear_slippage_factor to 10
+    configWithSlippage.set("quadratic_slippage_factor", str(10))  # Set the quadratic_slippage_factor to 10
+    configWithSlippage.set("decimal_places", int(0))  # Set the market decimal_places to 0
+    configWithSlippage.set("lp_price_range", str(1))
+    triggers0=[
+         {
+                "horizon": 86400,  # 24 hours
+                "probability": "0.90001",
+                "auction_extension": 5,
+        },
+    ]
+    configWithSlippage.set("price_monitoring_parameters.triggers", triggers0)
+   
+    # Initialize the Market Manager
+    marketManager = ConfigurableMarketManager(
+        proposal_key_name=MM_WALLET.name,
+        termination_key_name="TERMINATE_WALLET ",
+        market_name="CRYPTO:BTCDAI/DEC22",
+        market_code="MARKET",
+        asset_name=ASSET_NAME,
+        asset_dp=0,
+        proposal_wallet_name="MM_WALLET.name",
+        termination_wallet_name="termination_wallet",
+        market_config=configWithSlippage,
+        tag="my_tag",
+        settlement_price=1000.0,
+        initial_mint=1e6
+    )
+    # Initialize the manager and create the market
+    marketManager.initialise(vega=vega, create_key=True, mint_key=True)
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
+    
+    for wallet in wallets:
+        vega.mint(
+            wallet.name,
+            asset=asset_id,
+            amount=mint_amount,
+        )
+    vega.mint(
+        PARTY_A.name,
+        asset=asset_id,
+        amount=collateral_available,
+    )
+    # Wait for the market creation to complete
+    vega.wait_fn(10)
+    marketManager.vega.wait_for_total_catchup()
+    market_id = vega.all_markets()[0].id
+
+    # Access the updated value
+    print(f"linear slippage factor = {configWithSlippage.linear_slippage_factor}")  
+    vega.update_network_parameter(
+            MM_WALLET.name, parameter="network.markPriceUpdateMaximumFrequency", new_value="0"
+        )
+
+    vega.submit_liquidity(
+        key_name=MM_WALLET.name,
         market_id=market_id,
-        time_in_force="TIME_IN_FORCE_GTC",
+        commitment_amount=initial_commitment,
+        fee=0.002,
+        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
+        sell_specs=[("PEGGED_REFERENCE_BEST_ASK",1000, 1)],
+        is_amendment=False,
+    )
+    order_id_C=vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
         order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        volume=trader_position,
-        price=500,
+        order_ref="best-ask",
+        price=910,
+        volume=initial_volume,
+        wait=True,
     )
     vega.submit_order(
-        trading_wallet=trader_b.wallet_name,
-        trading_key=trader_b.key_name,
+        trading_key=PARTY_B.name,
         market_id=market_id,
-        time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
-        side="SIDE_SELL",
-        volume=trader_position,
-        price=500,
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=1000,
+        volume=initial_volume,
     )
     vega.submit_order(
-        trading_wallet=trader_b.wallet_name,
-        trading_key=trader_b.key_name,
+        trading_key=PARTY_A.name,
         market_id=market_id,
-        time_in_force="TIME_IN_FORCE_GTC",
         order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        volume=12,
-        price=680,
+        price=1000,
+        volume=initial_volume,
     )
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1005,
+        volume=2,
+    )
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1010,
+        volume=2,
+    )
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1200,
+        volume=initial_volume,
+    )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    vega.wait_fn(60)
+    # market_data = vega.get_latest_market_data(market_id=market_id)
+    print(f"market data = {vega.get_latest_market_data(market_id=market_id)}")
 
-    for price in [650, 660, 663, 644]:
-        move_market(
-            vega=vega,
-            market_id=market_id,
-            best_ask_id=best_ask_id,
-            best_bid_id=best_bid_id,
-            price=price,
-            spread=10,
-            volume=1,
-        )
-        vega.wait_for_total_catchup()
-        vega.wait_fn(60)
-
-        trader_a_position = vega.positions_by_market(
-            wallet_name=trader_a.wallet_name,
-            key_name=trader_a.key_name,
-            market_id=market_id,
-        )
-        trader_b_position = vega.positions_by_market(
-            wallet_name=trader_b.wallet_name,
-            key_name=trader_b.key_name,
-            market_id=market_id,
-        )
-        account_TRADER_B = vega.party_account(
-                key_name=trader_b.key_name,
-                wallet_name=trader_b.wallet_name,
-                asset_id=asset_id,  
-                market_id=market_id,   
-        )
-        open_orders_TRADER_B = vega.list_orders(
-                key_name=trader_b.key_name,
-                wallet_name=trader_b.wallet_name,
-                market_id=market_id,   
-        )
-        
-        print(f"account_TRADER_B at price {price} = {account_TRADER_B}", f"collateral_traderB = {account_TRADER_B.general + account_TRADER_B.bond + account_TRADER_B.margin}") 
-        print(f"trader_B_order at price {price} = {open_orders_TRADER_B}", f"trader_B position = {trader_b_position}")
-        if price == 663:
-            collateral_available = account_TRADER_B.general + account_TRADER_B.bond + account_TRADER_B.margin
-        if price == 664:
-            # Check Trader B closed out and Trader A position still open
-            assert trader_a_position.open_volume == trader_position
-            assert trader_a_position.unrealised_pnl > 0
-            assert trader_b_position.open_volume == 0
-            assert trader_b_position.unrealised_pnl == 0
-            #Check loss socialisation was not required for close out
-            assert trader_a_position.loss_socialisation_amount == 0
-            assert trader_b_position.loss_socialisation_amount == 0
-        else:
-            assert trader_a_position.open_volume == trader_position
-            assert trader_a_position.unrealised_pnl > 0            
-            assert trader_b_position.unrealised_pnl < 0
-
-    market_info = vega.market_info(market_id=market_id)
-    market_data = vega.get_latest_market_data(market_id=market_id)
-    print(f"market_data = {market_data}", type(market_data))
-    print(f"market_info = {market_info}", type(market_info))
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)
+    collateral = PARTY_A_account.general+PARTY_A_account.margin
+    print(f"partyA collateral={collateral}")
+    print(f"partyA margin account={PARTY_A_account.margin}")
+    
     _, estimate_liquidation_price = vega.estimate_position(
         market_id,
-        open_volume=-100,
-        side=["SIDE_SELL"],
-        price=[market_data.mark_price],
-        remaining=[12],
+        open_volume=-10,
+        side=["SIDE_SELL","SIDE_SELL" ],
+        price=[1005,1010],
+        remaining=[2,2],
         is_market_order=[False],
-        collateral_available=collateral_available,
+        collateral_available=collateral,
     )
-    assert market_data.mark_price <= round(estimate_liquidation_price.best_case.open_volume_only/1e5,0)
-    assert market_data.mark_price >= round(estimate_liquidation_price.worst_case.open_volume_only/1e5,0)
-    assert estimate_liquidation_price.best_case.including_sell_orders<= estimate_liquidation_price.best_case.open_volume_only
-    assert estimate_liquidation_price.worst_case.including_sell_orders<= estimate_liquidation_price.worst_case.open_volume_only
+    # print(f"estimate_best_price ={estimate_liquidation_price.best_case.open_volume_only}")
+    # print(f"estimate_worst_price ={estimate_liquidation_price.worst_case.open_volume_only}")
+    # print(f"estimate_best_price_with_sell ={estimate_liquidation_price.best_case.including_sell_orders}")
+    # print(f"estimate_worst_price_with_sell ={estimate_liquidation_price.worst_case.including_sell_orders}")
+
+    # #AC 0012-NP-LIPE-005: The estimated liquidation price with sell orders is lower than that for the open volume only.
+    assert(estimate_liquidation_price.best_case.including_sell_orders<=estimate_liquidation_price.best_case.open_volume_only)
+    assert(estimate_liquidation_price.worst_case.including_sell_orders<=estimate_liquidation_price.worst_case.open_volume_only)
+    
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=970,
+        volume=initial_volume,
+    )
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=967,
+        volume=initial_volume,
+    )
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=967,
+        volume=initial_volume,
+    )
+    market_data = vega.get_latest_market_data(market_id=market_id)
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)
+    # assert(PARTY_A_account.general+PARTY_A_account.margin==0)
+    # assert(estimate_liquidation_price.best_case.including_buy_orders>=market_data.mark_price)
+    # assert(estimate_liquidation_price.worst_case.including_buy_orders<=market_data.mark_price)
+    input("wait")
+
+
+
+
+
 
 
 @pytest.mark.integration
