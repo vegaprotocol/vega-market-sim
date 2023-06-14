@@ -465,19 +465,21 @@ class VegaService(ABC):
             max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
             quantum=quantum,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 10,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 10,
-            validation_time=blockchain_time_seconds + self.seconds_per_block * 5,
+            validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=key_name,
         )
+        self.wait_fn(1)
         gov.approve_proposal(
             proposal_id=proposal_id,
             wallet_name=wallet_name,
             wallet=self.wallet,
             key_name=key_name,
         )
-        self.wait_fn(15)
+        self.wait_fn(60)
+        self.wait_for_thread_catchup()
 
     def create_market_from_config(
         self,
@@ -493,18 +495,18 @@ class VegaService(ABC):
             proposal_wallet_name=proposal_wallet_name,
             proposal_key_name=proposal_key_name,
             market_config=market_config,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 91,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
         )
-
         gov.approve_proposal(
             proposal_id=proposal_id,
             wallet=self.wallet,
             wallet_name=proposal_wallet_name,
             key_name=proposal_key_name,
         )
-        self.wait_fn(15)
+        self.wait_fn(60)
+        self.wait_for_thread_catchup()
 
     def create_simple_market(
         self,
@@ -575,8 +577,8 @@ class VegaService(ABC):
             ),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 10,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 10,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
@@ -588,7 +590,8 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             key_name=proposal_key,
         )
-        self.wait_fn(15)
+        self.wait_fn(60)
+        self.wait_for_thread_catchup()
 
     def submit_market_order(
         self,
@@ -904,8 +907,8 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=proposal_key,
         )
@@ -915,7 +918,8 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             key_name=proposal_key,
         )
-        self.wait_fn(110)
+        self.wait_fn(60)
+        self.wait_for_thread_catchup()
 
     def update_market(
         self,
@@ -1031,8 +1035,8 @@ class VegaService(ABC):
             key_name=proposal_key,
             wallet_name=wallet_name,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 90,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 100,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
         )
         gov.approve_proposal(
@@ -1041,7 +1045,8 @@ class VegaService(ABC):
             key_name=proposal_key,
             wallet_name=wallet_name,
         )
-        self.wait_fn(110)
+        self.wait_fn(60)
+        self.wait_for_thread_catchup()
 
     def settle_market(
         self,
