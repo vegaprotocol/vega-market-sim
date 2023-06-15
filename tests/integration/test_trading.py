@@ -430,8 +430,8 @@ def test_liquidation_and_estimate_position_calculation_AC001(vega_service: VegaS
     vega.wait_for_total_catchup()
     
     configWithSlippage = MarketConfig()
-    configWithSlippage.set("linear_slippage_factor", str(1))  # Set the linear_slippage_factor to 0.5
-    configWithSlippage.set("quadratic_slippage_factor", str(1))  # Set the quadratic_slippage_factor to 0.5
+    configWithSlippage.set("linear_slippage_factor", str(1))  # Set the linear_slippage_factor to 1
+    configWithSlippage.set("quadratic_slippage_factor", str(1))  # Set the quadratic_slippage_factor to 1
     configWithSlippage.set("decimal_places", int(0))  # Set the market decimal_places to 0
     configWithSlippage.set("lp_price_range", str(1))
 
@@ -655,8 +655,8 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
         name=trader_b.key_name,
         wallet_name=trader_b.wallet_name,
     )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    vega.wait_fn(60)
 
     # Mint settlement assets for traders
     vega.mint(
@@ -671,8 +671,8 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
         asset=asset_id,
         amount=trader_mint,
     )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    vega.wait_fn(60)
 
     logging.info(
         f"Trader A Party: public_key = {vega.wallet.public_key(name=trader_a.key_name, wallet_name=trader_a.wallet_name)}"
@@ -702,8 +702,8 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
         volume=trader_position,
         price=500,
     )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    vega.wait_fn(60)
 
     for price in [550, 600, 650, 660, 662, 663, 664]:
         move_market(
@@ -715,8 +715,8 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(vega_service: Ve
             spread=10,
             volume=1,
         )
+        vega.wait_fn(1)
         vega.wait_for_total_catchup()
-        vega.wait_fn(60)
 
         trader_a_position = vega.positions_by_market(
             wallet_name=trader_a.wallet_name,
