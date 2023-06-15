@@ -1067,13 +1067,13 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     configWithSlippage = MarketConfig()
-    configWithSlippage.set("linear_slippage_factor", str(10))  # Set the linear_slippage_factor to 10
-    configWithSlippage.set("quadratic_slippage_factor", str(10))  # Set the quadratic_slippage_factor to 10
+    configWithSlippage.set("linear_slippage_factor", str(10000))  # Set the linear_slippage_factor to 10000
+    configWithSlippage.set("quadratic_slippage_factor", str(10000))  # Set the quadratic_slippage_factor to 10000
     configWithSlippage.set("decimal_places", int(0))  # Set the market decimal_places to 0
     configWithSlippage.set("lp_price_range", str(1))
     triggers0=[
          {
-                "horizon": 864000,  # 10 days
+                "horizon": 8640000,  # 100 days
                 "probability": "0.90001",
                 "auction_extension": 5,
         },
@@ -1269,10 +1269,10 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
     liq_wallet = WalletConfig("LIQ", "TRADER")
     wallets = [MM_WALLET, PARTY_B, PARTY_C, terminate_wallet, liq_wallet]
 
-    mint_amount = 100000000
+    mint_amount = 1000000000
     initial_volume = 10
-    initial_commitment = 1500
-    collateral_available = 132
+    initial_commitment = 1500000
+    collateral_available = 9000
 
     vega.wait_for_total_catchup()
     for wallet in wallets:
@@ -1295,7 +1295,7 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
     configWithSlippage.set("lp_price_range", str(1))
     triggers0=[
          {
-                "horizon": 86400,  # 24 hours
+                "horizon": 8640000,  # 100 days
                 "probability": "0.90001",
                 "auction_extension": 5,
         },
@@ -1333,7 +1333,7 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         amount=collateral_available,
     )
     # Wait for the market creation to complete
-    vega.wait_fn(10)
+    vega.wait_fn(1)
     marketManager.vega.wait_for_total_catchup()
     market_id = vega.all_markets()[0].id
 
@@ -1346,7 +1346,7 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         key_name=MM_WALLET.name,
         market_id=market_id,
         commitment_amount=initial_commitment,
-        fee=0.002,
+        fee=0.001,
         buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
         sell_specs=[("PEGGED_REFERENCE_BEST_ASK",1000, 1)],
         is_amendment=False,
@@ -1358,8 +1358,8 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
         order_ref="best-ask",
-        price=910,
-        volume=initial_volume,
+        price=950,
+        volume=1,
         wait=True,
     )
 
@@ -1369,7 +1369,7 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        price=1200,
+        price=4000,
         volume=initial_volume,
     )
     vega.submit_order(
@@ -1390,9 +1390,6 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         price=1000,
         volume=initial_volume,
     )
-    vega.wait_fn(1)
-    vega.wait_for_total_catchup()
-    
     vega.submit_order(
         trading_key=PARTY_A.name,
         market_id=market_id,
@@ -1402,17 +1399,22 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         order_ref="best-ask",
         price=970,
         volume=initial_volume,
-        wait=True,
     )
-    _, estimate_liquidation_price = vega.estimate_position(
+
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)
+    collateral = PARTY_A_account.general+PARTY_A_account.margin
+    _, estimate_liquidation_price_1 = vega.estimate_position(
         market_id,
         open_volume=0,
         side=["SIDE_BUY"],
         price=[970],
         remaining=[initial_volume],
         is_market_order=[False],
-        collateral_available=collateral_available,
+        collateral_available=collateral,
     )
+ 
     #AC 0012-NP-LIPE-003: An estimate is obtained for a position with no open volume and a single limit buy order, after the order fills the mark price keeps going down in small increments and the actual liquidation takes place within the obtained estimated range. 
     vega.submit_order(
         trading_key=PARTY_B.name,
@@ -1421,15 +1423,30 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
         price=970,
-        volume=initial_volume,
+        volume=10,
     )
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
+   
     vega.submit_order(
         trading_key=PARTY_C.name,
         market_id=market_id,
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        price=967,
+        order_ref="best-ask-50",
+        price=50,
+        volume=10,
+        wait=True,
+    )
+    #closeout
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=200,
         volume=initial_volume,
     )
     vega.submit_order(
@@ -1438,14 +1455,20 @@ def test_estimated_liquidation_price_AC003(vega_service: VegaServiceNull):
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        price=967,
+        price=200,
         volume=initial_volume,
     )
+    vega.wait_fn(10)
+    vega.wait_for_total_catchup()
     market_data = vega.get_latest_market_data(market_id=market_id)
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id)
-    assert(PARTY_A_account.general+PARTY_A_account.margin==0)
-    assert(estimate_liquidation_price.best_case.including_buy_orders>=market_data.mark_price)
-    assert(estimate_liquidation_price.worst_case.including_buy_orders<=market_data.mark_price)
+   
+    if PARTY_A_account.general+PARTY_A_account.margin==0:
+        closeout_price  = market_data.mark_price
+ 
+    assert(closeout_price >= estimate_liquidation_price_1.best_case.including_buy_orders)
+    assert(closeout_price <= estimate_liquidation_price_1.worst_case.including_buy_orders)
+   
 
 
 
