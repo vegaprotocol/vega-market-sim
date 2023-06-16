@@ -54,40 +54,11 @@ def find_block_range(current_node_segments, previous_node_segments):
             )
 
 
-def _terminate_proc(
-    proc: subprocess.Popen[bytes], out_file: BufferedWriter, err_file: BufferedWriter
-) -> None:
-    subprocess.run(
-        [
-            "vega_sim/bin/vegacapsule",
-            "network",
-            "destroy",
-        ]
-    )
-    proc.terminate()
-    out_file.close()
-    err_file.close()
-
-
-def _popen_process(
-    popen_args: List[str],
-    dir_root: str,
-    log_name: str,
-    env: Optional[Dict[str, str]] = None,
-) -> subprocess.Popen[bytes]:
-    out = open(os.path.join(dir_root, f"{log_name}.out"), "wb")
-    err = open(os.path.join(dir_root, f"{log_name}.err"), "wb")
-    sub_proc = subprocess.Popen(
-        popen_args, stdout=out, stderr=err, env=env, close_fds=True
-    )
-
-    atexit.register(functools.partial(_terminate_proc, sub_proc, out, err))
-    return sub_proc
-
-
 def _run(
     steps: int,
     test_dir: Optional[str] = None,
+    console: Optional[bool] = False,
+    network_on_host: bool = False,
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
@@ -100,14 +71,17 @@ def _run(
     with VegaServiceNetwork(
         network=Network.CAPSULE,
         run_with_wallet=False,
-        run_with_console=True,
+        run_with_console=console,
         vega_home_path=f"{test_dir}/vegahome",
         wallet_home_path=f"{test_dir}/vegahome/wallet",
+        wallet_path="vega_sim/bin/vegawallet",
         network_config_path=f"{test_dir}/vegahome/wallet",
         wallet_passphrase_path="vega_sim/vegacapsule/passphrase-file",
+        wallet_url="http://localhost:1789",
         faucet_url="http://localhost:1790",
         load_existing_keys=False,
         governance_symbol="VEGA",
+        network_on_host=network_on_host,
     ) as vega:
         # Run the fuzzing scenario
         scenario.run_iteration(
@@ -126,11 +100,15 @@ if __name__ == "__main__":
     parser.add_argument("--test-dir", type=str, default=None)
 
     parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("--console", action="store_true")
+    parser.add_argument("--network_on_host", action="store_true")
 
     args = parser.parse_args()
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO)
 
     _run(
         steps=args.steps,
+        console=args.console,
         test_dir=args.test_dir,
+        network_on_host=args.network_on_host,
     )

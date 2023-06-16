@@ -31,9 +31,14 @@ trap cleanup EXIT
 
 echo "Spinning up a nomad server"
 eval "${VEGA_BINS}/vegacapsule nomad --home-path ${VEGA_HOME} --install-path ${VEGA_BINS}" >/dev/null 2>&1 &
-sleep 10
+sleep 15
 echo "Spinning up a vegacapsule network"
 eval "${VEGA_BINS}/vegacapsule network bootstrap --config-path ${WORK_DIR}/vega_sim/vegacapsule/config.hcl --home-path ${VEGA_HOME}"
 eval "${VEGA_BINS}/vegacapsule ethereum multisig init --home-path ${VEGA_HOME}"
 
-python -m vega_sim.scenario.fuzzed_markets.run_capsule_test --steps $1 --test-dir $RESULT_DIR -d
+docker run \
+    --platform linux/amd64 \
+    --network host \
+    -v "${RESULT_DIR}:/tmp" \
+    vega_sim_learning:latest \
+        python -m vega_sim.scenario.fuzzed_markets.run_capsule_test --steps $1 --test-dir "/tmp" --debug --network_on_host

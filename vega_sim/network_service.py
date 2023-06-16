@@ -223,10 +223,12 @@ class VegaServiceNetwork(VegaService):
         wallet_home_path: Optional[str] = None,
         wallet_token_path: Optional[str] = None,
         wallet_passphrase_path: Optional[str] = None,
+        wallet_url: Optional[bool] = None,
         faucet_url: Optional[bool] = None,
         load_existing_keys: Optional[bool] = None,
         governance_symbol: Optional[str] = "VEGA",
         vegacapsule_bin_path: Optional[str] = "./vega_sim/bin/vegacapsule",
+        network_on_host: Optional[bool] = False,
     ):
         """Method initialises the class.
 
@@ -266,10 +268,11 @@ class VegaServiceNetwork(VegaService):
         self.run_with_console = run_with_console
 
         self._wallet = None
-        self._wallet_url = None
         self._data_node_grpc_url = None
         self._data_node_query_url = None
         self._data_node_rest_url = None
+
+        self._wallet_url = wallet_url
         self._faucet_url = faucet_url
 
         self._network_config = None
@@ -306,11 +309,6 @@ class VegaServiceNetwork(VegaService):
             if wallet_token_path is not None
             else environ.get("VEGA_WALLET_TOKENS_FILE")
         )
-        if self._token_path is None:
-            raise Exception(
-                "Either path to tokens JSON must be passed to wallet class or"
-                " VEGA_WALLET_TOKENS_FILE environment variable set"
-            )
 
         self._network_config_path = _find_network_config_toml(
             network=self.network, config_path=self._base_network_config_path
@@ -333,6 +331,28 @@ class VegaServiceNetwork(VegaService):
         self.vegacapsule_bin_path = vegacapsule_bin_path
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
+
+        if network_on_host:
+            logging.info(
+                "Network running on host machine. Updating url to use host.docker.internal"
+            )
+
+            def update_endpoint(endpoint, http: bool = True):
+                return (
+                    ("http://" if http else "")
+                    + "host.docker.internal:"
+                    + endpoint.split(":")[-1]
+                )
+
+            def update_iterator(iterator, http: bool = True):
+                for endpoint in iterator:
+                    yield update_endpoint(endpoint, http)
+
+            self._grpc_endpoints = update_iterator(self._grpc_endpoints, http=False)
+            self._rest_endpoints = update_iterator(self._rest_endpoints)
+            self._graphql_endpoints = update_iterator(self._graphql_endpoints)
+            self._wallet_url = update_endpoint(self._wallet_url)
+            self._faucet_url = update_endpoint(self._faucet_url)
 
     def __enter__(self):
         """Defines behaviour when class entered by a with statement."""
@@ -463,6 +483,11 @@ class VegaServiceNetwork(VegaService):
     def wallet(self) -> Wallet:
         if self._wallet is None:
             if self.load_existing_keys:
+                if self._token_path is None:
+                    raise Exception(
+                        "Either path to tokens JSON must be passed to wallet class or"
+                        " VEGA_WALLET_TOKENS_FILE environment variable set"
+                    )
                 self._wallet = VegaWallet.from_json(
                     self._token_path,
                     self.wallet_url,
@@ -470,6 +495,8 @@ class VegaServiceNetwork(VegaService):
                     vega_home_dir=self._vega_home,
                 )
             else:
+                print("not loading existing keys")
+                print(self.wallet_url, self._wallet_path, self._wallet_home)
                 self._wallet = VegaWallet(
                     wallet_url=self.wallet_url,
                     wallet_path=self._wallet_path,

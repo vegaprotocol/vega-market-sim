@@ -2743,7 +2743,8 @@ class Snitch(StateAgent):
 
     def initialise(self, vega: VegaService, **kwargs):
         self.vega = vega
-        self._create_process_map()
+        if not isinstance(vega, VegaServiceNetwork):
+            self._create_process_map()
 
     def step(self, vega_state: VegaState):
         if not self.only_extract_additional:
@@ -2782,54 +2783,55 @@ class Snitch(StateAgent):
                 )
             )
 
-            if self.platform == "Linux":
-                mem_vega = (
-                    self.process_map["vega"].memory_full_info()
-                    if "vega" in self.process_map
-                    else None
-                )
-                mem_datanode = (
-                    self.process_map["data-node"].memory_full_info()
-                    if "data-node" in self.process_map
-                    else None
-                )
-            elif self.platform == "Darwin":
-                mem_vega = (
-                    self.process_map["vega"].memory_info()
-                    if "vega" in self.process_map
-                    else None
-                )
-                mem_datanode = (
-                    self.process_map["data-node"].memory_info()
-                    if "data-node" in self.process_map
-                    else None
-                )
-            else:
-                mem_vega = None
-                mem_datanode = None
-                logging.warning(
-                    "Unable to record memory usage, unsupported operating system"
-                )
+            if not isinstance(self.vega, VegaServiceNetwork):
+                if self.platform == "Linux":
+                    mem_vega = (
+                        self.process_map["vega"].memory_full_info()
+                        if "vega" in self.process_map
+                        else None
+                    )
+                    mem_datanode = (
+                        self.process_map["data-node"].memory_full_info()
+                        if "data-node" in self.process_map
+                        else None
+                    )
+                elif self.platform == "Darwin":
+                    mem_vega = (
+                        self.process_map["vega"].memory_info()
+                        if "vega" in self.process_map
+                        else None
+                    )
+                    mem_datanode = (
+                        self.process_map["data-node"].memory_info()
+                        if "data-node" in self.process_map
+                        else None
+                    )
+                else:
+                    mem_vega = None
+                    mem_datanode = None
+                    logging.warning(
+                        "Unable to record memory usage, unsupported operating system"
+                    )
 
-            self.resources.append(
-                ResourceData(
-                    at_time=start_time,
-                    vega_cpu_per=self.process_map["vega"].cpu_percent()
-                    if "vega" in self.process_map
-                    else 0,
-                    vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
-                    vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
-                    datanode_cpu_per=self.process_map["data-node"].cpu_percent()
-                    if "data-node" in self.process_map
-                    else 0,
-                    datanode_mem_rss=mem_datanode.rss
-                    if mem_datanode is not None
-                    else 0,
-                    datanode_mem_vms=mem_datanode.vms
-                    if mem_datanode is not None
-                    else 0,
+                self.resources.append(
+                    ResourceData(
+                        at_time=start_time,
+                        vega_cpu_per=self.process_map["vega"].cpu_percent()
+                        if "vega" in self.process_map
+                        else 0,
+                        vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
+                        vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
+                        datanode_cpu_per=self.process_map["data-node"].cpu_percent()
+                        if "data-node" in self.process_map
+                        else 0,
+                        datanode_mem_rss=mem_datanode.rss
+                        if mem_datanode is not None
+                        else 0,
+                        datanode_mem_vms=mem_datanode.vms
+                        if mem_datanode is not None
+                        else 0,
+                    )
                 )
-            )
         if self.additional_state_fn is not None:
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)
