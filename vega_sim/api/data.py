@@ -457,6 +457,15 @@ def positions_by_market(
 ) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
 
+    market_price_decimals_map = (
+        market_price_decimals_map if market_price_decimals_map is not None else {}
+    )
+    market_position_decimals_map = (
+        market_position_decimals_map if market_position_decimals_map is not None else {}
+    )
+    market_to_asset_map = market_to_asset_map if market_to_asset_map is not None else {}
+    asset_decimals_map = asset_decimals_map if asset_decimals_map is not None else {}
+
     raw_positions = data_raw.positions_by_market(
         pub_key=pub_key, market_id=market_id, data_client=data_client
     )
@@ -500,8 +509,9 @@ def positions_by_market(
                 asset_id=market_to_asset_map[pos.market_id],
                 data_client=data_client,
             )
-            asset_decimals_map[pos.market_id] = int(asset_info.details.decimals)
-
+            asset_decimals_map[market_to_asset_map[pos.market_id]] = int(
+                asset_info.details.decimals
+            )
         # Convert raw proto into a market-sim Position object
         positions[pos.market_id] = _position_from_proto(
             position=pos,
