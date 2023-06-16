@@ -3,6 +3,7 @@ import logging
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 
+from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.scenario.constants import Network
@@ -30,21 +31,19 @@ def calc_maintenance(
 
     # Calculate maintenance margin components for a long position
     slippage_per_unit_long = calculate_spu(
-        riskiest_position=risk_factor_long,
+        riskiest_position=riskiest_long,
         order_book=order_book,
         mark_price=mark_price,
         side="long",
     )
     capped_slippage_long = calc_capped_slippage(
         riskiest_long,
-        max(open_volume, 0),
-        open_orders_long,
         mark_price,
         linear_slippage_factor,
         quadratic_slippage_factor,
     )
     uncapped_slippage_long = calc_uncapped_slippage(
-        max(open_volume, 0), open_orders_long, mark_price, slippage_per_unit_long
+        riskiest_long, mark_price, slippage_per_unit_long
     )
     volume_maintenance_long = calc_volume_maintenance(
         max(open_volume, 0), mark_price, risk_factor_long
@@ -68,21 +67,19 @@ def calc_maintenance(
 
     # Calculate maintenance margin components for a short position
     slippage_per_unit_short = calculate_spu(
-        riskiest_position=risk_factor_short,
+        riskiest_position=riskiest_short,
         order_book=order_book,
         mark_price=mark_price,
         side="short",
     )
     capped_slippage_short = calc_capped_slippage(
         riskiest_short,
-        abs(min(open_volume, 0)),
-        open_orders_short,
         mark_price,
         linear_slippage_factor,
         quadratic_slippage_factor,
     )
     uncapped_slippage_short = calc_uncapped_slippage(
-        abs(min(open_volume, 0)), open_orders_short, mark_price, slippage_per_unit_short
+        riskiest_short, mark_price, slippage_per_unit_short
     )
     volume_maintenance_short = calc_volume_maintenance(
         abs(min(open_volume, 0)), mark_price, risk_factor_short
@@ -109,20 +106,18 @@ def calc_maintenance(
 
 def calc_capped_slippage(
     riskiest_position,
-    open_volume,
-    open_orders,
     mark_price,
     linear_slippage_factor,
     quadratic_slippage_factor,
 ):
     return mark_price * (
         float(linear_slippage_factor) * riskiest_position
-        + float(quadratic_slippage_factor) ** 2 * (open_volume + open_orders)
+        + float(quadratic_slippage_factor) ** 2 * riskiest_position
     )
 
 
-def calc_uncapped_slippage(open_volume, open_orders, mark_price, slippage_per_unit):
-    return mark_price * (open_volume + open_orders) * slippage_per_unit
+def calc_uncapped_slippage(riskiest_position, mark_price, slippage_per_unit):
+    return mark_price * riskiest_position * slippage_per_unit
 
 
 def calc_volume_maintenance(open_volume, mark_price, risk_factor):
@@ -171,21 +166,33 @@ if __name__ == "__main__":
         order_book = vega.market_depth(market_id=MARKET_ID, num_levels=1000)
 
         # Get party data
-        mm_orders = data.list_orders(
-            data_client=vega.trading_data_client_v2,
-            market_id=MARKET_ID,
-            party_id=PARTY_ID,
-            live_only=True,
+        logging.debug(
+            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
         )
         mm_open_volume = data.positions_by_market(
             data_client=vega.trading_data_client_v2,
             pub_key=PARTY_ID,
             market_id=MARKET_ID,
         ).open_volume
+        logging.debug(
+            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
+        )
         mm_margin_levels = data.margin_levels(
             data_client=vega.trading_data_client_v2,
             party_id=PARTY_ID,
             market_id=MARKET_ID,
+        )
+        logging.debug(
+            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
+        )
+        mm_orders = data.list_orders(
+            data_client=vega.trading_data_client_v2,
+            market_id=MARKET_ID,
+            party_id=PARTY_ID,
+            live_only=True,
+        )
+        logging.debug(
+            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
         )
 
         # Extract the open orders
