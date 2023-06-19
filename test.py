@@ -26,12 +26,12 @@ def calc_maintenance(
     order_book,
 ):
     # Calculate riskiest long and short position
-    riskiest_long = max([mm_open_volume + open_orders_long, 0])
-    riskiest_short = abs(min([mm_open_volume - open_orders_short, 0]))
+    riskiest_long = max([open_volume + open_orders_long, 0])
+    riskiest_short = abs(min([open_volume - open_orders_short, 0]))
 
     # Calculate maintenance margin components for a long position
-    slippage_per_unit_long = calculate_spu(
-        riskiest_position=riskiest_long,
+    slippage_per_unit_long = calculate_slippage_per_unit(
+        open_volume=max([open_volume, 0]),
         order_book=order_book,
         mark_price=mark_price,
         side="long",
@@ -66,8 +66,8 @@ def calc_maintenance(
     )
 
     # Calculate maintenance margin components for a short position
-    slippage_per_unit_short = calculate_spu(
-        riskiest_position=riskiest_short,
+    slippage_per_unit_short = calculate_slippage_per_unit(
+        open_volume=abs(min(open_volume, 0)),
         order_book=order_book,
         mark_price=mark_price,
         side="short",
@@ -104,6 +104,30 @@ def calc_maintenance(
     return max([maintenance_short, maintenance_long])
 
 
+def calculate_slippage_per_unit(open_volume, order_book, side, mark_price):
+    if open_volume == 0:
+        return 0
+    if side == "short":
+        order_book = order_book.sells
+    else:
+        order_book = reversed(order_book.buys)
+
+    remaining = open_volume
+    total_value = 0
+    book_volume = 0
+    for price_level in order_book:
+        required = min(remaining, price_level.volume)
+        total_value += required * abs(price_level.price)
+        remaining += -required
+        book_volume += price_level.volume
+    if remaining > 0:
+        logging.warning(
+            f"Not enough volume on the book ({book_volume}) to close a {side} position of size {open_volume}. Slippage capping should be applied."
+        )
+    exit_price = total_value / (open_volume - remaining)
+    return exit_price - mark_price
+
+
 def calc_capped_slippage(
     riskiest_position,
     mark_price,
@@ -128,27 +152,65 @@ def calculate_orders_maintenance(open_orders, mark_price, risk_factor):
     return open_orders * mark_price * risk_factor
 
 
-def calculate_spu(riskiest_position, order_book, side, mark_price):
-    if riskiest_position == 0:
-        return 0
-    if side == "short":
-        order_book = order_book.sells
-    else:
-        order_book = reversed(order_book.buys)
+def main(vega):
+    # Get market data
+    risk_factors = vega.get_risk_factors(market_id=MARKET_ID)
+    market_data = vega.get_latest_market_data(market_id=MARKET_ID)
+    market_info = data_raw.market_info(
+        data_client=vega.trading_data_client_v2, market_id=MARKET_ID
+    )
+    order_book = vega.market_depth(market_id=MARKET_ID, num_levels=1000)
 
-    remaining = riskiest_position
-    total_slippage = 0
-    book_volume = 0
-    for price_level in order_book:
-        required = min(remaining, price_level.volume)
-        total_slippage += required * abs(price_level.price - mark_price)
-        remaining += -required
-        book_volume += price_level.volume
-    if remaining > 0:
-        logging.warning(
-            f"Not enough volume on the book ({book_volume}) to close a {side} position of size {riskiest_position}. Slippage capping should be applied."
-        )
-    return total_slippage / riskiest_position
+    # Get party data
+    logging.debug(
+        f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
+    )
+    mm_open_volume = data.positions_by_market(
+        data_client=vega.trading_data_client_v2,
+        pub_key=PARTY_ID,
+        market_id=MARKET_ID,
+    ).open_volume
+    logging.debug(
+        f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
+    )
+    mm_margin_levels = data.margin_levels(
+        data_client=vega.trading_data_client_v2,
+        party_id=PARTY_ID,
+        market_id=MARKET_ID,
+    )
+    logging.debug(
+        f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
+    )
+    mm_orders = data.list_orders(
+        data_client=vega.trading_data_client_v2,
+        market_id=MARKET_ID,
+        party_id=PARTY_ID,
+        live_only=True,
+    )
+    logging.debug(
+        f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
+    )
+
+    # Extract the open orders
+    open_orders_long = sum([order.size for order in mm_orders if order.side == 1])
+    open_orders_short = abs(sum([order.size for order in mm_orders if order.side == 2]))
+
+    # Calculate the expected maintenance
+    expected_maintenance = calc_maintenance(
+        open_volume=mm_open_volume,
+        open_orders_long=open_orders_long,
+        open_orders_short=open_orders_short,
+        mark_price=market_data.mark_price,
+        risk_factor_long=risk_factors.long,
+        risk_factor_short=risk_factors.short,
+        linear_slippage_factor=market_info.linear_slippage_factor,
+        quadratic_slippage_factor=market_info.quadratic_slippage_factor,
+        order_book=order_book,
+    )
+
+    logging.info(
+        f"expected maintenance_margin={expected_maintenance} | actual maintenance_margin={mm_margin_levels[0].maintenance_margin}"
+    )
 
 
 if __name__ == "__main__":
@@ -157,63 +219,4 @@ if __name__ == "__main__":
     with VegaServiceNetwork(
         network=Network.MAINNET1, run_with_wallet=True, run_with_console=False
     ) as vega:
-        # Get market data
-        risk_factors = vega.get_risk_factors(market_id=MARKET_ID)
-        market_data = vega.get_latest_market_data(market_id=MARKET_ID)
-        market_info = data_raw.market_info(
-            data_client=vega.trading_data_client_v2, market_id=MARKET_ID
-        )
-        order_book = vega.market_depth(market_id=MARKET_ID, num_levels=1000)
-
-        # Get party data
-        logging.debug(
-            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
-        )
-        mm_open_volume = data.positions_by_market(
-            data_client=vega.trading_data_client_v2,
-            pub_key=PARTY_ID,
-            market_id=MARKET_ID,
-        ).open_volume
-        logging.debug(
-            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
-        )
-        mm_margin_levels = data.margin_levels(
-            data_client=vega.trading_data_client_v2,
-            party_id=PARTY_ID,
-            market_id=MARKET_ID,
-        )
-        logging.debug(
-            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
-        )
-        mm_orders = data.list_orders(
-            data_client=vega.trading_data_client_v2,
-            market_id=MARKET_ID,
-            party_id=PARTY_ID,
-            live_only=True,
-        )
-        logging.debug(
-            f"timestamp={vega.trading_data_client_v2.GetVegaTime(GetVegaTimeRequest()).timestamp}"
-        )
-
-        # Extract the open orders
-        open_orders_long = sum([order.size for order in mm_orders if order.side == 1])
-        open_orders_short = abs(
-            sum([order.size for order in mm_orders if order.side == 2])
-        )
-
-        # Calculate the expected maintenance
-        expected_maintenance = calc_maintenance(
-            open_volume=mm_open_volume,
-            open_orders_long=open_orders_short,
-            open_orders_short=open_orders_short,
-            mark_price=market_data.mark_price,
-            risk_factor_long=risk_factors.long,
-            risk_factor_short=risk_factors.short,
-            linear_slippage_factor=market_info.linear_slippage_factor,
-            quadratic_slippage_factor=market_info.quadratic_slippage_factor,
-            order_book=order_book,
-        )
-
-        logging.info(
-            f"expected maintenance_margin={expected_maintenance} | actual maintenance_margin={mm_margin_levels[0].maintenance_margin}"
-        )
+        main(vega)
