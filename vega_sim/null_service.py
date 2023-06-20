@@ -701,7 +701,7 @@ class VegaServiceNull(VegaService):
         self.console_port = 0
 
         for key, name in self.PORT_TO_FIELD_MAP.items():
-            if key in port_config:
+            if port_config is not None and key in port_config:
                 setattr(self, name, port_config[key])
             else:
                 curr_ports = set(
