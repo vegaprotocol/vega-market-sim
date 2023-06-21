@@ -689,6 +689,8 @@ class VegaServiceNull(VegaService):
             Ports.CONSOLE: self.console_port,
         }
 
+    # set ports from port_config or alternatively find a free port
+    # to use
     def _assign_ports(self, port_config):
         self.wallet_port = 0
         self.data_node_rest_port = 0
