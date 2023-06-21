@@ -709,7 +709,7 @@ class VegaServiceNull(VegaService):
                 curr_ports = set(
                     [getattr(self, port) for port in self.PORT_TO_FIELD_MAP.values()]
                 )
-                setattr(self,name, find_free_port(curr_ports))
+                setattr(self, name, find_free_port(curr_ports))
 
     def start(self, block_on_startup: bool = True) -> None:
         if self.check_for_binaries and not self._using_all_custom_paths:
