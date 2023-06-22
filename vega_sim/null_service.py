@@ -691,7 +691,7 @@ class VegaServiceNull(VegaService):
 
     # set ports from port_config or alternatively find a free port
     # to use
-    def _assign_ports(self, port_config):
+    def _assign_ports(self, port_config: Optional[Dict[Ports, int]]):
         self.wallet_port = 0
         self.data_node_rest_port = 0
         self.data_node_grpc_port = 0
