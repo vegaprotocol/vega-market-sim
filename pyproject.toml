@@ -26,7 +26,7 @@ matplotlib = {version = "*", optional = true}
 snakeviz = {version = "*", optional = true}
 pytest-profiling = {version = "*", optional = true}
 ipywidgets = {version = "*", optional = true}
-googleapis-common-protos = "*"
+protoc-gen-openapiv2 = "*"
 plotly = "*"
 TA-Lib = {version = "*", optional = true}
 python-dotenv = "*"

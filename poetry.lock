@@ -2450,6 +2450,21 @@ files = [
 ]
 
 [[package]]
+name = "protoc-gen-openapiv2"
+version = "0.0.1"
+description = "Provides the missing pieces for gRPC Gateway."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "protoc-gen-openapiv2-0.0.1.tar.gz", hash = "sha256:6f79188d842c13177c9c0558845442c340b43011bf67dfef1dfc3bc067506409"},
+    {file = "protoc_gen_openapiv2-0.0.1-py3-none-any.whl", hash = "sha256:18090c8be3877c438e7da0f7eb7cace45a9a210306bca4707708dbad367857be"},
+]
+
+[package.dependencies]
+googleapis-common-protos = "*"
+protobuf = ">=4.21.0"
+
+[[package]]
 name = "psutil"
 version = "5.9.5"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -3786,4 +3801,4 @@ profile = ["pytest-profiling", "snakeviz"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "92b121632a382ac3addc7bddc43375149bc7ea410ff5a6b712e16decc6c9d8aa"
+content-hash = "04dd227a082ec5ad6f4fecf0df4ce7c6eb8f12910d9e69a3baf2315f6a345053"
