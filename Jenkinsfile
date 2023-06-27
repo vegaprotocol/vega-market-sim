@@ -15,6 +15,8 @@ pipeline {
     parameters {
         string( name: 'VEGA_VERSION', defaultValue: 'd79ae49de1cdd3d7ebc40efb38d5c6c4f82eefb3',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
+        string( name: 'VEGACAPSULE_VERSION', defaultValue: 'main',
+                description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
         string( name: 'NODE_LABEL', defaultValue: 'g-8vcpu-32gb',
@@ -61,6 +63,7 @@ pipeline {
                         timeout: 90,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
+                        vegacapsuleVersion: params.VEGACAPSULE_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
                         nodeLabel: params.NODE_LABEL,
                     )
