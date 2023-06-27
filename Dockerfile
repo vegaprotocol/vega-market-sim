@@ -30,6 +30,7 @@ RUN  pip install -r requirements-dev.txt
 RUN  pip install -r requirements-learning.txt
 COPY pytest.ini .
 COPY ./tests ./tests
+COPY ./scripts ./scripts
 COPY ./vega_sim ./vega_sim
 COPY ./examples ./examples
 COPY ./pyproject.toml ./pyproject.toml
@@ -42,6 +43,7 @@ COPY ./requirements-learning.txt .
 RUN  pip install -r requirements-learning.txt
 COPY ./pyproject.toml ./pyproject.toml
 COPY ./tests ./tests
+COPY ./scripts ./scripts
 COPY ./vega_sim ./vega_sim
 RUN pip install -e .
 RUN chmod 777 /vega_market_sim
