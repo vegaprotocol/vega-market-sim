@@ -287,6 +287,7 @@ class VegaService(ABC):
 
     @property
     def core_client(self) -> vac.VegaCoreClient:
+        print(self.vega_node_grpc_url)
         if self._core_client is None:
             channel = grpc.insecure_channel(
                 self.vega_node_grpc_url,

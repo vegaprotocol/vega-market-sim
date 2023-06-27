@@ -71,6 +71,7 @@ def _run(
         wallet_passphrase_path="vega_sim/vegacapsule/passphrase-file",
         wallet_url="http://localhost:1789",
         faucet_url="http://localhost:1790",
+        vega_node_grpc_url="localhost:3022",
         load_existing_keys=False,
         governance_symbol="VEGA",
         network_on_host=network_on_host,

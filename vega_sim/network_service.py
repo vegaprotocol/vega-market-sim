@@ -225,6 +225,7 @@ class VegaServiceNetwork(VegaService):
         wallet_passphrase_path: Optional[str] = None,
         wallet_url: Optional[bool] = None,
         faucet_url: Optional[bool] = None,
+        vega_node_grpc_url: Optional[str] = None,
         load_existing_keys: Optional[bool] = None,
         governance_symbol: Optional[str] = "VEGA",
         vegacapsule_bin_path: Optional[str] = "./vega_sim/bin/vegacapsule",
@@ -332,6 +333,8 @@ class VegaServiceNetwork(VegaService):
 
         self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
 
+        self._vega_node_grpc_url = vega_node_grpc_url
+
         if network_on_host:
             logging.info(
                 "Network running on host machine. Updating url to use host.docker.internal"
@@ -353,6 +356,11 @@ class VegaServiceNetwork(VegaService):
             self._graphql_endpoints = update_iterator(self._graphql_endpoints)
             self._wallet_url = update_endpoint(self._wallet_url)
             self._faucet_url = update_endpoint(self._faucet_url)
+
+            if self._vega_node_grpc_url is not None:
+                self._vega_node_grpc_url = update_endpoint(
+                    self._vega_node_grpc_url, http=False
+                )
 
     def __enter__(self):
         """Defines behaviour when class entered by a with statement."""
@@ -470,6 +478,10 @@ class VegaServiceNetwork(VegaService):
         return self._data_node_query_url
 
     @property
+    def vega_node_grpc_url(self) -> str:
+        return self._vega_node_grpc_url
+
+    @property
     def wallet_url(self) -> str:
         if self._wallet_url is None:
             self._wallet_url = f"http://127.0.0.1:1789"
@@ -505,16 +517,6 @@ class VegaServiceNetwork(VegaService):
 
     @property
     def core_state_client(self) -> None:
-        logging.debug(
-            (
-                "Parent property overridden as VegaNetworkService does not need a core"
-                " client."
-            ),
-        )
-        pass
-
-    @property
-    def core_client(self) -> None:
         logging.debug(
             (
                 "Parent property overridden as VegaNetworkService does not need a core"
