@@ -419,6 +419,7 @@ class FuzzingScenario(Scenario):
                         asset_for_metric_name=asset_name,
                         metric=metric,
                         market_names=[market_name],
+                        stake_key=True,
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )

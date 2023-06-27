@@ -3103,6 +3103,7 @@ class RewardFunder(StateAgentWithWallet):
         metric: Optional[str] = None,
         market_names: Optional[str] = None,
         wallet_name: Optional[str] = None,
+        stake_key: bool = False,
         tag: Optional[str] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
@@ -3113,6 +3114,7 @@ class RewardFunder(StateAgentWithWallet):
         self.account_type = account_type
         self.metric = metric
         self.market_names = market_names
+        self.stake_key = stake_key
 
     def initialise(
         self,
@@ -3125,12 +3127,19 @@ class RewardFunder(StateAgentWithWallet):
 
         # Faucet vega tokens
         self.vega.wait_for_total_catchup()
-        self.vega.mint(
-            wallet_name=self.wallet_name,
-            asset="VOTE",
-            amount=1e4,
-            key_name=self.key_name,
-        )
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
         self.vega.wait_fn(1)
         self.vega.wait_for_total_catchup()
 
