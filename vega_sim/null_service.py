@@ -635,11 +635,7 @@ class VegaServiceNull(VegaService):
         self.replay_from_path = replay_from_path
         self.check_for_binaries = check_for_binaries
 
-        if port_config is None:
-            self._assign_ports()
-        else:
-            for key, name in self.PORT_TO_FIELD_MAP.items():
-                setattr(self, name, port_config[key])
+        self._assign_ports(port_config)
 
         if start_immediately:
             self.start()
@@ -676,22 +672,6 @@ class VegaServiceNull(VegaService):
                 )
         return self._wallet
 
-    def _assign_ports(self):
-        self.wallet_port = 0
-        self.data_node_rest_port = 0
-        self.data_node_grpc_port = 0
-        self.data_node_postgres_port = 0
-        self.faucet_port = 0
-        self.vega_node_port = 0
-        self.vega_node_grpc_port = 0
-        self.vega_node_rest_port = 0
-        self.console_port = 0
-        for port_opt in self.PORT_TO_FIELD_MAP.values():
-            curr_ports = set(
-                [getattr(self, port) for port in self.PORT_TO_FIELD_MAP.values()]
-            )
-            setattr(self, port_opt, find_free_port(curr_ports))
-
     def _check_started(self) -> None:
         if self.proc is None:
             raise ServiceNotStartedError("NullChain Vega accessed without starting")
@@ -708,6 +688,28 @@ class VegaServiceNull(VegaService):
             Ports.CORE_REST: self.vega_node_rest_port,
             Ports.CONSOLE: self.console_port,
         }
+
+    # set ports from port_config or alternatively find a free port
+    # to use
+    def _assign_ports(self, port_config: Optional[Dict[Ports, int]]):
+        self.wallet_port = 0
+        self.data_node_rest_port = 0
+        self.data_node_grpc_port = 0
+        self.data_node_postgres_port = 0
+        self.faucet_port = 0
+        self.vega_node_port = 0
+        self.vega_node_grpc_port = 0
+        self.vega_node_rest_port = 0
+        self.console_port = 0
+
+        for key, name in self.PORT_TO_FIELD_MAP.items():
+            if port_config is not None and key in port_config:
+                setattr(self, name, port_config[key])
+            else:
+                curr_ports = set(
+                    [getattr(self, port) for port in self.PORT_TO_FIELD_MAP.values()]
+                )
+                setattr(self, name, find_free_port(curr_ports))
 
     def start(self, block_on_startup: bool = True) -> None:
         if self.check_for_binaries and not self._using_all_custom_paths:
