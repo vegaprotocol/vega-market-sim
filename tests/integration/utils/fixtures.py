@@ -1,7 +1,9 @@
 from collections import namedtuple
+from typing import Optional
 
 import pytest
 from vega_sim.null_service import VegaServiceNull
+import vega_sim.proto.vega.data_source_pb2 as data_source_protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -34,6 +36,14 @@ def build_basic_market(
     initial_volume: float = 1,
     initial_spread: float = 0.1,
     initial_commitment: float = 100,
+    market_decimals: int = 5,
+    settlement_price_decimals: Optional[int] = None,
+    oracle_spec_for_settlement_price: Optional[
+        data_source_protos.DataSourceDefinition
+    ] = None,
+    oracle_spec_for_trading_termination: Optional[
+        data_source_protos.DataSourceDefinition
+    ] = None,
 ):
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
@@ -73,6 +83,9 @@ def build_basic_market(
         settlement_asset_id=asset_id,
         termination_key=TERMINATE_WALLET.name,
         market_decimals=5,
+        oracle_spec_for_settlement_price=oracle_spec_for_settlement_price,
+        oracle_spec_for_trading_termination=oracle_spec_for_trading_termination,
+        settlement_price_decimals=settlement_price_decimals,
     )
 
     market_id = vega.all_markets()[0].id

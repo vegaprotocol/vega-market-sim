@@ -79,6 +79,90 @@ def get_blockchain_time(
     return blockchain_time if not in_seconds else int(blockchain_time / 1e9)
 
 
+def openoracle_oracle(
+    pub_key: str,
+    instrument_name: str,
+    min_price: Optional[int] = None,
+    min_timestamp: Optional[int] = None,
+) -> data_source_protos.DataSourceDefinition:
+    return data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=pub_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"prices.{instrument_name}.value",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                        ),
+                        conditions=(
+                            [
+                                oracles_protos.spec.Condition(
+                                    operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                                    value=str(min_price),
+                                )
+                            ]
+                            if min_price is not None
+                            else []
+                        ),
+                    ),
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"prices.{instrument_name}.timestamp",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                        ),
+                        conditions=(
+                            [
+                                oracles_protos.spec.Condition(
+                                    operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                                    value=str(min_timestamp),
+                                )
+                            ]
+                            if min_timestamp is not None
+                            else []
+                        ),
+                    ),
+                ],
+            )
+        )
+    )
+
+
+def vega_timestamp_termination_oracle(
+    pub_key: str,
+    timestamp: int,
+) -> data_source_protos.DataSourceDefinition:
+    return data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=pub_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name="vegaprotocol.builtin.timestamp",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_TIMESTAMP,
+                        ),
+                        conditions=[
+                            oracles_protos.spec.Condition(
+                                operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN_OR_EQUAL,
+                                value=str(timestamp),
+                            )
+                        ],
+                    )
+                ],
+            )
+        )
+    )
+
+
 def propose_market_from_config(
     data_client: vac.VegaTradingDataClientV2,
     wallet: Wallet,
@@ -154,6 +238,13 @@ def propose_future_market(
     price_monitoring_parameters: Optional[
         vega_protos.markets.PriceMonitoringParameters
     ] = None,
+    data_source_spec_for_settlement_data: Optional[
+        data_source_protos.DataSourceDefinition
+    ] = None,
+    data_source_spec_for_trading_termination: Optional[
+        data_source_protos.DataSourceDefinition
+    ] = None,
+    settlement_price_decimals: Optional[int] = 2,
     lp_price_range: float = 1,
     wallet_name: Optional[str] = None,
 ) -> str:
@@ -171,8 +262,8 @@ def propose_future_market(
         settlement_asset_id:
             str, the asset id the market will use for settlement
         data_client:
-            VegaTradingDataClientV2, an instantiated gRPC client for interacting with the
-                Vega data node
+            VegaTradingDataClientV2, an instantiated gRPC client for interacting with
+                the Vega data node
         termination_pub_key:
             str, the public key of the oracle to be used for trading termination
         governance_asset:
@@ -192,6 +283,12 @@ def propose_future_market(
             PriceMonitoringParameters, A set of parameters determining when the market
                 will drop into a price auction. If not passed defaults to a very
                 permissive setup
+        data_source_spec_for_settlement_data:
+            Optional[DataSourceDefinition], Spec configuration for oracle used to
+                determine settlement price.
+        data_source_spec_for_trading_termination:
+            Optional[DataSourceDefinition], Spec configuration for oracle used to
+                close market termination
         lp_price_range:
             float, Range allowed for LP price commitments from mid price
             (e.g. 2 allows mid-price +/- 2 * mid-price )
@@ -231,44 +328,57 @@ def propose_future_market(
     )
 
     price_decimals = 5 if market_decimals is None else market_decimals
-    data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
-        external=data_source_protos.DataSourceDefinitionExternal(
-            oracle=data_source_protos.DataSourceSpecConfiguration(
-                signers=[
-                    oracles_protos.data.Signer(
-                        pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
-                    )
-                ],
-                filters=[
-                    oracles_protos.spec.Filter(
-                        key=oracles_protos.spec.PropertyKey(
-                            name=f"price.{future_asset}.value",
-                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                            number_decimal_places=price_decimals,
-                        ),
-                        conditions=[],
-                    )
-                ],
+    settlement_price_decimals = (
+        price_decimals
+        if settlement_price_decimals is None
+        else settlement_price_decimals
+    )
+    data_source_spec_for_settlement_data = (
+        data_source_spec_for_settlement_data
+        if data_source_spec_for_settlement_data is not None
+        else data_source_protos.DataSourceDefinition(
+            external=data_source_protos.DataSourceDefinitionExternal(
+                oracle=data_source_protos.DataSourceSpecConfiguration(
+                    signers=[
+                        oracles_protos.data.Signer(
+                            pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
+                        )
+                    ],
+                    filters=[
+                        oracles_protos.spec.Filter(
+                            key=oracles_protos.spec.PropertyKey(
+                                name=f"price.{future_asset}.value",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                                number_decimal_places=settlement_price_decimals,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
             )
         )
     )
-    data_source_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
-        external=data_source_protos.DataSourceDefinitionExternal(
-            oracle=data_source_protos.DataSourceSpecConfiguration(
-                signers=[
-                    oracles_protos.data.Signer(
-                        pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
-                    )
-                ],
-                filters=[
-                    oracles_protos.spec.Filter(
-                        key=oracles_protos.spec.PropertyKey(
-                            name="trading.terminated",
-                            type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                        ),
-                        conditions=[],
-                    )
-                ],
+    data_source_spec_for_trading_termination = (
+        data_source_spec_for_trading_termination
+        if data_source_spec_for_trading_termination is not None
+        else data_source_protos.DataSourceDefinition(
+            external=data_source_protos.DataSourceDefinitionExternal(
+                oracle=data_source_protos.DataSourceSpecConfiguration(
+                    signers=[
+                        oracles_protos.data.Signer(
+                            pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
+                        )
+                    ],
+                    filters=[
+                        oracles_protos.spec.Filter(
+                            key=oracles_protos.spec.PropertyKey(
+                                name="trading.terminated",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
             )
         )
     )
@@ -591,4 +701,41 @@ def settle_oracle(
         wallet_name=wallet_name,
         transaction_type="oracle_data_submission",
         key_name=key_name,
+    )
+
+
+def settle_oracle_openoracle(
+    wallet_name: str,
+    wallet: Wallet,
+    payload: str,
+) -> None:
+    """
+    Settle the market and send settlement price.
+
+    Args:
+        login_token:
+            str, the login token for the wallet authorised to send
+             termination/settlement oracle signals
+        pub_key:
+            str, the public key for the wallet authorised to send
+             termination/settlement oracle signals
+        settlement_price:
+            float, final settlement price for the asset
+        oracle_name:
+            str, the name of the oracle to settle
+
+    """
+
+    # Use oracle feed to terminate market
+    # payload = base64.b64encode(payload)
+
+    oracle_submission = commands_protos.oracles.OracleDataSubmission(
+        payload=payload,
+        source=commands_protos.oracles.OracleDataSubmission.OracleSource.ORACLE_SOURCE_OPEN_ORACLE,
+    )
+
+    wallet.submit_transaction(
+        transaction=oracle_submission,
+        name=wallet_name,
+        transaction_type="oracle_data_submission",
     )

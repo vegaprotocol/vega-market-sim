@@ -505,7 +505,6 @@ class VegaService(ABC):
         market_name: str,
         proposal_key: str,
         settlement_asset_id: str,
-        termination_key: str,
         future_asset: Optional[str] = None,
         position_decimals: Optional[int] = None,
         market_decimals: Optional[int] = None,
@@ -515,36 +514,53 @@ class VegaService(ABC):
         price_monitoring_parameters: Optional[
             vega_protos.markets.PriceMonitoringParameters
         ] = None,
+        oracle_spec_for_settlement_price: Optional[
+            oracles_protos.spec.OracleSpecConfiguration
+        ] = None,
+        oracle_spec_for_trading_termination: Optional[
+            oracles_protos.spec.OracleSpecConfiguration
+        ] = None,
+        settlement_price_decimals: Optional[int] = 2,
+        termination_key: Optional[str] = None,
         wallet_name: Optional[str] = None,
         termination_wallet_name: Optional[str] = None,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
-                Args:
-                    market_name:
-                        str, name of the market
-                    proposal_key:
-                        str, the name of the key to use for proposing the market
-                    settlement_asset_id:
-                        str, the asset id the market will use for settlement
-                    termination_key:
-                        str, the name of the key which will be used to send termination data
-                    position_decimals:
-                        int, the decimal place precision to use for positions
-                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-                   market_decimals:
-                        int, the decimal place precision to use for market prices
-                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-                    price_monitoring_parameters:
-                        PriceMonitoringParameters, A set of parameters determining when the
-                            market will drop into a price auction. If not passed defaults
-                            to a very permissive setup
-                            wallet_name: Optional[str] = None,
-        :
-                        Optional[str], name of wallet proposing market. Defaults to None.
-                    termination_wallet_name:
-                        Optional[str], name of wallet settling market. Defaults to None.
-
+        Args:
+            market_name:
+                str, name of the market
+            proposal_key:
+                str, the name of the key to use for proposing the market
+            settlement_asset_id:
+                str, the asset id the market will use for settlement
+            termination_key:
+                str, the name of the key which will be used to send termination data
+            position_decimals:
+                int, the decimal place precision to use for positions
+                    (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+           market_decimals:
+                int, the decimal place precision to use for market prices
+                    (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+            price_monitoring_parameters:
+                PriceMonitoringParameters, A set of parameters determining when the
+                    market will drop into a price auction. If not passed defaults
+                    to a very permissive setup
+            oracle_spec_for_settlement_price:
+                Optional[OracleSpecConfiguration], Spec configuration for oracle used to
+                    determine settlement price.
+            oracle_spec_for_trading_termination:
+                Optional[OracleSpecConfiguration], Spec configuration for oracle used to
+                    close market termination
+            settlement_price_decimals:
+                int, The number of decimals to which the incoming
+                    settlement price will be padded
+            termination_key:
+                Optional[str], name of key settling market. Defaults to None.
+            wallet_name: Optional[str] = None,
+                Optional[str], name of wallet proposing market. Defaults to None.
+            termination_wallet_name:
+                Optional[str], name of wallet settling market. Defaults to None.
         """
         additional_kwargs = {}
         if future_asset is not None:
@@ -574,6 +590,9 @@ class VegaService(ABC):
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
+            data_source_spec_for_settlement_data=oracle_spec_for_settlement_price,
+            data_source_spec_for_trading_termination=oracle_spec_for_trading_termination,
+            settlement_price_decimals=settlement_price_decimals,
             **additional_kwargs,
         )
         gov.approve_proposal(
@@ -1063,6 +1082,17 @@ class VegaService(ABC):
                 settlement_price, decimals=filter_key.number_decimal_places
             ),
             key_name=settlement_key,
+        )
+
+    def settle_market_openoracle(
+        self,
+        settlement_wallet: str,
+        openoracle_data: str,
+    ):
+        gov.settle_oracle_openoracle(
+            wallet_name=settlement_wallet,
+            wallet=self.wallet,
+            payload=openoracle_data.encode(),
         )
 
     def party_account(
