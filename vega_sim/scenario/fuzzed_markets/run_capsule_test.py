@@ -1,14 +1,7 @@
-import os
-import time
-import atexit
 import logging
 import argparse
-import functools
-import subprocess
 
-from io import BufferedWriter
-from typing import Optional, List, Dict
-from datetime import datetime
+from typing import Optional
 
 from vega_sim.scenario.constants import Network
 from vega_sim.network_service import VegaServiceNetwork
@@ -28,7 +21,6 @@ def check_divergence(vega):
     while vega.data_node_grpc_url not in nodes_checked:
         # Check the network history segments of the current node match the previous
         current_node_segments = vega.list_all_network_history_segments()
-        # print(current_node_segments)
         if previous_node_segments is not None:
             if previous_node_segments != current_node_segments:
                 from_height, to_height = find_block_range(

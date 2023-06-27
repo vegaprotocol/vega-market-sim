@@ -202,8 +202,6 @@ class LocalDataCache:
         try:
             return self._asset_from_feed[asset_id]
         except KeyError as e:
-            print(f"Looking for asset id {asset_id}")
-            input("ERROR!")
             raise e
 
     def market_from_feed(

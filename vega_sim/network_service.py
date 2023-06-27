@@ -495,8 +495,6 @@ class VegaServiceNetwork(VegaService):
                     vega_home_dir=self._vega_home,
                 )
             else:
-                print("not loading existing keys")
-                print(self.wallet_url, self._wallet_path, self._wallet_home)
                 self._wallet = VegaWallet(
                     wallet_url=self.wallet_url,
                     wallet_path=self._wallet_path,
