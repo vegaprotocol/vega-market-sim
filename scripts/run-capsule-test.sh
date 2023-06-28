@@ -14,18 +14,15 @@ cleanup() {
     # Cleanup vegacapsule network
     eval "${VEGA_BINS}/vegacapsule network destroy"
     # Cleanup hanging vegacapsule or nomad_1.3.1 processes
-    processes=("nomad_1.3.1" "vegacapsule")
-    for process_name in "${processes[@]}"; do
-        pids=$(pgrep "$process_name")
-        if [ -n "$pids" ]; then
-            echo "Killing processes with name $process_name..."
-            for pid in $pids; do
-                kill "$pid"
-            done
-        else
-            echo "No processes found with name $process_name."
-        fi
-    done
+    pids=$(pgrep nomad_1.3.1)
+    if [ -n "$pids" ]; then
+        echo "Killing processes with name nomad_1.3.1..."
+        for pid in $pids; do
+            kill "$pid"
+        done
+    else
+        echo "No processes found with name nomad_1.3.1"
+    fi
 }
 trap cleanup EXIT
 
