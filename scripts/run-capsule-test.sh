@@ -25,23 +25,11 @@ echo "Spinning up a vegacapsule network"
 eval "${VEGA_BINS}/vegacapsule network bootstrap --config-path ${WORK_DIR}/vega_sim/vegacapsule/config.hcl --home-path ${VEGA_HOME}"
 eval "${VEGA_BINS}/vegacapsule ethereum multisig init --home-path ${VEGA_HOME}"
 
-if [ "$2" == "vega_sim_test" ]; then
-    docker run \
-    --platform linux/amd64 \
-    --network host \
-    -v "${RESULT_DIR}:/tmp" \
-    vega_sim_test:latest \
-        python -m vega_sim.scenario.fuzzed_markets.run_capsule_test --steps $1 --test-dir "/tmp" --debug --network_on_host
-elif  [ "$2" == "vega_sim_learning" ]; then
-    docker run \
+docker run \
     --platform linux/amd64 \
     --network host \
     -v "${RESULT_DIR}:/tmp" \
     vega_sim_learning:latest \
         python -m vega_sim.scenario.fuzzed_markets.run_capsule_test --steps $1 --test-dir "/tmp" --debug --network_on_host
-else
-    echo "Invalid Docker image specified."
-    exit 1
-fi
 
 
