@@ -13,21 +13,13 @@ mkdir -p "${VEGA_HOME}"
 cleanup() {
     # Cleanup vegacapsule network
     eval "${VEGA_BINS}/vegacapsule network destroy"
-    # Cleanup hanging vegacapsule or nomad_1.3.1 processes
-    pids=$(pgrep nomad_1.3.1)
-    if [ -n "$pids" ]; then
-        echo "Killing processes with name nomad_1.3.1..."
-        for pid in $pids; do
-            kill "$pid"
-        done
-    else
-        echo "No processes found with name nomad_1.3.1"
-    fi
+    kill "$NOMAD_PID"
 }
 trap cleanup EXIT
 
 echo "Spinning up a nomad server"
 eval "${VEGA_BINS}/vegacapsule nomad --home-path ${VEGA_HOME} --install-path ${VEGA_BINS}" >/dev/null 2>&1 &
+NOMAD_PID=$!
 sleep 15
 echo "Spinning up a vegacapsule network"
 eval "${VEGA_BINS}/vegacapsule network bootstrap --config-path ${WORK_DIR}/vega_sim/vegacapsule/config.hcl --home-path ${VEGA_HOME}"
