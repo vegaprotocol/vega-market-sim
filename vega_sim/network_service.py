@@ -417,11 +417,11 @@ class VegaServiceNetwork(VegaService):
         self.check_datanode(raise_on_error=False)
 
     def stop(self) -> None:
-        super().stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
             self.proc.terminate()
+        super().stop()
 
     def wait_fn(self, wait_multiple: float = 1) -> None:
         """Overrides redundant parent method."""

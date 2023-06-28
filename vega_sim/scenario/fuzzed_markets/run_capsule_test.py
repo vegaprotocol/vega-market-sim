@@ -32,6 +32,7 @@ def check_divergence(vega):
         # Add node to the checked nodes then switch node
         nodes_checked.add(vega.data_node_grpc_url)
         vega.switch_datanode()
+    logging.info("Network history segments have not diverged.")
 
 
 def find_block_range(current_node_segments, previous_node_segments):
