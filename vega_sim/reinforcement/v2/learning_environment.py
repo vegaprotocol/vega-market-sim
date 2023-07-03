@@ -24,8 +24,8 @@ class StepResult:
 class Environment:
     def __init__(
         self,
-        agents: Dict[str, Type[AgentType]],
-        agent_to_reward: Dict[str, Type[BaseRewarder]],
+        agents: Dict[str, AgentType],
+        agent_to_reward: Dict[str, Reward],
         agent_to_state: Dict[str, Type[State]],
         scenario: Scenario,
         reset_vega_every_n_runs: int = 100,

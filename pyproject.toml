@@ -36,6 +36,10 @@ gymnasium = {version = "*", optional = true}
 sb3-contrib = {version = "*", optional = true}
 stable-baselines3 = {version = "*", optional = true }
 tensorboard = {version = "*", optional = true}
+pettingzoo = {version = "*", optional = true}
+numba = {version = "^0.57.1", optional = true}
+tianshou = {version = "*", optional = true}
+
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -53,7 +57,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.extras]
-learning = ["matplotlib", "tqdm", "torch", "gymnasium", "stable-baselines3", "tensorboard"]
+learning = ["matplotlib", "tqdm", "torch", "gymnasium", "stable-baselines3", "tensorboard", "tianshou", "numba", "pettingzoo"]
 jupyter = ["jupyterlab", "jupyter", "matplotlib", "ipywidgets"]
 profile = ["snakeviz", "pytest-profiling"]
 agents = ["TA-Lib"]
