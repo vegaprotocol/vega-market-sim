@@ -28,7 +28,7 @@ pipeline {
     stages {
         stage('Config') {
             agent {
-                label 'market-sim-tests'
+                label params.NODE_LABEL
             }
             steps {
                 sh 'printenv'
