@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import Optional
 
 import pytest
 from vega_sim.null_service import VegaServiceNull
@@ -34,6 +35,9 @@ def build_basic_market(
     initial_volume: float = 1,
     initial_spread: float = 0.1,
     initial_commitment: float = 100,
+    parent_market_id: Optional[str] = None,
+    parent_market_insurance_pool_fraction: float = 1,
+    asset_id: Optional[str] = None,
 ):
     vega.wait_for_total_catchup()
     for wallet in WALLETS:
@@ -47,32 +51,36 @@ def build_basic_market(
     )
     vega.forward("10s")
 
-    # Create asset
-    vega.create_asset(
-        MM_WALLET.name,
-        name=ASSET_NAME,
-        symbol=ASSET_NAME,
-        decimals=5,
-        max_faucet_amount=10 * mint_amount * 1e5,
-    )
-    vega.forward("10s")
-    vega.wait_for_total_catchup()
-
-    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
-
-    for wallet in WALLETS:
-        vega.mint(
-            wallet.name,
-            asset=asset_id,
-            amount=mint_amount,
+    if asset_id is None:
+        # Create asset
+        vega.create_asset(
+            MM_WALLET.name,
+            name=ASSET_NAME,
+            symbol=ASSET_NAME,
+            decimals=5,
+            max_faucet_amount=10 * mint_amount * 1e5,
         )
+        vega.forward("10s")
+        vega.wait_for_total_catchup()
+
+        asset_id = vega.find_asset_id(symbol=ASSET_NAME)
+
+        for wallet in WALLETS:
+            vega.mint(
+                wallet.name,
+                asset=asset_id,
+                amount=mint_amount,
+            )
+
     vega.forward("10s")
     vega.create_simple_market(
-        market_name="CRYPTO:BTCDAI/DEC22",
+        market_name="CRYPTO:BTCDAI/Jun23",
         proposal_key=MM_WALLET.name,
         settlement_asset_id=asset_id,
         termination_key=TERMINATE_WALLET.name,
         market_decimals=5,
+        parent_market_id=parent_market_id,
+        parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
     )
 
     market_id = vega.all_markets()[0].id

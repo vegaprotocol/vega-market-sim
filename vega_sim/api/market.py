@@ -133,8 +133,8 @@ class MarketConfig(Config):
         )
         self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
 
-    def build(self):
-        return vega_protos.governance.NewMarket(
+    def build(self, with_parent_market_id: Optional[str] = None):
+        new_market = vega_protos.governance.NewMarket(
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=self.decimal_places,
                 position_decimal_places=self.position_decimal_places,
@@ -148,6 +148,14 @@ class MarketConfig(Config):
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
+        if with_parent_market_id is not None:
+            new_market.changes.successor.CopyFrom(
+                vega_protos.governance.SuccessorConfiguration(
+                    parent_market_id=with_parent_market_id,
+                    insurance_pool_fraction=str(1),
+                )
+            )
+        return new_market
 
     def set(self, parameter, value):
         rsetattr(self, attr=parameter, val=value)

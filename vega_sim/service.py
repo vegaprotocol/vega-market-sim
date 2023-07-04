@@ -517,33 +517,41 @@ class VegaService(ABC):
         ] = None,
         wallet_name: Optional[str] = None,
         termination_wallet_name: Optional[str] = None,
+        parent_market_id: Optional[str] = None,
+        parent_market_insurance_pool_fraction: float = 1,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
-                Args:
-                    market_name:
-                        str, name of the market
-                    proposal_key:
-                        str, the name of the key to use for proposing the market
-                    settlement_asset_id:
-                        str, the asset id the market will use for settlement
-                    termination_key:
-                        str, the name of the key which will be used to send termination data
-                    position_decimals:
-                        int, the decimal place precision to use for positions
-                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-                   market_decimals:
-                        int, the decimal place precision to use for market prices
-                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-                    price_monitoring_parameters:
-                        PriceMonitoringParameters, A set of parameters determining when the
-                            market will drop into a price auction. If not passed defaults
-                            to a very permissive setup
-                            wallet_name: Optional[str] = None,
-        :
-                        Optional[str], name of wallet proposing market. Defaults to None.
-                    termination_wallet_name:
-                        Optional[str], name of wallet settling market. Defaults to None.
+        Args:
+            market_name:
+                str, name of the market
+            proposal_key:
+                str, the name of the key to use for proposing the market
+            settlement_asset_id:
+                str, the asset id the market will use for settlement
+            termination_key:
+                str, the name of the key which will be used to send termination data
+            position_decimals:
+                int, the decimal place precision to use for positions
+                    (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+           market_decimals:
+                int, the decimal place precision to use for market prices
+                    (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+            price_monitoring_parameters:
+                PriceMonitoringParameters, A set of parameters determining when the
+                    market will drop into a price auction. If not passed defaults
+                    to a very permissive setup
+                    wallet_name: Optional[str] = None,
+            wallet_name:
+                Optional[str], name of wallet proposing market. Defaults to None.
+            termination_wallet_name:
+                Optional[str], name of wallet settling market. Defaults to None.
+            parent_market_id:
+                Optional[str], Market to set as the parent market on the proposal
+            parent_market_insurance_pool_fraction:
+                float, Fraction of parent market insurance pool to carry over.
+                    defaults to 1. No-op if parent_market_id is not set.
+
 
         """
         additional_kwargs = {}
@@ -574,6 +582,8 @@ class VegaService(ABC):
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
+            parent_market_id=parent_market_id,
+            parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
             **additional_kwargs,
         )
         gov.approve_proposal(
