@@ -150,7 +150,7 @@ class SingleAgentVegaEnv(gym.Env):
             {},
         )
 
-    def reset(self):
+    def reset(self, seed=None):
         self.env.reset()
         step_res = self.env.step({self.learner_name: None})[self.learner_name]
 
