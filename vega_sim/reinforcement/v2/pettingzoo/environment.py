@@ -59,15 +59,12 @@ class MultiAgentVegaEnv(ParallelEnv):
         super().__init__()
         self.num_levels_state = num_levels_state
         self.agent_configs = agents
-        # self.state_types = state_types
-        # self.action_types = action_types
         self.trade_volume = trade_volume
         self.steps_per_trading_session = steps_per_trading_session
         self.current_step = 0
         self.learner_names = {
             str(i): "learner_{i}" for i in range(len(self.agent_configs))
         }
-        # self.terminal_reward_type = terminal_reward_types
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -91,7 +88,6 @@ class MultiAgentVegaEnv(ParallelEnv):
             initial_asset_mint=1e8,
             step_length_seconds=1,
             block_length_seconds=1,
-            # market_maker_assumed_market_kappa=0.8,
             buy_intensity=5,
             sell_intensity=5,
             market_name="ETH",
@@ -221,18 +217,6 @@ class MultiAgentVegaEnv(ParallelEnv):
     def observation_space(self, agent: AgentID):
         return self.observation_spaces[agent]
 
-    # def last(self, observe: bool = True):
-    #     """Returns observation, cumulative reward, terminated, truncated, info for the current agent (specified by self.agent_selection)."""
-    #     agent = self.agent_selection
-    #     assert agent
-    #     return (
-    #         self.latest_observations[agent],
-    #         self.latest_rewards[agent],
-    #         self.latest_terminations[agent],
-    #         self.latest_truncations[agent],
-    #         self.latest_infos[agent],
-    #     )
-
 
 if __name__ == "__main__":
     from pettingzoo.utils.conversions import parallel_to_aec_wrapper
@@ -248,5 +232,4 @@ if __name__ == "__main__":
         ],
         steps_per_trading_session=200,
     )
-    # parallel_api_test(env, num_cycles=5)
     api_test(parallel_to_aec_wrapper(env), num_cycles=1, verbose_progress=True)

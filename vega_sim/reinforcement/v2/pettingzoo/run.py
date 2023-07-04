@@ -1,14 +1,3 @@
-"""This is a minimal example to show how to use Tianshou with a PettingZoo environment. No training of agents is done here.
-
-Author: Will (https://github.com/WillDudley)
-
-Python version used: 3.8.10
-
-Requirements:
-pettingzoo == 1.22.0
-git+https://github.com/thu-ml/tianshou
-"""
-
 import os
 
 import torch
