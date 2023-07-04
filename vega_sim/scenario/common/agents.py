@@ -3261,7 +3261,7 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         self.current_position = float(
             position.open_volume if position is not None else 0
         )
-
+        print("Position open volume "+str(self.current_position))
         # Get a list of live orders for the party
         orders = list(
             (
@@ -3277,7 +3277,7 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
             if self.market_id in vega_state.market_state
             else []
         )
-
+        
         # Check buy_order_reference and sell_order_reference are still live:
         buys = []
         sells = []
