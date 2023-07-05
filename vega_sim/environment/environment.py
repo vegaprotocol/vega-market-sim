@@ -515,7 +515,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 if self.raise_step_errors:
                     raise (e)
                 else:
-                    logging.debug(msg)
+                    logging.warning(msg)
         if pause_at_completion:
             input(
                 "Environment run completed. Pausing to allow inspection of state."
@@ -538,7 +538,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                 if self.raise_step_errors:
                     raise e(msg)
                 else:
-                    logging.debug(msg)
+                    logging.warning(msg)
 
 
 class RealtimeMarketEnvironment(MarketEnvironmentWithState):
