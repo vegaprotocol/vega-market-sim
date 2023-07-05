@@ -199,10 +199,7 @@ class LocalDataCache:
     ) -> vega_protos.assets.Asset:
         if asset_id not in self._asset_from_feed:
             self.initialise_assets()
-        try:
-            return self._asset_from_feed[asset_id]
-        except KeyError as e:
-            raise e
+        return self._asset_from_feed[asset_id]
 
     def market_from_feed(
         self,
