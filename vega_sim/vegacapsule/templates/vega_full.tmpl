@@ -1,0 +1,138 @@
+[Admin]
+    [Admin.Server]
+      SocketPath = "{{.NodeHomeDir}}/vega.sock"
+      Enabled = true
+
+[API]
+	Level = "Info"
+	Port = 3{{ printf "%02d" .NodeNumber }}2
+	[API.REST]
+			Port = 3{{ printf "%02d" .NodeNumber }}3
+
+[Blockchain]
+	Level = "Info"
+	[Blockchain.Tendermint]
+		Level = "Info"
+		RPCAddr = "tcp://127.0.0.1:26{{ printf "%02d" (add .NodeNumber 60) }}7"
+	[Blockchain.Null]
+		Level = "Info"
+		Port = 3{{ printf "%02d" (add .NodeNumber 10) }}1
+
+[Collateral]
+		Level = "Debug"
+
+[CoreAPI]
+	LogLevel = "Info"
+
+[Execution]
+	Level = "Debug"
+	[Execution.Matching]
+		Level = "Info"
+	[Execution.Risk]
+		Level = "Info"
+	[Execution.Position]
+		Level = "Info"
+		LogPositionUpdate = true
+	[Execution.Settlement]
+		Level = "Info"
+	[Execution.Fee]
+		Level = "Info"
+	[Execution.Liquidity]
+		Level = "Info"
+
+[EvtForward]
+	Level = "Info"
+	RetryRate = "1s"
+	[EvtForward.Ethereum]
+		Level = "Info"
+		PollEventRetryDuration = "1s"
+
+[Ethereum]
+  RPCEndpoint = "{{.ETHEndpoint}}"
+  RetryDelay = "1s"
+
+[NodeWallet]
+		Level = "Info"
+	[NodeWallet.ETH]
+		Level = "Info"
+
+[Processor]
+	Level = "Info"
+	[Processor.Ratelimit]
+		Requests = 10000
+		PerNBlocks = 1
+
+[Oracles]
+	Level = "Info"
+
+[Time]
+	Level = "Info"
+
+[Epoch]
+	Level = "Info"
+
+[Monitoring]
+	Level = "Info"
+
+[Metrics]
+	Level = "Info"
+
+[Governance]
+	Level = "Info"
+[Assets]
+	Level = "Info"
+
+[Notary]
+	Level = "Info"
+
+[Genesis]
+	Level = "Info"
+
+[Validators]
+	Level = "Info"
+
+[Banking]
+	Level = "Info"
+
+[Stats]
+	Level = "Info"
+
+[NetworkParameters]
+	Level = "Info"
+
+[Limits]
+	Level = "Info"
+
+[Checkpoint]
+	Level = "Info"
+
+[Staking]
+	Level = "Info"
+
+[Broker]
+	Level = "Info"
+	[Broker.Socket]
+		Port = 3{{ printf "%02d" .NodeNumber }}5
+		Enabled = true
+	[Broker.File]
+		Enabled = true
+		File = "{{.NodeHomeDir}}/eventlog.evt"
+
+
+[Rewards]
+	Level = "Info"
+
+[Delegation]
+	Level = "Info"
+
+[Spam]
+	Level = "Info"
+
+[Snapshot]
+	Level = "Info"
+
+[StateVar]
+	Level = "Info"
+
+[Pprof]
+	Level = "Info"
