@@ -22,6 +22,7 @@ from vega_sim.scenario.common.agents import (
     AtTheTouchMarketMaker,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
+    FuzzySuccessorConfigurableMarketManager,
     FuzzingAgent,
     RiskyMarketOrderTrader,
     RiskySimpleLiquidityProvider,
@@ -219,7 +220,7 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed market managers
             market_agents["market_managers"] = [
-                ConfigurableMarketManager(
+                FuzzySuccessorConfigurableMarketManager(
                     proposal_wallet_name="MARKET_MANAGER",
                     proposal_key_name="PROPOSAL_KEY",
                     termination_wallet_name="MARKET_MANAGER",
@@ -231,6 +232,7 @@ class FuzzingScenario(Scenario):
                     asset_name=asset_name,
                     settlement_price=price_process[-1],
                     tag=f"MARKET_{str(i_market).zfill(3)}",
+                    market_agents=market_agents,
                 )
             ]
 
@@ -441,19 +443,11 @@ class FuzzingScenario(Scenario):
             for agent_type, agent_list in market_agents.items():
                 self.all_agents[agent_type].extend(agent_list)
 
-        agents = (
-            self.all_agents["market_managers"]
-            + self.all_agents["market_makers"]
-            + self.all_agents["at_touch_market_makers"]
-            + self.all_agents["auction_traders"]
-            + self.all_agents["random_traders"]
-            + self.all_agents["fuzz_traders"]
-            + self.all_agents["risky_traders"]
-            + self.all_agents["risky_liquidity_providers"]
-            + self.all_agents["fuzz_liquidity_providers"]
-            + self.all_agents["reward_funders"]
-        )
-        return {agent.name(): agent for agent in agents}
+        return {
+            agent.name(): agent
+            for agent_list in self.all_agents.values()
+            for agent in agent_list
+        }
 
     def configure_environment(
         self,

@@ -52,6 +52,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersResponse.FromString,
         )
+        self.GetStopOrder = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetStopOrder",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderResponse.FromString,
+        )
+        self.ListStopOrders = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListStopOrders",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersResponse.FromString,
+        )
         self.ListPositions = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListPositions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.SerializeToString,
@@ -527,6 +537,25 @@ class TradingDataServiceServicer(object):
         """Observe orders
 
         Subscribe to a stream of orders
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetStopOrder(self, request, context):
+        """Get stop order
+
+        Get a stop order by its ID. A stop order's ID will be the SHA3-256 hash of the signature that the order was submitted with.
+        A stop order's ID is likely to be different from the ID of the order that will be submitted when the stop is triggered.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListStopOrders(self, request, context):
+        """List stop orders
+
+        Get a list of stop orders that match the given filters
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1408,6 +1437,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersResponse.SerializeToString,
         ),
+        "GetStopOrder": grpc.unary_unary_rpc_method_handler(
+            servicer.GetStopOrder,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderResponse.SerializeToString,
+        ),
+        "ListStopOrders": grpc.unary_unary_rpc_method_handler(
+            servicer.ListStopOrders,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersResponse.SerializeToString,
+        ),
         "ListPositions": grpc.unary_unary_rpc_method_handler(
             servicer.ListPositions,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.FromString,
@@ -2022,6 +2061,64 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ObserveOrders",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetStopOrder(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetStopOrder",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListStopOrders(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListStopOrders",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersResponse.FromString,
             options,
             channel_credentials,
             insecure,

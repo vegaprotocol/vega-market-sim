@@ -36,6 +36,10 @@ class Scenario(abc.ABC):
         self.state_extraction_fn = state_extraction_fn
         self.additional_data_output_fns = additional_data_output_fns
 
+    def _step_end_callback(self):
+        """Called after each set of agent steps before the next loop begins."""
+        pass
+
     @abc.abstractmethod
     def configure_agents(
         self,
@@ -64,6 +68,7 @@ class Scenario(abc.ABC):
         result = self.env.run(
             pause_at_completion=pause_at_completion,
             run_with_console=run_with_console,
+            step_end_callback=self._step_end_callback,
         )
         return result
 
@@ -97,6 +102,7 @@ class Scenario(abc.ABC):
             pause_at_completion=pause_at_completion,
             run_with_console=run_with_console,
             log_every_n_steps=log_every_n_steps,
+            step_end_callback=self._step_end_callback,
         )
         if output_data:
             agents_standard_output(self.agents)

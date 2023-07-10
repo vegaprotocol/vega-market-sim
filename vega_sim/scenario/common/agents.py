@@ -2814,20 +2814,24 @@ class Snitch(StateAgent):
             self.resources.append(
                 ResourceData(
                     at_time=start_time,
-                    vega_cpu_per=self.process_map["vega"].cpu_percent()
-                    if "vega" in self.process_map
-                    else 0,
+                    vega_cpu_per=(
+                        self.process_map["vega"].cpu_percent()
+                        if "vega" in self.process_map
+                        else 0
+                    ),
                     vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
                     vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
-                    datanode_cpu_per=self.process_map["data-node"].cpu_percent()
-                    if "data-node" in self.process_map
-                    else 0,
-                    datanode_mem_rss=mem_datanode.rss
-                    if mem_datanode is not None
-                    else 0,
-                    datanode_mem_vms=mem_datanode.vms
-                    if mem_datanode is not None
-                    else 0,
+                    datanode_cpu_per=(
+                        self.process_map["data-node"].cpu_percent()
+                        if "data-node" in self.process_map
+                        else 0
+                    ),
+                    datanode_mem_rss=(
+                        mem_datanode.rss if mem_datanode is not None else 0
+                    ),
+                    datanode_mem_vms=(
+                        mem_datanode.vms if mem_datanode is not None else 0
+                    ),
                 )
             )
         if self.additional_state_fn is not None:
@@ -3282,8 +3286,10 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
         buys = []
         sells = []
         for order in orders:
-            buys.append(order) if order.side == vega_protos.SIDE_BUY else sells.append(
-                order
+            (
+                buys.append(order)
+                if order.side == vega_protos.SIDE_BUY
+                else sells.append(order)
             )
 
         place_buy = self.current_position < self.max_position
@@ -3311,11 +3317,14 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
             price=None,
             expires_at=None,
             pegged_order=PeggedOrder(
-                reference=self.buy_peg_reference
-                if side == "SIDE_BUY"
-                else self.sell_peg_reference,
+                reference=(
+                    self.buy_peg_reference
+                    if side == "SIDE_BUY"
+                    else self.sell_peg_reference
+                ),
                 offset=self.peg_offset,
             ),
+            wait=False,
         )
 
     def _cancel_order(self, orders_to_cancel):
