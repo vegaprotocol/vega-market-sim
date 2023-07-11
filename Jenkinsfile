@@ -15,9 +15,11 @@ pipeline {
     parameters {
         string( name: 'VEGA_VERSION', defaultValue: 'c93df0d0584ba9ee87a52f8f72145067a4f70ebb',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
+        string( name: 'VEGACAPSULE_VERSION', defaultValue: 'main',
+                description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
-        string( name: 'NODE_LABEL', defaultValue: 'system-tests',
+        string( name: 'NODE_LABEL', defaultValue: 'g-8vcpu-32gb',
                 description: 'Node to run market sims' )
     }
     environment {
@@ -28,7 +30,7 @@ pipeline {
     stages {
         stage('Config') {
             agent {
-                label 'system-tests'
+                label params.NODE_LABEL
             }
             steps {
                 sh 'printenv'
@@ -61,6 +63,7 @@ pipeline {
                         timeout: 90,
                         vegaMarketSim: commitHash,
                         vegaVersion: params.VEGA_VERSION,
+                        vegacapsuleVersion: params.VEGACAPSULE_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
                         nodeLabel: params.NODE_LABEL,
                     )

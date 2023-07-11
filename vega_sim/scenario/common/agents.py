@@ -948,9 +948,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -2743,7 +2741,8 @@ class Snitch(StateAgent):
 
     def initialise(self, vega: VegaService, **kwargs):
         self.vega = vega
-        self._create_process_map()
+        if not isinstance(vega, VegaServiceNetwork):
+            self._create_process_map()
 
     def step(self, vega_state: VegaState):
         if not self.only_extract_additional:
@@ -2782,58 +2781,59 @@ class Snitch(StateAgent):
                 )
             )
 
-            if self.platform == "Linux":
-                mem_vega = (
-                    self.process_map["vega"].memory_full_info()
-                    if "vega" in self.process_map
-                    else None
-                )
-                mem_datanode = (
-                    self.process_map["data-node"].memory_full_info()
-                    if "data-node" in self.process_map
-                    else None
-                )
-            elif self.platform == "Darwin":
-                mem_vega = (
-                    self.process_map["vega"].memory_info()
-                    if "vega" in self.process_map
-                    else None
-                )
-                mem_datanode = (
-                    self.process_map["data-node"].memory_info()
-                    if "data-node" in self.process_map
-                    else None
-                )
-            else:
-                mem_vega = None
-                mem_datanode = None
-                logging.warning(
-                    "Unable to record memory usage, unsupported operating system"
-                )
-
-            self.resources.append(
-                ResourceData(
-                    at_time=start_time,
-                    vega_cpu_per=(
-                        self.process_map["vega"].cpu_percent()
+            if not isinstance(self.vega, VegaServiceNetwork):
+                if self.platform == "Linux":
+                    mem_vega = (
+                        self.process_map["vega"].memory_full_info()
                         if "vega" in self.process_map
-                        else 0
-                    ),
-                    vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
-                    vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
-                    datanode_cpu_per=(
-                        self.process_map["data-node"].cpu_percent()
+                        else None
+                    )
+                    mem_datanode = (
+                        self.process_map["data-node"].memory_full_info()
                         if "data-node" in self.process_map
-                        else 0
-                    ),
-                    datanode_mem_rss=(
-                        mem_datanode.rss if mem_datanode is not None else 0
-                    ),
-                    datanode_mem_vms=(
-                        mem_datanode.vms if mem_datanode is not None else 0
-                    ),
+                        else None
+                    )
+                elif self.platform == "Darwin":
+                    mem_vega = (
+                        self.process_map["vega"].memory_info()
+                        if "vega" in self.process_map
+                        else None
+                    )
+                    mem_datanode = (
+                        self.process_map["data-node"].memory_info()
+                        if "data-node" in self.process_map
+                        else None
+                    )
+                else:
+                    mem_vega = None
+                    mem_datanode = None
+                    logging.warning(
+                        "Unable to record memory usage, unsupported operating system"
+                    )
+
+                self.resources.append(
+                    ResourceData(
+                        at_time=start_time,
+                        vega_cpu_per=(
+                            self.process_map["vega"].cpu_percent()
+                            if "vega" in self.process_map
+                            else 0
+                        ),
+                        vega_mem_rss=mem_vega.rss if mem_vega is not None else 0,
+                        vega_mem_vms=mem_vega.vms if mem_vega is not None else 0,
+                        datanode_cpu_per=(
+                            self.process_map["data-node"].cpu_percent()
+                            if "data-node" in self.process_map
+                            else 0
+                        ),
+                        datanode_mem_rss=(
+                            mem_datanode.rss if mem_datanode is not None else 0
+                        ),
+                        datanode_mem_vms=(
+                            mem_datanode.vms if mem_datanode is not None else 0
+                        ),
+                    )
                 )
-            )
         if self.additional_state_fn is not None:
             self.additional_states.append(
                 self.additional_state_fn(self.vega, self.agents)
@@ -3105,6 +3105,7 @@ class RewardFunder(StateAgentWithWallet):
         metric: Optional[str] = None,
         market_names: Optional[str] = None,
         wallet_name: Optional[str] = None,
+        stake_key: bool = False,
         tag: Optional[str] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
@@ -3115,6 +3116,7 @@ class RewardFunder(StateAgentWithWallet):
         self.account_type = account_type
         self.metric = metric
         self.market_names = market_names
+        self.stake_key = stake_key
 
     def initialise(
         self,
@@ -3127,12 +3129,19 @@ class RewardFunder(StateAgentWithWallet):
 
         # Faucet vega tokens
         self.vega.wait_for_total_catchup()
-        self.vega.mint(
-            wallet_name=self.wallet_name,
-            asset="VOTE",
-            amount=1e4,
-            key_name=self.key_name,
-        )
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
         self.vega.wait_fn(1)
         self.vega.wait_for_total_catchup()
 

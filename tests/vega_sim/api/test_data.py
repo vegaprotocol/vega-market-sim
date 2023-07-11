@@ -130,6 +130,7 @@ def test_find_asset_id(trading_data_v2_servicer_and_port):
                             details=vega_protos.assets.AssetDetails(
                                 name="asset1", symbol="A1", decimals=5
                             ),
+                            status="STATUS_ENABLED",
                         ),
                     ),
                     data_node_protos_v2.trading_data.AssetEdge(
@@ -139,6 +140,7 @@ def test_find_asset_id(trading_data_v2_servicer_and_port):
                             details=vega_protos.assets.AssetDetails(
                                 name="asset2", symbol="A2", decimals=5
                             ),
+                            status="STATUS_ENABLED",
                         ),
                     ),
                     data_node_protos_v2.trading_data.AssetEdge(
@@ -148,6 +150,7 @@ def test_find_asset_id(trading_data_v2_servicer_and_port):
                             details=vega_protos.assets.AssetDetails(
                                 name="asset3", symbol="A3", decimals=5
                             ),
+                            status="STATUS_ENABLED",
                         ),
                     ),
                 ],
@@ -160,14 +163,16 @@ def test_find_asset_id(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    res = find_asset_id(symbol="A2", data_client=data_client)
+    res = find_asset_id(symbol="A2", enabled=True, data_client=data_client)
     assert res == "asset2_id"
 
     with pytest.raises(MissingAssetError):
-        find_asset_id(symbol="A4", data_client=data_client, raise_on_missing=True)
+        find_asset_id(
+            symbol="A4", enabled=True, data_client=data_client, raise_on_missing=True
+        )
 
     empty_res = find_asset_id(
-        symbol="A4", data_client=data_client, raise_on_missing=False
+        symbol="A4", data_client=data_client, enabled=True, raise_on_missing=False
     )
     assert empty_res is None
 

@@ -668,3 +668,15 @@ def estimate_position(
     response = data_client.EstimatePosition(base_request)
 
     return response.margin, response.liquidation
+
+
+def get_stake(data_client: vac.trading_data_grpc_v2, party_id: str = None):
+    base_request = data_node_protos_v2.trading_data.GetStakeRequest(party_id=party_id)
+    return data_client.GetStake(base_request).current_stake_available
+
+
+def list_all_network_history_segments(data_client: vac.trading_data_grpc_v2):
+    base_request = (
+        data_node_protos_v2.trading_data.ListAllNetworkHistorySegmentsRequest()
+    )
+    return data_client.ListAllNetworkHistorySegments(base_request).segments
