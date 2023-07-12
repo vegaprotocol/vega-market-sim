@@ -655,6 +655,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         successor_probability: float = 0.02,
         random_state: Optional[RandomState] = None,
         market_agents: Optional[Dict[str, List[StateAgentWithWallet]]] = None,
+        stake_key: bool = False,
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
@@ -684,6 +685,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
         self.settlement_price = settlement_price
         self.needs_to_update_markets = False
+        self.stake_key = stake_key
 
     def _get_termination_key_name(self):
         return (
@@ -726,6 +728,13 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 asset="VOTE",
                 amount=1e4,
                 key_name=self.key_name,
+            )
+
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
             )
 
         self.vega.wait_for_total_catchup()
@@ -789,7 +798,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
     def finalise(self):
         if self.settlement_price is not None:
             self.vega.settle_market(
-                self._get_termination_key_name,
+                self._get_termination_key_name(),
                 self.settlement_price,
                 self.market_id,
                 self.termination_wallet_name,

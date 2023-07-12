@@ -25,497 +25,7 @@ from ... import vega_pb2 as vega_dot_vega__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1fvega/snapshot/v1/snapshot.proto\x12\x10vega.snapshot.v1\x1a\x11vega/assets.proto\x1a\x17vega/chain_events.proto\x1a#vega/checkpoint/v1/checkpoint.proto\x1a\x17vega/data/v1/data.proto\x1a\x1bvega/events/v1/events.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x0fvega/vega.proto"\x9c\x01\n\x08Snapshot\x12\x16\n\x06height\x18\x01'
-    b" \x01(\x04R\x06height\x12\x30\n\x06\x66ormat\x18\x02"
-    b" \x01(\x0e\x32\x18.vega.snapshot.v1.FormatR\x06\x66ormat\x12\x16\n\x06\x63hunks\x18\x03"
-    b" \x01(\rR\x06\x63hunks\x12\x12\n\x04hash\x18\x04"
-    b" \x01(\x0cR\x04hash\x12\x1a\n\x08metadata\x18\x05"
-    b' \x01(\x0cR\x08metadata"{\n\x08NodeHash\x12\x10\n\x03key\x18\x03'
-    b" \x01(\tR\x03key\x12\x12\n\x04hash\x18\x04"
-    b" \x01(\tR\x04hash\x12\x16\n\x06height\x18\x05"
-    b" \x01(\x05R\x06height\x12\x18\n\x07version\x18\x06"
-    b" \x01(\x03R\x07version\x12\x17\n\x07is_leaf\x18\x07"
-    b' \x01(\x08R\x06isLeaf"\x84\x01\n\x08Metadata\x12\x18\n\x07version\x18\x01'
-    b" \x01(\x03R\x07version\x12!\n\x0c\x63hunk_hashes\x18\x02"
-    b" \x03(\tR\x0b\x63hunkHashes\x12;\n\x0bnode_hashes\x18\x03"
-    b' \x03(\x0b\x32\x1a.vega.snapshot.v1.NodeHashR\nnodeHashes"V\n\x05\x43hunk\x12-\n\x04\x64\x61ta\x18\x01'
-    b" \x03(\x0b\x32\x19.vega.snapshot.v1.PayloadR\x04\x64\x61ta\x12\x0e\n\x02nr\x18\x02"
-    b" \x01(\x03R\x02nr\x12\x0e\n\x02of\x18\x03"
-    b' \x01(\x03R\x02of"\xc6&\n\x07Payload\x12\x45\n\ractive_assets\x18\x01'
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.ActiveAssetsH\x00R\x0c\x61\x63tiveAssets\x12H\n\x0epending_assets\x18\x02"
-    b" \x01(\x0b\x32\x1f.vega.snapshot.v1.PendingAssetsH\x00R\rpendingAssets\x12W\n\x13\x62\x61nking_withdrawals\x18\x03"
-    b" \x01(\x0b\x32$.vega.snapshot.v1.BankingWithdrawalsH\x00R\x12\x62\x61nkingWithdrawals\x12N\n\x10\x62\x61nking_deposits\x18\x04"
-    b" \x01(\x0b\x32!.vega.snapshot.v1.BankingDepositsH\x00R\x0f\x62\x61nkingDeposits\x12\x42\n\x0c\x62\x61nking_seen\x18\x05"
-    b" \x01(\x0b\x32\x1d.vega.snapshot.v1.BankingSeenH\x00R\x0b\x62\x61nkingSeen\x12[\n\x15\x62\x61nking_asset_actions\x18\x06"
-    b" \x01(\x0b\x32%.vega.snapshot.v1.BankingAssetActionsH\x00R\x13\x62\x61nkingAssetActions\x12>\n\ncheckpoint\x18\x07"
-    b" \x01(\x0b\x32\x1c.vega.snapshot.v1.CheckpointH\x00R\ncheckpoint\x12W\n\x13\x63ollateral_accounts\x18\x08"
-    b" \x01(\x0b\x32$.vega.snapshot.v1.CollateralAccountsH\x00R\x12\x63ollateralAccounts\x12Q\n\x11\x63ollateral_assets\x18\t"
-    b' \x01(\x0b\x32".vega.snapshot.v1.CollateralAssetsH\x00R\x10\x63ollateralAssets\x12Q\n\x11\x64\x65legation_active\x18\n'
-    b' \x01(\x0b\x32".vega.snapshot.v1.DelegationActiveH\x00R\x10\x64\x65legationActive\x12T\n\x12\x64\x65legation_pending\x18\x0b'
-    b" \x01(\x0b\x32#.vega.snapshot.v1.DelegationPendingH\x00R\x11\x64\x65legationPending\x12K\n\x0f\x64\x65legation_auto\x18\x0c"
-    b" \x01(\x0b\x32"
-    b" .vega.snapshot.v1.DelegationAutoH\x00R\x0e\x64\x65legationAuto\x12Q\n\x11governance_active\x18\r"
-    b' \x01(\x0b\x32".vega.snapshot.v1.GovernanceActiveH\x00R\x10governanceActive\x12T\n\x12governance_enacted\x18\x0e'
-    b" \x01(\x0b\x32#.vega.snapshot.v1.GovernanceEnactedH\x00R\x11governanceEnacted\x12N\n\x10staking_accounts\x18\x0f"
-    b" \x01(\x0b\x32!.vega.snapshot.v1.StakingAccountsH\x00R\x0fstakingAccounts\x12\x45\n\rmatching_book\x18\x10"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.MatchingBookH\x00R\x0cmatchingBook\x12L\n\x12network_parameters\x18\x11"
-    b" \x01(\x0b\x32\x1b.vega.snapshot.v1.NetParamsH\x00R\x11networkParameters\x12Q\n\x11\x65xecution_markets\x18\x12"
-    b' \x01(\x0b\x32".vega.snapshot.v1.ExecutionMarketsH\x00R\x10\x65xecutionMarkets\x12N\n\x10market_positions\x18\x13'
-    b" \x01(\x0b\x32!.vega.snapshot.v1.MarketPositionsH\x00R\x0fmarketPositions\x12\x39\n\tapp_state\x18\x14"
-    b" \x01(\x0b\x32\x1a.vega.snapshot.v1.AppStateH\x00R\x08\x61ppState\x12\x34\n\x05\x65poch\x18\x15"
-    b" \x01(\x0b\x32\x1c.vega.snapshot.v1.EpochStateH\x00R\x05\x65poch\x12\x61\n\x17rewards_pending_payouts\x18\x17"
-    b" \x01(\x0b\x32'.vega.snapshot.v1.RewardsPendingPayoutsH\x00R\x15rewardsPendingPayouts\x12K\n\x0fgovernance_node\x18\x18"
-    b" \x01(\x0b\x32"
-    b" .vega.snapshot.v1.GovernanceNodeH\x00R\x0egovernanceNode\x12?\n\x0blimit_state\x18\x19"
-    b" \x01(\x0b\x32\x1c.vega.snapshot.v1.LimitStateH\x00R\nlimitState\x12L\n\x10vote_spam_policy\x18\x1a"
-    b" \x01(\x0b\x32"
-    b" .vega.snapshot.v1.VoteSpamPolicyH\x00R\x0evoteSpamPolicy\x12R\n\x12simple_spam_policy\x18\x1b"
-    b' \x01(\x0b\x32".vega.snapshot.v1.SimpleSpamPolicyH\x00R\x10simpleSpamPolicy\x12\x32\n\x06notary\x18\x1c'
-    b" \x01(\x0b\x32\x18.vega.snapshot.v1.NotaryH\x00R\x06notary\x12K\n\x0f\x65vent_forwarder\x18\x1f"
-    b" \x01(\x0b\x32"
-    b" .vega.snapshot.v1.EventForwarderH\x00R\x0e\x65ventForwarder\x12\x64\n\x18stake_verifier_deposited\x18"
-    b"  \x01(\x0b\x32(.vega.snapshot.v1.StakeVerifierDepositedH\x00R\x16stakeVerifierDeposited\x12^\n\x16stake_verifier_removed\x18!"
-    b' \x01(\x0b\x32&.vega.snapshot.v1.StakeVerifierRemovedH\x00R\x14stakeVerifierRemoved\x12\x35\n\x07witness\x18"'
-    b" \x01(\x0b\x32\x19.vega.snapshot.v1.WitnessH\x00R\x07witness\x12\x83\x01\n#delegation_last_reconciliation_time\x18#"
-    b" \x01(\x0b\x32\x32.vega.snapshot.v1.DelegationLastReconciliationTimeH\x00R"
-    b" delegationLastReconciliationTime\x12\x38\n\x08topology\x18$"
-    b" \x01(\x0b\x32\x1a.vega.snapshot.v1.TopologyH\x00R\x08topology\x12\x44\n\x0boracle_data\x18%"
-    b" \x01(\x0b\x32!.vega.snapshot.v1.OracleDataBatchH\x00R\noracleData\x12Z\n\x14liquidity_parameters\x18&"
-    b" \x01(\x0b\x32%.vega.snapshot.v1.LiquidityParametersH\x00R\x13liquidityParameters\x12p\n\x1cliquidity_pending_provisions\x18'"
-    b' \x01(\x0b\x32,.vega.snapshot.v1.LiquidityPendingProvisionsH\x00R\x1aliquidityPendingProvisions\x12\x80\x01\n"liquidity_parties_liquidity_orders\x18('
-    b" \x01(\x0b\x32\x31.vega.snapshot.v1.LiquidityPartiesLiquidityOrdersH\x00R\x1fliquidityPartiesLiquidityOrders\x12\x64\n\x18liquidity_parties_orders\x18)"
-    b" \x01(\x0b\x32(.vega.snapshot.v1.LiquidityPartiesOrdersH\x00R\x16liquidityPartiesOrders\x12Z\n\x14liquidity_provisions\x18*"
-    b" \x01(\x0b\x32%.vega.snapshot.v1.LiquidityProvisionsH\x00R\x13liquidityProvisions\x12T\n\x12liquidity_supplied\x18+"
-    b" \x01(\x0b\x32#.vega.snapshot.v1.LiquiditySuppliedH\x00R\x11liquiditySupplied\x12N\n\x10liquidity_target\x18,"
-    b" \x01(\x0b\x32!.vega.snapshot.v1.LiquidityTargetH\x00R\x0fliquidityTarget\x12\x64\n\x18\x66loating_point_consensus\x18."
-    b" \x01(\x0b\x32(.vega.snapshot.v1.FloatingPointConsensusH\x00R\x16\x66loatingPointConsensus\x12H\n\x0emarket_tracker\x18/"
-    b" \x01(\x0b\x32\x1f.vega.snapshot.v1.MarketTrackerH\x00R\rmarketTracker\x12m\n\x1b\x62\x61nking_recurring_transfers\x18\x31"
-    b" \x01(\x0b\x32+.vega.snapshot.v1.BankingRecurringTransfersH\x00R\x19\x62\x61nkingRecurringTransfers\x12m\n\x1b\x62\x61nking_scheduled_transfers\x18\x32"
-    b" \x01(\x0b\x32+.vega.snapshot.v1.BankingScheduledTransfersH\x00R\x19\x62\x61nkingScheduledTransfers\x12z\n"
-    b" erc20_multisig_topology_verified\x18\x33"
-    b" \x01(\x0b\x32/.vega.snapshot.v1.ERC20MultiSigTopologyVerifiedH\x00R\x1d\x65rc20MultisigTopologyVerified\x12w\n\x1f\x65rc20_multisig_topology_pending\x18\x34"
-    b" \x01(\x0b\x32..vega.snapshot.v1.ERC20MultiSigTopologyPendingH\x00R\x1c\x65rc20MultisigTopologyPending\x12\x43\n\rproof_of_work\x18\x35"
-    b" \x01(\x0b\x32\x1d.vega.snapshot.v1.ProofOfWorkH\x00R\x0bproofOfWork\x12[\n\x15pending_asset_updates\x18\x36"
-    b" \x01(\x0b\x32%.vega.snapshot.v1.PendingAssetUpdatesH\x00R\x13pendingAssetUpdates\x12j\n\x1aprotocol_upgrade_proposals\x18\x37"
-    b" \x01(\x0b\x32*.vega.snapshot.v1.ProtocolUpgradeProposalsH\x00R\x18protocolUpgradeProposals\x12X\n\x14\x62\x61nking_bridge_state\x18\x38"
-    b" \x01(\x0b\x32$.vega.snapshot.v1.BankingBridgeStateH\x00R\x12\x62\x61nkingBridgeState\x12N\n\x10settlement_state\x18\x39"
-    b" \x01(\x0b\x32!.vega.snapshot.v1.SettlementStateH\x00R\x0fsettlementState\x12N\n\x10liquidity_scores\x18:"
-    b" \x01(\x0b\x32!.vega.snapshot.v1.LiquidityScoresH\x00R\x0fliquidityScores\x12[\n\x15spot_liquidity_target\x18;"
-    b" \x01(\x0b\x32%.vega.snapshot.v1.SpotLiquidityTargetH\x00R\x13spotLiquidityTarget\x12\x8c\x01\n&banking_recurring_governance_transfers\x18<"
-    b" \x01(\x0b\x32\x35.vega.snapshot.v1.BankingRecurringGovernanceTransfersH\x00R#bankingRecurringGovernanceTransfers\x12\x8c\x01\n&banking_scheduled_governance_transfers\x18="
-    b' \x01(\x0b\x32\x35.vega.snapshot.v1.BankingScheduledGovernanceTransfersH\x00R#bankingScheduledGovernanceTransfersB\x06\n\x04\x64\x61ta"L\n\x15TimestampedTotalStake\x12\x1f\n\x0btotal_stake\x18\x01'
-    b" \x01(\x04R\ntotalStake\x12\x12\n\x04time\x18\x02"
-    b' \x01(\x03R\x04time"R\n\x17TimestampedOpenInterest\x12#\n\ropen_interest\x18\x01'
-    b" \x01(\x04R\x0copenInterest\x12\x12\n\x04time\x18\x02"
-    b' \x01(\x03R\x04time"\xf2\x02\n\x0fLiquidityTarget\x12\x1b\n\tmarket_id\x18\x01'
-    b" \x01(\tR\x08marketId\x12!\n\x0c\x63urrent_time\x18\x02"
-    b" \x01(\x03R\x0b\x63urrentTime\x12-\n\x12scheduled_truncate\x18\x03"
-    b" \x01(\x03R\x11scheduledTruncate\x12\x34\n\x16\x63urrent_open_interests\x18\x04"
-    b" \x03(\x04R\x14\x63urrentOpenInterests\x12\x61\n\x17previous_open_interests\x18\x05"
-    b" \x03(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterestR\x15previousOpenInterests\x12W\n\x12max_open_interests\x18\x06"
-    b' \x01(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterestR\x10maxOpenInterests"\xe0\x02\n\x13SpotLiquidityTarget\x12\x1b\n\tmarket_id\x18\x01'
-    b" \x01(\tR\x08marketId\x12!\n\x0c\x63urrent_time\x18\x02"
-    b" \x01(\x03R\x0b\x63urrentTime\x12-\n\x12scheduled_truncate\x18\x03"
-    b" \x01(\x03R\x11scheduledTruncate\x12.\n\x13\x63urrent_total_stake\x18\x04"
-    b" \x03(\x04R\x11\x63urrentTotalStake\x12Y\n\x14previous_total_stake\x18\x05"
-    b" \x03(\x0b\x32'.vega.snapshot.v1.TimestampedTotalStakeR\x12previousTotalStake\x12O\n\x0fmax_total_stake\x18\x06"
-    b" \x01(\x0b\x32'.vega.snapshot.v1.TimestampedTotalStakeR\rmaxTotalStake\"Z\n\x1eLiquidityOffsetProbabilityPair\x12\x16\n\x06offset\x18\x01"
-    b" \x01(\rR\x06offset\x12 \n\x0bprobability\x18\x02"
-    b' \x01(\tR\x0bprobability"\xfb\x01\n\x11LiquiditySupplied\x12\x1b\n\tmarket_id\x18\x01'
-    b" \x01(\tR\x08marketId\x12+\n\x11\x63onsensus_reached\x18\x02"
-    b" \x01(\x08R\x10\x63onsensusReached\x12M\n\tbid_cache\x18\x03"
-    b" \x03(\x0b\x32\x30.vega.snapshot.v1.LiquidityOffsetProbabilityPairR\x08\x62idCache\x12M\n\task_cache\x18\x04"
-    b' \x03(\x0b\x32\x30.vega.snapshot.v1.LiquidityOffsetProbabilityPairR\x08\x61skCache"P\n\x0fOracleDataBatch\x12=\n\x0boracle_data\x18\x01'
-    b' \x03(\x0b\x32\x1c.vega.snapshot.v1.OracleDataR\noracleData"r\n\nOracleData\x12.\n\x07signers\x18\x01'
-    b" \x03(\x0b\x32\x14.vega.data.v1.SignerR\x07signers\x12\x34\n\x04\x64\x61ta\x18\x02"
-    b" \x03(\x0b\x32"
-    b' .vega.snapshot.v1.OracleDataPairR\x04\x64\x61ta"8\n\x0eOracleDataPair\x12\x10\n\x03key\x18\x01'
-    b" \x01(\tR\x03key\x12\x14\n\x05value\x18\x02"
-    b' \x01(\tR\x05value"C\n\x07Witness\x12\x38\n\tresources\x18\x01'
-    b' \x03(\x0b\x32\x1a.vega.snapshot.v1.ResourceR\tresources"g\n\x08Resource\x12\x0e\n\x02id\x18\x01'
-    b" \x01(\tR\x02id\x12\x1f\n\x0b\x63heck_until\x18\x02"
-    b" \x01(\x03R\ncheckUntil\x12\x14\n\x05votes\x18\x03"
-    b" \x03(\tR\x05votes\x12\x14\n\x05state\x18\x04"
-    b' \x01(\rR\x05state"3\n\x0e\x45ventForwarder\x12!\n\x0c\x61\x63ked_events\x18\x01'
-    b' \x03(\tR\x0b\x61\x63kedEvents"?\n\x12\x43ollateralAccounts\x12)\n\x08\x61\x63\x63ounts\x18\x01'
-    b' \x03(\x0b\x32\r.vega.AccountR\x08\x61\x63\x63ounts"7\n\x10\x43ollateralAssets\x12#\n\x06\x61ssets\x18\x01'
-    b' \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets"3\n\x0c\x41\x63tiveAssets\x12#\n\x06\x61ssets\x18\x01'
-    b' \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets"4\n\rPendingAssets\x12#\n\x06\x61ssets\x18\x01'
-    b' \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets":\n\x13PendingAssetUpdates\x12#\n\x06\x61ssets\x18\x01'
-    b' \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets"P\n\nWithdrawal\x12\x10\n\x03ref\x18\x01'
-    b" \x01(\tR\x03ref\x12\x30\n\nwithdrawal\x18\x02"
-    b' \x01(\x0b\x32\x10.vega.WithdrawalR\nwithdrawal"B\n\x07\x44\x65posit\x12\x0e\n\x02id\x18\x01'
-    b" \x01(\tR\x02id\x12'\n\x07\x64\x65posit\x18\x02"
-    b' \x01(\x0b\x32\r.vega.DepositR\x07\x64\x65posit"i\n\x05TxRef\x12\x14\n\x05\x61sset\x18\x01'
-    b" \x01(\tR\x05\x61sset\x12\x19\n\x08\x62lock_nr\x18\x02"
-    b" \x01(\x04R\x07\x62lockNr\x12\x12\n\x04hash\x18\x03"
-    b" \x01(\tR\x04hash\x12\x1b\n\tlog_index\x18\x04"
-    b' \x01(\x04R\x08logIndex"T\n\x12\x42\x61nkingWithdrawals\x12>\n\x0bwithdrawals\x18\x01'
-    b' \x03(\x0b\x32\x1c.vega.snapshot.v1.WithdrawalR\x0bwithdrawals"F\n\x0f\x42\x61nkingDeposits\x12\x33\n\x07\x64\x65posit\x18\x01'
-    b' \x03(\x0b\x32\x19.vega.snapshot.v1.DepositR\x07\x64\x65posit"P\n\x0b\x42\x61nkingSeen\x12\x12\n\x04refs\x18\x01'
-    b" \x03(\tR\x04refs\x12-\n\x13last_seen_eth_block\x18\x02"
-    b' \x01(\x04R\x10lastSeenEthBlock"Y\n\x13\x42\x61nkingAssetActions\x12\x42\n\x0c\x61sset_action\x18\x01'
-    b' \x03(\x0b\x32\x1f.vega.checkpoint.v1.AssetActionR\x0b\x61ssetAction"t\n\x19\x42\x61nkingRecurringTransfers\x12W\n\x13recurring_transfers\x18\x01'
-    b' \x01(\x0b\x32&.vega.checkpoint.v1.RecurringTransfersR\x12recurringTransfers"t\n\x19\x42\x61nkingScheduledTransfers\x12W\n\x11transfers_at_time\x18\x01'
-    b' \x03(\x0b\x32+.vega.checkpoint.v1.ScheduledTransferAtTimeR\x0ftransfersAtTime"~\n#BankingRecurringGovernanceTransfers\x12W\n\x13recurring_transfers\x18\x01'
-    b' \x03(\x0b\x32&.vega.checkpoint.v1.GovernanceTransferR\x12recurringTransfers"\x88\x01\n#BankingScheduledGovernanceTransfers\x12\x61\n\x11transfers_at_time\x18\x01'
-    b' \x03(\x0b\x32\x35.vega.checkpoint.v1.ScheduledGovernanceTransferAtTimeR\x0ftransfersAtTime"X\n\x12\x42\x61nkingBridgeState\x12\x42\n\x0c\x62ridge_state\x18\x01'
-    b' \x01(\x0b\x32\x1f.vega.checkpoint.v1.BridgeStateR\x0b\x62ridgeState"%\n\nCheckpoint\x12\x17\n\x07next_cp\x18\x01'
-    b' \x01(\x03R\x06nextCp"\\\n'
-    b" DelegationLastReconciliationTime\x12\x38\n\x18last_reconciliation_time\x18\x01"
-    b' \x01(\x03R\x16lastReconciliationTime"F\n\x10\x44\x65legationActive\x12\x32\n\x0b\x64\x65legations\x18\x01'
-    b' \x03(\x0b\x32\x10.vega.DelegationR\x0b\x64\x65legations"}\n\x11\x44\x65legationPending\x12\x32\n\x0b\x64\x65legations\x18\x01'
-    b" \x03(\x0b\x32\x10.vega.DelegationR\x0b\x64\x65legations\x12\x34\n\x0cundelegation\x18\x02"
-    b' \x03(\x0b\x32\x10.vega.DelegationR\x0cundelegation"*\n\x0e\x44\x65legationAuto\x12\x18\n\x07parties\x18\x01'
-    b' \x03(\tR\x07parties"\x9a\x01\n\x0cProposalData\x12*\n\x08proposal\x18\x01'
-    b" \x01(\x0b\x32\x0e.vega.ProposalR\x08proposal\x12\x1c\n\x03yes\x18\x02"
-    b" \x03(\x0b\x32\n.vega.VoteR\x03yes\x12\x1a\n\x02no\x18\x03"
-    b" \x03(\x0b\x32\n.vega.VoteR\x02no\x12$\n\x07invalid\x18\x04"
-    b' \x03(\x0b\x32\n.vega.VoteR\x07invalid"Q\n\x11GovernanceEnacted\x12<\n\tproposals\x18\x01'
-    b' \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalDataR\tproposals"P\n\x10GovernanceActive\x12<\n\tproposals\x18\x01'
-    b' \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalDataR\tproposals">\n\x0eGovernanceNode\x12,\n\tproposals\x18\x01'
-    b' \x03(\x0b\x32\x0e.vega.ProposalR\tproposals"v\n\x0eStakingAccount\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x18\n\x07\x62\x61lance\x18\x02"
-    b" \x01(\tR\x07\x62\x61lance\x12\x34\n\x06\x65vents\x18\x03"
-    b' \x03(\x0b\x32\x1c.vega.events.v1.StakeLinkingR\x06\x65vents"\xe1\x01\n\x0fStakingAccounts\x12<\n\x08\x61\x63\x63ounts\x18\x01'
-    b" \x03(\x0b\x32"
-    b" .vega.snapshot.v1.StakingAccountR\x08\x61\x63\x63ounts\x12;\n\x1astaking_asset_total_supply\x18\x02"
-    b" \x01(\tR\x17stakingAssetTotalSupply\x12S\n\x1apending_stake_total_supply\x18\x03"
-    b' \x01(\x0b\x32\x16.vega.StakeTotalSupplyR\x17pendingStakeTotalSupply"\xcc\x01\n\x0cMatchingBook\x12\x1b\n\tmarket_id\x18\x01'
-    b" \x01(\tR\x08marketId\x12\x1d\n\x03\x62uy\x18\x02"
-    b" \x03(\x0b\x32\x0b.vega.OrderR\x03\x62uy\x12\x1f\n\x04sell\x18\x03"
-    b" \x03(\x0b\x32\x0b.vega.OrderR\x04sell\x12*\n\x11last_traded_price\x18\x04"
-    b" \x01(\tR\x0flastTradedPrice\x12\x18\n\x07\x61uction\x18\x05"
-    b" \x01(\x08R\x07\x61uction\x12\x19\n\x08\x62\x61tch_id\x18\x06"
-    b' \x01(\x04R\x07\x62\x61tchId";\n\tNetParams\x12.\n\x06params\x18\x01'
-    b' \x03(\x0b\x32\x16.vega.NetworkParameterR\x06params"0\n\nDecimalMap\x12\x10\n\x03key\x18\x01'
-    b" \x01(\x03R\x03key\x12\x10\n\x03val\x18\x02"
-    b' \x01(\tR\x03val"5\n\tTimePrice\x12\x12\n\x04time\x18\x01'
-    b" \x01(\x03R\x04time\x12\x14\n\x05price\x18\x02"
-    b' \x01(\tR\x05price";\n\x0bPriceVolume\x12\x14\n\x05price\x18\x01'
-    b" \x01(\tR\x05price\x12\x16\n\x06volume\x18\x02"
-    b' \x01(\x04R\x06volume"B\n\nPriceRange\x12\x10\n\x03min\x18\x01'
-    b" \x01(\tR\x03min\x12\x10\n\x03max\x18\x02"
-    b" \x01(\tR\x03max\x12\x10\n\x03ref\x18\x03"
-    b' \x01(\tR\x03ref"\x9a\x01\n\nPriceBound\x12\x16\n\x06\x61\x63tive\x18\x01'
-    b" \x01(\x08R\x06\x61\x63tive\x12\x1b\n\tup_factor\x18\x02"
-    b" \x01(\tR\x08upFactor\x12\x1f\n\x0b\x64own_factor\x18\x03"
-    b" \x01(\tR\ndownFactor\x12\x36\n\x07trigger\x18\x04"
-    b' \x01(\x0b\x32\x1c.vega.PriceMonitoringTriggerR\x07trigger"y\n\x0fPriceRangeCache\x12\x32\n\x05\x62ound\x18\x01'
-    b" \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceBoundR\x05\x62ound\x12\x32\n\x05range\x18\x02"
-    b' \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceRangeR\x05range"<\n\x0c\x43urrentPrice\x12\x14\n\x05price\x18\x01'
-    b" \x01(\tR\x05price\x12\x16\n\x06volume\x18\x02"
-    b' \x01(\x04R\x06volume"S\n\tPastPrice\x12\x12\n\x04time\x18\x01'
-    b" \x01(\x03R\x04time\x12\x32\n\x15volume_weighted_price\x18\x02"
-    b' \x01(\tR\x13volumeWeightedPrice"\xf4\x04\n\x0cPriceMonitor\x12'
-    b" \n\x0binitialised\x18\x03"
-    b" \x01(\x08R\x0binitialised\x12=\n\x0b\x66p_horizons\x18\x04"
-    b" \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMapR\nfpHorizons\x12\x10\n\x03now\x18\x05"
-    b" \x01(\x03R\x03now\x12\x16\n\x06update\x18\x06"
-    b" \x01(\x03R\x06update\x12\x34\n\x06\x62ounds\x18\x07"
-    b" \x03(\x0b\x32\x1c.vega.snapshot.v1.PriceBoundR\x06\x62ounds\x12\x33\n\x16price_range_cache_time\x18\x08"
-    b" \x01(\x03R\x13priceRangeCacheTime\x12M\n\x11price_range_cache\x18\t"
-    b" \x03(\x0b\x32!.vega.snapshot.v1.PriceRangeCacheR\x0fpriceRangeCache\x12/\n\x14ref_price_cache_time\x18\n"
-    b" \x01(\x03R\x11refPriceCacheTime\x12\x44\n\x0fref_price_cache\x18\x0b"
-    b" \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMapR\rrefPriceCache\x12=\n\nprices_now\x18\x0c"
-    b" \x03(\x0b\x32\x1e.vega.snapshot.v1.CurrentPriceR\tpricesNow\x12<\n\x0bprices_past\x18\r"
-    b" \x03(\x0b\x32\x1b.vega.snapshot.v1.PastPriceR\npricesPast\x12+\n\x11\x63onsensus_reached\x18\x0e"
-    b' \x01(\x08R\x10\x63onsensusReached"\xf8\x02\n\x0c\x41uctionState\x12,\n\x04mode\x18\x01'
-    b" \x01(\x0e\x32\x18.vega.Market.TradingModeR\x04mode\x12;\n\x0c\x64\x65\x66\x61ult_mode\x18\x02"
-    b" \x01(\x0e\x32\x18.vega.Market.TradingModeR\x0b\x64\x65\x66\x61ultMode\x12.\n\x07trigger\x18\x03"
-    b" \x01(\x0e\x32\x14.vega.AuctionTriggerR\x07trigger\x12\x14\n\x05\x62\x65gin\x18\x04"
-    b" \x01(\x03R\x05\x62\x65gin\x12'\n\x03\x65nd\x18\x05"
-    b" \x01(\x0b\x32\x15.vega.AuctionDurationR\x03\x65nd\x12\x14\n\x05start\x18\x06"
-    b" \x01(\x08R\x05start\x12\x12\n\x04stop\x18\x07"
-    b" \x01(\x08R\x04stop\x12\x32\n\textension\x18\x08"
-    b" \x01(\x0e\x32\x14.vega.AuctionTriggerR\textension\x12\x30\n\x14\x65xtension_event_sent\x18\t"
-    b' \x01(\x08R\x12\x65xtensionEventSent"u\n\rEquityShareLP\x12\x0e\n\x02id\x18\x01'
-    b" \x01(\tR\x02id\x12\x14\n\x05stake\x18\x02"
-    b" \x01(\tR\x05stake\x12\x14\n\x05share\x18\x03"
-    b" \x01(\tR\x05share\x12\x10\n\x03\x61vg\x18\x04"
-    b" \x01(\tR\x03\x61vg\x12\x16\n\x06vshare\x18\x05"
-    b' \x01(\tR\x06vshare"\xa9\x01\n\x0b\x45quityShare\x12\x10\n\x03mvp\x18\x01'
-    b" \x01(\tR\x03mvp\x12\x32\n\x15opening_auction_ended\x18\x02"
-    b" \x01(\x08R\x13openingAuctionEnded\x12\x31\n\x03lps\x18\x03"
-    b" \x03(\x0b\x32\x1f.vega.snapshot.v1.EquityShareLPR\x03lps\x12\x0c\n\x01r\x18\x04"
-    b" \x01(\tR\x01r\x12\x13\n\x05p_mvp\x18\x05"
-    b' \x01(\tR\x04pMvp"\x84\x01\n\x0b\x46\x65\x65Splitter\x12*\n\x11time_window_start\x18\x01'
-    b" \x01(\x03R\x0ftimeWindowStart\x12\x1f\n\x0btrade_value\x18\x02"
-    b" \x01(\tR\ntradeValue\x12\x10\n\x03\x61vg\x18\x03"
-    b" \x01(\tR\x03\x61vg\x12\x16\n\x06window\x18\x04"
-    b' \x01(\x04R\x06window"\xfc\x06\n\nSpotMarket\x12$\n\x06market\x18\x01'
-    b" \x01(\x0b\x32\x0c.vega.MarketR\x06market\x12\x43\n\rprice_monitor\x18\x02"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.PriceMonitorR\x0cpriceMonitor\x12\x43\n\rauction_state\x18\x03"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.AuctionStateR\x0c\x61uctionState\x12\x43\n\rpegged_orders\x18\x04"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.PeggedOrdersR\x0cpeggedOrders\x12\x34\n\x0f\x65xpiring_orders\x18\x05"
-    b' \x03(\x0b\x32\x0b.vega.OrderR\x0e\x65xpiringOrders\x12"\n\rlast_best_bid\x18\x06'
-    b' \x01(\tR\x0blastBestBid\x12"\n\rlast_best_ask\x18\x07'
-    b" \x01(\tR\x0blastBestAsk\x12 \n\x0clast_mid_bid\x18\x08 \x01(\tR\nlastMidBid\x12"
-    b" \n\x0clast_mid_ask\x18\t"
-    b" \x01(\tR\nlastMidAsk\x12\x35\n\x17last_market_value_proxy\x18\n"
-    b" \x01(\tR\x14lastMarketValueProxy\x12\x41\n\x1dlast_equity_share_distributed\x18\x0b"
-    b" \x01(\x03R\x1alastEquityShareDistributed\x12@\n\x0c\x65quity_share\x18\x0c"
-    b" \x01(\x0b\x32\x1d.vega.snapshot.v1.EquityShareR\x0b\x65quityShare\x12,\n\x12\x63urrent_mark_price\x18\r"
-    b" \x01(\tR\x10\x63urrentMarkPrice\x12@\n\x0c\x66\x65\x65_splitter\x18\x0e"
-    b" \x01(\x0b\x32\x1d.vega.snapshot.v1.FeeSplitterR\x0b\x66\x65\x65Splitter\x12-\n\x13next_mark_to_market\x18\x0f"
-    b" \x01(\x03R\x10nextMarkToMarket\x12*\n\x11last_traded_price\x18\x10"
-    b" \x01(\tR\x0flastTradedPrice\x12\x18\n\x07parties\x18\x11"
-    b" \x03(\tR\x07parties\x12\x16\n\x06\x63losed\x18\x12"
-    b' \x01(\x08R\x06\x63losed"\xd6\t\n\x06Market\x12$\n\x06market\x18\x01'
-    b" \x01(\x0b\x32\x0c.vega.MarketR\x06market\x12\x43\n\rprice_monitor\x18\x02"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.PriceMonitorR\x0cpriceMonitor\x12\x43\n\rauction_state\x18\x03"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.AuctionStateR\x0c\x61uctionState\x12\x43\n\rpegged_orders\x18\x04"
-    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.PeggedOrdersR\x0cpeggedOrders\x12\x34\n\x0f\x65xpiring_orders\x18\x05"
-    b' \x03(\x0b\x32\x0b.vega.OrderR\x0e\x65xpiringOrders\x12"\n\rlast_best_bid\x18\x06'
-    b' \x01(\tR\x0blastBestBid\x12"\n\rlast_best_ask\x18\x07'
-    b" \x01(\tR\x0blastBestAsk\x12 \n\x0clast_mid_bid\x18\x08 \x01(\tR\nlastMidBid\x12"
-    b" \n\x0clast_mid_ask\x18\t"
-    b" \x01(\tR\nlastMidAsk\x12\x35\n\x17last_market_value_proxy\x18\n"
-    b" \x01(\tR\x14lastMarketValueProxy\x12\x41\n\x1dlast_equity_share_distributed\x18\x0b"
-    b" \x01(\x03R\x1alastEquityShareDistributed\x12@\n\x0c\x65quity_share\x18\x0c"
-    b" \x01(\x0b\x32\x1d.vega.snapshot.v1.EquityShareR\x0b\x65quityShare\x12,\n\x12\x63urrent_mark_price\x18\r"
-    b" \x01(\tR\x10\x63urrentMarkPrice\x12*\n\x11risk_factor_short\x18\x0e"
-    b" \x01(\tR\x0friskFactorShort\x12(\n\x10risk_factor_long\x18\x0f"
-    b" \x01(\tR\x0eriskFactorLong\x12\x41\n\x1drisk_factor_consensus_reached\x18\x10"
-    b" \x01(\x08R\x1ariskFactorConsensusReached\x12@\n\x0c\x66\x65\x65_splitter\x18\x11"
-    b" \x01(\x0b\x32\x1d.vega.snapshot.v1.FeeSplitterR\x0b\x66\x65\x65Splitter\x12'\n\x0fsettlement_data\x18\x12"
-    b" \x01(\tR\x0esettlementData\x12-\n\x13next_mark_to_market\x18\x13"
-    b" \x01(\x03R\x10nextMarkToMarket\x12*\n\x11last_traded_price\x18\x14"
-    b" \x01(\tR\x0flastTradedPrice\x12\x18\n\x07parties\x18\x15"
-    b" \x03(\tR\x07parties\x12\x16\n\x06\x63losed\x18\x16"
-    b" \x01(\x08R\x06\x63losed\x12\x1c\n\tsucceeded\x18\x17"
-    b" \x01(\x08R\tsucceeded\x12=\n\x0bstop_orders\x18\x18"
-    b" \x01(\x0b\x32\x1c.vega.snapshot.v1.StopOrdersR\nstopOrders\x12=\n\x14\x65xpiring_stop_orders\x18\x19"
-    b' \x03(\x0b\x32\x0b.vega.OrderR\x12\x65xpiringStopOrders"=\n\rOrdersAtPrice\x12\x14\n\x05price\x18\x01'
-    b" \x01(\tR\x05price\x12\x16\n\x06orders\x18\x02"
-    b' \x03(\tR\x06orders"\x98\x01\n\x10PricedStopOrders\x12\x42\n\x0c\x66\x61lls_bellow\x18\x01'
-    b" \x03(\x0b\x32\x1f.vega.snapshot.v1.OrdersAtPriceR\x0b\x66\x61llsBellow\x12@\n\x0brises_above\x18\x02"
-    b' \x03(\x0b\x32\x1f.vega.snapshot.v1.OrdersAtPriceR\nrisesAbove"\xc4\x01\n\x12TrailingStopOrders\x12&\n\x0flast_seen_price\x18\x01'
-    b" \x01(\tR\rlastSeenPrice\x12\x43\n\x0c\x66\x61lls_bellow\x18\x02 \x03(\x0b\x32"
-    b" .vega.snapshot.v1.OffsetsAtPriceR\x0b\x66\x61llsBellow\x12\x41\n\x0brises_above\x18\x03"
-    b" \x03(\x0b\x32"
-    b' .vega.snapshot.v1.OffsetsAtPriceR\nrisesAbove"@\n\x0eOrdersAtOffset\x12\x16\n\x06offset\x18\x01'
-    b" \x01(\tR\x06offset\x12\x16\n\x06orders\x18\x02"
-    b' \x03(\tR\x06orders"b\n\x0eOffsetsAtPrice\x12\x14\n\x05price\x18\x01'
-    b" \x01(\tR\x05price\x12:\n\x07offsets\x18\x02 \x03(\x0b\x32"
-    b' .vega.snapshot.v1.OrdersAtOffsetR\x07offsets"\xf7\x01\n\nStopOrders\x12?\n\x0bstop_orders\x18\x01'
-    b" \x03(\x0b\x32\x1e.vega.events.v1.StopOrderEventR\nstopOrders\x12P\n\x12priced_stop_orders\x18\x02"
-    b' \x01(\x0b\x32".vega.snapshot.v1.PricedStopOrdersR\x10pricedStopOrders\x12V\n\x14trailing_stop_orders\x18\x03'
-    b' \x01(\x0b\x32$.vega.snapshot.v1.TrailingStopOrdersR\x12trailingStopOrders"@\n\x0cPeggedOrders\x12\x30\n\rparked_orders\x18\x02'
-    b' \x03(\x0b\x32\x0b.vega.OrderR\x0cparkedOrders"\x8f\x02\n\x10\x45xecutionMarkets\x12\x32\n\x07markets\x18\x01'
-    b" \x03(\x0b\x32\x18.vega.snapshot.v1.MarketR\x07markets\x12?\n\x0cspot_markets\x18\x02"
-    b" \x03(\x0b\x32\x1c.vega.snapshot.v1.SpotMarketR\x0bspotMarkets\x12H\n\x0fsettled_markets\x18\x03"
-    b" \x03(\x0b\x32\x1f.vega.checkpoint.v1.MarketStateR\x0esettledMarkets\x12<\n\nsuccessors\x18\x04"
-    b' \x03(\x0b\x32\x1c.vega.snapshot.v1.SuccessorsR\nsuccessors"^\n\nSuccessors\x12#\n\rparent_market\x18\x01'
-    b" \x01(\tR\x0cparentMarket\x12+\n\x11successor_markets\x18\x02"
-    b' \x03(\tR\x10successorMarkets"\xe7\x01\n\x08Position\x12\x19\n\x08party_id\x18\x01'
-    b" \x01(\tR\x07partyId\x12\x12\n\x04size\x18\x02"
-    b" \x01(\x03R\x04size\x12\x10\n\x03\x62uy\x18\x03"
-    b" \x01(\x03R\x03\x62uy\x12\x12\n\x04sell\x18\x04"
-    b" \x01(\x03R\x04sell\x12\x14\n\x05price\x18\x05"
-    b" \x01(\tR\x05price\x12&\n\x0f\x62uy_sum_product\x18\x06"
-    b" \x01(\tR\rbuySumProduct\x12(\n\x10sell_sum_product\x18\x07"
-    b" \x01(\tR\x0esellSumProduct\x12\x1e\n\ndistressed\x18\x08"
-    b' \x01(\x08R\ndistressed"h\n\x0fMarketPositions\x12\x1b\n\tmarket_id\x18\x01'
-    b" \x01(\tR\x08marketId\x12\x38\n\tpositions\x18\x02"
-    b' \x03(\x0b\x32\x1a.vega.snapshot.v1.PositionR\tpositions"\xee\x01\n\x0fSettlementState\x12\x1b\n\tmarket_id\x18\x01'
-    b" \x01(\tR\x08marketId\x12&\n\x0flast_mark_price\x18\x02"
-    b" \x01(\tR\rlastMarkPrice\x12[\n\x16last_settled_positions\x18\x03"
-    b" \x03(\x0b\x32%.vega.snapshot.v1.LastSettledPositionR\x14lastSettledPositions\x12\x39\n\x06trades\x18\x04"
-    b' \x03(\x0b\x32!.vega.snapshot.v1.SettlementTradeR\x06trades"V\n\x13LastSettledPosition\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12)\n\x10settled_position\x18\x02"
-    b' \x01(\x03R\x0fsettledPosition"\x94\x01\n\x0fSettlementTrade\x12\x19\n\x08party_id\x18\x01'
-    b" \x01(\tR\x07partyId\x12\x14\n\x05price\x18\x02"
-    b" \x01(\tR\x05price\x12!\n\x0cmarket_price\x18\x03"
-    b" \x01(\tR\x0bmarketPrice\x12\x12\n\x04size\x18\x04"
-    b" \x01(\x03R\x04size\x12\x19\n\x08new_size\x18\x05"
-    b' \x01(\x03R\x07newSize"g\n\x08\x41ppState\x12\x16\n\x06height\x18\x01'
-    b" \x01(\x04R\x06height\x12\x14\n\x05\x62lock\x18\x02"
-    b" \x01(\tR\x05\x62lock\x12\x12\n\x04time\x18\x03"
-    b" \x01(\x03R\x04time\x12\x19\n\x08\x63hain_id\x18\x04"
-    b' \x01(\tR\x07\x63hainId"\xc3\x01\n\nEpochState\x12\x10\n\x03seq\x18\x01'
-    b" \x01(\x04R\x03seq\x12\x1d\n\nstart_time\x18\x03"
-    b" \x01(\x03R\tstartTime\x12\x1f\n\x0b\x65xpire_time\x18\x04"
-    b" \x01(\x03R\nexpireTime\x12\x36\n\x18ready_to_start_new_epoch\x18\x06"
-    b" \x01(\x08R\x14readyToStartNewEpoch\x12+\n\x12ready_to_end_epoch\x18\x07"
-    b' \x01(\x08R\x0freadyToEndEpoch"{\n\x15RewardsPendingPayouts\x12\x62\n\x18scheduled_rewards_payout\x18\x01'
-    b' \x03(\x0b\x32(.vega.snapshot.v1.ScheduledRewardsPayoutR\x16scheduledRewardsPayout"\x81\x01\n\x16ScheduledRewardsPayout\x12\x1f\n\x0bpayout_time\x18\x01'
-    b" \x01(\x03R\npayoutTime\x12\x46\n\x0erewards_payout\x18\x02"
-    b' \x03(\x0b\x32\x1f.vega.snapshot.v1.RewardsPayoutR\rrewardsPayout"\xfc\x01\n\rRewardsPayout\x12!\n\x0c\x66rom_account\x18\x01'
-    b" \x01(\tR\x0b\x66romAccount\x12\x14\n\x05\x61sset\x18\x02"
-    b" \x01(\tR\x05\x61sset\x12T\n\x13reward_party_amount\x18\x03"
-    b" \x03(\x0b\x32$.vega.snapshot.v1.RewardsPartyAmountR\x11rewardPartyAmount\x12!\n\x0ctotal_reward\x18\x04"
-    b" \x01(\tR\x0btotalReward\x12\x1b\n\tepoch_seq\x18\x05"
-    b" \x01(\tR\x08\x65pochSeq\x12\x1c\n\ttimestamp\x18\x06"
-    b' \x01(\x03R\ttimestamp"B\n\x12RewardsPartyAmount\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x16\n\x06\x61mount\x18\x02"
-    b' \x01(\tR\x06\x61mount"\x94\x03\n\nLimitState\x12\x1f\n\x0b\x62lock_count\x18\x01'
-    b" \x01(\rR\nblockCount\x12,\n\x12\x63\x61n_propose_market\x18\x02"
-    b" \x01(\x08R\x10\x63\x61nProposeMarket\x12*\n\x11\x63\x61n_propose_asset\x18\x03"
-    b" \x01(\x08R\x0f\x63\x61nProposeAsset\x12%\n\x0egenesis_loaded\x18\x04"
-    b" \x01(\x08R\rgenesisLoaded\x12\x34\n\x16propose_market_enabled\x18\x05"
-    b" \x01(\x08R\x14proposeMarketEnabled\x12\x32\n\x15propose_asset_enabled\x18\x06"
-    b" \x01(\x08R\x13proposeAssetEnabled\x12=\n\x1bpropose_market_enabled_from\x18\x07"
-    b" \x01(\x03R\x18proposeMarketEnabledFrom\x12;\n\x1apropose_asset_enabled_from\x18\x08"
-    b' \x01(\x03R\x17proposeAssetEnabledFrom"\x94\x04\n\x0eVoteSpamPolicy\x12L\n\rparty_to_vote\x18\x01'
-    b" \x03(\x0b\x32(.vega.snapshot.v1.PartyProposalVoteCountR\x0bpartyToVote\x12\x44\n\x0e\x62\x61nned_parties\x18\x02"
-    b" \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedPartyR\rbannedParties\x12H\n\rtoken_balance\x18\x03"
-    b" \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalanceR\x0ctokenBalance\x12_\n\x1arecent_blocks_reject_stats\x18\x04"
-    b' \x03(\x0b\x32".vega.snapshot.v1.BlockRejectStatsR\x17recentBlocksRejectStats\x12.\n\x13\x63urrent_block_index\x18\x05'
-    b" \x01(\x04R\x11\x63urrentBlockIndex\x12.\n\x13last_increase_block\x18\x06"
-    b" \x01(\x04R\x11lastIncreaseBlock\x12*\n\x11\x63urrent_epoch_seq\x18\x07"
-    b" \x01(\x04R\x0f\x63urrentEpochSeq\x12\x37\n\x18min_voting_tokens_factor\x18\x08"
-    b' \x01(\tR\x15minVotingTokensFactor"`\n\x16PartyProposalVoteCount\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x1a\n\x08proposal\x18\x02"
-    b" \x01(\tR\x08proposal\x12\x14\n\x05\x63ount\x18\x03"
-    b' \x01(\x04R\x05\x63ount"C\n\x11PartyTokenBalance\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x18\n\x07\x62\x61lance\x18\x02"
-    b' \x01(\tR\x07\x62\x61lance"D\n\x10\x42lockRejectStats\x12\x1a\n\x08rejected\x18\x01'
-    b" \x01(\x04R\x08rejected\x12\x14\n\x05total\x18\x02"
-    b' \x01(\x04R\x05total"G\n\x19SpamPartyTransactionCount\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x14\n\x05\x63ount\x18\x02"
-    b' \x01(\x04R\x05\x63ount"\xc2\x02\n\x10SimpleSpamPolicy\x12\x1f\n\x0bpolicy_name\x18\x01'
-    b" \x01(\tR\npolicyName\x12Q\n\x0eparty_to_count\x18\x02"
-    b" \x03(\x0b\x32+.vega.snapshot.v1.SpamPartyTransactionCountR\x0cpartyToCount\x12\x44\n\x0e\x62\x61nned_parties\x18\x03"
-    b" \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedPartyR\rbannedParties\x12H\n\rtoken_balance\x18\x04"
-    b" \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalanceR\x0ctokenBalance\x12*\n\x11\x63urrent_epoch_seq\x18\x05"
-    b' \x01(\x04R\x0f\x63urrentEpochSeq"p\n\nNotarySigs\x12\x0e\n\x02id\x18\x01'
-    b" \x01(\tR\x02id\x12\x12\n\x04kind\x18\x02"
-    b" \x01(\x05R\x04kind\x12\x12\n\x04node\x18\x03"
-    b" \x01(\tR\x04node\x12\x10\n\x03sig\x18\x04"
-    b" \x01(\tR\x03sig\x12\x18\n\x07pending\x18\x05"
-    b' \x01(\x08R\x07pending"G\n\x06Notary\x12=\n\x0bnotary_sigs\x18\x01'
-    b' \x03(\x0b\x32\x1c.vega.snapshot.v1.NotarySigsR\nnotarySigs"m\n\x16StakeVerifierDeposited\x12S\n\x11pending_deposited\x18\x01'
-    b' \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPendingR\x10pendingDeposited"g\n\x14StakeVerifierRemoved\x12O\n\x0fpending_removed\x18\x01'
-    b' \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPendingR\x0ependingRemoved"\x85\x02\n\x14StakeVerifierPending\x12)\n\x10\x65thereum_address\x18\x01'
-    b" \x01(\tR\x0f\x65thereumAddress\x12&\n\x0fvega_public_key\x18\x02"
-    b" \x01(\tR\rvegaPublicKey\x12\x16\n\x06\x61mount\x18\x03"
-    b" \x01(\tR\x06\x61mount\x12\x1d\n\nblock_time\x18\x04"
-    b" \x01(\x03R\tblockTime\x12!\n\x0c\x62lock_number\x18\x05"
-    b" \x01(\x04R\x0b\x62lockNumber\x12\x1b\n\tlog_index\x18\x06"
-    b" \x01(\x04R\x08logIndex\x12\x13\n\x05tx_id\x18\x07"
-    b" \x01(\tR\x04txId\x12\x0e\n\x02id\x18\x08"
-    b' \x01(\tR\x02id"\x9b\x01\n\x12PendingKeyRotation\x12!\n\x0c\x62lock_height\x18\x01'
-    b" \x01(\x04R\x0b\x62lockHeight\x12\x17\n\x07node_id\x18\x02"
-    b" \x01(\tR\x06nodeId\x12\x1e\n\x0bnew_pub_key\x18\x03"
-    b" \x01(\tR\tnewPubKey\x12)\n\x11new_pub_key_index\x18\x04"
-    b' \x01(\rR\x0enewPubKeyIndex"\xb8\x01\n\x1aPendingEthereumKeyRotation\x12!\n\x0c\x62lock_height\x18\x01'
-    b" \x01(\x04R\x0b\x62lockHeight\x12\x17\n\x07node_id\x18\x02"
-    b" \x01(\tR\x06nodeId\x12\x1f\n\x0bnew_address\x18\x03"
-    b" \x01(\tR\nnewAddress\x12\x1c\n\tsubmitter\x18\x04"
-    b" \x01(\tR\tsubmitter\x12\x1f\n\x0bold_address\x18\x05"
-    b' \x01(\tR\noldAddress"\xdd\x04\n\x08Topology\x12G\n\x0evalidator_data\x18\x01'
-    b" \x03(\x0b\x32"
-    b" .vega.snapshot.v1.ValidatorStateR\rvalidatorData\x12\x1d\n\nchain_keys\x18\x02"
-    b" \x03(\tR\tchainKeys\x12_\n\x19pending_pub_key_rotations\x18\x03"
-    b" \x03(\x0b\x32$.vega.snapshot.v1.PendingKeyRotationR\x16pendingPubKeyRotations\x12[\n\x15validator_performance\x18\x04"
-    b" \x01(\x0b\x32&.vega.snapshot.v1.ValidatorPerformanceR\x14validatorPerformance\x12q\n\x1epending_ethereum_key_rotations\x18\x05"
-    b" \x03(\x0b\x32,.vega.snapshot.v1.PendingEthereumKeyRotationR\x1bpendingEthereumKeyRotations\x12\x43\n\nsignatures\x18\x06"
-    b" \x01(\x0b\x32#.vega.snapshot.v1.ToplogySignaturesR\nsignatures\x12s\n\x1funsolved_ethereum_key_rotations\x18\x07"
-    b' \x03(\x0b\x32,.vega.snapshot.v1.PendingEthereumKeyRotationR\x1cunsolvedEthereumKeyRotations"\xde\x01\n\x11ToplogySignatures\x12\x65\n\x12pending_signatures\x18\x01'
-    b" \x03(\x0b\x32\x36.vega.snapshot.v1.PendingERC20MultisigControlSignatureR\x11pendingSignatures\x12\x62\n\x11issued_signatures\x18\x02"
-    b' \x03(\x0b\x32\x35.vega.snapshot.v1.IssuedERC20MultisigControlSignatureR\x10issuedSignatures"\xb3\x01\n$PendingERC20MultisigControlSignature\x12\x17\n\x07node_id\x18\x01'
-    b" \x01(\tR\x06nodeId\x12)\n\x10\x65thereum_address\x18\x02"
-    b" \x01(\tR\x0f\x65thereumAddress\x12\x14\n\x05nonce\x18\x03"
-    b" \x01(\tR\x05nonce\x12\x1b\n\tepoch_seq\x18\x04"
-    b" \x01(\x04R\x08\x65pochSeq\x12\x14\n\x05\x61\x64\x64\x65\x64\x18\x05"
-    b' \x01(\x08R\x05\x61\x64\x64\x65\x64"\x9e\x01\n#IssuedERC20MultisigControlSignature\x12\x1f\n\x0bresource_id\x18\x01'
-    b" \x01(\tR\nresourceId\x12)\n\x10\x65thereum_address\x18\x02"
-    b" \x01(\tR\x0f\x65thereumAddress\x12+\n\x11submitter_address\x18\x03"
-    b' \x01(\tR\x10submitterAddress"\xf2\x03\n\x0eValidatorState\x12J\n\x10validator_update\x18\x01'
-    b" \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdateR\x0fvalidatorUpdate\x12\x1f\n\x0b\x62lock_added\x18\x02"
-    b" \x01(\x04R\nblockAdded\x12\x16\n\x06status\x18\x03"
-    b" \x01(\x05R\x06status\x12.\n\x13status_change_block\x18\x04"
-    b" \x01(\x04R\x11statusChangeBlock\x12\x46\n"
-    b" last_block_with_positive_ranking\x18\x05"
-    b" \x01(\x04R\x1clastBlockWithPositiveRanking\x12\x30\n\x14\x65th_events_forwarded\x18\x06"
-    b" \x01(\x04R\x12\x65thEventsForwarded\x12O\n\x11heartbeat_tracker\x18\x07"
-    b" \x01(\x0b\x32\".vega.snapshot.v1.HeartbeatTrackerR\x10heartbeatTracker\x12'\n\x0fvalidator_power\x18\x08"
-    b" \x01(\x03R\x0evalidatorPower\x12\x37\n\rranking_score\x18\t"
-    b' \x01(\x0b\x32\x12.vega.RankingScoreR\x0crankingScore"\xb9\x01\n\x10HeartbeatTracker\x12,\n\x12\x65xpected_next_hash\x18\x01'
-    b" \x01(\tR\x10\x65xpectedNextHash\x12\x37\n\x18\x65xpected_next_hash_since\x18\x02"
-    b" \x01(\x03R\x15\x65xpectedNextHashSince\x12\x1f\n\x0b\x62lock_index\x18\x03"
-    b" \x01(\x05R\nblockIndex\x12\x1d\n\nblock_sigs\x18\x04"
-    b' \x03(\x08R\tblockSigs"\x99\x02\n\x10PerformanceStats\x12+\n\x11validator_address\x18\x01'
-    b" \x01(\tR\x10validatorAddress\x12\x1a\n\x08proposed\x18\x02"
-    b" \x01(\x04R\x08proposed\x12\x18\n\x07\x65lected\x18\x03"
-    b" \x01(\x04R\x07\x65lected\x12\x14\n\x05voted\x18\x04"
-    b" \x01(\x04R\x05voted\x12*\n\x11last_height_voted\x18\x05"
-    b" \x01(\x03R\x0flastHeightVoted\x12\x30\n\x14last_height_proposed\x18\x06"
-    b" \x01(\x03R\x12lastHeightProposed\x12.\n\x13last_height_elected\x18\x07"
-    b' \x01(\x03R\x11lastHeightElected"l\n\x14ValidatorPerformance\x12T\n\x14validator_perf_stats\x18\x01'
-    b' \x03(\x0b\x32".vega.snapshot.v1.PerformanceStatsR\x12validatorPerfStats"\xae\x01\n\x13LiquidityParameters\x12\x17\n\x07max_fee\x18\x01'
-    b" \x01(\tR\x06maxFee\x12$\n\x0emax_shape_size\x18\x02"
-    b" \x01(\tR\x0cmaxShapeSize\x12;\n\x1astake_to_obligation_factor\x18\x03"
-    b" \x01(\tR\x17stakeToObligationFactor\x12\x1b\n\tmarket_id\x18\x04"
-    b' \x01(\tR\x08marketId"h\n\x1aLiquidityPendingProvisions\x12-\n\x12pending_provisions\x18\x01'
-    b" \x03(\tR\x11pendingProvisions\x12\x1b\n\tmarket_id\x18\x02"
-    b' \x01(\tR\x08marketId"\x80\x01\n\x1fLiquidityPartiesLiquidityOrders\x12@\n\x0cparty_orders\x18\x01'
-    b" \x03(\x0b\x32\x1d.vega.snapshot.v1.PartyOrdersR\x0bpartyOrders\x12\x1b\n\tmarket_id\x18\x02"
-    b' \x01(\tR\x08marketId"H\n\x0bPartyOrders\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12#\n\x06orders\x18\x02"
-    b' \x03(\x0b\x32\x0b.vega.OrderR\x06orders"w\n\x16LiquidityPartiesOrders\x12@\n\x0cparty_orders\x18\x01'
-    b" \x03(\x0b\x32\x1d.vega.snapshot.v1.PartyOrdersR\x0bpartyOrders\x12\x1b\n\tmarket_id\x18\x02"
-    b' \x01(\tR\x08marketId"\x7f\n\x13LiquidityProvisions\x12K\n\x14liquidity_provisions\x18\x01'
-    b" \x03(\x0b\x32\x18.vega.LiquidityProvisionR\x13liquidityProvisions\x12\x1b\n\tmarket_id\x18\x02"
-    b' \x01(\tR\x08marketId"\xa0\x01\n\x0fLiquidityScores\x12\x36\n\x17running_average_counter\x18\x01'
-    b" \x01(\x05R\x15runningAverageCounter\x12\x38\n\x06scores\x18\x02 \x03(\x0b\x32"
-    b" .vega.snapshot.v1.LiquidityScoreR\x06scores\x12\x1b\n\tmarket_id\x18\x03"
-    b' \x01(\tR\x08marketId"A\n\x0eLiquidityScore\x12\x14\n\x05score\x18\x01'
-    b" \x01(\tR\x05score\x12\x19\n\x08party_id\x18\x02"
-    b' \x01(\tR\x07partyId"\xb9\x01\n\x16\x46loatingPointConsensus\x12M\n\x11next_time_trigger\x18\x01'
-    b" \x03(\x0b\x32!.vega.snapshot.v1.NextTimeTriggerR\x0fnextTimeTrigger\x12P\n\x0fstate_variables\x18\x02"
-    b" \x03(\x0b\x32'.vega.snapshot.v1.StateVarInternalStateR\x0estateVariables\"\xfc\x01\n\x15StateVarInternalState\x12\x0e\n\x02id\x18\x01"
-    b" \x01(\tR\x02id\x12\x14\n\x05state\x18\x02"
-    b" \x01(\x05R\x05state\x12\x19\n\x08\x65vent_id\x18\x03"
-    b" \x01(\tR\x07\x65ventId\x12]\n\x12validators_results\x18\x04"
-    b" \x03(\x0b\x32..vega.snapshot.v1.FloatingPointValidatorResultR\x11validatorsResults\x12\x43\n\x1erounds_since_meaningful_update\x18\x05"
-    b' \x01(\x05R\x1broundsSinceMeaningfulUpdate"\\\n\x1c\x46loatingPointValidatorResult\x12\x0e\n\x02id\x18\x01'
-    b" \x01(\tR\x02id\x12,\n\x06\x62undle\x18\x02"
-    b' \x03(\x0b\x32\x14.vega.KeyValueBundleR\x06\x62undle"r\n\x0fNextTimeTrigger\x12\x14\n\x05\x61sset\x18\x01'
-    b" \x01(\tR\x05\x61sset\x12\x16\n\x06market\x18\x02"
-    b" \x01(\tR\x06market\x12\x0e\n\x02id\x18\x03"
-    b" \x01(\tR\x02id\x12!\n\x0cnext_trigger\x18\x04"
-    b' \x01(\x03R\x0bnextTrigger"c\n\rMarketTracker\x12R\n\x0fmarket_activity\x18\x01'
-    b' \x03(\x0b\x32).vega.checkpoint.v1.MarketActivityTrackerR\x0emarketActivity"t\n\x16SignerEventsPerAddress\x12\x18\n\x07\x61\x64\x64ress\x18\x01'
-    b" \x01(\tR\x07\x61\x64\x64ress\x12@\n\x06\x65vents\x18\x02"
-    b' \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEventR\x06\x65vents"\x80\x02\n\x1d\x45RC20MultiSigTopologyVerified\x12\x18\n\x07signers\x18\x01'
-    b" \x03(\tR\x07signers\x12V\n\x12\x65vents_per_address\x18\x02"
-    b" \x03(\x0b\x32(.vega.snapshot.v1.SignerEventsPerAddressR\x10\x65ventsPerAddress\x12L\n\tthreshold\x18\x03"
-    b" \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEventR\tthreshold\x12\x1f\n\x0bseen_events\x18\x04"
-    b' \x03(\tR\nseenEvents"\xbc\x02\n\x1c\x45RC20MultiSigTopologyPending\x12Q\n\x0fpending_signers\x18\x01'
-    b" \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEventR\x0ependingSigners\x12\x62\n\x15pending_threshold_set\x18\x02"
-    b" \x03(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEventR\x13pendingThresholdSet\x12+\n\x11witnessed_signers\x18\x03"
-    b" \x03(\tR\x10witnessedSigners\x12\x38\n\x18witnessed_threshold_sets\x18\x04"
-    b' \x03(\tR\x16witnessedThresholdSets"\xa1\x03\n\x0bProofOfWork\x12!\n\x0c\x62lock_height\x18\x01'
-    b" \x03(\x04R\x0b\x62lockHeight\x12\x1d\n\nblock_hash\x18\x02"
-    b" \x03(\tR\tblockHash\x12H\n\x0ctx_at_height\x18\x04"
-    b" \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeightR\ntxAtHeight\x12J\n\rtid_at_height\x18\x06"
-    b" \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeightR\x0btidAtHeight\x12\x35\n\x06\x62\x61nned\x18\x07"
-    b" \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedPartyR\x06\x62\x61nned\x12\x42\n\npow_params\x18\x08"
-    b" \x03(\x0b\x32#.vega.snapshot.v1.ProofOfWorkParamsR\tpowParams\x12?\n\tpow_state\x18\t"
-    b' \x03(\x0b\x32".vega.snapshot.v1.ProofOfWorkStateR\x08powState"9\n\x0b\x42\x61nnedParty\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x14\n\x05until\x18\x02"
-    b' \x01(\x03R\x05until"\x84\x03\n\x11ProofOfWorkParams\x12\x41\n\x1espam_pow_number_of_past_blocks\x18\x01'
-    b" \x01(\x04R\x19spamPowNumberOfPastBlocks\x12.\n\x13spam_pow_difficulty\x18\x02"
-    b" \x01(\rR\x11spamPowDifficulty\x12\x33\n\x16spam_pow_hash_function\x18\x03"
-    b" \x01(\tR\x13spamPowHashFunction\x12\x42\n\x1fspam_pow_number_of_tx_per_block\x18\x04"
-    b" \x01(\x04R\x19spamPowNumberOfTxPerBlock\x12\x43\n\x1espam_pow_increasing_difficulty\x18\x05"
-    b" \x01(\x08R\x1bspamPowIncreasingDifficulty\x12\x1d\n\nfrom_block\x18\x06"
-    b" \x01(\x04R\tfromBlock\x12\x1f\n\x0buntil_block\x18\x07"
-    b' \x01(\x03R\nuntilBlock"X\n\x10ProofOfWorkState\x12\x44\n\tpow_state\x18\x01'
-    b" \x03(\x0b\x32'.vega.snapshot.v1.ProofOfWorkBlockStateR\x08powState\"\x8c\x01\n\x15ProofOfWorkBlockState\x12!\n\x0c\x62lock_height\x18\x01"
-    b" \x01(\x04R\x0b\x62lockHeight\x12P\n\x0bparty_state\x18\x02"
-    b' \x03(\x0b\x32/.vega.snapshot.v1.ProofOfWorkPartyStateForBlockR\npartyState"\x85\x01\n\x1dProofOfWorkPartyStateForBlock\x12\x14\n\x05party\x18\x01'
-    b" \x01(\tR\x05party\x12\x1d\n\nseen_count\x18\x02"
-    b" \x01(\x04R\tseenCount\x12/\n\x13observed_difficulty\x18\x03"
-    b' \x01(\x04R\x12observedDifficulty"R\n\x14TransactionsAtHeight\x12\x16\n\x06height\x18\x01'
-    b' \x01(\x04R\x06height\x12"\n\x0ctransactions\x18\x02'
-    b' \x03(\tR\x0ctransactions"\xcb\x01\n\x18ProtocolUpgradeProposals\x12O\n\x10\x61\x63tive_proposals\x18\x01'
-    b" \x03(\x0b\x32$.vega.events.v1.ProtocolUpgradeEventR\x0f\x61\x63tiveProposals\x12^\n\x11\x61\x63\x63\x65pted_proposal\x18\x02"
-    b' \x01(\x0b\x32\x31.vega.snapshot.v1.AcceptedProtocolUpgradeProposalR\x10\x61\x63\x63\x65ptedProposal"}\n\x1f\x41\x63\x63\x65ptedProtocolUpgradeProposal\x12\x30\n\x14upgrade_block_height\x18\x01'
-    b" \x01(\x04R\x12upgradeBlockHeight\x12(\n\x10vega_release_tag\x18\x02"
-    b" \x01(\tR\x0evegaReleaseTag*`\n\x06\x46ormat\x12\x16\n\x12\x46ORMAT_UNSPECIFIED\x10\x00\x12\x10\n\x0c\x46ORMAT_PROTO\x10\x01\x12\x1b\n\x17\x46ORMAT_PROTO_COMPRESSED\x10\x02\x12\x0f\n\x0b\x46ORMAT_JSON\x10\x03\x42\x33Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1b\x06proto3"
+    b'\n\x1fvega/snapshot/v1/snapshot.proto\x12\x10vega.snapshot.v1\x1a\x11vega/assets.proto\x1a\x17vega/chain_events.proto\x1a#vega/checkpoint/v1/checkpoint.proto\x1a\x17vega/data/v1/data.proto\x1a\x1bvega/events/v1/events.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x0fvega/vega.proto"\x9c\x01\n\x08Snapshot\x12\x16\n\x06height\x18\x01 \x01(\x04R\x06height\x12\x30\n\x06\x66ormat\x18\x02 \x01(\x0e\x32\x18.vega.snapshot.v1.FormatR\x06\x66ormat\x12\x16\n\x06\x63hunks\x18\x03 \x01(\rR\x06\x63hunks\x12\x12\n\x04hash\x18\x04 \x01(\x0cR\x04hash\x12\x1a\n\x08metadata\x18\x05 \x01(\x0cR\x08metadata"{\n\x08NodeHash\x12\x10\n\x03key\x18\x03 \x01(\tR\x03key\x12\x12\n\x04hash\x18\x04 \x01(\tR\x04hash\x12\x16\n\x06height\x18\x05 \x01(\x05R\x06height\x12\x18\n\x07version\x18\x06 \x01(\x03R\x07version\x12\x17\n\x07is_leaf\x18\x07 \x01(\x08R\x06isLeaf"\x84\x01\n\x08Metadata\x12\x18\n\x07version\x18\x01 \x01(\x03R\x07version\x12!\n\x0c\x63hunk_hashes\x18\x02 \x03(\tR\x0b\x63hunkHashes\x12;\n\x0bnode_hashes\x18\x03 \x03(\x0b\x32\x1a.vega.snapshot.v1.NodeHashR\nnodeHashes"V\n\x05\x43hunk\x12-\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x19.vega.snapshot.v1.PayloadR\x04\x64\x61ta\x12\x0e\n\x02nr\x18\x02 \x01(\x03R\x02nr\x12\x0e\n\x02of\x18\x03 \x01(\x03R\x02of"\xa1(\n\x07Payload\x12\x45\n\ractive_assets\x18\x01 \x01(\x0b\x32\x1e.vega.snapshot.v1.ActiveAssetsH\x00R\x0c\x61\x63tiveAssets\x12H\n\x0epending_assets\x18\x02 \x01(\x0b\x32\x1f.vega.snapshot.v1.PendingAssetsH\x00R\rpendingAssets\x12W\n\x13\x62\x61nking_withdrawals\x18\x03 \x01(\x0b\x32$.vega.snapshot.v1.BankingWithdrawalsH\x00R\x12\x62\x61nkingWithdrawals\x12N\n\x10\x62\x61nking_deposits\x18\x04 \x01(\x0b\x32!.vega.snapshot.v1.BankingDepositsH\x00R\x0f\x62\x61nkingDeposits\x12\x42\n\x0c\x62\x61nking_seen\x18\x05 \x01(\x0b\x32\x1d.vega.snapshot.v1.BankingSeenH\x00R\x0b\x62\x61nkingSeen\x12[\n\x15\x62\x61nking_asset_actions\x18\x06 \x01(\x0b\x32%.vega.snapshot.v1.BankingAssetActionsH\x00R\x13\x62\x61nkingAssetActions\x12>\n\ncheckpoint\x18\x07 \x01(\x0b\x32\x1c.vega.snapshot.v1.CheckpointH\x00R\ncheckpoint\x12W\n\x13\x63ollateral_accounts\x18\x08 \x01(\x0b\x32$.vega.snapshot.v1.CollateralAccountsH\x00R\x12\x63ollateralAccounts\x12Q\n\x11\x63ollateral_assets\x18\t \x01(\x0b\x32".vega.snapshot.v1.CollateralAssetsH\x00R\x10\x63ollateralAssets\x12Q\n\x11\x64\x65legation_active\x18\n \x01(\x0b\x32".vega.snapshot.v1.DelegationActiveH\x00R\x10\x64\x65legationActive\x12T\n\x12\x64\x65legation_pending\x18\x0b \x01(\x0b\x32#.vega.snapshot.v1.DelegationPendingH\x00R\x11\x64\x65legationPending\x12K\n\x0f\x64\x65legation_auto\x18\x0c \x01(\x0b\x32 .vega.snapshot.v1.DelegationAutoH\x00R\x0e\x64\x65legationAuto\x12Q\n\x11governance_active\x18\r \x01(\x0b\x32".vega.snapshot.v1.GovernanceActiveH\x00R\x10governanceActive\x12T\n\x12governance_enacted\x18\x0e \x01(\x0b\x32#.vega.snapshot.v1.GovernanceEnactedH\x00R\x11governanceEnacted\x12N\n\x10staking_accounts\x18\x0f \x01(\x0b\x32!.vega.snapshot.v1.StakingAccountsH\x00R\x0fstakingAccounts\x12\x45\n\rmatching_book\x18\x10 \x01(\x0b\x32\x1e.vega.snapshot.v1.MatchingBookH\x00R\x0cmatchingBook\x12L\n\x12network_parameters\x18\x11 \x01(\x0b\x32\x1b.vega.snapshot.v1.NetParamsH\x00R\x11networkParameters\x12Q\n\x11\x65xecution_markets\x18\x12 \x01(\x0b\x32".vega.snapshot.v1.ExecutionMarketsH\x00R\x10\x65xecutionMarkets\x12N\n\x10market_positions\x18\x13 \x01(\x0b\x32!.vega.snapshot.v1.MarketPositionsH\x00R\x0fmarketPositions\x12\x39\n\tapp_state\x18\x14 \x01(\x0b\x32\x1a.vega.snapshot.v1.AppStateH\x00R\x08\x61ppState\x12\x34\n\x05\x65poch\x18\x15 \x01(\x0b\x32\x1c.vega.snapshot.v1.EpochStateH\x00R\x05\x65poch\x12\x61\n\x17rewards_pending_payouts\x18\x17 \x01(\x0b\x32\'.vega.snapshot.v1.RewardsPendingPayoutsH\x00R\x15rewardsPendingPayouts\x12K\n\x0fgovernance_node\x18\x18 \x01(\x0b\x32 .vega.snapshot.v1.GovernanceNodeH\x00R\x0egovernanceNode\x12?\n\x0blimit_state\x18\x19 \x01(\x0b\x32\x1c.vega.snapshot.v1.LimitStateH\x00R\nlimitState\x12L\n\x10vote_spam_policy\x18\x1a \x01(\x0b\x32 .vega.snapshot.v1.VoteSpamPolicyH\x00R\x0evoteSpamPolicy\x12R\n\x12simple_spam_policy\x18\x1b \x01(\x0b\x32".vega.snapshot.v1.SimpleSpamPolicyH\x00R\x10simpleSpamPolicy\x12\x32\n\x06notary\x18\x1c \x01(\x0b\x32\x18.vega.snapshot.v1.NotaryH\x00R\x06notary\x12K\n\x0f\x65vent_forwarder\x18\x1f \x01(\x0b\x32 .vega.snapshot.v1.EventForwarderH\x00R\x0e\x65ventForwarder\x12\x64\n\x18stake_verifier_deposited\x18  \x01(\x0b\x32(.vega.snapshot.v1.StakeVerifierDepositedH\x00R\x16stakeVerifierDeposited\x12^\n\x16stake_verifier_removed\x18! \x01(\x0b\x32&.vega.snapshot.v1.StakeVerifierRemovedH\x00R\x14stakeVerifierRemoved\x12\x35\n\x07witness\x18" \x01(\x0b\x32\x19.vega.snapshot.v1.WitnessH\x00R\x07witness\x12\x83\x01\n#delegation_last_reconciliation_time\x18# \x01(\x0b\x32\x32.vega.snapshot.v1.DelegationLastReconciliationTimeH\x00R delegationLastReconciliationTime\x12\x38\n\x08topology\x18$ \x01(\x0b\x32\x1a.vega.snapshot.v1.TopologyH\x00R\x08topology\x12\x44\n\x0boracle_data\x18% \x01(\x0b\x32!.vega.snapshot.v1.OracleDataBatchH\x00R\noracleData\x12Z\n\x14liquidity_parameters\x18& \x01(\x0b\x32%.vega.snapshot.v1.LiquidityParametersH\x00R\x13liquidityParameters\x12p\n\x1cliquidity_pending_provisions\x18\' \x01(\x0b\x32,.vega.snapshot.v1.LiquidityPendingProvisionsH\x00R\x1aliquidityPendingProvisions\x12\x80\x01\n"liquidity_parties_liquidity_orders\x18( \x01(\x0b\x32\x31.vega.snapshot.v1.LiquidityPartiesLiquidityOrdersH\x00R\x1fliquidityPartiesLiquidityOrders\x12\x64\n\x18liquidity_parties_orders\x18) \x01(\x0b\x32(.vega.snapshot.v1.LiquidityPartiesOrdersH\x00R\x16liquidityPartiesOrders\x12Z\n\x14liquidity_provisions\x18* \x01(\x0b\x32%.vega.snapshot.v1.LiquidityProvisionsH\x00R\x13liquidityProvisions\x12T\n\x12liquidity_supplied\x18+ \x01(\x0b\x32#.vega.snapshot.v1.LiquiditySuppliedH\x00R\x11liquiditySupplied\x12N\n\x10liquidity_target\x18, \x01(\x0b\x32!.vega.snapshot.v1.LiquidityTargetH\x00R\x0fliquidityTarget\x12\x64\n\x18\x66loating_point_consensus\x18. \x01(\x0b\x32(.vega.snapshot.v1.FloatingPointConsensusH\x00R\x16\x66loatingPointConsensus\x12H\n\x0emarket_tracker\x18/ \x01(\x0b\x32\x1f.vega.snapshot.v1.MarketTrackerH\x00R\rmarketTracker\x12m\n\x1b\x62\x61nking_recurring_transfers\x18\x31 \x01(\x0b\x32+.vega.snapshot.v1.BankingRecurringTransfersH\x00R\x19\x62\x61nkingRecurringTransfers\x12m\n\x1b\x62\x61nking_scheduled_transfers\x18\x32 \x01(\x0b\x32+.vega.snapshot.v1.BankingScheduledTransfersH\x00R\x19\x62\x61nkingScheduledTransfers\x12z\n erc20_multisig_topology_verified\x18\x33 \x01(\x0b\x32/.vega.snapshot.v1.ERC20MultiSigTopologyVerifiedH\x00R\x1d\x65rc20MultisigTopologyVerified\x12w\n\x1f\x65rc20_multisig_topology_pending\x18\x34 \x01(\x0b\x32..vega.snapshot.v1.ERC20MultiSigTopologyPendingH\x00R\x1c\x65rc20MultisigTopologyPending\x12\x43\n\rproof_of_work\x18\x35 \x01(\x0b\x32\x1d.vega.snapshot.v1.ProofOfWorkH\x00R\x0bproofOfWork\x12[\n\x15pending_asset_updates\x18\x36 \x01(\x0b\x32%.vega.snapshot.v1.PendingAssetUpdatesH\x00R\x13pendingAssetUpdates\x12j\n\x1aprotocol_upgrade_proposals\x18\x37 \x01(\x0b\x32*.vega.snapshot.v1.ProtocolUpgradeProposalsH\x00R\x18protocolUpgradeProposals\x12X\n\x14\x62\x61nking_bridge_state\x18\x38 \x01(\x0b\x32$.vega.snapshot.v1.BankingBridgeStateH\x00R\x12\x62\x61nkingBridgeState\x12N\n\x10settlement_state\x18\x39 \x01(\x0b\x32!.vega.snapshot.v1.SettlementStateH\x00R\x0fsettlementState\x12N\n\x10liquidity_scores\x18: \x01(\x0b\x32!.vega.snapshot.v1.LiquidityScoresH\x00R\x0fliquidityScores\x12[\n\x15spot_liquidity_target\x18; \x01(\x0b\x32%.vega.snapshot.v1.SpotLiquidityTargetH\x00R\x13spotLiquidityTarget\x12\x8c\x01\n&banking_recurring_governance_transfers\x18< \x01(\x0b\x32\x35.vega.snapshot.v1.BankingRecurringGovernanceTransfersH\x00R#bankingRecurringGovernanceTransfers\x12\x8c\x01\n&banking_scheduled_governance_transfers\x18= \x01(\x0b\x32\x35.vega.snapshot.v1.BankingScheduledGovernanceTransfersH\x00R#bankingScheduledGovernanceTransfers\x12\x65\n\x19\x65th_contract_call_results\x18> \x01(\x0b\x32(.vega.snapshot.v1.EthContractCallResultsH\x00R\x16\x65thContractCallResults\x12r\n\x1e\x65th_oracle_verifier_last_block\x18? \x01(\x0b\x32,.vega.snapshot.v1.EthOracleVerifierLastBlockH\x00R\x1a\x65thOracleVerifierLastBlockB\x06\n\x04\x64\x61ta"L\n\x15TimestampedTotalStake\x12\x1f\n\x0btotal_stake\x18\x01 \x01(\x04R\ntotalStake\x12\x12\n\x04time\x18\x02 \x01(\x03R\x04time"R\n\x17TimestampedOpenInterest\x12#\n\ropen_interest\x18\x01 \x01(\x04R\x0copenInterest\x12\x12\n\x04time\x18\x02 \x01(\x03R\x04time"\xf2\x02\n\x0fLiquidityTarget\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12!\n\x0c\x63urrent_time\x18\x02 \x01(\x03R\x0b\x63urrentTime\x12-\n\x12scheduled_truncate\x18\x03 \x01(\x03R\x11scheduledTruncate\x12\x34\n\x16\x63urrent_open_interests\x18\x04 \x03(\x04R\x14\x63urrentOpenInterests\x12\x61\n\x17previous_open_interests\x18\x05 \x03(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterestR\x15previousOpenInterests\x12W\n\x12max_open_interests\x18\x06 \x01(\x0b\x32).vega.snapshot.v1.TimestampedOpenInterestR\x10maxOpenInterests"\xe0\x02\n\x13SpotLiquidityTarget\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12!\n\x0c\x63urrent_time\x18\x02 \x01(\x03R\x0b\x63urrentTime\x12-\n\x12scheduled_truncate\x18\x03 \x01(\x03R\x11scheduledTruncate\x12.\n\x13\x63urrent_total_stake\x18\x04 \x03(\x04R\x11\x63urrentTotalStake\x12Y\n\x14previous_total_stake\x18\x05 \x03(\x0b\x32\'.vega.snapshot.v1.TimestampedTotalStakeR\x12previousTotalStake\x12O\n\x0fmax_total_stake\x18\x06 \x01(\x0b\x32\'.vega.snapshot.v1.TimestampedTotalStakeR\rmaxTotalStake"Z\n\x1eLiquidityOffsetProbabilityPair\x12\x16\n\x06offset\x18\x01 \x01(\rR\x06offset\x12 \n\x0bprobability\x18\x02 \x01(\tR\x0bprobability"\xfb\x01\n\x11LiquiditySupplied\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12+\n\x11\x63onsensus_reached\x18\x02 \x01(\x08R\x10\x63onsensusReached\x12M\n\tbid_cache\x18\x03 \x03(\x0b\x32\x30.vega.snapshot.v1.LiquidityOffsetProbabilityPairR\x08\x62idCache\x12M\n\task_cache\x18\x04 \x03(\x0b\x32\x30.vega.snapshot.v1.LiquidityOffsetProbabilityPairR\x08\x61skCache"P\n\x0fOracleDataBatch\x12=\n\x0boracle_data\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.OracleDataR\noracleData"\xa7\x01\n\nOracleData\x12.\n\x07signers\x18\x01 \x03(\x0b\x32\x14.vega.data.v1.SignerR\x07signers\x12\x34\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32 .vega.snapshot.v1.OracleDataPairR\x04\x64\x61ta\x12\x33\n\tmeta_data\x18\x03 \x03(\x0b\x32\x16.vega.data.v1.PropertyR\x08metaData"8\n\x0eOracleDataPair\x12\x10\n\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n\x05value\x18\x02 \x01(\tR\x05value"C\n\x07Witness\x12\x38\n\tresources\x18\x01 \x03(\x0b\x32\x1a.vega.snapshot.v1.ResourceR\tresources"g\n\x08Resource\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n\x0b\x63heck_until\x18\x02 \x01(\x03R\ncheckUntil\x12\x14\n\x05votes\x18\x03 \x03(\tR\x05votes\x12\x14\n\x05state\x18\x04 \x01(\rR\x05state"3\n\x0e\x45ventForwarder\x12!\n\x0c\x61\x63ked_events\x18\x01 \x03(\tR\x0b\x61\x63kedEvents"?\n\x12\x43ollateralAccounts\x12)\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32\r.vega.AccountR\x08\x61\x63\x63ounts"7\n\x10\x43ollateralAssets\x12#\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets"3\n\x0c\x41\x63tiveAssets\x12#\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets"4\n\rPendingAssets\x12#\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets":\n\x13PendingAssetUpdates\x12#\n\x06\x61ssets\x18\x01 \x03(\x0b\x32\x0b.vega.AssetR\x06\x61ssets"P\n\nWithdrawal\x12\x10\n\x03ref\x18\x01 \x01(\tR\x03ref\x12\x30\n\nwithdrawal\x18\x02 \x01(\x0b\x32\x10.vega.WithdrawalR\nwithdrawal"B\n\x07\x44\x65posit\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\'\n\x07\x64\x65posit\x18\x02 \x01(\x0b\x32\r.vega.DepositR\x07\x64\x65posit"i\n\x05TxRef\x12\x14\n\x05\x61sset\x18\x01 \x01(\tR\x05\x61sset\x12\x19\n\x08\x62lock_nr\x18\x02 \x01(\x04R\x07\x62lockNr\x12\x12\n\x04hash\x18\x03 \x01(\tR\x04hash\x12\x1b\n\tlog_index\x18\x04 \x01(\x04R\x08logIndex"T\n\x12\x42\x61nkingWithdrawals\x12>\n\x0bwithdrawals\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.WithdrawalR\x0bwithdrawals"F\n\x0f\x42\x61nkingDeposits\x12\x33\n\x07\x64\x65posit\x18\x01 \x03(\x0b\x32\x19.vega.snapshot.v1.DepositR\x07\x64\x65posit"P\n\x0b\x42\x61nkingSeen\x12\x12\n\x04refs\x18\x01 \x03(\tR\x04refs\x12-\n\x13last_seen_eth_block\x18\x02 \x01(\x04R\x10lastSeenEthBlock"Y\n\x13\x42\x61nkingAssetActions\x12\x42\n\x0c\x61sset_action\x18\x01 \x03(\x0b\x32\x1f.vega.checkpoint.v1.AssetActionR\x0b\x61ssetAction"t\n\x19\x42\x61nkingRecurringTransfers\x12W\n\x13recurring_transfers\x18\x01 \x01(\x0b\x32&.vega.checkpoint.v1.RecurringTransfersR\x12recurringTransfers"t\n\x19\x42\x61nkingScheduledTransfers\x12W\n\x11transfers_at_time\x18\x01 \x03(\x0b\x32+.vega.checkpoint.v1.ScheduledTransferAtTimeR\x0ftransfersAtTime"~\n#BankingRecurringGovernanceTransfers\x12W\n\x13recurring_transfers\x18\x01 \x03(\x0b\x32&.vega.checkpoint.v1.GovernanceTransferR\x12recurringTransfers"\x88\x01\n#BankingScheduledGovernanceTransfers\x12\x61\n\x11transfers_at_time\x18\x01 \x03(\x0b\x32\x35.vega.checkpoint.v1.ScheduledGovernanceTransferAtTimeR\x0ftransfersAtTime"X\n\x12\x42\x61nkingBridgeState\x12\x42\n\x0c\x62ridge_state\x18\x01 \x01(\x0b\x32\x1f.vega.checkpoint.v1.BridgeStateR\x0b\x62ridgeState"%\n\nCheckpoint\x12\x17\n\x07next_cp\x18\x01 \x01(\x03R\x06nextCp"\\\n DelegationLastReconciliationTime\x12\x38\n\x18last_reconciliation_time\x18\x01 \x01(\x03R\x16lastReconciliationTime"F\n\x10\x44\x65legationActive\x12\x32\n\x0b\x64\x65legations\x18\x01 \x03(\x0b\x32\x10.vega.DelegationR\x0b\x64\x65legations"}\n\x11\x44\x65legationPending\x12\x32\n\x0b\x64\x65legations\x18\x01 \x03(\x0b\x32\x10.vega.DelegationR\x0b\x64\x65legations\x12\x34\n\x0cundelegation\x18\x02 \x03(\x0b\x32\x10.vega.DelegationR\x0cundelegation"*\n\x0e\x44\x65legationAuto\x12\x18\n\x07parties\x18\x01 \x03(\tR\x07parties"\x9a\x01\n\x0cProposalData\x12*\n\x08proposal\x18\x01 \x01(\x0b\x32\x0e.vega.ProposalR\x08proposal\x12\x1c\n\x03yes\x18\x02 \x03(\x0b\x32\n.vega.VoteR\x03yes\x12\x1a\n\x02no\x18\x03 \x03(\x0b\x32\n.vega.VoteR\x02no\x12$\n\x07invalid\x18\x04 \x03(\x0b\x32\n.vega.VoteR\x07invalid"Q\n\x11GovernanceEnacted\x12<\n\tproposals\x18\x01 \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalDataR\tproposals"P\n\x10GovernanceActive\x12<\n\tproposals\x18\x01 \x03(\x0b\x32\x1e.vega.snapshot.v1.ProposalDataR\tproposals">\n\x0eGovernanceNode\x12,\n\tproposals\x18\x01 \x03(\x0b\x32\x0e.vega.ProposalR\tproposals"v\n\x0eStakingAccount\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x18\n\x07\x62\x61lance\x18\x02 \x01(\tR\x07\x62\x61lance\x12\x34\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x1c.vega.events.v1.StakeLinkingR\x06\x65vents"\xe1\x01\n\x0fStakingAccounts\x12<\n\x08\x61\x63\x63ounts\x18\x01 \x03(\x0b\x32 .vega.snapshot.v1.StakingAccountR\x08\x61\x63\x63ounts\x12;\n\x1astaking_asset_total_supply\x18\x02 \x01(\tR\x17stakingAssetTotalSupply\x12S\n\x1apending_stake_total_supply\x18\x03 \x01(\x0b\x32\x16.vega.StakeTotalSupplyR\x17pendingStakeTotalSupply"\xcc\x01\n\x0cMatchingBook\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12\x1d\n\x03\x62uy\x18\x02 \x03(\x0b\x32\x0b.vega.OrderR\x03\x62uy\x12\x1f\n\x04sell\x18\x03 \x03(\x0b\x32\x0b.vega.OrderR\x04sell\x12*\n\x11last_traded_price\x18\x04 \x01(\tR\x0flastTradedPrice\x12\x18\n\x07\x61uction\x18\x05 \x01(\x08R\x07\x61uction\x12\x19\n\x08\x62\x61tch_id\x18\x06 \x01(\x04R\x07\x62\x61tchId";\n\tNetParams\x12.\n\x06params\x18\x01 \x03(\x0b\x32\x16.vega.NetworkParameterR\x06params"0\n\nDecimalMap\x12\x10\n\x03key\x18\x01 \x01(\x03R\x03key\x12\x10\n\x03val\x18\x02 \x01(\tR\x03val"5\n\tTimePrice\x12\x12\n\x04time\x18\x01 \x01(\x03R\x04time\x12\x14\n\x05price\x18\x02 \x01(\tR\x05price";\n\x0bPriceVolume\x12\x14\n\x05price\x18\x01 \x01(\tR\x05price\x12\x16\n\x06volume\x18\x02 \x01(\x04R\x06volume"B\n\nPriceRange\x12\x10\n\x03min\x18\x01 \x01(\tR\x03min\x12\x10\n\x03max\x18\x02 \x01(\tR\x03max\x12\x10\n\x03ref\x18\x03 \x01(\tR\x03ref"\x9a\x01\n\nPriceBound\x12\x16\n\x06\x61\x63tive\x18\x01 \x01(\x08R\x06\x61\x63tive\x12\x1b\n\tup_factor\x18\x02 \x01(\tR\x08upFactor\x12\x1f\n\x0b\x64own_factor\x18\x03 \x01(\tR\ndownFactor\x12\x36\n\x07trigger\x18\x04 \x01(\x0b\x32\x1c.vega.PriceMonitoringTriggerR\x07trigger"y\n\x0fPriceRangeCache\x12\x32\n\x05\x62ound\x18\x01 \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceBoundR\x05\x62ound\x12\x32\n\x05range\x18\x02 \x01(\x0b\x32\x1c.vega.snapshot.v1.PriceRangeR\x05range"<\n\x0c\x43urrentPrice\x12\x14\n\x05price\x18\x01 \x01(\tR\x05price\x12\x16\n\x06volume\x18\x02 \x01(\x04R\x06volume"S\n\tPastPrice\x12\x12\n\x04time\x18\x01 \x01(\x03R\x04time\x12\x32\n\x15volume_weighted_price\x18\x02 \x01(\tR\x13volumeWeightedPrice"\xf4\x04\n\x0cPriceMonitor\x12 \n\x0binitialised\x18\x03 \x01(\x08R\x0binitialised\x12=\n\x0b\x66p_horizons\x18\x04 \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMapR\nfpHorizons\x12\x10\n\x03now\x18\x05 \x01(\x03R\x03now\x12\x16\n\x06update\x18\x06 \x01(\x03R\x06update\x12\x34\n\x06\x62ounds\x18\x07 \x03(\x0b\x32\x1c.vega.snapshot.v1.PriceBoundR\x06\x62ounds\x12\x33\n\x16price_range_cache_time\x18\x08 \x01(\x03R\x13priceRangeCacheTime\x12M\n\x11price_range_cache\x18\t \x03(\x0b\x32!.vega.snapshot.v1.PriceRangeCacheR\x0fpriceRangeCache\x12/\n\x14ref_price_cache_time\x18\n \x01(\x03R\x11refPriceCacheTime\x12\x44\n\x0fref_price_cache\x18\x0b \x03(\x0b\x32\x1c.vega.snapshot.v1.DecimalMapR\rrefPriceCache\x12=\n\nprices_now\x18\x0c \x03(\x0b\x32\x1e.vega.snapshot.v1.CurrentPriceR\tpricesNow\x12<\n\x0bprices_past\x18\r \x03(\x0b\x32\x1b.vega.snapshot.v1.PastPriceR\npricesPast\x12+\n\x11\x63onsensus_reached\x18\x0e \x01(\x08R\x10\x63onsensusReached"\xf8\x02\n\x0c\x41uctionState\x12,\n\x04mode\x18\x01 \x01(\x0e\x32\x18.vega.Market.TradingModeR\x04mode\x12;\n\x0c\x64\x65\x66\x61ult_mode\x18\x02 \x01(\x0e\x32\x18.vega.Market.TradingModeR\x0b\x64\x65\x66\x61ultMode\x12.\n\x07trigger\x18\x03 \x01(\x0e\x32\x14.vega.AuctionTriggerR\x07trigger\x12\x14\n\x05\x62\x65gin\x18\x04 \x01(\x03R\x05\x62\x65gin\x12\'\n\x03\x65nd\x18\x05 \x01(\x0b\x32\x15.vega.AuctionDurationR\x03\x65nd\x12\x14\n\x05start\x18\x06 \x01(\x08R\x05start\x12\x12\n\x04stop\x18\x07 \x01(\x08R\x04stop\x12\x32\n\textension\x18\x08 \x01(\x0e\x32\x14.vega.AuctionTriggerR\textension\x12\x30\n\x14\x65xtension_event_sent\x18\t \x01(\x08R\x12\x65xtensionEventSent"u\n\rEquityShareLP\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n\x05stake\x18\x02 \x01(\tR\x05stake\x12\x14\n\x05share\x18\x03 \x01(\tR\x05share\x12\x10\n\x03\x61vg\x18\x04 \x01(\tR\x03\x61vg\x12\x16\n\x06vshare\x18\x05 \x01(\tR\x06vshare"\xa9\x01\n\x0b\x45quityShare\x12\x10\n\x03mvp\x18\x01 \x01(\tR\x03mvp\x12\x32\n\x15opening_auction_ended\x18\x02 \x01(\x08R\x13openingAuctionEnded\x12\x31\n\x03lps\x18\x03 \x03(\x0b\x32\x1f.vega.snapshot.v1.EquityShareLPR\x03lps\x12\x0c\n\x01r\x18\x04 \x01(\tR\x01r\x12\x13\n\x05p_mvp\x18\x05 \x01(\tR\x04pMvp"\x84\x01\n\x0b\x46\x65\x65Splitter\x12*\n\x11time_window_start\x18\x01 \x01(\x03R\x0ftimeWindowStart\x12\x1f\n\x0btrade_value\x18\x02 \x01(\tR\ntradeValue\x12\x10\n\x03\x61vg\x18\x03 \x01(\tR\x03\x61vg\x12\x16\n\x06window\x18\x04 \x01(\x04R\x06window"\xfc\x06\n\nSpotMarket\x12$\n\x06market\x18\x01 \x01(\x0b\x32\x0c.vega.MarketR\x06market\x12\x43\n\rprice_monitor\x18\x02 \x01(\x0b\x32\x1e.vega.snapshot.v1.PriceMonitorR\x0cpriceMonitor\x12\x43\n\rauction_state\x18\x03 \x01(\x0b\x32\x1e.vega.snapshot.v1.AuctionStateR\x0c\x61uctionState\x12\x43\n\rpegged_orders\x18\x04 \x01(\x0b\x32\x1e.vega.snapshot.v1.PeggedOrdersR\x0cpeggedOrders\x12\x34\n\x0f\x65xpiring_orders\x18\x05 \x03(\x0b\x32\x0b.vega.OrderR\x0e\x65xpiringOrders\x12"\n\rlast_best_bid\x18\x06 \x01(\tR\x0blastBestBid\x12"\n\rlast_best_ask\x18\x07 \x01(\tR\x0blastBestAsk\x12 \n\x0clast_mid_bid\x18\x08 \x01(\tR\nlastMidBid\x12 \n\x0clast_mid_ask\x18\t \x01(\tR\nlastMidAsk\x12\x35\n\x17last_market_value_proxy\x18\n \x01(\tR\x14lastMarketValueProxy\x12\x41\n\x1dlast_equity_share_distributed\x18\x0b \x01(\x03R\x1alastEquityShareDistributed\x12@\n\x0c\x65quity_share\x18\x0c \x01(\x0b\x32\x1d.vega.snapshot.v1.EquityShareR\x0b\x65quityShare\x12,\n\x12\x63urrent_mark_price\x18\r \x01(\tR\x10\x63urrentMarkPrice\x12@\n\x0c\x66\x65\x65_splitter\x18\x0e \x01(\x0b\x32\x1d.vega.snapshot.v1.FeeSplitterR\x0b\x66\x65\x65Splitter\x12-\n\x13next_mark_to_market\x18\x0f \x01(\x03R\x10nextMarkToMarket\x12*\n\x11last_traded_price\x18\x10 \x01(\tR\x0flastTradedPrice\x12\x18\n\x07parties\x18\x11 \x03(\tR\x07parties\x12\x16\n\x06\x63losed\x18\x12 \x01(\x08R\x06\x63losed"\xd6\t\n\x06Market\x12$\n\x06market\x18\x01 \x01(\x0b\x32\x0c.vega.MarketR\x06market\x12\x43\n\rprice_monitor\x18\x02 \x01(\x0b\x32\x1e.vega.snapshot.v1.PriceMonitorR\x0cpriceMonitor\x12\x43\n\rauction_state\x18\x03 \x01(\x0b\x32\x1e.vega.snapshot.v1.AuctionStateR\x0c\x61uctionState\x12\x43\n\rpegged_orders\x18\x04 \x01(\x0b\x32\x1e.vega.snapshot.v1.PeggedOrdersR\x0cpeggedOrders\x12\x34\n\x0f\x65xpiring_orders\x18\x05 \x03(\x0b\x32\x0b.vega.OrderR\x0e\x65xpiringOrders\x12"\n\rlast_best_bid\x18\x06 \x01(\tR\x0blastBestBid\x12"\n\rlast_best_ask\x18\x07 \x01(\tR\x0blastBestAsk\x12 \n\x0clast_mid_bid\x18\x08 \x01(\tR\nlastMidBid\x12 \n\x0clast_mid_ask\x18\t \x01(\tR\nlastMidAsk\x12\x35\n\x17last_market_value_proxy\x18\n \x01(\tR\x14lastMarketValueProxy\x12\x41\n\x1dlast_equity_share_distributed\x18\x0b \x01(\x03R\x1alastEquityShareDistributed\x12@\n\x0c\x65quity_share\x18\x0c \x01(\x0b\x32\x1d.vega.snapshot.v1.EquityShareR\x0b\x65quityShare\x12,\n\x12\x63urrent_mark_price\x18\r \x01(\tR\x10\x63urrentMarkPrice\x12*\n\x11risk_factor_short\x18\x0e \x01(\tR\x0friskFactorShort\x12(\n\x10risk_factor_long\x18\x0f \x01(\tR\x0eriskFactorLong\x12\x41\n\x1drisk_factor_consensus_reached\x18\x10 \x01(\x08R\x1ariskFactorConsensusReached\x12@\n\x0c\x66\x65\x65_splitter\x18\x11 \x01(\x0b\x32\x1d.vega.snapshot.v1.FeeSplitterR\x0b\x66\x65\x65Splitter\x12\'\n\x0fsettlement_data\x18\x12 \x01(\tR\x0esettlementData\x12-\n\x13next_mark_to_market\x18\x13 \x01(\x03R\x10nextMarkToMarket\x12*\n\x11last_traded_price\x18\x14 \x01(\tR\x0flastTradedPrice\x12\x18\n\x07parties\x18\x15 \x03(\tR\x07parties\x12\x16\n\x06\x63losed\x18\x16 \x01(\x08R\x06\x63losed\x12\x1c\n\tsucceeded\x18\x17 \x01(\x08R\tsucceeded\x12=\n\x0bstop_orders\x18\x18 \x01(\x0b\x32\x1c.vega.snapshot.v1.StopOrdersR\nstopOrders\x12=\n\x14\x65xpiring_stop_orders\x18\x19 \x03(\x0b\x32\x0b.vega.OrderR\x12\x65xpiringStopOrders"=\n\rOrdersAtPrice\x12\x14\n\x05price\x18\x01 \x01(\tR\x05price\x12\x16\n\x06orders\x18\x02 \x03(\tR\x06orders"\x98\x01\n\x10PricedStopOrders\x12\x42\n\x0c\x66\x61lls_bellow\x18\x01 \x03(\x0b\x32\x1f.vega.snapshot.v1.OrdersAtPriceR\x0b\x66\x61llsBellow\x12@\n\x0brises_above\x18\x02 \x03(\x0b\x32\x1f.vega.snapshot.v1.OrdersAtPriceR\nrisesAbove"\xc4\x01\n\x12TrailingStopOrders\x12&\n\x0flast_seen_price\x18\x01 \x01(\tR\rlastSeenPrice\x12\x43\n\x0c\x66\x61lls_bellow\x18\x02 \x03(\x0b\x32 .vega.snapshot.v1.OffsetsAtPriceR\x0b\x66\x61llsBellow\x12\x41\n\x0brises_above\x18\x03 \x03(\x0b\x32 .vega.snapshot.v1.OffsetsAtPriceR\nrisesAbove"@\n\x0eOrdersAtOffset\x12\x16\n\x06offset\x18\x01 \x01(\tR\x06offset\x12\x16\n\x06orders\x18\x02 \x03(\tR\x06orders"b\n\x0eOffsetsAtPrice\x12\x14\n\x05price\x18\x01 \x01(\tR\x05price\x12:\n\x07offsets\x18\x02 \x03(\x0b\x32 .vega.snapshot.v1.OrdersAtOffsetR\x07offsets"\xf7\x01\n\nStopOrders\x12?\n\x0bstop_orders\x18\x01 \x03(\x0b\x32\x1e.vega.events.v1.StopOrderEventR\nstopOrders\x12P\n\x12priced_stop_orders\x18\x02 \x01(\x0b\x32".vega.snapshot.v1.PricedStopOrdersR\x10pricedStopOrders\x12V\n\x14trailing_stop_orders\x18\x03 \x01(\x0b\x32$.vega.snapshot.v1.TrailingStopOrdersR\x12trailingStopOrders"@\n\x0cPeggedOrders\x12\x30\n\rparked_orders\x18\x02 \x03(\x0b\x32\x0b.vega.OrderR\x0cparkedOrders"\x8f\x02\n\x10\x45xecutionMarkets\x12\x32\n\x07markets\x18\x01 \x03(\x0b\x32\x18.vega.snapshot.v1.MarketR\x07markets\x12?\n\x0cspot_markets\x18\x02 \x03(\x0b\x32\x1c.vega.snapshot.v1.SpotMarketR\x0bspotMarkets\x12H\n\x0fsettled_markets\x18\x03 \x03(\x0b\x32\x1f.vega.checkpoint.v1.MarketStateR\x0esettledMarkets\x12<\n\nsuccessors\x18\x04 \x03(\x0b\x32\x1c.vega.snapshot.v1.SuccessorsR\nsuccessors"^\n\nSuccessors\x12#\n\rparent_market\x18\x01 \x01(\tR\x0cparentMarket\x12+\n\x11successor_markets\x18\x02 \x03(\tR\x10successorMarkets"\xe7\x01\n\x08Position\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x12\n\x04size\x18\x02 \x01(\x03R\x04size\x12\x10\n\x03\x62uy\x18\x03 \x01(\x03R\x03\x62uy\x12\x12\n\x04sell\x18\x04 \x01(\x03R\x04sell\x12\x14\n\x05price\x18\x05 \x01(\tR\x05price\x12&\n\x0f\x62uy_sum_product\x18\x06 \x01(\tR\rbuySumProduct\x12(\n\x10sell_sum_product\x18\x07 \x01(\tR\x0esellSumProduct\x12\x1e\n\ndistressed\x18\x08 \x01(\x08R\ndistressed"h\n\x0fMarketPositions\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12\x38\n\tpositions\x18\x02 \x03(\x0b\x32\x1a.vega.snapshot.v1.PositionR\tpositions"\xee\x01\n\x0fSettlementState\x12\x1b\n\tmarket_id\x18\x01 \x01(\tR\x08marketId\x12&\n\x0flast_mark_price\x18\x02 \x01(\tR\rlastMarkPrice\x12[\n\x16last_settled_positions\x18\x03 \x03(\x0b\x32%.vega.snapshot.v1.LastSettledPositionR\x14lastSettledPositions\x12\x39\n\x06trades\x18\x04 \x03(\x0b\x32!.vega.snapshot.v1.SettlementTradeR\x06trades"V\n\x13LastSettledPosition\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12)\n\x10settled_position\x18\x02 \x01(\x03R\x0fsettledPosition"\x94\x01\n\x0fSettlementTrade\x12\x19\n\x08party_id\x18\x01 \x01(\tR\x07partyId\x12\x14\n\x05price\x18\x02 \x01(\tR\x05price\x12!\n\x0cmarket_price\x18\x03 \x01(\tR\x0bmarketPrice\x12\x12\n\x04size\x18\x04 \x01(\x03R\x04size\x12\x19\n\x08new_size\x18\x05 \x01(\x03R\x07newSize"g\n\x08\x41ppState\x12\x16\n\x06height\x18\x01 \x01(\x04R\x06height\x12\x14\n\x05\x62lock\x18\x02 \x01(\tR\x05\x62lock\x12\x12\n\x04time\x18\x03 \x01(\x03R\x04time\x12\x19\n\x08\x63hain_id\x18\x04 \x01(\tR\x07\x63hainId"\xc3\x01\n\nEpochState\x12\x10\n\x03seq\x18\x01 \x01(\x04R\x03seq\x12\x1d\n\nstart_time\x18\x03 \x01(\x03R\tstartTime\x12\x1f\n\x0b\x65xpire_time\x18\x04 \x01(\x03R\nexpireTime\x12\x36\n\x18ready_to_start_new_epoch\x18\x06 \x01(\x08R\x14readyToStartNewEpoch\x12+\n\x12ready_to_end_epoch\x18\x07 \x01(\x08R\x0freadyToEndEpoch"{\n\x15RewardsPendingPayouts\x12\x62\n\x18scheduled_rewards_payout\x18\x01 \x03(\x0b\x32(.vega.snapshot.v1.ScheduledRewardsPayoutR\x16scheduledRewardsPayout"\x81\x01\n\x16ScheduledRewardsPayout\x12\x1f\n\x0bpayout_time\x18\x01 \x01(\x03R\npayoutTime\x12\x46\n\x0erewards_payout\x18\x02 \x03(\x0b\x32\x1f.vega.snapshot.v1.RewardsPayoutR\rrewardsPayout"\xfc\x01\n\rRewardsPayout\x12!\n\x0c\x66rom_account\x18\x01 \x01(\tR\x0b\x66romAccount\x12\x14\n\x05\x61sset\x18\x02 \x01(\tR\x05\x61sset\x12T\n\x13reward_party_amount\x18\x03 \x03(\x0b\x32$.vega.snapshot.v1.RewardsPartyAmountR\x11rewardPartyAmount\x12!\n\x0ctotal_reward\x18\x04 \x01(\tR\x0btotalReward\x12\x1b\n\tepoch_seq\x18\x05 \x01(\tR\x08\x65pochSeq\x12\x1c\n\ttimestamp\x18\x06 \x01(\x03R\ttimestamp"B\n\x12RewardsPartyAmount\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x16\n\x06\x61mount\x18\x02 \x01(\tR\x06\x61mount"\x94\x03\n\nLimitState\x12\x1f\n\x0b\x62lock_count\x18\x01 \x01(\rR\nblockCount\x12,\n\x12\x63\x61n_propose_market\x18\x02 \x01(\x08R\x10\x63\x61nProposeMarket\x12*\n\x11\x63\x61n_propose_asset\x18\x03 \x01(\x08R\x0f\x63\x61nProposeAsset\x12%\n\x0egenesis_loaded\x18\x04 \x01(\x08R\rgenesisLoaded\x12\x34\n\x16propose_market_enabled\x18\x05 \x01(\x08R\x14proposeMarketEnabled\x12\x32\n\x15propose_asset_enabled\x18\x06 \x01(\x08R\x13proposeAssetEnabled\x12=\n\x1bpropose_market_enabled_from\x18\x07 \x01(\x03R\x18proposeMarketEnabledFrom\x12;\n\x1apropose_asset_enabled_from\x18\x08 \x01(\x03R\x17proposeAssetEnabledFrom"\x94\x04\n\x0eVoteSpamPolicy\x12L\n\rparty_to_vote\x18\x01 \x03(\x0b\x32(.vega.snapshot.v1.PartyProposalVoteCountR\x0bpartyToVote\x12\x44\n\x0e\x62\x61nned_parties\x18\x02 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedPartyR\rbannedParties\x12H\n\rtoken_balance\x18\x03 \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalanceR\x0ctokenBalance\x12_\n\x1arecent_blocks_reject_stats\x18\x04 \x03(\x0b\x32".vega.snapshot.v1.BlockRejectStatsR\x17recentBlocksRejectStats\x12.\n\x13\x63urrent_block_index\x18\x05 \x01(\x04R\x11\x63urrentBlockIndex\x12.\n\x13last_increase_block\x18\x06 \x01(\x04R\x11lastIncreaseBlock\x12*\n\x11\x63urrent_epoch_seq\x18\x07 \x01(\x04R\x0f\x63urrentEpochSeq\x12\x37\n\x18min_voting_tokens_factor\x18\x08 \x01(\tR\x15minVotingTokensFactor"`\n\x16PartyProposalVoteCount\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x1a\n\x08proposal\x18\x02 \x01(\tR\x08proposal\x12\x14\n\x05\x63ount\x18\x03 \x01(\x04R\x05\x63ount"C\n\x11PartyTokenBalance\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x18\n\x07\x62\x61lance\x18\x02 \x01(\tR\x07\x62\x61lance"D\n\x10\x42lockRejectStats\x12\x1a\n\x08rejected\x18\x01 \x01(\x04R\x08rejected\x12\x14\n\x05total\x18\x02 \x01(\x04R\x05total"G\n\x19SpamPartyTransactionCount\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x14\n\x05\x63ount\x18\x02 \x01(\x04R\x05\x63ount"\xc2\x02\n\x10SimpleSpamPolicy\x12\x1f\n\x0bpolicy_name\x18\x01 \x01(\tR\npolicyName\x12Q\n\x0eparty_to_count\x18\x02 \x03(\x0b\x32+.vega.snapshot.v1.SpamPartyTransactionCountR\x0cpartyToCount\x12\x44\n\x0e\x62\x61nned_parties\x18\x03 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedPartyR\rbannedParties\x12H\n\rtoken_balance\x18\x04 \x03(\x0b\x32#.vega.snapshot.v1.PartyTokenBalanceR\x0ctokenBalance\x12*\n\x11\x63urrent_epoch_seq\x18\x05 \x01(\x04R\x0f\x63urrentEpochSeq"p\n\nNotarySigs\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n\x04kind\x18\x02 \x01(\x05R\x04kind\x12\x12\n\x04node\x18\x03 \x01(\tR\x04node\x12\x10\n\x03sig\x18\x04 \x01(\tR\x03sig\x12\x18\n\x07pending\x18\x05 \x01(\x08R\x07pending"G\n\x06Notary\x12=\n\x0bnotary_sigs\x18\x01 \x03(\x0b\x32\x1c.vega.snapshot.v1.NotarySigsR\nnotarySigs"m\n\x16StakeVerifierDeposited\x12S\n\x11pending_deposited\x18\x01 \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPendingR\x10pendingDeposited"g\n\x14StakeVerifierRemoved\x12O\n\x0fpending_removed\x18\x01 \x03(\x0b\x32&.vega.snapshot.v1.StakeVerifierPendingR\x0ependingRemoved"\x85\x02\n\x14StakeVerifierPending\x12)\n\x10\x65thereum_address\x18\x01 \x01(\tR\x0f\x65thereumAddress\x12&\n\x0fvega_public_key\x18\x02 \x01(\tR\rvegaPublicKey\x12\x16\n\x06\x61mount\x18\x03 \x01(\tR\x06\x61mount\x12\x1d\n\nblock_time\x18\x04 \x01(\x03R\tblockTime\x12!\n\x0c\x62lock_number\x18\x05 \x01(\x04R\x0b\x62lockNumber\x12\x1b\n\tlog_index\x18\x06 \x01(\x04R\x08logIndex\x12\x13\n\x05tx_id\x18\x07 \x01(\tR\x04txId\x12\x0e\n\x02id\x18\x08 \x01(\tR\x02id"^\n\x1a\x45thOracleVerifierLastBlock\x12!\n\x0c\x62lock_height\x18\x01 \x01(\x04R\x0b\x62lockHeight\x12\x1d\n\nblock_time\x18\x02 \x01(\x04R\tblockTime"\x82\x01\n\x16\x45thContractCallResults\x12h\n\x1cpending_contract_call_result\x18\x01 \x03(\x0b\x32\'.vega.snapshot.v1.EthContractCallResultR\x19pendingContractCallResult"\x8a\x01\n\x15\x45thContractCallResult\x12!\n\x0c\x62lock_height\x18\x01 \x01(\x04R\x0b\x62lockHeight\x12\x1d\n\nblock_time\x18\x02 \x01(\x04R\tblockTime\x12\x17\n\x07spec_id\x18\x03 \x01(\tR\x06specId\x12\x16\n\x06result\x18\x04 \x01(\x0cR\x06result"\x9b\x01\n\x12PendingKeyRotation\x12!\n\x0c\x62lock_height\x18\x01 \x01(\x04R\x0b\x62lockHeight\x12\x17\n\x07node_id\x18\x02 \x01(\tR\x06nodeId\x12\x1e\n\x0bnew_pub_key\x18\x03 \x01(\tR\tnewPubKey\x12)\n\x11new_pub_key_index\x18\x04 \x01(\rR\x0enewPubKeyIndex"\xb8\x01\n\x1aPendingEthereumKeyRotation\x12!\n\x0c\x62lock_height\x18\x01 \x01(\x04R\x0b\x62lockHeight\x12\x17\n\x07node_id\x18\x02 \x01(\tR\x06nodeId\x12\x1f\n\x0bnew_address\x18\x03 \x01(\tR\nnewAddress\x12\x1c\n\tsubmitter\x18\x04 \x01(\tR\tsubmitter\x12\x1f\n\x0bold_address\x18\x05 \x01(\tR\noldAddress"\xdd\x04\n\x08Topology\x12G\n\x0evalidator_data\x18\x01 \x03(\x0b\x32 .vega.snapshot.v1.ValidatorStateR\rvalidatorData\x12\x1d\n\nchain_keys\x18\x02 \x03(\tR\tchainKeys\x12_\n\x19pending_pub_key_rotations\x18\x03 \x03(\x0b\x32$.vega.snapshot.v1.PendingKeyRotationR\x16pendingPubKeyRotations\x12[\n\x15validator_performance\x18\x04 \x01(\x0b\x32&.vega.snapshot.v1.ValidatorPerformanceR\x14validatorPerformance\x12q\n\x1epending_ethereum_key_rotations\x18\x05 \x03(\x0b\x32,.vega.snapshot.v1.PendingEthereumKeyRotationR\x1bpendingEthereumKeyRotations\x12\x43\n\nsignatures\x18\x06 \x01(\x0b\x32#.vega.snapshot.v1.ToplogySignaturesR\nsignatures\x12s\n\x1funsolved_ethereum_key_rotations\x18\x07 \x03(\x0b\x32,.vega.snapshot.v1.PendingEthereumKeyRotationR\x1cunsolvedEthereumKeyRotations"\xde\x01\n\x11ToplogySignatures\x12\x65\n\x12pending_signatures\x18\x01 \x03(\x0b\x32\x36.vega.snapshot.v1.PendingERC20MultisigControlSignatureR\x11pendingSignatures\x12\x62\n\x11issued_signatures\x18\x02 \x03(\x0b\x32\x35.vega.snapshot.v1.IssuedERC20MultisigControlSignatureR\x10issuedSignatures"\xb3\x01\n$PendingERC20MultisigControlSignature\x12\x17\n\x07node_id\x18\x01 \x01(\tR\x06nodeId\x12)\n\x10\x65thereum_address\x18\x02 \x01(\tR\x0f\x65thereumAddress\x12\x14\n\x05nonce\x18\x03 \x01(\tR\x05nonce\x12\x1b\n\tepoch_seq\x18\x04 \x01(\x04R\x08\x65pochSeq\x12\x14\n\x05\x61\x64\x64\x65\x64\x18\x05 \x01(\x08R\x05\x61\x64\x64\x65\x64"\x9e\x01\n#IssuedERC20MultisigControlSignature\x12\x1f\n\x0bresource_id\x18\x01 \x01(\tR\nresourceId\x12)\n\x10\x65thereum_address\x18\x02 \x01(\tR\x0f\x65thereumAddress\x12+\n\x11submitter_address\x18\x03 \x01(\tR\x10submitterAddress"\xf2\x03\n\x0eValidatorState\x12J\n\x10validator_update\x18\x01 \x01(\x0b\x32\x1f.vega.events.v1.ValidatorUpdateR\x0fvalidatorUpdate\x12\x1f\n\x0b\x62lock_added\x18\x02 \x01(\x04R\nblockAdded\x12\x16\n\x06status\x18\x03 \x01(\x05R\x06status\x12.\n\x13status_change_block\x18\x04 \x01(\x04R\x11statusChangeBlock\x12\x46\n last_block_with_positive_ranking\x18\x05 \x01(\x04R\x1clastBlockWithPositiveRanking\x12\x30\n\x14\x65th_events_forwarded\x18\x06 \x01(\x04R\x12\x65thEventsForwarded\x12O\n\x11heartbeat_tracker\x18\x07 \x01(\x0b\x32".vega.snapshot.v1.HeartbeatTrackerR\x10heartbeatTracker\x12\'\n\x0fvalidator_power\x18\x08 \x01(\x03R\x0evalidatorPower\x12\x37\n\rranking_score\x18\t \x01(\x0b\x32\x12.vega.RankingScoreR\x0crankingScore"\xb9\x01\n\x10HeartbeatTracker\x12,\n\x12\x65xpected_next_hash\x18\x01 \x01(\tR\x10\x65xpectedNextHash\x12\x37\n\x18\x65xpected_next_hash_since\x18\x02 \x01(\x03R\x15\x65xpectedNextHashSince\x12\x1f\n\x0b\x62lock_index\x18\x03 \x01(\x05R\nblockIndex\x12\x1d\n\nblock_sigs\x18\x04 \x03(\x08R\tblockSigs"\x99\x02\n\x10PerformanceStats\x12+\n\x11validator_address\x18\x01 \x01(\tR\x10validatorAddress\x12\x1a\n\x08proposed\x18\x02 \x01(\x04R\x08proposed\x12\x18\n\x07\x65lected\x18\x03 \x01(\x04R\x07\x65lected\x12\x14\n\x05voted\x18\x04 \x01(\x04R\x05voted\x12*\n\x11last_height_voted\x18\x05 \x01(\x03R\x0flastHeightVoted\x12\x30\n\x14last_height_proposed\x18\x06 \x01(\x03R\x12lastHeightProposed\x12.\n\x13last_height_elected\x18\x07 \x01(\x03R\x11lastHeightElected"l\n\x14ValidatorPerformance\x12T\n\x14validator_perf_stats\x18\x01 \x03(\x0b\x32".vega.snapshot.v1.PerformanceStatsR\x12validatorPerfStats"\xae\x01\n\x13LiquidityParameters\x12\x17\n\x07max_fee\x18\x01 \x01(\tR\x06maxFee\x12$\n\x0emax_shape_size\x18\x02 \x01(\tR\x0cmaxShapeSize\x12;\n\x1astake_to_obligation_factor\x18\x03 \x01(\tR\x17stakeToObligationFactor\x12\x1b\n\tmarket_id\x18\x04 \x01(\tR\x08marketId"h\n\x1aLiquidityPendingProvisions\x12-\n\x12pending_provisions\x18\x01 \x03(\tR\x11pendingProvisions\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId"\x80\x01\n\x1fLiquidityPartiesLiquidityOrders\x12@\n\x0cparty_orders\x18\x01 \x03(\x0b\x32\x1d.vega.snapshot.v1.PartyOrdersR\x0bpartyOrders\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId"H\n\x0bPartyOrders\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12#\n\x06orders\x18\x02 \x03(\x0b\x32\x0b.vega.OrderR\x06orders"w\n\x16LiquidityPartiesOrders\x12@\n\x0cparty_orders\x18\x01 \x03(\x0b\x32\x1d.vega.snapshot.v1.PartyOrdersR\x0bpartyOrders\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId"\x7f\n\x13LiquidityProvisions\x12K\n\x14liquidity_provisions\x18\x01 \x03(\x0b\x32\x18.vega.LiquidityProvisionR\x13liquidityProvisions\x12\x1b\n\tmarket_id\x18\x02 \x01(\tR\x08marketId"\xa0\x01\n\x0fLiquidityScores\x12\x36\n\x17running_average_counter\x18\x01 \x01(\x05R\x15runningAverageCounter\x12\x38\n\x06scores\x18\x02 \x03(\x0b\x32 .vega.snapshot.v1.LiquidityScoreR\x06scores\x12\x1b\n\tmarket_id\x18\x03 \x01(\tR\x08marketId"A\n\x0eLiquidityScore\x12\x14\n\x05score\x18\x01 \x01(\tR\x05score\x12\x19\n\x08party_id\x18\x02 \x01(\tR\x07partyId"\xb9\x01\n\x16\x46loatingPointConsensus\x12M\n\x11next_time_trigger\x18\x01 \x03(\x0b\x32!.vega.snapshot.v1.NextTimeTriggerR\x0fnextTimeTrigger\x12P\n\x0fstate_variables\x18\x02 \x03(\x0b\x32\'.vega.snapshot.v1.StateVarInternalStateR\x0estateVariables"\xfc\x01\n\x15StateVarInternalState\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n\x05state\x18\x02 \x01(\x05R\x05state\x12\x19\n\x08\x65vent_id\x18\x03 \x01(\tR\x07\x65ventId\x12]\n\x12validators_results\x18\x04 \x03(\x0b\x32..vega.snapshot.v1.FloatingPointValidatorResultR\x11validatorsResults\x12\x43\n\x1erounds_since_meaningful_update\x18\x05 \x01(\x05R\x1broundsSinceMeaningfulUpdate"\\\n\x1c\x46loatingPointValidatorResult\x12\x0e\n\x02id\x18\x01 \x01(\tR\x02id\x12,\n\x06\x62undle\x18\x02 \x03(\x0b\x32\x14.vega.KeyValueBundleR\x06\x62undle"r\n\x0fNextTimeTrigger\x12\x14\n\x05\x61sset\x18\x01 \x01(\tR\x05\x61sset\x12\x16\n\x06market\x18\x02 \x01(\tR\x06market\x12\x0e\n\x02id\x18\x03 \x01(\tR\x02id\x12!\n\x0cnext_trigger\x18\x04 \x01(\x03R\x0bnextTrigger"c\n\rMarketTracker\x12R\n\x0fmarket_activity\x18\x01 \x03(\x0b\x32).vega.checkpoint.v1.MarketActivityTrackerR\x0emarketActivity"t\n\x16SignerEventsPerAddress\x12\x18\n\x07\x61\x64\x64ress\x18\x01 \x01(\tR\x07\x61\x64\x64ress\x12@\n\x06\x65vents\x18\x02 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEventR\x06\x65vents"\x80\x02\n\x1d\x45RC20MultiSigTopologyVerified\x12\x18\n\x07signers\x18\x01 \x03(\tR\x07signers\x12V\n\x12\x65vents_per_address\x18\x02 \x03(\x0b\x32(.vega.snapshot.v1.SignerEventsPerAddressR\x10\x65ventsPerAddress\x12L\n\tthreshold\x18\x03 \x01(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEventR\tthreshold\x12\x1f\n\x0bseen_events\x18\x04 \x03(\tR\nseenEvents"\xbc\x02\n\x1c\x45RC20MultiSigTopologyPending\x12Q\n\x0fpending_signers\x18\x01 \x03(\x0b\x32(.vega.events.v1.ERC20MultiSigSignerEventR\x0ependingSigners\x12\x62\n\x15pending_threshold_set\x18\x02 \x03(\x0b\x32..vega.events.v1.ERC20MultiSigThresholdSetEventR\x13pendingThresholdSet\x12+\n\x11witnessed_signers\x18\x03 \x03(\tR\x10witnessedSigners\x12\x38\n\x18witnessed_threshold_sets\x18\x04 \x03(\tR\x16witnessedThresholdSets"\xa1\x03\n\x0bProofOfWork\x12!\n\x0c\x62lock_height\x18\x01 \x03(\x04R\x0b\x62lockHeight\x12\x1d\n\nblock_hash\x18\x02 \x03(\tR\tblockHash\x12H\n\x0ctx_at_height\x18\x04 \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeightR\ntxAtHeight\x12J\n\rtid_at_height\x18\x06 \x03(\x0b\x32&.vega.snapshot.v1.TransactionsAtHeightR\x0btidAtHeight\x12\x35\n\x06\x62\x61nned\x18\x07 \x03(\x0b\x32\x1d.vega.snapshot.v1.BannedPartyR\x06\x62\x61nned\x12\x42\n\npow_params\x18\x08 \x03(\x0b\x32#.vega.snapshot.v1.ProofOfWorkParamsR\tpowParams\x12?\n\tpow_state\x18\t \x03(\x0b\x32".vega.snapshot.v1.ProofOfWorkStateR\x08powState"9\n\x0b\x42\x61nnedParty\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x14\n\x05until\x18\x02 \x01(\x03R\x05until"\x84\x03\n\x11ProofOfWorkParams\x12\x41\n\x1espam_pow_number_of_past_blocks\x18\x01 \x01(\x04R\x19spamPowNumberOfPastBlocks\x12.\n\x13spam_pow_difficulty\x18\x02 \x01(\rR\x11spamPowDifficulty\x12\x33\n\x16spam_pow_hash_function\x18\x03 \x01(\tR\x13spamPowHashFunction\x12\x42\n\x1fspam_pow_number_of_tx_per_block\x18\x04 \x01(\x04R\x19spamPowNumberOfTxPerBlock\x12\x43\n\x1espam_pow_increasing_difficulty\x18\x05 \x01(\x08R\x1bspamPowIncreasingDifficulty\x12\x1d\n\nfrom_block\x18\x06 \x01(\x04R\tfromBlock\x12\x1f\n\x0buntil_block\x18\x07 \x01(\x03R\nuntilBlock"X\n\x10ProofOfWorkState\x12\x44\n\tpow_state\x18\x01 \x03(\x0b\x32\'.vega.snapshot.v1.ProofOfWorkBlockStateR\x08powState"\x8c\x01\n\x15ProofOfWorkBlockState\x12!\n\x0c\x62lock_height\x18\x01 \x01(\x04R\x0b\x62lockHeight\x12P\n\x0bparty_state\x18\x02 \x03(\x0b\x32/.vega.snapshot.v1.ProofOfWorkPartyStateForBlockR\npartyState"\x85\x01\n\x1dProofOfWorkPartyStateForBlock\x12\x14\n\x05party\x18\x01 \x01(\tR\x05party\x12\x1d\n\nseen_count\x18\x02 \x01(\x04R\tseenCount\x12/\n\x13observed_difficulty\x18\x03 \x01(\x04R\x12observedDifficulty"R\n\x14TransactionsAtHeight\x12\x16\n\x06height\x18\x01 \x01(\x04R\x06height\x12"\n\x0ctransactions\x18\x02 \x03(\tR\x0ctransactions"\xcb\x01\n\x18ProtocolUpgradeProposals\x12O\n\x10\x61\x63tive_proposals\x18\x01 \x03(\x0b\x32$.vega.events.v1.ProtocolUpgradeEventR\x0f\x61\x63tiveProposals\x12^\n\x11\x61\x63\x63\x65pted_proposal\x18\x02 \x01(\x0b\x32\x31.vega.snapshot.v1.AcceptedProtocolUpgradeProposalR\x10\x61\x63\x63\x65ptedProposal"}\n\x1f\x41\x63\x63\x65ptedProtocolUpgradeProposal\x12\x30\n\x14upgrade_block_height\x18\x01 \x01(\x04R\x12upgradeBlockHeight\x12(\n\x10vega_release_tag\x18\x02 \x01(\tR\x0evegaReleaseTag*`\n\x06\x46ormat\x12\x16\n\x12\x46ORMAT_UNSPECIFIED\x10\x00\x12\x10\n\x0c\x46ORMAT_PROTO\x10\x01\x12\x1b\n\x17\x46ORMAT_PROTO_COMPRESSED\x10\x02\x12\x0f\n\x0b\x46ORMAT_JSON\x10\x03\x42\x33Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1b\x06proto3'
 )
 
 _globals = globals()
@@ -528,8 +38,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     DESCRIPTOR._serialized_options = (
         b"Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1"
     )
-    _globals["_FORMAT"]._serialized_start = 26165
-    _globals["_FORMAT"]._serialized_end = 26261
+    _globals["_FORMAT"]._serialized_start = 27029
+    _globals["_FORMAT"]._serialized_end = 27125
     _globals["_SNAPSHOT"]._serialized_start = 249
     _globals["_SNAPSHOT"]._serialized_end = 405
     _globals["_NODEHASH"]._serialized_start = 407
@@ -539,251 +49,259 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["_CHUNK"]._serialized_start = 667
     _globals["_CHUNK"]._serialized_end = 753
     _globals["_PAYLOAD"]._serialized_start = 756
-    _globals["_PAYLOAD"]._serialized_end = 5690
-    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_start = 5692
-    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_end = 5768
-    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_start = 5770
-    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_end = 5852
-    _globals["_LIQUIDITYTARGET"]._serialized_start = 5855
-    _globals["_LIQUIDITYTARGET"]._serialized_end = 6225
-    _globals["_SPOTLIQUIDITYTARGET"]._serialized_start = 6228
-    _globals["_SPOTLIQUIDITYTARGET"]._serialized_end = 6580
-    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_start = 6582
-    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_end = 6672
-    _globals["_LIQUIDITYSUPPLIED"]._serialized_start = 6675
-    _globals["_LIQUIDITYSUPPLIED"]._serialized_end = 6926
-    _globals["_ORACLEDATABATCH"]._serialized_start = 6928
-    _globals["_ORACLEDATABATCH"]._serialized_end = 7008
-    _globals["_ORACLEDATA"]._serialized_start = 7010
-    _globals["_ORACLEDATA"]._serialized_end = 7124
-    _globals["_ORACLEDATAPAIR"]._serialized_start = 7126
-    _globals["_ORACLEDATAPAIR"]._serialized_end = 7182
-    _globals["_WITNESS"]._serialized_start = 7184
-    _globals["_WITNESS"]._serialized_end = 7251
-    _globals["_RESOURCE"]._serialized_start = 7253
-    _globals["_RESOURCE"]._serialized_end = 7356
-    _globals["_EVENTFORWARDER"]._serialized_start = 7358
-    _globals["_EVENTFORWARDER"]._serialized_end = 7409
-    _globals["_COLLATERALACCOUNTS"]._serialized_start = 7411
-    _globals["_COLLATERALACCOUNTS"]._serialized_end = 7474
-    _globals["_COLLATERALASSETS"]._serialized_start = 7476
-    _globals["_COLLATERALASSETS"]._serialized_end = 7531
-    _globals["_ACTIVEASSETS"]._serialized_start = 7533
-    _globals["_ACTIVEASSETS"]._serialized_end = 7584
-    _globals["_PENDINGASSETS"]._serialized_start = 7586
-    _globals["_PENDINGASSETS"]._serialized_end = 7638
-    _globals["_PENDINGASSETUPDATES"]._serialized_start = 7640
-    _globals["_PENDINGASSETUPDATES"]._serialized_end = 7698
-    _globals["_WITHDRAWAL"]._serialized_start = 7700
-    _globals["_WITHDRAWAL"]._serialized_end = 7780
-    _globals["_DEPOSIT"]._serialized_start = 7782
-    _globals["_DEPOSIT"]._serialized_end = 7848
-    _globals["_TXREF"]._serialized_start = 7850
-    _globals["_TXREF"]._serialized_end = 7955
-    _globals["_BANKINGWITHDRAWALS"]._serialized_start = 7957
-    _globals["_BANKINGWITHDRAWALS"]._serialized_end = 8041
-    _globals["_BANKINGDEPOSITS"]._serialized_start = 8043
-    _globals["_BANKINGDEPOSITS"]._serialized_end = 8113
-    _globals["_BANKINGSEEN"]._serialized_start = 8115
-    _globals["_BANKINGSEEN"]._serialized_end = 8195
-    _globals["_BANKINGASSETACTIONS"]._serialized_start = 8197
-    _globals["_BANKINGASSETACTIONS"]._serialized_end = 8286
-    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_start = 8288
-    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_end = 8404
-    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_start = 8406
-    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_end = 8522
-    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_start = 8524
-    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_end = 8650
-    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_start = 8653
-    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_end = 8789
-    _globals["_BANKINGBRIDGESTATE"]._serialized_start = 8791
-    _globals["_BANKINGBRIDGESTATE"]._serialized_end = 8879
-    _globals["_CHECKPOINT"]._serialized_start = 8881
-    _globals["_CHECKPOINT"]._serialized_end = 8918
-    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_start = 8920
-    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_end = 9012
-    _globals["_DELEGATIONACTIVE"]._serialized_start = 9014
-    _globals["_DELEGATIONACTIVE"]._serialized_end = 9084
-    _globals["_DELEGATIONPENDING"]._serialized_start = 9086
-    _globals["_DELEGATIONPENDING"]._serialized_end = 9211
-    _globals["_DELEGATIONAUTO"]._serialized_start = 9213
-    _globals["_DELEGATIONAUTO"]._serialized_end = 9255
-    _globals["_PROPOSALDATA"]._serialized_start = 9258
-    _globals["_PROPOSALDATA"]._serialized_end = 9412
-    _globals["_GOVERNANCEENACTED"]._serialized_start = 9414
-    _globals["_GOVERNANCEENACTED"]._serialized_end = 9495
-    _globals["_GOVERNANCEACTIVE"]._serialized_start = 9497
-    _globals["_GOVERNANCEACTIVE"]._serialized_end = 9577
-    _globals["_GOVERNANCENODE"]._serialized_start = 9579
-    _globals["_GOVERNANCENODE"]._serialized_end = 9641
-    _globals["_STAKINGACCOUNT"]._serialized_start = 9643
-    _globals["_STAKINGACCOUNT"]._serialized_end = 9761
-    _globals["_STAKINGACCOUNTS"]._serialized_start = 9764
-    _globals["_STAKINGACCOUNTS"]._serialized_end = 9989
-    _globals["_MATCHINGBOOK"]._serialized_start = 9992
-    _globals["_MATCHINGBOOK"]._serialized_end = 10196
-    _globals["_NETPARAMS"]._serialized_start = 10198
-    _globals["_NETPARAMS"]._serialized_end = 10257
-    _globals["_DECIMALMAP"]._serialized_start = 10259
-    _globals["_DECIMALMAP"]._serialized_end = 10307
-    _globals["_TIMEPRICE"]._serialized_start = 10309
-    _globals["_TIMEPRICE"]._serialized_end = 10362
-    _globals["_PRICEVOLUME"]._serialized_start = 10364
-    _globals["_PRICEVOLUME"]._serialized_end = 10423
-    _globals["_PRICERANGE"]._serialized_start = 10425
-    _globals["_PRICERANGE"]._serialized_end = 10491
-    _globals["_PRICEBOUND"]._serialized_start = 10494
-    _globals["_PRICEBOUND"]._serialized_end = 10648
-    _globals["_PRICERANGECACHE"]._serialized_start = 10650
-    _globals["_PRICERANGECACHE"]._serialized_end = 10771
-    _globals["_CURRENTPRICE"]._serialized_start = 10773
-    _globals["_CURRENTPRICE"]._serialized_end = 10833
-    _globals["_PASTPRICE"]._serialized_start = 10835
-    _globals["_PASTPRICE"]._serialized_end = 10918
-    _globals["_PRICEMONITOR"]._serialized_start = 10921
-    _globals["_PRICEMONITOR"]._serialized_end = 11549
-    _globals["_AUCTIONSTATE"]._serialized_start = 11552
-    _globals["_AUCTIONSTATE"]._serialized_end = 11928
-    _globals["_EQUITYSHARELP"]._serialized_start = 11930
-    _globals["_EQUITYSHARELP"]._serialized_end = 12047
-    _globals["_EQUITYSHARE"]._serialized_start = 12050
-    _globals["_EQUITYSHARE"]._serialized_end = 12219
-    _globals["_FEESPLITTER"]._serialized_start = 12222
-    _globals["_FEESPLITTER"]._serialized_end = 12354
-    _globals["_SPOTMARKET"]._serialized_start = 12357
-    _globals["_SPOTMARKET"]._serialized_end = 13249
-    _globals["_MARKET"]._serialized_start = 13252
-    _globals["_MARKET"]._serialized_end = 14427
-    _globals["_ORDERSATPRICE"]._serialized_start = 14429
-    _globals["_ORDERSATPRICE"]._serialized_end = 14490
-    _globals["_PRICEDSTOPORDERS"]._serialized_start = 14493
-    _globals["_PRICEDSTOPORDERS"]._serialized_end = 14645
-    _globals["_TRAILINGSTOPORDERS"]._serialized_start = 14648
-    _globals["_TRAILINGSTOPORDERS"]._serialized_end = 14844
-    _globals["_ORDERSATOFFSET"]._serialized_start = 14846
-    _globals["_ORDERSATOFFSET"]._serialized_end = 14910
-    _globals["_OFFSETSATPRICE"]._serialized_start = 14912
-    _globals["_OFFSETSATPRICE"]._serialized_end = 15010
-    _globals["_STOPORDERS"]._serialized_start = 15013
-    _globals["_STOPORDERS"]._serialized_end = 15260
-    _globals["_PEGGEDORDERS"]._serialized_start = 15262
-    _globals["_PEGGEDORDERS"]._serialized_end = 15326
-    _globals["_EXECUTIONMARKETS"]._serialized_start = 15329
-    _globals["_EXECUTIONMARKETS"]._serialized_end = 15538
-    _globals["_POSITION"]._serialized_start = 15541
-    _globals["_POSITION"]._serialized_end = 15772
-    _globals["_MARKETPOSITIONS"]._serialized_start = 15774
-    _globals["_MARKETPOSITIONS"]._serialized_end = 15878
-    _globals["_SETTLEMENTSTATE"]._serialized_start = 15881
-    _globals["_SETTLEMENTSTATE"]._serialized_end = 16119
-    _globals["_LASTSETTLEDPOSITION"]._serialized_start = 16121
-    _globals["_LASTSETTLEDPOSITION"]._serialized_end = 16207
-    _globals["_SETTLEMENTTRADE"]._serialized_start = 16210
-    _globals["_SETTLEMENTTRADE"]._serialized_end = 16358
-    _globals["_APPSTATE"]._serialized_start = 16360
-    _globals["_APPSTATE"]._serialized_end = 16463
-    _globals["_EPOCHSTATE"]._serialized_start = 16466
-    _globals["_EPOCHSTATE"]._serialized_end = 16661
-    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_start = 16663
-    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_end = 16786
-    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_start = 16789
-    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_end = 16918
-    _globals["_REWARDSPAYOUT"]._serialized_start = 16921
-    _globals["_REWARDSPAYOUT"]._serialized_end = 17173
-    _globals["_REWARDSPARTYAMOUNT"]._serialized_start = 17175
-    _globals["_REWARDSPARTYAMOUNT"]._serialized_end = 17241
-    _globals["_LIMITSTATE"]._serialized_start = 17244
-    _globals["_LIMITSTATE"]._serialized_end = 17648
-    _globals["_VOTESPAMPOLICY"]._serialized_start = 17651
-    _globals["_VOTESPAMPOLICY"]._serialized_end = 18183
-    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_start = 18185
-    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_end = 18281
-    _globals["_PARTYTOKENBALANCE"]._serialized_start = 18283
-    _globals["_PARTYTOKENBALANCE"]._serialized_end = 18350
-    _globals["_BLOCKREJECTSTATS"]._serialized_start = 18352
-    _globals["_BLOCKREJECTSTATS"]._serialized_end = 18420
-    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_start = 18422
-    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_end = 18493
-    _globals["_SIMPLESPAMPOLICY"]._serialized_start = 18496
-    _globals["_SIMPLESPAMPOLICY"]._serialized_end = 18818
-    _globals["_NOTARYSIGS"]._serialized_start = 18820
-    _globals["_NOTARYSIGS"]._serialized_end = 18932
-    _globals["_NOTARY"]._serialized_start = 18934
-    _globals["_NOTARY"]._serialized_end = 19005
-    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_start = 19007
-    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_end = 19116
-    _globals["_STAKEVERIFIERREMOVED"]._serialized_start = 19118
-    _globals["_STAKEVERIFIERREMOVED"]._serialized_end = 19221
-    _globals["_STAKEVERIFIERPENDING"]._serialized_start = 19224
-    _globals["_STAKEVERIFIERPENDING"]._serialized_end = 19485
-    _globals["_PENDINGKEYROTATION"]._serialized_start = 19488
-    _globals["_PENDINGKEYROTATION"]._serialized_end = 19643
-    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_start = 19646
-    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_end = 19830
-    _globals["_TOPOLOGY"]._serialized_start = 19833
-    _globals["_TOPOLOGY"]._serialized_end = 20438
-    _globals["_TOPLOGYSIGNATURES"]._serialized_start = 20441
-    _globals["_TOPLOGYSIGNATURES"]._serialized_end = 20663
-    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 20666
-    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 20845
-    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 20848
-    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 21006
-    _globals["_VALIDATORSTATE"]._serialized_start = 21009
-    _globals["_VALIDATORSTATE"]._serialized_end = 21507
-    _globals["_HEARTBEATTRACKER"]._serialized_start = 21510
-    _globals["_HEARTBEATTRACKER"]._serialized_end = 21695
-    _globals["_PERFORMANCESTATS"]._serialized_start = 21698
-    _globals["_PERFORMANCESTATS"]._serialized_end = 21979
-    _globals["_VALIDATORPERFORMANCE"]._serialized_start = 21981
-    _globals["_VALIDATORPERFORMANCE"]._serialized_end = 22089
-    _globals["_LIQUIDITYPARAMETERS"]._serialized_start = 22092
-    _globals["_LIQUIDITYPARAMETERS"]._serialized_end = 22266
-    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_start = 22268
-    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_end = 22372
-    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_start = 22375
-    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_end = 22503
-    _globals["_PARTYORDERS"]._serialized_start = 22505
-    _globals["_PARTYORDERS"]._serialized_end = 22577
-    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_start = 22579
-    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_end = 22698
-    _globals["_LIQUIDITYPROVISIONS"]._serialized_start = 22700
-    _globals["_LIQUIDITYPROVISIONS"]._serialized_end = 22827
-    _globals["_LIQUIDITYSCORES"]._serialized_start = 22830
-    _globals["_LIQUIDITYSCORES"]._serialized_end = 22990
-    _globals["_LIQUIDITYSCORE"]._serialized_start = 22992
-    _globals["_LIQUIDITYSCORE"]._serialized_end = 23057
-    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_start = 23060
-    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_end = 23245
-    _globals["_STATEVARINTERNALSTATE"]._serialized_start = 23248
-    _globals["_STATEVARINTERNALSTATE"]._serialized_end = 23500
-    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_start = 23502
-    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_end = 23594
-    _globals["_NEXTTIMETRIGGER"]._serialized_start = 23596
-    _globals["_NEXTTIMETRIGGER"]._serialized_end = 23710
-    _globals["_MARKETTRACKER"]._serialized_start = 23712
-    _globals["_MARKETTRACKER"]._serialized_end = 23811
-    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_start = 23813
-    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_end = 23929
-    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_start = 23932
-    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_end = 24188
-    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_start = 24191
-    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_end = 24507
-    _globals["_PROOFOFWORK"]._serialized_start = 24510
-    _globals["_PROOFOFWORK"]._serialized_end = 24927
-    _globals["_BANNEDPARTY"]._serialized_start = 24929
-    _globals["_BANNEDPARTY"]._serialized_end = 24986
-    _globals["_PROOFOFWORKPARAMS"]._serialized_start = 24989
-    _globals["_PROOFOFWORKPARAMS"]._serialized_end = 25377
-    _globals["_PROOFOFWORKSTATE"]._serialized_start = 25379
-    _globals["_PROOFOFWORKSTATE"]._serialized_end = 25467
-    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_start = 25470
-    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_end = 25610
-    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_start = 25613
-    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_end = 25746
-    _globals["_TRANSACTIONSATHEIGHT"]._serialized_start = 25748
-    _globals["_TRANSACTIONSATHEIGHT"]._serialized_end = 25830
-    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_start = 25833
-    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_end = 26036
-    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_start = 26038
-    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_end = 26163
+    _globals["_PAYLOAD"]._serialized_end = 5909
+    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_start = 5911
+    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_end = 5987
+    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_start = 5989
+    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_end = 6071
+    _globals["_LIQUIDITYTARGET"]._serialized_start = 6074
+    _globals["_LIQUIDITYTARGET"]._serialized_end = 6444
+    _globals["_SPOTLIQUIDITYTARGET"]._serialized_start = 6447
+    _globals["_SPOTLIQUIDITYTARGET"]._serialized_end = 6799
+    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_start = 6801
+    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_end = 6891
+    _globals["_LIQUIDITYSUPPLIED"]._serialized_start = 6894
+    _globals["_LIQUIDITYSUPPLIED"]._serialized_end = 7145
+    _globals["_ORACLEDATABATCH"]._serialized_start = 7147
+    _globals["_ORACLEDATABATCH"]._serialized_end = 7227
+    _globals["_ORACLEDATA"]._serialized_start = 7230
+    _globals["_ORACLEDATA"]._serialized_end = 7397
+    _globals["_ORACLEDATAPAIR"]._serialized_start = 7399
+    _globals["_ORACLEDATAPAIR"]._serialized_end = 7455
+    _globals["_WITNESS"]._serialized_start = 7457
+    _globals["_WITNESS"]._serialized_end = 7524
+    _globals["_RESOURCE"]._serialized_start = 7526
+    _globals["_RESOURCE"]._serialized_end = 7629
+    _globals["_EVENTFORWARDER"]._serialized_start = 7631
+    _globals["_EVENTFORWARDER"]._serialized_end = 7682
+    _globals["_COLLATERALACCOUNTS"]._serialized_start = 7684
+    _globals["_COLLATERALACCOUNTS"]._serialized_end = 7747
+    _globals["_COLLATERALASSETS"]._serialized_start = 7749
+    _globals["_COLLATERALASSETS"]._serialized_end = 7804
+    _globals["_ACTIVEASSETS"]._serialized_start = 7806
+    _globals["_ACTIVEASSETS"]._serialized_end = 7857
+    _globals["_PENDINGASSETS"]._serialized_start = 7859
+    _globals["_PENDINGASSETS"]._serialized_end = 7911
+    _globals["_PENDINGASSETUPDATES"]._serialized_start = 7913
+    _globals["_PENDINGASSETUPDATES"]._serialized_end = 7971
+    _globals["_WITHDRAWAL"]._serialized_start = 7973
+    _globals["_WITHDRAWAL"]._serialized_end = 8053
+    _globals["_DEPOSIT"]._serialized_start = 8055
+    _globals["_DEPOSIT"]._serialized_end = 8121
+    _globals["_TXREF"]._serialized_start = 8123
+    _globals["_TXREF"]._serialized_end = 8228
+    _globals["_BANKINGWITHDRAWALS"]._serialized_start = 8230
+    _globals["_BANKINGWITHDRAWALS"]._serialized_end = 8314
+    _globals["_BANKINGDEPOSITS"]._serialized_start = 8316
+    _globals["_BANKINGDEPOSITS"]._serialized_end = 8386
+    _globals["_BANKINGSEEN"]._serialized_start = 8388
+    _globals["_BANKINGSEEN"]._serialized_end = 8468
+    _globals["_BANKINGASSETACTIONS"]._serialized_start = 8470
+    _globals["_BANKINGASSETACTIONS"]._serialized_end = 8559
+    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_start = 8561
+    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_end = 8677
+    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_start = 8679
+    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_end = 8795
+    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_start = 8797
+    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_end = 8923
+    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_start = 8926
+    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_end = 9062
+    _globals["_BANKINGBRIDGESTATE"]._serialized_start = 9064
+    _globals["_BANKINGBRIDGESTATE"]._serialized_end = 9152
+    _globals["_CHECKPOINT"]._serialized_start = 9154
+    _globals["_CHECKPOINT"]._serialized_end = 9191
+    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_start = 9193
+    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_end = 9285
+    _globals["_DELEGATIONACTIVE"]._serialized_start = 9287
+    _globals["_DELEGATIONACTIVE"]._serialized_end = 9357
+    _globals["_DELEGATIONPENDING"]._serialized_start = 9359
+    _globals["_DELEGATIONPENDING"]._serialized_end = 9484
+    _globals["_DELEGATIONAUTO"]._serialized_start = 9486
+    _globals["_DELEGATIONAUTO"]._serialized_end = 9528
+    _globals["_PROPOSALDATA"]._serialized_start = 9531
+    _globals["_PROPOSALDATA"]._serialized_end = 9685
+    _globals["_GOVERNANCEENACTED"]._serialized_start = 9687
+    _globals["_GOVERNANCEENACTED"]._serialized_end = 9768
+    _globals["_GOVERNANCEACTIVE"]._serialized_start = 9770
+    _globals["_GOVERNANCEACTIVE"]._serialized_end = 9850
+    _globals["_GOVERNANCENODE"]._serialized_start = 9852
+    _globals["_GOVERNANCENODE"]._serialized_end = 9914
+    _globals["_STAKINGACCOUNT"]._serialized_start = 9916
+    _globals["_STAKINGACCOUNT"]._serialized_end = 10034
+    _globals["_STAKINGACCOUNTS"]._serialized_start = 10037
+    _globals["_STAKINGACCOUNTS"]._serialized_end = 10262
+    _globals["_MATCHINGBOOK"]._serialized_start = 10265
+    _globals["_MATCHINGBOOK"]._serialized_end = 10469
+    _globals["_NETPARAMS"]._serialized_start = 10471
+    _globals["_NETPARAMS"]._serialized_end = 10530
+    _globals["_DECIMALMAP"]._serialized_start = 10532
+    _globals["_DECIMALMAP"]._serialized_end = 10580
+    _globals["_TIMEPRICE"]._serialized_start = 10582
+    _globals["_TIMEPRICE"]._serialized_end = 10635
+    _globals["_PRICEVOLUME"]._serialized_start = 10637
+    _globals["_PRICEVOLUME"]._serialized_end = 10696
+    _globals["_PRICERANGE"]._serialized_start = 10698
+    _globals["_PRICERANGE"]._serialized_end = 10764
+    _globals["_PRICEBOUND"]._serialized_start = 10767
+    _globals["_PRICEBOUND"]._serialized_end = 10921
+    _globals["_PRICERANGECACHE"]._serialized_start = 10923
+    _globals["_PRICERANGECACHE"]._serialized_end = 11044
+    _globals["_CURRENTPRICE"]._serialized_start = 11046
+    _globals["_CURRENTPRICE"]._serialized_end = 11106
+    _globals["_PASTPRICE"]._serialized_start = 11108
+    _globals["_PASTPRICE"]._serialized_end = 11191
+    _globals["_PRICEMONITOR"]._serialized_start = 11194
+    _globals["_PRICEMONITOR"]._serialized_end = 11822
+    _globals["_AUCTIONSTATE"]._serialized_start = 11825
+    _globals["_AUCTIONSTATE"]._serialized_end = 12201
+    _globals["_EQUITYSHARELP"]._serialized_start = 12203
+    _globals["_EQUITYSHARELP"]._serialized_end = 12320
+    _globals["_EQUITYSHARE"]._serialized_start = 12323
+    _globals["_EQUITYSHARE"]._serialized_end = 12492
+    _globals["_FEESPLITTER"]._serialized_start = 12495
+    _globals["_FEESPLITTER"]._serialized_end = 12627
+    _globals["_SPOTMARKET"]._serialized_start = 12630
+    _globals["_SPOTMARKET"]._serialized_end = 13522
+    _globals["_MARKET"]._serialized_start = 13525
+    _globals["_MARKET"]._serialized_end = 14763
+    _globals["_ORDERSATPRICE"]._serialized_start = 14765
+    _globals["_ORDERSATPRICE"]._serialized_end = 14826
+    _globals["_PRICEDSTOPORDERS"]._serialized_start = 14829
+    _globals["_PRICEDSTOPORDERS"]._serialized_end = 14981
+    _globals["_TRAILINGSTOPORDERS"]._serialized_start = 14984
+    _globals["_TRAILINGSTOPORDERS"]._serialized_end = 15180
+    _globals["_ORDERSATOFFSET"]._serialized_start = 15182
+    _globals["_ORDERSATOFFSET"]._serialized_end = 15246
+    _globals["_OFFSETSATPRICE"]._serialized_start = 15248
+    _globals["_OFFSETSATPRICE"]._serialized_end = 15346
+    _globals["_STOPORDERS"]._serialized_start = 15349
+    _globals["_STOPORDERS"]._serialized_end = 15596
+    _globals["_PEGGEDORDERS"]._serialized_start = 15598
+    _globals["_PEGGEDORDERS"]._serialized_end = 15662
+    _globals["_EXECUTIONMARKETS"]._serialized_start = 15665
+    _globals["_EXECUTIONMARKETS"]._serialized_end = 15936
+    _globals["_SUCCESSORS"]._serialized_start = 15938
+    _globals["_SUCCESSORS"]._serialized_end = 16032
+    _globals["_POSITION"]._serialized_start = 16035
+    _globals["_POSITION"]._serialized_end = 16266
+    _globals["_MARKETPOSITIONS"]._serialized_start = 16268
+    _globals["_MARKETPOSITIONS"]._serialized_end = 16372
+    _globals["_SETTLEMENTSTATE"]._serialized_start = 16375
+    _globals["_SETTLEMENTSTATE"]._serialized_end = 16613
+    _globals["_LASTSETTLEDPOSITION"]._serialized_start = 16615
+    _globals["_LASTSETTLEDPOSITION"]._serialized_end = 16701
+    _globals["_SETTLEMENTTRADE"]._serialized_start = 16704
+    _globals["_SETTLEMENTTRADE"]._serialized_end = 16852
+    _globals["_APPSTATE"]._serialized_start = 16854
+    _globals["_APPSTATE"]._serialized_end = 16957
+    _globals["_EPOCHSTATE"]._serialized_start = 16960
+    _globals["_EPOCHSTATE"]._serialized_end = 17155
+    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_start = 17157
+    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_end = 17280
+    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_start = 17283
+    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_end = 17412
+    _globals["_REWARDSPAYOUT"]._serialized_start = 17415
+    _globals["_REWARDSPAYOUT"]._serialized_end = 17667
+    _globals["_REWARDSPARTYAMOUNT"]._serialized_start = 17669
+    _globals["_REWARDSPARTYAMOUNT"]._serialized_end = 17735
+    _globals["_LIMITSTATE"]._serialized_start = 17738
+    _globals["_LIMITSTATE"]._serialized_end = 18142
+    _globals["_VOTESPAMPOLICY"]._serialized_start = 18145
+    _globals["_VOTESPAMPOLICY"]._serialized_end = 18677
+    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_start = 18679
+    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_end = 18775
+    _globals["_PARTYTOKENBALANCE"]._serialized_start = 18777
+    _globals["_PARTYTOKENBALANCE"]._serialized_end = 18844
+    _globals["_BLOCKREJECTSTATS"]._serialized_start = 18846
+    _globals["_BLOCKREJECTSTATS"]._serialized_end = 18914
+    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_start = 18916
+    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_end = 18987
+    _globals["_SIMPLESPAMPOLICY"]._serialized_start = 18990
+    _globals["_SIMPLESPAMPOLICY"]._serialized_end = 19312
+    _globals["_NOTARYSIGS"]._serialized_start = 19314
+    _globals["_NOTARYSIGS"]._serialized_end = 19426
+    _globals["_NOTARY"]._serialized_start = 19428
+    _globals["_NOTARY"]._serialized_end = 19499
+    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_start = 19501
+    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_end = 19610
+    _globals["_STAKEVERIFIERREMOVED"]._serialized_start = 19612
+    _globals["_STAKEVERIFIERREMOVED"]._serialized_end = 19715
+    _globals["_STAKEVERIFIERPENDING"]._serialized_start = 19718
+    _globals["_STAKEVERIFIERPENDING"]._serialized_end = 19979
+    _globals["_ETHORACLEVERIFIERLASTBLOCK"]._serialized_start = 19981
+    _globals["_ETHORACLEVERIFIERLASTBLOCK"]._serialized_end = 20075
+    _globals["_ETHCONTRACTCALLRESULTS"]._serialized_start = 20078
+    _globals["_ETHCONTRACTCALLRESULTS"]._serialized_end = 20208
+    _globals["_ETHCONTRACTCALLRESULT"]._serialized_start = 20211
+    _globals["_ETHCONTRACTCALLRESULT"]._serialized_end = 20349
+    _globals["_PENDINGKEYROTATION"]._serialized_start = 20352
+    _globals["_PENDINGKEYROTATION"]._serialized_end = 20507
+    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_start = 20510
+    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_end = 20694
+    _globals["_TOPOLOGY"]._serialized_start = 20697
+    _globals["_TOPOLOGY"]._serialized_end = 21302
+    _globals["_TOPLOGYSIGNATURES"]._serialized_start = 21305
+    _globals["_TOPLOGYSIGNATURES"]._serialized_end = 21527
+    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 21530
+    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 21709
+    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 21712
+    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 21870
+    _globals["_VALIDATORSTATE"]._serialized_start = 21873
+    _globals["_VALIDATORSTATE"]._serialized_end = 22371
+    _globals["_HEARTBEATTRACKER"]._serialized_start = 22374
+    _globals["_HEARTBEATTRACKER"]._serialized_end = 22559
+    _globals["_PERFORMANCESTATS"]._serialized_start = 22562
+    _globals["_PERFORMANCESTATS"]._serialized_end = 22843
+    _globals["_VALIDATORPERFORMANCE"]._serialized_start = 22845
+    _globals["_VALIDATORPERFORMANCE"]._serialized_end = 22953
+    _globals["_LIQUIDITYPARAMETERS"]._serialized_start = 22956
+    _globals["_LIQUIDITYPARAMETERS"]._serialized_end = 23130
+    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_start = 23132
+    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_end = 23236
+    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_start = 23239
+    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_end = 23367
+    _globals["_PARTYORDERS"]._serialized_start = 23369
+    _globals["_PARTYORDERS"]._serialized_end = 23441
+    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_start = 23443
+    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_end = 23562
+    _globals["_LIQUIDITYPROVISIONS"]._serialized_start = 23564
+    _globals["_LIQUIDITYPROVISIONS"]._serialized_end = 23691
+    _globals["_LIQUIDITYSCORES"]._serialized_start = 23694
+    _globals["_LIQUIDITYSCORES"]._serialized_end = 23854
+    _globals["_LIQUIDITYSCORE"]._serialized_start = 23856
+    _globals["_LIQUIDITYSCORE"]._serialized_end = 23921
+    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_start = 23924
+    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_end = 24109
+    _globals["_STATEVARINTERNALSTATE"]._serialized_start = 24112
+    _globals["_STATEVARINTERNALSTATE"]._serialized_end = 24364
+    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_start = 24366
+    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_end = 24458
+    _globals["_NEXTTIMETRIGGER"]._serialized_start = 24460
+    _globals["_NEXTTIMETRIGGER"]._serialized_end = 24574
+    _globals["_MARKETTRACKER"]._serialized_start = 24576
+    _globals["_MARKETTRACKER"]._serialized_end = 24675
+    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_start = 24677
+    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_end = 24793
+    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_start = 24796
+    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_end = 25052
+    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_start = 25055
+    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_end = 25371
+    _globals["_PROOFOFWORK"]._serialized_start = 25374
+    _globals["_PROOFOFWORK"]._serialized_end = 25791
+    _globals["_BANNEDPARTY"]._serialized_start = 25793
+    _globals["_BANNEDPARTY"]._serialized_end = 25850
+    _globals["_PROOFOFWORKPARAMS"]._serialized_start = 25853
+    _globals["_PROOFOFWORKPARAMS"]._serialized_end = 26241
+    _globals["_PROOFOFWORKSTATE"]._serialized_start = 26243
+    _globals["_PROOFOFWORKSTATE"]._serialized_end = 26331
+    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_start = 26334
+    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_end = 26474
+    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_start = 26477
+    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_end = 26610
+    _globals["_TRANSACTIONSATHEIGHT"]._serialized_start = 26612
+    _globals["_TRANSACTIONSATHEIGHT"]._serialized_end = 26694
+    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_start = 26697
+    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_end = 26900
+    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_start = 26902
+    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_end = 27027
 # @@protoc_insertion_point(module_scope)
