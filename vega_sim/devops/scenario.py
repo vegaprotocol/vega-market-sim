@@ -156,7 +156,9 @@ class DevOpsScenario(Scenario):
             market_maker = ExponentialShapedMarketMaker(
                 wallet_name=MARKET_MAKER_AGENT.wallet_name,
                 key_name=MARKET_MAKER_AGENT.key_name,
-                market_name=self.market_manager_args.market_name,
+                market_name=self.market_name
+                if self.market_name is not None
+                else self.market_manager_args.market_name,
                 asset_name=self.market_manager_args.asset_name,
                 initial_asset_mint=self.market_maker_args.initial_mint,
                 commitment_amount=self.market_maker_args.commitment_amount,

@@ -226,7 +226,7 @@ class VegaServiceNetwork(VegaService):
         wallet_url: Optional[bool] = None,
         faucet_url: Optional[bool] = None,
         vega_node_grpc_url: Optional[str] = None,
-        load_existing_keys: Optional[bool] = None,
+        load_existing_keys: bool = True,
         governance_symbol: Optional[str] = "VEGA",
         vegacapsule_bin_path: Optional[str] = "./vega_sim/bin/vegacapsule",
         network_on_host: Optional[bool] = False,
@@ -303,7 +303,12 @@ class VegaServiceNetwork(VegaService):
             if wallet_home_path is not None
             else environ.get("WALLET_HOME")
         )
-        self._passphrase_file_path = wallet_passphrase_path
+
+        self._passphrase_file_path = (
+            wallet_passphrase_path
+            if wallet_passphrase_path is not None
+            else environ.get("VEGA_WALLET_TOKENS_PASSPHRASE_FILE")
+        )
 
         self._token_path = (
             wallet_token_path
