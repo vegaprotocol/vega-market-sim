@@ -41,7 +41,7 @@ For the most part the package is fairly self-contained Python, however there are
          - Run `python3 -m pip install -r requirements.txt`
   - Download the binaries by running `python -m vega_sim.tools.load_binaries` within your Python environment.
  -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
- -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
+ -  Run `make test_integration` which checks that everything is set up correctly. This should take a bit more than 5 minutes and bit less than 30. 
  -  You're good now.
   
 ### Build Vega from Source
