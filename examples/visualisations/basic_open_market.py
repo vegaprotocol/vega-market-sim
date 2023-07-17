@@ -21,7 +21,14 @@ import logging
 from collections import namedtuple
 
 from vega_sim.null_service import VegaServiceNull
-from examples.visualisations.utils import continuous_market, move_market, Visualisation
+from examples.visualisations.utils import (
+    continuous_market,
+    move_market,
+    Visualisation,
+    create_auxiliary_parties,
+    mint_governance_asset,
+    mint_settlement_asset,
+)
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
 
@@ -37,91 +44,6 @@ WALLET_NAME = "vega"
 
 TRADER_A = PartyConfig(wallet_name=WALLET_NAME, key_name="Trader A Party")
 TRADER_B = PartyConfig(wallet_name=WALLET_NAME, key_name="Trader B Party")
-
-
-def create_auxiliary_parties(
-    vega: VegaServiceNull,
-):
-    """Creates the default auxiliary parties.
-
-    Function creates wallet and keys for 5 default auxiliary parties who each have
-    individual responsibilities in proposing and managing the market.
-
-    Args:
-        vega (VegaServiceNull):
-            Service running core, datanode, and wallet processes.
-    """
-    for party in [AUX_PARTY_A, AUX_PARTY_B, AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E]:
-        vega.create_key(
-            name=party.key_name,
-            wallet_name=party.wallet_name,
-        )
-
-
-def mint_governance_asset(
-    vega: VegaServiceNull,
-):
-    """Mints the governance asset to the required default auxiliary parties.
-
-    Function mints the VOTE asset to AUX_PARTY_A and AUX_PARTY_B who are responsible for
-    proposing and settling the market respectively.
-
-    Args:
-        vega (VegaServiceNull):
-            Service running core, datanode, and wallet processes.
-    """
-
-    for party in [AUX_PARTY_A, AUX_PARTY_B]:
-        vega.mint(
-            wallet_name=party.wallet_name,
-            key_name=party.key_name,
-            asset="VOTE",
-            amount=1000,
-        )
-        vega.wait_for_total_catchup()
-
-
-def mint_settlement_asset(
-    vega: VegaServiceNull,
-    asset_id: str,
-):
-    """Mints the settlement asset to the required default auxiliary parties.
-
-    Function mints the specified settlement asset to AUX_PARTY_A, AUX_PARTY_B,
-    AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E.
-
-    Args:
-        vega (VegaServiceNull):
-            Service running core, datanode, and wallet processes.
-        asset_id (str):
-            Settlement asset id.
-    """
-
-    for party in [AUX_PARTY_A, AUX_PARTY_B, AUX_PARTY_C, AUX_PARTY_D, AUX_PARTY_E]:
-        vega.mint(
-            wallet_name=party.wallet_name,
-            key_name=party.key_name,
-            asset=asset_id,
-            amount=1e9,
-        )
-        vega.wait_for_total_catchup()
-
-
-def provide_liquidity(
-    vega: VegaServiceNull,
-    market_id: str,
-):
-    """Submits a default liquidity provision to the specified market.
-
-    Function uses AUX_PARTY_C to make a default liquidity submission pegged close to the
-    best-ask and best-bid with zero fee to the specified market.
-
-    Args:
-        vega (VegaServiceNull):
-            Service running core, datanode, and wallet processes.
-        market_id (str):
-            Market id.
-    """
 
 
 class BasicOpenMarketVisualisation(Visualisation):
@@ -144,18 +66,57 @@ class BasicOpenMarketVisualisation(Visualisation):
             wallet_name=AUX_PARTY_A.wallet_name,
             key_name=AUX_PARTY_A.key_name,
             name="STABLE_1",
-            symbol="STAB",
+            symbol="STABL",
             decimals=5,
             max_faucet_amount=1e9,
         )
         vega.wait_for_total_catchup()
-        asset_id = vega.find_asset_id(symbol="STAB")
+
+        asset_id = vega.find_asset_id(symbol="STABL")
         mint_settlement_asset(vega=vega, asset_id=asset_id)
+
+        # Create wallets and keys for traders
+        self.vega.create_key(
+            name=TRADER_A.key_name,
+            wallet_name=TRADER_A.wallet_name,
+        )
+        self.vega.create_key(
+            name=TRADER_B.key_name,
+            wallet_name=TRADER_B.wallet_name,
+        )
+        self.vega.wait_for_total_catchup()
+        self.vega.wait_fn(60)
+
+        # Mint settlement assets for traders
+        self.vega.mint(
+            wallet_name=TRADER_A.wallet_name,
+            key_name=TRADER_A.key_name,
+            asset=asset_id,
+            amount=self.TRADER_MINT,
+        )
+        self.vega.mint(
+            wallet_name=TRADER_B.wallet_name,
+            key_name=TRADER_B.key_name,
+            asset=asset_id,
+            amount=self.TRADER_MINT,
+        )
+        self.vega.wait_for_total_catchup()
+        self.vega.wait_fn(60)
+
+        logging.info(
+            "Trader A Party: public_key ="
+            f" {self.vega.wallet.public_key(name=TRADER_A.key_name, wallet_name=TRADER_A.wallet_name)}"
+        )
+        logging.info(
+            "Trader B Party: public_key ="
+            f" {self.vega.wallet.public_key(name=TRADER_B.key_name, wallet_name=TRADER_B.wallet_name)}"
+        )
+
         if pause:
             input("Ok, we've created the assets.")
 
         vega.create_simple_market(
-            market_name="XYZ:DAI Visualisation Example",
+            market_name="XYZ:STABL Dec23",
             wallet_name=AUX_PARTY_A.wallet_name,
             proposal_key=AUX_PARTY_A.key_name,
             termination_wallet_name=AUX_PARTY_A.wallet_name,
@@ -235,43 +196,6 @@ class BasicOpenMarketVisualisation(Visualisation):
 
         if pause:
             input("And we're open!")
-
-        # Create wallets and keys for traders
-        self.vega.create_key(
-            name=TRADER_A.key_name,
-            wallet_name=TRADER_A.wallet_name,
-        )
-        self.vega.create_key(
-            name=TRADER_B.key_name,
-            wallet_name=TRADER_B.wallet_name,
-        )
-        self.vega.wait_for_total_catchup()
-        self.vega.wait_fn(60)
-
-        # Mint settlement assets for traders
-        self.vega.mint(
-            wallet_name=TRADER_A.wallet_name,
-            key_name=TRADER_A.key_name,
-            asset=asset_id,
-            amount=self.TRADER_MINT,
-        )
-        self.vega.mint(
-            wallet_name=TRADER_B.wallet_name,
-            key_name=TRADER_B.key_name,
-            asset=asset_id,
-            amount=self.TRADER_MINT,
-        )
-        self.vega.wait_for_total_catchup()
-        self.vega.wait_fn(60)
-
-        logging.info(
-            "Trader A Party: public_key ="
-            f" {self.vega.wallet.public_key(name=TRADER_A.key_name, wallet_name=TRADER_A.wallet_name)}"
-        )
-        logging.info(
-            "Trader B Party: public_key ="
-            f" {self.vega.wallet.public_key(name=TRADER_B.key_name, wallet_name=TRADER_B.wallet_name)}"
-        )
 
         if pause:
             input(f"Paused after trader initialisation. View a public key.")

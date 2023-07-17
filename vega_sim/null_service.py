@@ -820,6 +820,7 @@ class VegaServiceNull(VegaService):
             logger.info("Stop called but nothing to stop")
         else:
             self.proc.terminate()
+            # self.proc.kill()
         if isinstance(self.wallet, SlimWallet):
             self.wallet.stop()
         super().stop()
