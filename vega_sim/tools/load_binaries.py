@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import platform
@@ -12,6 +13,7 @@ import vega_sim
 logger = logging.getLogger(__name__)
 
 URL_BASE = "https://github.com/vegaprotocol/vega/releases/download/v{version}/"
+URL_LATEST_BASE = "https://github.com/vegaprotocol/vega/releases/latest/download/"
 DATA_NODE = "data-node-{platform}-{chipset}64.zip"
 VEGA_CORE = "vega-{platform}-{chipset}64.zip"
 VEGAWALLET = "vegawallet-{platform}-{chipset}64.zip"
@@ -25,7 +27,7 @@ BIN_NAMES = {
 }
 
 
-def download_binaries(force: bool = False):
+def download_binaries(force: bool = False, latest: bool = False):
     platf = platform.system().lower()
 
     # We have no Windows specific builds, so people have to use WSL to run
@@ -48,7 +50,12 @@ def download_binaries(force: bool = False):
             ) or force:
                 logger.info(f"Downloading {file_name}")
 
-                url = URL_BASE.format(version=vega_sim.VEGA_VERSION) + file_name
+                url_base = (
+                    URL_BASE.format(version=vega_sim.VEGA_VERSION)
+                    if not latest
+                    else URL_LATEST_BASE
+                )
+                url = url_base + file_name
                 res = requests.get(url)
                 file_path = os.path.join(dir, f"{file_name}")
 
@@ -63,4 +70,10 @@ def download_binaries(force: bool = False):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    download_binaries()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--force", action="store_true")
+    parser.add_argument("--latest", action="store_true")
+    args = parser.parse_args()
+
+    download_binaries(force=args.force, latest=args.latest)
