@@ -525,6 +525,10 @@ class VegaService(ABC):
         ] = None,
         wallet_name: Optional[str] = None,
         termination_wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
     ) -> None:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -552,6 +556,17 @@ class VegaService(ABC):
                         Optional[str], name of wallet proposing market. Defaults to None.
                     termination_wallet_name:
                         Optional[str], name of wallet settling market. Defaults to None.
+                    vote_closing_time:
+                        Optional[datetime.datetime]: If set, decides at what time the vote will be set to
+                            close. Defaults to Now + 40 blocks
+                    vote_enactment_time:
+                        Optional[datetime.datetime]: If set, decides at what time the vote will be set to
+                            enact. Defaults to Now + 50 blocks
+                    approve_proposal:
+                        bool, default True, whether to automatically approve the proposal
+                    forward_time_to_enactment:
+                        bool, default True, whether to forward time until this proposal has already
+                            been enacted
 
         """
         additional_kwargs = {}
@@ -565,6 +580,13 @@ class VegaService(ABC):
             tau=tau,
             params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.0, sigma=sigma),
         )
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+
         proposal_id = gov.propose_future_market(
             market_name=market_name,
             wallet=self.wallet,
@@ -577,20 +599,31 @@ class VegaService(ABC):
             ),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
             **additional_kwargs,
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=wallet_name,
-            key_name=proposal_key,
-        )
-        self.wait_fn(60)
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
         self.wait_for_thread_catchup()
 
     def submit_market_order(
