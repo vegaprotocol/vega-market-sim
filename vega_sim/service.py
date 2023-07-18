@@ -486,8 +486,18 @@ class VegaService(ABC):
         proposal_key_name: str,
         market_config: market.MarketConfig,
         proposal_wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
     ):
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
 
         proposal_id = gov.propose_market_from_config(
             wallet=self.wallet,
@@ -495,17 +505,28 @@ class VegaService(ABC):
             proposal_wallet_name=proposal_wallet_name,
             proposal_key_name=proposal_key_name,
             market_config=market_config,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=proposal_wallet_name,
-            key_name=proposal_key_name,
-        )
-        self.wait_fn(60)
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=proposal_wallet_name,
+                key_name=proposal_key_name,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
         self.wait_for_thread_catchup()
 
     def create_simple_market(
