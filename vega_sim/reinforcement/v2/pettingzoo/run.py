@@ -33,25 +33,27 @@ def get_agents(env: pz.MultiAgentVegaEnv):
 
 
 if __name__ == "__main__":
+    env = None
     # Step 1: Load the PettingZoo environment
     try:
         agent_configs = [
             pz.AgentConfig(
                 action_type=pz.ActionType.AT_TOUCH_ONE_SIDE,
                 state_type=pz.PriceStateWithFees,
-                reward_type=pz.Reward.PNL,
-                terminal_reward_type=pz.Reward.SQ_INVENTORY_PENALTY,
+                # reward_type=pz.Reward.PNL,
+                # terminal_reward_type=pz.Reward.SQ_INVENTORY_PENALTY,
             ),
             pz.AgentConfig(
                 action_type=pz.ActionType.AT_TOUCH_ONE_SIDE,
                 state_type=pz.PriceStateWithFees,
-                reward_type=pz.Reward.PNL,
-                terminal_reward_type=pz.Reward.SQ_INVENTORY_PENALTY,
+                # reward_type=pz.Reward.PNL,
+                # terminal_reward_type=pz.Reward.SQ_INVENTORY_PENALTY,
             ),
         ]
         base_env = pz.MultiAgentVegaEnv(
             agents=agent_configs,
             steps_per_trading_session=200,
+            unified_reward=pz.Reward.UNIFIED_PNL,
         )
 
         # Step 2: Wrap the environment for Tianshou interfacing
@@ -120,4 +122,5 @@ if __name__ == "__main__":
             test_in_train=False,
         )
     finally:
-        env.close()
+        if env is not None:
+            env.close()

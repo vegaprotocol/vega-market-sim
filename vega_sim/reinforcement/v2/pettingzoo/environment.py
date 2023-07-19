@@ -40,7 +40,7 @@ ACTION_TO_AGENT = {
 class AgentConfig:
     action_type: ActionType
     state_type: Type[State]
-    reward_type: Reward
+    reward_type: Optional[Reward] = None
     terminal_reward_type: Optional[Reward] = None
 
 
@@ -55,6 +55,7 @@ class MultiAgentVegaEnv(ParallelEnv):
         num_levels_state: int = 5,
         trade_volume: float = 1,
         steps_per_trading_session: int = 1000,
+        unified_reward: Optional[Reward] = None,
     ):
         super().__init__()
         self.num_levels_state = num_levels_state
@@ -63,8 +64,9 @@ class MultiAgentVegaEnv(ParallelEnv):
         self.steps_per_trading_session = steps_per_trading_session
         self.current_step = 0
         self.learner_names = {
-            str(i): "learner_{i}" for i in range(len(self.agent_configs))
+            str(i): f"learner_{i}" for i in range(len(self.agent_configs))
         }
+        self.unified_reward = unified_reward
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -102,10 +104,14 @@ class MultiAgentVegaEnv(ParallelEnv):
                 learner_name: ACTION_TO_AGENT[self.agent_configs[int(i)].action_type]
                 for (i, learner_name) in self.learner_names.items()
             },
-            agent_to_reward={
-                learner_name: self.agent_configs[int(i)].reward_type
-                for (i, learner_name) in self.learner_names.items()
-            },
+            agent_to_reward=(
+                {
+                    learner_name: self.agent_configs[int(i)].reward_type
+                    for (i, learner_name) in self.learner_names.items()
+                }
+                if self.unified_reward is None
+                else self.unified_reward
+            ),
             agent_to_state={
                 learner_name: self.agent_configs[int(i)].state_type
                 for (i, learner_name) in self.learner_names.items()
