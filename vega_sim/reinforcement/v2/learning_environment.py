@@ -1,4 +1,4 @@
-from typing import Dict, Type, Optional
+from typing import Dict, Type, Optional, Union
 from dataclasses import dataclass
 from vega_sim.reinforcement.v2.agents.puppets import (
     AGENT_TYPE_TO_AGENT,
@@ -25,16 +25,23 @@ class Environment:
     def __init__(
         self,
         agents: Dict[str, AgentType],
-        agent_to_reward: Dict[str, Reward],
+        agent_to_reward: Union[Reward, Dict[str, Reward]],
         agent_to_state: Dict[str, Type[State]],
         scenario: Scenario,
         reset_vega_every_n_runs: int = 100,
         funds_per_run: float = 10_000,
     ):
         self._agents = agents
-        self._agent_to_reward_enum = agent_to_reward
         self._agent_to_state = agent_to_state
+
         self._agent_to_reward: Dict[str, BaseRewarder] = {}
+
+        if isinstance(agent_to_reward, dict):
+            self._is_single_reward = False
+            self._agent_to_reward_enum = agent_to_reward
+        else:
+            self._is_single_reward = True
+            self._single_reward_base: Reward = agent_to_reward
 
         self._scenario = scenario
         self._vega = VegaServiceNull(
@@ -71,6 +78,7 @@ class Environment:
         self._scenario.env.step(self._vega)
         self._vega.wait_fn(1)
         step_res = {}
+
         for agent_name, reward_gen in self._agent_to_reward.items():
             step_res[agent_name] = StepResult(
                 observation=self._extract_observation(agent_name),
@@ -133,10 +141,22 @@ class Environment:
 
         self._agent_to_reward = {}
 
-        for agent, reward in self._agent_to_reward_enum.items():
-            self._agent_to_reward[agent] = REWARD_ENUM_TO_CLASS[reward](
-                agent_key=agent, asset_id=manager.asset_id, market_id=manager.market_id
-            )
+        if not self._is_single_reward:
+            for agent, reward in self._agent_to_reward_enum.items():
+                self._agent_to_reward[agent] = REWARD_ENUM_TO_CLASS[reward](
+                    agent_key=agent,
+                    asset_id=manager.asset_id,
+                    market_id=manager.market_id,
+                )
+        else:
+            for agent in self._agent_to_state.keys():
+                self._agent_to_reward[agent] = REWARD_ENUM_TO_CLASS[
+                    self._single_reward_base
+                ](
+                    agent_keys=list(self._agent_to_state.keys()),
+                    asset_id=manager.asset_id,
+                    market_id=manager.market_id,
+                )
         self._market_id = manager.market_id
         self._asset_id = manager.asset_id
 
