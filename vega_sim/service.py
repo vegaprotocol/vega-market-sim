@@ -490,7 +490,7 @@ class VegaService(ABC):
         vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
         forward_time_to_enactment: bool = True,
-    ):
+    ) -> str:
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         enactment_time = (
@@ -528,6 +528,7 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+        return proposal_id
 
     def create_simple_market(
         self,
@@ -550,7 +551,7 @@ class VegaService(ABC):
         vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
         forward_time_to_enactment: bool = True,
-    ) -> None:
+    ) -> str:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
                 Args:
@@ -646,6 +647,7 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+        return proposal_id
 
     def submit_market_order(
         self,
