@@ -721,6 +721,8 @@ class VegaService(ABC):
         trading_wallet: Optional[str] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        peak_size: Optional[float] = None,
+        minimum_visible_size: Optional[float] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -764,6 +766,10 @@ class VegaService(ABC):
             post_only (bool):
                 Whether order should be prevented from trading immediately. Defaults to
                 False.
+            peak_size:
+                optional float, size of the order that is made visible and can be traded with during the execution of a single order.
+            minimum_visible_size:
+                optional float, minimum allowed remaining size of the order before it is replenished back to its peak size
 
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
@@ -796,6 +802,12 @@ class VegaService(ABC):
             else:
                 logger.debug(msg)
                 return
+        if (peak_size is None and minimum_visible_size is not None) or (
+            peak_size is not None and minimum_visible_size is None
+        ):
+            raise ValueError(
+                "Both 'peak_size' and 'minimum_visible_size' must be specified or none at all."
+            )
 
         return trading.submit_order(
             wallet=self.wallet,
@@ -826,6 +838,16 @@ class VegaService(ABC):
             key_name=trading_key,
             reduce_only=reduce_only,
             post_only=post_only,
+            iceberg_opts=vega_protos.commands.v1.commands.IcebergOpts(
+                peak_size=num_to_padded_int(
+                    peak_size, self.market_pos_decimals[market_id]
+                ),
+                minimum_visible_size=num_to_padded_int(
+                    minimum_visible_size, self.market_pos_decimals[market_id]
+                ),
+            )
+            if (peak_size is not None and minimum_visible_size is not None)
+            else None,
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:

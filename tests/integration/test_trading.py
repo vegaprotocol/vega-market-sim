@@ -404,6 +404,123 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
 
 
 @pytest.mark.integration
+def test_iceberg_order(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e5)
+    vega.wait_for_total_catchup()
+
+    market_id = vega.all_markets()[0].id
+
+    vega.submit_liquidity(
+        MM_WALLET.name,
+        market_id=market_id,
+        commitment_amount=100,
+        fee=0.001,
+        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 0.1, 1)],
+        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 0.1, 1)],
+        is_amendment=True,
+    )
+
+    with pytest.raises(ValueError):
+        vega.submit_order(
+            trading_key=PARTY_A.name,
+            market_id=market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side="SIDE_BUY",
+            price=0.29,
+            volume=10,
+            peak_size=5,
+        )
+    with pytest.raises(ValueError):
+        vega.submit_order(
+            trading_key=PARTY_A.name,
+            market_id=market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side="SIDE_BUY",
+            price=0.29,
+            volume=10,
+            minimum_visible_size=2,
+        )
+
+    # Place icebergs orders
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.29,
+        volume=10,
+        peak_size=5,
+        minimum_visible_size=2,
+    )
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.31,
+        volume=10,
+        peak_size=5,
+        minimum_visible_size=2,
+    )
+
+    # Place limit order at same price levels
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.29,
+        volume=1000,
+    )
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.31,
+        volume=1000,
+    )
+    vega.wait_for_total_catchup()
+
+    # Place market orders and check only the displayed volume is filled
+    vega.submit_market_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        fill_or_kill=False,
+        side="SIDE_SELL",
+        volume=10,
+    )
+    vega.wait_for_total_catchup()
+
+    position = vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)
+    assert position.open_volume == 5
+
+    # Place market orders and check only the displayed volume is filled
+    vega.submit_market_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        fill_or_kill=False,
+        side="SIDE_BUY",
+        volume=10,
+    )
+    vega.wait_for_total_catchup()
+
+    position = vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)
+    assert position.open_volume == 0
+
+
+@pytest.mark.integration
 def test_liquidation_price_witin_estimate_position_bounds_AC002(
     vega_service: VegaServiceNull,
 ):
