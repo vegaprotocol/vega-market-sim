@@ -196,7 +196,7 @@ class FuzzingScenario(Scenario):
         }
 
         self.market_agents = {}
-        self.initial_asset_mint = 1e9
+        self.initial_asset_mint = 10e9
 
         for i_market in range(self.n_markets):
             # Define the market and the asset:
@@ -238,6 +238,7 @@ class FuzzingScenario(Scenario):
                     stake_key=True if kwargs["network"] == Network.CAPSULE else False,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                     market_agents=market_agents,
+                    successor_probability=0.01,
                 )
             ]
 

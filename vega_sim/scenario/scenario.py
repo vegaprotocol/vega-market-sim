@@ -18,6 +18,7 @@ from vega_sim.tools.scenario_output import (
     market_data_standard_output,
     agents_standard_output,
     assets_standard_output,
+    market_chain_standard_output,
 )
 
 import vega_sim.proto.vega as vega_protos
@@ -109,6 +110,7 @@ class Scenario(abc.ABC):
             resources_standard_output(self.get_resource_data())
             assets_standard_output(self.get_assets())
             market_data_standard_output(self.get_run_data())
+            market_chain_standard_output(self.get_run_data())
             if self.additional_data_output_fns is not None:
                 market_data_standard_output(
                     self.get_additional_run_data(),
