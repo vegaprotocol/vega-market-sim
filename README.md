@@ -16,10 +16,11 @@ Market Simulator is still under active development and so may change notably ove
 
 ## Setup
 
+#### **Linux**: You should be good to go. 
+
 #### **MacOS**: Ensure that you have the command line developer tools installed. You can install them by running `xcode-select --install` in the terminal.  
 
 #### **Windows**: Please follow the [Windows setup instructions.](##windows-setup)  
-
 
 For the most part the package is fairly self-contained Python, however there are some utility functions which will automatically download the requisite Vega services for you. You can choose to either build the Vega binaries from source (allowing you to investigate or change the internals if you desire) or download prebuilt binaries for your platform.
 

@@ -486,8 +486,18 @@ class VegaService(ABC):
         proposal_key_name: str,
         market_config: market.MarketConfig,
         proposal_wallet_name: Optional[str] = None,
-    ):
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ) -> str:
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
 
         proposal_id = gov.propose_market_from_config(
             wallet=self.wallet,
@@ -495,18 +505,30 @@ class VegaService(ABC):
             proposal_wallet_name=proposal_wallet_name,
             proposal_key_name=proposal_key_name,
             market_config=market_config,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=proposal_wallet_name,
-            key_name=proposal_key_name,
-        )
-        self.wait_fn(60)
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=proposal_wallet_name,
+                key_name=proposal_key_name,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
         self.wait_for_thread_catchup()
+        return proposal_id
 
     def create_simple_market(
         self,
@@ -525,42 +547,55 @@ class VegaService(ABC):
         ] = None,
         wallet_name: Optional[str] = None,
         termination_wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
         parent_market_id: Optional[str] = None,
         parent_market_insurance_pool_fraction: float = 1,
-    ) -> None:
+    ) -> str:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
-        Args:
-            market_name:
-                str, name of the market
-            proposal_key:
-                str, the name of the key to use for proposing the market
-            settlement_asset_id:
-                str, the asset id the market will use for settlement
-            termination_key:
-                str, the name of the key which will be used to send termination data
-            position_decimals:
-                int, the decimal place precision to use for positions
-                    (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-           market_decimals:
-                int, the decimal place precision to use for market prices
-                    (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
-            price_monitoring_parameters:
-                PriceMonitoringParameters, A set of parameters determining when the
-                    market will drop into a price auction. If not passed defaults
-                    to a very permissive setup
-                    wallet_name: Optional[str] = None,
-            wallet_name:
-                Optional[str], name of wallet proposing market. Defaults to None.
-            termination_wallet_name:
-                Optional[str], name of wallet settling market. Defaults to None.
-            parent_market_id:
-                Optional[str], Market to set as the parent market on the proposal
-            parent_market_insurance_pool_fraction:
-                float, Fraction of parent market insurance pool to carry over.
-                    defaults to 1. No-op if parent_market_id is not set.
-
-
+                Args:
+                    market_name:
+                        str, name of the market
+                    proposal_key:
+                        str, the name of the key to use for proposing the market
+                    settlement_asset_id:
+                        str, the asset id the market will use for settlement
+                    termination_key:
+                        str, the name of the key which will be used to send termination data
+                    position_decimals:
+                        int, the decimal place precision to use for positions
+                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+                   market_decimals:
+                        int, the decimal place precision to use for market prices
+                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+                    price_monitoring_parameters:
+                        PriceMonitoringParameters, A set of parameters determining when the
+                            market will drop into a price auction. If not passed defaults
+                            to a very permissive setup
+                            wallet_name: Optional[str] = None,
+        :
+                        Optional[str], name of wallet proposing market. Defaults to None.
+                    termination_wallet_name:
+                        Optional[str], name of wallet settling market. Defaults to None.
+                    vote_closing_time:
+                        Optional[datetime.datetime]: If set, decides at what time the vote will be set to
+                            close. Defaults to Now + 40 blocks
+                    vote_enactment_time:
+                        Optional[datetime.datetime]: If set, decides at what time the vote will be set to
+                            enact. Defaults to Now + 50 blocks
+                    approve_proposal:
+                        bool, default True, whether to automatically approve the proposal
+                    forward_time_to_enactment:
+                        bool, default True, whether to forward time until this proposal has already
+                            been enacted
+                    parent_market_id:
+                        Optional[str], Market to set as the parent market on the proposal
+                    parent_market_insurance_pool_fraction:
+                        float, Fraction of parent market insurance pool to carry over.
+                            defaults to 1. No-op if parent_market_id is not set.
         """
         additional_kwargs = {}
         if future_asset is not None:
@@ -573,6 +608,13 @@ class VegaService(ABC):
             tau=tau,
             params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.0, sigma=sigma),
         )
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+
         proposal_id = gov.propose_future_market(
             market_name=market_name,
             wallet=self.wallet,
@@ -585,8 +627,12 @@ class VegaService(ABC):
             ),
             position_decimals=position_decimals,
             market_decimals=market_decimals,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
@@ -594,14 +640,22 @@ class VegaService(ABC):
             parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
             **additional_kwargs,
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=wallet_name,
-            key_name=proposal_key,
-        )
-        self.wait_fn(60)
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
         self.wait_for_thread_catchup()
+        return proposal_id
 
     def submit_market_order(
         self,
@@ -675,6 +729,8 @@ class VegaService(ABC):
         trading_wallet: Optional[str] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        peak_size: Optional[float] = None,
+        minimum_visible_size: Optional[float] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -718,6 +774,10 @@ class VegaService(ABC):
             post_only (bool):
                 Whether order should be prevented from trading immediately. Defaults to
                 False.
+            peak_size:
+                optional float, size of the order that is made visible and can be traded with during the execution of a single order.
+            minimum_visible_size:
+                optional float, minimum allowed remaining size of the order before it is replenished back to its peak size
 
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
@@ -750,6 +810,13 @@ class VegaService(ABC):
             else:
                 logger.debug(msg)
                 return
+        if (peak_size is None and minimum_visible_size is not None) or (
+            peak_size is not None and minimum_visible_size is None
+        ):
+            raise ValueError(
+                "Both 'peak_size' and 'minimum_visible_size' must be specified or none"
+                " at all."
+            )
 
         return trading.submit_order(
             wallet=self.wallet,
@@ -780,6 +847,18 @@ class VegaService(ABC):
             key_name=trading_key,
             reduce_only=reduce_only,
             post_only=post_only,
+            iceberg_opts=(
+                vega_protos.commands.v1.commands.IcebergOpts(
+                    peak_size=num_to_padded_int(
+                        peak_size, self.market_pos_decimals[market_id]
+                    ),
+                    minimum_visible_size=num_to_padded_int(
+                        minimum_visible_size, self.market_pos_decimals[market_id]
+                    ),
+                )
+                if (peak_size is not None and minimum_visible_size is not None)
+                else None
+            ),
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:

@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
@@ -84,8 +84,8 @@ def propose_market_from_config(
     wallet: Wallet,
     proposal_key_name: str,
     market_config: MarketConfig,
-    closing_time: str,
-    enactment_time: str,
+    closing_time: Union[str, int],
+    enactment_time: Union[str, int],
     time_forward_fn: Optional[Callable[[], None]] = None,
     governance_asset: Optional[str] = "VOTE",
     proposal_wallet_name: Optional[str] = None,
@@ -121,8 +121,8 @@ def propose_market_from_config(
     proposal = _build_generic_proposal(
         pub_key=pub_key,
         data_client=data_client,
-        closing_time=closing_time,
-        enactment_time=enactment_time,
+        closing_time=int(closing_time),
+        enactment_time=int(enactment_time),
     )
     proposal.terms.new_market.CopyFrom(changes)
 

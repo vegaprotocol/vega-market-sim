@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum, auto
-from typing import Optional
+from typing import Optional, List
 
 from vega_sim.scenario.common.agents import VegaService
 
@@ -8,6 +8,7 @@ from vega_sim.scenario.common.agents import VegaService
 class Reward(Enum):
     PNL = auto()
     SQ_INVENTORY_PENALTY = auto()
+    UNIFIED_PNL = auto()
 
 
 class BaseRewarder(ABC):
@@ -27,6 +28,49 @@ class BaseRewarder(ABC):
     @abstractmethod
     def get_reward(self, vega: VegaService) -> float:
         pass
+
+
+class BaseUnifiedRewarder(ABC):
+    def __init__(
+        self,
+        agent_keys: List[str],
+        market_id: str,
+        asset_id: str,
+        agent_wallets: Optional[List[str]] = None,
+    ):
+        self.agent_keys = agent_keys
+        self.agent_wallets = (
+            agent_wallets
+            if agent_wallets is not None
+            else [None for _ in range(len(self.agent_keys))]
+        )
+        self.asset_id = asset_id
+        self.market_id = market_id
+        self.last_balance = {}
+
+    @abstractmethod
+    def get_reward(self, vega: VegaService) -> float:
+        pass
+
+
+class PnlUnifiedRewarder(BaseUnifiedRewarder):
+    def get_reward(self, vega: VegaService) -> float:
+        reward = 0
+        for key, wallet in zip(self.agent_keys, self.agent_wallets):
+            balance = vega.party_account(
+                key_name=key,
+                wallet_name=wallet,
+                asset_id=self.asset_id,
+                market_id=self.market_id,
+            )
+            balance = sum(k for k in balance)
+            if self.last_balance.get(key):
+                key_reward = balance - self.last_balance.get(key)
+            else:
+                key_reward = 0
+            self.last_balance[key] = balance
+            reward += key_reward
+        return reward
 
 
 class PnlRewarder(BaseRewarder):
@@ -60,4 +104,5 @@ class SquareInventoryPenalty(BaseRewarder):
 REWARD_ENUM_TO_CLASS = {
     Reward.PNL: PnlRewarder,
     Reward.SQ_INVENTORY_PENALTY: SquareInventoryPenalty,
+    Reward.UNIFIED_PNL: PnlUnifiedRewarder,
 }
