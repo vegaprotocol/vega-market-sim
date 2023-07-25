@@ -4,7 +4,6 @@ import atexit
 import functools
 import logging
 import multiprocessing
-import psutil
 import os
 import shutil
 import signal
@@ -20,7 +19,9 @@ from io import BufferedWriter
 from os import path
 from typing import Dict, List, Optional, Set
 
+import docker
 import grpc
+import psutil
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
@@ -332,6 +333,7 @@ def manage_vega_processes(
         format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
     )
     port_config = port_config if port_config is not None else {}
+    docker_client = docker.from_env()
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
@@ -367,6 +369,20 @@ def manage_vega_processes(
         port_config=port_config,
         transactions_per_block=transactions_per_block,
         block_duration=block_duration,
+    )
+
+    data_node_docker_volume = docker_client.volumes.create()
+    data_node_container = docker_client.containers.run(
+        "timescale/timescaledb:2.8.0-pg14",
+        detach=True,
+        ports={5432: port_config[Ports.DATA_NODE_POSTGRES]},
+        volumes=[f"{data_node_docker_volume.name}:/var/lib/postgresql/data"],
+        environment={
+            "POSTGRES_USER": "vega",
+            "POSTGRES_PASSWORD": "vega",
+            "POSTGRES_DB": "vega",
+        },
+        remove=True,
     )
 
     dataNodeProcess = _popen_process(
@@ -544,6 +560,10 @@ def manage_vega_processes(
     child_conn.send({name: process.pid for name, process in processes.items()})
 
     signal.sigwait([signal.SIGKILL, signal.SIGTERM])
+
+    data_node_container.stop()
+    data_node_docker_volume.remove()
+
     for process in processes.values():
         process.terminate()
     for name, process in processes.items():
