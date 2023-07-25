@@ -13,7 +13,7 @@ pipeline {
         timeout(time: 50, unit: 'MINUTES')
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: 'b96879674398406191e8dafe4c229cb2e0609285',
+        string( name: 'VEGA_VERSION', defaultValue: '96a1e494ddaeabf2065096a1a8f28e11b2879319',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'VEGACAPSULE_VERSION', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
