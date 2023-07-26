@@ -126,7 +126,11 @@ class MarketConfig(Config):
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
 
-        self.successor = Successor(opt=config["successor"]) if config["successor"] is not None else None
+        self.successor = (
+            Successor(opt=config["successor"])
+            if config["successor"] is not None
+            else None
+        )
 
         self.instrument = InstrumentConfiguration(opt=config["instrument"])
         self.price_monitoring_parameters = PriceMonitoringParameters(
