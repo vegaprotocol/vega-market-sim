@@ -783,6 +783,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 name=self._get_termination_key_name(),
             ),
         )
+
         mkt_config.set("successor.parent_market_id", parent_market_id)
 
         self.vega.wait_for_total_catchup()

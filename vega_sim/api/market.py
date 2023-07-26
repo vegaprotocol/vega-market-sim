@@ -156,8 +156,9 @@ class MarketConfig(Config):
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
-        if self.successor is not None:
-            new_market.changes.successor.CopyFrom(self.successor.build())
+        successor = self.successor.build()
+        if successor is not None:
+            new_market.changes.successor.CopyFrom(successor)
         return new_market
 
     def set(self, parameter, value):
