@@ -784,15 +784,16 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             ),
         )
 
-        mkt_config.set(
-            "successor",
-            Successor(
-                opt={
-                    "parent_market_id": parent_market_id,
-                    "insurance_pool_fraction": 1,
-                }
-            ),
-        )
+        if parent_market_id is not None:
+            mkt_config.set(
+                "successor",
+                Successor(
+                    opt={
+                        "parent_market_id": parent_market_id,
+                        "insurance_pool_fraction": 1,
+                    }
+                ),
+            )
 
         self.vega.wait_for_total_catchup()
         self.vega.create_market_from_config(
