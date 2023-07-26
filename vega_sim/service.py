@@ -551,6 +551,8 @@ class VegaService(ABC):
         vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
         forward_time_to_enactment: bool = True,
+        parent_market_id: Optional[str] = None,
+        parent_market_insurance_pool_fraction: float = 1,
     ) -> str:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
@@ -589,7 +591,11 @@ class VegaService(ABC):
                     forward_time_to_enactment:
                         bool, default True, whether to forward time until this proposal has already
                             been enacted
-
+                    parent_market_id:
+                        Optional[str], Market to set as the parent market on the proposal
+                    parent_market_insurance_pool_fraction:
+                        float, Fraction of parent market insurance pool to carry over.
+                            defaults to 1. No-op if parent_market_id is not set.
         """
         additional_kwargs = {}
         if future_asset is not None:
@@ -630,6 +636,8 @@ class VegaService(ABC):
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
+            parent_market_id=parent_market_id,
+            parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
             **additional_kwargs,
         )
         if approve_proposal:
@@ -806,7 +814,8 @@ class VegaService(ABC):
             peak_size is not None and minimum_visible_size is None
         ):
             raise ValueError(
-                "Both 'peak_size' and 'minimum_visible_size' must be specified or none at all."
+                "Both 'peak_size' and 'minimum_visible_size' must be specified or none"
+                " at all."
             )
 
         return trading.submit_order(
@@ -838,16 +847,18 @@ class VegaService(ABC):
             key_name=trading_key,
             reduce_only=reduce_only,
             post_only=post_only,
-            iceberg_opts=vega_protos.commands.v1.commands.IcebergOpts(
-                peak_size=num_to_padded_int(
-                    peak_size, self.market_pos_decimals[market_id]
-                ),
-                minimum_visible_size=num_to_padded_int(
-                    minimum_visible_size, self.market_pos_decimals[market_id]
-                ),
-            )
-            if (peak_size is not None and minimum_visible_size is not None)
-            else None,
+            iceberg_opts=(
+                vega_protos.commands.v1.commands.IcebergOpts(
+                    peak_size=num_to_padded_int(
+                        peak_size, self.market_pos_decimals[market_id]
+                    ),
+                    minimum_visible_size=num_to_padded_int(
+                        minimum_visible_size, self.market_pos_decimals[market_id]
+                    ),
+                )
+                if (peak_size is not None and minimum_visible_size is not None)
+                else None
+            ),
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:

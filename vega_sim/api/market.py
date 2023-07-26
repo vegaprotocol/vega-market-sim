@@ -50,6 +50,7 @@ Examples:
 
 """
 
+import copy
 import functools
 import logging
 from typing import Optional, Union
@@ -111,6 +112,7 @@ class MarketConfig(Config):
             "lp_price_range": 0.5,
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
+            "successor": None,
         }
     }
 
@@ -124,6 +126,12 @@ class MarketConfig(Config):
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
 
+        self.successor = (
+            Successor(opt=config["successor"])
+            if config["successor"] is not None
+            else None
+        )
+
         self.instrument = InstrumentConfiguration(opt=config["instrument"])
         self.price_monitoring_parameters = PriceMonitoringParameters(
             opt=config["price_monitoring_parameters"]
@@ -134,7 +142,7 @@ class MarketConfig(Config):
         self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
 
     def build(self):
-        return vega_protos.governance.NewMarket(
+        new_market = vega_protos.governance.NewMarket(
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=self.decimal_places,
                 position_decimal_places=self.position_decimal_places,
@@ -148,9 +156,33 @@ class MarketConfig(Config):
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
+        if self.successor is not None:
+            new_market.changes.successor.CopyFrom(self.successor.build())
+        return new_market
 
     def set(self, parameter, value):
         rsetattr(self, attr=parameter, val=value)
+
+
+class Successor(Config):
+    OPTS = {
+        "default": {
+            "parent_market_id": None,
+            "insurance_pool_fraction": 1,
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+        self.parent_market_id = config["parent_market_id"]
+        self.insurance_pool_fraction = config.get("insurance_pool_fraction", 1)
+
+    def build(self) -> Optional[vega_protos.governance.SuccessorConfiguration]:
+        if self.parent_market_id is not None:
+            return vega_protos.governance.SuccessorConfiguration(
+                parent_market_id=self.parent_market_id,
+                insurance_pool_fraction=str(self.insurance_pool_fraction),
+            )
 
 
 class PriceMonitoringParameters(Config):

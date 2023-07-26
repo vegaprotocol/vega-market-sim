@@ -1,13 +1,15 @@
 import os
 import ast
 
+import itertools
 import argparse
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import vega_sim.proto.vega as vega_protos
 
-from typing import Optional
+from typing import Optional, List
 from collections import defaultdict
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -33,6 +35,7 @@ TRADING_MODE_COLORS = {
     3: (153 / 255, 204 / 255, 244 / 255),
     4: (255 / 255, 133 / 255, 133 / 255),
     5: (255 / 255, 204 / 255, 255 / 255),
+    6: (255 / 255, 0 / 255, 0 / 255),
 }
 
 
@@ -49,6 +52,7 @@ from vega_sim.tools.scenario_output import (
     load_trades_df,
     load_fuzzing_df,
     load_agents_df,
+    load_market_chain,
     load_resource_df,
     load_assets_df,
 )
@@ -90,6 +94,18 @@ def _order_book_df_to_heatmap_df(order_book_df: pd.DataFrame) -> pd.DataFrame:
         .sort_index(ascending=False)
         .values
     )
+
+
+def _series_df_to_single_series(
+    df: pd.DataFrame, market_series: List[str]
+) -> pd.DataFrame:
+    df_clone = df.copy().reset_index()
+    df_clone["series_ix"] = df_clone.market_id.apply(lambda x: market_series.index(x))
+    selector = df_clone.loc[df_clone.groupby("time").series_ix.idxmax()][
+        ["time", "market_id"]
+    ]
+
+    return df_clone.merge(selector, on=["time", "market_id"]).set_index("time")
 
 
 def plot_trading_summary(
@@ -213,13 +229,31 @@ def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
     data_df = load_market_data_df(run_name=run_name)
     accounts_df = load_accounts_df(run_name=run_name)
 
+    market_chains = load_market_chain(run_name=run_name)
+    if not market_chains:
+        market_chains = {
+            market_id: [market_id] for market_id in data_df["market_id"].unique()
+        }
+
     figs = {}
 
-    for market_id in data_df["market_id"].unique():
-        market_order_df = order_df[order_df["market_id"] == market_id]
-        market_trades_df = trades_df[trades_df["market_id"] == market_id]
-        market_data_df = data_df[data_df["market_id"] == market_id]
-        market_accounts_df = accounts_df[accounts_df["market_id"] == market_id]
+    for market_id, market_children in market_chains.items():
+        market_order_df = _series_df_to_single_series(
+            order_df[order_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+        market_trades_df = _series_df_to_single_series(
+            trades_df[trades_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+        market_data_df = _series_df_to_single_series(
+            data_df[data_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+        market_accounts_df = _series_df_to_single_series(
+            accounts_df[accounts_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
 
         market_mid_df = (
             market_order_df[market_order_df.level == 0].groupby("time")[["price"]].sum()
@@ -374,7 +408,10 @@ def plot_price_comparison(
     ax0.text(
         x=0.1,
         y=0.1,
-        s=f"external-price volatility = {round(ep_volatility, 1)}\nmark-price volatility = {round(mp_volatility, 1)}",
+        s=(
+            f"external-price volatility = {round(ep_volatility, 1)}\nmark-price"
+            f" volatility = {round(mp_volatility, 1)}"
+        ),
         fontsize=8,
         bbox=dict(facecolor="white", alpha=1),
         transform=ax0.transAxes,
@@ -426,6 +463,7 @@ def plot_risky_close_outs(
     insurance_pool_ds = accounts_df["balance"][
         (accounts_df["party_id"] == "network") & (accounts_df["type"] == 1)
     ]
+
     trader_close_outs_ds = fuzzing_df["trader_close_outs"]
     liquidity_provider_close_outs_ds = fuzzing_df["liquidity_provider_close_outs"]
 
@@ -485,13 +523,27 @@ def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     accounts_df = load_accounts_df(run_name=run_name)
     fuzzing_df = load_fuzzing_df(run_name=run_name)
 
-    markets = data_df.market_id.unique()
+    market_chains = load_market_chain(run_name=run_name)
+    if not market_chains:
+        market_chains = {
+            market_id: [market_id] for market_id in data_df["market_id"].unique()
+        }
 
     figs = {}
-    for market_id in markets:
-        market_data_df = data_df[data_df["market_id"] == market_id]
-        market_accounts_df = accounts_df[accounts_df["market_id"] == market_id]
-        market_fuzzing_df = fuzzing_df[fuzzing_df["market_id"] == market_id]
+    for market_id, market_children in market_chains.items():
+        market_data_df = _series_df_to_single_series(
+            data_df[data_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+        market_accounts_df = _series_df_to_single_series(
+            accounts_df[accounts_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+
+        market_fuzzing_df = _series_df_to_single_series(
+            fuzzing_df[fuzzing_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
 
         fig = plt.figure(figsize=[8, 10])
         fig.suptitle(
@@ -578,22 +630,38 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
 
 def plot_price_monitoring(run_name: Optional[str] = None):
     data_df = load_market_data_df(run_name=run_name)
-
-    market_ids = data_df.market_id.unique()
+    market_chains = load_market_chain(run_name=run_name)
+    if not market_chains:
+        market_chains = {
+            market_id: [market_id] for market_id in data_df["market_id"].unique()
+        }
 
     figs = {}
-    for market_id in market_ids:
-        market_data_df = data_df[data_df["market_id"] == market_id]
+    for market_id, market_children in market_chains.items():
+        market_data_df = _series_df_to_single_series(
+            data_df[data_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
 
         # Extract the tightest valid prices from the price monitoring valid_prices
         valid_prices = defaultdict(lambda: [])
         for index in market_data_df.index:
-            all_bounds = ast.literal_eval(
-                market_data_df.loc[index]["price_monitoring_bounds"]
+            all_bounds = list(
+                itertools.chain(
+                    *[
+                        ast.literal_eval(
+                            bounds[0] if isinstance(bounds, np.ndarray) else bounds
+                        )
+                        for bounds in market_data_df.loc[index][
+                            ["price_monitoring_bounds"]
+                        ].values
+                    ]
+                )
             )
             valid_prices["datetime"].append(index)
             valid_prices["min_valid_price"].append(np.nan)
             valid_prices["max_valid_price"].append(np.nan)
+
             for _, individual_bound in enumerate(all_bounds):
                 valid_prices["min_valid_price"][-1] = (
                     individual_bound[0]
@@ -870,6 +938,7 @@ if __name__ == "__main__":
                 fig.savefig(f"{dir}/monitoring-{i}.jpg")
 
     if args.accounts or args.all:
+        print("accounting")
         fig = account_plots()
         if args.save:
             fig.savefig(f"{dir}/accounts.jpg")

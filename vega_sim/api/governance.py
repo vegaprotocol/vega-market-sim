@@ -156,6 +156,8 @@ def propose_future_market(
     ] = None,
     lp_price_range: float = 1,
     wallet_name: Optional[str] = None,
+    parent_market_id: Optional[str] = None,
+    parent_market_insurance_pool_fraction: float = 1,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -197,6 +199,11 @@ def propose_future_market(
             (e.g. 2 allows mid-price +/- 2 * mid-price )
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
+        parent_market_id:
+            Optional[str], Market to set as the parent market on the proposal
+        parent_market_insurance_pool_fraction:
+            float, Fraction of parent market insurance pool to carry over.
+                defaults to 1. No-op if parent_market_id is not set.
 
     Returns:
         str, the ID of the future market proposal on chain
@@ -310,6 +317,13 @@ def propose_future_market(
             quadratic_slippage_factor="0",
         ),
     )
+    if parent_market_id is not None:
+        market_proposal.changes.successor.CopyFrom(
+            vega_protos.governance.SuccessorConfiguration(
+                parent_market_id=parent_market_id,
+                insurance_pool_fraction=str(parent_market_insurance_pool_fraction),
+            )
+        )
 
     proposal = _build_generic_proposal(
         pub_key=pub_key,
