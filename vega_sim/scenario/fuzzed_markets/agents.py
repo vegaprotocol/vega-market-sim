@@ -6,7 +6,7 @@ import pandas as pd
 from numpy.random import RandomState
 
 import vega_sim.proto.vega as vega_protos
-from vega_sim.api.market import MarketConfig
+from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
@@ -784,7 +784,15 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             ),
         )
 
-        mkt_config.set("successor.parent_market_id", parent_market_id)
+        mkt_config.set(
+            "successor",
+            Successor(
+                opt={
+                    "parent_market_id": parent_market_id,
+                    "insurance_pool_fraction": 1,
+                }
+            ),
+        )
 
         self.vega.wait_for_total_catchup()
         self.vega.create_market_from_config(
