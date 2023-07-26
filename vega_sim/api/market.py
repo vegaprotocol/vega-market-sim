@@ -112,7 +112,7 @@ class MarketConfig(Config):
             "lp_price_range": 0.5,
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
-            "successor": "default",
+            "successor": None,
         }
     }
 
@@ -126,7 +126,11 @@ class MarketConfig(Config):
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
 
-        self.successor = Successor(opt=config["successor"])
+        self.successor = (
+            Successor(opt=config["successor"])
+            if config["successor"] is not None
+            else None
+        )
 
         self.instrument = InstrumentConfiguration(opt=config["instrument"])
         self.price_monitoring_parameters = PriceMonitoringParameters(
@@ -152,9 +156,8 @@ class MarketConfig(Config):
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
-        successor = self.successor.build()
-        if successor is not None:
-            new_market.changes.successor.CopyFrom(successor)
+        if self.successor is not None:
+            new_market.changes.successor.CopyFrom(self.successor.build())
         return new_market
 
     def set(self, parameter, value):
