@@ -2,13 +2,14 @@ import logging
 import random
 import string
 import time
-from typing import Any, Optional, TypeVar, Union, Callable
+from decimal import Decimal
+from typing import Any, Callable, Optional, TypeVar, Union
 
 import requests
+
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
-
 
 T = TypeVar("T")
 
@@ -42,7 +43,7 @@ def enum_to_str(e: Any, val: int) -> str:
 
 
 def num_to_padded_int(to_convert: float, decimals: int) -> float:
-    return int(to_convert * 10**decimals)
+    return int(Decimal(str(to_convert)) * 10**decimals)
 
 
 def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
