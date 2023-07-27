@@ -20,7 +20,11 @@ from vega_sim.devops.classes import (
     SimulationArgs,
 )
 
-from vega_sim.scenario.common.utils.price_process import Granularity, LivePrice
+from vega_sim.scenario.common.utils.price_process import (
+    Granularity,
+    LivePrice,
+    AverageWeather,
+)
 
 SCENARIOS = {
     "ETHUSD": lambda: DevOpsScenario(
@@ -208,6 +212,53 @@ SCENARIOS = {
             granularity=Granularity.MINUTE,
             coinbase_code="ADA-USDT",
             start_date="2023-01-01 00:00:00",
+            randomise_history=False,
+        ),
+    ),
+    "NYCUSDT": lambda: DevOpsScenario(
+        live_price_process=AverageWeather(hours=72, location="athens"),
+        market_manager_args=MarketManagerArgs(
+            market_name="New York USDT",
+            market_code="NYC USDT",
+            asset_name="tDAI",
+            adp=18,
+            mdp=4,
+            pdp=2,
+        ),
+        market_maker_args=MarketMakerArgs(
+            market_kappa=100,
+            market_order_arrival_rate=10,
+            order_kappa=25,
+            order_size=1,
+            order_levels=15,
+            order_spacing=0.01,
+            order_clipping=200000,
+            inventory_lower_boundary=-10000,
+            inventory_upper_boundary=10000,
+            fee_amount=0.0001,
+            commitment_amount=4e4,
+            initial_mint=1e5,
+        ),
+        auction_trader_args=AuctionTraderArgs(
+            initial_volume=1,
+            initial_mint=1e5,
+        ),
+        random_trader_args=RandomTraderArgs(
+            order_intensity=[1, 50, 100],
+            order_volume=[1, 1, 1],
+            step_bias=[0.2, 0.01, 0.0005],
+            initial_mint=1e5,
+        ),
+        sensitive_trader_args=SensitiveTraderArgs(
+            scale=[10, 10, 10],
+            max_order_size=[0.001, 0.01, 0.1],
+            initial_mint=1e5,
+        ),
+        simulation_args=SimulationArgs(
+            n_steps=60 * 24 * 31,
+            granularity=Granularity.MINUTE,
+            coinbase_code="ADA-USDT",
+            start_date="2023-07-01 00:00:00",
             randomise_history=False,
         ),
     ),

@@ -172,15 +172,39 @@ def get_historic_price_series(
         return s
 
 
-if __name__ == "__main__":
-    print(
-        get_historic_price_series(
-            "ETH-USD",
-            granularity=Granularity.HOUR,
-            start="2022-08-02 01:01:50",
-            end="2022-09-05 09:05:20",
+def get_historic_temp_series(
+    latitude: float,
+    longitude: float,
+    hours: int = 24,
+    interpolation: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> list:
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&hourly=temperature_2m&start_date={start_date}&end_date={end_date}"
+    response = requests.get(url)
+    data = response.json()
+    s = (
+        pd.Series(
+            data=data["hourly"]["temperature_2m"],
+            index=pd.DatetimeIndex(
+                data["hourly"]["time"],
+            ),
         )
+        .sort_index()
+        .drop_duplicates()
+        .rolling(hours)
+        .mean()
+        .dropna()
     )
+    if interpolation is not None:
+        s_interpolated = pd.Series(
+            index=pd.date_range(start=s.index[0], end=s.index[-1], freq=interpolation)
+        )
+        s_interpolated.update(s)
+        s_interpolated = s_interpolated.interpolate(method="linear")
+        return s_interpolated
+    else:
+        return s
 
 
 class LivePrice:
@@ -207,3 +231,63 @@ class LivePrice:
     def _get_price(self):
         url = f"https://api.binance.com/api/v3/avgPrice?symbol={self.product}"
         return float(requests.get(url).json()["price"])
+
+
+class AverageWeather:
+    """Iterator for getting the average temperature.
+
+    Class is to be used when running the scenario on fairground incentives. The
+    iterator can be passed to the market-maker agent and the price-sensitive
+    agents to give them information regarding the live average temperature.
+
+    """
+
+    LOCATIONS = {
+        "athens": {"latitude": 37.983810, "longitude": 23.7278},
+        "new_york": {"latitude": 40.7143, "longitude": -74.006},
+    }
+
+    def __init__(
+        self,
+        hours: Optional[int] = 24,
+        location: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+    ):
+        if location is not None:
+            if location not in self.LOCATIONS:
+                raise ValueError("Invalid location specified.")
+            self.latitude = self.LOCATIONS[location]["latitude"]
+            self.longitude = self.LOCATIONS[location]["longitude"]
+        else:
+            self.latitude = latitude if latitude is not None else 0
+            self.longitude = longitude if longitude is not None else 0
+        self.hours = hours
+
+    def __iter__(self):
+        return self
+
+    def __getitem__(self, index):
+        return self._get_temp()
+
+    def __next__(self):
+        return self._get_temp()
+
+    def _get_temp(self):
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={self.latitude}&longitude={self.longitude}&hourly=temperature_2m&past_days={int(np.ceil(self.hours/24))}&forecast_days=0"
+        response = requests.get(url)
+        data = response.json()
+        hourly_temperatures = data["hourly"]["temperature_2m"]
+        past_week_temperatures = hourly_temperatures[-self.hours :]
+        return sum(past_week_temperatures) / len(past_week_temperatures)
+
+
+if __name__ == "__main__":
+    s = get_historic_temp_series(
+        longitude=37.983810,
+        latitude=23.7278,
+        interpolation="5s",
+        start_date="2023-06-01",
+        end_date="2023-07-01",
+    )
+    print(s)

@@ -15,7 +15,7 @@ scenario consists of the following agents.
 
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Optional, Union, Dict, Callable, Any
+from typing import Optional, Union, Dict, Callable, Any, Iterable
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.constants import Network
@@ -29,6 +29,7 @@ from vega_sim.environment.environment import (
 from vega_sim.scenario.common.utils.price_process import (
     LivePrice,
     get_historic_price_series,
+    get_historic_temp_series,
 )
 from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
@@ -59,7 +60,7 @@ from vega_sim.devops.classes import (
 class DevOpsScenario(Scenario):
     def __init__(
         self,
-        binance_code: str,
+        live_price_process: Iterable,
         market_manager_args: MarketManagerArgs,
         market_maker_args: MarketMakerArgs,
         auction_trader_args: AuctionTraderArgs,
@@ -74,7 +75,7 @@ class DevOpsScenario(Scenario):
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
-        self.binance_code = binance_code
+        self.live_price_process = live_price_process
 
         self.market_manager_args = market_manager_args
         self.market_maker_args = market_maker_args
@@ -115,6 +116,29 @@ class DevOpsScenario(Scenario):
 
         return price_process
 
+    def _get_historic_temperature_process(
+        self,
+        random_state,
+    ) -> list:
+        start = datetime.strptime(self.simulation_args.start_date, "%Y-%m-%d %H:%M:%S")
+
+        if self.simulation_args.randomise_history:
+            start = start + timedelta(days=int(random_state.choice(range(30))))
+
+        end = start + timedelta(
+            seconds=(self.simulation_args.n_steps)
+            * self.simulation_args.granularity.value
+        )
+
+        return get_historic_temp_series(
+            latitude=40.7143,
+            longitude=-74.006,
+            hours=24,
+            interpolation=f"{int(self.step_length_seconds)}S",
+            start_date=start.strftime("%Y-%m-%d"),
+            end_date=end.strftime("%Y-%m-%d"),
+        )
+
     def configure_agents(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
@@ -127,11 +151,14 @@ class DevOpsScenario(Scenario):
         )
 
         if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
-            self.price_process = self._get_historic_price_process(
-                random_state=random_state
+            # self.price_process = self._get_historic_price_process(
+            #     random_state=random_state
+            # )
+            self.price_process = self._get_historic_temperature_process(
+                random_state=random_state,
             )
         else:
-            self.price_process = LivePrice(product=self.binance_code)
+            self.price_process = self.live_price_process
 
         if kwargs.get("run_background", True):
             # Setup agent for proposing and settling the market
@@ -234,7 +261,7 @@ class DevOpsScenario(Scenario):
                 [market_manager, market_maker]
                 + auction_pass_agents
                 + random_market_order_traders
-                + sensitive_limit_order_traders
+                # + sensitive_limit_order_traders
             )
 
         else:
