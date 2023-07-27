@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python -m vega_sim.scenario.fuzzed_markets.run_fuzz_test --steps $1
+poetry run python -m vega_sim.scenario.fuzzed_markets.run_fuzz_test --steps $1
