@@ -244,8 +244,8 @@ SCENARIOS = {
             initial_mint=1e5,
         ),
         random_trader_args=RandomTraderArgs(
-            order_intensity=[1, 500, 1000],
-            order_volume=[1, 1, 1],
+            order_intensity=[10, 10, 100],
+            order_volume=[1, 10, 100],
             step_bias=[0.2, 0.01, 0.0005],
             initial_mint=1e5,
         ),
