@@ -216,7 +216,7 @@ SCENARIOS = {
         ),
     ),
     "NYCUSDT": lambda: DevOpsScenario(
-        live_price_process=AverageWeather(hours=72, location="athens"),
+        live_price_process=AverageWeather(hours=72, location="new_york"),
         market_manager_args=MarketManagerArgs(
             market_name="New York USDT",
             market_code="NYC USDT",
@@ -226,9 +226,9 @@ SCENARIOS = {
             pdp=2,
         ),
         market_maker_args=MarketMakerArgs(
-            market_kappa=100,
-            market_order_arrival_rate=10,
-            order_kappa=25,
+            market_kappa=300,
+            market_order_arrival_rate=1e4,
+            order_kappa=15,
             order_size=1,
             order_levels=15,
             order_spacing=0.01,
@@ -236,15 +236,15 @@ SCENARIOS = {
             inventory_lower_boundary=-10000,
             inventory_upper_boundary=10000,
             fee_amount=0.0001,
-            commitment_amount=4e4,
-            initial_mint=1e5,
+            commitment_amount=4e5,
+            initial_mint=1e6,
         ),
         auction_trader_args=AuctionTraderArgs(
             initial_volume=1,
             initial_mint=1e5,
         ),
         random_trader_args=RandomTraderArgs(
-            order_intensity=[1, 50, 100],
+            order_intensity=[1, 500, 1000],
             order_volume=[1, 1, 1],
             step_bias=[0.2, 0.01, 0.0005],
             initial_mint=1e5,
@@ -255,7 +255,7 @@ SCENARIOS = {
             initial_mint=1e5,
         ),
         simulation_args=SimulationArgs(
-            n_steps=60 * 24 * 31,
+            n_steps=10 * 60 * 24 * 7,
             granularity=Granularity.MINUTE,
             coinbase_code="ADA-USDT",
             start_date="2023-07-01 00:00:00",

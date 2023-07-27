@@ -175,7 +175,7 @@ def get_historic_price_series(
 def get_historic_temp_series(
     latitude: float,
     longitude: float,
-    hours: int = 24,
+    hours: int = 72,
     interpolation: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -192,16 +192,14 @@ def get_historic_temp_series(
         )
         .sort_index()
         .drop_duplicates()
-        .rolling(hours)
-        .mean()
-        .dropna()
     )
+    s = s.rolling(hours).mean().dropna()
     if interpolation is not None:
         s_interpolated = pd.Series(
             index=pd.date_range(start=s.index[0], end=s.index[-1], freq=interpolation)
         )
         s_interpolated.update(s)
-        s_interpolated = s_interpolated.interpolate(method="linear")
+        s_interpolated = s_interpolated.fillna(method='ffill')
         return s_interpolated
     else:
         return s

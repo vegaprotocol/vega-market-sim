@@ -126,14 +126,13 @@ class DevOpsScenario(Scenario):
             start = start + timedelta(days=int(random_state.choice(range(30))))
 
         end = start + timedelta(
-            seconds=(self.simulation_args.n_steps)
-            * self.simulation_args.granularity.value
+            seconds=(self.simulation_args.n_steps + 100) * self.step_length_seconds
         )
 
         return get_historic_temp_series(
             latitude=40.7143,
             longitude=-74.006,
-            hours=24,
+            hours=72,
             interpolation=f"{int(self.step_length_seconds)}S",
             start_date=start.strftime("%Y-%m-%d"),
             end_date=end.strftime("%Y-%m-%d"),
