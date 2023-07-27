@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     with VegaServiceNull(
-        run_with_console=True,
+        run_with_console=False,
         launch_graphql=False,
         retain_log_files=True,
         use_full_vega_wallet=True,

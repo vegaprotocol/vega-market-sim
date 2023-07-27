@@ -147,7 +147,7 @@ UlimitNOFile = 8192
 [SQLStore]
   Enabled = true
   WipeOnStartup = true
-  UseEmbedded = true
+  UseEmbedded = false
   [SQLStore.ConnectionConfig]
     Host = "localhost"
     Port = "TO_BE_SET"

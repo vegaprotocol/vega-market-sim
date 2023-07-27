@@ -4,7 +4,6 @@ import atexit
 import functools
 import logging
 import multiprocessing
-import psutil
 import os
 import shutil
 import signal
@@ -20,7 +19,9 @@ from io import BufferedWriter
 from os import path
 from typing import Dict, List, Optional, Set
 
+import docker
 import grpc
+import psutil
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
@@ -278,6 +279,7 @@ def _update_node_config(
     port_config: Dict[Ports, int],
     transactions_per_block: int = 1,
     block_duration: str = "1s",
+    use_docker_postgres: bool = False,
 ) -> None:
     config_path = path.join(vega_home, "config", "node", "config.toml")
     config_toml = toml.load(config_path)
@@ -307,6 +309,9 @@ def _update_node_config(
                 elem = elem[k]
             elem[config.key] = config.val_func(port_config[port_key])
 
+            if port_key == Ports.DATA_NODE_POSTGRES:
+                config_toml["SQLStore"]["UseEmbedded"] = not use_docker_postgres
+
             with open(file_path, "w") as f:
                 toml.dump(config_toml, f)
 
@@ -332,6 +337,12 @@ def manage_vega_processes(
         format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
     )
     port_config = port_config if port_config is not None else {}
+
+    try:
+        docker_client = docker.from_env()
+        use_docker_postgres = True
+    except:
+        use_docker_postgres = False
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
@@ -367,7 +378,23 @@ def manage_vega_processes(
         port_config=port_config,
         transactions_per_block=transactions_per_block,
         block_duration=block_duration,
+        use_docker_postgres=use_docker_postgres,
     )
+
+    if use_docker_postgres:
+        data_node_docker_volume = docker_client.volumes.create()
+        data_node_container = docker_client.containers.run(
+            "timescale/timescaledb:2.8.0-pg14",
+            detach=True,
+            ports={5432: port_config[Ports.DATA_NODE_POSTGRES]},
+            volumes=[f"{data_node_docker_volume.name}:/var/lib/postgresql/data"],
+            environment={
+                "POSTGRES_USER": "vega",
+                "POSTGRES_PASSWORD": "vega",
+                "POSTGRES_DB": "vega",
+            },
+            remove=True,
+        )
 
     dataNodeProcess = _popen_process(
         [
@@ -544,6 +571,22 @@ def manage_vega_processes(
     child_conn.send({name: process.pid for name, process in processes.items()})
 
     signal.sigwait([signal.SIGKILL, signal.SIGTERM])
+
+    if use_docker_postgres:
+        data_node_container.stop()
+        removed = False
+        for _ in range(10):
+            try:
+                data_node_docker_volume.remove(force=True)
+                removed = True
+                break
+            except docker.errors.APIError:
+                time.sleep(1)
+        if not removed:
+            logging.exception(
+                "Docker volume failed to cleanup, will require manual cleaning"
+            )
+
     for process in processes.values():
         process.terminate()
     for name, process in processes.items():
