@@ -17,6 +17,7 @@ import vega_sim.api.governance as gov
 import vega_sim.grpc.client as vac
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
+from vega_sim.tools.retry import retry
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ def _queue_forwarder(
             for event in o.events:
                 if (kill_thread_sig is not None) and kill_thread_sig.is_set():
                     return
-                output = handlers[event.type](event)
+                output = retry(5, 1.0, lambda: handlers[event.type](event))
                 if isinstance(output, (list, GeneratorType)):
                     for elem in output:
                         sink.put(elem)

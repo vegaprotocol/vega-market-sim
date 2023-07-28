@@ -393,8 +393,8 @@ class VegaService(ABC):
 
         self.wait_fn(1)
         self.wait_for_total_catchup()
-        for i in range(500):
-            time.sleep(0.0005 * 1.01**i)
+        for i in range(100):
+            time.sleep(0.05 * 1.03**i)
             post_acct = self.party_account(
                 wallet_name=wallet_name,
                 asset_id=asset,
