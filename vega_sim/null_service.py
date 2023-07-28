@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import atexit
 import functools
+import json
 import logging
 import multiprocessing
 import os
@@ -273,6 +274,27 @@ def _popen_process(
     atexit.register(functools.partial(_terminate_proc, sub_proc, out, err))
     return sub_proc
 
+def _update_genesis(
+    vega_home: str,
+) -> None:
+    genesis_path =  path.join(vega_home, "genesis.json")
+    content = {}
+    with open(genesis_path) as json_file:
+        content = json.load(json_file)
+
+    content["app_state"]["network_parameters"]["spam.protection.max.batchSize"] = "200"
+    content["app_state"]["network_parameters"]["spam.protection.max.delegations"] = "1000"
+    content["app_state"]["network_parameters"]["spam.protection.max.proposals"] = "500"
+    content["app_state"]["network_parameters"]["spam.protection.max.votes"] = "500"
+    content["app_state"]["network_parameters"]["spam.protection.maxUserTransfersPerEpoch"] = "200"
+    content["app_state"]["network_parameters"]["spam.protection.minimumWithdrawalQuantumMultiple"] = "1"
+    content["app_state"]["network_parameters"]["spam.protection.proposal.min.tokens"] = "1"
+    content["app_state"]["network_parameters"]["spam.protection.voting.min.tokens"] = "1"
+
+    with open(genesis_path, "w") as json_file:
+        json.dump(content, json_file)
+
+    pass
 
 def _update_node_config(
     vega_home: str,
@@ -380,6 +402,7 @@ def manage_vega_processes(
         block_duration=block_duration,
         use_docker_postgres=use_docker_postgres,
     )
+    _update_genesis(tmp_vega_home)
 
     if use_docker_postgres:
         data_node_docker_volume = docker_client.volumes.create()
