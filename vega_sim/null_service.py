@@ -294,7 +294,6 @@ def _update_genesis(
     with open(genesis_path, "w") as json_file:
         json.dump(content, json_file)
 
-    pass
 
 def _update_node_config(
     vega_home: str,
