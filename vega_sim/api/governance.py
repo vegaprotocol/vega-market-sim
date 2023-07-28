@@ -122,6 +122,7 @@ def propose_market_from_config(
         pub_key=pub_key,
         data_client=data_client,
         closing_time=int(closing_time),
+        validation_time=int(closing_time),
         enactment_time=int(enactment_time),
     )
     proposal.terms.new_market.CopyFrom(changes)
@@ -329,6 +330,7 @@ def propose_future_market(
         pub_key=pub_key,
         data_client=data_client,
         closing_time=closing_time,
+        validation_time=int(closing_time),
         enactment_time=enactment_time,
     )
     proposal.terms.new_market.CopyFrom(market_proposal)
@@ -358,6 +360,7 @@ def propose_network_parameter_change(
         pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
+        validation_time=int(closing_time),
         enactment_time=enactment_time,
     )
     network_param_update.terms.update_network_parameter.CopyFrom(
@@ -390,6 +393,7 @@ def propose_market_update(
         pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
+        validation_time=int(closing_time),
         enactment_time=enactment_time,
     )
     network_param_update.terms.update_market.CopyFrom(
@@ -450,6 +454,7 @@ def propose_asset(
         pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
         data_client=data_client,
         closing_time=closing_time,
+        validation_time=int(closing_time),
         enactment_time=enactment_time,
     )
     proposal.terms.validation_timestamp = (
@@ -475,11 +480,13 @@ def _build_generic_proposal(
     pub_key: str,
     data_client: vac.VegaTradingDataClientV2,
     closing_time: Optional[int] = None,
+    validation_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
 ) -> commands_protos.commands.ProposalSubmission:
     # Set closing/enactment timestamps to valid time offsets
     # from the current Vega blockchain time if not already set
-    none_times = [i is None for i in [closing_time, enactment_time]]
+    none_times = [i is None for i in [closing_time, enactment_time,validation_time]]
+    validation_time = 1
     if any(none_times):
         if not all(none_times):
             logger.warn(
@@ -490,6 +497,7 @@ def _build_generic_proposal(
         blockchain_time_seconds = get_blockchain_time(data_client, in_seconds=True)
 
         closing_time = blockchain_time_seconds + 172800
+        validation_time = blockchain_time_seconds + 172800
         enactment_time = blockchain_time_seconds + 172900
 
     # Propose market
@@ -500,6 +508,7 @@ def _build_generic_proposal(
         terms=vega_protos.governance.ProposalTerms(
             closing_timestamp=closing_time,
             enactment_timestamp=enactment_time,
+            validation_timestamp=validation_time,
         ),
         rationale=vega_protos.governance.ProposalRationale(
             description="Making a proposal", title="This is a proposal"
