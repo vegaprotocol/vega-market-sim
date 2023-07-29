@@ -67,13 +67,13 @@ def wait_for_datanode_sync(
     *at the time of call* not necessarily the latest data when the function returns.
 
     Wait time is exponential with increasing retries
-    (each attempt waits 0.0005 * 1.01^attempt_num seconds).
+    (each attempt waits 0.05 * 1.03^attempt_num seconds).
     """
     attempts = 1
     core_time = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
     trading_time = retry(10, 0.5, lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
     while core_time > trading_time:
-        logging.info(f"Sleeping in wait_for_datanode_sync for {0.05 * 1.03**attempts}")
+        logging.debug(f"Sleeping in wait_for_datanode_sync for {0.05 * 1.03**attempts}")
         time.sleep(0.05 * 1.03**attempts)
         try:
             trading_time = retry(10, 2.0, lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
@@ -103,10 +103,10 @@ def wait_for_core_catchup(
     core_time_two = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
 
     while core_time != core_time_two:
-        logging.info(f"Sleeping in wait_for_core_catchup for {0.05 * 1.03**attempts}")
+        logging.debug(f"Sleeping in wait_for_core_catchup for {0.05 * 1.03**attempts}")
 
         core_time = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
-        time.sleep(0.05 * 1.1**attempts)
+        time.sleep(0.05 * 1.03**attempts)
         core_time_two = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
         attempts += 1
         if attempts >= max_retries:
