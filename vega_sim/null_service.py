@@ -31,6 +31,7 @@ import vega_sim.grpc.client as vac
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
 from vega_sim.tools.load_binaries import download_binaries
+from vega_sim.tools.retry import retry
 from vega_sim.wallet.base import DEFAULT_WALLET_NAME, Wallet
 from vega_sim.wallet.slim_wallet import SlimWallet
 from vega_sim.wallet.vega_wallet import VegaWallet
@@ -577,15 +578,20 @@ def manage_vega_processes(
 
     # According to https://docs.oracle.com/cd/E19455-01/806-5257/gen-75415/index.html
     # There is no guarantee that signal will be catch by this thread. Usually the 
-    # parent process catches the sisnal and clear the list of pending signals, this 
-    # leave us with memory leak where we have orphaned vega processes and the docker
-    # container. Below is hack to maximize chance by catching the signal. 
-    # There are thread watchers + sigwait. As last resort We catches the `SIGCHLD` 
-    # in case the parent process exited and this is the orphan now.
+    # parent process catches the signal and removes it from the list of pending 
+    # signals, this leave us with memory leak where we have orphaned vega processes
+    # and the docker containers. Below is hack to maximize chance by catching the 
+    # signal. 
+    # We call signal.signal method as a workaround to move this thread on top of 
+    # the catch stack, then sigwait waits until singal is trapped. 
+    # As last resort We catches the `SIGCHLD`  in case the parent process exited 
+    # and this is the orphan now.
     # But to provide 100% guarantee this should be implemented in another way:
     #   - Signal should be trapped in the main process, and this should be synced 
-    #     the shared memory or this should be incorporated in the VegaServiceNull
-    #     and called directly.
+    #     the shared memory 
+    #   - or this entire process manager should be incorporated in the VegaServiceNull
+    #     and containers/processes should be removed as inline call in the __exit__
+    #   
     # 
     # Important assumption is that this signal can be caught multiple times as well
     def sighandler(signal, frame):
@@ -596,14 +602,18 @@ def manage_vega_processes(
 
         logger.debug("Received signal from parent process")
         if use_docker_postgres:
+            def kill_docker_container() -> None:
+                try:
+                    data_node_container.kill()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.debug(f"Container {data_node_container.name} has been already killed")
+                        return
+                    else:
+                        raise e
+
             logger.debug(f"Stopping container {data_node_container.name}")
-            try:
-                data_node_container.kill()
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 404:
-                    logger.debug(f"Container {data_node_container.name} has been already killed")
-                else:
-                    raise e
+            retry(10, 1.0, kill_docker_container)
             
             removed = False
             for _ in range(10):
