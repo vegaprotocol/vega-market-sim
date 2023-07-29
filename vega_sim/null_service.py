@@ -649,10 +649,10 @@ def manage_vega_processes(
             if process.poll() == -9:
                 logger.debug(f"Process {name} killed.")
 
-        if not retain_log_files:
+        if not retain_log_files and os.path.exists(tmp_vega_dir):
             shutil.rmtree(tmp_vega_dir)
 
-    # The below lines are workaround to put the listeners on top of the stack, so this process can handle it.
+    # The below lines are workaround to put the signal listeners on top of the stack, so this process can handle it.
     signal.signal(signal.SIGINT, lambda _s, _h: None)
     signal.signal(signal.SIGTERM, lambda _s, _h: None)
     signal.signal(signal.SIGCHLD, sighandler) # The process had previously created one or more child processes with the fork() function. One or more of these processes has since died.
