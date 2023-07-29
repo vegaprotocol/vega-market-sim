@@ -572,27 +572,24 @@ def manage_vega_processes(
 
     # Send process pid values for resource monitoring
     child_conn.send({name: process.pid for name, process in processes.items()})
-    
-
-
 
     # According to https://docs.oracle.com/cd/E19455-01/806-5257/gen-75415/index.html
-    # There is no guarantee that signal will be catch by this thread. Usually the 
-    # parent process catches the signal and removes it from the list of pending 
+    # There is no guarantee that signal will be catch by this thread. Usually the
+    # parent process catches the signal and removes it from the list of pending
     # signals, this leave us with memory leak where we have orphaned vega processes
-    # and the docker containers. Below is hack to maximize chance by catching the 
-    # signal. 
-    # We call signal.signal method as a workaround to move this thread on top of 
-    # the catch stack, then sigwait waits until singal is trapped. 
-    # As last resort We catches the `SIGCHLD`  in case the parent process exited 
+    # and the docker containers. Below is hack to maximize chance by catching the
+    # signal.
+    # We call signal.signal method as a workaround to move this thread on top of
+    # the catch stack, then sigwait waits until singal is trapped.
+    # As last resort We catches the `SIGCHLD`  in case the parent process exited
     # and this is the orphan now.
     # But to provide 100% guarantee this should be implemented in another way:
-    #   - Signal should be trapped in the main process, and this should be synced 
-    #     the shared memory 
+    #   - Signal should be trapped in the main process, and this should be synced
+    #     the shared memory
     #   - or this entire process manager should be incorporated in the VegaServiceNull
     #     and containers/processes should be removed as inline call in the __exit__
-    #   
-    # 
+    #
+    #
     # Important assumption is that this signal can be caught multiple times as well
     def sighandler(signal, frame):
         if signal is None:
@@ -602,19 +599,22 @@ def manage_vega_processes(
 
         logger.debug("Received signal from parent process")
         if use_docker_postgres:
+
             def kill_docker_container() -> None:
                 try:
                     data_node_container.kill()
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
-                        logger.debug(f"Container {data_node_container.name} has been already killed")
+                        logger.debug(
+                            f"Container {data_node_container.name} has been already killed"
+                        )
                         return
                     else:
                         raise e
 
             logger.debug(f"Stopping container {data_node_container.name}")
             retry(10, 1.0, kill_docker_container)
-            
+
             removed = False
             for _ in range(10):
                 try:
@@ -625,7 +625,9 @@ def manage_vega_processes(
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         removed = True
-                        logger.debug(f"Data node volume {data_node_docker_volume.name} has been already killed")
+                        logger.debug(
+                            f"Data node volume {data_node_docker_volume.name} has been already killed"
+                        )
                         break
                     else:
                         time.sleep(1)
@@ -635,7 +637,6 @@ def manage_vega_processes(
                 logging.exception(
                     "Docker volume failed to cleanup, will require manual cleaning"
                 )
-
 
         logger.debug("Starting termination for processes")
         for name, process in processes.items():
@@ -665,11 +666,15 @@ def manage_vega_processes(
     # The below lines are workaround to put the signal listeners on top of the stack, so this process can handle it.
     signal.signal(signal.SIGINT, lambda _s, _h: None)
     signal.signal(signal.SIGTERM, lambda _s, _h: None)
-    signal.signal(signal.SIGCHLD, sighandler) # The process had previously created one or more child processes with the fork() function. One or more of these processes has since died.
-    signal.sigwait([
-        signal.SIGKILL, # The process was explicitly killed by somebody wielding the kill program.
-        signal.SIGTERM, # The process was explicitly killed by somebody wielding the terminate program.
-    ])
+    signal.signal(
+        signal.SIGCHLD, sighandler
+    )  # The process had previously created one or more child processes with the fork() function. One or more of these processes has since died.
+    signal.sigwait(
+        [
+            signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.
+            signal.SIGTERM,  # The process was explicitly killed by somebody wielding the terminate program.
+        ]
+    )
     sighandler(None, None)
 
 
@@ -934,7 +939,6 @@ class VegaServiceNull(VegaService):
         if isinstance(self.wallet, SlimWallet):
             self.wallet.stop()
         super().stop()
-
 
     @property
     def wallet_url(self) -> str:

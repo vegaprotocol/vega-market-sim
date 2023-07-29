@@ -70,13 +70,21 @@ def wait_for_datanode_sync(
     (each attempt waits 0.05 * 1.03^attempt_num seconds).
     """
     attempts = 1
-    core_time = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
-    trading_time = retry(10, 0.5, lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
+    core_time = retry(
+        10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    )
+    trading_time = retry(
+        10, 0.5, lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    )
     while core_time > trading_time:
         logging.debug(f"Sleeping in wait_for_datanode_sync for {0.05 * 1.03**attempts}")
         time.sleep(0.05 * 1.03**attempts)
         try:
-            trading_time = retry(10, 2.0, lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
+            trading_time = retry(
+                10,
+                2.0,
+                lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp,
+            )
         except Exception as e:
             logging.warn(e)
             trading_time = sys.maxsize
@@ -98,16 +106,28 @@ def wait_for_core_catchup(
     in a standard tendermint chain
     """
     attempts = 1
-    core_time = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
+    core_time = retry(
+        10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    )
     time.sleep(0.1)
-    core_time_two = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
+    core_time_two = retry(
+        10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
+    )
 
     while core_time != core_time_two:
         logging.debug(f"Sleeping in wait_for_core_catchup for {0.05 * 1.03**attempts}")
 
-        core_time = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
+        core_time = retry(
+            10,
+            0.5,
+            lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp,
+        )
         time.sleep(0.05 * 1.03**attempts)
-        core_time_two = retry(10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp)
+        core_time_two = retry(
+            10,
+            0.5,
+            lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp,
+        )
         attempts += 1
         if attempts >= max_retries:
             raise DataNodeBehindError(
@@ -159,4 +179,6 @@ def forward(time: str, vega_node_url: str) -> None:
 
 
 def statistics(core_data_client: VegaCoreClient):
-    return retry(10, 0.5, lambda: core_data_client.Statistics(StatisticsRequest()).statistics)
+    return retry(
+        10, 0.5, lambda: core_data_client.Statistics(StatisticsRequest()).statistics
+    )

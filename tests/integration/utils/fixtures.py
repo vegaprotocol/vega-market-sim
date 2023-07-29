@@ -149,7 +149,6 @@ def vega_service():
     ) as vega:
         yield vega
     logging.debug("vega_service theardown")
-    
 
 
 @pytest.fixture(scope="function")

@@ -2,7 +2,8 @@ from typing import TypeVar, Callable
 import time
 import logging
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def retry(attempts: int, delay: float, func: Callable[[], T]) -> T:
     for i in range(attempts):
@@ -14,5 +15,5 @@ def retry(attempts: int, delay: float, func: Callable[[], T]) -> T:
             return result
         except Exception as e:
             time.sleep(delay)
-            if i == attempts-1:
+            if i == attempts - 1:
                 raise Exception(e)
