@@ -31,6 +31,7 @@ import vega_sim.grpc.client as vac
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
 from vega_sim.tools.load_binaries import download_binaries
+from vega_sim.tools.retry import retry
 from vega_sim.wallet.base import DEFAULT_WALLET_NAME, Wallet
 from vega_sim.wallet.slim_wallet import SlimWallet
 from vega_sim.wallet.vega_wallet import VegaWallet
@@ -570,42 +571,113 @@ def manage_vega_processes(
     # Send process pid values for resource monitoring
     child_conn.send({name: process.pid for name, process in processes.items()})
 
-    signal.sigwait([signal.SIGKILL, signal.SIGTERM])
+    # According to https://docs.oracle.com/cd/E19455-01/806-5257/gen-75415/index.html
+    # There is no guarantee that signal will be catch by this thread. Usually the
+    # parent process catches the signal and removes it from the list of pending
+    # signals, this leave us with memory leak where we have orphaned vega processes
+    # and the docker containers. Below is hack to maximize chance by catching the
+    # signal.
+    # We call signal.signal method as a workaround to move this thread on top of
+    # the catch stack, then sigwait waits until singal is trapped.
+    # As last resort We catches the `SIGCHLD`  in case the parent process exited
+    # and this is the orphan now.
+    # But to provide 100% guarantee this should be implemented in another way:
+    #   - Signal should be trapped in the main process, and this should be synced
+    #     the shared memory
+    #   - or this entire process manager should be incorporated in the VegaServiceNull
+    #     and containers/processes should be removed as inline call in the __exit__
+    #
+    #
+    # Important assumption is that this signal can be caught multiple times as well
+    def sighandler(signal, frame):
+        if signal is None:
+            logging.debug("VegaServiceNull exited normally")
+        else:
+            logging.debug(f"VegaServiceNull exited after trap the {signal} signal")
 
-    if use_docker_postgres:
-        data_node_container.stop()
-        removed = False
-        for _ in range(10):
-            try:
-                data_node_docker_volume.remove(force=True)
-                removed = True
-                break
-            except docker.errors.APIError:
-                time.sleep(1)
-        if not removed:
-            logging.exception(
-                "Docker volume failed to cleanup, will require manual cleaning"
-            )
+        logger.debug("Received signal from parent process")
+        if use_docker_postgres:
 
-    for process in processes.values():
-        process.terminate()
-    for name, process in processes.items():
-        attempts = 0
-        while process.poll() is None:
-            time.sleep(1)
-            attempts += 1
-            if attempts > 60:
-                logging.warning(
-                    f"Gracefully terminating process timed-out. Killing process {name}."
+            def kill_docker_container() -> None:
+                try:
+                    data_node_container.kill()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.debug(
+                            f"Container {data_node_container.name} has been already"
+                            " killed"
+                        )
+                        return
+                    else:
+                        raise e
+
+            logger.debug(f"Stopping container {data_node_container.name}")
+            retry(10, 1.0, kill_docker_container)
+
+            removed = False
+            for _ in range(10):
+                try:
+                    logging.info(f"Removing volume {data_node_docker_volume.name}")
+                    data_node_docker_volume.remove(force=True)
+                    removed = True
+                    break
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        removed = True
+                        logger.debug(
+                            f"Data node volume {data_node_docker_volume.name} has been"
+                            " already killed"
+                        )
+                        break
+                    else:
+                        time.sleep(1)
+                except docker.errors.APIError:
+                    time.sleep(1)
+            if not removed:
+                logging.exception(
+                    "Docker volume failed to cleanup, will require manual cleaning"
                 )
-                process.kill()
-        if process.poll() == 0:
-            logging.debug(f"Process {name} terminated.")
-        if process.poll() == -9:
-            logging.debug(f"Process {name} killed.")
 
-    if not retain_log_files:
-        shutil.rmtree(tmp_vega_dir)
+        logger.debug("Starting termination for processes")
+        for name, process in processes.items():
+            logger.debug(f"Terminating process {name}(pid: {process.pid})")
+            process.terminate()
+
+        for name, process in processes.items():
+            attempts = 0
+            while process.poll() is None:
+                logger.debug(f"Process {name} still not terminated")
+                time.sleep(1)
+                attempts += 1
+                if attempts > 60:
+                    logger.warning(
+                        "Gracefully terminating process timed-out. Killing process"
+                        f" {name}."
+                    )
+                    process.kill()
+            logger.debug(f"Process {name} stopped with {process.poll()}")
+            if process.poll() == 0:
+                logger.debug(f"Process {name} terminated.")
+            if process.poll() == -9:
+                logger.debug(f"Process {name} killed.")
+
+        if not retain_log_files and os.path.exists(tmp_vega_dir):
+            shutil.rmtree(tmp_vega_dir)
+
+    # The below lines are workaround to put the signal listeners on top of the stack, so this process can handle it.
+    signal.signal(signal.SIGINT, lambda _s, _h: None)
+    signal.signal(signal.SIGTERM, lambda _s, _h: None)
+
+    # The process had previously created one or more child processes with the fork() function.
+    # One or more of these processes has since died.
+    signal.signal(signal.SIGCHLD, sighandler)
+    signal.sigwait(
+        [
+            signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.
+            signal.SIGTERM,  # The process was explicitly killed by somebody wielding the terminate program.
+        ]
+    )
+    sighandler(None, None)
 
 
 class VegaServiceNull(VegaService):
@@ -677,6 +749,8 @@ class VegaServiceNull(VegaService):
         self.launch_graphql = launch_graphql
         self.replay_from_path = replay_from_path
         self.check_for_binaries = check_for_binaries
+
+        self.stopped = False
 
         self._assign_ports(port_config)
 
@@ -853,13 +927,17 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
+        logging.debug("Calling stop for veganullchain")
+        if self.stopped:
+            return
+        self.stopped = True
         self.core_client.stop()
         self.core_state_client.stop()
         self.trading_data_client_v2.stop()
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
-            self.proc.terminate()
+            os.kill(self.proc.pid, signal.SIGTERM)
         if isinstance(self.wallet, SlimWallet):
             self.wallet.stop()
         super().stop()

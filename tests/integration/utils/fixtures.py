@@ -1,4 +1,5 @@
 from collections import namedtuple
+import logging
 from typing import Optional
 
 import pytest
@@ -137,7 +138,7 @@ def build_basic_market(
     vega.wait_for_total_catchup()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def vega_service():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
@@ -147,15 +148,16 @@ def vega_service():
         listen_for_high_volume_stream_updates=False,
     ) as vega:
         yield vega
+    logging.debug("vega_service teardown")
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def vega_service_with_market(vega_service):
     build_basic_market(vega_service, initial_price=0.3)
     return vega_service
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def vega_service_with_high_volume():
     with VegaServiceNull(
         warn_on_raw_data_access=False,
@@ -165,9 +167,10 @@ def vega_service_with_high_volume():
         listen_for_high_volume_stream_updates=True,
     ) as vega:
         yield vega
+    logging.debug("vega_service_with_high_volume teardown")
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def vega_service_with_high_volume_with_market(vega_service_with_high_volume):
     build_basic_market(vega_service_with_high_volume, initial_price=0.3)
     return vega_service_with_high_volume
