@@ -94,6 +94,30 @@ if __name__ == "__main__":
             sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
             is_amendment=False,
         )
+
+        print("starting")
+        import time
+
+        for _ in range(100_000_000):
+            time.sleep(0.01)
+            vega.submit_order(
+                trading_key=MM_WALLET.name,
+                market_id=market_id,
+                time_in_force="TIME_IN_FORCE_GTC",
+                order_type="TYPE_LIMIT",
+                side="SIDE_SELL",
+                volume=1,
+                price=100,
+                wait=False,
+            )
+            vega.wait_fn(1)
+            vega.cancel_order(
+                trading_key=MM_WALLET.name,
+                market_id=market_id,
+            )
+
+        print("done")
+
         vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,
