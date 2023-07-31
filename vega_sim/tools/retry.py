@@ -9,7 +9,7 @@ def retry(attempts: int, delay: float, func: Callable[[], T]) -> T:
     for i in range(attempts):
         try:
             if i > 0:
-                logging.info(f"Retrying attempt {i}")
+                logging.debug(f"Retrying attempt {i}")
             result = func()
 
             return result

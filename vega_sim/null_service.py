@@ -382,8 +382,6 @@ def manage_vega_processes(
         use_docker_postgres=use_docker_postgres,
     )
 
-    data_node_docker_volume = None
-    data_node_container = None
     if use_docker_postgres:
         data_node_docker_volume = docker_client.volumes.create()
         data_node_container = docker_client.containers.run(
@@ -606,7 +604,8 @@ def manage_vega_processes(
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         logger.debug(
-                            f"Container {data_node_container.name} has been already killed"
+                            f"Container {data_node_container.name} has been already"
+                            " killed"
                         )
                         return
                     else:
@@ -626,7 +625,8 @@ def manage_vega_processes(
                     if e.response.status_code == 404:
                         removed = True
                         logger.debug(
-                            f"Data node volume {data_node_docker_volume.name} has been already killed"
+                            f"Data node volume {data_node_docker_volume.name} has been"
+                            " already killed"
                         )
                         break
                     else:
@@ -651,7 +651,8 @@ def manage_vega_processes(
                 attempts += 1
                 if attempts > 60:
                     logger.warning(
-                        f"Gracefully terminating process timed-out. Killing process {name}."
+                        "Gracefully terminating process timed-out. Killing process"
+                        f" {name}."
                     )
                     process.kill()
             logger.debug(f"Process {name} stopped with {process.poll()}")
@@ -666,9 +667,10 @@ def manage_vega_processes(
     # The below lines are workaround to put the signal listeners on top of the stack, so this process can handle it.
     signal.signal(signal.SIGINT, lambda _s, _h: None)
     signal.signal(signal.SIGTERM, lambda _s, _h: None)
-    signal.signal(
-        signal.SIGCHLD, sighandler
-    )  # The process had previously created one or more child processes with the fork() function. One or more of these processes has since died.
+
+    # The process had previously created one or more child processes with the fork() function.
+    # One or more of these processes has since died.
+    signal.signal(signal.SIGCHLD, sighandler)
     signal.sigwait(
         [
             signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.

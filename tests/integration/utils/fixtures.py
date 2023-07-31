@@ -148,7 +148,7 @@ def vega_service():
         listen_for_high_volume_stream_updates=False,
     ) as vega:
         yield vega
-    logging.debug("vega_service theardown")
+    logging.debug("vega_service teardown")
 
 
 @pytest.fixture(scope="function")
@@ -167,7 +167,7 @@ def vega_service_with_high_volume():
         listen_for_high_volume_stream_updates=True,
     ) as vega:
         yield vega
-    logging.debug("vega_service_with_high_volume theardown")
+    logging.debug("vega_service_with_high_volume teardown")
 
 
 @pytest.fixture(scope="function")
