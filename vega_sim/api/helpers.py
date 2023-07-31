@@ -73,7 +73,7 @@ def wait_for_datanode_sync(
     trading_time = trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
 
     while core_time > trading_time:
-        time.sleep(0.0005 * 1.01**attempts)
+        time.sleep(0.01 * 1.01**attempts)
         trading_time = trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
         attempts += 1
         if attempts >= max_retries:
@@ -117,7 +117,7 @@ def wait_for_acceptance(
         try:
             proposal = submission_load_func(submission_ref)
         except:
-            time.sleep(0.001)
+            time.sleep(0.05)
             continue
 
         if proposal:
