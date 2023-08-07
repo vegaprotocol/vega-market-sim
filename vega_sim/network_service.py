@@ -178,6 +178,7 @@ def manage_vega_processes(
 def _find_network_config_toml(
     network: Network, config_path: Optional[str] = None
 ) -> Optional[str]:
+    print(network.name)
     search_paths = (
         [config_path]
         if config_path is not None
@@ -187,14 +188,14 @@ def _find_network_config_toml(
                 "vega_sim",
                 "bin",
                 "networks-internal",
-                network.name.lower(),
+                network.name.lower().replace('_', '-'),
             ),
             path.join(
                 getcwd(),
                 "vega_sim",
                 "bin",
                 "networks",
-                network.name.lower(),
+                network.name.lower().replace('_', '-'),
             ),
         ]
     )
