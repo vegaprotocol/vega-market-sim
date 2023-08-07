@@ -211,7 +211,7 @@ class VegaWallet(Wallet):
     def get_keypairs(self, wallet_name: str) -> dict:
         if wallet_name not in self.login_tokens:
             self._load_token(wallet_name=wallet_name)
-
+        print(f"WALLET_TOKEN: {self.login_tokens[wallet_name]}")
         headers = {
             "Origin": "MarketSim",
             "Authorization": f"VWT {self.login_tokens[wallet_name]}",

@@ -469,6 +469,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         run_with_console: bool = False,
         pause_at_completion: bool = False,
         log_every_n_steps: Optional[int] = None,
+        step_end_callback: Optional[Callable[[], None]] = None,
     ):
         if self._vega is None:
             with VegaServiceNetwork(
