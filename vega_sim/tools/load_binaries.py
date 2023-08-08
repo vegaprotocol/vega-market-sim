@@ -12,8 +12,7 @@ import vega_sim
 
 logger = logging.getLogger(__name__)
 
-URL_BASE = "https://github.com/vegaprotocol/vega/releases/download/v{version}/"
-URL_LATEST_BASE = "https://github.com/vegaprotocol/vega/releases/latest/download/"
+URL_BASE = "https://github.com/vegaprotocol/vega/releases/download/{version}/"
 DATA_NODE = "data-node-{platform}-{chipset}64.zip"
 VEGA_CORE = "vega-{platform}-{chipset}64.zip"
 VEGAWALLET = "vegawallet-{platform}-{chipset}64.zip"
@@ -41,6 +40,17 @@ def download_binaries(force: bool = False, latest: bool = False):
     with tempfile.TemporaryDirectory() as dir:
         if not os.path.exists(vega_sim.vega_bin_path):
             os.mkdir(vega_sim.vega_bin_path)
+
+        if latest:
+            vega_versions = requests.get(
+                "https://api.github.com/repos/vegaprotocol/vega/releases"
+            ).json()
+            vega_version = vega_versions[0]["tag_name"]
+        else:
+            vega_version = vega_sim.VEGA_VERSION
+
+        logger.info(f"Downloading Vega version {vega_version}")
+
         for remote_file in FILES:
             file_name = remote_file.format(platform=platf, chipset=chipset)
             if (
@@ -50,11 +60,7 @@ def download_binaries(force: bool = False, latest: bool = False):
             ) or force:
                 logger.info(f"Downloading {file_name}")
 
-                url_base = (
-                    URL_BASE.format(version=vega_sim.VEGA_VERSION)
-                    if not latest
-                    else URL_LATEST_BASE
-                )
+                url_base = URL_BASE.format(version=vega_version)
                 url = url_base + file_name
                 res = requests.get(url)
                 file_path = os.path.join(dir, f"{file_name}")
