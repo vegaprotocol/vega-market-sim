@@ -1,7 +1,7 @@
 from importlib import metadata
 from pathlib import Path
 
-VEGA_VERSION = "0.72.6"
+VEGA_VERSION = "v0.72.6"
 try:
     __version__ = metadata.version(__package__)
 except metadata.PackageNotFoundError:
