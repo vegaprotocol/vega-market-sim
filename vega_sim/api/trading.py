@@ -319,8 +319,6 @@ def submit_simple_liquidity(
         market_id=market_id,
         commitment_amount=commitment_amount,
         fee=fee,
-        buy_specs=[(reference_buy, delta_buy, 1)],
-        sell_specs=[(reference_sell, delta_sell, 1)],
         is_amendment=is_amendment,
         key_name=key_name,
     )
@@ -332,8 +330,6 @@ def submit_liquidity(
     market_id: str,
     commitment_amount: int,
     fee: float,
-    buy_specs: List[Tuple[str, int, int]],
-    sell_specs: List[Tuple[str, int, int]],
     is_amendment: bool = False,
     key_name: Optional[str] = None,
 ):
@@ -352,14 +348,6 @@ def submit_liquidity(
         fee:
             float, The fee level at which to set the LP fee
              (in %, e.g. 0.01 == 1% and 1 == 100%)
-        buy_specs:
-            List[Tuple[str, int, int]], List of tuples, each containing a reference
-            point in their first position, a desired offset in their second and
-            a proportion in third
-        sell_specs:
-            List[Tuple[str, int, int]], List of tuples, each containing a reference
-            point in their first position, a desired offset in their second and
-            a proportion in third
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
     """
@@ -375,22 +363,8 @@ def submit_liquidity(
         market_id=market_id,
         commitment_amount=str(commitment_amount),
         fee=str(fee),
-        buys=[
-            vega_protos.vega.LiquidityOrder(
-                reference=spec[0],
-                offset=str(spec[1]),
-                proportion=spec[2],
-            )
-            for spec in buy_specs
-        ],
-        sells=[
-            vega_protos.vega.LiquidityOrder(
-                reference=spec[0],
-                offset=str(spec[1]),
-                proportion=spec[2],
-            )
-            for spec in sell_specs
-        ],
+        buys=[],
+        sells=[],
     )
     wallet.submit_transaction(
         transaction=submission,

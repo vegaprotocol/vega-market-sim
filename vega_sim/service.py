@@ -1486,8 +1486,8 @@ class VegaService(ABC):
         market_id: str,
         commitment_amount: float,
         fee: float,
-        buy_specs: List[Tuple[str, float, int]],
-        sell_specs: List[Tuple[str, float, int]],
+        buy_specs=[],
+        sell_specs=[],
         is_amendment: Optional[bool] = None,
         wallet_name: Optional[str] = None,
     ):
@@ -1504,14 +1504,6 @@ class VegaService(ABC):
             fee:
                 float, The fee level at which to set the LP fee
                  (in %, e.g. 0.01 == 1% and 1 == 100%)
-            buy_specs:
-                List[Tuple[str, int, int]], List of tuples, each containing a reference
-                point in their first position, a desired offset in their second and
-                a proportion in third
-            sell_specs:
-                List[Tuple[str, int, int]], List of tuples, each containing a reference
-                point in their first position, a desired offset in their second and
-                a proportion in third
             is_amendment:
                 Optional bool, Is the submission an amendment to an existing provision
                     If None, will query the network to check.
@@ -1519,14 +1511,7 @@ class VegaService(ABC):
                 optional, str name of wallet to use
         """
         asset_id = self.market_to_asset[market_id]
-        market_decimals = self.market_price_decimals[market_id]
 
-        buy_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
-        ]
-        sell_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
-        ]
         is_amendment = (
             is_amendment
             if is_amendment is not None
@@ -1543,8 +1528,6 @@ class VegaService(ABC):
                 commitment_amount, self.asset_decimals[asset_id]
             ),
             fee=fee,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,

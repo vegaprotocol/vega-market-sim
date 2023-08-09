@@ -948,9 +948,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -1153,8 +1151,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 market_id=self.market_id,
                 commitment_amount=initial_liq.amount,
                 fee=initial_liq.fee,
-                buy_specs=initial_liq.buy_specs,
-                sell_specs=initial_liq.sell_specs,
                 key_name=self.key_name,
             )
 
@@ -1256,8 +1252,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 market_id=self.market_id,
                 commitment_amount=liq.amount,
                 fee=liq.fee,
-                buy_specs=liq.buy_specs,
-                sell_specs=liq.sell_specs,
                 is_amendment=True,
                 key_name=self.key_name,
             )
