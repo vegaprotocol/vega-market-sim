@@ -232,7 +232,7 @@ SCENARIOS = {
             inventory_lower_boundary=-3,
             inventory_upper_boundary=3,
             fee_amount=0.0001,
-            commitment_amount=1e5,
+            commitment_amount=4e5,
             initial_mint=2e5,
         ),
         auction_trader_args=AuctionTraderArgs(
