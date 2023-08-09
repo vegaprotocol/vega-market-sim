@@ -36,34 +36,25 @@ from vega_sim.devops.scenario import DevOpsScenario
 from vega_sim.devops.registry import SCENARIOS
 
 
-import multiprocessing
-import subprocess
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
 
-def run_wallet(bin_path: str):
-    logger = logging.getLogger("vegawallet")
+class MyServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(bytes("OK", "utf-8"))
 
-    wallet_args = (
-        bin_path, 
-        "service",
-        "run",
-        "--network",
-        "mainnet-mirror",
-        "--load-tokens",
-        "--automatic-consent",
-        "--tokens-passphrase-file",
-        "/home/daniel/www/vega-market-sim/wallet-passphrase.txt",
-    )
+def health_check():
+    webServer = HTTPServer(("0.0.0.0", 80), MyServer)
+    print("Server started %s:%s" % ("0.0.0.0", 80))
+    webServer.serve_forever()
+    
+    webServer.server_close()
+    print("Server stopped.")
 
-    wallet_process = subprocess.Popen(
-        wallet_args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
-
-    with wallet_process.stdout:
-        for line in iter(wallet_process.stdout.readline, b''):
-            logger.info(line.decode("utf-8").strip())
-
+    
 def main():
     parser = argparse.ArgumentParser()
 
@@ -104,7 +95,8 @@ def main():
 
     process = wallet.background_run()
 
-
+    t = threading.Thread(target=health_check)
+    t.start()
     with VegaServiceNetwork(
         network=Network[args.network],
         run_with_console=args.console,
@@ -120,6 +112,7 @@ def main():
 
     process.terminate()
 
+    t.join()
 
 if __name__ == "__main__":
     main()
