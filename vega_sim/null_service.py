@@ -661,6 +661,7 @@ def manage_vega_processes(
             if process.poll() == -9:
                 logger.debug(f"Process {name} killed.")
 
+        logger.info(f"retain_log_files >>>>>> {retain_log_files}")
         if not retain_log_files and os.path.exists(tmp_vega_dir):
             shutil.rmtree(tmp_vega_dir)
 
