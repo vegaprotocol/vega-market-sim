@@ -258,6 +258,7 @@ class VegaWallet(Wallet):
             "Authorization": f"VWT {self.login_tokens[wallet_name]}",
         }
 
+
         submission = {
             "jsonrpc": "2.0",
             "method": "client.send_transaction",
@@ -272,7 +273,6 @@ class VegaWallet(Wallet):
             },
             "id": "request",
         }
-
         url = f"{self.wallet_url}/api/v2/requests"
 
         response = requests.post(url, headers=headers, json=submission)
