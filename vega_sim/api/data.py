@@ -982,8 +982,9 @@ def find_market_id(
     ]
 
     market_ids = {}
-
+    print(f"Checking for markets {name = }")
     for market in markets:
+        print(f"Market name: {market.tradable_instrument.instrument.name}")
         if market.tradable_instrument.instrument.name == name:
             if market.state in acceptable_states:
                 market_ids[market.id] = market.market_timestamps.pending
@@ -1019,6 +1020,7 @@ def find_asset_id(
         str, the ID of the asset
     """
     assets = data_raw.list_assets(data_client=data_client)
+
     # Find settlement asset
     for asset in assets:
         if asset.details.symbol == symbol:

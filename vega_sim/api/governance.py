@@ -87,7 +87,7 @@ def propose_market_from_config(
     closing_time: Union[str, int],
     enactment_time: Union[str, int],
     time_forward_fn: Optional[Callable[[], None]] = None,
-    governance_asset: Optional[str] = "VOTE",
+    governance_asset: Optional[str] = "VEGA",
     proposal_wallet_name: Optional[str] = None,
 ) -> str:
     # Make sure Vega network has governance asset
