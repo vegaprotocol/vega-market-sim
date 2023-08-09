@@ -22,7 +22,7 @@ Examples:
 
 
 """
-
+import os
 import argparse
 import logging
 
@@ -93,9 +93,15 @@ def main():
     scenario.market_name = args.market_name
     scenario.step_length_seconds = args.step_length_seconds
 
-    
+    network_name = str(args.network).lower().replace('_', '-')
+    wallet_binary = os.getenv('VEGA_WALLET_PATH')
+    wallet_home = os.getenv('VEGA_WALLET_HOME')
+    wallet_name = os.getenv('VEGA_USER_WALLET_NAME')
+    wallet_passphrase_file = os.getenv('VEGA_WALLET_TOKENS_PASSPHRASE_FILE')
 
-    wallet = VegaWallet("/home/daniel/www/vega-market-sim/tmp/vegawallet", "mainnet-mirror", "/home/daniel/www/vega-market-sim/wallet-passphrase.txt")
+    wallet = VegaWallet(wallet_binary, network_name, wallet_passphrase_file, wallet_home)
+    wallet.check_wallet(wallet_name)
+
     process = wallet.background_run()
 
 
