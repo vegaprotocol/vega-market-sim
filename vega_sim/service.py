@@ -80,7 +80,7 @@ def raw_data(fn):
     @wraps(fn)
     def wrapped_fn(self, *args, **kwargs):
         if self.warn_on_raw_data_access:
-            logger.warn(
+            logger.warning(
                 f"Using function with raw data from data-node {fn.__qualname__}. Be"
                 " wary if prices/positions are not converted from int form"
             )
