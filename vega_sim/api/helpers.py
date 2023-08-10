@@ -109,7 +109,7 @@ def wait_for_core_catchup(
     core_time = retry(
         10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )
-    time.sleep(0.0001)
+    time.sleep(0.1)
     core_time_two = retry(
         10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )
