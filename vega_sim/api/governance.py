@@ -126,20 +126,14 @@ def propose_market_from_config(
     )
     proposal.terms.new_market.CopyFrom(changes)
 
-    try:
-        return _make_and_wait_for_proposal(
-            wallet=wallet,
-            wallet_name=proposal_wallet_name,
-            key_name=proposal_key_name,
-            proposal=proposal,
-            data_client=data_client,
-            time_forward_fn=time_forward_fn,
-        ).proposal.id
-    except:
-        import pdb
-
-        pdb.set_trace()
-        a = 5
+    return _make_and_wait_for_proposal(
+        wallet=wallet,
+        wallet_name=proposal_wallet_name,
+        key_name=proposal_key_name,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+    ).proposal.id
 
 
 def propose_future_market(
