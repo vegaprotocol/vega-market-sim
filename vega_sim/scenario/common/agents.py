@@ -63,9 +63,7 @@ AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 ITOrder = namedtuple("ITOrder", ["side", "size"])
 MMOrder = namedtuple("MMOrder", ["size", "price"])
 
-LiquidityProvision = namedtuple(
-    "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
-)
+LiquidityProvision = namedtuple("LiquidityProvision", ["amount", "fee"])
 
 logger = logging.getLogger(__name__)
 
@@ -1025,8 +1023,6 @@ class MarketManager(StateAgentWithWallet):
                 market_id=self.market_id,
                 commitment_amount=self.commitment_amount,
                 fee=0.002,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
                 is_amendment=False,
                 key_name=self.key_name,
             )
@@ -1496,39 +1492,37 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             )
 
     def _liq_provis(self, state: VegaState) -> LiquidityProvision:
-        if (self.curr_asks is not None) and (self.curr_bids is not None):
-            est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
-        elif state is not None:
-            est_mid_price = state.market_state[self.market_id].midprice
-        else:
-            est_mid_price = None
-            buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
-            sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
+        # if (self.curr_asks is not None) and (self.curr_bids is not None):
+        #     est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
+        # elif state is not None:
+        #     est_mid_price = state.market_state[self.market_id].midprice
+        # else:
+        #     est_mid_price = None
+        #     buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
+        #     sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
 
-        if self.curr_asks is not None:
-            next_ask_step = self.curr_asks[-1].price + self.tick_spacing
-            sell_specs = [
-                [
-                    "PEGGED_REFERENCE_MID",
-                    next_ask_step - est_mid_price,
-                    1,
-                ]
-            ]
-        if self.curr_bids is not None:
-            next_bid_step = self.curr_bids[-1].price - self.tick_spacing
-            buy_specs = [
-                [
-                    "PEGGED_REFERENCE_MID",
-                    est_mid_price - next_bid_step,
-                    1,
-                ]
-            ]
+        # if self.curr_asks is not None:
+        #     next_ask_step = self.curr_asks[-1].price + self.tick_spacing
+        #     sell_specs = [
+        #         [
+        #             "PEGGED_REFERENCE_MID",
+        #             next_ask_step - est_mid_price,
+        #             1,
+        #         ]
+        #     ]
+        # if self.curr_bids is not None:
+        #     next_bid_step = self.curr_bids[-1].price - self.tick_spacing
+        #     buy_specs = [
+        #         [
+        #             "PEGGED_REFERENCE_MID",
+        #             est_mid_price - next_bid_step,
+        #             1,
+        #         ]
+        #     ]
 
         return LiquidityProvision(
             amount=self.commitment_amount,
             fee=self.fee_amount,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
         )
 
     def _optimal_strategy(
@@ -1599,7 +1593,15 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         )
         level_price[level_price < 1 / 10**self.mdp] = 1 / 10**self.mdp
 
-        return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
+        orders = [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
+        total_liq_supp = sum([order.size * order.price for order in orders])
+        remaining = self.commitment_amount - total_liq_supp
+
+        if remaining > 0:
+            next_price = orders[-1].price + mult_factor * self.tick_spacing
+            orders.append(MMOrder(remaining / next_price, next_price))
+
+        return orders
 
 
 class HedgedMarketMaker(ExponentialShapedMarketMaker):

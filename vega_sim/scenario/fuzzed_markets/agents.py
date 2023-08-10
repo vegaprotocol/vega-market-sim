@@ -10,7 +10,7 @@ from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import VegaService
+from vega_sim.service import VegaService, PeggedOrder
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -537,7 +537,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                 if is_valid
                 else self.random_state.randint(-5, 5)
             ),
-            self.random_state.randint(low=0, high=4000000),
+            3 * self.random_state.random(),
         )
 
     def step(self, vega_state):
@@ -574,14 +574,38 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         )
 
         buy_specs = [
-            self._gen_spec(vega_protos.vega.SIDE_BUY, valid)
+            [
+                vega_protos.vega.SIDE_BUY,
+                self._gen_spec(vega_protos.vega.SIDE_BUY, valid),
+            ]
             for _ in range(self.random_state.randint(1, 50))
         ]
 
         sell_specs = [
-            self._gen_spec(vega_protos.vega.SIDE_SELL, valid)
+            [
+                vega_protos.vega.SIDE_SELL,
+                self._gen_spec(vega_protos.vega.SIDE_SELL, valid),
+            ]
             for _ in range(self.random_state.randint(1, 50))
         ]
+
+        self.vega.cancel_order(
+            trading_key=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+        )
+        for side, spec in buy_specs + sell_specs:
+            self.vega.submit_order(
+                trading_key=self.key_name,
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                time_in_force="TIME_IN_FORCE_GTC",
+                pegged_order=PeggedOrder(reference=spec[0], offset=spec[1]),
+                volume=spec[2] * commitment_amount,
+                side=side,
+                wait=False,
+            )
 
         self.vega.submit_liquidity(
             key_name=self.key_name,
@@ -589,9 +613,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
             market_id=self.market_id,
             fee=fee,
             commitment_amount=commitment_amount,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
-            is_amendment=self.random_state.choice([True, False]),
+            is_amendment=self.random_state.choice([True, False, None]),
         )
 
 

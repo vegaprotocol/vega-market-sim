@@ -109,7 +109,7 @@ def wait_for_core_catchup(
     core_time = retry(
         10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )
-    time.sleep(0.0001)
+    time.sleep(0.01)
     core_time_two = retry(
         10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )
@@ -122,7 +122,7 @@ def wait_for_core_catchup(
             0.5,
             lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp,
         )
-        time.sleep(0.0001 * 1.03**attempts)
+        time.sleep(0.00001 * 1.03**attempts)
         core_time_two = retry(
             10,
             0.5,
@@ -141,18 +141,18 @@ def wait_for_acceptance(
 ) -> T:
     logger.debug("Waiting for proposal acceptance")
     submission_accepted = False
-    for i in range(20):
+    for i in range(50):
         try:
             proposal = submission_load_func(submission_ref)
         except:
-            time.sleep(0.0001 * 1.1**i)
+            time.sleep(0.001 * 1.1**i)
             continue
 
         if proposal:
             logger.debug("Your proposal has been accepted by the network")
             submission_accepted = True
             break
-        time.sleep(0.05 * 1.1**i)
+        time.sleep(0.001 * 1.1**i)
 
     if not submission_accepted:
         raise ProposalNotAcceptedError(

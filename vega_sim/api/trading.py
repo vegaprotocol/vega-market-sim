@@ -363,8 +363,6 @@ def submit_liquidity(
         market_id=market_id,
         commitment_amount=str(commitment_amount),
         fee=str(fee),
-        buys=[],
-        sells=[],
     )
     wallet.submit_transaction(
         transaction=submission,
