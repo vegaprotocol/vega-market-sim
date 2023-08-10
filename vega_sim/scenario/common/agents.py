@@ -1081,6 +1081,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         safety_factor: Optional[float] = 1.2,
         max_order_size: float = 10000,
         order_validity_length: Optional[float] = None,
+        auto_top_up: bool = False,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1109,6 +1110,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.bid_depth = None
         self.ask_depth = None
 
+        self.auto_top_up = auto_top_up
+        self.mint_key = False
+
         self.order_validity_length = order_validity_length
 
     def initialise(
@@ -1122,6 +1126,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+
         self.mint_key = mint_key
         if mint_key:
             # Top up asset
@@ -1248,7 +1253,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 else None
             )
         ) is not None:
-            if self.mint_key:
+            if self.auto_top_up and self.mint_key:
                 # Top up asset
                 account = self.vega.party_account(
                     key_name=self.key_name,
@@ -3054,6 +3059,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         initial_asset_mint: float = 1000000,
         tag: str = "",
         wallet_name: str = None,
+        auto_top_up: bool = False,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.side = side
@@ -3062,6 +3068,8 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.asset_name = asset_name
         self.price_process = price_process
         self.uncrossing_size = uncrossing_size
+        self.auto_top_up = auto_top_up
+        self.mint_key = False
 
     def initialise(
         self,
@@ -3071,7 +3079,6 @@ class UncrossAuctionAgent(StateAgentWithWallet):
     ):
         # Initialise wallet
         super().initialise(vega=vega, create_key=create_key)
-        self.mint_key = mint_key
 
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
@@ -3079,6 +3086,8 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.mint_key = mint_key
+
         if self.mint_key:
             # Top up asset
             self.vega.mint(
@@ -3097,7 +3106,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
             markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
             markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
         ]:
-            if self.mint_key:
+            if self.auto_top_up and self.mint_key:
                 account = self.vega.party_account(
                     key_name=self.key_name,
                     wallet_name=self.wallet_name,
