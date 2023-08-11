@@ -78,7 +78,7 @@ def wait_for_datanode_sync(
     )
     while core_time > trading_time:
         logging.debug(f"Sleeping in wait_for_datanode_sync for {0.05 * 1.03**attempts}")
-        time.sleep(0.001 * 1.03**attempts)
+        time.sleep(0.01 * 1.03**attempts)
         try:
             trading_time = retry(
                 10,
@@ -122,7 +122,7 @@ def wait_for_core_catchup(
             0.5,
             lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp,
         )
-        time.sleep(0.00001 * 1.03**attempts)
+        time.sleep(0.0001 * 1.03**attempts)
         core_time_two = retry(
             10,
             0.5,

@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import uuid
-import psutil
-import platform
-
 import datetime
 import logging
+import platform
+import uuid
 from dataclasses import dataclass
 from math import exp
 from queue import Queue
 
 import numpy as np
+import psutil
 
 try:
     import talib
@@ -26,6 +25,7 @@ from numpy.typing import ArrayLike
 
 import vega_sim.api.faucet as faucet
 from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
+from vega_sim.api.helpers import get_enum
 from vega_sim.api.trading import OrderRejectedError
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import Agent, StateAgent, StateAgentWithWallet
@@ -35,8 +35,6 @@ from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.proto.vega import vega as vega_protos
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
-
-from vega_sim.api.helpers import get_enum
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -946,9 +944,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -1081,6 +1077,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         safety_factor: Optional[float] = 1.2,
         max_order_size: float = 10000,
         order_validity_length: Optional[float] = None,
+        auto_top_up: bool = False,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1109,6 +1106,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.bid_depth = None
         self.ask_depth = None
 
+        self.auto_top_up = auto_top_up
+        self.mint_key = False
+
         self.order_validity_length = order_validity_length
 
     def initialise(
@@ -1122,6 +1122,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+
+        self.mint_key = mint_key
         if mint_key:
             # Top up asset
             self.vega.mint(
@@ -1245,12 +1247,30 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 else None
             )
         ) is not None:
+            if self.auto_top_up and self.mint_key:
+                # Top up asset
+                account = self.vega.party_account(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    asset_id=self.asset_id,
+                    market_id=self.market_id,
+                )
+
+                if account.general < 3 * liq.amount:
+                    # Top up asset
+                    self.vega.mint(
+                        wallet_name=self.wallet_name,
+                        asset=self.asset_id,
+                        amount=self.initial_asset_mint,
+                        key_name=self.key_name,
+                    )
+                    self.vega.wait_for_total_catchup()
+
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
                 commitment_amount=liq.amount,
                 fee=liq.fee,
-                is_amendment=True,
                 key_name=self.key_name,
             )
 
@@ -3037,6 +3057,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         initial_asset_mint: float = 1000000,
         tag: str = "",
         wallet_name: str = None,
+        auto_top_up: bool = False,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.side = side
@@ -3045,6 +3066,8 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.asset_name = asset_name
         self.price_process = price_process
         self.uncrossing_size = uncrossing_size
+        self.auto_top_up = auto_top_up
+        self.mint_key = False
 
     def initialise(
         self,
@@ -3054,17 +3077,20 @@ class UncrossAuctionAgent(StateAgentWithWallet):
     ):
         # Initialise wallet
         super().initialise(vega=vega, create_key=create_key)
+
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.vega.wait_for_total_catchup()
         # Get asset id
-        asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.mint_key = mint_key
+
+        if self.mint_key:
             # Top up asset
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset=asset_id,
+                asset=self.asset_id,
                 amount=self.initial_asset_mint,
                 key_name=self.key_name,
             )
@@ -3078,6 +3104,22 @@ class UncrossAuctionAgent(StateAgentWithWallet):
             markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
             markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
         ]:
+            if self.auto_top_up and self.mint_key:
+                account = self.vega.party_account(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    asset_id=self.asset_id,
+                    market_id=self.market_id,
+                )
+
+                if account.general < self.uncrossing_size * curr_price:
+                    # Top up asset
+                    self.vega.mint(
+                        wallet_name=self.wallet_name,
+                        asset=self.asset_id,
+                        amount=self.initial_asset_mint,
+                        key_name=self.key_name,
+                    )
             self.vega.submit_order(
                 trading_key=self.key_name,
                 trading_wallet=self.wallet_name,
