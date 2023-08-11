@@ -239,7 +239,6 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
     while ret_sock in existing_set:
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
             s.bind(("", 0))
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             ret_sock = s.getsockname()[1]
 
         num_tries += 1
