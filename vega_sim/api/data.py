@@ -982,9 +982,7 @@ def find_market_id(
     ]
 
     market_ids = {}
-    print(f"Checking for markets {name = }")
     for market in markets:
-        print(f"Market name: {market.tradable_instrument.instrument.name}")
         if market.tradable_instrument.instrument.name == name:
             if market.state in acceptable_states:
                 market_ids[market.id] = market.market_timestamps.pending

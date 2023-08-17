@@ -25,7 +25,7 @@ class VegaWallet(Wallet):
         wallet_path: str,
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
-        mutex: Optional[multiprocessing.Lock] = None
+        mutex: Optional[multiprocessing.Lock] = None,
     ):
         """Creates a wallet to interact with a full running vegawallet instance
 
@@ -56,9 +56,10 @@ class VegaWallet(Wallet):
 
     @classmethod
     def from_json(
-        cls, json_path: str, 
-        wallet_url: str, 
-        wallet_path: str, 
+        cls,
+        json_path: str,
+        wallet_url: str,
+        wallet_path: str,
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
         mutex: Optional[multiprocessing.Lock] = None,
@@ -82,8 +83,8 @@ class VegaWallet(Wallet):
                 str, dir of vega home configuration files
         """
         base = cls(
-            wallet_url=wallet_url, 
-            wallet_path=wallet_path, 
+            wallet_url=wallet_url,
+            wallet_path=wallet_path,
             vega_home_dir=vega_home_dir,
             passphrase_file_path=passphrase_file_path,
             mutex=mutex,
@@ -96,7 +97,7 @@ class VegaWallet(Wallet):
     def _load_token(self, wallet_name: str):
         if self._passphrase_file is None:
             raise Exception("Must set wallet passphrase file path to load tokens")
-        
+
         wallet_args = [
             self._wallet_path,
             "wallet",
@@ -107,7 +108,7 @@ class VegaWallet(Wallet):
             "--output",
             "json",
         ]
-        
+
         if not self._wallet_home is None:
             wallet_args += ["--home", self._wallet_home]
 
@@ -228,7 +229,7 @@ class VegaWallet(Wallet):
     def get_keypairs(self, wallet_name: str) -> dict:
         if wallet_name not in self.login_tokens:
             self._load_token(wallet_name=wallet_name)
-        
+
         headers = {
             "Origin": "MarketSim",
             "Authorization": f"VWT {self.login_tokens[wallet_name]}",
@@ -276,7 +277,6 @@ class VegaWallet(Wallet):
             "Origin": "MarketSim",
             "Authorization": f"VWT {self.login_tokens[wallet_name]}",
         }
-
 
         submission = {
             "jsonrpc": "2.0",
@@ -326,7 +326,6 @@ class VegaWallet(Wallet):
 
         return self.pub_keys[wallet_name][name]
 
-
     def _lock(self):
         """
         Lock if mutex is available
@@ -341,5 +340,5 @@ class VegaWallet(Wallet):
         """
         if self._mutex is None:
             return
-        
+
         self._mutex.release()
