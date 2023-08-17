@@ -11,6 +11,7 @@ pipeline {
         skipDefaultCheckout true
         timestamps()
         timeout(time: 50, unit: 'MINUTES')
+        disableConcurrentBuilds(abortPrevious: true)
     }
     parameters {
         string( name: 'VEGA_VERSION', defaultValue: '2de8bbe1e7e44b1d1da434286aa5c9480f882cd9',
