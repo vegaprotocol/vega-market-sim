@@ -674,6 +674,7 @@ def manage_vega_processes(
         [
             signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.
             signal.SIGTERM,  # The process was explicitly killed by somebody wielding the terminate program.
+            signal.SIGCHLD,
         ]
     )
     sighandler(None, None)
