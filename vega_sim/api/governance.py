@@ -332,7 +332,7 @@ def propose_future_market(
             linear_slippage_factor="0.001",
             quadratic_slippage_factor="0",
             liquidity_sla_parameters=vega_protos.markets.LiquiditySLAParameters(
-                price_range=lp_price_range,
+                price_range=str(lp_price_range),
                 commitment_min_time_fraction=str(commitment_min_time_fraction),
                 providers_fee_calculation_time_step=int(
                     providers_fee_calculation_time_step
