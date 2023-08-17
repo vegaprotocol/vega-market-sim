@@ -7,6 +7,7 @@ import json
 import logging
 import subprocess
 import requests
+import multiprocessing
 
 from google.protobuf.json_format import MessageToDict
 from vega_sim.wallet.base import Wallet, DEFAULT_WALLET_NAME
@@ -24,6 +25,7 @@ class VegaWallet(Wallet):
         wallet_path: str,
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
+        mutex: Optional[multiprocessing.Lock] = None
     ):
         """Creates a wallet to interact with a full running vegawallet instance
 
@@ -38,6 +40,7 @@ class VegaWallet(Wallet):
                 str, File containing login passphrase for wallet
 
         """
+
         self.wallet_url = wallet_url
         self.login_tokens = {}
         self.pub_keys = {}
@@ -45,6 +48,7 @@ class VegaWallet(Wallet):
         self._wallet_path = wallet_path
         self._wallet_home = vega_home_dir
         self._passphrase_file = passphrase_file_path
+        self._mutex = mutex
 
         self.vega_default_wallet_name = os.environ.get(
             "VEGA_DEFAULT_WALLET_NAME", DEFAULT_WALLET_NAME
@@ -52,7 +56,12 @@ class VegaWallet(Wallet):
 
     @classmethod
     def from_json(
-        cls, json_path: str, wallet_url: str, wallet_path: str, vega_home_dir: str
+        cls, json_path: str, 
+        wallet_url: str, 
+        wallet_path: str, 
+        vega_home_dir: str,
+        passphrase_file_path: Optional[str] = None,
+        mutex: Optional[multiprocessing.Lock] = None,
     ) -> "VegaWallet":
         """Creates a wallet to interact with a full running vegawallet instance.
             Loads tokens from a given json file in the form
@@ -73,7 +82,11 @@ class VegaWallet(Wallet):
                 str, dir of vega home configuration files
         """
         base = cls(
-            wallet_url=wallet_url, wallet_path=wallet_path, vega_home_dir=vega_home_dir
+            wallet_url=wallet_url, 
+            wallet_path=wallet_path, 
+            vega_home_dir=vega_home_dir,
+            passphrase_file_path=passphrase_file_path,
+            mutex=mutex,
         )
 
         with open(json_path, "r") as f:
@@ -83,19 +96,23 @@ class VegaWallet(Wallet):
     def _load_token(self, wallet_name: str):
         if self._passphrase_file is None:
             raise Exception("Must set wallet passphrase file path to load tokens")
+        
+        wallet_args = [
+            self._wallet_path,
+            "wallet",
+            "api-token",
+            "list",
+            "--passphrase-file",
+            self._passphrase_file,
+            "--output",
+            "json",
+        ]
+        
+        if not self._wallet_home is None:
+            wallet_args += ["--home", self._wallet_home]
+
         cmd = subprocess.run(
-            [
-                self._wallet_path,
-                "wallet",
-                "api-token",
-                "list",
-                "--home",
-                self._wallet_home,
-                "--passphrase-file",
-                self._passphrase_file,
-                "--output",
-                "json",
-            ],
+            wallet_args,
             capture_output=True,
             universal_newlines=True,
             encoding="UTF-8",
@@ -211,7 +228,7 @@ class VegaWallet(Wallet):
     def get_keypairs(self, wallet_name: str) -> dict:
         if wallet_name not in self.login_tokens:
             self._load_token(wallet_name=wallet_name)
-        print(f"WALLET_TOKEN: {self.login_tokens[wallet_name]}")
+        
         headers = {
             "Origin": "MarketSim",
             "Authorization": f"VWT {self.login_tokens[wallet_name]}",
@@ -226,7 +243,9 @@ class VegaWallet(Wallet):
 
         url = f"{self.wallet_url}/api/v2/requests"
 
+        self._lock()
         response = requests.post(url, headers=headers, json=submission)
+        self._release()
 
         try:
             response.raise_for_status()
@@ -275,8 +294,9 @@ class VegaWallet(Wallet):
         }
         url = f"{self.wallet_url}/api/v2/requests"
 
+        self._lock()
         response = requests.post(url, headers=headers, json=submission)
-
+        self._release()
         try:
             response.raise_for_status()
         except Exception as e:
@@ -305,3 +325,21 @@ class VegaWallet(Wallet):
             )
 
         return self.pub_keys[wallet_name][name]
+
+
+    def _lock(self):
+        """
+        Lock if mutex is available
+        """
+        if self._mutex is None:
+            return
+        self._mutex.acquire()
+
+    def _release(self):
+        """
+        Release the lock if mutex is available
+        """
+        if self._mutex is None:
+            return
+        
+        self._mutex.release()
