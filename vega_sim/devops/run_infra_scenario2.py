@@ -27,7 +27,7 @@ import argparse
 import logging
 
 
-from vega_sim.wallet.process import VegaWallet 
+from vega_sim.wallet.process import VegaWallet
 from vega_sim.scenario.constants import Network
 
 from vega_sim.network_service import VegaServiceNetwork
@@ -39,6 +39,7 @@ from vega_sim.devops.registry import SCENARIOS
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 
+
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -46,15 +47,16 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(bytes("OK", "utf-8"))
 
+
 def health_check():
     webServer = HTTPServer(("0.0.0.0", 80), MyServer)
     print("Server started %s:%s" % ("0.0.0.0", 80))
     webServer.serve_forever()
-    
+
     webServer.server_close()
     print("Server stopped.")
 
-    
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -84,13 +86,15 @@ def main():
     scenario.market_name = args.market_name
     scenario.step_length_seconds = args.step_length_seconds
 
-    network_name = str(args.network).lower().replace('_', '-')
-    wallet_binary = os.getenv('VEGA_WALLET_PATH')
-    wallet_home = os.getenv('VEGA_WALLET_HOME')
-    wallet_name = os.getenv('VEGA_USER_WALLET_NAME')
-    wallet_passphrase_file = os.getenv('VEGA_WALLET_TOKENS_PASSPHRASE_FILE')
+    network_name = str(args.network).lower().replace("_", "-")
+    wallet_binary = os.getenv("VEGA_WALLET_PATH")
+    wallet_home = os.getenv("VEGA_WALLET_HOME")
+    wallet_name = os.getenv("VEGA_USER_WALLET_NAME")
+    wallet_passphrase_file = os.getenv("VEGA_WALLET_TOKENS_PASSPHRASE_FILE")
 
-    wallet = VegaWallet(wallet_binary, network_name, wallet_passphrase_file, wallet_home)
+    wallet = VegaWallet(
+        wallet_binary, network_name, wallet_passphrase_file, wallet_home
+    )
     wallet.check_wallet(wallet_name)
 
     process = wallet.background_run()
@@ -113,6 +117,7 @@ def main():
     process.terminate()
 
     t.join()
+
 
 if __name__ == "__main__":
     main()

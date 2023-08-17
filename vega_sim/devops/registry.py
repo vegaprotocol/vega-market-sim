@@ -211,53 +211,6 @@ SCENARIOS = {
             randomise_history=False,
         ),
     ),
-    "BTCUSDT-230930": lambda: DevOpsScenario(
-        binance_code="BTCDAI",
-        market_manager_args=MarketManagerArgs(
-            market_name="BTC/USDT expiry 2023 Sept 30th",
-            market_code="BTC/USDT-230930",
-            asset_name="USDTT",
-            adp=6,
-            mdp=4,
-            pdp=0,
-        ),
-        market_maker_args=MarketMakerArgs(
-            market_kappa=0.15,
-            market_order_arrival_rate=100,
-            order_kappa=0.15,
-            order_size=1,
-            order_levels=25,
-            order_spacing=1,
-            order_clipping=10000,
-            inventory_lower_boundary=-3,
-            inventory_upper_boundary=3,
-            fee_amount=0.0001,
-            commitment_amount=4e5,
-            initial_mint=2e5,
-        ),
-        auction_trader_args=AuctionTraderArgs(
-            initial_volume=0.001,
-            initial_mint=1e4,
-        ),
-        random_trader_args=RandomTraderArgs(
-            order_intensity=[5, 5, 5],
-            order_volume=[0.01, 0.1, 1],
-            step_bias=[0.333, 0.012, 0.003],
-            initial_mint=1e6,
-        ),
-        sensitive_trader_args=SensitiveTraderArgs(
-            scale=[10, 10, 10],
-            max_order_size=[0.001, 0.01, 0.1],
-            initial_mint=1e4,
-        ),
-        simulation_args=SimulationArgs(
-            n_steps=60 * 6,
-            granularity=Granularity.MINUTE,
-            coinbase_code="BTC-USDT",
-            start_date="2022-11-01 00:00:00",
-            randomise_history=False,
-        ),
-    ),
 }
 
 AGENTS = {

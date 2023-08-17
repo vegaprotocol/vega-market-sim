@@ -8,9 +8,6 @@ from vega_sim.scenario.common.utils.price_process import random_walk
 
 from vega_sim.scenario.constants import Network
 
-from vega_sim.proto.vega import markets as markets_protos
-import time
-
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
@@ -31,5 +28,8 @@ def test_devops_scenarios(scenario_to_test: DevOpsScenario):
         warn_on_raw_data_access=False,
         run_with_console=False,
     ) as vega:
-        time.sleep(5.0)
-        assert True
+        scenario_to_test.run_iteration(
+            vega=vega,
+            network=Network.NULLCHAIN,
+            run_with_snitch=True,
+        )
