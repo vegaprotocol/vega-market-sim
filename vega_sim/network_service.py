@@ -231,6 +231,7 @@ class VegaServiceNetwork(VegaService):
         governance_symbol: Optional[str] = "VEGA",
         vegacapsule_bin_path: Optional[str] = "./vega_sim/bin/vegacapsule",
         network_on_host: Optional[bool] = False,
+        wallet_mutex: Optional[multiprocessing.Lock] = None,
     ):
         """Method initialises the class.
 
@@ -278,6 +279,8 @@ class VegaServiceNetwork(VegaService):
         self._faucet_url = faucet_url
 
         self._network_config = None
+
+        self._wallet_mutex = wallet_mutex
 
         self.vega_console_path = (
             vega_console_path
@@ -511,6 +514,8 @@ class VegaServiceNetwork(VegaService):
                     self.wallet_url,
                     wallet_path=self._wallet_path,
                     vega_home_dir=self._vega_home,
+                    passphrase_file_path=self._passphrase_file_path,
+                    mutex=self._wallet_mutex,
                 )
             else:
                 self._wallet = VegaWallet(
@@ -518,6 +523,7 @@ class VegaServiceNetwork(VegaService):
                     wallet_path=self._wallet_path,
                     vega_home_dir=self._wallet_home,
                     passphrase_file_path=self._passphrase_file_path,
+                    mutex=self._wallet_mutex,
                 )
         return self._wallet
 
