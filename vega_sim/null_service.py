@@ -392,8 +392,6 @@ def manage_vega_processes(
                 "-c",
                 "logging_collector=true",
                 "-c",
-                "log_directory=/var/lib/postgresql/data/log_tbm",
-                "-c",
                 "log_destination=stderr",
                 "-c",
                 "work_mem=5MB",
