@@ -343,6 +343,7 @@ def manage_vega_processes(
         use_docker_postgres = True
     except:
         use_docker_postgres = False
+    logger.info(f"Use Docker Postgres: {use_docker_postgres}")
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
@@ -590,21 +591,21 @@ def manage_vega_processes(
     # Important assumption is that this signal can be caught multiple times as well
     def sighandler(signal, frame):
         if signal is None:
-            logging.debug("VegaServiceNull exited normally")
+            logging.info("VegaServiceNull exited normally")
         else:
-            logging.debug(f"VegaServiceNull exited after trap the {signal} signal")
+            logging.info(f"VegaServiceNull exited after trap the {signal} signal")
 
-        logger.debug("Received signal from parent process")
+        logger.info("Received signal from parent process")
 
-        logger.debug("Starting termination for processes")
+        logger.info("Starting termination for processes")
         for name, process in processes.items():
-            logger.debug(f"Terminating process {name}(pid: {process.pid})")
+            logger.info(f"Terminating process {name}(pid: {process.pid})")
             process.terminate()
 
         for name, process in processes.items():
             attempts = 0
             while process.poll() is None:
-                logger.debug(f"Process {name} still not terminated")
+                logger.info(f"Process {name} still not terminated")
                 time.sleep(1)
                 attempts += 1
                 if attempts > 60:
@@ -613,11 +614,11 @@ def manage_vega_processes(
                         f" {name}."
                     )
                     process.kill()
-            logger.debug(f"Process {name} stopped with {process.poll()}")
+            logger.info(f"Process {name} stopped with {process.poll()}")
             if process.poll() == 0:
-                logger.debug(f"Process {name} terminated.")
+                logger.info(f"Process {name} terminated.")
             if process.poll() == -9:
-                logger.debug(f"Process {name} killed.")
+                logger.info(f"Process {name} killed.")
 
         if use_docker_postgres:
 
@@ -626,7 +627,7 @@ def manage_vega_processes(
                     data_node_container.kill()
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
-                        logger.debug(
+                        logger.info(
                             f"Container {data_node_container.name} has been already"
                             " killed"
                         )
@@ -634,11 +635,11 @@ def manage_vega_processes(
                     else:
                         raise e
 
-            logger.debug(f"Stopping container {data_node_container.name}")
+            logger.info(f"Stopping container {data_node_container.name}")
             retry(10, 1.0, kill_docker_container)
 
             removed = False
-            logger.debug(f"Removing volume {data_node_docker_volume.name}")
+            logger.info(f"Removing volume {data_node_docker_volume.name}")
             for _ in range(10):
                 try:
                     data_node_docker_volume.remove(force=True)
@@ -647,7 +648,7 @@ def manage_vega_processes(
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         removed = True
-                        logger.debug(
+                        logger.info(
                             f"Data node volume {data_node_docker_volume.name} has been"
                             " already killed"
                         )
