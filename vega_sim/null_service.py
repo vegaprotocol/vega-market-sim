@@ -594,7 +594,7 @@ def manage_vega_processes(
         else:
             logging.debug(f"VegaServiceNull exited after trap the {signal} signal")
 
-        logger.info("Received signal from parent process")
+        logger.debug("Received signal from parent process")
 
         logger.debug("Starting termination for processes")
         for name, process in processes.items():
