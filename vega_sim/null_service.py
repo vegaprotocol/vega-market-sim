@@ -386,6 +386,28 @@ def manage_vega_processes(
         data_node_docker_volume = docker_client.volumes.create()
         data_node_container = docker_client.containers.run(
             "timescale/timescaledb:2.8.0-pg14",
+            command=[
+                "-c",
+                "max_connections=50",
+                "-c",
+                "logging_collector=true",
+                "-c",
+                "log_directory=/var/lib/postgresql/data/log_tbm",
+                "-c",
+                "log_destination=stderr",
+                "-c",
+                "work_mem=5MB",
+                "-c",
+                "huge_pages=off",
+                "-c",
+                "shared_memory_type=sysv",
+                "-c",
+                "dynamic_shared_memory_type=sysv",
+                "-c",
+                "shared_buffers=2GB",
+                "-c",
+                "temp_buffers=5MB",
+            ],
             detach=True,
             ports={5432: port_config[Ports.DATA_NODE_POSTGRES]},
             volumes=[f"{data_node_docker_volume.name}:/var/lib/postgresql/data"],
@@ -624,7 +646,7 @@ def manage_vega_processes(
 
             def kill_docker_container() -> None:
                 try:
-                    data_node_container.kill()
+                    data_node_container.stop()
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         logger.info(
@@ -640,7 +662,10 @@ def manage_vega_processes(
 
             removed = False
             logger.info(f"Removing volume {data_node_docker_volume.name}")
-            for _ in range(10):
+            for _ in range(20):
+                if data_node_container.status == "running":
+                    time.sleep(3)
+                    continue
                 try:
                     data_node_docker_volume.remove(force=True)
                     removed = True
