@@ -610,21 +610,21 @@ def manage_vega_processes(
     # Important assumption is that this signal can be caught multiple times as well
     def sighandler(signal, frame):
         if signal is None:
-            logging.debug("VegaServiceNull exited normally")
+            logging.info("VegaServiceNull exited normally")
         else:
-            logging.debug(f"VegaServiceNull exited after trapping the {signal} signal")
+            logging.info(f"VegaServiceNull exited after trapping the {signal} signal")
 
-        logger.debug("Received signal from parent process")
+        logger.info("Received signal from parent process")
 
         logger.info("Starting termination for processes")
         for name, process in processes.items():
-            logger.debug(f"Terminating process {name}(pid: {process.pid})")
+            logger.info(f"Terminating process {name}(pid: {process.pid})")
             process.terminate()
 
         for name, process in processes.items():
             attempts = 0
             while process.poll() is None:
-                logger.debug(f"Process {name} still not terminated")
+                logger.info(f"Process {name} still not terminated")
                 time.sleep(1)
                 attempts += 1
                 if attempts > 60:
@@ -635,9 +635,9 @@ def manage_vega_processes(
                     process.kill()
             logger.debug(f"Process {name} stopped with {process.poll()}")
             if process.poll() == 0:
-                logger.debug(f"Process {name} terminated.")
+                logger.info(f"Process {name} terminated.")
             if process.poll() == -9:
-                logger.debug(f"Process {name} killed.")
+                logger.info(f"Process {name} killed.")
 
         if use_docker_postgres:
 
@@ -692,7 +692,6 @@ def manage_vega_processes(
 
     # The process had previously created one or more child processes with the fork() function.
     # One or more of these processes has since died.
-    signal.signal(signal.SIGCHLD, sighandler)
     signal.sigwait(
         [
             signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.
