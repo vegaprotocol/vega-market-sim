@@ -94,6 +94,7 @@ if __name__ == "__main__":
             sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
             is_amendment=False,
         )
+
         vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,
