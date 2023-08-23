@@ -11,6 +11,7 @@ pipeline {
         skipDefaultCheckout true
         timestamps()
         timeout(time: 50, unit: 'MINUTES')
+        disableConcurrentBuilds(abortPrevious: true)
     }
     parameters {
         string( name: 'VEGA_VERSION', defaultValue: 'feature/integrate-sla-rebased-2',

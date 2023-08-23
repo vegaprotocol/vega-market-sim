@@ -56,7 +56,7 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
 def wait_for_datanode_sync(
     trading_data_client: VegaTradingDataClientV2,
     core_data_client: VegaCoreClient,
-    max_retries: int = 100,
+    max_retries: int = 650,
 ) -> None:
     """Waits for Datanode to catch up to vega core client.
     Note: Will wait for datanode 'latest' time to catch up to core time
@@ -77,8 +77,8 @@ def wait_for_datanode_sync(
         10, 0.5, lambda: trading_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )
     while core_time > trading_time:
-        logging.debug(f"Sleeping in wait_for_datanode_sync for {0.05 * 1.03**attempts}")
-        time.sleep(0.01 * 1.03**attempts)
+        logging.debug(f"Sleeping in wait_for_datanode_sync for {0.005 * 1.1**attempts}")
+        time.sleep(0.0005 * 1.1**attempts)
         try:
             trading_time = retry(
                 10,
@@ -98,7 +98,7 @@ def wait_for_datanode_sync(
 
 def wait_for_core_catchup(
     core_data_client: VegaCoreClient,
-    max_retries: int = 20,
+    max_retries: int = 200,
 ) -> None:
     """Waits for core node to fully execute everything in it's backlog.
     Note that this operates by a rough cut of requesting time twice and checking for it
@@ -106,10 +106,11 @@ def wait_for_core_catchup(
     in a standard tendermint chain
     """
     attempts = 1
+
     core_time = retry(
         10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )
-    time.sleep(0.01)
+    time.sleep(0.0001)
     core_time_two = retry(
         10, 0.5, lambda: core_data_client.GetVegaTime(GetVegaTimeRequest()).timestamp
     )

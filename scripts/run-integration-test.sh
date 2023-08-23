@@ -17,5 +17,4 @@ set -x
 pytest -s -v -m integration \
     --junitxml ${RESULT_DIR}/integration-test-results.xml \
     --log-cli-level "${LOG_LEVEL}" \
-    -n "${PARALLEL_WORKERS}" \
     -k "${TEST_FUNCTION}" 

@@ -74,14 +74,16 @@ class LossSocialisationVisualisation(Visualisation):
             asset=asset_id,
             amount=self.TRADER_MINT,
         )
-        self.vega.wait_for_total_catchup()
         self.vega.wait_fn(60)
+        self.vega.wait_for_total_catchup()
 
         logging.info(
-            f"Trader A Party: public_key = {self.vega.wallet.public_key(name=TRADER_A.key_name, wallet_name=TRADER_A.wallet_name)}"
+            "Trader A Party: public_key ="
+            f" {self.vega.wallet.public_key(name=TRADER_A.key_name, wallet_name=TRADER_A.wallet_name)}"
         )
         logging.info(
-            f"Trader B Party: public_key = {self.vega.wallet.public_key(name=TRADER_B.key_name, wallet_name=TRADER_B.wallet_name)}"
+            "Trader B Party: public_key ="
+            f" {self.vega.wallet.public_key(name=TRADER_B.key_name, wallet_name=TRADER_B.wallet_name)}"
         )
 
         if pause:
@@ -114,7 +116,8 @@ class LossSocialisationVisualisation(Visualisation):
         # Pause to allow user to login to wallet on console
         if pause:
             input(
-                f"Paused at price 500. Trader B should have a short position. Press Enter to continue."
+                f"Paused at price 500. Trader B should have a short position. Press"
+                f" Enter to continue."
             )
 
         # Go through market movements
@@ -128,17 +131,20 @@ class LossSocialisationVisualisation(Visualisation):
                 spread=10,
                 volume=1,
             )
-            self.vega.wait_for_total_catchup()
             self.vega.wait_fn(60)
+            self.vega.wait_for_total_catchup()
 
             if pause:
                 if price == 710:
                     input(
-                        f"Paused at price {price}. Trader B should have been closed out. Trader A should have had loss-socialisation Press Enter to continue."
+                        f"Paused at price {price}. Trader B should have been closed"
+                        " out. Trader A should have had loss-socialisation Press Enter"
+                        " to continue."
                     )
                 else:
                     input(
-                        f"Paused at price {price}. Trader B margin should have increased. Press Enter to continue."
+                        f"Paused at price {price}. Trader B margin should have"
+                        " increased. Press Enter to continue."
                     )
 
             if test:
@@ -181,6 +187,7 @@ if __name__ == "__main__":
     with VegaServiceNull(
         run_with_console=args.console,
         warn_on_raw_data_access=False,
+        retain_log_files=True,
     ) as vega:
         vis = LossSocialisationVisualisation(vega=vega)
         vis.run(pause=args.pause, test=True)

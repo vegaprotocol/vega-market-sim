@@ -239,7 +239,6 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
     while ret_sock in existing_set:
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
             s.bind(("", 0))
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             ret_sock = s.getsockname()[1]
 
         num_tries += 1
@@ -386,6 +385,26 @@ def manage_vega_processes(
         data_node_docker_volume = docker_client.volumes.create()
         data_node_container = docker_client.containers.run(
             "timescale/timescaledb:2.8.0-pg14",
+            command=[
+                "-c",
+                "max_connections=50",
+                "-c",
+                "logging_collector=true",
+                "-c",
+                "log_destination=stderr",
+                "-c",
+                "work_mem=5MB",
+                "-c",
+                "huge_pages=off",
+                "-c",
+                "shared_memory_type=sysv",
+                "-c",
+                "dynamic_shared_memory_type=sysv",
+                "-c",
+                "shared_buffers=2GB",
+                "-c",
+                "temp_buffers=5MB",
+            ],
             detach=True,
             ports={5432: port_config[Ports.DATA_NODE_POSTGRES]},
             volumes=[f"{data_node_docker_volume.name}:/var/lib/postgresql/data"],
@@ -593,52 +612,11 @@ def manage_vega_processes(
         if signal is None:
             logging.debug("VegaServiceNull exited normally")
         else:
-            logging.debug(f"VegaServiceNull exited after trap the {signal} signal")
+            logging.debug(f"VegaServiceNull exited after trapping the {signal} signal")
 
         logger.debug("Received signal from parent process")
-        if use_docker_postgres:
 
-            def kill_docker_container() -> None:
-                try:
-                    data_node_container.kill()
-                except requests.exceptions.HTTPError as e:
-                    if e.response.status_code == 404:
-                        logger.debug(
-                            f"Container {data_node_container.name} has been already"
-                            " killed"
-                        )
-                        return
-                    else:
-                        raise e
-
-            logger.debug(f"Stopping container {data_node_container.name}")
-            retry(10, 1.0, kill_docker_container)
-
-            removed = False
-            for _ in range(10):
-                try:
-                    logging.info(f"Removing volume {data_node_docker_volume.name}")
-                    data_node_docker_volume.remove(force=True)
-                    removed = True
-                    break
-                except requests.exceptions.HTTPError as e:
-                    if e.response.status_code == 404:
-                        removed = True
-                        logger.debug(
-                            f"Data node volume {data_node_docker_volume.name} has been"
-                            " already killed"
-                        )
-                        break
-                    else:
-                        time.sleep(1)
-                except docker.errors.APIError:
-                    time.sleep(1)
-            if not removed:
-                logging.exception(
-                    "Docker volume failed to cleanup, will require manual cleaning"
-                )
-
-        logger.debug("Starting termination for processes")
+        logger.info("Starting termination for processes")
         for name, process in processes.items():
             logger.debug(f"Terminating process {name}(pid: {process.pid})")
             process.terminate()
@@ -661,6 +639,50 @@ def manage_vega_processes(
             if process.poll() == -9:
                 logger.debug(f"Process {name} killed.")
 
+        if use_docker_postgres:
+
+            def kill_docker_container() -> None:
+                try:
+                    data_node_container.stop()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.debug(
+                            f"Container {data_node_container.name} has been already"
+                            " killed"
+                        )
+                        return
+                    else:
+                        raise e
+
+            logger.debug(f"Stopping container {data_node_container.name}")
+            retry(10, 1.0, kill_docker_container)
+
+            removed = False
+            logger.debug(f"Removing volume {data_node_docker_volume.name}")
+            for _ in range(20):
+                if data_node_container.status == "running":
+                    time.sleep(3)
+                    continue
+                try:
+                    data_node_docker_volume.remove(force=True)
+                    removed = True
+                    break
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        removed = True
+                        logger.debug(
+                            f"Data node volume {data_node_docker_volume.name} has been"
+                            " already killed"
+                        )
+                        break
+                    else:
+                        time.sleep(1)
+                except docker.errors.APIError:
+                    time.sleep(1)
+            if not removed:
+                logging.exception(
+                    "Docker volume failed to cleanup, will require manual cleaning"
+                )
         if not retain_log_files and os.path.exists(tmp_vega_dir):
             shutil.rmtree(tmp_vega_dir)
 
@@ -675,6 +697,7 @@ def manage_vega_processes(
         [
             signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.
             signal.SIGTERM,  # The process was explicitly killed by somebody wielding the terminate program.
+            signal.SIGCHLD,
         ]
     )
     sighandler(None, None)
