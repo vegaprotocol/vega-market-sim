@@ -47,6 +47,7 @@ from vega_sim.proto.vega.markets_pb2 import (
     LiquidityMonitoringParameters,
     LogNormalRiskModel,
     PriceMonitoringParameters,
+    LiquiditySLAParameters,
     SimpleModelParams,
 )
 from vega_sim.wallet.base import Wallet
@@ -1023,7 +1024,7 @@ class VegaService(ABC):
         updated_simple_model_params: Optional[SimpleModelParams] = None,
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
-        updated_lp_price_range: Optional[float] = None,
+        updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1108,10 +1109,10 @@ class VegaService(ABC):
             simple=updated_simple_model_params,
             log_normal=updated_log_normal_risk_model,
             metadata=updated_metadata,
-            lp_price_range=(
-                str(updated_lp_price_range)
-                if updated_lp_price_range is not None
-                else current_market.lp_price_range
+            liquidity_sla_parameters=(
+                updated_sla_parameters
+                if updated_sla_parameters is not None
+                else current_market.liquidity_sla_params
             ),
             linear_slippage_factor=current_market.linear_slippage_factor,
             quadratic_slippage_factor=current_market.quadratic_slippage_factor,
