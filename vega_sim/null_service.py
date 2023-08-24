@@ -642,7 +642,7 @@ def manage_vega_processes(
             def kill_docker_container() -> None:
                 try:
                     data_node_container.stop()
-                    with open(tmp_vega_home + "/postgres.log", "wb") as f:
+                    with open(tmp_vega_home + "/postgres.out", "wb") as f:
                         f.write(data_node_container.logs())
                     data_node_container.remove()
                 except requests.exceptions.HTTPError as e:
