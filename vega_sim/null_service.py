@@ -389,8 +389,6 @@ def manage_vega_processes(
                 "-c",
                 "max_connections=50",
                 "-c",
-                "logging_collector=true",
-                "-c",
                 "log_destination=stderr",
                 "-c",
                 "work_mem=5MB",
@@ -413,7 +411,7 @@ def manage_vega_processes(
                 "POSTGRES_PASSWORD": "vega",
                 "POSTGRES_DB": "vega",
             },
-            remove=True,
+            remove=False,
         )
 
     dataNodeProcess = _popen_process(
@@ -644,6 +642,9 @@ def manage_vega_processes(
             def kill_docker_container() -> None:
                 try:
                     data_node_container.stop()
+                    with open(tmp_vega_home + "/postgres.log", "wb") as f:
+                        f.write(data_node_container.logs())
+                    data_node_container.remove()
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         logger.debug(
