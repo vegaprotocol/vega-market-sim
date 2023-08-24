@@ -384,7 +384,7 @@ def manage_vega_processes(
     if use_docker_postgres:
         data_node_docker_volume = docker_client.volumes.create()
         data_node_container = docker_client.containers.run(
-            "timescale/timescaledb:2.8.0-pg14",
+            "timescale/timescaledb:2.11.2-pg15",
             command=[
                 "-c",
                 "max_connections=50",
