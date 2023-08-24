@@ -931,6 +931,8 @@ class VegaServiceNull(VegaService):
                     "Timed out waiting for Vega simulator to start up"
                 )
 
+            # TODO: Remove this once datanode fixes up startup timing
+            time.sleep(3)
             self.process_pids = parent_conn.recv()
 
         # Initialise the data-cache
