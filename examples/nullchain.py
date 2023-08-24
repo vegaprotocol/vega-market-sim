@@ -90,8 +90,6 @@ if __name__ == "__main__":
             market_id=market_id,
             commitment_amount=10000,
             fee=0.001,
-            buy_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
-            sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
             is_amendment=False,
         )
 

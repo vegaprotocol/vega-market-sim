@@ -1487,8 +1487,6 @@ class VegaService(ABC):
         market_id: str,
         commitment_amount: float,
         fee: float,
-        buy_specs=[],
-        sell_specs=[],
         is_amendment: Optional[bool] = None,
         wallet_name: Optional[str] = None,
     ):

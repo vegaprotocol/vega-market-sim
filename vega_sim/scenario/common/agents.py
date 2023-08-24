@@ -944,9 +944,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -2983,26 +2981,6 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
                 self.inf_fee = float(int_market_info.fees.factors.infrastructure_fee)
         self.total_fees = self.mkr_fee + self.liq_fee + self.inf_fee
 
-        # Calculate the bid_depth and ask_depth
-        bid_offset = self.best_bid_price * self.total_fees * (1 + self.safety_factor)
-        ask_offset = self.best_ask_price * self.total_fees * (1 + self.safety_factor)
-
-        # Update the liquidity commitment
-        buy_specs = [
-            [
-                "PEGGED_REFERENCE_BEST_BID",
-                bid_offset,
-                1,
-            ]
-        ]
-        sell_specs = [
-            [
-                "PEGGED_REFERENCE_BEST_ASK",
-                ask_offset,
-                1,
-            ]
-        ]
-
         # Determine current account balance
         party_market_account = self.vega.party_account(
             wallet_name=self.wallet_name,
@@ -3023,8 +3001,6 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
             market_id=self.market_id,
             commitment_amount=total * self.commitment_ratio,
             fee=self.fee,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
         )
 
         # Dump any position with market orders

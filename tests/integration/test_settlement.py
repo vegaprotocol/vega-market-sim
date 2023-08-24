@@ -131,8 +131,6 @@ def test_settlement_with_successor(vega_service: VegaServiceNull):
         market_id=market_id_2,
         commitment_amount=100,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
         is_amendment=False,
     )
     # Add transactions in the proposed market to pass opening auction at price 0.3

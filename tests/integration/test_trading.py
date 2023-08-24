@@ -55,8 +55,6 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=100,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
     )
 
     vega.submit_market_order(
@@ -92,8 +90,6 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=100,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.005, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.005, 1)],
     )
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
@@ -138,14 +134,6 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=200,
         fee=0.005,
-        buy_specs=[
-            ("PEGGED_REFERENCE_MID", 0.001, 2),
-            ("PEGGED_REFERENCE_BEST_BID", 0.005, 5),
-        ],
-        sell_specs=[
-            ("PEGGED_REFERENCE_MID", 0.005, 6),
-            ("PEGGED_REFERENCE_BEST_ASK", 0.0002, 1),
-        ],
     )
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
@@ -420,8 +408,6 @@ def test_iceberg_order(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=100,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 0.1, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 0.1, 1)],
         is_amendment=True,
     )
 
@@ -681,7 +667,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     mint_amount = 100000000
     initial_volume = 10
     initial_commitment = 150000
-    collateral_available = 15000
+    collateral_available = 1500
 
     vega.wait_for_total_catchup()
     for wallet in wallets:
@@ -699,11 +685,11 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
 
     configWithSlippage = MarketConfig()
     configWithSlippage.set(
-        "linear_slippage_factor", str(10)
-    )  # Set the linear_slippage_factor to 10
+        "linear_slippage_factor", str(0.01)
+    )  # Set the linear_slippage_factor to 0.2
     configWithSlippage.set(
-        "quadratic_slippage_factor", str(10)
-    )  # Set the quadratic_slippage_factor to 10
+        "quadratic_slippage_factor", str(0)
+    )  # Set the quadratic_slippage_factor to 0
     configWithSlippage.set(
         "decimal_places", int(0)
     )  # Set the market decimal_places to 0
@@ -764,10 +750,31 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 1000, 1)],
         is_amendment=False,
     )
+
+    vega.submit_order(
+        trading_key=MM_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1120,
+        volume=initial_commitment / 1120,
+        wait=True,
+    )
+
+    vega.submit_order(
+        trading_key=MM_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=990,
+        volume=initial_commitment / 990,
+        wait=True,
+    )
+
     order_id_C = vega.submit_order(
         trading_key=PARTY_B.name,
         market_id=market_id,
@@ -812,7 +819,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        price=1010,
+        price=1060,
         volume=2,
     )
     vega.submit_order(
@@ -836,7 +843,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id,
         open_volume=-10,
         side=["SIDE_SELL", "SIDE_SELL"],
-        price=[1005, 1010],
+        price=[1005, 1060],
         remaining=[2, 2],
         is_market_order=[False],
         collateral_available=collateral,
@@ -859,7 +866,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
         price=1005,
-        volume=2,
+        volume=3,
     )
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
@@ -871,7 +878,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id,
         open_volume=-12,
         side=["SIDE_SELL"],
-        price=[1010],
+        price=[1060],
         remaining=[2],
         is_market_order=[False],
         collateral_available=collateral,
@@ -909,7 +916,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        price=1010,
+        price=1060,
         volume=1,
     )
     vega.wait_fn(1)
@@ -923,7 +930,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id,
         open_volume=-13,
         side=["SIDE_SELL"],
-        price=[1010],
+        price=[1060],
         remaining=[1],
         is_market_order=[False],
         collateral_available=collateral,
@@ -961,7 +968,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        price=1010,
+        price=1060,
         volume=1,
     )
     vega.wait_fn(1)
@@ -970,18 +977,76 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     PARTY_A_account = vega.party_account(
         key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
     )
+
+    _, estimate_liquidation_price_4 = vega.estimate_position(
+        market_id,
+        open_volume=-14,
+        collateral_available=PARTY_A_account.general + PARTY_A_account.margin,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1080,
+        volume=1,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=1080,
+        volume=1,
+    )
+
+    PARTY_A_account = vega.party_account(
+        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
+    )
+
+    assert PARTY_A_account.general + PARTY_A_account.margin > 1
+
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1103,
+        volume=1,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=1103,
+        volume=1,
+    )
+    vega.wait_fn(5)
+    vega.wait_for_total_catchup()
+
     market_data_closeout = vega.get_latest_market_data(market_id=market_id)
+
+    PARTY_A_account = vega.party_account(
+        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
+    )
     # check PARTY_A is closed out
     assert PARTY_A_account.general + PARTY_A_account.margin >= -1e-10
     assert PARTY_A_account.general + PARTY_A_account.margin <= 1e-10
-    # As the price keeps moving in small increments the liquidation happens within the originally estimated range (with sell orders)
     assert (
         market_data_closeout.mark_price
-        <= estimate_liquidation_price_1.best_case.including_sell_orders
+        <= estimate_liquidation_price_4.best_case.including_sell_orders
     )
     assert (
         market_data_closeout.mark_price
-        >= estimate_liquidation_price_1.worst_case.including_sell_orders
+        >= estimate_liquidation_price_4.worst_case.including_sell_orders
     )
 
 
@@ -1078,8 +1143,6 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 1000, 1)],
         is_amendment=False,
     )
     order_id_C = vega.submit_order(
@@ -1357,8 +1420,6 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 1000, 1)],
         is_amendment=False,
     )
     order_id_C = vega.submit_order(

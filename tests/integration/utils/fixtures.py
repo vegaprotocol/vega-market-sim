@@ -91,8 +91,6 @@ def build_basic_market(
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.0005, 1)],
         is_amendment=False,
     )
     # Add transactions in the proposed market to pass opening auction at price 0.3
