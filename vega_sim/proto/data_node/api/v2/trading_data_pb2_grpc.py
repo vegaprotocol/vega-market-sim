@@ -307,6 +307,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsResponse.FromString,
         )
+        self.ListLiquidityProviders = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListLiquidityProviders",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
+        )
         self.GetGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.SerializeToString,
@@ -461,6 +466,16 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/ListEntities",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
+        )
+        self.ListFundingPeriods = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListFundingPeriods",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsResponse.FromString,
+        )
+        self.ListFundingPeriodDataPoints = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListFundingPeriodDataPoints",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
         )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
@@ -1035,6 +1050,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListLiquidityProviders(self, request, context):
+        """List liquidity providers data
+
+        List information about active liquidity provider(s) for a given market, or liquidity provider's party ID
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetGovernanceData(self, request, context):
         """Get governance data
 
@@ -1318,6 +1342,24 @@ class TradingDataServiceServicer(object):
         """List entities
 
         Get a list of all entities created by transaction hash
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListFundingPeriods(self, request, context):
+        """List funding periods
+
+        Get a list of funding periods for a perpetual market.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListFundingPeriodDataPoints(self, request, context):
+        """List funding period data points
+
+        Get a list of data points for a perpetual market's funding periods.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1692,6 +1734,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsResponse.SerializeToString,
         ),
+        "ListLiquidityProviders": grpc.unary_unary_rpc_method_handler(
+            servicer.ListLiquidityProviders,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.SerializeToString,
+        ),
         "GetGovernanceData": grpc.unary_unary_rpc_method_handler(
             servicer.GetGovernanceData,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.FromString,
@@ -1846,6 +1893,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListEntities,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.SerializeToString,
+        ),
+        "ListFundingPeriods": grpc.unary_unary_rpc_method_handler(
+            servicer.ListFundingPeriods,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsResponse.SerializeToString,
+        ),
+        "ListFundingPeriodDataPoints": grpc.unary_unary_rpc_method_handler(
+            servicer.ListFundingPeriodDataPoints,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -3551,6 +3608,35 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def ListLiquidityProviders(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListLiquidityProviders",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def GetGovernanceData(
         request,
         target,
@@ -4439,6 +4525,64 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListEntities",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListFundingPeriods(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListFundingPeriods",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListFundingPeriodDataPoints(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListFundingPeriodDataPoints",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -109,10 +109,10 @@ class MarketConfig(Config):
             "liquidity_monitoring_parameters": "default",
             "log_normal": "default",
             "instrument": "default",
-            "lp_price_range": 0.5,
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
             "successor": None,
+            "liquidity_sla_parameters": "default",
         }
     }
 
@@ -121,7 +121,9 @@ class MarketConfig(Config):
 
         self.decimal_places = config["decimal_places"]
         self.position_decimal_places = config["position_decimal_places"]
-        self.lp_price_range = str(config["lp_price_range"])
+        self.liquidity_sla_parameters = LiquiditySLAParameters(
+            opt=config["liquidity_sla_parameters"]
+        )
         self.linear_slippage_factor = str(config["linear_slippage_factor"])
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
@@ -146,7 +148,7 @@ class MarketConfig(Config):
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=self.decimal_places,
                 position_decimal_places=self.position_decimal_places,
-                lp_price_range=self.lp_price_range,
+                liquidity_sla_parameters=self.liquidity_sla_parameters.build(),
                 metadata=self.metadata,
                 instrument=self.instrument.build(),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
@@ -245,6 +247,38 @@ class LiquidityMonitoringParameters(Config):
             triggering_ratio=self.triggering_ratio,
             auction_extension=self.auction_extension,
             target_stake_parameters=self.target_stake_parameters.build(),
+        )
+
+
+class LiquiditySLAParameters(Config):
+    OPTS = {
+        "default": {
+            "price_range": "0.5",
+            "commitment_min_time_fraction": "1",
+            "providers_fee_calculation_time_step": 1,
+            "performance_hysteresis_epochs": 1,
+            "sla_competition_factor": "1",
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.price_range = config["price_range"]
+        self.commitment_min_time_fraction = config["commitment_min_time_fraction"]
+        self.providers_fee_calculation_time_step = config[
+            "providers_fee_calculation_time_step"
+        ]
+        self.performance_hysteresis_epochs = config["performance_hysteresis_epochs"]
+        self.sla_competition_factor = config["sla_competition_factor"]
+
+    def build(self):
+        return vega_protos.markets.LiquiditySLAParameters(
+            price_range=self.price_range,
+            commitment_min_time_fraction=self.commitment_min_time_fraction,
+            providers_fee_calculation_time_step=self.providers_fee_calculation_time_step,
+            performance_hysteresis_epochs=self.performance_hysteresis_epochs,
+            sla_competition_factor=self.sla_competition_factor,
         )
 
 

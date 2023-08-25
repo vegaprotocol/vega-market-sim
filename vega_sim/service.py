@@ -47,6 +47,7 @@ from vega_sim.proto.vega.markets_pb2 import (
     LiquidityMonitoringParameters,
     LogNormalRiskModel,
     PriceMonitoringParameters,
+    LiquiditySLAParameters,
     SimpleModelParams,
 )
 from vega_sim.wallet.base import Wallet
@@ -1023,7 +1024,7 @@ class VegaService(ABC):
         updated_simple_model_params: Optional[SimpleModelParams] = None,
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
-        updated_lp_price_range: Optional[float] = None,
+        updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1108,10 +1109,10 @@ class VegaService(ABC):
             simple=updated_simple_model_params,
             log_normal=updated_log_normal_risk_model,
             metadata=updated_metadata,
-            lp_price_range=(
-                str(updated_lp_price_range)
-                if updated_lp_price_range is not None
-                else current_market.lp_price_range
+            liquidity_sla_parameters=(
+                updated_sla_parameters
+                if updated_sla_parameters is not None
+                else current_market.liquidity_sla_params
             ),
             linear_slippage_factor=current_market.linear_slippage_factor,
             quadratic_slippage_factor=current_market.quadratic_slippage_factor,
@@ -1486,8 +1487,6 @@ class VegaService(ABC):
         market_id: str,
         commitment_amount: float,
         fee: float,
-        buy_specs: List[Tuple[str, float, int]],
-        sell_specs: List[Tuple[str, float, int]],
         is_amendment: Optional[bool] = None,
         wallet_name: Optional[str] = None,
     ):
@@ -1504,14 +1503,6 @@ class VegaService(ABC):
             fee:
                 float, The fee level at which to set the LP fee
                  (in %, e.g. 0.01 == 1% and 1 == 100%)
-            buy_specs:
-                List[Tuple[str, int, int]], List of tuples, each containing a reference
-                point in their first position, a desired offset in their second and
-                a proportion in third
-            sell_specs:
-                List[Tuple[str, int, int]], List of tuples, each containing a reference
-                point in their first position, a desired offset in their second and
-                a proportion in third
             is_amendment:
                 Optional bool, Is the submission an amendment to an existing provision
                     If None, will query the network to check.
@@ -1519,14 +1510,7 @@ class VegaService(ABC):
                 optional, str name of wallet to use
         """
         asset_id = self.market_to_asset[market_id]
-        market_decimals = self.market_price_decimals[market_id]
 
-        buy_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
-        ]
-        sell_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
-        ]
         is_amendment = (
             is_amendment
             if is_amendment is not None
@@ -1543,8 +1527,6 @@ class VegaService(ABC):
                 commitment_amount, self.asset_decimals[asset_id]
             ),
             fee=fee,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
