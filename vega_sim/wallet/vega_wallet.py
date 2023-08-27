@@ -22,7 +22,7 @@ class VegaWallet(Wallet):
     def __init__(
         self,
         wallet_url: str,
-        wallet_path: str,
+        wallet_path: str | list[str],
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
         mutex: Optional[multiprocessing.Lock] = None,
@@ -33,7 +33,7 @@ class VegaWallet(Wallet):
             wallet_url:
                 str, base URL of the wallet service
             wallet_path:
-                str, path to a wallet binary to call CLI functions from
+                str | list[str], path to a wallet binary to call CLI functions from, you can pass vegawallet if you have dedicated wallet binary or ["vega", "wallet"] if you have a vega binary which contains a wallet implementation
             vega_home_dir:
                 str, dir of vega home configuration files
             passphrase_file_path:
@@ -44,8 +44,10 @@ class VegaWallet(Wallet):
         self.wallet_url = wallet_url
         self.login_tokens = {}
         self.pub_keys = {}
-
-        self._wallet_path = wallet_path
+        if isinstance(wallet_path, str):
+            self._wallet_path = [wallet_path]
+        else:
+            self._wallet_path = wallet_path
         self._wallet_home = vega_home_dir
         self._passphrase_file = passphrase_file_path
         self._mutex = mutex
@@ -59,7 +61,7 @@ class VegaWallet(Wallet):
         cls,
         json_path: str,
         wallet_url: str,
-        wallet_path: str,
+        wallet_path: str | list[str],
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
         mutex: Optional[multiprocessing.Lock] = None,
@@ -78,7 +80,7 @@ class VegaWallet(Wallet):
             wallet_url:
                 str, base URL of the wallet service
             wallet_path:
-                str, path to a wallet binary to call CLI functions from
+                str, path to a wallet binary to call CLI functions from, you can pass vegawallet if you have dedicated wallet binary or ["vega", "wallet"] if you have a vega binary which contains a wallet implementation
             vega_home_dir:
                 str, dir of vega home configuration files
         """
