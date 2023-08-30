@@ -934,7 +934,7 @@ class VegaServiceNull(VegaService):
                 )
 
             # TODO: Remove this once datanode fixes up startup timing
-            time.sleep(3)
+            time.sleep(6)
             self.process_pids = parent_conn.recv()
 
         # Initialise the data-cache
