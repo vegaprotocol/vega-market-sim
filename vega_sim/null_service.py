@@ -498,6 +498,7 @@ def manage_vega_processes(
         subprocess.run(
             [
                 vega_wallet_path,
+                "wallet",
                 "api-token",
                 "init",
                 f"--home={tmp_vega_home}",
@@ -509,6 +510,7 @@ def manage_vega_processes(
         subprocess.run(
             [
                 vega_wallet_path,
+                "wallet",
                 "create",
                 "--wallet",
                 DEFAULT_WALLET_NAME,
@@ -525,6 +527,7 @@ def manage_vega_processes(
         subprocess.run(
             [
                 vega_wallet_path,
+                "wallet",
                 "api-token",
                 "generate",
                 "--home=" + tmp_vega_home,
@@ -538,6 +541,7 @@ def manage_vega_processes(
 
         wallet_args = [
             vega_wallet_path,
+            "wallet",
             "service",
             "run",
             "--network",
@@ -750,9 +754,7 @@ class VegaServiceNull(VegaService):
         )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
-        self.vega_wallet_path = vega_wallet_path or path.join(
-            vega_bin_path, "vegawallet"
-        )
+        self.vega_wallet_path = vega_wallet_path or path.join(vega_bin_path, "vega")
         self.vega_console_path = vega_console_path or path.join(
             vega_bin_path, "console"
         )
@@ -931,6 +933,8 @@ class VegaServiceNull(VegaService):
                     "Timed out waiting for Vega simulator to start up"
                 )
 
+            # TODO: Remove this once datanode fixes up startup timing
+            time.sleep(6)
             self.process_pids = parent_conn.recv()
 
         # Initialise the data-cache

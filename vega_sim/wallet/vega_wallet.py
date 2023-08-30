@@ -86,6 +86,7 @@ class VegaWallet(Wallet):
         cmd = subprocess.run(
             [
                 self._wallet_path,
+                "wallet",
                 "api-token",
                 "list",
                 "--home",
@@ -130,6 +131,7 @@ class VegaWallet(Wallet):
         cmd = subprocess.run(
             [
                 self._wallet_path,
+                "wallet",
                 "key",
                 "generate",
                 "--wallet",
@@ -163,6 +165,7 @@ class VegaWallet(Wallet):
         subprocess.run(
             [
                 self._wallet_path,
+                "wallet",
                 "create",
                 "--wallet",
                 name,
@@ -182,6 +185,7 @@ class VegaWallet(Wallet):
         cmd = subprocess.run(
             [
                 self._wallet_path,
+                "wallet",
                 "api-token",
                 "generate",
                 "--home",
