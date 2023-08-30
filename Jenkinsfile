@@ -20,7 +20,7 @@ pipeline {
                 description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
-        string( name: 'NODE_LABEL', defaultValue: 'g-8vcpu-32gb',
+        string( name: 'NODE_LABEL', defaultValue: 'vega-market-sim',
                 description: 'Node to run market sims' )
     }
     environment {
