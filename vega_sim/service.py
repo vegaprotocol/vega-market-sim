@@ -198,10 +198,18 @@ class VegaService(ABC):
     @property
     def market_to_asset(self) -> str:
         if self._market_to_asset is None:
-            self._market_to_asset = DecimalsCache(
-                lambda market_id: self.data_cache.market_from_feed(
+            def get_settlement_asset(market_id):
+                market_data = self.data_cache.market_from_feed(
                     market_id=market_id
-                ).tradable_instrument.instrument.future.settlement_asset
+                )
+                
+                settlement_asset_id = market_data.tradable_instrument.instrument.future.settlement_asset
+                if len(settlement_asset_id) < 1:
+                    settlement_asset_id = market_data.tradable_instrument.instrument.perpetual.settlement_asset
+                return settlement_asset_id
+            
+            self._market_to_asset = DecimalsCache(
+                get_settlement_asset,
             )
         return self._market_to_asset
 
@@ -1433,9 +1441,13 @@ class VegaService(ABC):
             wallet_name:
                 str, The name of the wallet which is placing the order
         """
-        asset_id = data_raw.market_info(
+        
+        market_data = data_raw.market_info(
             market_id=market_id, data_client=self.trading_data_client_v2
-        ).tradable_instrument.instrument.future.settlement_asset
+        )
+        asset_id = market_data.tradable_instrument.instrument.future.settlement_asset
+        if len(asset_id) < 1:
+            asset_id = market_data.tradable_instrument.instrument.perpetual.settlement_asset
 
         is_amendment = (
             is_amendment
