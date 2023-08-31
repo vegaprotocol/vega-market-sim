@@ -1,4 +1,4 @@
-from typing import Dict, Type, Optional, Union
+from typing import Dict, Type, Optional, Union, List
 from dataclasses import dataclass
 from vega_sim.reinforcement.v2.agents.puppets import (
     AGENT_TYPE_TO_AGENT,
@@ -29,7 +29,8 @@ class Environment:
         agent_to_state: Dict[str, Type[State]],
         scenario: Scenario,
         reset_vega_every_n_runs: int = 100,
-        funds_per_run: float = 10_000,
+        fund_list: List = None
+        #funds_per_run: float = 10_000,
     ):
         self._agents = agents
         self._agent_to_state = agent_to_state
@@ -55,7 +56,7 @@ class Environment:
 
         self._runs_since_reset = 0
         self._reset_vega_every_n_runs = reset_vega_every_n_runs
-        self._funds_per_run = funds_per_run
+        self._fund_list = fund_list
 
         self._vega.start()
 
@@ -132,11 +133,11 @@ class Environment:
             agent.initialise(vega=self._vega)
             self._vega.wait_fn(1)
 
-        for agent_name in self._agents.keys():
+        for (i,agent_name) in enumerate(self._agents.keys()):
             self._vega.mint(
                 key_name=agent_name,
                 asset=manager.asset_id,
-                amount=self._funds_per_run,
+                amount=self._fund_list[i],
             )
 
         self._agent_to_reward = {}
