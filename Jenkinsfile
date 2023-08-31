@@ -11,15 +11,16 @@ pipeline {
         skipDefaultCheckout true
         timestamps()
         timeout(time: 50, unit: 'MINUTES')
+        disableConcurrentBuilds(abortPrevious: true)
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: 'd79ae49de1cdd3d7ebc40efb38d5c6c4f82eefb3',
+        string( name: 'VEGA_VERSION', defaultValue: '48766fb4a998c40d1672a8c553d34e02324a6e2c',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'VEGACAPSULE_VERSION', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
         string( name: 'JENKINS_SHARED_LIB_BRANCH', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/jenkins-shared-library repository')
-        string( name: 'NODE_LABEL', defaultValue: 'g-8vcpu-32gb',
+        string( name: 'NODE_LABEL', defaultValue: 'vega-market-sim',
                 description: 'Node to run market sims' )
     }
     environment {

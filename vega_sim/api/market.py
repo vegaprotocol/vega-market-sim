@@ -50,6 +50,7 @@ Examples:
 
 """
 
+import copy
 import functools
 import logging
 from typing import Optional, Union
@@ -108,9 +109,10 @@ class MarketConfig(Config):
             "liquidity_monitoring_parameters": "default",
             "log_normal": "default",
             "instrument": "default",
-            "lp_price_range": 0.5,
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
+            "successor": None,
+            "liquidity_sla_parameters": "default",
         }
     }
 
@@ -119,10 +121,18 @@ class MarketConfig(Config):
 
         self.decimal_places = config["decimal_places"]
         self.position_decimal_places = config["position_decimal_places"]
-        self.lp_price_range = str(config["lp_price_range"])
+        self.liquidity_sla_parameters = LiquiditySLAParameters(
+            opt=config["liquidity_sla_parameters"]
+        )
         self.linear_slippage_factor = str(config["linear_slippage_factor"])
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
+
+        self.successor = (
+            Successor(opt=config["successor"])
+            if config["successor"] is not None
+            else None
+        )
 
         self.instrument = InstrumentConfiguration(opt=config["instrument"])
         self.price_monitoring_parameters = PriceMonitoringParameters(
@@ -134,11 +144,11 @@ class MarketConfig(Config):
         self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
 
     def build(self):
-        return vega_protos.governance.NewMarket(
+        new_market = vega_protos.governance.NewMarket(
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=self.decimal_places,
                 position_decimal_places=self.position_decimal_places,
-                lp_price_range=self.lp_price_range,
+                liquidity_sla_parameters=self.liquidity_sla_parameters.build(),
                 metadata=self.metadata,
                 instrument=self.instrument.build(),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
@@ -148,9 +158,33 @@ class MarketConfig(Config):
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
             )
         )
+        if self.successor is not None:
+            new_market.changes.successor.CopyFrom(self.successor.build())
+        return new_market
 
     def set(self, parameter, value):
         rsetattr(self, attr=parameter, val=value)
+
+
+class Successor(Config):
+    OPTS = {
+        "default": {
+            "parent_market_id": None,
+            "insurance_pool_fraction": 1,
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+        self.parent_market_id = config["parent_market_id"]
+        self.insurance_pool_fraction = config.get("insurance_pool_fraction", 1)
+
+    def build(self) -> Optional[vega_protos.governance.SuccessorConfiguration]:
+        if self.parent_market_id is not None:
+            return vega_protos.governance.SuccessorConfiguration(
+                parent_market_id=self.parent_market_id,
+                insurance_pool_fraction=str(self.insurance_pool_fraction),
+            )
 
 
 class PriceMonitoringParameters(Config):
@@ -213,6 +247,38 @@ class LiquidityMonitoringParameters(Config):
             triggering_ratio=self.triggering_ratio,
             auction_extension=self.auction_extension,
             target_stake_parameters=self.target_stake_parameters.build(),
+        )
+
+
+class LiquiditySLAParameters(Config):
+    OPTS = {
+        "default": {
+            "price_range": "0.5",
+            "commitment_min_time_fraction": "1",
+            "providers_fee_calculation_time_step": 1,
+            "performance_hysteresis_epochs": 1,
+            "sla_competition_factor": "1",
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.price_range = config["price_range"]
+        self.commitment_min_time_fraction = config["commitment_min_time_fraction"]
+        self.providers_fee_calculation_time_step = config[
+            "providers_fee_calculation_time_step"
+        ]
+        self.performance_hysteresis_epochs = config["performance_hysteresis_epochs"]
+        self.sla_competition_factor = config["sla_competition_factor"]
+
+    def build(self):
+        return vega_protos.markets.LiquiditySLAParameters(
+            price_range=self.price_range,
+            commitment_min_time_fraction=self.commitment_min_time_fraction,
+            providers_fee_calculation_time_step=self.providers_fee_calculation_time_step,
+            performance_hysteresis_epochs=self.performance_hysteresis_epochs,
+            sla_competition_factor=self.sla_competition_factor,
         )
 
 

@@ -128,7 +128,7 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
     after_market = vega.market_info(market_id)
 
-    assert pre_market.tradable_instrument.instrument.code == "CRYPTO:BTCDAI/DEC22"
+    assert pre_market.tradable_instrument.instrument.code == "CRYPTO:BTCDAI/Jun23"
     assert after_market.tradable_instrument.instrument.code == "BTCUSD"
 
 

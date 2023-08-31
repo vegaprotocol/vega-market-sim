@@ -196,8 +196,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
             market_id=self.market_id,
             commitment_amount=self.commitment_amount,
             fee=0.0015,
-            buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-            sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
             is_amendment=False,
             key_name=self.key_name,
         )

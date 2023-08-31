@@ -5,6 +5,7 @@ import logging
 import numpy as np
 from typing import Optional, List
 from vega_sim.scenario.common.utils.price_process import random_walk
+from collections import defaultdict
 
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.environment.environment import (
@@ -25,6 +26,7 @@ from vega_sim.scenario.common.agents import (
     AtTheTouchMarketMaker,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
+    FuzzySuccessorConfigurableMarketManager,
     FuzzingAgent,
     RiskyMarketOrderTrader,
     RiskySimpleLiquidityProvider,
@@ -180,18 +182,21 @@ class FuzzingScenario(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        market_managers = []
-        market_makers = []
-        at_touch_market_makers = []
-        auction_traders = []
-        random_traders = []
-        fuzz_traders = []
-        risky_traders = []
-        fuzz_liquidity_providers = []
-        risky_liquidity_providers = []
-        reward_funders = []
+        self.all_agents = {
+            "market_managers": [],
+            "market_makers": [],
+            "at_touch_market_makers": [],
+            "auction_traders": [],
+            "random_traders": [],
+            "fuzz_traders": [],
+            "risky_traders": [],
+            "fuzz_liquidity_providers": [],
+            "risky_liquidity_providers": [],
+            "reward_funders": [],
+        }
 
-        self.initial_asset_mint = 1e9
+        self.market_agents = {}
+        self.initial_asset_mint = 10e9
 
         for i_market in range(self.n_markets):
             # Define the market and the asset:
@@ -199,6 +204,7 @@ class FuzzingScenario(Scenario):
             asset_name = f"ASSET_{str(i_market).zfill(3)}"
             asset_dp = 18
 
+            market_agents = {}
             # Create fuzzed market config
             market_config = MarketConfig()
             market_config.set(
@@ -217,8 +223,9 @@ class FuzzingScenario(Scenario):
             )
 
             # Create fuzzed market managers
-            market_managers.append(
-                ConfigurableMarketManager(
+            market_agents["market_managers"] = [
+                FuzzySuccessorConfigurableMarketManager(
+                    proposal_wallet_name="MARKET_MANAGER",
                     proposal_key_name="PROPOSAL_KEY",
                     termination_wallet_name="MARKET_MANAGER",
                     termination_key_name="TERMINATION_KEY",
@@ -230,10 +237,12 @@ class FuzzingScenario(Scenario):
                     settlement_price=price_process[-1],
                     stake_key=True if kwargs["network"] == Network.CAPSULE else False,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
+                    market_agents=market_agents,
+                    successor_probability=0.01,
                 )
-            )
+            ]
 
-            market_makers.append(
+            market_agents["market_makers"] = [
                 ExponentialShapedMarketMaker(
                     wallet_name="MARKET_MAKERS",
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
@@ -251,9 +260,9 @@ class FuzzingScenario(Scenario):
                     state_update_freq=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
-            )
+            ]
 
-            at_touch_market_makers.append(
+            market_agents["at_touch_market_makers"] = [
                 AtTheTouchMarketMaker(
                     wallet_name=f"AT_THE_TOUCH_MM",
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
@@ -265,40 +274,46 @@ class FuzzingScenario(Scenario):
                     max_position=5,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
-            )
+            ]
 
-            for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"]):
-                auction_traders.append(
-                    UncrossAuctionAgent(
-                        wallet_name=f"AUCTION_TRADERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_{side}",
-                        side=side,
-                        initial_asset_mint=self.initial_asset_mint,
-                        price_process=iter(price_process),
-                        market_name=market_name,
-                        asset_name=asset_name,
-                        uncrossing_size=20,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                    )
+            market_agents["auction_traders"] = [
+                UncrossAuctionAgent(
+                    wallet_name="AUCTION_TRADERS",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}_{side}",
+                    side=side,
+                    initial_asset_mint=self.initial_asset_mint,
+                    price_process=iter(price_process),
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    uncrossing_size=20,
+                    tag=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
                 )
+                for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
+            ]
+
+            market_agents["random_traders"] = [
+                MarketOrderTrader(
+                    wallet_name="RANDOM_TRADERS",
+                    key_name=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    buy_intensity=10,
+                    sell_intensity=10,
+                    base_order_size=1,
+                    step_bias=1,
+                    tag=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
+                )
+                for i_agent in range(5)
+            ]
 
             for i_agent in range(5):
-                random_traders.append(
-                    MarketOrderTrader(
-                        wallet_name=f"RANDOM_TRADERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                        market_name=market_name,
-                        asset_name=asset_name,
-                        buy_intensity=10,
-                        sell_intensity=10,
-                        base_order_size=1,
-                        step_bias=1,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                    )
-                )
-
-            for i_agent in range(5):
-                random_traders.append(
+                market_agents["random_traders"].append(
                     LimitOrderTrader(
                         wallet_name=f"RANDOM_TRADERS",
                         key_name=f"LIMIT_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
@@ -320,50 +335,54 @@ class FuzzingScenario(Scenario):
                     )
                 )
 
-            for i_agent in range(10):
-                fuzz_traders.append(
-                    FuzzingAgent(
-                        wallet_name="FUZZING_TRADERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                        market_name=market_name,
-                        asset_name=asset_name,
-                        output_plot_on_finalise=self.output,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                    )
+            market_agents["fuzz_traders"] = [
+                FuzzingAgent(
+                    wallet_name="FUZZING_TRADERS",
+                    key_name=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    output_plot_on_finalise=self.output,
+                    tag=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
                 )
+                for i_agent in range(10)
+            ]
 
-            for side in ["SIDE_BUY", "SIDE_SELL"]:
-                for i_agent in range(10):
-                    risky_traders.append(
-                        RiskyMarketOrderTrader(
-                            wallet_name="risky_traders",
-                            key_name=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
-                            market_name=market_name,
-                            asset_name=asset_name,
-                            side=side,
-                            initial_asset_mint=1_000,
-                            size_factor=0.5,
-                            step_bias=0.1,
-                            tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
-                        )
-                    )
-
-            for i_agent in range(5):
-                risky_liquidity_providers.append(
-                    RiskySimpleLiquidityProvider(
-                        wallet_name="risky_liquidity_providers",
-                        key_name=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                        market_name=market_name,
-                        asset_name=asset_name,
-                        initial_asset_mint=20_000,
-                        commitment_factor=0.5,
-                        step_bias=0.1,
-                        tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                    )
+            market_agents["risky_traders"] = [
+                RiskyMarketOrderTrader(
+                    wallet_name="risky_traders",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    side=side,
+                    initial_asset_mint=1_000,
+                    size_factor=0.5,
+                    step_bias=0.1,
+                    tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )
+                for side in ["SIDE_BUY", "SIDE_SELL"]
+                for i_agent in range(10)
+            ]
+
+            market_agents["risky_liquidity_providers"] = [
+                RiskySimpleLiquidityProvider(
+                    wallet_name="risky_liquidity_providers",
+                    key_name=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    initial_asset_mint=20_000,
+                    commitment_factor=0.5,
+                    step_bias=0.1,
+                    tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                )
+                for i_agent in range(5)
+            ]
 
             for i_agent in range(45):
-                risky_liquidity_providers.append(
+                market_agents["risky_liquidity_providers"].append(
                     RiskySimpleLiquidityProvider(
                         wallet_name="risky_liquidity_providers",
                         key_name=f"LOW_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
@@ -376,18 +395,22 @@ class FuzzingScenario(Scenario):
                     )
                 )
 
-            for i_agent in range(5):
-                fuzz_liquidity_providers.append(
-                    FuzzyLiquidityProvider(
-                        wallet_name="FUZZY_LIQUIDITY_PROVIDERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                        market_name=market_name,
-                        asset_name=asset_name,
-                        initial_asset_mint=5_000,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                    )
+            market_agents["fuzz_liquidity_providers"] = [
+                FuzzyLiquidityProvider(
+                    wallet_name="FUZZY_LIQUIDITY_PROVIDERS",
+                    key_name=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    initial_asset_mint=5_000,
+                    tag=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
                 )
+            ]
 
+            market_agents["reward_funders"] = []
             for i_agent, (account_type, metric) in enumerate(
                 [
                     (
@@ -408,7 +431,7 @@ class FuzzingScenario(Scenario):
                     ),
                 ]
             ):
-                reward_funders.append(
+                market_agents["reward_funders"].append(
                     RewardFunder(
                         wallet_name="REWARD_FUNDERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
@@ -423,20 +446,15 @@ class FuzzingScenario(Scenario):
                         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     )
                 )
+            self.market_agents[market_name] = market_agents
+            for agent_type, agent_list in market_agents.items():
+                self.all_agents[agent_type].extend(agent_list)
 
-        agents = (
-            market_managers
-            + market_makers
-            + at_touch_market_makers
-            + auction_traders
-            + random_traders
-            + fuzz_traders
-            + risky_traders
-            + risky_liquidity_providers
-            + fuzz_liquidity_providers
-            + reward_funders
-        )
-        return {agent.name(): agent for agent in agents}
+        return {
+            agent.name(): agent
+            for agent_list in self.all_agents.values()
+            for agent in agent_list
+        }
 
     def configure_environment(
         self,

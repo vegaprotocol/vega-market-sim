@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import uuid
-import psutil
-import platform
-
 import datetime
 import logging
+import platform
+import uuid
 from dataclasses import dataclass
 from math import exp
 from queue import Queue
 
 import numpy as np
+import psutil
 
 try:
     import talib
@@ -26,6 +25,7 @@ from numpy.typing import ArrayLike
 
 import vega_sim.api.faucet as faucet
 from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
+from vega_sim.api.helpers import get_enum
 from vega_sim.api.trading import OrderRejectedError
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import Agent, StateAgent, StateAgentWithWallet
@@ -35,8 +35,6 @@ from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.proto.vega import vega as vega_protos
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
-
-from vega_sim.api.helpers import get_enum
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -63,9 +61,7 @@ AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 ITOrder = namedtuple("ITOrder", ["side", "size"])
 MMOrder = namedtuple("MMOrder", ["size", "price"])
 
-LiquidityProvision = namedtuple(
-    "LiquidityProvision", ["amount", "fee", "buy_specs", "sell_specs"]
-)
+LiquidityProvision = namedtuple("LiquidityProvision", ["amount", "fee"])
 
 logger = logging.getLogger(__name__)
 
@@ -1027,8 +1023,6 @@ class MarketManager(StateAgentWithWallet):
                 market_id=self.market_id,
                 commitment_amount=self.commitment_amount,
                 fee=0.002,
-                buy_specs=[("PEGGED_REFERENCE_BEST_BID", 5, 1)],
-                sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 5, 1)],
                 is_amendment=False,
                 key_name=self.key_name,
             )
@@ -1085,6 +1079,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         safety_factor: Optional[float] = 1.2,
         max_order_size: float = 10000,
         order_validity_length: Optional[float] = None,
+        auto_top_up: bool = False,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1113,6 +1108,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.bid_depth = None
         self.ask_depth = None
 
+        self.auto_top_up = auto_top_up
+        self.mint_key = False
+
         self.order_validity_length = order_validity_length
 
     def initialise(
@@ -1126,6 +1124,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+
+        self.mint_key = mint_key
         if mint_key:
             # Top up asset
             self.vega.mint(
@@ -1153,8 +1153,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 market_id=self.market_id,
                 commitment_amount=initial_liq.amount,
                 fee=initial_liq.fee,
-                buy_specs=initial_liq.buy_specs,
-                sell_specs=initial_liq.sell_specs,
                 key_name=self.key_name,
             )
 
@@ -1251,14 +1249,30 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 else None
             )
         ) is not None:
+            if self.auto_top_up and self.mint_key:
+                # Top up asset
+                account = self.vega.party_account(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    asset_id=self.asset_id,
+                    market_id=self.market_id,
+                )
+
+                if account.general < 3 * liq.amount:
+                    # Top up asset
+                    self.vega.mint(
+                        wallet_name=self.wallet_name,
+                        asset=self.asset_id,
+                        amount=self.initial_asset_mint,
+                        key_name=self.key_name,
+                    )
+                    self.vega.wait_for_total_catchup()
+
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
                 commitment_amount=liq.amount,
                 fee=liq.fee,
-                buy_specs=liq.buy_specs,
-                sell_specs=liq.sell_specs,
-                is_amendment=True,
                 key_name=self.key_name,
             )
 
@@ -1502,39 +1516,9 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             )
 
     def _liq_provis(self, state: VegaState) -> LiquidityProvision:
-        if (self.curr_asks is not None) and (self.curr_bids is not None):
-            est_mid_price = (self.curr_bids[0].price + self.curr_asks[0].price) * 0.5
-        elif state is not None:
-            est_mid_price = state.market_state[self.market_id].midprice
-        else:
-            est_mid_price = None
-            buy_specs = [["PEGGED_REFERENCE_BEST_BID", 5, 1]]
-            sell_specs = [["PEGGED_REFERENCE_BEST_ASK", 5, 1]]
-
-        if self.curr_asks is not None:
-            next_ask_step = self.curr_asks[-1].price + self.tick_spacing
-            sell_specs = [
-                [
-                    "PEGGED_REFERENCE_MID",
-                    next_ask_step - est_mid_price,
-                    1,
-                ]
-            ]
-        if self.curr_bids is not None:
-            next_bid_step = self.curr_bids[-1].price - self.tick_spacing
-            buy_specs = [
-                [
-                    "PEGGED_REFERENCE_MID",
-                    est_mid_price - next_bid_step,
-                    1,
-                ]
-            ]
-
         return LiquidityProvision(
             amount=self.commitment_amount,
             fee=self.fee_amount,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
         )
 
     def _optimal_strategy(
@@ -2963,26 +2947,6 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
                 self.inf_fee = float(int_market_info.fees.factors.infrastructure_fee)
         self.total_fees = self.mkr_fee + self.liq_fee + self.inf_fee
 
-        # Calculate the bid_depth and ask_depth
-        bid_offset = self.best_bid_price * self.total_fees * (1 + self.safety_factor)
-        ask_offset = self.best_ask_price * self.total_fees * (1 + self.safety_factor)
-
-        # Update the liquidity commitment
-        buy_specs = [
-            [
-                "PEGGED_REFERENCE_BEST_BID",
-                bid_offset,
-                1,
-            ]
-        ]
-        sell_specs = [
-            [
-                "PEGGED_REFERENCE_BEST_ASK",
-                ask_offset,
-                1,
-            ]
-        ]
-
         # Determine current account balance
         party_market_account = self.vega.party_account(
             wallet_name=self.wallet_name,
@@ -3003,8 +2967,6 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
             market_id=self.market_id,
             commitment_amount=total * self.commitment_ratio,
             fee=self.fee,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
         )
 
         # Dump any position with market orders
@@ -3039,6 +3001,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         initial_asset_mint: float = 1000000,
         tag: str = "",
         wallet_name: str = None,
+        auto_top_up: bool = False,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.side = side
@@ -3047,6 +3010,8 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.asset_name = asset_name
         self.price_process = price_process
         self.uncrossing_size = uncrossing_size
+        self.auto_top_up = auto_top_up
+        self.mint_key = False
 
     def initialise(
         self,
@@ -3056,17 +3021,20 @@ class UncrossAuctionAgent(StateAgentWithWallet):
     ):
         # Initialise wallet
         super().initialise(vega=vega, create_key=create_key)
+
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.vega.wait_for_total_catchup()
         # Get asset id
-        asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        self.mint_key = mint_key
+
+        if self.mint_key:
             # Top up asset
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset=asset_id,
+                asset=self.asset_id,
                 amount=self.initial_asset_mint,
                 key_name=self.key_name,
             )
@@ -3080,6 +3048,22 @@ class UncrossAuctionAgent(StateAgentWithWallet):
             markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
             markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
         ]:
+            if self.auto_top_up and self.mint_key:
+                account = self.vega.party_account(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    asset_id=self.asset_id,
+                    market_id=self.market_id,
+                )
+
+                if account.general < self.uncrossing_size * curr_price:
+                    # Top up asset
+                    self.vega.mint(
+                        wallet_name=self.wallet_name,
+                        asset=self.asset_id,
+                        amount=self.initial_asset_mint,
+                        key_name=self.key_name,
+                    )
             self.vega.submit_order(
                 trading_key=self.key_name,
                 trading_wallet=self.wallet_name,

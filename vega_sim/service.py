@@ -47,6 +47,7 @@ from vega_sim.proto.vega.markets_pb2 import (
     LiquidityMonitoringParameters,
     LogNormalRiskModel,
     PriceMonitoringParameters,
+    LiquiditySLAParameters,
     SimpleModelParams,
 )
 from vega_sim.wallet.base import Wallet
@@ -80,7 +81,7 @@ def raw_data(fn):
     @wraps(fn)
     def wrapped_fn(self, *args, **kwargs):
         if self.warn_on_raw_data_access:
-            logger.warn(
+            logger.warning(
                 f"Using function with raw data from data-node {fn.__qualname__}. Be"
                 " wary if prices/positions are not converted from int form"
             )
@@ -393,8 +394,8 @@ class VegaService(ABC):
 
         self.wait_fn(1)
         self.wait_for_total_catchup()
-        for i in range(500):
-            time.sleep(0.0005 * 1.01**i)
+        for i in range(100):
+            time.sleep(0.05 * 1.03**i)
             post_acct = self.party_account(
                 wallet_name=wallet_name,
                 asset_id=asset,
@@ -490,7 +491,7 @@ class VegaService(ABC):
         vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
         forward_time_to_enactment: bool = True,
-    ):
+    ) -> str:
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
         enactment_time = (
@@ -528,6 +529,7 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+        return proposal_id
 
     def create_simple_market(
         self,
@@ -550,7 +552,9 @@ class VegaService(ABC):
         vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
         forward_time_to_enactment: bool = True,
-    ) -> None:
+        parent_market_id: Optional[str] = None,
+        parent_market_insurance_pool_fraction: float = 1,
+    ) -> str:
         """Creates a simple futures market with a predefined reasonable set of parameters.
 
                 Args:
@@ -588,7 +592,11 @@ class VegaService(ABC):
                     forward_time_to_enactment:
                         bool, default True, whether to forward time until this proposal has already
                             been enacted
-
+                    parent_market_id:
+                        Optional[str], Market to set as the parent market on the proposal
+                    parent_market_insurance_pool_fraction:
+                        float, Fraction of parent market insurance pool to carry over.
+                            defaults to 1. No-op if parent_market_id is not set.
         """
         additional_kwargs = {}
         if future_asset is not None:
@@ -629,6 +637,8 @@ class VegaService(ABC):
             risk_model=risk_model,
             time_forward_fn=lambda: self.wait_fn(2),
             price_monitoring_parameters=price_monitoring_parameters,
+            parent_market_id=parent_market_id,
+            parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
             **additional_kwargs,
         )
         if approve_proposal:
@@ -646,6 +656,7 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+        return proposal_id
 
     def submit_market_order(
         self,
@@ -719,6 +730,8 @@ class VegaService(ABC):
         trading_wallet: Optional[str] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        peak_size: Optional[float] = None,
+        minimum_visible_size: Optional[float] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -762,6 +775,10 @@ class VegaService(ABC):
             post_only (bool):
                 Whether order should be prevented from trading immediately. Defaults to
                 False.
+            peak_size:
+                optional float, size of the order that is made visible and can be traded with during the execution of a single order.
+            minimum_visible_size:
+                optional float, minimum allowed remaining size of the order before it is replenished back to its peak size
 
         Returns:
             Optional[str], If order acceptance is waited for, returns order ID.
@@ -794,6 +811,13 @@ class VegaService(ABC):
             else:
                 logger.debug(msg)
                 return
+        if (peak_size is None and minimum_visible_size is not None) or (
+            peak_size is not None and minimum_visible_size is None
+        ):
+            raise ValueError(
+                "Both 'peak_size' and 'minimum_visible_size' must be specified or none"
+                " at all."
+            )
 
         return trading.submit_order(
             wallet=self.wallet,
@@ -824,6 +848,18 @@ class VegaService(ABC):
             key_name=trading_key,
             reduce_only=reduce_only,
             post_only=post_only,
+            iceberg_opts=(
+                vega_protos.commands.v1.commands.IcebergOpts(
+                    peak_size=num_to_padded_int(
+                        peak_size, self.market_pos_decimals[market_id]
+                    ),
+                    minimum_visible_size=num_to_padded_int(
+                        minimum_visible_size, self.market_pos_decimals[market_id]
+                    ),
+                )
+                if (peak_size is not None and minimum_visible_size is not None)
+                else None
+            ),
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:
@@ -988,7 +1024,7 @@ class VegaService(ABC):
         updated_simple_model_params: Optional[SimpleModelParams] = None,
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
-        updated_lp_price_range: Optional[float] = None,
+        updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1073,10 +1109,10 @@ class VegaService(ABC):
             simple=updated_simple_model_params,
             log_normal=updated_log_normal_risk_model,
             metadata=updated_metadata,
-            lp_price_range=(
-                str(updated_lp_price_range)
-                if updated_lp_price_range is not None
-                else current_market.lp_price_range
+            liquidity_sla_parameters=(
+                updated_sla_parameters
+                if updated_sla_parameters is not None
+                else current_market.liquidity_sla_params
             ),
             linear_slippage_factor=current_market.linear_slippage_factor,
             quadratic_slippage_factor=current_market.quadratic_slippage_factor,
@@ -1451,8 +1487,6 @@ class VegaService(ABC):
         market_id: str,
         commitment_amount: float,
         fee: float,
-        buy_specs: List[Tuple[str, float, int]],
-        sell_specs: List[Tuple[str, float, int]],
         is_amendment: Optional[bool] = None,
         wallet_name: Optional[str] = None,
     ):
@@ -1469,14 +1503,6 @@ class VegaService(ABC):
             fee:
                 float, The fee level at which to set the LP fee
                  (in %, e.g. 0.01 == 1% and 1 == 100%)
-            buy_specs:
-                List[Tuple[str, int, int]], List of tuples, each containing a reference
-                point in their first position, a desired offset in their second and
-                a proportion in third
-            sell_specs:
-                List[Tuple[str, int, int]], List of tuples, each containing a reference
-                point in their first position, a desired offset in their second and
-                a proportion in third
             is_amendment:
                 Optional bool, Is the submission an amendment to an existing provision
                     If None, will query the network to check.
@@ -1484,14 +1510,7 @@ class VegaService(ABC):
                 optional, str name of wallet to use
         """
         asset_id = self.market_to_asset[market_id]
-        market_decimals = self.market_price_decimals[market_id]
 
-        buy_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in buy_specs
-        ]
-        sell_specs = [
-            (s[0], num_to_padded_int(s[1], market_decimals), s[2]) for s in sell_specs
-        ]
         is_amendment = (
             is_amendment
             if is_amendment is not None
@@ -1508,8 +1527,6 @@ class VegaService(ABC):
                 commitment_amount, self.asset_decimals[asset_id]
             ),
             fee=fee,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,

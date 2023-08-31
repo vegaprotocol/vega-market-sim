@@ -1,12 +1,16 @@
-from vega_sim.environment.agent import StateAgentWithWallet
-from typing import Optional
-from vega_sim.null_service import VegaServiceNull
-from numpy.random import RandomState
-from vega_sim.proto.vega import markets as markets_protos
-import vega_sim.proto.vega as vega_protos
-
+import copy
 import os
+from typing import Optional, Dict, List
+
 import pandas as pd
+from numpy.random import RandomState
+
+import vega_sim.proto.vega as vega_protos
+from vega_sim.api.market import MarketConfig, Successor
+from vega_sim.environment.agent import StateAgentWithWallet
+from vega_sim.null_service import VegaServiceNull
+from vega_sim.proto.vega import markets as markets_protos
+from vega_sim.service import VegaService, PeggedOrder
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -363,14 +367,20 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
 
             size = add_to_margin / (midprice * risk_factor + 1e-20)
 
-            self.vega.submit_market_order(
-                trading_key=self.key_name,
-                trading_wallet=self.wallet_name,
-                market_id=self.market_id,
-                side=self.side,
-                volume=size,
-                wait=False,
-            )
+            try:
+                self.vega.submit_market_order(
+                    trading_key=self.key_name,
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    side=self.side,
+                    volume=size,
+                    wait=False,
+                )
+            except Exception as e:
+                import pdb
+
+                pdb.set_trace()
+                print(f"There was an error {e}")
 
 
 class RiskySimpleLiquidityProvider(StateAgentWithWallet):
@@ -527,7 +537,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                 if is_valid
                 else self.random_state.randint(-5, 5)
             ),
-            self.random_state.randint(low=0, high=4000000),
+            3 * self.random_state.random(),
         )
 
     def step(self, vega_state):
@@ -564,14 +574,38 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         )
 
         buy_specs = [
-            self._gen_spec(vega_protos.vega.SIDE_BUY, valid)
+            [
+                vega_protos.vega.SIDE_BUY,
+                self._gen_spec(vega_protos.vega.SIDE_BUY, valid),
+            ]
             for _ in range(self.random_state.randint(1, 50))
         ]
 
         sell_specs = [
-            self._gen_spec(vega_protos.vega.SIDE_SELL, valid)
+            [
+                vega_protos.vega.SIDE_SELL,
+                self._gen_spec(vega_protos.vega.SIDE_SELL, valid),
+            ]
             for _ in range(self.random_state.randint(1, 50))
         ]
+
+        self.vega.cancel_order(
+            trading_key=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+        )
+        for side, spec in buy_specs + sell_specs:
+            self.vega.submit_order(
+                trading_key=self.key_name,
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                time_in_force="TIME_IN_FORCE_GTC",
+                pegged_order=PeggedOrder(reference=spec[0], offset=spec[1]),
+                volume=spec[2] * commitment_amount,
+                side=side,
+                wait=False,
+            )
 
         self.vega.submit_liquidity(
             key_name=self.key_name,
@@ -579,7 +613,255 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
             market_id=self.market_id,
             fee=fee,
             commitment_amount=commitment_amount,
-            buy_specs=buy_specs,
-            sell_specs=sell_specs,
-            is_amendment=self.random_state.choice([True, False]),
+            is_amendment=self.random_state.choice([True, False, None]),
         )
+
+
+class SuccessorMarketCreatorAgent(StateAgentWithWallet):
+    NAME_BASE = "successor_market_creator"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        tag: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+        random_state: Optional[RandomState] = None,
+        initial_asset_mint: float = 1e5,
+        new_market_prob: float = 0.02,
+    ):
+        super().__init__(key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.random_state = random_state if random_state is not None else RandomState()
+        self.initial_asset_mint = initial_asset_mint
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                wallet_name=self.wallet_name,
+            )
+
+        self.vega.wait_fn(5)
+
+
+class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
+    def __init__(
+        self,
+        proposal_key_name: str,
+        termination_key_name: str,
+        market_name: str,
+        market_code: str,
+        asset_name: str,
+        asset_dp: int,
+        proposal_wallet_name: Optional[str] = None,
+        termination_wallet_name: Optional[str] = None,
+        market_config: Optional[MarketConfig] = None,
+        tag: Optional[str] = None,
+        settlement_price: Optional[float] = None,
+        initial_mint: Optional[float] = 1e9,
+        successor_probability: float = 0.02,
+        random_state: Optional[RandomState] = None,
+        market_agents: Optional[Dict[str, List[StateAgentWithWallet]]] = None,
+        stake_key: bool = False,
+    ):
+        super().__init__(
+            wallet_name=proposal_wallet_name,
+            key_name=proposal_key_name,
+            tag=tag,
+        )
+
+        self.termination_wallet_name = termination_wallet_name
+        self.termination_key_base = termination_key_name
+        self.latest_key_idx = 0
+        self.market_agents = market_agents if market_agents is not None else {}
+
+        self.successor_probability = successor_probability
+        self.random_state = random_state if random_state is not None else RandomState()
+
+        self.market_name_base = market_name
+        self.market_code_base = market_code
+
+        self.asset_dp = asset_dp
+        self.asset_name = asset_name
+
+        self.initial_mint = initial_mint
+
+        self.market_config = (
+            market_config if market_config is not None else MarketConfig()
+        )
+
+        self.settlement_price = settlement_price
+        self.needs_to_update_markets = False
+        self.stake_key = stake_key
+
+    def _get_termination_key_name(self):
+        return (
+            f"{self.termination_key_base}_{self.latest_key_idx}"
+            if self.latest_key_idx > 0
+            else self.termination_key_base
+        )
+
+    def _get_market_name(self):
+        return (
+            f"{self.market_name_base}_{self.latest_key_idx}"
+            if self.latest_key_idx > 0
+            else self.market_name_base
+        )
+
+    def _get_market_code(self):
+        return (
+            f"{self.market_code_base}_{self.latest_key_idx}"
+            if self.latest_key_idx > 0
+            else self.market_code_base
+        )
+
+    def initialise(
+        self,
+        vega: VegaServiceNull,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        super().initialise(vega=vega, create_key=create_key)
+        if create_key:
+            self.vega.create_key(
+                wallet_name=self.termination_wallet_name,
+                name=self._get_termination_key_name(),
+            )
+
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+
+        self.vega.wait_for_total_catchup()
+
+        if self.vega.find_asset_id(symbol=self.asset_name) is None:
+            self.vega.create_asset(
+                wallet_name=self.wallet_name,
+                name=self.asset_name,
+                symbol=self.asset_name,
+                decimals=self.asset_dp,
+                quantum=int(10 ** (self.asset_dp)),
+                max_faucet_amount=10_000_000_000,
+                key_name=self.key_name,
+            )
+
+        self.vega.wait_for_total_catchup()
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_mint,
+                key_name=self.key_name,
+            )
+
+        self.vega.wait_for_total_catchup()
+        self.market_id = self.vega.find_market_id(name=self._get_market_name())
+
+        if self.market_id is None:
+            self._create_latest_market()
+
+    def _create_latest_market(self, parent_market_id: Optional[str] = None):
+        # Add market information and asset information to market config
+        mkt_config = copy.deepcopy(self.market_config)
+        mkt_config.set("instrument.name", self._get_market_name())
+        mkt_config.set("instrument.code", self._get_market_code())
+        mkt_config.set("instrument.future.settlement_asset", self.asset_id)
+        mkt_config.set("instrument.future.quote_name", self.asset_name)
+        mkt_config.set("instrument.future.number_decimal_places", self.asset_dp)
+        mkt_config.set(
+            "instrument.future.terminating_key",
+            self.vega.wallet.public_key(
+                wallet_name=self.termination_wallet_name,
+                name=self._get_termination_key_name(),
+            ),
+        )
+
+        if parent_market_id is not None:
+            mkt_config.set(
+                "successor",
+                Successor(
+                    opt={
+                        "parent_market_id": parent_market_id,
+                        "insurance_pool_fraction": 1,
+                    }
+                ),
+            )
+
+        self.vega.wait_for_total_catchup()
+        self.vega.create_market_from_config(
+            proposal_wallet_name=self.wallet_name,
+            proposal_key_name=self.key_name,
+            market_config=mkt_config,
+        )
+
+        self.vega.wait_for_total_catchup()
+        self.market_id = self.vega.find_market_id(name=self._get_market_name())
+
+    def finalise(self):
+        if self.settlement_price is not None:
+            self.vega.settle_market(
+                self._get_termination_key_name(),
+                self.settlement_price,
+                self.market_id,
+                self.termination_wallet_name,
+            )
+            self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state) -> None:
+        if self.needs_to_update_markets:
+            self.vega.settle_market(
+                self.old_termination_key,
+                self.vega.market_data_from_feed(self.old_market_id).last_traded_price,
+                self.market_id,
+                self.termination_wallet_name,
+            )
+
+            self.market_id = self.vega.find_market_id(name=self._get_market_name())
+            for agents in self.market_agents.values():
+                for agent in agents:
+                    agent.market_id = self.market_id
+                    agent.market_name = self._get_market_name()
+            self.needs_to_update_markets = False
+
+        if self.random_state.random() < self.successor_probability:
+            self.old_market_id = self.market_id
+            self.old_termination_key = self._get_termination_key_name()
+            self.latest_key_idx += 1
+
+            self.vega.create_key(
+                wallet_name=self.termination_wallet_name,
+                name=self._get_termination_key_name(),
+            )
+
+            self._create_latest_market(parent_market_id=self.market_id)
+            self.needs_to_update_markets = True

@@ -132,6 +132,7 @@ class MarketEnvironment:
         run_with_console: bool = False,
         pause_at_completion: bool = False,
         log_every_n_steps: Optional[int] = None,
+        step_end_callback: Optional[Callable[[], None]] = None,
     ) -> Optional[List[Any]]:
         """Run the simulation with specified agents.
 
@@ -144,6 +145,8 @@ class MarketEnvironment:
                 bool, default False, If True will pause with a keypress-prompt
                     once the simulation has completed, allowing the final state
                     to be inspected, either via code or the Console
+            step_end_callback:
+                Optional callable, called after each set of agent steps
         """
         if self._vega is None:
             with VegaServiceNull(
@@ -157,12 +160,14 @@ class MarketEnvironment:
                     vega,
                     pause_at_completion=pause_at_completion,
                     log_every_n_steps=log_every_n_steps,
+                    step_end_callback=step_end_callback,
                 )
         else:
             return self._run(
                 self._vega,
                 pause_at_completion=pause_at_completion,
                 log_every_n_steps=log_every_n_steps,
+                step_end_callback=step_end_callback,
             )
 
     def _start_live_feeds(self, vega: VegaService):
@@ -194,6 +199,7 @@ class MarketEnvironment:
         vega: VegaServiceNull,
         pause_at_completion: bool = False,
         log_every_n_steps: Optional[int] = None,
+        step_end_callback: Optional[Callable[[], None]] = None,
     ) -> None:
         """Run the simulation with specified agents.
 
@@ -204,6 +210,8 @@ class MarketEnvironment:
                     to be inspected, either via code or the Console
             log_every_n_steps:
                 Optional, int, If passed, will log a progress line every n steps
+            step_end_callback:
+                Optional callable, called after each set of agent steps
         """
         logger.info(f"Running wallet at: {vega.wallet_url}")
         logger.info(f"Running graphql at: http://localhost:{vega.data_node_rest_port}")
@@ -213,7 +221,7 @@ class MarketEnvironment:
         for agent in self.agents:
             agent.initialise(vega=vega)
             if isinstance(agent, StateAgentWithWallet):
-                logging.info(
+                logger.info(
                     f"{agent.name()}: key ="
                     f" {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
                 )
@@ -264,6 +272,9 @@ class MarketEnvironment:
                     f"Environment run at step {i}. Pausing to allow inspection of"
                     " state. Press Enter to continue"
                 )
+
+            if step_end_callback is not None:
+                step_end_callback()
 
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 

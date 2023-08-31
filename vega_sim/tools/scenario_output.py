@@ -5,6 +5,7 @@ import pandas as pd
 import itertools
 import os
 import os.path
+import json
 
 import vega_sim.proto.vega as vega_protos
 
@@ -18,6 +19,8 @@ TRADES_FILE_NAME = "trades.csv"
 ACCOUNTS_FILE_NAME = "accounts.csv"
 FUZZING_FILE_NAME = "additional_data.csv"
 RESOURCES_FILE_NAME = "resources.csv"
+ASSETS_FILE_NAME = "assets.csv"
+MARKET_CHAIN_FILE_NAME = "market_chain.json"
 
 
 def resource_data_to_row(data: ResourceData):
@@ -32,9 +35,6 @@ def resource_data_to_row(data: ResourceData):
             "datanode_mem_vms": data.datanode_mem_vms,
         }
     ]
-
-
-ASSETS_FILE_NAME = "assets.csv"
 
 
 def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
@@ -270,6 +270,30 @@ def assets_standard_output(
     )
 
 
+def market_chain_standard_output(
+    market_history_data: List[MarketHistoryData],
+    run_name: str = DEFAULT_RUN_NAME,
+    output_path: str = DEFAULT_PATH,
+):
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    full_path = os.path.join(output_path, run_name)
+
+    market_chains: Dict[str, List[str]] = {}
+    for history_data in market_history_data:
+        for market_id, market_info in history_data.market_info.items():
+            if not market_info.parent_market_id:
+                market_chains.setdefault(market_id, [market_id])
+            else:
+                for _, market_chain in market_chains.items():
+                    if market_chain[-1] == market_info.parent_market_id:
+                        market_chain.append(market_id)
+
+    os.makedirs(output_path, exist_ok=True)
+
+    with open(os.path.join(full_path, MARKET_CHAIN_FILE_NAME), "w") as f:
+        json.dump(market_chains, f, indent=4)
+
+
 def load_agents_df(
     run_name: Optional[str] = None,
     output_path: str = DEFAULT_PATH,
@@ -362,3 +386,17 @@ def load_resource_df(
         df["time"] = pd.to_datetime(df.time)
         df = df.set_index("time")
     return df
+
+
+def load_market_chain(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> Dict[str, List[str]]:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    file_path = os.path.join(output_path, run_name, MARKET_CHAIN_FILE_NAME)
+    if os.path.exists(file_path):
+        with open(file_path, "r") as f:
+            market_chain = json.load(fp=f)
+    else:
+        market_chain = {}
+    return market_chain

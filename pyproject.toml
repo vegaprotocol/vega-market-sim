@@ -3,7 +3,7 @@ name = "vega_sim"
 description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
-version = "1.2.0"
+version = "1.2.1"
 
 [tool.setuptools]
 zip-safe = false
@@ -32,8 +32,9 @@ TA-Lib = {version = "*", optional = true}
 python-dotenv = "*"
 deprecated = "*"
 psutil = "*"
+docker = "*"
 gymnasium = {version = "*", optional = true}
-sb3-contrib = {version = "*", optional = true}
+sb3-contrib = {version = "^2.0.0a1", optional = true}
 stable-baselines3 = {version = "*", optional = true }
 tensorboard = {version = "*", optional = true}
 pettingzoo = {version = "*", optional = true}
@@ -54,6 +55,7 @@ pytest-xdist = "*"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
 
 
 

@@ -53,6 +53,7 @@ def submit_order(
     key_name: Optional[str] = None,
     reduce_only: bool = False,
     post_only: bool = False,
+    iceberg_opts: Optional[vega_protos.commands.IcebergOpts] = None,
 ) -> Optional[str]:
     """
     Submit orders as specified to required pre-existing market.
@@ -103,6 +104,8 @@ def submit_order(
             bool, whether the order should only reduce a parties position.
         post_only:
             bool, whether an order should be prevented from trading immediately.
+        iceberg_ops:
+            Optional[vega_protos.commands.IcebergOpts], options to make order an iceberg order
 
     Returns:
         Optional[str], Order ID if wait is True, otherwise None
@@ -121,6 +124,7 @@ def submit_order(
         pegged_order=pegged_order,
         reduce_only=reduce_only,
         post_only=post_only,
+        iceberg_opts=iceberg_opts,
     )
 
     # Sign the transaction with an order submission command
@@ -186,6 +190,7 @@ def amend_order(
     volume_delta: float = 0,
     time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
     key_name: Optional[str] = None,
+    iceberg_opts: Optional[vega_protos.commands.v1.IcebergOpts] = None,
 ):
     """
     Amend a Limit order by orderID in the specified market
@@ -225,6 +230,7 @@ def amend_order(
         time_in_force=time_in_force,
         pegged_offset=pegged_offset,
         pegged_reference=pegged_reference,
+        iceberg_opts=iceberg_opts,
     )
 
     wallet.submit_transaction(
@@ -313,8 +319,6 @@ def submit_simple_liquidity(
         market_id=market_id,
         commitment_amount=commitment_amount,
         fee=fee,
-        buy_specs=[(reference_buy, delta_buy, 1)],
-        sell_specs=[(reference_sell, delta_sell, 1)],
         is_amendment=is_amendment,
         key_name=key_name,
     )
@@ -326,8 +330,6 @@ def submit_liquidity(
     market_id: str,
     commitment_amount: int,
     fee: float,
-    buy_specs: List[Tuple[str, int, int]],
-    sell_specs: List[Tuple[str, int, int]],
     is_amendment: bool = False,
     key_name: Optional[str] = None,
 ):
@@ -346,14 +348,6 @@ def submit_liquidity(
         fee:
             float, The fee level at which to set the LP fee
              (in %, e.g. 0.01 == 1% and 1 == 100%)
-        buy_specs:
-            List[Tuple[str, int, int]], List of tuples, each containing a reference
-            point in their first position, a desired offset in their second and
-            a proportion in third
-        sell_specs:
-            List[Tuple[str, int, int]], List of tuples, each containing a reference
-            point in their first position, a desired offset in their second and
-            a proportion in third
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
     """
@@ -369,22 +363,6 @@ def submit_liquidity(
         market_id=market_id,
         commitment_amount=str(commitment_amount),
         fee=str(fee),
-        buys=[
-            vega_protos.vega.LiquidityOrder(
-                reference=spec[0],
-                offset=str(spec[1]),
-                proportion=spec[2],
-            )
-            for spec in buy_specs
-        ],
-        sells=[
-            vega_protos.vega.LiquidityOrder(
-                reference=spec[0],
-                offset=str(spec[1]),
-                proportion=spec[2],
-            )
-            for spec in sell_specs
-        ],
     )
     wallet.submit_transaction(
         transaction=submission,
@@ -426,6 +404,7 @@ def order_amendment(
     time_in_force: Optional[vega_protos.vega.Order.TimeInForce] = None,
     pegged_offset: Optional[str] = None,
     pegged_reference: Optional[vega_protos.vega.PeggedReference] = None,
+    iceberg_opts: Optional[vega_protos.commands.v1.IcebergOpts] = None,
 ) -> OrderAmendment:
     """Creates a Vega OrderAmendment object.
 
@@ -519,6 +498,7 @@ def order_submission(
     pegged_order: Optional[Union[vega_protos.PeggedOrder, str]] = None,
     reduce_only: bool = False,
     post_only: bool = False,
+    iceberg_opts: Optional[vega_protos.commands.v1.IcebergOpts] = None,
 ) -> OrderSubmission:
     """Creates a Vega OrderSubmission object.
 
@@ -579,6 +559,7 @@ def order_submission(
         type=order_type,
         reduce_only=reduce_only,
         post_only=post_only,
+        iceberg_opts=iceberg_opts,
     )
 
     # Update OrderSubmission object with optional fields if specified
@@ -592,6 +573,8 @@ def order_submission(
 
     if pegged_order is not None:
         command.pegged_order.CopyFrom(pegged_order)
+    if iceberg_opts is not None:
+        command.iceberg_opts.CopyFrom(iceberg_opts)
 
     # Return the created and updated OrderSubmission object
     return command

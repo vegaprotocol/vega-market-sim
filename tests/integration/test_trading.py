@@ -55,8 +55,6 @@ def test_submit_market_order(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=100,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.1, 1)],
     )
 
     vega.submit_market_order(
@@ -92,60 +90,20 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         commitment_amount=100,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_MID", 0.005, 1)],
-        sell_specs=[("PEGGED_REFERENCE_MID", 0.005, 1)],
     )
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
 
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
     assert len(liq_provis) == 1
-    for provis in [
-        liq_provis[0].sells[0].liquidity_order,
-        liq_provis[0].buys[0].liquidity_order,
-    ]:
-        assert provis.reference == vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID
-        assert provis.offset == "500"
-        assert provis.proportion == 1
+    assert liq_provis[0].fee == "0.001"
 
-    buy_specs = [
-        vega_protos.vega.LiquidityOrder(
-            reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
-            offset="100",
-            proportion=2,
-        ),
-        vega_protos.vega.LiquidityOrder(
-            reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID,
-            offset="500",
-            proportion=5,
-        ),
-    ]
-    sell_specs = [
-        vega_protos.vega.LiquidityOrder(
-            reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
-            offset="500",
-            proportion=6,
-        ),
-        vega_protos.vega.LiquidityOrder(
-            reference=vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK,
-            offset="20",
-            proportion=1,
-        ),
-    ]
     vega.wait_for_total_catchup()
     vega.submit_liquidity(
         LIQ.name,
         market_id=market_id,
         commitment_amount=200,
         fee=0.005,
-        buy_specs=[
-            ("PEGGED_REFERENCE_MID", 0.001, 2),
-            ("PEGGED_REFERENCE_BEST_BID", 0.005, 5),
-        ],
-        sell_specs=[
-            ("PEGGED_REFERENCE_MID", 0.005, 6),
-            ("PEGGED_REFERENCE_BEST_ASK", 0.0002, 1),
-        ],
     )
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
@@ -153,48 +111,8 @@ def test_submit_amend_liquidity(vega_service_with_market: VegaServiceNull):
     liq_provis = vega.party_liquidity_provisions(LIQ.name, market_id=market_id)
 
     assert len(liq_provis) == 1
-
-    for provis, exp_provis in zip(liq_provis[0].sells, sell_specs):
-        assert provis.liquidity_order.reference == exp_provis.reference
-        assert provis.liquidity_order.offset == exp_provis.offset
-        assert provis.liquidity_order.proportion == exp_provis.proportion
-
-    for provis, exp_provis in zip(liq_provis[0].buys, buy_specs):
-        assert provis.liquidity_order.reference == exp_provis.reference
-        assert provis.liquidity_order.offset == exp_provis.offset
-        assert provis.liquidity_order.proportion == exp_provis.proportion
-
-    num_levels = 11
-    expected_bid_prices = [0.2995, 0.299, 0.25, 0.245, 0, 0, 0, 0, 0, 0, 0]
-    expected_bid_volumes = [334.0, 192.0, 1.0, 584.0, 0, 0, 0, 0, 0, 0, 0]
-    expected_ask_prices = [0.3005, 0.305, 0.35, 0.3502, 0, 0, 0, 0, 0, 0, 0]
-    expected_ask_volumes = [333.0, 563.0, 1.0, 82.0, 0, 0, 0, 0, 0, 0, 0]
-
-    book_state = vega.market_depth(market_id, num_levels=num_levels)
-    bid_prices = [level.price for level in book_state.buys] + [0] * max(
-        0, num_levels - len(book_state.buys)
-    )
-    bid_volumes = [level.volume for level in book_state.buys] + [0] * max(
-        0, num_levels - len(book_state.buys)
-    )
-    ask_prices = [level.price for level in book_state.sells] + [0] * max(
-        0, num_levels - len(book_state.sells)
-    )
-    ask_volumes = [level.volume for level in book_state.sells] + [0] * max(
-        0, num_levels - len(book_state.sells)
-    )
-
-    for price, exp_price in zip(bid_prices, expected_bid_prices):
-        assert price == exp_price
-
-    for vol, exp_vol in zip(bid_volumes, expected_bid_volumes):
-        assert vol == exp_vol
-
-    for price, exp_price in zip(ask_prices, expected_ask_prices):
-        assert price == exp_price
-
-    for vol, exp_vol in zip(ask_volumes, expected_ask_volumes):
-        assert vol == exp_vol
+    assert liq_provis[0].fee == "0.005"
+    assert liq_provis[0].commitment_amount == "20000000"
 
 
 @pytest.mark.integration
@@ -371,14 +289,18 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    create_and_faucet_wallet(vega=vega, wallet=LIQ, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e5)
     vega.wait_for_total_catchup()
 
     asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
 
     vega.recurring_transfer(
         from_key_name=PARTY_A.name,
+        to_key_name=PARTY_B.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=100,
         factor=1.0,
@@ -401,6 +323,121 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
     assert party_a_accounts_t2[0].balance == 799.8
+
+
+@pytest.mark.integration
+def test_iceberg_order(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e5)
+    vega.wait_for_total_catchup()
+
+    market_id = vega.all_markets()[0].id
+
+    vega.submit_liquidity(
+        MM_WALLET.name,
+        market_id=market_id,
+        commitment_amount=100,
+        fee=0.001,
+        is_amendment=True,
+    )
+
+    with pytest.raises(ValueError):
+        vega.submit_order(
+            trading_key=PARTY_A.name,
+            market_id=market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side="SIDE_BUY",
+            price=0.29,
+            volume=10,
+            peak_size=5,
+        )
+    with pytest.raises(ValueError):
+        vega.submit_order(
+            trading_key=PARTY_A.name,
+            market_id=market_id,
+            order_type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            side="SIDE_BUY",
+            price=0.29,
+            volume=10,
+            minimum_visible_size=2,
+        )
+
+    # Place icebergs orders
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.29,
+        volume=10,
+        peak_size=5,
+        minimum_visible_size=2,
+    )
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.31,
+        volume=10,
+        peak_size=5,
+        minimum_visible_size=2,
+    )
+
+    # Place limit order at same price levels
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.29,
+        volume=1000,
+    )
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.31,
+        volume=1000,
+    )
+    vega.wait_for_total_catchup()
+
+    # Place market orders and check only the displayed volume is filled
+    vega.submit_market_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        fill_or_kill=False,
+        side="SIDE_SELL",
+        volume=10,
+    )
+    vega.wait_for_total_catchup()
+
+    position = vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)
+    assert position.open_volume == 5
+
+    # Place market orders and check only the displayed volume is filled
+    vega.submit_market_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        fill_or_kill=False,
+        side="SIDE_BUY",
+        volume=10,
+    )
+    vega.wait_for_total_catchup()
+
+    position = vega.positions_by_market(key_name=PARTY_A.name, market_id=market_id)
+    assert position.open_volume == 0
 
 
 @pytest.mark.integration
@@ -564,7 +601,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     mint_amount = 100000000
     initial_volume = 10
     initial_commitment = 150000
-    collateral_available = 15000
+    collateral_available = 1500
 
     vega.wait_for_total_catchup()
     for wallet in wallets:
@@ -582,11 +619,11 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
 
     configWithSlippage = MarketConfig()
     configWithSlippage.set(
-        "linear_slippage_factor", str(10)
-    )  # Set the linear_slippage_factor to 10
+        "linear_slippage_factor", str(0.01)
+    )  # Set the linear_slippage_factor to 0.2
     configWithSlippage.set(
-        "quadratic_slippage_factor", str(10)
-    )  # Set the quadratic_slippage_factor to 10
+        "quadratic_slippage_factor", str(0)
+    )  # Set the quadratic_slippage_factor to 0
     configWithSlippage.set(
         "decimal_places", int(0)
     )  # Set the market decimal_places to 0
@@ -647,10 +684,31 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 1000, 1)],
         is_amendment=False,
     )
+
+    vega.submit_order(
+        trading_key=MM_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1120,
+        volume=initial_commitment / 1120,
+        wait=True,
+    )
+
+    vega.submit_order(
+        trading_key=MM_WALLET.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=990,
+        volume=initial_commitment / 990,
+        wait=True,
+    )
+
     order_id_C = vega.submit_order(
         trading_key=PARTY_B.name,
         market_id=market_id,
@@ -695,7 +753,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_SELL",
-        price=1010,
+        price=1060,
         volume=2,
     )
     vega.submit_order(
@@ -719,7 +777,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id,
         open_volume=-10,
         side=["SIDE_SELL", "SIDE_SELL"],
-        price=[1005, 1010],
+        price=[1005, 1060],
         remaining=[2, 2],
         is_market_order=[False],
         collateral_available=collateral,
@@ -742,7 +800,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
         price=1005,
-        volume=2,
+        volume=3,
     )
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
@@ -754,7 +812,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id,
         open_volume=-12,
         side=["SIDE_SELL"],
-        price=[1010],
+        price=[1060],
         remaining=[2],
         is_market_order=[False],
         collateral_available=collateral,
@@ -792,7 +850,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        price=1010,
+        price=1060,
         volume=1,
     )
     vega.wait_fn(1)
@@ -806,7 +864,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         market_id,
         open_volume=-13,
         side=["SIDE_SELL"],
-        price=[1010],
+        price=[1060],
         remaining=[1],
         is_market_order=[False],
         collateral_available=collateral,
@@ -844,7 +902,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         order_type="TYPE_LIMIT",
         time_in_force="TIME_IN_FORCE_GTC",
         side="SIDE_BUY",
-        price=1010,
+        price=1060,
         volume=1,
     )
     vega.wait_fn(1)
@@ -853,18 +911,76 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     PARTY_A_account = vega.party_account(
         key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
     )
+
+    _, estimate_liquidation_price_4 = vega.estimate_position(
+        market_id,
+        open_volume=-14,
+        collateral_available=PARTY_A_account.general + PARTY_A_account.margin,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1080,
+        volume=1,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=1080,
+        volume=1,
+    )
+
+    PARTY_A_account = vega.party_account(
+        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
+    )
+
+    assert PARTY_A_account.general + PARTY_A_account.margin > 1
+
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=1103,
+        volume=1,
+    )
+
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=1103,
+        volume=1,
+    )
+    vega.wait_fn(5)
+    vega.wait_for_total_catchup()
+
     market_data_closeout = vega.get_latest_market_data(market_id=market_id)
+
+    PARTY_A_account = vega.party_account(
+        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
+    )
     # check PARTY_A is closed out
     assert PARTY_A_account.general + PARTY_A_account.margin >= -1e-10
     assert PARTY_A_account.general + PARTY_A_account.margin <= 1e-10
-    # As the price keeps moving in small increments the liquidation happens within the originally estimated range (with sell orders)
     assert (
         market_data_closeout.mark_price
-        <= estimate_liquidation_price_1.best_case.including_sell_orders
+        <= estimate_liquidation_price_4.best_case.including_sell_orders
     )
     assert (
         market_data_closeout.mark_price
-        >= estimate_liquidation_price_1.worst_case.including_sell_orders
+        >= estimate_liquidation_price_4.worst_case.including_sell_orders
     )
 
 
@@ -961,8 +1077,6 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.002,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 1000, 1)],
         is_amendment=False,
     )
     order_id_C = vega.submit_order(
@@ -1240,8 +1354,6 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
         market_id=market_id,
         commitment_amount=initial_commitment,
         fee=0.001,
-        buy_specs=[("PEGGED_REFERENCE_BEST_BID", 1000, 1)],
-        sell_specs=[("PEGGED_REFERENCE_BEST_ASK", 1000, 1)],
         is_amendment=False,
     )
     order_id_C = vega.submit_order(

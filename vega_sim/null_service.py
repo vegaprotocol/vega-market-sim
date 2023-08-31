@@ -4,23 +4,27 @@ import atexit
 import functools
 import logging
 import multiprocessing
-import psutil
 import os
 import shutil
 import signal
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 import webbrowser
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum, auto
 from io import BufferedWriter
+from logging.handlers import QueueHandler
+from multiprocessing import Queue
 from os import path
 from typing import Dict, List, Optional, Set
 
+import docker
 import grpc
+import psutil
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
@@ -30,6 +34,7 @@ import vega_sim.grpc.client as vac
 from vega_sim import vega_bin_path, vega_home_path
 from vega_sim.service import VegaService
 from vega_sim.tools.load_binaries import download_binaries
+from vega_sim.tools.retry import retry
 from vega_sim.wallet.base import DEFAULT_WALLET_NAME, Wallet
 from vega_sim.wallet.slim_wallet import SlimWallet
 from vega_sim.wallet.vega_wallet import VegaWallet
@@ -225,6 +230,15 @@ class SocketNotFoundError(Exception):
     pass
 
 
+def logger_thread(q):
+    while True:
+        record = q.get()
+        if record is None:
+            break
+        logger = logging.getLogger(record.name)
+        logger.handle(record)
+
+
 def find_free_port(existing_set: Optional[Set[int]] = None):
     ret_sock = 0
     existing_set = (
@@ -237,7 +251,6 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
     while ret_sock in existing_set:
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
             s.bind(("", 0))
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             ret_sock = s.getsockname()[1]
 
         num_tries += 1
@@ -278,6 +291,7 @@ def _update_node_config(
     port_config: Dict[Ports, int],
     transactions_per_block: int = 1,
     block_duration: str = "1s",
+    use_docker_postgres: bool = False,
 ) -> None:
     config_path = path.join(vega_home, "config", "node", "config.toml")
     config_toml = toml.load(config_path)
@@ -307,12 +321,16 @@ def _update_node_config(
                 elem = elem[k]
             elem[config.key] = config.val_func(port_config[port_key])
 
+            if port_key == Ports.DATA_NODE_POSTGRES:
+                config_toml["SQLStore"]["UseEmbedded"] = not use_docker_postgres
+
             with open(file_path, "w") as f:
                 toml.dump(config_toml, f)
 
 
 def manage_vega_processes(
     child_conn: multiprocessing.Pipe,
+    log_queue,
     vega_path: str,
     data_node_path: str,
     vega_wallet_path: str,
@@ -327,11 +345,18 @@ def manage_vega_processes(
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
 ) -> None:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
-    )
+    logger.addHandler(QueueHandler(log_queue))
+
+    # Just set to DEBUG as it is filtered by the outer layer anyway
+    logger.setLevel(logging.DEBUG)
+
     port_config = port_config if port_config is not None else {}
+
+    try:
+        docker_client = docker.from_env()
+        use_docker_postgres = True
+    except:
+        use_docker_postgres = False
 
     # Explicitly not using context here so that crashed logs are retained
     tmp_vega_dir = tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
@@ -367,7 +392,41 @@ def manage_vega_processes(
         port_config=port_config,
         transactions_per_block=transactions_per_block,
         block_duration=block_duration,
+        use_docker_postgres=use_docker_postgres,
     )
+
+    if use_docker_postgres:
+        data_node_docker_volume = docker_client.volumes.create()
+        data_node_container = docker_client.containers.run(
+            "timescale/timescaledb:2.11.2-pg15",
+            command=[
+                "-c",
+                "max_connections=50",
+                "-c",
+                "log_destination=stderr",
+                "-c",
+                "work_mem=5MB",
+                "-c",
+                "huge_pages=off",
+                "-c",
+                "shared_memory_type=sysv",
+                "-c",
+                "dynamic_shared_memory_type=sysv",
+                "-c",
+                "shared_buffers=2GB",
+                "-c",
+                "temp_buffers=5MB",
+            ],
+            detach=True,
+            ports={5432: port_config[Ports.DATA_NODE_POSTGRES]},
+            volumes=[f"{data_node_docker_volume.name}:/var/lib/postgresql/data"],
+            environment={
+                "POSTGRES_USER": "vega",
+                "POSTGRES_PASSWORD": "vega",
+                "POSTGRES_DB": "vega",
+            },
+            remove=False,
+        )
 
     dataNodeProcess = _popen_process(
         [
@@ -451,6 +510,7 @@ def manage_vega_processes(
         subprocess.run(
             [
                 vega_wallet_path,
+                "wallet",
                 "api-token",
                 "init",
                 f"--home={tmp_vega_home}",
@@ -462,6 +522,7 @@ def manage_vega_processes(
         subprocess.run(
             [
                 vega_wallet_path,
+                "wallet",
                 "create",
                 "--wallet",
                 DEFAULT_WALLET_NAME,
@@ -478,6 +539,7 @@ def manage_vega_processes(
         subprocess.run(
             [
                 vega_wallet_path,
+                "wallet",
                 "api-token",
                 "generate",
                 "--home=" + tmp_vega_home,
@@ -491,6 +553,7 @@ def manage_vega_processes(
 
         wallet_args = [
             vega_wallet_path,
+            "wallet",
             "service",
             "run",
             "--network",
@@ -529,10 +592,10 @@ def manage_vega_processes(
                 vega_console_path,
                 "nx",
                 "serve",
-                "--port",
-                f"{port_config[Ports.CONSOLE]}",
                 "-o",
                 "trading",
+                "--port",
+                f"{port_config[Ports.CONSOLE]}",
             ],
             dir_root=tmp_vega_dir,
             log_name="console",
@@ -543,26 +606,119 @@ def manage_vega_processes(
     # Send process pid values for resource monitoring
     child_conn.send({name: process.pid for name, process in processes.items()})
 
-    signal.sigwait([signal.SIGKILL, signal.SIGTERM])
-    for process in processes.values():
-        process.terminate()
-    for name, process in processes.items():
-        attempts = 0
-        while process.poll() is None:
-            time.sleep(1)
-            attempts += 1
-            if attempts > 60:
-                logging.warning(
-                    f"Gracefully terminating process timed-out. Killing process {name}."
-                )
-                process.kill()
-        if process.poll() == 0:
-            logging.debug(f"Process {name} terminated.")
-        if process.poll() == -9:
-            logging.debug(f"Process {name} killed.")
+    # According to https://docs.oracle.com/cd/E19455-01/806-5257/gen-75415/index.html
+    # There is no guarantee that signal will be catch by this thread. Usually the
+    # parent process catches the signal and removes it from the list of pending
+    # signals, this leave us with memory leak where we have orphaned vega processes
+    # and the docker containers. Below is hack to maximize chance by catching the
+    # signal.
+    # We call signal.signal method as a workaround to move this thread on top of
+    # the catch stack, then sigwait waits until singal is trapped.
+    # As last resort We catches the `SIGCHLD`  in case the parent process exited
+    # and this is the orphan now.
+    # But to provide 100% guarantee this should be implemented in another way:
+    #   - Signal should be trapped in the main process, and this should be synced
+    #     the shared memory
+    #   - or this entire process manager should be incorporated in the VegaServiceNull
+    #     and containers/processes should be removed as inline call in the __exit__
+    #
+    #
+    # Important assumption is that this signal can be caught multiple times as well
+    def sighandler(signal, frame):
+        if signal is None:
+            logging.info("VegaServiceNull exited normally")
+        else:
+            logging.info(f"VegaServiceNull exited after trapping the {signal} signal")
 
-    if not retain_log_files:
-        shutil.rmtree(tmp_vega_dir)
+        logger.info("Received signal from parent process")
+
+        logger.info("Starting termination for processes")
+        for name, process in processes.items():
+            logger.info(f"Terminating process {name}(pid: {process.pid})")
+            process.terminate()
+
+        for name, process in processes.items():
+            attempts = 0
+            while process.poll() is None:
+                logger.info(f"Process {name} still not terminated")
+                time.sleep(1)
+                attempts += 1
+                if attempts > 60:
+                    logger.warning(
+                        "Gracefully terminating process timed-out. Killing process"
+                        f" {name}."
+                    )
+                    process.kill()
+            logger.debug(f"Process {name} stopped with {process.poll()}")
+            if process.poll() == 0:
+                logger.info(f"Process {name} terminated.")
+            if process.poll() == -9:
+                logger.info(f"Process {name} killed.")
+
+        if use_docker_postgres:
+
+            def kill_docker_container() -> None:
+                try:
+                    data_node_container.stop()
+                    with open(tmp_vega_home + "/postgres.out", "wb") as f:
+                        f.write(data_node_container.logs())
+                    data_node_container.remove()
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        logger.debug(
+                            f"Container {data_node_container.name} has been already"
+                            " killed"
+                        )
+                        return
+                    else:
+                        raise e
+
+            logger.debug(f"Stopping container {data_node_container.name}")
+            retry(10, 1.0, kill_docker_container)
+
+            removed = False
+            logger.debug(f"Removing volume {data_node_docker_volume.name}")
+            for _ in range(20):
+                if data_node_container.status == "running":
+                    time.sleep(3)
+                    continue
+                try:
+                    data_node_docker_volume.remove(force=True)
+                    removed = True
+                    break
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 404:
+                        removed = True
+                        logger.debug(
+                            f"Data node volume {data_node_docker_volume.name} has been"
+                            " already killed"
+                        )
+                        break
+                    else:
+                        time.sleep(1)
+                except docker.errors.APIError:
+                    time.sleep(1)
+            if not removed:
+                logging.exception(
+                    "Docker volume failed to cleanup, will require manual cleaning"
+                )
+        if not retain_log_files and os.path.exists(tmp_vega_dir):
+            shutil.rmtree(tmp_vega_dir)
+
+    # The below lines are workaround to put the signal listeners on top of the stack, so this process can handle it.
+    signal.signal(signal.SIGINT, lambda _s, _h: None)
+    signal.signal(signal.SIGTERM, lambda _s, _h: None)
+
+    # The process had previously created one or more child processes with the fork() function.
+    # One or more of these processes has since died.
+    signal.sigwait(
+        [
+            signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.
+            signal.SIGTERM,  # The process was explicitly killed by somebody wielding the terminate program.
+            signal.SIGCHLD,
+        ]
+    )
+    sighandler(None, None)
 
 
 class VegaServiceNull(VegaService):
@@ -612,9 +768,7 @@ class VegaServiceNull(VegaService):
         )
         self.vega_path = vega_path or path.join(vega_bin_path, "vega")
         self.data_node_path = data_node_path or path.join(vega_bin_path, "data-node")
-        self.vega_wallet_path = vega_wallet_path or path.join(
-            vega_bin_path, "vegawallet"
-        )
+        self.vega_wallet_path = vega_wallet_path or path.join(vega_bin_path, "vega")
         self.vega_console_path = vega_console_path or path.join(
             vega_bin_path, "console"
         )
@@ -634,6 +788,9 @@ class VegaServiceNull(VegaService):
         self.launch_graphql = launch_graphql
         self.replay_from_path = replay_from_path
         self.check_for_binaries = check_for_binaries
+
+        self.stopped = False
+        self.logger_p = None
 
         self._assign_ports(port_config)
 
@@ -717,10 +874,16 @@ class VegaServiceNull(VegaService):
         parent_conn, child_conn = multiprocessing.Pipe()
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()
+        self.queue = Queue()
+
+        self.logger_p = threading.Thread(target=logger_thread, args=(self.queue,))
+        self.logger_p.start()
+
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
                 "child_conn": child_conn,
+                "log_queue": self.queue,
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
@@ -791,13 +954,12 @@ class VegaServiceNull(VegaService):
                     "Timed out waiting for Vega simulator to start up"
                 )
 
+            # TODO: Remove this once datanode fixes up startup timing
+            time.sleep(6)
             self.process_pids = parent_conn.recv()
 
-            # Create a block before waiting for datanode sync and starting the feeds
-            self.wait_fn(1)
-            self.wait_for_total_catchup()
-            self.wait_for_thread_catchup()
-            self.data_cache
+        # Initialise the data-cache
+        self.data_cache
 
         if self.run_with_console:
             webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
@@ -813,13 +975,22 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
+        logger.debug("Calling stop for veganullchain")
+        if self.stopped:
+            return
+        self.stopped = True
         self.core_client.stop()
         self.core_state_client.stop()
         self.trading_data_client_v2.stop()
+
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
-            self.proc.terminate()
+            os.kill(self.proc.pid, signal.SIGTERM)
+        if self.queue is not None:
+            self.queue.put(None)
+            self.logger_p.join()
+
         if isinstance(self.wallet, SlimWallet):
             self.wallet.stop()
         super().stop()

@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     with VegaServiceNull(
-        run_with_console=True,
+        run_with_console=False,
         launch_graphql=False,
         retain_log_files=True,
         use_full_vega_wallet=True,
@@ -90,10 +90,9 @@ if __name__ == "__main__":
             market_id=market_id,
             commitment_amount=10000,
             fee=0.001,
-            buy_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
-            sell_specs=[("PEGGED_REFERENCE_MID", i * 2, i) for i in range(1, 10)],
             is_amendment=False,
         )
+
         vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,

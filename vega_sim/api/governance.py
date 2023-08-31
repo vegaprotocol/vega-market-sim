@@ -155,7 +155,13 @@ def propose_future_market(
         vega_protos.markets.PriceMonitoringParameters
     ] = None,
     lp_price_range: float = 1,
+    commitment_min_time_fraction: float = 0.95,
+    providers_fee_calculation_time_step: int = 1,
+    performance_hysteresis_epochs: int = 1,
+    sla_competition_factor: float = 1,
     wallet_name: Optional[str] = None,
+    parent_market_id: Optional[str] = None,
+    parent_market_insurance_pool_fraction: float = 1,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -193,10 +199,28 @@ def propose_future_market(
                 will drop into a price auction. If not passed defaults to a very
                 permissive setup
         lp_price_range:
-            float, Range allowed for LP price commitments from mid price
+            float, Range allowed for LP price commitments from mid price to count for SLA
             (e.g. 2 allows mid-price +/- 2 * mid-price )
+        commitment_min_time_fraction:
+            float, default 0.95, Specifies the minimum fraction of time LPs must spend
+                "on the book" providing their committed liquidity.
+        providers_fee_calculation_time_step:
+            int, default 1, Specifies how often the quality of liquidity supplied by the
+                LPs is evaluated and fees arising from that period are earmarked for specific parties.
+        performance_hysteresis_epochs:
+            int, default 1, Specifies the number of liquidity epochs over which past performance
+                will continue to affect rewards.
+        sla_competition_factor:
+            float, default 1, Specifies the maximum fraction of their accrued fees an
+                LP that meets the SLA implied by market.liquidity.commitmentMinTimeFraction
+                will lose to liquidity providers that achieved a higher SLA performance than them.
         key_name:
             Optional[str], key name stored in metadata. Defaults to None.
+        parent_market_id:
+            Optional[str], Market to set as the parent market on the proposal
+        parent_market_insurance_pool_fraction:
+            float, Fraction of parent market insurance pool to carry over.
+                defaults to 1. No-op if parent_market_id is not set.
 
     Returns:
         str, the ID of the future market proposal on chain
@@ -289,7 +313,6 @@ def propose_future_market(
                     ),
                 ),
             ),
-            lp_price_range=str(lp_price_range),
             decimal_places=price_decimals,
             position_decimal_places=(
                 0 if position_decimals is None else position_decimals
@@ -308,8 +331,24 @@ def propose_future_market(
             log_normal=risk_model,
             linear_slippage_factor="0.001",
             quadratic_slippage_factor="0",
+            liquidity_sla_parameters=vega_protos.markets.LiquiditySLAParameters(
+                price_range=str(lp_price_range),
+                commitment_min_time_fraction=str(commitment_min_time_fraction),
+                providers_fee_calculation_time_step=int(
+                    providers_fee_calculation_time_step
+                ),
+                performance_hysteresis_epochs=int(performance_hysteresis_epochs),
+                sla_competition_factor=str(sla_competition_factor),
+            ),
         ),
     )
+    if parent_market_id is not None:
+        market_proposal.changes.successor.CopyFrom(
+            vega_protos.governance.SuccessorConfiguration(
+                parent_market_id=parent_market_id,
+                insurance_pool_fraction=str(parent_market_insurance_pool_fraction),
+            )
+        )
 
     proposal = _build_generic_proposal(
         pub_key=pub_key,
