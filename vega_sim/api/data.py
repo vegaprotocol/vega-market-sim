@@ -946,9 +946,19 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
+
+            settlement_asset_id = market_info.tradable_instrument.instrument.future.settlement_asset
+            if len(settlement_asset_id) < 1:
+                settlement_asset_id = market_info.tradable_instrument.instrument.perpetual.settlement_asset
+
             market_to_asset_map[
                 pos.market_id
-            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+            ] = settlement_asset_id
+
+
+        if len(market_to_asset_map[market_id]) < 1:
+            market_to_asset_map[market_id] = resp.tradable_instrument.instrument.perpetual.settlement_asset
+
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -1928,10 +1938,15 @@ def get_trades(
                 market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
+            market_info = data_raw.market_info(
+                market_id=market_id, data_client=data_client
+            )
+            settlement_asset_id = market_info.tradable_instrument.instrument.future.settlement_asset
+            if len(settlement_asset_id) < 1:
+                settlement_asset_id = market_info.tradable_instrument.instrument.perpetual.settlement_asset
+
             market_asset_decimals_map[trade.market_id] = get_asset_decimals(
-                asset_id=data_raw.market_info(
-                    market_id=market_id, data_client=data_client
-                ).tradable_instrument.instrument.future.settlement_asset,
+                asset_id=settlement_asset_id,
                 data_client=data_client,
             )
         res_trades.append(
@@ -2293,9 +2308,14 @@ def get_latest_market_data(
             market_id=market_id, data_client=data_client
         )
     if market_id not in market_to_asset_map:
-        market_to_asset_map[market_id] = data_raw.market_info(
+        market_info = data_raw.market_info(
             market_id=market_id, data_client=data_client
-        ).tradable_instrument.instrument.future.settlement_asset
+        )
+        settlement_asset_id = market_info.tradable_instrument.instrument.future.settlement_asset
+        if len(settlement_asset_id) < 1:
+            settlement_asset_id = market_info.tradable_instrument.instrument.perpetual.settlement_asset
+
+        market_to_asset_map[market_id] = settlement_asset_id
     if market_to_asset_map[market_id] not in asset_decimals_map:
         asset_decimals_map[market_to_asset_map[market_id]] = get_asset_decimals(
             asset_id=market_to_asset_map[market_id],
