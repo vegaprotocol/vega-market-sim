@@ -10,12 +10,15 @@ import signal
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 import webbrowser
 from collections import namedtuple
 from contextlib import closing
 from enum import Enum, auto
 from io import BufferedWriter
+from logging.handlers import QueueHandler
+from multiprocessing import Queue
 from os import path
 from typing import Dict, List, Optional, Set
 
@@ -227,6 +230,15 @@ class SocketNotFoundError(Exception):
     pass
 
 
+def logger_thread(q):
+    while True:
+        record = q.get()
+        if record is None:
+            break
+        logger = logging.getLogger(record.name)
+        logger.handle(record)
+
+
 def find_free_port(existing_set: Optional[Set[int]] = None):
     ret_sock = 0
     existing_set = (
@@ -318,6 +330,7 @@ def _update_node_config(
 
 def manage_vega_processes(
     child_conn: multiprocessing.Pipe,
+    log_queue,
     vega_path: str,
     data_node_path: str,
     vega_wallet_path: str,
@@ -332,10 +345,11 @@ def manage_vega_processes(
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
 ) -> None:
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s: %(message)s",
-    )
+    logger.addHandler(QueueHandler(log_queue))
+
+    # Just set to DEBUG as it is filtered by the outer layer anyway
+    logger.setLevel(logging.DEBUG)
+
     port_config = port_config if port_config is not None else {}
 
     try:
@@ -776,6 +790,7 @@ class VegaServiceNull(VegaService):
         self.check_for_binaries = check_for_binaries
 
         self.stopped = False
+        self.logger_p = None
 
         self._assign_ports(port_config)
 
@@ -859,10 +874,16 @@ class VegaServiceNull(VegaService):
         parent_conn, child_conn = multiprocessing.Pipe()
         ctx = multiprocessing.get_context()
         port_config = self._generate_port_config()
+        self.queue = Queue()
+
+        self.logger_p = threading.Thread(target=logger_thread, args=(self.queue,))
+        self.logger_p.start()
+
         self.proc = ctx.Process(
             target=manage_vega_processes,
             kwargs={
                 "child_conn": child_conn,
+                "log_queue": self.queue,
                 "vega_path": self.vega_path,
                 "data_node_path": self.data_node_path,
                 "vega_wallet_path": self.vega_wallet_path,
@@ -954,17 +975,22 @@ class VegaServiceNull(VegaService):
         return f"{prefix}localhost:{port}"
 
     def stop(self) -> None:
-        logging.debug("Calling stop for veganullchain")
+        logger.debug("Calling stop for veganullchain")
         if self.stopped:
             return
         self.stopped = True
         self.core_client.stop()
         self.core_state_client.stop()
         self.trading_data_client_v2.stop()
+
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
         else:
             os.kill(self.proc.pid, signal.SIGTERM)
+        if self.queue is not None:
+            self.queue.put(None)
+            self.logger_p.join()
+
         if isinstance(self.wallet, SlimWallet):
             self.wallet.stop()
         super().stop()

@@ -289,14 +289,18 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
+    create_and_faucet_wallet(vega=vega, wallet=LIQ, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e5)
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e5)
     vega.wait_for_total_catchup()
 
     asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
 
     vega.recurring_transfer(
         from_key_name=PARTY_A.name,
+        to_key_name=PARTY_B.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         asset=asset_id,
         amount=100,
         factor=1.0,

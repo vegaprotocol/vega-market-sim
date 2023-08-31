@@ -221,7 +221,7 @@ class MarketEnvironment:
         for agent in self.agents:
             agent.initialise(vega=vega)
             if isinstance(agent, StateAgentWithWallet):
-                logging.info(
+                logger.info(
                     f"{agent.name()}: key ="
                     f" {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"
                 )
