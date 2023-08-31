@@ -295,43 +295,24 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
-    market_id = vega.all_markets()[0].id
 
     vega.recurring_transfer(
         from_key_name=PARTY_A.name,
         to_key_name=PARTY_B.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
         to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        # to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
         asset=asset_id,
         amount=100,
         factor=1.0,
-        # metric=vega_protos.vega.DispatchMetric.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
     )
 
     party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
     assert party_a_accounts_t0[0].balance == 1000
 
-    # vega.submit_order(
-    #     trading_key=LIQ.name,
-    #     market_id=market_id,
-    #     side="SIDE_SELL",
-    #     volume=10,
-    #     order_type="TYPE_LIMIT",
-    #     time_in_force="TIME_IN_FORCE_GTC",
-    #     price=0.5,
-    # )
-    # vega.submit_market_order(
-    #     trading_key=PARTY_B.name, market_id=market_id, side="SIDE_BUY", volume=1
-    # )
-
     # Forward one epoch
     next_epoch(vega=vega)
 
-    # vega.submit_market_order(
-    #     trading_key=PARTY_B.name, market_id=market_id, side="SIDE_BUY", volume=1
-    # )
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
     assert party_a_accounts_t1[0].balance == 899.9
