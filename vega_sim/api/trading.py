@@ -654,7 +654,6 @@ def transfer(
     else:
         command.one_off.CopyFrom(one_off)
 
-    print(f"SUBMITTING {command}")
     wallet.submit_transaction(
         transaction=command,
         wallet_name=wallet_name,
