@@ -464,11 +464,35 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
                 market_id=self.market_id,
                 fee=0.0001,
                 commitment_amount=self.commitment_amount,
-                reference_buy="PEGGED_REFERENCE_BEST_BID",
-                reference_sell="PEGGED_REFERENCE_BEST_ASK",
-                delta_buy=0,
-                delta_sell=0,
             )
+
+        self.vega.cancel_order(
+            trading_key=self.key_name,
+            market_id=self.market_id,
+            wallet_name=self.wallet_name,
+        )
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            trading_key=self.key_name,
+            side="SIDE_BUY",
+            order_type="TYPE_LIMIT",
+            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_BID", offset=0),
+            time_in_force="TIME_IN_FORCE_GTC",
+            volume=vega_state.market_state[self.market_id].midprice
+            / self.commitment_amount,
+        )
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            trading_key=self.key_name,
+            side="SIDE_SELL",
+            order_type="TYPE_LIMIT",
+            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_ASK", offset=0),
+            time_in_force="TIME_IN_FORCE_GTC",
+            volume=vega_state.market_state[self.market_id].midprice
+            / self.commitment_amount,
+        )
 
 
 class FuzzyLiquidityProvider(StateAgentWithWallet):

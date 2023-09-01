@@ -344,11 +344,10 @@ def manage_vega_processes(
     log_dir: Optional[str] = None,
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
+    log_level: Optional[int] = None,
 ) -> None:
     logger.addHandler(QueueHandler(log_queue))
-
-    # Just set to DEBUG as it is filtered by the outer layer anyway
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO if log_level is None else log_level)
 
     port_config = port_config if port_config is not None else {}
 
@@ -624,36 +623,36 @@ def manage_vega_processes(
     #
     #
     # Important assumption is that this signal can be caught multiple times as well
-    def sighandler(signal, frame):
+    def sighandler(signal, frame, logger_):
         if signal is None:
-            logging.info("VegaServiceNull exited normally")
+            logger_.info("VegaServiceNull exited normally")
         else:
-            logging.info(f"VegaServiceNull exited after trapping the {signal} signal")
+            logger_.info(f"VegaServiceNull exited after trapping the {signal} signal")
 
-        logger.info("Received signal from parent process")
+        logger_.info("Received signal from parent process")
 
-        logger.info("Starting termination for processes")
+        logger_.info("Starting termination for processes")
         for name, process in processes.items():
-            logger.info(f"Terminating process {name}(pid: {process.pid})")
+            logger_.info(f"Terminating process {name}(pid: {process.pid})")
             process.terminate()
 
         for name, process in processes.items():
             attempts = 0
             while process.poll() is None:
-                logger.info(f"Process {name} still not terminated")
+                logger_.info(f"Process {name} still not terminated")
                 time.sleep(1)
                 attempts += 1
                 if attempts > 60:
-                    logger.warning(
+                    logger_.warning(
                         "Gracefully terminating process timed-out. Killing process"
                         f" {name}."
                     )
                     process.kill()
-            logger.debug(f"Process {name} stopped with {process.poll()}")
+            logger_.debug(f"Process {name} stopped with {process.poll()}")
             if process.poll() == 0:
-                logger.info(f"Process {name} terminated.")
+                logger_.info(f"Process {name} terminated.")
             if process.poll() == -9:
-                logger.info(f"Process {name} killed.")
+                logger_.info(f"Process {name} killed.")
 
         if use_docker_postgres:
 
@@ -665,7 +664,7 @@ def manage_vega_processes(
                     data_node_container.remove()
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
-                        logger.debug(
+                        logger_.debug(
                             f"Container {data_node_container.name} has been already"
                             " killed"
                         )
@@ -673,11 +672,11 @@ def manage_vega_processes(
                     else:
                         raise e
 
-            logger.debug(f"Stopping container {data_node_container.name}")
+            logger_.debug(f"Stopping container {data_node_container.name}")
             retry(10, 1.0, kill_docker_container)
 
             removed = False
-            logger.debug(f"Removing volume {data_node_docker_volume.name}")
+            logger_.debug(f"Removing volume {data_node_docker_volume.name}")
             for _ in range(20):
                 if data_node_container.status == "running":
                     time.sleep(3)
@@ -689,7 +688,7 @@ def manage_vega_processes(
                 except requests.exceptions.HTTPError as e:
                     if e.response.status_code == 404:
                         removed = True
-                        logger.debug(
+                        logger_.debug(
                             f"Data node volume {data_node_docker_volume.name} has been"
                             " already killed"
                         )
@@ -699,7 +698,7 @@ def manage_vega_processes(
                 except docker.errors.APIError:
                     time.sleep(1)
             if not removed:
-                logging.exception(
+                logger_.exception(
                     "Docker volume failed to cleanup, will require manual cleaning"
                 )
         if not retain_log_files and os.path.exists(tmp_vega_dir):
@@ -718,7 +717,7 @@ def manage_vega_processes(
             signal.SIGCHLD,
         ]
     )
-    sighandler(None, None)
+    sighandler(None, None, logger_=logger)
 
 
 class VegaServiceNull(VegaService):
@@ -897,6 +896,7 @@ class VegaServiceNull(VegaService):
                 "log_dir": self.log_dir,
                 "store_transactions": self.store_transactions,
                 "replay_from_path": self.replay_from_path,
+                "log_level": logger.level,
             },
         )
         self.proc.start()
@@ -988,6 +988,8 @@ class VegaServiceNull(VegaService):
         else:
             os.kill(self.proc.pid, signal.SIGTERM)
         if self.queue is not None:
+            if self.proc is not None:
+                self.proc.join()
             self.queue.put(None)
             self.logger_p.join()
 

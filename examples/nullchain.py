@@ -230,10 +230,6 @@ if __name__ == "__main__":
             market_id=market_id,
             commitment_amount=5000,
             fee=0.002,
-            reference_buy="PEGGED_REFERENCE_MID",
-            reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=10,
-            delta_sell=10,
             is_amendment=True,
         )
 
