@@ -189,7 +189,7 @@ UlimitNOFile = 8192
     Transport = "tcp"
 
 [Rewards]
-  Level = "Debug"
+  Level = "Info"
 
 [Delegation]
   Level = "Info"
