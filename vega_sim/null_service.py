@@ -347,7 +347,7 @@ def manage_vega_processes(
     log_level: Optional[int] = None,
 ) -> None:
     logger.addHandler(QueueHandler(log_queue))
-    logger.setLevel(logging.INFO if log_level is None else log_level)
+    logger.setLevel(log_level if log_level is not None else logging.INFO)
 
     port_config = port_config if port_config is not None else {}
 
@@ -896,7 +896,7 @@ class VegaServiceNull(VegaService):
                 "log_dir": self.log_dir,
                 "store_transactions": self.store_transactions,
                 "replay_from_path": self.replay_from_path,
-                "log_level": logger.level,
+                "log_level": logging.getLogger().level,
             },
         )
         self.proc.start()

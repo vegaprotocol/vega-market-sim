@@ -478,9 +478,17 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             side="SIDE_BUY",
             order_type="TYPE_LIMIT",
             pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_BID", offset=0),
+            wait=False,
             time_in_force="TIME_IN_FORCE_GTC",
-            volume=vega_state.market_state[self.market_id].midprice
-            / self.commitment_amount,
+            volume=(
+                (
+                    1.2
+                    * self.commitment_amount
+                    / vega_state.market_state[self.market_id].midprice
+                )
+                if vega_state.market_state[self.market_id].midprice
+                else 1
+            ),
         )
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
@@ -489,9 +497,17 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             side="SIDE_SELL",
             order_type="TYPE_LIMIT",
             pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_ASK", offset=0),
+            wait=False,
             time_in_force="TIME_IN_FORCE_GTC",
-            volume=vega_state.market_state[self.market_id].midprice
-            / self.commitment_amount,
+            volume=(
+                (
+                    1.2
+                    * self.commitment_amount
+                    / vega_state.market_state[self.market_id].midprice
+                )
+                if vega_state.market_state[self.market_id].midprice
+                else 1
+            ),
         )
 
 
