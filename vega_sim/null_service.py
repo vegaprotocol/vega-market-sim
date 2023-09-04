@@ -988,8 +988,8 @@ class VegaServiceNull(VegaService):
         else:
             os.kill(self.proc.pid, signal.SIGTERM)
         if self.queue is not None:
-            if self.proc is not None:
-                self.proc.join()
+            # if self.proc is not None:
+            #     self.proc.join()
             self.queue.put(None)
             self.logger_p.join()
 
