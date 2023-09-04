@@ -224,10 +224,6 @@ class MarketMaker(StateAgentWithWallet):
         #     market_id=self.market_id,
         #     commitment_amount=2e5,
         #     fee=0.05,
-        #     reference_buy="PEGGED_REFERENCE_BEST_BID",
-        #     reference_sell="PEGGED_REFERENCE_BEST_ASK",
-        #     delta_buy=0,
-        #     delta_sell=0,
         #     is_amendment=True,
         # )
 

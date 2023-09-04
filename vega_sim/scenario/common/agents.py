@@ -2377,6 +2377,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         fee: float = 0.001,
         tag: str = "",
         wallet_name: Optional[str] = None,
+        commitment_amount_to_book_weighting: float = 1.2,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
 
@@ -2394,6 +2395,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         self.fee = fee
 
         self.commitment_amount = commitment_amount
+        self.commitment_amount_to_book_weighting = commitment_amount_to_book_weighting
 
     def initialise(
         self,
@@ -2420,11 +2422,27 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
             key_name=self.key_name,
             commitment_amount=self.commitment_amount,
             fee=self.fee,
-            reference_buy="PEGGED_REFERENCE_MID",
-            reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=5,
-            delta_sell=5,
             is_amendment=False,
+        )
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            trading_key=self.key_name,
+            side="SIDE_BUY",
+            order_type="TYPE_LIMIT",
+            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=5),
+            time_in_force="TIME_IN_FORCE_GTC",
+            volume=1,
+        )
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            trading_key=self.key_name,
+            side="SIDE_SELL",
+            order_type="TYPE_LIMIT",
+            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=5),
+            time_in_force="TIME_IN_FORCE_GTC",
+            volume=1,
         )
 
     def step(self, vega_state: VegaState):
@@ -2463,17 +2481,38 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         ask_offset = ask_price - vega_state.market_state[self.market_id].midprice
 
         # Submit liquidity
-        self.vega.submit_simple_liquidity(
-            wallet_name=self.wallet_name,
-            key_name=self.key_name,
+        self.vega.cancel_order(
+            trading_key=self.key_name,
             market_id=self.market_id,
-            commitment_amount=self.commitment_amount,
-            fee=self.fee,
-            reference_buy="PEGGED_REFERENCE_MID",
-            reference_sell="PEGGED_REFERENCE_MID",
-            delta_buy=bid_offset,
-            delta_sell=ask_offset,
-            is_amendment=True,
+            wallet_name=self.wallet_name,
+        )
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            trading_key=self.key_name,
+            side="SIDE_BUY",
+            order_type="TYPE_LIMIT",
+            pegged_order=PeggedOrder(
+                reference="PEGGED_REFERENCE_MID", offset=bid_offset
+            ),
+            time_in_force="TIME_IN_FORCE_GTC",
+            volume=self.commitment_amount_to_book_weighting
+            * self.commitment_amount
+            / bid_price,
+        )
+        self.vega.submit_order(
+            trading_wallet=self.wallet_name,
+            market_id=self.market_id,
+            trading_key=self.key_name,
+            side="SIDE_SELL",
+            order_type="TYPE_LIMIT",
+            pegged_order=PeggedOrder(
+                reference="PEGGED_REFERENCE_MID", offset=ask_offset
+            ),
+            time_in_force="TIME_IN_FORCE_GTC",
+            volume=self.commitment_amount_to_book_weighting
+            * self.commitment_amount
+            / ask_price,
         )
 
 

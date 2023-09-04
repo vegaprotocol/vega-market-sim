@@ -25,7 +25,14 @@ from ... import vega_pb2 as vega_dot_vega__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
-    b'\n\x1bvega/events/v1/events.proto\x12\x0evega.events.v1\x1a\x11vega/assets.proto\x1a\x1fvega/commands/v1/commands.proto\x1a\x1bvega/commands/v1/data.proto\x1a)vega/commands/v1/validator_commands.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x11vega/oracle.proto\x1a\x0fvega/vega.proto"\xe6\x02\n\rFundingPeriod\x12\x1b\n\tmarket_id\x18\x01'
+    b'\n\x1bvega/events/v1/events.proto\x12\x0evega.events.v1\x1a\x11vega/assets.proto\x1a\x1fvega/commands/v1/commands.proto\x1a\x1bvega/commands/v1/data.proto\x1a)vega/commands/v1/validator_commands.proto\x1a\x15vega/governance.proto\x1a\x12vega/markets.proto\x1a\x11vega/oracle.proto\x1a\x0fvega/vega.proto"\xc4\x02\n\x13PartyActivityStreak\x12\x14\n\x05party\x18\x01'
+    b" \x01(\tR\x05party\x12\x1d\n\nactive_for\x18\x02"
+    b" \x01(\x04R\tactiveFor\x12!\n\x0cinactive_for\x18\x03"
+    b" \x01(\x04R\x0binactiveFor\x12\x1b\n\tis_active\x18\x04"
+    b" \x01(\x08R\x08isActive\x12U\n'reward_distribution_activity_multiplier\x18\x05"
+    b' \x01(\tR$rewardDistributionActivityMultiplier\x12K\n"reward_vesting_activity_multiplier\x18\x06'
+    b" \x01(\tR\x1frewardVestingActivityMultiplier\x12\x14\n\x05\x65poch\x18\x07"
+    b' \x01(\x04R\x05\x65poch"\xe6\x02\n\rFundingPeriod\x12\x1b\n\tmarket_id\x18\x01'
     b" \x01(\tR\x08marketId\x12\x10\n\x03seq\x18\x02"
     b" \x01(\x04R\x03seq\x12\x14\n\x05start\x18\x03"
     b" \x01(\x03R\x05start\x12\x15\n\x03\x65nd\x18\x04"
@@ -301,25 +308,28 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b" \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1e\n\x08team_url\x18\x03"
     b' \x01(\tH\x01R\x07teamUrl\x88\x01\x01\x12"\n\navatar_url\x18\x04'
     b" \x01(\tH\x02R\tavatarUrl\x88\x01\x01\x12\x1d\n\ncreated_at\x18\x05"
-    b' \x01(\x03R\tcreatedAtB\x07\n\x05_nameB\x0b\n\t_team_urlB\r\n\x0b_avatar_url"\x90\x01\n\x13RefereeSwitchedTeam\x12'
+    b' \x01(\x03R\tcreatedAtB\x07\n\x05_nameB\x0b\n\t_team_urlB\r\n\x0b_avatar_url"\xab\x01\n\x13RefereeSwitchedTeam\x12'
     b" \n\x0c\x66rom_team_id\x18\x01 \x01(\tR\nfromTeamId\x12\x1c\n\nto_team_id\x18\x02"
     b" \x01(\tR\x08toTeamId\x12\x18\n\x07referee\x18\x03"
     b" \x01(\tR\x07referee\x12\x1f\n\x0bswitched_at\x18\x04"
-    b' \x01(\x03R\nswitchedAt"c\n\x11RefereeJoinedTeam\x12\x17\n\x07team_id\x18\x01'
+    b" \x01(\x03R\nswitchedAt\x12\x19\n\x08\x61t_epoch\x18\x05"
+    b' \x01(\x04R\x07\x61tEpoch"~\n\x11RefereeJoinedTeam\x12\x17\n\x07team_id\x18\x01'
     b" \x01(\tR\x06teamId\x12\x18\n\x07referee\x18\x02"
     b" \x01(\tR\x07referee\x12\x1b\n\tjoined_at\x18\x03"
-    b' \x01(\x03R\x08joinedAt"\x85\x01\n\x12ReferralSetCreated\x12\x15\n\x06set_id\x18\x01'
+    b" \x01(\x03R\x08joinedAt\x12\x19\n\x08\x61t_epoch\x18\x04"
+    b' \x01(\x04R\x07\x61tEpoch"\x85\x01\n\x12ReferralSetCreated\x12\x15\n\x06set_id\x18\x01'
     b" \x01(\tR\x05setId\x12\x1a\n\x08referrer\x18\x02"
     b" \x01(\tR\x08referrer\x12\x1d\n\ncreated_at\x18\x03"
     b" \x01(\x03R\tcreatedAt\x12\x1d\n\nupdated_at\x18\x04"
-    b' \x01(\x03R\tupdatedAt"h\n\x18RefereeJoinedReferralSet\x12\x15\n\x06set_id\x18\x01'
+    b' \x01(\x03R\tupdatedAt"\x83\x01\n\x18RefereeJoinedReferralSet\x12\x15\n\x06set_id\x18\x01'
     b" \x01(\tR\x05setId\x12\x18\n\x07referee\x18\x02"
     b" \x01(\tR\x07referee\x12\x1b\n\tjoined_at\x18\x03"
-    b' \x01(\x03R\x08joinedAt"I\n\x16ReferralProgramStarted\x12/\n\x07program\x18\x01'
+    b" \x01(\x03R\x08joinedAt\x12\x19\n\x08\x61t_epoch\x18\x04"
+    b' \x01(\x04R\x07\x61tEpoch"I\n\x16ReferralProgramStarted\x12/\n\x07program\x18\x01'
     b' \x01(\x0b\x32\x15.vega.ReferralProgramR\x07program"I\n\x16ReferralProgramUpdated\x12/\n\x07program\x18\x01'
     b' \x01(\x0b\x32\x15.vega.ReferralProgramR\x07program"@\n\x14ReferralProgramEnded\x12\x18\n\x07version\x18\x01'
     b" \x01(\x04R\x07version\x12\x0e\n\x02id\x18\x02"
-    b' \x01(\tR\x02id"\xcf)\n\x08\x42usEvent\x12\x0e\n\x02id\x18\x01'
+    b' \x01(\tR\x02id"\xab*\n\x08\x42usEvent\x12\x0e\n\x02id\x18\x01'
     b" \x01(\tR\x02id\x12\x14\n\x05\x62lock\x18\x02"
     b" \x01(\tR\x05\x62lock\x12\x30\n\x04type\x18\x03"
     b" \x01(\x0e\x32\x1c.vega.events.v1.BusEventTypeR\x04type\x12=\n\x0btime_update\x18\x65"
@@ -394,19 +404,20 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b" \x01(\x0b\x32&.vega.events.v1.ReferralProgramUpdatedH\x00R\x16referralProgramUpdated\x12]\n\x16referral_program_ended\x18\xa7\x01"
     b" \x01(\x0b\x32$.vega.events.v1.ReferralProgramEndedH\x00R\x14referralProgramEnded\x12W\n\x14referral_set_created\x18\xa8\x01"
     b' \x01(\x0b\x32".vega.events.v1.ReferralSetCreatedH\x00R\x12referralSetCreated\x12j\n\x1breferee_joined_referral_set\x18\xa9\x01'
-    b" \x01(\x0b\x32(.vega.events.v1.RefereeJoinedReferralSetH\x00R\x18refereeJoinedReferralSet\x12\x36\n\x06market\x18\xe9\x07"
+    b" \x01(\x0b\x32(.vega.events.v1.RefereeJoinedReferralSetH\x00R\x18refereeJoinedReferralSet\x12Z\n\x15party_activity_streak\x18\xaa\x01"
+    b" \x01(\x0b\x32#.vega.events.v1.PartyActivityStreakH\x00R\x13partyActivityStreak\x12\x36\n\x06market\x18\xe9\x07"
     b" \x01(\x0b\x32\x1b.vega.events.v1.MarketEventH\x00R\x06market\x12\x41\n\x0ctx_err_event\x18\xd1\x0f"
     b" \x01(\x0b\x32\x1c.vega.events.v1.TxErrorEventH\x00R\ntxErrEvent\x12\x18\n\x07version\x18\x04"
     b" \x01(\rR\x07version\x12\x19\n\x08\x63hain_id\x18\x05"
     b" \x01(\tR\x07\x63hainId\x12\x17\n\x07tx_hash\x18\x06"
-    b' \x01(\tR\x06txHashB\x07\n\x05\x65vent*\xdd\x01\n\x1dProtocolUpgradeProposalStatus\x12\x30\n,PROTOCOL_UPGRADE_PROPOSAL_STATUS_UNSPECIFIED\x10\x00\x12,\n(PROTOCOL_UPGRADE_PROPOSAL_STATUS_PENDING\x10\x01\x12-\n)PROTOCOL_UPGRADE_PROPOSAL_STATUS_APPROVED\x10\x02\x12-\n)PROTOCOL_UPGRADE_PROPOSAL_STATUS_REJECTED\x10\x03*\xfd\x14\n\x0c\x42usEventType\x12\x1e\n\x1a\x42US_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12\x42US_EVENT_TYPE_ALL\x10\x01\x12\x1e\n\x1a\x42US_EVENT_TYPE_TIME_UPDATE\x10\x02\x12#\n\x1f\x42US_EVENT_TYPE_LEDGER_MOVEMENTS\x10\x03\x12&\n"BUS_EVENT_TYPE_POSITION_RESOLUTION\x10\x04\x12\x18\n\x14\x42US_EVENT_TYPE_ORDER\x10\x05\x12\x1a\n\x16\x42US_EVENT_TYPE_ACCOUNT\x10\x06\x12\x18\n\x14\x42US_EVENT_TYPE_PARTY\x10\x07\x12\x18\n\x14\x42US_EVENT_TYPE_TRADE\x10\x08\x12'
+    b' \x01(\tR\x06txHashB\x07\n\x05\x65vent*\xdd\x01\n\x1dProtocolUpgradeProposalStatus\x12\x30\n,PROTOCOL_UPGRADE_PROPOSAL_STATUS_UNSPECIFIED\x10\x00\x12,\n(PROTOCOL_UPGRADE_PROPOSAL_STATUS_PENDING\x10\x01\x12-\n)PROTOCOL_UPGRADE_PROPOSAL_STATUS_APPROVED\x10\x02\x12-\n)PROTOCOL_UPGRADE_PROPOSAL_STATUS_REJECTED\x10\x03*\xa7\x15\n\x0c\x42usEventType\x12\x1e\n\x1a\x42US_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x16\n\x12\x42US_EVENT_TYPE_ALL\x10\x01\x12\x1e\n\x1a\x42US_EVENT_TYPE_TIME_UPDATE\x10\x02\x12#\n\x1f\x42US_EVENT_TYPE_LEDGER_MOVEMENTS\x10\x03\x12&\n"BUS_EVENT_TYPE_POSITION_RESOLUTION\x10\x04\x12\x18\n\x14\x42US_EVENT_TYPE_ORDER\x10\x05\x12\x1a\n\x16\x42US_EVENT_TYPE_ACCOUNT\x10\x06\x12\x18\n\x14\x42US_EVENT_TYPE_PARTY\x10\x07\x12\x18\n\x14\x42US_EVENT_TYPE_TRADE\x10\x08\x12'
     b' \n\x1c\x42US_EVENT_TYPE_MARGIN_LEVELS\x10\t\x12\x1b\n\x17\x42US_EVENT_TYPE_PROPOSAL\x10\n\x12\x17\n\x13\x42US_EVENT_TYPE_VOTE\x10\x0b\x12\x1e\n\x1a\x42US_EVENT_TYPE_MARKET_DATA\x10\x0c\x12!\n\x1d\x42US_EVENT_TYPE_NODE_SIGNATURE\x10\r\x12%\n!BUS_EVENT_TYPE_LOSS_SOCIALIZATION\x10\x0e\x12"\n\x1e\x42US_EVENT_TYPE_SETTLE_POSITION\x10\x0f\x12$\n'
     b" BUS_EVENT_TYPE_SETTLE_DISTRESSED\x10\x10\x12!\n\x1d\x42US_EVENT_TYPE_MARKET_CREATED\x10\x11\x12\x18\n\x14\x42US_EVENT_TYPE_ASSET\x10\x12\x12\x1e\n\x1a\x42US_EVENT_TYPE_MARKET_TICK\x10\x13\x12\x1d\n\x19\x42US_EVENT_TYPE_WITHDRAWAL\x10\x14\x12\x1a\n\x16\x42US_EVENT_TYPE_DEPOSIT\x10\x15\x12\x1a\n\x16\x42US_EVENT_TYPE_AUCTION\x10\x16\x12\x1e\n\x1a\x42US_EVENT_TYPE_RISK_FACTOR\x10\x17\x12$\n"
     b' BUS_EVENT_TYPE_NETWORK_PARAMETER\x10\x18\x12&\n"BUS_EVENT_TYPE_LIQUIDITY_PROVISION\x10\x19\x12!\n\x1d\x42US_EVENT_TYPE_MARKET_UPDATED\x10\x1a\x12\x1e\n\x1a\x42US_EVENT_TYPE_ORACLE_SPEC\x10\x1b\x12\x1e\n\x1a\x42US_EVENT_TYPE_ORACLE_DATA\x10\x1c\x12%\n!BUS_EVENT_TYPE_DELEGATION_BALANCE\x10\x1d\x12"\n\x1e\x42US_EVENT_TYPE_VALIDATOR_SCORE\x10\x1e\x12\x1f\n\x1b\x42US_EVENT_TYPE_EPOCH_UPDATE\x10\x1f\x12#\n\x1f\x42US_EVENT_TYPE_VALIDATOR_UPDATE\x10'
     b" \x12"
     b' \n\x1c\x42US_EVENT_TYPE_STAKE_LINKING\x10!\x12&\n"BUS_EVENT_TYPE_REWARD_PAYOUT_EVENT\x10"\x12\x1d\n\x19\x42US_EVENT_TYPE_CHECKPOINT\x10#\x12\x1f\n\x1b\x42US_EVENT_TYPE_STREAM_START\x10$\x12\x1f\n\x1b\x42US_EVENT_TYPE_KEY_ROTATION\x10%\x12\x1c\n\x18\x42US_EVENT_TYPE_STATE_VAR\x10&\x12!\n\x1d\x42US_EVENT_TYPE_NETWORK_LIMITS\x10\'\x12\x1b\n\x17\x42US_EVENT_TYPE_TRANSFER\x10(\x12$\n'
     b" BUS_EVENT_TYPE_VALIDATOR_RANKING\x10)\x12/\n+BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_EVENT\x10*\x12\x30\n,BUS_EVENT_TYPE_ERC20_MULTI_SIG_SET_THRESHOLD\x10+\x12/\n+BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_ADDED\x10,\x12\x31\n-BUS_EVENT_TYPE_ERC20_MULTI_SIG_SIGNER_REMOVED\x10-\x12!\n\x1d\x42US_EVENT_TYPE_POSITION_STATE\x10.\x12(\n$BUS_EVENT_TYPE_ETHEREUM_KEY_ROTATION\x10/\x12,\n(BUS_EVENT_TYPE_PROTOCOL_UPGRADE_PROPOSAL\x10\x30\x12\x1e\n\x1a\x42US_EVENT_TYPE_BEGIN_BLOCK\x10\x31\x12\x1c\n\x18\x42US_EVENT_TYPE_END_BLOCK\x10\x32\x12+\n'BUS_EVENT_TYPE_PROTOCOL_UPGRADE_STARTED\x10\x33\x12"
-    b" \n\x1c\x42US_EVENT_TYPE_SETTLE_MARKET\x10\x34\x12%\n!BUS_EVENT_TYPE_TRANSACTION_RESULT\x10\x35\x12!\n\x1d\x42US_EVENT_TYPE_SNAPSHOT_TAKEN\x10\x36\x12\x33\n/BUS_EVENT_TYPE_PROTOCOL_UPGRADE_DATA_NODE_READY\x10\x37\x12+\n'BUS_EVENT_TYPE_DISTRESSED_ORDERS_CLOSED\x10\x38\x12!\n\x1d\x42US_EVENT_TYPE_EXPIRED_ORDERS\x10\x39\x12'\n#BUS_EVENT_TYPE_DISTRESSED_POSITIONS\x10:\x12+\n'BUS_EVENT_TYPE_SPOT_LIQUIDITY_PROVISION\x10;\x12\x1d\n\x19\x42US_EVENT_TYPE_STOP_ORDER\x10<\x12!\n\x1d\x42US_EVENT_TYPE_FUNDING_PERIOD\x10=\x12,\n(BUS_EVENT_TYPE_FUNDING_PERIOD_DATA_POINT\x10>\x12\x1f\n\x1b\x42US_EVENT_TYPE_TEAM_CREATED\x10?\x12\x1f\n\x1b\x42US_EVENT_TYPE_TEAM_UPDATED\x10@\x12(\n$BUS_EVENT_TYPE_REFEREE_SWITCHED_TEAM\x10\x41\x12&\n\"BUS_EVENT_TYPE_REFEREE_JOINED_TEAM\x10\x42\x12+\n'BUS_EVENT_TYPE_REFERRAL_PROGRAM_STARTED\x10\x43\x12+\n'BUS_EVENT_TYPE_REFERRAL_PROGRAM_UPDATED\x10\x44\x12)\n%BUS_EVENT_TYPE_REFERRAL_PROGRAM_ENDED\x10\x45\x12'\n#BUS_EVENT_TYPE_REFERRAL_SET_CREATED\x10\x46\x12.\n*BUS_EVENT_TYPE_REFEREE_JOINED_REFERRAL_SET\x10G\x12\x19\n\x15\x42US_EVENT_TYPE_MARKET\x10\x65\x12\x1c\n\x17\x42US_EVENT_TYPE_TX_ERROR\x10\xc9\x01\x42\x31Z/code.vegaprotocol.io/vega/protos/vega/events/v1b\x06proto3"
+    b" \n\x1c\x42US_EVENT_TYPE_SETTLE_MARKET\x10\x34\x12%\n!BUS_EVENT_TYPE_TRANSACTION_RESULT\x10\x35\x12!\n\x1d\x42US_EVENT_TYPE_SNAPSHOT_TAKEN\x10\x36\x12\x33\n/BUS_EVENT_TYPE_PROTOCOL_UPGRADE_DATA_NODE_READY\x10\x37\x12+\n'BUS_EVENT_TYPE_DISTRESSED_ORDERS_CLOSED\x10\x38\x12!\n\x1d\x42US_EVENT_TYPE_EXPIRED_ORDERS\x10\x39\x12'\n#BUS_EVENT_TYPE_DISTRESSED_POSITIONS\x10:\x12+\n'BUS_EVENT_TYPE_SPOT_LIQUIDITY_PROVISION\x10;\x12\x1d\n\x19\x42US_EVENT_TYPE_STOP_ORDER\x10<\x12!\n\x1d\x42US_EVENT_TYPE_FUNDING_PERIOD\x10=\x12,\n(BUS_EVENT_TYPE_FUNDING_PERIOD_DATA_POINT\x10>\x12\x1f\n\x1b\x42US_EVENT_TYPE_TEAM_CREATED\x10?\x12\x1f\n\x1b\x42US_EVENT_TYPE_TEAM_UPDATED\x10@\x12(\n$BUS_EVENT_TYPE_REFEREE_SWITCHED_TEAM\x10\x41\x12&\n\"BUS_EVENT_TYPE_REFEREE_JOINED_TEAM\x10\x42\x12+\n'BUS_EVENT_TYPE_REFERRAL_PROGRAM_STARTED\x10\x43\x12+\n'BUS_EVENT_TYPE_REFERRAL_PROGRAM_UPDATED\x10\x44\x12)\n%BUS_EVENT_TYPE_REFERRAL_PROGRAM_ENDED\x10\x45\x12'\n#BUS_EVENT_TYPE_REFERRAL_SET_CREATED\x10\x46\x12.\n*BUS_EVENT_TYPE_REFEREE_JOINED_REFERRAL_SET\x10G\x12(\n$BUS_EVENT_TYPE_PARTY_ACTIVITY_STREAK\x10H\x12\x19\n\x15\x42US_EVENT_TYPE_MARKET\x10\x65\x12\x1c\n\x17\x42US_EVENT_TYPE_TX_ERROR\x10\xc9\x01\x42\x31Z/code.vegaprotocol.io/vega/protos/vega/events/v1b\x06proto3"
 )
 
 _globals = globals()
@@ -419,138 +430,140 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     DESCRIPTOR._serialized_options = (
         b"Z/code.vegaprotocol.io/vega/protos/vega/events/v1"
     )
-    _globals["_PROTOCOLUPGRADEPROPOSALSTATUS"]._serialized_start = 19617
-    _globals["_PROTOCOLUPGRADEPROPOSALSTATUS"]._serialized_end = 19838
-    _globals["_BUSEVENTTYPE"]._serialized_start = 19841
-    _globals["_BUSEVENTTYPE"]._serialized_end = 22526
-    _globals["_FUNDINGPERIOD"]._serialized_start = 251
-    _globals["_FUNDINGPERIOD"]._serialized_end = 609
-    _globals["_FUNDINGPERIODDATAPOINT"]._serialized_start = 612
-    _globals["_FUNDINGPERIODDATAPOINT"]._serialized_end = 918
-    _globals["_FUNDINGPERIODDATAPOINT_SOURCE"]._serialized_start = 844
-    _globals["_FUNDINGPERIODDATAPOINT_SOURCE"]._serialized_end = 918
-    _globals["_STOPORDEREVENT"]._serialized_start = 921
-    _globals["_STOPORDEREVENT"]._serialized_end = 1052
-    _globals["_ERC20MULTISIGSIGNERADDED"]._serialized_start = 1055
-    _globals["_ERC20MULTISIGSIGNERADDED"]._serialized_end = 1293
-    _globals["_ERC20MULTISIGSIGNERREMOVEDSUBMITTER"]._serialized_start = 1295
-    _globals["_ERC20MULTISIGSIGNERREMOVEDSUBMITTER"]._serialized_end = 1397
-    _globals["_ERC20MULTISIGSIGNERREMOVED"]._serialized_start = 1400
-    _globals["_ERC20MULTISIGSIGNERREMOVED"]._serialized_end = 1679
-    _globals["_TRANSFER"]._serialized_start = 1682
-    _globals["_TRANSFER"]._serialized_end = 2526
-    _globals["_TRANSFER_STATUS"]._serialized_start = 2375
-    _globals["_TRANSFER_STATUS"]._serialized_end = 2507
-    _globals["_ONEOFFGOVERNANCETRANSFER"]._serialized_start = 2528
-    _globals["_ONEOFFGOVERNANCETRANSFER"]._serialized_end = 2585
-    _globals["_ONEOFFTRANSFER"]._serialized_start = 2587
-    _globals["_ONEOFFTRANSFER"]._serialized_end = 2634
-    _globals["_RECURRINGTRANSFER"]._serialized_start = 2637
-    _globals["_RECURRINGTRANSFER"]._serialized_end = 2830
-    _globals["_RECURRINGGOVERNANCETRANSFER"]._serialized_start = 2833
-    _globals["_RECURRINGGOVERNANCETRANSFER"]._serialized_end = 3039
-    _globals["_STAKELINKING"]._serialized_start = 3042
-    _globals["_STAKELINKING"]._serialized_end = 3606
-    _globals["_STAKELINKING_TYPE"]._serialized_start = 3450
-    _globals["_STAKELINKING_TYPE"]._serialized_end = 3510
-    _globals["_STAKELINKING_STATUS"]._serialized_start = 3512
-    _globals["_STAKELINKING_STATUS"]._serialized_end = 3606
-    _globals["_ERC20MULTISIGSIGNEREVENT"]._serialized_start = 3609
-    _globals["_ERC20MULTISIGSIGNEREVENT"]._serialized_end = 3948
-    _globals["_ERC20MULTISIGSIGNEREVENT_TYPE"]._serialized_start = 3886
-    _globals["_ERC20MULTISIGSIGNEREVENT_TYPE"]._serialized_end = 3948
-    _globals["_ERC20MULTISIGTHRESHOLDSETEVENT"]._serialized_start = 3951
-    _globals["_ERC20MULTISIGTHRESHOLDSETEVENT"]._serialized_end = 4178
-    _globals["_CHECKPOINTEVENT"]._serialized_start = 4180
-    _globals["_CHECKPOINTEVENT"]._serialized_end = 4283
-    _globals["_STREAMSTARTEVENT"]._serialized_start = 4285
-    _globals["_STREAMSTARTEVENT"]._serialized_end = 4330
-    _globals["_REWARDPAYOUTEVENT"]._serialized_start = 4333
-    _globals["_REWARDPAYOUTEVENT"]._serialized_end = 4591
-    _globals["_VALIDATORSCOREEVENT"]._serialized_start = 4594
-    _globals["_VALIDATORSCOREEVENT"]._serialized_end = 4936
-    _globals["_DELEGATIONBALANCEEVENT"]._serialized_start = 4938
-    _globals["_DELEGATIONBALANCEEVENT"]._serialized_end = 5062
-    _globals["_MARKETEVENT"]._serialized_start = 5064
-    _globals["_MARKETEVENT"]._serialized_end = 5132
-    _globals["_TRANSACTIONRESULT"]._serialized_start = 5135
-    _globals["_TRANSACTIONRESULT"]._serialized_end = 7747
-    _globals["_TRANSACTIONRESULT_SUCCESSDETAILS"]._serialized_start = 7667
-    _globals["_TRANSACTIONRESULT_SUCCESSDETAILS"]._serialized_end = 7683
-    _globals["_TRANSACTIONRESULT_FAILUREDETAILS"]._serialized_start = 7685
-    _globals["_TRANSACTIONRESULT_FAILUREDETAILS"]._serialized_end = 7723
-    _globals["_TXERROREVENT"]._serialized_start = 7750
-    _globals["_TXERROREVENT"]._serialized_end = 9453
-    _globals["_TIMEUPDATE"]._serialized_start = 9455
-    _globals["_TIMEUPDATE"]._serialized_end = 9497
-    _globals["_EPOCHEVENT"]._serialized_start = 9500
-    _globals["_EPOCHEVENT"]._serialized_end = 9664
-    _globals["_LEDGERMOVEMENTS"]._serialized_start = 9666
-    _globals["_LEDGERMOVEMENTS"]._serialized_end = 9748
-    _globals["_POSITIONRESOLUTION"]._serialized_start = 9751
-    _globals["_POSITIONRESOLUTION"]._serialized_end = 9887
-    _globals["_LOSSSOCIALIZATION"]._serialized_start = 9889
-    _globals["_LOSSSOCIALIZATION"]._serialized_end = 9988
-    _globals["_TRADESETTLEMENT"]._serialized_start = 9990
-    _globals["_TRADESETTLEMENT"]._serialized_end = 10084
-    _globals["_SETTLEPOSITION"]._serialized_start = 10087
-    _globals["_SETTLEPOSITION"]._serialized_end = 10300
-    _globals["_SETTLEMARKET"]._serialized_start = 10302
-    _globals["_SETTLEMARKET"]._serialized_end = 10408
-    _globals["_POSITIONSTATEEVENT"]._serialized_start = 10411
-    _globals["_POSITIONSTATEEVENT"]._serialized_end = 10657
-    _globals["_SETTLEDISTRESSED"]._serialized_start = 10659
-    _globals["_SETTLEDISTRESSED"]._serialized_end = 10779
-    _globals["_DISTRESSEDORDERS"]._serialized_start = 10781
-    _globals["_DISTRESSEDORDERS"]._serialized_end = 10854
-    _globals["_DISTRESSEDPOSITIONS"]._serialized_start = 10857
-    _globals["_DISTRESSEDPOSITIONS"]._serialized_end = 10989
-    _globals["_MARKETTICK"]._serialized_start = 10991
-    _globals["_MARKETTICK"]._serialized_end = 11039
-    _globals["_AUCTIONEVENT"]._serialized_start = 11042
-    _globals["_AUCTIONEVENT"]._serialized_end = 11303
-    _globals["_VALIDATORUPDATE"]._serialized_start = 11306
-    _globals["_VALIDATORUPDATE"]._serialized_end = 11731
-    _globals["_VALIDATORRANKINGEVENT"]._serialized_start = 11734
-    _globals["_VALIDATORRANKINGEVENT"]._serialized_end = 12040
-    _globals["_KEYROTATION"]._serialized_start = 12043
-    _globals["_KEYROTATION"]._serialized_end = 12180
-    _globals["_ETHEREUMKEYROTATION"]._serialized_start = 12183
-    _globals["_ETHEREUMKEYROTATION"]._serialized_end = 12330
-    _globals["_PROTOCOLUPGRADEEVENT"]._serialized_start = 12333
-    _globals["_PROTOCOLUPGRADEEVENT"]._serialized_end = 12548
-    _globals["_STATEVAR"]._serialized_start = 12550
-    _globals["_STATEVAR"]._serialized_end = 12625
-    _globals["_BEGINBLOCK"]._serialized_start = 12627
-    _globals["_BEGINBLOCK"]._serialized_end = 12713
-    _globals["_ENDBLOCK"]._serialized_start = 12715
-    _globals["_ENDBLOCK"]._serialized_end = 12749
-    _globals["_PROTOCOLUPGRADESTARTED"]._serialized_start = 12751
-    _globals["_PROTOCOLUPGRADESTARTED"]._serialized_end = 12819
-    _globals["_PROTOCOLUPGRADEDATANODEREADY"]._serialized_start = 12821
-    _globals["_PROTOCOLUPGRADEDATANODEREADY"]._serialized_end = 12895
-    _globals["_CORESNAPSHOTDATA"]._serialized_start = 12898
-    _globals["_CORESNAPSHOTDATA"]._serialized_end = 13071
-    _globals["_EXPIREDORDERS"]._serialized_start = 13073
-    _globals["_EXPIREDORDERS"]._serialized_end = 13146
-    _globals["_TEAMCREATED"]._serialized_start = 13149
-    _globals["_TEAMCREATED"]._serialized_end = 13376
-    _globals["_TEAMUPDATED"]._serialized_start = 13379
-    _globals["_TEAMUPDATED"]._serialized_end = 13578
-    _globals["_REFEREESWITCHEDTEAM"]._serialized_start = 13581
-    _globals["_REFEREESWITCHEDTEAM"]._serialized_end = 13725
-    _globals["_REFEREEJOINEDTEAM"]._serialized_start = 13727
-    _globals["_REFEREEJOINEDTEAM"]._serialized_end = 13826
-    _globals["_REFERRALSETCREATED"]._serialized_start = 13829
-    _globals["_REFERRALSETCREATED"]._serialized_end = 13962
-    _globals["_REFEREEJOINEDREFERRALSET"]._serialized_start = 13964
-    _globals["_REFEREEJOINEDREFERRALSET"]._serialized_end = 14068
-    _globals["_REFERRALPROGRAMSTARTED"]._serialized_start = 14070
-    _globals["_REFERRALPROGRAMSTARTED"]._serialized_end = 14143
-    _globals["_REFERRALPROGRAMUPDATED"]._serialized_start = 14145
-    _globals["_REFERRALPROGRAMUPDATED"]._serialized_end = 14218
-    _globals["_REFERRALPROGRAMENDED"]._serialized_start = 14220
-    _globals["_REFERRALPROGRAMENDED"]._serialized_end = 14284
-    _globals["_BUSEVENT"]._serialized_start = 14287
-    _globals["_BUSEVENT"]._serialized_end = 19614
+    _globals["_PROTOCOLUPGRADEPROPOSALSTATUS"]._serialized_start = 20118
+    _globals["_PROTOCOLUPGRADEPROPOSALSTATUS"]._serialized_end = 20339
+    _globals["_BUSEVENTTYPE"]._serialized_start = 20342
+    _globals["_BUSEVENTTYPE"]._serialized_end = 23069
+    _globals["_PARTYACTIVITYSTREAK"]._serialized_start = 251
+    _globals["_PARTYACTIVITYSTREAK"]._serialized_end = 575
+    _globals["_FUNDINGPERIOD"]._serialized_start = 578
+    _globals["_FUNDINGPERIOD"]._serialized_end = 936
+    _globals["_FUNDINGPERIODDATAPOINT"]._serialized_start = 939
+    _globals["_FUNDINGPERIODDATAPOINT"]._serialized_end = 1245
+    _globals["_FUNDINGPERIODDATAPOINT_SOURCE"]._serialized_start = 1171
+    _globals["_FUNDINGPERIODDATAPOINT_SOURCE"]._serialized_end = 1245
+    _globals["_STOPORDEREVENT"]._serialized_start = 1248
+    _globals["_STOPORDEREVENT"]._serialized_end = 1379
+    _globals["_ERC20MULTISIGSIGNERADDED"]._serialized_start = 1382
+    _globals["_ERC20MULTISIGSIGNERADDED"]._serialized_end = 1620
+    _globals["_ERC20MULTISIGSIGNERREMOVEDSUBMITTER"]._serialized_start = 1622
+    _globals["_ERC20MULTISIGSIGNERREMOVEDSUBMITTER"]._serialized_end = 1724
+    _globals["_ERC20MULTISIGSIGNERREMOVED"]._serialized_start = 1727
+    _globals["_ERC20MULTISIGSIGNERREMOVED"]._serialized_end = 2006
+    _globals["_TRANSFER"]._serialized_start = 2009
+    _globals["_TRANSFER"]._serialized_end = 2853
+    _globals["_TRANSFER_STATUS"]._serialized_start = 2702
+    _globals["_TRANSFER_STATUS"]._serialized_end = 2834
+    _globals["_ONEOFFGOVERNANCETRANSFER"]._serialized_start = 2855
+    _globals["_ONEOFFGOVERNANCETRANSFER"]._serialized_end = 2912
+    _globals["_ONEOFFTRANSFER"]._serialized_start = 2914
+    _globals["_ONEOFFTRANSFER"]._serialized_end = 2961
+    _globals["_RECURRINGTRANSFER"]._serialized_start = 2964
+    _globals["_RECURRINGTRANSFER"]._serialized_end = 3157
+    _globals["_RECURRINGGOVERNANCETRANSFER"]._serialized_start = 3160
+    _globals["_RECURRINGGOVERNANCETRANSFER"]._serialized_end = 3366
+    _globals["_STAKELINKING"]._serialized_start = 3369
+    _globals["_STAKELINKING"]._serialized_end = 3933
+    _globals["_STAKELINKING_TYPE"]._serialized_start = 3777
+    _globals["_STAKELINKING_TYPE"]._serialized_end = 3837
+    _globals["_STAKELINKING_STATUS"]._serialized_start = 3839
+    _globals["_STAKELINKING_STATUS"]._serialized_end = 3933
+    _globals["_ERC20MULTISIGSIGNEREVENT"]._serialized_start = 3936
+    _globals["_ERC20MULTISIGSIGNEREVENT"]._serialized_end = 4275
+    _globals["_ERC20MULTISIGSIGNEREVENT_TYPE"]._serialized_start = 4213
+    _globals["_ERC20MULTISIGSIGNEREVENT_TYPE"]._serialized_end = 4275
+    _globals["_ERC20MULTISIGTHRESHOLDSETEVENT"]._serialized_start = 4278
+    _globals["_ERC20MULTISIGTHRESHOLDSETEVENT"]._serialized_end = 4505
+    _globals["_CHECKPOINTEVENT"]._serialized_start = 4507
+    _globals["_CHECKPOINTEVENT"]._serialized_end = 4610
+    _globals["_STREAMSTARTEVENT"]._serialized_start = 4612
+    _globals["_STREAMSTARTEVENT"]._serialized_end = 4657
+    _globals["_REWARDPAYOUTEVENT"]._serialized_start = 4660
+    _globals["_REWARDPAYOUTEVENT"]._serialized_end = 4918
+    _globals["_VALIDATORSCOREEVENT"]._serialized_start = 4921
+    _globals["_VALIDATORSCOREEVENT"]._serialized_end = 5263
+    _globals["_DELEGATIONBALANCEEVENT"]._serialized_start = 5265
+    _globals["_DELEGATIONBALANCEEVENT"]._serialized_end = 5389
+    _globals["_MARKETEVENT"]._serialized_start = 5391
+    _globals["_MARKETEVENT"]._serialized_end = 5459
+    _globals["_TRANSACTIONRESULT"]._serialized_start = 5462
+    _globals["_TRANSACTIONRESULT"]._serialized_end = 8074
+    _globals["_TRANSACTIONRESULT_SUCCESSDETAILS"]._serialized_start = 7994
+    _globals["_TRANSACTIONRESULT_SUCCESSDETAILS"]._serialized_end = 8010
+    _globals["_TRANSACTIONRESULT_FAILUREDETAILS"]._serialized_start = 8012
+    _globals["_TRANSACTIONRESULT_FAILUREDETAILS"]._serialized_end = 8050
+    _globals["_TXERROREVENT"]._serialized_start = 8077
+    _globals["_TXERROREVENT"]._serialized_end = 9780
+    _globals["_TIMEUPDATE"]._serialized_start = 9782
+    _globals["_TIMEUPDATE"]._serialized_end = 9824
+    _globals["_EPOCHEVENT"]._serialized_start = 9827
+    _globals["_EPOCHEVENT"]._serialized_end = 9991
+    _globals["_LEDGERMOVEMENTS"]._serialized_start = 9993
+    _globals["_LEDGERMOVEMENTS"]._serialized_end = 10075
+    _globals["_POSITIONRESOLUTION"]._serialized_start = 10078
+    _globals["_POSITIONRESOLUTION"]._serialized_end = 10214
+    _globals["_LOSSSOCIALIZATION"]._serialized_start = 10216
+    _globals["_LOSSSOCIALIZATION"]._serialized_end = 10315
+    _globals["_TRADESETTLEMENT"]._serialized_start = 10317
+    _globals["_TRADESETTLEMENT"]._serialized_end = 10411
+    _globals["_SETTLEPOSITION"]._serialized_start = 10414
+    _globals["_SETTLEPOSITION"]._serialized_end = 10627
+    _globals["_SETTLEMARKET"]._serialized_start = 10629
+    _globals["_SETTLEMARKET"]._serialized_end = 10735
+    _globals["_POSITIONSTATEEVENT"]._serialized_start = 10738
+    _globals["_POSITIONSTATEEVENT"]._serialized_end = 10984
+    _globals["_SETTLEDISTRESSED"]._serialized_start = 10986
+    _globals["_SETTLEDISTRESSED"]._serialized_end = 11106
+    _globals["_DISTRESSEDORDERS"]._serialized_start = 11108
+    _globals["_DISTRESSEDORDERS"]._serialized_end = 11181
+    _globals["_DISTRESSEDPOSITIONS"]._serialized_start = 11184
+    _globals["_DISTRESSEDPOSITIONS"]._serialized_end = 11316
+    _globals["_MARKETTICK"]._serialized_start = 11318
+    _globals["_MARKETTICK"]._serialized_end = 11366
+    _globals["_AUCTIONEVENT"]._serialized_start = 11369
+    _globals["_AUCTIONEVENT"]._serialized_end = 11630
+    _globals["_VALIDATORUPDATE"]._serialized_start = 11633
+    _globals["_VALIDATORUPDATE"]._serialized_end = 12058
+    _globals["_VALIDATORRANKINGEVENT"]._serialized_start = 12061
+    _globals["_VALIDATORRANKINGEVENT"]._serialized_end = 12367
+    _globals["_KEYROTATION"]._serialized_start = 12370
+    _globals["_KEYROTATION"]._serialized_end = 12507
+    _globals["_ETHEREUMKEYROTATION"]._serialized_start = 12510
+    _globals["_ETHEREUMKEYROTATION"]._serialized_end = 12657
+    _globals["_PROTOCOLUPGRADEEVENT"]._serialized_start = 12660
+    _globals["_PROTOCOLUPGRADEEVENT"]._serialized_end = 12875
+    _globals["_STATEVAR"]._serialized_start = 12877
+    _globals["_STATEVAR"]._serialized_end = 12952
+    _globals["_BEGINBLOCK"]._serialized_start = 12954
+    _globals["_BEGINBLOCK"]._serialized_end = 13040
+    _globals["_ENDBLOCK"]._serialized_start = 13042
+    _globals["_ENDBLOCK"]._serialized_end = 13076
+    _globals["_PROTOCOLUPGRADESTARTED"]._serialized_start = 13078
+    _globals["_PROTOCOLUPGRADESTARTED"]._serialized_end = 13146
+    _globals["_PROTOCOLUPGRADEDATANODEREADY"]._serialized_start = 13148
+    _globals["_PROTOCOLUPGRADEDATANODEREADY"]._serialized_end = 13222
+    _globals["_CORESNAPSHOTDATA"]._serialized_start = 13225
+    _globals["_CORESNAPSHOTDATA"]._serialized_end = 13398
+    _globals["_EXPIREDORDERS"]._serialized_start = 13400
+    _globals["_EXPIREDORDERS"]._serialized_end = 13473
+    _globals["_TEAMCREATED"]._serialized_start = 13476
+    _globals["_TEAMCREATED"]._serialized_end = 13703
+    _globals["_TEAMUPDATED"]._serialized_start = 13706
+    _globals["_TEAMUPDATED"]._serialized_end = 13905
+    _globals["_REFEREESWITCHEDTEAM"]._serialized_start = 13908
+    _globals["_REFEREESWITCHEDTEAM"]._serialized_end = 14079
+    _globals["_REFEREEJOINEDTEAM"]._serialized_start = 14081
+    _globals["_REFEREEJOINEDTEAM"]._serialized_end = 14207
+    _globals["_REFERRALSETCREATED"]._serialized_start = 14210
+    _globals["_REFERRALSETCREATED"]._serialized_end = 14343
+    _globals["_REFEREEJOINEDREFERRALSET"]._serialized_start = 14346
+    _globals["_REFEREEJOINEDREFERRALSET"]._serialized_end = 14477
+    _globals["_REFERRALPROGRAMSTARTED"]._serialized_start = 14479
+    _globals["_REFERRALPROGRAMSTARTED"]._serialized_end = 14552
+    _globals["_REFERRALPROGRAMUPDATED"]._serialized_start = 14554
+    _globals["_REFERRALPROGRAMUPDATED"]._serialized_end = 14627
+    _globals["_REFERRALPROGRAMENDED"]._serialized_start = 14629
+    _globals["_REFERRALPROGRAMENDED"]._serialized_end = 14693
+    _globals["_BUSEVENT"]._serialized_start = 14696
+    _globals["_BUSEVENT"]._serialized_end = 20115
 # @@protoc_insertion_point(module_scope)

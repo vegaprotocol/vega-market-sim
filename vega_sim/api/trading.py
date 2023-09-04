@@ -284,10 +284,6 @@ def submit_simple_liquidity(
     market_id: str,
     commitment_amount: int,
     fee: float,
-    reference_buy: str,
-    reference_sell: str,
-    delta_buy: int,
-    delta_sell: int,
     is_amendment: bool = False,
     key_name: Optional[str] = None,
 ):
@@ -304,14 +300,6 @@ def submit_simple_liquidity(
             int, The amount in asset decimals of market asset to commit to liquidity provision
         fee:
             float, The fee level at which to set the LP fee (in %, e.g. 0.01 == 1% and 1 == 100%)
-        reference_buy:
-            str, the reference point to use for the buy side of LP
-        reference_sell:
-            str, the reference point to use for the sell side of LP
-        delta_buy:
-            int, the offset from reference point for the buy side of LP
-        delta_sell:
-            int, the offset from reference point for the sell side of LP
     """
     return submit_liquidity(
         wallet_name=wallet_name,

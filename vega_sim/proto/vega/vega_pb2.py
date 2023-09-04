@@ -382,19 +382,26 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b' \x01(\x0b\x32\x11.vega.MatrixValueH\x00R\tmatrixValB\x07\n\x05value"#\n\x0bScalarValue\x12\x14\n\x05value\x18\x01'
     b' \x01(\tR\x05value"#\n\x0bVectorValue\x12\x14\n\x05value\x18\x01'
     b" \x03(\tR\x05value\"6\n\x0bMatrixValue\x12'\n\x05value\x18\x01"
-    b' \x03(\x0b\x32\x11.vega.VectorValueR\x05value"\xd1\x01\n\x0fReferralProgram\x12\x18\n\x07version\x18\x01'
+    b' \x03(\x0b\x32\x11.vega.VectorValueR\x05value"\x89\x02\n\x0fReferralProgram\x12\x18\n\x07version\x18\x01'
     b" \x01(\x04R\x07version\x12\x0e\n\x02id\x18\x02"
     b" \x01(\tR\x02id\x12\x36\n\rbenefit_tiers\x18\x03"
     b" \x03(\x0b\x32\x11.vega.BenefitTierR\x0c\x62\x65nefitTiers\x12\x37\n\x18\x65nd_of_program_timestamp\x18\x04"
     b" \x01(\x03R\x15\x65ndOfProgramTimestamp\x12#\n\rwindow_length\x18\x05"
-    b' \x01(\x04R\x0cwindowLength"\xf6\x01\n\x0b\x42\x65nefitTier\x12P\n%minimum_running_notional_taker_volume\x18\x01'
+    b" \x01(\x04R\x0cwindowLength\x12\x36\n\rstaking_tiers\x18\x06"
+    b' \x03(\x0b\x32\x11.vega.StakingTierR\x0cstakingTiers"\xf6\x01\n\x0b\x42\x65nefitTier\x12P\n%minimum_running_notional_taker_volume\x18\x01'
     b" \x01(\tR!minimumRunningNotionalTakerVolume\x12%\n\x0eminimum_epochs\x18\x02"
     b" \x01(\tR\rminimumEpochs\x12\x34\n\x16referral_reward_factor\x18\x03"
     b" \x01(\tR\x14referralRewardFactor\x12\x38\n\x18referral_discount_factor\x18\x04"
     b' \x01(\tR\x16referralDiscountFactor"E\n\x13VestingBenefitTiers\x12.\n\x05tiers\x18\x01'
     b' \x03(\x0b\x32\x18.vega.VestingBenefitTierR\x05tiers"y\n\x12VestingBenefitTier\x12\x36\n\x17minimum_quantum_balance\x18\x01'
     b" \x01(\tR\x15minimumQuantumBalance\x12+\n\x11reward_multiplier\x18\x02"
-    b" \x01(\tR\x10rewardMultiplier*9\n\x04Side\x12\x14\n\x10SIDE_UNSPECIFIED\x10\x00\x12\x0c\n\x08SIDE_BUY\x10\x01\x12\r\n\tSIDE_SELL\x10\x02*\xb5\x01\n\x08Interval\x12\x18\n\x14INTERVAL_UNSPECIFIED\x10\x00\x12\x1b\n\x0eINTERVAL_BLOCK\x10\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\x12\x10\n\x0cINTERVAL_I1M\x10<\x12\x11\n\x0cINTERVAL_I5M\x10\xac\x02\x12\x12\n\rINTERVAL_I15M\x10\x84\x07\x12\x11\n\x0cINTERVAL_I1H\x10\x90\x1c\x12\x12\n\x0cINTERVAL_I6H\x10\xe0\xa8\x01\x12\x12\n\x0cINTERVAL_I1D\x10\x80\xa3\x05*\x94\x01\n\x0ePositionStatus\x12\x1f\n\x1bPOSITION_STATUS_UNSPECIFIED\x10\x00\x12!\n\x1dPOSITION_STATUS_ORDERS_CLOSED\x10\x01\x12\x1e\n\x1aPOSITION_STATUS_CLOSED_OUT\x10\x02\x12\x1e\n\x1aPOSITION_STATUS_DISTRESSED\x10\x04*\xb0\x02\n\x0e\x41uctionTrigger\x12\x1f\n\x1b\x41UCTION_TRIGGER_UNSPECIFIED\x10\x00\x12\x19\n\x15\x41UCTION_TRIGGER_BATCH\x10\x01\x12\x1b\n\x17\x41UCTION_TRIGGER_OPENING\x10\x02\x12\x19\n\x15\x41UCTION_TRIGGER_PRICE\x10\x03\x12\x1d\n\x19\x41UCTION_TRIGGER_LIQUIDITY\x10\x04\x12,\n(AUCTION_TRIGGER_LIQUIDITY_TARGET_NOT_MET\x10\x05\x12\x32\n*AUCTION_TRIGGER_UNABLE_TO_DEPLOY_LP_ORDERS\x10\x06\x1a\x02\x08\x01\x12)\n%AUCTION_TRIGGER_GOVERNANCE_SUSPENSION\x10\x07*\x8b\x01\n\x0fPeggedReference\x12"
+    b' \x01(\tR\x10rewardMultiplier"\x7f\n\x0bStakingTier\x12\x32\n\x15minimum_staked_tokens\x18\x01'
+    b" \x01(\tR\x13minimumStakedTokens\x12<\n\x1areferral_reward_multiplier\x18\x02"
+    b' \x01(\tR\x18referralRewardMultiplier"S\n\x1a\x41\x63tivityStreakBenefitTiers\x12\x35\n\x05tiers\x18\x01'
+    b' \x03(\x0b\x32\x1f.vega.ActivityStreakBenefitTierR\x05tiers"\xaf\x01\n\x19\x41\x63tivityStreakBenefitTier\x12\x36\n\x17minimum_activity_streak\x18\x01'
+    b" \x01(\x04R\x15minimumActivityStreak\x12+\n\x11reward_multiplier\x18\x02"
+    b" \x01(\tR\x10rewardMultiplier\x12-\n\x12vesting_multiplier\x18\x03"
+    b" \x01(\tR\x11vestingMultiplier*9\n\x04Side\x12\x14\n\x10SIDE_UNSPECIFIED\x10\x00\x12\x0c\n\x08SIDE_BUY\x10\x01\x12\r\n\tSIDE_SELL\x10\x02*\xb5\x01\n\x08Interval\x12\x18\n\x14INTERVAL_UNSPECIFIED\x10\x00\x12\x1b\n\x0eINTERVAL_BLOCK\x10\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\x12\x10\n\x0cINTERVAL_I1M\x10<\x12\x11\n\x0cINTERVAL_I5M\x10\xac\x02\x12\x12\n\rINTERVAL_I15M\x10\x84\x07\x12\x11\n\x0cINTERVAL_I1H\x10\x90\x1c\x12\x12\n\x0cINTERVAL_I6H\x10\xe0\xa8\x01\x12\x12\n\x0cINTERVAL_I1D\x10\x80\xa3\x05*\x94\x01\n\x0ePositionStatus\x12\x1f\n\x1bPOSITION_STATUS_UNSPECIFIED\x10\x00\x12!\n\x1dPOSITION_STATUS_ORDERS_CLOSED\x10\x01\x12\x1e\n\x1aPOSITION_STATUS_CLOSED_OUT\x10\x02\x12\x1e\n\x1aPOSITION_STATUS_DISTRESSED\x10\x04*\xb0\x02\n\x0e\x41uctionTrigger\x12\x1f\n\x1b\x41UCTION_TRIGGER_UNSPECIFIED\x10\x00\x12\x19\n\x15\x41UCTION_TRIGGER_BATCH\x10\x01\x12\x1b\n\x17\x41UCTION_TRIGGER_OPENING\x10\x02\x12\x19\n\x15\x41UCTION_TRIGGER_PRICE\x10\x03\x12\x1d\n\x19\x41UCTION_TRIGGER_LIQUIDITY\x10\x04\x12,\n(AUCTION_TRIGGER_LIQUIDITY_TARGET_NOT_MET\x10\x05\x12\x32\n*AUCTION_TRIGGER_UNABLE_TO_DEPLOY_LP_ORDERS\x10\x06\x1a\x02\x08\x01\x12)\n%AUCTION_TRIGGER_GOVERNANCE_SUSPENSION\x10\x07*\x8b\x01\n\x0fPeggedReference\x12"
     b" \n\x1cPEGGED_REFERENCE_UNSPECIFIED\x10\x00\x12\x18\n\x14PEGGED_REFERENCE_MID\x10\x01\x12\x1d\n\x19PEGGED_REFERENCE_BEST_BID\x10\x02\x12\x1d\n\x19PEGGED_REFERENCE_BEST_ASK\x10\x03*\xc9\x10\n\nOrderError\x12\x1b\n\x17ORDER_ERROR_UNSPECIFIED\x10\x00\x12!\n\x1dORDER_ERROR_INVALID_MARKET_ID\x10\x01\x12"
     b" \n\x1cORDER_ERROR_INVALID_ORDER_ID\x10\x02\x12\x1f\n\x1bORDER_ERROR_OUT_OF_SEQUENCE\x10\x03\x12&\n\"ORDER_ERROR_INVALID_REMAINING_SIZE\x10\x04\x12\x1c\n\x18ORDER_ERROR_TIME_FAILURE\x10\x05\x12\x1f\n\x1bORDER_ERROR_REMOVAL_FAILURE\x10\x06\x12+\n'ORDER_ERROR_INVALID_EXPIRATION_DATETIME\x10\x07\x12'\n#ORDER_ERROR_INVALID_ORDER_REFERENCE\x10\x08\x12"
     b" \n\x1cORDER_ERROR_EDIT_NOT_ALLOWED\x10\t\x12\x1d\n\x19ORDER_ERROR_AMEND_FAILURE\x10\n\x12\x19\n\x15ORDER_ERROR_NOT_FOUND\x10\x0b\x12"
@@ -426,38 +433,38 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _AUCTIONTRIGGER.values_by_name[
         "AUCTION_TRIGGER_UNABLE_TO_DEPLOY_LP_ORDERS"
     ]._serialized_options = b"\010\001"
-    _globals["_SIDE"]._serialized_start = 17576
-    _globals["_SIDE"]._serialized_end = 17633
-    _globals["_INTERVAL"]._serialized_start = 17636
-    _globals["_INTERVAL"]._serialized_end = 17817
-    _globals["_POSITIONSTATUS"]._serialized_start = 17820
-    _globals["_POSITIONSTATUS"]._serialized_end = 17968
-    _globals["_AUCTIONTRIGGER"]._serialized_start = 17971
-    _globals["_AUCTIONTRIGGER"]._serialized_end = 18275
-    _globals["_PEGGEDREFERENCE"]._serialized_start = 18278
-    _globals["_PEGGEDREFERENCE"]._serialized_end = 18417
-    _globals["_ORDERERROR"]._serialized_start = 18420
-    _globals["_ORDERERROR"]._serialized_end = 20541
-    _globals["_CHAINSTATUS"]._serialized_start = 20544
-    _globals["_CHAINSTATUS"]._serialized_end = 20674
-    _globals["_ACCOUNTTYPE"]._serialized_start = 20677
-    _globals["_ACCOUNTTYPE"]._serialized_end = 21642
-    _globals["_TRANSFERTYPE"]._serialized_start = 21645
-    _globals["_TRANSFERTYPE"]._serialized_end = 23020
-    _globals["_DISPATCHMETRIC"]._serialized_start = 23023
-    _globals["_DISPATCHMETRIC"]._serialized_end = 23375
-    _globals["_ENTITYSCOPE"]._serialized_start = 23377
-    _globals["_ENTITYSCOPE"]._serialized_end = 23474
-    _globals["_INDIVIDUALSCOPE"]._serialized_start = 23477
-    _globals["_INDIVIDUALSCOPE"]._serialized_end = 23618
-    _globals["_DISTRIBUTIONSTRATEGY"]._serialized_start = 23621
-    _globals["_DISTRIBUTIONSTRATEGY"]._serialized_end = 23750
-    _globals["_NODESTATUS"]._serialized_start = 23752
-    _globals["_NODESTATUS"]._serialized_end = 23851
-    _globals["_EPOCHACTION"]._serialized_start = 23853
-    _globals["_EPOCHACTION"]._serialized_end = 23942
-    _globals["_VALIDATORNODESTATUS"]._serialized_start = 23945
-    _globals["_VALIDATORNODESTATUS"]._serialized_end = 24112
+    _globals["_SIDE"]._serialized_start = 18024
+    _globals["_SIDE"]._serialized_end = 18081
+    _globals["_INTERVAL"]._serialized_start = 18084
+    _globals["_INTERVAL"]._serialized_end = 18265
+    _globals["_POSITIONSTATUS"]._serialized_start = 18268
+    _globals["_POSITIONSTATUS"]._serialized_end = 18416
+    _globals["_AUCTIONTRIGGER"]._serialized_start = 18419
+    _globals["_AUCTIONTRIGGER"]._serialized_end = 18723
+    _globals["_PEGGEDREFERENCE"]._serialized_start = 18726
+    _globals["_PEGGEDREFERENCE"]._serialized_end = 18865
+    _globals["_ORDERERROR"]._serialized_start = 18868
+    _globals["_ORDERERROR"]._serialized_end = 20989
+    _globals["_CHAINSTATUS"]._serialized_start = 20992
+    _globals["_CHAINSTATUS"]._serialized_end = 21122
+    _globals["_ACCOUNTTYPE"]._serialized_start = 21125
+    _globals["_ACCOUNTTYPE"]._serialized_end = 22090
+    _globals["_TRANSFERTYPE"]._serialized_start = 22093
+    _globals["_TRANSFERTYPE"]._serialized_end = 23468
+    _globals["_DISPATCHMETRIC"]._serialized_start = 23471
+    _globals["_DISPATCHMETRIC"]._serialized_end = 23823
+    _globals["_ENTITYSCOPE"]._serialized_start = 23825
+    _globals["_ENTITYSCOPE"]._serialized_end = 23922
+    _globals["_INDIVIDUALSCOPE"]._serialized_start = 23925
+    _globals["_INDIVIDUALSCOPE"]._serialized_end = 24066
+    _globals["_DISTRIBUTIONSTRATEGY"]._serialized_start = 24069
+    _globals["_DISTRIBUTIONSTRATEGY"]._serialized_end = 24198
+    _globals["_NODESTATUS"]._serialized_start = 24200
+    _globals["_NODESTATUS"]._serialized_end = 24299
+    _globals["_EPOCHACTION"]._serialized_start = 24301
+    _globals["_EPOCHACTION"]._serialized_end = 24390
+    _globals["_VALIDATORNODESTATUS"]._serialized_start = 24393
+    _globals["_VALIDATORNODESTATUS"]._serialized_end = 24560
     _globals["_STOPORDER"]._serialized_start = 46
     _globals["_STOPORDER"]._serialized_end = 1511
     _globals["_STOPORDER_EXPIRYSTRATEGY"]._serialized_start = 666
@@ -611,11 +618,17 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["_MATRIXVALUE"]._serialized_start = 16865
     _globals["_MATRIXVALUE"]._serialized_end = 16919
     _globals["_REFERRALPROGRAM"]._serialized_start = 16922
-    _globals["_REFERRALPROGRAM"]._serialized_end = 17131
-    _globals["_BENEFITTIER"]._serialized_start = 17134
-    _globals["_BENEFITTIER"]._serialized_end = 17380
-    _globals["_VESTINGBENEFITTIERS"]._serialized_start = 17382
-    _globals["_VESTINGBENEFITTIERS"]._serialized_end = 17451
-    _globals["_VESTINGBENEFITTIER"]._serialized_start = 17453
-    _globals["_VESTINGBENEFITTIER"]._serialized_end = 17574
+    _globals["_REFERRALPROGRAM"]._serialized_end = 17187
+    _globals["_BENEFITTIER"]._serialized_start = 17190
+    _globals["_BENEFITTIER"]._serialized_end = 17436
+    _globals["_VESTINGBENEFITTIERS"]._serialized_start = 17438
+    _globals["_VESTINGBENEFITTIERS"]._serialized_end = 17507
+    _globals["_VESTINGBENEFITTIER"]._serialized_start = 17509
+    _globals["_VESTINGBENEFITTIER"]._serialized_end = 17630
+    _globals["_STAKINGTIER"]._serialized_start = 17632
+    _globals["_STAKINGTIER"]._serialized_end = 17759
+    _globals["_ACTIVITYSTREAKBENEFITTIERS"]._serialized_start = 17761
+    _globals["_ACTIVITYSTREAKBENEFITTIERS"]._serialized_end = 17844
+    _globals["_ACTIVITYSTREAKBENEFITTIER"]._serialized_start = 17847
+    _globals["_ACTIVITYSTREAKBENEFITTIER"]._serialized_end = 18022
 # @@protoc_insertion_point(module_scope)

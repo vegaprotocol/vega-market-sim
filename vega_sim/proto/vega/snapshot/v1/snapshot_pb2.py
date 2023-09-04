@@ -41,7 +41,7 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b' \x03(\x0b\x32\x1a.vega.snapshot.v1.NodeHashR\nnodeHashes"V\n\x05\x43hunk\x12-\n\x04\x64\x61ta\x18\x01'
     b" \x03(\x0b\x32\x19.vega.snapshot.v1.PayloadR\x04\x64\x61ta\x12\x0e\n\x02nr\x18\x02"
     b" \x01(\x03R\x02nr\x12\x0e\n\x02of\x18\x03"
-    b' \x01(\x03R\x02of"\xb3\x30\n\x07Payload\x12\x45\n\ractive_assets\x18\x01'
+    b' \x01(\x03R\x02of"\x80\x31\n\x07Payload\x12\x45\n\ractive_assets\x18\x01'
     b" \x01(\x0b\x32\x1e.vega.snapshot.v1.ActiveAssetsH\x00R\x0c\x61\x63tiveAssets\x12H\n\x0epending_assets\x18\x02"
     b" \x01(\x0b\x32\x1f.vega.snapshot.v1.PendingAssetsH\x00R\rpendingAssets\x12W\n\x13\x62\x61nking_withdrawals\x18\x03"
     b" \x01(\x0b\x32$.vega.snapshot.v1.BankingWithdrawalsH\x00R\x12\x62\x61nkingWithdrawals\x12N\n\x10\x62\x61nking_deposits\x18\x04"
@@ -117,7 +117,9 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b" \x01(\x0b\x32\x19.vega.snapshot.v1.VestingH\x00R\x07vesting\x12\x64\n\x18\x63urrent_referral_program\x18I"
     b" \x01(\x0b\x32(.vega.snapshot.v1.CurrentReferralProgramH\x00R\x16\x63urrentReferralProgram\x12X\n\x14new_referral_program\x18J"
     b" \x01(\x0b\x32$.vega.snapshot.v1.NewReferralProgramH\x00R\x12newReferralProgram\x12\x45\n\rreferral_sets\x18K"
-    b' \x01(\x0b\x32\x1e.vega.snapshot.v1.ReferralSetsH\x00R\x0creferralSetsB\x06\n\x04\x64\x61ta"V\n\x16OrderHoldingQuantities\x12\x0e\n\x02id\x18\x01'
+    b" \x01(\x0b\x32\x1e.vega.snapshot.v1.ReferralSetsH\x00R\x0creferralSets\x12K\n\x0f\x61\x63tivity_streak\x18L"
+    b" \x01(\x0b\x32"
+    b' .vega.snapshot.v1.ActivityStreakH\x00R\x0e\x61\x63tivityStreakB\x06\n\x04\x64\x61ta"V\n\x16OrderHoldingQuantities\x12\x0e\n\x02id\x18\x01'
     b" \x01(\tR\x02id\x12\x1a\n\x08quantity\x18\x02"
     b" \x01(\tR\x08quantity\x12\x10\n\x03\x66\x65\x65\x18\x03"
     b' \x01(\tR\x03\x66\x65\x65"\x83\x01\n\x15HoldingAccountTracker\x12\x1b\n\tmarket_id\x18\x01'
@@ -201,13 +203,14 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b" \x03(\x0b\x32"
     b" .vega.snapshot.v1.StakingAccountR\x08\x61\x63\x63ounts\x12;\n\x1astaking_asset_total_supply\x18\x02"
     b" \x01(\tR\x17stakingAssetTotalSupply\x12S\n\x1apending_stake_total_supply\x18\x03"
-    b' \x01(\x0b\x32\x16.vega.StakeTotalSupplyR\x17pendingStakeTotalSupply"\xcc\x01\n\x0cMatchingBook\x12\x1b\n\tmarket_id\x18\x01'
+    b' \x01(\x0b\x32\x16.vega.StakeTotalSupplyR\x17pendingStakeTotalSupply"\xf6\x01\n\x0cMatchingBook\x12\x1b\n\tmarket_id\x18\x01'
     b" \x01(\tR\x08marketId\x12\x1d\n\x03\x62uy\x18\x02"
     b" \x03(\x0b\x32\x0b.vega.OrderR\x03\x62uy\x12\x1f\n\x04sell\x18\x03"
     b" \x03(\x0b\x32\x0b.vega.OrderR\x04sell\x12*\n\x11last_traded_price\x18\x04"
     b" \x01(\tR\x0flastTradedPrice\x12\x18\n\x07\x61uction\x18\x05"
     b" \x01(\x08R\x07\x61uction\x12\x19\n\x08\x62\x61tch_id\x18\x06"
-    b' \x01(\x04R\x07\x62\x61tchId";\n\tNetParams\x12.\n\x06params\x18\x01'
+    b" \x01(\x04R\x07\x62\x61tchId\x12(\n\x10pegged_order_ids\x18\x07"
+    b' \x03(\tR\x0epeggedOrderIds";\n\tNetParams\x12.\n\x06params\x18\x01'
     b' \x03(\x0b\x32\x16.vega.NetworkParameterR\x06params"0\n\nDecimalMap\x12\x10\n\x03key\x18\x01'
     b" \x01(\x03R\x03key\x12\x10\n\x03val\x18\x02"
     b' \x01(\tR\x03val"5\n\tTimePrice\x12\x12\n\x04time\x18\x01'
@@ -348,9 +351,14 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b" \x01(\tR\x05price\x12&\n\x0f\x62uy_sum_product\x18\x06"
     b" \x01(\tR\rbuySumProduct\x12(\n\x10sell_sum_product\x18\x07"
     b" \x01(\tR\x0esellSumProduct\x12\x1e\n\ndistressed\x18\x08"
-    b' \x01(\x08R\ndistressed"h\n\x0fMarketPositions\x12\x1b\n\tmarket_id\x18\x01'
+    b' \x01(\x08R\ndistressed"\xb7\x01\n\x0fMarketPositions\x12\x1b\n\tmarket_id\x18\x01'
     b" \x01(\tR\x08marketId\x12\x38\n\tpositions\x18\x02"
-    b' \x03(\x0b\x32\x1a.vega.snapshot.v1.PositionR\tpositions"\xee\x01\n\x0fSettlementState\x12\x1b\n\tmarket_id\x18\x01'
+    b" \x03(\x0b\x32\x1a.vega.snapshot.v1.PositionR\tpositions\x12M\n\x0fparties_records\x18\x03"
+    b' \x03(\x0b\x32$.vega.snapshot.v1.PartyPositionStatsR\x0epartiesRecords"\xca\x01\n\x12PartyPositionStats\x12\x14\n\x05party\x18\x01'
+    b" \x01(\tR\x05party\x12\x30\n\x14latest_open_interest\x18\x02"
+    b" \x01(\x04R\x12latestOpenInterest\x12\x30\n\x14lowest_open_interest\x18\x03"
+    b" \x01(\x04R\x12lowestOpenInterest\x12(\n\rtraded_volume\x18\x04"
+    b' \x01(\x04H\x00R\x0ctradedVolume\x88\x01\x01\x42\x10\n\x0e_traded_volume"\xee\x01\n\x0fSettlementState\x12\x1b\n\tmarket_id\x18\x01'
     b" \x01(\tR\x08marketId\x12&\n\x0flast_mark_price\x18\x02"
     b" \x01(\tR\rlastMarkPrice\x12[\n\x16last_settled_positions\x18\x03"
     b" \x03(\x0b\x32%.vega.snapshot.v1.LastSettledPositionR\x14lastSettledPositions\x12\x39\n\x06trades\x18\x04"
@@ -589,10 +597,10 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b" \x01(\tR\x07teamUrl\x12\x1d\n\navatar_url\x18\x06"
     b" \x01(\tR\tavatarUrl\x12\x1d\n\ncreated_at\x18\x07"
     b" \x01(\x03R\tcreatedAt\x12\x16\n\x06\x63losed\x18\x08"
-    b' \x01(\x08R\x06\x63losed"l\n\nMembership\x12\x19\n\x08party_id\x18\x01'
+    b' \x01(\x08R\x06\x63losed"n\n\nMembership\x12\x19\n\x08party_id\x18\x01'
     b" \x01(\tR\x07partyId\x12\x1b\n\tjoined_at\x18\x02"
-    b" \x01(\x03R\x08joinedAt\x12&\n\x0fnumber_of_epoch\x18\x03"
-    b' \x01(\x04R\rnumberOfEpoch"Q\n\x0cTeamSwitches\x12\x41\n\rteam_switches\x18\x01'
+    b" \x01(\x03R\x08joinedAt\x12(\n\x10started_at_epoch\x18\x03"
+    b' \x01(\x04R\x0estartedAtEpoch"Q\n\x0cTeamSwitches\x12\x41\n\rteam_switches\x18\x01'
     b' \x03(\x0b\x32\x1c.vega.snapshot.v1.TeamSwitchR\x0cteamSwitches"g\n\nTeamSwitch\x12'
     b" \n\x0c\x66rom_team_id\x18\x01 \x01(\tR\nfromTeamId\x12\x1c\n\nto_team_id\x18\x02"
     b" \x01(\tR\x08toTeamId\x12\x19\n\x08party_id\x18\x03"
@@ -603,18 +611,27 @@ DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
     b' \x03(\x0b\x32\x1b.vega.snapshot.v1.InVestingR\tinVesting"Z\n\x16\x43urrentReferralProgram\x12@\n\x10referral_program\x18\x01'
     b' \x01(\x0b\x32\x15.vega.ReferralProgramR\x0freferralProgram"V\n\x12NewReferralProgram\x12@\n\x10referral_program\x18\x01'
     b' \x01(\x0b\x32\x15.vega.ReferralProgramR\x0freferralProgram"A\n\x0cReferralSets\x12\x31\n\x04sets\x18\x01'
-    b' \x03(\x0b\x32\x1d.vega.snapshot.v1.ReferralSetR\x04sets"\xcf\x01\n\x0bReferralSet\x12\x0e\n\x02id\x18\x01'
+    b' \x03(\x0b\x32\x1d.vega.snapshot.v1.ReferralSetR\x04sets"\x99\x02\n\x0bReferralSet\x12\x0e\n\x02id\x18\x01'
     b" \x01(\tR\x02id\x12\x1d\n\ncreated_at\x18\x02"
     b" \x01(\x03R\tcreatedAt\x12\x1d\n\nupdated_at\x18\x03"
     b" \x01(\x03R\tupdatedAt\x12\x38\n\x08referrer\x18\x04"
     b" \x01(\x0b\x32\x1c.vega.snapshot.v1.MembershipR\x08referrer\x12\x38\n\x08referees\x18\x05"
-    b' \x03(\x0b\x32\x1c.vega.snapshot.v1.MembershipR\x08referees"j\n\x0b\x41ssetLocked\x12\x14\n\x05\x61sset\x18\x01'
+    b" \x03(\x0b\x32\x1c.vega.snapshot.v1.MembershipR\x08referees\x12H\n\x0frunning_volumes\x18\x06"
+    b' \x03(\x0b\x32\x1f.vega.snapshot.v1.RunningVolumeR\x0erunningVolumes"=\n\rRunningVolume\x12\x14\n\x05\x65poch\x18\x01'
+    b" \x01(\x04R\x05\x65poch\x12\x16\n\x06volume\x18\x02"
+    b' \x01(\tR\x06volume"j\n\x0b\x41ssetLocked\x12\x14\n\x05\x61sset\x18\x01'
     b" \x01(\tR\x05\x61sset\x12\x45\n\x0e\x65poch_balances\x18\x02"
     b' \x03(\x0b\x32\x1e.vega.snapshot.v1.EpochBalanceR\repochBalances">\n\x0c\x45pochBalance\x12\x14\n\x05\x65poch\x18\x01'
     b" \x01(\x04R\x05\x65poch\x12\x18\n\x07\x62\x61lance\x18\x02"
     b' \x01(\tR\x07\x62\x61lance";\n\tInVesting\x12\x14\n\x05\x61sset\x18\x01'
     b" \x01(\tR\x05\x61sset\x12\x18\n\x07\x62\x61lance\x18\x02"
-    b" \x01(\tR\x07\x62\x61lance*`\n\x06\x46ormat\x12\x16\n\x12\x46ORMAT_UNSPECIFIED\x10\x00\x12\x10\n\x0c\x46ORMAT_PROTO\x10\x01\x12\x1b\n\x17\x46ORMAT_PROTO_COMPRESSED\x10\x02\x12\x0f\n\x0b\x46ORMAT_JSON\x10\x03\x42\x33Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1b\x06proto3"
+    b' \x01(\tR\x07\x62\x61lance"o\n\x0e\x41\x63tivityStreak\x12]\n\x17parties_activity_streak\x18\x01'
+    b' \x03(\x0b\x32%.vega.snapshot.v1.PartyActivityStreakR\x15partiesActivityStreak"\xe1\x01\n\x13PartyActivityStreak\x12\x14\n\x05party\x18\x01'
+    b" \x01(\tR\x05party\x12\x16\n\x06\x61\x63tive\x18\x02"
+    b" \x01(\x04R\x06\x61\x63tive\x12\x1a\n\x08inactive\x18\x03"
+    b" \x01(\x04R\x08inactive\x12\x44\n\x1ereward_distribution_multiplier\x18\x04"
+    b" \x01(\tR\x1crewardDistributionMultiplier\x12:\n\x19reward_vesting_multiplier\x18\x05"
+    b" \x01(\tR\x17rewardVestingMultiplier*`\n\x06\x46ormat\x12\x16\n\x12\x46ORMAT_UNSPECIFIED\x10\x00\x12\x10\n\x0c\x46ORMAT_PROTO\x10\x01\x12\x1b\n\x17\x46ORMAT_PROTO_COMPRESSED\x10\x02\x12\x0f\n\x0b\x46ORMAT_JSON\x10\x03\x42\x33Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1b\x06proto3"
 )
 
 _globals = globals()
@@ -627,8 +644,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     DESCRIPTOR._serialized_options = (
         b"Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1"
     )
-    _globals["_FORMAT"]._serialized_start = 32030
-    _globals["_FORMAT"]._serialized_end = 32126
+    _globals["_FORMAT"]._serialized_start = 32914
+    _globals["_FORMAT"]._serialized_end = 33010
     _globals["_SNAPSHOT"]._serialized_start = 249
     _globals["_SNAPSHOT"]._serialized_end = 405
     _globals["_NODEHASH"]._serialized_start = 407
@@ -638,309 +655,317 @@ if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["_CHUNK"]._serialized_start = 667
     _globals["_CHUNK"]._serialized_end = 753
     _globals["_PAYLOAD"]._serialized_start = 756
-    _globals["_PAYLOAD"]._serialized_end = 6951
-    _globals["_ORDERHOLDINGQUANTITIES"]._serialized_start = 6953
-    _globals["_ORDERHOLDINGQUANTITIES"]._serialized_end = 7039
-    _globals["_HOLDINGACCOUNTTRACKER"]._serialized_start = 7042
-    _globals["_HOLDINGACCOUNTTRACKER"]._serialized_end = 7173
-    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_start = 7175
-    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_end = 7251
-    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_start = 7253
-    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_end = 7335
-    _globals["_LIQUIDITYTARGET"]._serialized_start = 7338
-    _globals["_LIQUIDITYTARGET"]._serialized_end = 7708
-    _globals["_SPOTLIQUIDITYTARGET"]._serialized_start = 7711
-    _globals["_SPOTLIQUIDITYTARGET"]._serialized_end = 8063
-    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_start = 8065
-    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_end = 8155
-    _globals["_LIQUIDITYSUPPLIED"]._serialized_start = 8158
-    _globals["_LIQUIDITYSUPPLIED"]._serialized_end = 8409
-    _globals["_ORACLEDATABATCH"]._serialized_start = 8411
-    _globals["_ORACLEDATABATCH"]._serialized_end = 8491
-    _globals["_ORACLEDATA"]._serialized_start = 8494
-    _globals["_ORACLEDATA"]._serialized_end = 8661
-    _globals["_ORACLEDATAPAIR"]._serialized_start = 8663
-    _globals["_ORACLEDATAPAIR"]._serialized_end = 8719
-    _globals["_WITNESS"]._serialized_start = 8721
-    _globals["_WITNESS"]._serialized_end = 8788
-    _globals["_RESOURCE"]._serialized_start = 8790
-    _globals["_RESOURCE"]._serialized_end = 8893
-    _globals["_EVENTFORWARDER"]._serialized_start = 8895
-    _globals["_EVENTFORWARDER"]._serialized_end = 8946
-    _globals["_COLLATERALACCOUNTS"]._serialized_start = 8948
-    _globals["_COLLATERALACCOUNTS"]._serialized_end = 9011
-    _globals["_COLLATERALASSETS"]._serialized_start = 9013
-    _globals["_COLLATERALASSETS"]._serialized_end = 9068
-    _globals["_ACTIVEASSETS"]._serialized_start = 9070
-    _globals["_ACTIVEASSETS"]._serialized_end = 9121
-    _globals["_PENDINGASSETS"]._serialized_start = 9123
-    _globals["_PENDINGASSETS"]._serialized_end = 9175
-    _globals["_PENDINGASSETUPDATES"]._serialized_start = 9177
-    _globals["_PENDINGASSETUPDATES"]._serialized_end = 9235
-    _globals["_WITHDRAWAL"]._serialized_start = 9237
-    _globals["_WITHDRAWAL"]._serialized_end = 9317
-    _globals["_DEPOSIT"]._serialized_start = 9319
-    _globals["_DEPOSIT"]._serialized_end = 9385
-    _globals["_TXREF"]._serialized_start = 9387
-    _globals["_TXREF"]._serialized_end = 9492
-    _globals["_BANKINGWITHDRAWALS"]._serialized_start = 9494
-    _globals["_BANKINGWITHDRAWALS"]._serialized_end = 9578
-    _globals["_BANKINGDEPOSITS"]._serialized_start = 9580
-    _globals["_BANKINGDEPOSITS"]._serialized_end = 9650
-    _globals["_BANKINGSEEN"]._serialized_start = 9652
-    _globals["_BANKINGSEEN"]._serialized_end = 9732
-    _globals["_BANKINGASSETACTIONS"]._serialized_start = 9734
-    _globals["_BANKINGASSETACTIONS"]._serialized_end = 9823
-    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_start = 9825
-    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_end = 9941
-    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_start = 9943
-    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_end = 10059
-    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_start = 10061
-    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_end = 10187
-    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_start = 10190
-    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_end = 10326
-    _globals["_BANKINGBRIDGESTATE"]._serialized_start = 10328
-    _globals["_BANKINGBRIDGESTATE"]._serialized_end = 10416
-    _globals["_CHECKPOINT"]._serialized_start = 10418
-    _globals["_CHECKPOINT"]._serialized_end = 10455
-    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_start = 10457
-    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_end = 10549
-    _globals["_DELEGATIONACTIVE"]._serialized_start = 10551
-    _globals["_DELEGATIONACTIVE"]._serialized_end = 10621
-    _globals["_DELEGATIONPENDING"]._serialized_start = 10623
-    _globals["_DELEGATIONPENDING"]._serialized_end = 10748
-    _globals["_DELEGATIONAUTO"]._serialized_start = 10750
-    _globals["_DELEGATIONAUTO"]._serialized_end = 10792
-    _globals["_PROPOSALDATA"]._serialized_start = 10795
-    _globals["_PROPOSALDATA"]._serialized_end = 10949
-    _globals["_GOVERNANCEENACTED"]._serialized_start = 10951
-    _globals["_GOVERNANCEENACTED"]._serialized_end = 11032
-    _globals["_GOVERNANCEACTIVE"]._serialized_start = 11034
-    _globals["_GOVERNANCEACTIVE"]._serialized_end = 11114
-    _globals["_GOVERNANCENODE"]._serialized_start = 11116
-    _globals["_GOVERNANCENODE"]._serialized_end = 11178
-    _globals["_STAKINGACCOUNT"]._serialized_start = 11180
-    _globals["_STAKINGACCOUNT"]._serialized_end = 11298
-    _globals["_STAKINGACCOUNTS"]._serialized_start = 11301
-    _globals["_STAKINGACCOUNTS"]._serialized_end = 11526
-    _globals["_MATCHINGBOOK"]._serialized_start = 11529
-    _globals["_MATCHINGBOOK"]._serialized_end = 11733
-    _globals["_NETPARAMS"]._serialized_start = 11735
-    _globals["_NETPARAMS"]._serialized_end = 11794
-    _globals["_DECIMALMAP"]._serialized_start = 11796
-    _globals["_DECIMALMAP"]._serialized_end = 11844
-    _globals["_TIMEPRICE"]._serialized_start = 11846
-    _globals["_TIMEPRICE"]._serialized_end = 11899
-    _globals["_PRICEVOLUME"]._serialized_start = 11901
-    _globals["_PRICEVOLUME"]._serialized_end = 11960
-    _globals["_PRICERANGE"]._serialized_start = 11962
-    _globals["_PRICERANGE"]._serialized_end = 12028
-    _globals["_PRICEBOUND"]._serialized_start = 12031
-    _globals["_PRICEBOUND"]._serialized_end = 12185
-    _globals["_PRICERANGECACHE"]._serialized_start = 12187
-    _globals["_PRICERANGECACHE"]._serialized_end = 12308
-    _globals["_CURRENTPRICE"]._serialized_start = 12310
-    _globals["_CURRENTPRICE"]._serialized_end = 12370
-    _globals["_PASTPRICE"]._serialized_start = 12372
-    _globals["_PASTPRICE"]._serialized_end = 12455
-    _globals["_PRICEMONITOR"]._serialized_start = 12458
-    _globals["_PRICEMONITOR"]._serialized_end = 13086
-    _globals["_AUCTIONSTATE"]._serialized_start = 13089
-    _globals["_AUCTIONSTATE"]._serialized_end = 13465
-    _globals["_EQUITYSHARELP"]._serialized_start = 13467
-    _globals["_EQUITYSHARELP"]._serialized_end = 13584
-    _globals["_EQUITYSHARE"]._serialized_start = 13587
-    _globals["_EQUITYSHARE"]._serialized_end = 13756
-    _globals["_FEESPLITTER"]._serialized_start = 13759
-    _globals["_FEESPLITTER"]._serialized_end = 13891
-    _globals["_SPOTMARKET"]._serialized_start = 13894
-    _globals["_SPOTMARKET"]._serialized_end = 14912
-    _globals["_MARKET"]._serialized_start = 14915
-    _globals["_MARKET"]._serialized_end = 16206
-    _globals["_PRODUCT"]._serialized_start = 16208
-    _globals["_PRODUCT"]._serialized_end = 16274
-    _globals["_DATAPOINT"]._serialized_start = 16276
-    _globals["_DATAPOINT"]._serialized_end = 16339
-    _globals["_PERPS"]._serialized_start = 16342
-    _globals["_PERPS"]._serialized_end = 16568
-    _globals["_ORDERSATPRICE"]._serialized_start = 16570
-    _globals["_ORDERSATPRICE"]._serialized_end = 16631
-    _globals["_PRICEDSTOPORDERS"]._serialized_start = 16634
-    _globals["_PRICEDSTOPORDERS"]._serialized_end = 16786
-    _globals["_TRAILINGSTOPORDERS"]._serialized_start = 16789
-    _globals["_TRAILINGSTOPORDERS"]._serialized_end = 16985
-    _globals["_ORDERSATOFFSET"]._serialized_start = 16987
-    _globals["_ORDERSATOFFSET"]._serialized_end = 17051
-    _globals["_OFFSETSATPRICE"]._serialized_start = 17053
-    _globals["_OFFSETSATPRICE"]._serialized_end = 17151
-    _globals["_STOPORDERS"]._serialized_start = 17154
-    _globals["_STOPORDERS"]._serialized_end = 17401
-    _globals["_PEGGEDORDERS"]._serialized_start = 17403
-    _globals["_PEGGEDORDERS"]._serialized_end = 17467
-    _globals["_EXECUTIONMARKETS"]._serialized_start = 17470
-    _globals["_EXECUTIONMARKETS"]._serialized_end = 17772
-    _globals["_SUCCESSORS"]._serialized_start = 17774
-    _globals["_SUCCESSORS"]._serialized_end = 17868
-    _globals["_POSITION"]._serialized_start = 17871
-    _globals["_POSITION"]._serialized_end = 18102
-    _globals["_MARKETPOSITIONS"]._serialized_start = 18104
-    _globals["_MARKETPOSITIONS"]._serialized_end = 18208
-    _globals["_SETTLEMENTSTATE"]._serialized_start = 18211
-    _globals["_SETTLEMENTSTATE"]._serialized_end = 18449
-    _globals["_LASTSETTLEDPOSITION"]._serialized_start = 18451
-    _globals["_LASTSETTLEDPOSITION"]._serialized_end = 18537
-    _globals["_SETTLEMENTTRADE"]._serialized_start = 18540
-    _globals["_SETTLEMENTTRADE"]._serialized_end = 18688
-    _globals["_APPSTATE"]._serialized_start = 18690
-    _globals["_APPSTATE"]._serialized_end = 18793
-    _globals["_EPOCHSTATE"]._serialized_start = 18796
-    _globals["_EPOCHSTATE"]._serialized_end = 18991
-    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_start = 18993
-    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_end = 19116
-    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_start = 19119
-    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_end = 19248
-    _globals["_REWARDSPAYOUT"]._serialized_start = 19251
-    _globals["_REWARDSPAYOUT"]._serialized_end = 19503
-    _globals["_REWARDSPARTYAMOUNT"]._serialized_start = 19505
-    _globals["_REWARDSPARTYAMOUNT"]._serialized_end = 19571
-    _globals["_LIMITSTATE"]._serialized_start = 19574
-    _globals["_LIMITSTATE"]._serialized_end = 20106
-    _globals["_VOTESPAMPOLICY"]._serialized_start = 20109
-    _globals["_VOTESPAMPOLICY"]._serialized_end = 20641
-    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_start = 20643
-    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_end = 20739
-    _globals["_PARTYTOKENBALANCE"]._serialized_start = 20741
-    _globals["_PARTYTOKENBALANCE"]._serialized_end = 20808
-    _globals["_BLOCKREJECTSTATS"]._serialized_start = 20810
-    _globals["_BLOCKREJECTSTATS"]._serialized_end = 20878
-    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_start = 20880
-    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_end = 20951
-    _globals["_SIMPLESPAMPOLICY"]._serialized_start = 20954
-    _globals["_SIMPLESPAMPOLICY"]._serialized_end = 21276
-    _globals["_NOTARYSIGS"]._serialized_start = 21278
-    _globals["_NOTARYSIGS"]._serialized_end = 21390
-    _globals["_NOTARY"]._serialized_start = 21392
-    _globals["_NOTARY"]._serialized_end = 21463
-    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_start = 21465
-    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_end = 21574
-    _globals["_STAKEVERIFIERREMOVED"]._serialized_start = 21576
-    _globals["_STAKEVERIFIERREMOVED"]._serialized_end = 21679
-    _globals["_STAKEVERIFIERPENDING"]._serialized_start = 21682
-    _globals["_STAKEVERIFIERPENDING"]._serialized_end = 21943
-    _globals["_ETHORACLEVERIFIERLASTBLOCK"]._serialized_start = 21945
-    _globals["_ETHORACLEVERIFIERLASTBLOCK"]._serialized_end = 22039
-    _globals["_ETHCONTRACTCALLRESULTS"]._serialized_start = 22042
-    _globals["_ETHCONTRACTCALLRESULTS"]._serialized_end = 22172
-    _globals["_ETHCONTRACTCALLRESULT"]._serialized_start = 22175
-    _globals["_ETHCONTRACTCALLRESULT"]._serialized_end = 22350
-    _globals["_PENDINGKEYROTATION"]._serialized_start = 22353
-    _globals["_PENDINGKEYROTATION"]._serialized_end = 22508
-    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_start = 22511
-    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_end = 22695
-    _globals["_TOPOLOGY"]._serialized_start = 22698
-    _globals["_TOPOLOGY"]._serialized_end = 23303
-    _globals["_TOPLOGYSIGNATURES"]._serialized_start = 23306
-    _globals["_TOPLOGYSIGNATURES"]._serialized_end = 23528
-    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 23531
-    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 23710
-    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 23713
-    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 23871
-    _globals["_VALIDATORSTATE"]._serialized_start = 23874
-    _globals["_VALIDATORSTATE"]._serialized_end = 24372
-    _globals["_HEARTBEATTRACKER"]._serialized_start = 24375
-    _globals["_HEARTBEATTRACKER"]._serialized_end = 24560
-    _globals["_PERFORMANCESTATS"]._serialized_start = 24563
-    _globals["_PERFORMANCESTATS"]._serialized_end = 24844
-    _globals["_VALIDATORPERFORMANCE"]._serialized_start = 24846
-    _globals["_VALIDATORPERFORMANCE"]._serialized_end = 24954
-    _globals["_LIQUIDITYPARAMETERS"]._serialized_start = 24957
-    _globals["_LIQUIDITYPARAMETERS"]._serialized_end = 25131
-    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_start = 25133
-    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_end = 25237
-    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_start = 25240
-    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_end = 25368
-    _globals["_PARTYORDERS"]._serialized_start = 25370
-    _globals["_PARTYORDERS"]._serialized_end = 25442
-    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_start = 25444
-    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_end = 25563
-    _globals["_LIQUIDITYPROVISIONS"]._serialized_start = 25565
-    _globals["_LIQUIDITYPROVISIONS"]._serialized_end = 25692
-    _globals["_LIQUIDITYSCORES"]._serialized_start = 25695
-    _globals["_LIQUIDITYSCORES"]._serialized_end = 25855
-    _globals["_LIQUIDITYSCORE"]._serialized_start = 25857
-    _globals["_LIQUIDITYSCORE"]._serialized_end = 25922
-    _globals["_LIQUIDITYV2PROVISIONS"]._serialized_start = 25925
-    _globals["_LIQUIDITYV2PROVISIONS"]._serialized_end = 26054
-    _globals["_LIQUIDITYV2PENDINGPROVISIONS"]._serialized_start = 26057
-    _globals["_LIQUIDITYV2PENDINGPROVISIONS"]._serialized_end = 26208
-    _globals["_LIQUIDITYV2PERFORMANCES"]._serialized_start = 26211
-    _globals["_LIQUIDITYV2PERFORMANCES"]._serialized_end = 26409
-    _globals["_LIQUIDITYV2PERFORMANCEPERPARTY"]._serialized_start = 26412
-    _globals["_LIQUIDITYV2PERFORMANCEPERPARTY"]._serialized_end = 26738
-    _globals["_LIQUIDITYV2SCORES"]._serialized_start = 26741
-    _globals["_LIQUIDITYV2SCORES"]._serialized_end = 26964
-    _globals["_LIQUIDITYV2SUPPLIED"]._serialized_start = 26967
-    _globals["_LIQUIDITYV2SUPPLIED"]._serialized_end = 27220
-    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_start = 27223
-    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_end = 27408
-    _globals["_STATEVARINTERNALSTATE"]._serialized_start = 27411
-    _globals["_STATEVARINTERNALSTATE"]._serialized_end = 27663
-    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_start = 27665
-    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_end = 27757
-    _globals["_NEXTTIMETRIGGER"]._serialized_start = 27759
-    _globals["_NEXTTIMETRIGGER"]._serialized_end = 27873
-    _globals["_MARKETTRACKER"]._serialized_start = 27876
-    _globals["_MARKETTRACKER"]._serialized_end = 28068
-    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_start = 28070
-    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_end = 28186
-    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_start = 28189
-    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_end = 28445
-    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_start = 28448
-    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_end = 28764
-    _globals["_PROOFOFWORK"]._serialized_start = 28767
-    _globals["_PROOFOFWORK"]._serialized_end = 29230
-    _globals["_BANNEDPARTY"]._serialized_start = 29232
-    _globals["_BANNEDPARTY"]._serialized_end = 29289
-    _globals["_PROOFOFWORKPARAMS"]._serialized_start = 29292
-    _globals["_PROOFOFWORKPARAMS"]._serialized_end = 29680
-    _globals["_PROOFOFWORKSTATE"]._serialized_start = 29682
-    _globals["_PROOFOFWORKSTATE"]._serialized_end = 29770
-    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_start = 29773
-    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_end = 29913
-    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_start = 29916
-    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_end = 30049
-    _globals["_TRANSACTIONSATHEIGHT"]._serialized_start = 30051
-    _globals["_TRANSACTIONSATHEIGHT"]._serialized_end = 30133
-    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_start = 30136
-    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_end = 30339
-    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_start = 30341
-    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_end = 30466
-    _globals["_TEAMS"]._serialized_start = 30468
-    _globals["_TEAMS"]._serialized_end = 30521
-    _globals["_TEAM"]._serialized_start = 30524
-    _globals["_TEAM"]._serialized_end = 30795
-    _globals["_MEMBERSHIP"]._serialized_start = 30797
-    _globals["_MEMBERSHIP"]._serialized_end = 30905
-    _globals["_TEAMSWITCHES"]._serialized_start = 30907
-    _globals["_TEAMSWITCHES"]._serialized_end = 30988
-    _globals["_TEAMSWITCH"]._serialized_start = 30990
-    _globals["_TEAMSWITCH"]._serialized_end = 31093
-    _globals["_VESTING"]._serialized_start = 31095
-    _globals["_VESTING"]._serialized_end = 31174
-    _globals["_PARTYREWARD"]._serialized_start = 31177
-    _globals["_PARTYREWARD"]._serialized_end = 31338
-    _globals["_CURRENTREFERRALPROGRAM"]._serialized_start = 31340
-    _globals["_CURRENTREFERRALPROGRAM"]._serialized_end = 31430
-    _globals["_NEWREFERRALPROGRAM"]._serialized_start = 31432
-    _globals["_NEWREFERRALPROGRAM"]._serialized_end = 31518
-    _globals["_REFERRALSETS"]._serialized_start = 31520
-    _globals["_REFERRALSETS"]._serialized_end = 31585
-    _globals["_REFERRALSET"]._serialized_start = 31588
-    _globals["_REFERRALSET"]._serialized_end = 31795
-    _globals["_ASSETLOCKED"]._serialized_start = 31797
-    _globals["_ASSETLOCKED"]._serialized_end = 31903
-    _globals["_EPOCHBALANCE"]._serialized_start = 31905
-    _globals["_EPOCHBALANCE"]._serialized_end = 31967
-    _globals["_INVESTING"]._serialized_start = 31969
-    _globals["_INVESTING"]._serialized_end = 32028
+    _globals["_PAYLOAD"]._serialized_end = 7028
+    _globals["_ORDERHOLDINGQUANTITIES"]._serialized_start = 7030
+    _globals["_ORDERHOLDINGQUANTITIES"]._serialized_end = 7116
+    _globals["_HOLDINGACCOUNTTRACKER"]._serialized_start = 7119
+    _globals["_HOLDINGACCOUNTTRACKER"]._serialized_end = 7250
+    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_start = 7252
+    _globals["_TIMESTAMPEDTOTALSTAKE"]._serialized_end = 7328
+    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_start = 7330
+    _globals["_TIMESTAMPEDOPENINTEREST"]._serialized_end = 7412
+    _globals["_LIQUIDITYTARGET"]._serialized_start = 7415
+    _globals["_LIQUIDITYTARGET"]._serialized_end = 7785
+    _globals["_SPOTLIQUIDITYTARGET"]._serialized_start = 7788
+    _globals["_SPOTLIQUIDITYTARGET"]._serialized_end = 8140
+    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_start = 8142
+    _globals["_LIQUIDITYOFFSETPROBABILITYPAIR"]._serialized_end = 8232
+    _globals["_LIQUIDITYSUPPLIED"]._serialized_start = 8235
+    _globals["_LIQUIDITYSUPPLIED"]._serialized_end = 8486
+    _globals["_ORACLEDATABATCH"]._serialized_start = 8488
+    _globals["_ORACLEDATABATCH"]._serialized_end = 8568
+    _globals["_ORACLEDATA"]._serialized_start = 8571
+    _globals["_ORACLEDATA"]._serialized_end = 8738
+    _globals["_ORACLEDATAPAIR"]._serialized_start = 8740
+    _globals["_ORACLEDATAPAIR"]._serialized_end = 8796
+    _globals["_WITNESS"]._serialized_start = 8798
+    _globals["_WITNESS"]._serialized_end = 8865
+    _globals["_RESOURCE"]._serialized_start = 8867
+    _globals["_RESOURCE"]._serialized_end = 8970
+    _globals["_EVENTFORWARDER"]._serialized_start = 8972
+    _globals["_EVENTFORWARDER"]._serialized_end = 9023
+    _globals["_COLLATERALACCOUNTS"]._serialized_start = 9025
+    _globals["_COLLATERALACCOUNTS"]._serialized_end = 9088
+    _globals["_COLLATERALASSETS"]._serialized_start = 9090
+    _globals["_COLLATERALASSETS"]._serialized_end = 9145
+    _globals["_ACTIVEASSETS"]._serialized_start = 9147
+    _globals["_ACTIVEASSETS"]._serialized_end = 9198
+    _globals["_PENDINGASSETS"]._serialized_start = 9200
+    _globals["_PENDINGASSETS"]._serialized_end = 9252
+    _globals["_PENDINGASSETUPDATES"]._serialized_start = 9254
+    _globals["_PENDINGASSETUPDATES"]._serialized_end = 9312
+    _globals["_WITHDRAWAL"]._serialized_start = 9314
+    _globals["_WITHDRAWAL"]._serialized_end = 9394
+    _globals["_DEPOSIT"]._serialized_start = 9396
+    _globals["_DEPOSIT"]._serialized_end = 9462
+    _globals["_TXREF"]._serialized_start = 9464
+    _globals["_TXREF"]._serialized_end = 9569
+    _globals["_BANKINGWITHDRAWALS"]._serialized_start = 9571
+    _globals["_BANKINGWITHDRAWALS"]._serialized_end = 9655
+    _globals["_BANKINGDEPOSITS"]._serialized_start = 9657
+    _globals["_BANKINGDEPOSITS"]._serialized_end = 9727
+    _globals["_BANKINGSEEN"]._serialized_start = 9729
+    _globals["_BANKINGSEEN"]._serialized_end = 9809
+    _globals["_BANKINGASSETACTIONS"]._serialized_start = 9811
+    _globals["_BANKINGASSETACTIONS"]._serialized_end = 9900
+    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_start = 9902
+    _globals["_BANKINGRECURRINGTRANSFERS"]._serialized_end = 10018
+    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_start = 10020
+    _globals["_BANKINGSCHEDULEDTRANSFERS"]._serialized_end = 10136
+    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_start = 10138
+    _globals["_BANKINGRECURRINGGOVERNANCETRANSFERS"]._serialized_end = 10264
+    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_start = 10267
+    _globals["_BANKINGSCHEDULEDGOVERNANCETRANSFERS"]._serialized_end = 10403
+    _globals["_BANKINGBRIDGESTATE"]._serialized_start = 10405
+    _globals["_BANKINGBRIDGESTATE"]._serialized_end = 10493
+    _globals["_CHECKPOINT"]._serialized_start = 10495
+    _globals["_CHECKPOINT"]._serialized_end = 10532
+    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_start = 10534
+    _globals["_DELEGATIONLASTRECONCILIATIONTIME"]._serialized_end = 10626
+    _globals["_DELEGATIONACTIVE"]._serialized_start = 10628
+    _globals["_DELEGATIONACTIVE"]._serialized_end = 10698
+    _globals["_DELEGATIONPENDING"]._serialized_start = 10700
+    _globals["_DELEGATIONPENDING"]._serialized_end = 10825
+    _globals["_DELEGATIONAUTO"]._serialized_start = 10827
+    _globals["_DELEGATIONAUTO"]._serialized_end = 10869
+    _globals["_PROPOSALDATA"]._serialized_start = 10872
+    _globals["_PROPOSALDATA"]._serialized_end = 11026
+    _globals["_GOVERNANCEENACTED"]._serialized_start = 11028
+    _globals["_GOVERNANCEENACTED"]._serialized_end = 11109
+    _globals["_GOVERNANCEACTIVE"]._serialized_start = 11111
+    _globals["_GOVERNANCEACTIVE"]._serialized_end = 11191
+    _globals["_GOVERNANCENODE"]._serialized_start = 11193
+    _globals["_GOVERNANCENODE"]._serialized_end = 11255
+    _globals["_STAKINGACCOUNT"]._serialized_start = 11257
+    _globals["_STAKINGACCOUNT"]._serialized_end = 11375
+    _globals["_STAKINGACCOUNTS"]._serialized_start = 11378
+    _globals["_STAKINGACCOUNTS"]._serialized_end = 11603
+    _globals["_MATCHINGBOOK"]._serialized_start = 11606
+    _globals["_MATCHINGBOOK"]._serialized_end = 11852
+    _globals["_NETPARAMS"]._serialized_start = 11854
+    _globals["_NETPARAMS"]._serialized_end = 11913
+    _globals["_DECIMALMAP"]._serialized_start = 11915
+    _globals["_DECIMALMAP"]._serialized_end = 11963
+    _globals["_TIMEPRICE"]._serialized_start = 11965
+    _globals["_TIMEPRICE"]._serialized_end = 12018
+    _globals["_PRICEVOLUME"]._serialized_start = 12020
+    _globals["_PRICEVOLUME"]._serialized_end = 12079
+    _globals["_PRICERANGE"]._serialized_start = 12081
+    _globals["_PRICERANGE"]._serialized_end = 12147
+    _globals["_PRICEBOUND"]._serialized_start = 12150
+    _globals["_PRICEBOUND"]._serialized_end = 12304
+    _globals["_PRICERANGECACHE"]._serialized_start = 12306
+    _globals["_PRICERANGECACHE"]._serialized_end = 12427
+    _globals["_CURRENTPRICE"]._serialized_start = 12429
+    _globals["_CURRENTPRICE"]._serialized_end = 12489
+    _globals["_PASTPRICE"]._serialized_start = 12491
+    _globals["_PASTPRICE"]._serialized_end = 12574
+    _globals["_PRICEMONITOR"]._serialized_start = 12577
+    _globals["_PRICEMONITOR"]._serialized_end = 13205
+    _globals["_AUCTIONSTATE"]._serialized_start = 13208
+    _globals["_AUCTIONSTATE"]._serialized_end = 13584
+    _globals["_EQUITYSHARELP"]._serialized_start = 13586
+    _globals["_EQUITYSHARELP"]._serialized_end = 13703
+    _globals["_EQUITYSHARE"]._serialized_start = 13706
+    _globals["_EQUITYSHARE"]._serialized_end = 13875
+    _globals["_FEESPLITTER"]._serialized_start = 13878
+    _globals["_FEESPLITTER"]._serialized_end = 14010
+    _globals["_SPOTMARKET"]._serialized_start = 14013
+    _globals["_SPOTMARKET"]._serialized_end = 15031
+    _globals["_MARKET"]._serialized_start = 15034
+    _globals["_MARKET"]._serialized_end = 16325
+    _globals["_PRODUCT"]._serialized_start = 16327
+    _globals["_PRODUCT"]._serialized_end = 16393
+    _globals["_DATAPOINT"]._serialized_start = 16395
+    _globals["_DATAPOINT"]._serialized_end = 16458
+    _globals["_PERPS"]._serialized_start = 16461
+    _globals["_PERPS"]._serialized_end = 16687
+    _globals["_ORDERSATPRICE"]._serialized_start = 16689
+    _globals["_ORDERSATPRICE"]._serialized_end = 16750
+    _globals["_PRICEDSTOPORDERS"]._serialized_start = 16753
+    _globals["_PRICEDSTOPORDERS"]._serialized_end = 16905
+    _globals["_TRAILINGSTOPORDERS"]._serialized_start = 16908
+    _globals["_TRAILINGSTOPORDERS"]._serialized_end = 17104
+    _globals["_ORDERSATOFFSET"]._serialized_start = 17106
+    _globals["_ORDERSATOFFSET"]._serialized_end = 17170
+    _globals["_OFFSETSATPRICE"]._serialized_start = 17172
+    _globals["_OFFSETSATPRICE"]._serialized_end = 17270
+    _globals["_STOPORDERS"]._serialized_start = 17273
+    _globals["_STOPORDERS"]._serialized_end = 17520
+    _globals["_PEGGEDORDERS"]._serialized_start = 17522
+    _globals["_PEGGEDORDERS"]._serialized_end = 17586
+    _globals["_EXECUTIONMARKETS"]._serialized_start = 17589
+    _globals["_EXECUTIONMARKETS"]._serialized_end = 17891
+    _globals["_SUCCESSORS"]._serialized_start = 17893
+    _globals["_SUCCESSORS"]._serialized_end = 17987
+    _globals["_POSITION"]._serialized_start = 17990
+    _globals["_POSITION"]._serialized_end = 18221
+    _globals["_MARKETPOSITIONS"]._serialized_start = 18224
+    _globals["_MARKETPOSITIONS"]._serialized_end = 18407
+    _globals["_PARTYPOSITIONSTATS"]._serialized_start = 18410
+    _globals["_PARTYPOSITIONSTATS"]._serialized_end = 18612
+    _globals["_SETTLEMENTSTATE"]._serialized_start = 18615
+    _globals["_SETTLEMENTSTATE"]._serialized_end = 18853
+    _globals["_LASTSETTLEDPOSITION"]._serialized_start = 18855
+    _globals["_LASTSETTLEDPOSITION"]._serialized_end = 18941
+    _globals["_SETTLEMENTTRADE"]._serialized_start = 18944
+    _globals["_SETTLEMENTTRADE"]._serialized_end = 19092
+    _globals["_APPSTATE"]._serialized_start = 19094
+    _globals["_APPSTATE"]._serialized_end = 19197
+    _globals["_EPOCHSTATE"]._serialized_start = 19200
+    _globals["_EPOCHSTATE"]._serialized_end = 19395
+    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_start = 19397
+    _globals["_REWARDSPENDINGPAYOUTS"]._serialized_end = 19520
+    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_start = 19523
+    _globals["_SCHEDULEDREWARDSPAYOUT"]._serialized_end = 19652
+    _globals["_REWARDSPAYOUT"]._serialized_start = 19655
+    _globals["_REWARDSPAYOUT"]._serialized_end = 19907
+    _globals["_REWARDSPARTYAMOUNT"]._serialized_start = 19909
+    _globals["_REWARDSPARTYAMOUNT"]._serialized_end = 19975
+    _globals["_LIMITSTATE"]._serialized_start = 19978
+    _globals["_LIMITSTATE"]._serialized_end = 20510
+    _globals["_VOTESPAMPOLICY"]._serialized_start = 20513
+    _globals["_VOTESPAMPOLICY"]._serialized_end = 21045
+    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_start = 21047
+    _globals["_PARTYPROPOSALVOTECOUNT"]._serialized_end = 21143
+    _globals["_PARTYTOKENBALANCE"]._serialized_start = 21145
+    _globals["_PARTYTOKENBALANCE"]._serialized_end = 21212
+    _globals["_BLOCKREJECTSTATS"]._serialized_start = 21214
+    _globals["_BLOCKREJECTSTATS"]._serialized_end = 21282
+    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_start = 21284
+    _globals["_SPAMPARTYTRANSACTIONCOUNT"]._serialized_end = 21355
+    _globals["_SIMPLESPAMPOLICY"]._serialized_start = 21358
+    _globals["_SIMPLESPAMPOLICY"]._serialized_end = 21680
+    _globals["_NOTARYSIGS"]._serialized_start = 21682
+    _globals["_NOTARYSIGS"]._serialized_end = 21794
+    _globals["_NOTARY"]._serialized_start = 21796
+    _globals["_NOTARY"]._serialized_end = 21867
+    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_start = 21869
+    _globals["_STAKEVERIFIERDEPOSITED"]._serialized_end = 21978
+    _globals["_STAKEVERIFIERREMOVED"]._serialized_start = 21980
+    _globals["_STAKEVERIFIERREMOVED"]._serialized_end = 22083
+    _globals["_STAKEVERIFIERPENDING"]._serialized_start = 22086
+    _globals["_STAKEVERIFIERPENDING"]._serialized_end = 22347
+    _globals["_ETHORACLEVERIFIERLASTBLOCK"]._serialized_start = 22349
+    _globals["_ETHORACLEVERIFIERLASTBLOCK"]._serialized_end = 22443
+    _globals["_ETHCONTRACTCALLRESULTS"]._serialized_start = 22446
+    _globals["_ETHCONTRACTCALLRESULTS"]._serialized_end = 22576
+    _globals["_ETHCONTRACTCALLRESULT"]._serialized_start = 22579
+    _globals["_ETHCONTRACTCALLRESULT"]._serialized_end = 22754
+    _globals["_PENDINGKEYROTATION"]._serialized_start = 22757
+    _globals["_PENDINGKEYROTATION"]._serialized_end = 22912
+    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_start = 22915
+    _globals["_PENDINGETHEREUMKEYROTATION"]._serialized_end = 23099
+    _globals["_TOPOLOGY"]._serialized_start = 23102
+    _globals["_TOPOLOGY"]._serialized_end = 23707
+    _globals["_TOPLOGYSIGNATURES"]._serialized_start = 23710
+    _globals["_TOPLOGYSIGNATURES"]._serialized_end = 23932
+    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 23935
+    _globals["_PENDINGERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 24114
+    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_start = 24117
+    _globals["_ISSUEDERC20MULTISIGCONTROLSIGNATURE"]._serialized_end = 24275
+    _globals["_VALIDATORSTATE"]._serialized_start = 24278
+    _globals["_VALIDATORSTATE"]._serialized_end = 24776
+    _globals["_HEARTBEATTRACKER"]._serialized_start = 24779
+    _globals["_HEARTBEATTRACKER"]._serialized_end = 24964
+    _globals["_PERFORMANCESTATS"]._serialized_start = 24967
+    _globals["_PERFORMANCESTATS"]._serialized_end = 25248
+    _globals["_VALIDATORPERFORMANCE"]._serialized_start = 25250
+    _globals["_VALIDATORPERFORMANCE"]._serialized_end = 25358
+    _globals["_LIQUIDITYPARAMETERS"]._serialized_start = 25361
+    _globals["_LIQUIDITYPARAMETERS"]._serialized_end = 25535
+    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_start = 25537
+    _globals["_LIQUIDITYPENDINGPROVISIONS"]._serialized_end = 25641
+    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_start = 25644
+    _globals["_LIQUIDITYPARTIESLIQUIDITYORDERS"]._serialized_end = 25772
+    _globals["_PARTYORDERS"]._serialized_start = 25774
+    _globals["_PARTYORDERS"]._serialized_end = 25846
+    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_start = 25848
+    _globals["_LIQUIDITYPARTIESORDERS"]._serialized_end = 25967
+    _globals["_LIQUIDITYPROVISIONS"]._serialized_start = 25969
+    _globals["_LIQUIDITYPROVISIONS"]._serialized_end = 26096
+    _globals["_LIQUIDITYSCORES"]._serialized_start = 26099
+    _globals["_LIQUIDITYSCORES"]._serialized_end = 26259
+    _globals["_LIQUIDITYSCORE"]._serialized_start = 26261
+    _globals["_LIQUIDITYSCORE"]._serialized_end = 26326
+    _globals["_LIQUIDITYV2PROVISIONS"]._serialized_start = 26329
+    _globals["_LIQUIDITYV2PROVISIONS"]._serialized_end = 26458
+    _globals["_LIQUIDITYV2PENDINGPROVISIONS"]._serialized_start = 26461
+    _globals["_LIQUIDITYV2PENDINGPROVISIONS"]._serialized_end = 26612
+    _globals["_LIQUIDITYV2PERFORMANCES"]._serialized_start = 26615
+    _globals["_LIQUIDITYV2PERFORMANCES"]._serialized_end = 26813
+    _globals["_LIQUIDITYV2PERFORMANCEPERPARTY"]._serialized_start = 26816
+    _globals["_LIQUIDITYV2PERFORMANCEPERPARTY"]._serialized_end = 27142
+    _globals["_LIQUIDITYV2SCORES"]._serialized_start = 27145
+    _globals["_LIQUIDITYV2SCORES"]._serialized_end = 27368
+    _globals["_LIQUIDITYV2SUPPLIED"]._serialized_start = 27371
+    _globals["_LIQUIDITYV2SUPPLIED"]._serialized_end = 27624
+    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_start = 27627
+    _globals["_FLOATINGPOINTCONSENSUS"]._serialized_end = 27812
+    _globals["_STATEVARINTERNALSTATE"]._serialized_start = 27815
+    _globals["_STATEVARINTERNALSTATE"]._serialized_end = 28067
+    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_start = 28069
+    _globals["_FLOATINGPOINTVALIDATORRESULT"]._serialized_end = 28161
+    _globals["_NEXTTIMETRIGGER"]._serialized_start = 28163
+    _globals["_NEXTTIMETRIGGER"]._serialized_end = 28277
+    _globals["_MARKETTRACKER"]._serialized_start = 28280
+    _globals["_MARKETTRACKER"]._serialized_end = 28472
+    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_start = 28474
+    _globals["_SIGNEREVENTSPERADDRESS"]._serialized_end = 28590
+    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_start = 28593
+    _globals["_ERC20MULTISIGTOPOLOGYVERIFIED"]._serialized_end = 28849
+    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_start = 28852
+    _globals["_ERC20MULTISIGTOPOLOGYPENDING"]._serialized_end = 29168
+    _globals["_PROOFOFWORK"]._serialized_start = 29171
+    _globals["_PROOFOFWORK"]._serialized_end = 29634
+    _globals["_BANNEDPARTY"]._serialized_start = 29636
+    _globals["_BANNEDPARTY"]._serialized_end = 29693
+    _globals["_PROOFOFWORKPARAMS"]._serialized_start = 29696
+    _globals["_PROOFOFWORKPARAMS"]._serialized_end = 30084
+    _globals["_PROOFOFWORKSTATE"]._serialized_start = 30086
+    _globals["_PROOFOFWORKSTATE"]._serialized_end = 30174
+    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_start = 30177
+    _globals["_PROOFOFWORKBLOCKSTATE"]._serialized_end = 30317
+    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_start = 30320
+    _globals["_PROOFOFWORKPARTYSTATEFORBLOCK"]._serialized_end = 30453
+    _globals["_TRANSACTIONSATHEIGHT"]._serialized_start = 30455
+    _globals["_TRANSACTIONSATHEIGHT"]._serialized_end = 30537
+    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_start = 30540
+    _globals["_PROTOCOLUPGRADEPROPOSALS"]._serialized_end = 30743
+    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_start = 30745
+    _globals["_ACCEPTEDPROTOCOLUPGRADEPROPOSAL"]._serialized_end = 30870
+    _globals["_TEAMS"]._serialized_start = 30872
+    _globals["_TEAMS"]._serialized_end = 30925
+    _globals["_TEAM"]._serialized_start = 30928
+    _globals["_TEAM"]._serialized_end = 31199
+    _globals["_MEMBERSHIP"]._serialized_start = 31201
+    _globals["_MEMBERSHIP"]._serialized_end = 31311
+    _globals["_TEAMSWITCHES"]._serialized_start = 31313
+    _globals["_TEAMSWITCHES"]._serialized_end = 31394
+    _globals["_TEAMSWITCH"]._serialized_start = 31396
+    _globals["_TEAMSWITCH"]._serialized_end = 31499
+    _globals["_VESTING"]._serialized_start = 31501
+    _globals["_VESTING"]._serialized_end = 31580
+    _globals["_PARTYREWARD"]._serialized_start = 31583
+    _globals["_PARTYREWARD"]._serialized_end = 31744
+    _globals["_CURRENTREFERRALPROGRAM"]._serialized_start = 31746
+    _globals["_CURRENTREFERRALPROGRAM"]._serialized_end = 31836
+    _globals["_NEWREFERRALPROGRAM"]._serialized_start = 31838
+    _globals["_NEWREFERRALPROGRAM"]._serialized_end = 31924
+    _globals["_REFERRALSETS"]._serialized_start = 31926
+    _globals["_REFERRALSETS"]._serialized_end = 31991
+    _globals["_REFERRALSET"]._serialized_start = 31994
+    _globals["_REFERRALSET"]._serialized_end = 32275
+    _globals["_RUNNINGVOLUME"]._serialized_start = 32277
+    _globals["_RUNNINGVOLUME"]._serialized_end = 32338
+    _globals["_ASSETLOCKED"]._serialized_start = 32340
+    _globals["_ASSETLOCKED"]._serialized_end = 32446
+    _globals["_EPOCHBALANCE"]._serialized_start = 32448
+    _globals["_EPOCHBALANCE"]._serialized_end = 32510
+    _globals["_INVESTING"]._serialized_start = 32512
+    _globals["_INVESTING"]._serialized_end = 32571
+    _globals["_ACTIVITYSTREAK"]._serialized_start = 32573
+    _globals["_ACTIVITYSTREAK"]._serialized_end = 32684
+    _globals["_PARTYACTIVITYSTREAK"]._serialized_start = 32687
+    _globals["_PARTYACTIVITYSTREAK"]._serialized_end = 32912
 # @@protoc_insertion_point(module_scope)
