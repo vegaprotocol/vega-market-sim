@@ -516,6 +516,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
     def _gen_spec(self, side: vega_protos.vega.Side, is_valid: bool):
+        # This is a dummy change
         refs = [
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_UNSPECIFIED,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
