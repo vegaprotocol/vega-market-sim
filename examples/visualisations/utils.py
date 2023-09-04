@@ -15,6 +15,7 @@ use of the functions, the following parties are setup.
 from collections import namedtuple
 from typing import Optional, Tuple
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.service import PeggedOrder
 
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
@@ -242,10 +243,27 @@ def provide_liquidity(
         is_amendment=False,
         commitment_amount=10000,
         fee=0.00,
-        reference_buy="PEGGED_REFERENCE_BEST_BID",
-        reference_sell="PEGGED_REFERENCE_BEST_ASK",
-        delta_buy=1,
-        delta_sell=1,
+    )
+
+    vega.submit_order(
+        trading_key=AUX_PARTY_C.key_name,
+        trading_wallet=AUX_PARTY_C.wallet_name,
+        market_id=market_id,
+        side="SIDE_BUY",
+        order_type="TYPE_LIMIT",
+        pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_BID", offset=1),
+        time_in_force="TIME_IN_FORCE_GTC",
+        volume=1000,
+    )
+    vega.submit_order(
+        trading_key=AUX_PARTY_C.key_name,
+        trading_wallet=AUX_PARTY_C.wallet_name,
+        market_id=market_id,
+        side="SIDE_SELL",
+        order_type="TYPE_LIMIT",
+        pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_ASK", offset=1),
+        time_in_force="TIME_IN_FORCE_GTC",
+        volume=1000,
     )
 
 
