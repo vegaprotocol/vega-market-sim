@@ -41,26 +41,35 @@ AccountData = namedtuple(
 RiskFactor = namedtuple("RiskFactors", ["market_id", "short", "long"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
-Order = namedtuple(
-    "Order",
-    [
-        "price",
-        "size",
-        "id",
-        "reference",
-        "side",
-        "status",
-        "remaining",
-        "time_in_force",
-        "order_type",
-        "created_at",
-        "expires_at",
-        "party_id",
-        "market_id",
-        "updated_at",
-        "version",
-    ],
-)
+
+
+@dataclass
+class IcebergOrder:
+    peak_size: float
+    minimum_visible_size: float
+    reserved_remaining: float
+
+
+@dataclass
+class Order:
+    price: float
+    size: float
+    id: str
+    reference: str
+    side: vega_protos.vega.Side
+    status: vega_protos.vega.Order.Status
+    remaining: float
+    time_in_force: vega_protos.vega.Order.TimeInForce
+    order_type: vega_protos.vega.Order.TimeInForce
+    created_at: int
+    expires_at: int
+    party_id: str
+    market_id: str
+    updated_at: int
+    version: int
+    iceberg_order: IcebergOrder
+
+
 Position = namedtuple(
     "Position",
     [
@@ -343,6 +352,23 @@ def _margin_level_from_proto(
     )
 
 
+def _iceberg_order_from_proto(
+    iceberg_order: vega_protos.vega.IcebergOrder,
+    decimal_spec: DecimalSpec,
+) -> Order:
+    return IcebergOrder(
+        peak_size=num_from_padded_int(
+            iceberg_order.peak_size, decimal_spec.position_decimals
+        ),
+        minimum_visible_size=num_from_padded_int(
+            iceberg_order.minimum_visible_size, decimal_spec.position_decimals
+        ),
+        reserved_remaining=num_from_padded_int(
+            iceberg_order.reserved_remaining, decimal_spec.position_decimals
+        ),
+    )
+
+
 def _order_from_proto(
     order: vega_protos.vega.Order,
     decimal_spec: DecimalSpec,
@@ -363,6 +389,7 @@ def _order_from_proto(
         updated_at=order.updated_at,
         version=order.version,
         market_id=order.market_id,
+        iceberg_order=_iceberg_order_from_proto(order.iceberg_order, decimal_spec),
     )
 
 

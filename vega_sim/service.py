@@ -1952,6 +1952,8 @@ class VegaService(ABC):
         pegged_offset: Optional[float] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        peak_size: Optional[float] = None,
+        minimum_visible_size: Optional[float] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2048,15 +2050,27 @@ class VegaService(ABC):
             pegged_order=pegged_order,
             reduce_only=reduce_only,
             post_only=post_only,
+            iceberg_opts=(
+                vega_protos.commands.v1.commands.IcebergOpts(
+                    peak_size=num_to_padded_int(
+                        peak_size, self.market_pos_decimals[market_id]
+                    ),
+                    minimum_visible_size=num_to_padded_int(
+                        minimum_visible_size, self.market_pos_decimals[market_id]
+                    ),
+                )
+                if (peak_size is not None and minimum_visible_size is not None)
+                else None
+            ),
         )
 
     def submit_instructions(
         self,
         key_name: str,
         wallet_name: Optional[str] = None,
-        cancellations: Optional[List[OrderCancellation]] = None,
-        amendments: Optional[List[OrderAmendment]] = None,
-        submissions: Optional[List[OrderSubmission]] = None,
+        cancellations: Optional[List[OrderCancellation]] = [],
+        amendments: Optional[List[OrderAmendment]] = [],
+        submissions: Optional[List[OrderSubmission]] = [],
     ):
         """Submits a batch of market instructions to be processed sequentially.
 
