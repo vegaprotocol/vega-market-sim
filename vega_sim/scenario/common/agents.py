@@ -2804,6 +2804,9 @@ class Snitch(StateAgent):
         additional_state_fn: Optional[
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
+        additional_finalise_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
         only_extract_additional: bool = False,
     ):
         self.tag = None
@@ -2812,6 +2815,7 @@ class Snitch(StateAgent):
         self.additional_states = []
         self.agents = agents
         self.additional_state_fn = additional_state_fn
+        self.additional_finalise_fn = additional_finalise_fn
         self.seen_trades = set()
         self.only_extract_additional = only_extract_additional
         self.process_map: Dict[str, psutil.Process] = {}
@@ -2923,6 +2927,10 @@ class Snitch(StateAgent):
 
     def finalise(self):
         self.assets = self.vega.list_assets()
+        if self.additional_finalise_fn is not None:
+            self.additional_states.append(
+                self.additional_finalise_fn(self.vega, self.agents)
+            )
 
 
 class KeyFunder(Agent):
