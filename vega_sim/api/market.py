@@ -15,6 +15,10 @@ A MarketConfig class has the following attributes which can be set:
 • liquidity_monitoring_parameters.auction_extension
 • liquidity_monitoring_parameters.target_stake_parameters.time_window
 • liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
+• liquidity_sla_parameters.price_range
+• liquidity_sla_parameters.commitment_min_time_fraction
+• liquidity_sla_parameters.performance_hysteresis_epochs
+• liquidity_sla_parameters.sla_competition_factor
 • log_normal.tau
 • log_normal.risk_aversion_parameter
 • log_normal.params.mu
