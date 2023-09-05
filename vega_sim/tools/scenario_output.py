@@ -21,6 +21,7 @@ FUZZING_FILE_NAME = "additional_data.csv"
 RESOURCES_FILE_NAME = "resources.csv"
 ASSETS_FILE_NAME = "assets.csv"
 MARKET_CHAIN_FILE_NAME = "market_chain.json"
+LEDGER_ENTRIES_FILE_NAME = "ledger_entries.csv"
 
 
 def resource_data_to_row(data: ResourceData):
@@ -400,3 +401,14 @@ def load_market_chain(
     else:
         market_chain = {}
     return market_chain
+
+
+def load_ledger_entries_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    df = pd.read_csv(os.path.join(output_path, run_name, LEDGER_ENTRIES_FILE_NAME))
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time)
+    return df.drop_duplicates()
