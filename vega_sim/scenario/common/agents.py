@@ -2229,9 +2229,9 @@ class InformedTrader(StateAgentWithWallet):
             self._settle_order(self.queue.get())
 
         # Create an order, submit it, and add it to the queue to be settled
-        self.queue.put(self._create_order())
+        self.queue.put(self._create_order(vega_state=vega_state))
 
-    def _create_order(self) -> ITOrder:
+    def _create_order(self, vega_state: VegaState) -> ITOrder:
         # Determine the correct side
         price = self.price_process[self.current_step]
         next_price = self.price_process[
@@ -2240,7 +2240,7 @@ class InformedTrader(StateAgentWithWallet):
         side = vega_protos.SIDE_BUY if price < next_price else vega_protos.SIDE_SELL
 
         # Determine the volume of orders which can be profited from
-        order_book = self.vega.market_depth(market_id=self.market_id)
+        order_book = vega_state.market_state[self.market_id].depth
         if side == vega_protos.SIDE_BUY:
             volume = sum(
                 [order.volume for order in order_book.sells if order.price < next_price]

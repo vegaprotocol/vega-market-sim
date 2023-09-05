@@ -14,6 +14,7 @@ Attributes:
 import os
 import json
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import ipywidgets as widgets
@@ -167,7 +168,7 @@ class SingleParameterExperimentTk(NotebookTk):
             List of DataFrame objects containing data averaged across iterations.
     """
 
-    def __init__(self, path, dt) -> None:
+    def __init__(self, path, dt, granularity) -> None:
         """Inits object by reading data stored in json and csv files in the given path.
 
         Method loads test settings from the 'run_config.json' and test results from csv
@@ -185,6 +186,7 @@ class SingleParameterExperimentTk(NotebookTk):
         self.path = path
 
         self.dt = dt
+        self.granularity = granularity
 
         self.settings = self._load_settings()
 
@@ -201,6 +203,7 @@ class SingleParameterExperimentTk(NotebookTk):
         self,
         variables: Optional[list] = None,
         iterations: Optional[list] = None,
+        best_fit: bool = False,
     ):
         """Plots a variables result for each iteration or averaged across iterations.
 
@@ -253,9 +256,10 @@ class SingleParameterExperimentTk(NotebookTk):
                         variables=[keys[i][0]],
                         iterations=[keys[i][1]],
                         ylabel=keys[i][0],
-                        xlabel="Time",
+                        xlabel=f"Time [{self.granularity.name}]",
                         title=f"{keys[i][0]} // (iteration={keys[i][1]})",
                         labels=labels,
+                        best_fit=best_fit,
                     )
 
     def plot_comparison(
@@ -333,7 +337,7 @@ class SingleParameterExperimentTk(NotebookTk):
                     title=f"param={parameters[row]} // iteration={iterations[col]}",
                     parameters=[parameters[row]],
                     iterations=[iterations[col]],
-                    xlabel="Time",
+                    xlabel=f"Time [{self.granularity.name}]",
                     variables=variables,
                     formats=formats,
                     ylabel=ylabel,
@@ -643,6 +647,7 @@ class SingleParameterExperimentTk(NotebookTk):
         title: Optional[str] = None,
         labels: Optional[list] = None,
         labels_right: Optional[list] = None,
+        best_fit: bool = False,
     ):
         """Adds a complete plot to a given subplot axes.
 
@@ -686,6 +691,7 @@ class SingleParameterExperimentTk(NotebookTk):
             parameters=parameters,
             iterations=iterations,
             labels=labels,
+            best_fit=best_fit,
         )
 
         if variables_right is not None:
@@ -697,6 +703,7 @@ class SingleParameterExperimentTk(NotebookTk):
                 parameters=parameters,
                 iterations=iterations,
                 labels=labels_right,
+                best_fit=best_fit,
             )
             lns = lns + lns_right
 
@@ -722,6 +729,7 @@ class SingleParameterExperimentTk(NotebookTk):
         parameters: Optional[list] = None,
         iterations: list = ["avg"],
         labels: Optional[list] = None,
+        best_fit: bool = False,
     ):
         """Adds a plot to a specific axes of a subplot.
 
@@ -763,10 +771,20 @@ class SingleParameterExperimentTk(NotebookTk):
                             fmt = "-"
                         else:
                             fmt = formats[0][i] + formats[1][j] + formats[2][k]
-                        xdata = df.index * self.dt
+                        xdata = df.index * self.dt / self.granularity.value
                         ydata = df[variable]
                         label = f"{labels[0][i]}  {labels[1][j]}  {labels[2][k]}"
                         lns.append(ax.plot(xdata, ydata, fmt, label=label))
+
+                        if best_fit:
+                            a, b = np.polyfit(xdata, ydata, deg=1)
+                            print(label, a, b)
+                            ax.plot(
+                                xdata,
+                                xdata * a + b,
+                                fmt,
+                                label=None,
+                            )
 
                 else:
                     df = self.data_raw[parameter_index][
@@ -778,10 +796,20 @@ class SingleParameterExperimentTk(NotebookTk):
                             fmt = "-"
                         else:
                             fmt = formats[0][i] + formats[1][j] + formats[2][k]
-                        xdata = df.index * self.dt
+                        xdata = df.index * self.dt / self.granularity.value
                         ydata = df[variable]
                         label = f"{labels[0][i]}  {labels[1][j]}  {labels[2][k]}"
                         lns.append(ax.plot(xdata, ydata, fmt, label=label))
+
+                        if best_fit:
+                            a, b = np.polyfit(xdata, ydata, deg=1)
+                            print(label, a, b)
+                            ax.plot(
+                                xdata,
+                                xdata * a + b,
+                                fmt,
+                                label=None,
+                            )
 
         if "Market State" in variables:
             self._market_state_ticks(ax)
