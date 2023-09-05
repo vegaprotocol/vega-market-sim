@@ -979,9 +979,13 @@ class VegaServiceNull(VegaService):
         if self.stopped:
             return
         self.stopped = True
-        self.core_client.stop()
-        self.core_state_client.stop()
-        self.trading_data_client_v2.stop()
+
+        if self._core_client is not None:
+            self.core_client.stop()
+        if self._core_state_client is not None:
+            self.core_state_client.stop()
+        if self._trading_data_client_v2 is not None:
+            self.trading_data_client_v2.stop()
 
         if self.proc is None:
             logger.info("Stop called but nothing to stop")
