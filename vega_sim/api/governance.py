@@ -156,7 +156,6 @@ def propose_future_market(
     ] = None,
     lp_price_range: float = 1,
     commitment_min_time_fraction: float = 0.95,
-    providers_fee_calculation_time_step: int = 1,
     performance_hysteresis_epochs: int = 1,
     sla_competition_factor: float = 1,
     wallet_name: Optional[str] = None,
@@ -204,9 +203,6 @@ def propose_future_market(
         commitment_min_time_fraction:
             float, default 0.95, Specifies the minimum fraction of time LPs must spend
                 "on the book" providing their committed liquidity.
-        providers_fee_calculation_time_step:
-            int, default 1, Specifies how often the quality of liquidity supplied by the
-                LPs is evaluated and fees arising from that period are earmarked for specific parties.
         performance_hysteresis_epochs:
             int, default 1, Specifies the number of liquidity epochs over which past performance
                 will continue to affect rewards.
@@ -334,9 +330,6 @@ def propose_future_market(
             liquidity_sla_parameters=vega_protos.markets.LiquiditySLAParameters(
                 price_range=str(lp_price_range),
                 commitment_min_time_fraction=str(commitment_min_time_fraction),
-                providers_fee_calculation_time_step=int(
-                    providers_fee_calculation_time_step
-                ),
                 performance_hysteresis_epochs=int(performance_hysteresis_epochs),
                 sla_competition_factor=str(sla_competition_factor),
             ),
