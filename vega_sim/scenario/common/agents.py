@@ -1070,6 +1070,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         market_name: Optional[str] = None,
         asset_name: Optional[str] = None,
         commitment_amount: float = 6000,
+        supplied_amount: Optional[float] = None,
         market_decimal_places: int = 5,
         asset_decimal_places: int = 0,
         tag: str = "",
@@ -1112,6 +1113,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.mint_key = False
 
         self.order_validity_length = order_validity_length
+
+        self.supplied_amount = (
+            supplied_amount if supplied_amount is not None else commitment_amount
+        )
 
     def initialise(
         self,
@@ -1282,13 +1287,13 @@ class ShapedMarketMaker(StateAgentWithWallet):
         sell_shape: List[MMOrder],
     ):
         buy_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
+            self.safety_factor * self.supplied_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=buy_shape,
         )
 
         sell_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
+            self.safety_factor * self.supplied_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=sell_shape,
         )
@@ -1438,6 +1443,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         market_name: str = None,
         asset_name: str = None,
         commitment_amount: float = 6000,
+        supplied_amount: Optional[float] = None,
         market_decimal_places: int = 5,
         fee_amount: float = 0.001,
         kappa: float = 1,
@@ -1464,6 +1470,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             market_name=market_name,
             asset_name=asset_name,
             commitment_amount=commitment_amount,
+            supplied_amount=supplied_amount,
             market_decimal_places=market_decimal_places,
             asset_decimal_places=asset_decimal_places,
             tag=tag,
