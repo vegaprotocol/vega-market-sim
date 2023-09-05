@@ -939,6 +939,7 @@ def sla_plot(run_name: Optional[str] = None):
         if row["to_account_party_id"] not in ["network", None]:
             return row["to_account_party_id"]
         return None
+
     ledger_entries_df["poi"] = ledger_entries_df.apply(determine_poi, axis=1)
 
     # Initialise the figure and subplots
