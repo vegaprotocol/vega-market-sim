@@ -547,7 +547,6 @@ def order_submission(
         type=order_type,
         reduce_only=reduce_only,
         post_only=post_only,
-        iceberg_opts=iceberg_opts,
     )
 
     # Update OrderSubmission object with optional fields if specified

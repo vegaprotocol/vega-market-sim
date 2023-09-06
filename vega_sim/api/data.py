@@ -67,7 +67,7 @@ class Order:
     market_id: str
     updated_at: int
     version: int
-    iceberg_order: IcebergOrder
+    iceberg_order: Optional[IcebergOrder]
 
 
 Position = namedtuple(
@@ -389,7 +389,9 @@ def _order_from_proto(
         updated_at=order.updated_at,
         version=order.version,
         market_id=order.market_id,
-        iceberg_order=_iceberg_order_from_proto(order.iceberg_order, decimal_spec),
+        iceberg_order=_iceberg_order_from_proto(order.iceberg_order, decimal_spec)
+        if order.HasField("iceberg_order")
+        else None,
     )
 
 
