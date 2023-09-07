@@ -1152,7 +1152,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 if self.liquidity_commitment_fn is not None
                 else None
             )
-        ) is not None:
+        ) is not None and self.commitment_amount > 0:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
@@ -1273,13 +1273,14 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     )
                     self.vega.wait_for_total_catchup()
 
-            self.vega.submit_liquidity(
-                wallet_name=self.wallet_name,
-                market_id=self.market_id,
-                commitment_amount=liq.amount,
-                fee=liq.fee,
-                key_name=self.key_name,
-            )
+            if self.commitment_amount > 0:
+                self.vega.submit_liquidity(
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                    commitment_amount=liq.amount,
+                    fee=liq.fee,
+                    key_name=self.key_name,
+                )
 
     def _scale_orders(
         self,
