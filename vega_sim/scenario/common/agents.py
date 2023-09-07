@@ -2454,6 +2454,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
                 ]
             ]
         ):
+            logging.warning("Missing bids, asks, or bounds")
             return
 
         meet_commitment = self.random_state.rand() < self.target_time_on_book
@@ -2467,7 +2468,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
             + (ask_outer_bound - ask_inner_bound) * self.offset_proportion
         )
 
-        # Calculate size required at bid and ask price to meet commitment (give some overhead)
+        # Calculate size required at bid and ask price to meet commitment
         bid_size = self.commitment_amount / reference_price
         ask_size = self.commitment_amount / reference_price
 
@@ -2531,7 +2532,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
                 side=side,
                 size=size * self.commitment_amount_to_size_weighting,
                 price=price,
-                post_only=True,
+                # post_only=True,
                 peak_size=size * self.commitment_amount_to_peak_weighting,
                 minimum_visible_size=size * self.commitment_amount_to_minimum_weighting,
             )

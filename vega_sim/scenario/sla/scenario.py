@@ -141,12 +141,13 @@ class SLAScenario(Scenario):
 
         price_process = random_walk(
             num_steps=self.num_steps + 1,
-            sigma=2,
+            sigma=0.5,
             starting_price=1500,
             decimal_precision=self.asset_decimals,
         )
-
-        agents = []
+        # Add spikes to trigger price monitoring auctions
+        for i in self.random_state.randint(0, self.num_steps, size=2):
+            price_process[i] = price_process[i] * 10
 
         market_config = MarketConfig()
         market_config.set("liquidity_sla_parameters.price_range", self.price_range)
@@ -162,6 +163,8 @@ class SLAScenario(Scenario):
             "liquidity_sla_parameters.sla_competition_factor",
             self.sla_competition_factor,
         )
+
+        agents = []
 
         agents.append(
             ConfigurableMarketManager(
