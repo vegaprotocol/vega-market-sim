@@ -709,7 +709,6 @@ def manage_vega_processes(
 
     # The process had previously created one or more child processes with the fork() function.
     # One or more of these processes has since died.
-    signal.signal(signal.SIGCHLD, sighandler)
     signal.sigwait(
         [
             signal.SIGKILL,  # The process was explicitly killed by somebody wielding the kill program.

@@ -284,6 +284,10 @@ def submit_simple_liquidity(
     market_id: str,
     commitment_amount: int,
     fee: float,
+    reference_buy: str,
+    reference_sell: str,
+    delta_buy: int,
+    delta_sell: int,
     is_amendment: bool = False,
     key_name: Optional[str] = None,
 ):
