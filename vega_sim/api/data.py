@@ -60,7 +60,7 @@ class Order:
     status: vega_protos.vega.Order.Status
     remaining: float
     time_in_force: vega_protos.vega.Order.TimeInForce
-    order_type: vega_protos.vega.Order.TimeInForce
+    order_type: vega_protos.vega.Order.Type
     created_at: int
     expires_at: int
     party_id: str
