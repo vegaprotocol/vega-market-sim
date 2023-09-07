@@ -18,6 +18,7 @@ from vega_sim.scenario.common.agents import (
     UncrossAuctionAgent,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
+    LimitOrderTrader,
     SimpleLiquidityProvider,
 )
 
@@ -141,13 +142,10 @@ class SLAScenario(Scenario):
 
         price_process = random_walk(
             num_steps=self.num_steps + 1,
-            sigma=0.5,
+            sigma=2,
             starting_price=1500,
             decimal_precision=self.asset_decimals,
         )
-        # Add spikes to trigger price monitoring auctions
-        for i in self.random_state.randint(0, self.num_steps, size=2):
-            price_process[i] = price_process[i] * 10
 
         market_config = MarketConfig()
         market_config.set("liquidity_sla_parameters.price_range", self.price_range)
@@ -235,6 +233,29 @@ class SLAScenario(Scenario):
                 step_bias=1,
             )
         )
+        [
+            agents.append(
+                LimitOrderTrader(
+                    key_name="limit_order_trader",
+                    market_name=self.market_name,
+                    asset_name=self.asset_name,
+                    time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
+                    buy_volume=1,
+                    sell_volume=1,
+                    buy_intensity=10,
+                    sell_intensity=10,
+                    submit_bias=1,
+                    cancel_bias=0,
+                    duration=5,
+                    price_process=price_process,
+                    spread=0,
+                    mean=-3,
+                    sigma=0.5,
+                    tag=i,
+                )
+            )
+            for i in range(10)
+        ]
         for i in range(len(self.lps_commitment_amount)):
             agents.append(
                 SimpleLiquidityProvider(
