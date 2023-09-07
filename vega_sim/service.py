@@ -2068,9 +2068,9 @@ class VegaService(ABC):
         self,
         key_name: str,
         wallet_name: Optional[str] = None,
-        cancellations: Optional[List[OrderCancellation]] = [],
-        amendments: Optional[List[OrderAmendment]] = [],
-        submissions: Optional[List[OrderSubmission]] = [],
+        cancellations: Optional[List[OrderCancellation]] = None,
+        amendments: Optional[List[OrderAmendment]] = None,
+        submissions: Optional[List[OrderSubmission]] = None,
     ):
         """Submits a batch of market instructions to be processed sequentially.
 
@@ -2099,7 +2099,11 @@ class VegaService(ABC):
             key="spam.protection.max.batchSize", to_type="int"
         )
 
-        instructions = cancellations + amendments + submissions
+        instructions = (
+            (cancellations if cancellations is not None else [])
+            + (amendments if amendments is not None else [])
+            + (submissions if submissions is not None else [])
+        )
 
         batch_size = 0
 
