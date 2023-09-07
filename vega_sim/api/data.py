@@ -355,7 +355,7 @@ def _margin_level_from_proto(
 def _iceberg_order_from_proto(
     iceberg_order: vega_protos.vega.IcebergOrder,
     decimal_spec: DecimalSpec,
-) -> Order:
+) -> IcebergOrder:
     return IcebergOrder(
         peak_size=num_from_padded_int(
             iceberg_order.peak_size, decimal_spec.position_decimals
