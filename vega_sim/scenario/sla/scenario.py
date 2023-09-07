@@ -141,7 +141,7 @@ class SLAScenario(Scenario):
 
         price_process = random_walk(
             num_steps=self.num_steps + 1,
-            sigma=0.5,
+            sigma=2,
             starting_price=1500,
             decimal_precision=self.asset_decimals,
         )

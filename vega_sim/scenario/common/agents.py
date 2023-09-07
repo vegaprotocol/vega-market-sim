@@ -2409,8 +2409,25 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         )
 
     def step(self, vega_state: VegaState):
-        # Don't amend offset if in auction
         market_data = vega_state.market_state[self.market_id]
+
+        if vega_state.market_state[self.market_id].trading_mode in [
+            markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
+            markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
+        ]:
+            if market_data.indicative_price != 0:
+                reference_price = market_data.indicative_price
+            elif market_data.last_traded_price != 0:
+                reference_price = market_data.last_traded_price
+            else:
+                logging.warning("Unable to evaluate SLA during auction.")
+                return
+        else:
+            if market_data.midprice != 0:
+                reference_price = market_data.midprice
+            else:
+                logging.warning("Unable to evaluate SLA during continuous trading.")
+                return
 
         # Get the lower and upper bounds liquidity can be pegged between
         bid_inner_bound = self.bid_inner_bound_fn(
@@ -2451,8 +2468,8 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         )
 
         # Calculate size required at bid and ask price to meet commitment (give some overhead)
-        bid_size = self.commitment_amount / market_data.midprice
-        ask_size = self.commitment_amount / market_data.midprice
+        bid_size = self.commitment_amount / reference_price
+        ask_size = self.commitment_amount / reference_price
 
         buys, sells = self._get_orders(vega_state=vega_state)
 
