@@ -547,7 +547,6 @@ def order_submission(
         type=order_type,
         reduce_only=reduce_only,
         post_only=post_only,
-        iceberg_opts=iceberg_opts,
     )
 
     # Update OrderSubmission object with optional fields if specified
@@ -580,9 +579,9 @@ def batch_market_instructions(
     wallet: Wallet,
     wallet_name: str,
     key_name: Optional[str] = None,
-    amendments: Optional[List[OrderAmendment]] = [],
-    submissions: Optional[List[OrderSubmission]] = [],
-    cancellations: Optional[List[OrderCancellation]] = [],
+    amendments: Optional[List[OrderAmendment]] = None,
+    submissions: Optional[List[OrderSubmission]] = None,
+    cancellations: Optional[List[OrderCancellation]] = None,
 ):
     """Submits a batch of market instructions.
 
@@ -601,9 +600,14 @@ def batch_market_instructions(
             List of OrderCancellation objects to process sequentially. Defaults to [].
     """
 
-    command = vega_protos.commands.v1.commands.BatchMarketInstructions(
-        submissions=submissions, amendments=amendments, cancellations=cancellations
-    )
+    command = vega_protos.commands.v1.commands.BatchMarketInstructions()
+
+    if cancellations is not None:
+        command.cancellations.extend(cancellations)
+    if amendments is not None:
+        command.amendments.extend(amendments)
+    if submissions is not None:
+        command.submissions.extend(submissions)
 
     wallet.submit_transaction(
         transaction=command,

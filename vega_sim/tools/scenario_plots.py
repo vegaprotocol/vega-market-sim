@@ -38,6 +38,32 @@ TRADING_MODE_COLORS = {
     6: (255 / 255, 0 / 255, 0 / 255),
 }
 
+TRANSFER_TYPE_MAP = {
+    vega_protos.vega.TRANSFER_TYPE_LIQUIDITY_FEE_ALLOCATE: {
+        "color": "b",
+        "stack": False,
+    },
+    vega_protos.vega.TRANSFER_TYPE_LIQUIDITY_FEE_NET_DISTRIBUTE: {
+        "color": "g",
+        "stack": True,
+    },
+    vega_protos.vega.TRANSFER_TYPE_SLA_PENALTY_BOND_APPLY: {
+        "color": "r",
+        "stack": False,
+    },
+    vega_protos.vega.TRANSFER_TYPE_SLA_PENALTY_LP_FEE_APPLY: {
+        "color": "r",
+        "stack": True,
+    },
+    vega_protos.vega.TRANSFER_TYPE_LIQUIDITY_FEE_UNPAID_COLLECT: {
+        "color": [1, 0.8, 0],
+        "stack": True,
+    },
+    vega_protos.vega.TRANSFER_TYPE_SLA_PERFORMANCE_BONUS_DISTRIBUTE: {
+        "color": "c",
+        "stack": True,
+    },
+}
 
 """
 Thoughts for plots
@@ -55,6 +81,7 @@ from vega_sim.tools.scenario_output import (
     load_market_chain,
     load_resource_df,
     load_assets_df,
+    load_ledger_entries_df,
 )
 
 
@@ -901,6 +928,152 @@ def reward_plots(run_name: Optional[str] = None):
     return fig
 
 
+def sla_plot(run_name: Optional[str] = None):
+    accounts_df = load_accounts_df(run_name=run_name)
+    ledger_entries_df = load_ledger_entries_df(run_name=run_name)
+
+    # Add a party of interest (poi) column to the ledger entries dataframe
+    def determine_poi(row):
+        if row["from_account_party_id"] not in ["network", None]:
+            return row["from_account_party_id"]
+        if row["to_account_party_id"] not in ["network", None]:
+            return row["to_account_party_id"]
+        return None
+
+    ledger_entries_df["poi"] = ledger_entries_df.apply(determine_poi, axis=1)
+
+    # Initialise the figure and subplots
+    fig = plt.figure(figsize=[11.69, 8.27])
+    fig.suptitle(
+        f"SLA Analysis Plots",
+        fontsize=18,
+        fontweight="bold",
+        color=(0.2, 0.2, 0.2),
+    )
+    fig.tight_layout()
+    plt.rcParams.update({"font.size": 8})
+    gs = GridSpec(nrows=3, ncols=2, hspace=0.4)
+    fig.subplots_adjust(bottom=0.2)
+    axs: list[plt.Axes] = []
+
+    # Add a LP fee accounts plot
+    axs.append(fig.add_subplot(gs[0, 0:2]))
+    axs[-1].set_title(
+        f"LP Liquidity Fee Account Balances",
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    filtered_accounts_df = accounts_df[accounts_df["type"] == 19]
+    for i, party_id in enumerate(ledger_entries_df["poi"].unique()):
+        axs[-1].plot(
+            filtered_accounts_df[filtered_accounts_df["party_id"] == party_id][
+                "balance"
+            ],
+            label=f"LP {i+1}",
+        )
+    axs[-1].legend()
+    axs[-1].set_ylabel("Amount [USD]")
+
+    for i, party_id in enumerate(ledger_entries_df["poi"].unique()):
+        filtered_ledger_entries_df = ledger_entries_df[
+            ledger_entries_df["poi"] == party_id
+        ]
+        unique_times = filtered_ledger_entries_df["time"].unique()
+        unique_transfer_types = list(TRANSFER_TYPE_MAP.keys())
+        combinations = pd.DataFrame(
+            [(a, b) for a in unique_times for b in unique_transfer_types],
+            columns=["time", "transfer_type"],
+        )
+        merged_ledger_entries_df = pd.merge(
+            combinations,
+            filtered_ledger_entries_df,
+            on=["time", "transfer_type"],
+            how="left",
+        ).fillna(0)
+        # Condense transfers with identical timestamps + type
+        merged_ledger_entries_df = merged_ledger_entries_df.groupby(
+            ["time", "transfer_type"], as_index=False
+        )["quantity"].sum()
+
+        merged_ledger_entries_df.sort_values("time", ascending=True, inplace=True)
+        merged_ledger_entries_df["cum_sum"] = merged_ledger_entries_df.groupby(
+            "transfer_type"
+        )["quantity"].cumsum()
+
+        axs.append(fig.add_subplot(gs[1, i]))
+        axs[-1].set_title(
+            f"Bond account and penalties for LP {i+1}",
+            loc="left",
+            fontsize=12,
+            color=(0.3, 0.3, 0.3),
+        )
+        accounts = accounts_df[
+            (accounts_df["type"] == 9) & (accounts_df["party_id"] == party_id)
+        ]
+        axs[-1].plot(accounts.index, accounts["balance"], "g", label=f"Bond Account")
+        axs[-1].step(
+            merged_ledger_entries_df[merged_ledger_entries_df["transfer_type"] == 32][
+                "time"
+            ],
+            merged_ledger_entries_df[merged_ledger_entries_df["transfer_type"] == 32][
+                "cum_sum"
+            ],
+            "r",
+            label=f"SLA Penalties",
+        )
+        axs[-1].legend()
+        axs[-1].set_ylabel("Amount [USD]")
+
+        axs.append(fig.add_subplot(gs[2, i]))
+        axs[-1].set_title(
+            f"Cumulative transfers for LP {i+1}",
+            loc="left",
+            fontsize=12,
+            color=(0.3, 0.3, 0.3),
+        )
+        axs[-1].step(
+            merged_ledger_entries_df.time.unique(),
+            merged_ledger_entries_df[merged_ledger_entries_df["transfer_type"] == 30][
+                "cum_sum"
+            ],
+            label=vega_protos.vega.TransferType.Name(30),
+        )
+        data = []
+        labels = []
+        colors = []
+        for transfer_type in TRANSFER_TYPE_MAP:
+            if TRANSFER_TYPE_MAP[transfer_type]["stack"] == True:
+                data.append(
+                    merged_ledger_entries_df[
+                        merged_ledger_entries_df["transfer_type"] == transfer_type
+                    ]["cum_sum"]
+                )
+                labels.append(vega_protos.vega.TransferType.Name(transfer_type))
+                colors.append(TRANSFER_TYPE_MAP[transfer_type]["color"])
+        axs[-1].stackplot(
+            merged_ledger_entries_df.time.unique(),
+            *data,
+            labels=labels,
+            colors=colors,
+            step="pre",
+        )
+        axs[-1].legend(
+            fontsize="9",
+            loc="upper left",
+            bbox_to_anchor=(-0.02, -0.15),
+            fancybox=False,
+            shadow=False,
+        )
+        axs[-1].set_ylabel("Amount [USD]")
+
+    axs[0].get_shared_x_axes().join(*[ax for ax in axs[0:]])
+    axs[1].get_shared_y_axes().join(*[axs[1], axs[3]])
+    axs[2].get_shared_y_axes().join(*[axs[2], axs[4]])
+
+    return fig
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--fuzzing", action="store_true")
@@ -909,6 +1082,7 @@ if __name__ == "__main__":
     parser.add_argument("--accounts", action="store_true")
     parser.add_argument("--rewards", action="store_true")
     parser.add_argument("--resources", action="store_true")
+    parser.add_argument("--sla", action="store_true")
     parser.add_argument("--all", action="store_true")
 
     parser.add_argument("--show", action="store_true")
@@ -952,6 +1126,11 @@ if __name__ == "__main__":
         fig = resource_monitoring_plot()
         if args.save:
             fig.savefig(f"{dir}/resource_monitoring.jpg")
+
+    if args.sla or args.all:
+        fig = sla_plot()
+        if args.save:
+            fig.savefig(f"{dir}/sla.jpg")
 
     if args.show:
         plt.show()

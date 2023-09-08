@@ -1070,6 +1070,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         market_name: Optional[str] = None,
         asset_name: Optional[str] = None,
         commitment_amount: float = 6000,
+        supplied_amount: Optional[float] = None,
         market_decimal_places: int = 5,
         asset_decimal_places: int = 0,
         tag: str = "",
@@ -1113,6 +1114,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         self.order_validity_length = order_validity_length
 
+        self.supplied_amount = (
+            supplied_amount if supplied_amount is not None else commitment_amount
+        )
+
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
@@ -1147,7 +1152,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 if self.liquidity_commitment_fn is not None
                 else None
             )
-        ) is not None:
+        ) is not None and self.commitment_amount > 0:
             self.vega.submit_liquidity(
                 wallet_name=self.wallet_name,
                 market_id=self.market_id,
@@ -1268,13 +1273,14 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     )
                     self.vega.wait_for_total_catchup()
 
-            self.vega.submit_liquidity(
-                wallet_name=self.wallet_name,
-                market_id=self.market_id,
-                commitment_amount=liq.amount,
-                fee=liq.fee,
-                key_name=self.key_name,
-            )
+            if self.commitment_amount > 0:
+                self.vega.submit_liquidity(
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                    commitment_amount=liq.amount,
+                    fee=liq.fee,
+                    key_name=self.key_name,
+                )
 
     def _scale_orders(
         self,
@@ -1282,13 +1288,13 @@ class ShapedMarketMaker(StateAgentWithWallet):
         sell_shape: List[MMOrder],
     ):
         buy_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
+            self.safety_factor * self.supplied_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=buy_shape,
         )
 
         sell_scaling_factor = (
-            self.safety_factor * self.commitment_amount * self.stake_to_ccy_volume
+            self.safety_factor * self.supplied_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
             orders=sell_shape,
         )
@@ -1438,6 +1444,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         market_name: str = None,
         asset_name: str = None,
         commitment_amount: float = 6000,
+        supplied_amount: Optional[float] = None,
         market_decimal_places: int = 5,
         fee_amount: float = 0.001,
         kappa: float = 1,
@@ -1464,6 +1471,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             market_name=market_name,
             asset_name=asset_name,
             commitment_amount=commitment_amount,
+            supplied_amount=supplied_amount,
             market_decimal_places=market_decimal_places,
             asset_decimal_places=asset_decimal_places,
             tag=tag,
@@ -2339,7 +2347,11 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         fee: float = 0.001,
         tag: str = "",
         wallet_name: Optional[str] = None,
-        commitment_amount_to_book_weighting: float = 1.2,
+        commitment_amount_to_minimum_weighting: float = 1.2,
+        commitment_amount_to_peak_weighting: float = 1.5,
+        commitment_amount_to_size_weighting: float = 2.0,
+        target_time_on_book: float = 1,
+        random_state: Optional[np.random.RandomState] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
 
@@ -2357,7 +2369,16 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         self.fee = fee
 
         self.commitment_amount = commitment_amount
-        self.commitment_amount_to_book_weighting = commitment_amount_to_book_weighting
+        self.commitment_amount_to_minimum_weighting = (
+            commitment_amount_to_minimum_weighting
+        )
+        self.commitment_amount_to_peak_weighting = commitment_amount_to_peak_weighting
+        self.commitment_amount_to_size_weighting = commitment_amount_to_size_weighting
+        self.target_time_on_book = target_time_on_book
+
+        self.random_state = (
+            np.random.RandomState() if random_state is None else random_state
+        )
 
     def initialise(
         self,
@@ -2378,7 +2399,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
             )
             self.vega.wait_fn(2)
 
-        self.vega.submit_simple_liquidity(
+        self.vega.submit_liquidity(
             wallet_name=self.wallet_name,
             market_id=self.market_id,
             key_name=self.key_name,
@@ -2386,34 +2407,27 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
             fee=self.fee,
             is_amendment=False,
         )
-        self.vega.submit_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            trading_key=self.key_name,
-            side="SIDE_BUY",
-            order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=5),
-            time_in_force="TIME_IN_FORCE_GTC",
-            volume=1,
-        )
-        self.vega.submit_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            trading_key=self.key_name,
-            side="SIDE_SELL",
-            order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_MID", offset=5),
-            time_in_force="TIME_IN_FORCE_GTC",
-            volume=1,
-        )
 
     def step(self, vega_state: VegaState):
-        # Don't amend offset if in auction
-        if (
-            vega_state.market_state[self.market_id].trading_mode
-            != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
-        ):
-            return
+        market_data = vega_state.market_state[self.market_id]
+
+        if vega_state.market_state[self.market_id].trading_mode in [
+            markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
+            markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
+        ]:
+            if market_data.indicative_price != 0:
+                reference_price = market_data.indicative_price
+            elif market_data.last_traded_price != 0:
+                reference_price = market_data.last_traded_price
+            else:
+                logging.warning("Unable to evaluate SLA during auction.")
+                return
+        else:
+            if market_data.midprice != 0:
+                reference_price = market_data.midprice
+            else:
+                logging.warning("Unable to evaluate SLA during continuous trading.")
+                return
 
         # Get the lower and upper bounds liquidity can be pegged between
         bid_inner_bound = self.bid_inner_bound_fn(
@@ -2428,6 +2442,22 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         ask_outer_bound = self.ask_outer_bound_fn(
             vega_state=vega_state, market_id=self.market_id
         )
+        # If we are missing the needed fields return as the lp can't place orders (similar to parking epgs)
+        if any(
+            [
+                var is None
+                for var in [
+                    bid_inner_bound,
+                    bid_outer_bound,
+                    ask_inner_bound,
+                    ask_outer_bound,
+                ]
+            ]
+        ):
+            logging.warning("Missing bids, asks, or bounds")
+            return
+
+        meet_commitment = self.random_state.rand() < self.target_time_on_book
 
         bid_price = (
             bid_inner_bound
@@ -2438,44 +2468,86 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
             + (ask_outer_bound - ask_inner_bound) * self.offset_proportion
         )
 
-        # Calculate offsets for the bid and ask pegs from the mid-price
-        bid_offset = vega_state.market_state[self.market_id].midprice - bid_price
-        ask_offset = ask_price - vega_state.market_state[self.market_id].midprice
+        # Calculate size required at bid and ask price to meet commitment
+        bid_size = self.commitment_amount / reference_price
+        ask_size = self.commitment_amount / reference_price
 
-        # Submit liquidity
-        self.vega.cancel_order(
-            trading_key=self.key_name,
-            market_id=self.market_id,
+        buys, sells = self._get_orders(vega_state=vega_state)
+
+        cancellations = []
+        submissions = []
+
+        # Cancel orders, no longer meet commitment
+        cancellations.extend(self._cancel_orders(buys))
+        cancellations.extend(self._cancel_orders(sells))
+
+        # Refresh orders
+        if meet_commitment:
+            submissions.extend(
+                self._submit_order(side="SIDE_BUY", price=bid_price, size=bid_size)
+            )
+            submissions.extend(
+                self._submit_order(side="SIDE_SELL", price=ask_price, size=ask_size)
+            )
+
+        self.vega.submit_instructions(
+            key_name=self.key_name,
             wallet_name=self.wallet_name,
+            cancellations=cancellations,
+            submissions=submissions,
         )
-        self.vega.submit_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            trading_key=self.key_name,
-            side="SIDE_BUY",
-            order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(
-                reference="PEGGED_REFERENCE_MID", offset=bid_offset
-            ),
-            time_in_force="TIME_IN_FORCE_GTC",
-            volume=self.commitment_amount_to_book_weighting
-            * self.commitment_amount
-            / bid_price,
+
+    def _get_orders(self, vega_state) -> Tuple[List[Order], List[Order]]:
+        orders = list(
+            (
+                vega_state.market_state[self.market_id]
+                .orders.get(
+                    self.vega.wallet.public_key(
+                        wallet_name=self.wallet_name, name=self.key_name
+                    ),
+                    {},
+                )
+                .values()
+            )
+            if self.market_id in vega_state.market_state
+            else []
         )
-        self.vega.submit_order(
-            trading_wallet=self.wallet_name,
-            market_id=self.market_id,
-            trading_key=self.key_name,
-            side="SIDE_SELL",
-            order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(
-                reference="PEGGED_REFERENCE_MID", offset=ask_offset
-            ),
-            time_in_force="TIME_IN_FORCE_GTC",
-            volume=self.commitment_amount_to_book_weighting
-            * self.commitment_amount
-            / ask_price,
-        )
+        # Check buy_order_reference and sell_order_reference are still live:
+        buys = []
+        sells = []
+        for order in orders:
+            (
+                buys.append(order)
+                if order.side == vega_protos.SIDE_BUY
+                else sells.append(order)
+            )
+        return buys, sells
+
+    def _submit_order(self, side, price, size):
+        return [
+            self.vega.create_order_submission(
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                time_in_force="TIME_IN_FORCE_GTC",
+                side=side,
+                size=size * self.commitment_amount_to_size_weighting,
+                price=price,
+                # post_only=True,
+                peak_size=size * self.commitment_amount_to_peak_weighting,
+                minimum_visible_size=size * self.commitment_amount_to_minimum_weighting,
+            )
+        ]
+
+    def _cancel_orders(self, orders):
+        cancellations = []
+        for order in orders:
+            cancellations.append(
+                self.vega.create_order_cancellation(
+                    market_id=self.market_id,
+                    order_id=order.id,
+                )
+            )
+        return cancellations
 
 
 class MomentumTrader(StateAgentWithWallet):
@@ -2751,6 +2823,9 @@ class Snitch(StateAgent):
         additional_state_fn: Optional[
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
+        additional_finalise_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
         only_extract_additional: bool = False,
     ):
         self.tag = None
@@ -2759,6 +2834,7 @@ class Snitch(StateAgent):
         self.additional_states = []
         self.agents = agents
         self.additional_state_fn = additional_state_fn
+        self.additional_finalise_fn = additional_finalise_fn
         self.seen_trades = set()
         self.only_extract_additional = only_extract_additional
         self.process_map: Dict[str, psutil.Process] = {}
@@ -2870,6 +2946,10 @@ class Snitch(StateAgent):
 
     def finalise(self):
         self.assets = self.vega.list_assets()
+        if self.additional_finalise_fn is not None:
+            self.additional_states.append(
+                self.additional_finalise_fn(self.vega, self.agents)
+            )
 
 
 class KeyFunder(Agent):
