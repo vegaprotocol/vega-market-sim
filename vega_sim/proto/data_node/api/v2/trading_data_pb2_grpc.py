@@ -477,6 +477,31 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
         )
+        self.GetPartyActivityStreak = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetPartyActivityStreak",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakResponse.FromString,
+        )
+        self.GetCurrentReferralProgram = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetCurrentReferralProgram",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramResponse.FromString,
+        )
+        self.ListReferralSets = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListReferralSets",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsResponse.FromString,
+        )
+        self.ListReferralSetReferees = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListReferralSetReferees",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesResponse.FromString,
+        )
+        self.GetReferralSetStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetReferralSetStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1365,6 +1390,48 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def GetPartyActivityStreak(self, request, context):
+        """List party activity streak
+
+        Get a party's activity across epochs
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetCurrentReferralProgram(self, request, context):
+        """Get current referral program
+
+        Get the on-going referral program.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListReferralSets(self, request, context):
+        """List referral sets
+
+        List all referral sets, or a specific referral set if you know its ID.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListReferralSetReferees(self, request, context):
+        """List referral set referees
+
+        List all referees that belong to a referral set.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetReferralSetStats(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -1903,6 +1970,31 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListFundingPeriodDataPoints,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.SerializeToString,
+        ),
+        "GetPartyActivityStreak": grpc.unary_unary_rpc_method_handler(
+            servicer.GetPartyActivityStreak,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakResponse.SerializeToString,
+        ),
+        "GetCurrentReferralProgram": grpc.unary_unary_rpc_method_handler(
+            servicer.GetCurrentReferralProgram,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramResponse.SerializeToString,
+        ),
+        "ListReferralSets": grpc.unary_unary_rpc_method_handler(
+            servicer.ListReferralSets,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsResponse.SerializeToString,
+        ),
+        "ListReferralSetReferees": grpc.unary_unary_rpc_method_handler(
+            servicer.ListReferralSetReferees,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesResponse.SerializeToString,
+        ),
+        "GetReferralSetStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetReferralSetStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -4583,6 +4675,151 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListFundingPeriodDataPoints",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetPartyActivityStreak(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetPartyActivityStreak",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetCurrentReferralProgram(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetCurrentReferralProgram",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListReferralSets(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListReferralSets",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListReferralSetReferees(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListReferralSetReferees",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetReferralSetStats(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetReferralSetStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.FromString,
             options,
             channel_credentials,
             insecure,
