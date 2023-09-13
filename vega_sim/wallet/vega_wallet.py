@@ -44,10 +44,7 @@ class VegaWallet(Wallet):
         self.wallet_url = wallet_url
         self.login_tokens = {}
         self.pub_keys = {}
-        if isinstance(wallet_path, str):
-            self._wallet_path = [wallet_path]
-        else:
-            self._wallet_path = wallet_path
+        self._wallet_path = wallet_path
         self._wallet_home = vega_home_dir
         self._passphrase_file = passphrase_file_path
         self._mutex = mutex
