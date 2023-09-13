@@ -243,8 +243,12 @@ class VegaWallet(Wallet):
 
         url = f"{self.wallet_url}/api/v2/requests"
 
-        self._lock()
-        response = requests.post(url, headers=headers, json=submission)
+        response = None
+        if self._mutex is None:
+            response = requests.post(url, headers=headers, json=submission)
+        else:
+            with self._mutex:
+                response = requests.post(url, headers=headers, json=submission)
         self._release()
 
         try:
@@ -292,10 +296,15 @@ class VegaWallet(Wallet):
             "id": "request",
         }
         url = f"{self.wallet_url}/api/v2/requests"
+        
+        
+        response = None
+        if self._mutex is None:
+            response = requests.post(url, headers=headers, json=submission)
+        else:
+            with self._mutex:
+                response = requests.post(url, headers=headers, json=submission)
 
-        self._lock()
-        response = requests.post(url, headers=headers, json=submission)
-        self._release()
         try:
             response.raise_for_status()
         except Exception as e:
@@ -324,20 +333,3 @@ class VegaWallet(Wallet):
             )
 
         return self.pub_keys[wallet_name][name]
-
-    def _lock(self):
-        """
-        Lock if mutex is available
-        """
-        if self._mutex is None:
-            return
-        self._mutex.acquire()
-
-    def _release(self):
-        """
-        Release the lock if mutex is available
-        """
-        if self._mutex is None:
-            return
-
-        self._mutex.release()
