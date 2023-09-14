@@ -30,11 +30,15 @@ class Scenario(abc.ABC):
         state_extraction_fn: Optional[
             Callable[[VegaService, Dict[str, Agent]], Any]
         ] = None,
+        final_extraction_fn: Optional[
+            Callable[[VegaService, Dict[str, Agent]], Any]
+        ] = None,
         additional_data_output_fns: Optional[Dict[str, Callable]] = None,
     ):
         self.agents = []
         self.env: Optional[MarketEnvironment] = None
         self.state_extraction_fn = state_extraction_fn
+        self.final_extraction_fn = final_extraction_fn
         self.additional_data_output_fns = additional_data_output_fns
 
     def _step_end_callback(self):
@@ -92,7 +96,9 @@ class Scenario(abc.ABC):
 
         if run_with_snitch or output_data:
             self.agents["snitch"] = Snitch(
-                agents=self.agents, additional_state_fn=self.state_extraction_fn
+                agents=self.agents,
+                additional_state_fn=self.state_extraction_fn,
+                additional_finalise_fn=self.final_extraction_fn,
             )
 
         self.env = self.configure_environment(

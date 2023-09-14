@@ -14,7 +14,7 @@ pipeline {
         disableConcurrentBuilds(abortPrevious: true)
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: '48766fb4a998c40d1672a8c553d34e02324a6e2c',
+        string( name: 'VEGA_VERSION', defaultValue: 'a4f2e9b676780bb6a0b60239c7a36ac9712820e4',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'VEGACAPSULE_VERSION', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
@@ -67,6 +67,7 @@ pipeline {
                         vegacapsuleVersion: params.VEGACAPSULE_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
                         nodeLabel: params.NODE_LABEL,
+                        branchRun: isPRBuild()
                     )
                 }
             }

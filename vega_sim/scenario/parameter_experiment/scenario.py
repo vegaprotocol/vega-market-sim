@@ -186,6 +186,7 @@ class ParameterExperiment(Scenario):
                 asset_name=asset_name,
                 initial_asset_mint=1e10,
                 commitment_amount=100_000,
+                target_time_on_book=1,
                 bid_inner_bound_fn=lambda vega_state, market_id: vega_state.market_state[
                     market_id
                 ].midprice,
@@ -198,8 +199,9 @@ class ParameterExperiment(Scenario):
                 ask_outer_bound_fn=lambda vega_state, market_id: vega_state.market_state[
                     market_id
                 ].max_valid_price,
-                offset_proportion=0.16,
+                offset_proportion=offset,
                 fee=0.001,
+                random_state=random_state,
             )
             for i, offset in enumerate([0.02, 0.04, 0.06])
         ]

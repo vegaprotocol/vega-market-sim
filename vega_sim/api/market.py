@@ -15,6 +15,10 @@ A MarketConfig class has the following attributes which can be set:
 • liquidity_monitoring_parameters.auction_extension
 • liquidity_monitoring_parameters.target_stake_parameters.time_window
 • liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
+• liquidity_sla_parameters.price_range
+• liquidity_sla_parameters.commitment_min_time_fraction
+• liquidity_sla_parameters.performance_hysteresis_epochs
+• liquidity_sla_parameters.sla_competition_factor
 • log_normal.tau
 • log_normal.risk_aversion_parameter
 • log_normal.params.mu
@@ -255,7 +259,6 @@ class LiquiditySLAParameters(Config):
         "default": {
             "price_range": "0.5",
             "commitment_min_time_fraction": "1",
-            "providers_fee_calculation_time_step": 1,
             "performance_hysteresis_epochs": 1,
             "sla_competition_factor": "1",
         }
@@ -266,9 +269,7 @@ class LiquiditySLAParameters(Config):
 
         self.price_range = config["price_range"]
         self.commitment_min_time_fraction = config["commitment_min_time_fraction"]
-        self.providers_fee_calculation_time_step = config[
-            "providers_fee_calculation_time_step"
-        ]
+
         self.performance_hysteresis_epochs = config["performance_hysteresis_epochs"]
         self.sla_competition_factor = config["sla_competition_factor"]
 
@@ -276,7 +277,6 @@ class LiquiditySLAParameters(Config):
         return vega_protos.markets.LiquiditySLAParameters(
             price_range=self.price_range,
             commitment_min_time_fraction=self.commitment_min_time_fraction,
-            providers_fee_calculation_time_step=self.providers_fee_calculation_time_step,
             performance_hysteresis_epochs=self.performance_hysteresis_epochs,
             sla_competition_factor=self.sla_competition_factor,
         )

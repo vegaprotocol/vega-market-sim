@@ -4,6 +4,7 @@ from typing import Optional
 
 import pytest
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.service import PeggedOrder
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -93,6 +94,25 @@ def build_basic_market(
         fee=0.002,
         is_amendment=False,
     )
+    vega.submit_order(
+        trading_key=MM_WALLET.name,
+        market_id=market_id,
+        side="SIDE_BUY",
+        order_type="TYPE_LIMIT",
+        pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_BID", offset=5),
+        time_in_force="TIME_IN_FORCE_GTC",
+        volume=1.5 * initial_commitment / initial_price,
+    )
+    vega.submit_order(
+        trading_key=MM_WALLET.name,
+        market_id=market_id,
+        side="SIDE_SELL",
+        order_type="TYPE_LIMIT",
+        pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_ASK", offset=5),
+        time_in_force="TIME_IN_FORCE_GTC",
+        volume=1.5 * initial_commitment / initial_price,
+    )
+
     # Add transactions in the proposed market to pass opening auction at price 0.3
     vega.submit_order(
         trading_key=AUCTION1.name,

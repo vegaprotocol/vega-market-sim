@@ -284,10 +284,6 @@ def submit_simple_liquidity(
     market_id: str,
     commitment_amount: int,
     fee: float,
-    reference_buy: str,
-    reference_sell: str,
-    delta_buy: int,
-    delta_sell: int,
     is_amendment: bool = False,
     key_name: Optional[str] = None,
 ):
@@ -304,14 +300,6 @@ def submit_simple_liquidity(
             int, The amount in asset decimals of market asset to commit to liquidity provision
         fee:
             float, The fee level at which to set the LP fee (in %, e.g. 0.01 == 1% and 1 == 100%)
-        reference_buy:
-            str, the reference point to use for the buy side of LP
-        reference_sell:
-            str, the reference point to use for the sell side of LP
-        delta_buy:
-            int, the offset from reference point for the buy side of LP
-        delta_sell:
-            int, the offset from reference point for the sell side of LP
     """
     return submit_liquidity(
         wallet_name=wallet_name,
@@ -559,7 +547,6 @@ def order_submission(
         type=order_type,
         reduce_only=reduce_only,
         post_only=post_only,
-        iceberg_opts=iceberg_opts,
     )
 
     # Update OrderSubmission object with optional fields if specified
@@ -592,9 +579,9 @@ def batch_market_instructions(
     wallet: Wallet,
     wallet_name: str,
     key_name: Optional[str] = None,
-    amendments: Optional[List[OrderAmendment]] = [],
-    submissions: Optional[List[OrderSubmission]] = [],
-    cancellations: Optional[List[OrderCancellation]] = [],
+    amendments: Optional[List[OrderAmendment]] = None,
+    submissions: Optional[List[OrderSubmission]] = None,
+    cancellations: Optional[List[OrderCancellation]] = None,
 ):
     """Submits a batch of market instructions.
 
@@ -613,9 +600,14 @@ def batch_market_instructions(
             List of OrderCancellation objects to process sequentially. Defaults to [].
     """
 
-    command = vega_protos.commands.v1.commands.BatchMarketInstructions(
-        submissions=submissions, amendments=amendments, cancellations=cancellations
-    )
+    command = vega_protos.commands.v1.commands.BatchMarketInstructions()
+
+    if cancellations is not None:
+        command.cancellations.extend(cancellations)
+    if amendments is not None:
+        command.amendments.extend(amendments)
+    if submissions is not None:
+        command.submissions.extend(submissions)
 
     wallet.submit_transaction(
         transaction=command,

@@ -390,6 +390,7 @@ def test_open_orders_by_market(trading_data_v2_servicer_and_port):
                 expires_at=1653276950,
                 party_id="party1",
                 updated_at=1653266950,
+                iceberg_order=None,
                 version=1,
             ),
             Order(
@@ -407,6 +408,7 @@ def test_open_orders_by_market(trading_data_v2_servicer_and_port):
                 expires_at=1653276950,
                 party_id="party1",
                 updated_at=1653266950,
+                iceberg_order=None,
                 version=1,
             ),
             Order(
@@ -424,6 +426,7 @@ def test_open_orders_by_market(trading_data_v2_servicer_and_port):
                 expires_at=1653276950,
                 party_id="party2",
                 updated_at=1653266950,
+                iceberg_order=None,
                 version=1,
             ),
         ],
@@ -443,6 +446,7 @@ def test_open_orders_by_market(trading_data_v2_servicer_and_port):
                 expires_at=1653276950,
                 party_id="party1",
                 updated_at=1653266950,
+                iceberg_order=None,
                 version=1,
             ),
             Order(
@@ -460,6 +464,7 @@ def test_open_orders_by_market(trading_data_v2_servicer_and_port):
                 expires_at=1653276950,
                 party_id="party1",
                 updated_at=1653266950,
+                iceberg_order=None,
                 version=1,
             ),
         ],

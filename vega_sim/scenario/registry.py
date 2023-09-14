@@ -12,6 +12,7 @@ from vega_sim.scenario.configurable_market.scenario import ConfigurableMarket
 from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
 from vega_sim.scenario.parameter_experiment.scenario import ParameterExperiment
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
+from vega_sim.scenario.sla.scenario import SLAScenario
 
 
 from vega_sim.scenario.common.utils.price_process import (
@@ -199,9 +200,54 @@ SCENARIOS = {
     ),
     "parameter_experiment": lambda: ParameterExperiment(),
     "fuzz_test": lambda: FuzzingScenario(
-        num_steps=2 * 60 * 12,
+        num_steps=2 * 60 * 24,
         step_length_seconds=30,
         block_length_seconds=1,
         transactions_per_block=4096,
+    ),
+    "sla_a": lambda: SLAScenario(
+        num_steps=3000,
+        step_length_seconds=1,
+        block_length_seconds=1,
+        transactions_per_block=4096,
+        epoch_length="10m",
+        price_range="1",
+        commitment_min_time_fraction="0.9",
+        providers_fee_calculation_time_step="1m",
+        performance_hysteresis_epochs=1,
+        sla_competition_factor="1",
+        lps_offset=[0.5, 0.5],
+        lps_target_time_on_book=[1, 0.91],
+        lps_commitment_amount=[100000, 100000],
+    ),
+    "sla_b": lambda: SLAScenario(
+        num_steps=3000,
+        step_length_seconds=1,
+        block_length_seconds=1,
+        transactions_per_block=4096,
+        epoch_length="10m",
+        price_range="1",
+        commitment_min_time_fraction="0.9",
+        providers_fee_calculation_time_step="1m",
+        performance_hysteresis_epochs=1,
+        sla_competition_factor="1",
+        lps_offset=[0.5, 0.5],
+        lps_target_time_on_book=[0.91, 0.85],
+        lps_commitment_amount=[100000, 100000],
+    ),
+    "sla_c": lambda: SLAScenario(
+        num_steps=3000,
+        step_length_seconds=1,
+        block_length_seconds=1,
+        transactions_per_block=4096,
+        epoch_length="10m",
+        price_range="1",
+        commitment_min_time_fraction="0.9",
+        providers_fee_calculation_time_step="1m",
+        performance_hysteresis_epochs=1,
+        sla_competition_factor="1",
+        lps_offset=[0.5, 0.8],
+        lps_target_time_on_book=[0.91, 0.91],
+        lps_commitment_amount=[100000, 100000],
     ),
 }

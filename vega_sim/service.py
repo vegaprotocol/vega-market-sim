@@ -1406,10 +1406,6 @@ class VegaService(ABC):
         market_id: str,
         commitment_amount: float,
         fee: float,
-        reference_buy: str,
-        reference_sell: str,
-        delta_buy: float,
-        delta_sell: float,
         is_amendment: Optional[bool] = None,
         wallet_name: Optional[str] = None,
     ):
@@ -1441,9 +1437,6 @@ class VegaService(ABC):
             market_id=market_id, data_client=self.trading_data_client_v2
         ).tradable_instrument.instrument.future.settlement_asset
 
-        market_decimals = data.market_price_decimals(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
         is_amendment = (
             is_amendment
             if is_amendment is not None
@@ -1459,10 +1452,6 @@ class VegaService(ABC):
                 commitment_amount, self.asset_decimals[asset_id]
             ),
             fee=fee,
-            reference_buy=reference_buy,
-            reference_sell=reference_sell,
-            delta_buy=num_to_padded_int(delta_buy, market_decimals),
-            delta_sell=num_to_padded_int(delta_sell, market_decimals),
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
@@ -1963,6 +1952,8 @@ class VegaService(ABC):
         pegged_offset: Optional[float] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        peak_size: Optional[float] = None,
+        minimum_visible_size: Optional[float] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2059,6 +2050,18 @@ class VegaService(ABC):
             pegged_order=pegged_order,
             reduce_only=reduce_only,
             post_only=post_only,
+            iceberg_opts=(
+                vega_protos.commands.v1.commands.IcebergOpts(
+                    peak_size=num_to_padded_int(
+                        peak_size, self.market_pos_decimals[market_id]
+                    ),
+                    minimum_visible_size=num_to_padded_int(
+                        minimum_visible_size, self.market_pos_decimals[market_id]
+                    ),
+                )
+                if (peak_size is not None and minimum_visible_size is not None)
+                else None
+            ),
         )
 
     def submit_instructions(
@@ -2096,7 +2099,11 @@ class VegaService(ABC):
             key="spam.protection.max.batchSize", to_type="int"
         )
 
-        instructions = cancellations + amendments + submissions
+        instructions = (
+            (cancellations if cancellations is not None else [])
+            + (amendments if amendments is not None else [])
+            + (submissions if submissions is not None else [])
+        )
 
         batch_size = 0
 
@@ -2339,6 +2346,10 @@ class VegaService(ABC):
             dispatch_strategy = vega_protos.vega.DispatchStrategy(
                 asset_for_metric=asset_for_metric,
                 metric=metric,
+                entity_scope=vega_protos.vega.EntityScope.ENTITY_SCOPE_INDIVIDUALS,
+                individual_scope=vega_protos.vega.IndividualScope.INDIVIDUAL_SCOPE_ALL,
+                window_length=1,
+                distribution_strategy=vega_protos.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
             )
             # Set the optional DispatchStrategy fields
             if markets is not None:
