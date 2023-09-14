@@ -67,6 +67,7 @@ pipeline {
                         vegacapsuleVersion: params.VEGACAPSULE_VERSION,
                         jenkinsSharedLib: params.JENKINS_SHARED_LIB_BRANCH,
                         nodeLabel: params.NODE_LABEL,
+                        branchRun: commitHash != "develop"
                     )
                 }
             }
