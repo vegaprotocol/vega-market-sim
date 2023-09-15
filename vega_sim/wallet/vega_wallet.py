@@ -249,7 +249,6 @@ class VegaWallet(Wallet):
         else:
             with self._mutex:
                 response = requests.post(url, headers=headers, json=submission)
-        self._release()
 
         try:
             response.raise_for_status()
