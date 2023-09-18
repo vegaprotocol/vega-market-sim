@@ -1,6 +1,7 @@
 import pytest
 
 from tests.integration.utils.fixtures import (
+    create_and_faucet_wallet,
     build_basic_market,
     vega_service,
     MM_WALLET,
@@ -25,6 +26,14 @@ def test_settlement(vega_service: VegaServiceNull):
 
     settlement_price = random.randint(80, 120)
     trade_size = random.randint(1, 10)
+
+    create_and_faucet_wallet(vega, wallet=MM_WALLET, symbol="VOTE", amount=1000)
+    vega.update_network_parameter(
+        proposal_key=MM_WALLET.name,
+        parameter="market.liquidity.sla.nonPerformanceBondPenaltyMax",
+        new_value="0",
+    )
+    vega.wait_fn(1)
 
     build_basic_market(
         vega,

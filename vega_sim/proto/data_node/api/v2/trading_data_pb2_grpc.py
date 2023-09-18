@@ -132,6 +132,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.FromString,
         )
+        self.GetTransfer = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetTransfer",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferResponse.FromString,
+        )
         self.GetNetworkLimits = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkLimits",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.SerializeToString,
@@ -502,6 +507,21 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.FromString,
         )
+        self.ListTeams = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListTeams",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsResponse.FromString,
+        )
+        self.ListTeamReferees = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListTeamReferees",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesResponse.FromString,
+        )
+        self.ListTeamRefereeHistory = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListTeamRefereeHistory",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -744,6 +764,15 @@ class TradingDataServiceServicer(object):
         - a party ID
         - "network"
         - "0000000000000000000000000000000000000000000000000000000000000000", the public key for the global rewards account
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetTransfer(self, request, context):
+        """Get transfer by ID
+
+        Get a specific transfer by ID
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1432,6 +1461,33 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListTeams(self, request, context):
+        """List teams
+
+        Get a list of all teams, or for a specific team by using team ID, or party ID of a referrer or referee
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListTeamReferees(self, request, context):
+        """List team referees
+
+        Get a list of all referees for a given team ID
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListTeamRefereeHistory(self, request, context):
+        """List referee team history
+
+        Get a list of a referee's team history, i.e. the teams that a referee has been a member of and transferred from/to.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -1625,6 +1681,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListTransfers,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.SerializeToString,
+        ),
+        "GetTransfer": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTransfer,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferResponse.SerializeToString,
         ),
         "GetNetworkLimits": grpc.unary_unary_rpc_method_handler(
             servicer.GetNetworkLimits,
@@ -1995,6 +2056,21 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetReferralSetStats,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.SerializeToString,
+        ),
+        "ListTeams": grpc.unary_unary_rpc_method_handler(
+            servicer.ListTeams,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsResponse.SerializeToString,
+        ),
+        "ListTeamReferees": grpc.unary_unary_rpc_method_handler(
+            servicer.ListTeamReferees,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesResponse.SerializeToString,
+        ),
+        "ListTeamRefereeHistory": grpc.unary_unary_rpc_method_handler(
+            servicer.ListTeamRefereeHistory,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -2674,6 +2750,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListTransfers",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetTransfer(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetTransfer",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -4820,6 +4925,93 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetReferralSetStats",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListTeams(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListTeams",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListTeamReferees(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListTeamReferees",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListTeamRefereeHistory(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListTeamRefereeHistory",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
             options,
             channel_credentials,
             insecure,

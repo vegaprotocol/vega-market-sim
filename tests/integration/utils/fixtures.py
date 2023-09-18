@@ -23,9 +23,12 @@ WALLETS = [MM_WALLET, AUCTION1, AUCTION2, TERMINATE_WALLET, TRADER_WALLET]
 
 
 def create_and_faucet_wallet(
-    vega: VegaServiceNull, wallet: WalletConfig, amount: float = 1e4
+    vega: VegaServiceNull,
+    wallet: WalletConfig,
+    symbol: Optional[str] = None,
+    amount: float = 1e4,
 ):
-    asset_id = vega.find_asset_id(symbol=ASSET_NAME)
+    asset_id = vega.find_asset_id(symbol=symbol if symbol is not None else ASSET_NAME)
     vega.create_key(wallet.name)
     vega.mint(wallet.name, asset_id, amount)
 
