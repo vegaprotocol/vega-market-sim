@@ -344,15 +344,16 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
             self.commitment_amount = 0
             return
 
+        midprice = vega_state.market_state[self.market_id].midprice
+
         if (
             vega_state.market_state[self.market_id].trading_mode
             != markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            or midprice == 0
         ):
             return
         if self.random_state.rand() > self.step_bias:
             return
-
-        midprice = vega_state.market_state[self.market_id].midprice
 
         if account.general > 0:
             add_to_margin = max(
