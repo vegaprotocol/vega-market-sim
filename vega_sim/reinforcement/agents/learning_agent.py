@@ -158,7 +158,6 @@ class LearningAgent(StateAgentWithWallet):
         position = position.open_volume if position else 0
         account = self.vega.party_account(
             key_name=self.key_name,
-            asset_id=self.tdai_id,
             market_id=self.market_id,
         )
         book_state = self.vega.market_depth(
@@ -214,7 +213,6 @@ class LearningAgent(StateAgentWithWallet):
         for i in range(0, numTries):
             account = self.vega.party_account(
                 key_name=self.key_name,
-                asset_id=self.tdai_id,
                 market_id=self.market_id,
             )
             self.latest_state = self.state(self.vega)

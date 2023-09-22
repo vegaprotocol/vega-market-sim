@@ -10,6 +10,7 @@ from vega_sim.network_service import VegaServiceNetwork
 class VegaState:
     network_state: Tuple
     market_state: Dict[str, Any]
+    time: int
 
 
 class Agent(ABC):

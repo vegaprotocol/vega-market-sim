@@ -409,10 +409,14 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 orders=order_status.get(market_id, {}),
             )
 
-        return VegaState(network_state=(), market_state=market_state)
+        return VegaState(
+            network_state=(),
+            market_state=market_state,
+            time=vega.get_blockchain_time_from_feed(),
+        )
 
     def step(self, vega: VegaService) -> None:
-        vega.wait_for_thread_catchup()
+        # vega.wait_for_thread_catchup()
         state = self.state_func(vega)
         for agent in (
             sorted(self.agents, key=lambda _: self.random_state.random())
@@ -428,7 +432,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
                     " received."
                 )
                 # Mint forwards blocks, wait for catchup
-                vega.wait_for_total_catchup()
+                # vega.wait_for_total_catchup()
 
 
 class NetworkEnvironment(MarketEnvironmentWithState):

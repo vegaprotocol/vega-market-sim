@@ -35,12 +35,22 @@ T = TypeVar("T")
 S = TypeVar("S")
 
 PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
-AccountData = namedtuple(
-    "AccountData", ["owner", "balance", "asset", "market_id", "type"]
-)
 RiskFactor = namedtuple("RiskFactors", ["market_id", "short", "long"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
+
+
+@dataclass
+class AccountData:
+    owner: str
+    balance: float
+    asset: str
+    market_id: str
+    type: vega_protos.vega.AccountType
+
+    @property
+    def account_id(self):
+        return f"{self.owner}-{self.type}-{self.market_id}-{self.asset}"
 
 
 @dataclass
@@ -389,9 +399,11 @@ def _order_from_proto(
         updated_at=order.updated_at,
         version=order.version,
         market_id=order.market_id,
-        iceberg_order=_iceberg_order_from_proto(order.iceberg_order, decimal_spec)
-        if order.HasField("iceberg_order")
-        else None,
+        iceberg_order=(
+            _iceberg_order_from_proto(order.iceberg_order, decimal_spec)
+            if order.HasField("iceberg_order")
+            else None
+        ),
     )
 
 
@@ -519,9 +531,9 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
-            market_to_asset_map[
-                pos.market_id
-            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+            market_to_asset_map[pos.market_id] = (
+                market_info.tradable_instrument.instrument.future.settlement_asset
+            )
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -669,6 +681,16 @@ def _liquidity_provider_fee_share_from_proto(
     ]
 
 
+def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
+    return AccountData(
+        owner=account.owner,
+        balance=num_from_padded_int(int(account.balance), decimal_spec.asset_decimals),
+        asset=account.asset,
+        type=account.type,
+        market_id=account.market_id,
+    )
+
+
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
     pub_key: Optional[str] = None,
@@ -695,14 +717,8 @@ def list_accounts(
             )
 
         output_accounts.append(
-            AccountData(
-                owner=account.owner,
-                balance=num_from_padded_int(
-                    int(account.balance), asset_decimals_map.setdefault(account.asset)
-                ),
-                asset=account.asset,
-                type=account.type,
-                market_id=account.market_id,
+            _account_from_proto(
+                account, DecimalSpec(asset_decimals=asset_decimals_map[account.asset])
             )
         )
     return output_accounts
@@ -727,22 +743,42 @@ def party_account(
         asset_dp if asset_dp is not None else get_asset_decimals(asset_id, data_client)
     )
 
+    return account_list_to_party_account(
+        [
+            account
+            for account in accounts
+            if account.market_id is None or account.market_id == market_id
+        ],
+        asset_dp_conversion=asset_dp,
+    )
+
+
+def account_list_to_party_account(
+    accounts: Union[
+        List[data_node_protos_v2.trading_data.AccountBalance], List[AccountData]
+    ],
+    asset_dp_conversion: Optional[int] = None,
+):
     general, margin, bond = 0, 0, 0  # np.nan, np.nan, np.nan
     for account in accounts:
-        if (
-            account.market_id
-            and account.market_id != "!"
-            and account.market_id != market_id
-        ):
-            # The 'general' account type has no market ID, so we have to pull
-            # all markets then filter down here
-            continue
         if account.type == vega_protos.vega.ACCOUNT_TYPE_GENERAL:
-            general = num_from_padded_int(float(account.balance), asset_dp)
+            general = (
+                num_from_padded_int(float(account.balance), asset_dp_conversion)
+                if asset_dp_conversion is not None
+                else account.balance
+            )
         if account.type == vega_protos.vega.ACCOUNT_TYPE_MARGIN:
-            margin = num_from_padded_int(float(account.balance), asset_dp)
+            margin = (
+                num_from_padded_int(float(account.balance), asset_dp_conversion)
+                if asset_dp_conversion is not None
+                else account.balance
+            )
         if account.type == vega_protos.vega.ACCOUNT_TYPE_BOND:
-            bond = num_from_padded_int(float(account.balance), asset_dp)
+            bond = (
+                num_from_padded_int(float(account.balance), asset_dp_conversion)
+                if asset_dp_conversion is not None
+                else account.balance
+            )
 
     return PartyMarketAccount(general, margin, bond)
 
@@ -1499,6 +1535,24 @@ def transfer_subscription_handler(
         stream_item=stream,
         extraction_fn=lambda evt: evt.transfer,
         conversion_fn=_transfer_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
+
+
+def accounts_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> Transfer:
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.account,
+        conversion_fn=_account_from_proto,
         mkt_pos_dp=mkt_pos_dp,
         mkt_price_dp=mkt_price_dp,
         mkt_to_asset=mkt_to_asset,

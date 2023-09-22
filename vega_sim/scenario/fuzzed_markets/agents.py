@@ -130,8 +130,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 a=[None, self.random_state.normal(loc=self.curr_price, scale=20)]
             ),
             expires_at=int(
-                self.vega.get_blockchain_time()
-                + self.random_state.normal(loc=60, scale=60) * 1e9
+                vega_state.time + self.random_state.normal(loc=60, scale=60) * 1e9
             ),
             pegged_reference=self.random_state.choice(
                 a=[
@@ -221,8 +220,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 a=[None, self.random_state.normal(loc=self.curr_price, scale=10)]
             ),
             expires_at=int(
-                self.vega.get_blockchain_time()
-                + self.random_state.normal(loc=60, scale=60) * 1e9
+                vega_state.time + self.random_state.normal(loc=60, scale=60) * 1e9
             ),
             pegged_reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
             pegged_offset=self.random_state.normal(loc=0, scale=10),
@@ -330,7 +328,6 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
             key_name=self.key_name,
             wallet_name=self.wallet_name,
             market_id=self.market_id,
-            asset_id=self.asset_id,
         )
 
         if account.general + account.margin == 0:
@@ -437,7 +434,6 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             key_name=self.key_name,
             wallet_name=self.wallet_name,
             market_id=self.market_id,
-            asset_id=self.asset_id,
         )
 
         total_balance = account.general + account.margin + account.bond
@@ -591,7 +587,6 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
             key_name=self.key_name,
             wallet_name=self.wallet_name,
             market_id=self.market_id,
-            asset_id=self.asset_id,
         )
 
         total_balance = account.general + account.margin + account.bond

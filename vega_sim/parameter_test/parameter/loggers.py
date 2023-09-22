@@ -94,7 +94,6 @@ def _ideal_market_maker_single_data_extraction(
 
     general_lp, margin_lp, bond_lp = vega.party_account(
         wallet_name=mm_agent.wallet_name,
-        asset_id=mm_agent.asset_id,
         market_id=mm_agent.market_id,
         key_name=mm_agent.key_name,
     )
@@ -176,44 +175,47 @@ def _ideal_market_maker_single_data_extraction(
         "LP: Margin Account": margin_lp,
         "LP: Margin Rate": margin_rate,
         "LP: Bond Account": bond_lp,
-        "LP: GeneralPnl": general_lp
-        + margin_lp
-        + bond_lp
-        - mm_agent.initial_asset_mint,
+        "LP: GeneralPnl": (
+            general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
+        ),
         "LP: Return Over LockedCapital": (
             general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
-        )
-        / (max_locked_capital + 0.000000001),
+        ) / (max_locked_capital + 0.000000001),
         "LP: Annualised Return Over LockedCapital": (
-            general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
-        )
-        * 365
-        / (max_locked_capital + 0.000000001),
+            (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
+            * 365
+            / (max_locked_capital + 0.000000001)
+        ),
         "LP: Relative Return": (
             general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
-        )
-        / (mm_agent.initial_asset_mint + 0.00000001),
+        ) / (mm_agent.initial_asset_mint + 0.00000001),
         "LP: Annualised Relative Return": (
-            general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
-        )
-        * 365
-        / (mm_agent.initial_asset_mint + 0.00000001),
+            (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
+            * 365
+            / (mm_agent.initial_asset_mint + 0.00000001)
+        ),
         "LP: Max Margin": max_margin,
         "LP: Max Locked Capital": max_locked_capital,
         "LP: RealisedPnl": realised_pnl_lp,
         "LP: UnrealisedPnl": unrealised_pnl_lp,
         "LP: Position": inventory_lp,
-        "LP: Bid": -round(mm_agent.bid_depth, mm_agent.mdp)
-        if mm_agent.bid_depth is not None
-        else None,
-        "LP: Ask": round(mm_agent.ask_depth, mm_agent.mdp)
-        if mm_agent.ask_depth is not None
-        else None,
+        "LP: Bid": (
+            -round(mm_agent.bid_depth, mm_agent.mdp)
+            if mm_agent.bid_depth is not None
+            else None
+        ),
+        "LP: Ask": (
+            round(mm_agent.ask_depth, mm_agent.mdp)
+            if mm_agent.ask_depth is not None
+            else None
+        ),
         "LP: Received Liquidity Fees": received_liquidity_fees_lp,
         "LP: Liquidity Fee Shares": liquidity_fee_shares,
-        "External Midprice": mm_agent.price_process[mm_agent.current_step - 1]
-        if hasattr(mm_agent, "price_process")
-        else None,
+        "External Midprice": (
+            mm_agent.price_process[mm_agent.current_step - 1]
+            if hasattr(mm_agent, "price_process")
+            else None
+        ),
         "Midprice": mid_price,
         "Markprice": markprice,
         "LP: entry price": entry_price,
@@ -283,8 +285,9 @@ def tau_scaling_additional_data(
     market_info = vega.market_info(market_id=mm_agent.market_id)
 
     return {
-        "Market Open Interest": int(market_data.open_interest)
-        / 10**market_info.position_decimal_places
+        "Market Open Interest": (
+            int(market_data.open_interest) / 10**market_info.position_decimal_places
+        )
     }
 
 
@@ -342,7 +345,6 @@ def momentum_trader_data_extraction(
 
     general, margin, _ = vega.party_account(
         wallet_name=trader.wallet_name,
-        asset_id=trader.asset_id,
         market_id=trader.market_id,
     )
 
@@ -395,7 +397,6 @@ def uninformed_tradingbot_data_extraction(
 
     general, margin, _ = vega.party_account(
         wallet_name=trader.wallet_name,
-        asset_id=trader.asset_id,
         market_id=trader.market_id,
     )
 

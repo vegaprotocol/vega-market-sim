@@ -103,6 +103,7 @@ class LocalDataCache:
         self.orders_lock = threading.RLock()
         self.transfers_lock = threading.RLock()
         self.asset_lock = threading.RLock()
+        self.account_lock = threading.RLock()
         self.market_lock = threading.RLock()
         self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
@@ -114,6 +115,9 @@ class LocalDataCache:
         self._market_from_feed = {}
         self.market_data_from_feed_store = {}
         self._transfer_state_from_feed = {}
+        self._accounts_from_feed = {}
+        self._account_keys_for_party = {}
+        self._account_keys_for_market = {}
         self._trades_from_feed: List[data.Trade] = []
         self._ledger_entries_from_feed: List[data.LedgerEntry] = []
 
@@ -157,6 +161,16 @@ class LocalDataCache:
             (
                 (events_protos.BUS_EVENT_TYPE_MARKET_DATA,),
                 lambda evt: data.market_data_subscription_handler(
+                    evt,
+                    self._market_pos_decimals,
+                    self._market_price_decimals,
+                    self._market_to_asset,
+                    self._asset_decimals,
+                ),
+            ),
+            (
+                (events_protos.BUS_EVENT_TYPE_ACCOUNT,),
+                lambda evt: data.accounts_subscription_handler(
                     evt,
                     self._market_pos_decimals,
                     self._market_price_decimals,
@@ -282,6 +296,7 @@ class LocalDataCache:
         )
         self.initialise_assets()
         self.initialise_markets()
+        self.initialise_accounts()
         self.initialise_time_update_monitoring()
         self.initialise_order_monitoring(
             market_ids=market_ids,
@@ -326,6 +341,19 @@ class LocalDataCache:
         with self.asset_lock:
             for asset in base_assets:
                 self._asset_from_feed[asset.id] = asset
+
+    def initialise_accounts(self):
+        base_accounts = data.list_accounts(data_client=self._trading_data_client)
+
+        with self.account_lock:
+            for account in base_accounts:
+                self._accounts_from_feed[account.account_id] = account
+                self._account_keys_for_party.setdefault(account.owner, set()).add(
+                    account.account_id
+                )
+                self._account_keys_for_market.setdefault(account.market_id, set()).add(
+                    account.account_id
+                )
 
     def initialise_markets(self):
         base_markets = data_raw.all_markets(self._trading_data_client)
@@ -388,15 +416,15 @@ class LocalDataCache:
             ]
         with self.market_data_lock:
             for market_id in market_ids:
-                self.market_data_from_feed_store[
-                    market_id
-                ] = data.get_latest_market_data(
-                    market_id,
-                    data_client=self._trading_data_client,
-                    market_price_decimals_map=self._market_price_decimals,
-                    market_position_decimals_map=self._market_pos_decimals,
-                    asset_decimals_map=self._asset_decimals,
-                    market_to_asset_map=self._market_to_asset,
+                self.market_data_from_feed_store[market_id] = (
+                    data.get_latest_market_data(
+                        market_id,
+                        data_client=self._trading_data_client,
+                        market_price_decimals_map=self._market_price_decimals,
+                        market_position_decimals_map=self._market_pos_decimals,
+                        asset_decimals_map=self._asset_decimals,
+                        market_to_asset_map=self._market_to_asset,
+                    )
                 )
 
     def initialise_transfer_monitoring(
@@ -485,6 +513,16 @@ class LocalDataCache:
                     # get the decimal precision for the asset
                     self._asset_decimals[update.id]
 
+                elif isinstance(update, data.AccountData):
+                    with self.account_lock:
+                        self._accounts_from_feed[update.account_id] = update
+                        self._account_keys_for_party.setdefault(
+                            update.owner, set()
+                        ).add(update.account_id)
+                        self._account_keys_for_market.setdefault(
+                            update.market_id, set()
+                        ).add(update.account_id)
+
                 elif update is None:
                     logger.debug("Failed to process event into update.")
 
@@ -556,4 +594,52 @@ class LocalDataCache:
                 if exclude_trade_ids is not None and trade.id in exclude_trade_ids:
                     continue
                 results.append(trade)
+        return results
+
+    def get_accounts_from_stream(
+        self,
+        market_id: Optional[str] = None,
+        asset_id: Optional[str] = None,
+        party_id: Optional[str] = None,
+    ) -> List[data.AccountData]:
+        """Loads accounts for either a given party, market or both from stream.
+        Must pass one or the other
+
+        Args:
+            market_id:
+                optional str, Restrict to trades on a specific market
+            party_id:
+                optional str, Select only trades with a given id
+
+        Returns:
+            List[AccountData], list of formatted trade objects which match the required
+                restrictions.
+        """
+        if market_id is None and party_id is None:
+            raise Exception("At least one of market_id and party_id must be specified")
+        with self.account_lock:
+            to_check_keys = set()
+            if market_id is not None:
+                to_check_keys.update(
+                    self._account_keys_for_market.get(market_id, set())
+                )
+            if party_id is not None:
+                to_check_keys.update(self._account_keys_for_party.get(party_id, set()))
+            results = []
+            for key in to_check_keys:
+                acct = self._accounts_from_feed[key]
+                if party_id is not None and acct.owner != party_id:
+                    continue
+                if (
+                    market_id is not None
+                    and acct.market_id != market_id
+                    and acct.type != vega_protos.vega.AccountType.ACCOUNT_TYPE_GENERAL
+                ):
+                    continue
+                if market_id is None and acct.market_id != "":
+                    continue
+                if asset_id is not None and acct.asset != asset_id:
+                    continue
+                results.append(acct)
+
         return results

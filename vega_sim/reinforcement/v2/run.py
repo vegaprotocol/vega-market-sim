@@ -69,12 +69,10 @@ def run_training(
 
         pa = env._vega.party_account(
             key_name="test_agent_learner",
-            asset_id=env._asset_id,
             market_id=env._market_id,
         )
         pa2 = env._vega.party_account(
             key_name="test_agent_learner_2",
-            asset_id=env._asset_id,
             market_id=env._market_id,
         )
         pas.append(sum(pa))
