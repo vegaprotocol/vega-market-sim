@@ -1523,3 +1523,96 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     )
     assert closeout_price <= estimate_liquidation_price_2.best_case.open_volume_only
     assert closeout_price >= estimate_liquidation_price_2.worst_case.open_volume_only
+
+
+@pytest.mark.integration
+def test_referral_sets(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B)
+    vega.wait_for_total_catchup()
+    referrer_id = vega.wallet.public_key(name=PARTY_A.name)
+    referee_id = vega.wallet.public_key(name=PARTY_B.name)
+
+    vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    referral_set_id = list(vega.list_referral_sets().keys())[0]
+    vega.apply_referral_code(key_name=PARTY_B.name, id=referral_set_id)
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    # Check we can request a referral set by referral set id
+    referral_set = vega.list_referral_sets(referral_set_id=referral_set_id)
+    assert referral_set[referral_set_id].id == referral_set_id
+    assert referral_set[referral_set_id].referrer == referrer_id
+
+    # Check we can request a referral set by referrer
+    referral_set = vega.list_referral_sets(referrer=referrer_id)
+    assert referral_set[referral_set_id].id == referral_set_id
+    assert referral_set[referral_set_id].referrer == referrer_id
+
+    # Check we can request a referral set by referee
+    referral_set = vega.list_referral_sets(referee=referee_id)
+    assert referral_set[referral_set_id].id == referral_set_id
+    assert referral_set[referral_set_id].referrer == referrer_id
+
+    # Check we can request all referral set referees
+    referees = vega.list_referral_set_referees()
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+    # Check we can request referral set referees by referral set id
+    referees = vega.list_referral_set_referees(referral_set_id=referral_set_id)
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+    # Check we can request referral set referees by referrer id
+    referees = vega.list_referral_set_referees(referrer=referrer_id)
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+    # Check we can request referral set referees by referee id
+    referees = vega.list_referral_set_referees(referee=referee_id)
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+
+@pytest.mark.integration
+def test_referral_program(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    vega.update_referral_program(
+        proposal_key=MM_WALLET.name,
+        benefit_tiers=[
+            {
+                "minimum_running_notional_taker_volume": 10000,
+                "minimum_epochs": 1,
+                "referral_reward_factor": 0.01,
+                "referral_discount_factor": 0.01,
+            },
+            {
+                "minimum_running_notional_taker_volume": 20000,
+                "minimum_epochs": 2,
+                "referral_reward_factor": 0.02,
+                "referral_discount_factor": 0.02,
+            },
+            {
+                "minimum_running_notional_taker_volume": 30000,
+                "minimum_epochs": 3,
+                "referral_reward_factor": 0.03,
+                "referral_discount_factor": 0.03,
+            },
+        ],
+        staking_tiers=[
+            {"minimum_staked_tokens": 100, "referral_reward_multiplier": 1},
+            {"minimum_staked_tokens": 1000, "referral_reward_multiplier": 2},
+            {"minimum_staked_tokens": 10000, "referral_reward_multiplier": 2},
+        ],
+        window_length=1,
+    )
+    next_epoch(vega=vega)
+    referral_program = vega.get_current_referral_program()
+    assert referral_program is not None
