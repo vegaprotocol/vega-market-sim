@@ -49,9 +49,6 @@ if __name__ == "__main__":
         vega.forward("10s")
         vega.wait_for_total_catchup()
 
-        import pdb
-
-        pdb.set_trace()
         vega.create_asset(
             MM_WALLET.name,
             name="tDAI",
@@ -216,9 +213,6 @@ if __name__ == "__main__":
             wait=True,
         )
 
-        import pdb
-
-        pdb.set_trace()
         vega.cancel_order(MM_WALLET.name, market_id, to_cancel)
 
         vega.submit_order(
