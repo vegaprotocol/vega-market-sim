@@ -2643,3 +2643,111 @@ class VegaService(ABC):
 
     def stake(self, **kwargs):
         pass
+
+    def update_referral_program(
+        self,
+        proposal_key: str,
+        benefit_tiers: Optional[list[dict]] = None,
+        staking_tiers: Optional[list[dict]] = None,
+        end_of_program_timestamp: Optional[int] = None,
+        window_length: Optional[int] = None,
+        wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[int] = None,
+        vote_enactment_time: Optional[int] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        end_of_program_timestamp = (
+            enactment_time + self.seconds_per_block * 60 * 60 * 24 * 7 * 52
+            if end_of_program_timestamp is None
+            else int(end_of_program_timestamp.timestamp())
+        )
+        proposal_id = gov.update_referral_program(
+            key_name=proposal_key,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            benefit_tiers=benefit_tiers,
+            staking_tiers=staking_tiers,
+            end_of_program_timestamp=end_of_program_timestamp,
+            window_length=window_length,
+            wallet_name=wallet_name,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        self.wait_for_thread_catchup()
+        return proposal_id
+
+    def create_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+        trading.create_referral_set(
+            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+        )
+
+    def update_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+        trading.update_referral_set(
+            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+        )
+
+    def apply_referral_code(
+        self, key_name: str, id: str, wallet_name: Optional[str] = None
+    ):
+        trading.apply_referral_code(
+            wallet=self.wallet, key_name=key_name, id=id, wallet_name=wallet_name
+        )
+
+    def list_referral_sets(
+        self,
+        referral_set_id: Optional[str] = None,
+        referrer: Optional[str] = None,
+        referee: Optional[str] = None,
+    ) -> Dict[str : data.ReferralSet]:
+        return data.list_referral_sets(
+            data_client=self.trading_data_client_v2,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
+
+    def list_referral_set_referees(
+        self,
+        referral_set_id: Optional[str] = None,
+        referrer: Optional[str] = None,
+        referee: Optional[str] = None,
+    ) -> Dict[str : data.ReferralSetReferee]:
+        return data.list_referral_set_referees(
+            data_client=self.trading_data_client_v2,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
+
+    def get_current_referral_program(
+        self,
+    ) -> data.ReferralProgram:
+        return data.get_current_referral_program(
+            data_client=self.trading_data_client_v2
+        )

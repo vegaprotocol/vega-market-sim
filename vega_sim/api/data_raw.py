@@ -670,13 +670,66 @@ def estimate_position(
     return response.margin, response.liquidation
 
 
+@_retry(3)
 def get_stake(data_client: vac.trading_data_grpc_v2, party_id: str = None):
     base_request = data_node_protos_v2.trading_data.GetStakeRequest(party_id=party_id)
     return data_client.GetStake(base_request).current_stake_available
 
 
+@_retry(3)
 def list_all_network_history_segments(data_client: vac.trading_data_grpc_v2):
     base_request = (
         data_node_protos_v2.trading_data.ListAllNetworkHistorySegmentsRequest()
     )
     return data_client.ListAllNetworkHistorySegments(base_request).segments
+
+
+@_retry(3)
+def list_referral_sets(
+    data_client: vac.trading_data_grpc_v2,
+    referral_set_id: Optional[str] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
+) -> List[data_node_protos_v2.trading_data.ReferralSet]:
+    base_request = data_node_protos_v2.trading_data.ListReferralSetsRequest()
+    if referral_set_id is not None:
+        setattr(base_request, "referral_set_id", referral_set_id)
+    if referrer is not None:
+        setattr(base_request, "referrer", referrer)
+    if referee is not None:
+        setattr(base_request, "referee", referee)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListReferralSets(x).referral_sets,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_referral_set_referees(
+    data_client: vac.trading_data_grpc_v2,
+    referral_set_id: Optional[str] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
+) -> List[data_node_protos_v2.trading_data.ReferralSet]:
+    base_request = data_node_protos_v2.trading_data.ListReferralSetRefereesRequest()
+    if referral_set_id is not None:
+        setattr(base_request, "referral_set_id", referral_set_id)
+    if referrer is not None:
+        setattr(base_request, "referrer", referrer)
+    if referee is not None:
+        setattr(base_request, "referee", referee)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListReferralSetReferees(
+            x
+        ).referral_set_referees,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def get_current_referral_program(data_client: vac.trading_data_grpc_v2):
+    return data_client.GetCurrentReferralProgram(
+        data_node_protos_v2.trading_data.GetCurrentReferralProgramRequest()
+    ).current_referral_program

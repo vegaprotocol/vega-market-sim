@@ -666,3 +666,63 @@ def transfer(
     )
 
     logger.debug(f"Submitted a transfer.")
+
+
+def create_referral_set(
+    wallet: Wallet, key_name: str, wallet_name: Optional[str] = None
+):
+    is_team = False
+    command = vega_protos.commands.v1.commands.CreateReferralSet(
+        is_team=is_team,
+    )
+    if is_team:
+        command.team.CopyFrom(
+            vega_protos.commands.v1.commands.CreateReferralSet.Team(
+                name="name", team_url="name", avatar_url="name", closed=False
+            )
+        )
+    wallet.submit_transaction(
+        transaction=command,
+        wallet_name=wallet_name,
+        transaction_type="create_referral_set",
+        key_name=key_name,
+    )
+    logger.debug(f"Submitted a create referral set.")
+
+
+def update_referral_set(
+    wallet: Wallet, key_name: str, wallet_name: Optional[str] = None
+):
+    is_team = True
+    command = vega_protos.commands.v1.commands.UpdateReferralSet(
+        is_team=is_team,
+    )
+    if is_team:
+        command.team.CopyFrom(
+            vega_protos.commands.v1.commands.UpdateReferralSet.Team(
+                name="name", team_url="name", avatar_url="name", closed=False
+            )
+        )
+    print(command)
+    wallet.submit_transaction(
+        transaction=command,
+        wallet_name=wallet_name,
+        transaction_type="update_referral_set",
+        key_name=key_name,
+    )
+    logger.debug(f"Submitted an update referral set.")
+
+
+def apply_referral_code(
+    wallet: Wallet, key_name: str, id: str, wallet_name: Optional[str] = None
+):
+    command = vega_protos.commands.v1.commands.ApplyReferralCode(
+        id=id,
+    )
+    wallet.submit_transaction(
+        transaction=command,
+        wallet_name=wallet_name,
+        transaction_type="apply_referral_code",
+        key_name=key_name,
+    )
+    logger.debug(f"Submitted an apply referral code.")
