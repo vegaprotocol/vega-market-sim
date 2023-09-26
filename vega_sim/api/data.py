@@ -40,7 +40,7 @@ OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
 
 
-@dataclass
+@dataclass(frozen=True)
 class AccountData:
     owner: str
     balance: float
@@ -53,14 +53,14 @@ class AccountData:
         return f"{self.owner}-{self.type}-{self.market_id}-{self.asset}"
 
 
-@dataclass
+@dataclass(frozen=True)
 class IcebergOrder:
     peak_size: float
     minimum_visible_size: float
     reserved_remaining: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class Order:
     price: float
     size: float
@@ -127,20 +127,20 @@ MarginLevels = namedtuple(
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class LiquidationPrice:
     open_volume_only: float
     including_buy_orders: float
     including_sell_orders: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class MarginEstimate:
     best_case: MarginLevels
     worst_case: MarginLevels
 
 
-@dataclass
+@dataclass(frozen=True)
 class LiquidationEstimate:
     best_case: LiquidationPrice
     worst_case: LiquidationPrice
@@ -153,7 +153,7 @@ class DecimalSpec:
     asset_decimals: Optional[int] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class LedgerEntry:
     from_account: vega_protos.vega.AccountDetails
     to_account: vega_protos.vega.AccountDetails
@@ -162,7 +162,7 @@ class LedgerEntry:
     timestamp: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class AggregatedLedgerEntry:
     timestamp: int
     quantity: float
@@ -176,19 +176,19 @@ class AggregatedLedgerEntry:
     to_account_market_id: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class MarketDepth:
     buys: List[PriceLevel]
     sells: List[PriceLevel]
 
 
-@dataclass
+@dataclass(frozen=True)
 class OrdersBySide:
     bids: List[Order]
     asks: List[Order]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Fee:
     maker_fee: float
     infrastructure_fee: float

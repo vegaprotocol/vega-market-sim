@@ -599,32 +599,37 @@ class LocalDataCache:
     def get_accounts_from_stream(
         self,
         market_id: Optional[str] = None,
-        asset_id: Optional[str] = None,
         party_id: Optional[str] = None,
+        asset_id: Optional[str] = None,
     ) -> List[data.AccountData]:
         """Loads accounts for either a given party, market or both from stream.
-        Must pass one or the other
 
         Args:
             market_id:
-                optional str, Restrict to trades on a specific market
+                optional str, Restrict to accounts on a specific market
             party_id:
-                optional str, Select only trades with a given id
+                optional str, Select only accounts with a given party id
+            asset_id:
+                optional str, Restrict to only accounts for a given asset
 
         Returns:
             List[AccountData], list of formatted trade objects which match the required
                 restrictions.
         """
-        if market_id is None and party_id is None:
-            raise Exception("At least one of market_id and party_id must be specified")
+
         with self.account_lock:
-            to_check_keys = set()
-            if market_id is not None:
-                to_check_keys.update(
-                    self._account_keys_for_market.get(market_id, set())
-                )
-            if party_id is not None:
-                to_check_keys.update(self._account_keys_for_party.get(party_id, set()))
+            if market_id is None and party_id is None:
+                to_check_keys = self._accounts_from_feed.keys()
+            else:
+                to_check_keys = set()
+                if market_id is not None:
+                    to_check_keys.update(
+                        self._account_keys_for_market.get(market_id, set())
+                    )
+                if party_id is not None:
+                    to_check_keys.update(
+                        self._account_keys_for_party.get(party_id, set())
+                    )
             results = []
             for key in to_check_keys:
                 acct = self._accounts_from_feed[key]
@@ -643,3 +648,17 @@ class LocalDataCache:
                 results.append(acct)
 
         return results
+
+    def get_all_accounts_from_stream(
+        self,
+    ) -> List[data.AccountData]:
+        """Loads all accounts stored.
+
+        Returns:
+            List[AccountData], list of formatted account objects
+        """
+
+        with self.account_lock:
+            accts = list(self._accounts_from_feed.values())
+
+        return accts

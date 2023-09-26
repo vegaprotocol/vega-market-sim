@@ -2865,7 +2865,7 @@ class Snitch(StateAgent):
                     self.seen_trades.add(trade.id)
                     market_trades.setdefault(market.id, []).append(trade)
 
-            accounts = self.vega.list_accounts()
+            accounts = self.vega.get_accounts_from_stream()
             self.states.append(
                 MarketHistoryData(
                     at_time=start_time,
