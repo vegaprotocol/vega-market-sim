@@ -703,7 +703,6 @@ def update_referral_set(
                 name="name", team_url="name", avatar_url="name", closed=False
             )
         )
-    print(command)
     wallet.submit_transaction(
         transaction=command,
         wallet_name=wallet_name,

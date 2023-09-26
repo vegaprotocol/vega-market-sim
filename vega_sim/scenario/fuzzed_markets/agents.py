@@ -963,8 +963,7 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 try:
                     self._fuzzed_proposal()
                     return
-                except (HTTPError, ProposalNotAcceptedError) as e:
-                    logging.debug(e)
+                except (HTTPError, ProposalNotAcceptedError):
                     continue
             logging.info(
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
