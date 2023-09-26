@@ -5,9 +5,11 @@ import logging
 import numpy as np
 from typing import Optional, List
 from vega_sim.scenario.common.utils.price_process import random_walk
-from collections import defaultdict
 
 from vega_sim.scenario.scenario import Scenario
+from vega_sim.environment.agent import (
+    StateAgentWithWallet,
+)
 from vega_sim.environment.environment import (
     MarketEnvironmentWithState,
     NetworkEnvironment,
@@ -15,7 +17,6 @@ from vega_sim.environment.environment import (
 from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
 
-from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.scenario.common.agents import (
     StateAgent,
     UncrossAuctionAgent,
@@ -24,6 +25,7 @@ from vega_sim.scenario.common.agents import (
     LimitOrderTrader,
     RewardFunder,
     AtTheTouchMarketMaker,
+    ReferralAgentWrapper,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzySuccessorConfigurableMarketManager,
@@ -31,7 +33,9 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     RiskyMarketOrderTrader,
     RiskySimpleLiquidityProvider,
     FuzzyLiquidityProvider,
+    FuzzyReferralProgramManager,
 )
+import itertools
 
 import vega_sim.proto.vega as vega_protos
 
@@ -182,21 +186,17 @@ class FuzzingScenario(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
-        self.all_agents = {
-            "market_managers": [],
-            "market_makers": [],
-            "at_touch_market_makers": [],
-            "auction_traders": [],
-            "random_traders": [],
-            "fuzz_traders": [],
-            "risky_traders": [],
-            "fuzz_liquidity_providers": [],
-            "risky_liquidity_providers": [],
-            "reward_funders": [],
-        }
-
-        self.market_agents = {}
+        self.agents = []
         self.initial_asset_mint = 10e9
+
+        self.agents.append(
+            FuzzyReferralProgramManager(
+                wallet_name="REFERRAL_PROGRAM_MANAGERS",
+                key_name=f"REFERRAL_PROGRAM_MANAGER",
+                step_bias=0.2,
+                attempts_per_step=100,
+            )
+        )
 
         for i_market in range(self.n_markets):
             # Define the market and the asset:
@@ -293,23 +293,41 @@ class FuzzingScenario(Scenario):
                 for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
             ]
 
-            market_agents["random_traders"] = [
-                MarketOrderTrader(
-                    wallet_name="RANDOM_TRADERS",
-                    key_name=(
-                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+            num_referrers = 2
+            market_agents["referrers"] = [
+                ReferralAgentWrapper(
+                    agent=StateAgentWithWallet(
+                        key_name=f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_agent).zfill(3)}",
+                        wallet_name="REFERRERS",
+                        tag=str(i_agent),
                     ),
-                    market_name=market_name,
-                    asset_name=asset_name,
-                    buy_intensity=10,
-                    sell_intensity=10,
-                    base_order_size=1,
-                    step_bias=1,
-                    tag=(
-                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
-                    ),
+                    is_referrer=True,
                 )
-                for i_agent in range(5)
+                for i_agent in range(num_referrers)
+            ]
+            market_agents["random_traders"] = [
+                ReferralAgentWrapper(
+                    agent=MarketOrderTrader(
+                        wallet_name="RANDOM_TRADERS",
+                        key_name=(
+                            f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                        ),
+                        market_name=market_name,
+                        asset_name=asset_name,
+                        buy_intensity=10,
+                        sell_intensity=10,
+                        base_order_size=1,
+                        step_bias=1,
+                        tag=(
+                            f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                        ),
+                    ),
+                    referrer_key_name=market_agents["referrers"][0]._agent.key_name,
+                    referrer_wallet_name="REFERRERS",
+                )
+                for i_agent, i_referrer in itertools.product(
+                    range(5), range(num_referrers)
+                )
             ]
 
             for i_agent in range(5):
@@ -410,51 +428,45 @@ class FuzzingScenario(Scenario):
                 )
             ]
 
-            market_agents["reward_funders"] = []
-            for i_agent, (account_type, metric) in enumerate(
-                [
-                    (
-                        vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
-                        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
-                    ),
-                    (
-                        vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
-                        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
-                    ),
-                    (
-                        vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
-                        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
-                    ),
-                    (
-                        vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
-                        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
-                    ),
-                ]
-            ):
-                market_agents["reward_funders"].append(
-                    RewardFunder(
-                        wallet_name="REWARD_FUNDERS",
-                        key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                        reward_asset_name=vega_protos.vega.DispatchMetric.Name(metric),
-                        initial_mint=1e9,
-                        account_type=account_type,
-                        transfer_amount=100,
-                        asset_for_metric_name=asset_name,
-                        metric=metric,
-                        market_names=[market_name],
-                        stake_key=True,
-                        tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                    )
+            market_agents["reward_funders"] = [
+                RewardFunder(
+                    wallet_name="REWARD_FUNDERS",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    reward_asset_name=vega_protos.vega.DispatchMetric.Name(metric),
+                    initial_mint=1e9,
+                    account_type=account_type,
+                    transfer_amount=100,
+                    asset_for_metric_name=asset_name,
+                    metric=metric,
+                    market_names=[market_name],
+                    stake_key=True,
+                    tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                 )
-            self.market_agents[market_name] = market_agents
-            for agent_type, agent_list in market_agents.items():
-                self.all_agents[agent_type].extend(agent_list)
+                for i_agent, (account_type, metric) in enumerate(
+                    [
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
+                            vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
+                        ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+                            vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
+                        ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
+                            vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
+                        ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
+                            vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
+                        ),
+                    ]
+                )
+            ]
+            for _, agent_list in market_agents.items():
+                self.agents.extend(agent_list)
 
-        return {
-            agent.name(): agent
-            for agent_list in self.all_agents.values()
-            for agent in agent_list
-        }
+        return {agent.name(): agent for agent in self.agents}
 
     def configure_environment(
         self,
