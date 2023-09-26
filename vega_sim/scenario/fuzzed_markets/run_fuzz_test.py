@@ -77,11 +77,6 @@ def _run(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s",
@@ -89,7 +84,17 @@ if __name__ == "__main__":
         default=2 * 60 * 12,
         type=int,
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+    )
     parser.add_argument("--console", action="store_true")
     args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 
     _run(steps=args.steps, console=args.console, output=True)

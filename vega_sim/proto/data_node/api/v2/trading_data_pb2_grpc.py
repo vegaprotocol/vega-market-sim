@@ -522,6 +522,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
         )
+        self.GetReferralFeeStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1107,7 +1112,7 @@ class TradingDataServiceServicer(object):
     def ListLiquidityProviders(self, request, context):
         """List liquidity providers data
 
-        List information about active liquidity provider(s) for a given market, or liquidity provider's party ID
+        List information about active liquidity provider(s) for a given market, or liquidity provider's party ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1216,8 +1221,9 @@ class TradingDataServiceServicer(object):
     def EstimatePosition(self, request, context):
         """Estimate position
 
-        Estimate the margin that would be required for maintaining the specified position.
+        Estimate the margin that would be required for maintaining the specified position. Margin estimates are scaled to asset decimal places.
         If the optional collateral available argument is supplied, the response also contains the estimate of the liquidation price.
+        Liquidation price estimates are scaled to asset decimal places by default, unless an argument to scale to market decimal places is specified in the request.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1456,7 +1462,11 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetReferralSetStats(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Get referral set statistics
+
+        Get the total taker volume, and each referee's taker volume and, reward and discount factors for a referral set
+        at the latest or a specific epoch. You can also optionally filter for a specific referee's statistics.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -1483,6 +1493,16 @@ class TradingDataServiceServicer(object):
         """List referee team history
 
         Get a list of a referee's team history, i.e. the teams that a referee has been a member of and transferred from/to.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetReferralFeeStats(self, request, context):
+        """Get referral fee statistics
+
+        Gets accumulated rewards and discount information for a given asset or market for the latest epoch
+        or a specific epoch.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -2071,6 +2091,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListTeamRefereeHistory,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.SerializeToString,
+        ),
+        "GetReferralFeeStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetReferralFeeStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5012,6 +5037,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListTeamRefereeHistory",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetReferralFeeStats(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -1,9 +1,11 @@
+import logging
 import copy
 import os
 from typing import Optional, Dict, List
 
 import pandas as pd
 from numpy.random import RandomState
+from datetime import datetime
 
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.market import MarketConfig, Successor
@@ -11,6 +13,8 @@ from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.service import VegaService, PeggedOrder
+from vega_sim.api.governance import ProposalNotAcceptedError
+from requests.exceptions import HTTPError
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -906,3 +910,126 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
             self._create_latest_market(parent_market_id=self.market_id)
             self.needs_to_update_markets = True
+
+
+class FuzzyReferralProgramManager(StateAgentWithWallet):
+    """Agent proposes sensible and fuzzed update referral program proposals at a
+    controlled frequency.
+    """
+
+    def __init__(
+        self,
+        key_name: str,
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def step(self, vega_state):
+        if self.random_state.rand() > self.step_bias:
+            for i in range(self.attempts_per_step):
+                try:
+                    self._fuzzed_proposal()
+                    return
+                except (HTTPError, ProposalNotAcceptedError):
+                    continue
+            logging.info(
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+            )
+            self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        self.vega.update_referral_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": 1,
+                    "minimum_epochs": 1,
+                    "referral_reward_factor": 0.1,
+                    "referral_discount_factor": 0.1,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 2,
+                    "minimum_epochs": 2,
+                    "referral_reward_factor": 0.2,
+                    "referral_discount_factor": 0.2,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 3,
+                    "minimum_epochs": 3,
+                    "referral_reward_factor": 0.3,
+                    "referral_discount_factor": 0.3,
+                },
+            ],
+            staking_tiers=[
+                {"minimum_staked_tokens": 1, "referral_reward_multiplier": 1},
+            ],
+            window_length=1,
+        )
+
+    def _fuzzed_proposal(self):
+        self.vega.update_referral_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": self.random_state.randint(
+                        1, 1e6
+                    ),
+                    "minimum_epochs": self.random_state.randint(1, 10),
+                    "referral_reward_factor": self.random_state.rand(),
+                    "referral_discount_factor": self.random_state.rand(),
+                }
+                for _ in range(self.random_state.randint(1, 5))
+            ],
+            staking_tiers=[
+                {
+                    "minimum_staked_tokens": self.random_state.randint(1, 10),
+                    "referral_reward_multiplier": self.random_state.randint(1, 10),
+                }
+                for _ in range(self.random_state.randint(1, 5))
+            ],
+            window_length=self.random_state.randint(1, 100),
+            end_of_program_timestamp=datetime.fromtimestamp(
+                self.vega.get_blockchain_time(in_seconds=True)
+                + self.random_state.normal(
+                    loc=600 * self.vega.seconds_per_block,
+                    scale=300 * self.vega.seconds_per_block,
+                )
+            ),
+        )

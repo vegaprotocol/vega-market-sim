@@ -19,6 +19,7 @@ import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 from vega_sim.api.helpers import num_from_padded_int
+from collections import defaultdict
 
 
 class MissingAssetError(Exception):
@@ -251,6 +252,47 @@ class LiquidityProviderFeeShare:
     equity_like_share: float
     average_entry_valuation: float
     average_score: float
+
+
+@dataclass(frozen=True)
+class ReferralSet:
+    id: str
+    referrer: str
+    created_at: int
+    updated_at: int
+
+
+@dataclass(frozen=True)
+class ReferralSetReferee:
+    referral_set_id: str
+    referee: str
+    joined_at: int
+    at_epoch: int
+
+
+@dataclass(frozen=True)
+class BenefitTier:
+    minimum_running_notional_taker_volume: float
+    minimum_epochs: int
+    referral_reward_factor: float
+    referral_discount_factor: float
+
+
+@dataclass(frozen=True)
+class StakingTier:
+    minimum_staked_tokens: int
+    referral_reward_multiplier: float
+
+
+@dataclass(frozen=True)
+class ReferralProgram:
+    version: int
+    id: str
+    benefit_tiers: List[BenefitTier]
+    end_of_program_timestamp: int
+    window_length: int
+    staking_tiers: List[StakingTier]
+    ended_at: int
 
 
 def _ledger_entry_from_proto(
@@ -667,6 +709,64 @@ def _liquidity_provider_fee_share_from_proto(
         )
         for individual_liquidity_provider_fee_share in liquidity_provider_fee_share
     ]
+
+
+def _referral_set_from_proto(
+    referral_set,
+) -> ReferralSet:
+    return ReferralSet(
+        id=referral_set.id,
+        referrer=referral_set.referrer,
+        created_at=referral_set.created_at,
+        updated_at=referral_set.updated_at,
+    )
+
+
+def _referral_set_referee_from_proto(
+    referral_set_referee,
+) -> ReferralSetReferee:
+    return ReferralSetReferee(
+        referral_set_id=referral_set_referee.referral_set_id,
+        referee=referral_set_referee.referee,
+        joined_at=referral_set_referee.joined_at,
+        at_epoch=referral_set_referee.at_epoch,
+    )
+
+
+def _benefit_tier_from_proto(benefit_tier) -> BenefitTier:
+    return BenefitTier(
+        minimum_running_notional_taker_volume=float(
+            benefit_tier.minimum_running_notional_taker_volume
+        ),
+        minimum_epochs=int(benefit_tier.minimum_epochs),
+        referral_reward_factor=float(benefit_tier.referral_reward_factor),
+        referral_discount_factor=float(benefit_tier.referral_discount_factor),
+    )
+
+
+def _staking_tier_from_proto(staking_tier) -> StakingTier:
+    return StakingTier(
+        minimum_staked_tokens=float(staking_tier.minimum_staked_tokens),
+        referral_reward_multiplier=float(staking_tier.referral_reward_multiplier),
+    )
+
+
+def _referral_program_from_proto(referral_program) -> ReferralProgram:
+    return ReferralProgram(
+        version=referral_program.version,
+        id=referral_program.id,
+        benefit_tiers=[
+            _benefit_tier_from_proto(benefit_tier)
+            for benefit_tier in referral_program.benefit_tiers
+        ],
+        staking_tiers=[
+            _staking_tier_from_proto(staking_tier)
+            for staking_tier in referral_program.staking_tiers
+        ],
+        end_of_program_timestamp=referral_program.end_of_program_timestamp,
+        window_length=referral_program.window_length,
+        ended_at=referral_program.ended_at,
+    )
 
 
 def list_accounts(
@@ -1665,3 +1765,50 @@ def get_asset(
     asset_id: str,
 ):
     return data_raw.asset_info(data_client=data_client, asset_id=asset_id)
+
+
+def list_referral_sets(
+    data_client: vac.trading_data_grpc_v2,
+    referral_set_id: Optional[str] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
+) -> Dict[str, ReferralSet]:
+    response: List[
+        data_node_protos_v2.trading_data.ReferralSet
+    ] = data_raw.list_referral_sets(
+        data_client=data_client,
+        referral_set_id=referral_set_id,
+        referrer=referrer,
+        referee=referee,
+    )
+    referral_sets = {}
+    for referral_set in response:
+        referral_sets[referral_set.id] = _referral_set_from_proto(referral_set)
+    return referral_sets
+
+
+def list_referral_set_referees(
+    data_client: vac.trading_data_grpc_v2,
+    referral_set_id: Optional[str] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
+) -> Dict[str, Dict[str, ReferralSetReferee]]:
+    response: List[
+        data_node_protos_v2.trading_data.ReferralSetReferee
+    ] = data_raw.list_referral_set_referees(
+        data_client=data_client,
+        referral_set_id=referral_set_id,
+        referrer=referrer,
+        referee=referee,
+    )
+    referral_set_referees = defaultdict(dict)
+    for referral_set_referee in response:
+        referral_set_referees[referral_set_referee.referral_set_id][
+            referral_set_referee.referee
+        ] = _referral_set_referee_from_proto(referral_set_referee)
+    return referral_set_referees
+
+
+def get_current_referral_program(data_client: vac.trading_data_grpc_v2):
+    response = data_raw.get_current_referral_program(data_client=data_client)
+    return _referral_program_from_proto(referral_program=response)
