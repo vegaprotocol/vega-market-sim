@@ -747,7 +747,9 @@ def party_account(
         [
             account
             for account in accounts
-            if account.market_id is None or account.market_id == market_id
+            if account.market_id is None
+            or account.market_id == ""
+            or account.market_id == market_id
         ],
         asset_dp_conversion=asset_dp,
     )
