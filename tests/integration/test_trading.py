@@ -1616,3 +1616,77 @@ def test_referral_program(vega_service_with_market: VegaServiceNull):
     next_epoch(vega=vega)
     referral_program = vega.get_current_referral_program()
     assert referral_program is not None
+
+
+@pytest.mark.integration
+def test_volume_discount_program(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e9)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e9)
+    vega.wait_for_total_catchup()
+    vega.update_volume_discount_program(
+        proposal_key=MM_WALLET.name,
+        benefit_tiers=[
+            {
+                "minimum_running_notional_taker_volume": 1,
+                "volume_discount_factor": 0.01,
+            },
+        ],
+        window_length=7,
+    )
+    next_epoch(vega=vega)
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=100,
+    )
+    vega.wait_fn(1)
+    non_discounted_order_id = vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=100,
+        wait=True,
+    )
+    non_discounted_trades = vega.get_trades(
+        market_id=market_id, order_id=non_discounted_order_id
+    )
+    assert non_discounted_trades[0].seller_fee.maker_fee_volume_discount == 0
+    assert non_discounted_trades[0].seller_fee.liquidity_fee_volume_discount == 0
+    assert non_discounted_trades[0].seller_fee.infrastructure_fee_volume_discount == 0
+    next_epoch(vega=vega)
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=10000,
+    )
+    vega.wait_fn(1)
+    discounted_order_id = vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=10000,
+        wait=True,
+    )
+    discounted_trades = vega.get_trades(
+        market_id=market_id, order_id=discounted_order_id
+    )
+    assert discounted_trades[0].buyer_fee.maker_fee_volume_discount != 0
+    assert discounted_trades[0].buyer_fee.liquidity_fee_volume_discount != 0
+    assert discounted_trades[0].buyer_fee.infrastructure_fee_volume_discount != 0
