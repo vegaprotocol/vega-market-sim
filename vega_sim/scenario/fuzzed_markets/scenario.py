@@ -34,6 +34,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     RiskySimpleLiquidityProvider,
     FuzzyLiquidityProvider,
     FuzzyReferralProgramManager,
+    FuzzyVolumeDiscountProgramManager,
 )
 import itertools
 
@@ -191,6 +192,14 @@ class FuzzingScenario(Scenario):
 
         self.agents.append(
             FuzzyReferralProgramManager(
+                wallet_name="REFERRAL_PROGRAM_MANAGERS",
+                key_name=f"REFERRAL_PROGRAM_MANAGER",
+                step_bias=0.2,
+                attempts_per_step=100,
+            )
+        )
+        self.agents.append(
+            FuzzyVolumeDiscountProgramManager(
                 wallet_name="REFERRAL_PROGRAM_MANAGERS",
                 key_name=f"REFERRAL_PROGRAM_MANAGER",
                 step_bias=0.2,
