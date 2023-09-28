@@ -184,6 +184,12 @@ class Fee:
     maker_fee: float
     infrastructure_fee: float
     liquidity_fee: float
+    maker_fee_volume_discount: float
+    infrastructure_fee_volume_discount: float
+    liquidity_fee_volume_discount: float
+    maker_fee_referrer_discount: float
+    infrastructure_fee_referrer_discount: float
+    liquidity_fee_referrer_discount: float
 
 
 @dataclass(frozen=True)
@@ -354,6 +360,28 @@ def _trade_from_proto(
             liquidity_fee=num_from_padded_int(
                 trade.buyer_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
+            maker_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.maker_fee_volume_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            maker_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.maker_fee_referrer_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
         ),
         seller_fee=Fee(
             maker_fee=num_from_padded_int(
@@ -364,6 +392,29 @@ def _trade_from_proto(
             ),
             liquidity_fee=num_from_padded_int(
                 trade.seller_fee.liquidity_fee, decimal_spec.asset_decimals
+            ),
+            maker_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.maker_fee_volume_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.liquidity_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            maker_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.maker_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            infrastructure_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.liquidity_fee_referrer_discount,
+                decimal_spec.asset_decimals,
             ),
         ),
         buyer_auction_batch=trade.buyer_auction_batch,
