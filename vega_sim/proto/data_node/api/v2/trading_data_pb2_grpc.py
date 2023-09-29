@@ -532,6 +532,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
         )
+        self.GetCurrentVolumeDiscountProgram = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetCurrentVolumeDiscountProgram",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.FromString,
+        )
+        self.GetVolumeDiscountStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetVolumeDiscountStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1522,6 +1532,21 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def GetCurrentVolumeDiscountProgram(self, request, context):
+        """Get current volume discount program
+
+        Get the on-going volume discount program.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetVolumeDiscountStats(self, request, context):
+        """Get the volume discount statistics for a given epoch for all parties"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -2115,6 +2140,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetReferralFeeStats,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.SerializeToString,
+        ),
+        "GetCurrentVolumeDiscountProgram": grpc.unary_unary_rpc_method_handler(
+            servicer.GetCurrentVolumeDiscountProgram,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.SerializeToString,
+        ),
+        "GetVolumeDiscountStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetVolumeDiscountStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5114,6 +5149,64 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetCurrentVolumeDiscountProgram(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetCurrentVolumeDiscountProgram",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetVolumeDiscountStats(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetVolumeDiscountStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.FromString,
             options,
             channel_credentials,
             insecure,
