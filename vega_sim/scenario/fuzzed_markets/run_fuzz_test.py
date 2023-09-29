@@ -3,7 +3,7 @@ import os
 import logging
 import argparse
 
-from vega_sim.null_service import VegaServiceNull
+from vega_sim.null_service import VegaServiceNull, Ports
 
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
@@ -24,6 +24,8 @@ def _run(
     console: bool = False,
     output: bool = False,
     output_dir: str = "fuzz_plots",
+    core_metrics_port: int = 2723,
+    data_node_metrics_port: int = 3651,
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
@@ -40,6 +42,10 @@ def _run(
         retain_log_files=True,
         use_full_vega_wallet=False,
         run_with_console=console,
+        port_config={
+            Ports.METRICS: core_metrics_port,
+            Ports.DATA_NODE_METRICS: data_node_metrics_port,
+        },
     ) as vega:
         scenario.run_iteration(
             vega=vega,
@@ -90,6 +96,8 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument("--console", action="store_true")
+    parser.add_argument("--core_metrics_port", default=2723, type=int)
+    parser.add_argument("--data_node_metrics_port", default=3651, type=int)
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -97,4 +105,10 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    _run(steps=args.steps, console=args.console, output=True)
+    _run(
+        steps=args.steps,
+        console=args.console,
+        output=True,
+        core_metrics_port=args.core_metrics_port,
+        data_node_metrics_port=args.data_node_metrics_port,
+    )
