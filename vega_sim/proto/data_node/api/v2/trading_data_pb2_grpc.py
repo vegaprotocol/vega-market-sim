@@ -482,6 +482,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
         )
+        self.ListFundingPayments = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListFundingPayments",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.FromString,
+        )
         self.GetPartyActivityStreak = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetPartyActivityStreak",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.SerializeToString,
@@ -1425,6 +1430,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListFundingPayments(self, request, context):
+        """List funding payments for a party
+
+        Get a list of data points for a perpetual market's funding payment for a party.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetPartyActivityStreak(self, request, context):
         """List party activity streak
 
@@ -2051,6 +2065,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListFundingPeriodDataPoints,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.SerializeToString,
+        ),
+        "ListFundingPayments": grpc.unary_unary_rpc_method_handler(
+            servicer.ListFundingPayments,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.SerializeToString,
         ),
         "GetPartyActivityStreak": grpc.unary_unary_rpc_method_handler(
             servicer.GetPartyActivityStreak,
@@ -4805,6 +4824,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListFundingPeriodDataPoints",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListFundingPayments(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListFundingPayments",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.FromString,
             options,
             channel_credentials,
             insecure,

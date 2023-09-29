@@ -92,7 +92,7 @@ UlimitNOFile = 8192
   Timeout = "5s"
   Port = "TO_BE_SET"
   Path = "/metrics"
-  Enabled = false
+  Enabled = true
 
 [Transfers]
   Level = "Info"

@@ -57,6 +57,7 @@ class Ports(Enum):
     CORE_REST = auto()
     BROKER = auto()
     METRICS = auto()
+    DATA_NODE_METRICS = auto()
     PPROF = auto()
     CONSOLE = auto()
 
@@ -179,13 +180,15 @@ PORT_UPDATERS = {
             lambda port: port,
         ),
     ],
-    Ports.METRICS: [
+    Ports.DATA_NODE_METRICS: [
         PortUpdateConfig(
             ("config", "data-node", "config.toml"),
             ["Metrics"],
             "Port",
             lambda port: port,
         ),
+    ],
+    Ports.METRICS: [
         PortUpdateConfig(
             ("config", "node", "config.toml"),
             ["Metrics"],
@@ -722,15 +725,17 @@ def manage_vega_processes(
 
 class VegaServiceNull(VegaService):
     PORT_TO_FIELD_MAP = {
-        Ports.WALLET: "wallet_port",
-        Ports.DATA_NODE_GRPC: "data_node_grpc_port",
-        Ports.DATA_NODE_REST: "data_node_rest_port",
-        Ports.DATA_NODE_POSTGRES: "data_node_postgres_port",
-        Ports.FAUCET: "faucet_port",
-        Ports.VEGA_NODE: "vega_node_port",
+        Ports.CONSOLE: "console_port",
         Ports.CORE_GRPC: "vega_node_grpc_port",
         Ports.CORE_REST: "vega_node_rest_port",
-        Ports.CONSOLE: "console_port",
+        Ports.DATA_NODE_GRPC: "data_node_grpc_port",
+        Ports.DATA_NODE_METRICS: "data_node_metrics_port",
+        Ports.DATA_NODE_POSTGRES: "data_node_postgres_port",
+        Ports.DATA_NODE_REST: "data_node_rest_port",
+        Ports.FAUCET: "faucet_port",
+        Ports.METRICS: "metrics_port",
+        Ports.VEGA_NODE: "vega_node_port",
+        Ports.WALLET: "wallet_port",
     }
 
     def __init__(
@@ -834,29 +839,33 @@ class VegaServiceNull(VegaService):
 
     def _generate_port_config(self) -> Dict[Ports, int]:
         return {
-            Ports.WALLET: self.wallet_port,
-            Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
-            Ports.DATA_NODE_REST: self.data_node_rest_port,
-            Ports.DATA_NODE_POSTGRES: self.data_node_postgres_port,
-            Ports.FAUCET: self.faucet_port,
-            Ports.VEGA_NODE: self.vega_node_port,
+            Ports.CONSOLE: self.console_port,
             Ports.CORE_GRPC: self.vega_node_grpc_port,
             Ports.CORE_REST: self.vega_node_rest_port,
-            Ports.CONSOLE: self.console_port,
+            Ports.DATA_NODE_GRPC: self.data_node_grpc_port,
+            Ports.DATA_NODE_METRICS: self.data_node_metrics_port,
+            Ports.DATA_NODE_POSTGRES: self.data_node_postgres_port,
+            Ports.DATA_NODE_REST: self.data_node_rest_port,
+            Ports.FAUCET: self.faucet_port,
+            Ports.METRICS: self.metrics_port,
+            Ports.VEGA_NODE: self.vega_node_port,
+            Ports.WALLET: self.wallet_port,
         }
 
     # set ports from port_config or alternatively find a free port
     # to use
     def _assign_ports(self, port_config: Optional[Dict[Ports, int]]):
-        self.wallet_port = 0
-        self.data_node_rest_port = 0
-        self.data_node_grpc_port = 0
-        self.data_node_postgres_port = 0
-        self.faucet_port = 0
-        self.vega_node_port = 0
-        self.vega_node_grpc_port = 0
-        self.vega_node_rest_port = 0
         self.console_port = 0
+        self.data_node_grpc_port = 0
+        self.data_node_metrics_port = 0
+        self.data_node_postgres_port = 0
+        self.data_node_rest_port = 0
+        self.faucet_port = 0
+        self.metrics_port = 0
+        self.vega_node_grpc_port = 0
+        self.vega_node_port = 0
+        self.vega_node_rest_port = 0
+        self.wallet_port = 0
 
         for key, name in self.PORT_TO_FIELD_MAP.items():
             if port_config is not None and key in port_config:
