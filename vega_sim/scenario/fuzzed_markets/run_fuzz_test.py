@@ -96,8 +96,8 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument("--console", action="store_true")
-    parser.add_argument("--core_metrics_port", default=2723, type=int)
-    parser.add_argument("--data_node_metrics_port", default=3651, type=int)
+    parser.add_argument("--core-metrics-port", default=2723, type=int)
+    parser.add_argument("--data-node-metrics-port", default=3651, type=int)
     args = parser.parse_args()
 
     logging.basicConfig(
