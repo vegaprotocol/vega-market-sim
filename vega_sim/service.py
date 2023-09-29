@@ -2807,3 +2807,22 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
         self.wait_for_thread_catchup()
         return proposal_id
+
+    def get_current_volume_discount_program(
+        self,
+    ) -> data.VolumeDiscountProgram:
+        return data.get_current_volume_discount_program(
+            data_client=self.trading_data_client_v2
+        )
+
+    def get_volume_discount_stats(
+        self,
+        at_epoch: Optional[str] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.VolumeDiscountStats]:
+        return data.get_volume_discount_stats(
+            data_client=self.trading_data_client_v2,
+            at_epoch=at_epoch,
+            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )

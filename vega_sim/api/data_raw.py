@@ -733,3 +733,30 @@ def get_current_referral_program(data_client: vac.trading_data_grpc_v2):
     return data_client.GetCurrentReferralProgram(
         data_node_protos_v2.trading_data.GetCurrentReferralProgramRequest()
     ).current_referral_program
+
+
+@_retry(3)
+def get_current_volume_discount_program(
+    data_client: vac.trading_data_grpc_v2.TradingDataServiceStub,
+):
+    return data_client.GetCurrentVolumeDiscountProgram(
+        data_node_protos_v2.trading_data.GetCurrentVolumeDiscountProgramRequest()
+    ).current_volume_discount_program
+
+
+@_retry(3)
+def get_volume_discount_stats(
+    data_client: vac.trading_data_grpc_v2,
+    at_epoch: Optional[int] = None,
+    party_id: Optional[str] = None,
+) -> List[data_node_protos_v2.trading_data.ReferralSet]:
+    base_request = data_node_protos_v2.trading_data.GetVolumeDiscountStatsRequest()
+    if at_epoch is not None:
+        setattr(base_request, "at_epoch", at_epoch)
+    if party_id is not None:
+        setattr(base_request, "party_id", party_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.GetVolumeDiscountStats(x).stats,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

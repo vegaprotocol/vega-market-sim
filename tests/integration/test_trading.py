@@ -1660,10 +1660,12 @@ def test_volume_discount_program(vega_service_with_market: VegaServiceNull):
     non_discounted_trades = vega.get_trades(
         market_id=market_id, order_id=non_discounted_order_id
     )
+    assert vega.get_current_volume_discount_program() is not None
     assert non_discounted_trades[0].seller_fee.maker_fee_volume_discount == 0
     assert non_discounted_trades[0].seller_fee.liquidity_fee_volume_discount == 0
     assert non_discounted_trades[0].seller_fee.infrastructure_fee_volume_discount == 0
     next_epoch(vega=vega)
+    assert vega.get_volume_discount_stats(key_name=PARTY_B.name) is not None
     vega.submit_order(
         trading_key=PARTY_A.name,
         market_id=market_id,
