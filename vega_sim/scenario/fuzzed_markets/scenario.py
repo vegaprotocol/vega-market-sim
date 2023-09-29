@@ -469,6 +469,22 @@ class FuzzingScenario(Scenario):
                             vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
                             vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
                         ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
+                            vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
+                        ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
+                            vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
+                        ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
+                            vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
+                        ),
+                        (
+                            vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
+                            vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
+                        ),
                     ]
                 )
             ]
