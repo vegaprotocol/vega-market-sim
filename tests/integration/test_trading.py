@@ -286,25 +286,47 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
 @pytest.mark.integration
 def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
-    vega.wait_for_total_catchup()
+    market_id = vega.all_markets()[0].id
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
-    create_and_faucet_wallet(vega=vega, wallet=LIQ, amount=1e5)
     create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e5)
     create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e5)
     vega.wait_for_total_catchup()
 
-    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+    # Forward one epoch
+    next_epoch(vega=vega)
 
     vega.recurring_transfer(
         from_key_name=PARTY_A.name,
-        to_key_name=PARTY_B.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
         asset=asset_id,
+        asset_for_metric=asset_id,
+        metric=vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
         amount=100,
         factor=1.0,
     )
+    # Generate trades for non-zero metrics
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=10000,
+    )
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=10000,
+    )
+    vega.wait_for_total_catchup()
 
     party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
@@ -322,7 +344,7 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
 
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 799.8
+    assert party_a_accounts_t2[0].balance == 899.9
 
 
 @pytest.mark.integration
