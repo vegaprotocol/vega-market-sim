@@ -2751,3 +2751,78 @@ class VegaService(ABC):
         return data.get_current_referral_program(
             data_client=self.trading_data_client_v2
         )
+
+    def update_volume_discount_program(
+        self,
+        proposal_key: str,
+        benefit_tiers: Optional[list[dict]] = None,
+        end_of_program_timestamp: Optional[int] = None,
+        window_length: Optional[int] = None,
+        wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[int] = None,
+        vote_enactment_time: Optional[int] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        end_of_program_timestamp = (
+            enactment_time + self.seconds_per_block * 60 * 60 * 24 * 7 * 52
+            if end_of_program_timestamp is None
+            else int(end_of_program_timestamp.timestamp())
+        )
+        proposal_id = gov.update_volume_discount_program(
+            key_name=proposal_key,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            benefit_tiers=benefit_tiers,
+            end_of_program_timestamp=end_of_program_timestamp,
+            window_length=window_length,
+            wallet_name=wallet_name,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        self.wait_for_thread_catchup()
+        return proposal_id
+
+    def get_current_volume_discount_program(
+        self,
+    ) -> data.VolumeDiscountProgram:
+        return data.get_current_volume_discount_program(
+            data_client=self.trading_data_client_v2
+        )
+
+    def get_volume_discount_stats(
+        self,
+        at_epoch: Optional[str] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.VolumeDiscountStats]:
+        return data.get_volume_discount_stats(
+            data_client=self.trading_data_client_v2,
+            at_epoch=at_epoch,
+            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )

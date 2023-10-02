@@ -184,6 +184,12 @@ class Fee:
     maker_fee: float
     infrastructure_fee: float
     liquidity_fee: float
+    maker_fee_volume_discount: float
+    infrastructure_fee_volume_discount: float
+    liquidity_fee_volume_discount: float
+    maker_fee_referrer_discount: float
+    infrastructure_fee_referrer_discount: float
+    liquidity_fee_referrer_discount: float
 
 
 @dataclass(frozen=True)
@@ -271,6 +277,14 @@ class ReferralSetReferee:
 
 
 @dataclass(frozen=True)
+class VolumeDiscountStats:
+    at_epoch: int
+    party_id: str
+    discount_factor: float
+    running_volume: float
+
+
+@dataclass(frozen=True)
 class BenefitTier:
     minimum_running_notional_taker_volume: float
     minimum_epochs: int
@@ -292,6 +306,22 @@ class ReferralProgram:
     end_of_program_timestamp: int
     window_length: int
     staking_tiers: List[StakingTier]
+    ended_at: int
+
+
+@dataclass(frozen=True)
+class VolumeBenefitTier:
+    minimum_running_notional_taker_volume: float
+    volume_discount_factor: float
+
+
+@dataclass(frozen=True)
+class VolumeDiscountProgram:
+    version: int
+    id: str
+    benefit_tiers: List[VolumeBenefitTier]
+    end_of_program_timestamp: str
+    window_length: int
     ended_at: int
 
 
@@ -354,6 +384,28 @@ def _trade_from_proto(
             liquidity_fee=num_from_padded_int(
                 trade.buyer_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
+            maker_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.maker_fee_volume_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            maker_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.maker_fee_referrer_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
         ),
         seller_fee=Fee(
             maker_fee=num_from_padded_int(
@@ -364,6 +416,29 @@ def _trade_from_proto(
             ),
             liquidity_fee=num_from_padded_int(
                 trade.seller_fee.liquidity_fee, decimal_spec.asset_decimals
+            ),
+            maker_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.maker_fee_volume_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.liquidity_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            maker_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.maker_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            infrastructure_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.liquidity_fee_referrer_discount,
+                decimal_spec.asset_decimals,
             ),
         ),
         buyer_auction_batch=trade.buyer_auction_batch,
@@ -766,6 +841,40 @@ def _referral_program_from_proto(referral_program) -> ReferralProgram:
         end_of_program_timestamp=referral_program.end_of_program_timestamp,
         window_length=referral_program.window_length,
         ended_at=referral_program.ended_at,
+    )
+
+
+def _volume_benefit_tier_from_proto(volume_benefit_tier) -> VolumeBenefitTier:
+    return VolumeBenefitTier(
+        minimum_running_notional_taker_volume=float(
+            volume_benefit_tier.minimum_running_notional_taker_volume
+        ),
+        volume_discount_factor=float(volume_benefit_tier.volume_discount_factor),
+    )
+
+
+def _volume_discount_program_from_proto(
+    volume_discount_program,
+) -> VolumeDiscountProgram:
+    return VolumeDiscountProgram(
+        version=int(volume_discount_program.version),
+        id=str(volume_discount_program.id),
+        benefit_tiers=[
+            _volume_benefit_tier_from_proto(volume_benefit_tier)
+            for volume_benefit_tier in volume_discount_program.benefit_tiers
+        ],
+        end_of_program_timestamp=int(volume_discount_program.end_of_program_timestamp),
+        window_length=int(volume_discount_program.window_length),
+        ended_at=int(volume_discount_program.ended_at),
+    )
+
+
+def _volume_discount_stats_from_proto(volume_discount_stats) -> VolumeDiscountStats:
+    return VolumeDiscountStats(
+        at_epoch=int(volume_discount_stats.at_epoch),
+        party_id=str(volume_discount_stats.party_id),
+        discount_factor=float(volume_discount_stats.discount_factor),
+        running_volume=float(volume_discount_stats.running_volume),
     )
 
 
@@ -1809,6 +1918,29 @@ def list_referral_set_referees(
     return referral_set_referees
 
 
-def get_current_referral_program(data_client: vac.trading_data_grpc_v2):
+def get_current_referral_program(
+    data_client: vac.trading_data_grpc_v2,
+) -> ReferralProgram:
     response = data_raw.get_current_referral_program(data_client=data_client)
     return _referral_program_from_proto(referral_program=response)
+
+
+def get_current_volume_discount_program(
+    data_client: vac.trading_data_grpc_v2,
+) -> VolumeDiscountProgram:
+    response = data_raw.get_current_volume_discount_program(data_client=data_client)
+    return _volume_discount_program_from_proto(volume_discount_program=response)
+
+
+def get_volume_discount_stats(
+    data_client: vac.trading_data_grpc_v2,
+    at_epoch: Optional[int] = None,
+    party_id: Optional[str] = None,
+) -> List[VolumeDiscountStats]:
+    response = data_raw.get_volume_discount_stats(
+        data_client=data_client, at_epoch=at_epoch, party_id=party_id
+    )
+    return [
+        _volume_discount_stats_from_proto(volume_discount_stats=volume_discount_stats)
+        for volume_discount_stats in response
+    ]
