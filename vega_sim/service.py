@@ -2341,12 +2341,10 @@ class VegaService(ABC):
             )
         )
         # Set the optional RecurringTransfer fields
-        for attr, val in [
-            ("end_epoch", end_epoch),
-            ("factor", str(factor)),
-        ]:
-            if val is not None:
-                setattr(recurring_transfer, attr, val)
+        if end_epoch is not None:
+            setattr(recurring_transfer, "end_epoch", int(end_epoch))
+        if factor is not None:
+            setattr(recurring_transfer, "factor", str(factor))
 
         # If any dispatch strategy field is set, try and create a dispatch strategy
         if any(
@@ -2446,19 +2444,21 @@ class VegaService(ABC):
             distribution_strategy=None
             if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
             else distribution_strategy,
+            n_top_performers=str(n_top_performers)
+            if entity_scope is vega_protos.vega.ENTITY_SCOPE_TEAMS
+            else None,
         )
         # Set the optional DispatchStrategy fields
-        for attr, val in [
-            ("metric", metric),
-            ("n_top_performers", n_top_performers),
-            ("staking_requirement", staking_requirement),
-            (
+        if metric is not None:
+            setattr(dispatch_strategy, "metric", metric)
+        if staking_requirement is not None:
+            setattr(dispatch_strategy, "staking_requirement", str(staking_requirement))
+        if notional_time_weighted_average_position_requirement is not None:
+            setattr(
+                dispatch_strategy,
                 "notional_time_weighted_average_position_requirement",
-                notional_time_weighted_average_position_requirement,
-            ),
-        ]:
-            if val is not None:
-                setattr(dispatch_strategy, attr, val)
+                str(notional_time_weighted_average_position_requirement),
+            )
         if markets is not None:
             dispatch_strategy.markets.extend(markets)
         if team_scope is not None:
