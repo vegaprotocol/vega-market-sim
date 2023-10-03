@@ -640,26 +640,31 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
             market_id=self.market_id,
         )
         for side, spec in buy_specs + sell_specs:
-            self.vega.submit_order(
-                trading_key=self.key_name,
-                trading_wallet=self.wallet_name,
+            try:
+                self.vega.submit_order(
+                    trading_key=self.key_name,
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    order_type="TYPE_LIMIT",
+                    time_in_force="TIME_IN_FORCE_GTC",
+                    pegged_order=PeggedOrder(reference=spec[0], offset=spec[1]),
+                    volume=spec[2] * commitment_amount,
+                    side=side,
+                    wait=False,
+                )
+            except HTTPError:
+                continue
+        try:
+            self.vega.submit_liquidity(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
                 market_id=self.market_id,
-                order_type="TYPE_LIMIT",
-                time_in_force="TIME_IN_FORCE_GTC",
-                pegged_order=PeggedOrder(reference=spec[0], offset=spec[1]),
-                volume=spec[2] * commitment_amount,
-                side=side,
-                wait=False,
+                fee=fee,
+                commitment_amount=commitment_amount,
+                is_amendment=self.random_state.choice([True, False, None]),
             )
-
-        self.vega.submit_liquidity(
-            key_name=self.key_name,
-            wallet_name=self.wallet_name,
-            market_id=self.market_id,
-            fee=fee,
-            commitment_amount=commitment_amount,
-            is_amendment=self.random_state.choice([True, False, None]),
-        )
+        except HTTPError:
+            return
 
 
 class SuccessorMarketCreatorAgent(StateAgentWithWallet):
