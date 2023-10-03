@@ -35,6 +35,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyLiquidityProvider,
     FuzzyReferralProgramManager,
     FuzzyVolumeDiscountProgramManager,
+    FuzzyRewardFunder,
 )
 import itertools
 
@@ -486,6 +487,16 @@ class FuzzingScenario(Scenario):
                             vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
                         ),
                     ]
+                )
+            ]
+            market_agents["fuzzy_reward_funders"] = [
+                FuzzyRewardFunder(
+                    wallet_name="REWARD_FUNDERS",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}",
+                    asset_name=asset_name,
+                    step_bias=1,
+                    attempts_per_step=100,
+                    tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
             ]
             for _, agent_list in market_agents.items():

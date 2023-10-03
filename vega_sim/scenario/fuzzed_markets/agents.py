@@ -1138,3 +1138,147 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 )
             ),
         )
+
+
+class FuzzyRewardFunder(StateAgentWithWallet):
+    NAME_BASE = "fuzzy_reward_funder"
+
+    def __init__(
+        self,
+        key_name: str,
+        asset_name: str,
+        step_bias: float = 0.1,
+        attempts_per_step: int = 20,
+        initial_mint: float = 1e9,
+        wallet_name: Optional[str] = None,
+        stake_key: bool = False,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+
+        self.asset_name = asset_name
+        self.initial_mint = initial_mint
+        self.stake_key = stake_key
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(
+        self,
+        vega: VegaService,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_mint,
+                wallet_name=self.wallet_name,
+            )
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+
+    def step(self, vega_state):
+        if self.random_state.rand() > self.step_bias:
+            return
+        for _ in range(self.attempts_per_step):
+            try:
+                self._fuzzed_transfer(vega_state)
+            except HTTPError:
+                continue
+
+    def _fuzzed_transfer(self, vega_state):
+        current_epoch = self.vega.statistics().epoch_seq
+        rank_table = [
+            None,
+            [
+                vega_protos.vega.Rank(
+                    start_rank=self.random_state.randint(1, 100),
+                    share_ratio=self.random_state.randint(1, 100),
+                )
+                for _ in range(5)
+            ],
+        ]
+        self.vega.recurring_transfer(
+            from_wallet_name=self.wallet_name,
+            from_key_name=self.key_name,
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to_account_type=self.random_state.choice(
+                [
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
+                ]
+            ),
+            asset=self.asset_id,
+            amount=self.random_state.normal(loc=100, scale=100),
+            start_epoch=current_epoch + self.random_state.randint(-1, 5),
+            end_epoch=current_epoch + self.random_state.randint(-1, 20),
+            factor=self.random_state.rand(),
+            asset_for_metric=self.random_state.choice([None, self.asset_id]),
+            metric=self.random_state.choice(
+                [
+                    vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
+                    vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
+                    vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
+                    vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
+                    vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
+                    vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
+                    vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
+                    vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
+                ]
+            ),
+            markets=self.random_state.choice(list(vega_state.market_state.keys())),
+            entity_scope=self.random_state.choice(
+                [
+                    vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS,
+                    vega_protos.vega.ENTITY_SCOPE_TEAMS,
+                ]
+            ),
+            individual_scope=self.random_state.choice(
+                [
+                    vega_protos.vega.INDIVIDUAL_SCOPE_ALL,
+                    vega_protos.vega.INDIVIDUAL_SCOPE_IN_TEAM,
+                    vega_protos.vega.INDIVIDUAL_SCOPE_NOT_IN_TEAM,
+                ]
+            ),
+            n_top_performers=self.random_state.rand(),
+            notional_time_weighted_average_position_requirement=int(
+                self.random_state.normal(
+                    loc=1000,
+                    scale=100,
+                )
+            ),
+            window_length=self.random_state.choice(
+                [None, self.random_state.randint(0, 40)]
+            ),
+            lock_period=self.random_state.choice(
+                [None, self.random_state.randint(0, 40)]
+            ),
+            distribution_strategy=self.random_state.choice(
+                [
+                    None,
+                    vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA,
+                    vega_protos.vega.DISTRIBUTION_STRATEGY_RANK,
+                ]
+            ),
+            # rank_table=self.random_state.choice(rank_table),
+        )
