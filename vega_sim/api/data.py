@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
