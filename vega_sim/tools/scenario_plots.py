@@ -876,7 +876,7 @@ def reward_plots(run_name: Optional[str] = None):
 
     plt.rcParams.update({"font.size": 8})
 
-    gs = GridSpec(nrows=2, ncols=2, hspace=0.4)
+    gs = GridSpec(nrows=4, ncols=2, hspace=0.4)
 
     axs: list[plt.Axes] = []
 
@@ -907,6 +907,34 @@ def reward_plots(run_name: Optional[str] = None):
             1,
             vega_protos.vega.DispatchMetric.Name(
                 vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE
+            ),
+        ),
+        (
+            2,
+            0,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION
+            ),
+        ),
+        (
+            2,
+            1,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN
+            ),
+        ),
+        (
+            3,
+            0,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY
+            ),
+        ),
+        (
+            3,
+            1,
+            vega_protos.vega.DispatchMetric.Name(
+                vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING
             ),
         ),
     ]

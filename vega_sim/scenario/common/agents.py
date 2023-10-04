@@ -3275,11 +3275,6 @@ class RewardFunder(StateAgentWithWallet):
         self.vega.wait_fn(1)
         self.vega.wait_for_total_catchup()
 
-        market_ids = (
-            [self.vega.find_market_id(name) for name in self.market_names]
-            if self.market_names is not None
-            else None
-        )
         asset_for_metric_id = (
             self.vega.find_asset_id(self.asset_for_metric_name)
             if self.asset_for_metric_name is not None
@@ -3293,9 +3288,15 @@ class RewardFunder(StateAgentWithWallet):
             to_account_type=self.account_type,
             amount=self.transfer_amount,
             asset=reward_asset_id,
-            asset_for_metric=asset_for_metric_id,
+            asset_for_metric=asset_for_metric_id
+            if self.metric
+            not in [
+                vega_protos.DISPATCH_METRIC_MARKET_VALUE,
+                vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
+            ]
+            else None,
             metric=self.metric,
-            markets=market_ids,
+            window_length=3,
         )
 
 
