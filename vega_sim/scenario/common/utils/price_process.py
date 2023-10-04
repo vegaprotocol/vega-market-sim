@@ -1,11 +1,13 @@
-from typing import Optional
-import numpy as np
-
-from typing import Any, Dict, List, Optional, Union
-import requests
-import pandas as pd
-from enum import Enum
 import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
+import pandas as pd
+import requests
+import json
+from websockets.sync.client import connect
+import threading
 
 COINBASE_REQUEST_BASE = "https://api.exchange.coinbase.com/products"
 COINBASE_CANDLE_BASE = COINBASE_REQUEST_BASE + "/{product_id}/candles"
@@ -183,6 +185,12 @@ if __name__ == "__main__":
     )
 
 
+def _price_listener(iter_obj, symbol):
+    with connect(f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s") as ws:
+        while True:
+            iter_obj.latest_price = float(json.loads(ws.recv())["k"]["c"])
+
+
 class LivePrice:
     """Iterator for getting a live product price process.
 
@@ -192,8 +200,16 @@ class LivePrice:
 
     """
 
-    def __init__(self, product: str = "ADAUSDT"):
+    def __init__(self, product: str = "BTCBUSD"):
         self.product = product
+        self.latest_price = None
+
+        self._forwarding_thread = threading.Thread(
+            target=_price_listener,
+            args=(self, self.product.lower()),
+            daemon=True,
+        )
+        self._forwarding_thread.start()
 
     def __iter__(self):
         return self
@@ -205,5 +221,4 @@ class LivePrice:
         return self._get_price()
 
     def _get_price(self):
-        url = f"https://api.binance.com/api/v3/avgPrice?symbol={self.product}"
-        return float(requests.get(url).json()["price"])
+        return self.latest_price
