@@ -187,6 +187,12 @@ def _on_message(iter_obj, message):
     iter_obj.latest_price = float(json.loads(message)["k"]["c"])
 
 
+def _price_listener(iter_obj, symbol):
+    with connect(f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s") as ws:
+        while True:
+            iter_obj.latest_price = float(json.loads(ws.recv())["k"]["c"])
+
+
 class LivePrice:
     """Iterator for getting a live product price process.
 
