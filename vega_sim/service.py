@@ -2366,7 +2366,7 @@ class VegaService(ABC):
                 ]
             ]
         ):
-            dispatch_strategy = self.dispatch_strategy(
+            dispatch_strategy = data.dispatch_strategy(
                 asset_for_metric=asset_for_metric,
                 metric=metric,
                 markets=markets,
@@ -2399,73 +2399,6 @@ class VegaService(ABC):
             reference=reference,
             recurring=recurring_transfer,
         )
-
-    def dispatch_strategy(
-        self,
-        metric: vega_protos.vega.DispatchMetric,
-        asset_for_metric: Optional[str] = None,
-        markets: Optional[List[str]] = None,
-        entity_scope: Optional[vega_protos.vega.EntityScope] = None,
-        individual_scope: Optional[vega_protos.vega.IndividualScope] = None,
-        team_scope: Optional[List[str]] = None,
-        n_top_performers: Optional[float] = None,
-        staking_requirement: Optional[float] = None,
-        notional_time_weighted_average_position_requirement: Optional[float] = None,
-        window_length: Optional[int] = None,
-        lock_period: Optional[int] = None,
-        distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
-        rank_table: Optional[List[vega_protos.vega.Rank]] = None,
-    ) -> vega_protos.vega.DispatchStrategy:
-        # Set defaults for mandatory fields
-        if entity_scope is None:
-            entity_scope = vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
-        if individual_scope is None:
-            individual_scope = vega_protos.vega.INDIVIDUAL_SCOPE_ALL
-        if distribution_strategy is None:
-            distribution_strategy = vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA
-        if window_length is None:
-            window_length = 1
-        if lock_period is None:
-            lock_period = 1
-
-        # Set the mandatory (and conditionally mandatory) DispatchStrategy fields
-        dispatch_strategy = vega_protos.vega.DispatchStrategy(
-            asset_for_metric=None
-            if metric in [vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING]
-            else asset_for_metric,
-            entity_scope=entity_scope,
-            individual_scope=individual_scope
-            if entity_scope is vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
-            else None,
-            window_length=None
-            if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
-            else window_length,
-            lock_period=lock_period,
-            distribution_strategy=None
-            if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
-            else distribution_strategy,
-            n_top_performers=str(n_top_performers)
-            if entity_scope is vega_protos.vega.ENTITY_SCOPE_TEAMS
-            else None,
-        )
-        # Set the optional DispatchStrategy fields
-        if metric is not None:
-            setattr(dispatch_strategy, "metric", metric)
-        if staking_requirement is not None:
-            setattr(dispatch_strategy, "staking_requirement", str(staking_requirement))
-        if notional_time_weighted_average_position_requirement is not None:
-            setattr(
-                dispatch_strategy,
-                "notional_time_weighted_average_position_requirement",
-                str(notional_time_weighted_average_position_requirement),
-            )
-        if markets is not None:
-            dispatch_strategy.markets.extend(markets)
-        if team_scope is not None:
-            dispatch_strategy.team_scope.extend(team_scope)
-        if rank_table is not None:
-            dispatch_strategy.rank_table.extend(rank_table)
-        return dispatch_strategy
 
     def list_transfers(
         self,
