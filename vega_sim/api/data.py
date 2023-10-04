@@ -1947,7 +1947,6 @@ def get_volume_discount_stats(
 
 
 def dispatch_strategy(
-    self,
     metric: vega_protos.vega.DispatchMetric,
     asset_for_metric: Optional[str] = None,
     markets: Optional[List[str]] = None,
