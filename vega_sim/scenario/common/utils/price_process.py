@@ -188,9 +188,19 @@ def _on_message(iter_obj, message):
 
 
 def _price_listener(iter_obj, symbol):
-    with connect(f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s") as ws:
-        while True:
-            iter_obj.latest_price = float(json.loads(ws.recv())["k"]["c"])
+    ws = websocket.WebSocketApp(
+        f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
+        # on_open=lambda ws: print("ok"),
+        on_message=lambda _, msg: _on_message(iter_obj, msg),
+        # on_error=on_error,
+        # on_close=on_close,
+    )
+    ws.run_forever(reconnect=5)
+    # self._forwarding_thread.start()
+
+
+def _on_message(iter_obj, message):
+    iter_obj.latest_price = float(json.loads(message)["k"]["c"])
 
 
 class LivePrice:
