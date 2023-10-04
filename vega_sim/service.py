@@ -2286,6 +2286,16 @@ class VegaService(ABC):
         asset_for_metric: Optional[str] = None,
         metric: Optional[vega_protos.vega.DispatchMetric] = None,
         markets: Optional[List[str]] = None,
+        entity_scope: Optional[vega_protos.vega.EntityScope] = None,
+        individual_scope: Optional[vega_protos.vega.IndividualScope] = None,
+        team_scope: Optional[List[str]] = None,
+        n_top_performers: Optional[float] = None,
+        staking_requirement: Optional[float] = None,
+        notional_time_weighted_average_position_requirement: Optional[float] = None,
+        window_length: Optional[int] = None,
+        lock_period: Optional[int] = None,
+        distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
+        rank_table: Optional[List[vega_protos.vega.Rank]] = None,
     ):
         """Create a recurring transfer of funds.
 
@@ -2334,7 +2344,7 @@ class VegaService(ABC):
             None
         """
 
-        # Create the RecurringTransfer message
+        # Set the mandatory RecurringTransfer fields
         recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
             start_epoch=(
                 start_epoch
@@ -2343,29 +2353,46 @@ class VegaService(ABC):
             )
         )
         # Set the optional RecurringTransfer fields
-        if start_epoch is not None:
-            setattr(recurring_transfer, "start_epoch", start_epoch)
         if end_epoch is not None:
-            setattr(recurring_transfer, "end_epoch", end_epoch)
+            setattr(recurring_transfer, "end_epoch", int(end_epoch))
         if factor is not None:
             setattr(recurring_transfer, "factor", str(factor))
-        if any([val is not None for val in [asset_for_metric, metric, markets]]):
-            if any([val is None for val in [asset_for_metric, metric]]):
-                raise Exception(
-                    "Value for one but not all non-optional DispatchStrategy fields"
-                    " given."
-                )
-            dispatch_strategy = vega_protos.vega.DispatchStrategy(
+
+        # If any dispatch strategy field is set, try and create a dispatch strategy
+        if any(
+            [
+                arg is not None
+                for arg in [
+                    entity_scope,
+                    window_length,
+                    lock_period,
+                    distribution_strategy,
+                    metric,
+                    asset_for_metric,
+                    individual_scope,
+                    n_top_performers,
+                    staking_requirement,
+                    notional_time_weighted_average_position_requirement,
+                    markets,
+                    team_scope,
+                ]
+            ]
+        ):
+            dispatch_strategy = data.dispatch_strategy(
                 asset_for_metric=asset_for_metric,
                 metric=metric,
-                entity_scope=vega_protos.vega.EntityScope.ENTITY_SCOPE_INDIVIDUALS,
-                individual_scope=vega_protos.vega.IndividualScope.INDIVIDUAL_SCOPE_ALL,
-                window_length=1,
-                distribution_strategy=vega_protos.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
+                markets=markets,
+                entity_scope=entity_scope,
+                individual_scope=individual_scope,
+                team_scope=team_scope,
+                n_top_performers=n_top_performers,
+                staking_requirement=staking_requirement,
+                notional_time_weighted_average_position_requirement=notional_time_weighted_average_position_requirement,
+                window_length=window_length,
+                lock_period=lock_period,
+                distribution_strategy=distribution_strategy,
+                rank_table=rank_table,
             )
-            # Set the optional DispatchStrategy fields
-            if markets is not None:
-                dispatch_strategy.markets.extend(markets)
             recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
 
         trading.transfer(
