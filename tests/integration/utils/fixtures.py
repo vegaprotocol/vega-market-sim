@@ -167,7 +167,7 @@ def vega_service():
         retain_log_files=True,
         transactions_per_block=1,
         listen_for_high_volume_stream_updates=False,
-        use_full_vega_wallet=True,
+        use_full_vega_wallet=False,
     ) as vega:
         yield vega
     logging.debug("vega_service teardown")
