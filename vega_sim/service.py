@@ -2729,14 +2729,42 @@ class VegaService(ABC):
         self.wait_for_thread_catchup()
         return proposal_id
 
-    def create_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+    def create_referral_set(
+        self,
+        key_name: str,
+        name: Optional[str] = None,
+        team_url: Optional[str] = None,
+        avatar_url: Optional[str] = None,
+        closed: Optional[bool] = None,
+        wallet_name: Optional[str] = None,
+    ):
         trading.create_referral_set(
-            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+            wallet=self.wallet,
+            key_name=key_name,
+            wallet_name=wallet_name,
+            name=name,
+            team_url=team_url,
+            avatar_url=avatar_url,
+            closed=closed,
         )
 
-    def update_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+    def update_referral_set(
+        self,
+        key_name: str,
+        name: Optional[str] = None,
+        team_url: Optional[str] = None,
+        avatar_url: Optional[str] = None,
+        closed: Optional[bool] = None,
+        wallet_name: Optional[str] = None,
+    ):
         trading.update_referral_set(
-            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+            wallet=self.wallet,
+            key_name=key_name,
+            wallet_name=wallet_name,
+            name=name,
+            team_url=team_url,
+            avatar_url=avatar_url,
+            closed=closed,
         )
 
     def apply_referral_code(

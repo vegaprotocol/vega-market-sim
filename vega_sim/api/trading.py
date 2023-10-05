@@ -669,16 +669,27 @@ def transfer(
 
 
 def create_referral_set(
-    wallet: Wallet, key_name: str, wallet_name: Optional[str] = None
+    wallet: Wallet,
+    key_name: str,
+    name: Optional[str] = None,
+    team_url: Optional[str] = None,
+    avatar_url: Optional[str] = None,
+    closed: Optional[bool] = None,
+    wallet_name: Optional[str] = None,
 ):
-    is_team = False
+    if any(arg is not None for arg in [name, team_url, avatar_url, closed]):
+        is_team = True
+    else:
+        is_team = False
     command = vega_protos.commands.v1.commands.CreateReferralSet(
         is_team=is_team,
     )
     if is_team:
+        if not all(arg is not None for arg in [name, team_url, avatar_url, closed]):
+            raise ValueError("If one team arg passed, all team args must be passed.")
         command.team.CopyFrom(
             vega_protos.commands.v1.commands.CreateReferralSet.Team(
-                name="name", team_url="name", avatar_url="name", closed=False
+                name=name, team_url=team_url, avatar_url=avatar_url, closed=closed
             )
         )
     wallet.submit_transaction(
@@ -691,16 +702,27 @@ def create_referral_set(
 
 
 def update_referral_set(
-    wallet: Wallet, key_name: str, wallet_name: Optional[str] = None
+    wallet: Wallet,
+    key_name: str,
+    name: Optional[str] = None,
+    team_url: Optional[str] = None,
+    avatar_url: Optional[str] = None,
+    closed: Optional[bool] = None,
+    wallet_name: Optional[str] = None,
 ):
-    is_team = True
+    if any(arg is not None for arg in [name, team_url, avatar_url, closed]):
+        is_team = True
+    else:
+        is_team = False
     command = vega_protos.commands.v1.commands.UpdateReferralSet(
         is_team=is_team,
     )
     if is_team:
+        if not all(arg is not None for arg in [name, team_url, avatar_url, closed]):
+            raise ValueError("If one team arg passed, all team args must be passed.")
         command.team.CopyFrom(
-            vega_protos.commands.v1.commands.UpdateReferralSet.Team(
-                name="name", team_url="name", avatar_url="name", closed=False
+            vega_protos.commands.v1.commands.CreateReferralSet.Team(
+                name=name, team_url=team_url, avatar_url=avatar_url, closed=closed
             )
         )
     wallet.submit_transaction(
