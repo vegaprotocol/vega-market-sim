@@ -24,6 +24,10 @@ from vega_sim.api.data import (
     LiquidationPrice,
     ReferralSet,
     ReferralSetReferee,
+    ReferralSetStats,
+    PartyAmount,
+    ReferrerRewardsGenerated,
+    FeeStats,
     get_asset_decimals,
     find_asset_id,
     get_trades,
@@ -37,6 +41,8 @@ from vega_sim.api.data import (
     estimate_position,
     list_referral_sets,
     list_referral_set_referees,
+    get_referral_set_stats,
+    get_referral_fee_stats,
 )
 from vega_sim.grpc.client import (
     VegaTradingDataClientV2,
@@ -980,3 +986,137 @@ def test_list_referral_set_referees(trading_data_v2_servicer_and_port):
             )
         }
     }
+
+
+def test_get_referral_set_stats(trading_data_v2_servicer_and_port):
+    def GetReferralSetStats(self, request, context):
+        return data_node_protos_v2.trading_data.GetReferralSetStatsResponse(
+            stats=data_node_protos_v2.trading_data.ReferralSetStatsConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.ReferralSetStatsEdge(
+                        cursor="cursor",
+                        node=data_node_protos_v2.trading_data.ReferralSetStats(
+                            at_epoch=request.at_epoch,
+                            referral_set_running_notional_taker_volume="1000",
+                            party_id=request.referee,
+                            discount_factor="0.1",
+                            reward_factor="0.1",
+                            epoch_notional_taker_volume="1000",
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetReferralSetStats = GetReferralSetStats
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert get_referral_set_stats(data_client=data_client, at_epoch=1) == [
+        ReferralSetStats(
+            at_epoch=1,
+            referral_set_running_notional_taker_volume=1000.0,
+            party_id="",
+            discount_factor=0.1,
+            reward_factor=0.1,
+            epoch_notional_taker_volume=1000.0,
+        )
+    ]
+    assert get_referral_set_stats(data_client=data_client, referee="referee") == [
+        ReferralSetStats(
+            at_epoch=0,
+            referral_set_running_notional_taker_volume=1000.0,
+            party_id="referee",
+            discount_factor=0.1,
+            reward_factor=0.1,
+            epoch_notional_taker_volume=1000.0,
+        )
+    ]
+
+
+def test_get_referral_fee_stats(trading_data_v2_servicer_and_port):
+    def GetReferralFeeStats(self, request, context):
+        return data_node_protos_v2.trading_data.GetReferralFeeStatsResponse(
+            fee_stats=vega_protos.events.v1.events.FeeStats(
+                market=request.market_id,
+                asset=request.asset_id,
+                epoch_seq=1,
+                total_rewards_paid=[
+                    vega_protos.events.v1.events.PartyAmount(
+                        party="referrer1", amount="1000"
+                    )
+                ],
+                referrer_rewards_generated=[
+                    vega_protos.events.v1.events.ReferrerRewardsGenerated(
+                        referrer="referrer1",
+                        generated_reward=[
+                            vega_protos.events.v1.events.PartyAmount(
+                                party="referee1", amount="1000"
+                            )
+                        ],
+                    )
+                ],
+                referees_discount_applied=[
+                    vega_protos.events.v1.events.PartyAmount(
+                        party="referrer1", amount="1000"
+                    )
+                ],
+                volume_discount_applied=[
+                    vega_protos.events.v1.events.PartyAmount(
+                        party="referrer1", amount="1000"
+                    )
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.GetReferralFeeStats = GetReferralFeeStats
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert get_referral_fee_stats(
+        data_client=data_client,
+        market_id="market_id",
+        asset_decimals={"": 1},
+    ) == FeeStats(
+        market="market_id",
+        asset="",
+        epoch_seq=1,
+        total_rewards_paid=[PartyAmount(party="referrer1", amount=100.0)],
+        referrer_rewards_generated=[
+            ReferrerRewardsGenerated(
+                referrer="referrer1",
+                generated_reward=[PartyAmount(party="referee1", amount=100.0)],
+            )
+        ],
+        referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+        volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+    )
+    assert get_referral_fee_stats(
+        data_client=data_client,
+        asset_id="asset",
+        asset_decimals={"asset": 1},
+    ) == FeeStats(
+        market="",
+        asset="asset",
+        epoch_seq=1,
+        total_rewards_paid=[PartyAmount(party="referrer1", amount=100.0)],
+        referrer_rewards_generated=[
+            ReferrerRewardsGenerated(
+                referrer="referrer1",
+                generated_reward=[PartyAmount(party="referee1", amount=100.0)],
+            )
+        ],
+        referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+        volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+    )
+

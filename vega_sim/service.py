@@ -2779,6 +2779,32 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2
         )
 
+    def get_referral_set_stats(
+        self,
+        at_epoch: Optional[int] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.ReferralSetStats]:
+        return data.get_referral_set_stats(
+            data_client=self.trading_data_client_v2,
+            at_epoch=at_epoch,
+            referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def get_referral_fee_stats(
+        self,
+        market_id: Optional[str] = None,
+        asset_id: Optional[str] = None,
+        epoch_seq: Optional[int] = None,
+    ) -> List[data.FeeStats]:
+        return data.get_referral_fee_stats(
+            data_client=self.trading_data_client_v2,
+            market_id=market_id,
+            asset_id=asset_id,
+            epoch_seq=epoch_seq,
+            asset_decimals=self.asset_decimals,
+        )
+
     def update_volume_discount_program(
         self,
         proposal_key: str,
