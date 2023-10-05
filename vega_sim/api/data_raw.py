@@ -797,3 +797,53 @@ def get_volume_discount_stats(
         request_func=lambda x: data_client.GetVolumeDiscountStats(x).stats,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+@_retry(3)
+def list_teams(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.ListTeamsRequest()
+    if team_id is not None:
+        setattr(base_request, "team_id", team_id)
+    if party_id is not None:
+        setattr(base_request, "party_id", party_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListTeams(x).teams,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_team_referees(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.ListTeamRefereesRequest()
+    if team_id is not None:
+        setattr(base_request, "team_id", team_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListTeamReferees(x).team_referees,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_team_referee_history(
+    data_client: vac.trading_data_grpc_v2,
+    referee: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.ListTeamRefereeHistoryRequest()
+    if referee is not None:
+        setattr(base_request, "referee", referee)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListTeamRefereeHistory(
+            x
+        ).team_referee_history,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

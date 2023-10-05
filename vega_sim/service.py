@@ -2879,3 +2879,33 @@ class VegaService(ABC):
             at_epoch=at_epoch,
             party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
         )
+
+    def list_teams(
+        self,
+        key_name: Optional[str],
+        wallet_name: Optional[str] = None,
+        team_id: Optional[str] = None,
+    ) -> List[data.Team]:
+        return data.list_teams(
+            data_client=self.trading_data_client_v2,
+            team_id=team_id,
+            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def list_team_referees(
+        self,
+        team_id: Optional[str] = None,
+    ) -> List[data.TeamReferee]:
+        return data.list_team_referees(
+            data_client=self.trading_data_client_v2, team_id=team_id
+        )
+
+    def list_team_referee_history(
+        self,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.TeamRefereeHistory]:
+        return data.list_team_referee_history(
+            data_client=self.trading_data_client_v2,
+            referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )

@@ -360,6 +360,33 @@ class VolumeDiscountProgram:
     ended_at: int
 
 
+@dataclass(frozen=True)
+class Team:
+    team_id: str
+    referrer: str
+    name: str
+    team_url: str
+    avatar_url: str
+    created_at: int
+    closed: bool
+    created_at_epoch: int
+
+
+@dataclass(frozen=True)
+class TeamReferee:
+    team_id: str
+    referee: str
+    joined_at: int
+    joined_at_epoch: int
+
+
+@dataclass(frozen=True)
+class TeamRefereeHistory:
+    team_id: str
+    joined_at: int
+    joined_at_epoch: int
+
+
 def _ledger_entry_from_proto(
     ledger_entry,
     asset_decimals: int,
@@ -986,6 +1013,40 @@ def _volume_discount_stats_from_proto(volume_discount_stats) -> VolumeDiscountSt
         party_id=str(volume_discount_stats.party_id),
         discount_factor=float(volume_discount_stats.discount_factor),
         running_volume=float(volume_discount_stats.running_volume),
+    )
+
+
+def _team_from_proto(team: data_node_protos_v2.trading_data.Team) -> Team:
+    return Team(
+        team_id=team.team_id,
+        referrer=team.referrer,
+        name=team.name,
+        team_url=team.team_url,
+        avatar_url=team.avatar_url,
+        created_at=team.created_at,
+        closed=team.closed,
+        created_at_epoch=team.created_at_epoch,
+    )
+
+
+def _team_referee_from_proto(
+    team_referee: data_node_protos_v2.trading_data.TeamReferee,
+) -> TeamReferee:
+    return TeamReferee(
+        team_id=team_referee.team_id,
+        referee=team_referee.referee,
+        joined_at=team_referee.joined_at,
+        joined_at_epoch=team_referee.joined_at_epoch,
+    )
+
+
+def _team_referee_history_from_proto(
+    team_referee_history: data_node_protos_v2.trading_data.TeamRefereeHistory,
+) -> TeamRefereeHistory:
+    return TeamRefereeHistory(
+        team_id=team_referee_history.team_id,
+        joined_at=team_referee_history.joined_at,
+        joined_at_epoch=team_referee_history.joined_at_epoch,
     )
 
 
@@ -2155,3 +2216,37 @@ def dispatch_strategy(
     if rank_table is not None:
         dispatch_strategy.rank_table.extend(rank_table)
     return dispatch_strategy
+
+
+def list_teams(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> List[Team]:
+    response = data_raw.list_teams(
+        data_client=data_client, team_id=team_id, party_id=party_id
+    )
+    return {team.team_id: _team_from_proto(team=team) for team in response}
+
+
+def list_team_referees(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+) -> List[TeamReferee]:
+    response = data_raw.list_team_referees(data_client=data_client, team_id=team_id)
+    return [
+        _team_referee_from_proto(team_referee=team_referee) for team_referee in response
+    ]
+
+
+def list_team_referee_history(
+    data_client: vac.trading_data_grpc_v2,
+    referee: Optional[str] = None,
+) -> List[TeamRefereeHistory]:
+    response = data_raw.list_team_referee_history(
+        data_client=data_client, referee=referee
+    )
+    return [
+        _team_referee_history_from_proto(team_referee_history=team_referee_history)
+        for team_referee_history in response
+    ]

@@ -28,6 +28,9 @@ from vega_sim.api.data import (
     PartyAmount,
     ReferrerRewardsGenerated,
     FeeStats,
+    Team,
+    TeamReferee,
+    TeamRefereeHistory,
     get_asset_decimals,
     find_asset_id,
     get_trades,
@@ -43,6 +46,9 @@ from vega_sim.api.data import (
     list_referral_set_referees,
     get_referral_set_stats,
     get_referral_fee_stats,
+    list_teams,
+    list_team_referees,
+    list_team_referee_history,
 )
 from vega_sim.grpc.client import (
     VegaTradingDataClientV2,
@@ -1120,3 +1126,128 @@ def test_get_referral_fee_stats(trading_data_v2_servicer_and_port):
         volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
     )
 
+
+def test_list_teams(trading_data_v2_servicer_and_port):
+    def ListTeams(self, request, context):
+        return data_node_protos_v2.trading_data.ListTeamsResponse(
+            teams=data_node_protos_v2.trading_data.TeamConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.TeamEdge(
+                        cursor="cursor",
+                        node=data_node_protos_v2.trading_data.Team(
+                            team_id=request.team_id,
+                            referrer="referrer",
+                            name="name",
+                            team_url="team_url",
+                            avatar_url="avatar_url",
+                            created_at=123456789,
+                            closed=False,
+                            created_at_epoch=1,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListTeams = ListTeams
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert list_teams(data_client=data_client, team_id="id") == {
+        "id": Team(
+            team_id="id",
+            referrer="referrer",
+            name="name",
+            team_url="team_url",
+            avatar_url="avatar_url",
+            created_at=123456789,
+            closed=False,
+            created_at_epoch=1,
+        )
+    }
+
+
+def test_list_team_referees(trading_data_v2_servicer_and_port):
+    def ListTeamReferees(self, request, context):
+        return data_node_protos_v2.trading_data.ListTeamRefereesResponse(
+            team_referees=data_node_protos_v2.trading_data.TeamRefereeConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.TeamRefereeEdge(
+                        cursor="cursor",
+                        node=data_node_protos_v2.trading_data.TeamReferee(
+                            team_id=request.team_id,
+                            referee="referee",
+                            joined_at=123456789,
+                            joined_at_epoch=1,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListTeamReferees = ListTeamReferees
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert list_team_referees(data_client=data_client, team_id="id") == [
+        TeamReferee(
+            team_id="id",
+            referee="referee",
+            joined_at=123456789,
+            joined_at_epoch=1,
+        )
+    ]
+
+
+def test_list_team_referee_history(trading_data_v2_servicer_and_port):
+    def ListTeamRefereeHistory(self, request, context):
+        return data_node_protos_v2.trading_data.ListTeamRefereeHistoryResponse(
+            team_referee_history=data_node_protos_v2.trading_data.TeamRefereeHistoryConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.TeamRefereeHistoryEdge(
+                        cursor="cursor",
+                        node=data_node_protos_v2.trading_data.TeamRefereeHistory(
+                            team_id="id",
+                            joined_at=123456789,
+                            joined_at_epoch=1,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListTeamRefereeHistory = ListTeamRefereeHistory
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert list_team_referee_history(data_client=data_client, referee="id") == [
+        TeamRefereeHistory(
+            team_id="id",
+            joined_at=123456789,
+            joined_at_epoch=1,
+        )
+    ]
