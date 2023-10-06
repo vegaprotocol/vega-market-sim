@@ -867,9 +867,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
     _, estimate_liquidation_price_3 = vega.estimate_position(
         market_id,

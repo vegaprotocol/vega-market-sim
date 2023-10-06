@@ -38,608 +38,730 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "data_node.api.v2.trading_data_pb2", _globals
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222A\217\001\022\036\n\023Vega data node APIs2\007v0.72.1\032\034https://api.testnet.vega.xyz*\002\001\0022\020application/jsonR9\n\003500\0222\n\030An internal server error\022\026\n\024\032\022.google.rpc.Status"
-    _GETORDERREQUEST.fields_by_name["order_id"]._options = None
-    _GETORDERREQUEST.fields_by_name["order_id"]._serialized_options = b"\342A\001\002"
-    _LISTORDERVERSIONSREQUEST.fields_by_name["order_id"]._options = None
-    _LISTORDERVERSIONSREQUEST.fields_by_name[
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222A\217\001\022\036\n\023Vega data node APIs2\007v0.72.1\032\034https://api.testnet.vega.xyz*\002\001\0022\020application/jsonR9\n\003500\0222\n\030An internal server error\022\026\n\024\032\022.google.rpc.Status"
+    _globals["_GETORDERREQUEST"].fields_by_name["order_id"]._options = None
+    _globals["_GETORDERREQUEST"].fields_by_name[
         "order_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETSTOPORDERREQUEST.fields_by_name["order_id"]._options = None
-    _GETSTOPORDERREQUEST.fields_by_name[
+    _globals["_LISTORDERVERSIONSREQUEST"].fields_by_name["order_id"]._options = None
+    _globals["_LISTORDERVERSIONSREQUEST"].fields_by_name[
         "order_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTPOSITIONSREQUEST._options = None
-    _LISTPOSITIONSREQUEST._serialized_options = b"\030\001"
-    _LISTPOSITIONSRESPONSE._options = None
-    _LISTPOSITIONSRESPONSE._serialized_options = b"\030\001"
-    _EXPORTLEDGERENTRIESREQUEST.fields_by_name["party_id"]._options = None
-    _EXPORTLEDGERENTRIESREQUEST.fields_by_name[
+    _globals["_GETSTOPORDERREQUEST"].fields_by_name["order_id"]._options = None
+    _globals["_GETSTOPORDERREQUEST"].fields_by_name[
+        "order_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_LISTPOSITIONSREQUEST"]._options = None
+    _globals["_LISTPOSITIONSREQUEST"]._serialized_options = b"\030\001"
+    _globals["_LISTPOSITIONSRESPONSE"]._options = None
+    _globals["_LISTPOSITIONSRESPONSE"]._serialized_options = b"\030\001"
+    _globals["_EXPORTLEDGERENTRIESREQUEST"].fields_by_name["party_id"]._options = None
+    _globals["_EXPORTLEDGERENTRIESREQUEST"].fields_by_name[
         "party_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETLATESTMARKETDEPTHREQUEST.fields_by_name["market_id"]._options = None
-    _GETLATESTMARKETDEPTHREQUEST.fields_by_name[
+    _globals["_GETLATESTMARKETDEPTHREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_GETLATESTMARKETDEPTHREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETLATESTMARKETDATAREQUEST.fields_by_name["market_id"]._options = None
-    _GETLATESTMARKETDATAREQUEST.fields_by_name[
+    _globals["_GETLATESTMARKETDATAREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_GETLATESTMARKETDATAREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETMARKETDATAHISTORYBYIDREQUEST.fields_by_name["market_id"]._options = None
-    _GETMARKETDATAHISTORYBYIDREQUEST.fields_by_name[
+    _globals["_GETMARKETDATAHISTORYBYIDREQUEST"].fields_by_name[
+        "market_id"
+    ]._options = None
+    _globals["_GETMARKETDATAHISTORYBYIDREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETTRANSFERREQUEST.fields_by_name["transfer_id"]._options = None
-    _GETTRANSFERREQUEST.fields_by_name[
+    _globals["_GETTRANSFERREQUEST"].fields_by_name["transfer_id"]._options = None
+    _globals["_GETTRANSFERREQUEST"].fields_by_name[
         "transfer_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTCANDLEINTERVALSREQUEST.fields_by_name["market_id"]._options = None
-    _LISTCANDLEINTERVALSREQUEST.fields_by_name[
+    _globals["_LISTCANDLEINTERVALSREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_LISTCANDLEINTERVALSREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _OBSERVECANDLEDATAREQUEST.fields_by_name["candle_id"]._options = None
-    _OBSERVECANDLEDATAREQUEST.fields_by_name[
+    _globals["_OBSERVECANDLEDATAREQUEST"].fields_by_name["candle_id"]._options = None
+    _globals["_OBSERVECANDLEDATAREQUEST"].fields_by_name[
         "candle_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTCANDLEDATAREQUEST.fields_by_name["candle_id"]._options = None
-    _LISTCANDLEDATAREQUEST.fields_by_name[
+    _globals["_LISTCANDLEDATAREQUEST"].fields_by_name["candle_id"]._options = None
+    _globals["_LISTCANDLEDATAREQUEST"].fields_by_name[
         "candle_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETERC20LISTASSETBUNDLEREQUEST.fields_by_name["asset_id"]._options = None
-    _GETERC20LISTASSETBUNDLEREQUEST.fields_by_name[
+    _globals["_GETERC20LISTASSETBUNDLEREQUEST"].fields_by_name[
+        "asset_id"
+    ]._options = None
+    _globals["_GETERC20LISTASSETBUNDLEREQUEST"].fields_by_name[
         "asset_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETERC20SETASSETLIMITSBUNDLEREQUEST.fields_by_name["proposal_id"]._options = None
-    _GETERC20SETASSETLIMITSBUNDLEREQUEST.fields_by_name[
+    _globals["_GETERC20SETASSETLIMITSBUNDLEREQUEST"].fields_by_name[
+        "proposal_id"
+    ]._options = None
+    _globals["_GETERC20SETASSETLIMITSBUNDLEREQUEST"].fields_by_name[
         "proposal_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETERC20WITHDRAWALAPPROVALREQUEST.fields_by_name["withdrawal_id"]._options = None
-    _GETERC20WITHDRAWALAPPROVALREQUEST.fields_by_name[
+    _globals["_GETERC20WITHDRAWALAPPROVALREQUEST"].fields_by_name[
+        "withdrawal_id"
+    ]._options = None
+    _globals["_GETERC20WITHDRAWALAPPROVALREQUEST"].fields_by_name[
         "withdrawal_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETLASTTRADEREQUEST.fields_by_name["market_id"]._options = None
-    _GETLASTTRADEREQUEST.fields_by_name[
+    _globals["_GETLASTTRADEREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_GETLASTTRADEREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETORACLESPECREQUEST.fields_by_name["oracle_spec_id"]._options = None
-    _GETORACLESPECREQUEST.fields_by_name[
+    _globals["_GETORACLESPECREQUEST"].fields_by_name["oracle_spec_id"]._options = None
+    _globals["_GETORACLESPECREQUEST"].fields_by_name[
         "oracle_spec_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETMARKETREQUEST.fields_by_name["market_id"]._options = None
-    _GETMARKETREQUEST.fields_by_name["market_id"]._serialized_options = b"\342A\001\002"
-    _LISTSUCCESSORMARKETSREQUEST.fields_by_name["market_id"]._options = None
-    _LISTSUCCESSORMARKETSREQUEST.fields_by_name[
+    _globals["_GETMARKETREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_GETMARKETREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _GETPARTYREQUEST.fields_by_name["party_id"]._options = None
-    _GETPARTYREQUEST.fields_by_name["party_id"]._serialized_options = b"\342A\001\002"
-    _GETDEPOSITREQUEST.fields_by_name["id"]._options = None
-    _GETDEPOSITREQUEST.fields_by_name["id"]._serialized_options = b"\342A\001\002"
-    _GETWITHDRAWALREQUEST.fields_by_name["id"]._options = None
-    _GETWITHDRAWALREQUEST.fields_by_name["id"]._serialized_options = b"\342A\001\002"
-    _GETASSETREQUEST.fields_by_name["asset_id"]._options = None
-    _GETASSETREQUEST.fields_by_name["asset_id"]._serialized_options = b"\342A\001\002"
-    _GETNODEREQUEST.fields_by_name["id"]._options = None
-    _GETNODEREQUEST.fields_by_name["id"]._serialized_options = b"\342A\001\002"
-    _LISTNODESIGNATURESREQUEST.fields_by_name["id"]._options = None
-    _LISTNODESIGNATURESREQUEST.fields_by_name[
+    _globals["_LISTSUCCESSORMARKETSREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_LISTSUCCESSORMARKETSREQUEST"].fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_GETPARTYREQUEST"].fields_by_name["party_id"]._options = None
+    _globals["_GETPARTYREQUEST"].fields_by_name[
+        "party_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_GETDEPOSITREQUEST"].fields_by_name["id"]._options = None
+    _globals["_GETDEPOSITREQUEST"].fields_by_name[
         "id"
     ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEFEEREQUEST.fields_by_name["market_id"]._options = None
-    _ESTIMATEFEEREQUEST.fields_by_name[
+    _globals["_GETWITHDRAWALREQUEST"].fields_by_name["id"]._options = None
+    _globals["_GETWITHDRAWALREQUEST"].fields_by_name[
+        "id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_GETASSETREQUEST"].fields_by_name["asset_id"]._options = None
+    _globals["_GETASSETREQUEST"].fields_by_name[
+        "asset_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_GETNODEREQUEST"].fields_by_name["id"]._options = None
+    _globals["_GETNODEREQUEST"].fields_by_name[
+        "id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_LISTNODESIGNATURESREQUEST"].fields_by_name["id"]._options = None
+    _globals["_LISTNODESIGNATURESREQUEST"].fields_by_name[
+        "id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEFEEREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_ESTIMATEFEEREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEFEEREQUEST.fields_by_name["price"]._options = None
-    _ESTIMATEFEEREQUEST.fields_by_name["price"]._serialized_options = b"\342A\001\002"
-    _ESTIMATEFEEREQUEST.fields_by_name["size"]._options = None
-    _ESTIMATEFEEREQUEST.fields_by_name["size"]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST.fields_by_name["market_id"]._options = None
-    _ESTIMATEMARGINREQUEST.fields_by_name[
-        "market_id"
-    ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST.fields_by_name["party_id"]._options = None
-    _ESTIMATEMARGINREQUEST.fields_by_name[
-        "party_id"
-    ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST.fields_by_name["side"]._options = None
-    _ESTIMATEMARGINREQUEST.fields_by_name["side"]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST.fields_by_name["type"]._options = None
-    _ESTIMATEMARGINREQUEST.fields_by_name["type"]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST.fields_by_name["size"]._options = None
-    _ESTIMATEMARGINREQUEST.fields_by_name["size"]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST.fields_by_name["price"]._options = None
-    _ESTIMATEMARGINREQUEST.fields_by_name[
+    _globals["_ESTIMATEFEEREQUEST"].fields_by_name["price"]._options = None
+    _globals["_ESTIMATEFEEREQUEST"].fields_by_name[
         "price"
     ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEMARGINREQUEST._options = None
-    _ESTIMATEMARGINREQUEST._serialized_options = b"\030\001"
-    _ESTIMATEMARGINRESPONSE._options = None
-    _ESTIMATEMARGINRESPONSE._serialized_options = b"\030\001"
-    _GETNETWORKPARAMETERREQUEST.fields_by_name["key"]._options = None
-    _GETNETWORKPARAMETERREQUEST.fields_by_name[
+    _globals["_ESTIMATEFEEREQUEST"].fields_by_name["size"]._options = None
+    _globals["_ESTIMATEFEEREQUEST"].fields_by_name[
+        "size"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name[
+        "market_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name["party_id"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name[
+        "party_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name["side"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name[
+        "side"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name["type"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name[
+        "type"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name["size"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name[
+        "size"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name["price"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"].fields_by_name[
+        "price"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_ESTIMATEMARGINREQUEST"]._options = None
+    _globals["_ESTIMATEMARGINREQUEST"]._serialized_options = b"\030\001"
+    _globals["_ESTIMATEMARGINRESPONSE"]._options = None
+    _globals["_ESTIMATEMARGINRESPONSE"]._serialized_options = b"\030\001"
+    _globals["_GETNETWORKPARAMETERREQUEST"].fields_by_name["key"]._options = None
+    _globals["_GETNETWORKPARAMETERREQUEST"].fields_by_name[
         "key"
     ]._serialized_options = b"\342A\001\002"
-    _GETSTAKEREQUEST.fields_by_name["party_id"]._options = None
-    _GETSTAKEREQUEST.fields_by_name["party_id"]._serialized_options = b"\342A\001\002"
-    _GETRISKFACTORSREQUEST.fields_by_name["market_id"]._options = None
-    _GETRISKFACTORSREQUEST.fields_by_name[
+    _globals["_GETSTAKEREQUEST"].fields_by_name["party_id"]._options = None
+    _globals["_GETSTAKEREQUEST"].fields_by_name[
+        "party_id"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_GETRISKFACTORSREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_GETRISKFACTORSREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTENTITIESREQUEST.fields_by_name["transaction_hash"]._options = None
-    _LISTENTITIESREQUEST.fields_by_name[
+    _globals["_LISTENTITIESREQUEST"].fields_by_name["transaction_hash"]._options = None
+    _globals["_LISTENTITIESREQUEST"].fields_by_name[
         "transaction_hash"
     ]._serialized_options = b"\342A\001\002"
-    _GETPARTYACTIVITYSTREAKREQUEST.fields_by_name["party_id"]._options = None
-    _GETPARTYACTIVITYSTREAKREQUEST.fields_by_name[
+    _globals["_GETPARTYACTIVITYSTREAKREQUEST"].fields_by_name[
+        "party_id"
+    ]._options = None
+    _globals["_GETPARTYACTIVITYSTREAKREQUEST"].fields_by_name[
         "party_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTFUNDINGPAYMENTSREQUEST.fields_by_name["party_id"]._options = None
-    _LISTFUNDINGPAYMENTSREQUEST.fields_by_name[
+    _globals["_LISTFUNDINGPAYMENTSREQUEST"].fields_by_name["party_id"]._options = None
+    _globals["_LISTFUNDINGPAYMENTSREQUEST"].fields_by_name[
         "party_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTFUNDINGPERIODSREQUEST.fields_by_name["market_id"]._options = None
-    _LISTFUNDINGPERIODSREQUEST.fields_by_name[
+    _globals["_LISTFUNDINGPERIODSREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_LISTFUNDINGPERIODSREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTFUNDINGPERIODDATAPOINTSREQUEST.fields_by_name["market_id"]._options = None
-    _LISTFUNDINGPERIODDATAPOINTSREQUEST.fields_by_name[
+    _globals["_LISTFUNDINGPERIODDATAPOINTSREQUEST"].fields_by_name[
+        "market_id"
+    ]._options = None
+    _globals["_LISTFUNDINGPERIODDATAPOINTSREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEPOSITIONREQUEST.fields_by_name["market_id"]._options = None
-    _ESTIMATEPOSITIONREQUEST.fields_by_name[
+    _globals["_ESTIMATEPOSITIONREQUEST"].fields_by_name["market_id"]._options = None
+    _globals["_ESTIMATEPOSITIONREQUEST"].fields_by_name[
         "market_id"
     ]._serialized_options = b"\342A\001\002"
-    _ESTIMATEPOSITIONREQUEST.fields_by_name["open_volume"]._options = None
-    _ESTIMATEPOSITIONREQUEST.fields_by_name[
+    _globals["_ESTIMATEPOSITIONREQUEST"].fields_by_name["open_volume"]._options = None
+    _globals["_ESTIMATEPOSITIONREQUEST"].fields_by_name[
         "open_volume"
     ]._serialized_options = b"\342A\001\002"
-    _LISTTEAMREFEREESREQUEST.fields_by_name["team_id"]._options = None
-    _LISTTEAMREFEREESREQUEST.fields_by_name[
+    _globals["_LISTTEAMREFEREESREQUEST"].fields_by_name["team_id"]._options = None
+    _globals["_LISTTEAMREFEREESREQUEST"].fields_by_name[
         "team_id"
     ]._serialized_options = b"\342A\001\002"
-    _LISTTEAMREFEREEHISTORYREQUEST.fields_by_name["referee"]._options = None
-    _LISTTEAMREFEREEHISTORYREQUEST.fields_by_name[
+    _globals["_LISTTEAMREFEREEHISTORYREQUEST"].fields_by_name["referee"]._options = None
+    _globals["_LISTTEAMREFEREEHISTORYREQUEST"].fields_by_name[
         "referee"
     ]._serialized_options = b"\342A\001\002"
-    _TRADINGDATASERVICE.methods_by_name["ListAccounts"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListAccounts"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListAccounts"
     ]._serialized_options = b"\222A\n\n\010Accounts"
-    _TRADINGDATASERVICE.methods_by_name["ObserveAccounts"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveAccounts"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveAccounts"
     ]._serialized_options = b"\222A\n\n\010Accounts"
-    _TRADINGDATASERVICE.methods_by_name["Info"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["Info"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "Info"
     ]._serialized_options = b"\222A\022\n\020Node information"
-    _TRADINGDATASERVICE.methods_by_name["GetOrder"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetOrder"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetOrder"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["ListOrders"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListOrders"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListOrders"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["ListOrderVersions"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListOrderVersions"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListOrderVersions"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["ObserveOrders"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveOrders"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveOrders"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["GetStopOrder"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetStopOrder"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetStopOrder"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["ListStopOrders"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListStopOrders"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListStopOrders"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["ListPositions"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListPositions"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListPositions"
     ]._serialized_options = b"\210\002\001\222A\013\n\tPositions"
-    _TRADINGDATASERVICE.methods_by_name["ListAllPositions"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListAllPositions"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListAllPositions"
     ]._serialized_options = b"\222A\013\n\tPositions"
-    _TRADINGDATASERVICE.methods_by_name["ObservePositions"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObservePositions"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObservePositions"
     ]._serialized_options = b"\222A\013\n\tPositions"
-    _TRADINGDATASERVICE.methods_by_name["ListLedgerEntries"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListLedgerEntries"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListLedgerEntries"
     ]._serialized_options = b"\222A\020\n\016Ledger entries"
-    _TRADINGDATASERVICE.methods_by_name["ExportLedgerEntries"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ExportLedgerEntries"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ExportLedgerEntries"
     ]._serialized_options = b"\222A\020\n\016Ledger entries"
-    _TRADINGDATASERVICE.methods_by_name["ListBalanceChanges"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListBalanceChanges"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListBalanceChanges"
     ]._serialized_options = b"\222A\n\n\010Accounts"
-    _TRADINGDATASERVICE.methods_by_name["GetLatestMarketData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetLatestMarketData"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetLatestMarketData"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ListLatestMarketData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListLatestMarketData"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListLatestMarketData"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["GetLatestMarketDepth"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetLatestMarketDepth"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetLatestMarketDepth"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ObserveMarketsDepth"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ObserveMarketsDepth"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveMarketsDepth"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ObserveMarketsDepthUpdates"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ObserveMarketsDepthUpdates"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveMarketsDepthUpdates"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ObserveMarketsData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ObserveMarketsData"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveMarketsData"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["GetMarketDataHistoryByID"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetMarketDataHistoryByID"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetMarketDataHistoryByID"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ListTransfers"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListTransfers"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListTransfers"
     ]._serialized_options = b"\222A\013\n\tTransfers"
-    _TRADINGDATASERVICE.methods_by_name["GetTransfer"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetTransfer"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetTransfer"
     ]._serialized_options = b"\222A\013\n\tTransfers"
-    _TRADINGDATASERVICE.methods_by_name["GetNetworkLimits"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetNetworkLimits"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNetworkLimits"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListCandleData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListCandleData"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListCandleData"
     ]._serialized_options = b"\222A\t\n\007Candles"
-    _TRADINGDATASERVICE.methods_by_name["ObserveCandleData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveCandleData"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveCandleData"
     ]._serialized_options = b"\222A\t\n\007Candles"
-    _TRADINGDATASERVICE.methods_by_name["ListCandleIntervals"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListCandleIntervals"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListCandleIntervals"
     ]._serialized_options = b"\222A\t\n\007Candles"
-    _TRADINGDATASERVICE.methods_by_name["ListVotes"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListVotes"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListVotes"
     ]._serialized_options = b"\222A\014\n\nGovernance"
-    _TRADINGDATASERVICE.methods_by_name["ObserveVotes"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveVotes"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveVotes"
     ]._serialized_options = b"\222A\014\n\nGovernance"
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListERC20MultiSigSignerAddedBundles"
     ]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListERC20MultiSigSignerAddedBundles"
     ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListERC20MultiSigSignerRemovedBundles"
     ]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListERC20MultiSigSignerRemovedBundles"
     ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
-    _TRADINGDATASERVICE.methods_by_name["GetERC20ListAssetBundle"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetERC20ListAssetBundle"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetERC20ListAssetBundle"
     ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
-    _TRADINGDATASERVICE.methods_by_name["GetERC20SetAssetLimitsBundle"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetERC20SetAssetLimitsBundle"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetERC20SetAssetLimitsBundle"
     ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
-    _TRADINGDATASERVICE.methods_by_name["GetERC20WithdrawalApproval"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetERC20WithdrawalApproval"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetERC20WithdrawalApproval"
     ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
-    _TRADINGDATASERVICE.methods_by_name["GetLastTrade"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetLastTrade"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetLastTrade"
     ]._serialized_options = b"\222A\010\n\006Trades"
-    _TRADINGDATASERVICE.methods_by_name["ListTrades"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListTrades"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListTrades"
     ]._serialized_options = b"\222A\010\n\006Trades"
-    _TRADINGDATASERVICE.methods_by_name["ObserveTrades"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveTrades"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveTrades"
     ]._serialized_options = b"\222A\010\n\006Trades"
-    _TRADINGDATASERVICE.methods_by_name["GetOracleSpec"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetOracleSpec"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetOracleSpec"
     ]._serialized_options = b"\222A\016\n\014Data sources"
-    _TRADINGDATASERVICE.methods_by_name["ListOracleSpecs"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListOracleSpecs"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListOracleSpecs"
     ]._serialized_options = b"\222A\016\n\014Data sources"
-    _TRADINGDATASERVICE.methods_by_name["ListOracleData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListOracleData"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListOracleData"
     ]._serialized_options = b"\222A\016\n\014Data sources"
-    _TRADINGDATASERVICE.methods_by_name["GetMarket"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetMarket"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetMarket"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ListMarkets"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListMarkets"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListMarkets"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ListSuccessorMarkets"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListSuccessorMarkets"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListSuccessorMarkets"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["GetParty"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetParty"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetParty"
     ]._serialized_options = b"\222A\t\n\007Parties"
-    _TRADINGDATASERVICE.methods_by_name["ListParties"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListParties"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListParties"
     ]._serialized_options = b"\222A\t\n\007Parties"
-    _TRADINGDATASERVICE.methods_by_name["ListMarginLevels"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListMarginLevels"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListMarginLevels"
     ]._serialized_options = b"\222A\017\n\rMargin levels"
-    _TRADINGDATASERVICE.methods_by_name["ObserveMarginLevels"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ObserveMarginLevels"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveMarginLevels"
     ]._serialized_options = b"\222A\017\n\rMargin levels"
-    _TRADINGDATASERVICE.methods_by_name["ListRewards"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListRewards"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListRewards"
     ]._serialized_options = b"\222A\t\n\007Rewards"
-    _TRADINGDATASERVICE.methods_by_name["ListRewardSummaries"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListRewardSummaries"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListRewardSummaries"
     ]._serialized_options = b"\222A\t\n\007Rewards"
-    _TRADINGDATASERVICE.methods_by_name["ListEpochRewardSummaries"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListEpochRewardSummaries"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListEpochRewardSummaries"
     ]._serialized_options = b"\222A\t\n\007Rewards"
-    _TRADINGDATASERVICE.methods_by_name["GetDeposit"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetDeposit"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetDeposit"
     ]._serialized_options = b"\222A\010\n\006Assets"
-    _TRADINGDATASERVICE.methods_by_name["ListDeposits"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListDeposits"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListDeposits"
     ]._serialized_options = b"\222A\010\n\006Assets"
-    _TRADINGDATASERVICE.methods_by_name["GetWithdrawal"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetWithdrawal"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetWithdrawal"
     ]._serialized_options = b"\222A\010\n\006Assets"
-    _TRADINGDATASERVICE.methods_by_name["ListWithdrawals"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListWithdrawals"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListWithdrawals"
     ]._serialized_options = b"\222A\010\n\006Assets"
-    _TRADINGDATASERVICE.methods_by_name["GetAsset"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetAsset"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetAsset"
     ]._serialized_options = b"\222A\010\n\006Assets"
-    _TRADINGDATASERVICE.methods_by_name["ListAssets"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListAssets"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListAssets"
     ]._serialized_options = b"\222A\010\n\006Assets"
-    _TRADINGDATASERVICE.methods_by_name["ListLiquidityProvisions"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListLiquidityProvisions"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListLiquidityProvisions"
     ]._serialized_options = b"\222A\026\n\024Liquidity provisions"
-    _TRADINGDATASERVICE.methods_by_name["ObserveLiquidityProvisions"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ObserveLiquidityProvisions"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveLiquidityProvisions"
     ]._serialized_options = b"\222A\026\n\024Liquidity provisions"
-    _TRADINGDATASERVICE.methods_by_name["ListLiquidityProviders"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListLiquidityProviders"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListLiquidityProviders"
     ]._serialized_options = b"\222A\025\n\023Liquidity providers"
-    _TRADINGDATASERVICE.methods_by_name["GetGovernanceData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetGovernanceData"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetGovernanceData"
     ]._serialized_options = b"\222A\014\n\nGovernance"
-    _TRADINGDATASERVICE.methods_by_name["ListGovernanceData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListGovernanceData"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListGovernanceData"
     ]._serialized_options = b"\222A\014\n\nGovernance"
-    _TRADINGDATASERVICE.methods_by_name["ObserveGovernance"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveGovernance"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveGovernance"
     ]._serialized_options = b"\222A\014\n\nGovernance"
-    _TRADINGDATASERVICE.methods_by_name["ListDelegations"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListDelegations"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListDelegations"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetNetworkData"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetNetworkData"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNetworkData"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetNode"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetNode"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNode"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListNodes"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListNodes"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListNodes"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListNodeSignatures"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListNodeSignatures"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListNodeSignatures"
     ]._serialized_options = b"\222A\016\n\014ERC20 bridge"
-    _TRADINGDATASERVICE.methods_by_name["GetEpoch"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetEpoch"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetEpoch"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["EstimateFee"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["EstimateFee"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "EstimateFee"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["EstimateMargin"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["EstimateMargin"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "EstimateMargin"
     ]._serialized_options = b"\222A\010\n\006Orders"
-    _TRADINGDATASERVICE.methods_by_name["EstimatePosition"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["EstimatePosition"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "EstimatePosition"
     ]._serialized_options = b"\222A\013\n\tPositions"
-    _TRADINGDATASERVICE.methods_by_name["ListNetworkParameters"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListNetworkParameters"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListNetworkParameters"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetNetworkParameter"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetNetworkParameter"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNetworkParameter"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListCheckpoints"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListCheckpoints"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListCheckpoints"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetStake"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetStake"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetStake"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetRiskFactors"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetRiskFactors"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetRiskFactors"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ObserveEventBus"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ObserveEventBus"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveEventBus"
     ]._serialized_options = b"\222A\010\n\006Events"
-    _TRADINGDATASERVICE.methods_by_name["ObserveLedgerMovements"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ObserveLedgerMovements"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ObserveLedgerMovements"
     ]._serialized_options = b"\222A\022\n\020Ledger movements"
-    _TRADINGDATASERVICE.methods_by_name["ListKeyRotations"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListKeyRotations"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListKeyRotations"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListEthereumKeyRotations"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListEthereumKeyRotations"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListEthereumKeyRotations"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetVegaTime"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["GetVegaTime"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetVegaTime"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["GetProtocolUpgradeStatus"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetProtocolUpgradeStatus"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetProtocolUpgradeStatus"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListProtocolUpgradeProposals"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListProtocolUpgradeProposals"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListProtocolUpgradeProposals"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name["ListCoreSnapshots"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListCoreSnapshots"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListCoreSnapshots"
     ]._serialized_options = b"\222A\t\n\007Network"
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetMostRecentNetworkHistorySegment"
     ]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetMostRecentNetworkHistorySegment"
     ]._serialized_options = b"\222A\021\n\017Network history"
-    _TRADINGDATASERVICE.methods_by_name["ListAllNetworkHistorySegments"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListAllNetworkHistorySegments"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListAllNetworkHistorySegments"
     ]._serialized_options = b"\222A\021\n\017Network history"
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetActiveNetworkHistoryPeerAddresses"
     ]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetActiveNetworkHistoryPeerAddresses"
     ]._serialized_options = b"\222A\021\n\017Network history"
-    _TRADINGDATASERVICE.methods_by_name["GetNetworkHistoryStatus"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetNetworkHistoryStatus"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNetworkHistoryStatus"
     ]._serialized_options = b"\222A\021\n\017Network history"
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNetworkHistoryBootstrapPeers"
     ]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetNetworkHistoryBootstrapPeers"
     ]._serialized_options = b"\222A\021\n\017Network history"
-    _TRADINGDATASERVICE.methods_by_name["ListEntities"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListEntities"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListEntities"
     ]._serialized_options = b"\222A\n\n\010Explorer"
-    _TRADINGDATASERVICE.methods_by_name["ListFundingPeriods"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListFundingPeriods"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListFundingPeriods"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ListFundingPeriodDataPoints"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListFundingPeriodDataPoints"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListFundingPeriodDataPoints"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["ListFundingPayments"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListFundingPayments"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListFundingPayments"
     ]._serialized_options = b"\222A\t\n\007Markets"
-    _TRADINGDATASERVICE.methods_by_name["GetPartyActivityStreak"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetPartyActivityStreak"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetPartyActivityStreak"
     ]._serialized_options = b"\222A\022\n\020Referral program"
-    _TRADINGDATASERVICE.methods_by_name["GetCurrentReferralProgram"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetCurrentReferralProgram"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetCurrentReferralProgram"
     ]._serialized_options = b"\222A\022\n\020Referral program"
-    _TRADINGDATASERVICE.methods_by_name["ListReferralSets"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListReferralSets"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListReferralSets"
     ]._serialized_options = b"\222A\022\n\020Referral program"
-    _TRADINGDATASERVICE.methods_by_name["ListReferralSetReferees"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListReferralSetReferees"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListReferralSetReferees"
     ]._serialized_options = b"\222A\022\n\020Referral program"
-    _TRADINGDATASERVICE.methods_by_name["GetReferralSetStats"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetReferralSetStats"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetReferralSetStats"
     ]._serialized_options = b"\222A\022\n\020Referral program"
-    _TRADINGDATASERVICE.methods_by_name["ListTeams"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListTeams"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListTeams"
     ]._serialized_options = b"\222A\007\n\005Teams"
-    _TRADINGDATASERVICE.methods_by_name["ListTeamReferees"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["ListTeamReferees"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListTeamReferees"
     ]._serialized_options = b"\222A\007\n\005Teams"
-    _TRADINGDATASERVICE.methods_by_name["ListTeamRefereeHistory"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ListTeamRefereeHistory"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ListTeamRefereeHistory"
     ]._serialized_options = b"\222A\007\n\005Teams"
-    _TRADINGDATASERVICE.methods_by_name["GetReferralFeeStats"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetReferralFeeStats"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetReferralFeeStats"
     ]._serialized_options = b"\222A\022\n\020Referral program"
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetCurrentVolumeDiscountProgram"
     ]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetCurrentVolumeDiscountProgram"
     ]._serialized_options = b"\222A\031\n\027Volume discount program"
-    _TRADINGDATASERVICE.methods_by_name["GetVolumeDiscountStats"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "GetVolumeDiscountStats"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "GetVolumeDiscountStats"
     ]._serialized_options = b"\222A\031\n\027Volume discount program"
-    _TRADINGDATASERVICE.methods_by_name["ExportNetworkHistory"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
+        "ExportNetworkHistory"
+    ]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "ExportNetworkHistory"
     ]._serialized_options = b"\222A\021\n\017Network history"
-    _TRADINGDATASERVICE.methods_by_name["Ping"]._options = None
-    _TRADINGDATASERVICE.methods_by_name[
+    _globals["_TRADINGDATASERVICE"].methods_by_name["Ping"]._options = None
+    _globals["_TRADINGDATASERVICE"].methods_by_name[
         "Ping"
     ]._serialized_options = b"\222A\006\n\004Misc"
     _globals["_LEDGERENTRYFIELD"]._serialized_start = 47349

@@ -650,9 +650,9 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
-            market_to_asset_map[pos.market_id] = (
-                market_info.tradable_instrument.instrument.future.settlement_asset
-            )
+            market_to_asset_map[
+                pos.market_id
+            ] = market_info.tradable_instrument.instrument.future.settlement_asset
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -1941,13 +1941,13 @@ def list_referral_sets(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, ReferralSet]:
-    response: List[data_node_protos_v2.trading_data.ReferralSet] = (
-        data_raw.list_referral_sets(
-            data_client=data_client,
-            referral_set_id=referral_set_id,
-            referrer=referrer,
-            referee=referee,
-        )
+    response: List[
+        data_node_protos_v2.trading_data.ReferralSet
+    ] = data_raw.list_referral_sets(
+        data_client=data_client,
+        referral_set_id=referral_set_id,
+        referrer=referrer,
+        referee=referee,
     )
     referral_sets = {}
     for referral_set in response:
@@ -1961,13 +1961,13 @@ def list_referral_set_referees(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, Dict[str, ReferralSetReferee]]:
-    response: List[data_node_protos_v2.trading_data.ReferralSetReferee] = (
-        data_raw.list_referral_set_referees(
-            data_client=data_client,
-            referral_set_id=referral_set_id,
-            referrer=referrer,
-            referee=referee,
-        )
+    response: List[
+        data_node_protos_v2.trading_data.ReferralSetReferee
+    ] = data_raw.list_referral_set_referees(
+        data_client=data_client,
+        referral_set_id=referral_set_id,
+        referrer=referrer,
+        referee=referee,
     )
     referral_set_referees = defaultdict(dict)
     for referral_set_referee in response:

@@ -26,12 +26,14 @@ _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.governance_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
-    _GOVERNANCEDATA_YESPARTYENTRY._options = None
-    _GOVERNANCEDATA_YESPARTYENTRY._serialized_options = b"8\001"
-    _GOVERNANCEDATA_NOPARTYENTRY._options = None
-    _GOVERNANCEDATA_NOPARTYENTRY._serialized_options = b"8\001"
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
+    _globals["_GOVERNANCEDATA_YESPARTYENTRY"]._options = None
+    _globals["_GOVERNANCEDATA_YESPARTYENTRY"]._serialized_options = b"8\001"
+    _globals["_GOVERNANCEDATA_NOPARTYENTRY"]._options = None
+    _globals["_GOVERNANCEDATA_NOPARTYENTRY"]._serialized_options = b"8\001"
     _globals["_PROPOSALERROR"]._serialized_start = 10121
     _globals["_PROPOSALERROR"]._serialized_end = 12511
     _globals["_MARKETSTATEUPDATETYPE"]._serialized_start = 12514
