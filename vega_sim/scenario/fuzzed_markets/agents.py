@@ -215,7 +215,7 @@ class FuzzingAgent(StateAgentWithWallet):
             )
         )
 
-        return self.vega.create_order_submission(
+        return self.vega.build_order_submission(
             market_id=self.market_id,
             side=FuzzingAgent.MEMORY["SIDE"][-1],
             size=self.random_state.poisson(lam=10),

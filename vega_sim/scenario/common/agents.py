@@ -1365,7 +1365,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 amendments.append(transaction)
 
             else:
-                transaction = self.vega.create_order_submission(
+                transaction = self.vega.build_order_submission(
                     market_id=self.market_id,
                     price=order.price,
                     size=order.size,
@@ -2522,7 +2522,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
 
     def _submit_order(self, side, price, size):
         return [
-            self.vega.create_order_submission(
+            self.vega.build_order_submission(
                 market_id=self.market_id,
                 order_type="TYPE_LIMIT",
                 time_in_force="TIME_IN_FORCE_GTC",

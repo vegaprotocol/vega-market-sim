@@ -2069,7 +2069,7 @@ class VegaService(ABC):
             market_id=market_id,
         )
 
-    def create_order_submission(
+    def build_order_submission(
         self,
         market_id: str,
         size: float,
