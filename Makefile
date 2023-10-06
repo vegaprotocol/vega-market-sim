@@ -111,7 +111,11 @@ flake8:
 
 .PHONY: test
 test:
-	@env PYTHONPATH=. pytest -m "not integration" tests/
+	@env PYTHONPATH=. pytest -m "not integration and not api" tests/
+
+.PHONY: test_api
+test_api:
+	@env PYTHONPATH=. pytest -m api tests/
 
 .PHONY: test_integration
 test_integration:
