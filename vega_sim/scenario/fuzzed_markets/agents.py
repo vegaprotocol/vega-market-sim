@@ -116,7 +116,7 @@ class FuzzingAgent(StateAgentWithWallet):
     def create_fuzzed_amendment(self, vega_state):
         order_id = self._select_order_id()
 
-        return self.vega.create_order_amendment(
+        return self.vega.build_order_amendment(
             order_id=order_id,
             market_id=self.market_id,
             size_delta=self.random_state.normal(loc=0, scale=5),

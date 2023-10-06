@@ -1962,7 +1962,7 @@ class VegaService(ABC):
             market_price_decimals_map=self.market_price_decimals,
         )
 
-    def create_order_amendment(
+    def build_order_amendment(
         self,
         order_id: str,
         market_id: str,

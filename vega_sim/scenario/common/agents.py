@@ -1349,7 +1349,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             if i < len(orders):
                 order_to_amend = orders[i]
 
-                transaction = self.vega.create_order_amendment(
+                transaction = self.vega.build_order_amendment(
                     market_id=self.market_id,
                     order_id=order_to_amend.id,
                     price=order.price,
