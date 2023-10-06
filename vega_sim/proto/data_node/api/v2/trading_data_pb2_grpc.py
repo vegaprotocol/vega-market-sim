@@ -482,6 +482,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
         )
+        self.ListFundingPayments = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListFundingPayments",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.FromString,
+        )
         self.GetPartyActivityStreak = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetPartyActivityStreak",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.SerializeToString,
@@ -521,6 +526,21 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/ListTeamRefereeHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
+        )
+        self.GetReferralFeeStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
+        )
+        self.GetCurrentVolumeDiscountProgram = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetCurrentVolumeDiscountProgram",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.FromString,
+        )
+        self.GetVolumeDiscountStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetVolumeDiscountStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.FromString,
         )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
@@ -1107,7 +1127,7 @@ class TradingDataServiceServicer(object):
     def ListLiquidityProviders(self, request, context):
         """List liquidity providers data
 
-        List information about active liquidity provider(s) for a given market, or liquidity provider's party ID
+        List information about active liquidity provider(s) for a given market, or liquidity provider's party ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1216,8 +1236,9 @@ class TradingDataServiceServicer(object):
     def EstimatePosition(self, request, context):
         """Estimate position
 
-        Estimate the margin that would be required for maintaining the specified position.
+        Estimate the margin that would be required for maintaining the specified position. Margin estimates are scaled to asset decimal places.
         If the optional collateral available argument is supplied, the response also contains the estimate of the liquidation price.
+        Liquidation price estimates are scaled to asset decimal places by default, unless an argument to scale to market decimal places is specified in the request.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1419,6 +1440,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListFundingPayments(self, request, context):
+        """List funding payments for a party
+
+        Get a list of data points for a perpetual market's funding payment for a party.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetPartyActivityStreak(self, request, context):
         """List party activity streak
 
@@ -1456,7 +1486,11 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetReferralSetStats(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Get referral set statistics
+
+        Get the total taker volume, and each referee's taker volume and, reward and discount factors for a referral set
+        at the latest or a specific epoch. You can also optionally filter for a specific referee's statistics.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -1484,6 +1518,31 @@ class TradingDataServiceServicer(object):
 
         Get a list of a referee's team history, i.e. the teams that a referee has been a member of and transferred from/to.
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetReferralFeeStats(self, request, context):
+        """Get referral fee statistics
+
+        Gets accumulated rewards and discount information for a given asset or market for the latest epoch
+        or a specific epoch.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetCurrentVolumeDiscountProgram(self, request, context):
+        """Get current volume discount program
+
+        Get the on-going volume discount program.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetVolumeDiscountStats(self, request, context):
+        """Get the volume discount statistics for a given epoch for all parties"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -2032,6 +2091,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.SerializeToString,
         ),
+        "ListFundingPayments": grpc.unary_unary_rpc_method_handler(
+            servicer.ListFundingPayments,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.SerializeToString,
+        ),
         "GetPartyActivityStreak": grpc.unary_unary_rpc_method_handler(
             servicer.GetPartyActivityStreak,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.FromString,
@@ -2071,6 +2135,21 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListTeamRefereeHistory,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.SerializeToString,
+        ),
+        "GetReferralFeeStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetReferralFeeStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.SerializeToString,
+        ),
+        "GetCurrentVolumeDiscountProgram": grpc.unary_unary_rpc_method_handler(
+            servicer.GetCurrentVolumeDiscountProgram,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.SerializeToString,
+        ),
+        "GetVolumeDiscountStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetVolumeDiscountStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -4791,6 +4870,35 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def ListFundingPayments(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListFundingPayments",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def GetPartyActivityStreak(
         request,
         target,
@@ -5012,6 +5120,93 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListTeamRefereeHistory",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetReferralFeeStats(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetCurrentVolumeDiscountProgram(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetCurrentVolumeDiscountProgram",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetVolumeDiscountStats(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetVolumeDiscountStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.FromString,
             options,
             channel_credentials,
             insecure,

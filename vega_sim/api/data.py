@@ -682,6 +682,7 @@ def _liquidity_provider_fee_share_from_proto(
 
 
 def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
+    print(account)
     return AccountData(
         owner=account.owner,
         balance=num_from_padded_int(int(account.balance), decimal_spec.asset_decimals),

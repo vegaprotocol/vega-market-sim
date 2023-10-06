@@ -180,7 +180,8 @@ def _ideal_market_maker_single_data_extraction(
         ),
         "LP: Return Over LockedCapital": (
             general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
-        ) / (max_locked_capital + 0.000000001),
+        )
+        / (max_locked_capital + 0.000000001),
         "LP: Annualised Return Over LockedCapital": (
             (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
             * 365
@@ -188,7 +189,8 @@ def _ideal_market_maker_single_data_extraction(
         ),
         "LP: Relative Return": (
             general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint
-        ) / (mm_agent.initial_asset_mint + 0.00000001),
+        )
+        / (mm_agent.initial_asset_mint + 0.00000001),
         "LP: Annualised Relative Return": (
             (general_lp + margin_lp + bond_lp - mm_agent.initial_asset_mint)
             * 365

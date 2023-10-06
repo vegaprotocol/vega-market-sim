@@ -52,23 +52,23 @@ def _queue_forwarder(
     for evts, handler in stream_registry:
         for evt in evts:
             handlers[evt] = handler
-    try:
-        for o in obs:
-            for event in o.events:
-                if (kill_thread_sig is not None) and kill_thread_sig.is_set():
-                    return
-                output = retry(5, 1.0, lambda: handlers[event.type](event))
-                if isinstance(output, (list, GeneratorType)):
-                    for elem in output:
-                        sink.put(elem)
-                else:
-                    sink.put(output)
-    except grpc._channel._MultiThreadedRendezvous as e:
-        if e.details() in ["Channel closed!", "Socket closed"]:
-            logging.debug(f"Thread finished as {e.details}")
-            logger.info("Data cache event bus closed.")
-        else:
-            raise e
+    # try:
+    for o in obs:
+        for event in o.events:
+            if (kill_thread_sig is not None) and kill_thread_sig.is_set():
+                return
+            output = retry(5, 1.0, lambda: handlers[event.type](event))
+            if isinstance(output, (list, GeneratorType)):
+                for elem in output:
+                    sink.put(elem)
+            else:
+                sink.put(output)
+    # except grpc._channel._MultiThreadedRendezvous as e:
+    #     if e.details() in ["Channel closed!", "Socket closed"]:
+    #         logging.debug(f"Thread finished as {e.details}")
+    #         logger.info("Data cache event bus closed.")
+    #     else:
+    #         raise e
 
 
 class DecimalsCache(defaultdict):
@@ -447,6 +447,7 @@ class LocalDataCache:
             except Empty:
                 continue
             else:
+                print(update)
                 if isinstance(update, data.Order):
                     with self.orders_lock:
                         if update.version >= getattr(
@@ -515,6 +516,7 @@ class LocalDataCache:
 
                 elif isinstance(update, data.AccountData):
                     with self.account_lock:
+                        print(update)
                         self._accounts_from_feed[update.account_id] = update
                         self._account_keys_for_party.setdefault(
                             update.owner, set()
