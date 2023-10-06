@@ -685,11 +685,14 @@ def create_referral_set(
         is_team=is_team,
     )
     if is_team:
-        if not all(arg is not None for arg in [name, team_url, avatar_url, closed]):
+        if (name is None) or (closed is None):
             raise ValueError("If one team arg passed, all team args must be passed.")
         command.team.CopyFrom(
             vega_protos.commands.v1.commands.CreateReferralSet.Team(
-                name=name, team_url=team_url, avatar_url=avatar_url, closed=closed
+                name=name,
+                team_url=team_url if team_url is not None else "team_url",
+                avatar_url=avatar_url if avatar_url is not None else "avatar_url",
+                closed=closed,
             )
         )
     wallet.submit_transaction(
@@ -718,11 +721,14 @@ def update_referral_set(
         is_team=is_team,
     )
     if is_team:
-        if not all(arg is not None for arg in [name, team_url, avatar_url, closed]):
+        if (name is None) or (closed is None):
             raise ValueError("If one team arg passed, all team args must be passed.")
         command.team.CopyFrom(
             vega_protos.commands.v1.commands.CreateReferralSet.Team(
-                name=name, team_url=team_url, avatar_url=avatar_url, closed=closed
+                name=name,
+                team_url=team_url if team_url is not None else "team_url",
+                avatar_url=avatar_url if avatar_url is not None else "avatar_url",
+                closed=closed,
             )
         )
     wallet.submit_transaction(
