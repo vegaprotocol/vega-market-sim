@@ -1,6 +1,7 @@
 import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+import time
 
 import numpy as np
 import pandas as pd
@@ -178,12 +179,12 @@ def get_historic_price_series(
 def _price_listener(iter_obj, symbol):
     ws = websocket.WebSocketApp(
         f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
-        on_message=lambda _, msg: _on_message(iter_obj, msg),
+        on_message=lambda _, msg: _on_message(iter_obj, msg, symbol),
     )
     ws.run_forever(reconnect=5)
 
 
-def _on_message(iter_obj, message):
+def _on_message(iter_obj, message, symbol):
     iter_obj.latest_price = float(json.loads(message)["k"]["c"])
 
 
@@ -217,8 +218,20 @@ class LivePrice:
         return self._get_price()
 
     def _get_price(self):
+        while self.latest_price is None:
+            time.sleep(0.33)
         return self.latest_price
 
+_live_prices = {}
+_live_prices_lock = threading.Lock()
+
+def getLivePrice(product: str) -> LivePrice:
+    global _live_prices
+    global _live_prices_lock
+    with _live_prices_lock:
+        if not product in _live_prices:
+            _live_prices[product] = LivePrice(product=product)
+        return _live_prices[product]
 
 if __name__ == "__main__":
     print(
