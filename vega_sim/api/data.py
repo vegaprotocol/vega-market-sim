@@ -281,11 +281,11 @@ class ReferralSetReferee:
 @dataclass(frozen=True)
 class ReferralSetStats:
     at_epoch: int
-    referral_set_running_notional_taker_volume: int
+    referral_set_running_notional_taker_volume: float
     party_id: str
     discount_factor: float
     reward_factor: float
-    epoch_notional_taker_volume: int
+    epoch_notional_taker_volume: float
 
 
 @dataclass(frozen=True)
@@ -2222,7 +2222,7 @@ def list_teams(
     data_client: vac.trading_data_grpc_v2,
     team_id: Optional[str] = None,
     party_id: Optional[str] = None,
-) -> List[Team]:
+) -> Dict[str, Team]:
     response = data_raw.list_teams(
         data_client=data_client, team_id=team_id, party_id=party_id
     )
