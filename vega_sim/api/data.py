@@ -1456,6 +1456,9 @@ def account_list_to_party_account(
 
     return PartyMarketAccount(general, margin, bond)
 
+_market_ids = None
+_market_ids_update = datetime.datetime.now() - datetime.timedelta(hours = 1)
+_market_ids_lock = threading.Lock()
 
 def find_market_id(
     name: str, data_client: vac.VegaTradingDataClientV2, raise_on_missing: bool = False
@@ -1474,22 +1477,33 @@ def find_market_id(
     Returns:
         str, the ID of the asset
     """
-    markets = data_raw.all_markets(data_client=data_client)
+    global _market_ids
+    global _market_ids_update
+    global _market_ids_lock
+    if datetime.datetime.now() - _market_ids_update > datetime.timedelta(seconds=30):
+        if _market_ids_lock.acquire(blocking=False):
+            try:
+                _market_ids_update = datetime.datetime.now()
+                markets = data_raw.all_markets(data_client=data_client)
 
-    acceptable_states = [
-        vega_protos.markets.Market.STATE_PENDING,
-        vega_protos.markets.Market.STATE_ACTIVE,
-        vega_protos.markets.Market.STATE_SUSPENDED,
-    ]
+                acceptable_states = [
+                    vega_protos.markets.Market.STATE_PENDING,
+                    vega_protos.markets.Market.STATE_ACTIVE,
+                    vega_protos.markets.Market.STATE_SUSPENDED,
+                ]
 
-    market_ids = {}
-    for market in markets:
-        if market.tradable_instrument.instrument.name == name:
-            if market.state in acceptable_states:
-                market_ids[market.id] = market.market_timestamps.pending
+                _market_ids = {}
+                for market in markets:
+                    if market.tradable_instrument.instrument.name == name:
+                        if market.state in acceptable_states:
+                            _market_ids[market.id] = market.market_timestamps.pending
+            finally:
+                _market_ids_lock.release()
+        while _market_ids is None:
+            time.sleep(0.33)
 
-    if len(market_ids) > 0:
-        return max(market_ids, key=market_ids.get)
+    if len(_market_ids) > 0:
+        return max(_market_ids, key=_market_ids.get)
 
     if raise_on_missing:
         raise MissingMarketError(
