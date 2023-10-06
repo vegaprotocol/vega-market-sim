@@ -28,7 +28,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     with VegaServiceNull(
-        run_with_console=True,
+        run_with_console=False,
         launch_graphql=False,
         retain_log_files=True,
         use_full_vega_wallet=True,
@@ -91,44 +91,6 @@ if __name__ == "__main__":
             commitment_amount=10000,
             fee=0.001,
             is_amendment=False,
-        )
-
-        import vega_sim.proto.vega.data.v1 as oracles_protos
-        import vega_sim.proto.vega.data_source_pb2 as data_source_protos
-        import vega_sim.proto.vega.governance_pb2 as gov_protos
-
-        base_spec = vega.market_info(market_id)
-        now = vega.get_blockchain_time(in_seconds=True)
-        fut = base_spec.tradable_instrument.instrument.future
-
-        update_prod = gov_protos.UpdateInstrumentConfiguration(
-            code=base_spec.tradable_instrument.instrument.code,
-            future=gov_protos.UpdateFutureProduct(
-                quote_name=fut.quote_name,
-                data_source_spec_for_trading_termination=data_source_protos.DataSourceDefinition(
-                    internal=data_source_protos.DataSourceDefinitionInternal(
-                        time=data_source_protos.DataSourceSpecConfigurationTime(
-                            conditions=[
-                                oracles_protos.spec.Condition(
-                                    value=f"{now + 300}",
-                                    operator=oracles_protos.spec.Condition.Operator.OPERATOR_GREATER_THAN_OR_EQUAL,
-                                )
-                            ]
-                        )
-                    )
-                ),
-                data_source_spec_for_settlement_data=fut.data_source_spec_for_settlement_data.data,
-                data_source_spec_binding=vega_protos.markets.DataSourceSpecToFutureBinding(
-                    settlement_data_property=fut.data_source_spec_binding.settlement_data_property,
-                    trading_termination_property="vegaprotocol.builtin.timestamp",
-                ),
-            ),
-        )
-
-        vega.update_market(
-            proposal_key=MM_WALLET.name,
-            market_id=market_id,
-            updated_instrument=update_prod,
         )
 
         vega.submit_order(
