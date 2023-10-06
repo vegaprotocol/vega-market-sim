@@ -108,7 +108,7 @@ class FuzzingAgent(StateAgentWithWallet):
     def create_fuzzed_cancellation(self, vega_state):
         order_id = self._select_order_id()
 
-        return self.vega.create_order_cancellation(
+        return self.vega.build_order_cancellation(
             order_id=order_id,
             market_id=self.market_id,
         )

@@ -1383,7 +1383,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         if len(orders) > len(new_shape):
             for order in orders[len(new_shape) :]:
-                transaction = self.vega.create_order_cancellation(
+                transaction = self.vega.build_order_cancellation(
                     order_id=order.id,
                     market_id=self.market_id,
                 )
@@ -2539,7 +2539,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         cancellations = []
         for order in orders:
             cancellations.append(
-                self.vega.create_order_cancellation(
+                self.vega.build_order_cancellation(
                     market_id=self.market_id,
                     order_id=order.id,
                 )

@@ -2044,7 +2044,7 @@ class VegaService(ABC):
             pegged_reference=pegged_reference,
         )
 
-    def create_order_cancellation(
+    def build_order_cancellation(
         self,
         order_id: str,
         market_id: str,
