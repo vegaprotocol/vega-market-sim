@@ -432,7 +432,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
                     " received."
                 )
                 # Mint forwards blocks, wait for catchup
-                # vega.wait_for_total_catchup()
+                vega.wait_for_total_catchup()
 
 
 class NetworkEnvironment(MarketEnvironmentWithState):
