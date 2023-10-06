@@ -681,14 +681,16 @@ def _liquidity_provider_fee_share_from_proto(
     ]
 
 
+ALL_UPDATES = []
+
+
 def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
-    print(account)
     return AccountData(
         owner=account.owner,
         balance=num_from_padded_int(int(account.balance), decimal_spec.asset_decimals),
         asset=account.asset,
         type=account.type,
-        market_id=account.market_id,
+        market_id=account.market_id if account.market_id != "!" else "",
     )
 
 
@@ -1354,6 +1356,7 @@ def _stream_handler(
     event = extraction_fn(stream_item)
 
     market_id = getattr(event, "market_id", getattr(event, "market", None))
+    market_id = None if market_id == "!" else market_id
 
     # Check market creation event observed
     if (market_id is not None) and (

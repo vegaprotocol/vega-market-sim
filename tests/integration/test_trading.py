@@ -155,9 +155,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t1) == 1
     assert len(live_transfers_t1) == 0
-    import pdb
 
-    pdb.set_trace()
     assert party_a_accounts_t1.general == 499.5
     assert party_b_accounts_t1.general == 1500
 
