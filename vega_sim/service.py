@@ -2081,9 +2081,8 @@ class VegaService(ABC):
         reference: Optional[str] = None,
         reduce_only: bool = False,
         post_only: bool = False,
-        peak_size: Optional[float] = None,
-        minimum_visible_size: Optional[float] = None,
         pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
+        iceberg_opts: Optional[IcebergOpts] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2162,18 +2161,7 @@ class VegaService(ABC):
             pegged_order=pegged_order,
             reduce_only=reduce_only,
             post_only=post_only,
-            iceberg_opts=(
-                vega_protos.commands.v1.commands.IcebergOpts(
-                    peak_size=num_to_padded_int(
-                        peak_size, self.market_pos_decimals[market_id]
-                    ),
-                    minimum_visible_size=num_to_padded_int(
-                        minimum_visible_size, self.market_pos_decimals[market_id]
-                    ),
-                )
-                if (peak_size is not None and minimum_visible_size is not None)
-                else None
-            ),
+            iceberg_opts=iceberg_opts,
         )
 
     def submit_instructions(
@@ -3049,6 +3037,16 @@ class VegaService(ABC):
         return data.list_team_referee_history(
             data_client=self.trading_data_client_v2,
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def build_iceberg_opts(
+        self, market_id: str, peak_size: float, minimum_visible_size: float
+    ) -> vega_protos.vega.IcebergOpts:
+        return vega_protos.commands.v1.IcebergOpts(
+            peak_size=num_to_padded_int(peak_size, self.market_pos_decimals[market_id]),
+            minimum_visible_size=num_to_padded_int(
+                minimum_visible_size, self.market_pos_decimals[market_id]
+            ),
         )
 
     def build_pegged_order(
