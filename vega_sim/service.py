@@ -2079,12 +2079,11 @@ class VegaService(ABC):
         price: Optional[float] = None,
         expires_at: Optional[int] = None,
         reference: Optional[str] = None,
-        pegged_reference: Optional[str] = None,
-        pegged_offset: Optional[float] = None,
         reduce_only: bool = False,
         post_only: bool = False,
         peak_size: Optional[float] = None,
         minimum_visible_size: Optional[float] = None,
+        pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2134,16 +2133,6 @@ class VegaService(ABC):
                 )
             )
         )
-        pegged_offset = (
-            pegged_offset
-            if pegged_offset is None
-            else (
-                num_to_padded_int(
-                    to_convert=pegged_offset,
-                    decimals=self.market_price_decimals[market_id],
-                )
-            )
-        )
         size = (
             size
             if size is None
@@ -2151,14 +2140,6 @@ class VegaService(ABC):
                 to_convert=size, decimals=self.market_pos_decimals[market_id]
             )
         )
-        if (pegged_offset is not None) and (pegged_reference is not None):
-            pegged_order = trading.build_pegged_order(
-                pegged_reference=pegged_reference,
-                pegged_offset=pegged_offset,
-            )
-        else:
-            pegged_order = None
-
         if price is not None and price <= 0:
             msg = "Not submitting order as price is 0 or less."
             logger.debug(msg)
@@ -3068,4 +3049,17 @@ class VegaService(ABC):
         return data.list_team_referee_history(
             data_client=self.trading_data_client_v2,
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def build_pegged_order(
+        self,
+        market_id: str,
+        reference: vega_protos.vega.Order.PeggedReference,
+        offset: float,
+    ) -> vega_protos.vega.PeggedOrder:
+        return vega_protos.vega.PeggedOrder(
+            reference=reference,
+            offset=str(
+                num_to_padded_int(offset, self.market_price_decimals[market_id])
+            ),
         )
