@@ -1,11 +1,14 @@
-from typing import Optional
-import numpy as np
-
-from typing import Any, Dict, List, Optional, Union
-import requests
-import pandas as pd
-from enum import Enum
 import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
+import numpy as np
+import pandas as pd
+import requests
+import json
+from websockets.sync.client import connect
+import threading
+import websocket
 
 COINBASE_REQUEST_BASE = "https://api.exchange.coinbase.com/products"
 COINBASE_CANDLE_BASE = COINBASE_REQUEST_BASE + "/{product_id}/candles"
@@ -172,15 +175,16 @@ def get_historic_price_series(
         return s
 
 
-if __name__ == "__main__":
-    print(
-        get_historic_price_series(
-            "ETH-USD",
-            granularity=Granularity.HOUR,
-            start="2022-08-02 01:01:50",
-            end="2022-09-05 09:05:20",
-        )
+def _price_listener(iter_obj, symbol):
+    ws = websocket.WebSocketApp(
+        f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
+        on_message=lambda _, msg: _on_message(iter_obj, msg),
     )
+    ws.run_forever(reconnect=5)
+
+
+def _on_message(iter_obj, message):
+    iter_obj.latest_price = float(json.loads(message)["k"]["c"])
 
 
 class LivePrice:
@@ -192,8 +196,16 @@ class LivePrice:
 
     """
 
-    def __init__(self, product: str = "ADAUSDT"):
+    def __init__(self, product: str = "BTCBUSD"):
         self.product = product
+        self.latest_price = None
+
+        self._forwarding_thread = threading.Thread(
+            target=_price_listener,
+            args=(self, self.product.lower()),
+            daemon=True,
+        )
+        self._forwarding_thread.start()
 
     def __iter__(self):
         return self
@@ -205,5 +217,15 @@ class LivePrice:
         return self._get_price()
 
     def _get_price(self):
-        url = f"https://api.binance.com/api/v3/avgPrice?symbol={self.product}"
-        return float(requests.get(url).json()["price"])
+        return self.latest_price
+
+
+if __name__ == "__main__":
+    print(
+        get_historic_price_series(
+            "ETH-USD",
+            granularity=Granularity.HOUR,
+            start="2022-08-02 01:01:50",
+            end="2022-09-05 09:05:20",
+        )
+    )

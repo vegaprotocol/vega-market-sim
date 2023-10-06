@@ -33,6 +33,7 @@ python-dotenv = "*"
 deprecated = "*"
 psutil = "*"
 docker = "*"
+websockets = "*"
 gymnasium = {version = "*", optional = true}
 sb3-contrib = {version = "^2.0.0a1", optional = true}
 stable-baselines3 = {version = "*", optional = true }
@@ -55,8 +56,6 @@ pytest-xdist = "*"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-
 
 
 [tool.poetry.extras]
