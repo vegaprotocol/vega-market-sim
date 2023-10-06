@@ -80,7 +80,10 @@ class AgentWithWallet(Agent):
         pass
 
     def initialise(
-        self, vega: Union[VegaServiceNull, VegaServiceNetwork], create_key: bool = True
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = False,
     ):
         super().initialise(vega=vega)
         if create_key:

@@ -22,6 +22,8 @@ from vega_sim.api.data import (
     MarginEstimate,
     LiquidationEstimate,
     LiquidationPrice,
+    ReferralSet,
+    ReferralSetReferee,
     get_asset_decimals,
     find_asset_id,
     get_trades,
@@ -33,6 +35,8 @@ from vega_sim.api.data import (
     list_transfers,
     list_ledger_entries,
     estimate_position,
+    list_referral_sets,
+    list_referral_set_referees,
 )
 from vega_sim.grpc.client import (
     VegaTradingDataClientV2,
@@ -555,8 +559,28 @@ def test_get_trades(
             sell_order="so1",
             timestamp=100,
             trade_type=vega_protos.vega.Trade.TYPE_DEFAULT,
-            buyer_fee=Fee(maker_fee=10, infrastructure_fee=1.2, liquidity_fee=1.4),
-            seller_fee=Fee(maker_fee=20, infrastructure_fee=12.2, liquidity_fee=14.4),
+            buyer_fee=Fee(
+                maker_fee=10,
+                infrastructure_fee=1.2,
+                liquidity_fee=1.4,
+                maker_fee_referrer_discount=0,
+                maker_fee_volume_discount=0,
+                infrastructure_fee_referrer_discount=0,
+                infrastructure_fee_volume_discount=0,
+                liquidity_fee_referrer_discount=0,
+                liquidity_fee_volume_discount=0,
+            ),
+            seller_fee=Fee(
+                maker_fee=20,
+                infrastructure_fee=12.2,
+                liquidity_fee=14.4,
+                maker_fee_referrer_discount=0,
+                maker_fee_volume_discount=0,
+                infrastructure_fee_referrer_discount=0,
+                infrastructure_fee_volume_discount=0,
+                liquidity_fee_referrer_discount=0,
+                liquidity_fee_volume_discount=0,
+            ),
             buyer_auction_batch=100,
             seller_auction_batch=96,
         )
@@ -590,11 +614,23 @@ def test_get_trades(
                                 maker_fee="100",
                                 infrastructure_fee="12",
                                 liquidity_fee="14",
+                                maker_fee_referrer_discount="0",
+                                maker_fee_volume_discount="0",
+                                infrastructure_fee_referrer_discount="0",
+                                infrastructure_fee_volume_discount="0",
+                                liquidity_fee_referrer_discount="0",
+                                liquidity_fee_volume_discount="0",
                             ),
                             seller_fee=vega_protos.vega.Fee(
                                 maker_fee="200",
                                 infrastructure_fee="122",
                                 liquidity_fee="144",
+                                maker_fee_referrer_discount="0",
+                                maker_fee_volume_discount="0",
+                                infrastructure_fee_referrer_discount="0",
+                                infrastructure_fee_volume_discount="0",
+                                liquidity_fee_referrer_discount="0",
+                                liquidity_fee_volume_discount="0",
                             ),
                             buyer_auction_batch=100,
                             seller_auction_batch=96,
@@ -859,3 +895,90 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
 
     assert margin == expected_margin
     assert liquidation == expected_liquidation
+
+
+def test_list_referral_sets(trading_data_v2_servicer_and_port):
+    def ListReferralSets(self, request, context):
+        return data_node_protos_v2.trading_data.ListReferralSetsResponse(
+            referral_sets=data_node_protos_v2.trading_data.ReferralSetConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.ReferralSetEdge(
+                        cursor="cursor",
+                        node=data_node_protos_v2.trading_data.ReferralSet(
+                            id=request.referral_set_id,
+                            referrer=request.referrer,
+                            created_at=123456789,
+                            updated_at=123456789,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListReferralSets = ListReferralSets
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+
+    assert list_referral_sets(data_client=data_client, referral_set_id="id") == {
+        "id": ReferralSet(
+            id="id", referrer="", created_at=123456789, updated_at=123456789
+        )
+    }
+    assert list_referral_sets(data_client=data_client, referral_set_id="id") == {
+        "id": ReferralSet(
+            id="id", referrer="", created_at=123456789, updated_at=123456789
+        )
+    }
+
+
+def test_list_referral_set_referees(trading_data_v2_servicer_and_port):
+    def ListReferralSetReferees(self, request, context):
+        return data_node_protos_v2.trading_data.ListReferralSetRefereesResponse(
+            referral_set_referees=data_node_protos_v2.trading_data.ReferralSetRefereeConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.ReferralSetRefereeEdge(
+                        cursor="cursor",
+                        node=data_node_protos_v2.trading_data.ReferralSetReferee(
+                            referral_set_id=request.referral_set_id,
+                            referee=request.referee,
+                            joined_at=123456789,
+                            at_epoch=1,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListReferralSetReferees = ListReferralSetReferees
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert list_referral_set_referees(
+        data_client=data_client, referral_set_id="id"
+    ) == {
+        "id": {
+            "": ReferralSetReferee(
+                referral_set_id="id",
+                referee="",
+                joined_at=123456789,
+                at_epoch=1,
+            )
+        }
+    }

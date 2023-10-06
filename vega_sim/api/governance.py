@@ -624,3 +624,124 @@ def settle_oracle(
         transaction_type="oracle_data_submission",
         key_name=key_name,
     )
+
+
+def update_referral_program(
+    key_name: str,
+    wallet: Wallet,
+    data_client: vac.VegaTradingDataClientV2,
+    benefit_tiers: Optional[list[dict]] = None,
+    staking_tiers: Optional[list[dict]] = None,
+    end_of_program_timestamp: Optional[int] = None,
+    window_length: Optional[int] = None,
+    wallet_name: Optional[str] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    referral_program = vega_protos.vega.ReferralProgram(
+        end_of_program_timestamp=end_of_program_timestamp,
+        window_length=window_length,
+    )
+    if benefit_tiers is not None:
+        for benefit_tier in benefit_tiers:
+            referral_program.benefit_tiers.extend(
+                [
+                    vega_protos.vega.BenefitTier(
+                        minimum_running_notional_taker_volume=str(
+                            benefit_tier["minimum_running_notional_taker_volume"]
+                        ),
+                        minimum_epochs=str(benefit_tier["minimum_epochs"]),
+                        referral_reward_factor=str(
+                            benefit_tier["referral_reward_factor"]
+                        ),
+                        referral_discount_factor=str(
+                            benefit_tier["referral_discount_factor"]
+                        ),
+                    )
+                ]
+            )
+    if staking_tiers is not None:
+        for staking_tier in staking_tiers:
+            referral_program.staking_tiers.extend(
+                [
+                    vega_protos.vega.StakingTier(
+                        minimum_staked_tokens=str(
+                            staking_tier["minimum_staked_tokens"]
+                        ),
+                        referral_reward_multiplier=str(
+                            staking_tier["referral_reward_multiplier"]
+                        ),
+                    )
+                ]
+            )
+
+    proposal = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    proposal.terms.update_referral_program.CopyFrom(
+        vega_protos.governance.UpdateReferralProgram(changes=referral_program)
+    )
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    ).proposal.id
+
+
+def update_volume_discount_program(
+    key_name: str,
+    wallet: Wallet,
+    data_client: vac.VegaTradingDataClientV2,
+    benefit_tiers: Optional[list[dict]] = None,
+    end_of_program_timestamp: Optional[int] = None,
+    window_length: Optional[int] = None,
+    wallet_name: Optional[str] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    volume_discount_program = vega_protos.vega.VolumeDiscountProgram(
+        end_of_program_timestamp=end_of_program_timestamp,
+        window_length=window_length,
+    )
+    if benefit_tiers is not None:
+        for benefit_tier in benefit_tiers:
+            volume_discount_program.benefit_tiers.extend(
+                [
+                    vega_protos.vega.VolumeBenefitTier(
+                        minimum_running_notional_taker_volume=str(
+                            benefit_tier["minimum_running_notional_taker_volume"]
+                        ),
+                        volume_discount_factor=str(
+                            benefit_tier["volume_discount_factor"]
+                        ),
+                    )
+                ]
+            )
+
+    proposal = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    proposal.terms.update_volume_discount_program.CopyFrom(
+        vega_protos.governance.UpdateVolumeDiscountProgram(
+            changes=volume_discount_program
+        )
+    )
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    ).proposal.id

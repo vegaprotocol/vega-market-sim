@@ -281,25 +281,47 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
 @pytest.mark.integration
 def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
-    vega.wait_for_total_catchup()
+    market_id = vega.all_markets()[0].id
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e3)
-    create_and_faucet_wallet(vega=vega, wallet=LIQ, amount=1e5)
     create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e5)
     create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e5)
     vega.wait_for_total_catchup()
 
-    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+    # Forward one epoch
+    next_epoch(vega=vega)
 
     vega.recurring_transfer(
         from_key_name=PARTY_A.name,
-        to_key_name=PARTY_B.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
         asset=asset_id,
+        asset_for_metric=asset_id,
+        metric=vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
         amount=100,
         factor=1.0,
     )
+    # Generate trades for non-zero metrics
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=10000,
+    )
+    vega.submit_order(
+        trading_key=PARTY_C.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=10000,
+    )
+    vega.wait_for_total_catchup()
 
     party_a_accounts_t0 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
@@ -317,7 +339,7 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
 
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 799.8
+    assert party_a_accounts_t2[0].balance == 899.9
 
 
 @pytest.mark.integration
@@ -1494,3 +1516,172 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     )
     assert closeout_price <= estimate_liquidation_price_2.best_case.open_volume_only
     assert closeout_price >= estimate_liquidation_price_2.worst_case.open_volume_only
+
+
+@pytest.mark.integration
+def test_referral_sets(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B)
+    vega.wait_for_total_catchup()
+    referrer_id = vega.wallet.public_key(name=PARTY_A.name)
+    referee_id = vega.wallet.public_key(name=PARTY_B.name)
+
+    vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    referral_set_id = list(vega.list_referral_sets().keys())[0]
+    vega.apply_referral_code(key_name=PARTY_B.name, id=referral_set_id)
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    # Check we can request a referral set by referral set id
+    referral_set = vega.list_referral_sets(referral_set_id=referral_set_id)
+    assert referral_set[referral_set_id].id == referral_set_id
+    assert referral_set[referral_set_id].referrer == referrer_id
+
+    # Check we can request a referral set by referrer
+    referral_set = vega.list_referral_sets(referrer=referrer_id)
+    assert referral_set[referral_set_id].id == referral_set_id
+    assert referral_set[referral_set_id].referrer == referrer_id
+
+    # Check we can request a referral set by referee
+    referral_set = vega.list_referral_sets(referee=referee_id)
+    assert referral_set[referral_set_id].id == referral_set_id
+    assert referral_set[referral_set_id].referrer == referrer_id
+
+    # Check we can request all referral set referees
+    referees = vega.list_referral_set_referees()
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+    # Check we can request referral set referees by referral set id
+    referees = vega.list_referral_set_referees(referral_set_id=referral_set_id)
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+    # Check we can request referral set referees by referrer id
+    referees = vega.list_referral_set_referees(referrer=referrer_id)
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+    # Check we can request referral set referees by referee id
+    referees = vega.list_referral_set_referees(referee=referee_id)
+    assert referees[referral_set_id][referee_id].referee == referee_id
+    assert referees[referral_set_id][referee_id].referral_set_id == referral_set_id
+
+
+@pytest.mark.integration
+def test_referral_program(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    vega.update_referral_program(
+        proposal_key=MM_WALLET.name,
+        benefit_tiers=[
+            {
+                "minimum_running_notional_taker_volume": 10000,
+                "minimum_epochs": 1,
+                "referral_reward_factor": 0.01,
+                "referral_discount_factor": 0.01,
+            },
+            {
+                "minimum_running_notional_taker_volume": 20000,
+                "minimum_epochs": 2,
+                "referral_reward_factor": 0.02,
+                "referral_discount_factor": 0.02,
+            },
+            {
+                "minimum_running_notional_taker_volume": 30000,
+                "minimum_epochs": 3,
+                "referral_reward_factor": 0.03,
+                "referral_discount_factor": 0.03,
+            },
+        ],
+        staking_tiers=[
+            {"minimum_staked_tokens": 100, "referral_reward_multiplier": 1},
+            {"minimum_staked_tokens": 1000, "referral_reward_multiplier": 2},
+            {"minimum_staked_tokens": 10000, "referral_reward_multiplier": 2},
+        ],
+        window_length=1,
+    )
+    next_epoch(vega=vega)
+    referral_program = vega.get_current_referral_program()
+    assert referral_program is not None
+
+
+@pytest.mark.integration
+def test_volume_discount_program(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e9)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e9)
+    vega.wait_for_total_catchup()
+    vega.update_volume_discount_program(
+        proposal_key=MM_WALLET.name,
+        benefit_tiers=[
+            {
+                "minimum_running_notional_taker_volume": 1,
+                "volume_discount_factor": 0.01,
+            },
+        ],
+        window_length=7,
+    )
+    next_epoch(vega=vega)
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=100,
+    )
+    vega.wait_fn(1)
+    non_discounted_order_id = vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=100,
+        wait=True,
+    )
+    non_discounted_trades = vega.get_trades(
+        market_id=market_id, order_id=non_discounted_order_id
+    )
+    assert vega.get_current_volume_discount_program() is not None
+    assert non_discounted_trades[0].seller_fee.maker_fee_volume_discount == 0
+    assert non_discounted_trades[0].seller_fee.liquidity_fee_volume_discount == 0
+    assert non_discounted_trades[0].seller_fee.infrastructure_fee_volume_discount == 0
+    next_epoch(vega=vega)
+    assert vega.get_volume_discount_stats(key_name=PARTY_B.name) is not None
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=10000,
+    )
+    vega.wait_fn(1)
+    discounted_order_id = vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=10000,
+        wait=True,
+    )
+    discounted_trades = vega.get_trades(
+        market_id=market_id, order_id=discounted_order_id
+    )
+    assert discounted_trades[0].buyer_fee.maker_fee_volume_discount != 0
+    assert discounted_trades[0].buyer_fee.liquidity_fee_volume_discount != 0
+    assert discounted_trades[0].buyer_fee.infrastructure_fee_volume_discount != 0

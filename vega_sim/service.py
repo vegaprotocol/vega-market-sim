@@ -2318,6 +2318,16 @@ class VegaService(ABC):
         asset_for_metric: Optional[str] = None,
         metric: Optional[vega_protos.vega.DispatchMetric] = None,
         markets: Optional[List[str]] = None,
+        entity_scope: Optional[vega_protos.vega.EntityScope] = None,
+        individual_scope: Optional[vega_protos.vega.IndividualScope] = None,
+        team_scope: Optional[List[str]] = None,
+        n_top_performers: Optional[float] = None,
+        staking_requirement: Optional[float] = None,
+        notional_time_weighted_average_position_requirement: Optional[float] = None,
+        window_length: Optional[int] = None,
+        lock_period: Optional[int] = None,
+        distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
+        rank_table: Optional[List[vega_protos.vega.Rank]] = None,
     ):
         """Create a recurring transfer of funds.
 
@@ -2366,7 +2376,7 @@ class VegaService(ABC):
             None
         """
 
-        # Create the RecurringTransfer message
+        # Set the mandatory RecurringTransfer fields
         recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
             start_epoch=(
                 start_epoch
@@ -2375,29 +2385,46 @@ class VegaService(ABC):
             )
         )
         # Set the optional RecurringTransfer fields
-        if start_epoch is not None:
-            setattr(recurring_transfer, "start_epoch", start_epoch)
         if end_epoch is not None:
-            setattr(recurring_transfer, "end_epoch", end_epoch)
+            setattr(recurring_transfer, "end_epoch", int(end_epoch))
         if factor is not None:
             setattr(recurring_transfer, "factor", str(factor))
-        if any([val is not None for val in [asset_for_metric, metric, markets]]):
-            if any([val is None for val in [asset_for_metric, metric]]):
-                raise Exception(
-                    "Value for one but not all non-optional DispatchStrategy fields"
-                    " given."
-                )
-            dispatch_strategy = vega_protos.vega.DispatchStrategy(
+
+        # If any dispatch strategy field is set, try and create a dispatch strategy
+        if any(
+            [
+                arg is not None
+                for arg in [
+                    entity_scope,
+                    window_length,
+                    lock_period,
+                    distribution_strategy,
+                    metric,
+                    asset_for_metric,
+                    individual_scope,
+                    n_top_performers,
+                    staking_requirement,
+                    notional_time_weighted_average_position_requirement,
+                    markets,
+                    team_scope,
+                ]
+            ]
+        ):
+            dispatch_strategy = data.dispatch_strategy(
                 asset_for_metric=asset_for_metric,
                 metric=metric,
-                entity_scope=vega_protos.vega.EntityScope.ENTITY_SCOPE_INDIVIDUALS,
-                individual_scope=vega_protos.vega.IndividualScope.INDIVIDUAL_SCOPE_ALL,
-                window_length=1,
-                distribution_strategy=vega_protos.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
+                markets=markets,
+                entity_scope=entity_scope,
+                individual_scope=individual_scope,
+                team_scope=team_scope,
+                n_top_performers=n_top_performers,
+                staking_requirement=staking_requirement,
+                notional_time_weighted_average_position_requirement=notional_time_weighted_average_position_requirement,
+                window_length=window_length,
+                lock_period=lock_period,
+                distribution_strategy=distribution_strategy,
+                rank_table=rank_table,
             )
-            # Set the optional DispatchStrategy fields
-            if markets is not None:
-                dispatch_strategy.markets.extend(markets)
             recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
 
         trading.transfer(
@@ -2687,3 +2714,186 @@ class VegaService(ABC):
 
     def stake(self, **kwargs):
         pass
+
+    def update_referral_program(
+        self,
+        proposal_key: str,
+        benefit_tiers: Optional[list[dict]] = None,
+        staking_tiers: Optional[list[dict]] = None,
+        end_of_program_timestamp: Optional[int] = None,
+        window_length: Optional[int] = None,
+        wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[int] = None,
+        vote_enactment_time: Optional[int] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        end_of_program_timestamp = (
+            enactment_time + self.seconds_per_block * 60 * 60 * 24 * 7 * 52
+            if end_of_program_timestamp is None
+            else int(end_of_program_timestamp.timestamp())
+        )
+        proposal_id = gov.update_referral_program(
+            key_name=proposal_key,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            benefit_tiers=benefit_tiers,
+            staking_tiers=staking_tiers,
+            end_of_program_timestamp=end_of_program_timestamp,
+            window_length=window_length,
+            wallet_name=wallet_name,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        self.wait_for_thread_catchup()
+        return proposal_id
+
+    def create_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+        trading.create_referral_set(
+            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+        )
+
+    def update_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+        trading.update_referral_set(
+            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+        )
+
+    def apply_referral_code(
+        self, key_name: str, id: str, wallet_name: Optional[str] = None
+    ):
+        trading.apply_referral_code(
+            wallet=self.wallet, key_name=key_name, id=id, wallet_name=wallet_name
+        )
+
+    def list_referral_sets(
+        self,
+        referral_set_id: Optional[str] = None,
+        referrer: Optional[str] = None,
+        referee: Optional[str] = None,
+    ) -> Dict[str : data.ReferralSet]:
+        return data.list_referral_sets(
+            data_client=self.trading_data_client_v2,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
+
+    def list_referral_set_referees(
+        self,
+        referral_set_id: Optional[str] = None,
+        referrer: Optional[str] = None,
+        referee: Optional[str] = None,
+    ) -> Dict[str : data.ReferralSetReferee]:
+        return data.list_referral_set_referees(
+            data_client=self.trading_data_client_v2,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
+
+    def get_current_referral_program(
+        self,
+    ) -> data.ReferralProgram:
+        return data.get_current_referral_program(
+            data_client=self.trading_data_client_v2
+        )
+
+    def update_volume_discount_program(
+        self,
+        proposal_key: str,
+        benefit_tiers: Optional[list[dict]] = None,
+        end_of_program_timestamp: Optional[int] = None,
+        window_length: Optional[int] = None,
+        wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[int] = None,
+        vote_enactment_time: Optional[int] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        end_of_program_timestamp = (
+            enactment_time + self.seconds_per_block * 60 * 60 * 24 * 7 * 52
+            if end_of_program_timestamp is None
+            else int(end_of_program_timestamp.timestamp())
+        )
+        proposal_id = gov.update_volume_discount_program(
+            key_name=proposal_key,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            benefit_tiers=benefit_tiers,
+            end_of_program_timestamp=end_of_program_timestamp,
+            window_length=window_length,
+            wallet_name=wallet_name,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        self.wait_for_thread_catchup()
+        return proposal_id
+
+    def get_current_volume_discount_program(
+        self,
+    ) -> data.VolumeDiscountProgram:
+        return data.get_current_volume_discount_program(
+            data_client=self.trading_data_client_v2
+        )
+
+    def get_volume_discount_stats(
+        self,
+        at_epoch: Optional[str] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.VolumeDiscountStats]:
+        return data.get_volume_discount_stats(
+            data_client=self.trading_data_client_v2,
+            at_epoch=at_epoch,
+            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )

@@ -1,9 +1,11 @@
+import logging
 import copy
 import os
 from typing import Optional, Dict, List
 
 import pandas as pd
 from numpy.random import RandomState
+from datetime import datetime
 
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.market import MarketConfig, Successor
@@ -11,6 +13,8 @@ from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.service import VegaService, PeggedOrder
+from vega_sim.api.governance import ProposalNotAcceptedError
+from requests.exceptions import HTTPError
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -631,26 +635,31 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
             market_id=self.market_id,
         )
         for side, spec in buy_specs + sell_specs:
-            self.vega.submit_order(
-                trading_key=self.key_name,
-                trading_wallet=self.wallet_name,
+            try:
+                self.vega.submit_order(
+                    trading_key=self.key_name,
+                    trading_wallet=self.wallet_name,
+                    market_id=self.market_id,
+                    order_type="TYPE_LIMIT",
+                    time_in_force="TIME_IN_FORCE_GTC",
+                    pegged_order=PeggedOrder(reference=spec[0], offset=spec[1]),
+                    volume=spec[2] * commitment_amount,
+                    side=side,
+                    wait=False,
+                )
+            except HTTPError:
+                continue
+        try:
+            self.vega.submit_liquidity(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
                 market_id=self.market_id,
-                order_type="TYPE_LIMIT",
-                time_in_force="TIME_IN_FORCE_GTC",
-                pegged_order=PeggedOrder(reference=spec[0], offset=spec[1]),
-                volume=spec[2] * commitment_amount,
-                side=side,
-                wait=False,
+                fee=fee,
+                commitment_amount=commitment_amount,
+                is_amendment=self.random_state.choice([True, False, None]),
             )
-
-        self.vega.submit_liquidity(
-            key_name=self.key_name,
-            wallet_name=self.wallet_name,
-            market_id=self.market_id,
-            fee=fee,
-            commitment_amount=commitment_amount,
-            is_amendment=self.random_state.choice([True, False, None]),
-        )
+        except HTTPError:
+            return
 
 
 class SuccessorMarketCreatorAgent(StateAgentWithWallet):
@@ -901,3 +910,375 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
             self._create_latest_market(parent_market_id=self.market_id)
             self.needs_to_update_markets = True
+
+
+class FuzzyReferralProgramManager(StateAgentWithWallet):
+    """Agent proposes sensible and fuzzed update referral program proposals at a
+    controlled frequency.
+    """
+
+    def __init__(
+        self,
+        key_name: str,
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def step(self, vega_state):
+        if self.random_state.rand() > self.step_bias:
+            for i in range(self.attempts_per_step):
+                try:
+                    self._fuzzed_proposal()
+                    return
+                except (HTTPError, ProposalNotAcceptedError):
+                    continue
+            logging.info(
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+            )
+            self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        self.vega.update_referral_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": 1,
+                    "minimum_epochs": 1,
+                    "referral_reward_factor": 0.1,
+                    "referral_discount_factor": 0.1,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 2,
+                    "minimum_epochs": 2,
+                    "referral_reward_factor": 0.2,
+                    "referral_discount_factor": 0.2,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 3,
+                    "minimum_epochs": 3,
+                    "referral_reward_factor": 0.3,
+                    "referral_discount_factor": 0.3,
+                },
+            ],
+            staking_tiers=[
+                {"minimum_staked_tokens": 1, "referral_reward_multiplier": 1},
+            ],
+            window_length=1,
+        )
+
+    def _fuzzed_proposal(self):
+        self.vega.update_referral_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": self.random_state.randint(
+                        1, 1e6
+                    ),
+                    "minimum_epochs": self.random_state.randint(1, 10),
+                    "referral_reward_factor": self.random_state.rand(),
+                    "referral_discount_factor": self.random_state.rand(),
+                }
+                for _ in range(self.random_state.randint(1, 5))
+            ],
+            staking_tiers=[
+                {
+                    "minimum_staked_tokens": self.random_state.randint(1, 10),
+                    "referral_reward_multiplier": self.random_state.randint(1, 10),
+                }
+                for _ in range(self.random_state.randint(1, 5))
+            ],
+            window_length=self.random_state.randint(1, 100),
+            end_of_program_timestamp=datetime.fromtimestamp(
+                self.vega.get_blockchain_time(in_seconds=True)
+                + self.random_state.normal(
+                    loc=600 * self.vega.seconds_per_block,
+                    scale=300 * self.vega.seconds_per_block,
+                )
+            ),
+        )
+
+
+class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
+    """Agent proposes sensible and fuzzed update referral program proposals at a
+    controlled frequency.
+    """
+
+    def __init__(
+        self,
+        key_name: str,
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def step(self, vega_state):
+        if self.random_state.rand() > self.step_bias:
+            for i in range(self.attempts_per_step):
+                try:
+                    self._fuzzed_proposal()
+                    return
+                except (HTTPError, ProposalNotAcceptedError):
+                    continue
+            logging.info(
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+            )
+            self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        self.vega.update_volume_discount_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": 1000,
+                    "volume_discount_factor": 0.01,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 2000,
+                    "volume_discount_factor": 0.02,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 3000,
+                    "volume_discount_factor": 0.03,
+                },
+            ],
+            window_length=1,
+        )
+
+    def _fuzzed_proposal(self):
+        self.vega.update_volume_discount_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": self.random_state.randint(
+                        1, 1e6
+                    ),
+                    "volume_discount_factor": self.random_state.rand(),
+                }
+                for _ in range(self.random_state.randint(1, 5))
+            ],
+            window_length=self.random_state.randint(1, 100),
+            end_of_program_timestamp=datetime.fromtimestamp(
+                self.vega.get_blockchain_time(in_seconds=True)
+                + self.random_state.normal(
+                    loc=600 * self.vega.seconds_per_block,
+                    scale=300 * self.vega.seconds_per_block,
+                )
+            ),
+        )
+
+
+class FuzzyRewardFunder(StateAgentWithWallet):
+    NAME_BASE = "fuzzy_reward_funder"
+
+    def __init__(
+        self,
+        key_name: str,
+        asset_name: str,
+        step_bias: float = 0.1,
+        attempts_per_step: int = 20,
+        initial_mint: float = 1e9,
+        wallet_name: Optional[str] = None,
+        stake_key: bool = False,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+
+        self.asset_name = asset_name
+        self.initial_mint = initial_mint
+        self.stake_key = stake_key
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(
+        self,
+        vega: VegaService,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_mint,
+                wallet_name=self.wallet_name,
+            )
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+
+    def step(self, vega_state):
+        if self.random_state.rand() > self.step_bias:
+            return
+        for _ in range(self.attempts_per_step):
+            try:
+                self._fuzzed_transfer(vega_state)
+            except HTTPError:
+                continue
+
+    def _fuzzed_transfer(self, vega_state):
+        current_epoch = self.vega.statistics().epoch_seq
+        rank_table = [
+            None,
+            [
+                vega_protos.vega.Rank(
+                    start_rank=self.random_state.randint(1, 100),
+                    share_ratio=self.random_state.randint(1, 100),
+                )
+                for _ in range(5)
+            ],
+        ]
+        self.vega.recurring_transfer(
+            from_wallet_name=self.wallet_name,
+            from_key_name=self.key_name,
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to_account_type=self.random_state.choice(
+                [
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
+                    vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
+                ]
+            ),
+            asset=self.asset_id,
+            amount=self.random_state.normal(loc=100, scale=100),
+            start_epoch=current_epoch + self.random_state.randint(-1, 5),
+            end_epoch=current_epoch + self.random_state.randint(-1, 20),
+            factor=self.random_state.rand(),
+            asset_for_metric=self.random_state.choice([None, self.asset_id]),
+            metric=self.random_state.choice(
+                [
+                    vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
+                    vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
+                    vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
+                    vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
+                    vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
+                    vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
+                    vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
+                    vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
+                ]
+            ),
+            markets=self.random_state.choice(list(vega_state.market_state.keys())),
+            entity_scope=self.random_state.choice(
+                [
+                    vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS,
+                    vega_protos.vega.ENTITY_SCOPE_TEAMS,
+                ]
+            ),
+            individual_scope=self.random_state.choice(
+                [
+                    vega_protos.vega.INDIVIDUAL_SCOPE_ALL,
+                    vega_protos.vega.INDIVIDUAL_SCOPE_IN_TEAM,
+                    vega_protos.vega.INDIVIDUAL_SCOPE_NOT_IN_TEAM,
+                ]
+            ),
+            n_top_performers=self.random_state.rand(),
+            notional_time_weighted_average_position_requirement=int(
+                self.random_state.normal(
+                    loc=1000,
+                    scale=100,
+                )
+            ),
+            window_length=self.random_state.choice(
+                [None, self.random_state.randint(0, 40)]
+            ),
+            lock_period=self.random_state.choice(
+                [None, self.random_state.randint(0, 40)]
+            ),
+            distribution_strategy=self.random_state.choice(
+                [
+                    None,
+                    vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA,
+                    vega_protos.vega.DISTRIBUTION_STRATEGY_RANK,
+                ]
+            ),
+            # rank_table=self.random_state.choice(rank_table),
+        )

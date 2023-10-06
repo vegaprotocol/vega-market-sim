@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from collections import namedtuple
 from dataclasses import dataclass
@@ -19,6 +21,7 @@ import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
 from vega_sim.api.helpers import num_from_padded_int
+from collections import defaultdict
 
 
 class MissingAssetError(Exception):
@@ -193,6 +196,12 @@ class Fee:
     maker_fee: float
     infrastructure_fee: float
     liquidity_fee: float
+    maker_fee_volume_discount: float
+    infrastructure_fee_volume_discount: float
+    liquidity_fee_volume_discount: float
+    maker_fee_referrer_discount: float
+    infrastructure_fee_referrer_discount: float
+    liquidity_fee_referrer_discount: float
 
 
 @dataclass(frozen=True)
@@ -263,6 +272,71 @@ class LiquidityProviderFeeShare:
     average_score: float
 
 
+@dataclass(frozen=True)
+class ReferralSet:
+    id: str
+    referrer: str
+    created_at: int
+    updated_at: int
+
+
+@dataclass(frozen=True)
+class ReferralSetReferee:
+    referral_set_id: str
+    referee: str
+    joined_at: int
+    at_epoch: int
+
+
+@dataclass(frozen=True)
+class VolumeDiscountStats:
+    at_epoch: int
+    party_id: str
+    discount_factor: float
+    running_volume: float
+
+
+@dataclass(frozen=True)
+class BenefitTier:
+    minimum_running_notional_taker_volume: float
+    minimum_epochs: int
+    referral_reward_factor: float
+    referral_discount_factor: float
+
+
+@dataclass(frozen=True)
+class StakingTier:
+    minimum_staked_tokens: int
+    referral_reward_multiplier: float
+
+
+@dataclass(frozen=True)
+class ReferralProgram:
+    version: int
+    id: str
+    benefit_tiers: List[BenefitTier]
+    end_of_program_timestamp: int
+    window_length: int
+    staking_tiers: List[StakingTier]
+    ended_at: int
+
+
+@dataclass(frozen=True)
+class VolumeBenefitTier:
+    minimum_running_notional_taker_volume: float
+    volume_discount_factor: float
+
+
+@dataclass(frozen=True)
+class VolumeDiscountProgram:
+    version: int
+    id: str
+    benefit_tiers: List[VolumeBenefitTier]
+    end_of_program_timestamp: str
+    window_length: int
+    ended_at: int
+
+
 def _ledger_entry_from_proto(
     ledger_entry,
     asset_decimals: int,
@@ -322,6 +396,28 @@ def _trade_from_proto(
             liquidity_fee=num_from_padded_int(
                 trade.buyer_fee.liquidity_fee, decimal_spec.asset_decimals
             ),
+            maker_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.maker_fee_volume_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_volume_discount=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            maker_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.maker_fee_referrer_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.infrastructure_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_referrer_discount=num_from_padded_int(
+                trade.buyer_fee.liquidity_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
         ),
         seller_fee=Fee(
             maker_fee=num_from_padded_int(
@@ -332,6 +428,29 @@ def _trade_from_proto(
             ),
             liquidity_fee=num_from_padded_int(
                 trade.seller_fee.liquidity_fee, decimal_spec.asset_decimals
+            ),
+            maker_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.maker_fee_volume_discount, decimal_spec.asset_decimals
+            ),
+            infrastructure_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_volume_discount=num_from_padded_int(
+                trade.seller_fee.liquidity_fee_volume_discount,
+                decimal_spec.asset_decimals,
+            ),
+            maker_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.maker_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            infrastructure_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.infrastructure_fee_referrer_discount,
+                decimal_spec.asset_decimals,
+            ),
+            liquidity_fee_referrer_discount=num_from_padded_int(
+                trade.seller_fee.liquidity_fee_referrer_discount,
+                decimal_spec.asset_decimals,
             ),
         ),
         buyer_auction_batch=trade.buyer_auction_batch,
@@ -681,9 +800,6 @@ def _liquidity_provider_fee_share_from_proto(
     ]
 
 
-ALL_UPDATES = []
-
-
 def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
     return AccountData(
         owner=account.owner,
@@ -691,6 +807,98 @@ def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
         asset=account.asset,
         type=account.type,
         market_id=account.market_id if account.market_id != "!" else "",
+    )
+
+
+def _referral_set_from_proto(
+    referral_set,
+) -> ReferralSet:
+    return ReferralSet(
+        id=referral_set.id,
+        referrer=referral_set.referrer,
+        created_at=referral_set.created_at,
+        updated_at=referral_set.updated_at,
+    )
+
+
+def _referral_set_referee_from_proto(
+    referral_set_referee,
+) -> ReferralSetReferee:
+    return ReferralSetReferee(
+        referral_set_id=referral_set_referee.referral_set_id,
+        referee=referral_set_referee.referee,
+        joined_at=referral_set_referee.joined_at,
+        at_epoch=referral_set_referee.at_epoch,
+    )
+
+
+def _benefit_tier_from_proto(benefit_tier) -> BenefitTier:
+    return BenefitTier(
+        minimum_running_notional_taker_volume=float(
+            benefit_tier.minimum_running_notional_taker_volume
+        ),
+        minimum_epochs=int(benefit_tier.minimum_epochs),
+        referral_reward_factor=float(benefit_tier.referral_reward_factor),
+        referral_discount_factor=float(benefit_tier.referral_discount_factor),
+    )
+
+
+def _staking_tier_from_proto(staking_tier) -> StakingTier:
+    return StakingTier(
+        minimum_staked_tokens=float(staking_tier.minimum_staked_tokens),
+        referral_reward_multiplier=float(staking_tier.referral_reward_multiplier),
+    )
+
+
+def _referral_program_from_proto(referral_program) -> ReferralProgram:
+    return ReferralProgram(
+        version=referral_program.version,
+        id=referral_program.id,
+        benefit_tiers=[
+            _benefit_tier_from_proto(benefit_tier)
+            for benefit_tier in referral_program.benefit_tiers
+        ],
+        staking_tiers=[
+            _staking_tier_from_proto(staking_tier)
+            for staking_tier in referral_program.staking_tiers
+        ],
+        end_of_program_timestamp=referral_program.end_of_program_timestamp,
+        window_length=referral_program.window_length,
+        ended_at=referral_program.ended_at,
+    )
+
+
+def _volume_benefit_tier_from_proto(volume_benefit_tier) -> VolumeBenefitTier:
+    return VolumeBenefitTier(
+        minimum_running_notional_taker_volume=float(
+            volume_benefit_tier.minimum_running_notional_taker_volume
+        ),
+        volume_discount_factor=float(volume_benefit_tier.volume_discount_factor),
+    )
+
+
+def _volume_discount_program_from_proto(
+    volume_discount_program,
+) -> VolumeDiscountProgram:
+    return VolumeDiscountProgram(
+        version=int(volume_discount_program.version),
+        id=str(volume_discount_program.id),
+        benefit_tiers=[
+            _volume_benefit_tier_from_proto(volume_benefit_tier)
+            for volume_benefit_tier in volume_discount_program.benefit_tiers
+        ],
+        end_of_program_timestamp=int(volume_discount_program.end_of_program_timestamp),
+        window_length=int(volume_discount_program.window_length),
+        ended_at=int(volume_discount_program.ended_at),
+    )
+
+
+def _volume_discount_stats_from_proto(volume_discount_stats) -> VolumeDiscountStats:
+    return VolumeDiscountStats(
+        at_epoch=int(volume_discount_stats.at_epoch),
+        party_id=str(volume_discount_stats.party_id),
+        discount_factor=float(volume_discount_stats.discount_factor),
+        running_volume=float(volume_discount_stats.running_volume),
     )
 
 
@@ -1725,3 +1933,150 @@ def get_asset(
     asset_id: str,
 ):
     return data_raw.asset_info(data_client=data_client, asset_id=asset_id)
+
+
+def list_referral_sets(
+    data_client: vac.trading_data_grpc_v2,
+    referral_set_id: Optional[str] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
+) -> Dict[str, ReferralSet]:
+    response: List[data_node_protos_v2.trading_data.ReferralSet] = (
+        data_raw.list_referral_sets(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
+    )
+    referral_sets = {}
+    for referral_set in response:
+        referral_sets[referral_set.id] = _referral_set_from_proto(referral_set)
+    return referral_sets
+
+
+def list_referral_set_referees(
+    data_client: vac.trading_data_grpc_v2,
+    referral_set_id: Optional[str] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
+) -> Dict[str, Dict[str, ReferralSetReferee]]:
+    response: List[data_node_protos_v2.trading_data.ReferralSetReferee] = (
+        data_raw.list_referral_set_referees(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
+    )
+    referral_set_referees = defaultdict(dict)
+    for referral_set_referee in response:
+        referral_set_referees[referral_set_referee.referral_set_id][
+            referral_set_referee.referee
+        ] = _referral_set_referee_from_proto(referral_set_referee)
+    return referral_set_referees
+
+
+def get_current_referral_program(
+    data_client: vac.trading_data_grpc_v2,
+) -> ReferralProgram:
+    response = data_raw.get_current_referral_program(data_client=data_client)
+    return _referral_program_from_proto(referral_program=response)
+
+
+def get_current_volume_discount_program(
+    data_client: vac.trading_data_grpc_v2,
+) -> VolumeDiscountProgram:
+    response = data_raw.get_current_volume_discount_program(data_client=data_client)
+    return _volume_discount_program_from_proto(volume_discount_program=response)
+
+
+def get_volume_discount_stats(
+    data_client: vac.trading_data_grpc_v2,
+    at_epoch: Optional[int] = None,
+    party_id: Optional[str] = None,
+) -> List[VolumeDiscountStats]:
+    response = data_raw.get_volume_discount_stats(
+        data_client=data_client, at_epoch=at_epoch, party_id=party_id
+    )
+    return [
+        _volume_discount_stats_from_proto(volume_discount_stats=volume_discount_stats)
+        for volume_discount_stats in response
+    ]
+
+
+def dispatch_strategy(
+    metric: vega_protos.vega.DispatchMetric,
+    asset_for_metric: Optional[str] = None,
+    markets: Optional[List[str]] = None,
+    entity_scope: Optional[vega_protos.vega.EntityScope] = None,
+    individual_scope: Optional[vega_protos.vega.IndividualScope] = None,
+    team_scope: Optional[List[str]] = None,
+    n_top_performers: Optional[float] = None,
+    staking_requirement: Optional[float] = None,
+    notional_time_weighted_average_position_requirement: Optional[float] = None,
+    window_length: Optional[int] = None,
+    lock_period: Optional[int] = None,
+    distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
+    rank_table: Optional[List[vega_protos.vega.Rank]] = None,
+) -> vega_protos.vega.DispatchStrategy:
+    # Set defaults for mandatory fields
+    if entity_scope is None:
+        entity_scope = vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
+    if individual_scope is None:
+        individual_scope = vega_protos.vega.INDIVIDUAL_SCOPE_ALL
+    if distribution_strategy is None:
+        distribution_strategy = vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA
+    if window_length is None:
+        window_length = 1
+    if lock_period is None:
+        lock_period = 1
+
+    # Set the mandatory (and conditionally mandatory) DispatchStrategy fields
+    dispatch_strategy = vega_protos.vega.DispatchStrategy(
+        asset_for_metric=(
+            None
+            if metric in [vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING]
+            else asset_for_metric
+        ),
+        entity_scope=entity_scope,
+        individual_scope=(
+            individual_scope
+            if entity_scope is vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
+            else None
+        ),
+        window_length=(
+            None
+            if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
+            else window_length
+        ),
+        lock_period=lock_period,
+        distribution_strategy=(
+            None
+            if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
+            else distribution_strategy
+        ),
+        n_top_performers=(
+            str(n_top_performers)
+            if entity_scope is vega_protos.vega.ENTITY_SCOPE_TEAMS
+            else None
+        ),
+    )
+    # Set the optional DispatchStrategy fields
+    if metric is not None:
+        setattr(dispatch_strategy, "metric", metric)
+    if staking_requirement is not None:
+        setattr(dispatch_strategy, "staking_requirement", str(staking_requirement))
+    if notional_time_weighted_average_position_requirement is not None:
+        setattr(
+            dispatch_strategy,
+            "notional_time_weighted_average_position_requirement",
+            str(notional_time_weighted_average_position_requirement),
+        )
+    if markets is not None:
+        dispatch_strategy.markets.extend(markets)
+    if team_scope is not None:
+        dispatch_strategy.team_scope.extend(team_scope)
+    if rank_table is not None:
+        dispatch_strategy.rank_table.extend(rank_table)
+    return dispatch_strategy

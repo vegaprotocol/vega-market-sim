@@ -3,7 +3,7 @@ import os
 import logging
 import argparse
 
-from vega_sim.null_service import VegaServiceNull
+from vega_sim.null_service import VegaServiceNull, Ports
 
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
@@ -24,6 +24,8 @@ def _run(
     console: bool = False,
     output: bool = False,
     output_dir: str = "fuzz_plots",
+    core_metrics_port: int = 2723,
+    data_node_metrics_port: int = 3651,
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
@@ -40,6 +42,10 @@ def _run(
         retain_log_files=True,
         use_full_vega_wallet=False,
         run_with_console=console,
+        port_config={
+            Ports.METRICS: core_metrics_port,
+            Ports.DATA_NODE_METRICS: data_node_metrics_port,
+        },
     ) as vega:
         scenario.run_iteration(
             vega=vega,
@@ -77,11 +83,6 @@ def _run(
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-s",
@@ -89,7 +90,25 @@ if __name__ == "__main__":
         default=2 * 60 * 12,
         type=int,
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+    )
     parser.add_argument("--console", action="store_true")
+    parser.add_argument("--core-metrics-port", default=2723, type=int)
+    parser.add_argument("--data-node-metrics-port", default=3651, type=int)
     args = parser.parse_args()
 
-    _run(steps=args.steps, console=args.console, output=True)
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    _run(
+        steps=args.steps,
+        console=args.console,
+        output=True,
+        core_metrics_port=args.core_metrics_port,
+        data_node_metrics_port=args.data_node_metrics_port,
+    )

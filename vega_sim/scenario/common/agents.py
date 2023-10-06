@@ -3270,11 +3270,6 @@ class RewardFunder(StateAgentWithWallet):
         self.vega.wait_fn(1)
         self.vega.wait_for_total_catchup()
 
-        market_ids = (
-            [self.vega.find_market_id(name) for name in self.market_names]
-            if self.market_names is not None
-            else None
-        )
         asset_for_metric_id = (
             self.vega.find_asset_id(self.asset_for_metric_name)
             if self.asset_for_metric_name is not None
@@ -3288,9 +3283,15 @@ class RewardFunder(StateAgentWithWallet):
             to_account_type=self.account_type,
             amount=self.transfer_amount,
             asset=reward_asset_id,
-            asset_for_metric=asset_for_metric_id,
+            asset_for_metric=asset_for_metric_id
+            if self.metric
+            not in [
+                vega_protos.DISPATCH_METRIC_MARKET_VALUE,
+                vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
+            ]
+            else None,
             metric=self.metric,
-            markets=market_ids,
+            window_length=3,
         )
 
 
@@ -3444,3 +3445,68 @@ class AtTheTouchMarketMaker(StateAgentWithWallet):
                 market_id=self.market_id,
                 order_id=order.id,
             )
+
+
+class ReferralAgentWrapper:
+    def __init__(
+        self,
+        agent: StateAgentWithWallet,
+        is_referrer: bool = False,
+        referrer_key_name: Optional[str] = None,
+        referrer_wallet_name: Optional[str] = None,
+    ):
+        self._agent: StateAgentWithWallet = agent
+
+        if (not is_referrer) and (referrer_key_name is None):
+            raise ValueError(
+                "ReferralWrapper must either designate the agent as a referrer or specify a referrer key name."
+            )
+
+        self.is_referrer = is_referrer
+        self.referrer_key_name = referrer_key_name
+        self.referrer_wallet_name = referrer_wallet_name
+        self.applied_code = False
+        self.tag = agent.tag
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        self._agent.initialise(vega=vega, create_key=create_key, mint_key=mint_key)
+        if self.is_referrer:
+            self._agent.vega.create_referral_set(
+                key_name=self._agent.key_name, wallet_name=self._agent.wallet_name
+            )
+
+    def step(self, vega_state: VegaState):
+        if (self.referrer_key_name is not None) and (not self.applied_code):
+            try:
+                referrer_id = self._agent.vega.wallet.public_key(
+                    name=self.referrer_key_name,
+                    wallet_name=self.referrer_wallet_name,
+                )
+            except KeyError:
+                logging.debug("Specified referral key does not exist yet.")
+                return
+            referral_sets = list(
+                self._agent.vega.list_referral_sets(
+                    referrer_id,
+                ).keys()
+            )
+            if len(referral_sets) == 0:
+                logging.debug(
+                    "Specified referral key has not yet created a referral set."
+                )
+                return
+            self._agent.vega.apply_referral_code(referral_sets[0])
+            self.applied_code == True
+
+        self._agent.step(vega_state=vega_state)
+
+    def finalise(self):
+        self._agent.finalise()
+
+    def name(self):
+        return self._agent.name()
