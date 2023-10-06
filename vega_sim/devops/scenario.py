@@ -27,7 +27,7 @@ from vega_sim.environment.environment import (
     Agent,
 )
 from vega_sim.scenario.common.utils.price_process import (
-    LivePrice,
+    getLivePrice,
     get_historic_price_series,
 )
 from vega_sim.scenario.common.agents import (
@@ -128,7 +128,7 @@ class DevOpsScenario(Scenario):
                 random_state=random_state
             )
         else:
-            self.price_process = LivePrice(product=self.binance_code)
+            self.price_process = getLivePrice(product=self.binance_code)
 
         if self.scenario_wallet.market_creator_agent is None:
             raise ValueError(f"Missing market_creator wallet for the {self.market_name} devops scenario")
