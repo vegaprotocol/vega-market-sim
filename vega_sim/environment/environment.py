@@ -24,6 +24,7 @@ import time
 import datetime
 import logging
 import random
+from threading import Thread
 
 import numpy as np
 
@@ -483,10 +484,83 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             ) as vega:
                 return self._run(vega)
         else:
-            return self._run(
+            return self._run_in_theads(
                 self._vega,
                 pause_at_completion=pause_at_completion,
                 log_every_n_steps=log_every_n_steps,
+            )
+
+    def _run_in_theads_agent(
+        self,
+        vega: VegaServiceNetwork,
+        agent: Agent,
+    ):
+        i = 0
+        # A negative self.n_steps will loop indefinitely
+        while i != self.n_steps:
+            t_start = time.time()
+            try:
+                print(f"self.state_func {self.state_func}")
+                print(f"vega {vega}")
+                state = self.state_func(vega)
+                agent.step(state)
+            except Exception as e:
+                msg = f"Agent '{agent.name()}' failed to step. Error: {e}"
+                if self.raise_step_errors:
+                    raise e(msg)
+                else:
+                    logging.error(msg)
+            
+            t_elapsed = time.time() - t_start
+            if t_elapsed <= self.step_length_seconds:
+                logging.info(f"agent ok ({agent}): {round(t_elapsed,2)}s")
+                time.sleep(self.step_length_seconds - t_elapsed)
+            else:
+                logging.warning(f"slow agent ({agent}): {round(t_elapsed,2)}s (limit: {self.step_length_seconds}s)")
+
+    def _run_in_theads(
+        self,
+        vega: VegaServiceNetwork,
+        pause_at_completion: bool = False,
+        log_every_n_steps: Optional[int] = None,
+    ) -> None:
+        # Initial datanode connection check
+        vega.check_datanode(raise_on_error=self.raise_datanode_errors)
+
+        # Initialise agents without minting assets
+        for agent in self.agents:
+            agent.initialise(
+                vega=vega, create_key=self.create_keys, mint_key=self.mint_keys
+            )
+
+        self._start_live_feeds(vega=vega)
+
+        threads: List[Thread] = []
+
+        for agent in self.agents:
+            t = Thread(target=self._run_in_theads_agent, args=(vega, agent))
+            threads.append(t)
+
+        for t in threads:
+            t.start()
+
+        # wait
+        for t in threads:
+            t.join()
+
+        for agent in self.agents:
+            try:
+                agent.finalise()
+            except Exception as e:
+                msg = f"Agent '{agent.key_name}' failed to step. Error: {e}"
+                if self.raise_step_errors:
+                    raise (e)
+                else:
+                    logging.warning(msg)
+        if pause_at_completion:
+            input(
+                "Environment run completed. Pausing to allow inspection of state."
+                " Press Enter to continue"
             )
 
     def _run(
@@ -512,18 +586,25 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             t_start = time.time()
 
             vega.check_datanode(raise_on_error=self.raise_datanode_errors)
+            check_data_node_time = f"check_data_node: {time.time() - t_start}"
+
+            #print(f"after ping: {time.time() - t_start}", flush=True)
 
             i += 1
-            self.step(vega)
+            step_times = self.step(vega)
 
             t_elapsed = time.time() - t_start
             if t_elapsed <= self.step_length_seconds:
                 time.sleep(self.step_length_seconds - t_elapsed)
+                print(f" ok - {self}", flush=True)
             else:
                 logging.warning(
                     f"Environment step, {round(t_elapsed,2)}s, taking longer than"
                     f" defined scenario step length, {self.step_length_seconds}s,"
                 )
+                print(f" not ok ({round(t_elapsed,2)}s) - {self}", flush=True)
+                print(check_data_node_time, flush=True)
+                print("\n".join(step_times), flush=True)
             if log_every_n_steps is not None and i % log_every_n_steps == 0:
                 logger.info(f"Completed {i} steps")
 
@@ -543,22 +624,29 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             )
 
     def step(self, vega: VegaServiceNetwork) -> None:
+        timing_log = []
         t = time.time()
         state = self.state_func(vega)
         logging.debug(f"Get state took {time.time() - t} seconds.")
+        #print(f"{self} state_func: {time.time() - t}", flush=True)
         for agent in (
             sorted(self.agents, key=lambda _: self.random_state.random())
             if self.random_agent_ordering
             else self.agents
         ):
             try:
-                agent.step(state)
+                steps_timing = agent.step(state)
+                #print(f"{self} agent.step ({agent}, {agent.step}): {time.time() - t}", flush=True)
+                timing_log.append(f"{self} agent.step ({agent}, {agent.step}): {time.time() - t}")
+                if steps_timing is not None:
+                    timing_log.append("\n".join(steps_timing))
             except Exception as e:
                 msg = f"Agent '{agent.name()}' failed to step. Error: {e}"
                 if self.raise_step_errors:
                     raise e(msg)
                 else:
                     logging.warning(msg)
+        return timing_log
 
 
 class RealtimeMarketEnvironment(MarketEnvironmentWithState):
