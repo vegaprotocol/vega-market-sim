@@ -1714,3 +1714,58 @@ def test_volume_discount_program(vega_service_with_market: VegaServiceNull):
     assert discounted_trades[0].buyer_fee.maker_fee_volume_discount != 0
     assert discounted_trades[0].buyer_fee.liquidity_fee_volume_discount != 0
     assert discounted_trades[0].buyer_fee.infrastructure_fee_volume_discount != 0
+
+
+@pytest.mark.integration
+def test_teams(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+
+    # Initialise parties
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_C)
+    vega.wait_for_total_catchup()
+
+    # Create referral sets, teams from sets, then get team ids
+    vega.create_referral_set(
+        key_name=PARTY_A.name,
+        name="name_a",
+        team_url="team_url_a",
+        avatar_url="avatar_url_a",
+        closed=False,
+    )
+    vega.create_referral_set(
+        key_name=PARTY_B.name,
+        name="name_b",
+        team_url="team_url_b",
+        avatar_url="avatar_url_b",
+        closed=False,
+    )
+    vega.wait_fn((1))
+    vega.wait_for_total_catchup()
+    team_a_id = list(vega.list_teams(key_name=PARTY_A.name).keys())[0]
+    team_b_id = list(vega.list_teams(key_name=PARTY_B.name).keys())[0]
+
+    # Apply code and check the party has joined team
+    vega.apply_referral_code(key_name=PARTY_C.name, id=team_a_id)
+    next_epoch(vega)
+    assert len(vega.list_team_referees(team_id=team_a_id)) > 0
+    assert len(vega.list_team_referees(team_id=team_b_id)) == 0
+
+    # Apply code and check the party has moved team
+    vega.apply_referral_code(key_name=PARTY_C.name, id=team_b_id)
+    next_epoch(vega)
+    assert len(vega.list_team_referees(team_id=team_a_id)) == 0
+    assert len(vega.list_team_referees(team_id=team_b_id)) > 0
+
+    # Check the history is consistent
+    team_referee_history = [
+        team_referee_history.team_id
+        for team_referee_history in vega.list_team_referee_history(
+            key_name=PARTY_C.name
+        )
+    ]
+    assert team_a_id in team_referee_history
+    assert team_b_id in team_referee_history

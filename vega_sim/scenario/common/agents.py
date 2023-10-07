@@ -3457,6 +3457,10 @@ class ReferralAgentWrapper:
         self,
         agent: StateAgentWithWallet,
         is_referrer: bool = False,
+        team_name: Optional[str] = None,
+        team_url: Optional[str] = None,
+        avatar_url: Optional[str] = None,
+        closed: bool = False,
         referrer_key_name: Optional[str] = None,
         referrer_wallet_name: Optional[str] = None,
     ):
@@ -3468,6 +3472,10 @@ class ReferralAgentWrapper:
             )
 
         self.is_referrer = is_referrer
+        self.team_name = team_name
+        self.team_url = team_url
+        self.avatar_url = avatar_url
+        self.closed = closed
         self.referrer_key_name = referrer_key_name
         self.referrer_wallet_name = referrer_wallet_name
         self.applied_code = False
@@ -3482,7 +3490,12 @@ class ReferralAgentWrapper:
         self._agent.initialise(vega=vega, create_key=create_key, mint_key=mint_key)
         if self.is_referrer:
             self._agent.vega.create_referral_set(
-                key_name=self._agent.key_name, wallet_name=self._agent.wallet_name
+                key_name=self._agent.key_name,
+                wallet_name=self._agent.wallet_name,
+                name=self.team_name,
+                team_url=self.team_url,
+                avatar_url=self.avatar_url,
+                closed=self.closed,
             )
 
     def step(self, vega_state: VegaState):

@@ -2729,14 +2729,42 @@ class VegaService(ABC):
         self.wait_for_thread_catchup()
         return proposal_id
 
-    def create_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+    def create_referral_set(
+        self,
+        key_name: str,
+        name: Optional[str] = None,
+        team_url: Optional[str] = None,
+        avatar_url: Optional[str] = None,
+        closed: Optional[bool] = None,
+        wallet_name: Optional[str] = None,
+    ):
         trading.create_referral_set(
-            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+            wallet=self.wallet,
+            key_name=key_name,
+            wallet_name=wallet_name,
+            name=name,
+            team_url=team_url,
+            avatar_url=avatar_url,
+            closed=closed,
         )
 
-    def update_referral_set(self, key_name: str, wallet_name: Optional[str] = None):
+    def update_referral_set(
+        self,
+        key_name: str,
+        name: Optional[str] = None,
+        team_url: Optional[str] = None,
+        avatar_url: Optional[str] = None,
+        closed: Optional[bool] = None,
+        wallet_name: Optional[str] = None,
+    ):
         trading.update_referral_set(
-            wallet=self.wallet, key_name=key_name, wallet_name=wallet_name
+            wallet=self.wallet,
+            key_name=key_name,
+            wallet_name=wallet_name,
+            name=name,
+            team_url=team_url,
+            avatar_url=avatar_url,
+            closed=closed,
         )
 
     def apply_referral_code(
@@ -2777,6 +2805,32 @@ class VegaService(ABC):
     ) -> data.ReferralProgram:
         return data.get_current_referral_program(
             data_client=self.trading_data_client_v2
+        )
+
+    def get_referral_set_stats(
+        self,
+        at_epoch: Optional[int] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.ReferralSetStats]:
+        return data.get_referral_set_stats(
+            data_client=self.trading_data_client_v2,
+            at_epoch=at_epoch,
+            referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def get_referral_fee_stats(
+        self,
+        market_id: Optional[str] = None,
+        asset_id: Optional[str] = None,
+        epoch_seq: Optional[int] = None,
+    ) -> List[data.FeeStats]:
+        return data.get_referral_fee_stats(
+            data_client=self.trading_data_client_v2,
+            market_id=market_id,
+            asset_id=asset_id,
+            epoch_seq=epoch_seq,
+            asset_decimals=self.asset_decimals,
         )
 
     def update_volume_discount_program(
@@ -2852,4 +2906,34 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             at_epoch=at_epoch,
             party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def list_teams(
+        self,
+        key_name: Optional[str],
+        wallet_name: Optional[str] = None,
+        team_id: Optional[str] = None,
+    ) -> List[data.Team]:
+        return data.list_teams(
+            data_client=self.trading_data_client_v2,
+            team_id=team_id,
+            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def list_team_referees(
+        self,
+        team_id: Optional[str] = None,
+    ) -> List[data.TeamReferee]:
+        return data.list_team_referees(
+            data_client=self.trading_data_client_v2, team_id=team_id
+        )
+
+    def list_team_referee_history(
+        self,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.TeamRefereeHistory]:
+        return data.list_team_referee_history(
+            data_client=self.trading_data_client_v2,
+            referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
         )

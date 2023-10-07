@@ -736,6 +736,43 @@ def get_current_referral_program(data_client: vac.trading_data_grpc_v2):
 
 
 @_retry(3)
+def get_referral_set_stats(
+    data_client: vac.trading_data_grpc_v2,
+    at_epoch: Optional[int] = None,
+    referee: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.GetReferralSetStatsRequest()
+    if at_epoch is not None:
+        setattr(base_request, "at_epoch", at_epoch)
+    if referee is not None:
+        setattr(base_request, "referee", referee)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.GetReferralSetStats(x).stats,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def get_referral_fee_stats(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: Optional[str] = None,
+    asset_id: Optional[str] = None,
+    epoch_seq: Optional[int] = None,
+):
+    base_request = data_node_protos_v2.trading_data.GetReferralFeeStatsRequest()
+    if market_id is None and asset_id is None:
+        raise ValueError("Neither 'market_id' or 'asset_id' set.")
+    if market_id is not None:
+        setattr(base_request, "market_id", market_id)
+    if asset_id is not None:
+        setattr(base_request, "asset_id", asset_id)
+    if epoch_seq is not None:
+        setattr(base_request, "epoch_seq", epoch_seq)
+    return data_client.GetReferralFeeStats(base_request).fee_stats
+
+
+@_retry(3)
 def get_current_volume_discount_program(
     data_client: vac.trading_data_grpc_v2.TradingDataServiceStub,
 ):
@@ -758,5 +795,55 @@ def get_volume_discount_stats(
     return unroll_v2_pagination(
         base_request=base_request,
         request_func=lambda x: data_client.GetVolumeDiscountStats(x).stats,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_teams(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.ListTeamsRequest()
+    if team_id is not None:
+        setattr(base_request, "team_id", team_id)
+    if party_id is not None:
+        setattr(base_request, "party_id", party_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListTeams(x).teams,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_team_referees(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.ListTeamRefereesRequest()
+    if team_id is not None:
+        setattr(base_request, "team_id", team_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListTeamReferees(x).team_referees,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_team_referee_history(
+    data_client: vac.trading_data_grpc_v2,
+    referee: Optional[str] = None,
+):
+    base_request = data_node_protos_v2.trading_data.ListTeamRefereeHistoryRequest()
+    if referee is not None:
+        setattr(base_request, "referee", referee)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListTeamRefereeHistory(
+            x
+        ).team_referee_history,
         extraction_func=lambda res: [i.node for i in res.edges],
     )

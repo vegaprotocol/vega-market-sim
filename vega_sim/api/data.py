@@ -279,6 +279,39 @@ class ReferralSetReferee:
 
 
 @dataclass(frozen=True)
+class ReferralSetStats:
+    at_epoch: int
+    referral_set_running_notional_taker_volume: float
+    party_id: str
+    discount_factor: float
+    reward_factor: float
+    epoch_notional_taker_volume: float
+
+
+@dataclass(frozen=True)
+class PartyAmount:
+    party: str
+    amount: float
+
+
+@dataclass(frozen=True)
+class ReferrerRewardsGenerated:
+    referrer: str
+    generated_reward: List[PartyAmount]
+
+
+@dataclass(frozen=True)
+class FeeStats:
+    market: str
+    asset: str
+    epoch_seq: int
+    total_rewards_paid: List[PartyAmount]
+    referrer_rewards_generated: List[ReferrerRewardsGenerated]
+    referees_discount_applied: List[PartyAmount]
+    volume_discount_applied: List[PartyAmount]
+
+
+@dataclass(frozen=True)
 class VolumeDiscountStats:
     at_epoch: int
     party_id: str
@@ -325,6 +358,33 @@ class VolumeDiscountProgram:
     end_of_program_timestamp: str
     window_length: int
     ended_at: int
+
+
+@dataclass(frozen=True)
+class Team:
+    team_id: str
+    referrer: str
+    name: str
+    team_url: str
+    avatar_url: str
+    created_at: int
+    closed: bool
+    created_at_epoch: int
+
+
+@dataclass(frozen=True)
+class TeamReferee:
+    team_id: str
+    referee: str
+    joined_at: int
+    joined_at_epoch: int
+
+
+@dataclass(frozen=True)
+class TeamRefereeHistory:
+    team_id: str
+    joined_at: int
+    joined_at_epoch: int
 
 
 def _ledger_entry_from_proto(
@@ -846,6 +906,82 @@ def _referral_program_from_proto(referral_program) -> ReferralProgram:
     )
 
 
+def _referral_set_stats_from_proto(
+    referral_set_stats: data_node_protos_v2.trading_data.ReferralSetStats,
+) -> ReferralSetStats:
+    return ReferralSetStats(
+        at_epoch=referral_set_stats.at_epoch,
+        referral_set_running_notional_taker_volume=int(
+            referral_set_stats.referral_set_running_notional_taker_volume
+        ),
+        party_id=referral_set_stats.party_id,
+        discount_factor=float(referral_set_stats.discount_factor),
+        reward_factor=float(referral_set_stats.reward_factor),
+        epoch_notional_taker_volume=int(referral_set_stats.epoch_notional_taker_volume),
+    )
+
+
+def _party_amount_from_proto(
+    party_amount: vega_protos.events.v1.events.PartyAmount,
+    decimal_spec: DecimalSpec,
+) -> PartyAmount:
+    return PartyAmount(
+        party=party_amount.party,
+        amount=num_from_padded_int(party_amount.amount, decimal_spec.asset_decimals),
+    )
+
+
+def _referrer_rewards_generated_from_proto(
+    referrer_rewards_generated: vega_protos.events.v1.events.ReferrerRewardsGenerated,
+    decimal_spec: DecimalSpec,
+) -> ReferrerRewardsGenerated:
+    return ReferrerRewardsGenerated(
+        referrer=referrer_rewards_generated.referrer,
+        generated_reward=[
+            _party_amount_from_proto(
+                party_amount=generated_reward,
+                decimal_spec=decimal_spec,
+            )
+            for generated_reward in referrer_rewards_generated.generated_reward
+        ],
+    )
+
+
+def _fee_stats_from_proto(
+    fee_stats: vega_protos.events.v1.events.FeeStats, decimal_spec: DecimalSpec
+):
+    return FeeStats(
+        market=fee_stats.market,
+        asset=fee_stats.asset,
+        epoch_seq=fee_stats.epoch_seq,
+        total_rewards_paid=[
+            _party_amount_from_proto(
+                party_amount=party_amount, decimal_spec=decimal_spec
+            )
+            for party_amount in fee_stats.total_rewards_paid
+        ],
+        referrer_rewards_generated=[
+            _referrer_rewards_generated_from_proto(
+                referrer_rewards_generated=referrer_rewards_generated,
+                decimal_spec=decimal_spec,
+            )
+            for referrer_rewards_generated in fee_stats.referrer_rewards_generated
+        ],
+        referees_discount_applied=[
+            _party_amount_from_proto(
+                party_amount=party_amount, decimal_spec=decimal_spec
+            )
+            for party_amount in fee_stats.referees_discount_applied
+        ],
+        volume_discount_applied=[
+            _party_amount_from_proto(
+                party_amount=party_amount, decimal_spec=decimal_spec
+            )
+            for party_amount in fee_stats.volume_discount_applied
+        ],
+    )
+
+
 def _volume_benefit_tier_from_proto(volume_benefit_tier) -> VolumeBenefitTier:
     return VolumeBenefitTier(
         minimum_running_notional_taker_volume=float(
@@ -877,6 +1013,40 @@ def _volume_discount_stats_from_proto(volume_discount_stats) -> VolumeDiscountSt
         party_id=str(volume_discount_stats.party_id),
         discount_factor=float(volume_discount_stats.discount_factor),
         running_volume=float(volume_discount_stats.running_volume),
+    )
+
+
+def _team_from_proto(team: data_node_protos_v2.trading_data.Team) -> Team:
+    return Team(
+        team_id=team.team_id,
+        referrer=team.referrer,
+        name=team.name,
+        team_url=team.team_url,
+        avatar_url=team.avatar_url,
+        created_at=team.created_at,
+        closed=team.closed,
+        created_at_epoch=team.created_at_epoch,
+    )
+
+
+def _team_referee_from_proto(
+    team_referee: data_node_protos_v2.trading_data.TeamReferee,
+) -> TeamReferee:
+    return TeamReferee(
+        team_id=team_referee.team_id,
+        referee=team_referee.referee,
+        joined_at=team_referee.joined_at,
+        joined_at_epoch=team_referee.joined_at_epoch,
+    )
+
+
+def _team_referee_history_from_proto(
+    team_referee_history: data_node_protos_v2.trading_data.TeamRefereeHistory,
+) -> TeamRefereeHistory:
+    return TeamRefereeHistory(
+        team_id=team_referee_history.team_id,
+        joined_at=team_referee_history.joined_at,
+        joined_at_epoch=team_referee_history.joined_at_epoch,
     )
 
 
@@ -1920,6 +2090,39 @@ def list_referral_set_referees(
     return referral_set_referees
 
 
+def get_referral_set_stats(
+    data_client: vac.trading_data_grpc_v2,
+    at_epoch: Optional[int] = None,
+    referee: Optional[str] = None,
+) -> Dict[str, ReferralSetStats]:
+    response = data_raw.get_referral_set_stats(
+        data_client=data_client, at_epoch=at_epoch, referee=referee
+    )
+    return [
+        _referral_set_stats_from_proto(referral_set_stats=referral_set_stats)
+        for referral_set_stats in response
+    ]
+
+
+def get_referral_fee_stats(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: Optional[str] = None,
+    asset_id: Optional[str] = None,
+    epoch_seq: Optional[int] = None,
+    asset_decimals: Optional[Dict[str, int]] = {},
+) -> List[FeeStats]:
+    response = data_raw.get_referral_fee_stats(
+        data_client=data_client,
+        market_id=market_id,
+        asset_id=asset_id,
+        epoch_seq=epoch_seq,
+    )
+    return _fee_stats_from_proto(
+        fee_stats=response,
+        decimal_spec=DecimalSpec(asset_decimals=asset_decimals[response.asset]),
+    )
+
+
 def get_current_referral_program(
     data_client: vac.trading_data_grpc_v2,
 ) -> ReferralProgram:
@@ -2013,3 +2216,37 @@ def dispatch_strategy(
     if rank_table is not None:
         dispatch_strategy.rank_table.extend(rank_table)
     return dispatch_strategy
+
+
+def list_teams(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> Dict[str, Team]:
+    response = data_raw.list_teams(
+        data_client=data_client, team_id=team_id, party_id=party_id
+    )
+    return {team.team_id: _team_from_proto(team=team) for team in response}
+
+
+def list_team_referees(
+    data_client: vac.trading_data_grpc_v2,
+    team_id: Optional[str] = None,
+) -> List[TeamReferee]:
+    response = data_raw.list_team_referees(data_client=data_client, team_id=team_id)
+    return [
+        _team_referee_from_proto(team_referee=team_referee) for team_referee in response
+    ]
+
+
+def list_team_referee_history(
+    data_client: vac.trading_data_grpc_v2,
+    referee: Optional[str] = None,
+) -> List[TeamRefereeHistory]:
+    response = data_raw.list_team_referee_history(
+        data_client=data_client, referee=referee
+    )
+    return [
+        _team_referee_history_from_proto(team_referee_history=team_referee_history)
+        for team_referee_history in response
+    ]
