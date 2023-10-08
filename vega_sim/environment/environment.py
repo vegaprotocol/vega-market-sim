@@ -495,13 +495,12 @@ class NetworkEnvironment(MarketEnvironmentWithState):
         vega: VegaServiceNetwork,
         agent: Agent,
     ):
+        step_length_seconds = self.step_length_seconds
         i = 0
         # A negative self.n_steps will loop indefinitely
         while i != self.n_steps:
             t_start = time.time()
             try:
-                print(f"self.state_func {self.state_func}")
-                print(f"vega {vega}")
                 state = self.state_func(vega)
                 agent.step(state)
             except Exception as e:
@@ -512,9 +511,9 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                     logging.error(msg)
             
             t_elapsed = time.time() - t_start
-            if t_elapsed <= self.step_length_seconds:
-                logging.info(f"agent ok ({agent}): {round(t_elapsed,2)}s")
-                time.sleep(self.step_length_seconds - t_elapsed)
+            if t_elapsed <= step_length_seconds:
+                logging.debug(f"agent ok ({agent}): {round(t_elapsed,2)}s")
+                time.sleep(step_length_seconds - t_elapsed)
             else:
                 logging.warning(f"slow agent ({agent}): {round(t_elapsed,2)}s (limit: {self.step_length_seconds}s)")
 

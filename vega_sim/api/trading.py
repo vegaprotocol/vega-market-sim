@@ -138,7 +138,7 @@ def submit_order(
         key_name=key_name,
     )
 
-    logger.debug(f"Submitted Order on {side} at price {price}.")
+    logger.debug(f"Submitted New Order: market {market_id}, price {price}, wallet {wallet_name}/{key_name}, side {side}")
 
     if wait:
 

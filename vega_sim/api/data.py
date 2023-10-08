@@ -1456,7 +1456,7 @@ def account_list_to_party_account(
 
     return PartyMarketAccount(general, margin, bond)
 
-_market_ids = None
+_market_ids: Dict[str, str] = None
 _market_ids_update = datetime.datetime.now() - datetime.timedelta(hours = 1)
 _market_ids_lock = threading.Lock()
 
@@ -1483,7 +1483,6 @@ def find_market_id(
     if datetime.datetime.now() - _market_ids_update > datetime.timedelta(seconds=30):
         if _market_ids_lock.acquire(blocking=False):
             try:
-                _market_ids_update = datetime.datetime.now()
                 markets = data_raw.all_markets(data_client=data_client)
 
                 acceptable_states = [
@@ -1492,18 +1491,22 @@ def find_market_id(
                     vega_protos.markets.Market.STATE_SUSPENDED,
                 ]
 
-                _market_ids = {}
+                new_market_ids = {}
                 for market in markets:
-                    if market.tradable_instrument.instrument.name == name:
-                        if market.state in acceptable_states:
-                            _market_ids[market.id] = market.market_timestamps.pending
+                    if market.state in acceptable_states:
+                        market_name = market.tradable_instrument.instrument.name
+                        new_market_ids[market_name] = market.id
+
+                _market_ids = new_market_ids
+                _market_ids_update = datetime.datetime.now()
             finally:
                 _market_ids_lock.release()
         while _market_ids is None:
             time.sleep(0.33)
 
-    if len(_market_ids) > 0:
-        return max(_market_ids, key=_market_ids.get)
+    market_id = _market_ids.get(name, None)
+    if market_id is not None:
+        return market_id
 
     if raise_on_missing:
         raise MissingMarketError(

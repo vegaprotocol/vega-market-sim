@@ -186,7 +186,6 @@ def _price_listener(iter_obj, symbol):
 
 def _on_message(iter_obj, message, symbol):
     iter_obj.latest_price = float(json.loads(message)["k"]["c"])
-    print(f"NEW PRICE {symbol}: {iter_obj.latest_price}", flush=True)
 
 
 def _price_listener(iter_obj, symbol):
