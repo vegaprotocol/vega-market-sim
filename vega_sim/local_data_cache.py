@@ -21,8 +21,6 @@ from vega_sim.tools.retry import retry
 
 logger = logging.getLogger(__name__)
 
-ALL_EVTS = []
-
 
 def _queue_forwarder(
     data_client: vac.VegaCoreClient,
@@ -57,7 +55,6 @@ def _queue_forwarder(
     try:
         for o in obs:
             for event in o.events:
-                ALL_EVTS.append(event)
                 if (kill_thread_sig is not None) and kill_thread_sig.is_set():
                     return
                 output = retry(5, 1.0, lambda: handlers[event.type](event))
@@ -419,15 +416,15 @@ class LocalDataCache:
             ]
         with self.market_data_lock:
             for market_id in market_ids:
-                self.market_data_from_feed_store[
-                    market_id
-                ] = data.get_latest_market_data(
-                    market_id,
-                    data_client=self._trading_data_client,
-                    market_price_decimals_map=self._market_price_decimals,
-                    market_position_decimals_map=self._market_pos_decimals,
-                    asset_decimals_map=self._asset_decimals,
-                    market_to_asset_map=self._market_to_asset,
+                self.market_data_from_feed_store[market_id] = (
+                    data.get_latest_market_data(
+                        market_id,
+                        data_client=self._trading_data_client,
+                        market_price_decimals_map=self._market_price_decimals,
+                        market_position_decimals_map=self._market_pos_decimals,
+                        asset_decimals_map=self._asset_decimals,
+                        market_to_asset_map=self._market_to_asset,
+                    )
                 )
 
     def initialise_transfer_monitoring(
