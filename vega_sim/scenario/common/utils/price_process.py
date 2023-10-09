@@ -176,7 +176,7 @@ def get_historic_price_series(
         return s
 
 
-def _price_listener(iter_obj, symbol):
+def _binance_price_listener(iter_obj, symbol):
     ws = websocket.WebSocketApp(
         f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
         on_message=lambda _, msg: _on_message(iter_obj, msg, symbol),
@@ -186,6 +186,39 @@ def _price_listener(iter_obj, symbol):
 
 def _on_message(iter_obj, message, symbol):
     iter_obj.latest_price = float(json.loads(message)["k"]["c"])
+
+def _xauusd_price_listener(iter_obj):
+    url = "https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD"
+    while True:
+        try:
+            r = requests.get(url)
+            if r.status_code != 200:
+                print(f"failed to get GOLD price, status code: {r.status_code}", flush=True)
+            else:
+                data = r.json()
+                total_bid = 0
+                total_ask = 0
+                count = 0
+                for item in data:
+                    spread_profile_prices = item.get("spreadProfilePrices", [])
+                    for spread_profile_price in spread_profile_prices:
+                        bid = spread_profile_price.get("bid", 0)
+                        ask = spread_profile_price.get("ask", 0)
+                        total_bid += bid
+                        total_ask += ask
+                        count += 1
+                average_bid = total_bid / count if count > 0 else 0
+                average_ask = total_ask / count if count > 0 else 0
+
+                print("GOLD Average Bid Price:", average_bid, flush=True)
+                print("GOLD Average Ask Price:", average_ask, flush=True)
+
+                mid_price = (average_bid + average_ask) / 2
+                print("GOLD Mid Price Between Average Bid and Average Ask:", mid_price, flush=True)
+                iter_obj.latest_price = mid_price
+        except Exception as e:
+            print(f"Failed to get price for GOLD {e}", flush=True)
+        time.sleep(30)
 
 
 class LivePrice:
@@ -201,11 +234,18 @@ class LivePrice:
         self.product = product
         self.latest_price = None
 
-        self._forwarding_thread = threading.Thread(
-            target=_price_listener,
-            args=(self, self.product.lower()),
-            daemon=True,
-        )
+        if product == "XAUUSD":
+            self._forwarding_thread = threading.Thread(
+                target=_xauusd_price_listener,
+                args=(self,),
+                daemon=True,
+            )
+        else:
+            self._forwarding_thread = threading.Thread(
+                target=_binance_price_listener,
+                args=(self, self.product.lower()),
+                daemon=True,
+            )
         self._forwarding_thread.start()
 
     def __iter__(self):
