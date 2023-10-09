@@ -213,9 +213,6 @@ if __name__ == "__main__":
             wait=True,
         )
 
-        import pdb
-
-        pdb.set_trace()
         vega.cancel_order(MM_WALLET.name, market_id, to_cancel)
 
         vega.submit_order(
