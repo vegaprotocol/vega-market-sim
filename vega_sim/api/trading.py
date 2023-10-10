@@ -695,13 +695,14 @@ def create_referral_set(
                 closed=closed,
             )
         )
-    wallet.submit_transaction(
+    response = wallet.submit_transaction(
         transaction=command,
         wallet_name=wallet_name,
         transaction_type="create_referral_set",
         key_name=key_name,
     )
     logger.debug(f"Submitted a create referral set.")
+    return response
 
 
 def update_referral_set(

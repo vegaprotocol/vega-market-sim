@@ -282,6 +282,7 @@ class VegaWallet(Wallet):
         except Exception as e:
             logging.warning(f"Submission failed, response={response.json()}")
             raise e
+        return response
 
     def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Return a public key for the given wallet name and key name.

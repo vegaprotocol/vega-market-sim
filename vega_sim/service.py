@@ -2782,7 +2782,7 @@ class VegaService(ABC):
         closed: Optional[bool] = None,
         wallet_name: Optional[str] = None,
     ):
-        trading.create_referral_set(
+        return trading.create_referral_set(
             wallet=self.wallet,
             key_name=key_name,
             wallet_name=wallet_name,

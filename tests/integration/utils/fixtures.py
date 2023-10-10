@@ -174,9 +174,29 @@ def vega_service():
 
 
 @pytest.fixture(scope="function")
+def vega_spam_service():
+    with VegaServiceNull(
+        warn_on_raw_data_access=False,
+        run_with_console=False,
+        retain_log_files=True,
+        transactions_per_block=5,
+        listen_for_high_volume_stream_updates=False,
+        use_full_vega_wallet=True,
+    ) as vega:
+        yield vega
+    logging.debug("vega_spam_service teardown")
+
+
+@pytest.fixture(scope="function")
 def vega_service_with_market(vega_service):
     build_basic_market(vega_service, initial_price=0.3)
     return vega_service
+
+
+@pytest.fixture(scope="function")
+def vega_spam_service_with_market(vega_spam_service):
+    build_basic_market(vega_spam_service, initial_price=0.3)
+    return vega_spam_service
 
 
 @pytest.fixture(scope="function")
