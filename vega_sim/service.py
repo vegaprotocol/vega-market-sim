@@ -382,7 +382,7 @@ class VegaService(ABC):
         """
         asset_decimals = self.asset_decimals[asset]
         curr_acct = self.party_account(
-            wallet_name=wallet_name, asset_id=asset, market_id=None, key_name=key_name
+            wallet_name=wallet_name, asset_id=asset, key_name=key_name
         ).general
 
         faucet.mint(
@@ -394,12 +394,13 @@ class VegaService(ABC):
 
         self.wait_fn(1)
         self.wait_for_total_catchup()
+
         for i in range(100):
             time.sleep(0.05 * 1.03**i)
+            self.data_cache.initialise_accounts()
             post_acct = self.party_account(
                 wallet_name=wallet_name,
                 asset_id=asset,
-                market_id=None,
                 key_name=key_name,
             ).general
             if post_acct > curr_acct:
@@ -1169,17 +1170,28 @@ class VegaService(ABC):
     def party_account(
         self,
         key_name: str,
-        asset_id: str,
-        market_id: str,
+        market_id: Optional[str] = None,
+        asset_id: Optional[str] = None,
         wallet_name: Optional[str] = None,
     ) -> data.PartyMarketAccount:
         """Output money in general accounts/margin accounts/bond accounts (if exists)
         of a party."""
-        return data.party_account(
-            self.wallet.public_key(wallet_name=wallet_name, name=key_name),
-            asset_id=asset_id,
+        if market_id is None and asset_id is None:
+            raise Exception("Either market or asset must be passed")
+        if market_id is not None and asset_id is not None:
+            raise Exception("Only one of market or asset can be passed")
+
+        if market_id is not None:
+            asset_id = self._market_to_asset[market_id]
+
+        accounts = self.get_accounts_from_stream(
+            key_name=key_name,
             market_id=market_id,
-            data_client=self.trading_data_client_v2,
+            wallet_name=wallet_name,
+            asset_id=asset_id,
+        )
+        return data.account_list_to_party_account(
+            accounts=accounts,
         )
 
     def list_accounts(
@@ -1215,6 +1227,38 @@ class VegaService(ABC):
             asset_id=asset_id,
             market_id=market_id,
             asset_decimals_map=self.asset_decimals,
+        )
+
+    def get_accounts_from_stream(
+        self,
+        key_name: Optional[str] = None,
+        market_id: Optional[str] = None,
+        asset_id: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.AccountData]:
+        """Loads accounts for either a given party, market or both from stream.
+        Must pass one or the other
+
+        Args:
+            market_id:
+                optional str, Restrict to accounts on a specific market
+            asset_id:
+                optional str, Restrict to accounts on a specific asset
+            party_id:
+                optional str, Select only accounts for a given party
+
+        Returns:
+            List[AccountData], list of formatted trade objects which match the required
+                restrictions.
+        """
+        return self.data_cache.get_accounts_from_stream(
+            market_id=market_id,
+            party_id=(
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name)
+                if key_name is not None
+                else None
+            ),
+            asset_id=asset_id,
         )
 
     def positions_by_market(

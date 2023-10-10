@@ -34,14 +34,20 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "blockexplorer.api.v1.blockexplorer_pb2", _globals
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z5code.vegaprotocol.io/vega/protos/blockexplorer/api/v1\222A>\022#\n\030Vega block explorer APIs2\007v0.72.1\032\023lb.testnet.vega.xyz*\002\001\002"
-    _GETTRANSACTIONREQUEST.fields_by_name["hash"]._options = None
-    _GETTRANSACTIONREQUEST.fields_by_name["hash"]._serialized_options = b"\342A\001\002"
-    _LISTTRANSACTIONSREQUEST_FILTERSENTRY._options = None
-    _LISTTRANSACTIONSREQUEST_FILTERSENTRY._serialized_options = b"8\001"
-    _LISTTRANSACTIONSREQUEST.fields_by_name["limit"]._options = None
-    _LISTTRANSACTIONSREQUEST.fields_by_name["limit"]._serialized_options = b"\030\001"
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z5code.vegaprotocol.io/vega/protos/blockexplorer/api/v1\222A>\022#\n\030Vega block explorer APIs2\007v0.72.1\032\023lb.testnet.vega.xyz*\002\001\002"
+    _globals["_GETTRANSACTIONREQUEST"].fields_by_name["hash"]._options = None
+    _globals["_GETTRANSACTIONREQUEST"].fields_by_name[
+        "hash"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_LISTTRANSACTIONSREQUEST_FILTERSENTRY"]._options = None
+    _globals["_LISTTRANSACTIONSREQUEST_FILTERSENTRY"]._serialized_options = b"8\001"
+    _globals["_LISTTRANSACTIONSREQUEST"].fields_by_name["limit"]._options = None
+    _globals["_LISTTRANSACTIONSREQUEST"].fields_by_name[
+        "limit"
+    ]._serialized_options = b"\030\001"
     _globals["_INFOREQUEST"]._serialized_start = 217
     _globals["_INFOREQUEST"]._serialized_end = 230
     _globals["_INFORESPONSE"]._serialized_start = 232

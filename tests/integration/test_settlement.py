@@ -63,26 +63,26 @@ def test_settlement(vega_service: VegaServiceNull):
     # check bond and margin for all
     for wallet in wallets:
         general, margin, bond = vega.party_account(
-            key_name=wallet.name, asset_id=tdai_id, market_id=market_id
+            key_name=wallet.name, market_id=market_id
         )
         assert margin == 0
         assert bond == 0
 
     # LP general
     general, margin, bond = vega.party_account(
-        key_name=MM_WALLET.name, asset_id=tdai_id, market_id=market_id
+        key_name=MM_WALLET.name, market_id=market_id
     )
     assert general == participants_initial_deposit
 
     # Trader 1 who went long
     general, margin, bond = vega.party_account(
-        key_name=TRADER_1_WALLET.name, asset_id=tdai_id, market_id=market_id
+        key_name=TRADER_1_WALLET.name, market_id=market_id
     )
     assert general == (participants_initial_deposit + pnl_long)
 
     # Trader 2 who went short
     general, margin, bond = vega.party_account(
-        key_name=TRADER_2_WALLET.name, asset_id=tdai_id, market_id=market_id
+        key_name=TRADER_2_WALLET.name, market_id=market_id
     )
 
     assert general == (participants_initial_deposit - pnl_long)

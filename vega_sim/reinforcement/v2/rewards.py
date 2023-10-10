@@ -60,7 +60,6 @@ class PnlUnifiedRewarder(BaseUnifiedRewarder):
             balance = vega.party_account(
                 key_name=key,
                 wallet_name=wallet,
-                asset_id=self.asset_id,
                 market_id=self.market_id,
             )
             balance = sum(k for k in balance)
@@ -78,7 +77,6 @@ class PnlRewarder(BaseRewarder):
         balance = vega.party_account(
             key_name=self.agent_key,
             wallet_name=self.agent_wallet,
-            asset_id=self.asset_id,
             market_id=self.market_id,
         )
         balance = sum(k for k in balance)

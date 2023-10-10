@@ -31,44 +31,48 @@ _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.api.v1.core_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/vega/protos/vega/api/v1\222A4\022\031\n\016Vega core APIs2\007v0.72.1\032\023lb.testnet.vega.xyz*\002\001\002"
-    _PROPAGATECHAINEVENTREQUEST.fields_by_name["event"]._options = None
-    _PROPAGATECHAINEVENTREQUEST.fields_by_name[
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z,code.vegaprotocol.io/vega/protos/vega/api/v1\222A4\022\031\n\016Vega core APIs2\007v0.72.1\032\023lb.testnet.vega.xyz*\002\001\002"
+    _globals["_PROPAGATECHAINEVENTREQUEST"].fields_by_name["event"]._options = None
+    _globals["_PROPAGATECHAINEVENTREQUEST"].fields_by_name[
         "event"
     ]._serialized_options = b"\342A\001\002"
-    _PROPAGATECHAINEVENTREQUEST.fields_by_name["pub_key"]._options = None
-    _PROPAGATECHAINEVENTREQUEST.fields_by_name[
+    _globals["_PROPAGATECHAINEVENTREQUEST"].fields_by_name["pub_key"]._options = None
+    _globals["_PROPAGATECHAINEVENTREQUEST"].fields_by_name[
         "pub_key"
     ]._serialized_options = b"\342A\001\002"
-    _PROPAGATECHAINEVENTREQUEST.fields_by_name["signature"]._options = None
-    _PROPAGATECHAINEVENTREQUEST.fields_by_name[
+    _globals["_PROPAGATECHAINEVENTREQUEST"].fields_by_name["signature"]._options = None
+    _globals["_PROPAGATECHAINEVENTREQUEST"].fields_by_name[
         "signature"
     ]._serialized_options = b"\342A\001\002"
-    _SUBMITTRANSACTIONREQUEST.fields_by_name["tx"]._options = None
-    _SUBMITTRANSACTIONREQUEST.fields_by_name[
+    _globals["_SUBMITTRANSACTIONREQUEST"].fields_by_name["tx"]._options = None
+    _globals["_SUBMITTRANSACTIONREQUEST"].fields_by_name[
         "tx"
     ]._serialized_options = b"\342A\001\002"
-    _SUBMITTRANSACTIONREQUEST.fields_by_name["type"]._options = None
-    _SUBMITTRANSACTIONREQUEST.fields_by_name[
+    _globals["_SUBMITTRANSACTIONREQUEST"].fields_by_name["type"]._options = None
+    _globals["_SUBMITTRANSACTIONREQUEST"].fields_by_name[
         "type"
     ]._serialized_options = b"\342A\001\002"
-    _CHECKTRANSACTIONREQUEST.fields_by_name["tx"]._options = None
-    _CHECKTRANSACTIONREQUEST.fields_by_name["tx"]._serialized_options = b"\342A\001\002"
-    _SUBMITRAWTRANSACTIONREQUEST.fields_by_name["tx"]._options = None
-    _SUBMITRAWTRANSACTIONREQUEST.fields_by_name[
+    _globals["_CHECKTRANSACTIONREQUEST"].fields_by_name["tx"]._options = None
+    _globals["_CHECKTRANSACTIONREQUEST"].fields_by_name[
         "tx"
     ]._serialized_options = b"\342A\001\002"
-    _SUBMITRAWTRANSACTIONREQUEST.fields_by_name["type"]._options = None
-    _SUBMITRAWTRANSACTIONREQUEST.fields_by_name[
+    _globals["_SUBMITRAWTRANSACTIONREQUEST"].fields_by_name["tx"]._options = None
+    _globals["_SUBMITRAWTRANSACTIONREQUEST"].fields_by_name[
+        "tx"
+    ]._serialized_options = b"\342A\001\002"
+    _globals["_SUBMITRAWTRANSACTIONREQUEST"].fields_by_name["type"]._options = None
+    _globals["_SUBMITRAWTRANSACTIONREQUEST"].fields_by_name[
         "type"
     ]._serialized_options = b"\342A\001\002"
-    _CHECKRAWTRANSACTIONREQUEST.fields_by_name["tx"]._options = None
-    _CHECKRAWTRANSACTIONREQUEST.fields_by_name[
+    _globals["_CHECKRAWTRANSACTIONREQUEST"].fields_by_name["tx"]._options = None
+    _globals["_CHECKRAWTRANSACTIONREQUEST"].fields_by_name[
         "tx"
     ]._serialized_options = b"\342A\001\002"
-    _GETSPAMSTATISTICSREQUEST.fields_by_name["party_id"]._options = None
-    _GETSPAMSTATISTICSREQUEST.fields_by_name[
+    _globals["_GETSPAMSTATISTICSREQUEST"].fields_by_name["party_id"]._options = None
+    _globals["_GETSPAMSTATISTICSREQUEST"].fields_by_name[
         "party_id"
     ]._serialized_options = b"\342A\001\002"
     _globals["_PROPAGATECHAINEVENTREQUEST"]._serialized_start = 202

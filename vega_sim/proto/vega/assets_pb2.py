@@ -20,8 +20,10 @@ _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.assets_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
     _globals["_ASSET"]._serialized_start = 28
     _globals["_ASSET"]._serialized_end = 265
     _globals["_ASSET_STATUS"]._serialized_start = 143

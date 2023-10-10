@@ -38,22 +38,32 @@ T = TypeVar("T")
 S = TypeVar("S")
 
 PartyMarketAccount = namedtuple("PartyMarketAccount", ["general", "margin", "bond"])
-AccountData = namedtuple(
-    "AccountData", ["owner", "balance", "asset", "market_id", "type"]
-)
 RiskFactor = namedtuple("RiskFactors", ["market_id", "short", "long"])
 OrderBook = namedtuple("OrderBook", ["bids", "asks"])
 PriceLevel = namedtuple("PriceLevel", ["price", "number_of_orders", "volume"])
 
 
-@dataclass
+@dataclass(frozen=True)
+class AccountData:
+    owner: str
+    balance: float
+    asset: str
+    market_id: str
+    type: vega_protos.vega.AccountType
+
+    @property
+    def account_id(self):
+        return f"{self.owner}-{self.type}-{self.market_id}-{self.asset}"
+
+
+@dataclass(frozen=True)
 class IcebergOrder:
     peak_size: float
     minimum_visible_size: float
     reserved_remaining: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class Order:
     price: float
     size: float
@@ -120,20 +130,20 @@ MarginLevels = namedtuple(
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class LiquidationPrice:
     open_volume_only: float
     including_buy_orders: float
     including_sell_orders: float
 
 
-@dataclass
+@dataclass(frozen=True)
 class MarginEstimate:
     best_case: MarginLevels
     worst_case: MarginLevels
 
 
-@dataclass
+@dataclass(frozen=True)
 class LiquidationEstimate:
     best_case: LiquidationPrice
     worst_case: LiquidationPrice
@@ -146,7 +156,7 @@ class DecimalSpec:
     asset_decimals: Optional[int] = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class LedgerEntry:
     from_account: vega_protos.vega.AccountDetails
     to_account: vega_protos.vega.AccountDetails
@@ -155,7 +165,7 @@ class LedgerEntry:
     timestamp: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class AggregatedLedgerEntry:
     timestamp: int
     quantity: float
@@ -169,19 +179,19 @@ class AggregatedLedgerEntry:
     to_account_market_id: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class MarketDepth:
     buys: List[PriceLevel]
     sells: List[PriceLevel]
 
 
-@dataclass
+@dataclass(frozen=True)
 class OrdersBySide:
     bids: List[Order]
     asks: List[Order]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Fee:
     maker_fee: float
     infrastructure_fee: float
@@ -568,9 +578,11 @@ def _order_from_proto(
         updated_at=order.updated_at,
         version=order.version,
         market_id=order.market_id,
-        iceberg_order=_iceberg_order_from_proto(order.iceberg_order, decimal_spec)
-        if order.HasField("iceberg_order")
-        else None,
+        iceberg_order=(
+            _iceberg_order_from_proto(order.iceberg_order, decimal_spec)
+            if order.HasField("iceberg_order")
+            else None
+        ),
     )
 
 
@@ -848,6 +860,16 @@ def _liquidity_provider_fee_share_from_proto(
     ]
 
 
+def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
+    return AccountData(
+        owner=account.owner,
+        balance=num_from_padded_int(int(account.balance), decimal_spec.asset_decimals),
+        asset=account.asset,
+        type=account.type,
+        market_id=account.market_id if account.market_id != "!" else "",
+    )
+
+
 def _referral_set_from_proto(
     referral_set,
 ) -> ReferralSet:
@@ -1076,14 +1098,8 @@ def list_accounts(
             )
 
         output_accounts.append(
-            AccountData(
-                owner=account.owner,
-                balance=num_from_padded_int(
-                    int(account.balance), asset_decimals_map.setdefault(account.asset)
-                ),
-                asset=account.asset,
-                type=account.type,
-                market_id=account.market_id,
+            _account_from_proto(
+                account, DecimalSpec(asset_decimals=asset_decimals_map[account.asset])
             )
         )
     return output_accounts
@@ -1108,22 +1124,44 @@ def party_account(
         asset_dp if asset_dp is not None else get_asset_decimals(asset_id, data_client)
     )
 
+    return account_list_to_party_account(
+        [
+            account
+            for account in accounts
+            if account.market_id is None
+            or account.market_id == ""
+            or account.market_id == market_id
+        ],
+        asset_dp_conversion=asset_dp,
+    )
+
+
+def account_list_to_party_account(
+    accounts: Union[
+        List[data_node_protos_v2.trading_data.AccountBalance], List[AccountData]
+    ],
+    asset_dp_conversion: Optional[int] = None,
+):
     general, margin, bond = 0, 0, 0  # np.nan, np.nan, np.nan
     for account in accounts:
-        if (
-            account.market_id
-            and account.market_id != "!"
-            and account.market_id != market_id
-        ):
-            # The 'general' account type has no market ID, so we have to pull
-            # all markets then filter down here
-            continue
         if account.type == vega_protos.vega.ACCOUNT_TYPE_GENERAL:
-            general = num_from_padded_int(float(account.balance), asset_dp)
+            general = (
+                num_from_padded_int(float(account.balance), asset_dp_conversion)
+                if asset_dp_conversion is not None
+                else account.balance
+            )
         if account.type == vega_protos.vega.ACCOUNT_TYPE_MARGIN:
-            margin = num_from_padded_int(float(account.balance), asset_dp)
+            margin = (
+                num_from_padded_int(float(account.balance), asset_dp_conversion)
+                if asset_dp_conversion is not None
+                else account.balance
+            )
         if account.type == vega_protos.vega.ACCOUNT_TYPE_BOND:
-            bond = num_from_padded_int(float(account.balance), asset_dp)
+            bond = (
+                num_from_padded_int(float(account.balance), asset_dp_conversion)
+                if asset_dp_conversion is not None
+                else account.balance
+            )
 
     return PartyMarketAccount(general, margin, bond)
 
@@ -1696,6 +1734,7 @@ def _stream_handler(
     event = extraction_fn(stream_item)
 
     market_id = getattr(event, "market_id", getattr(event, "market", None))
+    market_id = None if market_id == "!" else market_id
 
     # Check market creation event observed
     if (market_id is not None) and (
@@ -1880,6 +1919,24 @@ def transfer_subscription_handler(
         stream_item=stream,
         extraction_fn=lambda evt: evt.transfer,
         conversion_fn=_transfer_from_proto,
+        mkt_pos_dp=mkt_pos_dp,
+        mkt_price_dp=mkt_price_dp,
+        mkt_to_asset=mkt_to_asset,
+        asset_dp=asset_dp,
+    )
+
+
+def accounts_subscription_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+    mkt_pos_dp: Optional[Dict[str, int]] = None,
+    mkt_price_dp: Optional[Dict[str, int]] = None,
+    mkt_to_asset: Optional[Dict[str, str]] = None,
+    asset_dp: Optional[Dict[str, int]] = None,
+) -> Transfer:
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.account,
+        conversion_fn=_account_from_proto,
         mkt_pos_dp=mkt_pos_dp,
         mkt_price_dp=mkt_price_dp,
         mkt_to_asset=mkt_to_asset,
@@ -2180,23 +2237,33 @@ def dispatch_strategy(
 
     # Set the mandatory (and conditionally mandatory) DispatchStrategy fields
     dispatch_strategy = vega_protos.vega.DispatchStrategy(
-        asset_for_metric=None
-        if metric in [vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING]
-        else asset_for_metric,
+        asset_for_metric=(
+            None
+            if metric in [vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING]
+            else asset_for_metric
+        ),
         entity_scope=entity_scope,
-        individual_scope=individual_scope
-        if entity_scope is vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
-        else None,
-        window_length=None
-        if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
-        else window_length,
+        individual_scope=(
+            individual_scope
+            if entity_scope is vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
+            else None
+        ),
+        window_length=(
+            None
+            if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
+            else window_length
+        ),
         lock_period=lock_period,
-        distribution_strategy=None
-        if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
-        else distribution_strategy,
-        n_top_performers=str(n_top_performers)
-        if entity_scope is vega_protos.vega.ENTITY_SCOPE_TEAMS
-        else None,
+        distribution_strategy=(
+            None
+            if metric in [vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE]
+            else distribution_strategy
+        ),
+        n_top_performers=(
+            str(n_top_performers)
+            if entity_scope is vega_protos.vega.ENTITY_SCOPE_TEAMS
+            else None
+        ),
     )
     # Set the optional DispatchStrategy fields
     if metric is not None:

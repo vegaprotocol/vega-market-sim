@@ -75,6 +75,7 @@ def test_party_account(trading_data_v2_servicer_and_port):
                         node=data_node_protos_v2.trading_data.AccountBalance(
                             balance="1051",
                             type=vega_protos.vega.ACCOUNT_TYPE_BOND,
+                            market_id="MARK_ID",
                         ),
                     ),
                     data_node_protos_v2.trading_data.AccountEdge(
@@ -96,6 +97,7 @@ def test_party_account(trading_data_v2_servicer_and_port):
                         node=data_node_protos_v2.trading_data.AccountBalance(
                             balance="6423",
                             type=vega_protos.vega.ACCOUNT_TYPE_MARGIN,
+                            market_id="MARK_ID",
                         ),
                     ),
                 ],

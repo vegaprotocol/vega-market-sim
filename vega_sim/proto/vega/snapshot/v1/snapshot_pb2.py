@@ -34,10 +34,10 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "vega.snapshot.v1.snapshot_pb2", _globals
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = (
-        b"Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1"
-    )
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1"
     _globals["_FORMAT"]._serialized_start = 35428
     _globals["_FORMAT"]._serialized_end = 35524
     _globals["_SNAPSHOT"]._serialized_start = 249

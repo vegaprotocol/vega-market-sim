@@ -32,8 +32,10 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "vega.api.v1.corestate_pb2", _globals
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b"Z,code.vegaprotocol.io/vega/protos/vega/api/v1\222A:\022\037\n\024Vega core state APIs2\007v0.72.1\032\023lb.testnet.vega.xyz*\002\001\002"
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z,code.vegaprotocol.io/vega/protos/vega/api/v1\222A:\022\037\n\024Vega core state APIs2\007v0.72.1\032\023lb.testnet.vega.xyz*\002\001\002"
     _globals["_ACCOUNT"]._serialized_start = 200
     _globals["_ACCOUNT"]._serialized_end = 323
     _globals["_LISTACCOUNTSREQUEST"]._serialized_start = 325

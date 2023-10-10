@@ -27,10 +27,10 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "vega.commands.v1.validator_commands_pb2", _globals
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = (
-        b"Z1code.vegaprotocol.io/vega/protos/vega/commands/v1"
-    )
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/vega/commands/v1"
     _globals["_NODESIGNATUREKIND"]._serialized_start = 2491
     _globals["_NODESIGNATUREKIND"]._serialized_end = 2770
     _globals["_VALIDATORHEARTBEAT"]._serialized_start = 140

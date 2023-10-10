@@ -34,10 +34,10 @@ _builder.BuildTopDescriptorsAndMessages(
     DESCRIPTOR, "vega.events.v1.events_pb2", _globals
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = (
-        b"Z/code.vegaprotocol.io/vega/protos/vega/events/v1"
-    )
+    _globals["DESCRIPTOR"]._options = None
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z/code.vegaprotocol.io/vega/protos/vega/events/v1"
     _globals["_PROTOCOLUPGRADEPROPOSALSTATUS"]._serialized_start = 22968
     _globals["_PROTOCOLUPGRADEPROPOSALSTATUS"]._serialized_end = 23189
     _globals["_BUSEVENTTYPE"]._serialized_start = 23192

@@ -40,7 +40,6 @@ class SimpleState(State):
         balance = sum(
             vega.party_account(
                 for_key_name,
-                asset_id=asset_id,
                 market_id=market_id,
                 wallet_name=for_wallet_name,
             )
@@ -107,7 +106,6 @@ class PriceStateWithFees(State):
         position = position.open_volume if position else 0
         account = vega.party_account(
             key_name=for_key_name,
-            asset_id=asset_id,
             market_id=market_id,
             wallet_name=for_wallet_name,
         )

@@ -29,7 +29,7 @@ def _run(
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
-        step_length_seconds=30,
+        # step_length_seconds=30,
         block_length_seconds=1,
         transactions_per_block=4096,
         output=output,

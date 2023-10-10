@@ -409,7 +409,11 @@ class MarketEnvironmentWithState(MarketEnvironment):
                 orders=order_status.get(market_id, {}),
             )
 
-        return VegaState(network_state=(), market_state=market_state)
+        return VegaState(
+            network_state=(),
+            market_state=market_state,
+            time=vega.get_blockchain_time_from_feed(),
+        )
 
     def step(self, vega: VegaService) -> None:
         vega.wait_for_thread_catchup()

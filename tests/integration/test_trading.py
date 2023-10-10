@@ -141,12 +141,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     party_a_accounts_t1 = vega.party_account(
         key_name=PARTY_A.name,
-        asset_id=asset_id,
         market_id=market_id,
     )
     party_b_accounts_t1 = vega.party_account(
         key_name=PARTY_B.name,
-        asset_id=asset_id,
         market_id=market_id,
     )
 
@@ -157,6 +155,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     assert len(all_transfers_t1) == 1
     assert len(live_transfers_t1) == 0
+
     assert party_a_accounts_t1.general == 499.5
     assert party_b_accounts_t1.general == 1500
 
@@ -175,12 +174,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     party_a_accounts_t2 = vega.party_account(
         key_name=PARTY_A.name,
-        asset_id=asset_id,
         market_id=market_id,
     )
     party_b_accounts_t2 = vega.party_account(
         key_name=PARTY_B.name,
-        asset_id=asset_id,
         market_id=market_id,
     )
 
@@ -199,12 +196,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
 
     party_a_accounts_t3 = vega.party_account(
         key_name=PARTY_A.name,
-        asset_id=asset_id,
         market_id=market_id,
     )
     party_b_accounts_t3 = vega.party_account(
         key_name=PARTY_B.name,
-        asset_id=asset_id,
         market_id=market_id,
     )
 
@@ -544,7 +539,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
     account_TRADER_B = vega.party_account(
         key_name=trader_b.key_name,
         wallet_name=trader_b.wallet_name,
-        asset_id=asset_id,
         market_id=market_id,
     )
     collateral = account_TRADER_B.margin + account_TRADER_B.general
@@ -593,7 +587,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
         account_TRADER_B = vega.party_account(
             key_name=trader_b.key_name,
             wallet_name=trader_b.wallet_name,
-            asset_id=asset_id,
             market_id=market_id,
         )
 
@@ -790,9 +783,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
 
     _, estimate_liquidation_price_1 = vega.estimate_position(
@@ -826,9 +817,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     )
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
     _, estimate_liquidation_price_2 = vega.estimate_position(
         market_id,
@@ -878,9 +867,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
     _, estimate_liquidation_price_3 = vega.estimate_position(
         market_id,
@@ -930,9 +917,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
 
     _, estimate_liquidation_price_4 = vega.estimate_position(
         market_id,
@@ -960,9 +945,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
         volume=1,
     )
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
 
     assert PARTY_A_account.general + PARTY_A_account.margin > 1
 
@@ -990,9 +973,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
 
     market_data_closeout = vega.get_latest_market_data(market_id=market_id)
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     # check PARTY_A is closed out
     assert PARTY_A_account.general + PARTY_A_account.margin >= -1e-10
     assert PARTY_A_account.general + PARTY_A_account.margin <= 1e-10
@@ -1160,9 +1141,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
     _, estimate_liquidation_price_1 = vega.estimate_position(
         market_id,
@@ -1193,9 +1172,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         volume=1,
     )
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
 
     _, estimate_liquidation_price_2 = vega.estimate_position(
@@ -1243,9 +1220,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         volume=2,
     )
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
     _, estimate_liquidation_price_3 = vega.estimate_position(
         market_id,
@@ -1430,9 +1405,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
 
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
     _, estimate_liquidation_price_1 = vega.estimate_position(
         market_id,
@@ -1498,9 +1471,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
 
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     assert PARTY_A_account.margin + PARTY_A_account.general != 0
 
     # use estimated liquidation price
@@ -1532,9 +1503,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_fn(10)
     vega.wait_for_total_catchup()
     market_data = vega.get_latest_market_data(market_id=market_id)
-    PARTY_A_account = vega.party_account(
-        key_name=PARTY_A.name, asset_id=asset_id, market_id=market_id
-    )
+    PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     closeout_price = market_data.mark_price
 
     assert PARTY_A_account.general + PARTY_A_account.margin == 0

@@ -1259,7 +1259,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 account = self.vega.party_account(
                     key_name=self.key_name,
                     wallet_name=self.wallet_name,
-                    asset_id=self.asset_id,
                     market_id=self.market_id,
                 )
 
@@ -1800,7 +1799,6 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         # Get the total balance on the internal market (excluding bond)
         internal_account = self.vega.party_account(
             wallet_name=self.wallet_name,
-            asset_id=self.asset_id,
             market_id=self.market_id,
             key_name=self.key_name,
         )
@@ -1809,7 +1807,6 @@ class HedgedMarketMaker(ExponentialShapedMarketMaker):
         # Get the total balance on the external market (excluding bond)
         external_account = self.vega.party_account(
             wallet_name=self.wallet_name,
-            asset_id=self.asset_id,
             market_id=self.market_id,
             key_name=self.external_key_name,
         )
@@ -2870,7 +2867,7 @@ class Snitch(StateAgent):
                     self.seen_trades.add(trade.id)
                     market_trades.setdefault(market.id, []).append(trade)
 
-            accounts = self.vega.list_accounts()
+            accounts = self.vega.get_accounts_from_stream()
             self.states.append(
                 MarketHistoryData(
                     at_time=start_time,
@@ -3070,7 +3067,6 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
         party_market_account = self.vega.party_account(
             wallet_name=self.wallet_name,
             key_name=self.key_name,
-            asset_id=self.asset_id,
             market_id=self.market_id,
         )
 
@@ -3171,7 +3167,6 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                 account = self.vega.party_account(
                     key_name=self.key_name,
                     wallet_name=self.wallet_name,
-                    asset_id=self.asset_id,
                     market_id=self.market_id,
                 )
 
