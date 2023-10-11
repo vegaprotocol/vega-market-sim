@@ -639,7 +639,7 @@ def update_referral_program(
     enactment_time: Optional[int] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
 ):
-    referral_program = vega_protos.vega.ReferralProgram(
+    referral_program = vega_protos.governance.ReferralProgramChanges(
         end_of_program_timestamp=end_of_program_timestamp,
         window_length=window_length,
     )
@@ -707,7 +707,7 @@ def update_volume_discount_program(
     enactment_time: Optional[int] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
 ):
-    volume_discount_program = vega_protos.vega.VolumeDiscountProgram(
+    volume_discount_program = vega_protos.governance.VolumeDiscountProgramChanges(
         end_of_program_timestamp=end_of_program_timestamp,
         window_length=window_length,
     )
