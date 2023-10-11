@@ -62,12 +62,12 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     
     assert vega.spam_protection == True, "test pre-requisite, need to enable spam protection"
 
-    create_and_faucet_wallet(vega=vega, wallet=MM_WALLET)
+    create_and_faucet_wallet(vega=vega, wallet=MM_WALLET, symbol="VOTE")
     vega.wait_for_total_catchup()
     # Access the updated value
     vega.update_network_parameter(
         MM_WALLET.name,
-        parameter="spam.protection.max.CreateReferralSet",
+        parameter="spam.protection.max.createReferralSet",
         new_value="3",
     )
 
@@ -76,12 +76,22 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     referrer_id = vega.wallet.public_key(name=PARTY_A.name)
 
     # ACT single block 4 tx
+    vega.wait_fn(1)
     response1 = vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
     response2 = vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
     response3 = vega.create_referral_set(key_name=PARTY_A.name)
-    # this one will be pre block rejected
+    vega.wait_fn(1)
     response4 = vega.create_referral_set(key_name=PARTY_A.name)
-
+    vega.wait_fn(1)
+    response5 = vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
+    response6 = vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
+    response7 = vega.create_referral_set(key_name=PARTY_A.name)
+    vega.wait_fn(1)
+    response8 = vega.create_referral_set(key_name=PARTY_A.name)
     # assert only 3 in block
 
     vega.wait_fn(1)
