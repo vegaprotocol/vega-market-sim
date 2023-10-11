@@ -2791,7 +2791,7 @@ class VegaService(ABC):
             team_url=team_url,
             avatar_url=avatar_url,
             closed=closed,
-            check_tx_fail = check_tx_fail,
+            check_tx_fail=check_tx_fail,
         )
 
     def update_referral_set(
