@@ -59,12 +59,17 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     """
 
     vega = vega_spam_service_with_market
+    
+    assert vega.spam_protection == True, "test pre-requisite, need to enable spam protection"
+
+    create_and_faucet_wallet(vega=vega, wallet=MM_WALLET)
+    vega.wait_for_total_catchup()
     # Access the updated value
-    # vega.update_network_parameter(
-    #     MM_WALLET.name,
-    #     parameter="spam.protection.max.CreateReferralSet",
-    #     new_value="3",
-    # )
+    vega.update_network_parameter(
+        MM_WALLET.name,
+        parameter="spam.protection.max.CreateReferralSet",
+        new_value="3",
+    )
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
     vega.wait_for_total_catchup()

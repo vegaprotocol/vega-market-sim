@@ -182,6 +182,7 @@ def vega_spam_service():
         transactions_per_block=5,
         listen_for_high_volume_stream_updates=False,
         use_full_vega_wallet=True,
+        spam_protection=True
     ) as vega:
         yield vega
     logging.debug("vega_spam_service teardown")
