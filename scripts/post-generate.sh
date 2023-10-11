@@ -101,7 +101,7 @@ do
 	touch "$generated_dir/$x/__init__.py"
 done
 
-find "$generated_dir/vega" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
+find "$generated_dir/vega" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed -Ei -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as #from . import \1_pb2 as #' \
 	-e 's#^from vega.commands.v1 import#from .commands.v1 import#' \
 	-e 's#^from vega.events.v1 import#from .events.v1 import#' \
@@ -111,7 +111,7 @@ find "$generated_dir/vega" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in
 	-e 's#^from vega.checkpoint.v1 import#from .checkpoint.v1 import#' \
 	-e 's#^import ([a-z_]*)_pb2 as #from . import \1_pb2 as #'
 
-find "$generated_dir/vega/api" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
+find "$generated_dir/vega/api" -maxdepth 1 -name '*.py' -print0 | xargs -0r sed -Ei -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from .. import \1_pb2 as#' \
 	-e 's#^from vega.api import #from . import #' \
 	-e 's#^from vega.commands.v1 import#from ..commands.v1 import#' \
@@ -130,16 +130,16 @@ find \
 	"$generated_dir/vega/data/v1" \
 	"$generated_dir/vega/snapshot/v1" \
 	"$generated_dir/vega/wallet/v1" \
-	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
+	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed -Ei -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from ... import \1_pb2 as#' \
 	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ...\1 import #' \
 	-e 's#^import ([a-z_]*_pb2) as #from ... import \1 as #'
 
 find \
 	"$generated_dir/data_node/api/v2" \
-	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed --in-place -r \
+	-maxdepth 1 -name '*.py' -print0 | xargs -0r sed -Ei -r \
 	-e 's#^from vega import ([a-z_]*)_pb2 as#from ....vega import \1_pb2 as#' \
 	-e 's#^from vega.(api.v1|commands.v1|events.v1|data.v1|snapshot.v1|wallet.v1|checkpoint.v1|github.com.mwitkow.go_proto_validators) import #from ....vega.\1 import #' \
 	-e 's#^from data_node.(api.v2) import #from ...\1 import #'
 
-find "$generated_dir" -name '*.py' -print0 | xargs -0r sed --in-place -re 's#[ \t]+$##'
+find "$generated_dir" -name '*.py' -print0 | xargs -0r sed -Ei -re 's#[ \t]+$##'
