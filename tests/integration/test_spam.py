@@ -44,19 +44,6 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     A party who has more than 50% of their CreateReferralSet transactions post-block rejected should be banned for 1/48th of an
     epoch or untill the end of the current epoch (whichever comes first). When banned for the above reason,
     CreateReferralSet transactions should be pre-block rejected (0062-SPAM-033).
-
-    Test1
-    spam.protection.max.CreateReferralSet=3
-    epoch1
-    block1 = 1
-    block2 = 1
-    block3 = 1 - (2nd tx is post block rejected)
-
-    Test2
-    spam.protection.max.CreateReferralSet=3
-    epoch1
-      block1 = 3 (4th tx is rejected)
-      block2 = 1 (tx is rejected)
     """
     # Arrange
     vega = vega_spam_service_with_market
@@ -83,7 +70,7 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     vega.wait_for_total_catchup()
     referrer_id = vega.wallet.public_key(name=PARTY_A.name)
 
-    # ACT single block 4 tx
+    # ACT
     vega.wait_fn(1)
     response1 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
     vega.wait_fn(1)
@@ -98,6 +85,8 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     response6 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
 
     vega.wait_fn(1)
+
+    # Assert
 
     # submit goverance transfer
     market_id = vega.all_markets()[0].id
