@@ -1,4 +1,4 @@
-from . import wallet_pb2 as walle
+from . import wallet_pb2 as wallet
 from . import wallet_pb2_grpc as wallet_grpc
 
 __all__ = [

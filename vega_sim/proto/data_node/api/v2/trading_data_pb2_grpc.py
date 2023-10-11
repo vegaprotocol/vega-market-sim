@@ -580,7 +580,7 @@ class TradingDataServiceServicer(object):
         """Data node information
 
         Get information about the data node.
-        Response contains a semver formatted version of the data node and the commit hash, from which the data node was buil
+        Response contains a semver formatted version of the data node and the commit hash, from which the data node was built
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -682,7 +682,7 @@ class TradingDataServiceServicer(object):
         Entries can be filtered by:
         - the sending account (market ID, asset ID, account type)
         - receiving account (market ID, asset ID, account type)
-        - sending AND receiving accoun
+        - sending AND receiving account
         - transfer type either in addition to the above filters or as a standalone option
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -717,7 +717,7 @@ class TradingDataServiceServicer(object):
     def GetLatestMarketData(self, request, context):
         """Get latest market data
 
-        Get the latest market data for a given marke
+        Get the latest market data for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -726,7 +726,7 @@ class TradingDataServiceServicer(object):
     def ListLatestMarketData(self, request, context):
         """List latest market data
 
-        Get a list of the latest market data for every marke
+        Get a list of the latest market data for every market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -735,7 +735,7 @@ class TradingDataServiceServicer(object):
     def GetLatestMarketDepth(self, request, context):
         """Get latest market depth
 
-        Get the latest market depth for a given marke
+        Get the latest market depth for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -744,7 +744,7 @@ class TradingDataServiceServicer(object):
     def ObserveMarketsDepth(self, request, context):
         """Observe markets depth
 
-        Subscribe to a stream of the latest market depth for a given marke
+        Subscribe to a stream of the latest market depth for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -753,7 +753,7 @@ class TradingDataServiceServicer(object):
     def ObserveMarketsDepthUpdates(self, request, context):
         """Observe markets depth updates
 
-        Subscribe to a stream of updates on market depth for a given marke
+        Subscribe to a stream of updates on market depth for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -762,7 +762,7 @@ class TradingDataServiceServicer(object):
     def ObserveMarketsData(self, request, context):
         """Observe markets data
 
-        Subscribe to a stream of data about a given marke
+        Subscribe to a stream of data about a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -783,7 +783,7 @@ class TradingDataServiceServicer(object):
         Get a list of transfers between public keys. A valid value for public key can be one of:
         - a party ID
         - "network"
-        - "0000000000000000000000000000000000000000000000000000000000000000", the public key for the global rewards accoun
+        - "0000000000000000000000000000000000000000000000000000000000000000", the public key for the global rewards account
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -855,7 +855,7 @@ class TradingDataServiceServicer(object):
     def ListERC20MultiSigSignerAddedBundles(self, request, context):
         """List ERC20 multi-sig signer added bundles
 
-        Get a list of the signature bundles to add a particular validator to the signer list of the multisig contrac
+        Get a list of the signature bundles to add a particular validator to the signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -864,7 +864,7 @@ class TradingDataServiceServicer(object):
     def ListERC20MultiSigSignerRemovedBundles(self, request, context):
         """List ERC20 multi-sig signer removed bundles
 
-        Get a list of the signature bundles to remove a particular validator from signer list of the multisig contrac
+        Get a list of the signature bundles to remove a particular validator from signer list of the multisig contract
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -919,7 +919,7 @@ class TradingDataServiceServicer(object):
     def ObserveTrades(self, request, context):
         """Observe trades
 
-        Subscribe to a stream of trades, optionally filtered by party/marke
+        Subscribe to a stream of trades, optionally filtered by party/market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -946,17 +946,17 @@ class TradingDataServiceServicer(object):
     def ListOracleData(self, request, context):
         """List oracle data
 
-        Get a list of all oracle data that have been broadcast to any marke
+        Get a list of all oracle data that have been broadcast to any market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetMarket(self, request, context):
-        """Get marke
+        """Get market
 
-        Get information about a specific market using its ID. A market's ID will be the same as the ID of the proposal tha
-        generated i
+        Get information about a specific market using its ID. A market's ID will be the same as the ID of the proposal that
+        generated it
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -975,7 +975,7 @@ class TradingDataServiceServicer(object):
         """List successor markets
 
         Given a market ID, return the full lineage of markets since inception, or all successor markets since and including
-        the given market ID. The markets will be returned in succession order, i.e. the market at position i will be the paren
+        the given market ID. The markets will be returned in succession order, i.e. the market at position i will be the parent
         of the market at position i+1.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1051,7 +1051,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetDeposit(self, request, context):
-        """Get deposi
+        """Get deposit
 
         Get a deposit by its ID
         """
@@ -1063,7 +1063,7 @@ class TradingDataServiceServicer(object):
         """List deposits
 
         Get a list of deposits for a given party.
-        If a date range is provided, filtering will be based on the last time the deposi
+        If a date range is provided, filtering will be based on the last time the deposit
         has been updated in Vega time.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1089,7 +1089,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def GetAsset(self, request, context):
-        """Get asse
+        """Get asset
 
         Get a single asset using its ID. Use the assets list query to get an asset's ID
         """
@@ -1109,7 +1109,7 @@ class TradingDataServiceServicer(object):
     def ListLiquidityProvisions(self, request, context):
         """List liquidity provisions
 
-        Get a list of liquidity provisions for a given marke
+        Get a list of liquidity provisions for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1283,7 +1283,7 @@ class TradingDataServiceServicer(object):
     def GetRiskFactors(self, request, context):
         """Get risk factors
 
-        Get risk factor data for a given marke
+        Get risk factor data for a given market
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1365,13 +1365,13 @@ class TradingDataServiceServicer(object):
         """Network History
 
         Network history allows the data node to reach out to peer nodes and fetch the most recent history, as well as
-        older history if desired, such that it can quickly get itself up to the latest block height of the network and star
+        older history if desired, such that it can quickly get itself up to the latest block height of the network and start
         to consume events for the latest block from the Vega core.
         See https://github.com/vegaprotocol/vega/tree/develop/datanode/networkhistory/README.md for a full description of network history
 
-        Get most recent network history segmen
+        Get most recent network history segment
 
-        Get the network's most recently history segmen
+        Get the network's most recently history segment
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1488,7 +1488,7 @@ class TradingDataServiceServicer(object):
     def GetReferralSetStats(self, request, context):
         """Get referral set statistics
 
-        Get the total taker volume, and each referee's taker volume and, reward and discount factors for a referral se
+        Get the total taker volume, and each referee's taker volume and, reward and discount factors for a referral set
         at the latest or a specific epoch. You can also optionally filter for a specific referee's statistics.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1553,7 +1553,7 @@ class TradingDataServiceServicer(object):
         Export CSV table data from network history between two block heights.
 
         The requested block heights must fall on network history segment boundaries, which can
-        be discovered by calling the API to list all network history segments. By defaul
+        be discovered by calling the API to list all network history segments. By default
         segments contain 1000 blocks. In that case ranges such as (1, 1000), (1001, 2000), (1, 3000)
         would all fall on segment boundaries and be valid.
 
@@ -1583,7 +1583,7 @@ class TradingDataServiceServicer(object):
         The first row of the CSV file is a header that describes the contents of each column
         in subsequent rows.
 
-        Usually the ZIP file will contain only a single CSV file. However it is possible tha
+        Usually the ZIP file will contain only a single CSV file. However it is possible that
         the (from_block, to_block) request spans over a range of blocks in which the underlying
         schema of the database changes. For example, a column may have been added, removed, or renamed.
 

@@ -80,7 +80,7 @@ class CoreStateServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def ListAccounts(self, request, context):
-        """Accounts lis
+        """Accounts list
 
         Get a list of accounts
         """
@@ -89,7 +89,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListAssets(self, request, context):
-        """Assets lis
+        """Assets list
 
         Get a list of assets
         """
@@ -98,7 +98,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListNetworkParameters(self, request, context):
-        """Network parameters lis
+        """Network parameters list
 
         Get a list of network parameters
         """
@@ -107,7 +107,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListNetworkLimits(self, request, context):
-        """Network limits lis
+        """Network limits list
 
         Get a list of network limits
         """
@@ -116,7 +116,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListParties(self, request, context):
-        """Parties lis
+        """Parties list
 
         Get a list of parties
         """
@@ -125,7 +125,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListValidators(self, request, context):
-        """Validators lis
+        """Validators list
 
         Get a list of validators
         """
@@ -134,7 +134,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListMarkets(self, request, context):
-        """Markets lis
+        """Markets list
 
         Get a list of markets
         """
@@ -143,7 +143,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListProposals(self, request, context):
-        """Proposals lis
+        """Proposals list
 
         Get a list of proposals
         """
@@ -152,7 +152,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListMarketsData(self, request, context):
-        """Markets data lis
+        """Markets data list
 
         Get a list of markets data
         """
@@ -161,7 +161,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListVotes(self, request, context):
-        """Votes lis
+        """Votes list
 
         Get a list of votes
         """
@@ -170,7 +170,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListPartiesStake(self, request, context):
-        """Parties stake lis
+        """Parties stake list
 
         Get a list of parties stake
         """
@@ -179,7 +179,7 @@ class CoreStateServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListDelegations(self, request, context):
-        """Delegations lis
+        """Delegations list
 
         Get a list of delegations
         """

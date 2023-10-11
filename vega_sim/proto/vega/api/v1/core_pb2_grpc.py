@@ -79,9 +79,9 @@ class CoreServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def PropagateChainEvent(self, request, context):
-        """Chain even
+        """Chain event
 
-        Propagate a chain even
+        Propagate a chain event
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -97,7 +97,7 @@ class CoreServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def LastBlockHeight(self, request, context):
-        """Blockchain heigh
+        """Blockchain height
 
         Get the height of the last tendermint block
         """
