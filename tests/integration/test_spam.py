@@ -41,8 +41,9 @@ def next_epoch(vega: VegaServiceNull):
 @pytest.mark.integration
 def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaServiceNull):
     """
-    A party who has submitted more than spam.protection.max.CreateReferralSet transactions in the current epoch plus in
-    the current block, should have their transactions submitted in the current block post-block rejected (0062-SPAM-032).
+    A party who has more than 50% of their CreateReferralSet transactions post-block rejected should be banned for 1/48th of an
+    epoch or untill the end of the current epoch (whichever comes first). When banned for the above reason,
+    CreateReferralSet transactions should be pre-block rejected (0062-SPAM-033).
 
     Test1
     spam.protection.max.CreateReferralSet=3
@@ -57,10 +58,12 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
       block1 = 3 (4th tx is rejected)
       block2 = 1 (tx is rejected)
     """
-
+    # Arrange
     vega = vega_spam_service_with_market
-    
-    assert vega.spam_protection == True, "test pre-requisite, need to enable spam protection"
+
+    assert (
+        vega.spam_protection == True
+    ), "test pre-requisite, need to enable spam protection"
 
     create_and_faucet_wallet(vega=vega, wallet=MM_WALLET, symbol="VOTE")
     vega.wait_for_total_catchup()
@@ -70,6 +73,11 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
         parameter="spam.protection.max.createReferralSet",
         new_value="3",
     )
+    vega.update_network_parameter(
+        MM_WALLET.name,
+        parameter="spam.pow.numberOfTxPerBlock",
+        new_value="3",
+    )
 
     create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
     vega.wait_for_total_catchup()
@@ -77,22 +85,41 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
 
     # ACT single block 4 tx
     vega.wait_fn(1)
-    response1 = vega.create_referral_set(key_name=PARTY_A.name)
+    response1 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
     vega.wait_fn(1)
-    response2 = vega.create_referral_set(key_name=PARTY_A.name)
+    response2 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
     vega.wait_fn(1)
-    response3 = vega.create_referral_set(key_name=PARTY_A.name)
+    response3 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
     vega.wait_fn(1)
-    response4 = vega.create_referral_set(key_name=PARTY_A.name)
+    response4 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
     vega.wait_fn(1)
-    response5 = vega.create_referral_set(key_name=PARTY_A.name)
+    response5 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
     vega.wait_fn(1)
-    response6 = vega.create_referral_set(key_name=PARTY_A.name)
+    response6 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+
     vega.wait_fn(1)
-    response7 = vega.create_referral_set(key_name=PARTY_A.name)
-    vega.wait_fn(1)
-    response8 = vega.create_referral_set(key_name=PARTY_A.name)
-    # assert only 3 in block
+
+    # submit goverance transfer
+    market_id = vega.all_markets()[0].id
+
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e3)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
+
+    vega.one_off_transfer(
+        from_key_name=PARTY_A.name,
+        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        to_key_name=PARTY_B.name,
+        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+        asset=asset_id,
+        amount=500,
+    )
 
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
+
+    party_a_accounts_t1 = vega.party_account(
+        key_name=PARTY_A.name,
+        market_id=market_id,
+    )

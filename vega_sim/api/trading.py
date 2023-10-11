@@ -676,6 +676,7 @@ def create_referral_set(
     avatar_url: Optional[str] = None,
     closed: Optional[bool] = None,
     wallet_name: Optional[str] = None,
+    check_tx_fail: bool = True,
 ):
     if any(arg is not None for arg in [name, team_url, avatar_url, closed]):
         is_team = True
@@ -700,6 +701,7 @@ def create_referral_set(
         wallet_name=wallet_name,
         transaction_type="create_referral_set",
         key_name=key_name,
+        check_tx_fail=check_tx_fail,
     )
     logger.debug(f"Submitted a create referral set.")
     return response

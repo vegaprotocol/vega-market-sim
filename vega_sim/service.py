@@ -2781,6 +2781,7 @@ class VegaService(ABC):
         avatar_url: Optional[str] = None,
         closed: Optional[bool] = None,
         wallet_name: Optional[str] = None,
+        check_tx_fail: bool = True,
     ):
         return trading.create_referral_set(
             wallet=self.wallet,
@@ -2790,6 +2791,7 @@ class VegaService(ABC):
             team_url=team_url,
             avatar_url=avatar_url,
             closed=closed,
+            check_tx_fail = check_tx_fail,
         )
 
     def update_referral_set(

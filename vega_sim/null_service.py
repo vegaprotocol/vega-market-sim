@@ -294,7 +294,7 @@ def _update_node_config(
     transactions_per_block: int = 1,
     block_duration: str = "1s",
     use_docker_postgres: bool = False,
-    spam_protection=False
+    spam_protection=False,
 ) -> None:
     config_path = path.join(vega_home, "config", "node", "config.toml")
     config_toml = toml.load(config_path)
@@ -349,7 +349,7 @@ def manage_vega_processes(
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
     log_level: Optional[int] = None,
-    spam_protection:bool = False,
+    spam_protection: bool = False,
 ) -> None:
     logger.addHandler(QueueHandler(log_queue))
     logger.setLevel(log_level if log_level is not None else logging.INFO)
@@ -397,7 +397,7 @@ def manage_vega_processes(
         transactions_per_block=transactions_per_block,
         block_duration=block_duration,
         use_docker_postgres=use_docker_postgres,
-        spam_protection=spam_protection
+        spam_protection=spam_protection,
     )
 
     if use_docker_postgres:
@@ -770,7 +770,7 @@ class VegaServiceNull(VegaService):
             listen_for_high_volume_stream_updates=listen_for_high_volume_stream_updates,
         )
         self.retain_log_files = retain_log_files
-        self.spam_protection=spam_protection
+        self.spam_protection = spam_protection
 
         self._using_all_custom_paths = all(
             [x is not None for x in [vega_path, data_node_path, vega_wallet_path]]
@@ -911,7 +911,7 @@ class VegaServiceNull(VegaService):
                 "store_transactions": self.store_transactions,
                 "replay_from_path": self.replay_from_path,
                 "log_level": logging.getLogger().level,
-                "spam_protection": self.spam_protection
+                "spam_protection": self.spam_protection,
             },
         )
         self.proc.start()

@@ -31,6 +31,7 @@ class Wallet(ABC):
         key_name: str,
         transaction_type: str,
         wallet_name: Optional[str],
+        check_tx_fail: bool = True,
     ):
         """Submits a transaction to Vega core via wallet
 

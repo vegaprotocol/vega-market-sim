@@ -244,6 +244,7 @@ class VegaWallet(Wallet):
         transaction: Any,
         transaction_type: str,
         wallet_name: Optional[int] = None,
+        check_tx_fail: bool = True,
     ):
         wallet_name = (
             wallet_name if wallet_name is not None else self.vega_default_wallet_name
@@ -277,11 +278,12 @@ class VegaWallet(Wallet):
 
         response = requests.post(url, headers=headers, json=submission)
 
-        try:
-            response.raise_for_status()
-        except Exception as e:
-            logging.warning(f"Submission failed, response={response.json()}")
-            raise e
+        if check_tx_fail:
+            try:
+                response.raise_for_status()
+            except Exception as e:
+                logging.warning(f"Submission failed, response={response.json()}")
+                raise e
         return response
 
     def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:

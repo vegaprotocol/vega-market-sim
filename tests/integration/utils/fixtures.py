@@ -179,10 +179,10 @@ def vega_spam_service():
         warn_on_raw_data_access=False,
         run_with_console=False,
         retain_log_files=True,
-        transactions_per_block=5,
+        transactions_per_block=10,
         listen_for_high_volume_stream_updates=False,
         use_full_vega_wallet=True,
-        spam_protection=True
+        spam_protection=True,
     ) as vega:
         yield vega
     logging.debug("vega_spam_service teardown")
