@@ -72,17 +72,17 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
 
     # ACT
     vega.wait_fn(1)
-    response1 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+    response1 = vega.create_referral_set(key_name=PARTY_A.name)
     vega.wait_fn(1)
-    response2 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+    response2 = vega.create_referral_set(key_name=PARTY_A.name)
     vega.wait_fn(1)
-    response3 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+    response3 = vega.create_referral_set(key_name=PARTY_A.name)
     vega.wait_fn(1)
-    response4 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+    response4 = vega.create_referral_set(key_name=PARTY_A.name)
     vega.wait_fn(1)
-    response5 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+    response5 = vega.create_referral_set(key_name=PARTY_A.name)
     vega.wait_fn(1)
-    response6 = vega.create_referral_set(key_name=PARTY_A.name, check_tx_fail=False)
+    response6 = vega.create_referral_set(key_name=PARTY_A.name)
 
     vega.wait_fn(1)
 
