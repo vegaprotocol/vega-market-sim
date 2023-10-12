@@ -256,7 +256,6 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
         try_sock = np.random.randint(10000, 65535)
 
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-            s.settimeout(0.1)
             try:
                 s.connect(("", ret_sock))
             except:
