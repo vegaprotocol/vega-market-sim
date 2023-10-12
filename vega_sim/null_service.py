@@ -24,8 +24,6 @@ from typing import Dict, List, Optional, Set
 
 import docker
 import grpc
-import numpy as np
-import psutil
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
@@ -253,15 +251,10 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
 
     num_tries = 0
     while ret_sock in existing_set:
-        try_sock = np.random.randint(10000, 65535)
-
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-            s.settimeout(1)
-            try:
-                s.connect(("", ret_sock))
-                s.shutdown(socket.SHUT_RDWR)
-            except:
-                ret_sock = try_sock
+            s.bind(("", 0))
+            ret_sock = s.getsockname()[1]
+            s.shutdown(socket.SHUT_RDWR)
 
         num_tries += 1
         if num_tries >= 100:
