@@ -1,9 +1,12 @@
+import json
+import time
 import pytest
 import logging
 from collections import namedtuple
 
 from requests import Response
 import vega_sim.proto.vega as vega_protos
+from google.protobuf.json_format import MessageToDict
 from examples.visualisations.utils import continuous_market, move_market
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
@@ -40,8 +43,54 @@ def next_epoch(vega: VegaServiceNull):
     vega.wait_for_total_catchup()
 
 
+def blocks_from_next_epoch(vega: VegaServiceNull, blocks_from_next_epoch: int = 0):
+    forwards = 0
+
+    vega_stats = vega.statistics()
+    epoch_expiry = time_in_epoch(vega_stats.epoch_expiry_time, False)
+    current_vega_time = time_in_epoch(vega_stats.vega_time, False)
+    time_till_next_epoch = epoch_expiry - current_vega_time - blocks_from_next_epoch
+
+    if time_till_next_epoch < 0:
+        next_epoch(vega)
+        epoch_expiry = time_in_epoch(vega_stats.epoch_expiry_time)
+        current_vega_time = time_in_epoch(vega_stats.vega_time)
+        time_till_next_epoch = epoch_expiry - current_vega_time - blocks_from_next_epoch
+
+    epoch_seq = vega.statistics().epoch_seq
+
+    while epoch_seq == vega.statistics().epoch_seq:
+        vega.wait_fn(1)
+        forwards += 1
+        # next epoch will occur when forwards=122
+        if forwards == time_till_next_epoch:
+            break
+        if forwards > 2 * 10 * 60:
+            raise Exception(
+                "Epoch not started after forwarding the duration of two epochs."
+            )
+    vega.wait_for_total_catchup()
+
+
+def time_in_epoch(value: str, return_in_nanoseconds: bool = True):
+    pattern = "%Y-%m-%dT%H:%M:%SZ %Z"
+    epoch = int(time.mktime(time.strptime(value + " UTC", pattern)))
+    if return_in_nanoseconds:
+        epoch = epoch * 1000000000
+    return epoch
+
+
 @pytest.mark.integration
-def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaServiceNull):
+@pytest.mark.parametrize(
+    "epoch_boundary",
+    [
+        (False,),
+        (True,),
+    ],
+)
+def test_spam_referral_sets_max_epoch(
+    vega_spam_service_with_market: VegaServiceNull, epoch_boundary
+):
     """
     A party who has more than 50% of their CreateReferralSet transactions post-block rejected should be banned for 1/48th of an
     epoch or untill the end of the current epoch (whichever comes first). When banned for the above reason,
@@ -49,107 +98,170 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     """
     # Arrange
     vega = vega_spam_service_with_market
+    max_spam = 3
 
     assert (
         vega.spam_protection == True
     ), "test pre-requisite, need to enable spam protection"
 
     create_and_faucet_wallet(vega=vega, wallet=MM_WALLET, symbol="VOTE")
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
+    referrer_id = vega.wallet.public_key(name=PARTY_A.name)
     vega.wait_for_total_catchup()
+
     # Access the updated value
     vega.update_network_parameter(
         MM_WALLET.name,
         parameter="spam.protection.max.createReferralSet",
-        new_value="7",
+        new_value=str(max_spam),
     )
+
     vega.update_network_parameter(
         MM_WALLET.name,
-        parameter="spam.pow.numberOfTxPerBlock",
-        new_value="3",
+        parameter="validators.epoch.length",
+        new_value="5m",
     )
+    # nanoseconds
+    epoch_duration = 5 * 60 * 1000000000
 
-    create_and_faucet_wallet(vega=vega, wallet=PARTY_A)
-    vega.wait_for_total_catchup()
-    referrer_id = vega.wallet.public_key(name=PARTY_A.name)
+    vega.wait_fn(1)
+    spam_stats = vega.get_spam_statistics(referrer_id)
+    spam_stats = MessageToDict(spam_stats)
+    assert (
+        int(spam_stats["statistics"]["createReferralSet"]["maxForEpoch"]) == max_spam
+    ), "test-prerequisite net param change did not take place"
+    assert (
+        "countForEpoch" not in spam_stats["statistics"]["createReferralSet"]
+    ), f"should not have submitted any create referral sets {spam_stats}"
 
-    wallet_error = "the transaction per block limit has been reached"
+    next_epoch(vega)
+
+    if epoch_boundary[0]:
+        blocks_from_next_epoch(vega, max_spam + 3)
 
     # ACT
-    vega.wait_fn(1)
-    response1: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    response1.raise_for_status()
+    start_epoch = vega.statistics().epoch_seq
 
-    response2: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    response2.raise_for_status()
-    response3: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    response3.raise_for_status()
+    # submit create referral set up to max_spam
+    for _ in range(max_spam):
+        vega.create_referral_set(key_name=PARTY_A.name)
+        vega.wait_fn(1)
 
-    response4: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    assert response4.status_code == 400
-    assert wallet_error in response4.content.decode("utf-8")
+    spam_stats_at_max = vega.get_spam_statistics(referrer_id)
+    spam_stats_at_max = MessageToDict(spam_stats_at_max)
 
-    response5: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    assert response5.status_code == 400
-    assert wallet_error in response5.content.decode("utf-8")
-
-    response6: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    assert response6.status_code == 400
-    assert wallet_error in response6.content.decode("utf-8")
-
-    response7: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    assert response7.status_code == 400
-    assert wallet_error in response7.content.decode("utf-8")
-
-    vega.wait_fn(1)
-
-    # Assert 1
-
-    vega.wait_fn(1)
-    # party should be banned
-    response8: Response = vega.create_referral_set(
-        key_name=PARTY_A.name, check_tx_fail=False
-    )
-    assert response8.status_code == 400
-    assert "party is banned" in response8.content.decode("utf-8")
-
-    # Assert 2
-
-    # submit goverance transfer
-    market_id = vega.all_markets()[0].id
-
-    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e3)
-    vega.wait_for_total_catchup()
-
-    asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
-
-    # expecting wallet rejection and test to fail
-    vega.one_off_transfer(
-        from_key_name=PARTY_A.name,
-        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to_key_name=PARTY_B.name,
-        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        asset=asset_id,
-        amount=500,
-    )
-
-    vega.wait_fn(1)
-    vega.wait_for_total_catchup()
-
-    party_a_accounts_t1 = vega.party_account(
+    # submit one more tx to trigger ban
+    vega.create_referral_set(
         key_name=PARTY_A.name,
-        market_id=market_id,
+        name="name_a",
+        team_url="team_url_a",
+        avatar_url="avatar_url_a",
+        closed=False,
     )
+    vega.wait_fn(1)
+
+    spam_stats_at_ban = vega.get_spam_statistics(referrer_id)
+    spam_stats_at_ban = MessageToDict(spam_stats_at_ban)
+
+    vega_stats = vega.statistics()
+    current_epoch = vega_stats.epoch_seq
+
+    # Assert - test took place in one epoch
+    assert (
+        start_epoch == current_epoch
+    ), "test prerequisite not met, need to be in one epoch"
+
+    # Assert - at max_spam, no ban
+    assert (
+        "countForEpoch" in spam_stats_at_max["statistics"]["createReferralSet"]
+    ), f"should have submitted max create referral sets {spam_stats_at_max}"
+    assert (
+        int(spam_stats_at_max["statistics"]["createReferralSet"]["countForEpoch"])
+        == max_spam
+    ), f"expected to have {max_spam} tx for create referral sets in epoch"
+    assert (
+        "bannedUntil" not in spam_stats_at_max["statistics"]["createReferralSet"]
+    ), f"party should not be banned yet {spam_stats_at_max}"
+
+    # Assert - at max_spam + 1, ban is invoked
+    assert (
+        "bannedUntil" in spam_stats_at_ban["statistics"]["createReferralSet"]
+    ), f"party should be banned {spam_stats_at_ban}"
+
+    banned_until = int(
+        spam_stats_at_ban["statistics"]["createReferralSet"]["bannedUntil"]
+    )
+    epoch_expiry_time = time_in_epoch(vega_stats.epoch_expiry_time)
+
+    # assert the team has not been created
+    team_a = list(vega.list_teams(key_name=PARTY_A.name))
+    assert (
+        len(team_a) == 0
+    ), "party is banned, and did not expect changes to referral set"
+
+    if epoch_boundary[0]:
+        # Assert ban will not be lifted in current epoch
+        assert banned_until > epoch_expiry_time
+
+        # wait for next epoch
+        if vega.statistics().epoch_seq <= current_epoch:
+            next_epoch(vega)
+
+        # Assert ban is lifted start of next epoch
+        spam_stats_at_ban_lifted = MessageToDict(vega.get_spam_statistics(referrer_id))
+        assert (
+            "bannedUntil"
+            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
+        ), f"party should have ban lifted next epoch {spam_stats_at_ban_lifted}"
+
+        # Assert counter for spam statistics is reset
+        assert (
+            "countForEpoch"
+            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
+        ), f"party should have create referral sets count, reset {spam_stats_at_ban_lifted}"
+    else:
+        # Assert ban is within current epoch
+        assert banned_until < epoch_expiry_time
+
+        # Assert ban is 1/48 of epoch
+        ban_start_time = time_in_epoch(vega_stats.vega_time)
+        actual_ban_duration = banned_until - ban_start_time
+        expected_ban_duration = int(epoch_duration / 48)
+        assert expected_ban_duration == actual_ban_duration
+
+        # move forward until the band is lifted and ensure we still in same epoch
+        actual_ban_duration_in_sec = actual_ban_duration / 1000000000
+        blocks_from_next_epoch(vega, actual_ban_duration_in_sec + 1)
+        vega_stats2 = vega.statistics()
+        assert current_epoch == vega_stats2.epoch_seq, "expected to be in same epoch"
+
+        # Assert ban is lifted
+        assert time_in_epoch(vega_stats2.vega_time) > banned_until
+        spam_stats_at_ban_lifted = MessageToDict(vega.get_spam_statistics(referrer_id))
+        assert (
+            "bannedUntil"
+            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
+        ), f"party should have ban lifted next epoch {spam_stats_at_ban_lifted}"
+
+        # spam stats will not reset
+        assert (
+            int(spam_stats_at_max["statistics"]["createReferralSet"]["countForEpoch"])
+            == max_spam
+        ), f"expected to have {max_spam} tx for create referral sets in epoch"
+
+    next_epoch(vega)
+
+    all_referral_sets2 = vega.list_referral_sets()
+    # submit one more tx and confirm changes take place
+    vega.create_referral_set(
+        key_name=PARTY_A.name,
+        name="name_a",
+        team_url="team_url_a",
+        avatar_url="avatar_url_a",
+        closed=False,
+    )
+
+    vega.wait_fn((1))
+    vega.wait_for_total_catchup()
+    team_a = list(vega.list_teams(key_name=PARTY_A.name).keys())
+    print("test")
