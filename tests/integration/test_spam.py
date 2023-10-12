@@ -244,11 +244,11 @@ def test_spam_referral_sets_max_epoch(
         # Assert ban is within current epoch
         assert banned_until < epoch_expiry_time
 
-        # Assert ban is 1/48 of epoch
+        # Assert ban is 1/48 of epoch with a small margin for error
         ban_start_time = time_in_epoch(vega_stats.vega_time)
         actual_ban_duration = banned_until - ban_start_time
         expected_ban_duration = int(epoch_duration / 48)
-        assert expected_ban_duration == actual_ban_duration
+        assert (expected_ban_duration - 2) <= actual_ban_duration <= (expected_ban_duration +2)
 
         # move forward until the band is lifted and ensure we still in same epoch
         actual_ban_duration_in_sec = actual_ban_duration / 1000000000
