@@ -96,7 +96,10 @@ def test_spam_referral_sets_max_epoch(
     epoch or untill the end of the current epoch (whichever comes first). When banned for the above reason,
     CreateReferralSet transactions should be pre-block rejected (0062-SPAM-033).
     """
-    # Arrange
+    #
+    # ARRANGE
+    #
+
     vega = vega_spam_service_with_market
     max_spam = 3
 
@@ -139,7 +142,10 @@ def test_spam_referral_sets_max_epoch(
     if epoch_boundary:
         blocks_from_next_epoch(vega, max_spam + 3)
 
+    #
     # ACT
+    #
+
     start_epoch = vega.statistics().epoch_seq
 
     # submit create referral set up to max_spam
@@ -165,6 +171,10 @@ def test_spam_referral_sets_max_epoch(
         closed=False,
     )
     vega.wait_fn(1)
+
+    #
+    # ASSERT
+    #
 
     spam_stats_at_ban = vega.get_spam_statistics(referrer_id)
     spam_stats_at_ban = MessageToDict(spam_stats_at_ban)
@@ -199,11 +209,14 @@ def test_spam_referral_sets_max_epoch(
     )
     epoch_expiry_time = time_in_epoch(vega_stats.epoch_expiry_time)
 
-    # assert the team has not been created
-    team_a = list(vega.list_teams(key_name=PARTY_A.name))
+    # assert the team only 1 team
+    team_a = vega.list_teams(key_name=PARTY_A.name)
     assert (
-        len(team_a) == 0
+        len(team_a) == 1
     ), "party is banned, and did not expect changes to referral set"
+
+    # assert the created team is first submission
+    assert team_a[list(team_a.keys())[0]].name == "name_0"
 
     if epoch_boundary:
         # Assert ban will not be lifted in current epoch
@@ -254,20 +267,3 @@ def test_spam_referral_sets_max_epoch(
             int(spam_stats_at_max["statistics"]["createReferralSet"]["countForEpoch"])
             == max_spam
         ), f"expected to have {max_spam} tx for create referral sets in epoch"
-
-    next_epoch(vega)
-
-    all_referral_sets2 = vega.list_referral_sets()
-    # submit one more tx and confirm changes take place
-    vega.create_referral_set(
-        key_name=PARTY_A.name,
-        name="name_a",
-        team_url="team_url_a",
-        avatar_url="avatar_url_a",
-        closed=False,
-    )
-
-    vega.wait_fn((1))
-    vega.wait_for_total_catchup()
-    team_a = list(vega.list_teams(key_name=PARTY_A.name).keys())
-    print("test")
