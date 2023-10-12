@@ -9,7 +9,10 @@ import requests
 
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
-from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
+from vega_sim.proto.vega.api.v1.core_pb2 import (
+    StatisticsRequest,
+    GetSpamStatisticsRequest,
+)
 from vega_sim.tools.retry import retry
 
 T = TypeVar("T")
@@ -182,4 +185,14 @@ def forward(time: str, vega_node_url: str) -> None:
 def statistics(core_data_client: VegaCoreClient):
     return retry(
         10, 0.5, lambda: core_data_client.Statistics(StatisticsRequest()).statistics
+    )
+
+
+def get_spam_statistics(core_data_client: VegaCoreClient, party_id: str):
+    return retry(
+        10,
+        0.5,
+        lambda: core_data_client.GetSpamStatistics(
+            GetSpamStatisticsRequest(party_id=party_id)
+        ),
     )

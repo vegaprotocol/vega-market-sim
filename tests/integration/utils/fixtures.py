@@ -181,7 +181,7 @@ def vega_spam_service():
         retain_log_files=True,
         transactions_per_block=10,
         listen_for_high_volume_stream_updates=False,
-        use_full_vega_wallet=True,
+        use_full_vega_wallet=False,
         spam_protection=True,
     ) as vega:
         yield vega

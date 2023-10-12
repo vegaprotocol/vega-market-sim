@@ -28,6 +28,7 @@ from vega_sim.api.helpers import (
     get_enum,
     forward,
     statistics,
+    get_spam_statistics,
     num_to_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
@@ -2709,6 +2710,9 @@ class VegaService(ABC):
     def statistics(self):
         return statistics(core_data_client=self.core_client)
 
+    def get_spam_statistics(self, party_id: str):
+        return get_spam_statistics(core_data_client=self.core_client, party_id=party_id)
+
     def list_assets(self):
         return self.data_cache._asset_from_feed.values()
 
@@ -2781,9 +2785,8 @@ class VegaService(ABC):
         avatar_url: Optional[str] = None,
         closed: Optional[bool] = None,
         wallet_name: Optional[str] = None,
-        check_tx_fail: bool = True,
     ):
-        return trading.create_referral_set(
+        trading.create_referral_set(
             wallet=self.wallet,
             key_name=key_name,
             wallet_name=wallet_name,
@@ -2791,7 +2794,6 @@ class VegaService(ABC):
             team_url=team_url,
             avatar_url=avatar_url,
             closed=closed,
-            check_tx_fail=check_tx_fail,
         )
 
     def update_referral_set(
