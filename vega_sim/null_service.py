@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Set
 
 import docker
 import grpc
+import numpy as np
 import psutil
 import requests
 import toml
@@ -252,9 +253,14 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
 
     num_tries = 0
     while ret_sock in existing_set:
+        try_sock = np.random.randint(10000, 65535)
+
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-            s.bind(("", 0))
-            ret_sock = s.getsockname()[1]
+            s.settimeout(0.1)
+            try:
+                s.connect(("", ret_sock))
+            except:
+                ret_sock = try_sock
 
         num_tries += 1
         if num_tries >= 100:
