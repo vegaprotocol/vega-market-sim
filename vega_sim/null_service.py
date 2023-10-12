@@ -251,10 +251,9 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
 
     num_tries = 0
     while ret_sock in existing_set:
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(("", 0))
             ret_sock = s.getsockname()[1]
-            s.shutdown(socket.SHUT_RDWR)
 
         num_tries += 1
         if num_tries >= 100:
