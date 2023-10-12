@@ -251,7 +251,7 @@ def test_spam_create_referral_sets_in_epoch(
         assert (expected_ban_duration - 2) <= actual_ban_duration <= (expected_ban_duration +2)
 
         # move forward until the band is lifted and ensure we still in same epoch
-        actual_ban_duration_in_sec = actual_ban_duration / 1000000000
+        actual_ban_duration_in_sec = int(actual_ban_duration / 1000000000)
         blocks_from_next_epoch(vega, actual_ban_duration_in_sec + 1)
         vega_stats2 = vega.statistics()
         assert current_epoch == vega_stats2.epoch_seq, "expected to be in same epoch"
