@@ -84,8 +84,8 @@ def time_in_epoch(value: str, return_in_nanoseconds: bool = True):
 @pytest.mark.parametrize(
     "epoch_boundary",
     [
-        (False,),
-        (True,),
+        (False),
+        (True),
     ],
 )
 def test_spam_referral_sets_max_epoch(
@@ -136,15 +136,21 @@ def test_spam_referral_sets_max_epoch(
 
     next_epoch(vega)
 
-    if epoch_boundary[0]:
+    if epoch_boundary:
         blocks_from_next_epoch(vega, max_spam + 3)
 
     # ACT
     start_epoch = vega.statistics().epoch_seq
 
     # submit create referral set up to max_spam
-    for _ in range(max_spam):
-        vega.create_referral_set(key_name=PARTY_A.name)
+    for i in range(max_spam):
+        vega.create_referral_set(
+            key_name=PARTY_A.name,
+            name=f"name_{i}",
+            team_url="team_url_a",
+            avatar_url="avatar_url_a",
+            closed=False,
+        )
         vega.wait_fn(1)
 
     spam_stats_at_max = vega.get_spam_statistics(referrer_id)
@@ -153,9 +159,9 @@ def test_spam_referral_sets_max_epoch(
     # submit one more tx to trigger ban
     vega.create_referral_set(
         key_name=PARTY_A.name,
-        name="name_a",
-        team_url="team_url_a",
-        avatar_url="avatar_url_a",
+        name="name_x",
+        team_url="team_url_x",
+        avatar_url="avatar_url_x",
         closed=False,
     )
     vega.wait_fn(1)
@@ -199,7 +205,7 @@ def test_spam_referral_sets_max_epoch(
         len(team_a) == 0
     ), "party is banned, and did not expect changes to referral set"
 
-    if epoch_boundary[0]:
+    if epoch_boundary:
         # Assert ban will not be lifted in current epoch
         assert banned_until > epoch_expiry_time
 
