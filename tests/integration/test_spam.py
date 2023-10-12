@@ -88,7 +88,7 @@ def time_in_epoch(value: str, return_in_nanoseconds: bool = True):
         (True),
     ],
 )
-def test_spam_referral_sets_max_epoch(
+def test_spam_create_referral_sets_in_epoch(
     vega_spam_service_with_market: VegaServiceNull, epoch_boundary
 ):
     """
