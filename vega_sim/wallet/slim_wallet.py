@@ -141,6 +141,7 @@ class SlimWallet(Wallet):
         transaction: Any,
         transaction_type: str,
         wallet_name: Optional[str] = None,
+        check_tx_fail: bool = True,
     ):
         # if self.remaining_until_height_update <= 0:
         #     self.block_height = self.core_client.LastBlockHeight(
