@@ -35,7 +35,7 @@ def next_epoch(vega: VegaServiceNull):
     while epoch_seq == vega.statistics().epoch_seq:
         vega.wait_fn(1)
         forwards += 1
-        if forwards > 2 * 10 * 60:
+        if forwards > 6 * 10 * 60:
             raise Exception(
                 "Epoch not started after forwarding the duration of two epochs."
             )
@@ -65,7 +65,7 @@ def blocks_from_next_epoch(vega: VegaServiceNull, blocks_from_next_epoch: int = 
         # next epoch will occur when forwards=122
         if forwards == time_till_next_epoch:
             break
-        if forwards > 2 * 10 * 60:
+        if forwards > 6 * 10 * 60:
             raise Exception(
                 "Epoch not started after forwarding the duration of two epochs."
             )
@@ -102,6 +102,8 @@ def test_spam_referral_sets_max_epoch(
 
     vega = vega_spam_service_with_market
     max_spam = 3
+    # in minutes
+    epoch_length=60
 
     assert (
         vega.spam_protection == True
@@ -122,10 +124,10 @@ def test_spam_referral_sets_max_epoch(
     vega.update_network_parameter(
         MM_WALLET.name,
         parameter="validators.epoch.length",
-        new_value="5m",
+        new_value=f"{epoch_length}m",
     )
     # nanoseconds
-    epoch_duration = 5 * 60 * 1000000000
+    epoch_duration = epoch_length * 60 * 1000000000
 
     vega.wait_fn(1)
     spam_stats = vega.get_spam_statistics(referrer_id)
