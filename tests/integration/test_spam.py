@@ -1,6 +1,8 @@
 import pytest
 import logging
 from collections import namedtuple
+
+from requests import Response
 import vega_sim.proto.vega as vega_protos
 from examples.visualisations.utils import continuous_market, move_market
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
@@ -58,7 +60,7 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     vega.update_network_parameter(
         MM_WALLET.name,
         parameter="spam.protection.max.createReferralSet",
-        new_value="3",
+        new_value="7",
     )
     vega.update_network_parameter(
         MM_WALLET.name,
@@ -70,23 +72,61 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
     vega.wait_for_total_catchup()
     referrer_id = vega.wallet.public_key(name=PARTY_A.name)
 
+    wallet_error = "the transaction per block limit has been reached"
+
     # ACT
     vega.wait_fn(1)
-    response1 = vega.create_referral_set(key_name=PARTY_A.name)
-    vega.wait_fn(1)
-    response2 = vega.create_referral_set(key_name=PARTY_A.name)
-    vega.wait_fn(1)
-    response3 = vega.create_referral_set(key_name=PARTY_A.name)
-    vega.wait_fn(1)
-    response4 = vega.create_referral_set(key_name=PARTY_A.name)
-    vega.wait_fn(1)
-    response5 = vega.create_referral_set(key_name=PARTY_A.name)
-    vega.wait_fn(1)
-    response6 = vega.create_referral_set(key_name=PARTY_A.name)
+    response1: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    response1.raise_for_status()
+
+    response2: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    response2.raise_for_status()
+    response3: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    response3.raise_for_status()
+
+    response4: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    assert response4.status_code == 400
+    assert wallet_error in response4.content.decode("utf-8")
+
+    response5: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    assert response5.status_code == 400
+    assert wallet_error in response5.content.decode("utf-8")
+
+    response6: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    assert response6.status_code == 400
+    assert wallet_error in response6.content.decode("utf-8")
+
+    response7: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    assert response7.status_code == 400
+    assert wallet_error in response7.content.decode("utf-8")
 
     vega.wait_fn(1)
 
-    # Assert
+    # Assert 1
+
+    vega.wait_fn(1)
+    # party should be banned
+    response8: Response = vega.create_referral_set(
+        key_name=PARTY_A.name, check_tx_fail=False
+    )
+    assert response8.status_code == 400
+    assert "party is banned" in response8.content.decode("utf-8")
+
+    # Assert 2
 
     # submit goverance transfer
     market_id = vega.all_markets()[0].id
@@ -96,6 +136,7 @@ def test_spam_referral_sets_max_block(vega_spam_service_with_market: VegaService
 
     asset_id = vega.find_asset_id(symbol=ASSET_NAME, raise_on_missing=True)
 
+    # expecting wallet rejection and test to fail
     vega.one_off_transfer(
         from_key_name=PARTY_A.name,
         from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
