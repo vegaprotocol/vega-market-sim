@@ -260,6 +260,7 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
                 s.connect(("", ret_sock))
             except:
                 ret_sock = try_sock
+            s.shutdown()
 
         num_tries += 1
         if num_tries >= 100:
