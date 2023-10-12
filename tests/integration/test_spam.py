@@ -4,7 +4,6 @@ import pytest
 import logging
 from collections import namedtuple
 
-from requests import Response
 import vega_sim.proto.vega as vega_protos
 from google.protobuf.json_format import MessageToDict
 from examples.visualisations.utils import continuous_market, move_market
@@ -17,8 +16,6 @@ from tests.integration.utils.fixtures import (
     WalletConfig,
     create_and_faucet_wallet,
     vega_spam_service,
-    vega_service_with_high_volume,
-    vega_service_with_high_volume_with_market,
     vega_spam_service_with_market,
 )
 from vega_sim.null_service import VegaServiceNull
@@ -27,6 +24,8 @@ LIQ = WalletConfig("liq", "liq")
 PARTY_A = WalletConfig("party_a", "party_a")
 PARTY_B = WalletConfig("party_b", "party_b")
 PARTY_C = WalletConfig("party_c", "party_c")
+# in minutes
+EPOCH_LENGTH = 60
 
 
 def next_epoch(vega: VegaServiceNull):
@@ -35,7 +34,7 @@ def next_epoch(vega: VegaServiceNull):
     while epoch_seq == vega.statistics().epoch_seq:
         vega.wait_fn(1)
         forwards += 1
-        if forwards > 6 * 10 * 60:
+        if forwards > 60 * EPOCH_LENGTH:
             raise Exception(
                 "Epoch not started after forwarding the duration of two epochs."
             )
@@ -49,13 +48,9 @@ def blocks_from_next_epoch(vega: VegaServiceNull, blocks_from_next_epoch: int = 
     vega_stats = vega.statistics()
     epoch_expiry = time_in_epoch(vega_stats.epoch_expiry_time, False)
     current_vega_time = time_in_epoch(vega_stats.vega_time, False)
-    time_till_next_epoch = epoch_expiry - current_vega_time - blocks_from_next_epoch
+    time_close_to_next_epoch = epoch_expiry - current_vega_time - blocks_from_next_epoch
 
-    if time_till_next_epoch < 0:
-        next_epoch(vega)
-        epoch_expiry = time_in_epoch(vega_stats.epoch_expiry_time)
-        current_vega_time = time_in_epoch(vega_stats.vega_time)
-        time_till_next_epoch = epoch_expiry - current_vega_time - blocks_from_next_epoch
+    assert time_close_to_next_epoch > 1, "Test-prerequisite, roll to next epoch first"
 
     epoch_seq = vega.statistics().epoch_seq
 
@@ -63,9 +58,9 @@ def blocks_from_next_epoch(vega: VegaServiceNull, blocks_from_next_epoch: int = 
         vega.wait_fn(1)
         forwards += 1
         # next epoch will occur when forwards=122
-        if forwards == time_till_next_epoch:
+        if forwards == time_close_to_next_epoch:
             break
-        if forwards > 6 * 10 * 60:
+        if forwards > 60 * EPOCH_LENGTH:
             raise Exception(
                 "Epoch not started after forwarding the duration of two epochs."
             )
@@ -102,8 +97,6 @@ def test_spam_create_referral_sets_in_epoch(
 
     vega = vega_spam_service_with_market
     max_spam = 3
-    # in minutes
-    epoch_length=60
 
     assert (
         vega.spam_protection == True
@@ -124,10 +117,10 @@ def test_spam_create_referral_sets_in_epoch(
     vega.update_network_parameter(
         MM_WALLET.name,
         parameter="validators.epoch.length",
-        new_value=f"{epoch_length}m",
+        new_value=f"{EPOCH_LENGTH}m",
     )
     # nanoseconds
-    epoch_duration = epoch_length * 60 * 1000000000
+    epoch_duration = EPOCH_LENGTH * 60 * 1000000000
 
     vega.wait_fn(1)
     spam_stats = vega.get_spam_statistics(referrer_id)
@@ -248,7 +241,11 @@ def test_spam_create_referral_sets_in_epoch(
         ban_start_time = time_in_epoch(vega_stats.vega_time)
         actual_ban_duration = banned_until - ban_start_time
         expected_ban_duration = int(epoch_duration / 48)
-        assert (expected_ban_duration - 2) <= actual_ban_duration <= (expected_ban_duration +2)
+        assert (
+            (expected_ban_duration - 2)
+            <= actual_ban_duration
+            <= (expected_ban_duration + 2)
+        )
 
         # move forward until the band is lifted and ensure we still in same epoch
         actual_ban_duration_in_sec = int(actual_ban_duration / 1000000000)
