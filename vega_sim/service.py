@@ -2407,6 +2407,7 @@ class VegaService(ABC):
                     notional_time_weighted_average_position_requirement,
                     markets,
                     team_scope,
+                    rank_table,
                 ]
             ]
         ):

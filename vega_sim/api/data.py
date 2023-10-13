@@ -2245,7 +2245,7 @@ def dispatch_strategy(
         entity_scope=entity_scope,
         individual_scope=(
             individual_scope
-            if entity_scope is vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
+            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS
             else None
         ),
         window_length=(
@@ -2261,7 +2261,7 @@ def dispatch_strategy(
         ),
         n_top_performers=(
             str(n_top_performers)
-            if entity_scope is vega_protos.vega.ENTITY_SCOPE_TEAMS
+            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS
             else None
         ),
     )

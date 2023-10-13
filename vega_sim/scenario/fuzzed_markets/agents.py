@@ -4,6 +4,7 @@ import os
 from typing import Optional, Dict, List
 
 import pandas as pd
+from numpy import array
 from numpy.random import RandomState
 from datetime import datetime
 
@@ -1143,11 +1144,57 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
 class FuzzyRewardFunder(StateAgentWithWallet):
     NAME_BASE = "fuzzy_reward_funder"
 
+    # List of valid dispatch metrics
+    DISPATCH_METRICS = [
+        vega_protos.vega.DISPATCH_METRIC_UNSPECIFIED,
+        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
+        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
+        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
+        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
+        vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
+        vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
+        vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
+        vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
+    ]
+    # Map of valid dispatch metrics to relevant account type
+    ACCOUNT_TYPES = {
+        vega_protos.vega.DISPATCH_METRIC_UNSPECIFIED: vega_protos.vega.ACCOUNT_TYPE_UNSPECIFIED,
+        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID: vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
+        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED: vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
+        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED: vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
+        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE: vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
+        vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION: vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
+        vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN: vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
+        vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY: vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
+        vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING: vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
+    }
+
+    # List of valid entity scopes
+    ENTITY_SCOPE = {
+        vega_protos.vega.ENTITY_SCOPE_UNSPECIFIED: 0.1,
+        vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS: 0.45,
+        vega_protos.vega.ENTITY_SCOPE_TEAMS: 0.45,
+    }
+    # List of valid individual scopes
+    INDIVIDUAL_SCOPE = {
+        vega_protos.vega.INDIVIDUAL_SCOPE_UNSPECIFIED: 0.1,
+        vega_protos.vega.INDIVIDUAL_SCOPE_ALL: 0.3,
+        vega_protos.vega.INDIVIDUAL_SCOPE_IN_TEAM: 0.3,
+        vega_protos.vega.INDIVIDUAL_SCOPE_NOT_IN_TEAM: 0.3,
+    }
+    # List of valid distribution strategies
+    DISTRIBUTION_STRATEGIES = {
+        vega_protos.vega.DISTRIBUTION_STRATEGY_UNSPECIFIED: 0.1,
+        vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA: 0.45,
+        vega_protos.vega.DISTRIBUTION_STRATEGY_RANK: 0.45,
+    }
+
     def __init__(
         self,
         key_name: str,
         asset_name: str,
         step_bias: float = 0.1,
+        validity_bias: float = 0.8,
         attempts_per_step: int = 20,
         initial_mint: float = 1e9,
         wallet_name: Optional[str] = None,
@@ -1161,6 +1208,7 @@ class FuzzyRewardFunder(StateAgentWithWallet):
         self.initial_mint = initial_mint
         self.stake_key = stake_key
         self.step_bias = step_bias
+        self.validity_bias = validity_bias
         self.attempts_per_step = attempts_per_step
 
         self.random_state = random_state if random_state is not None else RandomState()
@@ -1201,84 +1249,165 @@ class FuzzyRewardFunder(StateAgentWithWallet):
                 continue
 
     def _fuzzed_transfer(self, vega_state):
+        # Pick transfer durations
         current_epoch = self.vega.statistics().epoch_seq
-        rank_table = [
-            None,
-            [
-                vega_protos.vega.Rank(
-                    start_rank=self.random_state.randint(1, 100),
-                    share_ratio=self.random_state.randint(1, 100),
-                )
-                for _ in range(5)
-            ],
-        ]
+        start_epoch = self._pick_start_epoch(current_epoch)
+        end_epoch = self._pick_end_epoch(start_epoch)
+
+        # Pick driving parameters
+        entity_scope = self.random_state.choice(
+            list(self.ENTITY_SCOPE.keys()), p=list(self.ENTITY_SCOPE.values())
+        )
+        dispatch_metric = self.random_state.choice(self.DISPATCH_METRICS)
+        distribution_strategy = self.random_state.choice(
+            list(self.DISTRIBUTION_STRATEGIES.keys()),
+            p=list(self.DISTRIBUTION_STRATEGIES.values()),
+        )
+
         self.vega.recurring_transfer(
+            start_epoch=start_epoch,
+            end_epoch=end_epoch,
+            asset=self.asset_id,
+            amount=self.random_state.normal(loc=150, scale=10),
             from_wallet_name=self.wallet_name,
             from_key_name=self.key_name,
+            asset_for_metric=self._pick_asset_for_metric(dispatch_metric),
+            metric=dispatch_metric,
             from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to_account_type=self.random_state.choice(
-                [
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
-                    vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
-                ]
-            ),
-            asset=self.asset_id,
-            amount=self.random_state.normal(loc=100, scale=100),
-            start_epoch=current_epoch + self.random_state.randint(-1, 5),
-            end_epoch=current_epoch + self.random_state.randint(-1, 20),
+            to_account_type=self._pick_account_type(dispatch_metric),
             factor=self.random_state.rand(),
-            asset_for_metric=self.random_state.choice([None, self.asset_id]),
-            metric=self.random_state.choice(
-                [
-                    vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
-                    vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
-                    vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
-                    vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
-                    vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
-                    vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
-                    vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
-                    vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
-                ]
-            ),
-            markets=self.random_state.choice(list(vega_state.market_state.keys())),
-            entity_scope=self.random_state.choice(
-                [
-                    vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS,
-                    vega_protos.vega.ENTITY_SCOPE_TEAMS,
-                ]
-            ),
-            individual_scope=self.random_state.choice(
-                [
-                    vega_protos.vega.INDIVIDUAL_SCOPE_ALL,
-                    vega_protos.vega.INDIVIDUAL_SCOPE_IN_TEAM,
-                    vega_protos.vega.INDIVIDUAL_SCOPE_NOT_IN_TEAM,
-                ]
-            ),
-            n_top_performers=self.random_state.rand(),
-            notional_time_weighted_average_position_requirement=int(
-                self.random_state.normal(
-                    loc=1000,
-                    scale=100,
-                )
-            ),
-            window_length=self.random_state.choice(
-                [None, self.random_state.randint(0, 40)]
-            ),
-            lock_period=self.random_state.choice(
-                [None, self.random_state.randint(0, 40)]
-            ),
-            distribution_strategy=self.random_state.choice(
-                [
-                    None,
-                    vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA,
-                    vega_protos.vega.DISTRIBUTION_STRATEGY_RANK,
-                ]
-            ),
-            # rank_table=self.random_state.choice(rank_table),
+            markets=self._pick_markets(list(vega_state.market_state.keys())),
+            entity_scope=entity_scope,
+            individual_scope=self._pick_individual_scope(entity_scope),
+            n_top_performers=self._pick_n_top_performers(entity_scope),
+            notional_time_weighted_average_position_requirement=self._pick_notional_time_weighted_average_position_requirement(),
+            window_length=self._pick_window_length(dispatch_metric),
+            lock_period=self._pick_window_length(dispatch_metric),
+            distribution_strategy=distribution_strategy,
+            rank_table=self._pick_rank_table(distribution_strategy),
         )
+
+    def _valid(self):
+        return self.random_state.rand() < self.validity_bias
+
+    def _pick_start_epoch(self, current_epoch):
+        """Given a current_epoch, pick either a valid or random start_epoch."""
+        if self._valid():
+            return current_epoch + self.random_state.randint(1, 5)
+        else:
+            return max(current_epoch + self.random_state.randint(-5, 5), 0)
+
+    def _pick_end_epoch(self, start_epoch):
+        """Given a start_epoch, pick either a valid or random end_epoch."""
+        if self._valid():
+            return start_epoch + self.random_state.randint(1, 5)
+        else:
+            return max(start_epoch + self.random_state.randint(-5, 5), 0)
+
+    def _pick_account_type(self, dispatch_metric):
+        """Given a dispatch_metric, pick either a valid or random account_type."""
+        if self._valid():
+            return self.ACCOUNT_TYPES[dispatch_metric]
+        else:
+            return self.random_state.choice([None] + list(self.ACCOUNT_TYPES.values()))
+
+    def _pick_asset_for_metric(self, dispatch_metric):
+        """Given a dispatch_metric, pick either a valid or random asset_for_metric."""
+        if self._valid():
+            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE:
+                return None
+            else:
+                return self.asset_id
+        else:
+            return self.random_state.choice([None, self.asset_id])
+
+    def _pick_individual_scope(self, entity_scope):
+        """Given an entity_scope, pick either a valid or random individual_scope."""
+        if self._valid():
+            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS:
+                return self.random_state.choice(
+                    list(self.INDIVIDUAL_SCOPE.keys()),
+                    p=list(self.INDIVIDUAL_SCOPE.values()),
+                )
+            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS:
+                return None
+        else:
+            return self.random_state.choice([None] + list(self.INDIVIDUAL_SCOPE.keys()))
+
+    def _pick_n_top_performers(self, entity_scope):
+        """Given an entity_scope, pick either a valid or random n_top_performers."""
+        if self._valid():
+            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS:
+                return None
+            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS:
+                return self.random_state.rand()
+        else:
+            return self.random_state.choice([None, self.random_state.rand()])
+
+    def _pick_markets(self, markets):
+        """Given a list of markets, pick either no markets or a subset of markets"""
+        if self.random_state.rand() < 0.5:
+            return None
+        else:
+            return self.random_state.choice(
+                markets, self.random_state.randint(1, len(markets))
+            )
+
+    def _pick_notional_time_weighted_average_position_requirement(self):
+        """Pick a random notional_time_weighted_average_position_requirement"""
+        return self.random_state.choice([None, self.random_state.randint(0, 1000)])
+
+    def _pick_window_length(self, dispatch_metric):
+        """Given a dispatch_metric, pick either a valid or random window_length"""
+        if self._valid():
+            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE:
+                return None
+            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY:
+                return self.random_state.randint(2, 5)
+            return self.random_state.randint(1, 5)
+        else:
+            return self.random_state.choice([None, self.random_state.randint(0, 5)])
+
+    def _pick_lock_period(self):
+        """Pick either a valid or random lock_period"""
+        if self._valid():
+            return self.random_state.randint(0, 5)
+        else:
+            return self.random_state.choice([None, self.random_state.randint(0, 5)])
+
+    def _pick_rank_table(self, distribution_strategy):
+        """Given a distribution_strategy, pick either a valid or random rank_table"""
+        if self._valid():
+            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA:
+                return None
+            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_RANK:
+                rank_table = [
+                    vega_protos.vega.Rank(
+                        start_rank=1,
+                        share_ratio=self.random_state.randint(1, 100),
+                    )
+                ]
+                for _ in range(self.random_state.randint(1, 10)):
+                    rank_table.append(
+                        vega_protos.vega.Rank(
+                            start_rank=rank_table[-1].start_rank
+                            + self.random_state.randint(1, 10),
+                            share_ratio=self.random_state.randint(1, 10),
+                        )
+                    )
+                return rank_table
+            return self.random_state.choice(
+                array(
+                    [
+                        None,
+                        [
+                            vega_protos.vega.Rank(
+                                start_rank=self.random_state.randint(1, 10),
+                                share_ratio=self.random_state.randint(1, 10),
+                            )
+                            for _ in range(5)
+                        ],
+                    ],
+                    dtype=object,
+                )
+            )
