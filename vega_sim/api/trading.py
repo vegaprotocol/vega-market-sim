@@ -707,6 +707,7 @@ def create_referral_set(
 def update_referral_set(
     wallet: Wallet,
     key_name: str,
+    referral_set_id: str,
     name: Optional[str] = None,
     team_url: Optional[str] = None,
     avatar_url: Optional[str] = None,
@@ -718,13 +719,14 @@ def update_referral_set(
     else:
         is_team = False
     command = vega_protos.commands.v1.commands.UpdateReferralSet(
+        id=referral_set_id,
         is_team=is_team,
     )
     if is_team:
         if (name is None) or (closed is None):
             raise ValueError("If one team arg passed, all team args must be passed.")
         command.team.CopyFrom(
-            vega_protos.commands.v1.commands.CreateReferralSet.Team(
+            vega_protos.commands.v1.commands.UpdateReferralSet.Team(
                 name=name,
                 team_url=team_url if team_url is not None else "team_url",
                 avatar_url=avatar_url if avatar_url is not None else "avatar_url",

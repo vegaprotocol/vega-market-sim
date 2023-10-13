@@ -2799,6 +2799,7 @@ class VegaService(ABC):
     def update_referral_set(
         self,
         key_name: str,
+        referral_set_id: str,
         name: Optional[str] = None,
         team_url: Optional[str] = None,
         avatar_url: Optional[str] = None,
@@ -2808,6 +2809,7 @@ class VegaService(ABC):
         trading.update_referral_set(
             wallet=self.wallet,
             key_name=key_name,
+            referral_set_id=referral_set_id,
             wallet_name=wallet_name,
             name=name,
             team_url=team_url,
