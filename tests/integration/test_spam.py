@@ -75,7 +75,7 @@ def time_in_epoch(value: str, return_in_nanoseconds: bool = True):
     return epoch
 
 
-@pytest.mark.integration
+@pytest.mark.spam
 @pytest.mark.parametrize(
     "epoch_boundary",
     [
@@ -215,55 +215,63 @@ def test_spam_create_referral_sets_in_epoch(
     assert team_a[list(team_a.keys())[0]].name == "name_0"
 
     if epoch_boundary:
-        # Assert ban will not be lifted in current epoch
-        assert banned_until > epoch_expiry_time
-
-        # wait for next epoch
-        if vega.statistics().epoch_seq <= current_epoch:
-            next_epoch(vega)
-
-        # Assert ban is lifted start of next epoch
-        spam_stats_at_ban_lifted = MessageToDict(vega.get_spam_statistics(referrer_id))
-        assert (
-            "bannedUntil"
-            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
-        ), f"party should have ban lifted next epoch {spam_stats_at_ban_lifted}"
-
-        # Assert counter for spam statistics is reset
-        assert (
-            "countForEpoch"
-            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
-        ), f"party should have create referral sets count, reset {spam_stats_at_ban_lifted}"
+        assert_ban_lifted_next_epoch(vega, referrer_id, current_epoch, banned_until, epoch_expiry_time)
     else:
-        # Assert ban is within current epoch
-        assert banned_until < epoch_expiry_time
+        assert_ban_lifted_in_epoch(vega, max_spam, referrer_id, epoch_duration, spam_stats_at_max, vega_stats, current_epoch, banned_until, epoch_expiry_time)
 
-        # Assert ban is 1/48 of epoch with a small margin for error
-        ban_start_time = time_in_epoch(vega_stats.vega_time)
-        actual_ban_duration = banned_until - ban_start_time
-        expected_ban_duration = int(epoch_duration / 48)
-        assert (
+
+def assert_ban_lifted_in_epoch(vega, max_spam, referrer_id, epoch_duration, spam_stats_at_max, vega_stats, current_epoch, banned_until, epoch_expiry_time):
+    # Assert ban is within current epoch
+    assert banned_until < epoch_expiry_time
+
+    # Assert ban is 1/48 of epoch with a small margin for error
+    ban_start_time = time_in_epoch(vega_stats.vega_time)
+    actual_ban_duration = banned_until - ban_start_time
+    expected_ban_duration = int(epoch_duration / 48)
+    assert (
             (expected_ban_duration - 2)
             <= actual_ban_duration
             <= (expected_ban_duration + 2)
         )
 
-        # move forward until the band is lifted and ensure we still in same epoch
-        actual_ban_duration_in_sec = int(actual_ban_duration / 1000000000)
-        blocks_from_next_epoch(vega, actual_ban_duration_in_sec + 1)
-        vega_stats2 = vega.statistics()
-        assert current_epoch == vega_stats2.epoch_seq, "expected to be in same epoch"
+    # move forward until the band is lifted and ensure we still in same epoch
+    actual_ban_duration_in_sec = int(actual_ban_duration / 1000000000)
+    blocks_from_next_epoch(vega, actual_ban_duration_in_sec + 1)
+    vega_stats2 = vega.statistics()
+    assert current_epoch == vega_stats2.epoch_seq, "expected to be in same epoch"
 
-        # Assert ban is lifted
-        assert time_in_epoch(vega_stats2.vega_time) > banned_until
-        spam_stats_at_ban_lifted = MessageToDict(vega.get_spam_statistics(referrer_id))
-        assert (
+    # Assert ban is lifted
+    assert time_in_epoch(vega_stats2.vega_time) > banned_until
+    spam_stats_at_ban_lifted = MessageToDict(vega.get_spam_statistics(referrer_id))
+    assert (
             "bannedUntil"
             not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
         ), f"party should have ban lifted next epoch {spam_stats_at_ban_lifted}"
 
-        # spam stats will not reset
-        assert (
+    # spam stats will not reset
+    assert (
             int(spam_stats_at_max["statistics"]["createReferralSet"]["countForEpoch"])
             == max_spam
         ), f"expected to have {max_spam} tx for create referral sets in epoch"
+
+
+def assert_ban_lifted_next_epoch(vega, referrer_id, current_epoch, banned_until, epoch_expiry_time):
+    # Assert ban will not be lifted in current epoch
+    assert banned_until > epoch_expiry_time
+
+    # wait for next epoch
+    if vega.statistics().epoch_seq <= current_epoch:
+        next_epoch(vega)
+
+    # Assert ban is lifted start of next epoch
+    spam_stats_at_ban_lifted = MessageToDict(vega.get_spam_statistics(referrer_id))
+    assert (
+            "bannedUntil"
+            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
+        ), f"party should have ban lifted next epoch {spam_stats_at_ban_lifted}"
+
+        # Assert counter for spam statistics is reset
+    assert (
+            "countForEpoch"
+            not in spam_stats_at_ban_lifted["statistics"]["createReferralSet"]
+        ), f"party should have create referral sets count, reset {spam_stats_at_ban_lifted}"
