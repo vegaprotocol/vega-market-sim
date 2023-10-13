@@ -527,10 +527,10 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
         )
-        self.GetReferralFeeStats = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
+        self.GetFeesStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetFeesStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsResponse.FromString,
         )
         self.GetCurrentVolumeDiscountProgram = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetCurrentVolumeDiscountProgram",
@@ -1522,10 +1522,10 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def GetReferralFeeStats(self, request, context):
-        """Get referral fee statistics
+    def GetFeesStats(self, request, context):
+        """Get fees statistics
 
-        Gets accumulated rewards and discount information for a given asset or market for the latest epoch
+        Gets accumulated fees, rewards, and applied discount information for a given asset or market for the latest epoch
         or a specific epoch.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -2136,10 +2136,10 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.SerializeToString,
         ),
-        "GetReferralFeeStats": grpc.unary_unary_rpc_method_handler(
-            servicer.GetReferralFeeStats,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.SerializeToString,
+        "GetFeesStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetFeesStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsResponse.SerializeToString,
         ),
         "GetCurrentVolumeDiscountProgram": grpc.unary_unary_rpc_method_handler(
             servicer.GetCurrentVolumeDiscountProgram,
@@ -5131,7 +5131,7 @@ class TradingDataService(object):
         )
 
     @staticmethod
-    def GetReferralFeeStats(
+    def GetFeesStats(
         request,
         target,
         options=(),
@@ -5146,9 +5146,9 @@ class TradingDataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            "/datanode.api.v2.TradingDataService/GetReferralFeeStats",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralFeeStatsResponse.FromString,
+            "/datanode.api.v2.TradingDataService/GetFeesStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsResponse.FromString,
             options,
             channel_credentials,
             insecure,
