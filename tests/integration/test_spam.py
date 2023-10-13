@@ -124,6 +124,7 @@ def test_spam_create_referral_sets_in_epoch(
 
     vega.wait_fn(1)
     spam_stats = vega.get_spam_statistics(referrer_id)
+    logging.info(f"the spam stats are: {spam_stats=}")
     spam_stats = MessageToDict(spam_stats)
     assert (
         int(spam_stats["statistics"]["createReferralSet"]["maxForEpoch"]) == max_spam
