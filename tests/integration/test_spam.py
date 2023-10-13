@@ -123,9 +123,9 @@ def test_spam_create_referral_sets_in_epoch(
     epoch_duration = EPOCH_LENGTH * 60 * 1000000000
 
     vega.wait_fn(1)
-    spam_stats = vega.get_spam_statistics(referrer_id)
+    spam_stats_response = vega.get_spam_statistics(referrer_id)
+    spam_stats = MessageToDict(spam_stats_response)
     logging.info(f"the spam stats are: {spam_stats=}")
-    spam_stats = MessageToDict(spam_stats)
     assert (
         int(spam_stats["statistics"]["createReferralSet"]["maxForEpoch"]) == max_spam
     ), "test-prerequisite net param change did not take place"
