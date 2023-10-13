@@ -75,7 +75,7 @@ def time_in_epoch(value: str, return_in_nanoseconds: bool = True):
     return epoch
 
 
-@pytest.mark.spam
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "epoch_boundary",
     [
@@ -238,7 +238,7 @@ def test_spam_create_referral_sets_in_epoch(
         )
 
 
-@pytest.mark.spam
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "epoch_boundary",
     [
@@ -413,7 +413,7 @@ def test_spam_update_referral_sets_in_epoch(
         )
 
 
-@pytest.mark.spam
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "epoch_boundary",
     [
