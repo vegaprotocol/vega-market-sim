@@ -29,6 +29,7 @@ from vega_sim.api.helpers import (
     forward,
     statistics,
     num_to_padded_int,
+    num_from_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
 )
@@ -1298,6 +1299,9 @@ class VegaService(ABC):
         return data_raw.market_info(
             market_id=market_id, data_client=self.trading_data_client_v2
         )
+
+    def last_trade_price(self, market_id: str) -> float:
+        return self.market_data_from_feed(market_id=market_id).last_traded_price
 
     @raw_data
     def market_data_from_feed(

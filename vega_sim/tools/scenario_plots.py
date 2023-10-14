@@ -445,7 +445,7 @@ def plot_price_comparison(
     )
 
     ax0.set_ylabel("PRICE")
-    ax0.legend(labels=["external price", "mark price"])
+    ax0.legend(labels=["mark price", "external price"])
 
 
 def plot_risky_close_outs(
@@ -545,6 +545,51 @@ def plot_risky_close_outs(
     ax1r.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
 
 
+def price_comp_plots(run_name: Optional[str] = None) -> Figure:
+    data_df = load_market_data_df(run_name=run_name)
+    fuzzing_df = load_fuzzing_df(run_name=run_name)
+
+    market_chains = load_market_chain(run_name=run_name)
+    if not market_chains:
+        market_chains = {
+            market_id: [market_id] for market_id in data_df["market_id"].unique()
+        }
+
+    figs = {}
+    for market_id, market_children in market_chains.items():
+        market_data_df = _series_df_to_single_series(
+            data_df[data_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+        market_fuzzing_df = _series_df_to_single_series(
+            fuzzing_df[fuzzing_df["market_id"].isin(market_children)],
+            market_series=market_children,
+        )
+
+        fig = plt.figure(figsize=[8, 10])
+        fig.suptitle(
+            f"Price Comparison Plots",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+
+        plt.rcParams.update({"font.size": 8})
+
+        gs = GridSpec(nrows=3, ncols=1, height_ratios=[2, 2, 3], hspace=0.3)
+
+        plot_trading_mode(fig, ss=gs[0, 0], data_df=market_data_df)
+        plot_price_comparison(
+            fig,
+            ss=gs[1, 0],
+            data_df=market_data_df,
+            fuzzing_df=market_fuzzing_df,
+        )
+        figs[market_id] = fig
+    return figs
+
+
 def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     data_df = load_market_data_df(run_name=run_name)
     accounts_df = load_accounts_df(run_name=run_name)
@@ -604,6 +649,83 @@ def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     return figs
 
 
+def account_and_margin_plots(
+    run_name: Optional[str] = None, agent_types: Optional[list] = None
+):
+    accounts_df = load_accounts_df(run_name=run_name)
+    agents_df = load_agents_df(run_name=run_name)
+
+    fig = plt.figure(figsize=[8, 10])
+    fig.suptitle(
+        f"Agent Account Plots",
+        fontsize=18,
+        fontweight="bold",
+        color=(0.2, 0.2, 0.2),
+    )
+    fig.tight_layout()
+
+    plt.rcParams.update({"font.size": 8})
+
+    agent_types = (
+        agent_types
+        if agent_types is not None
+        else [
+            FuzzingAgent,
+            FuzzyLiquidityProvider,
+            RiskyMarketOrderTrader,
+            RiskySimpleLiquidityProvider,
+        ]
+    )
+
+    gs = GridSpec(nrows=len(agent_types) * 2, ncols=1, hspace=0.5)
+
+    axs: list[plt.Axes] = []
+
+    for i, agent_type in enumerate(agent_types):
+        tot_plt = fig.add_subplot(gs[2 * i, 0])
+        margin_plt = fig.add_subplot(gs[2 * i + 1, 0])
+
+        tot_plt.set_title(
+            f"Total Account Balance: {agent_type.__name__}",
+            loc="left",
+            fontsize=12,
+            color=(0.3, 0.3, 0.3),
+        )
+        margin_plt.set_title(
+            f"Margin Account Balance: {agent_type.__name__}",
+            loc="left",
+            fontsize=12,
+            color=(0.3, 0.3, 0.3),
+        )
+
+        agent_keys = agents_df["agent_key"][
+            agents_df["agent_type"] == agent_type.__name__
+        ].to_list()
+        for key in agent_keys:
+            totals = (
+                accounts_df[accounts_df["party_id"] == key]["balance"]
+                .groupby(level=0)
+                .sum()
+            )
+            margin = (
+                accounts_df[
+                    (accounts_df["party_id"] == key)
+                    & (
+                        accounts_df["type"]
+                        == vega_protos.vega.AccountType.ACCOUNT_TYPE_MARGIN
+                    )
+                ]["balance"]
+                .groupby(level=0)
+                .sum()
+            )
+            tot_plt.plot(totals)
+            margin_plt.plot(margin)
+        tot_plt.autoscale(enable=True, axis="y")
+        margin_plt.autoscale(enable=True, axis="y")
+
+    return fig
+
+
 def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     agents_df = load_agents_df(run_name=run_name)
@@ -619,12 +741,16 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
 
     plt.rcParams.update({"font.size": 8})
 
-    agent_types = [
-        FuzzingAgent,
-        FuzzyLiquidityProvider,
-        RiskyMarketOrderTrader,
-        RiskySimpleLiquidityProvider,
-    ]
+    agent_types = (
+        agent_types
+        if agent_types is not None
+        else [
+            FuzzingAgent,
+            FuzzyLiquidityProvider,
+            RiskyMarketOrderTrader,
+            RiskySimpleLiquidityProvider,
+        ]
+    )
 
     gs = GridSpec(nrows=len(agent_types), ncols=1, hspace=0.5)
 

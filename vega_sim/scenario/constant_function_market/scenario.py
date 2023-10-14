@@ -1,31 +1,76 @@
 import argparse
 import datetime
-import itertools
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.market import MarketConfig
-from vega_sim.environment.environment import (
-    MarketEnvironmentWithState,
-)
+from vega_sim.environment.environment import MarketEnvironmentWithState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
     LimitOrderTrader,
     MarketOrderTrader,
+    ArbitrageTrader,
     PriceSensitiveMarketOrderTrader,
     StateAgent,
     UncrossAuctionAgent,
 )
-from vega_sim.scenario.common.utils.price_process import random_walk
+from vega_sim.scenario.common.utils.price_process import (
+    Granularity,
+    get_historic_price_series,
+    random_walk,
+)
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
+from vega_sim.scenario.constant_function_market.agents import CFMMarketMaker
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.scenario import Scenario
+from vega_sim.tools.scenario_plots import (
+    account_and_margin_plots,
+    fuzz_plots,
+    price_comp_plots,
+    plot_run_outputs,
+    reward_plots,
+)
+
+
+@dataclass
+class MarketHistoryAdditionalData:
+    at_time: datetime.datetime
+    external_prices: Dict[str, float]
+
+
+def state_extraction_fn(vega: VegaServiceNull, agents: dict):
+    at_time = vega.get_blockchain_time()
+
+    external_prices = {}
+
+    for _, agent in agents.items():
+        if isinstance(agent, CFMMarketMaker):
+            external_prices[agent.market_id] = agent.curr_price
+
+    return MarketHistoryAdditionalData(
+        at_time=at_time,
+        external_prices=external_prices,
+    )
+
+
+def additional_data_to_rows(data) -> List[pd.Series]:
+    results = []
+    for market_id in data.external_prices.keys():
+        results.append(
+            {
+                "time": data.at_time,
+                "market_id": market_id,
+                "external_price": data.external_prices.get(market_id, np.NaN),
+            }
+        )
+    return results
 
 
 class CFMScenario(Scenario):
@@ -38,7 +83,12 @@ class CFMScenario(Scenario):
         market_config: Optional[dict] = None,
         output: bool = True,
     ):
-        super().__init__()
+        super().__init__(
+            state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
+            additional_data_output_fns={
+                "additional_data.csv": lambda data: additional_data_to_rows(data),
+            },
+        )
 
         self.market_config = market_config
 
@@ -83,12 +133,19 @@ class CFMScenario(Scenario):
 
         i_market = 0
         # Create fuzzed price process
-        price_process = random_walk(
-            random_state=self.random_state,
-            starting_price=1000,
-            num_steps=self.num_steps,
-            decimal_precision=int(market_config.decimal_places),
-        )
+        # price_process = [1000] * self.num_steps
+        # price_process = random_walk(
+        #     random_state=self.random_state,
+        #     starting_price=1000,
+        #     num_steps=self.num_steps,
+        #     decimal_precision=int(market_config.decimal_places),
+        # )
+        price_process = get_historic_price_series(
+            product_id="ETH-USD",
+            granularity=Granularity.MINUTE,
+            start=str(datetime.datetime(2022, 11, 8)),
+            end=str(datetime.datetime(2022, 11, 8) + datetime.timedelta(minutes=1000)),
+        ).values
 
         # Create fuzzed market managers
         market_agents["market_managers"] = [
@@ -107,26 +164,6 @@ class CFMScenario(Scenario):
             )
         ]
 
-        market_agents["market_makers"] = [
-            ExponentialShapedMarketMaker(
-                wallet_name="MARKET_MAKERS",
-                key_name=f"MARKET_{str(i_market).zfill(3)}",
-                price_process_generator=iter(price_process),
-                initial_asset_mint=self.initial_asset_mint,
-                market_name=market_name,
-                asset_name=asset_name,
-                commitment_amount=1e6,
-                market_decimal_places=market_config.decimal_places,
-                asset_decimal_places=asset_dp,
-                num_steps=self.num_steps,
-                kappa=2.4,
-                tick_spacing=0.05,
-                market_kappa=50,
-                state_update_freq=10,
-                tag=f"MARKET_{str(i_market).zfill(3)}",
-            )
-        ]
-
         market_agents["auction_traders"] = [
             UncrossAuctionAgent(
                 wallet_name="AUCTION_TRADERS",
@@ -136,30 +173,108 @@ class CFMScenario(Scenario):
                 price_process=iter(price_process),
                 market_name=market_name,
                 asset_name=asset_name,
-                uncrossing_size=20,
+                uncrossing_size=0.1,
                 tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
             )
             for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
         ]
 
-        market_agents["random_traders"] = [
-            MarketOrderTrader(
-                wallet_name="RANDOM_TRADERS",
-                key_name=(
-                    f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
-                ),
+        market_agents["market_makers"] = [
+            # ExponentialShapedMarketMaker(
+            #     wallet_name="MARKET_MAKERS",
+            #     key_name=f"MARKET_{str(i_market).zfill(3)}",
+            #     price_process_generator=iter(price_process),
+            #     initial_asset_mint=self.initial_asset_mint,
+            #     market_name=market_name,
+            #     asset_name=asset_name,
+            #     commitment_amount=1e6,
+            #     market_decimal_places=market_config.decimal_places,
+            #     asset_decimal_places=asset_dp,
+            #     num_steps=self.num_steps,
+            #     kappa=2.4,
+            #     tick_spacing=0.05,
+            #     market_kappa=50,
+            #     state_update_freq=10,
+            #     tag=f"MARKET_{str(i_market).zfill(3)}",
+            # )
+            CFMMarketMaker(
+                key_name="CFM_MAKER",
+                num_steps=self.num_steps,
+                initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
                 asset_name=asset_name,
-                buy_intensity=10,
-                sell_intensity=10,
-                base_order_size=1,
-                step_bias=1,
-                tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                commitment_amount=10e6,
+                market_decimal_places=market_config.decimal_places,
+                fee_amount=0.001,
+                k_scaling_large=600e6,
+                k_scaling_small=5e6,
+                min_trade_unit=0.01,
+                initial_price=price_process[0],
+                num_levels=20,
+                volume_per_side=100,
+                tick_spacing=0.5,
+                asset_decimal_places=asset_dp,
+                tag="MARKET_CFM",
+                price_process_generator=iter(price_process),
             )
-            for i_agent in range(5)
         ]
 
-        # for i_agent in range(5):
+        # market_agents["price_sensitive_traders"] = [
+        #     PriceSensitiveMarketOrderTrader(
+        #         key_name=f"PRICE_SENSITIVE_{str(i_agent).zfill(3)}",
+        #         market_name=market_name,
+        #         asset_name=asset_name,
+        #         price_process_generator=iter(price_process),
+        #         initial_asset_mint=self.initial_asset_mint,
+        #         buy_intensity=5,
+        #         sell_intensity=5,
+        #         price_half_life=0.2,
+        #         tag=f"SENSITIVE_AGENT_{str(i_agent).zfill(3)}",
+        #         random_state=random_state,
+        #         base_order_size=0.2,
+        #         wallet_name="SENSITIVE_TRADERS",
+        #     )
+        #     for i_agent in range(6)
+        # ]
+
+        market_agents["arb_traders"] = [
+            ArbitrageTrader(
+                key_name=f"PRICE_SENSITIVE_{str(i_agent).zfill(3)}",
+                market_name=market_name,
+                asset_name=asset_name,
+                price_process_generator=iter(price_process),
+                initial_asset_mint=self.initial_asset_mint,
+                buy_intensity=5,
+                sell_intensity=5,
+                spread_offset=0.001,
+                tag=f"ARB_AGENT_{str(i_agent).zfill(3)}",
+                random_state=random_state,
+                base_order_size=1,
+                wallet_name="ARB_TRADERS",
+            )
+            for i_agent in range(10)
+        ]
+
+        # market_agents["random_traders"] = [
+        #     MarketOrderTrader(
+        #         wallet_name="RANDOM_TRADERS",
+        #         key_name=(
+        #             f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+        #         ),
+        #         market_name=market_name,
+        #         asset_name=asset_name,
+        #         buy_intensity=6,
+        #         sell_intensity=6,
+        #         base_order_size=0.1,
+        #         step_bias=0.5,
+        #         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+        #         random_state=random_state,
+        #     )
+        #     for i_agent in range(1)
+        #     # for i_agent in range(1)
+        # ]
+
+        # for i_agent in range(1):
         #     market_agents["random_traders"].append(
         #         LimitOrderTrader(
         #             wallet_name=f"RANDOM_TRADERS",
@@ -169,10 +284,10 @@ class CFMScenario(Scenario):
         #             market_name=market_name,
         #             asset_name=asset_name,
         #             time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
-        #             buy_volume=1,
-        #             sell_volume=1,
-        #             buy_intensity=10,
-        #             sell_intensity=10,
+        #             buy_volume=0.1,
+        #             sell_volume=0.1,
+        #             buy_intensity=1,
+        #             sell_intensity=1,
         #             submit_bias=1,
         #             cancel_bias=0,
         #             duration=120,
@@ -215,8 +330,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG)
 
     scenario = CFMScenario(
-        num_steps=100,
-        step_length_seconds=5,
+        num_steps=600,
+        step_length_seconds=10,
         block_length_seconds=1,
         transactions_per_block=4096,
     )
@@ -231,5 +346,16 @@ if __name__ == "__main__":
         transactions_per_block=scenario.transactions_per_block,
     ) as vega:
         scenario.run_iteration(
-            vega=vega, pause_at_completion=False, log_every_n_steps=100
+            vega=vega,
+            pause_at_completion=False,
+            log_every_n_steps=10,
+            output_data=True,
         )
+
+    figs = price_comp_plots()
+    for i, fig in enumerate(figs.values()):
+        fig.savefig(f"./cfm_plots/trading-{i}.jpg")
+
+    account_fig = account_and_margin_plots(agent_types=[CFMMarketMaker])
+    account_fig.savefig(f"./cfm_plots/accounts.jpg")
+    plt.close(account_fig)

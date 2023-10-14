@@ -195,24 +195,24 @@ class PriceMonitoringParameters(Config):
     OPTS = {
         "default": {
             "triggers": [
-                {
-                    "horizon": 900,  # 15 minutes
-                    "probability": "0.90001",
-                    "auction_extension": 60,
-                },
-                {
-                    "horizon": 3600,  # 1 hour
-                    "probability": "0.90001",
-                    "auction_extension": 300,
-                },
-                {
-                    "horizon": 14_400,  # 4 hour
-                    "probability": "0.90001",
-                    "auction_extension": 900,
-                },
+                # {
+                #     "horizon": 900,  # 15 minutes
+                #     "probability": "0.90001",
+                #     "auction_extension": 60,
+                # },
+                # {
+                #     "horizon": 3600,  # 1 hour
+                #     "probability": "0.90001",
+                #     "auction_extension": 300,
+                # },
+                # {
+                #     "horizon": 14_400,  # 4 hour
+                #     "probability": "0.90001",
+                #     "auction_extension": 900,
+                # },
                 {
                     "horizon": 86_400,  # 1 day
-                    "probability": "0.90001",
+                    "probability": "0.9999999",
                     "auction_extension": 3600,
                 },
             ]
@@ -257,10 +257,10 @@ class LiquidityMonitoringParameters(Config):
 class LiquiditySLAParameters(Config):
     OPTS = {
         "default": {
-            "price_range": "0.5",
-            "commitment_min_time_fraction": "1",
+            "price_range": "1",
+            "commitment_min_time_fraction": "0.01",
             "performance_hysteresis_epochs": 1,
-            "sla_competition_factor": "1",
+            "sla_competition_factor": "0",
         }
     }
 

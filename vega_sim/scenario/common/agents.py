@@ -312,6 +312,121 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
             )
 
 
+class ArbitrageTrader(StateAgentWithWallet):
+    NAME_BASE = "arbitrage_trader"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        price_process_generator: Iterable[float],
+        initial_asset_mint: float = 1000000,
+        buy_intensity: float = 1,
+        sell_intensity: float = 1,
+        spread_offset: float = 0.01,
+        tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
+        base_order_size: float = 1,
+        wallet_name: str = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.initial_asset_mint = initial_asset_mint
+        self.buy_intensity = buy_intensity
+        self.sell_intensity = sell_intensity
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+        self.base_order_size = base_order_size
+        self.price_process_generator = price_process_generator
+        self.spread_offset = spread_offset
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_fn(5)
+
+    def step(self, vega_state: VegaState):
+        self.curr_price = next(self.price_process_generator)
+
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+
+        self.current_position = int(position.open_volume) if position is not None else 0
+
+        if abs(self.current_position) > 0:
+            self.place_order(
+                vega_state=vega_state,
+                volume=abs(self.current_position),
+                side=vega_protos.SIDE_BUY if self.current_position < 0 else vega_protos.SIDE_SELL,
+                price=self.curr_price,
+            )
+
+        buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
+        sell_vol = self.random_state.poisson(self.sell_intensity) * self.base_order_size
+
+        self.place_order(
+            vega_state=vega_state,
+            volume=buy_vol,
+            side=vega_protos.SIDE_BUY,
+            price=self.curr_price * (1 - self.spread_offset),
+        )
+
+        self.place_order(
+            vega_state=vega_state,
+            volume=sell_vol,
+            side=vega_protos.SIDE_SELL,
+            price=self.curr_price * (1 + self.spread_offset),
+        )
+
+    def place_order(
+        self, vega_state: VegaState, volume: float, side: vega_protos.Side, price: float
+    ):
+        if (
+            (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            )
+            and vega_state.market_state[self.market_id].state
+            == markets_protos.Market.State.STATE_ACTIVE
+            and volume != 0
+        ):
+            self.vega.submit_order(
+                trading_key=self.key_name,
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                side=side,
+                volume=volume,
+                price=price,
+                time_in_force="TIME_IN_FORCE_IOC",
+                wait=False,
+                trading_wallet=self.wallet_name,
+            )
+
+
 class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
     NAME_BASE = "price_sensitive_lo_trader"
 
@@ -944,9 +1059,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -1054,7 +1167,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
     def __init__(
         self,
         key_name: str,
-        price_process_generator: Iterable[float],
+        price_process_generator: Optional[Iterable[float]],
         best_price_offset_fn: Callable[[float, int], Tuple[float, float]],
         shape_fn: Callable[
             [
@@ -1163,8 +1276,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
-        self.prev_price = self.curr_price
-        self.curr_price = next(self.price_process_generator)
+        if self.price_process_generator is not None:
+            self.prev_price = self.curr_price
+            self.curr_price = next(self.price_process_generator)
 
         self._update_state(current_step=self.current_step)
 
@@ -1175,9 +1289,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = int(position.open_volume) if position is not None else 0
+        self.current_position = int(position.open_volume) if position is not None else 0
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
-            current_position, self.current_step
+            self.current_position, self.current_step
         )
         if (self.bid_depth is None) or (self.ask_depth is None):
             return
@@ -1390,7 +1504,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
                 cancellations.append(transaction)
 
-        if submissions is not []:
+        if not all(val is [] for val in (submissions, amendments, cancellations)):
             self.vega.submit_instructions(
                 wallet_name=self.wallet_name,
                 key_name=self.key_name,
@@ -2868,6 +2982,7 @@ class Snitch(StateAgent):
                     market_trades.setdefault(market.id, []).append(trade)
 
             accounts = self.vega.get_accounts_from_stream()
+
             self.states.append(
                 MarketHistoryData(
                     at_time=start_time,
@@ -3283,13 +3398,15 @@ class RewardFunder(StateAgentWithWallet):
             to_account_type=self.account_type,
             amount=self.transfer_amount,
             asset=reward_asset_id,
-            asset_for_metric=asset_for_metric_id
-            if self.metric
-            not in [
-                vega_protos.DISPATCH_METRIC_MARKET_VALUE,
-                vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
-            ]
-            else None,
+            asset_for_metric=(
+                asset_for_metric_id
+                if self.metric
+                not in [
+                    vega_protos.DISPATCH_METRIC_MARKET_VALUE,
+                    vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
+                ]
+                else None
+            ),
             metric=self.metric,
             window_length=3,
         )
@@ -3463,7 +3580,8 @@ class ReferralAgentWrapper:
 
         if (not is_referrer) and (referrer_key_name is None):
             raise ValueError(
-                "ReferralWrapper must either designate the agent as a referrer or specify a referrer key name."
+                "ReferralWrapper must either designate the agent as a referrer or"
+                " specify a referrer key name."
             )
 
         self.is_referrer = is_referrer

@@ -379,9 +379,6 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
                     wait=False,
                 )
             except Exception as e:
-                import pdb
-
-                pdb.set_trace()
                 print(f"There was an error {e}")
 
 
@@ -966,7 +963,8 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 except (HTTPError, ProposalNotAcceptedError):
                     continue
             logging.info(
-                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
+                " proposal."
             )
             self._sensible_proposal()
 
@@ -1089,7 +1087,8 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 except (HTTPError, ProposalNotAcceptedError):
                     continue
             logging.info(
-                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
+                " proposal."
             )
             self._sensible_proposal()
 
