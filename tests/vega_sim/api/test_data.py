@@ -27,7 +27,7 @@ from vega_sim.api.data import (
     ReferralSetStats,
     PartyAmount,
     ReferrerRewardsGenerated,
-    FeeStats,
+    FeesStats,
     Team,
     TeamReferee,
     TeamRefereeHistory,
@@ -45,7 +45,7 @@ from vega_sim.api.data import (
     list_referral_sets,
     list_referral_set_referees,
     get_referral_set_stats,
-    get_referral_fee_stats,
+    get_fees_stats,
     list_teams,
     list_team_referees,
     list_team_referee_history,
@@ -1050,10 +1050,10 @@ def test_get_referral_set_stats(trading_data_v2_servicer_and_port):
     ]
 
 
-def test_get_referral_fee_stats(trading_data_v2_servicer_and_port):
-    def GetReferralFeeStats(self, request, context):
-        return data_node_protos_v2.trading_data.GetReferralFeeStatsResponse(
-            fee_stats=vega_protos.events.v1.events.FeeStats(
+def test_get_fees_stats(trading_data_v2_servicer_and_port):
+    def GetFeesStats(self, request, context):
+        return data_node_protos_v2.trading_data.GetFeesStatsResponse(
+            fees_stats=vega_protos.events.v1.events.FeesStats(
                 market=request.market_id,
                 asset=request.asset_id,
                 epoch_seq=1,
@@ -1086,16 +1086,16 @@ def test_get_referral_fee_stats(trading_data_v2_servicer_and_port):
         )
 
     server, port, mock_servicer = trading_data_v2_servicer_and_port
-    mock_servicer.GetReferralFeeStats = GetReferralFeeStats
+    mock_servicer.GetFeesStats = GetFeesStats
 
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    assert get_referral_fee_stats(
+    assert get_fees_stats(
         data_client=data_client,
         market_id="market_id",
         asset_decimals={"": 1},
-    ) == FeeStats(
+    ) == FeesStats(
         market="market_id",
         asset="",
         epoch_seq=1,
@@ -1109,11 +1109,11 @@ def test_get_referral_fee_stats(trading_data_v2_servicer_and_port):
         referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
         volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
     )
-    assert get_referral_fee_stats(
+    assert get_fees_stats(
         data_client=data_client,
         asset_id="asset",
         asset_decimals={"asset": 1},
-    ) == FeeStats(
+    ) == FeesStats(
         market="",
         asset="asset",
         epoch_seq=1,

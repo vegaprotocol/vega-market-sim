@@ -754,22 +754,26 @@ def get_referral_set_stats(
 
 
 @_retry(3)
-def get_referral_fee_stats(
+def get_fees_stats(
     data_client: vac.trading_data_grpc_v2,
     market_id: Optional[str] = None,
     asset_id: Optional[str] = None,
     epoch_seq: Optional[int] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
 ):
-    base_request = data_node_protos_v2.trading_data.GetReferralFeeStatsRequest()
-    if market_id is None and asset_id is None:
-        raise ValueError("Neither 'market_id' or 'asset_id' set.")
+    base_request = data_node_protos_v2.trading_data.GetFeesStatsRequest()
     if market_id is not None:
         setattr(base_request, "market_id", market_id)
     if asset_id is not None:
         setattr(base_request, "asset_id", asset_id)
     if epoch_seq is not None:
         setattr(base_request, "epoch_seq", epoch_seq)
-    return data_client.GetReferralFeeStats(base_request).fee_stats
+    if referrer is not None:
+        setattr(base_request, "referrer", referrer)
+    if referee is not None:
+        setattr(base_request, "referee", referee)
+    return data_client.GetFeesStats(base_request).fees_stats
 
 
 @_retry(3)

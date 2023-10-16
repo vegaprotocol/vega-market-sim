@@ -499,7 +499,8 @@ class FuzzingScenario(Scenario):
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
                     asset_name=asset_name,
                     step_bias=1,
-                    attempts_per_step=100,
+                    validity_bias=0.8,
+                    attempts_per_step=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
             ]
