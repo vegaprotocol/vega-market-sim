@@ -253,6 +253,24 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
             )
         self.vega.wait_fn(5)
 
+    def _execution_price(self, volume: float, side: vega_protos.Side):
+        book_depth = self.vega.market_depth(self.market_id)
+        remaining_volume = volume
+        vwap = None
+
+        levels = book_depth.buys if side == vega_protos.SIDE_SELL else book_depth.sells
+        idx = 0
+
+        while remaining_volume > 0:
+            if len(levels) > idx:
+                if vwap is None:
+                    vwap = 0
+                vwap += levels[idx].price * min(levels[idx].volume, remaining_volume)
+                remaining_volume -= levels[idx].volume
+            else:
+                break
+        return vwap
+
     def step(self, vega_state: VegaState):
         self.curr_price = next(self.price_process_generator)
 
@@ -261,13 +279,29 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
         sell_vol = self.random_state.poisson(self.sell_intensity) * self.base_order_size
 
-        best_bid, best_ask = self.vega.best_prices(self.market_id)
+        # best_bid, best_ask = self.vega.best_prices(self.market_id)
+        buy_vwap = self._execution_price(buy_vol, vega_protos.SIDE_BUY)
+        sell_vwap = self._execution_price(buy_vol, vega_protos.SIDE_SELL)
 
-        will_buy = self.random_state.rand() < np.exp(
-            -1 * self.probability_decay * max([best_ask - self.curr_price, 0])
+        will_buy = (
+            (
+                self.random_state.rand()
+                < np.exp(
+                    -1 * self.probability_decay * max([buy_vwap - self.curr_price, 0])
+                )
+            )
+            if buy_vwap is not None
+            else False
         )
-        will_sell = self.random_state.rand() < np.exp(
-            -1 * self.probability_decay * max([self.curr_price - best_bid, 0])
+        will_sell = (
+            (
+                self.random_state.rand()
+                < np.exp(
+                    -1 * self.probability_decay * max([self.curr_price - sell_vwap, 0])
+                )
+            )
+            if sell_vwap is not None
+            else False
         )
 
         if buy_first and will_buy:
@@ -381,7 +415,11 @@ class ArbitrageTrader(StateAgentWithWallet):
             self.place_order(
                 vega_state=vega_state,
                 volume=abs(self.current_position),
-                side=vega_protos.SIDE_BUY if self.current_position < 0 else vega_protos.SIDE_SELL,
+                side=(
+                    vega_protos.SIDE_BUY
+                    if self.current_position < 0
+                    else vega_protos.SIDE_SELL
+                ),
                 price=self.curr_price,
             )
 

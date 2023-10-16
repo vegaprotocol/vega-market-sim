@@ -219,23 +219,23 @@ class CFMScenario(Scenario):
             )
         ]
 
-        # market_agents["price_sensitive_traders"] = [
-        #     PriceSensitiveMarketOrderTrader(
-        #         key_name=f"PRICE_SENSITIVE_{str(i_agent).zfill(3)}",
-        #         market_name=market_name,
-        #         asset_name=asset_name,
-        #         price_process_generator=iter(price_process),
-        #         initial_asset_mint=self.initial_asset_mint,
-        #         buy_intensity=5,
-        #         sell_intensity=5,
-        #         price_half_life=0.2,
-        #         tag=f"SENSITIVE_AGENT_{str(i_agent).zfill(3)}",
-        #         random_state=random_state,
-        #         base_order_size=0.2,
-        #         wallet_name="SENSITIVE_TRADERS",
-        #     )
-        #     for i_agent in range(6)
-        # ]
+        market_agents["price_sensitive_traders"] = [
+            PriceSensitiveMarketOrderTrader(
+                key_name=f"PRICE_SENSITIVE_{str(i_agent).zfill(3)}",
+                market_name=market_name,
+                asset_name=asset_name,
+                price_process_generator=iter(price_process),
+                initial_asset_mint=self.initial_asset_mint,
+                buy_intensity=5,
+                sell_intensity=5,
+                price_half_life=0.2,
+                tag=f"SENSITIVE_AGENT_{str(i_agent).zfill(3)}",
+                random_state=random_state,
+                base_order_size=0.2,
+                wallet_name="SENSITIVE_TRADERS",
+            )
+            for i_agent in range(6)
+        ]
 
         market_agents["arb_traders"] = [
             ArbitrageTrader(
@@ -249,30 +249,30 @@ class CFMScenario(Scenario):
                 spread_offset=0.001,
                 tag=f"ARB_AGENT_{str(i_agent).zfill(3)}",
                 random_state=random_state,
-                base_order_size=1,
+                base_order_size=0.1,
                 wallet_name="ARB_TRADERS",
             )
             for i_agent in range(10)
         ]
 
-        # market_agents["random_traders"] = [
-        #     MarketOrderTrader(
-        #         wallet_name="RANDOM_TRADERS",
-        #         key_name=(
-        #             f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
-        #         ),
-        #         market_name=market_name,
-        #         asset_name=asset_name,
-        #         buy_intensity=6,
-        #         sell_intensity=6,
-        #         base_order_size=0.1,
-        #         step_bias=0.5,
-        #         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-        #         random_state=random_state,
-        #     )
-        #     for i_agent in range(1)
-        #     # for i_agent in range(1)
-        # ]
+        market_agents["random_traders"] = [
+            MarketOrderTrader(
+                wallet_name="RANDOM_TRADERS",
+                key_name=(
+                    f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                ),
+                market_name=market_name,
+                asset_name=asset_name,
+                buy_intensity=6,
+                sell_intensity=6,
+                base_order_size=0.01,
+                step_bias=0.5,
+                tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                random_state=random_state,
+            )
+            for i_agent in range(1)
+            # for i_agent in range(1)
+        ]
 
         # for i_agent in range(1):
         #     market_agents["random_traders"].append(

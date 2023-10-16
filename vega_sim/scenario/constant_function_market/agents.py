@@ -25,14 +25,14 @@ def _price_for_size(
     # mid = buy_pool / sell_pool
 
     if side == vega_protos.Side.SIDE_SELL:
-        k_scaling = k_scaling_large if position >= 0 else k_scaling_small
+        k_scaling = k_scaling_small if position >= 0 else k_scaling_large
 
         virtual_sell = (k_scaling / ref_price) ** 0.5
         virtual_buy = (k_scaling * ref_price) ** 0.5
 
         return (virtual_buy + trade_size * ref_price) / virtual_sell
     elif side == vega_protos.Side.SIDE_BUY:
-        k_scaling = k_scaling_large if position <= 0 else k_scaling_small
+        k_scaling = k_scaling_small if position <= 0 else k_scaling_large
 
         virtual_sell = (k_scaling / ref_price) ** 0.5
         virtual_buy = (k_scaling * ref_price) ** 0.5
