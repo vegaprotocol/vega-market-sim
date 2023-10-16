@@ -2864,13 +2864,13 @@ class VegaService(ABC):
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
         )
 
-    def get_referral_fee_stats(
+    def get_fees_stats(
         self,
         market_id: Optional[str] = None,
         asset_id: Optional[str] = None,
         epoch_seq: Optional[int] = None,
-    ) -> List[data.FeeStats]:
-        return data.get_referral_fee_stats(
+    ) -> List[data.FeesStats]:
+        return data.get_fees_stats(
             data_client=self.trading_data_client_v2,
             market_id=market_id,
             asset_id=asset_id,

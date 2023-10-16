@@ -311,7 +311,7 @@ class ReferrerRewardsGenerated:
 
 
 @dataclass(frozen=True)
-class FeeStats:
+class FeesStats:
     market: str
     asset: str
     epoch_seq: int
@@ -969,10 +969,10 @@ def _referrer_rewards_generated_from_proto(
     )
 
 
-def _fee_stats_from_proto(
-    fee_stats: vega_protos.events.v1.events.FeeStats, decimal_spec: DecimalSpec
+def _fees_stats_from_proto(
+    fee_stats: vega_protos.events.v1.events.FeesStats, decimal_spec: DecimalSpec
 ):
-    return FeeStats(
+    return FeesStats(
         market=fee_stats.market,
         asset=fee_stats.asset,
         epoch_seq=fee_stats.epoch_seq,
@@ -2161,20 +2161,24 @@ def get_referral_set_stats(
     ]
 
 
-def get_referral_fee_stats(
+def get_fees_stats(
     data_client: vac.trading_data_grpc_v2,
     market_id: Optional[str] = None,
     asset_id: Optional[str] = None,
     epoch_seq: Optional[int] = None,
+    referrer: Optional[str] = None,
+    referee: Optional[str] = None,
     asset_decimals: Optional[Dict[str, int]] = {},
-) -> List[FeeStats]:
-    response = data_raw.get_referral_fee_stats(
+) -> List[FeesStats]:
+    response = data_raw.get_fees_stats(
         data_client=data_client,
         market_id=market_id,
         asset_id=asset_id,
         epoch_seq=epoch_seq,
+        referrer=referrer,
+        referee=referee,
     )
-    return _fee_stats_from_proto(
+    return _fees_stats_from_proto(
         fee_stats=response,
         decimal_spec=DecimalSpec(asset_decimals=asset_decimals[response.asset]),
     )
