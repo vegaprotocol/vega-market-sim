@@ -3109,3 +3109,16 @@ class VegaService(ABC):
         return vega_protos.commands.v1.commands.StopOrdersSubmission(
             rises_above=rises_above, falls_below=falls_below
         )
+
+    def submit_stop_order(
+        self,
+        stop_orders_submission: StopOrdersSubmission,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+    ):
+        trading.submit_stop_orders(
+            wallet=self.wallet,
+            stop_orders_submission=stop_orders_submission,
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )

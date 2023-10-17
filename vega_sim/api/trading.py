@@ -745,3 +745,18 @@ def apply_referral_code(
         key_name=key_name,
     )
     logger.debug(f"Submitted an apply referral code.")
+
+
+def submit_stop_orders(
+    wallet: Wallet,
+    key_name: str,
+    stop_orders_submission,
+    wallet_name: Optional[str] = None,
+):
+    wallet.submit_transaction(
+        transaction=stop_orders_submission,
+        wallet_name=wallet_name,
+        transaction_type="stop_orders_submission",
+        key_name=key_name,
+    )
+    logger.debug(f"Submitted stop orders.")
