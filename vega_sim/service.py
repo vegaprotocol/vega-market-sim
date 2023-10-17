@@ -79,6 +79,10 @@ class VegaFaucetError(Exception):
     pass
 
 
+class VegaCommandError(Exception):
+    pass
+
+
 def raw_data(fn):
     @wraps(fn)
     def wrapped_fn(self, *args, **kwargs):
