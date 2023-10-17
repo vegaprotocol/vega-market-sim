@@ -1808,9 +1808,3 @@ def test_stop_order(vega_service_with_market: VegaServiceNull):
         )
         > 0
     )
-
-    print(
-        vega.list_stop_orders(
-            statuses=[vega_protos.vega.StopOrder.STATUS_PENDING],
-        )
-    )
