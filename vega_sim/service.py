@@ -37,6 +37,8 @@ from vega_sim.proto.vega.commands.v1.commands_pb2 import (
     OrderAmendment,
     OrderCancellation,
     OrderSubmission,
+    StopOrdersCancellation,
+    StopOrdersSubmission,
 )
 from vega_sim.proto.vega.governance_pb2 import (
     UpdateFutureProduct,
@@ -2171,6 +2173,8 @@ class VegaService(ABC):
         cancellations: Optional[List[OrderCancellation]] = None,
         amendments: Optional[List[OrderAmendment]] = None,
         submissions: Optional[List[OrderSubmission]] = None,
+        stop_orders_cancellation: Optional[List[StopOrdersCancellation]] = None,
+        stop_orders_submission: Optional[List[StopOrdersSubmission]] = None,
     ):
         """Submits a batch of market instructions to be processed sequentially.
 
@@ -2203,6 +2207,8 @@ class VegaService(ABC):
             (cancellations if cancellations is not None else [])
             + (amendments if amendments is not None else [])
             + (submissions if submissions is not None else [])
+            + (stop_orders_cancellation if stop_orders_cancellation is not None else [])
+            + (stop_orders_submission if stop_orders_submission is not None else [])
         )
 
         batch_size = 0
@@ -2210,6 +2216,8 @@ class VegaService(ABC):
         batch_of_cancellations = []
         batch_of_amendments = []
         batch_of_submissions = []
+        batch_of_stop_orders_cancellation = []
+        batch_of_stop_orders_submission = []
 
         for i, instruction in enumerate(instructions):
             if instruction is None:
@@ -2220,6 +2228,10 @@ class VegaService(ABC):
                 batch_of_amendments.append(instruction)
             elif isinstance(instruction, OrderSubmission):
                 batch_of_submissions.append(instruction)
+            elif isinstance(instruction, StopOrdersCancellation):
+                batch_of_stop_orders_cancellation.append(instruction)
+            elif isinstance(instruction, StopOrdersSubmission):
+                batch_of_stop_orders_submission.append(instruction)
             else:
                 batch_size += -1
                 raise ValueError(f"Invalid instruction type {type(instruction)}.")
@@ -2234,6 +2246,8 @@ class VegaService(ABC):
                     cancellations=batch_of_cancellations,
                     amendments=batch_of_amendments,
                     submissions=batch_of_submissions,
+                    stop_orders_submission=batch_of_stop_orders_submission,
+                    stop_orders_cancellation=batch_of_stop_orders_cancellation,
                 )
 
                 batch_size = 0
@@ -2241,6 +2255,8 @@ class VegaService(ABC):
                 batch_of_cancellations = []
                 batch_of_amendments = []
                 batch_of_submissions = []
+                batch_of_stop_orders_submission = []
+                batch_of_stop_orders_cancellation = []
 
     def get_network_parameter(
         self, key: str, to_type: Optional[Union[str, int, float]] = None

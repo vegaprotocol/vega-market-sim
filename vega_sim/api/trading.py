@@ -18,6 +18,8 @@ from vega_sim.proto.vega.commands.v1.commands_pb2 import (
     OrderCancellation,
     OrderAmendment,
     OrderSubmission,
+    StopOrdersCancellation,
+    StopOrdersSubmission,
 )
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
@@ -574,6 +576,8 @@ def batch_market_instructions(
     amendments: Optional[List[OrderAmendment]] = None,
     submissions: Optional[List[OrderSubmission]] = None,
     cancellations: Optional[List[OrderCancellation]] = None,
+    stop_orders_cancellation: Optional[List[StopOrdersCancellation]] = None,
+    stop_orders_submission: Optional[List[StopOrdersSubmission]] = None,
 ):
     """Submits a batch of market instructions.
 
@@ -600,6 +604,10 @@ def batch_market_instructions(
         command.amendments.extend(amendments)
     if submissions is not None:
         command.submissions.extend(submissions)
+    if stop_orders_cancellation is not None:
+        command.stop_orders_cancellation.extend(stop_orders_cancellation)
+    if stop_orders_submission is not None:
+        command.stop_orders_submission.extend(stop_orders_submission)
 
     wallet.submit_transaction(
         transaction=command,
