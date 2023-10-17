@@ -3061,3 +3061,38 @@ class VegaService(ABC):
                 num_to_padded_int(offset, self.market_price_decimals[market_id])
             ),
         )
+
+    def build_stop_order_setup(
+        self,
+        market_id: str,
+        order_submission: vega_protos.commands.v1.commands.OrderSubmission,
+        expires_at: Optional[datetime.datetime] = None,
+        expiry_strategy: Optional[
+            vega_protos.commands.v1.commands.ExpiryStrategy
+        ] = None,
+        price: Optional[float] = None,
+        trailing_percent_offset: Optional[float] = None,
+    ) -> vega_protos.commands.v1.commands.StopOrderSetup:
+        if price is None and trailing_percent_offset is None:
+            raise VegaCommandError(
+                "'price' and 'trailing_percent_offset' can not both be None."
+            )
+        stop_order_setup = vega_protos.commands.v1.commands.StopOrderSetup(
+            order_submission=order_submission,
+            expiry_strategy=expiry_strategy,
+        )
+        if expires_at is not None:
+            setattr(stop_order_setup, "expires_at", int(expires_at.timestamp()))
+        if price is not None:
+            setattr(
+                stop_order_setup,
+                "price",
+                str(num_to_padded_int(price, self.market_price_decimals[market_id])),
+            )
+        if trailing_percent_offset is not None:
+            setattr(
+                stop_order_setup,
+                "trailing_percent_offset",
+                str(trailing_percent_offset),
+            )
+        return stop_order_setup
