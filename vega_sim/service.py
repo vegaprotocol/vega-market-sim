@@ -3096,3 +3096,16 @@ class VegaService(ABC):
                 str(trailing_percent_offset),
             )
         return stop_order_setup
+
+    def build_stop_orders_submission(
+        self,
+        rises_above: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
+        falls_below: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
+    ) -> vega_protos.commands.v1.commands.StopOrdersSubmission:
+        if rises_above is None and falls_below is None:
+            raise VegaCommandError(
+                "'rises_above' and 'falls_below' can not both be None."
+            )
+        return vega_protos.commands.v1.commands.StopOrdersSubmission(
+            rises_above=rises_above, falls_below=falls_below
+        )
