@@ -3138,3 +3138,26 @@ class VegaService(ABC):
             key_name=key_name,
             wallet_name=wallet_name,
         )
+
+    def list_stop_orders(
+        self,
+        statuses: Optional[List[vega_protos.vega.StopOrder.Status]] = None,
+        expiry_strategies: Optional[
+            List[vega_protos.vega.StopOrder.ExpiryStrategies]
+        ] = None,
+        date_range: Optional[vega_protos.vega.DateRange] = None,
+        party_ids: Optional[List[str]] = None,
+        market_ids: Optional[List[str]] = None,
+        live_only: Optional[bool] = None,
+    ):
+        return data.list_stop_orders(
+            data_client=self.trading_data_client_v2,
+            statuses=statuses,
+            expiry_strategies=expiry_strategies,
+            date_range=date_range,
+            party_ids=party_ids,
+            market_ids=market_ids,
+            live_only=live_only,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+        )
