@@ -1017,10 +1017,44 @@ class VegaService(ABC):
         market_id: str,
         proposal_key: str,
         market_state: vega_protos.governance.MarketStateUpdateType,
-        price: Optional[str] = None,
+        price: Optional[float] = None,
         wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
-    ):
+        forward_time_to_enactment: bool = True,
+    ) -> str:
+        """Update the state of a market using a governance proposal. Optionally
+        automatically approves the proposal and forwards time to the enactment.
+
+        Args:
+            market_id:
+                str, The ID of the market to update
+            proposal_key:
+                str, The name of the key proposing the change. If automatically
+                    approving this key should have enough governance tokens to
+                    approve by itself
+            market_state:
+                MarketStateUpdateType, The value of the market to set
+            price:
+                Optional[float], If setting a termination state, the value at
+                    which to terminate (last mark price)
+            wallet_name:
+                Optional[str], If using a non-default wallet name, the wallet
+                    containing the proposal key name
+            vote_closing_time:
+                Optional[datetime], The time at which the vote should close
+            vote_enactment_time:
+                Optional[datetime], The time at which the vote should enact
+            approve_proposal:
+                bool, default True, Whether to automatically approve the proposal
+            forward_time_to_enactment:
+                bool, default True, Whether to forward time to enactment of the
+                    proposal
+
+        Returns:
+            str, The proposal ID
+        """
         conv_price = (
             str(num_to_padded_int(price, self.market_price_decimals[market_id]))
             if price is not None
@@ -1029,12 +1063,21 @@ class VegaService(ABC):
 
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
         proposal_id = gov.propose_market_state_update(
             market_state=market_state,
             market_id=market_id,
             price=conv_price,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
             data_client=self.trading_data_client_v2,
             wallet=self.wallet,
@@ -1048,7 +1091,13 @@ class VegaService(ABC):
                 key_name=proposal_key,
                 wallet_name=wallet_name,
             )
-            self.wait_fn(60)
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        return proposal_id
 
     def update_market(
         self,

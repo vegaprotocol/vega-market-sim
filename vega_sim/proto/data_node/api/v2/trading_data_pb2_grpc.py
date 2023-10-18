@@ -1114,7 +1114,7 @@ class TradingDataServiceServicer(object):
     def ListLiquidityProvisions(self, request, context):
         """List liquidity provisions
 
-        Get a list of liquidity provisions for a given market
+        Get a list of liquidity provisions for a given market.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1455,9 +1455,10 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListFundingPayments(self, request, context):
-        """List funding payments for a party
+        """List funding payments
 
-        Get a list of data points for a perpetual market's funding payment for a party.
+        Get a list of funding payment gains and losses for a party as a result of their position on a perpetual market when a funding
+        period ends.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1466,7 +1467,7 @@ class TradingDataServiceServicer(object):
     def GetPartyActivityStreak(self, request, context):
         """List party activity streak
 
-        Get a party's activity across epochs
+        Get a party's activity across epochs.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1475,7 +1476,8 @@ class TradingDataServiceServicer(object):
     def GetCurrentReferralProgram(self, request, context):
         """Get current referral program
 
-        Get the on-going referral program.
+        Get the current referral program for the network. This program may not be active if it has ended
+        and has not been replaced by another.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1539,8 +1541,7 @@ class TradingDataServiceServicer(object):
     def GetFeesStats(self, request, context):
         """Get fees statistics
 
-        Gets accumulated fees, rewards, and applied discount information for a given asset or market for the latest epoch
-        or a specific epoch.
+        Get accumulated fees, rewards, and applied discount information. Either a market or an asset must be supplied as filter.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1549,14 +1550,18 @@ class TradingDataServiceServicer(object):
     def GetCurrentVolumeDiscountProgram(self, request, context):
         """Get current volume discount program
 
-        Get the on-going volume discount program.
+        Get the current volume discount program for the network. This program may not be active if it has ended
+        and has not been replaced by another.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetVolumeDiscountStats(self, request, context):
-        """Get the volume discount statistics for a given epoch for all parties"""
+        """Get volume discount statistics
+
+        Get the information about a party's running traded volume, and the discount factor it earns them.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
