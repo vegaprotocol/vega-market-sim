@@ -163,3 +163,43 @@ def test_update_market_risk(vega_service_with_market: VegaServiceNull):
         after_market.tradable_instrument.log_normal_risk_model.risk_aversion_parameter
         == 0.05
     )
+
+
+@pytest.mark.integration
+def test_update_market_governance_changes(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    market_id = vega.all_markets()[0].id
+
+    vega.wait_for_total_catchup()
+
+    create_and_faucet_wallet(vega=vega, wallet=LIQ)
+
+    assert vega.get_latest_market_data(market_id).market_state == 5
+
+    vega.update_market_state(
+        market_id,
+        MM_WALLET.name,
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_SUSPEND,
+    )
+    vega.wait_for_total_catchup()
+    assert vega.get_latest_market_data(market_id).market_state == 10
+
+    vega.update_market_state(
+        market_id,
+        MM_WALLET.name,
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_RESUME,
+    )
+    vega.wait_for_total_catchup()
+    assert vega.get_latest_market_data(market_id).market_state == 5
+
+    vega.update_market_state(
+        market_id,
+        MM_WALLET.name,
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_TERMINATE,
+        price=5.1,
+    )
+    vega.wait_for_total_catchup()
+    mi = vega.get_latest_market_data(market_id)
+
+    assert mi.market_state == 7
+    assert mi.mark_price == 5.1
