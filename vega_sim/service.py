@@ -1012,6 +1012,44 @@ class VegaService(ABC):
         self.wait_fn(60)
         self.wait_for_thread_catchup()
 
+    def update_market_state(
+        self,
+        market_id: str,
+        proposal_key: str,
+        market_state: vega_protos.governance.MarketStateUpdateType,
+        price: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        approve_proposal: bool = True,
+    ):
+        conv_price = (
+            str(num_to_padded_int(price, self.market_price_decimals[market_id]))
+            if price is not None
+            else None
+        )
+
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        proposal_id = gov.propose_market_state_update(
+            market_state=market_state,
+            market_id=market_id,
+            price=conv_price,
+            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
+            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            time_forward_fn=lambda: self.wait_fn(2),
+            data_client=self.trading_data_client_v2,
+            wallet=self.wallet,
+            key_name=proposal_key,
+            wallet_name=wallet_name,
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                key_name=proposal_key,
+                wallet_name=wallet_name,
+            )
+            self.wait_fn(60)
+
     def update_market(
         self,
         proposal_key: str,

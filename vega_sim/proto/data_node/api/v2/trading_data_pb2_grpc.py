@@ -317,6 +317,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
         )
+        self.ListPaidLiquidityFees = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListPaidLiquidityFees",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
+        )
         self.GetGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.SerializeToString,
@@ -1133,6 +1138,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListPaidLiquidityFees(self, request, context):
+        """List paid liquidity fees data
+
+        List information about paid liquidity fees for a given market, or asset ID.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def GetGovernanceData(self, request, context):
         """Get governance data
 
@@ -1925,6 +1939,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListLiquidityProviders,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.SerializeToString,
+        ),
+        "ListPaidLiquidityFees": grpc.unary_unary_rpc_method_handler(
+            servicer.ListPaidLiquidityFees,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.SerializeToString,
         ),
         "GetGovernanceData": grpc.unary_unary_rpc_method_handler(
             servicer.GetGovernanceData,
@@ -3902,6 +3921,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListLiquidityProviders",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListPaidLiquidityFees(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListPaidLiquidityFees",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
             options,
             channel_credentials,
             insecure,
