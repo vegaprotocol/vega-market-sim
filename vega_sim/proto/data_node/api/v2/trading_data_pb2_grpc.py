@@ -317,6 +317,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
         )
+        self.ListPaidLiquidityFees = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListPaidLiquidityFees",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
+        )
         self.GetGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.SerializeToString,
@@ -1109,7 +1114,7 @@ class TradingDataServiceServicer(object):
     def ListLiquidityProvisions(self, request, context):
         """List liquidity provisions
 
-        Get a list of liquidity provisions for a given market
+        Get a list of liquidity provisions for a given market.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1128,6 +1133,15 @@ class TradingDataServiceServicer(object):
         """List liquidity providers data
 
         List information about active liquidity provider(s) for a given market, or liquidity provider's party ID.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListPaidLiquidityFees(self, request, context):
+        """List paid liquidity fees data
+
+        List information about paid liquidity fees for a given market, or asset ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1441,9 +1455,10 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListFundingPayments(self, request, context):
-        """List funding payments for a party
+        """List funding payments
 
-        Get a list of data points for a perpetual market's funding payment for a party.
+        Get a list of funding payment gains and losses for a party as a result of their position on a perpetual market when a funding
+        period ends.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1452,7 +1467,7 @@ class TradingDataServiceServicer(object):
     def GetPartyActivityStreak(self, request, context):
         """List party activity streak
 
-        Get a party's activity across epochs
+        Get a party's activity across epochs.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1461,7 +1476,8 @@ class TradingDataServiceServicer(object):
     def GetCurrentReferralProgram(self, request, context):
         """Get current referral program
 
-        Get the on-going referral program.
+        Get the current referral program for the network. This program may not be active if it has ended
+        and has not been replaced by another.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1525,8 +1541,7 @@ class TradingDataServiceServicer(object):
     def GetFeesStats(self, request, context):
         """Get fees statistics
 
-        Gets accumulated fees, rewards, and applied discount information for a given asset or market for the latest epoch
-        or a specific epoch.
+        Get accumulated fees, rewards, and applied discount information. Either a market or an asset must be supplied as filter.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1535,14 +1550,18 @@ class TradingDataServiceServicer(object):
     def GetCurrentVolumeDiscountProgram(self, request, context):
         """Get current volume discount program
 
-        Get the on-going volume discount program.
+        Get the current volume discount program for the network. This program may not be active if it has ended
+        and has not been replaced by another.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
     def GetVolumeDiscountStats(self, request, context):
-        """Get the volume discount statistics for a given epoch for all parties"""
+        """Get volume discount statistics
+
+        Get the information about a party's running traded volume, and the discount factor it earns them.
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
@@ -1925,6 +1944,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListLiquidityProviders,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.SerializeToString,
+        ),
+        "ListPaidLiquidityFees": grpc.unary_unary_rpc_method_handler(
+            servicer.ListPaidLiquidityFees,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.SerializeToString,
         ),
         "GetGovernanceData": grpc.unary_unary_rpc_method_handler(
             servicer.GetGovernanceData,
@@ -3902,6 +3926,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListLiquidityProviders",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListPaidLiquidityFees(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListPaidLiquidityFees",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
             options,
             channel_credentials,
             insecure,
