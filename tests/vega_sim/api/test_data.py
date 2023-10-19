@@ -28,6 +28,7 @@ from vega_sim.api.data import (
     ReferralSetStats,
     PartyAmount,
     ReferrerRewardsGenerated,
+    MakerFeesGenerated,
     FeesStats,
     Team,
     TeamReferee,
@@ -1064,7 +1065,7 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
                 market=request.market_id,
                 asset=request.asset_id,
                 epoch_seq=1,
-                total_rewards_paid=[
+                total_rewards_received=[
                     vega_protos.events.v1.events.PartyAmount(
                         party="referrer1", amount="1000"
                     )
@@ -1089,6 +1090,21 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
                         party="referrer1", amount="1000"
                     )
                 ],
+                total_maker_fees_received=[
+                    vega_protos.events.v1.events.PartyAmount(
+                        party="referrer1", amount="1000"
+                    )
+                ],
+                maker_fees_generated=[
+                    vega_protos.events.v1.events.MakerFeesGenerated(
+                        taker="taker1",
+                        maker_fees_paid=[
+                            vega_protos.events.v1.events.PartyAmount(
+                                party="referrer1", amount="1000"
+                            )
+                        ],
+                    )
+                ],
             )
         )
 
@@ -1106,7 +1122,7 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         market="market_id",
         asset="",
         epoch_seq=1,
-        total_rewards_paid=[PartyAmount(party="referrer1", amount=100.0)],
+        total_rewards_received=[PartyAmount(party="referrer1", amount=100.0)],
         referrer_rewards_generated=[
             ReferrerRewardsGenerated(
                 referrer="referrer1",
@@ -1115,6 +1131,13 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         ],
         referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
         volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+        total_maker_fees_received=[PartyAmount(party="referrer1", amount=100.0)],
+        maker_fees_generated=[
+            MakerFeesGenerated(
+                taker="taker1",
+                maker_fees_paid=[PartyAmount(party="referrer1", amount=100.0)],
+            )
+        ],
     )
     assert get_fees_stats(
         data_client=data_client,
@@ -1124,7 +1147,7 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         market="",
         asset="asset",
         epoch_seq=1,
-        total_rewards_paid=[PartyAmount(party="referrer1", amount=100.0)],
+        total_rewards_received=[PartyAmount(party="referrer1", amount=100.0)],
         referrer_rewards_generated=[
             ReferrerRewardsGenerated(
                 referrer="referrer1",
@@ -1133,6 +1156,13 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         ],
         referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
         volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+        total_maker_fees_received=[PartyAmount(party="referrer1", amount=100.0)],
+        maker_fees_generated=[
+            MakerFeesGenerated(
+                taker="taker1",
+                maker_fees_paid=[PartyAmount(party="referrer1", amount=100.0)],
+            )
+        ],
     )
 
 

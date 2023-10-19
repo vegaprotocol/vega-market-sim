@@ -759,8 +759,7 @@ def get_fees_stats(
     market_id: Optional[str] = None,
     asset_id: Optional[str] = None,
     epoch_seq: Optional[int] = None,
-    referrer: Optional[str] = None,
-    referee: Optional[str] = None,
+    party_id: Optional[str] = None,
 ):
     base_request = data_node_protos_v2.trading_data.GetFeesStatsRequest()
     if market_id is not None:
@@ -769,10 +768,8 @@ def get_fees_stats(
         setattr(base_request, "asset_id", asset_id)
     if epoch_seq is not None:
         setattr(base_request, "epoch_seq", epoch_seq)
-    if referrer is not None:
-        setattr(base_request, "referrer", referrer)
-    if referee is not None:
-        setattr(base_request, "referee", referee)
+    if party_id is not None:
+        setattr(base_request, "referrer", party_id)
     return data_client.GetFeesStats(base_request).fees_stats
 
 

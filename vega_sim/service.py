@@ -2945,12 +2945,17 @@ class VegaService(ABC):
         market_id: Optional[str] = None,
         asset_id: Optional[str] = None,
         epoch_seq: Optional[int] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
     ) -> List[data.FeesStats]:
         return data.get_fees_stats(
             data_client=self.trading_data_client_v2,
             market_id=market_id,
             asset_id=asset_id,
             epoch_seq=epoch_seq,
+            party_id=self.wallet.public_key(key_name, wallet_name)
+            if key_name is not None
+            else None,
             asset_decimals=self.asset_decimals,
         )
 

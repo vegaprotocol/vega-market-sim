@@ -311,14 +311,35 @@ class ReferrerRewardsGenerated:
 
 
 @dataclass(frozen=True)
+class MakerFeesGenerated:
+    taker: float
+    maker_fees_paid: List[PartyAmount]
+
+
+def _maker_fees_generated_from_proto(
+    maker_fees_generated: vega_protos.events.v1.events.MakerFeesGenerated,
+    decimal_spec: DecimalSpec,
+):
+    return MakerFeesGenerated(
+        taker=maker_fees_generated.taker,
+        maker_fees_paid=[
+            _party_amount_from_proto(party_amount, decimal_spec)
+            for party_amount in maker_fees_generated.maker_fees_paid
+        ],
+    )
+
+
+@dataclass(frozen=True)
 class FeesStats:
     market: str
     asset: str
     epoch_seq: int
-    total_rewards_paid: List[PartyAmount]
+    total_rewards_received: List[PartyAmount]
     referrer_rewards_generated: List[ReferrerRewardsGenerated]
     referees_discount_applied: List[PartyAmount]
     volume_discount_applied: List[PartyAmount]
+    total_maker_fees_received: List[PartyAmount]
+    maker_fees_generated: List[MakerFeesGenerated]
 
 
 @dataclass(frozen=True)
@@ -1114,11 +1135,11 @@ def _fees_stats_from_proto(
         market=fee_stats.market,
         asset=fee_stats.asset,
         epoch_seq=fee_stats.epoch_seq,
-        total_rewards_paid=[
+        total_rewards_received=[
             _party_amount_from_proto(
                 party_amount=party_amount, decimal_spec=decimal_spec
             )
-            for party_amount in fee_stats.total_rewards_paid
+            for party_amount in fee_stats.total_rewards_received
         ],
         referrer_rewards_generated=[
             _referrer_rewards_generated_from_proto(
@@ -1138,6 +1159,19 @@ def _fees_stats_from_proto(
                 party_amount=party_amount, decimal_spec=decimal_spec
             )
             for party_amount in fee_stats.volume_discount_applied
+        ],
+        total_maker_fees_received=[
+            _party_amount_from_proto(
+                party_amount=party_amount, decimal_spec=decimal_spec
+            )
+            for party_amount in fee_stats.total_maker_fees_received
+        ],
+        maker_fees_generated=[
+            _maker_fees_generated_from_proto(
+                maker_fees_generated=maker_fees_generated,
+                decimal_spec=decimal_spec,
+            )
+            for maker_fees_generated in fee_stats.maker_fees_generated
         ],
     )
 
@@ -2304,8 +2338,7 @@ def get_fees_stats(
     market_id: Optional[str] = None,
     asset_id: Optional[str] = None,
     epoch_seq: Optional[int] = None,
-    referrer: Optional[str] = None,
-    referee: Optional[str] = None,
+    party_id: Optional[str] = None,
     asset_decimals: Optional[Dict[str, int]] = {},
 ) -> List[FeesStats]:
     response = data_raw.get_fees_stats(
@@ -2313,8 +2346,7 @@ def get_fees_stats(
         market_id=market_id,
         asset_id=asset_id,
         epoch_seq=epoch_seq,
-        referrer=referrer,
-        referee=referee,
+        party_id=party_id,
     )
     return _fees_stats_from_proto(
         fee_stats=response,
