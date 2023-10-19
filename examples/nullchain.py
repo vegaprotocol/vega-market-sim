@@ -6,6 +6,10 @@ from vega_sim.null_service import VegaServiceNull
 import vega_sim.proto.vega as vega_protos
 from vega_sim.proto.vega.governance_pb2 import UpdateMarketConfiguration
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--perps", action="store_true", default=False)
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -26,6 +30,8 @@ wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+
+    args = parser.parse_args()
 
     with VegaServiceNull(
         run_with_console=False,
@@ -75,13 +81,40 @@ if __name__ == "__main__":
         vega.wait_fn(10)
         vega.wait_for_total_catchup()
 
-        vega.create_simple_market(
-            market_name="BTC:DAI_Mar22",
-            proposal_key=MM_WALLET.name,
-            settlement_asset_id=tdai_id,
-            termination_key=TERMINATE_WALLET.name,
-            market_decimals=5,
-        )
+        if args.perps:
+            perps_netparam = "limits.markets.proposePerpetualEnabled"
+            if not vega.get_network_parameter(key=perps_netparam, to_type="int"):
+                new_val = "1"
+                vega.update_network_parameter(
+                    proposal_key=MM_WALLET.name,
+                    parameter=perps_netparam,
+                    new_value=new_val,
+                )
+                vega.wait_for_total_catchup()
+                if not vega.get_network_parameter(key=perps_netparam, to_type="int"):
+                    exit(
+                        "perps market proposals not allowed by default, allowing via network parameter change failed"
+                    )
+                else:
+                    print(
+                        f"successfully updated network parameter '{perps_netparam}' to '{new_val}'"
+                    )
+
+            vega.create_simple_perps_market(
+                market_name="BTC:DAI_Perpetual",
+                proposal_key=MM_WALLET.name,
+                settlement_asset_id=tdai_id,
+                settlement_data_key=TERMINATE_WALLET.name,
+                market_decimals=5,
+            )
+        else:
+            vega.create_simple_market(
+                market_name="BTC:DAI_Mar22",
+                proposal_key=MM_WALLET.name,
+                settlement_asset_id=tdai_id,
+                termination_key=TERMINATE_WALLET.name,
+                market_decimals=5,
+            )
         vega.wait_for_total_catchup()
 
         market_id = vega.all_markets()[0].id

@@ -10,6 +10,7 @@ import requests
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
+from vega_sim.proto.vega.markets_pb2 import Market
 from vega_sim.tools.retry import retry
 
 T = TypeVar("T")
@@ -157,7 +158,7 @@ def wait_for_acceptance(
 
     if not submission_accepted:
         raise ProposalNotAcceptedError(
-            "The market did not accept the proposal within the specified time"
+            "The network did not accept the proposal within the specified time"
         )
     return proposal
 
@@ -183,3 +184,26 @@ def statistics(core_data_client: VegaCoreClient):
     return retry(
         10, 0.5, lambda: core_data_client.Statistics(StatisticsRequest()).statistics
     )
+
+
+def extract_settlement_asset_from_market(market: Market) -> str:
+    instrument = market.tradable_instrument.instrument
+    if (
+        hasattr(instrument, "future")
+        and hasattr(instrument.future, "settlement_asset")
+        and len(instrument.future.settlement_asset) > 0
+    ):
+        return instrument.future.settlement_asset
+    if (
+        hasattr(instrument, "spot")
+        and hasattr(instrument.spot, "settlement_asset")
+        and len(instrument.spot.settlement_asset) > 0
+    ):
+        return instrument.spot.settlement_asset
+    if (
+        hasattr(instrument, "perpetual")
+        and hasattr(instrument.perpetual, "settlement_asset")
+        and len(instrument.perpetual.settlement_asset) > 0
+    ):
+        return instrument.perpetual.settlement_asset
+    raise Exception("product is not recognized or settlement asset wasn't set")

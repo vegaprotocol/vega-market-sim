@@ -20,6 +20,7 @@ import vega_sim.api.faucet as faucet
 import vega_sim.api.governance as gov
 import vega_sim.api.market as market
 import vega_sim.api.trading as trading
+import vega_sim.api.helpers as helpers
 import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
@@ -210,6 +211,17 @@ class VegaService(ABC):
                 ).tradable_instrument.instrument.future.settlement_asset
             )
         return self._market_to_asset
+
+    @property
+    def market_to_asset(self) -> str:
+        if self._market_to_asset is None:
+            self._market_to_asset = DecimalsCache(self.__extract_settlement_asset)
+        return self._market_to_asset
+
+    def __extract_settlement_asset(self, market_id) -> str:
+        return helpers.extract_settlement_asset_from_market(
+            self.data_cache.market_from_feed(market_id=market_id)
+        )
 
     @property
     def data_cache(self) -> LocalDataCache:
@@ -538,6 +550,133 @@ class VegaService(ABC):
         self.wait_for_thread_catchup()
         return proposal_id
 
+    def create_simple_perps_market(
+        self,
+        market_name: str,
+        proposal_key: str,
+        settlement_asset_id: str,
+        settlement_data_key: str,
+        perp_asset: Optional[str] = None,
+        position_decimals: Optional[int] = None,
+        market_decimals: Optional[int] = None,
+        risk_aversion: Optional[float] = 1e-6,
+        tau: Optional[float] = 1.0 / 365.25 / 24,
+        sigma: Optional[float] = 1.0,
+        price_monitoring_parameters: Optional[
+            vega_protos.markets.PriceMonitoringParameters
+        ] = None,
+        wallet_name: Optional[str] = None,
+        settlement_data_wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+        parent_market_id: Optional[str] = None,
+        parent_market_insurance_pool_fraction: float = 1,
+    ) -> str:
+        """Creates a simple perpetual futures market with a predefined reasonable set of parameters.
+
+                Args:
+                    market_name:
+                        str, name of the market
+                    proposal_key:
+                        str, the name of the key to use for proposing the market
+                    settlement_asset_id:
+                        str, the asset id the market will use for settlement
+                    termination_key:
+                        str, the name of the key which will be used to send termination data
+                    position_decimals:
+                        int, the decimal place precision to use for positions
+                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+                   market_decimals:
+                        int, the decimal place precision to use for market prices
+                            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+                    price_monitoring_parameters:
+                        PriceMonitoringParameters, A set of parameters determining when the
+                            market will drop into a price auction. If not passed defaults
+                            to a very permissive setup
+                            wallet_name: Optional[str] = None,
+        :
+                        Optional[str], name of wallet proposing market. Defaults to None.
+                    termination_wallet_name:
+                        Optional[str], name of wallet settling market. Defaults to None.
+                    vote_closing_time:
+                        Optional[datetime.datetime]: If set, decides at what time the vote will be set to
+                            close. Defaults to Now + 40 blocks
+                    vote_enactment_time:
+                        Optional[datetime.datetime]: If set, decides at what time the vote will be set to
+                            enact. Defaults to Now + 50 blocks
+                    approve_proposal:
+                        bool, default True, whether to automatically approve the proposal
+                    forward_time_to_enactment:
+                        bool, default True, whether to forward time until this proposal has already
+                            been enacted
+                    parent_market_id:
+                        Optional[str], Market to set as the parent market on the proposal
+                    parent_market_insurance_pool_fraction:
+                        float, Fraction of parent market insurance pool to carry over.
+                            defaults to 1. No-op if parent_market_id is not set.
+        """
+        additional_kwargs = {}
+        if perp_asset is not None:
+            additional_kwargs["future_asset"] = perp_asset
+
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        risk_model = vega_protos.markets.LogNormalRiskModel(
+            risk_aversion_parameter=risk_aversion,
+            tau=tau,
+            params=vega_protos.markets.LogNormalModelParams(mu=0, r=0.0, sigma=sigma),
+        )
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+
+        proposal_id = gov.propose_perps_market(
+            market_name=market_name,
+            wallet=self.wallet,
+            wallet_name=wallet_name,
+            key_name=proposal_key,
+            settlement_asset_id=settlement_asset_id,
+            data_client=self.trading_data_client_v2,
+            settlement_data_pub_key=self.wallet.public_key(
+                wallet_name=settlement_data_wallet_name, name=settlement_data_key
+            ),
+            position_decimals=position_decimals,
+            market_decimals=market_decimals,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
+            risk_model=risk_model,
+            time_forward_fn=lambda: self.wait_fn(2),
+            price_monitoring_parameters=price_monitoring_parameters,
+            parent_market_id=parent_market_id,
+            parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+            **additional_kwargs,
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        self.wait_for_thread_catchup()
+        return proposal_id
+
     def create_simple_market(
         self,
         market_name: str,
@@ -562,7 +701,7 @@ class VegaService(ABC):
         parent_market_id: Optional[str] = None,
         parent_market_insurance_pool_fraction: float = 1,
     ) -> str:
-        """Creates a simple futures market with a predefined reasonable set of parameters.
+        """Creates a simple fixed-expiry futures market with a predefined reasonable set of parameters.
 
                 Args:
                     market_name:
@@ -1570,9 +1709,9 @@ class VegaService(ABC):
             wallet_name:
                 str, The name of the wallet which is placing the order
         """
-        asset_id = data_raw.market_info(
+        asset_id = data_raw.settlement_asset(
             market_id=market_id, data_client=self.trading_data_client_v2
-        ).tradable_instrument.instrument.future.settlement_asset
+        )
 
         is_amendment = (
             is_amendment
