@@ -539,7 +539,7 @@ def _stop_order_from_proto(
         price=num_from_padded_int(stop_order.price, decimal_spec.price_decimals)
         if stop_order.price is not None
         else None,
-        trailing_percent_offset=stop_order.trailing_percent_offset
+        trailing_percent_offset=float(stop_order.trailing_percent_offset)
         if stop_order.trailing_percent_offset != ""
         else None,
     )
