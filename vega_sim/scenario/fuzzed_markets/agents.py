@@ -939,7 +939,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
     def finalise(self):
         if self.settlement_price is not None:
-            self.vega.settle_market(
+            self.vega.submit_termination_and_settlement_data(
                 self._get_termination_key_name(),
                 self.settlement_price,
                 self.market_id,
@@ -949,7 +949,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
     def step(self, vega_state) -> None:
         if self.needs_to_update_markets:
-            self.vega.settle_market(
+            self.vega.submit_termination_and_settlement_data(
                 self.old_termination_key,
                 self.vega.market_data_from_feed(self.old_market_id).last_traded_price,
                 self.market_id,

@@ -111,7 +111,7 @@ def market_info(
 
 def settlement_asset(market_id: str, data_client: vac.VegaTradingDataClientV2) -> str:
     "Output settlement asset"
-    return helpers.extract_settlement_asset_from_market(
+    return helpers.get_settlement_asset(
         market_info(market_id=market_id, data_client=data_client)
     )
 

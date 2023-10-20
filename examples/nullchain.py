@@ -1,10 +1,8 @@
 import logging
-import numpy as np
 from collections import namedtuple
+from random import randint
 
 from vega_sim.null_service import VegaServiceNull
-import vega_sim.proto.vega as vega_protos
-from vega_sim.proto.vega.governance_pb2 import UpdateMarketConfiguration
 
 import argparse
 
@@ -105,6 +103,7 @@ if __name__ == "__main__":
                 proposal_key=MM_WALLET.name,
                 settlement_asset_id=tdai_id,
                 settlement_data_key=TERMINATE_WALLET.name,
+                funding_payment_frequency_in_seconds=10,
                 market_decimals=5,
             )
         else:
@@ -266,16 +265,61 @@ if __name__ == "__main__":
             is_amendment=True,
         )
 
+        position = vega.positions_by_market(key_name=MM_WALLET2.name)
         margin_levels = vega.margin_levels(MM_WALLET2.name)
+        print(f"Position is: {position}")
         print(f"Margin levels are: {margin_levels}")
         vega.forward("10s")
 
+        if args.perps:
+            for i in range(20):
+                matching_price = 100 + randint(-5, 5)
+                oracle_price = matching_price + randint(-50, 50)
+
+                # vega.submit_order(
+                #             trading_key=MM_WALLET.name,
+                #             market_id=market_id,
+                #             time_in_force="TIME_IN_FORCE_GTC",
+                #             order_type="TYPE_LIMIT",
+                #             side="SIDE_BUY",
+                #             volume=1,
+                #             price=matching_price,
+                #             wait=True,
+                #         )
+                # vega.submit_order(
+                #             trading_key=MM_WALLET2.name,
+                #             market_id=market_id,
+                #             time_in_force="TIME_IN_FORCE_GTC",
+                #             order_type="TYPE_LIMIT",
+                #             side="SIDE_SELL",
+                #             volume=1,
+                #             price=matching_price,
+                #             wait=True,
+                #         )
+
+                # TODO: Add eth-block-time metadata
+                vega.submit_termination_and_settlement_data(
+                    settlement_key=TERMINATE_WALLET.name,
+                    settlement_price=oracle_price,
+                    market_id=market_id,
+                )
+                vega.forward("4s")
+                # md = vega.get_latest_market_data(market_id=market_id)
+                # print(md)
+
         input("Pausing to observe the market, press Enter to continue.")
-        vega.settle_market(
-            settlement_key=TERMINATE_WALLET.name,
-            settlement_price=100,
-            market_id=market_id,
-        )
+        if args.perps:
+            print("TODO: submit market closure proposal at this point")
+        else:
+            vega.submit_termination_and_settlement_data(
+                settlement_key=TERMINATE_WALLET.name,
+                settlement_price=100,
+                market_id=market_id,
+            )
         vega.wait_for_total_catchup()
+
+        transfers = vega.list_transfers(key_name=MM_WALLET2.name)
+        print(f"transfers:\n\t{transfers}")
+
         vega.forward("10s")
         input("Press Enter to finish")

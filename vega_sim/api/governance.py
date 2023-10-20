@@ -829,7 +829,41 @@ def _make_and_wait_for_proposal(
     return proposal
 
 
-def settle_oracle(
+def submit_oracle_data(
+    key_name: str,
+    payload: dict[str, str],
+    wallet: Wallet,
+    wallet_name: Optional[str] = None,
+):
+    """
+    Submit oracle data
+
+    Args:
+        key_name:
+            str, key name stored in metadata.
+        payload:
+            dict[str, str], payload to be encoded as JSON and submitted to the network
+        wallet:
+            str, the public key for the wallet authorised to send oracle signals
+        wallet_name:
+            str, the login token for the wallet authorised to send oracle signals
+    """
+    endcoded_payload = json.dumps(payload).encode()
+
+    oracle_submission = commands_protos.data.OracleDataSubmission(
+        payload=endcoded_payload,
+        source=commands_protos.data.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
+    )
+
+    wallet.submit_transaction(
+        transaction=oracle_submission,
+        wallet_name=wallet_name,
+        transaction_type="oracle_data_submission",
+        key_name=key_name,
+    )
+
+
+def submit_termination_and_settlement_data(
     key_name: str,
     wallet: Wallet,
     settlement_price: float,
@@ -837,13 +871,13 @@ def settle_oracle(
     wallet_name: Optional[str] = None,
 ) -> None:
     """
-    Settle the market and send settlement price.
+    Terminate the market and send settlement price.
 
     Args:
-        login_token:
+        wallet_name:
             str, the login token for the wallet authorised to send
              termination/settlement oracle signals
-        pub_key:
+        wallet:
             str, the public key for the wallet authorised to send
              termination/settlement oracle signals
         settlement_price:
@@ -855,36 +889,56 @@ def settle_oracle(
 
     """
 
-    # Use oracle feed to terminate market
-    payload = {"trading.terminated": "true"}
-    payload = json.dumps(payload).encode()
-
-    oracle_submission = commands_protos.data.OracleDataSubmission(
-        payload=payload,
-        source=commands_protos.data.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
-    )
-
-    wallet.submit_transaction(
-        transaction=oracle_submission,
-        wallet_name=wallet_name,
-        transaction_type="oracle_data_submission",
+    # use oracle feed to terminate market
+    submit_oracle_data(
         key_name=key_name,
+        payload={"trading.terminated": "true"},
+        wallet=wallet,
+        wallet_name=wallet_name,
     )
 
-    # use oracle to settle market
+    submit_settlement_data(
+        key_name=key_name,
+        wallet=wallet,
+        settlement_price=settlement_price,
+        oracle_name=oracle_name,
+        wallet_name=wallet_name,
+    )
+    # payload["eth-block-time"] = get_blockchain_time(data_client=)
+
+
+def submit_settlement_data(
+    key_name: str,
+    wallet: Wallet,
+    settlement_price: float,
+    oracle_name: str,
+    wallet_name: Optional[str] = None,
+    additional_payload: Optional[dict[str, str]] = None,
+) -> None:
+    """
+    Send settlement price.
+
+    Args:
+        wallet_name:
+            str, the login token for the wallet authorised to send
+             termination/settlement oracle signals
+        wallet:
+            str, the public key for the wallet authorised to send
+             termination/settlement oracle signals
+        settlement_price:
+            float, final settlement price for the asset
+        oracle_name:
+            str, the name of the oracle to settle
+        key_name:
+            str, key name stored in metadata.
+
+    """
+
     payload = {oracle_name: str(settlement_price)}
-    payload = json.dumps(payload).encode()
-
-    oracle_submission = commands_protos.data.OracleDataSubmission(
-        payload=payload,
-        source=commands_protos.data.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
-    )
-
-    wallet.submit_transaction(
-        transaction=oracle_submission,
-        wallet_name=wallet_name,
-        transaction_type="oracle_data_submission",
-        key_name=key_name,
+    if additional_payload != None:
+        payload.update(additional_payload)
+    submit_oracle_data(
+        key_name=key_name, payload=payload, wallet=wallet, wallet_name=wallet_name
     )
 
 

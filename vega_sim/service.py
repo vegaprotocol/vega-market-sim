@@ -219,7 +219,7 @@ class VegaService(ABC):
         return self._market_to_asset
 
     def __extract_settlement_asset(self, market_id) -> str:
-        return helpers.extract_settlement_asset_from_market(
+        return helpers.get_settlement_asset(
             self.data_cache.market_from_feed(market_id=market_id)
         )
 
@@ -556,7 +556,8 @@ class VegaService(ABC):
         proposal_key: str,
         settlement_asset_id: str,
         settlement_data_key: str,
-        perp_asset: Optional[str] = None,
+        funding_payment_frequency_in_seconds: Optional[int] = None,
+        asset: Optional[str] = None,
         position_decimals: Optional[int] = None,
         market_decimals: Optional[int] = None,
         risk_aversion: Optional[float] = 1e-6,
@@ -618,8 +619,8 @@ class VegaService(ABC):
                             defaults to 1. No-op if parent_market_id is not set.
         """
         additional_kwargs = {}
-        if perp_asset is not None:
-            additional_kwargs["future_asset"] = perp_asset
+        if asset is not None:
+            additional_kwargs["future_asset"] = asset
 
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
@@ -645,6 +646,7 @@ class VegaService(ABC):
             settlement_data_pub_key=self.wallet.public_key(
                 wallet_name=settlement_data_wallet_name, name=settlement_data_key
             ),
+            funding_payment_frequency_in_seconds=funding_payment_frequency_in_seconds,
             position_decimals=position_decimals,
             market_decimals=market_decimals,
             closing_time=(
@@ -1371,25 +1373,27 @@ class VegaService(ABC):
         self.wait_fn(60)
         self.wait_for_thread_catchup()
 
-    def settle_market(
+    def submit_termination_and_settlement_data(
         self,
         settlement_key: str,
         settlement_price: float,
         market_id: str,
         wallet_name: Optional[str] = None,
     ):
-        future_inst = data_raw.market_info(
-            market_id, data_client=self.trading_data_client_v2
-        ).tradable_instrument.instrument.future
+        product = helpers.get_product(
+            data_raw.market_info(market_id, data_client=self.trading_data_client_v2)
+        )
 
-        filter_key = future_inst.data_source_spec_for_settlement_data.data.external.oracle.filters[
-            0
-        ].key
+        filter_key = (
+            product.data_source_spec_for_settlement_data.data.external.oracle.filters[
+                0
+            ].key
+        )
         oracle_name = filter_key.name
 
-        logger.info(f"Settling market at price {settlement_price} for {oracle_name}")
+        logger.info(f"Submitting settlement price {settlement_price} for {oracle_name}")
 
-        gov.settle_oracle(
+        gov.submit_termination_and_settlement_data(
             wallet=self.wallet,
             wallet_name=wallet_name,
             oracle_name=oracle_name,

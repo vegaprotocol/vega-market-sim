@@ -186,24 +186,28 @@ def statistics(core_data_client: VegaCoreClient):
     )
 
 
-def extract_settlement_asset_from_market(market: Market) -> str:
+def get_settlement_asset(market: Market) -> str:
+    return get_product(market).settlement_asset
+
+
+def get_product(market: Market) -> Any:
     instrument = market.tradable_instrument.instrument
     if (
         hasattr(instrument, "future")
         and hasattr(instrument.future, "settlement_asset")
         and len(instrument.future.settlement_asset) > 0
     ):
-        return instrument.future.settlement_asset
+        return instrument.future
     if (
         hasattr(instrument, "spot")
         and hasattr(instrument.spot, "settlement_asset")
         and len(instrument.spot.settlement_asset) > 0
     ):
-        return instrument.spot.settlement_asset
+        return instrument.spot
     if (
         hasattr(instrument, "perpetual")
         and hasattr(instrument.perpetual, "settlement_asset")
         and len(instrument.perpetual.settlement_asset) > 0
     ):
-        return instrument.perpetual.settlement_asset
+        return instrument.perpetual
     raise Exception("product is not recognized or settlement asset wasn't set")
