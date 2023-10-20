@@ -2529,9 +2529,12 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
                 side=side,
                 size=size * self.commitment_amount_to_size_weighting,
                 price=price,
-                # post_only=True,
-                peak_size=size * self.commitment_amount_to_peak_weighting,
-                minimum_visible_size=size * self.commitment_amount_to_minimum_weighting,
+                iceberg_opts=self.vega.build_iceberg_opts(
+                    market_id=self.market_id,
+                    peak_size=size * self.commitment_amount_to_peak_weighting,
+                    minimum_visible_size=size
+                    * self.commitment_amount_to_minimum_weighting,
+                ),
             )
         ]
 

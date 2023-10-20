@@ -327,11 +327,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
         )
-        self.ListPaidLiquidityFees = channel.unary_unary(
-            "/datanode.api.v2.TradingDataService/ListPaidLiquidityFees",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
-        )
         self.GetGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.SerializeToString,
