@@ -18,6 +18,8 @@ from vega_sim.proto.vega.commands.v1.commands_pb2 import (
     OrderCancellation,
     OrderAmendment,
     OrderSubmission,
+    StopOrdersCancellation,
+    StopOrdersSubmission,
 )
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
@@ -567,14 +569,6 @@ def order_submission(
     return command
 
 
-def build_pegged_order(pegged_reference: str, pegged_offset: int):
-    pegged_reference = get_enum(pegged_reference, vega_protos.vega.PeggedReference)
-
-    return vega_protos.vega.PeggedOrder(
-        reference=pegged_reference, offset=str(pegged_offset)
-    )
-
-
 def batch_market_instructions(
     wallet: Wallet,
     wallet_name: str,
@@ -582,6 +576,8 @@ def batch_market_instructions(
     amendments: Optional[List[OrderAmendment]] = None,
     submissions: Optional[List[OrderSubmission]] = None,
     cancellations: Optional[List[OrderCancellation]] = None,
+    stop_orders_cancellation: Optional[List[StopOrdersCancellation]] = None,
+    stop_orders_submission: Optional[List[StopOrdersSubmission]] = None,
 ):
     """Submits a batch of market instructions.
 
@@ -608,6 +604,10 @@ def batch_market_instructions(
         command.amendments.extend(amendments)
     if submissions is not None:
         command.submissions.extend(submissions)
+    if stop_orders_cancellation is not None:
+        command.stop_orders_cancellation.extend(stop_orders_cancellation)
+    if stop_orders_submission is not None:
+        command.stop_orders_submission.extend(stop_orders_submission)
 
     wallet.submit_transaction(
         transaction=command,
@@ -753,3 +753,18 @@ def apply_referral_code(
         key_name=key_name,
     )
     logger.debug(f"Submitted an apply referral code.")
+
+
+def submit_stop_orders(
+    wallet: Wallet,
+    key_name: str,
+    stop_orders_submission,
+    wallet_name: Optional[str] = None,
+):
+    wallet.submit_transaction(
+        transaction=stop_orders_submission,
+        wallet_name=wallet_name,
+        transaction_type="stop_orders_submission",
+        key_name=key_name,
+    )
+    logger.debug(f"Submitted stop orders.")

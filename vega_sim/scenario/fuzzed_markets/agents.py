@@ -13,7 +13,7 @@ from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import VegaService, PeggedOrder
+from vega_sim.service import VegaService, PeggedOrder, VegaCommandError
 from vega_sim.api.governance import ProposalNotAcceptedError
 from requests.exceptions import HTTPError
 
@@ -92,10 +92,14 @@ class FuzzingAgent(StateAgentWithWallet):
         )
 
         self.curr_price = vega_state.market_state[self.market_id].midprice
+        self.curr_time = self.vega.get_blockchain_time(in_seconds=True)
 
         submissions = [self.create_fuzzed_submission(vega_state) for _ in range(20)]
         amendments = [self.create_fuzzed_amendment(vega_state) for _ in range(10)]
         cancellations = [self.create_fuzzed_cancellation(vega_state) for _ in range(1)]
+        stop_orders_submissions = [
+            self.create_fuzzed_stop_orders_submission(vega_state) for _ in range(10)
+        ]
 
         self.vega.submit_instructions(
             key_name=self.key_name,
@@ -103,12 +107,13 @@ class FuzzingAgent(StateAgentWithWallet):
             submissions=submissions,
             amendments=amendments,
             cancellations=cancellations,
+            stop_orders_submission=stop_orders_submissions,
         )
 
     def create_fuzzed_cancellation(self, vega_state):
         order_id = self._select_order_id()
 
-        return self.vega.create_order_cancellation(
+        return self.vega.build_order_cancellation(
             order_id=order_id,
             market_id=self.market_id,
         )
@@ -116,7 +121,7 @@ class FuzzingAgent(StateAgentWithWallet):
     def create_fuzzed_amendment(self, vega_state):
         order_id = self._select_order_id()
 
-        return self.vega.create_order_amendment(
+        return self.vega.build_order_amendment(
             order_id=order_id,
             market_id=self.market_id,
             size_delta=self.random_state.normal(loc=0, scale=5),
@@ -215,22 +220,81 @@ class FuzzingAgent(StateAgentWithWallet):
             )
         )
 
-        return self.vega.create_order_submission(
+        try:
+            return self.vega.build_order_submission(
+                market_id=self.market_id,
+                side=FuzzingAgent.MEMORY["SIDE"][-1],
+                size=self.random_state.poisson(lam=10),
+                order_type=FuzzingAgent.MEMORY["TYPE"][-1],
+                time_in_force=FuzzingAgent.MEMORY["TIME_IN_FORCE"][-1],
+                price=self.random_state.choice(
+                    a=[None, self.random_state.normal(loc=self.curr_price, scale=10)]
+                ),
+                expires_at=int(
+                    vega_state.time + self.random_state.normal(loc=60, scale=60) * 1e9
+                ),
+                pegged_order=self.random_state.choice(
+                    [
+                        None,
+                        self.vega.build_pegged_order(
+                            market_id=self.market_id,
+                            reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
+                            offset=self.random_state.normal(loc=0, scale=10),
+                        ),
+                    ]
+                ),
+                iceberg_opts=self.random_state.choice(
+                    [
+                        None,
+                        self.vega.build_iceberg_opts(
+                            market_id=self.market_id,
+                            peak_size=self.random_state.normal(loc=100, scale=20),
+                            minimum_visible_size=self.random_state.normal(
+                                loc=100, scale=20
+                            ),
+                        ),
+                    ]
+                ),
+                reduce_only=FuzzingAgent.MEMORY["REDUCE_ONLY"][-1],
+                post_only=FuzzingAgent.MEMORY["POST_ONLY"][-1],
+            )
+        except VegaCommandError:
+            return None
+
+    def create_fuzzed_stop_orders_submission(self, vega_state):
+        try:
+            return self.vega.build_stop_orders_submission(
+                rises_above=self.random_state.choice(
+                    [self.create_fuzzed_stop_orders_setup(vega_state), None]
+                ),
+                falls_below=self.random_state.choice(
+                    [self.create_fuzzed_stop_orders_setup(vega_state), None]
+                ),
+            )
+        except VegaCommandError:
+            return None
+
+    def create_fuzzed_stop_orders_setup(self, vega_state):
+        return self.vega.build_stop_order_setup(
             market_id=self.market_id,
-            side=FuzzingAgent.MEMORY["SIDE"][-1],
-            size=self.random_state.poisson(lam=10),
-            order_type=FuzzingAgent.MEMORY["TYPE"][-1],
-            time_in_force=FuzzingAgent.MEMORY["TIME_IN_FORCE"][-1],
+            order_submission=self.create_fuzzed_submission(vega_state=vega_state),
+            expires_at=datetime.utcfromtimestamp(
+                self.random_state.normal(loc=self.curr_time + 120, scale=30)
+            ),
+            expiry_strategy=self.random_state.choice(
+                [
+                    None,
+                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_UNSPECIFIED,
+                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
+                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_SUBMIT,
+                ]
+            ),
             price=self.random_state.choice(
-                a=[None, self.random_state.normal(loc=self.curr_price, scale=10)]
+                [None, self.random_state.normal(loc=self.curr_price, scale=10)]
             ),
-            expires_at=int(
-                vega_state.time + self.random_state.normal(loc=60, scale=60) * 1e9
+            trailing_percent_offset=self.random_state.choice(
+                [None, self.random_state.rand()]
             ),
-            pegged_reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
-            pegged_offset=self.random_state.normal(loc=0, scale=10),
-            reduce_only=FuzzingAgent.MEMORY["REDUCE_ONLY"][-1],
-            post_only=FuzzingAgent.MEMORY["POST_ONLY"][-1],
         )
 
     def _select_order_id(self):

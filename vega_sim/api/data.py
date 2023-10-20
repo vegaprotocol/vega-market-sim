@@ -311,14 +311,35 @@ class ReferrerRewardsGenerated:
 
 
 @dataclass(frozen=True)
+class MakerFeesGenerated:
+    taker: float
+    maker_fees_paid: List[PartyAmount]
+
+
+def _maker_fees_generated_from_proto(
+    maker_fees_generated: vega_protos.events.v1.events.MakerFeesGenerated,
+    decimal_spec: DecimalSpec,
+):
+    return MakerFeesGenerated(
+        taker=maker_fees_generated.taker,
+        maker_fees_paid=[
+            _party_amount_from_proto(party_amount, decimal_spec)
+            for party_amount in maker_fees_generated.maker_fees_paid
+        ],
+    )
+
+
+@dataclass(frozen=True)
 class FeesStats:
     market: str
     asset: str
     epoch_seq: int
-    total_rewards_paid: List[PartyAmount]
+    total_rewards_received: List[PartyAmount]
     referrer_rewards_generated: List[ReferrerRewardsGenerated]
     referees_discount_applied: List[PartyAmount]
     volume_discount_applied: List[PartyAmount]
+    total_maker_fees_received: List[PartyAmount]
+    maker_fees_generated: List[MakerFeesGenerated]
 
 
 @dataclass(frozen=True)
@@ -395,6 +416,144 @@ class TeamRefereeHistory:
     team_id: str
     joined_at: int
     joined_at_epoch: int
+
+
+@dataclass(frozen=True)
+class PeggedOrder:
+    reference: vega_protos.vega.PeggedReference
+    offset: float
+
+
+@dataclass(frozen=True)
+class IcebergOpts:
+    peak_size: float
+    minimum_visible_size: float
+
+
+@dataclass(frozen=True)
+class OrderSubmission:
+    market_id: str
+    size: float
+    side: vega_protos.vega.Side
+    time_in_force: vega_protos.Order.TimeInForce
+    type: vega_protos.Order.Type
+    reference: str
+    post_only: bool
+    reduce_only: bool
+    price: Optional[float] = None
+    expires_at: Optional[datetime.datetime] = None
+    pegged_order: Optional[PeggedOrder] = None
+    iceberg_opts: Optional[IcebergOpts] = None
+
+
+@dataclass(frozen=True)
+class StopOrder:
+    id: str
+    trigger_direction: vega_protos.vega.StopOrder.TriggerDirection
+    status: vega_protos.vega.StopOrder.Status
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    order_id: str
+    party_id: str
+    market_id: str
+    rejection_reason: vega_protos.vega.StopOrder.RejectionReason
+    price: Optional[float] = None
+    trailing_percent_offset: Optional[float] = None
+    oco_link_id: Optional[str] = None
+    expires_at: Optional[datetime.datetime] = None
+    expiry_strategy: Optional[vega_protos.vega.StopOrder.ExpiryStrategy] = None
+
+
+@dataclass(frozen=True)
+class StopOrderEvent:
+    submission: OrderSubmission
+    stop_order: StopOrder
+
+
+def _pegged_order_from_proto(pegged_order, decimal_spec: DecimalSpec) -> PeggedOrder:
+    return PeggedOrder(
+        reference=pegged_order.reference,
+        offset=num_from_padded_int(pegged_order.offset, decimal_spec.price_decimals),
+    )
+
+
+def _iceberg_opts_from_proto(iceberg_opts, decimal_spec: DecimalSpec) -> IcebergOpts:
+    return IcebergOpts(
+        peak_size=num_from_padded_int(
+            iceberg_opts.peak_size, decimal_spec.position_decimals
+        ),
+        minimum_visible_size=num_from_padded_int(
+            iceberg_opts.minimum_visible_size, decimal_spec.position_decimals
+        ),
+    )
+
+
+def _order_submission_from_proto(
+    order_submission: vega_protos.commands.OrderSubmission,
+    decimal_spec: DecimalSpec,
+) -> OrderSubmission:
+    return OrderSubmission(
+        market_id=order_submission.market_id,
+        price=num_from_padded_int(order_submission.price, decimal_spec.price_decimals),
+        size=num_from_padded_int(order_submission.size, decimal_spec.position_decimals),
+        side=order_submission.side,
+        time_in_force=order_submission.time_in_force,
+        expires_at=datetime.datetime.fromtimestamp(order_submission.expires_at / 1e9)
+        if order_submission.expires_at != 0
+        else None,
+        type=order_submission.type,
+        reference=order_submission.reference,
+        pegged_order=_pegged_order_from_proto(
+            order_submission.pegged_order, decimal_spec
+        ),
+        post_only=order_submission.post_only,
+        reduce_only=order_submission.reduce_only,
+        iceberg_opts=_iceberg_opts_from_proto(
+            order_submission.iceberg_opts, decimal_spec
+        ),
+    )
+
+
+def _stop_order_from_proto(
+    stop_order: vega_protos.vega.StopOrder, decimal_spec: DecimalSpec
+) -> StopOrder:
+    return StopOrder(
+        id=stop_order.id,
+        oco_link_id=stop_order.oco_link_id,
+        expires_at=datetime.datetime.fromtimestamp(stop_order.expires_at / 1e9)
+        if stop_order.expires_at != 0
+        else None,
+        expiry_strategy=stop_order.expiry_strategy,
+        trigger_direction=stop_order.trigger_direction,
+        status=stop_order.status,
+        created_at=datetime.datetime.fromtimestamp(stop_order.created_at / 1e9)
+        if stop_order.created_at != 0
+        else None,
+        updated_at=datetime.datetime.fromtimestamp(stop_order.updated_at / 1e9)
+        if stop_order.updated_at != 0
+        else None,
+        order_id=stop_order.order_id,
+        party_id=stop_order.party_id,
+        market_id=stop_order.market_id,
+        rejection_reason=stop_order.rejection_reason,
+        price=num_from_padded_int(stop_order.price, decimal_spec.price_decimals)
+        if stop_order.price is not None
+        else None,
+        trailing_percent_offset=float(stop_order.trailing_percent_offset)
+        if stop_order.trailing_percent_offset != ""
+        else None,
+    )
+
+
+def _stop_order_event_from_proto(
+    stop_order_event: vega_protos.events.StopOrderEvent, decimal_spec: DecimalSpec
+) -> StopOrderEvent:
+    return StopOrderEvent(
+        submission=_order_submission_from_proto(
+            stop_order_event.submission, decimal_spec
+        ),
+        stop_order=_stop_order_from_proto(stop_order_event.stop_order, decimal_spec),
+    )
 
 
 def _ledger_entry_from_proto(
@@ -976,11 +1135,11 @@ def _fees_stats_from_proto(
         market=fee_stats.market,
         asset=fee_stats.asset,
         epoch_seq=fee_stats.epoch_seq,
-        total_rewards_paid=[
+        total_rewards_received=[
             _party_amount_from_proto(
                 party_amount=party_amount, decimal_spec=decimal_spec
             )
-            for party_amount in fee_stats.total_rewards_paid
+            for party_amount in fee_stats.total_rewards_received
         ],
         referrer_rewards_generated=[
             _referrer_rewards_generated_from_proto(
@@ -1000,6 +1159,19 @@ def _fees_stats_from_proto(
                 party_amount=party_amount, decimal_spec=decimal_spec
             )
             for party_amount in fee_stats.volume_discount_applied
+        ],
+        total_maker_fees_received=[
+            _party_amount_from_proto(
+                party_amount=party_amount, decimal_spec=decimal_spec
+            )
+            for party_amount in fee_stats.total_maker_fees_received
+        ],
+        maker_fees_generated=[
+            _maker_fees_generated_from_proto(
+                maker_fees_generated=maker_fees_generated,
+                decimal_spec=decimal_spec,
+            )
+            for maker_fees_generated in fee_stats.maker_fees_generated
         ],
     )
 
@@ -2166,8 +2338,7 @@ def get_fees_stats(
     market_id: Optional[str] = None,
     asset_id: Optional[str] = None,
     epoch_seq: Optional[int] = None,
-    referrer: Optional[str] = None,
-    referee: Optional[str] = None,
+    party_id: Optional[str] = None,
     asset_decimals: Optional[Dict[str, int]] = {},
 ) -> List[FeesStats]:
     response = data_raw.get_fees_stats(
@@ -2175,8 +2346,7 @@ def get_fees_stats(
         market_id=market_id,
         asset_id=asset_id,
         epoch_seq=epoch_seq,
-        referrer=referrer,
-        referee=referee,
+        party_id=party_id,
     )
     return _fees_stats_from_proto(
         fee_stats=response,
@@ -2320,4 +2490,42 @@ def list_team_referee_history(
     return [
         _team_referee_history_from_proto(team_referee_history=team_referee_history)
         for team_referee_history in response
+    ]
+
+
+def list_stop_orders(
+    data_client: vac.trading_data_grpc_v2,
+    statuses: Optional[List[vega_protos.vega.StopOrder.Status]] = None,
+    expiry_strategies: Optional[
+        List[vega_protos.vega.StopOrder.ExpiryStrategies]
+    ] = None,
+    date_range: Optional[vega_protos.vega.DateRange] = None,
+    party_ids: Optional[List[str]] = None,
+    market_ids: Optional[List[str]] = None,
+    live_only: Optional[bool] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+):
+    response = data_raw.list_stop_orders(
+        data_client=data_client,
+        statuses=statuses,
+        expiry_strategies=expiry_strategies,
+        date_range=date_range,
+        party_ids=party_ids,
+        market_ids=market_ids,
+        live_only=live_only,
+    )
+    return [
+        _stop_order_event_from_proto(
+            stop_order_event,
+            DecimalSpec(
+                price_decimals=market_price_decimals_map[
+                    stop_order_event.submission.market_id
+                ],
+                position_decimals=market_position_decimals_map[
+                    stop_order_event.submission.market_id
+                ],
+            ),
+        )
+        for stop_order_event in response
     ]

@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+import datetime
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
@@ -27,10 +28,16 @@ from vega_sim.api.data import (
     ReferralSetStats,
     PartyAmount,
     ReferrerRewardsGenerated,
+    MakerFeesGenerated,
     FeesStats,
     Team,
     TeamReferee,
     TeamRefereeHistory,
+    StopOrderEvent,
+    OrderSubmission,
+    PeggedOrder,
+    IcebergOpts,
+    StopOrder,
     get_asset_decimals,
     find_asset_id,
     get_trades,
@@ -49,6 +56,7 @@ from vega_sim.api.data import (
     list_teams,
     list_team_referees,
     list_team_referee_history,
+    list_stop_orders,
 )
 from vega_sim.grpc.client import (
     VegaTradingDataClientV2,
@@ -1057,7 +1065,7 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
                 market=request.market_id,
                 asset=request.asset_id,
                 epoch_seq=1,
-                total_rewards_paid=[
+                total_rewards_received=[
                     vega_protos.events.v1.events.PartyAmount(
                         party="referrer1", amount="1000"
                     )
@@ -1082,6 +1090,21 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
                         party="referrer1", amount="1000"
                     )
                 ],
+                total_maker_fees_received=[
+                    vega_protos.events.v1.events.PartyAmount(
+                        party="referrer1", amount="1000"
+                    )
+                ],
+                maker_fees_generated=[
+                    vega_protos.events.v1.events.MakerFeesGenerated(
+                        taker="taker1",
+                        maker_fees_paid=[
+                            vega_protos.events.v1.events.PartyAmount(
+                                party="referrer1", amount="1000"
+                            )
+                        ],
+                    )
+                ],
             )
         )
 
@@ -1099,7 +1122,7 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         market="market_id",
         asset="",
         epoch_seq=1,
-        total_rewards_paid=[PartyAmount(party="referrer1", amount=100.0)],
+        total_rewards_received=[PartyAmount(party="referrer1", amount=100.0)],
         referrer_rewards_generated=[
             ReferrerRewardsGenerated(
                 referrer="referrer1",
@@ -1108,6 +1131,13 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         ],
         referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
         volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+        total_maker_fees_received=[PartyAmount(party="referrer1", amount=100.0)],
+        maker_fees_generated=[
+            MakerFeesGenerated(
+                taker="taker1",
+                maker_fees_paid=[PartyAmount(party="referrer1", amount=100.0)],
+            )
+        ],
     )
     assert get_fees_stats(
         data_client=data_client,
@@ -1117,7 +1147,7 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         market="",
         asset="asset",
         epoch_seq=1,
-        total_rewards_paid=[PartyAmount(party="referrer1", amount=100.0)],
+        total_rewards_received=[PartyAmount(party="referrer1", amount=100.0)],
         referrer_rewards_generated=[
             ReferrerRewardsGenerated(
                 referrer="referrer1",
@@ -1126,6 +1156,13 @@ def test_get_fees_stats(trading_data_v2_servicer_and_port):
         ],
         referees_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
         volume_discount_applied=[PartyAmount(party="referrer1", amount=100.0)],
+        total_maker_fees_received=[PartyAmount(party="referrer1", amount=100.0)],
+        maker_fees_generated=[
+            MakerFeesGenerated(
+                taker="taker1",
+                maker_fees_paid=[PartyAmount(party="referrer1", amount=100.0)],
+            )
+        ],
     )
 
 
@@ -1251,5 +1288,111 @@ def test_list_team_referee_history(trading_data_v2_servicer_and_port):
             team_id="id",
             joined_at=123456789,
             joined_at_epoch=1,
+        )
+    ]
+
+
+def test_list_stop_orders(trading_data_v2_servicer_and_port):
+    def ListStopOrders(self, request, context):
+        return data_node_protos_v2.trading_data.ListStopOrdersResponse(
+            orders=data_node_protos_v2.trading_data.StopOrderConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.StopOrderEdge(
+                        cursor="cursor",
+                        node=vega_protos.events.v1.events.StopOrderEvent(
+                            submission=vega_protos.commands.v1.commands.OrderSubmission(
+                                market_id="market_id",
+                                price="30",
+                                size=10000,
+                                side=vega_protos.vega.SIDE_BUY,
+                                time_in_force=vega_protos.vega.Order.TIME_IN_FORCE_IOC,
+                                type=vega_protos.vega.Order.TYPE_LIMIT,
+                                reference="reference",
+                                pegged_order=vega_protos.vega.PeggedOrder(
+                                    reference=vega_protos.vega.PEGGED_REFERENCE_MID,
+                                    offset="1",
+                                ),
+                                post_only=True,
+                                reduce_only=True,
+                                iceberg_opts=vega_protos.commands.v1.commands.IcebergOpts(
+                                    peak_size=1000,
+                                    minimum_visible_size=100,
+                                ),
+                            ),
+                            stop_order=vega_protos.vega.StopOrder(
+                                id="id",
+                                oco_link_id="oco_link_id",
+                                expires_at=1672531200000000000,
+                                expiry_strategy=vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
+                                trigger_direction=vega_protos.vega.StopOrder.TRIGGER_DIRECTION_RISES_ABOVE,
+                                status=vega_protos.vega.StopOrder.STATUS_PENDING,
+                                created_at=1672531200000000000,
+                                updated_at=1672531200000000000,
+                                order_id="order_id",
+                                party_id="party_id",
+                                market_id="market_id",
+                                rejection_reason=vega_protos.vega.StopOrder.REJECTION_REASON_TRADING_NOT_ALLOWED,
+                                price="1000",
+                                trailing_percent_offset=None,
+                            ),
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListStopOrders = ListStopOrders
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    stop_orders = list_stop_orders(
+        data_client=data_client,
+        market_price_decimals_map={"market_id": 0},
+        market_position_decimals_map={"market_id": 2},
+    )
+    assert stop_orders == [
+        StopOrderEvent(
+            submission=OrderSubmission(
+                market_id="market_id",
+                price=30.0,
+                size=100.0,
+                side=vega_protos.vega.SIDE_BUY,
+                time_in_force=vega_protos.vega.Order.TIME_IN_FORCE_IOC,
+                type=vega_protos.vega.Order.TYPE_LIMIT,
+                reference="reference",
+                pegged_order=PeggedOrder(
+                    reference=vega_protos.vega.PEGGED_REFERENCE_MID,
+                    offset=1.0,
+                ),
+                post_only=True,
+                reduce_only=True,
+                iceberg_opts=IcebergOpts(
+                    peak_size=10.0,
+                    minimum_visible_size=1.0,
+                ),
+            ),
+            stop_order=StopOrder(
+                id="id",
+                oco_link_id="oco_link_id",
+                expires_at=datetime.datetime(2023, 1, 1, 0, 0),
+                expiry_strategy=vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
+                trigger_direction=vega_protos.vega.StopOrder.TRIGGER_DIRECTION_RISES_ABOVE,
+                status=vega_protos.vega.StopOrder.STATUS_PENDING,
+                created_at=datetime.datetime(2023, 1, 1, 0, 0),
+                updated_at=datetime.datetime(2023, 1, 1, 0, 0),
+                order_id="order_id",
+                party_id="party_id",
+                market_id="market_id",
+                rejection_reason=vega_protos.vega.StopOrder.REJECTION_REASON_TRADING_NOT_ALLOWED,
+                price=1000.0,
+            ),
         )
     ]
