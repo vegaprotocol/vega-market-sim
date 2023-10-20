@@ -14,7 +14,7 @@ pipeline {
         disableConcurrentBuilds(abortPrevious: true)
     }
     parameters {
-        string( name: 'VEGA_VERSION', defaultValue: '347011f9a22f34ee9cbcf5b9def9f6b68dc33c8b',
+        string( name: 'VEGA_VERSION', defaultValue: 'fc2174d6f5471bc6a0f742f6dc18b68d2a761839',
                 description: 'Git branch, tag or hash of the vegaprotocol/vega repository')
         string( name: 'VEGACAPSULE_VERSION', defaultValue: 'main',
                 description: 'Git branch, tag or hash of the vegaprotocol/vegacapsule repository')
