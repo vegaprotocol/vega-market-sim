@@ -424,6 +424,42 @@ def propose_market_update(
     ).proposal.id
 
 
+def propose_market_state_update(
+    market_id: str,
+    key_name: str,
+    wallet: Wallet,
+    market_state: vega_protos.governance.MarketStateUpdateType,
+    price: Optional[str] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    data_client: Optional[vac.VegaTradingDataClientV2] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+    wallet_name: Optional[str] = None,
+) -> str:
+    market_state_update = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    market_state_update.terms.update_market_state.CopyFrom(
+        vega_protos.governance.UpdateMarketState(
+            changes=vega_protos.governance.UpdateMarketStateConfiguration(
+                market_id=market_id, price=price, update_type=market_state
+            )
+        )
+    )
+
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        key_name=key_name,
+        wallet=wallet,
+        proposal=market_state_update,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+    ).proposal.id
+
+
 def approve_proposal(
     key_name: str,
     proposal_id: str,

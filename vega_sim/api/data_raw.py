@@ -754,22 +754,23 @@ def get_referral_set_stats(
 
 
 @_retry(3)
-def get_referral_fee_stats(
+def get_fees_stats(
     data_client: vac.trading_data_grpc_v2,
     market_id: Optional[str] = None,
     asset_id: Optional[str] = None,
     epoch_seq: Optional[int] = None,
+    party_id: Optional[str] = None,
 ):
-    base_request = data_node_protos_v2.trading_data.GetReferralFeeStatsRequest()
-    if market_id is None and asset_id is None:
-        raise ValueError("Neither 'market_id' or 'asset_id' set.")
+    base_request = data_node_protos_v2.trading_data.GetFeesStatsRequest()
     if market_id is not None:
         setattr(base_request, "market_id", market_id)
     if asset_id is not None:
         setattr(base_request, "asset_id", asset_id)
     if epoch_seq is not None:
         setattr(base_request, "epoch_seq", epoch_seq)
-    return data_client.GetReferralFeeStats(base_request).fee_stats
+    if party_id is not None:
+        setattr(base_request, "referrer", party_id)
+    return data_client.GetFeesStats(base_request).fees_stats
 
 
 @_retry(3)
@@ -845,5 +846,33 @@ def list_team_referee_history(
         request_func=lambda x: data_client.ListTeamRefereeHistory(
             x
         ).team_referee_history,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_stop_orders(
+    data_client: vac.trading_data_grpc_v2,
+    statuses: Optional[List[vega_protos.vega.StopOrder.Status]] = None,
+    expiry_strategies: Optional[
+        List[vega_protos.vega.StopOrder.ExpiryStrategies]
+    ] = None,
+    date_range: Optional[vega_protos.vega.DateRange] = None,
+    party_ids: Optional[List[str]] = None,
+    market_ids: Optional[List[str]] = None,
+    live_only: Optional[bool] = None,
+):
+    filter = data_node_protos_v2.trading_data.StopOrderFilter(
+        statuses=statuses,
+        expiry_strategies=expiry_strategies,
+        date_range=date_range,
+        party_ids=party_ids,
+        market_ids=market_ids,
+        live_only=live_only,
+    )
+    base_request = data_node_protos_v2.trading_data.ListStopOrdersRequest(filter=filter)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListStopOrders(x).orders,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
