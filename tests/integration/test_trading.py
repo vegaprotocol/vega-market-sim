@@ -1686,6 +1686,7 @@ def test_volume_discount_program(vega_service_with_market: VegaServiceNull):
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Skipping as team features currently disabled.")
 def test_teams(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
 
