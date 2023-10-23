@@ -3067,12 +3067,17 @@ class VegaService(ABC):
     def build_iceberg_opts(
         self, market_id: str, peak_size: float, minimum_visible_size: float
     ) -> vega_protos.commands.v1.commands.IcebergOpts:
-        return vega_protos.commands.v1.commands.IcebergOpts(
-            peak_size=num_to_padded_int(peak_size, self.market_pos_decimals[market_id]),
-            minimum_visible_size=num_to_padded_int(
-                minimum_visible_size, self.market_pos_decimals[market_id]
-            ),
-        )
+        try:
+            return vega_protos.commands.v1.commands.IcebergOpts(
+                peak_size=num_to_padded_int(
+                    peak_size, self.market_pos_decimals[market_id]
+                ),
+                minimum_visible_size=num_to_padded_int(
+                    minimum_visible_size, self.market_pos_decimals[market_id]
+                ),
+            )
+        except ValueError as e:
+            raise VegaCommandError(e)
 
     def build_pegged_order(
         self,
