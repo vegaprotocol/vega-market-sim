@@ -311,7 +311,7 @@ class FuzzingScenario(Scenario):
                         wallet_name="REFERRERS",
                         tag=str(i_agent),
                     ),
-                    # is_referrer=True,
+                    is_referrer=True,
                     # team_name=f"TEAM_{i_agent}",
                     # team_url=f"URL_{i_agent}",
                     # avatar_url=f"AVATAR_{i_agent}",
