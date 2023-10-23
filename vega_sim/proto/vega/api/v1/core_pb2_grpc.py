@@ -72,7 +72,8 @@ class CoreServiceServicer(object):
     def SubmitTransaction(self, request, context):
         """Submit transaction
 
-        Submit a signed transaction
+        Submit a signed transaction to the network containing a command to be executed such that if the submission is successful then it will be included in the chain's mempool.
+        The network will then attempt to execute the transaction in the next available block, where the results of its execution can be seen on the EventBus.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -126,7 +127,8 @@ class CoreServiceServicer(object):
     def SubmitRawTransaction(self, request, context):
         """Submit raw transaction
 
-        Submit a version agnostic signed transaction
+        Submit a pre-serialised signed transaction containing a command to the network to be executed, such that if the submission is successful then it will be included in the chain's mempool.
+        The network will then attempt to execute the transaction in the next available block, where the results of its execution can be seen on the EventBus.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -135,7 +137,8 @@ class CoreServiceServicer(object):
     def CheckTransaction(self, request, context):
         """Check transaction
 
-        Check a signed transaction
+        Send a signed transaction containing a command to the network to be checked, but not added to the chain's mempool.
+        This is useful for checking the validity of a potential transaction before submitting it.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -144,7 +147,8 @@ class CoreServiceServicer(object):
     def CheckRawTransaction(self, request, context):
         """Check raw transaction
 
-        Check a raw signed transaction
+        Send a pre-serialised transaction containing a command to the network to be checked, but then not added to the chain's mempool.
+        This is useful for checking the validity of a potential transaction before submitting it.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -153,7 +157,7 @@ class CoreServiceServicer(object):
     def GetSpamStatistics(self, request, context):
         """Get Spam statistics
 
-        Get the spam statistics for a given party
+        Get the spam statistics for a given party.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
