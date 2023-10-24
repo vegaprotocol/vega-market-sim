@@ -312,10 +312,10 @@ class FuzzingScenario(Scenario):
                         tag=str(i_agent),
                     ),
                     is_referrer=True,
-                    team_name=f"TEAM_{i_agent}",
-                    team_url=f"URL_{i_agent}",
-                    avatar_url=f"AVATAR_{i_agent}",
-                    closed=False,
+                    # team_name=f"TEAM_{i_agent}",
+                    # team_url=f"URL_{i_agent}",
+                    # avatar_url=f"AVATAR_{i_agent}",
+                    # closed=False,
                 )
                 for i_agent in range(num_referrers)
             ]
@@ -499,7 +499,8 @@ class FuzzingScenario(Scenario):
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
                     asset_name=asset_name,
                     step_bias=1,
-                    attempts_per_step=100,
+                    validity_bias=0.8,
+                    attempts_per_step=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )
             ]

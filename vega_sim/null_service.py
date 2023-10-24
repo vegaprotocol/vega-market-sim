@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import atexit
+import datetime
 import functools
 import logging
 import multiprocessing
@@ -24,7 +25,6 @@ from typing import Dict, List, Optional, Set
 
 import docker
 import grpc
-import psutil
 import requests
 import toml
 from urllib3.exceptions import MaxRetryError
@@ -44,6 +44,8 @@ logger = logging.getLogger(__name__)
 PortUpdateConfig = namedtuple(
     "PortUpdateConfig", ["file_path", "config_path", "key", "val_func"]
 )
+
+PORT_DIR_NAME = "market_sim_ports"
 
 
 class Ports(Enum):
@@ -250,9 +252,19 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
         else set([ret_sock])
     )
 
+    # Synchronisation to try to avoid using the same ports across processes
+    # launching at very similar times
+    dated_path_dir = path.join(
+        tempfile.gettempdir(),
+        PORT_DIR_NAME,
+        datetime.date.today().strftime("%Y-%d-%m-%H-%M"),
+    )
+    os.makedirs(dated_path_dir, exist_ok=True)
+    existing_set.update(set(int(x) for x in os.listdir(dated_path_dir)))
+
     num_tries = 0
     while ret_sock in existing_set:
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(("", 0))
             ret_sock = s.getsockname()[1]
 
@@ -262,6 +274,7 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
             # a port it seems reasonable to give up
             raise SocketNotFoundError("Failed finding a free socket")
 
+    open(path.join(dated_path_dir, str(ret_sock)), "x")
     return ret_sock
 
 

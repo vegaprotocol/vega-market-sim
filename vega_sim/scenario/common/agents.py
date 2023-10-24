@@ -1501,7 +1501,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
             if i < len(orders):
                 order_to_amend = orders[i]
 
-                transaction = self.vega.create_order_amendment(
+                transaction = self.vega.build_order_amendment(
                     market_id=self.market_id,
                     order_id=order_to_amend.id,
                     price=order.price,
@@ -1517,7 +1517,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 amendments.append(transaction)
 
             else:
-                transaction = self.vega.create_order_submission(
+                transaction = self.vega.build_order_submission(
                     market_id=self.market_id,
                     price=order.price,
                     size=order.size,
@@ -1535,7 +1535,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         if len(orders) > len(new_shape):
             for order in orders[len(new_shape) :]:
-                transaction = self.vega.create_order_cancellation(
+                transaction = self.vega.build_order_cancellation(
                     order_id=order.id,
                     market_id=self.market_id,
                 )
@@ -2674,16 +2674,19 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
 
     def _submit_order(self, side, price, size):
         return [
-            self.vega.create_order_submission(
+            self.vega.build_order_submission(
                 market_id=self.market_id,
                 order_type="TYPE_LIMIT",
                 time_in_force="TIME_IN_FORCE_GTC",
                 side=side,
                 size=size * self.commitment_amount_to_size_weighting,
                 price=price,
-                # post_only=True,
-                peak_size=size * self.commitment_amount_to_peak_weighting,
-                minimum_visible_size=size * self.commitment_amount_to_minimum_weighting,
+                iceberg_opts=self.vega.build_iceberg_opts(
+                    market_id=self.market_id,
+                    peak_size=size * self.commitment_amount_to_peak_weighting,
+                    minimum_visible_size=size
+                    * self.commitment_amount_to_minimum_weighting,
+                ),
             )
         ]
 
@@ -2691,7 +2694,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
         cancellations = []
         for order in orders:
             cancellations.append(
-                self.vega.create_order_cancellation(
+                self.vega.build_order_cancellation(
                     market_id=self.market_id,
                     order_id=order.id,
                 )
@@ -3610,7 +3613,7 @@ class ReferralAgentWrapper:
         team_name: Optional[str] = None,
         team_url: Optional[str] = None,
         avatar_url: Optional[str] = None,
-        closed: bool = False,
+        closed: Optional[bool] = None,
         referrer_key_name: Optional[str] = None,
         referrer_wallet_name: Optional[str] = None,
     ):

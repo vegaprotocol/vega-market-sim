@@ -38,6 +38,8 @@ from vega_sim.proto.vega.commands.v1.commands_pb2 import (
     OrderAmendment,
     OrderCancellation,
     OrderSubmission,
+    StopOrdersCancellation,
+    StopOrdersSubmission,
 )
 from vega_sim.proto.vega.governance_pb2 import (
     UpdateFutureProduct,
@@ -75,6 +77,10 @@ class DatanodeSlowResponseError(Exception):
 
 
 class VegaFaucetError(Exception):
+    pass
+
+
+class VegaCommandError(Exception):
     pass
 
 
@@ -1013,6 +1019,93 @@ class VegaService(ABC):
         self.wait_fn(60)
         self.wait_for_thread_catchup()
 
+    def update_market_state(
+        self,
+        market_id: str,
+        proposal_key: str,
+        market_state: vega_protos.governance.MarketStateUpdateType,
+        price: Optional[float] = None,
+        wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ) -> str:
+        """Update the state of a market using a governance proposal. Optionally
+        automatically approves the proposal and forwards time to the enactment.
+
+        Args:
+            market_id:
+                str, The ID of the market to update
+            proposal_key:
+                str, The name of the key proposing the change. If automatically
+                    approving this key should have enough governance tokens to
+                    approve by itself
+            market_state:
+                MarketStateUpdateType, The value of the market to set
+            price:
+                Optional[float], If setting a termination state, the value at
+                    which to terminate (last mark price)
+            wallet_name:
+                Optional[str], If using a non-default wallet name, the wallet
+                    containing the proposal key name
+            vote_closing_time:
+                Optional[datetime], The time at which the vote should close
+            vote_enactment_time:
+                Optional[datetime], The time at which the vote should enact
+            approve_proposal:
+                bool, default True, Whether to automatically approve the proposal
+            forward_time_to_enactment:
+                bool, default True, Whether to forward time to enactment of the
+                    proposal
+
+        Returns:
+            str, The proposal ID
+        """
+        conv_price = (
+            str(num_to_padded_int(price, self.market_price_decimals[market_id]))
+            if price is not None
+            else None
+        )
+
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        proposal_id = gov.propose_market_state_update(
+            market_state=market_state,
+            market_id=market_id,
+            price=conv_price,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if vote_closing_time is None
+                else int(vote_closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+            data_client=self.trading_data_client_v2,
+            wallet=self.wallet,
+            key_name=proposal_key,
+            wallet_name=wallet_name,
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                key_name=proposal_key,
+                wallet_name=wallet_name,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        return proposal_id
+
     def update_market(
         self,
         proposal_key: str,
@@ -1879,7 +1972,7 @@ class VegaService(ABC):
             market_price_decimals_map=self.market_price_decimals,
         )
 
-    def create_order_amendment(
+    def build_order_amendment(
         self,
         order_id: str,
         market_id: str,
@@ -1961,7 +2054,7 @@ class VegaService(ABC):
             pegged_reference=pegged_reference,
         )
 
-    def create_order_cancellation(
+    def build_order_cancellation(
         self,
         order_id: str,
         market_id: str,
@@ -1986,7 +2079,7 @@ class VegaService(ABC):
             market_id=market_id,
         )
 
-    def create_order_submission(
+    def build_order_submission(
         self,
         market_id: str,
         size: float,
@@ -1996,12 +2089,10 @@ class VegaService(ABC):
         price: Optional[float] = None,
         expires_at: Optional[int] = None,
         reference: Optional[str] = None,
-        pegged_reference: Optional[str] = None,
-        pegged_offset: Optional[float] = None,
         reduce_only: bool = False,
         post_only: bool = False,
-        peak_size: Optional[float] = None,
-        minimum_visible_size: Optional[float] = None,
+        pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
+        iceberg_opts: Optional[IcebergOpts] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2051,16 +2142,6 @@ class VegaService(ABC):
                 )
             )
         )
-        pegged_offset = (
-            pegged_offset
-            if pegged_offset is None
-            else (
-                num_to_padded_int(
-                    to_convert=pegged_offset,
-                    decimals=self.market_price_decimals[market_id],
-                )
-            )
-        )
         size = (
             size
             if size is None
@@ -2068,14 +2149,6 @@ class VegaService(ABC):
                 to_convert=size, decimals=self.market_pos_decimals[market_id]
             )
         )
-        if (pegged_offset is not None) and (pegged_reference is not None):
-            pegged_order = trading.build_pegged_order(
-                pegged_reference=pegged_reference,
-                pegged_offset=pegged_offset,
-            )
-        else:
-            pegged_order = None
-
         if price is not None and price <= 0:
             msg = "Not submitting order as price is 0 or less."
             logger.debug(msg)
@@ -2098,18 +2171,7 @@ class VegaService(ABC):
             pegged_order=pegged_order,
             reduce_only=reduce_only,
             post_only=post_only,
-            iceberg_opts=(
-                vega_protos.commands.v1.commands.IcebergOpts(
-                    peak_size=num_to_padded_int(
-                        peak_size, self.market_pos_decimals[market_id]
-                    ),
-                    minimum_visible_size=num_to_padded_int(
-                        minimum_visible_size, self.market_pos_decimals[market_id]
-                    ),
-                )
-                if (peak_size is not None and minimum_visible_size is not None)
-                else None
-            ),
+            iceberg_opts=iceberg_opts,
         )
 
     def submit_instructions(
@@ -2119,6 +2181,8 @@ class VegaService(ABC):
         cancellations: Optional[List[OrderCancellation]] = None,
         amendments: Optional[List[OrderAmendment]] = None,
         submissions: Optional[List[OrderSubmission]] = None,
+        stop_orders_cancellation: Optional[List[StopOrdersCancellation]] = None,
+        stop_orders_submission: Optional[List[StopOrdersSubmission]] = None,
     ):
         """Submits a batch of market instructions to be processed sequentially.
 
@@ -2151,6 +2215,8 @@ class VegaService(ABC):
             (cancellations if cancellations is not None else [])
             + (amendments if amendments is not None else [])
             + (submissions if submissions is not None else [])
+            + (stop_orders_cancellation if stop_orders_cancellation is not None else [])
+            + (stop_orders_submission if stop_orders_submission is not None else [])
         )
 
         batch_size = 0
@@ -2158,6 +2224,8 @@ class VegaService(ABC):
         batch_of_cancellations = []
         batch_of_amendments = []
         batch_of_submissions = []
+        batch_of_stop_orders_cancellation = []
+        batch_of_stop_orders_submission = []
 
         for i, instruction in enumerate(instructions):
             if instruction is None:
@@ -2168,6 +2236,10 @@ class VegaService(ABC):
                 batch_of_amendments.append(instruction)
             elif isinstance(instruction, OrderSubmission):
                 batch_of_submissions.append(instruction)
+            elif isinstance(instruction, StopOrdersCancellation):
+                batch_of_stop_orders_cancellation.append(instruction)
+            elif isinstance(instruction, StopOrdersSubmission):
+                batch_of_stop_orders_submission.append(instruction)
             else:
                 batch_size += -1
                 raise ValueError(f"Invalid instruction type {type(instruction)}.")
@@ -2182,6 +2254,8 @@ class VegaService(ABC):
                     cancellations=batch_of_cancellations,
                     amendments=batch_of_amendments,
                     submissions=batch_of_submissions,
+                    stop_orders_submission=batch_of_stop_orders_submission,
+                    stop_orders_cancellation=batch_of_stop_orders_cancellation,
                 )
 
                 batch_size = 0
@@ -2189,6 +2263,8 @@ class VegaService(ABC):
                 batch_of_cancellations = []
                 batch_of_amendments = []
                 batch_of_submissions = []
+                batch_of_stop_orders_submission = []
+                batch_of_stop_orders_cancellation = []
 
     def get_network_parameter(
         self, key: str, to_type: Optional[Union[str, int, float]] = None
@@ -2411,6 +2487,7 @@ class VegaService(ABC):
                     notional_time_weighted_average_position_requirement,
                     markets,
                     team_scope,
+                    rank_table,
                 ]
             ]
         ):
@@ -2867,17 +2944,22 @@ class VegaService(ABC):
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
         )
 
-    def get_referral_fee_stats(
+    def get_fees_stats(
         self,
         market_id: Optional[str] = None,
         asset_id: Optional[str] = None,
         epoch_seq: Optional[int] = None,
-    ) -> List[data.FeeStats]:
-        return data.get_referral_fee_stats(
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+    ) -> List[data.FeesStats]:
+        return data.get_fees_stats(
             data_client=self.trading_data_client_v2,
             market_id=market_id,
             asset_id=asset_id,
             epoch_seq=epoch_seq,
+            party_id=self.wallet.public_key(key_name, wallet_name)
+            if key_name is not None
+            else None,
             asset_decimals=self.asset_decimals,
         )
 
@@ -2984,4 +3066,116 @@ class VegaService(ABC):
         return data.list_team_referee_history(
             data_client=self.trading_data_client_v2,
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+        )
+
+    def build_iceberg_opts(
+        self, market_id: str, peak_size: float, minimum_visible_size: float
+    ) -> vega_protos.commands.v1.commands.IcebergOpts:
+        try:
+            return vega_protos.commands.v1.commands.IcebergOpts(
+                peak_size=num_to_padded_int(
+                    peak_size, self.market_pos_decimals[market_id]
+                ),
+                minimum_visible_size=num_to_padded_int(
+                    minimum_visible_size, self.market_pos_decimals[market_id]
+                ),
+            )
+        except ValueError as e:
+            raise VegaCommandError(e)
+
+    def build_pegged_order(
+        self,
+        market_id: str,
+        reference: vega_protos.vega.Order.PeggedReference,
+        offset: float,
+    ) -> vega_protos.vega.PeggedOrder:
+        return vega_protos.vega.PeggedOrder(
+            reference=reference,
+            offset=str(
+                num_to_padded_int(offset, self.market_price_decimals[market_id])
+            ),
+        )
+
+    def build_stop_order_setup(
+        self,
+        market_id: str,
+        order_submission: vega_protos.commands.v1.commands.OrderSubmission,
+        expires_at: Optional[datetime.datetime] = None,
+        expiry_strategy: Optional[
+            vega_protos.commands.v1.commands.ExpiryStrategy
+        ] = None,
+        price: Optional[float] = None,
+        trailing_percent_offset: Optional[float] = None,
+    ) -> vega_protos.commands.v1.commands.StopOrderSetup:
+        if price is None and trailing_percent_offset is None:
+            raise VegaCommandError(
+                "'price' and 'trailing_percent_offset' can not both be None."
+            )
+        stop_order_setup = vega_protos.commands.v1.commands.StopOrderSetup(
+            order_submission=order_submission,
+            expiry_strategy=expiry_strategy,
+        )
+        if expires_at is not None:
+            setattr(stop_order_setup, "expires_at", int(expires_at.timestamp()))
+        if price is not None:
+            setattr(
+                stop_order_setup,
+                "price",
+                str(num_to_padded_int(price, self.market_price_decimals[market_id])),
+            )
+        if trailing_percent_offset is not None:
+            setattr(
+                stop_order_setup,
+                "trailing_percent_offset",
+                str(trailing_percent_offset),
+            )
+        return stop_order_setup
+
+    def build_stop_orders_submission(
+        self,
+        rises_above: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
+        falls_below: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
+    ) -> vega_protos.commands.v1.commands.StopOrdersSubmission:
+        if rises_above is None and falls_below is None:
+            raise VegaCommandError(
+                "'rises_above' and 'falls_below' can not both be None."
+            )
+        return vega_protos.commands.v1.commands.StopOrdersSubmission(
+            rises_above=rises_above, falls_below=falls_below
+        )
+
+    def submit_stop_order(
+        self,
+        stop_orders_submission: StopOrdersSubmission,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+    ):
+        trading.submit_stop_orders(
+            wallet=self.wallet,
+            stop_orders_submission=stop_orders_submission,
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )
+
+    def list_stop_orders(
+        self,
+        statuses: Optional[List[vega_protos.vega.StopOrder.Status]] = None,
+        expiry_strategies: Optional[
+            List[vega_protos.vega.StopOrder.ExpiryStrategies]
+        ] = None,
+        date_range: Optional[vega_protos.vega.DateRange] = None,
+        party_ids: Optional[List[str]] = None,
+        market_ids: Optional[List[str]] = None,
+        live_only: Optional[bool] = None,
+    ):
+        return data.list_stop_orders(
+            data_client=self.trading_data_client_v2,
+            statuses=statuses,
+            expiry_strategies=expiry_strategies,
+            date_range=date_range,
+            party_ids=party_ids,
+            market_ids=market_ids,
+            live_only=live_only,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
         )

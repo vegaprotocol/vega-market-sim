@@ -1686,6 +1686,7 @@ def test_volume_discount_program(vega_service_with_market: VegaServiceNull):
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Skipping as team features currently disabled.")
 def test_teams(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
 
@@ -1738,3 +1739,73 @@ def test_teams(vega_service_with_market: VegaServiceNull):
     ]
     assert team_a_id in team_referee_history
     assert team_b_id in team_referee_history
+
+
+@pytest.mark.integration
+def test_stop_order(vega_service_with_market: VegaServiceNull):
+    vega = vega_service_with_market
+    # Party A places the stop order
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_A, amount=1e9)
+    vega.wait_for_total_catchup()
+    # Parties B and C move the mark price, triggering the stop
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_B, amount=1e9)
+    vega.wait_for_total_catchup()
+    create_and_faucet_wallet(vega=vega, wallet=PARTY_C, amount=1e9)
+    vega.wait_for_total_catchup()
+    market_id = vega.all_markets()[0].id
+
+    # Party A opens a position
+    vega.submit_order(
+        trading_key=PARTY_A.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_BUY",
+        price=0.30,
+        volume=1,
+    )
+    vega.submit_order(
+        trading_key=PARTY_B.name,
+        market_id=market_id,
+        order_type="TYPE_LIMIT",
+        time_in_force="TIME_IN_FORCE_GTC",
+        side="SIDE_SELL",
+        price=0.30,
+        volume=1,
+    )
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    # Build a stop order and submit it
+    order_submission = vega.build_order_submission(
+        market_id=market_id,
+        size=1,
+        side=vega_protos.vega.SIDE_SELL,
+        order_type=vega_protos.vega.Order.TYPE_LIMIT,
+        price=5.0,
+        time_in_force=vega_protos.vega.Order.TIME_IN_FORCE_IOC,
+        reduce_only=True,
+    )
+    stop_order_setup = vega.build_stop_order_setup(
+        market_id=market_id,
+        order_submission=order_submission,
+        price=0.4,
+    )
+    stop_orders_submission = vega.build_stop_orders_submission(
+        rises_above=stop_order_setup,
+        falls_below=None,
+    )
+    vega.submit_stop_order(
+        stop_orders_submission=stop_orders_submission, key_name=PARTY_A.name
+    )
+    vega.wait_fn(1)
+    vega.wait_for_total_catchup()
+
+    assert (
+        len(
+            vega.list_stop_orders(
+                statuses=[vega_protos.vega.StopOrder.STATUS_PENDING],
+            )
+        )
+        > 0
+    )
