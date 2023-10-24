@@ -43,7 +43,7 @@ def enum_to_str(e: Any, val: int) -> str:
     return e.keys()[e.values().index(val)]
 
 
-def num_to_padded_int(to_convert: float, decimals: int) -> float:
+def num_to_padded_int(to_convert: float, decimals: int) -> int:
     return int(Decimal(str(to_convert)) * 10**decimals)
 
 

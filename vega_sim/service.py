@@ -11,6 +11,7 @@ from functools import wraps
 from itertools import product
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
+from enum import Enum
 
 import grpc
 
@@ -82,6 +83,20 @@ class VegaFaucetError(Exception):
 
 class VegaCommandError(Exception):
     pass
+
+class MarketStateUpdate(Enum):
+    Unspecified = (
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_UNSPECIFIED
+    )
+    Terminate = (
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_TERMINATE
+    )
+    Suspend = (
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_SUSPEND
+    )
+    Resume = (
+        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_RESUME
+    )
 
 
 def raw_data(fn):
@@ -1391,7 +1406,9 @@ class VegaService(ABC):
         )
         oracle_name = filter_key.name
 
-        logger.info(f"Submitting settlement price {settlement_price} for {oracle_name}")
+        logger.info(
+            f"Submitting market termination signal and settlement price {settlement_price} for {oracle_name}"
+        )
 
         gov.submit_termination_and_settlement_data(
             wallet=self.wallet,
@@ -1402,6 +1419,113 @@ class VegaService(ABC):
             ),
             key_name=settlement_key,
         )
+
+    def submit_settlement_data(
+        self,
+        settlement_key: str,
+        settlement_price: float,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+        additional_payload: Optional[dict[str, str]] = None,
+    ):
+        product = helpers.get_product(
+            data_raw.market_info(market_id, data_client=self.trading_data_client_v2)
+        )
+
+        filter_key = (
+            product.data_source_spec_for_settlement_data.data.external.oracle.filters[
+                0
+            ].key
+        )
+        oracle_name = filter_key.name
+
+        msg = f"Submitting settlement price {settlement_price} for {oracle_name}"
+        if additional_payload != None:
+            msg += f" with additional payload: {additional_payload}"
+        logger.info(msg)
+
+        gov.submit_settlement_data(
+            wallet=self.wallet,
+            wallet_name=wallet_name,
+            oracle_name=oracle_name,
+            settlement_price=num_to_padded_int(
+                settlement_price, decimals=filter_key.number_decimal_places
+            ),
+            key_name=settlement_key,
+            additional_payload=additional_payload,
+        )
+
+    def propose_market_state_update(
+        self,
+        proposal_key: str,
+        market_id: str,
+        update_type: MarketStateUpdate,
+        settlement_price: Optional[float] = None,
+        wallet_name: Optional[str] = None,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        price = None
+        if not settlement_price is None:
+            product = helpers.get_product(
+                data_raw.market_info(market_id, data_client=self.trading_data_client_v2)
+            )
+
+            filter_key = product.data_source_spec_for_settlement_data.data.external.oracle.filters[
+                0
+            ].key
+            price = str(
+                num_to_padded_int(
+                    settlement_price, decimals=filter_key.number_decimal_places
+                )
+            )
+
+        market_state_update = vega_protos.governance.UpdateMarketStateConfiguration(
+            market_id=market_id, update_type=update_type.value, price=price
+        )
+
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+
+        proposal_id = gov.propose_market_state_update(
+            key_name=proposal_key,
+            wallet=self.wallet,
+            market_state_update=market_state_update,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            data_client=self.trading_data_client_v2,
+            time_forward_fn=lambda: self.wait_fn(2),
+            wallet_name=wallet_name,
+        )
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                key_name=proposal_key,
+                wallet_name=wallet_name,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        self.wait_for_thread_catchup()
+
+        return proposal_id
 
     def party_account(
         self,
@@ -1586,6 +1710,17 @@ class VegaService(ABC):
             market_position_decimals_map=self.market_pos_decimals,
             market_to_asset_map=self.market_to_asset,
             asset_decimals_map=self.asset_decimals,
+        )
+
+    def get_market_state(
+        self,
+        market_id: str,
+    ) -> str:
+        """
+        Output market state.
+        """
+        return vega_protos.markets.Market.State.Name(
+            self.get_latest_market_data(market_id).market_state
         )
 
     def market_account(

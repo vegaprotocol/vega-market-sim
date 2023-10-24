@@ -3,6 +3,7 @@ from collections import namedtuple
 from random import randint
 
 from vega_sim.null_service import VegaServiceNull
+from vega_sim.service import MarketStateUpdate
 
 import argparse
 
@@ -21,10 +22,10 @@ TRADER_WALLET = WalletConfig("Zl3pLs6Xk6SwIK7Jlp2x", "bJQDDVGAhKkj3PVCc7Rr")
 # The party randomly post LOs at buy/sell side to simulate real Market situation
 RANDOM_WALLET = WalletConfig("OJpVLvU5fgLJbhNPdESa", "GmJTt9Gk34BHDlovB7AJ")
 
-# The party to terminate the market and send settlment price
-TERMINATE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
+# The party to interact with the network via governance
+GOVERNANCE_WALLET = WalletConfig("FJMKnwfZdd48C8NqvYrG", "bY3DxwtsCstMIIZdNpKs")
 
-wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, TERMINATE_WALLET]
+wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, GOVERNANCE_WALLET]
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -102,7 +103,7 @@ if __name__ == "__main__":
                 market_name="BTC:DAI_Perpetual",
                 proposal_key=MM_WALLET.name,
                 settlement_asset_id=tdai_id,
-                settlement_data_key=TERMINATE_WALLET.name,
+                settlement_data_key=GOVERNANCE_WALLET.name,
                 funding_payment_frequency_in_seconds=10,
                 market_decimals=5,
             )
@@ -111,7 +112,7 @@ if __name__ == "__main__":
                 market_name="BTC:DAI_Mar22",
                 proposal_key=MM_WALLET.name,
                 settlement_asset_id=tdai_id,
-                termination_key=TERMINATE_WALLET.name,
+                termination_key=GOVERNANCE_WALLET.name,
                 market_decimals=5,
             )
         vega.wait_for_total_catchup()
@@ -143,85 +144,6 @@ if __name__ == "__main__":
             volume=1,
             price=100,
         )
-
-        # for i in range(1, 100, 2):
-        #     trader = np.random.choice([MM_WALLET.name, MM_WALLET2.name])
-
-        #     vega.submit_order(
-        #         trading_wallet=trader,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10 * np.random.random() + 1,
-        #         price=100 - 0.25 * i,
-        #     )
-
-        #     vega.submit_order(
-        #         trading_wallet=trader,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10 * np.random.random() + 1,
-        #         price=100 + 0.25 * i,
-        #     )
-
-        # for wallet in [MM_WALLET, MM_WALLET2]:
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10,
-        #         price=99.5,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10,
-        #         price=99,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_BUY",
-        #         volume=10,
-        #         price=98,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10,
-        #         price=101,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10,
-        #         price=102,
-        #     )
-        #     vega.submit_order(
-        #         trading_wallet=wallet.name,
-        #         market_id=market_id,
-        #         time_in_force="TIME_IN_FORCE_GTC",
-        #         order_type="TYPE_LIMIT",
-        #         side="SIDE_SELL",
-        #         volume=10,
-        #         price=103,
-        #     )
 
         vega.submit_order(
             trading_key=MM_WALLET.name,
@@ -276,50 +198,71 @@ if __name__ == "__main__":
                 matching_price = 100 + randint(-5, 5)
                 oracle_price = matching_price + randint(-50, 50)
 
-                # vega.submit_order(
-                #             trading_key=MM_WALLET.name,
-                #             market_id=market_id,
-                #             time_in_force="TIME_IN_FORCE_GTC",
-                #             order_type="TYPE_LIMIT",
-                #             side="SIDE_BUY",
-                #             volume=1,
-                #             price=matching_price,
-                #             wait=True,
-                #         )
-                # vega.submit_order(
-                #             trading_key=MM_WALLET2.name,
-                #             market_id=market_id,
-                #             time_in_force="TIME_IN_FORCE_GTC",
-                #             order_type="TYPE_LIMIT",
-                #             side="SIDE_SELL",
-                #             volume=1,
-                #             price=matching_price,
-                #             wait=True,
-                #         )
-
-                # TODO: Add eth-block-time metadata
-                vega.submit_termination_and_settlement_data(
-                    settlement_key=TERMINATE_WALLET.name,
+                vega.submit_order(
+                    trading_key=MM_WALLET.name,
+                    market_id=market_id,
+                    time_in_force="TIME_IN_FORCE_GTC",
+                    order_type="TYPE_LIMIT",
+                    side="SIDE_BUY",
+                    volume=1,
+                    price=matching_price,
+                    wait=True,
+                )
+                vega.submit_order(
+                    trading_key=MM_WALLET2.name,
+                    market_id=market_id,
+                    time_in_force="TIME_IN_FORCE_GTC",
+                    order_type="TYPE_LIMIT",
+                    side="SIDE_SELL",
+                    volume=1,
+                    price=matching_price,
+                    wait=True,
+                )
+                vega.submit_settlement_data(
+                    settlement_key=GOVERNANCE_WALLET.name,
                     settlement_price=oracle_price,
                     market_id=market_id,
+                    additional_payload={
+                        "eth-block-time": str(vega.get_blockchain_time(in_seconds=True))
+                    },
                 )
                 vega.forward("4s")
-                # md = vega.get_latest_market_data(market_id=market_id)
-                # print(md)
+
+        # suspend market
+        print(f"market state: {vega.get_market_state(market_id)}")
+        update_type = MarketStateUpdate.Suspend
+        print(f"submitting proposal: {update_type}")
+        vega.propose_market_state_update(
+            proposal_key=MM_WALLET.name, market_id=market_id, update_type=update_type
+        )
+        print(f"market state: {vega.get_market_state(market_id)}")
+        # resume market
+        update_type = MarketStateUpdate.Resume
+        print(f"submitting proposal: {update_type}")
+        vega.propose_market_state_update(
+            proposal_key=MM_WALLET.name, market_id=market_id, update_type=update_type
+        )
+        print(f"market state: {vega.get_market_state(market_id)}")
 
         input("Pausing to observe the market, press Enter to continue.")
         if args.perps:
-            print("TODO: submit market closure proposal at this point")
+            # close market
+            update_type = MarketStateUpdate.Terminate
+            print(f"submitting proposal: {update_type}")
+            vega.propose_market_state_update(
+                proposal_key=MM_WALLET.name,
+                market_id=market_id,
+                update_type=update_type,
+                settlement_price=100,
+            )
         else:
             vega.submit_termination_and_settlement_data(
-                settlement_key=TERMINATE_WALLET.name,
+                settlement_key=GOVERNANCE_WALLET.name,
                 settlement_price=100,
                 market_id=market_id,
             )
         vega.wait_for_total_catchup()
-
-        transfers = vega.list_transfers(key_name=MM_WALLET2.name)
-        print(f"transfers:\n\t{transfers}")
+        print(f"market state: {vega.get_market_state(market_id)}")
 
         vega.forward("10s")
         input("Press Enter to finish")
