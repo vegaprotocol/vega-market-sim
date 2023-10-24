@@ -292,6 +292,7 @@ class MarketData:
     market_state: str
     next_mark_to_market: float
     last_traded_price: float
+    product_data: None | PerpsData
 
 
 @dataclass(frozen=True)
@@ -308,6 +309,14 @@ class LiquidityProviderFeeShare:
     equity_like_share: float
     average_entry_valuation: float
     average_score: float
+
+
+@dataclass(frozen=True)
+class PerpsData:
+    funding_payment: float
+    funding_rate: float
+    internal_twap: float
+    external_twap: float
 
 
 @dataclass(frozen=True)
@@ -1032,6 +1041,7 @@ def _market_data_from_proto(
         last_traded_price=num_from_padded_int(
             market_data.last_traded_price, decimal_spec.price_decimals
         ),
+        product_data=_product_data_from_proto(market_data.product_data, decimal_spec),
     )
 
 
@@ -1079,6 +1089,30 @@ def _liquidity_provider_fee_share_from_proto(
         )
         for individual_liquidity_provider_fee_share in liquidity_provider_fee_share
     ]
+
+
+def _product_data_from_proto(
+    product_data: vega_protos.vega.ProductData, decimal_spec: DecimalSpec
+) -> None | PerpsData:
+    data_field = product_data.WhichOneof("data")
+    if data_field is None:
+        return None
+    if data_field == "perpetual_data":
+        data = getattr(product_data, data_field)
+
+        return PerpsData(
+            funding_payment=num_from_padded_int(
+                data.funding_payment, decimal_spec.price_decimals
+            ),
+            funding_rate=float(data.funding_rate),
+            internal_twap=num_from_padded_int(
+                data.internal_twap, decimal_spec.price_decimals
+            ),
+            external_twap=num_from_padded_int(
+                data.external_twap, decimal_spec.price_decimals
+            ),
+        )
+    raise Exception(f"unsupported product data type '{data_field}'")
 
 
 def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:

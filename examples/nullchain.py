@@ -195,8 +195,8 @@ if __name__ == "__main__":
 
         if args.perps:
             for i in range(20):
-                matching_price = 100 + randint(-5, 5)
-                oracle_price = matching_price + randint(-50, 50)
+                internal_price = 100 + randint(-5, 5)
+                external_price = internal_price + randint(-50, 50)
 
                 vega.submit_order(
                     trading_key=MM_WALLET.name,
@@ -205,7 +205,7 @@ if __name__ == "__main__":
                     order_type="TYPE_LIMIT",
                     side="SIDE_BUY",
                     volume=1,
-                    price=matching_price,
+                    price=internal_price,
                     wait=True,
                 )
                 vega.submit_order(
@@ -215,18 +215,16 @@ if __name__ == "__main__":
                     order_type="TYPE_LIMIT",
                     side="SIDE_SELL",
                     volume=1,
-                    price=matching_price,
+                    price=internal_price,
                     wait=True,
                 )
                 vega.submit_settlement_data(
                     settlement_key=GOVERNANCE_WALLET.name,
-                    settlement_price=oracle_price,
+                    settlement_price=external_price,
                     market_id=market_id,
-                    additional_payload={
-                        "eth-block-time": str(vega.get_blockchain_time(in_seconds=True))
-                    },
                 )
                 vega.forward("4s")
+                print(vega.get_latest_market_data(market_id=market_id).product_data)
 
         # suspend market
         print(f"market state: {vega.get_market_state(market_id)}")
