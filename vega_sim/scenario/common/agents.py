@@ -3458,7 +3458,7 @@ class ReferralAgentWrapper:
         team_name: Optional[str] = None,
         team_url: Optional[str] = None,
         avatar_url: Optional[str] = None,
-        closed: bool = False,
+        closed: Optional[bool] = None,
         referrer_key_name: Optional[str] = None,
         referrer_wallet_name: Optional[str] = None,
     ):
