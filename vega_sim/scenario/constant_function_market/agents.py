@@ -235,6 +235,155 @@ class CFMMarketMaker(ShapedMarketMaker):
         return agg_bids, agg_asks
 
 
+class CFMV3MarketMaker(ShapedMarketMaker):
+    NAME_BASE = "cfm_v3_market_maker"
+
+    def __init__(
+        self,
+        key_name: str,
+        num_steps: int,
+        base_price: float = 100,
+        price_width_below: float = 0.05,
+        price_width_above: float = 0.05,
+        margin_usage_at_bounds: float = 0.8,
+        initial_asset_mint: float = 1000000,
+        market_name: str = None,
+        asset_name: str = None,
+        commitment_amount: float = 6000,
+        supplied_amount: Optional[float] = None,
+        market_decimal_places: int = 5,
+        fee_amount: float = 0.001,
+        min_trade_unit: float = 0.01,
+        volume_per_side: float = 10,
+        num_levels: int = 25,
+        tick_spacing: float = 1,
+        asset_decimal_places: int = 0,
+        tag: str = "",
+        wallet_name: str = None,
+        orders_from_stream: Optional[bool] = True,
+        state_update_freq: Optional[int] = None,
+        order_validity_length: Optional[float] = None,
+        price_process_generator: Optional[Iterable[float]] = None,
+    ):
+        super().__init__(
+            wallet_name=wallet_name,
+            initial_asset_mint=initial_asset_mint,
+            market_name=market_name,
+            asset_name=asset_name,
+            commitment_amount=commitment_amount,
+            supplied_amount=supplied_amount,
+            market_decimal_places=market_decimal_places,
+            asset_decimal_places=asset_decimal_places,
+            tag=tag,
+            shape_fn=self._generate_shape,
+            best_price_offset_fn=lambda *args, **kwargs: (0, 0),
+            liquidity_commitment_fn=self._liq_provis,
+            key_name=key_name,
+            orders_from_stream=orders_from_stream,
+            state_update_freq=state_update_freq,
+            order_validity_length=order_validity_length,
+            price_process_generator=price_process_generator,
+        )
+        self.base_price = base_price
+        self.upper_price = price_width_above * base_price
+        self.lower_price = price_width_below * base_price
+        self.margin_usage_at_bounds = margin_usage_at_bounds
+
+        self.tick_spacing = tick_spacing
+        self.num_levels = num_levels
+        self.fee_amount = fee_amount
+        self.volume_per_side = volume_per_side
+
+        self.num_steps = num_steps
+        self.min_trade_unit = min_trade_unit
+
+        self.curr_bids, self.curr_asks = None, None
+
+    def initialise(
+        self,
+        vega,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        super().initialise(vega=vega, create_key=create_key, mint_key=mint_key)
+
+        risk_factors = vega.get_risk_factors(self.market_id)
+
+        lower_margin_factor = 1 / (self.lower_price * risk_factors.short)
+        upper_margin_factor = 1 / (self.upper_price * risk_factors.long)
+
+        self.use_upper_bound = risk_factors.long > risk_factors.short
+        self.margin_factor = (
+            upper_margin_factor if self.use_upper_bound else lower_margin_factor
+        )
+
+    def _liq_provis(self, state: VegaState) -> LiquidityProvision:
+        return LiquidityProvision(
+            amount=self.commitment_amount,
+            fee=self.fee_amount,
+        )
+
+    def _scale_orders(
+        self,
+        buy_shape: List[MMOrder],
+        sell_shape: List[MMOrder],
+    ):
+        return (buy_shape, sell_shape)
+
+    def _generate_shape(
+        self, bid_price_depth: float, ask_price_depth: float
+    ) -> Tuple[List[MMOrder], List[MMOrder]]:
+        balance = sum(
+            self.vega.get_accounts_from_stream(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+            )[0]
+        )
+
+        liquidity = self.margin_factor * balance
+        allowable_posn_short = self.margin_usage_at_bounds * liquidity
+
+        allowable_posn_long = self.margin_usage_at_bounds * liquidity
+
+        # ref_price = self.curr_price
+
+        ref_price = self.vega.last_trade_price(market_id=self.market_id)
+
+        if ref_price == 0:
+            ref_price = self.curr_price
+
+        bid_orders, ask_orders = _build_price_levels(
+            position=self.current_position,
+            ref_price=ref_price,
+            min_trade_unit=self.min_trade_unit,
+            num_steps=int(self.volume_per_side / self.min_trade_unit),
+            tick_spacing=self.tick_spacing,
+            k_scaling_large=self.k_scaling_large,
+            k_scaling_small=self.k_scaling_small,
+        )
+        agg_bids = _aggregate_price_levels(
+            bid_orders,
+            side=vega_protos.Side.SIDE_BUY,
+            tick_spacing=self.tick_spacing,
+            starting_price=ref_price,
+            min_trade_unit=self.min_trade_unit,
+            max_levels=self.num_levels,
+        )
+        agg_asks = _aggregate_price_levels(
+            ask_orders,
+            side=vega_protos.Side.SIDE_SELL,
+            tick_spacing=self.tick_spacing,
+            starting_price=ref_price,
+            min_trade_unit=self.min_trade_unit,
+            max_levels=self.num_levels,
+        )
+        self.curr_bids = agg_bids
+        self.curr_asks = agg_asks
+
+        return agg_bids, agg_asks
+
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
