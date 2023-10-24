@@ -84,7 +84,8 @@ class VegaFaucetError(Exception):
 class VegaCommandError(Exception):
     pass
 
-class MarketStateUpdate(Enum):
+
+class MarketStateUpdateType(Enum):
     Unspecified = (
         vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_UNSPECIFIED
     )
@@ -1178,7 +1179,7 @@ class VegaService(ABC):
         self,
         market_id: str,
         proposal_key: str,
-        market_state: vega_protos.governance.MarketStateUpdateType,
+        market_state: MarketStateUpdateType,
         price: Optional[float] = None,
         wallet_name: Optional[str] = None,
         vote_closing_time: Optional[datetime.datetime] = None,
@@ -1197,7 +1198,7 @@ class VegaService(ABC):
                     approving this key should have enough governance tokens to
                     approve by itself
             market_state:
-                MarketStateUpdateType, The value of the market to set
+                MarketStateUpdateType, The value of the market state to set
             price:
                 Optional[float], If setting a termination state, the value at
                     which to terminate (last mark price)
@@ -1231,7 +1232,7 @@ class VegaService(ABC):
             else int(vote_enactment_time.timestamp())
         )
         proposal_id = gov.propose_market_state_update(
-            market_state=market_state,
+            market_state=market_state.value,
             market_id=market_id,
             price=conv_price,
             closing_time=(
@@ -1454,78 +1455,6 @@ class VegaService(ABC):
             key_name=settlement_key,
             additional_payload=additional_payload,
         )
-
-    def propose_market_state_update(
-        self,
-        proposal_key: str,
-        market_id: str,
-        update_type: MarketStateUpdate,
-        settlement_price: Optional[float] = None,
-        wallet_name: Optional[str] = None,
-        vote_closing_time: Optional[datetime.datetime] = None,
-        vote_enactment_time: Optional[datetime.datetime] = None,
-        approve_proposal: bool = True,
-        forward_time_to_enactment: bool = True,
-    ):
-        price = None
-        if not settlement_price is None:
-            product = helpers.get_product(
-                data_raw.market_info(market_id, data_client=self.trading_data_client_v2)
-            )
-
-            filter_key = product.data_source_spec_for_settlement_data.data.external.oracle.filters[
-                0
-            ].key
-            price = str(
-                num_to_padded_int(
-                    settlement_price, decimals=filter_key.number_decimal_places
-                )
-            )
-
-        market_state_update = vega_protos.governance.UpdateMarketStateConfiguration(
-            market_id=market_id, update_type=update_type.value, price=price
-        )
-
-        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
-        enactment_time = (
-            blockchain_time_seconds + self.seconds_per_block * 50
-            if vote_enactment_time is None
-            else int(vote_enactment_time.timestamp())
-        )
-        closing_time = (
-            blockchain_time_seconds + self.seconds_per_block * 40
-            if vote_closing_time is None
-            else int(vote_closing_time.timestamp())
-        )
-
-        proposal_id = gov.propose_market_state_update(
-            key_name=proposal_key,
-            wallet=self.wallet,
-            market_state_update=market_state_update,
-            closing_time=closing_time,
-            enactment_time=enactment_time,
-            data_client=self.trading_data_client_v2,
-            time_forward_fn=lambda: self.wait_fn(2),
-            wallet_name=wallet_name,
-        )
-
-        if approve_proposal:
-            gov.approve_proposal(
-                proposal_id=proposal_id,
-                wallet=self.wallet,
-                key_name=proposal_key,
-                wallet_name=wallet_name,
-            )
-
-        if forward_time_to_enactment:
-            time_to_enactment = enactment_time - self.get_blockchain_time(
-                in_seconds=True
-            )
-            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
-
-        self.wait_for_thread_catchup()
-
-        return proposal_id
 
     def party_account(
         self,

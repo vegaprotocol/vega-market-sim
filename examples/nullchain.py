@@ -3,7 +3,7 @@ from collections import namedtuple
 from random import randint
 
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.service import MarketStateUpdate
+from vega_sim.service import MarketStateUpdateType
 
 import argparse
 
@@ -230,30 +230,31 @@ if __name__ == "__main__":
 
         # suspend market
         print(f"market state: {vega.get_market_state(market_id)}")
-        update_type = MarketStateUpdate.Suspend
+        update_type = MarketStateUpdateType.Suspend
         print(f"submitting proposal: {update_type}")
-        vega.propose_market_state_update(
-            proposal_key=MM_WALLET.name, market_id=market_id, update_type=update_type
+        vega.update_market_state(
+            proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
         print(f"market state: {vega.get_market_state(market_id)}")
         # resume market
-        update_type = MarketStateUpdate.Resume
+        vega.wait_for_total_catchup()
+        update_type = MarketStateUpdateType.Resume
         print(f"submitting proposal: {update_type}")
-        vega.propose_market_state_update(
-            proposal_key=MM_WALLET.name, market_id=market_id, update_type=update_type
+        vega.update_market_state(
+            proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
         print(f"market state: {vega.get_market_state(market_id)}")
 
         input("Pausing to observe the market, press Enter to continue.")
         if args.perps:
             # close market
-            update_type = MarketStateUpdate.Terminate
+            update_type = MarketStateUpdateType.Terminate
             print(f"submitting proposal: {update_type}")
-            vega.propose_market_state_update(
+            vega.update_market_state(
                 proposal_key=MM_WALLET.name,
                 market_id=market_id,
-                update_type=update_type,
-                settlement_price=100,
+                market_state=update_type,
+                price=100,
             )
         else:
             vega.submit_termination_and_settlement_data(

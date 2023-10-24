@@ -8,7 +8,7 @@ from tests.integration.utils.fixtures import (
     MM_WALLET,
 )
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.service import MarketStateUpdate
+from vega_sim.service import MarketStateUpdateType
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data.v1 as oracles_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
@@ -175,32 +175,30 @@ def test_update_market_governance_changes(vega_service_with_market: VegaServiceN
 
     create_and_faucet_wallet(vega=vega, wallet=LIQ)
 
-    assert vega.get_latest_market_data(market_id).market_state == 5
+    assert vega.get_market_state(market_id) == "STATE_ACTIVE"
 
     vega.update_market_state(
         market_id,
         MM_WALLET.name,
-        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_SUSPEND,
+        MarketStateUpdateType.Suspend,
     )
     vega.wait_for_total_catchup()
-    assert vega.get_latest_market_data(market_id).market_state == 10
+    assert vega.get_market_state(market_id) == "STATE_SUSPENDED_VIA_GOVERNANCE"
 
     vega.update_market_state(
         market_id,
         MM_WALLET.name,
-        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_RESUME,
+        MarketStateUpdateType.Resume,
     )
     vega.wait_for_total_catchup()
-    assert vega.get_latest_market_data(market_id).market_state == 5
+    assert vega.get_market_state(market_id) == "STATE_ACTIVE"
 
     vega.update_market_state(
         market_id,
         MM_WALLET.name,
-        vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_TERMINATE,
+        MarketStateUpdateType.Terminate,
         price=5.1,
     )
     vega.wait_for_total_catchup()
-    mi = vega.get_latest_market_data(market_id)
-
-    assert mi.market_state == 7
-    assert mi.mark_price == 5.1
+    assert vega.get_market_state(market_id) == "STATE_CLOSED"
+    assert vega.get_latest_market_data(market_id).mark_price == 5.1

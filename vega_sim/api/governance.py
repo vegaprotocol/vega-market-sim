@@ -649,6 +649,7 @@ def propose_market_update(
         time_forward_fn=time_forward_fn,
     ).proposal.id
 
+
 def propose_market_state_update(
     market_id: str,
     key_name: str,
