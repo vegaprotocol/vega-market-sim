@@ -463,7 +463,7 @@ def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
     direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
-) -> List[events_protos.Transfer]:
+) -> List[data_node_protos_v2.trading_data.TransferNode]:
     """Returns a list of raw transfers.
 
     Args:
@@ -475,7 +475,7 @@ def list_transfers(
             Direction of transfers to return. Defaults to None.
 
     Returns:
-        List[events_protos.Transfer]:
+        List[data_node_protos_v2.trading_data.TransferNode]:
             A list of Vega Transfer proto objects.
     """
 
