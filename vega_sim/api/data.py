@@ -96,24 +96,6 @@ Position = namedtuple(
         "loss_socialisation_amount",
     ],
 )
-Transfer = namedtuple(
-    "Transfer",
-    [
-        "id",
-        "party_from",
-        "from_account_type",
-        "party_to",
-        "to_account_type",
-        "asset",
-        "amount",
-        "reference",
-        "status",
-        "timestamp",
-        "reason",
-        "one_off",
-        "recurring",
-    ],
-)
 
 MarginLevels = namedtuple(
     "MarginLevels",
@@ -128,6 +110,62 @@ MarginLevels = namedtuple(
         "timestamp",
     ],
 )
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class OneOffTransfer:
+    pass
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class RecurringTransfer:
+    pass
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class OneOffGovernanceTransfer:
+    pass
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class RecurringGovernanceTransfer:
+    pass
+
+
+@dataclass(frozen=True)
+class Transfer:
+    id: str
+    party_from: str
+    from_account_type: vega_protos.vega.AccountType
+    party_to: str
+    to_account_type: vega_protos.vega.AccountType
+    asset: str
+    amount: float
+    reference: str
+    status: vega_protos.vega.Transfer.Status
+    timestamp: datetime.datetime
+    reason: Optional[str] = None
+    one_off: Optional[OneOffTransfer] = None
+    recurring: Optional[RecurringTransfer] = None
+    one_off_governance: Optional[OneOffGovernanceTransfer] = None
+    recurring_governance: Optional[RecurringGovernanceTransfer] = None
+
+
+@dataclass(frozen=True)
+class TransferFees:
+    transfer_id: str
+    amount: float
+    epoch: int
+
+
+@dataclass(frozen=True)
+class TransferNode:
+    transfer: Transfer
+    fees: TransferFees
 
 
 @dataclass(frozen=True)
@@ -789,6 +827,30 @@ def _transfer_from_proto(
         reason=transfer.reason,
         one_off=transfer.one_off,
         recurring=transfer.recurring,
+    )
+
+
+def _transfer_fees_from_proto(
+    transfer_fees: vega_protos.events.v1.events.TransferFees, decimal_spec: DecimalSpec
+) -> TransferFees:
+    return TransferFees(
+        transfer_id=transfer_fees.transfer_id,
+        amount=num_from_padded_int(transfer_fees.amount, decimal_spec.asset_decimals),
+        epoch=int(transfer_fees.epoch),
+    )
+
+
+def _transfer_node_from_proto(
+    transfer_node: data_node_protos_v2.trading_data.TransferNode,
+    decimal_spec: DecimalSpec,
+):
+    return TransferNode(
+        transfer=_transfer_from_proto(
+            transfer=transfer_node.transfer, decimal_spec=decimal_spec
+        ),
+        fees=_transfer_fees_from_proto(
+            transfer_fees=transfer_node.fees, decimal_spec=decimal_spec
+        ),
     )
 
 
@@ -1862,7 +1924,7 @@ def list_transfers(
             A list of processed Transfer objects for the specified party and direction.
     """
 
-    transfers = data_raw.list_transfers(
+    transfer_nodes = data_raw.list_transfers(
         data_client=data_client,
         party_id=party_id,
         direction=direction,
@@ -1871,7 +1933,9 @@ def list_transfers(
     asset_dp = {}
     res_transfers = []
 
-    for transfer in transfers:
+    for transfer_node in transfer_nodes:
+        transfer = transfer_node.transfer
+
         if transfer.status == events_protos.Transfer.Status.STATUS_REJECTED:
             continue
 
