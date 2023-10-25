@@ -63,6 +63,10 @@ TRANSFER_TYPE_MAP = {
         "color": "c",
         "stack": True,
     },
+    vega_protos.vega.TRANSFER_TYPE_MAKER_FEE_RECEIVE: {
+        "color": "y",
+        "stack": True,
+    },
 }
 
 """
@@ -1221,9 +1225,9 @@ def sla_plot(run_name: Optional[str] = None):
         )
         axs[-1].set_ylabel("Amount [USD]")
 
-    axs[0].get_shared_x_axes().join(*[ax for ax in axs[0:]])
-    axs[1].get_shared_y_axes().join(*[axs[1], axs[3]])
-    axs[2].get_shared_y_axes().join(*[axs[2], axs[4]])
+    # axs[0].get_shared_x_axes().join(*[ax for ax in axs[0:]])
+    # axs[1].get_shared_y_axes().join(*[axs[1], axs[3]])
+    # axs[2].get_shared_y_axes().join(*[axs[2], axs[4]])
 
     return fig
 
