@@ -247,14 +247,17 @@ class CFMScenario(Scenario):
                 commitment_amount=1_000,
                 market_decimal_places=market_config.decimal_places,
                 fee_amount=0.001,
-                initial_price=price_process[0],
+                initial_price=max(price_process),
+                # initial_price=price_process[0],
                 num_levels=200,
                 tick_spacing=0.1,
                 price_width_above=0.2,
                 price_width_below=0.2,
+                margin_usage_at_bound_above=0,
+                margin_usage_at_bound_below=0.8,
                 asset_decimal_places=asset_dp,
-                tag="MARKET_CFM",
                 price_process_generator=iter(price_process),
+                tag="MARKET_CFM",
             )
         ]
 
@@ -283,12 +286,12 @@ class CFMScenario(Scenario):
                 asset_name=asset_name,
                 price_process_generator=iter(price_process),
                 initial_asset_mint=self.initial_asset_mint,
-                buy_intensity=20,
-                sell_intensity=20,
+                buy_intensity=1,
+                sell_intensity=1,
                 spread_offset=0.0001,
                 tag=f"ARB_AGENT_{str(i_agent).zfill(3)}",
                 random_state=random_state,
-                base_order_size=0.1,
+                base_order_size=0.001,
                 wallet_name="ARB_TRADERS",
             )
             for i_agent in range(2)
@@ -379,7 +382,7 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=True,
+        run_with_console=False,
         use_full_vega_wallet=False,
         retain_log_files=True,
         launch_graphql=False,

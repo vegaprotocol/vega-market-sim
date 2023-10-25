@@ -18,12 +18,7 @@ def _price_for_size(
     k_scaling_large: float,
     k_scaling_small: float,
     trade_size: float,
-    # pool_size: float,
 ) -> float:
-    # sell_pool = pool_size / (last_trade + 1)
-    # buy_pool = pool_size - sell_pool
-    # mid = buy_pool / sell_pool
-
     if side == vega_protos.Side.SIDE_SELL:
         k_scaling = k_scaling_small if position >= 0 else k_scaling_large
 
@@ -245,7 +240,8 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         initial_price: float = 100,
         price_width_below: float = 0.05,
         price_width_above: float = 0.05,
-        margin_usage_at_bounds: float = 0.8,
+        margin_usage_at_bound_above: float = 0.8,
+        margin_usage_at_bound_below: float = 0.8,
         initial_asset_mint: float = 1000000,
         market_name: str = None,
         asset_name: str = None,
@@ -294,7 +290,8 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         self.lower_liq_factor = 1 / (self.base_price_sqrt - self.lower_price_sqrt)
         self.upper_liq_factor = 1 / (self.upper_price_sqrt - self.base_price_sqrt)
 
-        self.margin_usage_at_bounds = margin_usage_at_bounds
+        self.margin_usage_at_bound_above = margin_usage_at_bound_above
+        self.margin_usage_at_bound_below = margin_usage_at_bound_below
 
         self.tick_spacing = tick_spacing
         self.num_levels = num_levels
@@ -333,7 +330,9 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         end_price_sqrt,
         range_upper_price_sqrt,
         liquidity_factor,
-    ) -> float:
+    ) -> Optional[float]:
+        if liquidity_factor == 0:
+            return None
         start_fut_pos = (
             liquidity_factor
             * (range_upper_price_sqrt - start_price_sqrt)
@@ -365,12 +364,12 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         self, ref_price: float, balance: float
     ) -> Tuple[List[MMOrder], List[MMOrder]]:
         upper_L = (
-            self.margin_usage_at_bounds
+            self.margin_usage_at_bound_above
             * (balance / self.short_factor)
             * self.upper_liq_factor
         )
         lower_L = (
-            self.margin_usage_at_bounds
+            self.margin_usage_at_bound_below
             * (balance / self.long_factor)
             * self.lower_liq_factor
         )
@@ -394,7 +393,8 @@ class CFMV3MarketMaker(ShapedMarketMaker):
                 self.upper_price_sqrt,
                 upper_L if price > self.base_price else lower_L,
             )
-            agg_asks.append(MMOrder(volume, price))
+            if volume is not None:
+                agg_asks.append(MMOrder(volume, price))
 
         for i in range(1, self.num_levels):
             pre_price_sqrt = (ref_price - (i - 1) * self.tick_spacing) ** 0.5
@@ -409,7 +409,8 @@ class CFMV3MarketMaker(ShapedMarketMaker):
                 self.upper_price_sqrt,
                 upper_L if price > self.base_price else lower_L,
             )
-            agg_bids.append(MMOrder(volume, price))
+            if volume is not None:
+                agg_bids.append(MMOrder(volume, price))
 
         self.curr_bids = agg_bids
         self.curr_asks = agg_asks
