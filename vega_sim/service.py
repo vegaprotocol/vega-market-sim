@@ -222,22 +222,11 @@ class VegaService(ABC):
     def market_to_asset(self) -> str:
         if self._market_to_asset is None:
             self._market_to_asset = DecimalsCache(
-                lambda market_id: self.data_cache.market_from_feed(
-                    market_id=market_id
-                ).tradable_instrument.instrument.future.settlement_asset
+                lambda market_id: helpers.get_product(
+                    self.data_cache.market_from_feed(market_id=market_id)
+                ).settlement_asset
             )
         return self._market_to_asset
-
-    @property
-    def market_to_asset(self) -> str:
-        if self._market_to_asset is None:
-            self._market_to_asset = DecimalsCache(self.__extract_settlement_asset)
-        return self._market_to_asset
-
-    def __extract_settlement_asset(self, market_id) -> str:
-        return helpers.get_settlement_asset(
-            self.data_cache.market_from_feed(market_id=market_id)
-        )
 
     @property
     def data_cache(self) -> LocalDataCache:
@@ -1397,7 +1386,7 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
     ):
         product = helpers.get_product(
-            data_raw.market_info(market_id, data_client=self.trading_data_client_v2)
+            self._local_data_cache.market_from_feed(market_id)
         )
 
         filter_key = (
@@ -1430,7 +1419,7 @@ class VegaService(ABC):
         additional_payload: Optional[dict[str, str]] = None,
     ):
         product = helpers.get_product(
-            data_raw.market_info(market_id, data_client=self.trading_data_client_v2)
+            self._local_data_cache.market_from_feed(market_id)
         )
 
         filter_key = (
@@ -1641,17 +1630,6 @@ class VegaService(ABC):
             asset_decimals_map=self.asset_decimals,
         )
 
-    def get_market_state(
-        self,
-        market_id: str,
-    ) -> str:
-        """
-        Output market state.
-        """
-        return vega_protos.markets.Market.State.Name(
-            self.get_latest_market_data(market_id).market_state
-        )
-
     def market_account(
         self,
         market_id: str,
@@ -1777,9 +1755,7 @@ class VegaService(ABC):
             wallet_name:
                 str, The name of the wallet which is placing the order
         """
-        asset_id = data_raw.settlement_asset(
-            market_id=market_id, data_client=self.trading_data_client_v2
-        )
+        asset_id = self.market_to_asset[market_id]
 
         is_amendment = (
             is_amendment

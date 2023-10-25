@@ -1,14 +1,12 @@
 import logging
 from collections import namedtuple
 from random import randint
+import argparse
 
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import MarketStateUpdateType
+import vega_sim.proto.vega as vega_protos
 
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--perps", action="store_true", default=False)
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
@@ -29,7 +27,8 @@ wallets = [MM_WALLET, MM_WALLET2, TRADER_WALLET, RANDOM_WALLET, GOVERNANCE_WALLE
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--perps", action="store_true", default=False)
     args = parser.parse_args()
 
     with VegaServiceNull(
@@ -227,13 +226,17 @@ if __name__ == "__main__":
                 print(vega.get_latest_market_data(market_id=market_id).product_data)
 
         # suspend market
-        print(f"market state: {vega.get_market_state(market_id)}")
+        print(
+            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+        )
         update_type = MarketStateUpdateType.Suspend
         print(f"submitting proposal: {update_type}")
         vega.update_market_state(
             proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
-        print(f"market state: {vega.get_market_state(market_id)}")
+        print(
+            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+        )
         # resume market
         vega.wait_for_total_catchup()
         update_type = MarketStateUpdateType.Resume
@@ -241,7 +244,9 @@ if __name__ == "__main__":
         vega.update_market_state(
             proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
-        print(f"market state: {vega.get_market_state(market_id)}")
+        print(
+            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+        )
 
         input("Pausing to observe the market, press Enter to continue.")
         if args.perps:
@@ -261,7 +266,9 @@ if __name__ == "__main__":
                 market_id=market_id,
             )
         vega.wait_for_total_catchup()
-        print(f"market state: {vega.get_market_state(market_id)}")
+        print(
+            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+        )
 
         vega.forward("10s")
         input("Press Enter to finish")

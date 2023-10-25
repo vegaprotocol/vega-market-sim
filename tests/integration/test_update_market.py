@@ -175,7 +175,12 @@ def test_update_market_governance_changes(vega_service_with_market: VegaServiceN
 
     create_and_faucet_wallet(vega=vega, wallet=LIQ)
 
-    assert vega.get_market_state(market_id) == "STATE_ACTIVE"
+    assert (
+        vega_protos.markets.Market.State.Name(
+            vega.get_latest_market_data(market_id).market_state
+        )
+        == "STATE_ACTIVE"
+    )
 
     vega.update_market_state(
         market_id,
@@ -183,7 +188,12 @@ def test_update_market_governance_changes(vega_service_with_market: VegaServiceN
         MarketStateUpdateType.Suspend,
     )
     vega.wait_for_total_catchup()
-    assert vega.get_market_state(market_id) == "STATE_SUSPENDED_VIA_GOVERNANCE"
+    assert (
+        vega_protos.markets.Market.State.Name(
+            vega.get_latest_market_data(market_id).market_state
+        )
+        == "STATE_SUSPENDED_VIA_GOVERNANCE"
+    )
 
     vega.update_market_state(
         market_id,
@@ -191,7 +201,12 @@ def test_update_market_governance_changes(vega_service_with_market: VegaServiceN
         MarketStateUpdateType.Resume,
     )
     vega.wait_for_total_catchup()
-    assert vega.get_market_state(market_id) == "STATE_ACTIVE"
+    assert (
+        vega_protos.markets.Market.State.Name(
+            vega.get_latest_market_data(market_id).market_state
+        )
+        == "STATE_ACTIVE"
+    )
 
     vega.update_market_state(
         market_id,
@@ -200,5 +215,10 @@ def test_update_market_governance_changes(vega_service_with_market: VegaServiceN
         price=5.1,
     )
     vega.wait_for_total_catchup()
-    assert vega.get_market_state(market_id) == "STATE_CLOSED"
+    assert (
+        vega_protos.markets.Market.State.Name(
+            vega.get_latest_market_data(market_id).market_state
+        )
+        == "STATE_CLOSED"
+    )
     assert vega.get_latest_market_data(market_id).mark_price == 5.1

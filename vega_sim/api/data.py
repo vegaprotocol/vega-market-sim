@@ -292,7 +292,7 @@ class MarketData:
     market_state: str
     next_mark_to_market: float
     last_traded_price: float
-    product_data: None | PerpsData
+    product_data: ProductData
 
 
 @dataclass(frozen=True)
@@ -312,11 +312,16 @@ class LiquidityProviderFeeShare:
 
 
 @dataclass(frozen=True)
-class PerpsData:
+class PerpetualData:
     funding_payment: float
     funding_rate: float
     internal_twap: float
     external_twap: float
+
+
+@dataclass(frozen=True)
+class ProductData:
+    perpetual_data: None | PerpetualData
 
 
 @dataclass(frozen=True)
@@ -1093,14 +1098,13 @@ def _liquidity_provider_fee_share_from_proto(
 
 def _product_data_from_proto(
     product_data: vega_protos.vega.ProductData, decimal_spec: DecimalSpec
-) -> None | PerpsData:
+) -> ProductData:
     data_field = product_data.WhichOneof("data")
     if data_field is None:
-        return None
+        return ProductData(perpetual_data=None)
     if data_field == "perpetual_data":
         data = getattr(product_data, data_field)
-
-        return PerpsData(
+        perpetual_data = PerpetualData(
             funding_payment=num_from_padded_int(
                 data.funding_payment, decimal_spec.price_decimals
             ),
@@ -1112,6 +1116,7 @@ def _product_data_from_proto(
                 data.external_twap, decimal_spec.price_decimals
             ),
         )
+        return ProductData(perpetual_data=perpetual_data)
     raise Exception(f"unsupported product data type '{data_field}'")
 
 

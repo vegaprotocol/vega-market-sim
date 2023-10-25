@@ -191,23 +191,7 @@ def get_settlement_asset(market: Market) -> str:
 
 
 def get_product(market: Market) -> Any:
-    instrument = market.tradable_instrument.instrument
-    if (
-        hasattr(instrument, "future")
-        and hasattr(instrument.future, "settlement_asset")
-        and len(instrument.future.settlement_asset) > 0
-    ):
-        return instrument.future
-    if (
-        hasattr(instrument, "spot")
-        and hasattr(instrument.spot, "settlement_asset")
-        and len(instrument.spot.settlement_asset) > 0
-    ):
-        return instrument.spot
-    if (
-        hasattr(instrument, "perpetual")
-        and hasattr(instrument.perpetual, "settlement_asset")
-        and len(instrument.perpetual.settlement_asset) > 0
-    ):
-        return instrument.perpetual
-    raise Exception("product is not recognized or settlement asset wasn't set")
+    product = market.tradable_instrument.instrument.WhichOneof("product")
+    if product is None:
+        raise Exception(f"product not set for market '{market.id}'")
+    return getattr(market.tradable_instrument.instrument, product)

@@ -10,7 +10,6 @@ import vega_sim.grpc.client as vac
 import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
-import vega_sim.api.helpers as helpers
 
 logger = logging.getLogger(__name__)
 
@@ -107,13 +106,6 @@ def market_info(
     return data_client.GetMarket(
         data_node_protos_v2.trading_data.GetMarketRequest(market_id=market_id)
     ).market
-
-
-def settlement_asset(market_id: str, data_client: vac.VegaTradingDataClientV2) -> str:
-    "Output settlement asset"
-    return helpers.get_settlement_asset(
-        market_info(market_id=market_id, data_client=data_client)
-    )
 
 
 @_retry(3)
