@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import string
 from collections import namedtuple
 from dataclasses import dataclass
 from typing import (
@@ -1364,6 +1365,9 @@ def list_accounts(
     asset_decimals_map = {} if asset_decimals_map is None else asset_decimals_map
     output_accounts = []
     for account in accounts:
+        if not is_valid_vega_id(account.asset):
+            continue
+
         if account.asset not in asset_decimals_map:
             asset_decimals_map[account.asset] = get_asset_decimals(
                 asset_id=account.asset,
@@ -1377,6 +1381,8 @@ def list_accounts(
         )
     return output_accounts
 
+def is_valid_vega_id(resource_id: str) -> bool:
+    return len(resource_id) == 64 and all(c in string.hexdigits for c in resource_id)
 
 def party_account(
     pub_key: str,
