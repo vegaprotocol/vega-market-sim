@@ -126,7 +126,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
 
     def finalise(self):
         if self.settlement_price:
-            self.vega.settle_market(
+            self.vega.submit_termination_and_settlement_data(
                 self.terminate_key_name,
                 self.settlement_price,
                 self.market_id,
