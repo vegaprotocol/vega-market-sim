@@ -55,6 +55,7 @@ def _run(
         )
 
     if output:
+        print("plotting")
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
@@ -63,20 +64,24 @@ def _run(
             fig.savefig(f"{output_dir}/monitoring-{key}.jpg")
             plt.close(fig)
 
+        print("plotting 2")
         fuzz_figs = fuzz_plots()
         for key, fig in fuzz_figs.items():
             fig.savefig(f"{output_dir}/fuzz-{key}.jpg")
             plt.close(fig)
 
+        print("plotting 3")
         trading_figs = plot_run_outputs()
         for key, fig in trading_figs.items():
             fig.savefig(f"{output_dir}/trading-{key}.jpg")
             plt.close(fig)
 
+        print("plotting 4")
         reward_fig = reward_plots()
         reward_fig.savefig(f"{output_dir}/rewards.jpg")
         plt.close(fig)
 
+        print("plotting 5")
         account_fig = account_plots()
         account_fig.savefig(f"{output_dir}/accounts.jpg")
         plt.close(account_fig)
