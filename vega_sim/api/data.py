@@ -1381,6 +1381,8 @@ def list_accounts(
         )
     return output_accounts
 
+def is_valid_vega_id(resource_id: str) -> bool:
+    return len(resource_id) == 64 and all(c in string.hexdigits for c in resource_id)
 
 def is_valid_vega_id(resource_id: str) -> bool:
     return len(resource_id) == 64 and all(c in string.hexdigits for c in resource_id)
