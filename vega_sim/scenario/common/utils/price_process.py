@@ -179,13 +179,10 @@ def get_historic_price_series(
 def _binance_price_listener(iter_obj, symbol):
     ws = websocket.WebSocketApp(
         f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
-        on_message=lambda _, msg: _on_message(iter_obj, msg, symbol),
+        on_message=lambda _, msg: _on_message(iter_obj, msg),
     )
     ws.run_forever(reconnect=5)
 
-
-def _on_message(iter_obj, message, symbol):
-    iter_obj.latest_price = float(json.loads(message)["k"]["c"])
 
 def _xauusd_price_listener(iter_obj):
     url = "https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD"
@@ -221,14 +218,6 @@ def _xauusd_price_listener(iter_obj):
         time.sleep(30)
 
 
-def _price_listener(iter_obj, symbol):
-    ws = websocket.WebSocketApp(
-        f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
-        # on_open=lambda ws: print("ok"),
-        on_message=lambda _, msg: _on_message(iter_obj, msg),
-    )
-    ws.run_forever(reconnect=5)
-
 
 def _on_message(iter_obj, message):
     iter_obj.latest_price = float(json.loads(message)["k"]["c"])
@@ -250,7 +239,7 @@ class LivePrice:
         if product == "XAUUSD":
             self._forwarding_thread = threading.Thread(
                 target=_xauusd_price_listener,
-                args=(self,),
+                args=(self, self.product.lower()),
                 daemon=True,
             )
         else:
