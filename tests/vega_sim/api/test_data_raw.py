@@ -776,6 +776,8 @@ def test_list_transfers(trading_data_v2_servicer_and_port):
     )
     setattr(expected, "from", "party1")
 
+    expected = data_node_protos_v2.trading_data.TransferNode(transfer=expected)
+
     def ListTransfers(self, request, context):
         return data_node_protos_v2.trading_data.ListTransfersResponse(
             transfers=data_node_protos_v2.trading_data.TransferConnection(

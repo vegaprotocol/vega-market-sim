@@ -136,6 +136,114 @@ def propose_market_from_config(
     ).proposal.id
 
 
+def __propose_market(
+    key_name: str,
+    wallet: Wallet,
+    instrument: vega_protos.governance.InstrumentConfiguration,
+    data_client: vac.VegaTradingDataClientV2,
+    governance_asset: str = "VOTE",
+    future_asset: str = "BTC",
+    position_decimals: Optional[int] = None,
+    price_decimals: Optional[int] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+    price_monitoring_parameters: Optional[
+        vega_protos.markets.PriceMonitoringParameters
+    ] = None,
+    lp_price_range: float = 1,
+    commitment_min_time_fraction: float = 0.95,
+    performance_hysteresis_epochs: int = 1,
+    sla_competition_factor: float = 1,
+    wallet_name: Optional[str] = None,
+    parent_market_id: Optional[str] = None,
+    parent_market_insurance_pool_fraction: float = 1,
+) -> str:
+    # Make sure Vega network has governance asset
+    vote_asset_id = find_asset_id(
+        governance_asset, raise_on_missing=True, data_client=data_client
+    )
+    pub_key = wallet.public_key(wallet_name=wallet_name, name=key_name)
+
+    # Request accounts for party and check governance asset balance
+    party_accounts = data_raw.list_accounts(
+        data_client=data_client, asset_id=vote_asset_id, party_id=pub_key
+    )
+
+    voting_balance = 0
+    for account in party_accounts:
+        if account.asset == vote_asset_id:
+            voting_balance = account.balance
+            break
+
+    if voting_balance == 0:
+        raise LowBalanceError(
+            f"Public key {pub_key} is missing governance token {governance_asset}"
+        )
+
+    risk_model = risk_model if risk_model is not None else _default_risk_model()
+    price_monitoring_parameters = (
+        price_monitoring_parameters
+        if price_monitoring_parameters is not None
+        else _default_price_monitoring_parameters()
+    )
+
+    market_proposal = vega_protos.governance.NewMarket(
+        changes=vega_protos.governance.NewMarketConfiguration(
+            instrument=instrument,
+            decimal_places=price_decimals,
+            position_decimal_places=(
+                0 if position_decimals is None else position_decimals
+            ),
+            metadata=[
+                f"base:{future_asset}",
+            ],
+            liquidity_monitoring_parameters=vega_protos.markets.LiquidityMonitoringParameters(
+                target_stake_parameters=vega_protos.markets.TargetStakeParameters(
+                    time_window=3600, scaling_factor=1
+                ),
+                triggering_ratio="0.7",
+                auction_extension=0,
+            ),
+            price_monitoring_parameters=price_monitoring_parameters,
+            log_normal=risk_model,
+            linear_slippage_factor="0.001",
+            quadratic_slippage_factor="0",
+            liquidity_sla_parameters=vega_protos.markets.LiquiditySLAParameters(
+                price_range=str(lp_price_range),
+                commitment_min_time_fraction=str(commitment_min_time_fraction),
+                performance_hysteresis_epochs=int(performance_hysteresis_epochs),
+                sla_competition_factor=str(sla_competition_factor),
+            ),
+        ),
+    )
+    if parent_market_id is not None:
+        market_proposal.changes.successor.CopyFrom(
+            vega_protos.governance.SuccessorConfiguration(
+                parent_market_id=parent_market_id,
+                insurance_pool_fraction=str(parent_market_insurance_pool_fraction),
+            )
+        )
+
+    proposal = _build_generic_proposal(
+        pub_key=pub_key,
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    proposal.terms.new_market.CopyFrom(market_proposal)
+
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    ).proposal.id
+
+
 def propose_future_market(
     market_name: str,
     key_name: str,
@@ -221,35 +329,6 @@ def propose_future_market(
     Returns:
         str, the ID of the future market proposal on chain
     """
-    # Make sure Vega network has governance asset
-    vote_asset_id = find_asset_id(
-        governance_asset, raise_on_missing=True, data_client=data_client
-    )
-    pub_key = wallet.public_key(wallet_name=wallet_name, name=key_name)
-
-    # Request accounts for party and check governance asset balance
-    party_accounts = data_raw.list_accounts(
-        data_client=data_client, asset_id=vote_asset_id, party_id=pub_key
-    )
-
-    voting_balance = 0
-    for account in party_accounts:
-        if account.asset == vote_asset_id:
-            voting_balance = account.balance
-            break
-
-    if voting_balance == 0:
-        raise LowBalanceError(
-            f"Public key {pub_key} is missing governance token {governance_asset}"
-        )
-
-    risk_model = risk_model if risk_model is not None else _default_risk_model()
-    price_monitoring_parameters = (
-        price_monitoring_parameters
-        if price_monitoring_parameters is not None
-        else _default_price_monitoring_parameters()
-    )
-
     price_decimals = 5 if market_decimals is None else market_decimals
     data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
         external=data_source_protos.DataSourceDefinitionExternal(
@@ -292,73 +371,220 @@ def propose_future_market(
             )
         )
     )
-
-    market_proposal = vega_protos.governance.NewMarket(
-        changes=vega_protos.governance.NewMarketConfiguration(
-            instrument=vega_protos.governance.InstrumentConfiguration(
-                name=market_name,
-                code=market_name,
-                future=vega_protos.governance.FutureProduct(
-                    settlement_asset=settlement_asset_id,
-                    quote_name=future_asset,
-                    data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
-                    data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
-                    data_source_spec_binding=vega_protos.markets.DataSourceSpecToFutureBinding(
-                        settlement_data_property=f"price.{future_asset}.value",
-                        trading_termination_property="trading.terminated",
-                    ),
-                ),
-            ),
-            decimal_places=price_decimals,
-            position_decimal_places=(
-                0 if position_decimals is None else position_decimals
-            ),
-            metadata=[
-                f"base:{future_asset}",
-            ],
-            liquidity_monitoring_parameters=vega_protos.markets.LiquidityMonitoringParameters(
-                target_stake_parameters=vega_protos.markets.TargetStakeParameters(
-                    time_window=3600, scaling_factor=1
-                ),
-                triggering_ratio="0.7",
-                auction_extension=0,
-            ),
-            price_monitoring_parameters=price_monitoring_parameters,
-            log_normal=risk_model,
-            linear_slippage_factor="0.001",
-            quadratic_slippage_factor="0",
-            liquidity_sla_parameters=vega_protos.markets.LiquiditySLAParameters(
-                price_range=str(lp_price_range),
-                commitment_min_time_fraction=str(commitment_min_time_fraction),
-                performance_hysteresis_epochs=int(performance_hysteresis_epochs),
-                sla_competition_factor=str(sla_competition_factor),
+    instrument = vega_protos.governance.InstrumentConfiguration(
+        name=market_name,
+        code=market_name,
+        future=vega_protos.governance.FutureProduct(
+            settlement_asset=settlement_asset_id,
+            quote_name=future_asset,
+            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+            data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
+            data_source_spec_binding=vega_protos.markets.DataSourceSpecToFutureBinding(
+                settlement_data_property=f"price.{future_asset}.value",
+                trading_termination_property="trading.terminated",
             ),
         ),
     )
-    if parent_market_id is not None:
-        market_proposal.changes.successor.CopyFrom(
-            vega_protos.governance.SuccessorConfiguration(
-                parent_market_id=parent_market_id,
-                insurance_pool_fraction=str(parent_market_insurance_pool_fraction),
-            )
-        )
-
-    proposal = _build_generic_proposal(
-        pub_key=pub_key,
+    return __propose_market(
+        key_name=key_name,
+        wallet=wallet,
+        instrument=instrument,
         data_client=data_client,
+        governance_asset=governance_asset,
+        future_asset=future_asset,
+        position_decimals=position_decimals,
+        price_decimals=price_decimals,
         closing_time=closing_time,
         enactment_time=enactment_time,
-    )
-    proposal.terms.new_market.CopyFrom(market_proposal)
-
-    return _make_and_wait_for_proposal(
-        wallet_name=wallet_name,
-        wallet=wallet,
-        proposal=proposal,
-        data_client=data_client,
+        risk_model=risk_model,
         time_forward_fn=time_forward_fn,
+        price_monitoring_parameters=price_monitoring_parameters,
+        lp_price_range=lp_price_range,
+        commitment_min_time_fraction=commitment_min_time_fraction,
+        performance_hysteresis_epochs=performance_hysteresis_epochs,
+        sla_competition_factor=sla_competition_factor,
+        wallet_name=wallet_name,
+        parent_market_id=parent_market_id,
+        parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+    )
+
+
+def propose_perps_market(
+    market_name: str,
+    key_name: str,
+    wallet: Wallet,
+    settlement_asset_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    settlement_data_pub_key: str,
+    governance_asset: str = "VOTE",
+    future_asset: str = "BTC",
+    position_decimals: Optional[int] = None,
+    market_decimals: Optional[int] = None,
+    margin_funding_factor: Optional[float] = None,
+    interest_rate: Optional[float] = None,
+    clamp_lower_bound: Optional[float] = None,
+    clamp_upper_bound: Optional[float] = None,
+    funding_payment_frequency_in_seconds: Optional[int] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    risk_model: Optional[vega_protos.markets.LogNormalRiskModel] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+    price_monitoring_parameters: Optional[
+        vega_protos.markets.PriceMonitoringParameters
+    ] = None,
+    lp_price_range: float = 1,
+    commitment_min_time_fraction: float = 0.95,
+    performance_hysteresis_epochs: int = 1,
+    sla_competition_factor: float = 1,
+    wallet_name: Optional[str] = None,
+    parent_market_id: Optional[str] = None,
+    parent_market_insurance_pool_fraction: float = 1,
+) -> str:
+    """Propose a perps market as specified user.
+
+    Args:
+        market_name:
+            str, name of the market
+        wallet_name:
+            str, the wallet name performing the action
+        wallet:
+            Wallet, wallet client
+        login_token:
+            str, the token returned from proposer wallet login
+        settlement_asset_id:
+            str, the asset id the market will use for settlement
+        data_client:
+            VegaTradingDataClientV2, an instantiated gRPC client for interacting with the
+                Vega data node
+        termination_pub_key:
+            str, the public key of the oracle to be used for trading termination
+        governance_asset:
+            str, the governance asset on the market
+        future_asset:
+            str, the symbol of the future asset used
+                (used for generating/linking names of oracles)
+        position_decimals:
+            int, the decimal place precision to use for positions
+            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+        market_decimals:
+            int, the decimal place precision to use for market prices
+            (e.g. 2 means 2dp, so 200 => 2.00, 3 would mean 200 => 0.2)
+        risk_model:
+            LogNormalRiskModel, A parametrised risk model on which the market will run
+        price_monitoring_parameters:
+            PriceMonitoringParameters, A set of parameters determining when the market
+                will drop into a price auction. If not passed defaults to a very
+                permissive setup
+        lp_price_range:
+            float, Range allowed for LP price commitments from mid price to count for SLA
+            (e.g. 2 allows mid-price +/- 2 * mid-price )
+        commitment_min_time_fraction:
+            float, default 0.95, Specifies the minimum fraction of time LPs must spend
+                "on the book" providing their committed liquidity.
+        performance_hysteresis_epochs:
+            int, default 1, Specifies the number of liquidity epochs over which past performance
+                will continue to affect rewards.
+        sla_competition_factor:
+            float, default 1, Specifies the maximum fraction of their accrued fees an
+                LP that meets the SLA implied by market.liquidity.commitmentMinTimeFraction
+                will lose to liquidity providers that achieved a higher SLA performance than them.
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
+        parent_market_id:
+            Optional[str], Market to set as the parent market on the proposal
+        parent_market_insurance_pool_fraction:
+            float, Fraction of parent market insurance pool to carry over.
+                defaults to 1. No-op if parent_market_id is not set.
+
+    Returns:
+        str, the ID of the future market proposal on chain
+    """
+    price_decimals = 5 if market_decimals is None else market_decimals
+    data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
+        external=data_source_protos.DataSourceDefinitionExternal(
+            oracle=data_source_protos.DataSourceSpecConfiguration(
+                signers=[
+                    oracles_protos.data.Signer(
+                        pub_key=oracles_protos.data.PubKey(key=settlement_data_pub_key)
+                    )
+                ],
+                filters=[
+                    oracles_protos.spec.Filter(
+                        key=oracles_protos.spec.PropertyKey(
+                            name=f"price.{future_asset}.value",
+                            type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                            number_decimal_places=price_decimals,
+                        ),
+                        conditions=[],
+                    )
+                ],
+            )
+        )
+    )
+    data_source_spec_for_settlement_schedule = data_source_protos.DataSourceDefinition(
+        internal=data_source_protos.DataSourceDefinitionInternal(
+            time_trigger=data_source_protos.DataSourceSpecConfigurationTimeTrigger(
+                conditions=[
+                    oracles_protos.spec.Condition(
+                        operator="OPERATOR_GREATER_THAN_OR_EQUAL", value="0"
+                    )
+                ],
+                triggers=[
+                    oracles_protos.spec.InternalTimeTrigger(
+                        every=60
+                        if funding_payment_frequency_in_seconds is None
+                        else funding_payment_frequency_in_seconds
+                    )
+                ],
+            )
+        )
+    )
+    instrument = vega_protos.governance.InstrumentConfiguration(
+        name=market_name,
+        code=market_name,
+        perpetual=vega_protos.governance.PerpetualProduct(
+            settlement_asset=settlement_asset_id,
+            quote_name=future_asset,
+            margin_funding_factor="0"
+            if margin_funding_factor is None
+            else str(margin_funding_factor),
+            interest_rate="0" if interest_rate is None else str(interest_rate),
+            clamp_lower_bound="0"
+            if clamp_lower_bound is None
+            else str(clamp_lower_bound),
+            clamp_upper_bound="0"
+            if clamp_upper_bound is None
+            else str(clamp_upper_bound),
+            data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
+            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+            data_source_spec_binding=vega_protos.markets.DataSourceSpecToPerpetualBinding(
+                settlement_data_property=f"price.{future_asset}.value",
+                settlement_schedule_property="vegaprotocol.builtin.timetrigger",
+            ),
+        ),
+    )
+    return __propose_market(
         key_name=key_name,
-    ).proposal.id
+        wallet=wallet,
+        instrument=instrument,
+        data_client=data_client,
+        governance_asset=governance_asset,
+        future_asset=future_asset,
+        position_decimals=position_decimals,
+        price_decimals=price_decimals,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+        risk_model=risk_model,
+        time_forward_fn=time_forward_fn,
+        price_monitoring_parameters=price_monitoring_parameters,
+        lp_price_range=lp_price_range,
+        commitment_min_time_fraction=commitment_min_time_fraction,
+        performance_hysteresis_epochs=performance_hysteresis_epochs,
+        sla_competition_factor=sla_competition_factor,
+        wallet_name=wallet_name,
+        parent_market_id=parent_market_id,
+        parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+    )
 
 
 def propose_network_parameter_change(
@@ -603,7 +829,41 @@ def _make_and_wait_for_proposal(
     return proposal
 
 
-def settle_oracle(
+def submit_oracle_data(
+    key_name: str,
+    payload: dict[str, str],
+    wallet: Wallet,
+    wallet_name: Optional[str] = None,
+):
+    """
+    Submit oracle data
+
+    Args:
+        key_name:
+            str, key name stored in metadata.
+        payload:
+            dict[str, str], payload to be encoded as JSON and submitted to the network
+        wallet:
+            str, the public key for the wallet authorised to send oracle signals
+        wallet_name:
+            str, the login token for the wallet authorised to send oracle signals
+    """
+    endcoded_payload = json.dumps(payload).encode()
+
+    oracle_submission = commands_protos.data.OracleDataSubmission(
+        payload=endcoded_payload,
+        source=commands_protos.data.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
+    )
+
+    wallet.submit_transaction(
+        transaction=oracle_submission,
+        wallet_name=wallet_name,
+        transaction_type="oracle_data_submission",
+        key_name=key_name,
+    )
+
+
+def submit_termination_and_settlement_data(
     key_name: str,
     wallet: Wallet,
     settlement_price: float,
@@ -611,13 +871,13 @@ def settle_oracle(
     wallet_name: Optional[str] = None,
 ) -> None:
     """
-    Settle the market and send settlement price.
+    Terminate the market and send settlement price.
 
     Args:
-        login_token:
+        wallet_name:
             str, the login token for the wallet authorised to send
              termination/settlement oracle signals
-        pub_key:
+        wallet:
             str, the public key for the wallet authorised to send
              termination/settlement oracle signals
         settlement_price:
@@ -629,36 +889,55 @@ def settle_oracle(
 
     """
 
-    # Use oracle feed to terminate market
-    payload = {"trading.terminated": "true"}
-    payload = json.dumps(payload).encode()
-
-    oracle_submission = commands_protos.data.OracleDataSubmission(
-        payload=payload,
-        source=commands_protos.data.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
-    )
-
-    wallet.submit_transaction(
-        transaction=oracle_submission,
-        wallet_name=wallet_name,
-        transaction_type="oracle_data_submission",
+    # use oracle feed to terminate market
+    submit_oracle_data(
         key_name=key_name,
+        payload={"trading.terminated": "true"},
+        wallet=wallet,
+        wallet_name=wallet_name,
     )
 
-    # use oracle to settle market
+    submit_settlement_data(
+        key_name=key_name,
+        wallet=wallet,
+        settlement_price=settlement_price,
+        oracle_name=oracle_name,
+        wallet_name=wallet_name,
+    )
+
+
+def submit_settlement_data(
+    key_name: str,
+    wallet: Wallet,
+    settlement_price: float,
+    oracle_name: str,
+    wallet_name: Optional[str] = None,
+    additional_payload: Optional[dict[str, str]] = None,
+) -> None:
+    """
+    Send settlement price.
+
+    Args:
+        wallet_name:
+            str, the login token for the wallet authorised to send
+             termination/settlement oracle signals
+        wallet:
+            str, the public key for the wallet authorised to send
+             termination/settlement oracle signals
+        settlement_price:
+            float, final settlement price for the asset
+        oracle_name:
+            str, the name of the oracle to settle
+        key_name:
+            str, key name stored in metadata.
+
+    """
+
     payload = {oracle_name: str(settlement_price)}
-    payload = json.dumps(payload).encode()
-
-    oracle_submission = commands_protos.data.OracleDataSubmission(
-        payload=payload,
-        source=commands_protos.data.OracleDataSubmission.OracleSource.ORACLE_SOURCE_JSON,
-    )
-
-    wallet.submit_transaction(
-        transaction=oracle_submission,
-        wallet_name=wallet_name,
-        transaction_type="oracle_data_submission",
-        key_name=key_name,
+    if additional_payload != None:
+        payload.update(additional_payload)
+    submit_oracle_data(
+        key_name=key_name, payload=payload, wallet=wallet, wallet_name=wallet_name
     )
 
 

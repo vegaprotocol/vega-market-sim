@@ -96,24 +96,6 @@ Position = namedtuple(
         "loss_socialisation_amount",
     ],
 )
-Transfer = namedtuple(
-    "Transfer",
-    [
-        "id",
-        "party_from",
-        "from_account_type",
-        "party_to",
-        "to_account_type",
-        "asset",
-        "amount",
-        "reference",
-        "status",
-        "timestamp",
-        "reason",
-        "one_off",
-        "recurring",
-    ],
-)
 
 MarginLevels = namedtuple(
     "MarginLevels",
@@ -128,6 +110,62 @@ MarginLevels = namedtuple(
         "timestamp",
     ],
 )
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class OneOffTransfer:
+    pass
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class RecurringTransfer:
+    pass
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class OneOffGovernanceTransfer:
+    pass
+
+
+# TODO: Implement class and add to _transfer_from_proto
+@dataclass(frozen=True)
+class RecurringGovernanceTransfer:
+    pass
+
+
+@dataclass(frozen=True)
+class Transfer:
+    id: str
+    party_from: str
+    from_account_type: vega_protos.vega.AccountType
+    party_to: str
+    to_account_type: vega_protos.vega.AccountType
+    asset: str
+    amount: float
+    reference: str
+    status: vega_protos.vega.Transfer.Status
+    timestamp: datetime.datetime
+    reason: Optional[str] = None
+    one_off: Optional[OneOffTransfer] = None
+    recurring: Optional[RecurringTransfer] = None
+    one_off_governance: Optional[OneOffGovernanceTransfer] = None
+    recurring_governance: Optional[RecurringGovernanceTransfer] = None
+
+
+@dataclass(frozen=True)
+class TransferFees:
+    transfer_id: str
+    amount: float
+    epoch: int
+
+
+@dataclass(frozen=True)
+class TransferNode:
+    transfer: Transfer
+    fees: TransferFees
 
 
 @dataclass(frozen=True)
@@ -254,6 +292,7 @@ class MarketData:
     market_state: str
     next_mark_to_market: float
     last_traded_price: float
+    product_data: ProductData
 
 
 @dataclass(frozen=True)
@@ -270,6 +309,19 @@ class LiquidityProviderFeeShare:
     equity_like_share: float
     average_entry_valuation: float
     average_score: float
+
+
+@dataclass(frozen=True)
+class PerpetualData:
+    funding_payment: float
+    funding_rate: float
+    internal_twap: float
+    external_twap: float
+
+
+@dataclass(frozen=True)
+class ProductData:
+    perpetual_data: None | PerpetualData
 
 
 @dataclass(frozen=True)
@@ -792,6 +844,30 @@ def _transfer_from_proto(
     )
 
 
+def _transfer_fees_from_proto(
+    transfer_fees: vega_protos.events.v1.events.TransferFees, decimal_spec: DecimalSpec
+) -> TransferFees:
+    return TransferFees(
+        transfer_id=transfer_fees.transfer_id,
+        amount=num_from_padded_int(transfer_fees.amount, decimal_spec.asset_decimals),
+        epoch=int(transfer_fees.epoch),
+    )
+
+
+def _transfer_node_from_proto(
+    transfer_node: data_node_protos_v2.trading_data.TransferNode,
+    decimal_spec: DecimalSpec,
+):
+    return TransferNode(
+        transfer=_transfer_from_proto(
+            transfer=transfer_node.transfer, decimal_spec=decimal_spec
+        ),
+        fees=_transfer_fees_from_proto(
+            transfer_fees=transfer_node.fees, decimal_spec=decimal_spec
+        ),
+    )
+
+
 def _margin_estimate_from_proto(
     margin_estimate: data_node_protos_v2.trading_data.MarginEstimate,
     decimal_spec: DecimalSpec,
@@ -970,6 +1046,7 @@ def _market_data_from_proto(
         last_traded_price=num_from_padded_int(
             market_data.last_traded_price, decimal_spec.price_decimals
         ),
+        product_data=_product_data_from_proto(market_data.product_data, decimal_spec),
     )
 
 
@@ -1017,6 +1094,30 @@ def _liquidity_provider_fee_share_from_proto(
         )
         for individual_liquidity_provider_fee_share in liquidity_provider_fee_share
     ]
+
+
+def _product_data_from_proto(
+    product_data: vega_protos.vega.ProductData, decimal_spec: DecimalSpec
+) -> ProductData:
+    data_field = product_data.WhichOneof("data")
+    if data_field is None:
+        return ProductData(perpetual_data=None)
+    if data_field == "perpetual_data":
+        data = getattr(product_data, data_field)
+        perpetual_data = PerpetualData(
+            funding_payment=num_from_padded_int(
+                data.funding_payment, decimal_spec.price_decimals
+            ),
+            funding_rate=float(data.funding_rate),
+            internal_twap=num_from_padded_int(
+                data.internal_twap, decimal_spec.price_decimals
+            ),
+            external_twap=num_from_padded_int(
+                data.external_twap, decimal_spec.price_decimals
+            ),
+        )
+        return ProductData(perpetual_data=perpetual_data)
+    raise Exception(f"unsupported product data type '{data_field}'")
 
 
 def _account_from_proto(account, decimal_spec: DecimalSpec) -> AccountData:
@@ -1862,7 +1963,7 @@ def list_transfers(
             A list of processed Transfer objects for the specified party and direction.
     """
 
-    transfers = data_raw.list_transfers(
+    transfer_nodes = data_raw.list_transfers(
         data_client=data_client,
         party_id=party_id,
         direction=direction,
@@ -1871,7 +1972,9 @@ def list_transfers(
     asset_dp = {}
     res_transfers = []
 
-    for transfer in transfers:
+    for transfer_node in transfer_nodes:
+        transfer = transfer_node.transfer
+
         if transfer.status == events_protos.Transfer.Status.STATUS_REJECTED:
             continue
 

@@ -704,21 +704,23 @@ def test_list_transfers(
         recurring=events_protos.RecurringTransfer(),
     )
 
-    node = events_protos.Transfer(
-        id="id1",
-        from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        to="party2",
-        to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-        asset="asset1",
-        amount="100000",
-        reference="reference",
-        status=events_protos.Transfer.Status.STATUS_DONE,
-        timestamp=000000000,
-        reason="reason",
-        one_off=events_protos.OneOffTransfer(deliver_on=000000000),
-        recurring=events_protos.RecurringTransfer(),
+    node = data_node_protos_v2.trading_data.TransferNode(
+        transfer=events_protos.Transfer(
+            id="id1",
+            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            to="party2",
+            to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+            asset="asset1",
+            amount="100000",
+            reference="reference",
+            status=events_protos.Transfer.Status.STATUS_DONE,
+            timestamp=000000000,
+            reason="reason",
+            one_off=events_protos.OneOffTransfer(deliver_on=000000000),
+            recurring=events_protos.RecurringTransfer(),
+        )
     )
-    setattr(node, "from", "party1")
+    setattr(node.transfer, "from", "party1")
 
     def ListTransfers(self, request, context):
         return data_node_protos_v2.trading_data.ListTransfersResponse(

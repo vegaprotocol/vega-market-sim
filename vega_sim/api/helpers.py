@@ -10,6 +10,7 @@ import requests
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
+from vega_sim.proto.vega.markets_pb2 import Market
 from vega_sim.tools.retry import retry
 
 T = TypeVar("T")
@@ -42,7 +43,7 @@ def enum_to_str(e: Any, val: int) -> str:
     return e.keys()[e.values().index(val)]
 
 
-def num_to_padded_int(to_convert: float, decimals: int) -> float:
+def num_to_padded_int(to_convert: float, decimals: int) -> int:
     return int(Decimal(str(to_convert)) * 10**decimals)
 
 
@@ -157,7 +158,7 @@ def wait_for_acceptance(
 
     if not submission_accepted:
         raise ProposalNotAcceptedError(
-            "The market did not accept the proposal within the specified time"
+            "The network did not accept the proposal within the specified time"
         )
     return proposal
 
@@ -183,3 +184,14 @@ def statistics(core_data_client: VegaCoreClient):
     return retry(
         10, 0.5, lambda: core_data_client.Statistics(StatisticsRequest()).statistics
     )
+
+
+def get_settlement_asset(market: Market) -> str:
+    return get_product(market).settlement_asset
+
+
+def get_product(market: Market) -> Any:
+    product = market.tradable_instrument.instrument.WhichOneof("product")
+    if product is None:
+        raise Exception(f"product not set for market '{market.id}'")
+    return getattr(market.tradable_instrument.instrument, product)

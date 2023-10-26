@@ -52,7 +52,7 @@ def test_settlement(vega_service: VegaServiceNull):
     vega.wait_fn(1)
     vega.wait_for_datanode_sync()
 
-    vega.settle_market(
+    vega.submit_termination_and_settlement_data(
         settlement_key=TERMINATE_WALLET.name,
         settlement_price=settlement_price,
         market_id=market_id,
@@ -129,7 +129,7 @@ def test_settlement_with_successor(vega_service: VegaServiceNull):
 
     market_id_2 = vega.all_markets()[0].id
 
-    vega.settle_market(
+    vega.submit_termination_and_settlement_data(
         settlement_key=TERMINATE_WALLET.name,
         settlement_price=settlement_price,
         market_id=market_id,
@@ -183,7 +183,7 @@ def test_settlement_with_successor(vega_service: VegaServiceNull):
         price=101,
     )
 
-    vega.settle_market(
+    vega.submit_termination_and_settlement_data(
         settlement_key="TERMINATE_2",
         settlement_price=settlement_price,
         market_id=market_id_2,
