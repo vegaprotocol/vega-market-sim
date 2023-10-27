@@ -1,13 +1,15 @@
-from vega_sim.environment.agent import Agent, StateAgentWithWallet
-from vega_sim.scenario.common.agents import MarketHistoryData, ResourceData
-from typing import List, Callable, Optional, Dict
-import pandas as pd
+import csv
 import itertools
+import json
 import os
 import os.path
-import json
+from typing import Callable, Dict, List, Optional
+
+import pandas as pd
 
 import vega_sim.proto.vega as vega_protos
+from vega_sim.environment.agent import Agent, StateAgentWithWallet
+from vega_sim.scenario.common.agents import MarketHistoryData, ResourceData
 
 DEFAULT_PATH = "./run_logs"
 DEFAULT_RUN_NAME = "latest"
@@ -71,7 +73,7 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
     return results
 
 
-def history_data_to_order_book_rows(data: MarketHistoryData) -> List[pd.Series]:
+def history_data_to_order_book_rows(data: MarketHistoryData) -> List[dict]:
     results = []
     for market_id, depth in data.market_depth.items():
         for side, side_vals in [("BID", depth.buys), ("ASK", depth.sells)]:
@@ -89,7 +91,7 @@ def history_data_to_order_book_rows(data: MarketHistoryData) -> List[pd.Series]:
     return results
 
 
-def history_data_to_trade_rows(data: MarketHistoryData) -> List[pd.Series]:
+def history_data_to_trade_rows(data: MarketHistoryData) -> List[dict]:
     results = []
     for market_id, trades in data.trades.items():
         for trade in trades:
@@ -120,7 +122,7 @@ def history_data_to_trade_rows(data: MarketHistoryData) -> List[pd.Series]:
     return results
 
 
-def history_data_to_account_rows(data: MarketHistoryData) -> List[pd.Series]:
+def history_data_to_account_rows(data: MarketHistoryData) -> List[dict]:
     results = []
     for account in data.accounts:
         results.append(
@@ -140,20 +142,25 @@ def _market_data_standard_output(
     market_history_data: List[MarketHistoryData],
     file_name: str,
     output_path: str = DEFAULT_PATH,
-    data_to_row_fn: Callable[[MarketHistoryData], pd.Series] = history_data_to_row,
+    data_to_row_fn: Callable[[MarketHistoryData], dict] = history_data_to_row,
 ):
-    results = list(
-        itertools.chain.from_iterable(
-            [data_to_row_fn(data=step_data) for step_data in market_history_data],
-        )
-    )
-    result_df = pd.DataFrame.from_records(
-        results,
-        index="time" if len(results) > 0 else None,
-    )
-    os.makedirs(output_path, exist_ok=True)
+    if len(market_history_data) == 0:
+        return
 
-    result_df.to_csv(path_or_buf=os.path.join(output_path, file_name))
+    os.makedirs(output_path, exist_ok=True)
+    with open(os.path.join(output_path, file_name), "w") as f:
+        writer = None
+
+        for step_data in market_history_data:
+            row_data = data_to_row_fn(data=step_data)
+            if not isinstance(row_data, list):
+                row_data = [row_data]
+            if row_data:
+                if writer is None:
+                    writer = csv.DictWriter(f, fieldnames=list(row_data[0].keys()))
+                    writer.writeheader()
+                for row in row_data:
+                    writer.writerow(row)
 
 
 def market_data_standard_output(
