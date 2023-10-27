@@ -241,19 +241,19 @@ class CFMScenario(Scenario):
             CFMV3MarketMaker(
                 key_name="CFM_MAKER",
                 num_steps=self.num_steps,
-                initial_asset_mint=10_000,
+                initial_asset_mint=100_000,
                 market_name=market_name,
                 asset_name=asset_name,
-                commitment_amount=1_000,
+                commitment_amount=10_000,
                 market_decimal_places=market_config.decimal_places,
                 fee_amount=0.001,
-                initial_price=max(price_process),
-                # initial_price=price_process[0],
+                # initial_price=max(price_process),
+                initial_price=price_process[0],
                 num_levels=200,
                 tick_spacing=0.1,
                 price_width_above=0.2,
                 price_width_below=0.2,
-                margin_usage_at_bound_above=0,
+                margin_usage_at_bound_above=0.8,
                 margin_usage_at_bound_below=0.8,
                 asset_decimal_places=asset_dp,
                 price_process_generator=iter(price_process),
@@ -286,35 +286,35 @@ class CFMScenario(Scenario):
                 asset_name=asset_name,
                 price_process_generator=iter(price_process),
                 initial_asset_mint=self.initial_asset_mint,
-                buy_intensity=1,
-                sell_intensity=1,
+                buy_intensity=10,
+                sell_intensity=10,
                 spread_offset=0.0001,
                 tag=f"ARB_AGENT_{str(i_agent).zfill(3)}",
                 random_state=random_state,
-                base_order_size=0.001,
+                base_order_size=0.1,
                 wallet_name="ARB_TRADERS",
             )
             for i_agent in range(2)
         ]
 
-        market_agents["random_traders"] = [
-            MarketOrderTrader(
-                wallet_name="RANDOM_TRADERS",
-                key_name=(
-                    f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
-                ),
-                market_name=market_name,
-                asset_name=asset_name,
-                buy_intensity=10,
-                sell_intensity=10,
-                base_order_size=0.001,
-                step_bias=0.5,
-                tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
-                random_state=random_state,
-            )
-            for i_agent in range(20)
-            # for i_agent in range(1)
-        ]
+        # market_agents["random_traders"] = [
+        #     MarketOrderTrader(
+        #         wallet_name="RANDOM_TRADERS",
+        #         key_name=(
+        #             f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+        #         ),
+        #         market_name=market_name,
+        #         asset_name=asset_name,
+        #         buy_intensity=10,
+        #         sell_intensity=10,
+        #         base_order_size=0.001,
+        #         step_bias=0.5,
+        #         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+        #         random_state=random_state,
+        #     )
+        #     for i_agent in range(20)
+        #     # for i_agent in range(1)
+        # ]
 
         # for i_agent in range(1):
         #     market_agents["random_traders"].append(
@@ -377,12 +377,12 @@ if __name__ == "__main__":
         step_length_seconds=10,
         block_length_seconds=1,
         transactions_per_block=4096,
-        # pause_every_n_steps=300,
+        pause_every_n_steps=20,
     )
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=False,
+        run_with_console=True,
         use_full_vega_wallet=False,
         retain_log_files=True,
         launch_graphql=False,
