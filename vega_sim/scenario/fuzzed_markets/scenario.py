@@ -84,20 +84,16 @@ def state_extraction_fn(vega: VegaServiceNull, agents: dict):
 
 
 def additional_data_to_rows(data) -> List[pd.Series]:
-    results = []
     for market_id in data.external_prices.keys():
-        results.append(
-            {
-                "time": data.at_time,
-                "market_id": market_id,
-                "external_price": data.external_prices.get(market_id, np.NaN),
-                "trader_close_outs": data.trader_close_outs.get(market_id, 0),
-                "liquidity_provider_close_outs": data.liquidity_provider_close_outs.get(
-                    market_id, 0
-                ),
-            }
-        )
-    return results
+        yield {
+            "time": data.at_time,
+            "market_id": market_id,
+            "external_price": data.external_prices.get(market_id, np.NaN),
+            "trader_close_outs": data.trader_close_outs.get(market_id, 0),
+            "liquidity_provider_close_outs": data.liquidity_provider_close_outs.get(
+                market_id, 0
+            ),
+        }
 
 
 def _create_price_process(
@@ -323,18 +319,14 @@ class FuzzingScenario(Scenario):
                 ReferralAgentWrapper(
                     agent=MarketOrderTrader(
                         wallet_name="RANDOM_TRADERS",
-                        key_name=(
-                            f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
-                        ),
+                        key_name=f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
                         asset_name=asset_name,
                         buy_intensity=10,
                         sell_intensity=10,
                         base_order_size=1,
                         step_bias=1,
-                        tag=(
-                            f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
-                        ),
+                        tag=f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     ),
                     referrer_key_name=market_agents["referrers"][0]._agent.key_name,
                     referrer_wallet_name="REFERRERS",
@@ -445,7 +437,9 @@ class FuzzingScenario(Scenario):
             market_agents["reward_funders"] = [
                 RewardFunder(
                     wallet_name="REWARD_FUNDERS",
-                    key_name=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    key_name=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
                     reward_asset_name=vega_protos.vega.DispatchMetric.Name(metric),
                     initial_mint=1e9,
                     account_type=account_type,
@@ -454,7 +448,9 @@ class FuzzingScenario(Scenario):
                     metric=metric,
                     market_names=[market_name],
                     stake_key=True,
-                    tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
+                    tag=(
+                        f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
+                    ),
                 )
                 for i_agent, (account_type, metric) in enumerate(
                     [
