@@ -115,18 +115,12 @@ class Scenario(abc.ABC):
             step_end_callback=self._step_end_callback,
         )
         if output_data:
-            logger.info("std")
             agents_standard_output(self.agents)
-            logger.info("resource std")
             resources_standard_output(self.get_resource_data())
-            logger.info("asset std")
             assets_standard_output(self.get_assets())
-            logger.info("mkt_data")
             market_data_standard_output(self.get_run_data())
-            logger.info("mkt_chain")
             market_chain_standard_output(self.get_run_data())
             if self.additional_data_output_fns is not None:
-                logger.info("additional")
                 market_data_standard_output(
                     self.get_additional_run_data(),
                     custom_output_fns=self.additional_data_output_fns,
