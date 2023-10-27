@@ -111,17 +111,15 @@ def history_data_to_trade_rows(data: MarketHistoryData) -> List[dict]:
 
 
 def history_data_to_account_rows(data: MarketHistoryData) -> List[dict]:
-    
     for account in data.accounts:
         yield {
-                "time": data.at_time,
-                "party_id": account.owner,
-                "balance": account.balance,
-                "market_id": account.market_id,
-                "asset": account.asset,
-                "type": account.type,
-            }
-        )
+            "time": data.at_time,
+            "party_id": account.owner,
+            "balance": account.balance,
+            "market_id": account.market_id,
+            "asset": account.asset,
+            "type": account.type,
+        }
 
 
 def _market_data_standard_output(
