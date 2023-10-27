@@ -1,11 +1,9 @@
 import abc
 import numpy as np
 from typing import Optional, List, Callable, Any, Dict
-import logging
 
 from vega_sim.null_service import VegaService
 from vega_sim.environment.environment import MarketEnvironment
-from vega_sim.scenario.constants import Network
 from vega_sim.scenario.common.agents import (
     Snitch,
     StateAgent,
@@ -17,14 +15,11 @@ from vega_sim.tools.scenario_output import (
     agents_standard_output,
     resources_standard_output,
     market_data_standard_output,
-    agents_standard_output,
     assets_standard_output,
     market_chain_standard_output,
 )
 
 import vega_sim.proto.vega as vega_protos
-
-logger = logging.getLogger(__name__)
 
 
 class Scenario(abc.ABC):
