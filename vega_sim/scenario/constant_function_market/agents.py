@@ -360,18 +360,34 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             )
         )
 
-        upper_L = self._calculate_liq_val(
-            self.margin_usage_at_bound_above,
-            balance,
-            self.short_factor,
-            self.upper_liq_factor,
+        volume_at_upper = (
+            self.margin_usage_at_bound_above
+            * (balance / self.short_factor)
+            / self.upper_price
         )
-        lower_L = self._calculate_liq_val(
-            self.margin_usage_at_bound_below,
-            balance,
-            self.long_factor,
-            self.lower_liq_factor,
+        upper_L = (
+            volume_at_upper
+            * self.upper_price_sqrt
+            * self.base_price_sqrt
+            / (self.upper_price_sqrt - self.base_price_sqrt)
         )
+        # self._calculate_liq_val(
+        #     self.margin_usage_at_bound_above,
+        #     balance,
+        #     self.short_factor,
+        #     self.upper_liq_factor,
+        # )
+        lower_L = (
+            self.margin_usage_at_bound_below
+            * (balance / self.long_factor)
+            * self.lower_liq_factor
+        )
+        # self._calculate_liq_val(
+        #     self.margin_usage_at_bound_below,
+        #     balance,
+        #     self.long_factor,
+        #     self.lower_liq_factor,
+        # )
         if self.use_last_price_as_ref:
             ref_price = self.vega.last_trade_price(market_id=self.market_id)
         else:
@@ -386,22 +402,24 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             )
             if self.current_position > 0:
                 L = lower_L
+                usd_total = (
+                    self.margin_usage_at_bound_below * balance / self.long_factor
+                )
                 lower_bound = self.lower_price_sqrt
                 upper_bound = self.base_price_sqrt
-                usd_total = self.margin_usage_at_bound_below * balance
+                virt_x = abs(self.current_position) + L / upper_bound
+                virt_y = (
+                    usd_total - abs(self.current_position) * average_entry
+                ) + L * lower_bound
             else:
                 L = upper_L
                 lower_bound = self.base_price_sqrt
                 upper_bound = self.upper_price_sqrt
-                usd_total = self.margin_usage_at_bound_above * balance
+                virt_x = (volume_at_upper + self.current_position) + L / upper_bound
+                virt_y = (abs(self.current_position) * average_entry) + L * lower_bound
             if L == 0:
                 ref_price = self.base_price
             else:
-                virt_x = self.current_position + L / upper_bound
-                virt_y = (
-                    usd_total - self.current_position * average_entry
-                ) + L * lower_bound
-
                 ref_price = virt_y / virt_x
 
         return self._calculate_price_levels(
@@ -434,14 +452,14 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             volume = self._quantity_for_move(
                 pre_price_sqrt,
                 price**0.5,
-                self.upper_price_sqrt,
-                upper_L if pos > 0 else lower_L,
+                self.upper_price_sqrt if pos < 0 else self.base_price_sqrt,
+                upper_L if pos < 0 else lower_L,
             )
-            if pos > 0 and pos - volume < 0:
-                volume = pos
             if volume is not None:
+                if pos > 0 and pos - volume < 0:
+                    volume = pos
                 agg_asks.append(MMOrder(volume, price))
-            pos -= volume
+                pos -= volume
 
         pos = self.current_position
         for i in range(1, self.num_levels):
@@ -454,22 +472,18 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             volume = self._quantity_for_move(
                 pre_price_sqrt,
                 price**0.5,
-                self.upper_price_sqrt,
-                upper_L if price > self.base_price else lower_L,
+                self.upper_price_sqrt if pos < 0 else self.base_price_sqrt,
+                upper_L if pos < 0 else lower_L,
             )
-            if pos < 0 and pos + volume > 0:
-                volume = pos
             if volume is not None:
+                if pos < 0 and pos + volume > 0:
+                    volume = pos
                 agg_bids.append(MMOrder(volume, price))
-            pos += volume
+                pos += volume
 
         self.curr_bids = agg_bids
         self.curr_asks = agg_asks
 
-        # print(agg_asks)
-        # import pdb
-
-        # pdb.set_trace()
         return agg_bids, agg_asks
 
 
@@ -693,6 +707,7 @@ class CFMV3LastTradeMarketMaker(ShapedMarketMaker):
                 self.upper_price_sqrt,
                 upper_L if price > self.base_price else lower_L,
             )
+
             if volume is not None:
                 agg_bids.append(MMOrder(volume, price))
 

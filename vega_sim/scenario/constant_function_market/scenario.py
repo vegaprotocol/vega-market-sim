@@ -146,14 +146,14 @@ class CFMScenario(Scenario):
         #     num_steps=self.num_steps,
         #     decimal_precision=int(market_config.decimal_places),
         # )
-        price_process = get_historic_price_series(
-            product_id="ETH-USD",
-            granularity=Granularity.MINUTE,
-            start=str(datetime.datetime(2023, 10, 23, 10)),
-            end=str(
-                datetime.datetime(2023, 10, 23, 10) + datetime.timedelta(minutes=1000)
-            ),
-        ).values
+        # price_process = get_historic_price_series(
+        #     product_id="ETH-USD",
+        #     granularity=Granularity.MINUTE,
+        #     start=str(datetime.datetime(2023, 10, 23, 10)),
+        #     end=str(
+        #         datetime.datetime(2023, 10, 23, 10) + datetime.timedelta(minutes=1000)
+        #     ),
+        # ).values
         # price_process = get_historic_price_series(
         #     product_id="ETH-USD",
         #     granularity=Granularity.MINUTE,
@@ -161,12 +161,12 @@ class CFMScenario(Scenario):
         #     end=str(datetime.datetime(2022, 11, 8) + datetime.timedelta(minutes=1000)),
         # ).values
 
-        # price_process = get_historic_price_series(
-        #     product_id="ETH-USD",
-        #     granularity=Granularity.MINUTE,
-        #     start=str(datetime.datetime(2023, 7, 8)),
-        #     end=str(datetime.datetime(2023, 7, 8) + datetime.timedelta(minutes=1000)),
-        # ).values
+        price_process = get_historic_price_series(
+            product_id="ETH-USD",
+            granularity=Granularity.MINUTE,
+            start=str(datetime.datetime(2023, 7, 8)),
+            end=str(datetime.datetime(2023, 7, 8) + datetime.timedelta(minutes=1000)),
+        ).values
 
         # Create fuzzed market managers
         market_agents["market_managers"] = [
@@ -241,19 +241,19 @@ class CFMScenario(Scenario):
             CFMV3MarketMaker(
                 key_name="CFM_MAKER",
                 num_steps=self.num_steps,
-                initial_asset_mint=100_000,
+                initial_asset_mint=10_000,
                 market_name=market_name,
                 asset_name=asset_name,
-                commitment_amount=10_000,
+                commitment_amount=1_000,
                 market_decimal_places=market_config.decimal_places,
                 fee_amount=0.001,
-                # initial_price=max(price_process),
-                initial_price=price_process[0],
+                initial_price=max(price_process),
+                # initial_price=price_process[0],
                 num_levels=200,
                 tick_spacing=0.1,
                 price_width_above=0.2,
                 price_width_below=0.2,
-                margin_usage_at_bound_above=0.8,
+                margin_usage_at_bound_above=0,
                 margin_usage_at_bound_below=0.8,
                 asset_decimal_places=asset_dp,
                 price_process_generator=iter(price_process),
@@ -286,8 +286,8 @@ class CFMScenario(Scenario):
                 asset_name=asset_name,
                 price_process_generator=iter(price_process),
                 initial_asset_mint=self.initial_asset_mint,
-                buy_intensity=10,
-                sell_intensity=10,
+                buy_intensity=100,
+                sell_intensity=100,
                 spread_offset=0.0001,
                 tag=f"ARB_AGENT_{str(i_agent).zfill(3)}",
                 random_state=random_state,
@@ -307,7 +307,7 @@ class CFMScenario(Scenario):
         #         asset_name=asset_name,
         #         buy_intensity=10,
         #         sell_intensity=10,
-        #         base_order_size=0.001,
+        #         base_order_size=0.01,
         #         step_bias=0.5,
         #         tag=f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
         #         random_state=random_state,
@@ -377,7 +377,7 @@ if __name__ == "__main__":
         step_length_seconds=10,
         block_length_seconds=1,
         transactions_per_block=4096,
-        pause_every_n_steps=20,
+        # pause_every_n_steps=100,
     )
 
     with VegaServiceNull(
