@@ -54,7 +54,6 @@ Examples:
 
 """
 
-import copy
 import functools
 import logging
 from typing import Optional, Union
@@ -195,24 +194,24 @@ class PriceMonitoringParameters(Config):
     OPTS = {
         "default": {
             "triggers": [
-                # {
-                #     "horizon": 900,  # 15 minutes
-                #     "probability": "0.90001",
-                #     "auction_extension": 60,
-                # },
-                # {
-                #     "horizon": 3600,  # 1 hour
-                #     "probability": "0.90001",
-                #     "auction_extension": 300,
-                # },
-                # {
-                #     "horizon": 14_400,  # 4 hour
-                #     "probability": "0.90001",
-                #     "auction_extension": 900,
-                # },
+                {
+                    "horizon": 900,  # 15 minutes
+                    "probability": "0.90001",
+                    "auction_extension": 60,
+                },
+                {
+                    "horizon": 3600,  # 1 hour
+                    "probability": "0.90001",
+                    "auction_extension": 300,
+                },
+                {
+                    "horizon": 14_400,  # 4 hour
+                    "probability": "0.90001",
+                    "auction_extension": 900,
+                },
                 {
                     "horizon": 86_400,  # 1 day
-                    "probability": "0.9999999",
+                    "probability": "0.90001",
                     "auction_extension": 3600,
                 },
             ]
@@ -230,7 +229,7 @@ class PriceMonitoringParameters(Config):
 class LiquidityMonitoringParameters(Config):
     OPTS = {
         "default": {
-            "triggering_ratio": "0.01",
+            "triggering_ratio": "0.7",
             "auction_extension": 0,
             "target_stake_parameters": "default",
         }
@@ -257,10 +256,10 @@ class LiquidityMonitoringParameters(Config):
 class LiquiditySLAParameters(Config):
     OPTS = {
         "default": {
-            "price_range": "1",
-            "commitment_min_time_fraction": "0.01",
+            "price_range": "0.5",
+            "commitment_min_time_fraction": "1",
             "performance_hysteresis_epochs": 1,
-            "sla_competition_factor": "0",
+            "sla_competition_factor": "1",
         }
     }
 
