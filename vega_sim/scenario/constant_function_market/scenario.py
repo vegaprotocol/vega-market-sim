@@ -49,6 +49,33 @@ class MarketHistoryAdditionalData:
     external_prices: Dict[str, float]
 
 
+@dataclass
+class LedgerEntries:
+    entries: List[dict]
+
+
+def additional_ledger_data_to_rows(data) -> List[Dict]:
+    results = []
+
+    if isinstance(data, LedgerEntries):
+        for ledger_entry in data.entries:
+            results.append(
+                {
+                    "time": ledger_entry.timestamp,
+                    "quantity": ledger_entry.quantity,
+                    "transfer_type": ledger_entry.transfer_type,
+                    "asset_id": ledger_entry.asset_id,
+                    "from_account_type": ledger_entry.from_account_type,
+                    "to_account_type": ledger_entry.to_account_type,
+                    "from_account_party_id": ledger_entry.from_account_party_id,
+                    "to_account_party_id": ledger_entry.to_account_party_id,
+                    "from_account_market_id": ledger_entry.from_account_market_id,
+                    "to_account_market_id": ledger_entry.to_account_market_id,
+                }
+            )
+    return results
+
+
 def state_extraction_fn(vega: VegaServiceNull, agents: dict):
     at_time = vega.get_blockchain_time()
 
@@ -64,8 +91,26 @@ def state_extraction_fn(vega: VegaServiceNull, agents: dict):
     )
 
 
+def final_extraction(vega: VegaServiceNull, agents: dict):
+    results = []
+    for _, agent in agents.items():
+        if isinstance(agent, (CFMMarketMaker, CFMV3MarketMaker)):
+            from_ledger_entries = vega.list_ledger_entries(
+                from_party_ids=[agent._public_key],
+                transfer_types=[14, 20, 30, 31, 32, 33, 34, 35],
+            )
+            to_ledger_entries = vega.list_ledger_entries(
+                to_party_ids=[agent._public_key],
+                transfer_types=[14, 20, 30, 31, 32, 33, 34, 35],
+            )
+            results = results + from_ledger_entries + to_ledger_entries
+    return LedgerEntries(entries=results)
+
+
 def additional_data_to_rows(data) -> List[pd.Series]:
     results = []
+    if isinstance(data, LedgerEntries):
+        return results
     for market_id in data.external_prices.keys():
         results.append(
             {
@@ -90,8 +135,10 @@ class CFMScenario(Scenario):
     ):
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
+            final_extraction_fn=lambda vega, agents: final_extraction(vega, agents),
             additional_data_output_fns={
                 "additional_data.csv": lambda data: additional_data_to_rows(data),
+                "ledger_entries.csv": lambda data: additional_ledger_data_to_rows(data),
             },
         )
 
@@ -382,7 +429,7 @@ if __name__ == "__main__":
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
-        run_with_console=True,
+        run_with_console=False,
         use_full_vega_wallet=False,
         retain_log_files=True,
         launch_graphql=False,
