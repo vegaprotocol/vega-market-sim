@@ -104,6 +104,7 @@ def final_extraction(vega: VegaServiceNull, agents: dict):
                 transfer_types=[14, 20, 30, 31, 32, 33, 34, 35],
             )
             results = results + from_ledger_entries + to_ledger_entries
+
     return LedgerEntries(entries=results)
 
 

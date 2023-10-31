@@ -1398,7 +1398,8 @@ class VegaService(ABC):
         oracle_name = filter_key.name
 
         logger.info(
-            f"Submitting market termination signal and settlement price {settlement_price} for {oracle_name}"
+            "Submitting market termination signal and settlement price"
+            f" {settlement_price} for {oracle_name}"
         )
 
         gov.submit_termination_and_settlement_data(
@@ -2836,6 +2837,13 @@ class VegaService(ABC):
                 A list of all transfers matching the requested criteria
         """
 
+        to_datetime = (
+            to_datetime
+            if to_datetime is not None
+            else datetime.datetime.fromtimestamp(
+                (self.get_blockchain_time_from_feed() / 1e9) + 360
+            )
+        )
         return data.list_ledger_entries(
             data_client=self.trading_data_client_v2,
             asset_id=asset_id,
@@ -3140,9 +3148,11 @@ class VegaService(ABC):
             market_id=market_id,
             asset_id=asset_id,
             epoch_seq=epoch_seq,
-            party_id=self.wallet.public_key(key_name, wallet_name)
-            if key_name is not None
-            else None,
+            party_id=(
+                self.wallet.public_key(key_name, wallet_name)
+                if key_name is not None
+                else None
+            ),
             asset_decimals=self.asset_decimals,
         )
 

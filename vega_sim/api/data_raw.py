@@ -425,9 +425,9 @@ def get_trades(
             party_ids=[party_id] if party_id is not None else None,
             order_ids=[order_id] if order_id is not None else None,
             date_range=data_node_protos_v2.trading_data.DateRange(
-                start_timestamp=int(start.timestamp() * 1e9)
-                if start is not None
-                else None,
+                start_timestamp=(
+                    int(start.timestamp() * 1e9) if start is not None else None
+                ),
                 end_timestamp=int(end.timestamp() * 1e9) if end is not None else None,
             ),
         ),
@@ -593,12 +593,14 @@ def list_ledger_entries(
         base_request.date_range.CopyFrom(
             data_node_protos_v2.trading_data.DateRange(
                 start_timestamp=(
-                    from_datetime.timestamp() * 1e9
+                    int(from_datetime.timestamp() * 1e9)
                     if from_datetime is not None
                     else None
                 ),
                 end_timestamp=(
-                    to_datetime.timestamp() * 1e9 if to_datetime is not None else None
+                    int(to_datetime.timestamp() * 1e9)
+                    if to_datetime is not None
+                    else None
                 ),
             )
         )
