@@ -110,16 +110,23 @@ class Scenario(abc.ABC):
             step_end_callback=self._step_end_callback,
         )
         if output_data:
+            print("o1")
             agents_standard_output(self.agents)
+            print("o2")
             resources_standard_output(self.get_resource_data())
+            print("o3")
             assets_standard_output(self.get_assets())
+            print("o4")
             market_data_standard_output(self.get_run_data())
+            print("o5")
             market_chain_standard_output(self.get_run_data())
+            print("o6")
             if self.additional_data_output_fns is not None:
                 market_data_standard_output(
                     self.get_additional_run_data(),
                     custom_output_fns=self.additional_data_output_fns,
                 )
+            print("o7")
 
         return outputs
 
