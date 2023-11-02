@@ -351,15 +351,33 @@ class CFMV3MarketMaker(ShapedMarketMaker):
     def _generate_shape(
         self, bid_price_depth: float, ask_price_depth: float
     ) -> Tuple[List[MMOrder], List[MMOrder]]:
-        balance = sum(
-            a.balance
-            for a in self.vega.get_accounts_from_stream(
-                key_name=self.key_name,
-                wallet_name=self.wallet_name,
-                market_id=self.market_id,
-            )
+        return self._generate_shape_calcs(
+            balance=sum(
+                a.balance
+                for a in self.vega.get_accounts_from_stream(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                )
+            ),
+            average_entry=(
+                self.vega.positions_by_market(
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                    key_name=self.key_name,
+                ).average_entry_price
+                if self.current_position != 0
+                else 0
+            ),
+            position=self.current_position,
         )
 
+    def _generate_shape_calcs(
+        self,
+        balance: float,
+        average_entry: float,
+        position: float,
+    ) -> Tuple[List[MMOrder], List[MMOrder]]:
         volume_at_upper = (
             self.margin_usage_at_bound_above
             * (balance / self.short_factor)
@@ -391,39 +409,32 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         if self.use_last_price_as_ref:
             ref_price = self.vega.last_trade_price(market_id=self.market_id)
         else:
-            average_entry = (
-                self.vega.positions_by_market(
-                    wallet_name=self.wallet_name,
-                    market_id=self.market_id,
-                    key_name=self.key_name,
-                ).average_entry_price
-                if self.current_position != 0
-                else 0
-            )
-            if self.current_position > 0:
+            if position > 0:
                 L = lower_L
                 usd_total = (
                     self.margin_usage_at_bound_below * balance / self.long_factor
                 )
                 lower_bound = self.lower_price_sqrt
                 upper_bound = self.base_price_sqrt
-                virt_x = abs(self.current_position) + L / upper_bound
-                virt_y = (
-                    usd_total - abs(self.current_position) * average_entry
-                ) + L * lower_bound
+                virt_x = abs(position) + L / upper_bound
+                virt_y = (usd_total - abs(position) * average_entry) + L * lower_bound
             else:
                 L = upper_L
                 lower_bound = self.base_price_sqrt
                 upper_bound = self.upper_price_sqrt
-                virt_x = (volume_at_upper + self.current_position) + L / upper_bound
-                virt_y = (abs(self.current_position) * average_entry) + L * lower_bound
+                virt_x = (volume_at_upper + position) + L / upper_bound
+                virt_y = (abs(position) * average_entry) + L * lower_bound
             if L == 0:
                 ref_price = self.base_price
             else:
                 ref_price = virt_y / virt_x
 
         return self._calculate_price_levels(
-            ref_price=ref_price, balance=balance, upper_L=upper_L, lower_L=lower_L
+            ref_price=ref_price,
+            balance=balance,
+            upper_L=upper_L,
+            lower_L=lower_L,
+            position=position,
         )
 
     def _calculate_liq_val(
@@ -432,7 +443,12 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         return margin_frac * (balance / risk_factor) * liq_factor
 
     def _calculate_price_levels(
-        self, ref_price: float, balance: float, upper_L: float, lower_L: float
+        self,
+        ref_price: float,
+        balance: float,
+        upper_L: float,
+        lower_L: float,
+        position: float,
     ) -> Tuple[List[MMOrder], List[MMOrder]]:
         if ref_price == 0:
             ref_price = self.curr_price
@@ -440,7 +456,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         agg_bids = []
         agg_asks = []
 
-        pos = self.current_position
+        pos = position
 
         for i in range(1, self.num_levels):
             pre_price_sqrt = (ref_price + (i - 1) * self.tick_spacing) ** 0.5
@@ -461,7 +477,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
                 agg_asks.append(MMOrder(volume, price))
                 pos -= volume
 
-        pos = self.current_position
+        pos = position
         for i in range(1, self.num_levels):
             pre_price_sqrt = (ref_price - (i - 1) * self.tick_spacing) ** 0.5
             price = ref_price - i * self.tick_spacing
@@ -768,17 +784,48 @@ if __name__ == "__main__":
     mm = CFMV3MarketMaker(
         "fawfa",
         num_steps=12,
-        base_price=2000,
+        initial_price=2000,
         price_width_above=0.1,
-        price_width_below=0.1,
-        margin_usage_at_bounds=0.8,
+        price_width_below=1,
+        margin_usage_at_bound_above=0.8,
+        margin_usage_at_bound_below=0.8,
         initial_asset_mint=100_000,
         market_name="MKT",
         num_levels=300,
         tick_spacing=1,
     )
+    balance = 100_000
 
-    bids, asks = mm._calculate_price_levels(1700, 100_000)
+    mm.short_factor = 0.02
+    mm.long_factor = 0.02
+
+    volume_at_upper = (
+        mm.margin_usage_at_bound_above * (balance / mm.short_factor) / mm.upper_price
+    )
+    upper_L = (
+        volume_at_upper
+        * mm.upper_price_sqrt
+        * mm.base_price_sqrt
+        / (mm.upper_price_sqrt - mm.base_price_sqrt)
+    )
+
+    lower_L = (
+        mm.margin_usage_at_bound_below
+        * (balance / mm.long_factor)
+        * mm.lower_liq_factor
+    )
+
+    to_price = 2000
+    pos = mm._quantity_for_move(
+        mm.base_price_sqrt,
+        to_price**0.5,
+        mm.base_price_sqrt if to_price < mm.base_price else mm.upper_price_sqrt,
+        lower_L,
+    )
+    print(f"pos would be {pos}")
+    bids, asks = mm._generate_shape_calcs(
+        balance=balance, average_entry=to_price, position=pos
+    )
 
     x = []
     y = []
