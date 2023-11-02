@@ -18,6 +18,8 @@ from vega_sim.tools.scenario_plots import (
 
 from matplotlib import pyplot as plt
 
+logger = logging.getLogger(__name__)
+
 
 def _run(
     steps: int = 2880,
@@ -58,30 +60,30 @@ def _run(
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        print("plot 1")
+        logger.info("plot 1")
         fuzz_figs = plot_price_monitoring()
         for key, fig in fuzz_figs.items():
             fig.savefig(f"{output_dir}/monitoring-{key}.jpg")
             plt.close(fig)
 
-        print("plot 2")
+        logger.info("plot 2")
         fuzz_figs = fuzz_plots()
         for key, fig in fuzz_figs.items():
             fig.savefig(f"{output_dir}/fuzz-{key}.jpg")
             plt.close(fig)
 
-        print("plot 3")
+        logger.info("plot 3")
         trading_figs = plot_run_outputs()
         for key, fig in trading_figs.items():
             fig.savefig(f"{output_dir}/trading-{key}.jpg")
             plt.close(fig)
 
-        print("plot 4")
+        logger.info("plot 4")
         reward_fig = reward_plots()
         reward_fig.savefig(f"{output_dir}/rewards.jpg")
         plt.close(fig)
 
-        print("plot 5")
+        logger.info("plot 5")
         account_fig = account_plots()
         account_fig.savefig(f"{output_dir}/accounts.jpg")
         plt.close(account_fig)
