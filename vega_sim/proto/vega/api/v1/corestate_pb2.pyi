@@ -18,7 +18,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Account(_message.Message):
-    __slots__ = ["party", "market", "balance", "asset", "type"]
+    __slots__ = ("party", "market", "balance", "asset", "type")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
@@ -39,7 +39,7 @@ class Account(_message.Message):
     ) -> None: ...
 
 class ListAccountsRequest(_message.Message):
-    __slots__ = ["party", "market"]
+    __slots__ = ("party", "market")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     party: str
@@ -49,7 +49,7 @@ class ListAccountsRequest(_message.Message):
     ) -> None: ...
 
 class ListAccountsResponse(_message.Message):
-    __slots__ = ["accounts"]
+    __slots__ = ("accounts",)
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     accounts: _containers.RepeatedCompositeFieldContainer[Account]
     def __init__(
@@ -57,13 +57,13 @@ class ListAccountsResponse(_message.Message):
     ) -> None: ...
 
 class ListAssetsRequest(_message.Message):
-    __slots__ = ["asset"]
+    __slots__ = ("asset",)
     ASSET_FIELD_NUMBER: _ClassVar[int]
     asset: str
     def __init__(self, asset: _Optional[str] = ...) -> None: ...
 
 class ListAssetsResponse(_message.Message):
-    __slots__ = ["assets"]
+    __slots__ = ("assets",)
     ASSETS_FIELD_NUMBER: _ClassVar[int]
     assets: _containers.RepeatedCompositeFieldContainer[_assets_pb2.Asset]
     def __init__(
@@ -71,13 +71,13 @@ class ListAssetsResponse(_message.Message):
     ) -> None: ...
 
 class ListNetworkParametersRequest(_message.Message):
-    __slots__ = ["network_parameter_key"]
+    __slots__ = ("network_parameter_key",)
     NETWORK_PARAMETER_KEY_FIELD_NUMBER: _ClassVar[int]
     network_parameter_key: str
     def __init__(self, network_parameter_key: _Optional[str] = ...) -> None: ...
 
 class ListNetworkParametersResponse(_message.Message):
-    __slots__ = ["network_parameters"]
+    __slots__ = ("network_parameters",)
     NETWORK_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     network_parameters: _containers.RepeatedCompositeFieldContainer[
         _vega_pb2.NetworkParameter
@@ -90,11 +90,11 @@ class ListNetworkParametersResponse(_message.Message):
     ) -> None: ...
 
 class ListNetworkLimitsRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ListNetworkLimitsResponse(_message.Message):
-    __slots__ = ["network_limits"]
+    __slots__ = ("network_limits",)
     NETWORK_LIMITS_FIELD_NUMBER: _ClassVar[int]
     network_limits: _vega_pb2.NetworkLimits
     def __init__(
@@ -102,11 +102,11 @@ class ListNetworkLimitsResponse(_message.Message):
     ) -> None: ...
 
 class ListPartiesRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ListPartiesResponse(_message.Message):
-    __slots__ = ["parties"]
+    __slots__ = ("parties",)
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     parties: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Party]
     def __init__(
@@ -114,11 +114,11 @@ class ListPartiesResponse(_message.Message):
     ) -> None: ...
 
 class ListValidatorsRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ListValidatorsResponse(_message.Message):
-    __slots__ = ["validators"]
+    __slots__ = ("validators",)
     VALIDATORS_FIELD_NUMBER: _ClassVar[int]
     validators: _containers.RepeatedCompositeFieldContainer[_events_pb2.ValidatorUpdate]
     def __init__(
@@ -129,13 +129,13 @@ class ListValidatorsResponse(_message.Message):
     ) -> None: ...
 
 class ListMarketsRequest(_message.Message):
-    __slots__ = ["market"]
+    __slots__ = ("market",)
     MARKET_FIELD_NUMBER: _ClassVar[int]
     market: str
     def __init__(self, market: _Optional[str] = ...) -> None: ...
 
 class ListMarketsResponse(_message.Message):
-    __slots__ = ["markets"]
+    __slots__ = ("markets",)
     MARKETS_FIELD_NUMBER: _ClassVar[int]
     markets: _containers.RepeatedCompositeFieldContainer[_markets_pb2.Market]
     def __init__(
@@ -143,7 +143,7 @@ class ListMarketsResponse(_message.Message):
     ) -> None: ...
 
 class ListProposalsRequest(_message.Message):
-    __slots__ = ["proposal", "proposer"]
+    __slots__ = ("proposal", "proposer")
     PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     PROPOSER_FIELD_NUMBER: _ClassVar[int]
     proposal: str
@@ -153,7 +153,7 @@ class ListProposalsRequest(_message.Message):
     ) -> None: ...
 
 class ListProposalsResponse(_message.Message):
-    __slots__ = ["proposals"]
+    __slots__ = ("proposals",)
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
     proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
     def __init__(
@@ -164,13 +164,13 @@ class ListProposalsResponse(_message.Message):
     ) -> None: ...
 
 class ListMarketsDataRequest(_message.Message):
-    __slots__ = ["market"]
+    __slots__ = ("market",)
     MARKET_FIELD_NUMBER: _ClassVar[int]
     market: str
     def __init__(self, market: _Optional[str] = ...) -> None: ...
 
 class ListMarketsDataResponse(_message.Message):
-    __slots__ = ["markets_data"]
+    __slots__ = ("markets_data",)
     MARKETS_DATA_FIELD_NUMBER: _ClassVar[int]
     markets_data: _containers.RepeatedCompositeFieldContainer[_vega_pb2.MarketData]
     def __init__(
@@ -181,7 +181,7 @@ class ListMarketsDataResponse(_message.Message):
     ) -> None: ...
 
 class ListVotesRequest(_message.Message):
-    __slots__ = ["proposal", "party"]
+    __slots__ = ("proposal", "party")
     PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     PARTY_FIELD_NUMBER: _ClassVar[int]
     proposal: str
@@ -191,7 +191,7 @@ class ListVotesRequest(_message.Message):
     ) -> None: ...
 
 class ListVotesResponse(_message.Message):
-    __slots__ = ["votes"]
+    __slots__ = ("votes",)
     VOTES_FIELD_NUMBER: _ClassVar[int]
     votes: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Vote]
     def __init__(
@@ -199,7 +199,7 @@ class ListVotesResponse(_message.Message):
     ) -> None: ...
 
 class PartyStake(_message.Message):
-    __slots__ = ["party", "current_stake_available", "stake_linkings"]
+    __slots__ = ("party", "current_stake_available", "stake_linkings")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     CURRENT_STAKE_AVAILABLE_FIELD_NUMBER: _ClassVar[int]
     STAKE_LINKINGS_FIELD_NUMBER: _ClassVar[int]
@@ -218,13 +218,13 @@ class PartyStake(_message.Message):
     ) -> None: ...
 
 class ListPartiesStakeRequest(_message.Message):
-    __slots__ = ["party"]
+    __slots__ = ("party",)
     PARTY_FIELD_NUMBER: _ClassVar[int]
     party: str
     def __init__(self, party: _Optional[str] = ...) -> None: ...
 
 class ListPartiesStakeResponse(_message.Message):
-    __slots__ = ["parties_stake"]
+    __slots__ = ("parties_stake",)
     PARTIES_STAKE_FIELD_NUMBER: _ClassVar[int]
     parties_stake: _containers.RepeatedCompositeFieldContainer[PartyStake]
     def __init__(
@@ -232,7 +232,7 @@ class ListPartiesStakeResponse(_message.Message):
     ) -> None: ...
 
 class ListDelegationsRequest(_message.Message):
-    __slots__ = ["party", "node", "epoch_seq"]
+    __slots__ = ("party", "node", "epoch_seq")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     NODE_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -247,7 +247,7 @@ class ListDelegationsRequest(_message.Message):
     ) -> None: ...
 
 class ListDelegationsResponse(_message.Message):
-    __slots__ = ["delegations"]
+    __slots__ = ("delegations",)
     DELEGATIONS_FIELD_NUMBER: _ClassVar[int]
     delegations: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Delegation]
     def __init__(

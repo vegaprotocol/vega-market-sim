@@ -14,7 +14,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class NodeSignatureKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     NODE_SIGNATURE_KIND_UNSPECIFIED: _ClassVar[NodeSignatureKind]
     NODE_SIGNATURE_KIND_ASSET_NEW: _ClassVar[NodeSignatureKind]
     NODE_SIGNATURE_KIND_ASSET_WITHDRAWAL: _ClassVar[NodeSignatureKind]
@@ -30,7 +30,7 @@ NODE_SIGNATURE_KIND_ERC20_MULTISIG_SIGNER_REMOVED: NodeSignatureKind
 NODE_SIGNATURE_KIND_ASSET_UPDATE: NodeSignatureKind
 
 class ValidatorHeartbeat(_message.Message):
-    __slots__ = ["node_id", "ethereum_signature", "vega_signature", "message"]
+    __slots__ = ("node_id", "ethereum_signature", "vega_signature", "message")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     ETHEREUM_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     VEGA_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
@@ -48,7 +48,7 @@ class ValidatorHeartbeat(_message.Message):
     ) -> None: ...
 
 class AnnounceNode(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "vega_pub_key",
         "ethereum_address",
         "chain_pub_key",
@@ -62,7 +62,7 @@ class AnnounceNode(_message.Message):
         "ethereum_signature",
         "vega_signature",
         "submitter_address",
-    ]
+    )
     VEGA_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     CHAIN_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -107,10 +107,10 @@ class AnnounceNode(_message.Message):
     ) -> None: ...
 
 class NodeVote(_message.Message):
-    __slots__ = ["reference", "type"]
+    __slots__ = ("reference", "type")
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[NodeVote.Type]
         TYPE_STAKE_DEPOSITED: _ClassVar[NodeVote.Type]
         TYPE_STAKE_REMOVED: _ClassVar[NodeVote.Type]
@@ -150,7 +150,7 @@ class NodeVote(_message.Message):
     ) -> None: ...
 
 class NodeSignature(_message.Message):
-    __slots__ = ["id", "sig", "kind"]
+    __slots__ = ("id", "sig", "kind")
     ID_FIELD_NUMBER: _ClassVar[int]
     SIG_FIELD_NUMBER: _ClassVar[int]
     KIND_FIELD_NUMBER: _ClassVar[int]
@@ -165,7 +165,7 @@ class NodeSignature(_message.Message):
     ) -> None: ...
 
 class ChainEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "tx_id",
         "nonce",
         "builtin",
@@ -173,7 +173,7 @@ class ChainEvent(_message.Message):
         "staking_event",
         "erc20_multisig",
         "contract_call",
-    ]
+    )
     TX_ID_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BUILTIN_FIELD_NUMBER: _ClassVar[int]
@@ -206,12 +206,12 @@ class ChainEvent(_message.Message):
     ) -> None: ...
 
 class KeyRotateSubmission(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "new_pub_key_index",
         "target_block",
         "new_pub_key",
         "current_pub_key_hash",
-    ]
+    )
     NEW_PUB_KEY_INDEX_FIELD_NUMBER: _ClassVar[int]
     TARGET_BLOCK_FIELD_NUMBER: _ClassVar[int]
     NEW_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -229,13 +229,13 @@ class KeyRotateSubmission(_message.Message):
     ) -> None: ...
 
 class EthereumKeyRotateSubmission(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "target_block",
         "new_address",
         "current_address",
         "submitter_address",
         "ethereum_signature",
-    ]
+    )
     TARGET_BLOCK_FIELD_NUMBER: _ClassVar[int]
     NEW_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     CURRENT_ADDRESS_FIELD_NUMBER: _ClassVar[int]
@@ -256,7 +256,7 @@ class EthereumKeyRotateSubmission(_message.Message):
     ) -> None: ...
 
 class StateVariableProposal(_message.Message):
-    __slots__ = ["proposal"]
+    __slots__ = ("proposal",)
     PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     proposal: _vega_pb2.StateValueProposal
     def __init__(
@@ -264,7 +264,7 @@ class StateVariableProposal(_message.Message):
     ) -> None: ...
 
 class ProtocolUpgradeProposal(_message.Message):
-    __slots__ = ["upgrade_block_height", "vega_release_tag"]
+    __slots__ = ("upgrade_block_height", "vega_release_tag")
     UPGRADE_BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     VEGA_RELEASE_TAG_FIELD_NUMBER: _ClassVar[int]
     upgrade_block_height: int

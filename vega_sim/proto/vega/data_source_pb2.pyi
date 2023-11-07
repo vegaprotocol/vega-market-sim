@@ -16,7 +16,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class DataSourceDefinition(_message.Message):
-    __slots__ = ["internal", "external"]
+    __slots__ = ("internal", "external")
     INTERNAL_FIELD_NUMBER: _ClassVar[int]
     EXTERNAL_FIELD_NUMBER: _ClassVar[int]
     internal: DataSourceDefinitionInternal
@@ -28,7 +28,7 @@ class DataSourceDefinition(_message.Message):
     ) -> None: ...
 
 class DataSourceSpecConfigurationTime(_message.Message):
-    __slots__ = ["conditions"]
+    __slots__ = ("conditions",)
     CONDITIONS_FIELD_NUMBER: _ClassVar[int]
     conditions: _containers.RepeatedCompositeFieldContainer[_spec_pb2.Condition]
     def __init__(
@@ -37,7 +37,7 @@ class DataSourceSpecConfigurationTime(_message.Message):
     ) -> None: ...
 
 class DataSourceSpecConfigurationTimeTrigger(_message.Message):
-    __slots__ = ["conditions", "triggers"]
+    __slots__ = ("conditions", "triggers")
     CONDITIONS_FIELD_NUMBER: _ClassVar[int]
     TRIGGERS_FIELD_NUMBER: _ClassVar[int]
     conditions: _containers.RepeatedCompositeFieldContainer[_spec_pb2.Condition]
@@ -51,7 +51,7 @@ class DataSourceSpecConfigurationTimeTrigger(_message.Message):
     ) -> None: ...
 
 class DataSourceDefinitionInternal(_message.Message):
-    __slots__ = ["time", "time_trigger"]
+    __slots__ = ("time", "time_trigger")
     TIME_FIELD_NUMBER: _ClassVar[int]
     TIME_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     time: DataSourceSpecConfigurationTime
@@ -65,7 +65,7 @@ class DataSourceDefinitionInternal(_message.Message):
     ) -> None: ...
 
 class DataSourceDefinitionExternal(_message.Message):
-    __slots__ = ["oracle", "eth_oracle"]
+    __slots__ = ("oracle", "eth_oracle")
     ORACLE_FIELD_NUMBER: _ClassVar[int]
     ETH_ORACLE_FIELD_NUMBER: _ClassVar[int]
     oracle: DataSourceSpecConfiguration
@@ -77,7 +77,7 @@ class DataSourceDefinitionExternal(_message.Message):
     ) -> None: ...
 
 class DataSourceSpecConfiguration(_message.Message):
-    __slots__ = ["signers", "filters"]
+    __slots__ = ("signers", "filters")
     SIGNERS_FIELD_NUMBER: _ClassVar[int]
     FILTERS_FIELD_NUMBER: _ClassVar[int]
     signers: _containers.RepeatedCompositeFieldContainer[_data_pb2.Signer]
@@ -89,7 +89,7 @@ class DataSourceSpecConfiguration(_message.Message):
     ) -> None: ...
 
 class EthCallSpec(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "address",
         "abi",
         "method",
@@ -98,7 +98,7 @@ class EthCallSpec(_message.Message):
         "required_confirmations",
         "filters",
         "normalisers",
-    ]
+    )
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     ABI_FIELD_NUMBER: _ClassVar[int]
     METHOD_FIELD_NUMBER: _ClassVar[int]
@@ -128,7 +128,7 @@ class EthCallSpec(_message.Message):
     ) -> None: ...
 
 class Normaliser(_message.Message):
-    __slots__ = ["name", "expression"]
+    __slots__ = ("name", "expression")
     NAME_FIELD_NUMBER: _ClassVar[int]
     EXPRESSION_FIELD_NUMBER: _ClassVar[int]
     name: str
@@ -138,7 +138,7 @@ class Normaliser(_message.Message):
     ) -> None: ...
 
 class EthCallTrigger(_message.Message):
-    __slots__ = ["time_trigger"]
+    __slots__ = ("time_trigger",)
     TIME_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     time_trigger: EthTimeTrigger
     def __init__(
@@ -146,7 +146,7 @@ class EthCallTrigger(_message.Message):
     ) -> None: ...
 
 class EthTimeTrigger(_message.Message):
-    __slots__ = ["initial", "every", "until"]
+    __slots__ = ("initial", "every", "until")
     INITIAL_FIELD_NUMBER: _ClassVar[int]
     EVERY_FIELD_NUMBER: _ClassVar[int]
     UNTIL_FIELD_NUMBER: _ClassVar[int]
@@ -161,10 +161,10 @@ class EthTimeTrigger(_message.Message):
     ) -> None: ...
 
 class DataSourceSpec(_message.Message):
-    __slots__ = ["id", "created_at", "updated_at", "data", "status"]
+    __slots__ = ("id", "created_at", "updated_at", "data", "status")
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[DataSourceSpec.Status]
         STATUS_ACTIVE: _ClassVar[DataSourceSpec.Status]
         STATUS_DEACTIVATED: _ClassVar[DataSourceSpec.Status]
@@ -191,7 +191,7 @@ class DataSourceSpec(_message.Message):
     ) -> None: ...
 
 class ExternalDataSourceSpec(_message.Message):
-    __slots__ = ["spec"]
+    __slots__ = ("spec",)
     SPEC_FIELD_NUMBER: _ClassVar[int]
     spec: DataSourceSpec
     def __init__(

@@ -17,7 +17,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class ProposalError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     PROPOSAL_ERROR_UNSPECIFIED: _ClassVar[ProposalError]
     PROPOSAL_ERROR_CLOSE_TIME_TOO_SOON: _ClassVar[ProposalError]
     PROPOSAL_ERROR_CLOSE_TIME_TOO_LATE: _ClassVar[ProposalError]
@@ -72,14 +72,14 @@ class ProposalError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     PROPOSAL_ERROR_INVALID_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ProposalError]
 
 class MarketStateUpdateType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     MARKET_STATE_UPDATE_TYPE_UNSPECIFIED: _ClassVar[MarketStateUpdateType]
     MARKET_STATE_UPDATE_TYPE_TERMINATE: _ClassVar[MarketStateUpdateType]
     MARKET_STATE_UPDATE_TYPE_SUSPEND: _ClassVar[MarketStateUpdateType]
     MARKET_STATE_UPDATE_TYPE_RESUME: _ClassVar[MarketStateUpdateType]
 
 class GovernanceTransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     GOVERNANCE_TRANSFER_TYPE_UNSPECIFIED: _ClassVar[GovernanceTransferType]
     GOVERNANCE_TRANSFER_TYPE_ALL_OR_NOTHING: _ClassVar[GovernanceTransferType]
     GOVERNANCE_TRANSFER_TYPE_BEST_EFFORT: _ClassVar[GovernanceTransferType]
@@ -145,7 +145,7 @@ GOVERNANCE_TRANSFER_TYPE_ALL_OR_NOTHING: GovernanceTransferType
 GOVERNANCE_TRANSFER_TYPE_BEST_EFFORT: GovernanceTransferType
 
 class SpotProduct(_message.Message):
-    __slots__ = ["base_asset", "quote_asset", "name"]
+    __slots__ = ("base_asset", "quote_asset", "name")
     BASE_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_ASSET_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -160,13 +160,13 @@ class SpotProduct(_message.Message):
     ) -> None: ...
 
 class FutureProduct(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "settlement_asset",
         "quote_name",
         "data_source_spec_for_settlement_data",
         "data_source_spec_for_trading_termination",
         "data_source_spec_binding",
-    ]
+    )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
@@ -193,7 +193,7 @@ class FutureProduct(_message.Message):
     ) -> None: ...
 
 class PerpetualProduct(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "settlement_asset",
         "quote_name",
         "margin_funding_factor",
@@ -203,7 +203,7 @@ class PerpetualProduct(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
-    ]
+    )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -242,7 +242,7 @@ class PerpetualProduct(_message.Message):
     ) -> None: ...
 
 class InstrumentConfiguration(_message.Message):
-    __slots__ = ["name", "code", "future", "spot", "perpetual"]
+    __slots__ = ("name", "code", "future", "spot", "perpetual")
     NAME_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
     FUTURE_FIELD_NUMBER: _ClassVar[int]
@@ -263,7 +263,7 @@ class InstrumentConfiguration(_message.Message):
     ) -> None: ...
 
 class NewSpotMarketConfiguration(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "instrument",
         "decimal_places",
         "metadata",
@@ -273,7 +273,7 @@ class NewSpotMarketConfiguration(_message.Message):
         "log_normal",
         "position_decimal_places",
         "sla_params",
-    ]
+    )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -312,7 +312,7 @@ class NewSpotMarketConfiguration(_message.Message):
     ) -> None: ...
 
 class NewMarketConfiguration(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "instrument",
         "decimal_places",
         "metadata",
@@ -326,7 +326,7 @@ class NewMarketConfiguration(_message.Message):
         "quadratic_slippage_factor",
         "successor",
         "liquidity_sla_parameters",
-    ]
+    )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -377,7 +377,7 @@ class NewMarketConfiguration(_message.Message):
     ) -> None: ...
 
 class NewSpotMarket(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: NewSpotMarketConfiguration
     def __init__(
@@ -385,7 +385,7 @@ class NewSpotMarket(_message.Message):
     ) -> None: ...
 
 class SuccessorConfiguration(_message.Message):
-    __slots__ = ["parent_market_id", "insurance_pool_fraction"]
+    __slots__ = ("parent_market_id", "insurance_pool_fraction")
     PARENT_MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     INSURANCE_POOL_FRACTION_FIELD_NUMBER: _ClassVar[int]
     parent_market_id: str
@@ -397,7 +397,7 @@ class SuccessorConfiguration(_message.Message):
     ) -> None: ...
 
 class NewMarket(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: NewMarketConfiguration
     def __init__(
@@ -405,7 +405,7 @@ class NewMarket(_message.Message):
     ) -> None: ...
 
 class UpdateMarket(_message.Message):
-    __slots__ = ["market_id", "changes"]
+    __slots__ = ("market_id", "changes")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -417,7 +417,7 @@ class UpdateMarket(_message.Message):
     ) -> None: ...
 
 class UpdateSpotMarket(_message.Message):
-    __slots__ = ["market_id", "changes"]
+    __slots__ = ("market_id", "changes")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -429,7 +429,7 @@ class UpdateSpotMarket(_message.Message):
     ) -> None: ...
 
 class UpdateMarketConfiguration(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "instrument",
         "metadata",
         "price_monitoring_parameters",
@@ -440,7 +440,7 @@ class UpdateMarketConfiguration(_message.Message):
         "linear_slippage_factor",
         "quadratic_slippage_factor",
         "liquidity_sla_parameters",
-    ]
+    )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
@@ -482,14 +482,14 @@ class UpdateMarketConfiguration(_message.Message):
     ) -> None: ...
 
 class UpdateSpotMarketConfiguration(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "metadata",
         "price_monitoring_parameters",
         "target_stake_parameters",
         "simple",
         "log_normal",
         "sla_params",
-    ]
+    )
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     TARGET_STAKE_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
@@ -519,7 +519,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     ) -> None: ...
 
 class UpdateInstrumentConfiguration(_message.Message):
-    __slots__ = ["code", "future", "perpetual"]
+    __slots__ = ("code", "future", "perpetual")
     CODE_FIELD_NUMBER: _ClassVar[int]
     FUTURE_FIELD_NUMBER: _ClassVar[int]
     PERPETUAL_FIELD_NUMBER: _ClassVar[int]
@@ -534,12 +534,12 @@ class UpdateInstrumentConfiguration(_message.Message):
     ) -> None: ...
 
 class UpdateFutureProduct(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "quote_name",
         "data_source_spec_for_settlement_data",
         "data_source_spec_for_trading_termination",
         "data_source_spec_binding",
-    ]
+    )
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_TRADING_TERMINATION_FIELD_NUMBER: _ClassVar[int]
@@ -563,7 +563,7 @@ class UpdateFutureProduct(_message.Message):
     ) -> None: ...
 
 class UpdatePerpetualProduct(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "quote_name",
         "margin_funding_factor",
         "interest_rate",
@@ -572,7 +572,7 @@ class UpdatePerpetualProduct(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
-    ]
+    )
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     INTEREST_RATE_FIELD_NUMBER: _ClassVar[int]
@@ -608,7 +608,7 @@ class UpdatePerpetualProduct(_message.Message):
     ) -> None: ...
 
 class UpdateNetworkParameter(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: _vega_pb2.NetworkParameter
     def __init__(
@@ -616,7 +616,7 @@ class UpdateNetworkParameter(_message.Message):
     ) -> None: ...
 
 class NewAsset(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: _assets_pb2.AssetDetails
     def __init__(
@@ -624,7 +624,7 @@ class NewAsset(_message.Message):
     ) -> None: ...
 
 class UpdateAsset(_message.Message):
-    __slots__ = ["asset_id", "changes"]
+    __slots__ = ("asset_id", "changes")
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
@@ -636,11 +636,11 @@ class UpdateAsset(_message.Message):
     ) -> None: ...
 
 class NewFreeform(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ProposalTerms(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "closing_timestamp",
         "enactment_timestamp",
         "validation_timestamp",
@@ -657,7 +657,7 @@ class ProposalTerms(_message.Message):
         "update_market_state",
         "update_referral_program",
         "update_volume_discount_program",
-    ]
+    )
     CLOSING_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     ENACTMENT_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     VALIDATION_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -717,7 +717,7 @@ class ProposalTerms(_message.Message):
     ) -> None: ...
 
 class ProposalRationale(_message.Message):
-    __slots__ = ["description", "title"]
+    __slots__ = ("description", "title")
     DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
     TITLE_FIELD_NUMBER: _ClassVar[int]
     description: str
@@ -727,10 +727,10 @@ class ProposalRationale(_message.Message):
     ) -> None: ...
 
 class GovernanceData(_message.Message):
-    __slots__ = ["proposal", "yes", "no", "yes_party", "no_party"]
+    __slots__ = ("proposal", "yes", "no", "yes_party", "no_party")
 
     class YesPartyEntry(_message.Message):
-        __slots__ = ["key", "value"]
+        __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
@@ -742,7 +742,7 @@ class GovernanceData(_message.Message):
         ) -> None: ...
 
     class NoPartyEntry(_message.Message):
-        __slots__ = ["key", "value"]
+        __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
@@ -772,7 +772,7 @@ class GovernanceData(_message.Message):
     ) -> None: ...
 
 class Proposal(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "reference",
         "party_id",
@@ -786,10 +786,10 @@ class Proposal(_message.Message):
         "required_majority",
         "required_liquidity_provider_participation",
         "required_liquidity_provider_majority",
-    ]
+    )
 
     class State(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATE_UNSPECIFIED: _ClassVar[Proposal.State]
         STATE_FAILED: _ClassVar[Proposal.State]
         STATE_OPEN: _ClassVar[Proposal.State]
@@ -850,7 +850,7 @@ class Proposal(_message.Message):
     ) -> None: ...
 
 class Vote(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party_id",
         "value",
         "proposal_id",
@@ -858,10 +858,10 @@ class Vote(_message.Message):
         "total_governance_token_balance",
         "total_governance_token_weight",
         "total_equity_like_share_weight",
-    ]
+    )
 
     class Value(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         VALUE_UNSPECIFIED: _ClassVar[Vote.Value]
         VALUE_NO: _ClassVar[Vote.Value]
         VALUE_YES: _ClassVar[Vote.Value]
@@ -894,7 +894,7 @@ class Vote(_message.Message):
     ) -> None: ...
 
 class UpdateVolumeDiscountProgram(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: VolumeDiscountProgramChanges
     def __init__(
@@ -902,7 +902,7 @@ class UpdateVolumeDiscountProgram(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountProgramChanges(_message.Message):
-    __slots__ = ["benefit_tiers", "end_of_program_timestamp", "window_length"]
+    __slots__ = ("benefit_tiers", "end_of_program_timestamp", "window_length")
     BENEFIT_TIERS_FIELD_NUMBER: _ClassVar[int]
     END_OF_PROGRAM_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     WINDOW_LENGTH_FIELD_NUMBER: _ClassVar[int]
@@ -921,7 +921,7 @@ class VolumeDiscountProgramChanges(_message.Message):
     ) -> None: ...
 
 class UpdateReferralProgram(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: ReferralProgramChanges
     def __init__(
@@ -929,12 +929,12 @@ class UpdateReferralProgram(_message.Message):
     ) -> None: ...
 
 class ReferralProgramChanges(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "benefit_tiers",
         "end_of_program_timestamp",
         "window_length",
         "staking_tiers",
-    ]
+    )
     BENEFIT_TIERS_FIELD_NUMBER: _ClassVar[int]
     END_OF_PROGRAM_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     WINDOW_LENGTH_FIELD_NUMBER: _ClassVar[int]
@@ -956,7 +956,7 @@ class ReferralProgramChanges(_message.Message):
     ) -> None: ...
 
 class UpdateMarketState(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: UpdateMarketStateConfiguration
     def __init__(
@@ -964,7 +964,7 @@ class UpdateMarketState(_message.Message):
     ) -> None: ...
 
 class UpdateMarketStateConfiguration(_message.Message):
-    __slots__ = ["market_id", "update_type", "price"]
+    __slots__ = ("market_id", "update_type", "price")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     UPDATE_TYPE_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -979,7 +979,7 @@ class UpdateMarketStateConfiguration(_message.Message):
     ) -> None: ...
 
 class CancelTransfer(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: CancelTransferConfiguration
     def __init__(
@@ -987,13 +987,13 @@ class CancelTransfer(_message.Message):
     ) -> None: ...
 
 class CancelTransferConfiguration(_message.Message):
-    __slots__ = ["transfer_id"]
+    __slots__ = ("transfer_id",)
     TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     transfer_id: str
     def __init__(self, transfer_id: _Optional[str] = ...) -> None: ...
 
 class NewTransfer(_message.Message):
-    __slots__ = ["changes"]
+    __slots__ = ("changes",)
     CHANGES_FIELD_NUMBER: _ClassVar[int]
     changes: NewTransferConfiguration
     def __init__(
@@ -1001,7 +1001,7 @@ class NewTransfer(_message.Message):
     ) -> None: ...
 
 class NewTransferConfiguration(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "source_type",
         "source",
         "transfer_type",
@@ -1012,7 +1012,7 @@ class NewTransferConfiguration(_message.Message):
         "destination",
         "one_off",
         "recurring",
-    ]
+    )
     SOURCE_TYPE_FIELD_NUMBER: _ClassVar[int]
     SOURCE_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_TYPE_FIELD_NUMBER: _ClassVar[int]
@@ -1048,13 +1048,13 @@ class NewTransferConfiguration(_message.Message):
     ) -> None: ...
 
 class OneOffTransfer(_message.Message):
-    __slots__ = ["deliver_on"]
+    __slots__ = ("deliver_on",)
     DELIVER_ON_FIELD_NUMBER: _ClassVar[int]
     deliver_on: int
     def __init__(self, deliver_on: _Optional[int] = ...) -> None: ...
 
 class RecurringTransfer(_message.Message):
-    __slots__ = ["start_epoch", "end_epoch", "dispatch_strategy"]
+    __slots__ = ("start_epoch", "end_epoch", "dispatch_strategy")
     START_EPOCH_FIELD_NUMBER: _ClassVar[int]
     END_EPOCH_FIELD_NUMBER: _ClassVar[int]
     DISPATCH_STRATEGY_FIELD_NUMBER: _ClassVar[int]

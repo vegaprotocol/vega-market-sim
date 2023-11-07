@@ -16,13 +16,13 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class BatchMarketInstructions(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "cancellations",
         "amendments",
         "submissions",
         "stop_orders_cancellation",
         "stop_orders_submission",
-    ]
+    )
     CANCELLATIONS_FIELD_NUMBER: _ClassVar[int]
     AMENDMENTS_FIELD_NUMBER: _ClassVar[int]
     SUBMISSIONS_FIELD_NUMBER: _ClassVar[int]
@@ -51,7 +51,7 @@ class BatchMarketInstructions(_message.Message):
     ) -> None: ...
 
 class StopOrdersSubmission(_message.Message):
-    __slots__ = ["rises_above", "falls_below"]
+    __slots__ = ("rises_above", "falls_below")
     RISES_ABOVE_FIELD_NUMBER: _ClassVar[int]
     FALLS_BELOW_FIELD_NUMBER: _ClassVar[int]
     rises_above: StopOrderSetup
@@ -63,13 +63,13 @@ class StopOrdersSubmission(_message.Message):
     ) -> None: ...
 
 class StopOrderSetup(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "order_submission",
         "expires_at",
         "expiry_strategy",
         "price",
         "trailing_percent_offset",
-    ]
+    )
     ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
     EXPIRY_STRATEGY_FIELD_NUMBER: _ClassVar[int]
@@ -92,7 +92,7 @@ class StopOrderSetup(_message.Message):
     ) -> None: ...
 
 class StopOrdersCancellation(_message.Message):
-    __slots__ = ["market_id", "stop_order_id"]
+    __slots__ = ("market_id", "stop_order_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     STOP_ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -102,7 +102,7 @@ class StopOrdersCancellation(_message.Message):
     ) -> None: ...
 
 class OrderSubmission(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "price",
         "size",
@@ -115,7 +115,7 @@ class OrderSubmission(_message.Message):
         "post_only",
         "reduce_only",
         "iceberg_opts",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
@@ -157,7 +157,7 @@ class OrderSubmission(_message.Message):
     ) -> None: ...
 
 class IcebergOpts(_message.Message):
-    __slots__ = ["peak_size", "minimum_visible_size"]
+    __slots__ = ("peak_size", "minimum_visible_size")
     PEAK_SIZE_FIELD_NUMBER: _ClassVar[int]
     MINIMUM_VISIBLE_SIZE_FIELD_NUMBER: _ClassVar[int]
     peak_size: int
@@ -169,7 +169,7 @@ class IcebergOpts(_message.Message):
     ) -> None: ...
 
 class OrderCancellation(_message.Message):
-    __slots__ = ["order_id", "market_id"]
+    __slots__ = ("order_id", "market_id")
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     order_id: str
@@ -179,7 +179,7 @@ class OrderCancellation(_message.Message):
     ) -> None: ...
 
 class OrderAmendment(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "order_id",
         "market_id",
         "price",
@@ -188,7 +188,7 @@ class OrderAmendment(_message.Message):
         "time_in_force",
         "pegged_offset",
         "pegged_reference",
-    ]
+    )
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -218,7 +218,7 @@ class OrderAmendment(_message.Message):
     ) -> None: ...
 
 class LiquidityProvisionSubmission(_message.Message):
-    __slots__ = ["market_id", "commitment_amount", "fee", "reference"]
+    __slots__ = ("market_id", "commitment_amount", "fee", "reference")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     COMMITMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     FEE_FIELD_NUMBER: _ClassVar[int]
@@ -236,13 +236,13 @@ class LiquidityProvisionSubmission(_message.Message):
     ) -> None: ...
 
 class LiquidityProvisionCancellation(_message.Message):
-    __slots__ = ["market_id"]
+    __slots__ = ("market_id",)
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     def __init__(self, market_id: _Optional[str] = ...) -> None: ...
 
 class LiquidityProvisionAmendment(_message.Message):
-    __slots__ = ["market_id", "commitment_amount", "fee", "reference"]
+    __slots__ = ("market_id", "commitment_amount", "fee", "reference")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     COMMITMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     FEE_FIELD_NUMBER: _ClassVar[int]
@@ -260,7 +260,7 @@ class LiquidityProvisionAmendment(_message.Message):
     ) -> None: ...
 
 class WithdrawSubmission(_message.Message):
-    __slots__ = ["amount", "asset", "ext"]
+    __slots__ = ("amount", "asset", "ext")
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
     EXT_FIELD_NUMBER: _ClassVar[int]
@@ -275,7 +275,7 @@ class WithdrawSubmission(_message.Message):
     ) -> None: ...
 
 class ProposalSubmission(_message.Message):
-    __slots__ = ["reference", "terms", "rationale"]
+    __slots__ = ("reference", "terms", "rationale")
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
     TERMS_FIELD_NUMBER: _ClassVar[int]
     RATIONALE_FIELD_NUMBER: _ClassVar[int]
@@ -290,7 +290,7 @@ class ProposalSubmission(_message.Message):
     ) -> None: ...
 
 class VoteSubmission(_message.Message):
-    __slots__ = ["proposal_id", "value"]
+    __slots__ = ("proposal_id", "value")
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     proposal_id: str
@@ -302,7 +302,7 @@ class VoteSubmission(_message.Message):
     ) -> None: ...
 
 class DelegateSubmission(_message.Message):
-    __slots__ = ["node_id", "amount"]
+    __slots__ = ("node_id", "amount")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     node_id: str
@@ -312,10 +312,10 @@ class DelegateSubmission(_message.Message):
     ) -> None: ...
 
 class UndelegateSubmission(_message.Message):
-    __slots__ = ["node_id", "amount", "method"]
+    __slots__ = ("node_id", "amount", "method")
 
     class Method(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         METHOD_UNSPECIFIED: _ClassVar[UndelegateSubmission.Method]
         METHOD_NOW: _ClassVar[UndelegateSubmission.Method]
         METHOD_AT_END_OF_EPOCH: _ClassVar[UndelegateSubmission.Method]
@@ -336,7 +336,7 @@ class UndelegateSubmission(_message.Message):
     ) -> None: ...
 
 class Transfer(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "from_account_type",
         "to",
         "to_account_type",
@@ -345,7 +345,7 @@ class Transfer(_message.Message):
         "reference",
         "one_off",
         "recurring",
-    ]
+    )
     FROM_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
     TO_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
@@ -375,13 +375,13 @@ class Transfer(_message.Message):
     ) -> None: ...
 
 class OneOffTransfer(_message.Message):
-    __slots__ = ["deliver_on"]
+    __slots__ = ("deliver_on",)
     DELIVER_ON_FIELD_NUMBER: _ClassVar[int]
     deliver_on: int
     def __init__(self, deliver_on: _Optional[int] = ...) -> None: ...
 
 class RecurringTransfer(_message.Message):
-    __slots__ = ["start_epoch", "end_epoch", "factor", "dispatch_strategy"]
+    __slots__ = ("start_epoch", "end_epoch", "factor", "dispatch_strategy")
     START_EPOCH_FIELD_NUMBER: _ClassVar[int]
     END_EPOCH_FIELD_NUMBER: _ClassVar[int]
     FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -401,13 +401,13 @@ class RecurringTransfer(_message.Message):
     ) -> None: ...
 
 class CancelTransfer(_message.Message):
-    __slots__ = ["transfer_id"]
+    __slots__ = ("transfer_id",)
     TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     transfer_id: str
     def __init__(self, transfer_id: _Optional[str] = ...) -> None: ...
 
 class IssueSignatures(_message.Message):
-    __slots__ = ["submitter", "kind", "validator_node_id"]
+    __slots__ = ("submitter", "kind", "validator_node_id")
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     KIND_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_NODE_ID_FIELD_NUMBER: _ClassVar[int]
@@ -422,10 +422,10 @@ class IssueSignatures(_message.Message):
     ) -> None: ...
 
 class CreateReferralSet(_message.Message):
-    __slots__ = ["is_team", "team"]
+    __slots__ = ("is_team", "team")
 
     class Team(_message.Message):
-        __slots__ = ["name", "team_url", "avatar_url", "closed"]
+        __slots__ = ("name", "team_url", "avatar_url", "closed")
         NAME_FIELD_NUMBER: _ClassVar[int]
         TEAM_URL_FIELD_NUMBER: _ClassVar[int]
         AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
@@ -452,10 +452,10 @@ class CreateReferralSet(_message.Message):
     ) -> None: ...
 
 class UpdateReferralSet(_message.Message):
-    __slots__ = ["id", "is_team", "team"]
+    __slots__ = ("id", "is_team", "team")
 
     class Team(_message.Message):
-        __slots__ = ["name", "team_url", "avatar_url", "closed"]
+        __slots__ = ("name", "team_url", "avatar_url", "closed")
         NAME_FIELD_NUMBER: _ClassVar[int]
         TEAM_URL_FIELD_NUMBER: _ClassVar[int]
         AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
@@ -485,7 +485,7 @@ class UpdateReferralSet(_message.Message):
     ) -> None: ...
 
 class ApplyReferralCode(_message.Message):
-    __slots__ = ["id"]
+    __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...

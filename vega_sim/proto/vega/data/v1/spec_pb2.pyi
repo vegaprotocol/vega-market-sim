@@ -13,7 +13,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Filter(_message.Message):
-    __slots__ = ["key", "conditions"]
+    __slots__ = ("key", "conditions")
     KEY_FIELD_NUMBER: _ClassVar[int]
     CONDITIONS_FIELD_NUMBER: _ClassVar[int]
     key: PropertyKey
@@ -25,10 +25,10 @@ class Filter(_message.Message):
     ) -> None: ...
 
 class PropertyKey(_message.Message):
-    __slots__ = ["name", "type", "number_decimal_places"]
+    __slots__ = ("name", "type", "number_decimal_places")
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[PropertyKey.Type]
         TYPE_EMPTY: _ClassVar[PropertyKey.Type]
         TYPE_INTEGER: _ClassVar[PropertyKey.Type]
@@ -57,10 +57,10 @@ class PropertyKey(_message.Message):
     ) -> None: ...
 
 class Condition(_message.Message):
-    __slots__ = ["operator", "value"]
+    __slots__ = ("operator", "value")
 
     class Operator(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         OPERATOR_UNSPECIFIED: _ClassVar[Condition.Operator]
         OPERATOR_EQUALS: _ClassVar[Condition.Operator]
         OPERATOR_GREATER_THAN: _ClassVar[Condition.Operator]
@@ -84,7 +84,7 @@ class Condition(_message.Message):
     ) -> None: ...
 
 class InternalTimeTrigger(_message.Message):
-    __slots__ = ["initial", "every"]
+    __slots__ = ("initial", "every")
     INITIAL_FIELD_NUMBER: _ClassVar[int]
     EVERY_FIELD_NUMBER: _ClassVar[int]
     initial: int

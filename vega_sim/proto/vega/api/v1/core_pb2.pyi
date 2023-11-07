@@ -18,7 +18,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class PropagateChainEventRequest(_message.Message):
-    __slots__ = ["event", "pub_key", "signature"]
+    __slots__ = ("event", "pub_key", "signature")
     EVENT_FIELD_NUMBER: _ClassVar[int]
     PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     SIGNATURE_FIELD_NUMBER: _ClassVar[int]
@@ -33,16 +33,16 @@ class PropagateChainEventRequest(_message.Message):
     ) -> None: ...
 
 class PropagateChainEventResponse(_message.Message):
-    __slots__ = ["success"]
+    __slots__ = ("success",)
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     success: bool
     def __init__(self, success: bool = ...) -> None: ...
 
 class SubmitTransactionRequest(_message.Message):
-    __slots__ = ["tx", "type"]
+    __slots__ = ("tx", "type")
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[SubmitTransactionRequest.Type]
         TYPE_ASYNC: _ClassVar[SubmitTransactionRequest.Type]
         TYPE_SYNC: _ClassVar[SubmitTransactionRequest.Type]
@@ -62,7 +62,7 @@ class SubmitTransactionRequest(_message.Message):
     ) -> None: ...
 
 class SubmitTransactionResponse(_message.Message):
-    __slots__ = ["success", "tx_hash", "code", "data", "log", "height"]
+    __slots__ = ("success", "tx_hash", "code", "data", "log", "height")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     TX_HASH_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
@@ -86,7 +86,7 @@ class SubmitTransactionResponse(_message.Message):
     ) -> None: ...
 
 class CheckTransactionRequest(_message.Message):
-    __slots__ = ["tx"]
+    __slots__ = ("tx",)
     TX_FIELD_NUMBER: _ClassVar[int]
     tx: _transaction_pb2.Transaction
     def __init__(
@@ -94,7 +94,7 @@ class CheckTransactionRequest(_message.Message):
     ) -> None: ...
 
 class CheckTransactionResponse(_message.Message):
-    __slots__ = ["success", "code", "gas_wanted", "gas_used", "data", "log", "info"]
+    __slots__ = ("success", "code", "gas_wanted", "gas_used", "data", "log", "info")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
     GAS_WANTED_FIELD_NUMBER: _ClassVar[int]
@@ -121,10 +121,10 @@ class CheckTransactionResponse(_message.Message):
     ) -> None: ...
 
 class SubmitRawTransactionRequest(_message.Message):
-    __slots__ = ["tx", "type"]
+    __slots__ = ("tx", "type")
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[SubmitRawTransactionRequest.Type]
         TYPE_ASYNC: _ClassVar[SubmitRawTransactionRequest.Type]
         TYPE_SYNC: _ClassVar[SubmitRawTransactionRequest.Type]
@@ -144,7 +144,7 @@ class SubmitRawTransactionRequest(_message.Message):
     ) -> None: ...
 
 class SubmitRawTransactionResponse(_message.Message):
-    __slots__ = ["success", "tx_hash", "code", "data", "log", "height"]
+    __slots__ = ("success", "tx_hash", "code", "data", "log", "height")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     TX_HASH_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
@@ -168,13 +168,13 @@ class SubmitRawTransactionResponse(_message.Message):
     ) -> None: ...
 
 class CheckRawTransactionRequest(_message.Message):
-    __slots__ = ["tx"]
+    __slots__ = ("tx",)
     TX_FIELD_NUMBER: _ClassVar[int]
     tx: bytes
     def __init__(self, tx: _Optional[bytes] = ...) -> None: ...
 
 class CheckRawTransactionResponse(_message.Message):
-    __slots__ = ["success", "code", "gas_wanted", "gas_used", "data", "log", "info"]
+    __slots__ = ("success", "code", "gas_wanted", "gas_used", "data", "log", "info")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
     GAS_WANTED_FIELD_NUMBER: _ClassVar[int]
@@ -201,17 +201,17 @@ class CheckRawTransactionResponse(_message.Message):
     ) -> None: ...
 
 class GetVegaTimeRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetVegaTimeResponse(_message.Message):
-    __slots__ = ["timestamp"]
+    __slots__ = ("timestamp",)
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     timestamp: int
     def __init__(self, timestamp: _Optional[int] = ...) -> None: ...
 
 class ObserveEventBusRequest(_message.Message):
-    __slots__ = ["type", "market_id", "party_id", "batch_size"]
+    __slots__ = ("type", "market_id", "party_id", "batch_size")
     TYPE_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -229,7 +229,7 @@ class ObserveEventBusRequest(_message.Message):
     ) -> None: ...
 
 class ObserveEventBusResponse(_message.Message):
-    __slots__ = ["events"]
+    __slots__ = ("events",)
     EVENTS_FIELD_NUMBER: _ClassVar[int]
     events: _containers.RepeatedCompositeFieldContainer[_events_pb2.BusEvent]
     def __init__(
@@ -237,11 +237,11 @@ class ObserveEventBusResponse(_message.Message):
     ) -> None: ...
 
 class StatisticsRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class StatisticsResponse(_message.Message):
-    __slots__ = ["statistics"]
+    __slots__ = ("statistics",)
     STATISTICS_FIELD_NUMBER: _ClassVar[int]
     statistics: Statistics
     def __init__(
@@ -249,7 +249,7 @@ class StatisticsResponse(_message.Message):
     ) -> None: ...
 
 class Statistics(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "block_height",
         "backlog_length",
         "total_peers",
@@ -288,7 +288,7 @@ class Statistics(_message.Message):
         "epoch_expiry_time",
         "event_count",
         "events_per_second",
-    ]
+    )
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     BACKLOG_LENGTH_FIELD_NUMBER: _ClassVar[int]
     TOTAL_PEERS_FIELD_NUMBER: _ClassVar[int]
@@ -408,11 +408,11 @@ class Statistics(_message.Message):
     ) -> None: ...
 
 class LastBlockHeightRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class LastBlockHeightResponse(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "height",
         "hash",
         "spam_pow_hash_function",
@@ -421,7 +421,7 @@ class LastBlockHeightResponse(_message.Message):
         "spam_pow_number_of_tx_per_block",
         "spam_pow_increasing_difficulty",
         "chain_id",
-    ]
+    )
     HEIGHT_FIELD_NUMBER: _ClassVar[int]
     HASH_FIELD_NUMBER: _ClassVar[int]
     SPAM_POW_HASH_FUNCTION_FIELD_NUMBER: _ClassVar[int]
@@ -451,18 +451,18 @@ class LastBlockHeightResponse(_message.Message):
     ) -> None: ...
 
 class GetSpamStatisticsRequest(_message.Message):
-    __slots__ = ["party_id"]
+    __slots__ = ("party_id",)
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     def __init__(self, party_id: _Optional[str] = ...) -> None: ...
 
 class SpamStatistic(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "count_for_epoch",
         "max_for_epoch",
         "banned_until",
         "min_tokens_required",
-    ]
+    )
     COUNT_FOR_EPOCH_FIELD_NUMBER: _ClassVar[int]
     MAX_FOR_EPOCH_FIELD_NUMBER: _ClassVar[int]
     BANNED_UNTIL_FIELD_NUMBER: _ClassVar[int]
@@ -480,7 +480,7 @@ class SpamStatistic(_message.Message):
     ) -> None: ...
 
 class VoteSpamStatistics(_message.Message):
-    __slots__ = ["statistics", "max_for_epoch", "banned_until"]
+    __slots__ = ("statistics", "max_for_epoch", "banned_until")
     STATISTICS_FIELD_NUMBER: _ClassVar[int]
     MAX_FOR_EPOCH_FIELD_NUMBER: _ClassVar[int]
     BANNED_UNTIL_FIELD_NUMBER: _ClassVar[int]
@@ -495,7 +495,7 @@ class VoteSpamStatistics(_message.Message):
     ) -> None: ...
 
 class VoteSpamStatistic(_message.Message):
-    __slots__ = ["proposal", "count_for_epoch", "min_tokens_required"]
+    __slots__ = ("proposal", "count_for_epoch", "min_tokens_required")
     PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     COUNT_FOR_EPOCH_FIELD_NUMBER: _ClassVar[int]
     MIN_TOKENS_REQUIRED_FIELD_NUMBER: _ClassVar[int]
@@ -510,7 +510,7 @@ class VoteSpamStatistic(_message.Message):
     ) -> None: ...
 
 class PoWBlockState(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "block_height",
         "block_hash",
         "transactions_seen",
@@ -519,7 +519,7 @@ class PoWBlockState(_message.Message):
         "difficulty",
         "tx_per_block",
         "increasing_difficulty",
-    ]
+    )
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HASH_FIELD_NUMBER: _ClassVar[int]
     TRANSACTIONS_SEEN_FIELD_NUMBER: _ClassVar[int]
@@ -549,7 +549,7 @@ class PoWBlockState(_message.Message):
     ) -> None: ...
 
 class PoWStatistic(_message.Message):
-    __slots__ = ["block_states", "banned_until", "number_of_past_blocks"]
+    __slots__ = ("block_states", "banned_until", "number_of_past_blocks")
     BLOCK_STATES_FIELD_NUMBER: _ClassVar[int]
     BANNED_UNTIL_FIELD_NUMBER: _ClassVar[int]
     NUMBER_OF_PAST_BLOCKS_FIELD_NUMBER: _ClassVar[int]
@@ -564,7 +564,7 @@ class PoWStatistic(_message.Message):
     ) -> None: ...
 
 class SpamStatistics(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "proposals",
         "delegations",
         "transfers",
@@ -576,7 +576,7 @@ class SpamStatistics(_message.Message):
         "create_referral_set",
         "update_referral_set",
         "apply_referral_code",
-    ]
+    )
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
     DELEGATIONS_FIELD_NUMBER: _ClassVar[int]
     TRANSFERS_FIELD_NUMBER: _ClassVar[int]
@@ -615,7 +615,7 @@ class SpamStatistics(_message.Message):
     ) -> None: ...
 
 class GetSpamStatisticsResponse(_message.Message):
-    __slots__ = ["chain_id", "statistics"]
+    __slots__ = ("chain_id", "statistics")
     CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     STATISTICS_FIELD_NUMBER: _ClassVar[int]
     chain_id: str

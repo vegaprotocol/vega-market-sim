@@ -14,13 +14,13 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Side(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     SIDE_UNSPECIFIED: _ClassVar[Side]
     SIDE_BUY: _ClassVar[Side]
     SIDE_SELL: _ClassVar[Side]
 
 class Interval(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     INTERVAL_UNSPECIFIED: _ClassVar[Interval]
     INTERVAL_BLOCK: _ClassVar[Interval]
     INTERVAL_I1M: _ClassVar[Interval]
@@ -31,14 +31,14 @@ class Interval(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     INTERVAL_I1D: _ClassVar[Interval]
 
 class PositionStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     POSITION_STATUS_UNSPECIFIED: _ClassVar[PositionStatus]
     POSITION_STATUS_ORDERS_CLOSED: _ClassVar[PositionStatus]
     POSITION_STATUS_CLOSED_OUT: _ClassVar[PositionStatus]
     POSITION_STATUS_DISTRESSED: _ClassVar[PositionStatus]
 
 class AuctionTrigger(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     AUCTION_TRIGGER_UNSPECIFIED: _ClassVar[AuctionTrigger]
     AUCTION_TRIGGER_BATCH: _ClassVar[AuctionTrigger]
     AUCTION_TRIGGER_OPENING: _ClassVar[AuctionTrigger]
@@ -49,14 +49,14 @@ class AuctionTrigger(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     AUCTION_TRIGGER_GOVERNANCE_SUSPENSION: _ClassVar[AuctionTrigger]
 
 class PeggedReference(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     PEGGED_REFERENCE_UNSPECIFIED: _ClassVar[PeggedReference]
     PEGGED_REFERENCE_MID: _ClassVar[PeggedReference]
     PEGGED_REFERENCE_BEST_BID: _ClassVar[PeggedReference]
     PEGGED_REFERENCE_BEST_ASK: _ClassVar[PeggedReference]
 
 class OrderError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     ORDER_ERROR_UNSPECIFIED: _ClassVar[OrderError]
     ORDER_ERROR_INVALID_MARKET_ID: _ClassVar[OrderError]
     ORDER_ERROR_INVALID_ORDER_ID: _ClassVar[OrderError]
@@ -110,14 +110,14 @@ class OrderError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ORDER_ERROR_REDUCE_ONLY_ORDER_WOULD_NOT_REDUCE_POSITION: _ClassVar[OrderError]
 
 class ChainStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     CHAIN_STATUS_UNSPECIFIED: _ClassVar[ChainStatus]
     CHAIN_STATUS_DISCONNECTED: _ClassVar[ChainStatus]
     CHAIN_STATUS_REPLAYING: _ClassVar[ChainStatus]
     CHAIN_STATUS_CONNECTED: _ClassVar[ChainStatus]
 
 class AccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     ACCOUNT_TYPE_UNSPECIFIED: _ClassVar[AccountType]
     ACCOUNT_TYPE_INSURANCE: _ClassVar[AccountType]
     ACCOUNT_TYPE_SETTLEMENT: _ClassVar[AccountType]
@@ -148,7 +148,7 @@ class AccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: _ClassVar[AccountType]
 
 class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     TRANSFER_TYPE_UNSPECIFIED: _ClassVar[TransferType]
     TRANSFER_TYPE_LOSS: _ClassVar[TransferType]
     TRANSFER_TYPE_WIN: _ClassVar[TransferType]
@@ -190,7 +190,7 @@ class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     TRANSFER_TYPE_FEE_REFERRER_REWARD_DISTRIBUTE: _ClassVar[TransferType]
 
 class DispatchMetric(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     DISPATCH_METRIC_UNSPECIFIED: _ClassVar[DispatchMetric]
     DISPATCH_METRIC_MAKER_FEES_PAID: _ClassVar[DispatchMetric]
     DISPATCH_METRIC_MAKER_FEES_RECEIVED: _ClassVar[DispatchMetric]
@@ -202,38 +202,38 @@ class DispatchMetric(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     DISPATCH_METRIC_VALIDATOR_RANKING: _ClassVar[DispatchMetric]
 
 class EntityScope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     ENTITY_SCOPE_UNSPECIFIED: _ClassVar[EntityScope]
     ENTITY_SCOPE_INDIVIDUALS: _ClassVar[EntityScope]
     ENTITY_SCOPE_TEAMS: _ClassVar[EntityScope]
 
 class IndividualScope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     INDIVIDUAL_SCOPE_UNSPECIFIED: _ClassVar[IndividualScope]
     INDIVIDUAL_SCOPE_ALL: _ClassVar[IndividualScope]
     INDIVIDUAL_SCOPE_IN_TEAM: _ClassVar[IndividualScope]
     INDIVIDUAL_SCOPE_NOT_IN_TEAM: _ClassVar[IndividualScope]
 
 class DistributionStrategy(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     DISTRIBUTION_STRATEGY_UNSPECIFIED: _ClassVar[DistributionStrategy]
     DISTRIBUTION_STRATEGY_PRO_RATA: _ClassVar[DistributionStrategy]
     DISTRIBUTION_STRATEGY_RANK: _ClassVar[DistributionStrategy]
 
 class NodeStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     NODE_STATUS_UNSPECIFIED: _ClassVar[NodeStatus]
     NODE_STATUS_VALIDATOR: _ClassVar[NodeStatus]
     NODE_STATUS_NON_VALIDATOR: _ClassVar[NodeStatus]
 
 class EpochAction(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     EPOCH_ACTION_UNSPECIFIED: _ClassVar[EpochAction]
     EPOCH_ACTION_START: _ClassVar[EpochAction]
     EPOCH_ACTION_END: _ClassVar[EpochAction]
 
 class ValidatorNodeStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     VALIDATOR_NODE_STATUS_UNSPECIFIED: _ClassVar[ValidatorNodeStatus]
     VALIDATOR_NODE_STATUS_TENDERMINT: _ClassVar[ValidatorNodeStatus]
     VALIDATOR_NODE_STATUS_ERSATZ: _ClassVar[ValidatorNodeStatus]
@@ -417,7 +417,7 @@ VALIDATOR_NODE_STATUS_ERSATZ: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_PENDING: ValidatorNodeStatus
 
 class StopOrder(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "oco_link_id",
         "expires_at",
@@ -432,10 +432,10 @@ class StopOrder(_message.Message):
         "rejection_reason",
         "price",
         "trailing_percent_offset",
-    ]
+    )
 
     class ExpiryStrategy(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         EXPIRY_STRATEGY_UNSPECIFIED: _ClassVar[StopOrder.ExpiryStrategy]
         EXPIRY_STRATEGY_CANCELS: _ClassVar[StopOrder.ExpiryStrategy]
         EXPIRY_STRATEGY_SUBMIT: _ClassVar[StopOrder.ExpiryStrategy]
@@ -444,7 +444,7 @@ class StopOrder(_message.Message):
     EXPIRY_STRATEGY_SUBMIT: StopOrder.ExpiryStrategy
 
     class TriggerDirection(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TRIGGER_DIRECTION_UNSPECIFIED: _ClassVar[StopOrder.TriggerDirection]
         TRIGGER_DIRECTION_RISES_ABOVE: _ClassVar[StopOrder.TriggerDirection]
         TRIGGER_DIRECTION_FALLS_BELOW: _ClassVar[StopOrder.TriggerDirection]
@@ -453,7 +453,7 @@ class StopOrder(_message.Message):
     TRIGGER_DIRECTION_FALLS_BELOW: StopOrder.TriggerDirection
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[StopOrder.Status]
         STATUS_PENDING: _ClassVar[StopOrder.Status]
         STATUS_CANCELLED: _ClassVar[StopOrder.Status]
@@ -470,7 +470,7 @@ class StopOrder(_message.Message):
     STATUS_REJECTED: StopOrder.Status
 
     class RejectionReason(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         REJECTION_REASON_UNSPECIFIED: _ClassVar[StopOrder.RejectionReason]
         REJECTION_REASON_TRADING_NOT_ALLOWED: _ClassVar[StopOrder.RejectionReason]
         REJECTION_REASON_EXPIRY_IN_THE_PAST: _ClassVar[StopOrder.RejectionReason]
@@ -538,13 +538,13 @@ class StopOrder(_message.Message):
     ) -> None: ...
 
 class Party(_message.Message):
-    __slots__ = ["id"]
+    __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...
 
 class RiskFactor(_message.Message):
-    __slots__ = ["market", "short", "long"]
+    __slots__ = ("market", "short", "long")
     MARKET_FIELD_NUMBER: _ClassVar[int]
     SHORT_FIELD_NUMBER: _ClassVar[int]
     LONG_FIELD_NUMBER: _ClassVar[int]
@@ -559,7 +559,7 @@ class RiskFactor(_message.Message):
     ) -> None: ...
 
 class PeggedOrder(_message.Message):
-    __slots__ = ["reference", "offset"]
+    __slots__ = ("reference", "offset")
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
     OFFSET_FIELD_NUMBER: _ClassVar[int]
     reference: PeggedReference
@@ -571,7 +571,7 @@ class PeggedOrder(_message.Message):
     ) -> None: ...
 
 class IcebergOrder(_message.Message):
-    __slots__ = ["peak_size", "minimum_visible_size", "reserved_remaining"]
+    __slots__ = ("peak_size", "minimum_visible_size", "reserved_remaining")
     PEAK_SIZE_FIELD_NUMBER: _ClassVar[int]
     MINIMUM_VISIBLE_SIZE_FIELD_NUMBER: _ClassVar[int]
     RESERVED_REMAINING_FIELD_NUMBER: _ClassVar[int]
@@ -586,7 +586,7 @@ class IcebergOrder(_message.Message):
     ) -> None: ...
 
 class Order(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "market_id",
         "party_id",
@@ -609,10 +609,10 @@ class Order(_message.Message):
         "post_only",
         "reduce_only",
         "iceberg_order",
-    ]
+    )
 
     class TimeInForce(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TIME_IN_FORCE_UNSPECIFIED: _ClassVar[Order.TimeInForce]
         TIME_IN_FORCE_GTC: _ClassVar[Order.TimeInForce]
         TIME_IN_FORCE_GTT: _ClassVar[Order.TimeInForce]
@@ -629,7 +629,7 @@ class Order(_message.Message):
     TIME_IN_FORCE_GFN: Order.TimeInForce
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[Order.Type]
         TYPE_LIMIT: _ClassVar[Order.Type]
         TYPE_MARKET: _ClassVar[Order.Type]
@@ -640,7 +640,7 @@ class Order(_message.Message):
     TYPE_NETWORK: Order.Type
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[Order.Status]
         STATUS_ACTIVE: _ClassVar[Order.Status]
         STATUS_EXPIRED: _ClassVar[Order.Status]
@@ -730,13 +730,13 @@ class Order(_message.Message):
     ) -> None: ...
 
 class OrderCancellationConfirmation(_message.Message):
-    __slots__ = ["order"]
+    __slots__ = ("order",)
     ORDER_FIELD_NUMBER: _ClassVar[int]
     order: Order
     def __init__(self, order: _Optional[_Union[Order, _Mapping]] = ...) -> None: ...
 
 class OrderConfirmation(_message.Message):
-    __slots__ = ["order", "trades", "passive_orders_affected"]
+    __slots__ = ("order", "trades", "passive_orders_affected")
     ORDER_FIELD_NUMBER: _ClassVar[int]
     TRADES_FIELD_NUMBER: _ClassVar[int]
     PASSIVE_ORDERS_AFFECTED_FIELD_NUMBER: _ClassVar[int]
@@ -751,13 +751,13 @@ class OrderConfirmation(_message.Message):
     ) -> None: ...
 
 class AuctionIndicativeState(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "indicative_price",
         "indicative_volume",
         "auction_start",
         "auction_end",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     INDICATIVE_PRICE_FIELD_NUMBER: _ClassVar[int]
     INDICATIVE_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -778,7 +778,7 @@ class AuctionIndicativeState(_message.Message):
     ) -> None: ...
 
 class Trade(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "market_id",
         "price",
@@ -794,10 +794,10 @@ class Trade(_message.Message):
         "seller_fee",
         "buyer_auction_batch",
         "seller_auction_batch",
-    ]
+    )
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[Trade.Type]
         TYPE_DEFAULT: _ClassVar[Trade.Type]
         TYPE_NETWORK_CLOSE_OUT_GOOD: _ClassVar[Trade.Type]
@@ -856,7 +856,7 @@ class Trade(_message.Message):
     ) -> None: ...
 
 class Fee(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "maker_fee",
         "infrastructure_fee",
         "liquidity_fee",
@@ -866,7 +866,7 @@ class Fee(_message.Message):
         "maker_fee_referrer_discount",
         "infrastructure_fee_referrer_discount",
         "liquidity_fee_referrer_discount",
-    ]
+    )
     MAKER_FEE_FIELD_NUMBER: _ClassVar[int]
     INFRASTRUCTURE_FEE_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_FIELD_NUMBER: _ClassVar[int]
@@ -899,7 +899,7 @@ class Fee(_message.Message):
     ) -> None: ...
 
 class TradeSet(_message.Message):
-    __slots__ = ["trades"]
+    __slots__ = ("trades",)
     TRADES_FIELD_NUMBER: _ClassVar[int]
     trades: _containers.RepeatedCompositeFieldContainer[Trade]
     def __init__(
@@ -907,7 +907,7 @@ class TradeSet(_message.Message):
     ) -> None: ...
 
 class Candle(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "timestamp",
         "datetime",
         "high",
@@ -917,7 +917,7 @@ class Candle(_message.Message):
         "volume",
         "interval",
         "notional",
-    ]
+    )
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     DATETIME_FIELD_NUMBER: _ClassVar[int]
     HIGH_FIELD_NUMBER: _ClassVar[int]
@@ -950,7 +950,7 @@ class Candle(_message.Message):
     ) -> None: ...
 
 class PriceLevel(_message.Message):
-    __slots__ = ["price", "number_of_orders", "volume"]
+    __slots__ = ("price", "number_of_orders", "volume")
     PRICE_FIELD_NUMBER: _ClassVar[int]
     NUMBER_OF_ORDERS_FIELD_NUMBER: _ClassVar[int]
     VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -965,7 +965,7 @@ class PriceLevel(_message.Message):
     ) -> None: ...
 
 class MarketDepth(_message.Message):
-    __slots__ = ["market_id", "buy", "sell", "sequence_number"]
+    __slots__ = ("market_id", "buy", "sell", "sequence_number")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     BUY_FIELD_NUMBER: _ClassVar[int]
     SELL_FIELD_NUMBER: _ClassVar[int]
@@ -983,13 +983,13 @@ class MarketDepth(_message.Message):
     ) -> None: ...
 
 class MarketDepthUpdate(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "buy",
         "sell",
         "sequence_number",
         "previous_sequence_number",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     BUY_FIELD_NUMBER: _ClassVar[int]
     SELL_FIELD_NUMBER: _ClassVar[int]
@@ -1010,7 +1010,7 @@ class MarketDepthUpdate(_message.Message):
     ) -> None: ...
 
 class Position(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "party_id",
         "open_volume",
@@ -1020,7 +1020,7 @@ class Position(_message.Message):
         "updated_at",
         "loss_socialisation_amount",
         "position_status",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     OPEN_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -1053,7 +1053,7 @@ class Position(_message.Message):
     ) -> None: ...
 
 class PositionTrade(_message.Message):
-    __slots__ = ["volume", "price"]
+    __slots__ = ("volume", "price")
     VOLUME_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     volume: int
@@ -1063,7 +1063,7 @@ class PositionTrade(_message.Message):
     ) -> None: ...
 
 class Deposit(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "status",
         "party_id",
@@ -1072,10 +1072,10 @@ class Deposit(_message.Message):
         "tx_hash",
         "credited_timestamp",
         "created_timestamp",
-    ]
+    )
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[Deposit.Status]
         STATUS_OPEN: _ClassVar[Deposit.Status]
         STATUS_CANCELLED: _ClassVar[Deposit.Status]
@@ -1113,7 +1113,7 @@ class Deposit(_message.Message):
     ) -> None: ...
 
 class Withdrawal(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "party_id",
         "amount",
@@ -1124,10 +1124,10 @@ class Withdrawal(_message.Message):
         "created_timestamp",
         "withdrawn_timestamp",
         "ext",
-    ]
+    )
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[Withdrawal.Status]
         STATUS_OPEN: _ClassVar[Withdrawal.Status]
         STATUS_REJECTED: _ClassVar[Withdrawal.Status]
@@ -1171,7 +1171,7 @@ class Withdrawal(_message.Message):
     ) -> None: ...
 
 class WithdrawExt(_message.Message):
-    __slots__ = ["erc20"]
+    __slots__ = ("erc20",)
     ERC20_FIELD_NUMBER: _ClassVar[int]
     erc20: Erc20WithdrawExt
     def __init__(
@@ -1179,13 +1179,13 @@ class WithdrawExt(_message.Message):
     ) -> None: ...
 
 class Erc20WithdrawExt(_message.Message):
-    __slots__ = ["receiver_address"]
+    __slots__ = ("receiver_address",)
     RECEIVER_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     receiver_address: str
     def __init__(self, receiver_address: _Optional[str] = ...) -> None: ...
 
 class Account(_message.Message):
-    __slots__ = ["id", "owner", "balance", "asset", "market_id", "type"]
+    __slots__ = ("id", "owner", "balance", "asset", "market_id", "type")
     ID_FIELD_NUMBER: _ClassVar[int]
     OWNER_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
@@ -1209,7 +1209,7 @@ class Account(_message.Message):
     ) -> None: ...
 
 class FinancialAmount(_message.Message):
-    __slots__ = ["amount", "asset"]
+    __slots__ = ("amount", "asset")
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
     amount: str
@@ -1219,7 +1219,7 @@ class FinancialAmount(_message.Message):
     ) -> None: ...
 
 class Transfer(_message.Message):
-    __slots__ = ["owner", "amount", "type", "min_amount", "market_id"]
+    __slots__ = ("owner", "amount", "type", "min_amount", "market_id")
     OWNER_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     TYPE_FIELD_NUMBER: _ClassVar[int]
@@ -1240,7 +1240,7 @@ class Transfer(_message.Message):
     ) -> None: ...
 
 class DispatchStrategy(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "asset_for_metric",
         "metric",
         "markets",
@@ -1254,7 +1254,7 @@ class DispatchStrategy(_message.Message):
         "lock_period",
         "distribution_strategy",
         "rank_table",
-    ]
+    )
     ASSET_FOR_METRIC_FIELD_NUMBER: _ClassVar[int]
     METRIC_FIELD_NUMBER: _ClassVar[int]
     MARKETS_FIELD_NUMBER: _ClassVar[int]
@@ -1299,7 +1299,7 @@ class DispatchStrategy(_message.Message):
     ) -> None: ...
 
 class Rank(_message.Message):
-    __slots__ = ["start_rank", "share_ratio"]
+    __slots__ = ("start_rank", "share_ratio")
     START_RANK_FIELD_NUMBER: _ClassVar[int]
     SHARE_RATIO_FIELD_NUMBER: _ClassVar[int]
     start_rank: int
@@ -1309,7 +1309,7 @@ class Rank(_message.Message):
     ) -> None: ...
 
 class TransferRequest(_message.Message):
-    __slots__ = ["from_account", "to_account", "amount", "min_amount", "asset", "type"]
+    __slots__ = ("from_account", "to_account", "amount", "min_amount", "asset", "type")
     FROM_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -1333,7 +1333,7 @@ class TransferRequest(_message.Message):
     ) -> None: ...
 
 class AccountDetails(_message.Message):
-    __slots__ = ["asset_id", "type", "owner", "market_id"]
+    __slots__ = ("asset_id", "type", "owner", "market_id")
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     TYPE_FIELD_NUMBER: _ClassVar[int]
     OWNER_FIELD_NUMBER: _ClassVar[int]
@@ -1351,7 +1351,7 @@ class AccountDetails(_message.Message):
     ) -> None: ...
 
 class LedgerEntry(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "from_account",
         "to_account",
         "amount",
@@ -1359,7 +1359,7 @@ class LedgerEntry(_message.Message):
         "timestamp",
         "from_account_balance",
         "to_account_balance",
-    ]
+    )
     FROM_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -1386,7 +1386,7 @@ class LedgerEntry(_message.Message):
     ) -> None: ...
 
 class PostTransferBalance(_message.Message):
-    __slots__ = ["account", "balance"]
+    __slots__ = ("account", "balance")
     ACCOUNT_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
     account: AccountDetails
@@ -1398,7 +1398,7 @@ class PostTransferBalance(_message.Message):
     ) -> None: ...
 
 class LedgerMovement(_message.Message):
-    __slots__ = ["entries", "balances"]
+    __slots__ = ("entries", "balances")
     ENTRIES_FIELD_NUMBER: _ClassVar[int]
     BALANCES_FIELD_NUMBER: _ClassVar[int]
     entries: _containers.RepeatedCompositeFieldContainer[LedgerEntry]
@@ -1410,7 +1410,7 @@ class LedgerMovement(_message.Message):
     ) -> None: ...
 
 class MarginLevels(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "maintenance_margin",
         "search_level",
         "initial_margin",
@@ -1419,7 +1419,7 @@ class MarginLevels(_message.Message):
         "market_id",
         "asset",
         "timestamp",
-    ]
+    )
     MAINTENANCE_MARGIN_FIELD_NUMBER: _ClassVar[int]
     SEARCH_LEVEL_FIELD_NUMBER: _ClassVar[int]
     INITIAL_MARGIN_FIELD_NUMBER: _ClassVar[int]
@@ -1449,7 +1449,7 @@ class MarginLevels(_message.Message):
     ) -> None: ...
 
 class PerpetualData(_message.Message):
-    __slots__ = ["funding_payment", "funding_rate", "internal_twap", "external_twap"]
+    __slots__ = ("funding_payment", "funding_rate", "internal_twap", "external_twap")
     FUNDING_PAYMENT_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_FIELD_NUMBER: _ClassVar[int]
     INTERNAL_TWAP_FIELD_NUMBER: _ClassVar[int]
@@ -1467,7 +1467,7 @@ class PerpetualData(_message.Message):
     ) -> None: ...
 
 class ProductData(_message.Message):
-    __slots__ = ["perpetual_data"]
+    __slots__ = ("perpetual_data",)
     PERPETUAL_DATA_FIELD_NUMBER: _ClassVar[int]
     perpetual_data: PerpetualData
     def __init__(
@@ -1475,7 +1475,7 @@ class ProductData(_message.Message):
     ) -> None: ...
 
 class MarketData(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "mark_price",
         "best_bid_price",
         "best_bid_volume",
@@ -1508,7 +1508,7 @@ class MarketData(_message.Message):
         "market_growth",
         "product_data",
         "liquidity_provider_sla",
-    ]
+    )
     MARK_PRICE_FIELD_NUMBER: _ClassVar[int]
     BEST_BID_PRICE_FIELD_NUMBER: _ClassVar[int]
     BEST_BID_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -1624,13 +1624,13 @@ class MarketData(_message.Message):
     ) -> None: ...
 
 class LiquidityProviderFeeShare(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party",
         "equity_like_share",
         "average_entry_valuation",
         "average_score",
         "virtual_stake",
-    ]
+    )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     EQUITY_LIKE_SHARE_FIELD_NUMBER: _ClassVar[int]
     AVERAGE_ENTRY_VALUATION_FIELD_NUMBER: _ClassVar[int]
@@ -1651,7 +1651,7 @@ class LiquidityProviderFeeShare(_message.Message):
     ) -> None: ...
 
 class LiquidityProviderSLA(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party",
         "current_epoch_fraction_of_time_on_book",
         "last_epoch_fraction_of_time_on_book",
@@ -1661,7 +1661,7 @@ class LiquidityProviderSLA(_message.Message):
         "required_liquidity",
         "notional_volume_buys",
         "notional_volume_sells",
-    ]
+    )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     CURRENT_EPOCH_FRACTION_OF_TIME_ON_BOOK_FIELD_NUMBER: _ClassVar[int]
     LAST_EPOCH_FRACTION_OF_TIME_ON_BOOK_FIELD_NUMBER: _ClassVar[int]
@@ -1694,7 +1694,7 @@ class LiquidityProviderSLA(_message.Message):
     ) -> None: ...
 
 class PriceMonitoringBounds(_message.Message):
-    __slots__ = ["min_valid_price", "max_valid_price", "trigger", "reference_price"]
+    __slots__ = ("min_valid_price", "max_valid_price", "trigger", "reference_price")
     MIN_VALID_PRICE_FIELD_NUMBER: _ClassVar[int]
     MAX_VALID_PRICE_FIELD_NUMBER: _ClassVar[int]
     TRIGGER_FIELD_NUMBER: _ClassVar[int]
@@ -1712,7 +1712,7 @@ class PriceMonitoringBounds(_message.Message):
     ) -> None: ...
 
 class ErrorDetail(_message.Message):
-    __slots__ = ["code", "message", "inner"]
+    __slots__ = ("code", "message", "inner")
     CODE_FIELD_NUMBER: _ClassVar[int]
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     INNER_FIELD_NUMBER: _ClassVar[int]
@@ -1727,7 +1727,7 @@ class ErrorDetail(_message.Message):
     ) -> None: ...
 
 class NetworkParameter(_message.Message):
-    __slots__ = ["key", "value"]
+    __slots__ = ("key", "value")
     KEY_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     key: str
@@ -1737,7 +1737,7 @@ class NetworkParameter(_message.Message):
     ) -> None: ...
 
 class NetworkLimits(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "can_propose_market",
         "can_propose_asset",
         "propose_market_enabled",
@@ -1747,7 +1747,7 @@ class NetworkLimits(_message.Message):
         "propose_asset_enabled_from",
         "can_propose_spot_market",
         "can_propose_perpetual_market",
-    ]
+    )
     CAN_PROPOSE_MARKET_FIELD_NUMBER: _ClassVar[int]
     CAN_PROPOSE_ASSET_FIELD_NUMBER: _ClassVar[int]
     PROPOSE_MARKET_ENABLED_FIELD_NUMBER: _ClassVar[int]
@@ -1780,7 +1780,7 @@ class NetworkLimits(_message.Message):
     ) -> None: ...
 
 class LiquidityOrder(_message.Message):
-    __slots__ = ["reference", "proportion", "offset"]
+    __slots__ = ("reference", "proportion", "offset")
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
     PROPORTION_FIELD_NUMBER: _ClassVar[int]
     OFFSET_FIELD_NUMBER: _ClassVar[int]
@@ -1795,7 +1795,7 @@ class LiquidityOrder(_message.Message):
     ) -> None: ...
 
 class LiquidityOrderReference(_message.Message):
-    __slots__ = ["order_id", "liquidity_order"]
+    __slots__ = ("order_id", "liquidity_order")
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_ORDER_FIELD_NUMBER: _ClassVar[int]
     order_id: str
@@ -1807,7 +1807,7 @@ class LiquidityOrderReference(_message.Message):
     ) -> None: ...
 
 class LiquidityProvision(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "party_id",
         "created_at",
@@ -1820,10 +1820,10 @@ class LiquidityProvision(_message.Message):
         "version",
         "status",
         "reference",
-    ]
+    )
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[LiquidityProvision.Status]
         STATUS_ACTIVE: _ClassVar[LiquidityProvision.Status]
         STATUS_STOPPED: _ClassVar[LiquidityProvision.Status]
@@ -1879,7 +1879,7 @@ class LiquidityProvision(_message.Message):
     ) -> None: ...
 
 class EthereumConfig(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "network_id",
         "chain_id",
         "collateral_bridge_contract",
@@ -1887,7 +1887,7 @@ class EthereumConfig(_message.Message):
         "staking_bridge_contract",
         "token_vesting_contract",
         "multisig_control_contract",
-    ]
+    )
     NETWORK_ID_FIELD_NUMBER: _ClassVar[int]
     CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     COLLATERAL_BRIDGE_CONTRACT_FIELD_NUMBER: _ClassVar[int]
@@ -1922,7 +1922,7 @@ class EthereumConfig(_message.Message):
     ) -> None: ...
 
 class EthereumContractConfig(_message.Message):
-    __slots__ = ["address", "deployment_block_height"]
+    __slots__ = ("address", "deployment_block_height")
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     DEPLOYMENT_BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     address: str
@@ -1934,7 +1934,7 @@ class EthereumContractConfig(_message.Message):
     ) -> None: ...
 
 class EpochTimestamps(_message.Message):
-    __slots__ = ["start_time", "expiry_time", "end_time", "first_block", "last_block"]
+    __slots__ = ("start_time", "expiry_time", "end_time", "first_block", "last_block")
     START_TIME_FIELD_NUMBER: _ClassVar[int]
     EXPIRY_TIME_FIELD_NUMBER: _ClassVar[int]
     END_TIME_FIELD_NUMBER: _ClassVar[int]
@@ -1955,7 +1955,7 @@ class EpochTimestamps(_message.Message):
     ) -> None: ...
 
 class Epoch(_message.Message):
-    __slots__ = ["seq", "timestamps", "validators", "delegations"]
+    __slots__ = ("seq", "timestamps", "validators", "delegations")
     SEQ_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMPS_FIELD_NUMBER: _ClassVar[int]
     VALIDATORS_FIELD_NUMBER: _ClassVar[int]
@@ -1973,7 +1973,7 @@ class Epoch(_message.Message):
     ) -> None: ...
 
 class EpochParticipation(_message.Message):
-    __slots__ = ["epoch", "offline", "online", "total_rewards"]
+    __slots__ = ("epoch", "offline", "online", "total_rewards")
     EPOCH_FIELD_NUMBER: _ClassVar[int]
     OFFLINE_FIELD_NUMBER: _ClassVar[int]
     ONLINE_FIELD_NUMBER: _ClassVar[int]
@@ -1991,7 +1991,7 @@ class EpochParticipation(_message.Message):
     ) -> None: ...
 
 class EpochData(_message.Message):
-    __slots__ = ["total", "offline", "online"]
+    __slots__ = ("total", "offline", "online")
     TOTAL_FIELD_NUMBER: _ClassVar[int]
     OFFLINE_FIELD_NUMBER: _ClassVar[int]
     ONLINE_FIELD_NUMBER: _ClassVar[int]
@@ -2006,14 +2006,14 @@ class EpochData(_message.Message):
     ) -> None: ...
 
 class RankingScore(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "stake_score",
         "performance_score",
         "previous_status",
         "status",
         "voting_power",
         "ranking_score",
-    ]
+    )
     STAKE_SCORE_FIELD_NUMBER: _ClassVar[int]
     PERFORMANCE_SCORE_FIELD_NUMBER: _ClassVar[int]
     PREVIOUS_STATUS_FIELD_NUMBER: _ClassVar[int]
@@ -2037,14 +2037,14 @@ class RankingScore(_message.Message):
     ) -> None: ...
 
 class RewardScore(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "raw_validator_score",
         "performance_score",
         "multisig_score",
         "validator_score",
         "normalised_score",
         "validator_status",
-    ]
+    )
     RAW_VALIDATOR_SCORE_FIELD_NUMBER: _ClassVar[int]
     PERFORMANCE_SCORE_FIELD_NUMBER: _ClassVar[int]
     MULTISIG_SCORE_FIELD_NUMBER: _ClassVar[int]
@@ -2068,7 +2068,7 @@ class RewardScore(_message.Message):
     ) -> None: ...
 
 class Node(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "pub_key",
         "tm_pub_key",
@@ -2087,7 +2087,7 @@ class Node(_message.Message):
         "ranking_score",
         "name",
         "avatar_url",
-    ]
+    )
     ID_FIELD_NUMBER: _ClassVar[int]
     PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     TM_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -2147,7 +2147,7 @@ class Node(_message.Message):
     ) -> None: ...
 
 class NodeSet(_message.Message):
-    __slots__ = ["total", "inactive", "promoted", "demoted", "maximum"]
+    __slots__ = ("total", "inactive", "promoted", "demoted", "maximum")
     TOTAL_FIELD_NUMBER: _ClassVar[int]
     INACTIVE_FIELD_NUMBER: _ClassVar[int]
     PROMOTED_FIELD_NUMBER: _ClassVar[int]
@@ -2168,7 +2168,7 @@ class NodeSet(_message.Message):
     ) -> None: ...
 
 class NodeData(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "staked_total",
         "total_nodes",
         "inactive_nodes",
@@ -2176,7 +2176,7 @@ class NodeData(_message.Message):
         "ersatz_nodes",
         "pending_nodes",
         "uptime",
-    ]
+    )
     STAKED_TOTAL_FIELD_NUMBER: _ClassVar[int]
     TOTAL_NODES_FIELD_NUMBER: _ClassVar[int]
     INACTIVE_NODES_FIELD_NUMBER: _ClassVar[int]
@@ -2203,7 +2203,7 @@ class NodeData(_message.Message):
     ) -> None: ...
 
 class Delegation(_message.Message):
-    __slots__ = ["party", "node_id", "amount", "epoch_seq"]
+    __slots__ = ("party", "node_id", "amount", "epoch_seq")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -2221,7 +2221,7 @@ class Delegation(_message.Message):
     ) -> None: ...
 
 class Reward(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "asset_id",
         "party_id",
         "epoch",
@@ -2231,7 +2231,7 @@ class Reward(_message.Message):
         "market_id",
         "reward_type",
         "locked_until_epoch",
-    ]
+    )
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2264,7 +2264,7 @@ class Reward(_message.Message):
     ) -> None: ...
 
 class RewardSummary(_message.Message):
-    __slots__ = ["asset_id", "party_id", "amount"]
+    __slots__ = ("asset_id", "party_id", "amount")
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -2279,7 +2279,7 @@ class RewardSummary(_message.Message):
     ) -> None: ...
 
 class EpochRewardSummary(_message.Message):
-    __slots__ = ["epoch", "asset_id", "market_id", "reward_type", "amount"]
+    __slots__ = ("epoch", "asset_id", "market_id", "reward_type", "amount")
     EPOCH_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -2300,7 +2300,7 @@ class EpochRewardSummary(_message.Message):
     ) -> None: ...
 
 class StateValueProposal(_message.Message):
-    __slots__ = ["state_var_id", "event_id", "kvb"]
+    __slots__ = ("state_var_id", "event_id", "kvb")
     STATE_VAR_ID_FIELD_NUMBER: _ClassVar[int]
     EVENT_ID_FIELD_NUMBER: _ClassVar[int]
     KVB_FIELD_NUMBER: _ClassVar[int]
@@ -2315,7 +2315,7 @@ class StateValueProposal(_message.Message):
     ) -> None: ...
 
 class KeyValueBundle(_message.Message):
-    __slots__ = ["key", "tolerance", "value"]
+    __slots__ = ("key", "tolerance", "value")
     KEY_FIELD_NUMBER: _ClassVar[int]
     TOLERANCE_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
@@ -2330,7 +2330,7 @@ class KeyValueBundle(_message.Message):
     ) -> None: ...
 
 class StateVarValue(_message.Message):
-    __slots__ = ["scalar_val", "vector_val", "matrix_val"]
+    __slots__ = ("scalar_val", "vector_val", "matrix_val")
     SCALAR_VAL_FIELD_NUMBER: _ClassVar[int]
     VECTOR_VAL_FIELD_NUMBER: _ClassVar[int]
     MATRIX_VAL_FIELD_NUMBER: _ClassVar[int]
@@ -2345,19 +2345,19 @@ class StateVarValue(_message.Message):
     ) -> None: ...
 
 class ScalarValue(_message.Message):
-    __slots__ = ["value"]
+    __slots__ = ("value",)
     VALUE_FIELD_NUMBER: _ClassVar[int]
     value: str
     def __init__(self, value: _Optional[str] = ...) -> None: ...
 
 class VectorValue(_message.Message):
-    __slots__ = ["value"]
+    __slots__ = ("value",)
     VALUE_FIELD_NUMBER: _ClassVar[int]
     value: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, value: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class MatrixValue(_message.Message):
-    __slots__ = ["value"]
+    __slots__ = ("value",)
     VALUE_FIELD_NUMBER: _ClassVar[int]
     value: _containers.RepeatedCompositeFieldContainer[VectorValue]
     def __init__(
@@ -2365,14 +2365,14 @@ class MatrixValue(_message.Message):
     ) -> None: ...
 
 class ReferralProgram(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "version",
         "id",
         "benefit_tiers",
         "end_of_program_timestamp",
         "window_length",
         "staking_tiers",
-    ]
+    )
     VERSION_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     BENEFIT_TIERS_FIELD_NUMBER: _ClassVar[int]
@@ -2396,7 +2396,7 @@ class ReferralProgram(_message.Message):
     ) -> None: ...
 
 class VolumeBenefitTier(_message.Message):
-    __slots__ = ["minimum_running_notional_taker_volume", "volume_discount_factor"]
+    __slots__ = ("minimum_running_notional_taker_volume", "volume_discount_factor")
     MINIMUM_RUNNING_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
     VOLUME_DISCOUNT_FACTOR_FIELD_NUMBER: _ClassVar[int]
     minimum_running_notional_taker_volume: str
@@ -2408,12 +2408,12 @@ class VolumeBenefitTier(_message.Message):
     ) -> None: ...
 
 class BenefitTier(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "minimum_running_notional_taker_volume",
         "minimum_epochs",
         "referral_reward_factor",
         "referral_discount_factor",
-    ]
+    )
     MINIMUM_RUNNING_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
     MINIMUM_EPOCHS_FIELD_NUMBER: _ClassVar[int]
     REFERRAL_REWARD_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -2431,7 +2431,7 @@ class BenefitTier(_message.Message):
     ) -> None: ...
 
 class VestingBenefitTiers(_message.Message):
-    __slots__ = ["tiers"]
+    __slots__ = ("tiers",)
     TIERS_FIELD_NUMBER: _ClassVar[int]
     tiers: _containers.RepeatedCompositeFieldContainer[VestingBenefitTier]
     def __init__(
@@ -2439,7 +2439,7 @@ class VestingBenefitTiers(_message.Message):
     ) -> None: ...
 
 class VestingBenefitTier(_message.Message):
-    __slots__ = ["minimum_quantum_balance", "reward_multiplier"]
+    __slots__ = ("minimum_quantum_balance", "reward_multiplier")
     MINIMUM_QUANTUM_BALANCE_FIELD_NUMBER: _ClassVar[int]
     REWARD_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     minimum_quantum_balance: str
@@ -2451,7 +2451,7 @@ class VestingBenefitTier(_message.Message):
     ) -> None: ...
 
 class StakingTier(_message.Message):
-    __slots__ = ["minimum_staked_tokens", "referral_reward_multiplier"]
+    __slots__ = ("minimum_staked_tokens", "referral_reward_multiplier")
     MINIMUM_STAKED_TOKENS_FIELD_NUMBER: _ClassVar[int]
     REFERRAL_REWARD_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     minimum_staked_tokens: str
@@ -2463,13 +2463,13 @@ class StakingTier(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountProgram(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "version",
         "id",
         "benefit_tiers",
         "end_of_program_timestamp",
         "window_length",
-    ]
+    )
     VERSION_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     BENEFIT_TIERS_FIELD_NUMBER: _ClassVar[int]
@@ -2490,7 +2490,7 @@ class VolumeDiscountProgram(_message.Message):
     ) -> None: ...
 
 class ActivityStreakBenefitTiers(_message.Message):
-    __slots__ = ["tiers"]
+    __slots__ = ("tiers",)
     TIERS_FIELD_NUMBER: _ClassVar[int]
     tiers: _containers.RepeatedCompositeFieldContainer[ActivityStreakBenefitTier]
     def __init__(
@@ -2499,7 +2499,7 @@ class ActivityStreakBenefitTiers(_message.Message):
     ) -> None: ...
 
 class ActivityStreakBenefitTier(_message.Message):
-    __slots__ = ["minimum_activity_streak", "reward_multiplier", "vesting_multiplier"]
+    __slots__ = ("minimum_activity_streak", "reward_multiplier", "vesting_multiplier")
     MINIMUM_ACTIVITY_STREAK_FIELD_NUMBER: _ClassVar[int]
     REWARD_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     VESTING_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]

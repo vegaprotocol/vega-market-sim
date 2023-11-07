@@ -15,7 +15,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class TxVersion(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     TX_VERSION_UNSPECIFIED: _ClassVar[TxVersion]
     TX_VERSION_V2: _ClassVar[TxVersion]
     TX_VERSION_V3: _ClassVar[TxVersion]
@@ -25,7 +25,7 @@ TX_VERSION_V2: TxVersion
 TX_VERSION_V3: TxVersion
 
 class InputData(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "nonce",
         "block_height",
         "order_submission",
@@ -58,7 +58,7 @@ class InputData(_message.Message):
         "protocol_upgrade_proposal",
         "issue_signatures",
         "oracle_data_submission",
-    ]
+    )
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
@@ -216,7 +216,7 @@ class InputData(_message.Message):
     ) -> None: ...
 
 class Transaction(_message.Message):
-    __slots__ = ["input_data", "signature", "address", "pub_key", "version", "pow"]
+    __slots__ = ("input_data", "signature", "address", "pub_key", "version", "pow")
     INPUT_DATA_FIELD_NUMBER: _ClassVar[int]
     SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
@@ -240,7 +240,7 @@ class Transaction(_message.Message):
     ) -> None: ...
 
 class ProofOfWork(_message.Message):
-    __slots__ = ["tid", "nonce"]
+    __slots__ = ("tid", "nonce")
     TID_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     tid: str
