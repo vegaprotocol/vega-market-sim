@@ -9,9 +9,8 @@ from tests.integration.utils.fixtures import WalletConfig, vega_service
 PARTY_A = WalletConfig(name="party_a", passphrase="pass")
 PARTY_B = WalletConfig(name="party_b", passphrase="pass")
 
-pytest.mark.integration
 
-
+@pytest.mark.integration
 def test_governance_transfer(vega_service: vega_service):
     vega: VegaServiceNull = vega_service
 
