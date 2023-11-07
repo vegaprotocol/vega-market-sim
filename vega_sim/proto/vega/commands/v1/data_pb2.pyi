@@ -6,10 +6,10 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class OracleDataSubmission(_message.Message):
-    __slots__ = ["source", "payload"]
+    __slots__ = ("source", "payload")
 
     class OracleSource(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         ORACLE_SOURCE_UNSPECIFIED: _ClassVar[OracleDataSubmission.OracleSource]
         ORACLE_SOURCE_OPEN_ORACLE: _ClassVar[OracleDataSubmission.OracleSource]
         ORACLE_SOURCE_JSON: _ClassVar[OracleDataSubmission.OracleSource]

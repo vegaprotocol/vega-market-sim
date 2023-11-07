@@ -13,7 +13,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class SubmitTransactionRequest(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "pub_key",
         "propagate",
         "order_submission",
@@ -46,7 +46,7 @@ class SubmitTransactionRequest(_message.Message):
         "protocol_upgrade_proposal",
         "issue_signatures",
         "oracle_data_submission",
-    ]
+    )
     PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     PROPAGATE_FIELD_NUMBER: _ClassVar[int]
     ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]

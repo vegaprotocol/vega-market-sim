@@ -11,10 +11,10 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class Asset(_message.Message):
-    __slots__ = ["id", "details", "status"]
+    __slots__ = ("id", "details", "status")
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[Asset.Status]
         STATUS_PROPOSED: _ClassVar[Asset.Status]
         STATUS_REJECTED: _ClassVar[Asset.Status]
@@ -39,7 +39,7 @@ class Asset(_message.Message):
     ) -> None: ...
 
 class AssetDetails(_message.Message):
-    __slots__ = ["name", "symbol", "decimals", "quantum", "builtin_asset", "erc20"]
+    __slots__ = ("name", "symbol", "decimals", "quantum", "builtin_asset", "erc20")
     NAME_FIELD_NUMBER: _ClassVar[int]
     SYMBOL_FIELD_NUMBER: _ClassVar[int]
     DECIMALS_FIELD_NUMBER: _ClassVar[int]
@@ -63,13 +63,13 @@ class AssetDetails(_message.Message):
     ) -> None: ...
 
 class BuiltinAsset(_message.Message):
-    __slots__ = ["max_faucet_amount_mint"]
+    __slots__ = ("max_faucet_amount_mint",)
     MAX_FAUCET_AMOUNT_MINT_FIELD_NUMBER: _ClassVar[int]
     max_faucet_amount_mint: str
     def __init__(self, max_faucet_amount_mint: _Optional[str] = ...) -> None: ...
 
 class ERC20(_message.Message):
-    __slots__ = ["contract_address", "lifetime_limit", "withdraw_threshold"]
+    __slots__ = ("contract_address", "lifetime_limit", "withdraw_threshold")
     CONTRACT_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     LIFETIME_LIMIT_FIELD_NUMBER: _ClassVar[int]
     WITHDRAW_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
@@ -84,7 +84,7 @@ class ERC20(_message.Message):
     ) -> None: ...
 
 class AssetDetailsUpdate(_message.Message):
-    __slots__ = ["quantum", "erc20"]
+    __slots__ = ("quantum", "erc20")
     QUANTUM_FIELD_NUMBER: _ClassVar[int]
     ERC20_FIELD_NUMBER: _ClassVar[int]
     quantum: str
@@ -96,7 +96,7 @@ class AssetDetailsUpdate(_message.Message):
     ) -> None: ...
 
 class ERC20Update(_message.Message):
-    __slots__ = ["lifetime_limit", "withdraw_threshold"]
+    __slots__ = ("lifetime_limit", "withdraw_threshold")
     LIFETIME_LIMIT_FIELD_NUMBER: _ClassVar[int]
     WITHDRAW_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     lifetime_limit: str

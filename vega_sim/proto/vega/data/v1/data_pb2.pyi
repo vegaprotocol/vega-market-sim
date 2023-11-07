@@ -12,19 +12,19 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class ETHAddress(_message.Message):
-    __slots__ = ["address"]
+    __slots__ = ("address",)
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     address: str
     def __init__(self, address: _Optional[str] = ...) -> None: ...
 
 class PubKey(_message.Message):
-    __slots__ = ["key"]
+    __slots__ = ("key",)
     KEY_FIELD_NUMBER: _ClassVar[int]
     key: str
     def __init__(self, key: _Optional[str] = ...) -> None: ...
 
 class Signer(_message.Message):
-    __slots__ = ["pub_key", "eth_address"]
+    __slots__ = ("pub_key", "eth_address")
     PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     ETH_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     pub_key: PubKey
@@ -36,7 +36,7 @@ class Signer(_message.Message):
     ) -> None: ...
 
 class Property(_message.Message):
-    __slots__ = ["name", "value"]
+    __slots__ = ("name", "value")
     NAME_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     name: str
@@ -46,14 +46,14 @@ class Property(_message.Message):
     ) -> None: ...
 
 class Data(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "signers",
         "data",
         "matched_spec_ids",
         "broadcast_at",
         "meta_data",
         "error",
-    ]
+    )
     SIGNERS_FIELD_NUMBER: _ClassVar[int]
     DATA_FIELD_NUMBER: _ClassVar[int]
     MATCHED_SPEC_IDS_FIELD_NUMBER: _ClassVar[int]
@@ -77,7 +77,7 @@ class Data(_message.Message):
     ) -> None: ...
 
 class ExternalData(_message.Message):
-    __slots__ = ["data"]
+    __slots__ = ("data",)
     DATA_FIELD_NUMBER: _ClassVar[int]
     data: Data
     def __init__(self, data: _Optional[_Union[Data, _Mapping]] = ...) -> None: ...
