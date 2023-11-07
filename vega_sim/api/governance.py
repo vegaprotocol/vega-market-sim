@@ -1114,3 +1114,22 @@ def new_transfer(
         time_forward_fn=time_forward_fn,
         key_name=key_name,
     ).proposal.id
+
+
+def submit_proposal(
+    key_name: str,
+    wallet: Wallet,
+    data_client: vac.VegaTradingDataClientV2,
+    proposal: vega_protos.commands.v1.commands.ProposalSubmission,
+    wallet_name: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    proposal = _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    )
+    return proposal.proposal.id

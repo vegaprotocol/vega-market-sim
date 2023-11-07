@@ -36,6 +36,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyReferralProgramManager,
     FuzzyVolumeDiscountProgramManager,
     FuzzyRewardFunder,
+    FuzzyGovernanceTransferAgent,
 )
 import itertools
 
@@ -332,11 +333,11 @@ class FuzzingScenario(Scenario):
                     referrer_wallet_name="REFERRERS",
                 )
                 for i_agent, i_referrer in itertools.product(
-                    range(5), range(num_referrers)
+                    range(1), range(num_referrers)
                 )
             ]
 
-            for i_agent in range(5):
+            for i_agent in range(1):
                 market_agents["random_traders"].append(
                     LimitOrderTrader(
                         wallet_name=f"RANDOM_TRADERS",
@@ -372,7 +373,7 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                 )
-                for i_agent in range(10)
+                for i_agent in range(1)
             ]
 
             market_agents["risky_traders"] = [
@@ -388,7 +389,7 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )
                 for side in ["SIDE_BUY", "SIDE_SELL"]
-                for i_agent in range(10)
+                for i_agent in range(1)
             ]
 
             market_agents["risky_liquidity_providers"] = [
@@ -402,10 +403,10 @@ class FuzzingScenario(Scenario):
                     step_bias=0.1,
                     tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                 )
-                for i_agent in range(5)
+                for i_agent in range(1)
             ]
 
-            for i_agent in range(45):
+            for i_agent in range(1):
                 market_agents["risky_liquidity_providers"].append(
                     RiskySimpleLiquidityProvider(
                         wallet_name="risky_liquidity_providers",
@@ -496,6 +497,17 @@ class FuzzingScenario(Scenario):
                     asset_name=asset_name,
                     step_bias=1,
                     validity_bias=0.8,
+                    attempts_per_step=10,
+                    tag=f"MARKET_{str(i_market).zfill(3)}",
+                )
+            ]
+            market_agents["fuzzy_governance_transfer_agents"] = [
+                FuzzyGovernanceTransferAgent(
+                    wallet_name="REWARD_FUNDERS",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}",
+                    asset_name=asset_name,
+                    step_bias=1,
+                    validity_bias=1.0,
                     attempts_per_step=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                 )

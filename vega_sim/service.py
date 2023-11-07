@@ -3347,3 +3347,39 @@ class VegaService(ABC):
 
         self.wait_for_thread_catchup()
         return proposal_id
+
+    def submit_proposal(
+        self,
+        key_name: str,
+        proposal_submission: vega_protos.commands.v1.commands.ProposalSubmission,
+        approve_proposal: Optional[bool] = False,
+        enact_proposal: Optional[bool] = False,
+        wallet_name: Optional[str] = None,
+    ):
+        proposal_id = gov.submit_proposal(
+            key_name=key_name,
+            wallet_name=wallet_name,
+            wallet=self.wallet,
+            proposal=proposal_submission,
+            data_client=self.trading_data_client_v2,
+            time_forward_fn=lambda: self.wait_fn((2)),
+        )
+        if proposal_id is None:
+            return
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=key_name,
+            )
+
+        if enact_proposal:
+            time_to_enactment = (
+                proposal_submission.terms.enactment_time
+                - self.get_blockchain_time(in_seconds=True)
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        self.wait_for_thread_catchup()
