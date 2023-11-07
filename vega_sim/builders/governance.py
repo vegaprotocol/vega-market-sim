@@ -101,15 +101,15 @@ def new_transfer(
 def new_transfer_configuration(
     vega_service: VegaService,
     source_type: vega_protos.vega.AccountType,
-    transfer_type: vega_protos.governance.GovernanceTransferType,
+    transfer_type: vega_protos.governance.GovernanceTransferType.Value,
     amount: float,
     asset: str,
     fraction_of_balance: float,
-    destination_type: vega_protos.vega.AccountType,
+    destination_type: vega_protos.vega.AccountType.Value,
     source: Optional[str] = None,
     destination: Optional[str] = None,
-    one_off: Optional[str] = None,
-    recurring: Optional[str] = None,
+    one_off: Optional[vega_protos.governance.OneOffTransfer] = None,
+    recurring: Optional[vega_protos.governance.RecurringTransfer] = None,
 ) -> vega_protos.governance.NewTransferConfiguration:
     new_transfer_configuration = vega_protos.governance.NewTransferConfiguration(
         source_type=source_type,
@@ -158,7 +158,7 @@ def recurring_transfer(
     return recurring_transfer
 
 
-def vote_submission(proposal_id: str, value: vega_protos.governance.Vote.Value):
+def vote_submission(proposal_id: str, value: vega_protos.governance.Vote.Value.Value):
     return vega_protos.commands.v1.commands.VoteSubmission(
         proposal_id=proposal_id, value=value
     )

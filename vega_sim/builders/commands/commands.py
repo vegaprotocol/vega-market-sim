@@ -32,9 +32,9 @@ def proposal_submission(
 
 def transfer(
     vega_service: VegaService,
-    from_account_type: vega_protos.vega.AccountType,
+    from_account_type: vega_protos.vega.AccountType.Value,
     to: str,
-    to_account_type: vega_protos.vega.AccountType,
+    to_account_type: vega_protos.vega.AccountType.Value,
     asset: str,
     amount: float,
     reference: str,
@@ -93,7 +93,7 @@ def stop_order_setup(
     market_id: str,
     order_submission: vega_protos.commands.v1.commands.OrderSubmission,
     expires_at: Optional[datetime.datetime] = None,
-    expiry_strategy: Optional[vega_protos.vega.StopOrder.ExpiryStrategy] = None,
+    expiry_strategy: Optional[vega_protos.vega.StopOrder.ExpiryStrategy.Value] = None,
     price: Optional[float] = None,
     trailing_percent_offset: Optional[float] = None,
 ) -> vega_protos.commands.v1.commands.StopOrderSetup:
@@ -139,7 +139,7 @@ def iceberg_opts(
 def pegged_order(
     vega_service: VegaService,
     market_id: str,
-    reference: vega_protos.vega.PeggedReference,
+    reference: vega_protos.vega.PeggedReference.Value,
     offset: float,
 ) -> vega_protos.vega.PeggedOrder:
     return vega_protos.vega.PeggedOrder(

@@ -22,13 +22,13 @@ logger = logging.getLogger(__name__)
 
 def dispatch_strategy(
     asset_for_metric: str,
-    metric: vega_protos.vega.DispatchMetric,
-    entity_scope: vega_protos.vega.EntityScope,
+    metric: vega_protos.vega.DispatchMetric.Value,
+    entity_scope: vega_protos.vega.EntityScope.Value,
     window_length: int,
     lock_period: int,
-    distribution_strategy: vega_protos.vega.DistributionStrategy,
+    distribution_strategy: vega_protos.vega.DistributionStrategy.Value,
     markets: Optional[List[str]] = None,
-    individual_scope: Optional[vega_protos.vega.IndividualScope] = None,
+    individual_scope: Optional[vega_protos.vega.IndividualScope.Value] = None,
     team_scope: Optional[List[str]] = None,
     n_top_performers: Optional[float] = None,
     staking_requirement: Optional[float] = None,
