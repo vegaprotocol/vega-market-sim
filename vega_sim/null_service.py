@@ -13,6 +13,7 @@ import subprocess
 import tempfile
 import threading
 import time
+import random
 import webbrowser
 from collections import namedtuple
 from contextlib import closing
@@ -264,9 +265,10 @@ def find_free_port(existing_set: Optional[Set[int]] = None):
 
     num_tries = 0
     while ret_sock in existing_set:
+        test_sock = random.randint(1023, 65535)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", 0))
-            ret_sock = s.getsockname()[1]
+            if s.connect_ex(("", test_sock)):
+                ret_sock = test_sock
 
         num_tries += 1
         if num_tries >= 100:

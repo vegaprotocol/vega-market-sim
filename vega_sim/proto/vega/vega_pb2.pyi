@@ -146,6 +146,7 @@ class AccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY: _ClassVar[AccountType]
     ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: _ClassVar[AccountType]
     ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: _ClassVar[AccountType]
+    ACCOUNT_TYPE_ORDER_MARGIN: _ClassVar[AccountType]
 
 class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -238,6 +239,12 @@ class ValidatorNodeStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     VALIDATOR_NODE_STATUS_TENDERMINT: _ClassVar[ValidatorNodeStatus]
     VALIDATOR_NODE_STATUS_ERSATZ: _ClassVar[ValidatorNodeStatus]
     VALIDATOR_NODE_STATUS_PENDING: _ClassVar[ValidatorNodeStatus]
+
+class MarginMode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    MARGIN_MODE_UNSPECIFIED: _ClassVar[MarginMode]
+    MARGIN_MODE_CROSS_MARGIN: _ClassVar[MarginMode]
+    MARGIN_MODE_ISOLATED_MARGIN: _ClassVar[MarginMode]
 
 SIDE_UNSPECIFIED: Side
 SIDE_BUY: Side
@@ -347,6 +354,7 @@ ACCOUNT_TYPE_REWARD_RELATIVE_RETURN: AccountType
 ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY: AccountType
 ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: AccountType
 ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: AccountType
+ACCOUNT_TYPE_ORDER_MARGIN: AccountType
 TRANSFER_TYPE_UNSPECIFIED: TransferType
 TRANSFER_TYPE_LOSS: TransferType
 TRANSFER_TYPE_WIN: TransferType
@@ -415,6 +423,9 @@ VALIDATOR_NODE_STATUS_UNSPECIFIED: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_TENDERMINT: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_ERSATZ: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_PENDING: ValidatorNodeStatus
+MARGIN_MODE_UNSPECIFIED: MarginMode
+MARGIN_MODE_CROSS_MARGIN: MarginMode
+MARGIN_MODE_ISOLATED_MARGIN: MarginMode
 
 class StopOrder(_message.Message):
     __slots__ = (
@@ -794,6 +805,7 @@ class Trade(_message.Message):
         "seller_fee",
         "buyer_auction_batch",
         "seller_auction_batch",
+        "asset_price",
     )
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -821,6 +833,7 @@ class Trade(_message.Message):
     SELLER_FEE_FIELD_NUMBER: _ClassVar[int]
     BUYER_AUCTION_BATCH_FIELD_NUMBER: _ClassVar[int]
     SELLER_AUCTION_BATCH_FIELD_NUMBER: _ClassVar[int]
+    ASSET_PRICE_FIELD_NUMBER: _ClassVar[int]
     id: str
     market_id: str
     price: str
@@ -836,6 +849,7 @@ class Trade(_message.Message):
     seller_fee: Fee
     buyer_auction_batch: int
     seller_auction_batch: int
+    asset_price: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -853,6 +867,7 @@ class Trade(_message.Message):
         seller_fee: _Optional[_Union[Fee, _Mapping]] = ...,
         buyer_auction_batch: _Optional[int] = ...,
         seller_auction_batch: _Optional[int] = ...,
+        asset_price: _Optional[str] = ...,
     ) -> None: ...
 
 class Fee(_message.Message):

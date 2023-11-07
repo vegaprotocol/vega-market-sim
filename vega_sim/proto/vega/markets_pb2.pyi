@@ -304,11 +304,15 @@ class FeeFactors(_message.Message):
     ) -> None: ...
 
 class Fees(_message.Message):
-    __slots__ = ("factors",)
+    __slots__ = ("factors", "liquidity_fee_settings")
     FACTORS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     factors: FeeFactors
+    liquidity_fee_settings: LiquidityFeeSettings
     def __init__(
-        self, factors: _Optional[_Union[FeeFactors, _Mapping]] = ...
+        self,
+        factors: _Optional[_Union[FeeFactors, _Mapping]] = ...,
+        liquidity_fee_settings: _Optional[_Union[LiquidityFeeSettings, _Mapping]] = ...,
     ) -> None: ...
 
 class PriceMonitoringTrigger(_message.Message):
@@ -381,6 +385,29 @@ class LiquiditySLAParameters(_message.Message):
         commitment_min_time_fraction: _Optional[str] = ...,
         performance_hysteresis_epochs: _Optional[int] = ...,
         sla_competition_factor: _Optional[str] = ...,
+    ) -> None: ...
+
+class LiquidityFeeSettings(_message.Message):
+    __slots__ = ("method", "fee_constant")
+
+    class Method(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        METHOD_UNSPECIFIED: _ClassVar[LiquidityFeeSettings.Method]
+        METHOD_MARGINAL_COST: _ClassVar[LiquidityFeeSettings.Method]
+        METHOD_WEIGHTED_AVERAGE: _ClassVar[LiquidityFeeSettings.Method]
+        METHOD_CONSTANT: _ClassVar[LiquidityFeeSettings.Method]
+    METHOD_UNSPECIFIED: LiquidityFeeSettings.Method
+    METHOD_MARGINAL_COST: LiquidityFeeSettings.Method
+    METHOD_WEIGHTED_AVERAGE: LiquidityFeeSettings.Method
+    METHOD_CONSTANT: LiquidityFeeSettings.Method
+    METHOD_FIELD_NUMBER: _ClassVar[int]
+    FEE_CONSTANT_FIELD_NUMBER: _ClassVar[int]
+    method: LiquidityFeeSettings.Method
+    fee_constant: str
+    def __init__(
+        self,
+        method: _Optional[_Union[LiquidityFeeSettings.Method, str]] = ...,
+        fee_constant: _Optional[str] = ...,
     ) -> None: ...
 
 class TargetStakeParameters(_message.Message):

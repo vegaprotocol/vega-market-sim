@@ -313,15 +313,18 @@ class VestingStatsUpdated(_message.Message):
     ) -> None: ...
 
 class PartyVestingStats(_message.Message):
-    __slots__ = ("party_id", "reward_bonus_multiplier")
+    __slots__ = ("party_id", "reward_bonus_multiplier", "quantum_balance")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     REWARD_BONUS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_BALANCE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     reward_bonus_multiplier: str
+    quantum_balance: str
     def __init__(
         self,
         party_id: _Optional[str] = ...,
         reward_bonus_multiplier: _Optional[str] = ...,
+        quantum_balance: _Optional[str] = ...,
     ) -> None: ...
 
 class FeesStats(_message.Message):
@@ -408,13 +411,18 @@ class MakerFeesGenerated(_message.Message):
     ) -> None: ...
 
 class PartyAmount(_message.Message):
-    __slots__ = ("party", "amount")
+    __slots__ = ("party", "amount", "quantum_amount")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     party: str
     amount: str
+    quantum_amount: str
     def __init__(
-        self, party: _Optional[str] = ..., amount: _Optional[str] = ...
+        self,
+        party: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+        quantum_amount: _Optional[str] = ...,
     ) -> None: ...
 
 class PartyActivityStreak(_message.Message):
@@ -1114,6 +1122,7 @@ class TransactionResult(_message.Message):
         "create_referral_set",
         "update_referral_set",
         "apply_referral_code",
+        "update_margin_mode",
         "success",
         "failure",
     )
@@ -1155,6 +1164,7 @@ class TransactionResult(_message.Message):
     CREATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1185,6 +1195,7 @@ class TransactionResult(_message.Message):
     create_referral_set: _commands_pb2.CreateReferralSet
     update_referral_set: _commands_pb2.UpdateReferralSet
     apply_referral_code: _commands_pb2.ApplyReferralCode
+    update_margin_mode: _commands_pb2.UpdateMarginMode
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1262,6 +1273,9 @@ class TransactionResult(_message.Message):
         ] = ...,
         apply_referral_code: _Optional[
             _Union[_commands_pb2.ApplyReferralCode, _Mapping]
+        ] = ...,
+        update_margin_mode: _Optional[
+            _Union[_commands_pb2.UpdateMarginMode, _Mapping]
         ] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
@@ -1997,6 +2011,8 @@ class ReferralSetStatsUpdated(_message.Message):
         "reward_factor",
         "rewards_multiplier",
         "rewards_factor_multiplier",
+        "was_eligible",
+        "referrer_taker_volume",
     )
     SET_ID_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2005,6 +2021,8 @@ class ReferralSetStatsUpdated(_message.Message):
     REWARD_FACTOR_FIELD_NUMBER: _ClassVar[int]
     REWARDS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     REWARDS_FACTOR_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
+    WAS_ELIGIBLE_FIELD_NUMBER: _ClassVar[int]
+    REFERRER_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
     set_id: str
     at_epoch: int
     referral_set_running_notional_taker_volume: str
@@ -2012,6 +2030,8 @@ class ReferralSetStatsUpdated(_message.Message):
     reward_factor: str
     rewards_multiplier: str
     rewards_factor_multiplier: str
+    was_eligible: bool
+    referrer_taker_volume: str
     def __init__(
         self,
         set_id: _Optional[str] = ...,
@@ -2021,6 +2041,8 @@ class ReferralSetStatsUpdated(_message.Message):
         reward_factor: _Optional[str] = ...,
         rewards_multiplier: _Optional[str] = ...,
         rewards_factor_multiplier: _Optional[str] = ...,
+        was_eligible: bool = ...,
+        referrer_taker_volume: _Optional[str] = ...,
     ) -> None: ...
 
 class RefereeStats(_message.Message):

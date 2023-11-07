@@ -273,6 +273,7 @@ class NewSpotMarketConfiguration(_message.Message):
         "log_normal",
         "position_decimal_places",
         "sla_params",
+        "liquidity_fee_settings",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -283,6 +284,7 @@ class NewSpotMarketConfiguration(_message.Message):
     LOG_NORMAL_FIELD_NUMBER: _ClassVar[int]
     POSITION_DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
     SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -292,6 +294,7 @@ class NewSpotMarketConfiguration(_message.Message):
     log_normal: _markets_pb2.LogNormalRiskModel
     position_decimal_places: int
     sla_params: _markets_pb2.LiquiditySLAParameters
+    liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -308,6 +311,9 @@ class NewSpotMarketConfiguration(_message.Message):
         position_decimal_places: _Optional[int] = ...,
         sla_params: _Optional[
             _Union[_markets_pb2.LiquiditySLAParameters, _Mapping]
+        ] = ...,
+        liquidity_fee_settings: _Optional[
+            _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -326,6 +332,7 @@ class NewMarketConfiguration(_message.Message):
         "quadratic_slippage_factor",
         "successor",
         "liquidity_sla_parameters",
+        "liquidity_fee_settings",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -340,6 +347,7 @@ class NewMarketConfiguration(_message.Message):
     QUADRATIC_SLIPPAGE_FACTOR_FIELD_NUMBER: _ClassVar[int]
     SUCCESSOR_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -353,6 +361,7 @@ class NewMarketConfiguration(_message.Message):
     quadratic_slippage_factor: str
     successor: SuccessorConfiguration
     liquidity_sla_parameters: _markets_pb2.LiquiditySLAParameters
+    liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -373,6 +382,9 @@ class NewMarketConfiguration(_message.Message):
         successor: _Optional[_Union[SuccessorConfiguration, _Mapping]] = ...,
         liquidity_sla_parameters: _Optional[
             _Union[_markets_pb2.LiquiditySLAParameters, _Mapping]
+        ] = ...,
+        liquidity_fee_settings: _Optional[
+            _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -440,6 +452,7 @@ class UpdateMarketConfiguration(_message.Message):
         "linear_slippage_factor",
         "quadratic_slippage_factor",
         "liquidity_sla_parameters",
+        "liquidity_fee_settings",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -451,6 +464,7 @@ class UpdateMarketConfiguration(_message.Message):
     LINEAR_SLIPPAGE_FACTOR_FIELD_NUMBER: _ClassVar[int]
     QUADRATIC_SLIPPAGE_FACTOR_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     instrument: UpdateInstrumentConfiguration
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
@@ -461,6 +475,7 @@ class UpdateMarketConfiguration(_message.Message):
     linear_slippage_factor: str
     quadratic_slippage_factor: str
     liquidity_sla_parameters: _markets_pb2.LiquiditySLAParameters
+    liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     def __init__(
         self,
         instrument: _Optional[_Union[UpdateInstrumentConfiguration, _Mapping]] = ...,
@@ -479,6 +494,9 @@ class UpdateMarketConfiguration(_message.Message):
         liquidity_sla_parameters: _Optional[
             _Union[_markets_pb2.LiquiditySLAParameters, _Mapping]
         ] = ...,
+        liquidity_fee_settings: _Optional[
+            _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class UpdateSpotMarketConfiguration(_message.Message):
@@ -489,6 +507,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
         "simple",
         "log_normal",
         "sla_params",
+        "liquidity_fee_settings",
     )
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
@@ -496,12 +515,14 @@ class UpdateSpotMarketConfiguration(_message.Message):
     SIMPLE_FIELD_NUMBER: _ClassVar[int]
     LOG_NORMAL_FIELD_NUMBER: _ClassVar[int]
     SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
     target_stake_parameters: _markets_pb2.TargetStakeParameters
     simple: _markets_pb2.SimpleModelParams
     log_normal: _markets_pb2.LogNormalRiskModel
     sla_params: _markets_pb2.LiquiditySLAParameters
+    liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     def __init__(
         self,
         metadata: _Optional[_Iterable[str]] = ...,
@@ -515,6 +536,9 @@ class UpdateSpotMarketConfiguration(_message.Message):
         log_normal: _Optional[_Union[_markets_pb2.LogNormalRiskModel, _Mapping]] = ...,
         sla_params: _Optional[
             _Union[_markets_pb2.LiquiditySLAParameters, _Mapping]
+        ] = ...,
+        liquidity_fee_settings: _Optional[
+            _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
         ] = ...,
     ) -> None: ...
 
