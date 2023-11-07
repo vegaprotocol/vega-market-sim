@@ -2506,11 +2506,11 @@ class VegaService(ABC):
     def one_off_transfer(
         self,
         from_key_name: str,
-        to_key_name: str,
         from_account_type: vega_protos.vega.AccountType,
         to_account_type: vega_protos.vega.AccountType,
         asset: str,
         amount: float,
+        to_key_name: Optional[str] = None,
         reference: Optional[str] = None,
         from_wallet_name: Optional[str] = None,
         to_wallet_name: Optional[str] = None,
@@ -2552,7 +2552,9 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name),
+            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+            if to_key_name is not None
+            else "0000000000000000000000000000000000000000000000000000000000000000",
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, adp)),
@@ -3282,3 +3284,66 @@ class VegaService(ABC):
             market_price_decimals_map=self.market_price_decimals,
             market_position_decimals_map=self.market_pos_decimals,
         )
+
+    def propose_transfer(
+        self,
+        key_name: str,
+        source_type: vega_protos.vega.AccountType,
+        transfer_type: vega_protos.governance.GovernanceTransferType,
+        amount: float,
+        asset: str,
+        fraction_of_balance: float,
+        destination_type: vega_protos.vega.AccountType,
+        source: Optional[str] = None,
+        destination: Optional[str] = None,
+        closing_time: Optional[datetime.datetime] = None,
+        enactment_time: Optional[datetime.datetime] = None,
+        wallet_name: Optional[str] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        """
+        Method does not support delayed one off transfers or recurring transfers.
+        """
+        blockchain_time = self.get_blockchain_time(in_seconds=True)
+
+        if closing_time is None:
+            closing_time = datetime.datetime.fromtimestamp(blockchain_time + 50)
+        if enactment_time is None:
+            enactment_time = datetime.datetime.fromtimestamp(blockchain_time + 60)
+
+        proposal_id = gov.new_transfer(
+            vega_service=self,
+            source_type=source_type,
+            transfer_type=transfer_type,
+            amount=amount,
+            asset=asset,
+            fraction_of_balance=fraction_of_balance,
+            destination_type=destination_type,
+            source=source,
+            destination=destination,
+            key_name=key_name,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            wallet_name=wallet_name,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=key_name,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time.timestamp() - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        self.wait_for_thread_catchup()
+        return proposal_id
