@@ -20,6 +20,8 @@ from vega_sim.api.helpers import (
 from vega_sim.api.market import MarketConfig
 from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 from vega_sim.wallet.base import Wallet
+import vega_sim.builders as builders
+from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
 
@@ -693,7 +695,7 @@ def approve_proposal(
     wallet_name: Optional[str] = None,
 ):
     wallet.submit_transaction(
-        transaction=commands_protos.commands.VoteSubmission(
+        transaction=builders.governance.vote_submission(
             value=vega_protos.governance.Vote.Value.VALUE_YES, proposal_id=proposal_id
         ),
         wallet_name=wallet_name,

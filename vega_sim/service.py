@@ -2271,7 +2271,7 @@ class VegaService(ABC):
         reduce_only: bool = False,
         post_only: bool = False,
         pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
-        iceberg_opts: Optional[IcebergOpts] = None,
+        iceberg_opts: Optional[vega_protos.commands.v1.commands.IcebergOpts] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -3245,82 +3245,6 @@ class VegaService(ABC):
         return data.list_team_referee_history(
             data_client=self.trading_data_client_v2,
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
-        )
-
-    def build_iceberg_opts(
-        self, market_id: str, peak_size: float, minimum_visible_size: float
-    ) -> vega_protos.commands.v1.commands.IcebergOpts:
-        try:
-            return vega_protos.commands.v1.commands.IcebergOpts(
-                peak_size=num_to_padded_int(
-                    peak_size, self.market_pos_decimals[market_id]
-                ),
-                minimum_visible_size=num_to_padded_int(
-                    minimum_visible_size, self.market_pos_decimals[market_id]
-                ),
-            )
-        except ValueError as e:
-            raise VegaCommandError(e)
-
-    def build_pegged_order(
-        self,
-        market_id: str,
-        reference: vega_protos.vega.Order.PeggedReference,
-        offset: float,
-    ) -> vega_protos.vega.PeggedOrder:
-        return vega_protos.vega.PeggedOrder(
-            reference=reference,
-            offset=str(
-                num_to_padded_int(offset, self.market_price_decimals[market_id])
-            ),
-        )
-
-    def build_stop_order_setup(
-        self,
-        market_id: str,
-        order_submission: vega_protos.commands.v1.commands.OrderSubmission,
-        expires_at: Optional[datetime.datetime] = None,
-        expiry_strategy: Optional[
-            vega_protos.commands.v1.commands.ExpiryStrategy
-        ] = None,
-        price: Optional[float] = None,
-        trailing_percent_offset: Optional[float] = None,
-    ) -> vega_protos.commands.v1.commands.StopOrderSetup:
-        if price is None and trailing_percent_offset is None:
-            raise VegaCommandError(
-                "'price' and 'trailing_percent_offset' can not both be None."
-            )
-        stop_order_setup = vega_protos.commands.v1.commands.StopOrderSetup(
-            order_submission=order_submission,
-            expiry_strategy=expiry_strategy,
-        )
-        if expires_at is not None:
-            setattr(stop_order_setup, "expires_at", int(expires_at.timestamp()))
-        if price is not None:
-            setattr(
-                stop_order_setup,
-                "price",
-                str(num_to_padded_int(price, self.market_price_decimals[market_id])),
-            )
-        if trailing_percent_offset is not None:
-            setattr(
-                stop_order_setup,
-                "trailing_percent_offset",
-                str(trailing_percent_offset),
-            )
-        return stop_order_setup
-
-    def build_stop_orders_submission(
-        self,
-        rises_above: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
-        falls_below: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
-    ) -> vega_protos.commands.v1.commands.StopOrdersSubmission:
-        if rises_above is None and falls_below is None:
-            raise VegaCommandError(
-                "'rises_above' and 'falls_below' can not both be None."
-            )
-        return vega_protos.commands.v1.commands.StopOrdersSubmission(
-            rises_above=rises_above, falls_below=falls_below
         )
 
     def submit_stop_order(

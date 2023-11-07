@@ -17,6 +17,8 @@ from vega_sim.service import VegaService, PeggedOrder, VegaCommandError
 from vega_sim.api.governance import ProposalNotAcceptedError
 from requests.exceptions import HTTPError
 
+import vega_sim.builders as builders
+
 
 class FuzzingAgent(StateAgentWithWallet):
     NAME_BASE = "fuzzing_agent"
@@ -236,7 +238,8 @@ class FuzzingAgent(StateAgentWithWallet):
                 pegged_order=self.random_state.choice(
                     [
                         None,
-                        self.vega.build_pegged_order(
+                        builders.commands.commands.pegged_order(
+                            vega_service=self.vega,
                             market_id=self.market_id,
                             reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
                             offset=self.random_state.normal(loc=0, scale=10),
@@ -246,7 +249,8 @@ class FuzzingAgent(StateAgentWithWallet):
                 iceberg_opts=self.random_state.choice(
                     [
                         None,
-                        self.vega.build_iceberg_opts(
+                        builders.commands.commands.iceberg_opts(
+                            vega_service=self.vega,
                             market_id=self.market_id,
                             peak_size=self.random_state.normal(loc=100, scale=20),
                             minimum_visible_size=self.random_state.normal(
@@ -263,7 +267,7 @@ class FuzzingAgent(StateAgentWithWallet):
 
     def create_fuzzed_stop_orders_submission(self, vega_state):
         try:
-            return self.vega.build_stop_orders_submission(
+            return builders.commands.commands.stop_orders_submission(
                 rises_above=self.random_state.choice(
                     [self.create_fuzzed_stop_orders_setup(vega_state), None]
                 ),
@@ -275,7 +279,8 @@ class FuzzingAgent(StateAgentWithWallet):
             return None
 
     def create_fuzzed_stop_orders_setup(self, vega_state):
-        return self.vega.build_stop_order_setup(
+        return builders.commands.commands.stop_order_setup(
+            vega_service=self.vega,
             market_id=self.market_id,
             order_submission=self.create_fuzzed_submission(vega_state=vega_state),
             expires_at=datetime.utcfromtimestamp(
