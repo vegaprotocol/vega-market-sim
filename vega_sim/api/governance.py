@@ -1,7 +1,7 @@
 import json
 import logging
 import datetime
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, Dict
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
@@ -22,7 +22,6 @@ from vega_sim.api.market import MarketConfig
 from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 from vega_sim.wallet.base import Wallet
 import vega_sim.builders as builders
-from vega_sim.service import VegaService
 
 logger = logging.getLogger(__name__)
 
@@ -1066,7 +1065,7 @@ def update_volume_discount_program(
 
 
 def new_transfer(
-    vega_service: VegaService,
+    asset_decimals: Dict[str, int],
     data_client: vac.VegaTradingDataClientV2,
     key_name: str,
     wallet: Wallet,
@@ -1085,7 +1084,7 @@ def new_transfer(
 ):
     new_transfer = builders.governance.new_transfer(
         changes=builders.governance.new_transfer_configuration(
-            vega_service=vega_service,
+            asset_decimals=asset_decimals,
             source_type=source_type,
             transfer_type=transfer_type,
             amount=amount,

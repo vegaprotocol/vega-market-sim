@@ -13,8 +13,6 @@ import datetime
 import vega_sim.proto.vega as vega_protos
 
 from typing import *
-from vega_sim.service import VegaService
-from vega_sim.api.helpers import num_to_padded_int
 
 
 logger = logging.getLogger(__name__)

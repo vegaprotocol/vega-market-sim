@@ -13,7 +13,6 @@ import datetime
 import vega_sim.proto.vega as vega_protos
 
 from typing import *
-from vega_sim.service import VegaService
 from vega_sim.api.helpers import num_to_padded_int
 
 
@@ -31,7 +30,7 @@ def proposal_submission(
 
 
 def transfer(
-    vega_service: VegaService,
+    asset_decimals: Dict[str, int],
     from_account_type: vega_protos.vega.AccountType.Value,
     to: str,
     to_account_type: vega_protos.vega.AccountType.Value,
@@ -46,7 +45,7 @@ def transfer(
         to=to,
         to_account_type=to_account_type,
         asset=asset,
-        amount=str(num_to_padded_int(amount, vega_service.asset_decimals[asset])),
+        amount=str(num_to_padded_int(amount, asset_decimals[asset])),
         reference=reference,
     )
     if recurring is not None:
@@ -64,16 +63,17 @@ def one_off_transfer(deliver_on: datetime.datetime):
 
 def recurring_transfer(
     start_epoch: int,
-    factor: float,
     end_epoch: Optional[int] = None,
+    factor: Optional[float] = None,
     dispatch_strategy: Optional[vega_protos.vega.DispatchStrategy] = None,
 ) -> vega_protos.commands.v1.commands.RecurringTransfer:
     recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
         start_epoch=start_epoch,
-        factor=str(factor),
     )
     if end_epoch is not None:
         setattr(recurring_transfer, "end_epoch", int(end_epoch))
+    if factor is not None:
+        setattr(recurring_transfer, "factor", str(factor))
     if dispatch_strategy is not None:
         recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
     return recurring_transfer
@@ -89,7 +89,7 @@ def stop_orders_submission(
 
 
 def stop_order_setup(
-    vega_service: VegaService,
+    market_price_decimals: Dict[str, int],
     market_id: str,
     order_submission: vega_protos.commands.v1.commands.OrderSubmission,
     expires_at: Optional[datetime.datetime] = None,
@@ -107,9 +107,7 @@ def stop_order_setup(
         setattr(
             stop_order_setup,
             "price",
-            str(
-                num_to_padded_int(price, vega_service.market_price_decimals[market_id])
-            ),
+            str(num_to_padded_int(price, market_price_decimals[market_id])),
         )
     if trailing_percent_offset is not None:
         setattr(
@@ -121,30 +119,26 @@ def stop_order_setup(
 
 
 def iceberg_opts(
-    vega_service: VegaService,
+    market_pos_decimals: Dict[str, int],
     market_id: str,
     peak_size: float,
     minimum_visible_size: float,
 ) -> vega_protos.commands.v1.commands.IcebergOpts:
     return vega_protos.commands.v1.commands.IcebergOpts(
-        peak_size=num_to_padded_int(
-            peak_size, vega_service.market_pos_decimals[market_id]
-        ),
+        peak_size=num_to_padded_int(peak_size, market_pos_decimals[market_id]),
         minimum_visible_size=num_to_padded_int(
-            minimum_visible_size, vega_service.market_pos_decimals[market_id]
+            minimum_visible_size, market_pos_decimals[market_id]
         ),
     )
 
 
 def pegged_order(
-    vega_service: VegaService,
+    market_price_decimals: Dict[str, int],
     market_id: str,
     reference: vega_protos.vega.PeggedReference.Value,
     offset: float,
 ) -> vega_protos.vega.PeggedOrder:
     return vega_protos.vega.PeggedOrder(
         reference=reference,
-        offset=str(
-            num_to_padded_int(offset, vega_service.market_price_decimals[market_id])
-        ),
+        offset=str(num_to_padded_int(offset, market_price_decimals[market_id])),
     )

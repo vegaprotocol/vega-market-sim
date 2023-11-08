@@ -21,6 +21,8 @@ import vega_sim.builders as builders
 
 from uuid import uuid4
 
+import vega_sim.scenario.fuzzed_markets.fuzzers as fuzzers
+
 
 class FuzzingAgent(StateAgentWithWallet):
     NAME_BASE = "fuzzing_agent"
@@ -199,12 +201,12 @@ class FuzzingAgent(StateAgentWithWallet):
         FuzzingAgent.MEMORY["PEGGED_REFERENCE"].append(
             self.random_state.choice(
                 a=[
-                    "PEGGED_REFERENCE_UNSPECIFIED",
-                    "PEGGED_REFERENCE_MID",
-                    "PEGGED_REFERENCE_BEST_BID",
-                    "PEGGED_REFERENCE_BEST_ASK",
+                    vega_protos.vega.PEGGED_REFERENCE_UNSPECIFIED,
+                    vega_protos.vega.PEGGED_REFERENCE_MID,
+                    vega_protos.vega.PEGGED_REFERENCE_BEST_BID,
+                    vega_protos.vega.PEGGED_REFERENCE_BEST_ASK,
                 ],
-                p=[0.5, 0.5 / 3, 0.5 / 3, 0.5 / 3],
+                p=[0.1, 0.3, 0.3, 0.3],
             )
         )
         FuzzingAgent.MEMORY["REDUCE_ONLY"].append(
@@ -241,7 +243,7 @@ class FuzzingAgent(StateAgentWithWallet):
                     [
                         None,
                         builders.commands.commands.pegged_order(
-                            vega_service=self.vega,
+                            market_price_decimals=self.vega.market_price_decimals,
                             market_id=self.market_id,
                             reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
                             offset=self.random_state.normal(loc=0, scale=10),
@@ -252,7 +254,7 @@ class FuzzingAgent(StateAgentWithWallet):
                     [
                         None,
                         builders.commands.commands.iceberg_opts(
-                            vega_service=self.vega,
+                            market_pos_decimals=self.vega.market_pos_decimals,
                             market_id=self.market_id,
                             peak_size=self.random_state.normal(loc=100, scale=20),
                             minimum_visible_size=self.random_state.normal(
@@ -282,7 +284,7 @@ class FuzzingAgent(StateAgentWithWallet):
 
     def create_fuzzed_stop_orders_setup(self, vega_state):
         return builders.commands.commands.stop_order_setup(
-            vega_service=self.vega,
+            market_price_decimals=self.vega.market_price_decimals,
             market_id=self.market_id,
             order_submission=self.create_fuzzed_submission(vega_state=vega_state),
             expires_at=datetime.utcfromtimestamp(
@@ -550,7 +552,9 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             trading_key=self.key_name,
             side="SIDE_BUY",
             order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_BID", offset=0),
+            pegged_order=PeggedOrder(
+                reference=vega_protos.vega.PEGGED_REFERENCE_BEST_BID, offset=0
+            ),
             wait=False,
             time_in_force="TIME_IN_FORCE_GTC",
             volume=(
@@ -569,7 +573,9 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             trading_key=self.key_name,
             side="SIDE_SELL",
             order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_ASK", offset=0),
+            pegged_order=PeggedOrder(
+                reference=vega_protos.vega.PEGGED_REFERENCE_BEST_ASK, offset=0
+            ),
             wait=False,
             time_in_force="TIME_IN_FORCE_GTC",
             volume=(
@@ -630,7 +636,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
 
     def _gen_spec(self, side: vega_protos.vega.Side, is_valid: bool):
         refs = [
-            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_UNSPECIFIED,
+            # vega_protos.vega.PeggedReference.PEGGED_REFERENCE_UNSPECIFIED,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK,
@@ -1417,6 +1423,8 @@ class FuzzyRewardFunder(StateAgentWithWallet):
 
     def _pick_markets(self, markets):
         """Given a list of markets, pick either no markets or a subset of markets"""
+        if len(markets) <= 1:
+            return None
         if self.random_state.rand() < 0.5:
             return None
         else:
@@ -1489,9 +1497,8 @@ class FuzzyGovernanceTransferAgent(FuzzyRewardFunder):
 
     SOURCE_TYPES = {
         vega_protos.vega.ACCOUNT_TYPE_UNSPECIFIED: 0.1,
-        vega_protos.vega.ACCOUNT_TYPE_INSURANCE: 0.3,
-        vega_protos.vega.ACCOUNT_TYPE_GLOBAL_INSURANCE: 0.3,
-        vega_protos.vega.ACCOUNT_TYPE_NETWORK_TREASURY: 0.3,
+        vega_protos.vega.ACCOUNT_TYPE_GLOBAL_INSURANCE: 0.45,
+        vega_protos.vega.ACCOUNT_TYPE_NETWORK_TREASURY: 0.45,
     }
 
     TRANSFER_TYPES = {
@@ -1554,6 +1561,7 @@ class FuzzyGovernanceTransferAgent(FuzzyRewardFunder):
             try:
                 self._fuzzed_transfer(vega_state)
             except (HTTPError, ProposalNotAcceptedError):
+                print("Transaction successful")
                 continue
 
     def _fuzzed_transfer(self, vega_state):
@@ -1564,12 +1572,13 @@ class FuzzyGovernanceTransferAgent(FuzzyRewardFunder):
 
         new_transfer = builders.governance.new_transfer(
             changes=builders.governance.new_transfer_configuration(
-                vega_service=self.vega,
+                asset_decimals=self.vega.asset_decimals,
                 source_type=source_type,
                 transfer_type=self._pick_transfer_type(),
                 amount=100,
                 asset=self.asset_id,
                 fraction_of_balance=self.random_state.rand(),
+                destination="",
                 destination_type=destination_type,
                 source=self._pick_source(
                     source_type=source_type,

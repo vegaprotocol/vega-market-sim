@@ -12,7 +12,6 @@ import datetime
 import vega_sim.proto.vega as vega_protos
 
 from typing import *
-from vega_sim.service import VegaService
 from vega_sim.api.helpers import num_to_padded_int
 
 
@@ -99,7 +98,7 @@ def new_transfer(
 
 
 def new_transfer_configuration(
-    vega_service: VegaService,
+    asset_decimals: Dict[str, int],
     source_type: vega_protos.vega.AccountType,
     transfer_type: vega_protos.governance.GovernanceTransferType.Value,
     amount: float,
@@ -115,9 +114,7 @@ def new_transfer_configuration(
         source_type=source_type,
         transfer_type=transfer_type,
         amount=str(
-            num_to_padded_int(
-                to_convert=amount, decimals=vega_service.asset_decimals[asset]
-            )
+            num_to_padded_int(to_convert=amount, decimals=asset_decimals[asset])
         ),
         asset=asset,
         fraction_of_balance=str(fraction_of_balance),
