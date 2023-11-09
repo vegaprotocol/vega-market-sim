@@ -2968,7 +2968,7 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2
         )
 
-    def statistics(self):
+    def statistics(self) -> vega_protos.api.v1.core.Statistics:
         return statistics(core_data_client=self.core_client)
 
     def list_assets(self):
@@ -3221,14 +3221,16 @@ class VegaService(ABC):
 
     def list_teams(
         self,
-        key_name: Optional[str],
+        key_name: Optional[str] = None,
         wallet_name: Optional[str] = None,
         team_id: Optional[str] = None,
     ) -> List[data.Team]:
         return data.list_teams(
             data_client=self.trading_data_client_v2,
             team_id=team_id,
-            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+            party_id=None
+            if key_name is None
+            else self.wallet.public_key(name=key_name, wallet_name=wallet_name),
         )
 
     def list_team_referees(

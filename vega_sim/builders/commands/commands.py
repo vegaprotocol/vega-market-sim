@@ -63,17 +63,16 @@ def one_off_transfer(deliver_on: datetime.datetime):
 
 def recurring_transfer(
     start_epoch: int,
+    factor: float,
     end_epoch: Optional[int] = None,
-    factor: Optional[float] = None,
     dispatch_strategy: Optional[vega_protos.vega.DispatchStrategy] = None,
 ) -> vega_protos.commands.v1.commands.RecurringTransfer:
     recurring_transfer = vega_protos.commands.v1.commands.RecurringTransfer(
         start_epoch=start_epoch,
+        factor=str(factor),
     )
     if end_epoch is not None:
         setattr(recurring_transfer, "end_epoch", int(end_epoch))
-    if factor is not None:
-        setattr(recurring_transfer, "factor", str(factor))
     if dispatch_strategy is not None:
         recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
     return recurring_transfer
