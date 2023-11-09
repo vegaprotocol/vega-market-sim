@@ -22,7 +22,7 @@ class VegaWallet(Wallet):
     def __init__(
         self,
         wallet_url: str,
-        wallet_path: str | list[str],
+        wallet_path: str,
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
         mutex: Optional[multiprocessing.Lock] = None,
@@ -33,7 +33,7 @@ class VegaWallet(Wallet):
             wallet_url:
                 str, base URL of the wallet service
             wallet_path:
-                str | list[str], path to a wallet binary to call CLI functions from, you can pass vegawallet if you have dedicated wallet binary or ["vega", "wallet"] if you have a vega binary which contains a wallet implementation
+                str, path to a wallet binary to call CLI functions from, you can pass vegawallet if you have dedicated wallet binary
             vega_home_dir:
                 str, dir of vega home configuration files
             passphrase_file_path:
@@ -58,7 +58,7 @@ class VegaWallet(Wallet):
         cls,
         json_path: str,
         wallet_url: str,
-        wallet_path: str | list[str],
+        wallet_path: str,
         vega_home_dir: str,
         passphrase_file_path: Optional[str] = None,
         mutex: Optional[multiprocessing.Lock] = None,
