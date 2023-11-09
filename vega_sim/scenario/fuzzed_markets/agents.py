@@ -1221,51 +1221,6 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
 class FuzzyRewardFunder(StateAgentWithWallet):
     NAME_BASE = "fuzzy_reward_funder"
 
-    # List of valid dispatch metrics
-    DISPATCH_METRICS = [
-        vega_protos.vega.DISPATCH_METRIC_UNSPECIFIED,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
-        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
-        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
-        vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
-        vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
-        vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
-        vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
-    ]
-    # Map of valid dispatch metrics to relevant account type
-    ACCOUNT_TYPES = {
-        vega_protos.vega.DISPATCH_METRIC_UNSPECIFIED: vega_protos.vega.ACCOUNT_TYPE_UNSPECIFIED,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID: vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED: vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
-        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED: vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
-        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE: vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
-        vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION: vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
-        vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN: vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
-        vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY: vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
-        vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING: vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
-    }
-
-    # List of valid entity scopes
-    ENTITY_SCOPE = {
-        vega_protos.vega.ENTITY_SCOPE_UNSPECIFIED: 0.1,
-        vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS: 0.45,
-        vega_protos.vega.ENTITY_SCOPE_TEAMS: 0.45,
-    }
-    # List of valid individual scopes
-    INDIVIDUAL_SCOPE = {
-        vega_protos.vega.INDIVIDUAL_SCOPE_UNSPECIFIED: 0.1,
-        vega_protos.vega.INDIVIDUAL_SCOPE_ALL: 0.3,
-        vega_protos.vega.INDIVIDUAL_SCOPE_IN_TEAM: 0.3,
-        vega_protos.vega.INDIVIDUAL_SCOPE_NOT_IN_TEAM: 0.3,
-    }
-    # List of valid distribution strategies
-    DISTRIBUTION_STRATEGIES = {
-        vega_protos.vega.DISTRIBUTION_STRATEGY_UNSPECIFIED: 0.1,
-        vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA: 0.45,
-        vega_protos.vega.DISTRIBUTION_STRATEGY_RANK: 0.45,
-    }
-
     def __init__(
         self,
         key_name: str,
@@ -1321,206 +1276,54 @@ class FuzzyRewardFunder(StateAgentWithWallet):
             return
         for _ in range(self.attempts_per_step):
             try:
-                self._fuzzed_transfer(vega_state)
+                fuzzed_transfer = fuzzers.fuzz_transfer(
+                    vega=self.vega, rs=self.random_state, bias=self.validity_bias
+                )
+                # Overwrite fields which should not be fuzzed
+                fuzzed_transfer.asset = self.asset_id
+                fuzzed_transfer.from_account_type = (
+                    vega_protos.vega.ACCOUNT_TYPE_GENERAL
+                )
+                self.vega.wallet.submit_transaction(
+                    transaction=fuzzed_transfer,
+                    key_name=self.key_name,
+                    transaction_type="transfer",
+                    wallet_name=self.wallet_name,
+                )
+
             except HTTPError:
                 continue
 
-    def _fuzzed_transfer(self, vega_state):
-        # Pick transfer durations
-        current_epoch = self.vega.statistics().epoch_seq
-        start_epoch = self._pick_start_epoch(current_epoch)
-        end_epoch = self._pick_end_epoch(start_epoch)
 
-        # Pick driving parameters
-        entity_scope = self.random_state.choice(
-            list(self.ENTITY_SCOPE.keys()), p=list(self.ENTITY_SCOPE.values())
-        )
-        dispatch_metric = self.random_state.choice(self.DISPATCH_METRICS)
-        distribution_strategy = self.random_state.choice(
-            list(self.DISTRIBUTION_STRATEGIES.keys()),
-            p=list(self.DISTRIBUTION_STRATEGIES.values()),
-        )
+class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
+    NAME_BASE = "fuzzy_governance_transfer_agent"
 
-        self.vega.recurring_transfer(
-            start_epoch=start_epoch,
-            end_epoch=end_epoch,
-            asset=self.asset_id,
-            amount=self.random_state.normal(loc=150, scale=10),
-            from_wallet_name=self.wallet_name,
-            from_key_name=self.key_name,
-            asset_for_metric=self._pick_asset_for_metric(dispatch_metric),
-            metric=dispatch_metric,
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to_account_type=self._pick_account_type(dispatch_metric),
-            factor=self.random_state.rand(),
-            markets=self._pick_markets(list(vega_state.market_state.keys())),
-            entity_scope=entity_scope,
-            individual_scope=self._pick_individual_scope(entity_scope),
-            n_top_performers=self._pick_n_top_performers(entity_scope),
-            notional_time_weighted_average_position_requirement=self._pick_notional_time_weighted_average_position_requirement(),
-            window_length=self._pick_window_length(dispatch_metric),
-            lock_period=self._pick_window_length(dispatch_metric),
-            distribution_strategy=distribution_strategy,
-            rank_table=self._pick_rank_table(distribution_strategy),
-        )
+    def __init__(
+        self,
+        key_name: str,
+        asset_name: str,
+        step_bias: float = 0.1,
+        validity_bias: float = 0.8,
+        attempts_per_step: int = 20,
+        initial_mint: float = 1e9,
+        wallet_name: Optional[str] = None,
+        stake_key: bool = False,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
 
-    def _valid(self):
-        return self.random_state.rand() < self.validity_bias
+        self.asset_name = asset_name
+        self.initial_mint = initial_mint
+        self.stake_key = stake_key
+        self.step_bias = step_bias
+        self.validity_bias = validity_bias
+        self.attempts_per_step = attempts_per_step
 
-    def _pick_start_epoch(self, current_epoch):
-        """Given a current_epoch, pick either a valid or random start_epoch."""
-        if self._valid():
-            return current_epoch + self.random_state.randint(1, 5)
-        else:
-            return max(current_epoch + self.random_state.randint(-5, 5), 0)
+        self.random_state = random_state if random_state is not None else RandomState()
 
-    def _pick_end_epoch(self, start_epoch):
-        """Given a start_epoch, pick either a valid or random end_epoch."""
-        if self._valid():
-            return start_epoch + self.random_state.randint(1, 5)
-        else:
-            return max(start_epoch + self.random_state.randint(-5, 5), 0)
-
-    def _pick_account_type(self, dispatch_metric):
-        """Given a dispatch_metric, pick either a valid or random account_type."""
-        if self._valid():
-            return self.ACCOUNT_TYPES[dispatch_metric]
-        else:
-            return self.random_state.choice([None] + list(self.ACCOUNT_TYPES.values()))
-
-    def _pick_asset_for_metric(self, dispatch_metric):
-        """Given a dispatch_metric, pick either a valid or random asset_for_metric."""
-        if self._valid():
-            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE:
-                return None
-            else:
-                return self.asset_id
-        else:
-            return self.random_state.choice([None, self.asset_id])
-
-    def _pick_individual_scope(self, entity_scope):
-        """Given an entity_scope, pick either a valid or random individual_scope."""
-        if self._valid():
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS:
-                return self.random_state.choice(
-                    list(self.INDIVIDUAL_SCOPE.keys()),
-                    p=list(self.INDIVIDUAL_SCOPE.values()),
-                )
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS:
-                return None
-        else:
-            return self.random_state.choice([None] + list(self.INDIVIDUAL_SCOPE.keys()))
-
-    def _pick_n_top_performers(self, entity_scope):
-        """Given an entity_scope, pick either a valid or random n_top_performers."""
-        if self._valid():
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS:
-                return None
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS:
-                return self.random_state.rand()
-        else:
-            return self.random_state.choice([None, self.random_state.rand()])
-
-    def _pick_markets(self, markets):
-        """Given a list of markets, pick either no markets or a subset of markets"""
-        if len(markets) <= 1:
-            return None
-        if self.random_state.rand() < 0.5:
-            return None
-        else:
-            return self.random_state.choice(
-                markets, self.random_state.randint(1, len(markets))
-            )
-
-    def _pick_notional_time_weighted_average_position_requirement(self):
-        """Pick a random notional_time_weighted_average_position_requirement"""
-        return self.random_state.choice([None, self.random_state.randint(0, 1000)])
-
-    def _pick_window_length(self, dispatch_metric):
-        """Given a dispatch_metric, pick either a valid or random window_length"""
-        if self._valid():
-            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE:
-                return None
-            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY:
-                return self.random_state.randint(2, 5)
-            return self.random_state.randint(1, 5)
-        else:
-            return self.random_state.choice([None, self.random_state.randint(0, 5)])
-
-    def _pick_lock_period(self):
-        """Pick either a valid or random lock_period"""
-        if self._valid():
-            return self.random_state.randint(0, 5)
-        else:
-            return self.random_state.choice([None, self.random_state.randint(0, 5)])
-
-    def _pick_rank_table(self, distribution_strategy):
-        """Given a distribution_strategy, pick either a valid or random rank_table"""
-        if self._valid():
-            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA:
-                return None
-            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_RANK:
-                rank_table = [
-                    vega_protos.vega.Rank(
-                        start_rank=1,
-                        share_ratio=self.random_state.randint(1, 100),
-                    )
-                ]
-                for _ in range(self.random_state.randint(1, 10)):
-                    rank_table.append(
-                        vega_protos.vega.Rank(
-                            start_rank=rank_table[-1].start_rank
-                            + self.random_state.randint(1, 10),
-                            share_ratio=self.random_state.randint(1, 10),
-                        )
-                    )
-                return rank_table
-            return self.random_state.choice(
-                array(
-                    [
-                        None,
-                        [
-                            vega_protos.vega.Rank(
-                                start_rank=self.random_state.randint(1, 10),
-                                share_ratio=self.random_state.randint(1, 10),
-                            )
-                            for _ in range(5)
-                        ],
-                    ],
-                    dtype=object,
-                )
-            )
-
-
-class FuzzyGovernanceTransferAgent(FuzzyRewardFunder):
-    NAME_BASE = "FuzzyGovernanceTransferAgent"
-
-    SOURCE_TYPES = {
-        vega_protos.vega.ACCOUNT_TYPE_UNSPECIFIED: 0.1,
-        vega_protos.vega.ACCOUNT_TYPE_GLOBAL_INSURANCE: 0.45,
-        vega_protos.vega.ACCOUNT_TYPE_NETWORK_TREASURY: 0.45,
-    }
-
-    TRANSFER_TYPES = {
-        vega_protos.governance.GOVERNANCE_TRANSFER_TYPE_UNSPECIFIED: 0.1,
-        vega_protos.governance.GOVERNANCE_TRANSFER_TYPE_ALL_OR_NOTHING: 0.45,
-        vega_protos.governance.GOVERNANCE_TRANSFER_TYPE_BEST_EFFORT: 0.45,
-    }
-
-    DESTINATION_TYPES = {
-        vega_protos.vega.ACCOUNT_TYPE_UNSPECIFIED: 0.0,
-        vega_protos.vega.ACCOUNT_TYPE_INSURANCE: 0.2,
-        vega_protos.vega.ACCOUNT_TYPE_GENERAL: 0.2,
-        vega_protos.vega.ACCOUNT_TYPE_GLOBAL_INSURANCE: 0.2,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY: 0.05,
-        vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: 0.05,
-    }
+        self.proposals = 0
+        self.accepted_proposals = 0
 
     def initialise(
         self,
@@ -1559,187 +1362,44 @@ class FuzzyGovernanceTransferAgent(FuzzyRewardFunder):
             return
         for _ in range(self.attempts_per_step):
             try:
-                self._fuzzed_transfer(vega_state)
+                fuzzed_new_transfer_configuration = (
+                    fuzzers.fuzz_new_transfer_configuration(
+                        vega=self.vega, rs=self.random_state, bias=self.validity_bias
+                    )
+                )
+                # Overwrite fields which should not be fuzzed
+                fuzzed_new_transfer_configuration.asset = self.asset_id
+                new_transfer = builders.governance.new_transfer(
+                    changes=fuzzed_new_transfer_configuration,
+                )
+                blockchain_time = self.vega.get_blockchain_time(in_seconds=True)
+                closing = datetime.fromtimestamp(int(blockchain_time + 50))
+                enactment = datetime.fromtimestamp(int(blockchain_time + 50))
+                terms = builders.governance.proposal_terms(
+                    closing_timestamp=closing,
+                    enactment_timestamp=enactment,
+                    new_transfer=new_transfer,
+                )
+                rationale = builders.governance.proposal_rational(
+                    description="fuzzed-proposal",
+                    title="fuzzed-proposal",
+                )
+                proposal_submission = builders.commands.commands.proposal_submission(
+                    reference=str(uuid4()), terms=terms, rationale=rationale
+                )
+                self.proposals += 1
+                self.vega.submit_proposal(
+                    key_name=self.key_name,
+                    proposal_submission=proposal_submission,
+                    approve_proposal=True,
+                    wallet_name=self.wallet_name,
+                )
+                continue
             except (HTTPError, ProposalNotAcceptedError):
-                print("Transaction successful")
+                self.accepted_proposals += 1
                 continue
 
-    def _fuzzed_transfer(self, vega_state):
-        # Pick drivers
-        one_off = self.random_state.choice([True, False])
-        source_type = self._pick_source_type()
-        destination_type = self._pick_destination_type(one_off)
-
-        new_transfer = builders.governance.new_transfer(
-            changes=builders.governance.new_transfer_configuration(
-                asset_decimals=self.vega.asset_decimals,
-                source_type=source_type,
-                transfer_type=self._pick_transfer_type(),
-                amount=100,
-                asset=self.asset_id,
-                fraction_of_balance=self.random_state.rand(),
-                destination="",
-                destination_type=destination_type,
-                source=self._pick_source(
-                    source_type=source_type,
-                    markets=list(vega_state.market_state.keys()),
-                ),
-                one_off=self._pick_one_off(one_off),
-                recurring=self._pick_recurring(one_off, destination_type, vega_state),
-            )
+    def finalise(self):
+        logging.info(
+            f"Agent {self.name()} proposed {self.accepted_proposals}/{self.proposals} valid governance transfer proposals."
         )
-        blockchain_time = self.vega.get_blockchain_time(in_seconds=True)
-        closing = datetime.fromtimestamp(int(blockchain_time + 50))
-        enactment = datetime.fromtimestamp(int(blockchain_time + 50))
-        terms = builders.governance.proposal_terms(
-            closing_timestamp=closing,
-            enactment_timestamp=enactment,
-            new_transfer=new_transfer,
-        )
-        rationale = builders.governance.proposal_rational(
-            description="fuzzed-proposal",
-            title="fuzzed-proposal",
-        )
-        proposal_submission = builders.commands.commands.proposal_submission(
-            reference=str(uuid4()), terms=terms, rationale=rationale
-        )
-        self.vega.submit_proposal(
-            key_name=self.key_name,
-            proposal_submission=proposal_submission,
-            approve_proposal=True,
-            wallet_name=self.wallet_name,
-        )
-
-    def _pick_source_type(self):
-        return self.random_state.choice(
-            list(self.SOURCE_TYPES.keys()), p=list(self.SOURCE_TYPES.values())
-        )
-
-    def _pick_transfer_type(self):
-        return self.random_state.choice(
-            list(self.TRANSFER_TYPES.keys()), p=list(self.TRANSFER_TYPES.values())
-        )
-
-    def _pick_source(self, source_type, markets):
-        if self._valid():
-            if source_type in [
-                vega_protos.vega.ACCOUNT_TYPE_GLOBAL_INSURANCE,
-                vega_protos.vega.ACCOUNT_TYPE_NETWORK_TREASURY,
-            ]:
-                return None
-        return self.random_state.choice(markets + [None])
-
-    def _pick_destination_type(self, one_off):
-        if self._valid():
-            if one_off:
-                return self.random_state.choice(
-                    [
-                        vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
-                        vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-                        vega_protos.vega.ACCOUNT_TYPE_GLOBAL_INSURANCE,
-                    ]
-                )
-        return self.random_state.choice(
-            list(self.DESTINATION_TYPES.keys()), p=list(self.DESTINATION_TYPES.values())
-        )
-
-    def _pick_kind(self, destination_type, vega_state):
-        if self.valid:
-            if destination_type in []:
-                return self._pick_one_off()
-            else:
-                return self._pick_recurring_transfer(self, destination_type, vega_state)
-
-    def _pick_one_off(self, one_off):
-        if self._valid():
-            if one_off:
-                return builders.governance.one_off_transfer()
-            else:
-                return None
-        return self.random_state.choice([builders.governance.one_off_transfer(), None])
-
-    def _pick_dispatch_metric(self, destination_type):
-        if self._valid():
-            if destination_type == vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES:
-                return vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID
-            if (
-                destination_type
-                == vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES
-            ):
-                return vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED
-            if (
-                destination_type
-                == vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES
-            ):
-                return vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED
-            if (
-                destination_type
-                == vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS
-            ):
-                return vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE
-            if (
-                destination_type
-                == vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION
-            ):
-                return vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION
-            if destination_type == vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN:
-                return vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN
-            if (
-                destination_type
-                == vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY
-            ):
-                return vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY
-            if (
-                destination_type
-                == vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING
-            ):
-                return vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING
-        else:
-            return self.random_state.choice(list(self.DISPATCH_METRICS.keys()))
-
-    def _pick_recurring(self, one_off, destination_type, vega_state):
-        # Pick transfer durations
-        current_epoch = self.vega.statistics().epoch_seq
-        start_epoch = self._pick_start_epoch(current_epoch)
-        end_epoch = self._pick_end_epoch(start_epoch)
-
-        # Pick driving parameters
-        entity_scope = self.random_state.choice(
-            list(self.ENTITY_SCOPE.keys()), p=list(self.ENTITY_SCOPE.values())
-        )
-        dispatch_metric = self.random_state.choice(self.DISPATCH_METRICS)
-        distribution_strategy = self.random_state.choice(
-            list(self.DISTRIBUTION_STRATEGIES.keys()),
-            p=list(self.DISTRIBUTION_STRATEGIES.values()),
-        )
-
-        dispatch_strategy = builders.vega.dispatch_strategy(
-            metric=dispatch_metric,
-            asset_for_metric=self._pick_asset_for_metric(
-                dispatch_metric=dispatch_metric
-            ),
-            entity_scope=entity_scope,
-            window_length=self._pick_window_length(dispatch_metric=dispatch_metric),
-            lock_period=self._pick_lock_period(),
-            distribution_strategy=distribution_strategy,
-            markets=None,
-            individual_scope=self._pick_individual_scope(entity_scope=entity_scope),
-            team_scope=None,
-            n_top_performers=self._pick_n_top_performers(entity_scope=entity_scope),
-            notional_time_weighted_average_position_requirement=self._pick_notional_time_weighted_average_position_requirement(),
-            rank_table=self._pick_rank_table(
-                distribution_strategy=distribution_strategy
-            ),
-        )
-        recurring_transfer = builders.governance.recurring_transfer(
-            start_epoch=start_epoch,
-            end_epoch=end_epoch,
-            dispatch_strategy=dispatch_strategy,
-        )
-
-        if self._valid():
-            if one_off:
-                return None
-            else:
-                return recurring_transfer
-        return self.random_state.choice([recurring_transfer, None])
