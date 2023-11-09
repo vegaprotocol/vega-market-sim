@@ -235,8 +235,10 @@ class LivePrice:
             time.sleep(0.33)
         return self.latest_price
 
+
 _live_prices = {}
 _live_prices_lock = threading.Lock()
+
 
 def getLivePrice(product: str) -> LivePrice:
     global _live_prices
@@ -245,6 +247,7 @@ def getLivePrice(product: str) -> LivePrice:
         if not product in _live_prices:
             _live_prices[product] = LivePrice(product=product)
         return _live_prices[product]
+
 
 if __name__ == "__main__":
     print(

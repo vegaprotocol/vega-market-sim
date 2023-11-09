@@ -27,7 +27,7 @@ from vega_sim.environment.environment import (
     Agent,
 )
 from vega_sim.scenario.common.utils.price_process import (
-    getLivePrice,
+    LivePrice,
     get_historic_price_series,
 )
 from vega_sim.scenario.common.agents import (
@@ -81,8 +81,11 @@ class DevOpsScenario(Scenario):
 
         self.step_length_seconds = step_length_seconds
         self.market_name = market_name
-        self.scenario_wallet = scenario_wallet if scenario_wallet is not None else default_scenario_wallet()
-
+        self.scenario_wallet = (
+            scenario_wallet
+            if scenario_wallet is not None
+            else default_scenario_wallet()
+        )
 
     def _get_historic_price_process(
         self,
@@ -131,10 +134,14 @@ class DevOpsScenario(Scenario):
             self.price_process = getLivePrice(product=self.binance_code)
 
         if self.scenario_wallet.market_creator_agent is None:
-            raise ValueError(f"Missing market_creator wallet for the {self.market_name} devops scenario")
-        
+            raise ValueError(
+                f"Missing market_creator wallet for the {self.market_name} devops scenario"
+            )
+
         if self.scenario_wallet.market_maker_agent is None:
-            raise ValueError(f"Missing market_maker wallet for the {self.market_name} devops scenario")
+            raise ValueError(
+                f"Missing market_maker wallet for the {self.market_name} devops scenario"
+            )
 
         if kwargs.get("run_background", True):
             # Setup agent for proposing and settling the market

@@ -295,8 +295,7 @@ class VegaWallet(Wallet):
             "id": "request",
         }
         url = f"{self.wallet_url}/api/v2/requests"
-        
-        
+
         response = None
         if self._mutex is None:
             response = requests.post(url, headers=headers, json=submission)
