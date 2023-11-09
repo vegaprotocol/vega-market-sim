@@ -44,7 +44,7 @@ def enum_to_str(e: Any, val: int) -> str:
 
 
 def num_to_padded_int(to_convert: float, decimals: int) -> int:
-    return int(Decimal(str(to_convert)) * 10**decimals)
+    return int(Decimal(str(to_convert)) * Decimal(10**decimals))
 
 
 def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
