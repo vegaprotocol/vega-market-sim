@@ -1400,6 +1400,6 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
                 continue
 
     def finalise(self):
-        logging.info(
+        logging.debug(
             f"Agent {self.name()} proposed {self.accepted_proposals}/{self.proposals} valid governance transfer proposals."
         )
