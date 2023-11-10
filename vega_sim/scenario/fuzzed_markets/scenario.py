@@ -333,11 +333,11 @@ class FuzzingScenario(Scenario):
                     referrer_wallet_name="REFERRERS",
                 )
                 for i_agent, i_referrer in itertools.product(
-                    range(1), range(num_referrers)
+                    range(5), range(num_referrers)
                 )
             ]
 
-            for i_agent in range(1):
+            for i_agent in range(5):
                 market_agents["random_traders"].append(
                     LimitOrderTrader(
                         wallet_name=f"RANDOM_TRADERS",
@@ -373,7 +373,7 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                 )
-                for i_agent in range(1)
+                for i_agent in range(10)
             ]
 
             market_agents["risky_traders"] = [
@@ -389,7 +389,7 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )
                 for side in ["SIDE_BUY", "SIDE_SELL"]
-                for i_agent in range(1)
+                for i_agent in range(10)
             ]
 
             market_agents["risky_liquidity_providers"] = [
@@ -403,10 +403,10 @@ class FuzzingScenario(Scenario):
                     step_bias=0.1,
                     tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                 )
-                for i_agent in range(1)
+                for i_agent in range(5)
             ]
 
-            for i_agent in range(1):
+            for i_agent in range(45):
                 market_agents["risky_liquidity_providers"].append(
                     RiskySimpleLiquidityProvider(
                         wallet_name="risky_liquidity_providers",
