@@ -454,18 +454,6 @@ def manage_vega_processes(
         log_name="data_node",
     )
 
-    vegaFaucetProcess = _popen_process(
-        [
-            vega_path,
-            "faucet",
-            "run",
-            "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
-            "--home=" + tmp_vega_home,
-        ],
-        dir_root=tmp_vega_dir,
-        log_name="faucet",
-    )
-
     vega_args = [
         vega_path,
         "start",
@@ -497,6 +485,18 @@ def manage_vega_processes(
         vega_args,
         dir_root=tmp_vega_dir,
         log_name="node",
+    )
+
+    vegaFaucetProcess = _popen_process(
+        [
+            vega_path,
+            "faucet",
+            "run",
+            "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
+            "--home=" + tmp_vega_home,
+        ],
+        dir_root=tmp_vega_dir,
+        log_name="faucet",
     )
 
     processes = {
