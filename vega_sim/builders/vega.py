@@ -8,11 +8,10 @@ Attributes:
 """
 
 import logging
-import datetime
 
 import vega_sim.proto.vega as vega_protos
 
-from typing import *
+from typing import Optional, List
 
 
 logger = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ import datetime
 
 import vega_sim.proto.vega as vega_protos
 
-from typing import *
+from typing import Optional, Dict
 from vega_sim.api.helpers import num_to_padded_int
 
 
