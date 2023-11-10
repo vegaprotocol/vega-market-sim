@@ -5,6 +5,7 @@ import vega_sim.proto.vega as vega_protos
 from examples.visualisations.utils import continuous_market, move_market
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
+import vega_sim.builders as build
 
 from tests.integration.utils.fixtures import (
     ASSET_NAME,
@@ -1786,12 +1787,13 @@ def test_stop_order(vega_service_with_market: VegaServiceNull):
         time_in_force=vega_protos.vega.Order.TIME_IN_FORCE_IOC,
         reduce_only=True,
     )
-    stop_order_setup = vega.build_stop_order_setup(
+    stop_order_setup = build.commands.commands.stop_order_setup(
+        market_price_decimals=vega.market_price_decimals,
         market_id=market_id,
         order_submission=order_submission,
         price=0.4,
     )
-    stop_orders_submission = vega.build_stop_orders_submission(
+    stop_orders_submission = build.commands.commands.stop_orders_submission(
         rises_above=stop_order_setup,
         falls_below=None,
     )
