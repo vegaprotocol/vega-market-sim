@@ -3315,7 +3315,7 @@ class VegaService(ABC):
             enactment_time = datetime.datetime.fromtimestamp(blockchain_time + 60)
 
         proposal_id = gov.new_transfer(
-            vega_service=self,
+            asset_decimals=self.asset_decimals,
             source_type=source_type,
             transfer_type=transfer_type,
             amount=amount,
