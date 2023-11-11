@@ -369,6 +369,16 @@ class MakerFeesGenerated:
     maker_fees_paid: List[PartyAmount]
 
 
+@dataclass(frozen=True)
+class NetworkParameter:
+    key: str
+    value: str
+
+
+def _network_parameter_from_proto(network_parameter: vega_protos.vega.NetworkParameter):
+    return NetworkParameter(key=network_parameter.key, value=network_parameter.value)
+
+
 def _maker_fees_generated_from_proto(
     maker_fees_generated: vega_protos.events.v1.events.MakerFeesGenerated,
     decimal_spec: DecimalSpec,
@@ -2667,4 +2677,13 @@ def list_stop_orders(
             ),
         )
         for stop_order_event in response
+    ]
+
+
+def list_network_parameters(
+    data_client: vac.trading_data_grpc_v2,
+) -> List[NetworkParameter]:
+    response = data_raw.list_network_parameters(data_client=data_client)
+    return [
+        _network_parameter_from_proto(network_parameter=proto) for proto in response
     ]
