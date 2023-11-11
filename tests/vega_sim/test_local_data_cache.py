@@ -315,3 +315,57 @@ def test_transfer_subscription(mk_asset_decimals, core_servicer_and_port):
     )
     for transfer in transfers:
         assert transfer.id == queue.get().id
+
+
+def test_network_parameter_subscription(core_servicer_and_port):
+    network_parameters_t0 = [
+        vega_protos.vega.NetworkParameter(key="key_a_t0", value="param_a_t0"),
+        vega_protos.vega.NetworkParameter(key="key_b_t0", value="param_b_t0"),
+    ]
+    network_parameters_t1 = [
+        vega_protos.vega.NetworkParameter(key="key_a_t1", value="param_a_t1"),
+        vega_protos.vega.NetworkParameter(key="key_b_t1", value="param_b_t1"),
+    ]
+    network_parameters_t2 = [
+        vega_protos.vega.NetworkParameter(key="key_a_t2", value="param_a_t2"),
+        vega_protos.vega.NetworkParameter(key="key_b_t2", value="param_b_t2"),
+    ]
+
+    def ObserveEventBus(self, request, context):
+        for network_parameters_chunk in [
+            network_parameters_t0,
+            network_parameters_t1,
+            network_parameters_t2,
+        ]:
+            yield vega_protos.api.v1.core.ObserveEventBusResponse(
+                events=[
+                    events_protos.BusEvent(
+                        network_parameter=network_parameter,
+                        type=events_protos.BUS_EVENT_TYPE_NETWORK_PARAMETER,
+                    )
+                    for network_parameter in network_parameters_chunk
+                ]
+            )
+
+    server, port, mock_servicer = core_servicer_and_port
+    mock_servicer.ObserveEventBus = ObserveEventBus
+
+    add_CoreServiceServicer_to_server(mock_servicer(), server)
+
+    data_client = VegaCoreClient(f"localhost:{port}")
+
+    queue = Queue()
+    _queue_forwarder(
+        data_client=data_client,
+        stream_registry=[
+            (
+                (events_protos.BUS_EVENT_TYPE_NETWORK_PARAMETER,),
+                lambda evt: evt.network_parameter,
+            ),
+        ],
+        sink=queue,
+    )
+    for network_parameter in (
+        network_parameters_t0 + network_parameters_t1 + network_parameters_t2
+    ):
+        assert network_parameter == queue.get()

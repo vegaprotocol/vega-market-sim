@@ -2293,6 +2293,16 @@ def market_data_subscription_handler(
     )
 
 
+def network_parameter_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+) -> Transfer:
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.network_parameter,
+        conversion_fn=_network_parameter_from_proto,
+    )
+
+
 def get_latest_market_data(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
