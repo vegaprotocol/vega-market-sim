@@ -1433,7 +1433,7 @@ def test_list_network_parameters(trading_data_v2_servicer_and_port):
                             key="key_c",
                             value="value_c",
                         ),
-                    )
+                    ),
                 ],
             )
         )
