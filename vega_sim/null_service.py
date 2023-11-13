@@ -487,6 +487,14 @@ def manage_vega_processes(
         log_name="node",
     )
 
+    for _ in range(500):
+        try:
+            requests.get(
+                f"http://localhost:{port_config[Ports.CORE_REST]}/blockchain/height"
+            ).raise_for_status()
+        except:
+            pass
+
     vegaFaucetProcess = _popen_process(
         [
             vega_path,
