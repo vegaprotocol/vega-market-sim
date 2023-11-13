@@ -1714,6 +1714,7 @@ class Position(_message.Message):
         "buy_sum_product",
         "sell_sum_product",
         "distressed",
+        "average_entry_price",
     )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
@@ -1723,6 +1724,7 @@ class Position(_message.Message):
     BUY_SUM_PRODUCT_FIELD_NUMBER: _ClassVar[int]
     SELL_SUM_PRODUCT_FIELD_NUMBER: _ClassVar[int]
     DISTRESSED_FIELD_NUMBER: _ClassVar[int]
+    AVERAGE_ENTRY_PRICE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     size: int
     buy: int
@@ -1731,6 +1733,7 @@ class Position(_message.Message):
     buy_sum_product: str
     sell_sum_product: str
     distressed: bool
+    average_entry_price: bytes
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -1741,6 +1744,7 @@ class Position(_message.Message):
         buy_sum_product: _Optional[str] = ...,
         sell_sum_product: _Optional[str] = ...,
         distressed: bool = ...,
+        average_entry_price: _Optional[bytes] = ...,
     ) -> None: ...
 
 class MarketPositions(_message.Message):
