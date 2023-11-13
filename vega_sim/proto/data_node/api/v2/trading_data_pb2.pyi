@@ -134,6 +134,30 @@ class PageInfo(_message.Message):
         end_cursor: _Optional[str] = ...,
     ) -> None: ...
 
+class GetPartyVestingStatsRequest(_message.Message):
+    __slots__ = ("party_id",)
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    def __init__(self, party_id: _Optional[str] = ...) -> None: ...
+
+class GetPartyVestingStatsResponse(_message.Message):
+    __slots__ = ("party_id", "reward_bonus_multiplier", "epoch_seq", "quantum_balance")
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    REWARD_BONUS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    reward_bonus_multiplier: str
+    epoch_seq: int
+    quantum_balance: str
+    def __init__(
+        self,
+        party_id: _Optional[str] = ...,
+        reward_bonus_multiplier: _Optional[str] = ...,
+        epoch_seq: _Optional[int] = ...,
+        quantum_balance: _Optional[str] = ...,
+    ) -> None: ...
+
 class GetVestingBalancesSummaryRequest(_message.Message):
     __slots__ = ("party_id", "asset_id")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -672,21 +696,25 @@ class LedgerEntryFilter(_message.Message):
         "from_account_filter",
         "to_account_filter",
         "transfer_types",
+        "transfer_id",
     )
     CLOSE_ON_ACCOUNT_FILTERS_FIELD_NUMBER: _ClassVar[int]
     FROM_ACCOUNT_FILTER_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_FILTER_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_TYPES_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     close_on_account_filters: bool
     from_account_filter: AccountFilter
     to_account_filter: AccountFilter
     transfer_types: _containers.RepeatedScalarFieldContainer[_vega_pb2.TransferType]
+    transfer_id: str
     def __init__(
         self,
         close_on_account_filters: bool = ...,
         from_account_filter: _Optional[_Union[AccountFilter, _Mapping]] = ...,
         to_account_filter: _Optional[_Union[AccountFilter, _Mapping]] = ...,
         transfer_types: _Optional[_Iterable[_Union[_vega_pb2.TransferType, str]]] = ...,
+        transfer_id: _Optional[str] = ...,
     ) -> None: ...
 
 class AggregatedLedgerEntry(_message.Message):
@@ -1093,18 +1121,21 @@ class MarketDataConnection(_message.Message):
     ) -> None: ...
 
 class ListTransfersRequest(_message.Message):
-    __slots__ = ("pubkey", "direction", "pagination")
+    __slots__ = ("pubkey", "direction", "pagination", "is_reward")
     PUBKEY_FIELD_NUMBER: _ClassVar[int]
     DIRECTION_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    IS_REWARD_FIELD_NUMBER: _ClassVar[int]
     pubkey: str
     direction: TransferDirection
     pagination: Pagination
+    is_reward: bool
     def __init__(
         self,
         pubkey: _Optional[str] = ...,
         direction: _Optional[_Union[TransferDirection, str]] = ...,
         pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+        is_reward: bool = ...,
     ) -> None: ...
 
 class ListTransfersResponse(_message.Message):
@@ -4353,25 +4384,25 @@ class ListReferralSetRefereesRequest(_message.Message):
         "pagination",
         "referrer",
         "referee",
-        "aggregation_days",
+        "aggregation_epochs",
     )
     REFERRAL_SET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
-    AGGREGATION_DAYS_FIELD_NUMBER: _ClassVar[int]
+    AGGREGATION_EPOCHS_FIELD_NUMBER: _ClassVar[int]
     referral_set_id: str
     pagination: Pagination
     referrer: str
     referee: str
-    aggregation_days: int
+    aggregation_epochs: int
     def __init__(
         self,
         referral_set_id: _Optional[str] = ...,
         pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
         referrer: _Optional[str] = ...,
         referee: _Optional[str] = ...,
-        aggregation_days: _Optional[int] = ...,
+        aggregation_epochs: _Optional[int] = ...,
     ) -> None: ...
 
 class ListReferralSetRefereesResponse(_message.Message):
@@ -4445,6 +4476,8 @@ class ReferralSetStats(_message.Message):
         "epoch_notional_taker_volume",
         "rewards_multiplier",
         "rewards_factor_multiplier",
+        "was_eligible",
+        "referrer_taker_volume",
     )
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     REFERRAL_SET_RUNNING_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -4454,6 +4487,8 @@ class ReferralSetStats(_message.Message):
     EPOCH_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
     REWARDS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     REWARDS_FACTOR_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
+    WAS_ELIGIBLE_FIELD_NUMBER: _ClassVar[int]
+    REFERRER_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
     at_epoch: int
     referral_set_running_notional_taker_volume: str
     party_id: str
@@ -4462,6 +4497,8 @@ class ReferralSetStats(_message.Message):
     epoch_notional_taker_volume: str
     rewards_multiplier: str
     rewards_factor_multiplier: str
+    was_eligible: bool
+    referrer_taker_volume: str
     def __init__(
         self,
         at_epoch: _Optional[int] = ...,
@@ -4472,6 +4509,8 @@ class ReferralSetStats(_message.Message):
         epoch_notional_taker_volume: _Optional[str] = ...,
         rewards_multiplier: _Optional[str] = ...,
         rewards_factor_multiplier: _Optional[str] = ...,
+        was_eligible: bool = ...,
+        referrer_taker_volume: _Optional[str] = ...,
     ) -> None: ...
 
 class Team(_message.Message):
@@ -4879,4 +4918,32 @@ class FeesStatsForParty(_message.Message):
         referees_discount_applied: _Optional[str] = ...,
         volume_discount_applied: _Optional[str] = ...,
         total_maker_fees_received: _Optional[str] = ...,
+    ) -> None: ...
+
+class ObserveTransactionResultsRequest(_message.Message):
+    __slots__ = ("party_ids", "hashes", "status")
+    PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
+    HASHES_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    party_ids: _containers.RepeatedScalarFieldContainer[str]
+    hashes: _containers.RepeatedScalarFieldContainer[str]
+    status: bool
+    def __init__(
+        self,
+        party_ids: _Optional[_Iterable[str]] = ...,
+        hashes: _Optional[_Iterable[str]] = ...,
+        status: bool = ...,
+    ) -> None: ...
+
+class ObserveTransactionResultsResponse(_message.Message):
+    __slots__ = ("transaction_results",)
+    TRANSACTION_RESULTS_FIELD_NUMBER: _ClassVar[int]
+    transaction_results: _containers.RepeatedCompositeFieldContainer[
+        _events_pb2.TransactionResult
+    ]
+    def __init__(
+        self,
+        transaction_results: _Optional[
+            _Iterable[_Union[_events_pb2.TransactionResult, _Mapping]]
+        ] = ...,
     ) -> None: ...

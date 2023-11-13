@@ -562,6 +562,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryResponse.FromString,
         )
+        self.GetPartyVestingStats = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetPartyVestingStats",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.FromString,
+        )
+        self.ObserveTransactionResults = channel.unary_stream(
+            "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1612,6 +1622,24 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def GetPartyVestingStats(self, request, context):
+        """Get vesting balance statistics
+
+        Get information about a party's vesting rewards
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ObserveTransactionResults(self, request, context):
+        """Observe transaction results
+
+        Subscribe to a stream of transaction results, optionally filtered by party/hash/status
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -2235,6 +2263,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetVestingBalancesSummary,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryResponse.SerializeToString,
+        ),
+        "GetPartyVestingStats": grpc.unary_unary_rpc_method_handler(
+            servicer.GetPartyVestingStats,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.SerializeToString,
+        ),
+        "ObserveTransactionResults": grpc.unary_stream_rpc_method_handler(
+            servicer.ObserveTransactionResults,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5408,6 +5446,64 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetVestingBalancesSummary",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetPartyVestingStats(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetPartyVestingStats",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ObserveTransactionResults(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
             options,
             channel_credentials,
             insecure,

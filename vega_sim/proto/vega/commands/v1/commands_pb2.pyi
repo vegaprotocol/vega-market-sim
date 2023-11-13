@@ -168,6 +168,30 @@ class IcebergOpts(_message.Message):
         minimum_visible_size: _Optional[int] = ...,
     ) -> None: ...
 
+class UpdateMarginMode(_message.Message):
+    __slots__ = ("market_id", "mode", "margin_factor")
+
+    class Mode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        MODE_CROSS_UNSPECIFIED: _ClassVar[UpdateMarginMode.Mode]
+        MODE_CROSS_MARGIN: _ClassVar[UpdateMarginMode.Mode]
+        MODE_ISOLATED_MARGIN: _ClassVar[UpdateMarginMode.Mode]
+    MODE_CROSS_UNSPECIFIED: UpdateMarginMode.Mode
+    MODE_CROSS_MARGIN: UpdateMarginMode.Mode
+    MODE_ISOLATED_MARGIN: UpdateMarginMode.Mode
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    MODE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    mode: UpdateMarginMode.Mode
+    margin_factor: str
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        mode: _Optional[_Union[UpdateMarginMode.Mode, str]] = ...,
+        margin_factor: _Optional[str] = ...,
+    ) -> None: ...
+
 class OrderCancellation(_message.Message):
     __slots__ = ("order_id", "market_id")
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
@@ -188,6 +212,7 @@ class OrderAmendment(_message.Message):
         "time_in_force",
         "pegged_offset",
         "pegged_reference",
+        "size",
     )
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -197,6 +222,7 @@ class OrderAmendment(_message.Message):
     TIME_IN_FORCE_FIELD_NUMBER: _ClassVar[int]
     PEGGED_OFFSET_FIELD_NUMBER: _ClassVar[int]
     PEGGED_REFERENCE_FIELD_NUMBER: _ClassVar[int]
+    SIZE_FIELD_NUMBER: _ClassVar[int]
     order_id: str
     market_id: str
     price: str
@@ -205,6 +231,7 @@ class OrderAmendment(_message.Message):
     time_in_force: _vega_pb2.Order.TimeInForce
     pegged_offset: str
     pegged_reference: _vega_pb2.PeggedReference
+    size: int
     def __init__(
         self,
         order_id: _Optional[str] = ...,
@@ -215,6 +242,7 @@ class OrderAmendment(_message.Message):
         time_in_force: _Optional[_Union[_vega_pb2.Order.TimeInForce, str]] = ...,
         pegged_offset: _Optional[str] = ...,
         pegged_reference: _Optional[_Union[_vega_pb2.PeggedReference, str]] = ...,
+        size: _Optional[int] = ...,
     ) -> None: ...
 
 class LiquidityProvisionSubmission(_message.Message):
