@@ -492,6 +492,7 @@ def manage_vega_processes(
             requests.get(
                 f"http://localhost:{port_config[Ports.CORE_REST]}/blockchain/height"
             ).raise_for_status()
+            break
         except:
             pass
 
