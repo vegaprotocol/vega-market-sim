@@ -38,14 +38,8 @@ from vega_sim.scenario.common.agents import (
 )
 from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
-from vega_sim.devops.wallet import (
-    MARKET_CREATOR_AGENT,
-    MARKET_SETTLER_AGENT,
-    MARKET_MAKER_AGENT,
-    AUCTION_TRADER_AGENTS,
-    RANDOM_TRADER_AGENTS,
-    SENSITIVE_TRADER_AGENTS,
-)
+from vega_sim.devops.wallet import ScenarioWallet, default_scenario_wallet
+
 from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
@@ -69,6 +63,7 @@ class DevOpsScenario(Scenario):
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, Dict[str, Agent]], Any]
         ] = None,
+        scenario_wallet: Optional[ScenarioWallet] = None,
         step_length_seconds: float = 10,
         market_name: Optional[str] = None,
     ):
@@ -86,6 +81,11 @@ class DevOpsScenario(Scenario):
 
         self.step_length_seconds = step_length_seconds
         self.market_name = market_name
+        self.scenario_wallet = (
+            scenario_wallet
+            if scenario_wallet is not None
+            else default_scenario_wallet()
+        )
 
     def _get_historic_price_process(
         self,
@@ -131,15 +131,25 @@ class DevOpsScenario(Scenario):
                 random_state=random_state
             )
         else:
-            self.price_process = LivePrice(product=self.binance_code)
+            self.price_process = get_live_price(product=self.binance_code)
+
+        if self.scenario_wallet.market_creator_agent is None:
+            raise ValueError(
+                f"Missing market_creator wallet for the {self.market_name} devops scenario"
+            )
+
+        if self.scenario_wallet.market_maker_agent is None:
+            raise ValueError(
+                f"Missing market_maker wallet for the {self.market_name} devops scenario"
+            )
 
         if kwargs.get("run_background", True):
             # Setup agent for proposing and settling the market
             market_manager = ConfigurableMarketManager(
-                proposal_wallet_name=MARKET_CREATOR_AGENT.wallet_name,
-                proposal_key_name=MARKET_CREATOR_AGENT.key_name,
-                termination_wallet_name=MARKET_SETTLER_AGENT.wallet_name,
-                termination_key_name=MARKET_SETTLER_AGENT.key_name,
+                proposal_wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
+                proposal_key_name=self.scenario_wallet.market_creator_agent.key_name,
+                termination_wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
+                termination_key_name=self.scenario_wallet.market_creator_agent.key_name,
                 market_config=MarketConfig(),
                 market_name=self.market_name
                 if self.market_name is not None
@@ -154,8 +164,8 @@ class DevOpsScenario(Scenario):
 
             # Setup agent for proving a market for traders
             market_maker = ExponentialShapedMarketMaker(
-                wallet_name=MARKET_MAKER_AGENT.wallet_name,
-                key_name=MARKET_MAKER_AGENT.key_name,
+                wallet_name=self.scenario_wallet.market_maker_agent.wallet_name,
+                key_name=self.scenario_wallet.market_maker_agent.key_name,
                 market_name=self.market_name
                 if self.market_name is not None
                 else self.market_manager_args.market_name,
@@ -190,7 +200,7 @@ class DevOpsScenario(Scenario):
                     side=["SIDE_BUY", "SIDE_SELL"][i],
                     tag=i,
                 )
-                for i, party in enumerate(AUCTION_TRADER_AGENTS)
+                for i, party in enumerate(self.scenario_wallet.auction_trader_agents)
             ]
 
             # Setup agents for placing random market orders
@@ -209,7 +219,7 @@ class DevOpsScenario(Scenario):
                     step_bias=self.random_trader_args.step_bias[i],
                     tag=i,
                 )
-                for i, party in enumerate(RANDOM_TRADER_AGENTS)
+                for i, party in enumerate(self.scenario_wallet.random_trader_agents)
             ]
 
             # Setup agents for placing price-sensitive limit orders
@@ -227,7 +237,7 @@ class DevOpsScenario(Scenario):
                     max_order_size=self.sensitive_trader_args.max_order_size[i],
                     tag=i,
                 )
-                for i, party in enumerate(SENSITIVE_TRADER_AGENTS)
+                for i, party in enumerate(self.scenario_wallet.sensitive_trader_agents)
             ]
 
             agents = (

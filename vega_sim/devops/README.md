@@ -5,6 +5,7 @@ The `devops` directory contains the tools for running pre-configured scenarios o
 - stagnet1
 - stagnet3
 - fairground
+- mainnet-mirror
 - testnet2
 
 Currently market-sim agents are unable to make governance commands on existing networks. Therefore scenarios must be run on existing markets.
