@@ -182,8 +182,8 @@ class LocalDataCache:
             ),
             (
                 (events_protos.BUS_EVENT_TYPE_NETWORK_PARAMETER,),
-                lambda evt: data.network_parameter_handler(
-                    evt,
+                lambda evt: data._network_parameter_from_proto(
+                    evt.network_parameter,
                 ),
             ),
         ]

@@ -16,4 +16,4 @@ def retry(attempts: int, delay: float, func: Callable[[], T]) -> T:
         except Exception as e:
             time.sleep(delay)
             if i == attempts - 1:
-                raise Exception(e)
+                raise e
