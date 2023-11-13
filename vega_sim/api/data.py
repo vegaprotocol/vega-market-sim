@@ -950,7 +950,7 @@ def positions_by_market(
             settlement_asset_id = (
                 market_info.tradable_instrument.instrument.future.settlement_asset
             )
-            if len(settlement_asset_id) < 1:
+            if not settlement_asset_id:
                 settlement_asset_id = (
                     market_info.tradable_instrument.instrument.perpetual.settlement_asset
                 )
@@ -1946,7 +1946,7 @@ def get_trades(
             settlement_asset_id = (
                 market_info.tradable_instrument.instrument.future.settlement_asset
             )
-            if len(settlement_asset_id) < 1:
+            if not settlement_asset_id:
                 settlement_asset_id = (
                     market_info.tradable_instrument.instrument.perpetual.settlement_asset
                 )
@@ -2318,7 +2318,7 @@ def get_latest_market_data(
         settlement_asset_id = (
             market_info.tradable_instrument.instrument.future.settlement_asset
         )
-        if len(settlement_asset_id) < 1:
+        if not settlement_asset_id:
             settlement_asset_id = (
                 market_info.tradable_instrument.instrument.perpetual.settlement_asset
             )

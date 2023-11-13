@@ -240,7 +240,7 @@ _live_prices = {}
 _live_prices_lock = threading.Lock()
 
 
-def getLivePrice(product: str) -> LivePrice:
+def get_live_price(product: str) -> LivePrice:
     global _live_prices
     global _live_prices_lock
     with _live_prices_lock:
