@@ -2271,7 +2271,7 @@ class VegaService(ABC):
         reduce_only: bool = False,
         post_only: bool = False,
         pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
-        iceberg_opts: Optional[IcebergOpts] = None,
+        iceberg_opts: Optional[vega_protos.commands.v1.commands.IcebergOpts] = None,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2506,11 +2506,11 @@ class VegaService(ABC):
     def one_off_transfer(
         self,
         from_key_name: str,
-        to_key_name: str,
         from_account_type: vega_protos.vega.AccountType,
         to_account_type: vega_protos.vega.AccountType,
         asset: str,
         amount: float,
+        to_key_name: Optional[str] = None,
         reference: Optional[str] = None,
         from_wallet_name: Optional[str] = None,
         to_wallet_name: Optional[str] = None,
@@ -2552,7 +2552,9 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name),
+            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+            if to_key_name is not None
+            else "0000000000000000000000000000000000000000000000000000000000000000",
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, adp)),
@@ -2966,7 +2968,7 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2
         )
 
-    def statistics(self):
+    def statistics(self) -> vega_protos.api.v1.core.Statistics:
         return statistics(core_data_client=self.core_client)
 
     def list_assets(self):
@@ -3219,14 +3221,16 @@ class VegaService(ABC):
 
     def list_teams(
         self,
-        key_name: Optional[str],
+        key_name: Optional[str] = None,
         wallet_name: Optional[str] = None,
         team_id: Optional[str] = None,
     ) -> List[data.Team]:
         return data.list_teams(
             data_client=self.trading_data_client_v2,
             team_id=team_id,
-            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+            party_id=None
+            if key_name is None
+            else self.wallet.public_key(name=key_name, wallet_name=wallet_name),
         )
 
     def list_team_referees(
@@ -3245,82 +3249,6 @@ class VegaService(ABC):
         return data.list_team_referee_history(
             data_client=self.trading_data_client_v2,
             referee=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
-        )
-
-    def build_iceberg_opts(
-        self, market_id: str, peak_size: float, minimum_visible_size: float
-    ) -> vega_protos.commands.v1.commands.IcebergOpts:
-        try:
-            return vega_protos.commands.v1.commands.IcebergOpts(
-                peak_size=num_to_padded_int(
-                    peak_size, self.market_pos_decimals[market_id]
-                ),
-                minimum_visible_size=num_to_padded_int(
-                    minimum_visible_size, self.market_pos_decimals[market_id]
-                ),
-            )
-        except ValueError as e:
-            raise VegaCommandError(e)
-
-    def build_pegged_order(
-        self,
-        market_id: str,
-        reference: vega_protos.vega.Order.PeggedReference,
-        offset: float,
-    ) -> vega_protos.vega.PeggedOrder:
-        return vega_protos.vega.PeggedOrder(
-            reference=reference,
-            offset=str(
-                num_to_padded_int(offset, self.market_price_decimals[market_id])
-            ),
-        )
-
-    def build_stop_order_setup(
-        self,
-        market_id: str,
-        order_submission: vega_protos.commands.v1.commands.OrderSubmission,
-        expires_at: Optional[datetime.datetime] = None,
-        expiry_strategy: Optional[
-            vega_protos.commands.v1.commands.ExpiryStrategy
-        ] = None,
-        price: Optional[float] = None,
-        trailing_percent_offset: Optional[float] = None,
-    ) -> vega_protos.commands.v1.commands.StopOrderSetup:
-        if price is None and trailing_percent_offset is None:
-            raise VegaCommandError(
-                "'price' and 'trailing_percent_offset' can not both be None."
-            )
-        stop_order_setup = vega_protos.commands.v1.commands.StopOrderSetup(
-            order_submission=order_submission,
-            expiry_strategy=expiry_strategy,
-        )
-        if expires_at is not None:
-            setattr(stop_order_setup, "expires_at", int(expires_at.timestamp()))
-        if price is not None:
-            setattr(
-                stop_order_setup,
-                "price",
-                str(num_to_padded_int(price, self.market_price_decimals[market_id])),
-            )
-        if trailing_percent_offset is not None:
-            setattr(
-                stop_order_setup,
-                "trailing_percent_offset",
-                str(trailing_percent_offset),
-            )
-        return stop_order_setup
-
-    def build_stop_orders_submission(
-        self,
-        rises_above: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
-        falls_below: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
-    ) -> vega_protos.commands.v1.commands.StopOrdersSubmission:
-        if rises_above is None and falls_below is None:
-            raise VegaCommandError(
-                "'rises_above' and 'falls_below' can not both be None."
-            )
-        return vega_protos.commands.v1.commands.StopOrdersSubmission(
-            rises_above=rises_above, falls_below=falls_below
         )
 
     def submit_stop_order(
@@ -3358,3 +3286,102 @@ class VegaService(ABC):
             market_price_decimals_map=self.market_price_decimals,
             market_position_decimals_map=self.market_pos_decimals,
         )
+
+    def propose_transfer(
+        self,
+        key_name: str,
+        source_type: vega_protos.vega.AccountType,
+        transfer_type: vega_protos.governance.GovernanceTransferType,
+        amount: float,
+        asset: str,
+        fraction_of_balance: float,
+        destination_type: vega_protos.vega.AccountType,
+        source: Optional[str] = None,
+        destination: Optional[str] = None,
+        closing_time: Optional[datetime.datetime] = None,
+        enactment_time: Optional[datetime.datetime] = None,
+        wallet_name: Optional[str] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        """
+        Method does not support delayed one off transfers or recurring transfers.
+        """
+        blockchain_time = self.get_blockchain_time(in_seconds=True)
+
+        if closing_time is None:
+            closing_time = datetime.datetime.fromtimestamp(blockchain_time + 50)
+        if enactment_time is None:
+            enactment_time = datetime.datetime.fromtimestamp(blockchain_time + 60)
+
+        proposal_id = gov.new_transfer(
+            asset_decimals=self.asset_decimals,
+            source_type=source_type,
+            transfer_type=transfer_type,
+            amount=amount,
+            asset=asset,
+            fraction_of_balance=fraction_of_balance,
+            destination_type=destination_type,
+            source=source,
+            destination=destination,
+            key_name=key_name,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            wallet_name=wallet_name,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=key_name,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time.timestamp() - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        self.wait_for_thread_catchup()
+        return proposal_id
+
+    def submit_proposal(
+        self,
+        key_name: str,
+        proposal_submission: vega_protos.commands.v1.commands.ProposalSubmission,
+        approve_proposal: Optional[bool] = False,
+        enact_proposal: Optional[bool] = False,
+        wallet_name: Optional[str] = None,
+    ):
+        proposal_id = gov.submit_proposal(
+            key_name=key_name,
+            wallet_name=wallet_name,
+            wallet=self.wallet,
+            proposal=proposal_submission,
+            data_client=self.trading_data_client_v2,
+            time_forward_fn=lambda: self.wait_fn((2)),
+        )
+        if proposal_id is None:
+            return
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=key_name,
+            )
+
+        if enact_proposal:
+            time_to_enactment = (
+                proposal_submission.terms.enactment_time
+                - self.get_blockchain_time(in_seconds=True)
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        self.wait_for_thread_catchup()

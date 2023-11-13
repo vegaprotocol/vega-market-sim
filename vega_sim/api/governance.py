@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import Callable, Optional, Union
+import datetime
+from typing import Callable, Optional, Union, Dict
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
@@ -20,6 +21,7 @@ from vega_sim.api.helpers import (
 from vega_sim.api.market import MarketConfig
 from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 from vega_sim.wallet.base import Wallet
+import vega_sim.builders as builders
 
 logger = logging.getLogger(__name__)
 
@@ -693,7 +695,7 @@ def approve_proposal(
     wallet_name: Optional[str] = None,
 ):
     wallet.submit_transaction(
-        transaction=commands_protos.commands.VoteSubmission(
+        transaction=builders.governance.vote_submission(
             value=vega_protos.governance.Vote.Value.VALUE_YES, proposal_id=proposal_id
         ),
         wallet_name=wallet_name,
@@ -1060,3 +1062,73 @@ def update_volume_discount_program(
         time_forward_fn=time_forward_fn,
         key_name=key_name,
     ).proposal.id
+
+
+def new_transfer(
+    asset_decimals: Dict[str, int],
+    data_client: vac.VegaTradingDataClientV2,
+    key_name: str,
+    wallet: Wallet,
+    source_type: vega_protos.vega.AccountType,
+    transfer_type: vega_protos.governance.GovernanceTransferType,
+    amount: float,
+    asset: str,
+    fraction_of_balance: float,
+    destination_type: vega_protos.vega.AccountType,
+    source: Optional[str] = None,
+    destination: Optional[str] = None,
+    closing_time: Optional[datetime.datetime] = None,
+    enactment_time: Optional[datetime.datetime] = None,
+    wallet_name: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    new_transfer = builders.governance.new_transfer(
+        changes=builders.governance.new_transfer_configuration(
+            asset_decimals=asset_decimals,
+            source_type=source_type,
+            transfer_type=transfer_type,
+            amount=amount,
+            asset=asset,
+            fraction_of_balance=fraction_of_balance,
+            destination_type=destination_type,
+            source=source,
+            destination=destination,
+            one_off=builders.governance.one_off_transfer(deliver_on=enactment_time),
+        )
+    )
+
+    proposal = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
+        data_client=data_client,
+        closing_time=int(closing_time.timestamp()),
+        enactment_time=int(enactment_time.timestamp()),
+    )
+    proposal.terms.new_transfer.CopyFrom(new_transfer)
+
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    ).proposal.id
+
+
+def submit_proposal(
+    key_name: str,
+    wallet: Wallet,
+    data_client: vac.VegaTradingDataClientV2,
+    proposal: vega_protos.commands.v1.commands.ProposalSubmission,
+    wallet_name: Optional[str] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+):
+    proposal = _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    )
+    return proposal.proposal.id

@@ -24,6 +24,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from numpy.typing import ArrayLike
 
 import vega_sim.api.faucet as faucet
+import vega_sim.builders as build
 from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
 from vega_sim.api.helpers import get_enum
 from vega_sim.api.trading import OrderRejectedError
@@ -2529,7 +2530,8 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
                 side=side,
                 size=size * self.commitment_amount_to_size_weighting,
                 price=price,
-                iceberg_opts=self.vega.build_iceberg_opts(
+                iceberg_opts=build.commands.commands.iceberg_opts(
+                    market_pos_decimals=self.vega.market_pos_decimals,
                     market_id=self.market_id,
                     peak_size=size * self.commitment_amount_to_peak_weighting,
                     minimum_visible_size=size
