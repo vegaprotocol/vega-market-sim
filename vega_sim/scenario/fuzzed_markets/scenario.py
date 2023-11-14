@@ -26,6 +26,7 @@ from vega_sim.scenario.common.agents import (
     RewardFunder,
     AtTheTouchMarketMaker,
     ReferralAgentWrapper,
+    SettlementDataSubmitter,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzySuccessorConfigurableMarketManager,
@@ -254,6 +255,7 @@ class FuzzingScenario(Scenario):
 
             # Create fuzzed market managers
             market_agents["market_managers"] = [
+                settlement_data_agent,
                 FuzzySuccessorConfigurableMarketManager(
                     proposal_wallet_name="MARKET_MANAGER",
                     proposal_key_name="PROPOSAL_KEY",
