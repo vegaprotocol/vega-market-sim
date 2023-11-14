@@ -81,10 +81,6 @@ class VegaFaucetError(Exception):
     pass
 
 
-class VegaCommandError(Exception):
-    pass
-
-
 class MarketStateUpdateType(Enum):
     Unspecified = (
         vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_UNSPECIFIED

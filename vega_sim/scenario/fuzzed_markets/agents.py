@@ -13,7 +13,7 @@ from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import VegaService, PeggedOrder, VegaCommandError
+from vega_sim.service import VegaService, PeggedOrder
 from vega_sim.api.governance import ProposalNotAcceptedError
 from requests.exceptions import HTTPError
 
@@ -266,7 +266,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 reduce_only=FuzzingAgent.MEMORY["REDUCE_ONLY"][-1],
                 post_only=FuzzingAgent.MEMORY["POST_ONLY"][-1],
             )
-        except VegaCommandError:
+        except builders.exceptions.VegaProtoValueError:
             return None
 
     def create_fuzzed_stop_orders_submission(self, vega_state):
@@ -279,32 +279,35 @@ class FuzzingAgent(StateAgentWithWallet):
                     [self.create_fuzzed_stop_orders_setup(vega_state), None]
                 ),
             )
-        except VegaCommandError:
+        except builders.exceptions.VegaProtoValueError:
             return None
 
     def create_fuzzed_stop_orders_setup(self, vega_state):
-        return builders.commands.commands.stop_order_setup(
-            market_price_decimals=self.vega.market_price_decimals,
-            market_id=self.market_id,
-            order_submission=self.create_fuzzed_submission(vega_state=vega_state),
-            expires_at=datetime.utcfromtimestamp(
-                self.random_state.normal(loc=self.curr_time + 120, scale=30)
-            ),
-            expiry_strategy=self.random_state.choice(
-                [
-                    None,
-                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_UNSPECIFIED,
-                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
-                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_SUBMIT,
-                ]
-            ),
-            price=self.random_state.choice(
-                [None, self.random_state.normal(loc=self.curr_price, scale=10)]
-            ),
-            trailing_percent_offset=self.random_state.choice(
-                [None, self.random_state.rand()]
-            ),
-        )
+        try:
+            return builders.commands.commands.stop_order_setup(
+                market_price_decimals=self.vega.market_price_decimals,
+                market_id=self.market_id,
+                order_submission=self.create_fuzzed_submission(vega_state=vega_state),
+                expires_at=datetime.utcfromtimestamp(
+                    self.random_state.normal(loc=self.curr_time + 120, scale=30)
+                ),
+                expiry_strategy=self.random_state.choice(
+                    [
+                        None,
+                        vega_protos.vega.StopOrder.EXPIRY_STRATEGY_UNSPECIFIED,
+                        vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
+                        vega_protos.vega.StopOrder.EXPIRY_STRATEGY_SUBMIT,
+                    ]
+                ),
+                price=self.random_state.choice(
+                    [None, self.random_state.normal(loc=self.curr_price, scale=10)]
+                ),
+                trailing_percent_offset=self.random_state.choice(
+                    [None, self.random_state.rand()]
+                ),
+            )
+        except builders.exceptions.VegaProtoValueError:
+            return None
 
     def _select_order_id(self):
         if self.live_orders != {}:
@@ -725,7 +728,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                     side=side,
                     wait=False,
                 )
-            except HTTPError:
+            except (HTTPError, builders.exceptions.VegaProtoValueError):
                 continue
         try:
             self.vega.submit_liquidity(
@@ -736,7 +739,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                 commitment_amount=commitment_amount,
                 is_amendment=self.random_state.choice([True, False, None]),
             )
-        except HTTPError:
+        except (HTTPError, builders.exceptions.VegaProtoValueError):
             return
 
 
@@ -1041,7 +1044,11 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 try:
                     self._fuzzed_proposal()
                     return
-                except (HTTPError, ProposalNotAcceptedError):
+                except (
+                    HTTPError,
+                    ProposalNotAcceptedError,
+                    builders.exceptions.VegaProtoValueError,
+                ):
                     continue
             logging.info(
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
@@ -1164,7 +1171,11 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 try:
                     self._fuzzed_proposal()
                     return
-                except (HTTPError, ProposalNotAcceptedError):
+                except (
+                    HTTPError,
+                    ProposalNotAcceptedError,
+                    builders.exceptions.VegaProtoValueError,
+                ):
                     continue
             logging.info(
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
@@ -1291,7 +1302,7 @@ class FuzzyRewardFunder(StateAgentWithWallet):
                     wallet_name=self.wallet_name,
                 )
 
-            except HTTPError:
+            except (HTTPError, builders.exceptions.VegaProtoValueError):
                 continue
 
 
@@ -1394,9 +1405,13 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
                     approve_proposal=True,
                     wallet_name=self.wallet_name,
                 )
-                continue
-            except (HTTPError, ProposalNotAcceptedError):
                 self.accepted_proposals += 1
+                continue
+            except (
+                HTTPError,
+                ProposalNotAcceptedError,
+                builders.exceptions.VegaProtoValueError,
+            ):
                 continue
 
     def finalise(self):
