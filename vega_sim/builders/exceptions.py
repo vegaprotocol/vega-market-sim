@@ -9,6 +9,7 @@ def raise_custom_build_errors(func: Callable):
             return func(*args, **kwargs)
         except ValueError as ve:
             raise VegaProtoValueError(ve)
+
     return inner
 
 
