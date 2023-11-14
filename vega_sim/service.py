@@ -1949,6 +1949,9 @@ class VegaService(ABC):
             live_only=live_only, blockchain_time=blockchain_time
         )
 
+    def network_parameter_from_feed(self, key: str) -> data.NetworkParameter:
+        return self.data_cache.network_parameter_from_feed(key=key)
+
     @raw_data
     def liquidity_provisions(
         self,
