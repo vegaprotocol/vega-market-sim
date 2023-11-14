@@ -7,13 +7,18 @@ import pandas as pd
 from numpy import array
 from numpy.random import RandomState
 from datetime import datetime
+from typing import NamedTuple
 
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import VegaService, PeggedOrder
+from vega_sim.service import (
+    VegaService,
+    PeggedOrder,
+    MarketStateUpdateType,
+)
 from vega_sim.api.governance import ProposalNotAcceptedError
 from requests.exceptions import HTTPError
 
@@ -785,6 +790,14 @@ class SuccessorMarketCreatorAgent(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
 
+class PerpProductOptions(NamedTuple):
+    funding_payment_frequency_in_seconds: Optional[int]
+    margin_funding_factor: Optional[float]
+    interest_rate: Optional[float]
+    clamp_lower_bound: Optional[float]
+    clamp_upper_bound: Optional[float]
+
+
 class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
     def __init__(
         self,
@@ -804,6 +817,10 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         market_agents: Optional[Dict[str, List[StateAgentWithWallet]]] = None,
         stake_key: bool = False,
+        perp_settlement_key_name: Optional[str] = None,
+        perp_assure_enabled: bool = True,
+        perp_close_on_finalise: bool = True,
+        perp_options: Optional[PerpProductOptions] = None,
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
@@ -831,9 +848,18 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig()
         )
 
+        if self.market_config.is_perp() and perp_settlement_key_name == None:
+            raise ValueError(
+                "'perp_settlement_wallet_name' must be supplied when `market_config` indicated as perp market"
+            )
+
         self.settlement_price = settlement_price
         self.needs_to_update_markets = False
         self.stake_key = stake_key
+        self.perp_options = perp_options
+        self.perp_assure_enabled = perp_assure_enabled
+        self.perp_close_at_settlement_price = perp_close_on_finalise
+        self.perp_settlement_key_name = perp_settlement_key_name
 
     def _get_termination_key_name(self):
         return (
@@ -912,25 +938,62 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
         self.vega.wait_for_total_catchup()
         self.market_id = self.vega.find_market_id(name=self._get_market_name())
-
         if self.market_id is None:
             self._create_latest_market()
+
+    def _set_product_variables(self, mkt_config: MarketConfig):
+        if mkt_config.is_future():
+            mkt_config.set("instrument.future.settlement_asset", self.asset_id)
+            mkt_config.set("instrument.future.quote_name", self.asset_name)
+            mkt_config.set("instrument.future.number_decimal_places", self.asset_dp)
+            mkt_config.set(
+                "instrument.future.terminating_key",
+                self.vega.wallet.public_key(
+                    wallet_name=self.termination_wallet_name,
+                    name=self._get_termination_key_name(),
+                ),
+            )
+        if mkt_config.is_perp():
+            mkt_config.set("instrument.perp.settlement_asset", self.asset_id)
+            mkt_config.set("instrument.perp.quote_name", self.asset_name)
+            mkt_config.set("instrument.perp.number_decimal_places", self.asset_dp)
+            mkt_config.set(
+                "instrument.perp.settlement_key",
+                self.vega.wallet.public_key(
+                    name=self.perp_settlement_key_name,
+                ),
+            )
+            if self.perp_options != None:
+                if self.perp_options.funding_payment_frequency_in_seconds != None:
+                    mkt_config.set(
+                        "instrument.perp.funding_payment_frequency_in_seconds"
+                    )
+                if self.perp_options.margin_funding_factor != None:
+                    mkt_config.set(
+                        "instrument.perp.margin_funding_factor",
+                        self.perp_options.margin_funding_factor,
+                    )
+                if self.perp_options.interest_rate != None:
+                    mkt_config.set(
+                        "instrument.perp.interest_rate", self.perp_options.interest_rate
+                    )
+                if self.perp_options.clamp_lower_bound != None:
+                    mkt_config.set(
+                        "instrument.perp.clamp_lower_bound",
+                        self.perp_options.clamp_lower_bound,
+                    )
+                if self.perp_options.clamp_upper_bound != None:
+                    mkt_config.set(
+                        "instrument.perp.clamp_upper_bound",
+                        self.perp_options.clamp_upper_bound,
+                    )
 
     def _create_latest_market(self, parent_market_id: Optional[str] = None):
         # Add market information and asset information to market config
         mkt_config = copy.deepcopy(self.market_config)
         mkt_config.set("instrument.name", self._get_market_name())
         mkt_config.set("instrument.code", self._get_market_code())
-        mkt_config.set("instrument.future.settlement_asset", self.asset_id)
-        mkt_config.set("instrument.future.quote_name", self.asset_name)
-        mkt_config.set("instrument.future.number_decimal_places", self.asset_dp)
-        mkt_config.set(
-            "instrument.future.terminating_key",
-            self.vega.wallet.public_key(
-                wallet_name=self.termination_wallet_name,
-                name=self._get_termination_key_name(),
-            ),
-        )
+        self._set_product_variables(mkt_config)
 
         if parent_market_id is not None:
             mkt_config.set(
@@ -944,6 +1007,14 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             )
 
         self.vega.wait_for_total_catchup()
+
+        if self.perp_assure_enabled and mkt_config.is_perp():
+            self.vega.try_enable_perp_markets(
+                wallet_name=self.wallet_name,
+                proposal_key=self.key_name,
+                raise_on_failure=True,
+            )
+
         self.vega.create_market_from_config(
             proposal_wallet_name=self.wallet_name,
             proposal_key_name=self.key_name,
@@ -955,13 +1026,23 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
     def finalise(self):
         if self.settlement_price is not None:
-            self.vega.submit_termination_and_settlement_data(
-                self._get_termination_key_name(),
-                self.settlement_price,
-                self.market_id,
-                self.termination_wallet_name,
-            )
-            self.vega.wait_for_total_catchup()
+            if self.market_config.is_future():
+                self.vega.submit_termination_and_settlement_data(
+                    self._get_termination_key_name(),
+                    self.settlement_price,
+                    self.market_id,
+                    self.termination_wallet_name,
+                )
+                self.vega.wait_for_total_catchup()
+            if self.perp_close_at_settlement_price and self.market_config.is_perp():
+                self.vega.update_market_state(
+                    market_id=self.market_id,
+                    proposal_key=self.key_name,
+                    wallet_name=self.wallet_name,
+                    market_state=MarketStateUpdateType.Terminate,
+                    price=self.settlement_price,
+                )
+                self.vega.wait_for_total_catchup()
 
     def step(self, vega_state) -> None:
         if self.needs_to_update_markets:
@@ -979,7 +1060,11 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                     agent.market_name = self._get_market_name()
             self.needs_to_update_markets = False
 
-        if self.random_state.random() < self.successor_probability:
+        # current successor market implementation requires both markets to be futures markets
+        if (
+            not self.market_config.is_perp()
+            and self.random_state.random() < self.successor_probability
+        ):
             self.old_market_id = self.market_id
             self.old_termination_key = self._get_termination_key_name()
             self.latest_key_idx += 1

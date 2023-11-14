@@ -26,6 +26,7 @@ from vega_sim.scenario.common.agents import (
     RewardFunder,
     AtTheTouchMarketMaker,
     ReferralAgentWrapper,
+    SettlementDataSubmitter,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzySuccessorConfigurableMarketManager,
@@ -148,10 +149,17 @@ class FuzzingScenario(Scenario):
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
         n_markets: int = 2,
+        perps_market_probability: float = 0.5,
+        perps_data_perturbation: float = 0.5,
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
         output: bool = True,
     ):
+        if perps_market_probability < 0 or perps_market_probability > 1:
+            raise ValueError(
+                f"'perps_market_probability' must be in range [0,1], got '{perps_market_probability}'"
+            )
+
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
             additional_data_output_fns={
@@ -160,6 +168,8 @@ class FuzzingScenario(Scenario):
         )
 
         self.n_markets = n_markets
+        self.perps_probability = perps_market_probability
+        self.perps_data_perturbation = perps_data_perturbation
         self.fuzz_market_config = fuzz_market_config
 
         self.num_steps = num_steps
@@ -206,6 +216,9 @@ class FuzzingScenario(Scenario):
         )
 
         for i_market in range(self.n_markets):
+            # Determine if we should use perps market, otherwise use futures
+            perps_market = self.random_state.random() < self.perps_probability
+
             # Define the market and the asset:
             market_name = f"ASSET_{str(i_market).zfill(3)}"
             asset_name = f"ASSET_{str(i_market).zfill(3)}"
@@ -213,7 +226,7 @@ class FuzzingScenario(Scenario):
 
             market_agents = {}
             # Create fuzzed market config
-            market_config = MarketConfig()
+            market_config = MarketConfig("perp" if perps_market else None)
             market_config.set(
                 "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
                 1e-4,
@@ -229,8 +242,27 @@ class FuzzingScenario(Scenario):
                 decimal_places=int(market_config.decimal_places),
             )
 
+            perps_external_price_process = price_process
+            if perps_market:
+                perps_external_price_process = np.multiply(
+                    price_process,
+                    self.random_state.uniform(
+                        low=1 - self.perps_data_perturbation,
+                        high=1 + self.perps_data_perturbation,
+                        size=len(price_process),
+                    ),
+                )
+
+            perp_settlement_key_name = "PERP_SETTLEMENT_KEY"
+            settlement_data_agent = SettlementDataSubmitter(
+                market_name=market_name,
+                key_name=perp_settlement_key_name,
+                oracle_data_generator=iter(perps_external_price_process),
+            )
+
             # Create fuzzed market managers
             market_agents["market_managers"] = [
+                settlement_data_agent,
                 FuzzySuccessorConfigurableMarketManager(
                     proposal_wallet_name="MARKET_MANAGER",
                     proposal_key_name="PROPOSAL_KEY",
@@ -246,7 +278,9 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                     market_agents=market_agents,
                     successor_probability=0.01,
-                )
+                    perp_close_on_finalise=True,
+                    perp_settlement_key_name=perp_settlement_key_name,
+                ),
             ]
 
             market_agents["market_makers"] = [
