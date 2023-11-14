@@ -12,11 +12,13 @@ import logging
 import vega_sim.proto.vega as vega_protos
 
 from typing import Optional, List
+from vega_sim.builders.exceptions import raise_custom_build_errors
 
 
 logger = logging.getLogger(__name__)
 
 
+@raise_custom_build_errors
 def dispatch_strategy(
     asset_for_metric: str,
     metric: vega_protos.vega.DispatchMetric.Value,
@@ -65,5 +67,6 @@ def dispatch_strategy(
     return dispatch_strategy
 
 
+@raise_custom_build_errors
 def rank(start_rank: int, share_ratio: int) -> vega_protos.vega.Rank:
     return vega_protos.vega.Rank(start_rank=start_rank, share_ratio=share_ratio)

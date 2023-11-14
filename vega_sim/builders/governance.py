@@ -13,11 +13,13 @@ import vega_sim.proto.vega as vega_protos
 
 from typing import Optional, Dict
 from vega_sim.api.helpers import num_to_padded_int
+from vega_sim.builders.exceptions import raise_custom_build_errors
 
 
 logger = logging.getLogger(__name__)
 
 
+@raise_custom_build_errors
 def proposal_terms(
     closing_timestamp: datetime.datetime,
     enactment_timestamp: datetime.datetime,
@@ -83,6 +85,7 @@ def proposal_terms(
     return proposal_terms
 
 
+@raise_custom_build_errors
 def proposal_rational(
     description: str, title: str
 ) -> vega_protos.governance.ProposalRationale:
@@ -91,12 +94,14 @@ def proposal_rational(
     )
 
 
+@raise_custom_build_errors
 def new_transfer(
     changes: vega_protos.governance.NewTransferConfiguration,
 ) -> vega_protos.governance.NewTransfer:
     return vega_protos.governance.NewTransfer(changes=changes)
 
 
+@raise_custom_build_errors
 def new_transfer_configuration(
     asset_decimals: Dict[str, int],
     source_type: vega_protos.vega.AccountType,
@@ -131,6 +136,7 @@ def new_transfer_configuration(
     return new_transfer_configuration
 
 
+@raise_custom_build_errors
 def one_off_transfer(
     deliver_on: Optional[datetime.datetime] = None,
 ) -> vega_protos.governance.OneOffTransfer:
@@ -140,6 +146,7 @@ def one_off_transfer(
     return one_off_transfer
 
 
+@raise_custom_build_errors
 def recurring_transfer(
     start_epoch: int,
     end_epoch: Optional[int] = None,
@@ -155,6 +162,7 @@ def recurring_transfer(
     return recurring_transfer
 
 
+@raise_custom_build_errors
 def vote_submission(proposal_id: str, value: vega_protos.governance.Vote.Value.Value):
     return vega_protos.commands.v1.commands.VoteSubmission(
         proposal_id=proposal_id, value=value

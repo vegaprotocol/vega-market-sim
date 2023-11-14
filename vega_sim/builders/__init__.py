@@ -1,3 +1,3 @@
-from . import commands, governance, vega
+from . import exceptions, commands, governance, vega
 
-__all__ = ["commands", "governance", "vega"]
+__all__ = ["exceptions", "commands", "governance", "vega"]

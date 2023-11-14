@@ -14,11 +14,13 @@ import vega_sim.proto.vega as vega_protos
 
 from typing import Optional, Dict
 from vega_sim.api.helpers import num_to_padded_int
+from vega_sim.builders.exceptions import raise_custom_build_errors
 
 
 logger = logging.getLogger(__name__)
 
 
+@raise_custom_build_errors
 def proposal_submission(
     reference: str,
     terms: vega_protos.governance.ProposalTerms,
@@ -29,6 +31,7 @@ def proposal_submission(
     )
 
 
+@raise_custom_build_errors
 def transfer(
     asset_decimals: Dict[str, int],
     from_account_type: vega_protos.vega.AccountType.Value,
@@ -55,12 +58,14 @@ def transfer(
     return transfer
 
 
+@raise_custom_build_errors
 def one_off_transfer(deliver_on: datetime.datetime):
     return vega_protos.commands.v1.commands.OneOffTransfer(
         deliver_on=int(deliver_on.timestamp() * 1e9)
     )
 
 
+@raise_custom_build_errors
 def recurring_transfer(
     start_epoch: int,
     factor: float,
@@ -78,6 +83,7 @@ def recurring_transfer(
     return recurring_transfer
 
 
+@raise_custom_build_errors
 def stop_orders_submission(
     rises_above: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
     falls_below: Optional[vega_protos.commands.v1.commands.StopOrderSetup] = None,
@@ -87,6 +93,7 @@ def stop_orders_submission(
     )
 
 
+@raise_custom_build_errors
 def stop_order_setup(
     market_price_decimals: Dict[str, int],
     market_id: str,
@@ -117,6 +124,7 @@ def stop_order_setup(
     return stop_order_setup
 
 
+@raise_custom_build_errors
 def iceberg_opts(
     market_pos_decimals: Dict[str, int],
     market_id: str,
@@ -131,6 +139,7 @@ def iceberg_opts(
     )
 
 
+@raise_custom_build_errors
 def pegged_order(
     market_price_decimals: Dict[str, int],
     market_id: str,
