@@ -818,7 +818,6 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         market_agents: Optional[Dict[str, List[StateAgentWithWallet]]] = None,
         stake_key: bool = False,
         perp_settlement_key_name: Optional[str] = None,
-        perp_assure_enabled: bool = True,
         perp_close_on_finalise: bool = True,
         perp_options: Optional[PerpProductOptions] = None,
     ):
@@ -857,7 +856,6 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         self.needs_to_update_markets = False
         self.stake_key = stake_key
         self.perp_options = perp_options
-        self.perp_assure_enabled = perp_assure_enabled
         self.perp_close_at_settlement_price = perp_close_on_finalise
         self.perp_settlement_key_name = perp_settlement_key_name
 
@@ -1007,13 +1005,6 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             )
 
         self.vega.wait_for_total_catchup()
-
-        if self.perp_assure_enabled and mkt_config.is_perp():
-            self.vega.try_enable_perp_markets(
-                wallet_name=self.wallet_name,
-                proposal_key=self.key_name,
-                raise_on_failure=True,
-            )
 
         self.vega.create_market_from_config(
             proposal_wallet_name=self.wallet_name,

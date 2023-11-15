@@ -80,9 +80,6 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
 
         if args.perps:
-            vega.try_enable_perp_markets(
-                proposal_key=MM_WALLET.name, raise_on_failure=True
-            )
             vega.create_simple_perps_market(
                 market_name="BTC:DAI_Perpetual",
                 proposal_key=MM_WALLET.name,
@@ -171,7 +168,7 @@ if __name__ == "__main__":
             is_amendment=True,
         )
 
-        position = vega.positions_by_market(key_name=MM_WALLET2.name)
+        position = vega.positions_by_market(key_name=MM_WALLET2.name, market_id=market_id)
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Position is: {position}")
         print(f"Margin levels are: {margin_levels}")

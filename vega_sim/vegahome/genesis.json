@@ -136,6 +136,7 @@
       "governance.proposal.transfer.requiredMajority": "0.5",
       "governance.proposal.transfer.requiredParticipation": "0.00001",
       "limits.markets.maxPeggedOrders": "1500",
+      "limits.markets.proposePerpetualEnabled": "1",
       "market.auction.maximumDuration": "168h",
       "market.auction.minimumDuration": "1s",
       "market.fee.factors.infrastructureFee": "0.0005",
