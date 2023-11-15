@@ -13,7 +13,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class SubmitTransactionRequest(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "pub_key",
         "propagate",
         "order_submission",
@@ -36,6 +36,8 @@ class SubmitTransactionRequest(_message.Message):
         "create_referral_set",
         "update_referral_set",
         "apply_referral_code",
+        "update_margin_mode",
+        "join_team",
         "node_vote",
         "node_signature",
         "chain_event",
@@ -46,7 +48,7 @@ class SubmitTransactionRequest(_message.Message):
         "protocol_upgrade_proposal",
         "issue_signatures",
         "oracle_data_submission",
-    ]
+    )
     PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     PROPAGATE_FIELD_NUMBER: _ClassVar[int]
     ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
@@ -69,6 +71,8 @@ class SubmitTransactionRequest(_message.Message):
     CREATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     NODE_VOTE_FIELD_NUMBER: _ClassVar[int]
     NODE_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     CHAIN_EVENT_FIELD_NUMBER: _ClassVar[int]
@@ -101,6 +105,8 @@ class SubmitTransactionRequest(_message.Message):
     create_referral_set: _commands_pb2.CreateReferralSet
     update_referral_set: _commands_pb2.UpdateReferralSet
     apply_referral_code: _commands_pb2.ApplyReferralCode
+    update_margin_mode: _commands_pb2.UpdateMarginMode
+    join_team: _commands_pb2.JoinTeam
     node_vote: _validator_commands_pb2.NodeVote
     node_signature: _validator_commands_pb2.NodeSignature
     chain_event: _validator_commands_pb2.ChainEvent
@@ -173,6 +179,10 @@ class SubmitTransactionRequest(_message.Message):
         apply_referral_code: _Optional[
             _Union[_commands_pb2.ApplyReferralCode, _Mapping]
         ] = ...,
+        update_margin_mode: _Optional[
+            _Union[_commands_pb2.UpdateMarginMode, _Mapping]
+        ] = ...,
+        join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
         node_vote: _Optional[_Union[_validator_commands_pb2.NodeVote, _Mapping]] = ...,
         node_signature: _Optional[
             _Union[_validator_commands_pb2.NodeSignature, _Mapping]

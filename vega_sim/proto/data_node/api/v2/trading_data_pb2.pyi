@@ -23,14 +23,14 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class LedgerEntryField(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     LEDGER_ENTRY_FIELD_UNSPECIFIED: _ClassVar[LedgerEntryField]
     LEDGER_ENTRY_FIELD_ACCOUNT_FROM_ID: _ClassVar[LedgerEntryField]
     LEDGER_ENTRY_FIELD_ACCOUNT_TO_ID: _ClassVar[LedgerEntryField]
     LEDGER_ENTRY_FIELD_TRANSFER_TYPE: _ClassVar[LedgerEntryField]
 
 class AccountField(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     ACCOUNT_FIELD_UNSPECIFIED: _ClassVar[AccountField]
     ACCOUNT_FIELD_ID: _ClassVar[AccountField]
     ACCOUNT_FIELD_PARTY_ID: _ClassVar[AccountField]
@@ -39,14 +39,14 @@ class AccountField(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ACCOUNT_FIELD_TYPE: _ClassVar[AccountField]
 
 class TransferDirection(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     TRANSFER_DIRECTION_UNSPECIFIED: _ClassVar[TransferDirection]
     TRANSFER_DIRECTION_TRANSFER_FROM: _ClassVar[TransferDirection]
     TRANSFER_DIRECTION_TRANSFER_TO: _ClassVar[TransferDirection]
     TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM: _ClassVar[TransferDirection]
 
 class Table(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     TABLE_UNSPECIFIED: _ClassVar[Table]
     TABLE_BALANCES: _ClassVar[Table]
     TABLE_CHECKPOINTS: _ClassVar[Table]
@@ -96,7 +96,7 @@ TABLE_BLOCKS: Table
 TABLE_REWARDS: Table
 
 class Pagination(_message.Message):
-    __slots__ = ["first", "after", "last", "before", "newest_first"]
+    __slots__ = ("first", "after", "last", "before", "newest_first")
     FIRST_FIELD_NUMBER: _ClassVar[int]
     AFTER_FIELD_NUMBER: _ClassVar[int]
     LAST_FIELD_NUMBER: _ClassVar[int]
@@ -117,7 +117,7 @@ class Pagination(_message.Message):
     ) -> None: ...
 
 class PageInfo(_message.Message):
-    __slots__ = ["has_next_page", "has_previous_page", "start_cursor", "end_cursor"]
+    __slots__ = ("has_next_page", "has_previous_page", "start_cursor", "end_cursor")
     HAS_NEXT_PAGE_FIELD_NUMBER: _ClassVar[int]
     HAS_PREVIOUS_PAGE_FIELD_NUMBER: _ClassVar[int]
     START_CURSOR_FIELD_NUMBER: _ClassVar[int]
@@ -135,13 +135,13 @@ class PageInfo(_message.Message):
     ) -> None: ...
 
 class GetPartyVestingStatsRequest(_message.Message):
-    __slots__ = ["party_id"]
+    __slots__ = ("party_id",)
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     def __init__(self, party_id: _Optional[str] = ...) -> None: ...
 
 class GetPartyVestingStatsResponse(_message.Message):
-    __slots__ = ["party_id", "reward_bonus_multiplier", "epoch_seq", "quantum_balance"]
+    __slots__ = ("party_id", "reward_bonus_multiplier", "epoch_seq", "quantum_balance")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     REWARD_BONUS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -159,7 +159,7 @@ class GetPartyVestingStatsResponse(_message.Message):
     ) -> None: ...
 
 class GetVestingBalancesSummaryRequest(_message.Message):
-    __slots__ = ["party_id", "asset_id"]
+    __slots__ = ("party_id", "asset_id")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -169,7 +169,7 @@ class GetVestingBalancesSummaryRequest(_message.Message):
     ) -> None: ...
 
 class GetVestingBalancesSummaryResponse(_message.Message):
-    __slots__ = ["party_id", "epoch_seq", "locked_balances", "vesting_balances"]
+    __slots__ = ("party_id", "epoch_seq", "locked_balances", "vesting_balances")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
     LOCKED_BALANCES_FIELD_NUMBER: _ClassVar[int]
@@ -195,7 +195,7 @@ class GetVestingBalancesSummaryResponse(_message.Message):
     ) -> None: ...
 
 class AccountBalance(_message.Message):
-    __slots__ = ["owner", "balance", "asset", "market_id", "type"]
+    __slots__ = ("owner", "balance", "asset", "market_id", "type")
     OWNER_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -216,7 +216,7 @@ class AccountBalance(_message.Message):
     ) -> None: ...
 
 class ListAccountsRequest(_message.Message):
-    __slots__ = ["filter", "pagination"]
+    __slots__ = ("filter", "pagination")
     FILTER_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     filter: AccountFilter
@@ -228,7 +228,7 @@ class ListAccountsRequest(_message.Message):
     ) -> None: ...
 
 class ListAccountsResponse(_message.Message):
-    __slots__ = ["accounts"]
+    __slots__ = ("accounts",)
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     accounts: AccountsConnection
     def __init__(
@@ -236,7 +236,7 @@ class ListAccountsResponse(_message.Message):
     ) -> None: ...
 
 class AccountsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[AccountEdge]
@@ -248,7 +248,7 @@ class AccountsConnection(_message.Message):
     ) -> None: ...
 
 class AccountEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: AccountBalance
@@ -260,7 +260,7 @@ class AccountEdge(_message.Message):
     ) -> None: ...
 
 class ObserveAccountsRequest(_message.Message):
-    __slots__ = ["market_id", "party_id", "asset", "type"]
+    __slots__ = ("market_id", "party_id", "asset", "type")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -278,7 +278,7 @@ class ObserveAccountsRequest(_message.Message):
     ) -> None: ...
 
 class ObserveAccountsResponse(_message.Message):
-    __slots__ = ["snapshot", "updates"]
+    __slots__ = ("snapshot", "updates")
     SNAPSHOT_FIELD_NUMBER: _ClassVar[int]
     UPDATES_FIELD_NUMBER: _ClassVar[int]
     snapshot: AccountSnapshotPage
@@ -290,7 +290,7 @@ class ObserveAccountsResponse(_message.Message):
     ) -> None: ...
 
 class AccountSnapshotPage(_message.Message):
-    __slots__ = ["accounts", "last_page"]
+    __slots__ = ("accounts", "last_page")
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     LAST_PAGE_FIELD_NUMBER: _ClassVar[int]
     accounts: _containers.RepeatedCompositeFieldContainer[AccountBalance]
@@ -302,7 +302,7 @@ class AccountSnapshotPage(_message.Message):
     ) -> None: ...
 
 class AccountUpdates(_message.Message):
-    __slots__ = ["accounts"]
+    __slots__ = ("accounts",)
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     accounts: _containers.RepeatedCompositeFieldContainer[AccountBalance]
     def __init__(
@@ -310,11 +310,11 @@ class AccountUpdates(_message.Message):
     ) -> None: ...
 
 class InfoRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class InfoResponse(_message.Message):
-    __slots__ = ["version", "commit_hash"]
+    __slots__ = ("version", "commit_hash")
     VERSION_FIELD_NUMBER: _ClassVar[int]
     COMMIT_HASH_FIELD_NUMBER: _ClassVar[int]
     version: str
@@ -324,7 +324,7 @@ class InfoResponse(_message.Message):
     ) -> None: ...
 
 class GetOrderRequest(_message.Message):
-    __slots__ = ["order_id", "version"]
+    __slots__ = ("order_id", "version")
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
     order_id: str
@@ -334,7 +334,7 @@ class GetOrderRequest(_message.Message):
     ) -> None: ...
 
 class GetOrderResponse(_message.Message):
-    __slots__ = ["order"]
+    __slots__ = ("order",)
     ORDER_FIELD_NUMBER: _ClassVar[int]
     order: _vega_pb2.Order
     def __init__(
@@ -342,7 +342,7 @@ class GetOrderResponse(_message.Message):
     ) -> None: ...
 
 class OrderFilter(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "statuses",
         "types",
         "time_in_forces",
@@ -352,7 +352,7 @@ class OrderFilter(_message.Message):
         "reference",
         "date_range",
         "live_only",
-    ]
+    )
     STATUSES_FIELD_NUMBER: _ClassVar[int]
     TYPES_FIELD_NUMBER: _ClassVar[int]
     TIME_IN_FORCES_FIELD_NUMBER: _ClassVar[int]
@@ -389,7 +389,7 @@ class OrderFilter(_message.Message):
     ) -> None: ...
 
 class ListOrdersRequest(_message.Message):
-    __slots__ = ["pagination", "filter"]
+    __slots__ = ("pagination", "filter")
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     FILTER_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
@@ -401,7 +401,7 @@ class ListOrdersRequest(_message.Message):
     ) -> None: ...
 
 class ListOrdersResponse(_message.Message):
-    __slots__ = ["orders"]
+    __slots__ = ("orders",)
     ORDERS_FIELD_NUMBER: _ClassVar[int]
     orders: OrderConnection
     def __init__(
@@ -409,7 +409,7 @@ class ListOrdersResponse(_message.Message):
     ) -> None: ...
 
 class ListOrderVersionsRequest(_message.Message):
-    __slots__ = ["order_id", "pagination"]
+    __slots__ = ("order_id", "pagination")
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     order_id: str
@@ -421,7 +421,7 @@ class ListOrderVersionsRequest(_message.Message):
     ) -> None: ...
 
 class ListOrderVersionsResponse(_message.Message):
-    __slots__ = ["orders"]
+    __slots__ = ("orders",)
     ORDERS_FIELD_NUMBER: _ClassVar[int]
     orders: OrderConnection
     def __init__(
@@ -429,7 +429,7 @@ class ListOrderVersionsResponse(_message.Message):
     ) -> None: ...
 
 class ObserveOrdersRequest(_message.Message):
-    __slots__ = ["market_ids", "party_ids", "exclude_liquidity"]
+    __slots__ = ("market_ids", "party_ids", "exclude_liquidity")
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
     EXCLUDE_LIQUIDITY_FIELD_NUMBER: _ClassVar[int]
@@ -444,7 +444,7 @@ class ObserveOrdersRequest(_message.Message):
     ) -> None: ...
 
 class ObserveOrdersResponse(_message.Message):
-    __slots__ = ["snapshot", "updates"]
+    __slots__ = ("snapshot", "updates")
     SNAPSHOT_FIELD_NUMBER: _ClassVar[int]
     UPDATES_FIELD_NUMBER: _ClassVar[int]
     snapshot: OrderSnapshotPage
@@ -456,7 +456,7 @@ class ObserveOrdersResponse(_message.Message):
     ) -> None: ...
 
 class OrderSnapshotPage(_message.Message):
-    __slots__ = ["orders", "last_page"]
+    __slots__ = ("orders", "last_page")
     ORDERS_FIELD_NUMBER: _ClassVar[int]
     LAST_PAGE_FIELD_NUMBER: _ClassVar[int]
     orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
@@ -468,7 +468,7 @@ class OrderSnapshotPage(_message.Message):
     ) -> None: ...
 
 class OrderUpdates(_message.Message):
-    __slots__ = ["orders"]
+    __slots__ = ("orders",)
     ORDERS_FIELD_NUMBER: _ClassVar[int]
     orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
     def __init__(
@@ -476,13 +476,13 @@ class OrderUpdates(_message.Message):
     ) -> None: ...
 
 class GetStopOrderRequest(_message.Message):
-    __slots__ = ["order_id"]
+    __slots__ = ("order_id",)
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     order_id: str
     def __init__(self, order_id: _Optional[str] = ...) -> None: ...
 
 class GetStopOrderResponse(_message.Message):
-    __slots__ = ["order"]
+    __slots__ = ("order",)
     ORDER_FIELD_NUMBER: _ClassVar[int]
     order: _events_pb2.StopOrderEvent
     def __init__(
@@ -490,7 +490,7 @@ class GetStopOrderResponse(_message.Message):
     ) -> None: ...
 
 class ListStopOrdersRequest(_message.Message):
-    __slots__ = ["pagination", "filter"]
+    __slots__ = ("pagination", "filter")
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     FILTER_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
@@ -502,14 +502,14 @@ class ListStopOrdersRequest(_message.Message):
     ) -> None: ...
 
 class StopOrderFilter(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "statuses",
         "expiry_strategies",
         "date_range",
         "party_ids",
         "market_ids",
         "live_only",
-    ]
+    )
     STATUSES_FIELD_NUMBER: _ClassVar[int]
     EXPIRY_STRATEGIES_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
@@ -537,7 +537,7 @@ class StopOrderFilter(_message.Message):
     ) -> None: ...
 
 class StopOrderEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.StopOrderEvent
@@ -549,7 +549,7 @@ class StopOrderEdge(_message.Message):
     ) -> None: ...
 
 class StopOrderConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[StopOrderEdge]
@@ -561,7 +561,7 @@ class StopOrderConnection(_message.Message):
     ) -> None: ...
 
 class ListStopOrdersResponse(_message.Message):
-    __slots__ = ["orders"]
+    __slots__ = ("orders",)
     ORDERS_FIELD_NUMBER: _ClassVar[int]
     orders: StopOrderConnection
     def __init__(
@@ -569,7 +569,7 @@ class ListStopOrdersResponse(_message.Message):
     ) -> None: ...
 
 class ListPositionsRequest(_message.Message):
-    __slots__ = ["party_id", "market_id", "pagination"]
+    __slots__ = ("party_id", "market_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -584,7 +584,7 @@ class ListPositionsRequest(_message.Message):
     ) -> None: ...
 
 class ListPositionsResponse(_message.Message):
-    __slots__ = ["positions"]
+    __slots__ = ("positions",)
     POSITIONS_FIELD_NUMBER: _ClassVar[int]
     positions: PositionConnection
     def __init__(
@@ -592,7 +592,7 @@ class ListPositionsResponse(_message.Message):
     ) -> None: ...
 
 class PositionsFilter(_message.Message):
-    __slots__ = ["party_ids", "market_ids"]
+    __slots__ = ("party_ids", "market_ids")
     PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     party_ids: _containers.RepeatedScalarFieldContainer[str]
@@ -604,7 +604,7 @@ class PositionsFilter(_message.Message):
     ) -> None: ...
 
 class ListAllPositionsRequest(_message.Message):
-    __slots__ = ["filter", "pagination"]
+    __slots__ = ("filter", "pagination")
     FILTER_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     filter: PositionsFilter
@@ -616,7 +616,7 @@ class ListAllPositionsRequest(_message.Message):
     ) -> None: ...
 
 class ListAllPositionsResponse(_message.Message):
-    __slots__ = ["positions"]
+    __slots__ = ("positions",)
     POSITIONS_FIELD_NUMBER: _ClassVar[int]
     positions: PositionConnection
     def __init__(
@@ -624,7 +624,7 @@ class ListAllPositionsResponse(_message.Message):
     ) -> None: ...
 
 class PositionEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Position
@@ -636,7 +636,7 @@ class PositionEdge(_message.Message):
     ) -> None: ...
 
 class PositionConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[PositionEdge]
@@ -648,7 +648,7 @@ class PositionConnection(_message.Message):
     ) -> None: ...
 
 class ObservePositionsRequest(_message.Message):
-    __slots__ = ["party_id", "market_id"]
+    __slots__ = ("party_id", "market_id")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -658,7 +658,7 @@ class ObservePositionsRequest(_message.Message):
     ) -> None: ...
 
 class ObservePositionsResponse(_message.Message):
-    __slots__ = ["snapshot", "updates"]
+    __slots__ = ("snapshot", "updates")
     SNAPSHOT_FIELD_NUMBER: _ClassVar[int]
     UPDATES_FIELD_NUMBER: _ClassVar[int]
     snapshot: PositionSnapshotPage
@@ -670,7 +670,7 @@ class ObservePositionsResponse(_message.Message):
     ) -> None: ...
 
 class PositionSnapshotPage(_message.Message):
-    __slots__ = ["positions", "last_page"]
+    __slots__ = ("positions", "last_page")
     POSITIONS_FIELD_NUMBER: _ClassVar[int]
     LAST_PAGE_FIELD_NUMBER: _ClassVar[int]
     positions: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Position]
@@ -682,7 +682,7 @@ class PositionSnapshotPage(_message.Message):
     ) -> None: ...
 
 class PositionUpdates(_message.Message):
-    __slots__ = ["positions"]
+    __slots__ = ("positions",)
     POSITIONS_FIELD_NUMBER: _ClassVar[int]
     positions: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Position]
     def __init__(
@@ -691,30 +691,34 @@ class PositionUpdates(_message.Message):
     ) -> None: ...
 
 class LedgerEntryFilter(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "close_on_account_filters",
         "from_account_filter",
         "to_account_filter",
         "transfer_types",
-    ]
+        "transfer_id",
+    )
     CLOSE_ON_ACCOUNT_FILTERS_FIELD_NUMBER: _ClassVar[int]
     FROM_ACCOUNT_FILTER_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_FILTER_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_TYPES_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     close_on_account_filters: bool
     from_account_filter: AccountFilter
     to_account_filter: AccountFilter
     transfer_types: _containers.RepeatedScalarFieldContainer[_vega_pb2.TransferType]
+    transfer_id: str
     def __init__(
         self,
         close_on_account_filters: bool = ...,
         from_account_filter: _Optional[_Union[AccountFilter, _Mapping]] = ...,
         to_account_filter: _Optional[_Union[AccountFilter, _Mapping]] = ...,
         transfer_types: _Optional[_Iterable[_Union[_vega_pb2.TransferType, str]]] = ...,
+        transfer_id: _Optional[str] = ...,
     ) -> None: ...
 
 class AggregatedLedgerEntry(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "timestamp",
         "quantity",
         "transfer_type",
@@ -727,7 +731,7 @@ class AggregatedLedgerEntry(_message.Message):
         "to_account_market_id",
         "from_account_balance",
         "to_account_balance",
-    ]
+    )
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     QUANTITY_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_TYPE_FIELD_NUMBER: _ClassVar[int]
@@ -769,7 +773,7 @@ class AggregatedLedgerEntry(_message.Message):
     ) -> None: ...
 
 class ListLedgerEntriesRequest(_message.Message):
-    __slots__ = ["filter", "pagination", "date_range"]
+    __slots__ = ("filter", "pagination", "date_range")
     FILTER_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
@@ -784,7 +788,7 @@ class ListLedgerEntriesRequest(_message.Message):
     ) -> None: ...
 
 class ExportLedgerEntriesRequest(_message.Message):
-    __slots__ = ["party_id", "asset_id", "date_range"]
+    __slots__ = ("party_id", "asset_id", "date_range")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
@@ -799,7 +803,7 @@ class ExportLedgerEntriesRequest(_message.Message):
     ) -> None: ...
 
 class ListLedgerEntriesResponse(_message.Message):
-    __slots__ = ["ledger_entries"]
+    __slots__ = ("ledger_entries",)
     LEDGER_ENTRIES_FIELD_NUMBER: _ClassVar[int]
     ledger_entries: AggregatedLedgerEntriesConnection
     def __init__(
@@ -810,7 +814,7 @@ class ListLedgerEntriesResponse(_message.Message):
     ) -> None: ...
 
 class AggregatedLedgerEntriesEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: AggregatedLedgerEntry
@@ -822,7 +826,7 @@ class AggregatedLedgerEntriesEdge(_message.Message):
     ) -> None: ...
 
 class AggregatedLedgerEntriesConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[AggregatedLedgerEntriesEdge]
@@ -836,7 +840,7 @@ class AggregatedLedgerEntriesConnection(_message.Message):
     ) -> None: ...
 
 class ListBalanceChangesRequest(_message.Message):
-    __slots__ = ["filter", "pagination", "date_range"]
+    __slots__ = ("filter", "pagination", "date_range")
     FILTER_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
@@ -851,7 +855,7 @@ class ListBalanceChangesRequest(_message.Message):
     ) -> None: ...
 
 class ListBalanceChangesResponse(_message.Message):
-    __slots__ = ["balances"]
+    __slots__ = ("balances",)
     BALANCES_FIELD_NUMBER: _ClassVar[int]
     balances: AggregatedBalanceConnection
     def __init__(
@@ -859,7 +863,7 @@ class ListBalanceChangesResponse(_message.Message):
     ) -> None: ...
 
 class GetBalanceHistoryRequest(_message.Message):
-    __slots__ = ["filter", "group_by", "pagination", "date_range"]
+    __slots__ = ("filter", "group_by", "pagination", "date_range")
     FILTER_FIELD_NUMBER: _ClassVar[int]
     GROUP_BY_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -877,7 +881,7 @@ class GetBalanceHistoryRequest(_message.Message):
     ) -> None: ...
 
 class GetBalanceHistoryResponse(_message.Message):
-    __slots__ = ["balances"]
+    __slots__ = ("balances",)
     BALANCES_FIELD_NUMBER: _ClassVar[int]
     balances: AggregatedBalanceConnection
     def __init__(
@@ -885,7 +889,7 @@ class GetBalanceHistoryResponse(_message.Message):
     ) -> None: ...
 
 class AggregatedBalanceEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: AggregatedBalance
@@ -897,7 +901,7 @@ class AggregatedBalanceEdge(_message.Message):
     ) -> None: ...
 
 class AggregatedBalanceConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[AggregatedBalanceEdge]
@@ -909,7 +913,7 @@ class AggregatedBalanceConnection(_message.Message):
     ) -> None: ...
 
 class AccountFilter(_message.Message):
-    __slots__ = ["asset_id", "party_ids", "market_ids", "account_types"]
+    __slots__ = ("asset_id", "party_ids", "market_ids", "account_types")
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
@@ -927,14 +931,14 @@ class AccountFilter(_message.Message):
     ) -> None: ...
 
 class AggregatedBalance(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "timestamp",
         "balance",
         "party_id",
         "asset_id",
         "market_id",
         "account_type",
-    ]
+    )
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -958,13 +962,13 @@ class AggregatedBalance(_message.Message):
     ) -> None: ...
 
 class ObserveMarketsDepthRequest(_message.Message):
-    __slots__ = ["market_ids"]
+    __slots__ = ("market_ids",)
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     market_ids: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, market_ids: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class ObserveMarketsDepthResponse(_message.Message):
-    __slots__ = ["market_depth"]
+    __slots__ = ("market_depth",)
     MARKET_DEPTH_FIELD_NUMBER: _ClassVar[int]
     market_depth: _containers.RepeatedCompositeFieldContainer[_vega_pb2.MarketDepth]
     def __init__(
@@ -975,13 +979,13 @@ class ObserveMarketsDepthResponse(_message.Message):
     ) -> None: ...
 
 class ObserveMarketsDepthUpdatesRequest(_message.Message):
-    __slots__ = ["market_ids"]
+    __slots__ = ("market_ids",)
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     market_ids: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, market_ids: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class ObserveMarketsDepthUpdatesResponse(_message.Message):
-    __slots__ = ["update"]
+    __slots__ = ("update",)
     UPDATE_FIELD_NUMBER: _ClassVar[int]
     update: _containers.RepeatedCompositeFieldContainer[_vega_pb2.MarketDepthUpdate]
     def __init__(
@@ -992,13 +996,13 @@ class ObserveMarketsDepthUpdatesResponse(_message.Message):
     ) -> None: ...
 
 class ObserveMarketsDataRequest(_message.Message):
-    __slots__ = ["market_ids"]
+    __slots__ = ("market_ids",)
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     market_ids: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, market_ids: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class ObserveMarketsDataResponse(_message.Message):
-    __slots__ = ["market_data"]
+    __slots__ = ("market_data",)
     MARKET_DATA_FIELD_NUMBER: _ClassVar[int]
     market_data: _containers.RepeatedCompositeFieldContainer[_vega_pb2.MarketData]
     def __init__(
@@ -1007,7 +1011,7 @@ class ObserveMarketsDataResponse(_message.Message):
     ) -> None: ...
 
 class GetLatestMarketDepthRequest(_message.Message):
-    __slots__ = ["market_id", "max_depth"]
+    __slots__ = ("market_id", "max_depth")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     MAX_DEPTH_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -1017,7 +1021,7 @@ class GetLatestMarketDepthRequest(_message.Message):
     ) -> None: ...
 
 class GetLatestMarketDepthResponse(_message.Message):
-    __slots__ = ["market_id", "buy", "sell", "last_trade", "sequence_number"]
+    __slots__ = ("market_id", "buy", "sell", "last_trade", "sequence_number")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     BUY_FIELD_NUMBER: _ClassVar[int]
     SELL_FIELD_NUMBER: _ClassVar[int]
@@ -1038,11 +1042,11 @@ class GetLatestMarketDepthResponse(_message.Message):
     ) -> None: ...
 
 class ListLatestMarketDataRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ListLatestMarketDataResponse(_message.Message):
-    __slots__ = ["markets_data"]
+    __slots__ = ("markets_data",)
     MARKETS_DATA_FIELD_NUMBER: _ClassVar[int]
     markets_data: _containers.RepeatedCompositeFieldContainer[_vega_pb2.MarketData]
     def __init__(
@@ -1053,13 +1057,13 @@ class ListLatestMarketDataResponse(_message.Message):
     ) -> None: ...
 
 class GetLatestMarketDataRequest(_message.Message):
-    __slots__ = ["market_id"]
+    __slots__ = ("market_id",)
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     def __init__(self, market_id: _Optional[str] = ...) -> None: ...
 
 class GetLatestMarketDataResponse(_message.Message):
-    __slots__ = ["market_data"]
+    __slots__ = ("market_data",)
     MARKET_DATA_FIELD_NUMBER: _ClassVar[int]
     market_data: _vega_pb2.MarketData
     def __init__(
@@ -1067,7 +1071,7 @@ class GetLatestMarketDataResponse(_message.Message):
     ) -> None: ...
 
 class GetMarketDataHistoryByIDRequest(_message.Message):
-    __slots__ = ["market_id", "start_timestamp", "end_timestamp", "pagination"]
+    __slots__ = ("market_id", "start_timestamp", "end_timestamp", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     START_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     END_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -1085,7 +1089,7 @@ class GetMarketDataHistoryByIDRequest(_message.Message):
     ) -> None: ...
 
 class GetMarketDataHistoryByIDResponse(_message.Message):
-    __slots__ = ["market_data"]
+    __slots__ = ("market_data",)
     MARKET_DATA_FIELD_NUMBER: _ClassVar[int]
     market_data: MarketDataConnection
     def __init__(
@@ -1093,7 +1097,7 @@ class GetMarketDataHistoryByIDResponse(_message.Message):
     ) -> None: ...
 
 class MarketDataEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.MarketData
@@ -1105,7 +1109,7 @@ class MarketDataEdge(_message.Message):
     ) -> None: ...
 
 class MarketDataConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[MarketDataEdge]
@@ -1117,7 +1121,7 @@ class MarketDataConnection(_message.Message):
     ) -> None: ...
 
 class ListTransfersRequest(_message.Message):
-    __slots__ = ["pubkey", "direction", "pagination", "is_reward"]
+    __slots__ = ("pubkey", "direction", "pagination", "is_reward")
     PUBKEY_FIELD_NUMBER: _ClassVar[int]
     DIRECTION_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -1135,7 +1139,7 @@ class ListTransfersRequest(_message.Message):
     ) -> None: ...
 
 class ListTransfersResponse(_message.Message):
-    __slots__ = ["transfers"]
+    __slots__ = ("transfers",)
     TRANSFERS_FIELD_NUMBER: _ClassVar[int]
     transfers: TransferConnection
     def __init__(
@@ -1143,7 +1147,7 @@ class ListTransfersResponse(_message.Message):
     ) -> None: ...
 
 class TransferNode(_message.Message):
-    __slots__ = ["transfer", "fees"]
+    __slots__ = ("transfer", "fees")
     TRANSFER_FIELD_NUMBER: _ClassVar[int]
     FEES_FIELD_NUMBER: _ClassVar[int]
     transfer: _events_pb2.Transfer
@@ -1155,7 +1159,7 @@ class TransferNode(_message.Message):
     ) -> None: ...
 
 class TransferEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: TransferNode
@@ -1167,7 +1171,7 @@ class TransferEdge(_message.Message):
     ) -> None: ...
 
 class TransferConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[TransferEdge]
@@ -1179,13 +1183,13 @@ class TransferConnection(_message.Message):
     ) -> None: ...
 
 class GetTransferRequest(_message.Message):
-    __slots__ = ["transfer_id"]
+    __slots__ = ("transfer_id",)
     TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     transfer_id: str
     def __init__(self, transfer_id: _Optional[str] = ...) -> None: ...
 
 class GetTransferResponse(_message.Message):
-    __slots__ = ["transfer", "fees"]
+    __slots__ = ("transfer", "fees")
     TRANSFER_FIELD_NUMBER: _ClassVar[int]
     FEES_FIELD_NUMBER: _ClassVar[int]
     transfer: _events_pb2.Transfer
@@ -1197,11 +1201,11 @@ class GetTransferResponse(_message.Message):
     ) -> None: ...
 
 class GetNetworkLimitsRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetNetworkLimitsResponse(_message.Message):
-    __slots__ = ["limits"]
+    __slots__ = ("limits",)
     LIMITS_FIELD_NUMBER: _ClassVar[int]
     limits: _vega_pb2.NetworkLimits
     def __init__(
@@ -1209,13 +1213,13 @@ class GetNetworkLimitsResponse(_message.Message):
     ) -> None: ...
 
 class ListCandleIntervalsRequest(_message.Message):
-    __slots__ = ["market_id"]
+    __slots__ = ("market_id",)
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     def __init__(self, market_id: _Optional[str] = ...) -> None: ...
 
 class IntervalToCandleId(_message.Message):
-    __slots__ = ["interval", "candle_id"]
+    __slots__ = ("interval", "candle_id")
     INTERVAL_FIELD_NUMBER: _ClassVar[int]
     CANDLE_ID_FIELD_NUMBER: _ClassVar[int]
     interval: str
@@ -1225,7 +1229,7 @@ class IntervalToCandleId(_message.Message):
     ) -> None: ...
 
 class ListCandleIntervalsResponse(_message.Message):
-    __slots__ = ["interval_to_candle_id"]
+    __slots__ = ("interval_to_candle_id",)
     INTERVAL_TO_CANDLE_ID_FIELD_NUMBER: _ClassVar[int]
     interval_to_candle_id: _containers.RepeatedCompositeFieldContainer[
         IntervalToCandleId
@@ -1238,7 +1242,7 @@ class ListCandleIntervalsResponse(_message.Message):
     ) -> None: ...
 
 class Candle(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "start",
         "last_update",
         "high",
@@ -1247,7 +1251,7 @@ class Candle(_message.Message):
         "close",
         "volume",
         "notional",
-    ]
+    )
     START_FIELD_NUMBER: _ClassVar[int]
     LAST_UPDATE_FIELD_NUMBER: _ClassVar[int]
     HIGH_FIELD_NUMBER: _ClassVar[int]
@@ -1277,19 +1281,19 @@ class Candle(_message.Message):
     ) -> None: ...
 
 class ObserveCandleDataRequest(_message.Message):
-    __slots__ = ["candle_id"]
+    __slots__ = ("candle_id",)
     CANDLE_ID_FIELD_NUMBER: _ClassVar[int]
     candle_id: str
     def __init__(self, candle_id: _Optional[str] = ...) -> None: ...
 
 class ObserveCandleDataResponse(_message.Message):
-    __slots__ = ["candle"]
+    __slots__ = ("candle",)
     CANDLE_FIELD_NUMBER: _ClassVar[int]
     candle: Candle
     def __init__(self, candle: _Optional[_Union[Candle, _Mapping]] = ...) -> None: ...
 
 class ListCandleDataRequest(_message.Message):
-    __slots__ = ["candle_id", "from_timestamp", "to_timestamp", "pagination"]
+    __slots__ = ("candle_id", "from_timestamp", "to_timestamp", "pagination")
     CANDLE_ID_FIELD_NUMBER: _ClassVar[int]
     FROM_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     TO_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -1307,7 +1311,7 @@ class ListCandleDataRequest(_message.Message):
     ) -> None: ...
 
 class ListCandleDataResponse(_message.Message):
-    __slots__ = ["candles"]
+    __slots__ = ("candles",)
     CANDLES_FIELD_NUMBER: _ClassVar[int]
     candles: CandleDataConnection
     def __init__(
@@ -1315,7 +1319,7 @@ class ListCandleDataResponse(_message.Message):
     ) -> None: ...
 
 class CandleEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: Candle
@@ -1327,7 +1331,7 @@ class CandleEdge(_message.Message):
     ) -> None: ...
 
 class CandleDataConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[CandleEdge]
@@ -1339,7 +1343,7 @@ class CandleDataConnection(_message.Message):
     ) -> None: ...
 
 class ListVotesRequest(_message.Message):
-    __slots__ = ["party_id", "proposal_id", "pagination"]
+    __slots__ = ("party_id", "proposal_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -1354,7 +1358,7 @@ class ListVotesRequest(_message.Message):
     ) -> None: ...
 
 class ListVotesResponse(_message.Message):
-    __slots__ = ["votes"]
+    __slots__ = ("votes",)
     VOTES_FIELD_NUMBER: _ClassVar[int]
     votes: VoteConnection
     def __init__(
@@ -1362,7 +1366,7 @@ class ListVotesResponse(_message.Message):
     ) -> None: ...
 
 class VoteEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _governance_pb2.Vote
@@ -1374,7 +1378,7 @@ class VoteEdge(_message.Message):
     ) -> None: ...
 
 class VoteConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[VoteEdge]
@@ -1386,7 +1390,7 @@ class VoteConnection(_message.Message):
     ) -> None: ...
 
 class ObserveVotesRequest(_message.Message):
-    __slots__ = ["party_id", "proposal_id"]
+    __slots__ = ("party_id", "proposal_id")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1396,7 +1400,7 @@ class ObserveVotesRequest(_message.Message):
     ) -> None: ...
 
 class ObserveVotesResponse(_message.Message):
-    __slots__ = ["vote"]
+    __slots__ = ("vote",)
     VOTE_FIELD_NUMBER: _ClassVar[int]
     vote: _governance_pb2.Vote
     def __init__(
@@ -1404,7 +1408,7 @@ class ObserveVotesResponse(_message.Message):
     ) -> None: ...
 
 class ListERC20MultiSigSignerAddedBundlesRequest(_message.Message):
-    __slots__ = ["node_id", "submitter", "epoch_seq", "pagination"]
+    __slots__ = ("node_id", "submitter", "epoch_seq", "pagination")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -1422,7 +1426,7 @@ class ListERC20MultiSigSignerAddedBundlesRequest(_message.Message):
     ) -> None: ...
 
 class ListERC20MultiSigSignerAddedBundlesResponse(_message.Message):
-    __slots__ = ["bundles"]
+    __slots__ = ("bundles",)
     BUNDLES_FIELD_NUMBER: _ClassVar[int]
     bundles: ERC20MultiSigSignerAddedConnection
     def __init__(
@@ -1431,7 +1435,7 @@ class ListERC20MultiSigSignerAddedBundlesResponse(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerAddedEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.ERC20MultiSigSignerAdded
@@ -1443,7 +1447,7 @@ class ERC20MultiSigSignerAddedEdge(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerAddedBundleEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: ERC20MultiSigSignerAddedBundle
@@ -1455,7 +1459,7 @@ class ERC20MultiSigSignerAddedBundleEdge(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerAddedConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[
@@ -1471,14 +1475,14 @@ class ERC20MultiSigSignerAddedConnection(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerAddedBundle(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "new_signer",
         "submitter",
         "nonce",
         "timestamp",
         "signatures",
         "epoch_seq",
-    ]
+    )
     NEW_SIGNER_FIELD_NUMBER: _ClassVar[int]
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -1502,7 +1506,7 @@ class ERC20MultiSigSignerAddedBundle(_message.Message):
     ) -> None: ...
 
 class ListERC20MultiSigSignerRemovedBundlesRequest(_message.Message):
-    __slots__ = ["node_id", "submitter", "epoch_seq", "pagination"]
+    __slots__ = ("node_id", "submitter", "epoch_seq", "pagination")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -1520,7 +1524,7 @@ class ListERC20MultiSigSignerRemovedBundlesRequest(_message.Message):
     ) -> None: ...
 
 class ListERC20MultiSigSignerRemovedBundlesResponse(_message.Message):
-    __slots__ = ["bundles"]
+    __slots__ = ("bundles",)
     BUNDLES_FIELD_NUMBER: _ClassVar[int]
     bundles: ERC20MultiSigSignerRemovedConnection
     def __init__(
@@ -1531,7 +1535,7 @@ class ListERC20MultiSigSignerRemovedBundlesResponse(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerRemovedEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.ERC20MultiSigSignerRemoved
@@ -1543,7 +1547,7 @@ class ERC20MultiSigSignerRemovedEdge(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerRemovedBundleEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: ERC20MultiSigSignerRemovedBundle
@@ -1555,7 +1559,7 @@ class ERC20MultiSigSignerRemovedBundleEdge(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerRemovedConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[
@@ -1571,14 +1575,14 @@ class ERC20MultiSigSignerRemovedConnection(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerRemovedBundle(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "old_signer",
         "submitter",
         "nonce",
         "timestamp",
         "signatures",
         "epoch_seq",
-    ]
+    )
     OLD_SIGNER_FIELD_NUMBER: _ClassVar[int]
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -1602,13 +1606,13 @@ class ERC20MultiSigSignerRemovedBundle(_message.Message):
     ) -> None: ...
 
 class GetERC20ListAssetBundleRequest(_message.Message):
-    __slots__ = ["asset_id"]
+    __slots__ = ("asset_id",)
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
     def __init__(self, asset_id: _Optional[str] = ...) -> None: ...
 
 class GetERC20ListAssetBundleResponse(_message.Message):
-    __slots__ = ["asset_source", "vega_asset_id", "nonce", "signatures"]
+    __slots__ = ("asset_source", "vega_asset_id", "nonce", "signatures")
     ASSET_SOURCE_FIELD_NUMBER: _ClassVar[int]
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -1626,20 +1630,20 @@ class GetERC20ListAssetBundleResponse(_message.Message):
     ) -> None: ...
 
 class GetERC20SetAssetLimitsBundleRequest(_message.Message):
-    __slots__ = ["proposal_id"]
+    __slots__ = ("proposal_id",)
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
     proposal_id: str
     def __init__(self, proposal_id: _Optional[str] = ...) -> None: ...
 
 class GetERC20SetAssetLimitsBundleResponse(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "asset_source",
         "vega_asset_id",
         "nonce",
         "lifetime_limit",
         "threshold",
         "signatures",
-    ]
+    )
     ASSET_SOURCE_FIELD_NUMBER: _ClassVar[int]
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -1663,20 +1667,20 @@ class GetERC20SetAssetLimitsBundleResponse(_message.Message):
     ) -> None: ...
 
 class GetERC20WithdrawalApprovalRequest(_message.Message):
-    __slots__ = ["withdrawal_id"]
+    __slots__ = ("withdrawal_id",)
     WITHDRAWAL_ID_FIELD_NUMBER: _ClassVar[int]
     withdrawal_id: str
     def __init__(self, withdrawal_id: _Optional[str] = ...) -> None: ...
 
 class GetERC20WithdrawalApprovalResponse(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "asset_source",
         "amount",
         "nonce",
         "signatures",
         "target_address",
         "creation",
-    ]
+    )
     ASSET_SOURCE_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -1700,13 +1704,13 @@ class GetERC20WithdrawalApprovalResponse(_message.Message):
     ) -> None: ...
 
 class GetLastTradeRequest(_message.Message):
-    __slots__ = ["market_id"]
+    __slots__ = ("market_id",)
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     def __init__(self, market_id: _Optional[str] = ...) -> None: ...
 
 class GetLastTradeResponse(_message.Message):
-    __slots__ = ["trade"]
+    __slots__ = ("trade",)
     TRADE_FIELD_NUMBER: _ClassVar[int]
     trade: _vega_pb2.Trade
     def __init__(
@@ -1714,7 +1718,7 @@ class GetLastTradeResponse(_message.Message):
     ) -> None: ...
 
 class ListTradesRequest(_message.Message):
-    __slots__ = ["market_ids", "order_ids", "party_ids", "pagination", "date_range"]
+    __slots__ = ("market_ids", "order_ids", "party_ids", "pagination", "date_range")
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     ORDER_IDS_FIELD_NUMBER: _ClassVar[int]
     PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
@@ -1735,7 +1739,7 @@ class ListTradesRequest(_message.Message):
     ) -> None: ...
 
 class ListTradesResponse(_message.Message):
-    __slots__ = ["trades"]
+    __slots__ = ("trades",)
     TRADES_FIELD_NUMBER: _ClassVar[int]
     trades: TradeConnection
     def __init__(
@@ -1743,7 +1747,7 @@ class ListTradesResponse(_message.Message):
     ) -> None: ...
 
 class TradeConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[TradeEdge]
@@ -1755,7 +1759,7 @@ class TradeConnection(_message.Message):
     ) -> None: ...
 
 class TradeEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Trade
@@ -1767,7 +1771,7 @@ class TradeEdge(_message.Message):
     ) -> None: ...
 
 class ObserveTradesRequest(_message.Message):
-    __slots__ = ["market_ids", "party_ids"]
+    __slots__ = ("market_ids", "party_ids")
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
     market_ids: _containers.RepeatedScalarFieldContainer[str]
@@ -1779,7 +1783,7 @@ class ObserveTradesRequest(_message.Message):
     ) -> None: ...
 
 class ObserveTradesResponse(_message.Message):
-    __slots__ = ["trades"]
+    __slots__ = ("trades",)
     TRADES_FIELD_NUMBER: _ClassVar[int]
     trades: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Trade]
     def __init__(
@@ -1787,13 +1791,13 @@ class ObserveTradesResponse(_message.Message):
     ) -> None: ...
 
 class GetOracleSpecRequest(_message.Message):
-    __slots__ = ["oracle_spec_id"]
+    __slots__ = ("oracle_spec_id",)
     ORACLE_SPEC_ID_FIELD_NUMBER: _ClassVar[int]
     oracle_spec_id: str
     def __init__(self, oracle_spec_id: _Optional[str] = ...) -> None: ...
 
 class GetOracleSpecResponse(_message.Message):
-    __slots__ = ["oracle_spec"]
+    __slots__ = ("oracle_spec",)
     ORACLE_SPEC_FIELD_NUMBER: _ClassVar[int]
     oracle_spec: _oracle_pb2.OracleSpec
     def __init__(
@@ -1801,7 +1805,7 @@ class GetOracleSpecResponse(_message.Message):
     ) -> None: ...
 
 class ListOracleSpecsRequest(_message.Message):
-    __slots__ = ["pagination"]
+    __slots__ = ("pagination",)
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
     def __init__(
@@ -1809,7 +1813,7 @@ class ListOracleSpecsRequest(_message.Message):
     ) -> None: ...
 
 class ListOracleSpecsResponse(_message.Message):
-    __slots__ = ["oracle_specs"]
+    __slots__ = ("oracle_specs",)
     ORACLE_SPECS_FIELD_NUMBER: _ClassVar[int]
     oracle_specs: OracleSpecsConnection
     def __init__(
@@ -1817,7 +1821,7 @@ class ListOracleSpecsResponse(_message.Message):
     ) -> None: ...
 
 class ListOracleDataRequest(_message.Message):
-    __slots__ = ["oracle_spec_id", "pagination"]
+    __slots__ = ("oracle_spec_id", "pagination")
     ORACLE_SPEC_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     oracle_spec_id: str
@@ -1829,7 +1833,7 @@ class ListOracleDataRequest(_message.Message):
     ) -> None: ...
 
 class ListOracleDataResponse(_message.Message):
-    __slots__ = ["oracle_data"]
+    __slots__ = ("oracle_data",)
     ORACLE_DATA_FIELD_NUMBER: _ClassVar[int]
     oracle_data: OracleDataConnection
     def __init__(
@@ -1837,7 +1841,7 @@ class ListOracleDataResponse(_message.Message):
     ) -> None: ...
 
 class OracleSpecEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _oracle_pb2.OracleSpec
@@ -1849,7 +1853,7 @@ class OracleSpecEdge(_message.Message):
     ) -> None: ...
 
 class OracleSpecsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[OracleSpecEdge]
@@ -1861,7 +1865,7 @@ class OracleSpecsConnection(_message.Message):
     ) -> None: ...
 
 class OracleDataEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _oracle_pb2.OracleData
@@ -1873,7 +1877,7 @@ class OracleDataEdge(_message.Message):
     ) -> None: ...
 
 class OracleDataConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[OracleDataEdge]
@@ -1885,13 +1889,13 @@ class OracleDataConnection(_message.Message):
     ) -> None: ...
 
 class GetMarketRequest(_message.Message):
-    __slots__ = ["market_id"]
+    __slots__ = ("market_id",)
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     def __init__(self, market_id: _Optional[str] = ...) -> None: ...
 
 class GetMarketResponse(_message.Message):
-    __slots__ = ["market"]
+    __slots__ = ("market",)
     MARKET_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     def __init__(
@@ -1899,7 +1903,7 @@ class GetMarketResponse(_message.Message):
     ) -> None: ...
 
 class ListMarketsRequest(_message.Message):
-    __slots__ = ["pagination", "include_settled"]
+    __slots__ = ("pagination", "include_settled")
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     INCLUDE_SETTLED_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
@@ -1911,7 +1915,7 @@ class ListMarketsRequest(_message.Message):
     ) -> None: ...
 
 class ListMarketsResponse(_message.Message):
-    __slots__ = ["markets"]
+    __slots__ = ("markets",)
     MARKETS_FIELD_NUMBER: _ClassVar[int]
     markets: MarketConnection
     def __init__(
@@ -1919,7 +1923,7 @@ class ListMarketsResponse(_message.Message):
     ) -> None: ...
 
 class MarketEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _markets_pb2.Market
@@ -1931,7 +1935,7 @@ class MarketEdge(_message.Message):
     ) -> None: ...
 
 class MarketConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[MarketEdge]
@@ -1943,7 +1947,7 @@ class MarketConnection(_message.Message):
     ) -> None: ...
 
 class ListSuccessorMarketsRequest(_message.Message):
-    __slots__ = ["market_id", "include_full_history", "pagination"]
+    __slots__ = ("market_id", "include_full_history", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     INCLUDE_FULL_HISTORY_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -1958,7 +1962,7 @@ class ListSuccessorMarketsRequest(_message.Message):
     ) -> None: ...
 
 class SuccessorMarket(_message.Message):
-    __slots__ = ["market", "proposals"]
+    __slots__ = ("market", "proposals")
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
@@ -1974,7 +1978,7 @@ class SuccessorMarket(_message.Message):
     ) -> None: ...
 
 class SuccessorMarketEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: SuccessorMarket
@@ -1986,7 +1990,7 @@ class SuccessorMarketEdge(_message.Message):
     ) -> None: ...
 
 class SuccessorMarketConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[SuccessorMarketEdge]
@@ -1998,7 +2002,7 @@ class SuccessorMarketConnection(_message.Message):
     ) -> None: ...
 
 class ListSuccessorMarketsResponse(_message.Message):
-    __slots__ = ["successor_markets"]
+    __slots__ = ("successor_markets",)
     SUCCESSOR_MARKETS_FIELD_NUMBER: _ClassVar[int]
     successor_markets: SuccessorMarketConnection
     def __init__(
@@ -2007,13 +2011,13 @@ class ListSuccessorMarketsResponse(_message.Message):
     ) -> None: ...
 
 class GetPartyRequest(_message.Message):
-    __slots__ = ["party_id"]
+    __slots__ = ("party_id",)
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     def __init__(self, party_id: _Optional[str] = ...) -> None: ...
 
 class GetPartyResponse(_message.Message):
-    __slots__ = ["party"]
+    __slots__ = ("party",)
     PARTY_FIELD_NUMBER: _ClassVar[int]
     party: _vega_pb2.Party
     def __init__(
@@ -2021,7 +2025,7 @@ class GetPartyResponse(_message.Message):
     ) -> None: ...
 
 class ListPartiesRequest(_message.Message):
-    __slots__ = ["party_id", "pagination"]
+    __slots__ = ("party_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -2033,7 +2037,7 @@ class ListPartiesRequest(_message.Message):
     ) -> None: ...
 
 class ListPartiesResponse(_message.Message):
-    __slots__ = ["parties"]
+    __slots__ = ("parties",)
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     parties: PartyConnection
     def __init__(
@@ -2041,7 +2045,7 @@ class ListPartiesResponse(_message.Message):
     ) -> None: ...
 
 class PartyEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Party
@@ -2053,7 +2057,7 @@ class PartyEdge(_message.Message):
     ) -> None: ...
 
 class PartyConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[PartyEdge]
@@ -2065,7 +2069,7 @@ class PartyConnection(_message.Message):
     ) -> None: ...
 
 class OrderEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Order
@@ -2077,7 +2081,7 @@ class OrderEdge(_message.Message):
     ) -> None: ...
 
 class ListMarginLevelsRequest(_message.Message):
-    __slots__ = ["party_id", "market_id", "pagination"]
+    __slots__ = ("party_id", "market_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -2092,7 +2096,7 @@ class ListMarginLevelsRequest(_message.Message):
     ) -> None: ...
 
 class ListMarginLevelsResponse(_message.Message):
-    __slots__ = ["margin_levels"]
+    __slots__ = ("margin_levels",)
     MARGIN_LEVELS_FIELD_NUMBER: _ClassVar[int]
     margin_levels: MarginConnection
     def __init__(
@@ -2100,7 +2104,7 @@ class ListMarginLevelsResponse(_message.Message):
     ) -> None: ...
 
 class ObserveMarginLevelsRequest(_message.Message):
-    __slots__ = ["party_id", "market_id"]
+    __slots__ = ("party_id", "market_id")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -2110,7 +2114,7 @@ class ObserveMarginLevelsRequest(_message.Message):
     ) -> None: ...
 
 class ObserveMarginLevelsResponse(_message.Message):
-    __slots__ = ["margin_levels"]
+    __slots__ = ("margin_levels",)
     MARGIN_LEVELS_FIELD_NUMBER: _ClassVar[int]
     margin_levels: _vega_pb2.MarginLevels
     def __init__(
@@ -2118,7 +2122,7 @@ class ObserveMarginLevelsResponse(_message.Message):
     ) -> None: ...
 
 class OrderConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[OrderEdge]
@@ -2130,7 +2134,7 @@ class OrderConnection(_message.Message):
     ) -> None: ...
 
 class MarginEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.MarginLevels
@@ -2142,7 +2146,7 @@ class MarginEdge(_message.Message):
     ) -> None: ...
 
 class MarginConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[MarginEdge]
@@ -2154,7 +2158,7 @@ class MarginConnection(_message.Message):
     ) -> None: ...
 
 class ListRewardsRequest(_message.Message):
-    __slots__ = ["party_id", "asset_id", "pagination", "from_epoch", "to_epoch"]
+    __slots__ = ("party_id", "asset_id", "pagination", "from_epoch", "to_epoch")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -2175,7 +2179,7 @@ class ListRewardsRequest(_message.Message):
     ) -> None: ...
 
 class ListRewardsResponse(_message.Message):
-    __slots__ = ["rewards"]
+    __slots__ = ("rewards",)
     REWARDS_FIELD_NUMBER: _ClassVar[int]
     rewards: RewardsConnection
     def __init__(
@@ -2183,7 +2187,7 @@ class ListRewardsResponse(_message.Message):
     ) -> None: ...
 
 class RewardEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Reward
@@ -2195,7 +2199,7 @@ class RewardEdge(_message.Message):
     ) -> None: ...
 
 class RewardsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[RewardEdge]
@@ -2207,7 +2211,7 @@ class RewardsConnection(_message.Message):
     ) -> None: ...
 
 class ListRewardSummariesRequest(_message.Message):
-    __slots__ = ["party_id", "asset_id", "pagination"]
+    __slots__ = ("party_id", "asset_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -2222,7 +2226,7 @@ class ListRewardSummariesRequest(_message.Message):
     ) -> None: ...
 
 class ListRewardSummariesResponse(_message.Message):
-    __slots__ = ["summaries"]
+    __slots__ = ("summaries",)
     SUMMARIES_FIELD_NUMBER: _ClassVar[int]
     summaries: _containers.RepeatedCompositeFieldContainer[_vega_pb2.RewardSummary]
     def __init__(
@@ -2233,7 +2237,7 @@ class ListRewardSummariesResponse(_message.Message):
     ) -> None: ...
 
 class RewardSummaryFilter(_message.Message):
-    __slots__ = ["asset_ids", "market_ids", "from_epoch", "to_epoch"]
+    __slots__ = ("asset_ids", "market_ids", "from_epoch", "to_epoch")
     ASSET_IDS_FIELD_NUMBER: _ClassVar[int]
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
     FROM_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2251,7 +2255,7 @@ class RewardSummaryFilter(_message.Message):
     ) -> None: ...
 
 class ListEpochRewardSummariesRequest(_message.Message):
-    __slots__ = ["filter", "pagination"]
+    __slots__ = ("filter", "pagination")
     FILTER_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     filter: RewardSummaryFilter
@@ -2263,7 +2267,7 @@ class ListEpochRewardSummariesRequest(_message.Message):
     ) -> None: ...
 
 class ListEpochRewardSummariesResponse(_message.Message):
-    __slots__ = ["summaries"]
+    __slots__ = ("summaries",)
     SUMMARIES_FIELD_NUMBER: _ClassVar[int]
     summaries: EpochRewardSummaryConnection
     def __init__(
@@ -2271,7 +2275,7 @@ class ListEpochRewardSummariesResponse(_message.Message):
     ) -> None: ...
 
 class EpochRewardSummaryConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[EpochRewardSummaryEdge]
@@ -2283,7 +2287,7 @@ class EpochRewardSummaryConnection(_message.Message):
     ) -> None: ...
 
 class EpochRewardSummaryEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.EpochRewardSummary
@@ -2295,7 +2299,7 @@ class EpochRewardSummaryEdge(_message.Message):
     ) -> None: ...
 
 class ObserveRewardsRequest(_message.Message):
-    __slots__ = ["asset_id", "party_id"]
+    __slots__ = ("asset_id", "party_id")
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
@@ -2305,7 +2309,7 @@ class ObserveRewardsRequest(_message.Message):
     ) -> None: ...
 
 class ObserveRewardsResponse(_message.Message):
-    __slots__ = ["reward"]
+    __slots__ = ("reward",)
     REWARD_FIELD_NUMBER: _ClassVar[int]
     reward: _vega_pb2.Reward
     def __init__(
@@ -2313,13 +2317,13 @@ class ObserveRewardsResponse(_message.Message):
     ) -> None: ...
 
 class GetDepositRequest(_message.Message):
-    __slots__ = ["id"]
+    __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...
 
 class GetDepositResponse(_message.Message):
-    __slots__ = ["deposit"]
+    __slots__ = ("deposit",)
     DEPOSIT_FIELD_NUMBER: _ClassVar[int]
     deposit: _vega_pb2.Deposit
     def __init__(
@@ -2327,7 +2331,7 @@ class GetDepositResponse(_message.Message):
     ) -> None: ...
 
 class ListDepositsRequest(_message.Message):
-    __slots__ = ["party_id", "pagination", "date_range"]
+    __slots__ = ("party_id", "pagination", "date_range")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
@@ -2342,7 +2346,7 @@ class ListDepositsRequest(_message.Message):
     ) -> None: ...
 
 class ListDepositsResponse(_message.Message):
-    __slots__ = ["deposits"]
+    __slots__ = ("deposits",)
     DEPOSITS_FIELD_NUMBER: _ClassVar[int]
     deposits: DepositsConnection
     def __init__(
@@ -2350,7 +2354,7 @@ class ListDepositsResponse(_message.Message):
     ) -> None: ...
 
 class DepositEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Deposit
@@ -2362,7 +2366,7 @@ class DepositEdge(_message.Message):
     ) -> None: ...
 
 class DepositsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[DepositEdge]
@@ -2374,13 +2378,13 @@ class DepositsConnection(_message.Message):
     ) -> None: ...
 
 class GetWithdrawalRequest(_message.Message):
-    __slots__ = ["id"]
+    __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...
 
 class GetWithdrawalResponse(_message.Message):
-    __slots__ = ["withdrawal"]
+    __slots__ = ("withdrawal",)
     WITHDRAWAL_FIELD_NUMBER: _ClassVar[int]
     withdrawal: _vega_pb2.Withdrawal
     def __init__(
@@ -2388,7 +2392,7 @@ class GetWithdrawalResponse(_message.Message):
     ) -> None: ...
 
 class ListWithdrawalsRequest(_message.Message):
-    __slots__ = ["party_id", "pagination", "date_range"]
+    __slots__ = ("party_id", "pagination", "date_range")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
@@ -2403,7 +2407,7 @@ class ListWithdrawalsRequest(_message.Message):
     ) -> None: ...
 
 class ListWithdrawalsResponse(_message.Message):
-    __slots__ = ["withdrawals"]
+    __slots__ = ("withdrawals",)
     WITHDRAWALS_FIELD_NUMBER: _ClassVar[int]
     withdrawals: WithdrawalsConnection
     def __init__(
@@ -2411,7 +2415,7 @@ class ListWithdrawalsResponse(_message.Message):
     ) -> None: ...
 
 class WithdrawalEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Withdrawal
@@ -2423,7 +2427,7 @@ class WithdrawalEdge(_message.Message):
     ) -> None: ...
 
 class WithdrawalsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[WithdrawalEdge]
@@ -2435,13 +2439,13 @@ class WithdrawalsConnection(_message.Message):
     ) -> None: ...
 
 class GetAssetRequest(_message.Message):
-    __slots__ = ["asset_id"]
+    __slots__ = ("asset_id",)
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
     def __init__(self, asset_id: _Optional[str] = ...) -> None: ...
 
 class GetAssetResponse(_message.Message):
-    __slots__ = ["asset"]
+    __slots__ = ("asset",)
     ASSET_FIELD_NUMBER: _ClassVar[int]
     asset: _assets_pb2.Asset
     def __init__(
@@ -2449,7 +2453,7 @@ class GetAssetResponse(_message.Message):
     ) -> None: ...
 
 class ListAssetsRequest(_message.Message):
-    __slots__ = ["asset_id", "pagination"]
+    __slots__ = ("asset_id", "pagination")
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
@@ -2461,7 +2465,7 @@ class ListAssetsRequest(_message.Message):
     ) -> None: ...
 
 class ListAssetsResponse(_message.Message):
-    __slots__ = ["assets"]
+    __slots__ = ("assets",)
     ASSETS_FIELD_NUMBER: _ClassVar[int]
     assets: AssetsConnection
     def __init__(
@@ -2469,7 +2473,7 @@ class ListAssetsResponse(_message.Message):
     ) -> None: ...
 
 class AssetEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _assets_pb2.Asset
@@ -2481,7 +2485,7 @@ class AssetEdge(_message.Message):
     ) -> None: ...
 
 class AssetsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[AssetEdge]
@@ -2493,7 +2497,7 @@ class AssetsConnection(_message.Message):
     ) -> None: ...
 
 class ListLiquidityProvisionsRequest(_message.Message):
-    __slots__ = ["market_id", "party_id", "reference", "live", "pagination"]
+    __slots__ = ("market_id", "party_id", "reference", "live", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
@@ -2514,7 +2518,7 @@ class ListLiquidityProvisionsRequest(_message.Message):
     ) -> None: ...
 
 class ListAllLiquidityProvisionsRequest(_message.Message):
-    __slots__ = ["market_id", "party_id", "reference", "live", "pagination"]
+    __slots__ = ("market_id", "party_id", "reference", "live", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
@@ -2535,7 +2539,7 @@ class ListAllLiquidityProvisionsRequest(_message.Message):
     ) -> None: ...
 
 class ListLiquidityProvisionsResponse(_message.Message):
-    __slots__ = ["liquidity_provisions"]
+    __slots__ = ("liquidity_provisions",)
     LIQUIDITY_PROVISIONS_FIELD_NUMBER: _ClassVar[int]
     liquidity_provisions: LiquidityProvisionsConnection
     def __init__(
@@ -2546,7 +2550,7 @@ class ListLiquidityProvisionsResponse(_message.Message):
     ) -> None: ...
 
 class ListAllLiquidityProvisionsResponse(_message.Message):
-    __slots__ = ["liquidity_provisions"]
+    __slots__ = ("liquidity_provisions",)
     LIQUIDITY_PROVISIONS_FIELD_NUMBER: _ClassVar[int]
     liquidity_provisions: LiquidityProvisionsWithPendingConnection
     def __init__(
@@ -2557,7 +2561,7 @@ class ListAllLiquidityProvisionsResponse(_message.Message):
     ) -> None: ...
 
 class LiquidityProvision(_message.Message):
-    __slots__ = ["current", "pending"]
+    __slots__ = ("current", "pending")
     CURRENT_FIELD_NUMBER: _ClassVar[int]
     PENDING_FIELD_NUMBER: _ClassVar[int]
     current: _vega_pb2.LiquidityProvision
@@ -2569,7 +2573,7 @@ class LiquidityProvision(_message.Message):
     ) -> None: ...
 
 class LiquidityProvisionsEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.LiquidityProvision
@@ -2581,7 +2585,7 @@ class LiquidityProvisionsEdge(_message.Message):
     ) -> None: ...
 
 class LiquidityProvisionWithPendingEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: LiquidityProvision
@@ -2593,7 +2597,7 @@ class LiquidityProvisionWithPendingEdge(_message.Message):
     ) -> None: ...
 
 class LiquidityProvisionsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[LiquidityProvisionsEdge]
@@ -2605,7 +2609,7 @@ class LiquidityProvisionsConnection(_message.Message):
     ) -> None: ...
 
 class LiquidityProvisionsWithPendingConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[
@@ -2621,7 +2625,7 @@ class LiquidityProvisionsWithPendingConnection(_message.Message):
     ) -> None: ...
 
 class ObserveLiquidityProvisionsRequest(_message.Message):
-    __slots__ = ["market_id", "party_id"]
+    __slots__ = ("market_id", "party_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -2631,7 +2635,7 @@ class ObserveLiquidityProvisionsRequest(_message.Message):
     ) -> None: ...
 
 class ObserveLiquidityProvisionsResponse(_message.Message):
-    __slots__ = ["liquidity_provisions"]
+    __slots__ = ("liquidity_provisions",)
     LIQUIDITY_PROVISIONS_FIELD_NUMBER: _ClassVar[int]
     liquidity_provisions: _containers.RepeatedCompositeFieldContainer[
         _vega_pb2.LiquidityProvision
@@ -2644,7 +2648,7 @@ class ObserveLiquidityProvisionsResponse(_message.Message):
     ) -> None: ...
 
 class ListLiquidityProvidersRequest(_message.Message):
-    __slots__ = ["market_id", "party_id", "pagination"]
+    __slots__ = ("market_id", "party_id", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -2659,7 +2663,7 @@ class ListLiquidityProvidersRequest(_message.Message):
     ) -> None: ...
 
 class LiquidityProvider(_message.Message):
-    __slots__ = ["party_id", "market_id", "fee_share", "sla"]
+    __slots__ = ("party_id", "market_id", "fee_share", "sla")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     FEE_SHARE_FIELD_NUMBER: _ClassVar[int]
@@ -2679,7 +2683,7 @@ class LiquidityProvider(_message.Message):
     ) -> None: ...
 
 class LiquidityProviderEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: LiquidityProvider
@@ -2691,7 +2695,7 @@ class LiquidityProviderEdge(_message.Message):
     ) -> None: ...
 
 class LiquidityProviderConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[LiquidityProviderEdge]
@@ -2703,7 +2707,7 @@ class LiquidityProviderConnection(_message.Message):
     ) -> None: ...
 
 class ListLiquidityProvidersResponse(_message.Message):
-    __slots__ = ["liquidity_providers"]
+    __slots__ = ("liquidity_providers",)
     LIQUIDITY_PROVIDERS_FIELD_NUMBER: _ClassVar[int]
     liquidity_providers: LiquidityProviderConnection
     def __init__(
@@ -2714,7 +2718,7 @@ class ListLiquidityProvidersResponse(_message.Message):
     ) -> None: ...
 
 class ListPaidLiquidityFeesRequest(_message.Message):
-    __slots__ = ["market_id", "asset_id", "epoch_seq", "party_ids", "pagination"]
+    __slots__ = ("market_id", "asset_id", "epoch_seq", "party_ids", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -2735,7 +2739,7 @@ class ListPaidLiquidityFeesRequest(_message.Message):
     ) -> None: ...
 
 class ListPaidLiquidityFeesResponse(_message.Message):
-    __slots__ = ["paid_liquidity_fees"]
+    __slots__ = ("paid_liquidity_fees",)
     PAID_LIQUIDITY_FEES_FIELD_NUMBER: _ClassVar[int]
     paid_liquidity_fees: PaidLiquidityFeesConnection
     def __init__(
@@ -2746,7 +2750,7 @@ class ListPaidLiquidityFeesResponse(_message.Message):
     ) -> None: ...
 
 class PaidLiquidityFeesEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.PaidLiquidityFeesStats
@@ -2758,7 +2762,7 @@ class PaidLiquidityFeesEdge(_message.Message):
     ) -> None: ...
 
 class PaidLiquidityFeesConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[PaidLiquidityFeesEdge]
@@ -2770,7 +2774,7 @@ class PaidLiquidityFeesConnection(_message.Message):
     ) -> None: ...
 
 class GetGovernanceDataRequest(_message.Message):
-    __slots__ = ["proposal_id", "reference"]
+    __slots__ = ("proposal_id", "reference")
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
     proposal_id: str
@@ -2780,7 +2784,7 @@ class GetGovernanceDataRequest(_message.Message):
     ) -> None: ...
 
 class GetGovernanceDataResponse(_message.Message):
-    __slots__ = ["data"]
+    __slots__ = ("data",)
     DATA_FIELD_NUMBER: _ClassVar[int]
     data: _governance_pb2.GovernanceData
     def __init__(
@@ -2788,16 +2792,16 @@ class GetGovernanceDataResponse(_message.Message):
     ) -> None: ...
 
 class ListGovernanceDataRequest(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "proposal_state",
         "proposal_type",
         "proposer_party_id",
         "proposal_reference",
         "pagination",
-    ]
+    )
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_ALL: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_NEW_MARKET: _ClassVar[ListGovernanceDataRequest.Type]
@@ -2813,6 +2817,7 @@ class ListGovernanceDataRequest(_message.Message):
         TYPE_UPDATE_MARKET_STATE: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_REFERRAL_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
+
     TYPE_UNSPECIFIED: ListGovernanceDataRequest.Type
     TYPE_ALL: ListGovernanceDataRequest.Type
     TYPE_NEW_MARKET: ListGovernanceDataRequest.Type
@@ -2848,7 +2853,7 @@ class ListGovernanceDataRequest(_message.Message):
     ) -> None: ...
 
 class ListGovernanceDataResponse(_message.Message):
-    __slots__ = ["connection"]
+    __slots__ = ("connection",)
     CONNECTION_FIELD_NUMBER: _ClassVar[int]
     connection: GovernanceDataConnection
     def __init__(
@@ -2856,7 +2861,7 @@ class ListGovernanceDataResponse(_message.Message):
     ) -> None: ...
 
 class GovernanceDataEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _governance_pb2.GovernanceData
@@ -2868,7 +2873,7 @@ class GovernanceDataEdge(_message.Message):
     ) -> None: ...
 
 class GovernanceDataConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[GovernanceDataEdge]
@@ -2880,13 +2885,13 @@ class GovernanceDataConnection(_message.Message):
     ) -> None: ...
 
 class ObserveGovernanceRequest(_message.Message):
-    __slots__ = ["party_id"]
+    __slots__ = ("party_id",)
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     def __init__(self, party_id: _Optional[str] = ...) -> None: ...
 
 class ObserveGovernanceResponse(_message.Message):
-    __slots__ = ["data"]
+    __slots__ = ("data",)
     DATA_FIELD_NUMBER: _ClassVar[int]
     data: _governance_pb2.GovernanceData
     def __init__(
@@ -2894,7 +2899,7 @@ class ObserveGovernanceResponse(_message.Message):
     ) -> None: ...
 
 class ListDelegationsRequest(_message.Message):
-    __slots__ = ["party_id", "node_id", "epoch_id", "pagination"]
+    __slots__ = ("party_id", "node_id", "epoch_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_ID_FIELD_NUMBER: _ClassVar[int]
@@ -2912,7 +2917,7 @@ class ListDelegationsRequest(_message.Message):
     ) -> None: ...
 
 class ListDelegationsResponse(_message.Message):
-    __slots__ = ["delegations"]
+    __slots__ = ("delegations",)
     DELEGATIONS_FIELD_NUMBER: _ClassVar[int]
     delegations: DelegationsConnection
     def __init__(
@@ -2920,7 +2925,7 @@ class ListDelegationsResponse(_message.Message):
     ) -> None: ...
 
 class DelegationEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Delegation
@@ -2932,7 +2937,7 @@ class DelegationEdge(_message.Message):
     ) -> None: ...
 
 class DelegationsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[DelegationEdge]
@@ -2944,7 +2949,7 @@ class DelegationsConnection(_message.Message):
     ) -> None: ...
 
 class ObserveDelegationsRequest(_message.Message):
-    __slots__ = ["party_id", "node_id"]
+    __slots__ = ("party_id", "node_id")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -2954,7 +2959,7 @@ class ObserveDelegationsRequest(_message.Message):
     ) -> None: ...
 
 class ObserveDelegationsResponse(_message.Message):
-    __slots__ = ["delegation"]
+    __slots__ = ("delegation",)
     DELEGATION_FIELD_NUMBER: _ClassVar[int]
     delegation: _vega_pb2.Delegation
     def __init__(
@@ -2962,7 +2967,7 @@ class ObserveDelegationsResponse(_message.Message):
     ) -> None: ...
 
 class NodeBasic(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "pub_key",
         "tm_pub_key",
@@ -2972,7 +2977,7 @@ class NodeBasic(_message.Message):
         "status",
         "name",
         "avatar_url",
-    ]
+    )
     ID_FIELD_NUMBER: _ClassVar[int]
     PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     TM_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -3005,11 +3010,11 @@ class NodeBasic(_message.Message):
     ) -> None: ...
 
 class GetNetworkDataRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetNetworkDataResponse(_message.Message):
-    __slots__ = ["node_data"]
+    __slots__ = ("node_data",)
     NODE_DATA_FIELD_NUMBER: _ClassVar[int]
     node_data: _vega_pb2.NodeData
     def __init__(
@@ -3017,13 +3022,13 @@ class GetNetworkDataResponse(_message.Message):
     ) -> None: ...
 
 class GetNodeRequest(_message.Message):
-    __slots__ = ["id"]
+    __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...
 
 class GetNodeResponse(_message.Message):
-    __slots__ = ["node"]
+    __slots__ = ("node",)
     NODE_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Node
     def __init__(
@@ -3031,7 +3036,7 @@ class GetNodeResponse(_message.Message):
     ) -> None: ...
 
 class ListNodesRequest(_message.Message):
-    __slots__ = ["epoch_seq", "pagination"]
+    __slots__ = ("epoch_seq", "pagination")
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     epoch_seq: int
@@ -3043,7 +3048,7 @@ class ListNodesRequest(_message.Message):
     ) -> None: ...
 
 class ListNodesResponse(_message.Message):
-    __slots__ = ["nodes"]
+    __slots__ = ("nodes",)
     NODES_FIELD_NUMBER: _ClassVar[int]
     nodes: NodesConnection
     def __init__(
@@ -3051,7 +3056,7 @@ class ListNodesResponse(_message.Message):
     ) -> None: ...
 
 class NodeEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.Node
@@ -3063,7 +3068,7 @@ class NodeEdge(_message.Message):
     ) -> None: ...
 
 class NodesConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[NodeEdge]
@@ -3075,7 +3080,7 @@ class NodesConnection(_message.Message):
     ) -> None: ...
 
 class ListNodeSignaturesRequest(_message.Message):
-    __slots__ = ["id", "pagination"]
+    __slots__ = ("id", "pagination")
     ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     id: str
@@ -3087,7 +3092,7 @@ class ListNodeSignaturesRequest(_message.Message):
     ) -> None: ...
 
 class ListNodeSignaturesResponse(_message.Message):
-    __slots__ = ["signatures"]
+    __slots__ = ("signatures",)
     SIGNATURES_FIELD_NUMBER: _ClassVar[int]
     signatures: NodeSignaturesConnection
     def __init__(
@@ -3095,7 +3100,7 @@ class ListNodeSignaturesResponse(_message.Message):
     ) -> None: ...
 
 class NodeSignatureEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _validator_commands_pb2.NodeSignature
@@ -3107,7 +3112,7 @@ class NodeSignatureEdge(_message.Message):
     ) -> None: ...
 
 class NodeSignaturesConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[NodeSignatureEdge]
@@ -3119,7 +3124,7 @@ class NodeSignaturesConnection(_message.Message):
     ) -> None: ...
 
 class GetEpochRequest(_message.Message):
-    __slots__ = ["id", "block"]
+    __slots__ = ("id", "block")
     ID_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
     id: int
@@ -3129,7 +3134,7 @@ class GetEpochRequest(_message.Message):
     ) -> None: ...
 
 class GetEpochResponse(_message.Message):
-    __slots__ = ["epoch"]
+    __slots__ = ("epoch",)
     EPOCH_FIELD_NUMBER: _ClassVar[int]
     epoch: _vega_pb2.Epoch
     def __init__(
@@ -3137,7 +3142,7 @@ class GetEpochResponse(_message.Message):
     ) -> None: ...
 
 class EstimateFeeRequest(_message.Message):
-    __slots__ = ["market_id", "price", "size"]
+    __slots__ = ("market_id", "price", "size")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
@@ -3152,7 +3157,7 @@ class EstimateFeeRequest(_message.Message):
     ) -> None: ...
 
 class EstimateFeeResponse(_message.Message):
-    __slots__ = ["fee"]
+    __slots__ = ("fee",)
     FEE_FIELD_NUMBER: _ClassVar[int]
     fee: _vega_pb2.Fee
     def __init__(
@@ -3160,7 +3165,7 @@ class EstimateFeeResponse(_message.Message):
     ) -> None: ...
 
 class EstimateMarginRequest(_message.Message):
-    __slots__ = ["market_id", "party_id", "side", "type", "size", "price"]
+    __slots__ = ("market_id", "party_id", "side", "type", "size", "price")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     SIDE_FIELD_NUMBER: _ClassVar[int]
@@ -3184,7 +3189,7 @@ class EstimateMarginRequest(_message.Message):
     ) -> None: ...
 
 class EstimateMarginResponse(_message.Message):
-    __slots__ = ["margin_levels"]
+    __slots__ = ("margin_levels",)
     MARGIN_LEVELS_FIELD_NUMBER: _ClassVar[int]
     margin_levels: _vega_pb2.MarginLevels
     def __init__(
@@ -3192,7 +3197,7 @@ class EstimateMarginResponse(_message.Message):
     ) -> None: ...
 
 class ListNetworkParametersRequest(_message.Message):
-    __slots__ = ["pagination"]
+    __slots__ = ("pagination",)
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
     def __init__(
@@ -3200,7 +3205,7 @@ class ListNetworkParametersRequest(_message.Message):
     ) -> None: ...
 
 class ListNetworkParametersResponse(_message.Message):
-    __slots__ = ["network_parameters"]
+    __slots__ = ("network_parameters",)
     NETWORK_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     network_parameters: NetworkParameterConnection
     def __init__(
@@ -3211,13 +3216,13 @@ class ListNetworkParametersResponse(_message.Message):
     ) -> None: ...
 
 class GetNetworkParameterRequest(_message.Message):
-    __slots__ = ["key"]
+    __slots__ = ("key",)
     KEY_FIELD_NUMBER: _ClassVar[int]
     key: str
     def __init__(self, key: _Optional[str] = ...) -> None: ...
 
 class GetNetworkParameterResponse(_message.Message):
-    __slots__ = ["network_parameter"]
+    __slots__ = ("network_parameter",)
     NETWORK_PARAMETER_FIELD_NUMBER: _ClassVar[int]
     network_parameter: _vega_pb2.NetworkParameter
     def __init__(
@@ -3228,7 +3233,7 @@ class GetNetworkParameterResponse(_message.Message):
     ) -> None: ...
 
 class NetworkParameterEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _vega_pb2.NetworkParameter
@@ -3240,7 +3245,7 @@ class NetworkParameterEdge(_message.Message):
     ) -> None: ...
 
 class NetworkParameterConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[NetworkParameterEdge]
@@ -3252,7 +3257,7 @@ class NetworkParameterConnection(_message.Message):
     ) -> None: ...
 
 class Checkpoint(_message.Message):
-    __slots__ = ["hash", "block_hash", "at_block"]
+    __slots__ = ("hash", "block_hash", "at_block")
     HASH_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HASH_FIELD_NUMBER: _ClassVar[int]
     AT_BLOCK_FIELD_NUMBER: _ClassVar[int]
@@ -3267,7 +3272,7 @@ class Checkpoint(_message.Message):
     ) -> None: ...
 
 class ListCheckpointsRequest(_message.Message):
-    __slots__ = ["pagination"]
+    __slots__ = ("pagination",)
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
     def __init__(
@@ -3275,7 +3280,7 @@ class ListCheckpointsRequest(_message.Message):
     ) -> None: ...
 
 class ListCheckpointsResponse(_message.Message):
-    __slots__ = ["checkpoints"]
+    __slots__ = ("checkpoints",)
     CHECKPOINTS_FIELD_NUMBER: _ClassVar[int]
     checkpoints: CheckpointsConnection
     def __init__(
@@ -3283,7 +3288,7 @@ class ListCheckpointsResponse(_message.Message):
     ) -> None: ...
 
 class CheckpointEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: Checkpoint
@@ -3295,7 +3300,7 @@ class CheckpointEdge(_message.Message):
     ) -> None: ...
 
 class CheckpointsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[CheckpointEdge]
@@ -3307,7 +3312,7 @@ class CheckpointsConnection(_message.Message):
     ) -> None: ...
 
 class GetStakeRequest(_message.Message):
-    __slots__ = ["party_id", "pagination"]
+    __slots__ = ("party_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -3319,7 +3324,7 @@ class GetStakeRequest(_message.Message):
     ) -> None: ...
 
 class GetStakeResponse(_message.Message):
-    __slots__ = ["current_stake_available", "stake_linkings"]
+    __slots__ = ("current_stake_available", "stake_linkings")
     CURRENT_STAKE_AVAILABLE_FIELD_NUMBER: _ClassVar[int]
     STAKE_LINKINGS_FIELD_NUMBER: _ClassVar[int]
     current_stake_available: str
@@ -3331,7 +3336,7 @@ class GetStakeResponse(_message.Message):
     ) -> None: ...
 
 class StakeLinkingEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.StakeLinking
@@ -3343,7 +3348,7 @@ class StakeLinkingEdge(_message.Message):
     ) -> None: ...
 
 class StakesConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[StakeLinkingEdge]
@@ -3355,13 +3360,13 @@ class StakesConnection(_message.Message):
     ) -> None: ...
 
 class GetRiskFactorsRequest(_message.Message):
-    __slots__ = ["market_id"]
+    __slots__ = ("market_id",)
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     def __init__(self, market_id: _Optional[str] = ...) -> None: ...
 
 class GetRiskFactorsResponse(_message.Message):
-    __slots__ = ["risk_factor"]
+    __slots__ = ("risk_factor",)
     RISK_FACTOR_FIELD_NUMBER: _ClassVar[int]
     risk_factor: _vega_pb2.RiskFactor
     def __init__(
@@ -3369,7 +3374,7 @@ class GetRiskFactorsResponse(_message.Message):
     ) -> None: ...
 
 class ObserveEventBusRequest(_message.Message):
-    __slots__ = ["type", "market_id", "party_id", "batch_size"]
+    __slots__ = ("type", "market_id", "party_id", "batch_size")
     TYPE_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -3387,7 +3392,7 @@ class ObserveEventBusRequest(_message.Message):
     ) -> None: ...
 
 class ObserveEventBusResponse(_message.Message):
-    __slots__ = ["events"]
+    __slots__ = ("events",)
     EVENTS_FIELD_NUMBER: _ClassVar[int]
     events: _containers.RepeatedCompositeFieldContainer[_events_pb2.BusEvent]
     def __init__(
@@ -3395,11 +3400,11 @@ class ObserveEventBusResponse(_message.Message):
     ) -> None: ...
 
 class ObserveLedgerMovementsRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ObserveLedgerMovementsResponse(_message.Message):
-    __slots__ = ["ledger_movement"]
+    __slots__ = ("ledger_movement",)
     LEDGER_MOVEMENT_FIELD_NUMBER: _ClassVar[int]
     ledger_movement: _vega_pb2.LedgerMovement
     def __init__(
@@ -3408,7 +3413,7 @@ class ObserveLedgerMovementsResponse(_message.Message):
     ) -> None: ...
 
 class ListKeyRotationsRequest(_message.Message):
-    __slots__ = ["node_id", "pagination"]
+    __slots__ = ("node_id", "pagination")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     node_id: str
@@ -3420,7 +3425,7 @@ class ListKeyRotationsRequest(_message.Message):
     ) -> None: ...
 
 class ListKeyRotationsResponse(_message.Message):
-    __slots__ = ["rotations"]
+    __slots__ = ("rotations",)
     ROTATIONS_FIELD_NUMBER: _ClassVar[int]
     rotations: KeyRotationConnection
     def __init__(
@@ -3428,7 +3433,7 @@ class ListKeyRotationsResponse(_message.Message):
     ) -> None: ...
 
 class KeyRotationEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.KeyRotation
@@ -3440,7 +3445,7 @@ class KeyRotationEdge(_message.Message):
     ) -> None: ...
 
 class KeyRotationConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[KeyRotationEdge]
@@ -3452,7 +3457,7 @@ class KeyRotationConnection(_message.Message):
     ) -> None: ...
 
 class ListEthereumKeyRotationsRequest(_message.Message):
-    __slots__ = ["node_id", "pagination"]
+    __slots__ = ("node_id", "pagination")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     node_id: str
@@ -3464,7 +3469,7 @@ class ListEthereumKeyRotationsRequest(_message.Message):
     ) -> None: ...
 
 class ListEthereumKeyRotationsResponse(_message.Message):
-    __slots__ = ["key_rotations"]
+    __slots__ = ("key_rotations",)
     KEY_ROTATIONS_FIELD_NUMBER: _ClassVar[int]
     key_rotations: EthereumKeyRotationsConnection
     def __init__(
@@ -3475,7 +3480,7 @@ class ListEthereumKeyRotationsResponse(_message.Message):
     ) -> None: ...
 
 class EthereumKeyRotationsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[EthereumKeyRotationEdge]
@@ -3487,7 +3492,7 @@ class EthereumKeyRotationsConnection(_message.Message):
     ) -> None: ...
 
 class EthereumKeyRotationEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.EthereumKeyRotation
@@ -3499,17 +3504,17 @@ class EthereumKeyRotationEdge(_message.Message):
     ) -> None: ...
 
 class GetVegaTimeRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetVegaTimeResponse(_message.Message):
-    __slots__ = ["timestamp"]
+    __slots__ = ("timestamp",)
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     timestamp: int
     def __init__(self, timestamp: _Optional[int] = ...) -> None: ...
 
 class DateRange(_message.Message):
-    __slots__ = ["start_timestamp", "end_timestamp"]
+    __slots__ = ("start_timestamp", "end_timestamp")
     START_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     END_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     start_timestamp: int
@@ -3519,17 +3524,17 @@ class DateRange(_message.Message):
     ) -> None: ...
 
 class GetProtocolUpgradeStatusRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetProtocolUpgradeStatusResponse(_message.Message):
-    __slots__ = ["ready"]
+    __slots__ = ("ready",)
     READY_FIELD_NUMBER: _ClassVar[int]
     ready: bool
     def __init__(self, ready: bool = ...) -> None: ...
 
 class ListProtocolUpgradeProposalsRequest(_message.Message):
-    __slots__ = ["status", "approved_by", "pagination"]
+    __slots__ = ("status", "approved_by", "pagination")
     STATUS_FIELD_NUMBER: _ClassVar[int]
     APPROVED_BY_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -3544,7 +3549,7 @@ class ListProtocolUpgradeProposalsRequest(_message.Message):
     ) -> None: ...
 
 class ListProtocolUpgradeProposalsResponse(_message.Message):
-    __slots__ = ["protocol_upgrade_proposals"]
+    __slots__ = ("protocol_upgrade_proposals",)
     PROTOCOL_UPGRADE_PROPOSALS_FIELD_NUMBER: _ClassVar[int]
     protocol_upgrade_proposals: ProtocolUpgradeProposalConnection
     def __init__(
@@ -3555,7 +3560,7 @@ class ListProtocolUpgradeProposalsResponse(_message.Message):
     ) -> None: ...
 
 class ProtocolUpgradeProposalConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[ProtocolUpgradeProposalEdge]
@@ -3569,7 +3574,7 @@ class ProtocolUpgradeProposalConnection(_message.Message):
     ) -> None: ...
 
 class ProtocolUpgradeProposalEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.ProtocolUpgradeEvent
@@ -3581,7 +3586,7 @@ class ProtocolUpgradeProposalEdge(_message.Message):
     ) -> None: ...
 
 class ListCoreSnapshotsRequest(_message.Message):
-    __slots__ = ["pagination"]
+    __slots__ = ("pagination",)
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     pagination: Pagination
     def __init__(
@@ -3589,7 +3594,7 @@ class ListCoreSnapshotsRequest(_message.Message):
     ) -> None: ...
 
 class ListCoreSnapshotsResponse(_message.Message):
-    __slots__ = ["core_snapshots"]
+    __slots__ = ("core_snapshots",)
     CORE_SNAPSHOTS_FIELD_NUMBER: _ClassVar[int]
     core_snapshots: CoreSnapshotConnection
     def __init__(
@@ -3597,7 +3602,7 @@ class ListCoreSnapshotsResponse(_message.Message):
     ) -> None: ...
 
 class CoreSnapshotConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[CoreSnapshotEdge]
@@ -3609,7 +3614,7 @@ class CoreSnapshotConnection(_message.Message):
     ) -> None: ...
 
 class CoreSnapshotEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.CoreSnapshotData
@@ -3621,14 +3626,14 @@ class CoreSnapshotEdge(_message.Message):
     ) -> None: ...
 
 class HistorySegment(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "from_height",
         "to_height",
         "history_segment_id",
         "previous_history_segment_id",
         "database_version",
         "chain_id",
-    ]
+    )
     FROM_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     TO_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     HISTORY_SEGMENT_ID_FIELD_NUMBER: _ClassVar[int]
@@ -3652,11 +3657,11 @@ class HistorySegment(_message.Message):
     ) -> None: ...
 
 class GetMostRecentNetworkHistorySegmentRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetMostRecentNetworkHistorySegmentResponse(_message.Message):
-    __slots__ = ["segment", "swarm_key_seed"]
+    __slots__ = ("segment", "swarm_key_seed")
     SEGMENT_FIELD_NUMBER: _ClassVar[int]
     SWARM_KEY_SEED_FIELD_NUMBER: _ClassVar[int]
     segment: HistorySegment
@@ -3668,11 +3673,11 @@ class GetMostRecentNetworkHistorySegmentResponse(_message.Message):
     ) -> None: ...
 
 class ListAllNetworkHistorySegmentsRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class ListAllNetworkHistorySegmentsResponse(_message.Message):
-    __slots__ = ["segments"]
+    __slots__ = ("segments",)
     SEGMENTS_FIELD_NUMBER: _ClassVar[int]
     segments: _containers.RepeatedCompositeFieldContainer[HistorySegment]
     def __init__(
@@ -3680,21 +3685,21 @@ class ListAllNetworkHistorySegmentsResponse(_message.Message):
     ) -> None: ...
 
 class GetActiveNetworkHistoryPeerAddressesRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetActiveNetworkHistoryPeerAddressesResponse(_message.Message):
-    __slots__ = ["ip_addresses"]
+    __slots__ = ("ip_addresses",)
     IP_ADDRESSES_FIELD_NUMBER: _ClassVar[int]
     ip_addresses: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, ip_addresses: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class GetNetworkHistoryStatusRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetNetworkHistoryStatusResponse(_message.Message):
-    __slots__ = ["ipfs_address", "swarm_key", "swarm_key_seed", "connected_peers"]
+    __slots__ = ("ipfs_address", "swarm_key", "swarm_key_seed", "connected_peers")
     IPFS_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     SWARM_KEY_FIELD_NUMBER: _ClassVar[int]
     SWARM_KEY_SEED_FIELD_NUMBER: _ClassVar[int]
@@ -3712,17 +3717,17 @@ class GetNetworkHistoryStatusResponse(_message.Message):
     ) -> None: ...
 
 class GetNetworkHistoryBootstrapPeersRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetNetworkHistoryBootstrapPeersResponse(_message.Message):
-    __slots__ = ["bootstrap_peers"]
+    __slots__ = ("bootstrap_peers",)
     BOOTSTRAP_PEERS_FIELD_NUMBER: _ClassVar[int]
     bootstrap_peers: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, bootstrap_peers: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class ExportNetworkHistoryRequest(_message.Message):
-    __slots__ = ["from_block", "to_block", "table"]
+    __slots__ = ("from_block", "to_block", "table")
     FROM_BLOCK_FIELD_NUMBER: _ClassVar[int]
     TO_BLOCK_FIELD_NUMBER: _ClassVar[int]
     TABLE_FIELD_NUMBER: _ClassVar[int]
@@ -3737,13 +3742,13 @@ class ExportNetworkHistoryRequest(_message.Message):
     ) -> None: ...
 
 class ListEntitiesRequest(_message.Message):
-    __slots__ = ["transaction_hash"]
+    __slots__ = ("transaction_hash",)
     TRANSACTION_HASH_FIELD_NUMBER: _ClassVar[int]
     transaction_hash: str
     def __init__(self, transaction_hash: _Optional[str] = ...) -> None: ...
 
 class ListEntitiesResponse(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "accounts",
         "orders",
         "positions",
@@ -3772,7 +3777,7 @@ class ListEntitiesResponse(_message.Message):
         "key_rotations",
         "ethereum_key_rotations",
         "protocol_upgrade_proposals",
-    ]
+    )
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     ORDERS_FIELD_NUMBER: _ClassVar[int]
     POSITIONS_FIELD_NUMBER: _ClassVar[int]
@@ -3902,7 +3907,7 @@ class ListEntitiesResponse(_message.Message):
     ) -> None: ...
 
 class GetPartyActivityStreakRequest(_message.Message):
-    __slots__ = ["party_id", "epoch"]
+    __slots__ = ("party_id", "epoch")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -3912,7 +3917,7 @@ class GetPartyActivityStreakRequest(_message.Message):
     ) -> None: ...
 
 class GetPartyActivityStreakResponse(_message.Message):
-    __slots__ = ["activity_streak"]
+    __slots__ = ("activity_streak",)
     ACTIVITY_STREAK_FIELD_NUMBER: _ClassVar[int]
     activity_streak: _events_pb2.PartyActivityStreak
     def __init__(
@@ -3923,7 +3928,7 @@ class GetPartyActivityStreakResponse(_message.Message):
     ) -> None: ...
 
 class FundingPayment(_message.Message):
-    __slots__ = ["party_id", "market_id", "funding_period_seq", "timestamp", "amount"]
+    __slots__ = ("party_id", "market_id", "funding_period_seq", "timestamp", "amount")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     FUNDING_PERIOD_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -3944,7 +3949,7 @@ class FundingPayment(_message.Message):
     ) -> None: ...
 
 class ListFundingPaymentsRequest(_message.Message):
-    __slots__ = ["party_id", "market_id", "pagination"]
+    __slots__ = ("party_id", "market_id", "pagination")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -3959,7 +3964,7 @@ class ListFundingPaymentsRequest(_message.Message):
     ) -> None: ...
 
 class FundingPaymentEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: FundingPayment
@@ -3971,7 +3976,7 @@ class FundingPaymentEdge(_message.Message):
     ) -> None: ...
 
 class FundingPaymentConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[FundingPaymentEdge]
@@ -3983,7 +3988,7 @@ class FundingPaymentConnection(_message.Message):
     ) -> None: ...
 
 class ListFundingPaymentsResponse(_message.Message):
-    __slots__ = ["funding_payments"]
+    __slots__ = ("funding_payments",)
     FUNDING_PAYMENTS_FIELD_NUMBER: _ClassVar[int]
     funding_payments: FundingPaymentConnection
     def __init__(
@@ -3992,7 +3997,7 @@ class ListFundingPaymentsResponse(_message.Message):
     ) -> None: ...
 
 class ListFundingPeriodsRequest(_message.Message):
-    __slots__ = ["market_id", "date_range", "pagination"]
+    __slots__ = ("market_id", "date_range", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -4007,7 +4012,7 @@ class ListFundingPeriodsRequest(_message.Message):
     ) -> None: ...
 
 class FundingPeriodEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.FundingPeriod
@@ -4019,7 +4024,7 @@ class FundingPeriodEdge(_message.Message):
     ) -> None: ...
 
 class FundingPeriodConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[FundingPeriodEdge]
@@ -4031,7 +4036,7 @@ class FundingPeriodConnection(_message.Message):
     ) -> None: ...
 
 class ListFundingPeriodsResponse(_message.Message):
-    __slots__ = ["funding_periods"]
+    __slots__ = ("funding_periods",)
     FUNDING_PERIODS_FIELD_NUMBER: _ClassVar[int]
     funding_periods: FundingPeriodConnection
     def __init__(
@@ -4040,7 +4045,7 @@ class ListFundingPeriodsResponse(_message.Message):
     ) -> None: ...
 
 class ListFundingPeriodDataPointsRequest(_message.Message):
-    __slots__ = ["market_id", "date_range", "source", "seq", "pagination"]
+    __slots__ = ("market_id", "date_range", "source", "seq", "pagination")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     DATE_RANGE_FIELD_NUMBER: _ClassVar[int]
     SOURCE_FIELD_NUMBER: _ClassVar[int]
@@ -4061,7 +4066,7 @@ class ListFundingPeriodDataPointsRequest(_message.Message):
     ) -> None: ...
 
 class FundingPeriodDataPointEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: _events_pb2.FundingPeriodDataPoint
@@ -4073,7 +4078,7 @@ class FundingPeriodDataPointEdge(_message.Message):
     ) -> None: ...
 
 class FundingPeriodDataPointConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[FundingPeriodDataPointEdge]
@@ -4085,7 +4090,7 @@ class FundingPeriodDataPointConnection(_message.Message):
     ) -> None: ...
 
 class ListFundingPeriodDataPointsResponse(_message.Message):
-    __slots__ = ["funding_period_data_points"]
+    __slots__ = ("funding_period_data_points",)
     FUNDING_PERIOD_DATA_POINTS_FIELD_NUMBER: _ClassVar[int]
     funding_period_data_points: FundingPeriodDataPointConnection
     def __init__(
@@ -4096,15 +4101,15 @@ class ListFundingPeriodDataPointsResponse(_message.Message):
     ) -> None: ...
 
 class PingRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class PingResponse(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class OrderInfo(_message.Message):
-    __slots__ = ["side", "price", "remaining", "is_market_order"]
+    __slots__ = ("side", "price", "remaining", "is_market_order")
     SIDE_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     REMAINING_FIELD_NUMBER: _ClassVar[int]
@@ -4122,13 +4127,13 @@ class OrderInfo(_message.Message):
     ) -> None: ...
 
 class EstimatePositionRequest(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "open_volume",
         "orders",
         "collateral_available",
         "scale_liquidation_price_to_market_decimals",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     OPEN_VOLUME_FIELD_NUMBER: _ClassVar[int]
     ORDERS_FIELD_NUMBER: _ClassVar[int]
@@ -4149,7 +4154,7 @@ class EstimatePositionRequest(_message.Message):
     ) -> None: ...
 
 class EstimatePositionResponse(_message.Message):
-    __slots__ = ["margin", "liquidation"]
+    __slots__ = ("margin", "liquidation")
     MARGIN_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
     margin: MarginEstimate
@@ -4161,7 +4166,7 @@ class EstimatePositionResponse(_message.Message):
     ) -> None: ...
 
 class MarginEstimate(_message.Message):
-    __slots__ = ["worst_case", "best_case"]
+    __slots__ = ("worst_case", "best_case")
     WORST_CASE_FIELD_NUMBER: _ClassVar[int]
     BEST_CASE_FIELD_NUMBER: _ClassVar[int]
     worst_case: _vega_pb2.MarginLevels
@@ -4173,7 +4178,7 @@ class MarginEstimate(_message.Message):
     ) -> None: ...
 
 class LiquidationEstimate(_message.Message):
-    __slots__ = ["worst_case", "best_case"]
+    __slots__ = ("worst_case", "best_case")
     WORST_CASE_FIELD_NUMBER: _ClassVar[int]
     BEST_CASE_FIELD_NUMBER: _ClassVar[int]
     worst_case: LiquidationPrice
@@ -4185,7 +4190,7 @@ class LiquidationEstimate(_message.Message):
     ) -> None: ...
 
 class LiquidationPrice(_message.Message):
-    __slots__ = ["open_volume_only", "including_buy_orders", "including_sell_orders"]
+    __slots__ = ("open_volume_only", "including_buy_orders", "including_sell_orders")
     OPEN_VOLUME_ONLY_FIELD_NUMBER: _ClassVar[int]
     INCLUDING_BUY_ORDERS_FIELD_NUMBER: _ClassVar[int]
     INCLUDING_SELL_ORDERS_FIELD_NUMBER: _ClassVar[int]
@@ -4200,11 +4205,11 @@ class LiquidationPrice(_message.Message):
     ) -> None: ...
 
 class GetCurrentReferralProgramRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetCurrentReferralProgramResponse(_message.Message):
-    __slots__ = ["current_referral_program"]
+    __slots__ = ("current_referral_program",)
     CURRENT_REFERRAL_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     current_referral_program: ReferralProgram
     def __init__(
@@ -4213,7 +4218,7 @@ class GetCurrentReferralProgramResponse(_message.Message):
     ) -> None: ...
 
 class ReferralProgram(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "version",
         "id",
         "benefit_tiers",
@@ -4221,7 +4226,7 @@ class ReferralProgram(_message.Message):
         "window_length",
         "staking_tiers",
         "ended_at",
-    ]
+    )
     VERSION_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     BENEFIT_TIERS_FIELD_NUMBER: _ClassVar[int]
@@ -4252,7 +4257,7 @@ class ReferralProgram(_message.Message):
     ) -> None: ...
 
 class ReferralSet(_message.Message):
-    __slots__ = ["id", "referrer", "created_at", "updated_at"]
+    __slots__ = ("id", "referrer", "created_at", "updated_at")
     ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -4270,7 +4275,7 @@ class ReferralSet(_message.Message):
     ) -> None: ...
 
 class ReferralSetEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: ReferralSet
@@ -4282,7 +4287,7 @@ class ReferralSetEdge(_message.Message):
     ) -> None: ...
 
 class ReferralSetConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[ReferralSetEdge]
@@ -4294,7 +4299,7 @@ class ReferralSetConnection(_message.Message):
     ) -> None: ...
 
 class ListReferralSetsRequest(_message.Message):
-    __slots__ = ["referral_set_id", "pagination", "referrer", "referee"]
+    __slots__ = ("referral_set_id", "pagination", "referrer", "referee")
     REFERRAL_SET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -4312,7 +4317,7 @@ class ListReferralSetsRequest(_message.Message):
     ) -> None: ...
 
 class ListReferralSetsResponse(_message.Message):
-    __slots__ = ["referral_sets"]
+    __slots__ = ("referral_sets",)
     REFERRAL_SETS_FIELD_NUMBER: _ClassVar[int]
     referral_sets: ReferralSetConnection
     def __init__(
@@ -4320,14 +4325,14 @@ class ListReferralSetsResponse(_message.Message):
     ) -> None: ...
 
 class ReferralSetReferee(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "referral_set_id",
         "referee",
         "joined_at",
         "at_epoch",
         "total_referee_notional_taker_volume",
         "total_referee_generated_rewards",
-    ]
+    )
     REFERRAL_SET_ID_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
     JOINED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -4351,7 +4356,7 @@ class ReferralSetReferee(_message.Message):
     ) -> None: ...
 
 class ReferralSetRefereeEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: ReferralSetReferee
@@ -4363,7 +4368,7 @@ class ReferralSetRefereeEdge(_message.Message):
     ) -> None: ...
 
 class ReferralSetRefereeConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[ReferralSetRefereeEdge]
@@ -4375,13 +4380,13 @@ class ReferralSetRefereeConnection(_message.Message):
     ) -> None: ...
 
 class ListReferralSetRefereesRequest(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "referral_set_id",
         "pagination",
         "referrer",
         "referee",
         "aggregation_epochs",
-    ]
+    )
     REFERRAL_SET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -4402,7 +4407,7 @@ class ListReferralSetRefereesRequest(_message.Message):
     ) -> None: ...
 
 class ListReferralSetRefereesResponse(_message.Message):
-    __slots__ = ["referral_set_referees"]
+    __slots__ = ("referral_set_referees",)
     REFERRAL_SET_REFEREES_FIELD_NUMBER: _ClassVar[int]
     referral_set_referees: ReferralSetRefereeConnection
     def __init__(
@@ -4413,7 +4418,7 @@ class ListReferralSetRefereesResponse(_message.Message):
     ) -> None: ...
 
 class GetReferralSetStatsRequest(_message.Message):
-    __slots__ = ["referral_set_id", "at_epoch", "referee", "pagination"]
+    __slots__ = ("referral_set_id", "at_epoch", "referee", "pagination")
     REFERRAL_SET_ID_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
@@ -4431,7 +4436,7 @@ class GetReferralSetStatsRequest(_message.Message):
     ) -> None: ...
 
 class GetReferralSetStatsResponse(_message.Message):
-    __slots__ = ["stats"]
+    __slots__ = ("stats",)
     STATS_FIELD_NUMBER: _ClassVar[int]
     stats: ReferralSetStatsConnection
     def __init__(
@@ -4439,7 +4444,7 @@ class GetReferralSetStatsResponse(_message.Message):
     ) -> None: ...
 
 class ReferralSetStatsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[ReferralSetStatsEdge]
@@ -4451,7 +4456,7 @@ class ReferralSetStatsConnection(_message.Message):
     ) -> None: ...
 
 class ReferralSetStatsEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: ReferralSetStats
@@ -4463,7 +4468,7 @@ class ReferralSetStatsEdge(_message.Message):
     ) -> None: ...
 
 class ReferralSetStats(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "at_epoch",
         "referral_set_running_notional_taker_volume",
         "party_id",
@@ -4474,7 +4479,7 @@ class ReferralSetStats(_message.Message):
         "rewards_factor_multiplier",
         "was_eligible",
         "referrer_taker_volume",
-    ]
+    )
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     REFERRAL_SET_RUNNING_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -4510,7 +4515,7 @@ class ReferralSetStats(_message.Message):
     ) -> None: ...
 
 class Team(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "team_id",
         "referrer",
         "name",
@@ -4519,7 +4524,7 @@ class Team(_message.Message):
         "created_at",
         "closed",
         "created_at_epoch",
-    ]
+    )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -4549,7 +4554,7 @@ class Team(_message.Message):
     ) -> None: ...
 
 class TeamEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: Team
@@ -4561,7 +4566,7 @@ class TeamEdge(_message.Message):
     ) -> None: ...
 
 class TeamConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[TeamEdge]
@@ -4573,7 +4578,7 @@ class TeamConnection(_message.Message):
     ) -> None: ...
 
 class ListTeamsRequest(_message.Message):
-    __slots__ = ["team_id", "party_id", "pagination"]
+    __slots__ = ("team_id", "party_id", "pagination")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -4588,7 +4593,7 @@ class ListTeamsRequest(_message.Message):
     ) -> None: ...
 
 class ListTeamsResponse(_message.Message):
-    __slots__ = ["teams"]
+    __slots__ = ("teams",)
     TEAMS_FIELD_NUMBER: _ClassVar[int]
     teams: TeamConnection
     def __init__(
@@ -4596,7 +4601,7 @@ class ListTeamsResponse(_message.Message):
     ) -> None: ...
 
 class ListTeamRefereesRequest(_message.Message):
-    __slots__ = ["team_id", "pagination"]
+    __slots__ = ("team_id", "pagination")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     team_id: str
@@ -4608,7 +4613,7 @@ class ListTeamRefereesRequest(_message.Message):
     ) -> None: ...
 
 class TeamReferee(_message.Message):
-    __slots__ = ["team_id", "referee", "joined_at", "joined_at_epoch"]
+    __slots__ = ("team_id", "referee", "joined_at", "joined_at_epoch")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
     JOINED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -4626,7 +4631,7 @@ class TeamReferee(_message.Message):
     ) -> None: ...
 
 class TeamRefereeEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: TeamReferee
@@ -4638,7 +4643,7 @@ class TeamRefereeEdge(_message.Message):
     ) -> None: ...
 
 class TeamRefereeConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[TeamRefereeEdge]
@@ -4650,7 +4655,7 @@ class TeamRefereeConnection(_message.Message):
     ) -> None: ...
 
 class ListTeamRefereesResponse(_message.Message):
-    __slots__ = ["team_referees"]
+    __slots__ = ("team_referees",)
     TEAM_REFEREES_FIELD_NUMBER: _ClassVar[int]
     team_referees: TeamRefereeConnection
     def __init__(
@@ -4658,7 +4663,7 @@ class ListTeamRefereesResponse(_message.Message):
     ) -> None: ...
 
 class TeamRefereeHistory(_message.Message):
-    __slots__ = ["team_id", "joined_at", "joined_at_epoch"]
+    __slots__ = ("team_id", "joined_at", "joined_at_epoch")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     JOINED_AT_FIELD_NUMBER: _ClassVar[int]
     JOINED_AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -4673,7 +4678,7 @@ class TeamRefereeHistory(_message.Message):
     ) -> None: ...
 
 class TeamRefereeHistoryEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: TeamRefereeHistory
@@ -4685,7 +4690,7 @@ class TeamRefereeHistoryEdge(_message.Message):
     ) -> None: ...
 
 class TeamRefereeHistoryConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[TeamRefereeHistoryEdge]
@@ -4697,7 +4702,7 @@ class TeamRefereeHistoryConnection(_message.Message):
     ) -> None: ...
 
 class ListTeamRefereeHistoryRequest(_message.Message):
-    __slots__ = ["referee", "pagination"]
+    __slots__ = ("referee", "pagination")
     REFEREE_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     referee: str
@@ -4709,7 +4714,7 @@ class ListTeamRefereeHistoryRequest(_message.Message):
     ) -> None: ...
 
 class ListTeamRefereeHistoryResponse(_message.Message):
-    __slots__ = ["team_referee_history"]
+    __slots__ = ("team_referee_history",)
     TEAM_REFEREE_HISTORY_FIELD_NUMBER: _ClassVar[int]
     team_referee_history: TeamRefereeHistoryConnection
     def __init__(
@@ -4720,7 +4725,7 @@ class ListTeamRefereeHistoryResponse(_message.Message):
     ) -> None: ...
 
 class GetFeesStatsRequest(_message.Message):
-    __slots__ = ["market_id", "asset_id", "epoch_seq", "party_id"]
+    __slots__ = ("market_id", "asset_id", "epoch_seq", "party_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -4738,7 +4743,7 @@ class GetFeesStatsRequest(_message.Message):
     ) -> None: ...
 
 class GetFeesStatsResponse(_message.Message):
-    __slots__ = ["fees_stats"]
+    __slots__ = ("fees_stats",)
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     fees_stats: _events_pb2.FeesStats
     def __init__(
@@ -4746,7 +4751,7 @@ class GetFeesStatsResponse(_message.Message):
     ) -> None: ...
 
 class GetFeesStatsForPartyRequest(_message.Message):
-    __slots__ = ["party_id", "asset_id", "from_epoch", "to_epoch"]
+    __slots__ = ("party_id", "asset_id", "from_epoch", "to_epoch")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     FROM_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -4764,7 +4769,7 @@ class GetFeesStatsForPartyRequest(_message.Message):
     ) -> None: ...
 
 class GetFeesStatsForPartyResponse(_message.Message):
-    __slots__ = ["fees_stats_for_party"]
+    __slots__ = ("fees_stats_for_party",)
     FEES_STATS_FOR_PARTY_FIELD_NUMBER: _ClassVar[int]
     fees_stats_for_party: _containers.RepeatedCompositeFieldContainer[FeesStatsForParty]
     def __init__(
@@ -4775,11 +4780,11 @@ class GetFeesStatsForPartyResponse(_message.Message):
     ) -> None: ...
 
 class GetCurrentVolumeDiscountProgramRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class GetCurrentVolumeDiscountProgramResponse(_message.Message):
-    __slots__ = ["current_volume_discount_program"]
+    __slots__ = ("current_volume_discount_program",)
     CURRENT_VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     current_volume_discount_program: VolumeDiscountProgram
     def __init__(
@@ -4790,7 +4795,7 @@ class GetCurrentVolumeDiscountProgramResponse(_message.Message):
     ) -> None: ...
 
 class GetVolumeDiscountStatsRequest(_message.Message):
-    __slots__ = ["at_epoch", "party_id", "pagination"]
+    __slots__ = ("at_epoch", "party_id", "pagination")
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
@@ -4805,7 +4810,7 @@ class GetVolumeDiscountStatsRequest(_message.Message):
     ) -> None: ...
 
 class GetVolumeDiscountStatsResponse(_message.Message):
-    __slots__ = ["stats"]
+    __slots__ = ("stats",)
     STATS_FIELD_NUMBER: _ClassVar[int]
     stats: VolumeDiscountStatsConnection
     def __init__(
@@ -4813,7 +4818,7 @@ class GetVolumeDiscountStatsResponse(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountStatsConnection(_message.Message):
-    __slots__ = ["edges", "page_info"]
+    __slots__ = ("edges", "page_info")
     EDGES_FIELD_NUMBER: _ClassVar[int]
     PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
     edges: _containers.RepeatedCompositeFieldContainer[VolumeDiscountStatsEdge]
@@ -4825,7 +4830,7 @@ class VolumeDiscountStatsConnection(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountStatsEdge(_message.Message):
-    __slots__ = ["node", "cursor"]
+    __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
     node: VolumeDiscountStats
@@ -4837,7 +4842,7 @@ class VolumeDiscountStatsEdge(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountStats(_message.Message):
-    __slots__ = ["at_epoch", "party_id", "discount_factor", "running_volume"]
+    __slots__ = ("at_epoch", "party_id", "discount_factor", "running_volume")
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     DISCOUNT_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -4855,14 +4860,14 @@ class VolumeDiscountStats(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountProgram(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "version",
         "id",
         "benefit_tiers",
         "end_of_program_timestamp",
         "window_length",
         "ended_at",
-    ]
+    )
     VERSION_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     BENEFIT_TIERS_FIELD_NUMBER: _ClassVar[int]
@@ -4890,13 +4895,13 @@ class VolumeDiscountProgram(_message.Message):
     ) -> None: ...
 
 class FeesStatsForParty(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "asset_id",
         "total_rewards_received",
         "referees_discount_applied",
         "volume_discount_applied",
         "total_maker_fees_received",
-    ]
+    )
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     TOTAL_REWARDS_RECEIVED_FIELD_NUMBER: _ClassVar[int]
     REFEREES_DISCOUNT_APPLIED_FIELD_NUMBER: _ClassVar[int]
@@ -4914,4 +4919,32 @@ class FeesStatsForParty(_message.Message):
         referees_discount_applied: _Optional[str] = ...,
         volume_discount_applied: _Optional[str] = ...,
         total_maker_fees_received: _Optional[str] = ...,
+    ) -> None: ...
+
+class ObserveTransactionResultsRequest(_message.Message):
+    __slots__ = ("party_ids", "hashes", "status")
+    PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
+    HASHES_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    party_ids: _containers.RepeatedScalarFieldContainer[str]
+    hashes: _containers.RepeatedScalarFieldContainer[str]
+    status: bool
+    def __init__(
+        self,
+        party_ids: _Optional[_Iterable[str]] = ...,
+        hashes: _Optional[_Iterable[str]] = ...,
+        status: bool = ...,
+    ) -> None: ...
+
+class ObserveTransactionResultsResponse(_message.Message):
+    __slots__ = ("transaction_results",)
+    TRANSACTION_RESULTS_FIELD_NUMBER: _ClassVar[int]
+    transaction_results: _containers.RepeatedCompositeFieldContainer[
+        _events_pb2.TransactionResult
+    ]
+    def __init__(
+        self,
+        transaction_results: _Optional[
+            _Iterable[_Union[_events_pb2.TransactionResult, _Mapping]]
+        ] = ...,
     ) -> None: ...

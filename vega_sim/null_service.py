@@ -454,18 +454,6 @@ def manage_vega_processes(
         log_name="data_node",
     )
 
-    vegaFaucetProcess = _popen_process(
-        [
-            vega_path,
-            "faucet",
-            "run",
-            "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
-            "--home=" + tmp_vega_home,
-        ],
-        dir_root=tmp_vega_dir,
-        log_name="faucet",
-    )
-
     vega_args = [
         vega_path,
         "start",
@@ -497,6 +485,27 @@ def manage_vega_processes(
         vega_args,
         dir_root=tmp_vega_dir,
         log_name="node",
+    )
+
+    for _ in range(500):
+        try:
+            requests.get(
+                f"http://localhost:{port_config[Ports.CORE_REST]}/blockchain/height"
+            ).raise_for_status()
+            break
+        except:
+            pass
+
+    vegaFaucetProcess = _popen_process(
+        [
+            vega_path,
+            "faucet",
+            "run",
+            "--passphrase-file=" + tmp_vega_home + "/passphrase-file",
+            "--home=" + tmp_vega_home,
+        ],
+        dir_root=tmp_vega_dir,
+        log_name="faucet",
     )
 
     processes = {
@@ -955,6 +964,10 @@ class VegaServiceNull(VegaService):
                     requests.get(
                         f"http://localhost:{self.vega_node_rest_port}/blockchain/height"
                     ).raise_for_status()
+                    requests.get(
+                        f"http://localhost:{self.faucet_port}/api/v1/health"
+                    ).raise_for_status()
+
                     if self._use_full_vega_wallet:
                         requests.get(
                             f"http://localhost:{self.wallet_port}/api/v2/health"

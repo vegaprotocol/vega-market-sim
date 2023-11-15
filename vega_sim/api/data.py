@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import string
 from collections import namedtuple
 from dataclasses import dataclass
 from typing import (
@@ -366,6 +367,16 @@ class ReferrerRewardsGenerated:
 class MakerFeesGenerated:
     taker: float
     maker_fees_paid: List[PartyAmount]
+
+
+@dataclass(frozen=True)
+class NetworkParameter:
+    key: str
+    value: str
+
+
+def _network_parameter_from_proto(network_parameter: vega_protos.vega.NetworkParameter):
+    return NetworkParameter(key=network_parameter.key, value=network_parameter.value)
 
 
 def _maker_fees_generated_from_proto(
@@ -957,9 +968,21 @@ def positions_by_market(
                 market_info = data_raw.market_info(
                     market_id=pos.market_id, data_client=data_client
                 )
+
+            settlement_asset_id = (
+                market_info.tradable_instrument.instrument.future.settlement_asset
+            )
+            if not settlement_asset_id:
+                settlement_asset_id = (
+                    market_info.tradable_instrument.instrument.perpetual.settlement_asset
+                )
+
+            market_to_asset_map[pos.market_id] = settlement_asset_id
+
+        if len(market_to_asset_map[market_id]) < 1:
             market_to_asset_map[
-                pos.market_id
-            ] = market_info.tradable_instrument.instrument.future.settlement_asset
+                market_id
+            ] = resp.tradable_instrument.instrument.perpetual.settlement_asset
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -1376,6 +1399,9 @@ def list_accounts(
     asset_decimals_map = {} if asset_decimals_map is None else asset_decimals_map
     output_accounts = []
     for account in accounts:
+        if not is_valid_vega_id(account.asset):
+            continue
+
         if account.asset not in asset_decimals_map:
             asset_decimals_map[account.asset] = get_asset_decimals(
                 asset_id=account.asset,
@@ -1388,6 +1414,10 @@ def list_accounts(
             )
         )
     return output_accounts
+
+
+def is_valid_vega_id(resource_id: str) -> bool:
+    return len(resource_id) == 64 and all(c in string.hexdigits for c in resource_id)
 
 
 def party_account(
@@ -1477,7 +1507,6 @@ def find_market_id(
     ]
 
     market_ids = {}
-
     for market in markets:
         if market.tradable_instrument.instrument.name == name:
             if market.state in acceptable_states:
@@ -1514,6 +1543,7 @@ def find_asset_id(
         str, the ID of the asset
     """
     assets = data_raw.list_assets(data_client=data_client)
+
     # Find settlement asset
     for asset in assets:
         if asset.details.symbol == symbol:
@@ -1932,10 +1962,19 @@ def get_trades(
                 market_id=trade.market_id, data_client=data_client
             )
         if trade.market_id not in market_asset_decimals_map:
+            market_info = data_raw.market_info(
+                market_id=market_id, data_client=data_client
+            )
+            settlement_asset_id = (
+                market_info.tradable_instrument.instrument.future.settlement_asset
+            )
+            if not settlement_asset_id:
+                settlement_asset_id = (
+                    market_info.tradable_instrument.instrument.perpetual.settlement_asset
+                )
+
             market_asset_decimals_map[trade.market_id] = get_asset_decimals(
-                asset_id=data_raw.market_info(
-                    market_id=market_id, data_client=data_client
-                ).tradable_instrument.instrument.future.settlement_asset,
+                asset_id=settlement_asset_id,
                 data_client=data_client,
             )
         res_trades.append(
@@ -2266,6 +2305,16 @@ def market_data_subscription_handler(
     )
 
 
+def network_parameter_handler(
+    stream: Iterable[vega_protos.api.v1.core.ObserveEventBusResponse],
+) -> Transfer:
+    return _stream_handler(
+        stream_item=stream,
+        extraction_fn=lambda evt: evt.network_parameter,
+        conversion_fn=_network_parameter_from_proto,
+    )
+
+
 def get_latest_market_data(
     market_id: str,
     data_client: vac.VegaTradingDataClientV2,
@@ -2297,9 +2346,16 @@ def get_latest_market_data(
             market_id=market_id, data_client=data_client
         )
     if market_id not in market_to_asset_map:
-        market_to_asset_map[market_id] = data_raw.market_info(
-            market_id=market_id, data_client=data_client
-        ).tradable_instrument.instrument.future.settlement_asset
+        market_info = data_raw.market_info(market_id=market_id, data_client=data_client)
+        settlement_asset_id = (
+            market_info.tradable_instrument.instrument.future.settlement_asset
+        )
+        if not settlement_asset_id:
+            settlement_asset_id = (
+                market_info.tradable_instrument.instrument.perpetual.settlement_asset
+            )
+
+        market_to_asset_map[market_id] = settlement_asset_id
     if market_to_asset_map[market_id] not in asset_decimals_map:
         asset_decimals_map[market_to_asset_map[market_id]] = get_asset_decimals(
             asset_id=market_to_asset_map[market_id],
@@ -2643,4 +2699,13 @@ def list_stop_orders(
             ),
         )
         for stop_order_event in response
+    ]
+
+
+def list_network_parameters(
+    data_client: vac.trading_data_grpc_v2,
+) -> List[NetworkParameter]:
+    response = data_raw.list_network_parameters(data_client=data_client)
+    return [
+        _network_parameter_from_proto(network_parameter=proto) for proto in response
     ]

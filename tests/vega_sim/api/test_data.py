@@ -38,6 +38,7 @@ from vega_sim.api.data import (
     PeggedOrder,
     IcebergOpts,
     StopOrder,
+    NetworkParameter,
     get_asset_decimals,
     find_asset_id,
     get_trades,
@@ -57,6 +58,7 @@ from vega_sim.api.data import (
     list_team_referees,
     list_team_referee_history,
     list_stop_orders,
+    list_network_parameters,
 )
 from vega_sim.grpc.client import (
     VegaTradingDataClientV2,
@@ -1397,4 +1399,56 @@ def test_list_stop_orders(trading_data_v2_servicer_and_port):
                 price=1000.0,
             ),
         )
+    ]
+
+
+def test_list_network_parameters(trading_data_v2_servicer_and_port):
+    def ListNetworkParameters(self, request, context):
+        return data_node_protos_v2.trading_data.ListNetworkParametersResponse(
+            network_parameters=data_node_protos_v2.trading_data.NetworkParameterConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.NetworkParameterEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.NetworkParameter(
+                            key="key_a",
+                            value="value_a",
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.NetworkParameterEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.NetworkParameter(
+                            key="key_b",
+                            value="value_b",
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.NetworkParameterEdge(
+                        cursor="cursor",
+                        node=vega_protos.vega.NetworkParameter(
+                            key="key_c",
+                            value="value_c",
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListNetworkParameters = ListNetworkParameters
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    network_parameters = list_network_parameters(
+        data_client=data_client,
+    )
+    assert network_parameters == [
+        NetworkParameter("key_a", "value_a"),
+        NetworkParameter("key_b", "value_b"),
+        NetworkParameter("key_c", "value_c"),
     ]

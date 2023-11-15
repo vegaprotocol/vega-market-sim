@@ -8,8 +8,6 @@ from vega_sim.scenario.common.utils.price_process import random_walk
 
 from vega_sim.scenario.constants import Network
 
-from vega_sim.proto.vega import markets as markets_protos
-
 
 @pytest.mark.integration
 @pytest.mark.parametrize(

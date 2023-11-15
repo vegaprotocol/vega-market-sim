@@ -18,7 +18,7 @@ Examples:
 
     Test the ETHUSD scenario with a simulation on a nullchain network.
 
-    $ python -m vega_sim.vega_sim.devops.run -s ETHUSD -n NULLCHAIN -d -c -p
+    $ python -m vega_sim.devops.run_scenario -s ETHUSD -n NULLCHAIN -d -c -p
 
 
 """

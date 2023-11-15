@@ -21,7 +21,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class ProtocolUpgradeProposalStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     PROTOCOL_UPGRADE_PROPOSAL_STATUS_UNSPECIFIED: _ClassVar[
         ProtocolUpgradeProposalStatus
     ]
@@ -30,7 +30,7 @@ class ProtocolUpgradeProposalStatus(int, metaclass=_enum_type_wrapper.EnumTypeWr
     PROTOCOL_UPGRADE_PROPOSAL_STATUS_REJECTED: _ClassVar[ProtocolUpgradeProposalStatus]
 
 class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = []
+    __slots__ = ()
     BUS_EVENT_TYPE_UNSPECIFIED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_ALL: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TIME_UPDATE: _ClassVar[BusEventType]
@@ -210,7 +210,7 @@ BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
 class VestingBalancesSummary(_message.Message):
-    __slots__ = ["epoch_seq", "parties_vesting_summary"]
+    __slots__ = ("epoch_seq", "parties_vesting_summary")
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
     PARTIES_VESTING_SUMMARY_FIELD_NUMBER: _ClassVar[int]
     epoch_seq: int
@@ -226,7 +226,7 @@ class VestingBalancesSummary(_message.Message):
     ) -> None: ...
 
 class PartyVestingSummary(_message.Message):
-    __slots__ = ["party", "party_locked_balances", "party_vesting_balances"]
+    __slots__ = ("party", "party_locked_balances", "party_vesting_balances")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     PARTY_LOCKED_BALANCES_FIELD_NUMBER: _ClassVar[int]
     PARTY_VESTING_BALANCES_FIELD_NUMBER: _ClassVar[int]
@@ -249,7 +249,7 @@ class PartyVestingSummary(_message.Message):
     ) -> None: ...
 
 class PartyLockedBalance(_message.Message):
-    __slots__ = ["asset", "until_epoch", "balance"]
+    __slots__ = ("asset", "until_epoch", "balance")
     ASSET_FIELD_NUMBER: _ClassVar[int]
     UNTIL_EPOCH_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
@@ -264,7 +264,7 @@ class PartyLockedBalance(_message.Message):
     ) -> None: ...
 
 class PartyVestingBalance(_message.Message):
-    __slots__ = ["asset", "balance"]
+    __slots__ = ("asset", "balance")
     ASSET_FIELD_NUMBER: _ClassVar[int]
     BALANCE_FIELD_NUMBER: _ClassVar[int]
     asset: str
@@ -274,7 +274,7 @@ class PartyVestingBalance(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountStatsUpdated(_message.Message):
-    __slots__ = ["at_epoch", "stats"]
+    __slots__ = ("at_epoch", "stats")
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     STATS_FIELD_NUMBER: _ClassVar[int]
     at_epoch: int
@@ -286,7 +286,7 @@ class VolumeDiscountStatsUpdated(_message.Message):
     ) -> None: ...
 
 class PartyVolumeDiscountStats(_message.Message):
-    __slots__ = ["party_id", "discount_factor", "running_volume"]
+    __slots__ = ("party_id", "discount_factor", "running_volume")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     DISCOUNT_FACTOR_FIELD_NUMBER: _ClassVar[int]
     RUNNING_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -301,7 +301,7 @@ class PartyVolumeDiscountStats(_message.Message):
     ) -> None: ...
 
 class VestingStatsUpdated(_message.Message):
-    __slots__ = ["at_epoch", "stats"]
+    __slots__ = ("at_epoch", "stats")
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     STATS_FIELD_NUMBER: _ClassVar[int]
     at_epoch: int
@@ -313,7 +313,7 @@ class VestingStatsUpdated(_message.Message):
     ) -> None: ...
 
 class PartyVestingStats(_message.Message):
-    __slots__ = ["party_id", "reward_bonus_multiplier", "quantum_balance"]
+    __slots__ = ("party_id", "reward_bonus_multiplier", "quantum_balance")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     REWARD_BONUS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     QUANTUM_BALANCE_FIELD_NUMBER: _ClassVar[int]
@@ -328,7 +328,7 @@ class PartyVestingStats(_message.Message):
     ) -> None: ...
 
 class FeesStats(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market",
         "asset",
         "epoch_seq",
@@ -338,7 +338,7 @@ class FeesStats(_message.Message):
         "volume_discount_applied",
         "total_maker_fees_received",
         "maker_fees_generated",
-    ]
+    )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -387,7 +387,7 @@ class FeesStats(_message.Message):
     ) -> None: ...
 
 class ReferrerRewardsGenerated(_message.Message):
-    __slots__ = ["referrer", "generated_reward"]
+    __slots__ = ("referrer", "generated_reward")
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     GENERATED_REWARD_FIELD_NUMBER: _ClassVar[int]
     referrer: str
@@ -399,7 +399,7 @@ class ReferrerRewardsGenerated(_message.Message):
     ) -> None: ...
 
 class MakerFeesGenerated(_message.Message):
-    __slots__ = ["taker", "maker_fees_paid"]
+    __slots__ = ("taker", "maker_fees_paid")
     TAKER_FIELD_NUMBER: _ClassVar[int]
     MAKER_FEES_PAID_FIELD_NUMBER: _ClassVar[int]
     taker: str
@@ -411,7 +411,7 @@ class MakerFeesGenerated(_message.Message):
     ) -> None: ...
 
 class PartyAmount(_message.Message):
-    __slots__ = ["party", "amount", "quantum_amount"]
+    __slots__ = ("party", "amount", "quantum_amount")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -426,7 +426,7 @@ class PartyAmount(_message.Message):
     ) -> None: ...
 
 class PartyActivityStreak(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party",
         "active_for",
         "inactive_for",
@@ -436,7 +436,7 @@ class PartyActivityStreak(_message.Message):
         "epoch",
         "traded_volume",
         "open_volume",
-    ]
+    )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     ACTIVE_FOR_FIELD_NUMBER: _ClassVar[int]
     INACTIVE_FOR_FIELD_NUMBER: _ClassVar[int]
@@ -469,7 +469,7 @@ class PartyActivityStreak(_message.Message):
     ) -> None: ...
 
 class FundingPeriod(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "seq",
         "start",
@@ -478,7 +478,7 @@ class FundingPeriod(_message.Message):
         "funding_rate",
         "internal_twap",
         "external_twap",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     SEQ_FIELD_NUMBER: _ClassVar[int]
     START_FIELD_NUMBER: _ClassVar[int]
@@ -508,7 +508,7 @@ class FundingPeriod(_message.Message):
     ) -> None: ...
 
 class FundingPayment(_message.Message):
-    __slots__ = ["party_id", "amount"]
+    __slots__ = ("party_id", "amount")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -518,7 +518,7 @@ class FundingPayment(_message.Message):
     ) -> None: ...
 
 class FundingPayments(_message.Message):
-    __slots__ = ["market_id", "seq", "payments"]
+    __slots__ = ("market_id", "seq", "payments")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     SEQ_FIELD_NUMBER: _ClassVar[int]
     PAYMENTS_FIELD_NUMBER: _ClassVar[int]
@@ -533,13 +533,14 @@ class FundingPayments(_message.Message):
     ) -> None: ...
 
 class FundingPeriodDataPoint(_message.Message):
-    __slots__ = ["market_id", "seq", "data_point_type", "price", "timestamp", "twap"]
+    __slots__ = ("market_id", "seq", "data_point_type", "price", "timestamp", "twap")
 
     class Source(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         SOURCE_UNSPECIFIED: _ClassVar[FundingPeriodDataPoint.Source]
         SOURCE_EXTERNAL: _ClassVar[FundingPeriodDataPoint.Source]
         SOURCE_INTERNAL: _ClassVar[FundingPeriodDataPoint.Source]
+
     SOURCE_UNSPECIFIED: FundingPeriodDataPoint.Source
     SOURCE_EXTERNAL: FundingPeriodDataPoint.Source
     SOURCE_INTERNAL: FundingPeriodDataPoint.Source
@@ -566,7 +567,7 @@ class FundingPeriodDataPoint(_message.Message):
     ) -> None: ...
 
 class StopOrderEvent(_message.Message):
-    __slots__ = ["submission", "stop_order"]
+    __slots__ = ("submission", "stop_order")
     SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     STOP_ORDER_FIELD_NUMBER: _ClassVar[int]
     submission: _commands_pb2.OrderSubmission
@@ -578,7 +579,7 @@ class StopOrderEvent(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerAdded(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "signature_id",
         "validator_id",
         "timestamp",
@@ -586,7 +587,7 @@ class ERC20MultiSigSignerAdded(_message.Message):
         "submitter",
         "nonce",
         "epoch_seq",
-    ]
+    )
     SIGNATURE_ID_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -613,7 +614,7 @@ class ERC20MultiSigSignerAdded(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerRemovedSubmitter(_message.Message):
-    __slots__ = ["signature_id", "submitter"]
+    __slots__ = ("signature_id", "submitter")
     SIGNATURE_ID_FIELD_NUMBER: _ClassVar[int]
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     signature_id: str
@@ -623,14 +624,14 @@ class ERC20MultiSigSignerRemovedSubmitter(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerRemoved(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "signature_submitters",
         "validator_id",
         "timestamp",
         "old_signer",
         "nonce",
         "epoch_seq",
-    ]
+    )
     SIGNATURE_SUBMITTERS_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -658,7 +659,7 @@ class ERC20MultiSigSignerRemoved(_message.Message):
     ) -> None: ...
 
 class Transfer(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "from_account_type",
         "to",
@@ -673,16 +674,17 @@ class Transfer(_message.Message):
         "recurring",
         "one_off_governance",
         "recurring_governance",
-    ]
+    )
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[Transfer.Status]
         STATUS_PENDING: _ClassVar[Transfer.Status]
         STATUS_DONE: _ClassVar[Transfer.Status]
         STATUS_REJECTED: _ClassVar[Transfer.Status]
         STATUS_STOPPED: _ClassVar[Transfer.Status]
         STATUS_CANCELLED: _ClassVar[Transfer.Status]
+
     STATUS_UNSPECIFIED: Transfer.Status
     STATUS_PENDING: Transfer.Status
     STATUS_DONE: Transfer.Status
@@ -740,19 +742,19 @@ class Transfer(_message.Message):
     ) -> None: ...
 
 class OneOffGovernanceTransfer(_message.Message):
-    __slots__ = ["deliver_on"]
+    __slots__ = ("deliver_on",)
     DELIVER_ON_FIELD_NUMBER: _ClassVar[int]
     deliver_on: int
     def __init__(self, deliver_on: _Optional[int] = ...) -> None: ...
 
 class OneOffTransfer(_message.Message):
-    __slots__ = ["deliver_on"]
+    __slots__ = ("deliver_on",)
     DELIVER_ON_FIELD_NUMBER: _ClassVar[int]
     deliver_on: int
     def __init__(self, deliver_on: _Optional[int] = ...) -> None: ...
 
 class RecurringTransfer(_message.Message):
-    __slots__ = ["start_epoch", "end_epoch", "factor", "dispatch_strategy"]
+    __slots__ = ("start_epoch", "end_epoch", "factor", "dispatch_strategy")
     START_EPOCH_FIELD_NUMBER: _ClassVar[int]
     END_EPOCH_FIELD_NUMBER: _ClassVar[int]
     FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -772,7 +774,7 @@ class RecurringTransfer(_message.Message):
     ) -> None: ...
 
 class RecurringGovernanceTransfer(_message.Message):
-    __slots__ = ["start_epoch", "end_epoch", "dispatch_strategy"]
+    __slots__ = ("start_epoch", "end_epoch", "dispatch_strategy")
     START_EPOCH_FIELD_NUMBER: _ClassVar[int]
     END_EPOCH_FIELD_NUMBER: _ClassVar[int]
     DISPATCH_STRATEGY_FIELD_NUMBER: _ClassVar[int]
@@ -789,7 +791,7 @@ class RecurringGovernanceTransfer(_message.Message):
     ) -> None: ...
 
 class StakeLinking(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "type",
         "ts",
@@ -802,23 +804,25 @@ class StakeLinking(_message.Message):
         "block_time",
         "log_index",
         "ethereum_address",
-    ]
+    )
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[StakeLinking.Type]
         TYPE_LINK: _ClassVar[StakeLinking.Type]
         TYPE_UNLINK: _ClassVar[StakeLinking.Type]
+
     TYPE_UNSPECIFIED: StakeLinking.Type
     TYPE_LINK: StakeLinking.Type
     TYPE_UNLINK: StakeLinking.Type
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATUS_UNSPECIFIED: _ClassVar[StakeLinking.Status]
         STATUS_PENDING: _ClassVar[StakeLinking.Status]
         STATUS_ACCEPTED: _ClassVar[StakeLinking.Status]
         STATUS_REJECTED: _ClassVar[StakeLinking.Status]
+
     STATUS_UNSPECIFIED: StakeLinking.Status
     STATUS_PENDING: StakeLinking.Status
     STATUS_ACCEPTED: StakeLinking.Status
@@ -864,7 +868,7 @@ class StakeLinking(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigSignerEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "type",
         "signer",
@@ -873,13 +877,14 @@ class ERC20MultiSigSignerEvent(_message.Message):
         "tx_hash",
         "log_index",
         "block_number",
-    ]
+    )
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TYPE_UNSPECIFIED: _ClassVar[ERC20MultiSigSignerEvent.Type]
         TYPE_ADDED: _ClassVar[ERC20MultiSigSignerEvent.Type]
         TYPE_REMOVED: _ClassVar[ERC20MultiSigSignerEvent.Type]
+
     TYPE_UNSPECIFIED: ERC20MultiSigSignerEvent.Type
     TYPE_ADDED: ERC20MultiSigSignerEvent.Type
     TYPE_REMOVED: ERC20MultiSigSignerEvent.Type
@@ -912,7 +917,7 @@ class ERC20MultiSigSignerEvent(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigThresholdSetEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "new_threshold",
         "nonce",
@@ -920,7 +925,7 @@ class ERC20MultiSigThresholdSetEvent(_message.Message):
         "tx_hash",
         "log_index",
         "block_number",
-    ]
+    )
     ID_FIELD_NUMBER: _ClassVar[int]
     NEW_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -947,7 +952,7 @@ class ERC20MultiSigThresholdSetEvent(_message.Message):
     ) -> None: ...
 
 class CheckpointEvent(_message.Message):
-    __slots__ = ["hash", "block_hash", "block_height"]
+    __slots__ = ("hash", "block_hash", "block_height")
     HASH_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HASH_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
@@ -962,13 +967,13 @@ class CheckpointEvent(_message.Message):
     ) -> None: ...
 
 class StreamStartEvent(_message.Message):
-    __slots__ = ["chain_id"]
+    __slots__ = ("chain_id",)
     CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     chain_id: str
     def __init__(self, chain_id: _Optional[str] = ...) -> None: ...
 
 class RewardPayoutEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party",
         "epoch_seq",
         "asset",
@@ -978,7 +983,7 @@ class RewardPayoutEvent(_message.Message):
         "reward_type",
         "market",
         "locked_until_epoch",
-    ]
+    )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -1011,7 +1016,7 @@ class RewardPayoutEvent(_message.Message):
     ) -> None: ...
 
 class ValidatorScoreEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "node_id",
         "epoch_seq",
         "validator_score",
@@ -1020,7 +1025,7 @@ class ValidatorScoreEvent(_message.Message):
         "raw_validator_score",
         "validator_status",
         "multisig_score",
-    ]
+    )
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_SCORE_FIELD_NUMBER: _ClassVar[int]
@@ -1050,7 +1055,7 @@ class ValidatorScoreEvent(_message.Message):
     ) -> None: ...
 
 class DelegationBalanceEvent(_message.Message):
-    __slots__ = ["party", "node_id", "amount", "epoch_seq"]
+    __slots__ = ("party", "node_id", "amount", "epoch_seq")
     PARTY_FIELD_NUMBER: _ClassVar[int]
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -1068,7 +1073,7 @@ class DelegationBalanceEvent(_message.Message):
     ) -> None: ...
 
 class MarketEvent(_message.Message):
-    __slots__ = ["market_id", "payload"]
+    __slots__ = ("market_id", "payload")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PAYLOAD_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -1078,7 +1083,7 @@ class MarketEvent(_message.Message):
     ) -> None: ...
 
 class TransferFees(_message.Message):
-    __slots__ = ["transfer_id", "amount", "epoch"]
+    __slots__ = ("transfer_id", "amount", "epoch")
     TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -1093,7 +1098,7 @@ class TransferFees(_message.Message):
     ) -> None: ...
 
 class TransactionResult(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party_id",
         "status",
         "hash",
@@ -1122,16 +1127,18 @@ class TransactionResult(_message.Message):
         "create_referral_set",
         "update_referral_set",
         "apply_referral_code",
+        "update_margin_mode",
+        "join_team",
         "success",
         "failure",
-    ]
+    )
 
     class SuccessDetails(_message.Message):
-        __slots__ = []
+        __slots__ = ()
         def __init__(self) -> None: ...
 
     class FailureDetails(_message.Message):
-        __slots__ = ["error"]
+        __slots__ = ("error",)
         ERROR_FIELD_NUMBER: _ClassVar[int]
         error: str
         def __init__(self, error: _Optional[str] = ...) -> None: ...
@@ -1163,6 +1170,8 @@ class TransactionResult(_message.Message):
     CREATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1193,6 +1202,8 @@ class TransactionResult(_message.Message):
     create_referral_set: _commands_pb2.CreateReferralSet
     update_referral_set: _commands_pb2.UpdateReferralSet
     apply_referral_code: _commands_pb2.ApplyReferralCode
+    update_margin_mode: _commands_pb2.UpdateMarginMode
+    join_team: _commands_pb2.JoinTeam
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1271,12 +1282,16 @@ class TransactionResult(_message.Message):
         apply_referral_code: _Optional[
             _Union[_commands_pb2.ApplyReferralCode, _Mapping]
         ] = ...,
+        update_margin_mode: _Optional[
+            _Union[_commands_pb2.UpdateMarginMode, _Mapping]
+        ] = ...,
+        join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
     ) -> None: ...
 
 class TxErrorEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party_id",
         "err_msg",
         "order_submission",
@@ -1297,7 +1312,7 @@ class TxErrorEvent(_message.Message):
         "protocol_upgrade_proposal",
         "issue_signatures",
         "batch_market_instructions",
-    ]
+    )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ERR_MSG_FIELD_NUMBER: _ClassVar[int]
     ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
@@ -1395,13 +1410,13 @@ class TxErrorEvent(_message.Message):
     ) -> None: ...
 
 class TimeUpdate(_message.Message):
-    __slots__ = ["timestamp"]
+    __slots__ = ("timestamp",)
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     timestamp: int
     def __init__(self, timestamp: _Optional[int] = ...) -> None: ...
 
 class EpochEvent(_message.Message):
-    __slots__ = ["seq", "action", "start_time", "expire_time", "end_time"]
+    __slots__ = ("seq", "action", "start_time", "expire_time", "end_time")
     SEQ_FIELD_NUMBER: _ClassVar[int]
     ACTION_FIELD_NUMBER: _ClassVar[int]
     START_TIME_FIELD_NUMBER: _ClassVar[int]
@@ -1422,7 +1437,7 @@ class EpochEvent(_message.Message):
     ) -> None: ...
 
 class LedgerMovements(_message.Message):
-    __slots__ = ["ledger_movements"]
+    __slots__ = ("ledger_movements",)
     LEDGER_MOVEMENTS_FIELD_NUMBER: _ClassVar[int]
     ledger_movements: _containers.RepeatedCompositeFieldContainer[
         _vega_pb2.LedgerMovement
@@ -1435,7 +1450,7 @@ class LedgerMovements(_message.Message):
     ) -> None: ...
 
 class PositionResolution(_message.Message):
-    __slots__ = ["market_id", "distressed", "closed", "mark_price"]
+    __slots__ = ("market_id", "distressed", "closed", "mark_price")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     DISTRESSED_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
@@ -1453,7 +1468,7 @@ class PositionResolution(_message.Message):
     ) -> None: ...
 
 class LossSocialization(_message.Message):
-    __slots__ = ["market_id", "party_id", "amount"]
+    __slots__ = ("market_id", "party_id", "amount")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -1468,7 +1483,7 @@ class LossSocialization(_message.Message):
     ) -> None: ...
 
 class TradeSettlement(_message.Message):
-    __slots__ = ["size", "price", "market_price"]
+    __slots__ = ("size", "price", "market_price")
     SIZE_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     MARKET_PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -1483,13 +1498,13 @@ class TradeSettlement(_message.Message):
     ) -> None: ...
 
 class SettlePosition(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "party_id",
         "price",
         "trade_settlements",
         "position_factor",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -1512,7 +1527,7 @@ class SettlePosition(_message.Message):
     ) -> None: ...
 
 class SettleMarket(_message.Message):
-    __slots__ = ["market_id", "price", "position_factor"]
+    __slots__ = ("market_id", "price", "position_factor")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     POSITION_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -1527,7 +1542,7 @@ class SettleMarket(_message.Message):
     ) -> None: ...
 
 class PositionStateEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "party_id",
         "market_id",
         "size",
@@ -1535,7 +1550,7 @@ class PositionStateEvent(_message.Message):
         "potential_sells",
         "vw_buy_price",
         "vw_sell_price",
-    ]
+    )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
@@ -1562,7 +1577,7 @@ class PositionStateEvent(_message.Message):
     ) -> None: ...
 
 class SettleDistressed(_message.Message):
-    __slots__ = ["market_id", "party_id", "margin", "price"]
+    __slots__ = ("market_id", "party_id", "margin", "price")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FIELD_NUMBER: _ClassVar[int]
@@ -1580,7 +1595,7 @@ class SettleDistressed(_message.Message):
     ) -> None: ...
 
 class DistressedOrders(_message.Message):
-    __slots__ = ["market_id", "parties"]
+    __slots__ = ("market_id", "parties")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -1590,7 +1605,7 @@ class DistressedOrders(_message.Message):
     ) -> None: ...
 
 class DistressedPositions(_message.Message):
-    __slots__ = ["market_id", "distressed_parties", "safe_parties"]
+    __slots__ = ("market_id", "distressed_parties", "safe_parties")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     DISTRESSED_PARTIES_FIELD_NUMBER: _ClassVar[int]
     SAFE_PARTIES_FIELD_NUMBER: _ClassVar[int]
@@ -1605,7 +1620,7 @@ class DistressedPositions(_message.Message):
     ) -> None: ...
 
 class MarketTick(_message.Message):
-    __slots__ = ["id", "time"]
+    __slots__ = ("id", "time")
     ID_FIELD_NUMBER: _ClassVar[int]
     TIME_FIELD_NUMBER: _ClassVar[int]
     id: str
@@ -1615,7 +1630,7 @@ class MarketTick(_message.Message):
     ) -> None: ...
 
 class AuctionEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market_id",
         "opening_auction",
         "leave",
@@ -1623,7 +1638,7 @@ class AuctionEvent(_message.Message):
         "end",
         "trigger",
         "extension_trigger",
-    ]
+    )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     OPENING_AUCTION_FIELD_NUMBER: _ClassVar[int]
     LEAVE_FIELD_NUMBER: _ClassVar[int]
@@ -1650,7 +1665,7 @@ class AuctionEvent(_message.Message):
     ) -> None: ...
 
 class ValidatorUpdate(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "node_id",
         "vega_pub_key",
         "ethereum_address",
@@ -1664,7 +1679,7 @@ class ValidatorUpdate(_message.Message):
         "from_epoch",
         "submitter_address",
         "epoch_seq",
-    ]
+    )
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     VEGA_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
@@ -1709,7 +1724,7 @@ class ValidatorUpdate(_message.Message):
     ) -> None: ...
 
 class ValidatorRankingEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "node_id",
         "stake_score",
         "performance_score",
@@ -1718,7 +1733,7 @@ class ValidatorRankingEvent(_message.Message):
         "next_status",
         "epoch_seq",
         "tm_voting_power",
-    ]
+    )
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     STAKE_SCORE_FIELD_NUMBER: _ClassVar[int]
     PERFORMANCE_SCORE_FIELD_NUMBER: _ClassVar[int]
@@ -1748,7 +1763,7 @@ class ValidatorRankingEvent(_message.Message):
     ) -> None: ...
 
 class KeyRotation(_message.Message):
-    __slots__ = ["node_id", "old_pub_key", "new_pub_key", "block_height"]
+    __slots__ = ("node_id", "old_pub_key", "new_pub_key", "block_height")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     OLD_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
     NEW_PUB_KEY_FIELD_NUMBER: _ClassVar[int]
@@ -1766,7 +1781,7 @@ class KeyRotation(_message.Message):
     ) -> None: ...
 
 class EthereumKeyRotation(_message.Message):
-    __slots__ = ["node_id", "old_address", "new_address", "block_height"]
+    __slots__ = ("node_id", "old_address", "new_address", "block_height")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     OLD_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     NEW_ADDRESS_FIELD_NUMBER: _ClassVar[int]
@@ -1784,7 +1799,7 @@ class EthereumKeyRotation(_message.Message):
     ) -> None: ...
 
 class ProtocolUpgradeEvent(_message.Message):
-    __slots__ = ["upgrade_block_height", "vega_release_tag", "approvers", "status"]
+    __slots__ = ("upgrade_block_height", "vega_release_tag", "approvers", "status")
     UPGRADE_BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     VEGA_RELEASE_TAG_FIELD_NUMBER: _ClassVar[int]
     APPROVERS_FIELD_NUMBER: _ClassVar[int]
@@ -1802,7 +1817,7 @@ class ProtocolUpgradeEvent(_message.Message):
     ) -> None: ...
 
 class StateVar(_message.Message):
-    __slots__ = ["id", "event_id", "state"]
+    __slots__ = ("id", "event_id", "state")
     ID_FIELD_NUMBER: _ClassVar[int]
     EVENT_ID_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
@@ -1817,7 +1832,7 @@ class StateVar(_message.Message):
     ) -> None: ...
 
 class BeginBlock(_message.Message):
-    __slots__ = ["height", "timestamp", "hash"]
+    __slots__ = ("height", "timestamp", "hash")
     HEIGHT_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     HASH_FIELD_NUMBER: _ClassVar[int]
@@ -1832,25 +1847,25 @@ class BeginBlock(_message.Message):
     ) -> None: ...
 
 class EndBlock(_message.Message):
-    __slots__ = ["height"]
+    __slots__ = ("height",)
     HEIGHT_FIELD_NUMBER: _ClassVar[int]
     height: int
     def __init__(self, height: _Optional[int] = ...) -> None: ...
 
 class ProtocolUpgradeStarted(_message.Message):
-    __slots__ = ["last_block_height"]
+    __slots__ = ("last_block_height",)
     LAST_BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     last_block_height: int
     def __init__(self, last_block_height: _Optional[int] = ...) -> None: ...
 
 class ProtocolUpgradeDataNodeReady(_message.Message):
-    __slots__ = ["last_block_height"]
+    __slots__ = ("last_block_height",)
     LAST_BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     last_block_height: int
     def __init__(self, last_block_height: _Optional[int] = ...) -> None: ...
 
 class CoreSnapshotData(_message.Message):
-    __slots__ = ["block_height", "block_hash", "core_version", "protocol_upgrade_block"]
+    __slots__ = ("block_height", "block_hash", "core_version", "protocol_upgrade_block")
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HASH_FIELD_NUMBER: _ClassVar[int]
     CORE_VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -1868,7 +1883,7 @@ class CoreSnapshotData(_message.Message):
     ) -> None: ...
 
 class ExpiredOrders(_message.Message):
-    __slots__ = ["market_id", "order_ids"]
+    __slots__ = ("market_id", "order_ids")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     ORDER_IDS_FIELD_NUMBER: _ClassVar[int]
     market_id: str
@@ -1880,7 +1895,7 @@ class ExpiredOrders(_message.Message):
     ) -> None: ...
 
 class TeamCreated(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "team_id",
         "referrer",
         "name",
@@ -1889,7 +1904,7 @@ class TeamCreated(_message.Message):
         "created_at",
         "closed",
         "at_epoch",
-    ]
+    )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -1919,7 +1934,7 @@ class TeamCreated(_message.Message):
     ) -> None: ...
 
 class TeamUpdated(_message.Message):
-    __slots__ = ["team_id", "name", "team_url", "avatar_url", "closed"]
+    __slots__ = ("team_id", "name", "team_url", "avatar_url", "closed")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     TEAM_URL_FIELD_NUMBER: _ClassVar[int]
@@ -1940,7 +1955,7 @@ class TeamUpdated(_message.Message):
     ) -> None: ...
 
 class RefereeSwitchedTeam(_message.Message):
-    __slots__ = ["from_team_id", "to_team_id", "referee", "switched_at", "at_epoch"]
+    __slots__ = ("from_team_id", "to_team_id", "referee", "switched_at", "at_epoch")
     FROM_TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     TO_TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
@@ -1961,7 +1976,7 @@ class RefereeSwitchedTeam(_message.Message):
     ) -> None: ...
 
 class RefereeJoinedTeam(_message.Message):
-    __slots__ = ["team_id", "referee", "joined_at", "at_epoch"]
+    __slots__ = ("team_id", "referee", "joined_at", "at_epoch")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
     JOINED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -1979,7 +1994,7 @@ class RefereeJoinedTeam(_message.Message):
     ) -> None: ...
 
 class ReferralSetCreated(_message.Message):
-    __slots__ = ["set_id", "referrer", "created_at", "updated_at"]
+    __slots__ = ("set_id", "referrer", "created_at", "updated_at")
     SET_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -1997,7 +2012,7 @@ class ReferralSetCreated(_message.Message):
     ) -> None: ...
 
 class ReferralSetStatsUpdated(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "set_id",
         "at_epoch",
         "referral_set_running_notional_taker_volume",
@@ -2007,7 +2022,7 @@ class ReferralSetStatsUpdated(_message.Message):
         "rewards_factor_multiplier",
         "was_eligible",
         "referrer_taker_volume",
-    ]
+    )
     SET_ID_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     REFERRAL_SET_RUNNING_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -2040,7 +2055,7 @@ class ReferralSetStatsUpdated(_message.Message):
     ) -> None: ...
 
 class RefereeStats(_message.Message):
-    __slots__ = ["party_id", "discount_factor", "epoch_notional_taker_volume"]
+    __slots__ = ("party_id", "discount_factor", "epoch_notional_taker_volume")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     DISCOUNT_FACTOR_FIELD_NUMBER: _ClassVar[int]
     EPOCH_NOTIONAL_TAKER_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -2055,7 +2070,7 @@ class RefereeStats(_message.Message):
     ) -> None: ...
 
 class RefereeJoinedReferralSet(_message.Message):
-    __slots__ = ["set_id", "referee", "joined_at", "at_epoch"]
+    __slots__ = ("set_id", "referee", "joined_at", "at_epoch")
     SET_ID_FIELD_NUMBER: _ClassVar[int]
     REFEREE_FIELD_NUMBER: _ClassVar[int]
     JOINED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -2073,7 +2088,7 @@ class RefereeJoinedReferralSet(_message.Message):
     ) -> None: ...
 
 class ReferralProgramStarted(_message.Message):
-    __slots__ = ["program", "started_at", "at_epoch"]
+    __slots__ = ("program", "started_at", "at_epoch")
     PROGRAM_FIELD_NUMBER: _ClassVar[int]
     STARTED_AT_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2088,7 +2103,7 @@ class ReferralProgramStarted(_message.Message):
     ) -> None: ...
 
 class ReferralProgramUpdated(_message.Message):
-    __slots__ = ["program", "updated_at", "at_epoch"]
+    __slots__ = ("program", "updated_at", "at_epoch")
     PROGRAM_FIELD_NUMBER: _ClassVar[int]
     UPDATED_AT_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2103,7 +2118,7 @@ class ReferralProgramUpdated(_message.Message):
     ) -> None: ...
 
 class ReferralProgramEnded(_message.Message):
-    __slots__ = ["version", "id", "ended_at", "at_epoch"]
+    __slots__ = ("version", "id", "ended_at", "at_epoch")
     VERSION_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     ENDED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -2121,7 +2136,7 @@ class ReferralProgramEnded(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountProgramStarted(_message.Message):
-    __slots__ = ["program", "started_at", "at_epoch"]
+    __slots__ = ("program", "started_at", "at_epoch")
     PROGRAM_FIELD_NUMBER: _ClassVar[int]
     STARTED_AT_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2136,7 +2151,7 @@ class VolumeDiscountProgramStarted(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountProgramUpdated(_message.Message):
-    __slots__ = ["program", "updated_at", "at_epoch"]
+    __slots__ = ("program", "updated_at", "at_epoch")
     PROGRAM_FIELD_NUMBER: _ClassVar[int]
     UPDATED_AT_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
@@ -2151,7 +2166,7 @@ class VolumeDiscountProgramUpdated(_message.Message):
     ) -> None: ...
 
 class VolumeDiscountProgramEnded(_message.Message):
-    __slots__ = ["version", "id", "ended_at", "at_epoch"]
+    __slots__ = ("version", "id", "ended_at", "at_epoch")
     VERSION_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
     ENDED_AT_FIELD_NUMBER: _ClassVar[int]
@@ -2169,13 +2184,13 @@ class VolumeDiscountProgramEnded(_message.Message):
     ) -> None: ...
 
 class PaidLiquidityFeesStats(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "market",
         "asset",
         "epoch_seq",
         "total_fees_paid",
         "fees_paid_per_party",
-    ]
+    )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -2196,7 +2211,7 @@ class PaidLiquidityFeesStats(_message.Message):
     ) -> None: ...
 
 class BusEvent(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "block",
         "type",
@@ -2285,7 +2300,7 @@ class BusEvent(_message.Message):
         "version",
         "chain_id",
         "tx_hash",
-    ]
+    )
     ID_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
     TYPE_FIELD_NUMBER: _ClassVar[int]

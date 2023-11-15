@@ -16,11 +16,11 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class InfoRequest(_message.Message):
-    __slots__ = []
+    __slots__ = ()
     def __init__(self) -> None: ...
 
 class InfoResponse(_message.Message):
-    __slots__ = ["version", "commit_hash"]
+    __slots__ = ("version", "commit_hash")
     VERSION_FIELD_NUMBER: _ClassVar[int]
     COMMIT_HASH_FIELD_NUMBER: _ClassVar[int]
     version: str
@@ -30,13 +30,13 @@ class InfoResponse(_message.Message):
     ) -> None: ...
 
 class GetTransactionRequest(_message.Message):
-    __slots__ = ["hash"]
+    __slots__ = ("hash",)
     HASH_FIELD_NUMBER: _ClassVar[int]
     hash: str
     def __init__(self, hash: _Optional[str] = ...) -> None: ...
 
 class GetTransactionResponse(_message.Message):
-    __slots__ = ["transaction"]
+    __slots__ = ("transaction",)
     TRANSACTION_FIELD_NUMBER: _ClassVar[int]
     transaction: Transaction
     def __init__(
@@ -44,7 +44,7 @@ class GetTransactionResponse(_message.Message):
     ) -> None: ...
 
 class ListTransactionsRequest(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "limit",
         "before",
         "after",
@@ -54,10 +54,10 @@ class ListTransactionsRequest(_message.Message):
         "parties",
         "first",
         "last",
-    ]
+    )
 
     class FiltersEntry(_message.Message):
-        __slots__ = ["key", "value"]
+        __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
@@ -97,7 +97,7 @@ class ListTransactionsRequest(_message.Message):
     ) -> None: ...
 
 class ListTransactionsResponse(_message.Message):
-    __slots__ = ["transactions"]
+    __slots__ = ("transactions",)
     TRANSACTIONS_FIELD_NUMBER: _ClassVar[int]
     transactions: _containers.RepeatedCompositeFieldContainer[Transaction]
     def __init__(
@@ -105,7 +105,7 @@ class ListTransactionsResponse(_message.Message):
     ) -> None: ...
 
 class Transaction(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "block",
         "index",
         "hash",
@@ -119,7 +119,7 @@ class Transaction(_message.Message):
         "created_at",
         "version",
         "pow",
-    ]
+    )
     BLOCK_FIELD_NUMBER: _ClassVar[int]
     INDEX_FIELD_NUMBER: _ClassVar[int]
     HASH_FIELD_NUMBER: _ClassVar[int]

@@ -13,9 +13,15 @@ from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import VegaService, PeggedOrder, VegaCommandError
+from vega_sim.service import VegaService, PeggedOrder
 from vega_sim.api.governance import ProposalNotAcceptedError
 from requests.exceptions import HTTPError
+
+import vega_sim.builders as builders
+
+from uuid import uuid4
+
+import vega_sim.scenario.fuzzed_markets.fuzzers as fuzzers
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -195,12 +201,12 @@ class FuzzingAgent(StateAgentWithWallet):
         FuzzingAgent.MEMORY["PEGGED_REFERENCE"].append(
             self.random_state.choice(
                 a=[
-                    "PEGGED_REFERENCE_UNSPECIFIED",
-                    "PEGGED_REFERENCE_MID",
-                    "PEGGED_REFERENCE_BEST_BID",
-                    "PEGGED_REFERENCE_BEST_ASK",
+                    vega_protos.vega.PEGGED_REFERENCE_UNSPECIFIED,
+                    vega_protos.vega.PEGGED_REFERENCE_MID,
+                    vega_protos.vega.PEGGED_REFERENCE_BEST_BID,
+                    vega_protos.vega.PEGGED_REFERENCE_BEST_ASK,
                 ],
-                p=[0.5, 0.5 / 3, 0.5 / 3, 0.5 / 3],
+                p=[0.1, 0.3, 0.3, 0.3],
             )
         )
         FuzzingAgent.MEMORY["REDUCE_ONLY"].append(
@@ -236,7 +242,8 @@ class FuzzingAgent(StateAgentWithWallet):
                 pegged_order=self.random_state.choice(
                     [
                         None,
-                        self.vega.build_pegged_order(
+                        builders.commands.commands.pegged_order(
+                            market_price_decimals=self.vega.market_price_decimals,
                             market_id=self.market_id,
                             reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
                             offset=self.random_state.normal(loc=0, scale=10),
@@ -246,7 +253,8 @@ class FuzzingAgent(StateAgentWithWallet):
                 iceberg_opts=self.random_state.choice(
                     [
                         None,
-                        self.vega.build_iceberg_opts(
+                        builders.commands.commands.iceberg_opts(
+                            market_pos_decimals=self.vega.market_pos_decimals,
                             market_id=self.market_id,
                             peak_size=self.random_state.normal(loc=100, scale=20),
                             minimum_visible_size=self.random_state.normal(
@@ -258,12 +266,12 @@ class FuzzingAgent(StateAgentWithWallet):
                 reduce_only=FuzzingAgent.MEMORY["REDUCE_ONLY"][-1],
                 post_only=FuzzingAgent.MEMORY["POST_ONLY"][-1],
             )
-        except VegaCommandError:
+        except builders.exceptions.VegaProtoValueError:
             return None
 
     def create_fuzzed_stop_orders_submission(self, vega_state):
         try:
-            return self.vega.build_stop_orders_submission(
+            return builders.commands.commands.stop_orders_submission(
                 rises_above=self.random_state.choice(
                     [self.create_fuzzed_stop_orders_setup(vega_state), None]
                 ),
@@ -271,31 +279,35 @@ class FuzzingAgent(StateAgentWithWallet):
                     [self.create_fuzzed_stop_orders_setup(vega_state), None]
                 ),
             )
-        except VegaCommandError:
+        except builders.exceptions.VegaProtoValueError:
             return None
 
     def create_fuzzed_stop_orders_setup(self, vega_state):
-        return self.vega.build_stop_order_setup(
-            market_id=self.market_id,
-            order_submission=self.create_fuzzed_submission(vega_state=vega_state),
-            expires_at=datetime.utcfromtimestamp(
-                self.random_state.normal(loc=self.curr_time + 120, scale=30)
-            ),
-            expiry_strategy=self.random_state.choice(
-                [
-                    None,
-                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_UNSPECIFIED,
-                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
-                    vega_protos.vega.StopOrder.EXPIRY_STRATEGY_SUBMIT,
-                ]
-            ),
-            price=self.random_state.choice(
-                [None, self.random_state.normal(loc=self.curr_price, scale=10)]
-            ),
-            trailing_percent_offset=self.random_state.choice(
-                [None, self.random_state.rand()]
-            ),
-        )
+        try:
+            return builders.commands.commands.stop_order_setup(
+                market_price_decimals=self.vega.market_price_decimals,
+                market_id=self.market_id,
+                order_submission=self.create_fuzzed_submission(vega_state=vega_state),
+                expires_at=datetime.utcfromtimestamp(
+                    self.random_state.normal(loc=self.curr_time + 120, scale=30)
+                ),
+                expiry_strategy=self.random_state.choice(
+                    [
+                        None,
+                        vega_protos.vega.StopOrder.EXPIRY_STRATEGY_UNSPECIFIED,
+                        vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
+                        vega_protos.vega.StopOrder.EXPIRY_STRATEGY_SUBMIT,
+                    ]
+                ),
+                price=self.random_state.choice(
+                    [None, self.random_state.normal(loc=self.curr_price, scale=10)]
+                ),
+                trailing_percent_offset=self.random_state.choice(
+                    [None, self.random_state.rand()]
+                ),
+            )
+        except builders.exceptions.VegaProtoValueError:
+            return None
 
     def _select_order_id(self):
         if self.live_orders != {}:
@@ -540,7 +552,9 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             trading_key=self.key_name,
             side="SIDE_BUY",
             order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_BID", offset=0),
+            pegged_order=PeggedOrder(
+                reference=vega_protos.vega.PEGGED_REFERENCE_BEST_BID, offset=0
+            ),
             wait=False,
             time_in_force="TIME_IN_FORCE_GTC",
             volume=(
@@ -559,7 +573,9 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
             trading_key=self.key_name,
             side="SIDE_SELL",
             order_type="TYPE_LIMIT",
-            pegged_order=PeggedOrder(reference="PEGGED_REFERENCE_BEST_ASK", offset=0),
+            pegged_order=PeggedOrder(
+                reference=vega_protos.vega.PEGGED_REFERENCE_BEST_ASK, offset=0
+            ),
             wait=False,
             time_in_force="TIME_IN_FORCE_GTC",
             volume=(
@@ -620,7 +636,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
 
     def _gen_spec(self, side: vega_protos.vega.Side, is_valid: bool):
         refs = [
-            vega_protos.vega.PeggedReference.PEGGED_REFERENCE_UNSPECIFIED,
+            # vega_protos.vega.PeggedReference.PEGGED_REFERENCE_UNSPECIFIED,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_MID,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_BID,
             vega_protos.vega.PeggedReference.PEGGED_REFERENCE_BEST_ASK,
@@ -709,7 +725,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                     side=side,
                     wait=False,
                 )
-            except HTTPError:
+            except (HTTPError, builders.exceptions.VegaProtoValueError):
                 continue
         try:
             self.vega.submit_liquidity(
@@ -720,7 +736,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                 commitment_amount=commitment_amount,
                 is_amendment=self.random_state.choice([True, False, None]),
             )
-        except HTTPError:
+        except (HTTPError, builders.exceptions.VegaProtoValueError):
             return
 
 
@@ -1025,7 +1041,11 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 try:
                     self._fuzzed_proposal()
                     return
-                except (HTTPError, ProposalNotAcceptedError):
+                except (
+                    HTTPError,
+                    ProposalNotAcceptedError,
+                    builders.exceptions.VegaProtoValueError,
+                ):
                     continue
             logging.info(
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
@@ -1149,7 +1169,11 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 try:
                     self._fuzzed_proposal()
                     return
-                except (HTTPError, ProposalNotAcceptedError):
+                except (
+                    HTTPError,
+                    ProposalNotAcceptedError,
+                    builders.exceptions.VegaProtoValueError,
+                ):
                     continue
             logging.info(
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
@@ -1207,51 +1231,6 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
 class FuzzyRewardFunder(StateAgentWithWallet):
     NAME_BASE = "fuzzy_reward_funder"
 
-    # List of valid dispatch metrics
-    DISPATCH_METRICS = [
-        vega_protos.vega.DISPATCH_METRIC_UNSPECIFIED,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
-        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
-        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE,
-        vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION,
-        vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN,
-        vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
-        vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
-    ]
-    # Map of valid dispatch metrics to relevant account type
-    ACCOUNT_TYPES = {
-        vega_protos.vega.DISPATCH_METRIC_UNSPECIFIED: vega_protos.vega.ACCOUNT_TYPE_UNSPECIFIED,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID: vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
-        vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED: vega_protos.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
-        vega_protos.vega.DISPATCH_METRIC_LP_FEES_RECEIVED: vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
-        vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE: vega_protos.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
-        vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION: vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
-        vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN: vega_protos.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
-        vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY: vega_protos.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
-        vega_protos.vega.DISPATCH_METRIC_VALIDATOR_RANKING: vega_protos.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
-    }
-
-    # List of valid entity scopes
-    ENTITY_SCOPE = {
-        vega_protos.vega.ENTITY_SCOPE_UNSPECIFIED: 0.1,
-        vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS: 0.45,
-        vega_protos.vega.ENTITY_SCOPE_TEAMS: 0.45,
-    }
-    # List of valid individual scopes
-    INDIVIDUAL_SCOPE = {
-        vega_protos.vega.INDIVIDUAL_SCOPE_UNSPECIFIED: 0.1,
-        vega_protos.vega.INDIVIDUAL_SCOPE_ALL: 0.3,
-        vega_protos.vega.INDIVIDUAL_SCOPE_IN_TEAM: 0.3,
-        vega_protos.vega.INDIVIDUAL_SCOPE_NOT_IN_TEAM: 0.3,
-    }
-    # List of valid distribution strategies
-    DISTRIBUTION_STRATEGIES = {
-        vega_protos.vega.DISTRIBUTION_STRATEGY_UNSPECIFIED: 0.1,
-        vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA: 0.45,
-        vega_protos.vega.DISTRIBUTION_STRATEGY_RANK: 0.45,
-    }
-
     def __init__(
         self,
         key_name: str,
@@ -1307,170 +1286,134 @@ class FuzzyRewardFunder(StateAgentWithWallet):
             return
         for _ in range(self.attempts_per_step):
             try:
-                self._fuzzed_transfer(vega_state)
-            except HTTPError:
+                fuzzed_transfer = fuzzers.fuzz_transfer(
+                    vega=self.vega, rs=self.random_state, bias=self.validity_bias
+                )
+                # Overwrite fields which should not be fuzzed
+                fuzzed_transfer.asset = self.asset_id
+                fuzzed_transfer.from_account_type = (
+                    vega_protos.vega.ACCOUNT_TYPE_GENERAL
+                )
+                self.vega.wallet.submit_transaction(
+                    transaction=fuzzed_transfer,
+                    key_name=self.key_name,
+                    transaction_type="transfer",
+                    wallet_name=self.wallet_name,
+                )
+
+            except (HTTPError, builders.exceptions.VegaProtoValueError):
                 continue
 
-    def _fuzzed_transfer(self, vega_state):
-        # Pick transfer durations
-        current_epoch = self.vega.statistics().epoch_seq
-        start_epoch = self._pick_start_epoch(current_epoch)
-        end_epoch = self._pick_end_epoch(start_epoch)
 
-        # Pick driving parameters
-        entity_scope = self.random_state.choice(
-            list(self.ENTITY_SCOPE.keys()), p=list(self.ENTITY_SCOPE.values())
-        )
-        dispatch_metric = self.random_state.choice(self.DISPATCH_METRICS)
-        distribution_strategy = self.random_state.choice(
-            list(self.DISTRIBUTION_STRATEGIES.keys()),
-            p=list(self.DISTRIBUTION_STRATEGIES.values()),
-        )
+class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
+    NAME_BASE = "fuzzy_governance_transfer_agent"
 
-        self.vega.recurring_transfer(
-            start_epoch=start_epoch,
-            end_epoch=end_epoch,
-            asset=self.asset_id,
-            amount=self.random_state.normal(loc=150, scale=10),
-            from_wallet_name=self.wallet_name,
-            from_key_name=self.key_name,
-            asset_for_metric=self._pick_asset_for_metric(dispatch_metric),
-            metric=dispatch_metric,
-            from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-            to_account_type=self._pick_account_type(dispatch_metric),
-            factor=self.random_state.rand(),
-            markets=self._pick_markets(list(vega_state.market_state.keys())),
-            entity_scope=entity_scope,
-            individual_scope=self._pick_individual_scope(entity_scope),
-            n_top_performers=self._pick_n_top_performers(entity_scope),
-            notional_time_weighted_average_position_requirement=self._pick_notional_time_weighted_average_position_requirement(),
-            window_length=self._pick_window_length(dispatch_metric),
-            lock_period=self._pick_window_length(dispatch_metric),
-            distribution_strategy=distribution_strategy,
-            rank_table=self._pick_rank_table(distribution_strategy),
-        )
+    def __init__(
+        self,
+        key_name: str,
+        asset_name: str,
+        step_bias: float = 0.1,
+        validity_bias: float = 0.8,
+        attempts_per_step: int = 20,
+        initial_mint: float = 1e9,
+        wallet_name: Optional[str] = None,
+        stake_key: bool = False,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
 
-    def _valid(self):
-        return self.random_state.rand() < self.validity_bias
+        self.asset_name = asset_name
+        self.initial_mint = initial_mint
+        self.stake_key = stake_key
+        self.step_bias = step_bias
+        self.validity_bias = validity_bias
+        self.attempts_per_step = attempts_per_step
 
-    def _pick_start_epoch(self, current_epoch):
-        """Given a current_epoch, pick either a valid or random start_epoch."""
-        if self._valid():
-            return current_epoch + self.random_state.randint(1, 5)
-        else:
-            return max(current_epoch + self.random_state.randint(-5, 5), 0)
+        self.random_state = random_state if random_state is not None else RandomState()
 
-    def _pick_end_epoch(self, start_epoch):
-        """Given a start_epoch, pick either a valid or random end_epoch."""
-        if self._valid():
-            return start_epoch + self.random_state.randint(1, 5)
-        else:
-            return max(start_epoch + self.random_state.randint(-5, 5), 0)
+        self.proposals = 0
+        self.accepted_proposals = 0
 
-    def _pick_account_type(self, dispatch_metric):
-        """Given a dispatch_metric, pick either a valid or random account_type."""
-        if self._valid():
-            return self.ACCOUNT_TYPES[dispatch_metric]
-        else:
-            return self.random_state.choice([None] + list(self.ACCOUNT_TYPES.values()))
+    def initialise(
+        self,
+        vega: VegaService,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
 
-    def _pick_asset_for_metric(self, dispatch_metric):
-        """Given a dispatch_metric, pick either a valid or random asset_for_metric."""
-        if self._valid():
-            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE:
-                return None
-            else:
-                return self.asset_id
-        else:
-            return self.random_state.choice([None, self.asset_id])
-
-    def _pick_individual_scope(self, entity_scope):
-        """Given an entity_scope, pick either a valid or random individual_scope."""
-        if self._valid():
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS:
-                return self.random_state.choice(
-                    list(self.INDIVIDUAL_SCOPE.keys()),
-                    p=list(self.INDIVIDUAL_SCOPE.values()),
-                )
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS:
-                return None
-        else:
-            return self.random_state.choice([None] + list(self.INDIVIDUAL_SCOPE.keys()))
-
-    def _pick_n_top_performers(self, entity_scope):
-        """Given an entity_scope, pick either a valid or random n_top_performers."""
-        if self._valid():
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_INDIVIDUALS:
-                return None
-            if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS:
-                return self.random_state.rand()
-        else:
-            return self.random_state.choice([None, self.random_state.rand()])
-
-    def _pick_markets(self, markets):
-        """Given a list of markets, pick either no markets or a subset of markets"""
-        if self.random_state.rand() < 0.5:
-            return None
-        else:
-            return self.random_state.choice(
-                markets, self.random_state.randint(1, len(markets))
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_mint,
+                wallet_name=self.wallet_name,
+            )
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset="VOTE",
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
             )
 
-    def _pick_notional_time_weighted_average_position_requirement(self):
-        """Pick a random notional_time_weighted_average_position_requirement"""
-        return self.random_state.choice([None, self.random_state.randint(0, 1000)])
-
-    def _pick_window_length(self, dispatch_metric):
-        """Given a dispatch_metric, pick either a valid or random window_length"""
-        if self._valid():
-            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_MARKET_VALUE:
-                return None
-            if dispatch_metric == vega_protos.vega.DISPATCH_METRIC_RETURN_VOLATILITY:
-                return self.random_state.randint(2, 5)
-            return self.random_state.randint(1, 5)
-        else:
-            return self.random_state.choice([None, self.random_state.randint(0, 5)])
-
-    def _pick_lock_period(self):
-        """Pick either a valid or random lock_period"""
-        if self._valid():
-            return self.random_state.randint(0, 5)
-        else:
-            return self.random_state.choice([None, self.random_state.randint(0, 5)])
-
-    def _pick_rank_table(self, distribution_strategy):
-        """Given a distribution_strategy, pick either a valid or random rank_table"""
-        if self._valid():
-            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA:
-                return None
-            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_RANK:
-                rank_table = [
-                    vega_protos.vega.Rank(
-                        start_rank=1,
-                        share_ratio=self.random_state.randint(1, 100),
+    def step(self, vega_state):
+        if self.random_state.rand() > self.step_bias:
+            return
+        for _ in range(self.attempts_per_step):
+            try:
+                fuzzed_new_transfer_configuration = (
+                    fuzzers.fuzz_new_transfer_configuration(
+                        vega=self.vega, rs=self.random_state, bias=self.validity_bias
                     )
-                ]
-                for _ in range(self.random_state.randint(1, 10)):
-                    rank_table.append(
-                        vega_protos.vega.Rank(
-                            start_rank=rank_table[-1].start_rank
-                            + self.random_state.randint(1, 10),
-                            share_ratio=self.random_state.randint(1, 10),
-                        )
-                    )
-                return rank_table
-            return self.random_state.choice(
-                array(
-                    [
-                        None,
-                        [
-                            vega_protos.vega.Rank(
-                                start_rank=self.random_state.randint(1, 10),
-                                share_ratio=self.random_state.randint(1, 10),
-                            )
-                            for _ in range(5)
-                        ],
-                    ],
-                    dtype=object,
                 )
-            )
+                # Overwrite fields which should not be fuzzed
+                fuzzed_new_transfer_configuration.asset = self.asset_id
+                new_transfer = builders.governance.new_transfer(
+                    changes=fuzzed_new_transfer_configuration,
+                )
+                blockchain_time = self.vega.get_blockchain_time(in_seconds=True)
+                closing = datetime.fromtimestamp(int(blockchain_time + 50))
+                enactment = datetime.fromtimestamp(int(blockchain_time + 50))
+                terms = builders.governance.proposal_terms(
+                    closing_timestamp=closing,
+                    enactment_timestamp=enactment,
+                    new_transfer=new_transfer,
+                )
+                rationale = builders.governance.proposal_rational(
+                    description="fuzzed-proposal",
+                    title="fuzzed-proposal",
+                )
+                proposal_submission = builders.commands.commands.proposal_submission(
+                    reference=str(uuid4()), terms=terms, rationale=rationale
+                )
+                self.proposals += 1
+                self.vega.submit_proposal(
+                    key_name=self.key_name,
+                    proposal_submission=proposal_submission,
+                    approve_proposal=True,
+                    wallet_name=self.wallet_name,
+                )
+                self.accepted_proposals += 1
+                continue
+            except (
+                HTTPError,
+                ProposalNotAcceptedError,
+                builders.exceptions.VegaProtoValueError,
+            ):
+                continue
+
+    def finalise(self):
+        logging.debug(
+            f"Agent {self.name()} proposed {self.accepted_proposals}/{self.proposals} valid governance transfer proposals."
+        )

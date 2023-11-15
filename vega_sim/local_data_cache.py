@@ -108,6 +108,7 @@ class LocalDataCache:
         self.market_data_lock = threading.RLock()
         self.trades_lock = threading.RLock()
         self.ledger_entries_lock = threading.RLock()
+        self.network_parameter_lock = threading.RLock()
         self._time_update_from_feed = 0
         self._live_order_state_from_feed = {}
         self._dead_order_state_from_feed = {}
@@ -120,6 +121,7 @@ class LocalDataCache:
         self._account_keys_for_market = {}
         self._trades_from_feed: List[data.Trade] = []
         self._ledger_entries_from_feed: List[data.LedgerEntry] = []
+        self._network_parameter_from_feed: Dict[str, data.NetworkParameter] = {}
 
         self._observation_thread = None
         self._aggregated_observation_feed: Queue[Any] = Queue()
@@ -176,6 +178,12 @@ class LocalDataCache:
                     self._market_price_decimals,
                     self._market_to_asset,
                     self._asset_decimals,
+                ),
+            ),
+            (
+                (events_protos.BUS_EVENT_TYPE_NETWORK_PARAMETER,),
+                lambda evt: data._network_parameter_from_proto(
+                    evt.network_parameter,
                 ),
             ),
         ]
@@ -278,6 +286,14 @@ class LocalDataCache:
                         transfers_dict.setdefault(party_id, {})[transfer_id] = transfer
         return transfers_dict
 
+    def network_parameter_from_feed(
+        self,
+        key: str,
+    ) -> data.NetworkParameter:
+        if key not in self._network_parameter_from_feed:
+            self.initialise_network_parameters()
+        return self._network_parameter_from_feed[key]
+
     def start_live_feeds(
         self,
         market_ids: Optional[Union[str, List[str]]] = None,
@@ -306,6 +322,7 @@ class LocalDataCache:
         self.initialise_market_data(
             market_ids,
         )
+        self.initialise_network_parameters()
 
         self._observation_thread = threading.Thread(
             target=self._monitor_stream, daemon=True
@@ -440,6 +457,15 @@ class LocalDataCache:
             for t in base_transfers:
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
+    def initialise_network_parameters(self):
+        base_network_parameters = data.list_network_parameters(
+            data_client=self._trading_data_client
+        )
+
+        with self.transfers_lock:
+            for p in base_network_parameters:
+                self._network_parameter_from_feed[p.key] = p
+
     def _monitor_stream(self) -> None:
         while not self._kill_thread_sig.is_set():
             try:
@@ -522,6 +548,10 @@ class LocalDataCache:
                         self._account_keys_for_market.setdefault(
                             update.market_id, set()
                         ).add(update.account_id)
+
+                elif isinstance(update, data.NetworkParameter):
+                    with self.network_parameter_lock:
+                        self._network_parameter_from_feed[update.key] = update
 
                 elif update is None:
                     logger.debug("Failed to process event into update.")

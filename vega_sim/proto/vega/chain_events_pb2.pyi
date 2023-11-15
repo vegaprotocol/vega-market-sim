@@ -10,7 +10,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class EthContractCallEvent(_message.Message):
-    __slots__ = ["spec_id", "block_height", "block_time", "result", "error"]
+    __slots__ = ("spec_id", "block_height", "block_time", "result", "error")
     SPEC_ID_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
@@ -31,7 +31,7 @@ class EthContractCallEvent(_message.Message):
     ) -> None: ...
 
 class BuiltinAssetDeposit(_message.Message):
-    __slots__ = ["vega_asset_id", "party_id", "amount"]
+    __slots__ = ("vega_asset_id", "party_id", "amount")
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -46,7 +46,7 @@ class BuiltinAssetDeposit(_message.Message):
     ) -> None: ...
 
 class BuiltinAssetWithdrawal(_message.Message):
-    __slots__ = ["vega_asset_id", "party_id", "amount"]
+    __slots__ = ("vega_asset_id", "party_id", "amount")
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -61,7 +61,7 @@ class BuiltinAssetWithdrawal(_message.Message):
     ) -> None: ...
 
 class BuiltinAssetEvent(_message.Message):
-    __slots__ = ["deposit", "withdrawal"]
+    __slots__ = ("deposit", "withdrawal")
     DEPOSIT_FIELD_NUMBER: _ClassVar[int]
     WITHDRAWAL_FIELD_NUMBER: _ClassVar[int]
     deposit: BuiltinAssetDeposit
@@ -73,7 +73,7 @@ class BuiltinAssetEvent(_message.Message):
     ) -> None: ...
 
 class ERC20AssetList(_message.Message):
-    __slots__ = ["vega_asset_id", "asset_source"]
+    __slots__ = ("vega_asset_id", "asset_source")
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_SOURCE_FIELD_NUMBER: _ClassVar[int]
     vega_asset_id: str
@@ -83,18 +83,18 @@ class ERC20AssetList(_message.Message):
     ) -> None: ...
 
 class ERC20AssetDelist(_message.Message):
-    __slots__ = ["vega_asset_id"]
+    __slots__ = ("vega_asset_id",)
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     vega_asset_id: str
     def __init__(self, vega_asset_id: _Optional[str] = ...) -> None: ...
 
 class ERC20AssetLimitsUpdated(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "vega_asset_id",
         "source_ethereum_address",
         "lifetime_limits",
         "withdraw_threshold",
-    ]
+    )
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     SOURCE_ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     LIFETIME_LIMITS_FIELD_NUMBER: _ClassVar[int]
@@ -112,12 +112,12 @@ class ERC20AssetLimitsUpdated(_message.Message):
     ) -> None: ...
 
 class ERC20Deposit(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "vega_asset_id",
         "source_ethereum_address",
         "target_party_id",
         "amount",
-    ]
+    )
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     SOURCE_ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     TARGET_PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -135,7 +135,7 @@ class ERC20Deposit(_message.Message):
     ) -> None: ...
 
 class ERC20Withdrawal(_message.Message):
-    __slots__ = ["vega_asset_id", "target_ethereum_address", "reference_nonce"]
+    __slots__ = ("vega_asset_id", "target_ethereum_address", "reference_nonce")
     VEGA_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     TARGET_ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_NONCE_FIELD_NUMBER: _ClassVar[int]
@@ -150,7 +150,7 @@ class ERC20Withdrawal(_message.Message):
     ) -> None: ...
 
 class ERC20Event(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "index",
         "block",
         "asset_list",
@@ -160,7 +160,7 @@ class ERC20Event(_message.Message):
         "asset_limits_updated",
         "bridge_stopped",
         "bridge_resumed",
-    ]
+    )
     INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
     ASSET_LIST_FIELD_NUMBER: _ClassVar[int]
@@ -195,7 +195,7 @@ class ERC20Event(_message.Message):
     ) -> None: ...
 
 class ERC20SignerAdded(_message.Message):
-    __slots__ = ["new_signer", "nonce", "block_time"]
+    __slots__ = ("new_signer", "nonce", "block_time")
     NEW_SIGNER_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
@@ -210,7 +210,7 @@ class ERC20SignerAdded(_message.Message):
     ) -> None: ...
 
 class ERC20SignerRemoved(_message.Message):
-    __slots__ = ["old_signer", "nonce", "block_time"]
+    __slots__ = ("old_signer", "nonce", "block_time")
     OLD_SIGNER_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
@@ -225,7 +225,7 @@ class ERC20SignerRemoved(_message.Message):
     ) -> None: ...
 
 class ERC20ThresholdSet(_message.Message):
-    __slots__ = ["new_threshold", "nonce", "block_time"]
+    __slots__ = ("new_threshold", "nonce", "block_time")
     NEW_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
@@ -240,7 +240,7 @@ class ERC20ThresholdSet(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigEvent(_message.Message):
-    __slots__ = ["index", "block", "signer_added", "signer_removed", "threshold_set"]
+    __slots__ = ("index", "block", "signer_added", "signer_removed", "threshold_set")
     INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
     SIGNER_ADDED_FIELD_NUMBER: _ClassVar[int]
@@ -261,7 +261,7 @@ class ERC20MultiSigEvent(_message.Message):
     ) -> None: ...
 
 class StakingEvent(_message.Message):
-    __slots__ = ["index", "block", "stake_deposited", "stake_removed", "total_supply"]
+    __slots__ = ("index", "block", "stake_deposited", "stake_removed", "total_supply")
     INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
     STAKE_DEPOSITED_FIELD_NUMBER: _ClassVar[int]
@@ -282,7 +282,7 @@ class StakingEvent(_message.Message):
     ) -> None: ...
 
 class StakeDeposited(_message.Message):
-    __slots__ = ["ethereum_address", "vega_public_key", "amount", "block_time"]
+    __slots__ = ("ethereum_address", "vega_public_key", "amount", "block_time")
     ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     VEGA_PUBLIC_KEY_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -300,7 +300,7 @@ class StakeDeposited(_message.Message):
     ) -> None: ...
 
 class StakeRemoved(_message.Message):
-    __slots__ = ["ethereum_address", "vega_public_key", "amount", "block_time"]
+    __slots__ = ("ethereum_address", "vega_public_key", "amount", "block_time")
     ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     VEGA_PUBLIC_KEY_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -318,7 +318,7 @@ class StakeRemoved(_message.Message):
     ) -> None: ...
 
 class StakeTotalSupply(_message.Message):
-    __slots__ = ["token_address", "total_supply"]
+    __slots__ = ("token_address", "total_supply")
     TOKEN_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     TOTAL_SUPPLY_FIELD_NUMBER: _ClassVar[int]
     token_address: str

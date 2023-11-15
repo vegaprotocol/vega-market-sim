@@ -14,7 +14,7 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class AuctionDuration(_message.Message):
-    __slots__ = ["duration", "volume"]
+    __slots__ = ("duration", "volume")
     DURATION_FIELD_NUMBER: _ClassVar[int]
     VOLUME_FIELD_NUMBER: _ClassVar[int]
     duration: int
@@ -24,7 +24,7 @@ class AuctionDuration(_message.Message):
     ) -> None: ...
 
 class Spot(_message.Message):
-    __slots__ = ["base_asset", "quote_asset", "name"]
+    __slots__ = ("base_asset", "quote_asset", "name")
     BASE_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_ASSET_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -39,13 +39,13 @@ class Spot(_message.Message):
     ) -> None: ...
 
 class Future(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "settlement_asset",
         "quote_name",
         "data_source_spec_for_settlement_data",
         "data_source_spec_for_trading_termination",
         "data_source_spec_binding",
-    ]
+    )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
@@ -72,7 +72,7 @@ class Future(_message.Message):
     ) -> None: ...
 
 class Perpetual(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "settlement_asset",
         "quote_name",
         "margin_funding_factor",
@@ -82,7 +82,7 @@ class Perpetual(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
-    ]
+    )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -121,7 +121,7 @@ class Perpetual(_message.Message):
     ) -> None: ...
 
 class DataSourceSpecToFutureBinding(_message.Message):
-    __slots__ = ["settlement_data_property", "trading_termination_property"]
+    __slots__ = ("settlement_data_property", "trading_termination_property")
     SETTLEMENT_DATA_PROPERTY_FIELD_NUMBER: _ClassVar[int]
     TRADING_TERMINATION_PROPERTY_FIELD_NUMBER: _ClassVar[int]
     settlement_data_property: str
@@ -133,7 +133,7 @@ class DataSourceSpecToFutureBinding(_message.Message):
     ) -> None: ...
 
 class DataSourceSpecToPerpetualBinding(_message.Message):
-    __slots__ = ["settlement_data_property", "settlement_schedule_property"]
+    __slots__ = ("settlement_data_property", "settlement_schedule_property")
     SETTLEMENT_DATA_PROPERTY_FIELD_NUMBER: _ClassVar[int]
     SETTLEMENT_SCHEDULE_PROPERTY_FIELD_NUMBER: _ClassVar[int]
     settlement_data_property: str
@@ -145,13 +145,13 @@ class DataSourceSpecToPerpetualBinding(_message.Message):
     ) -> None: ...
 
 class InstrumentMetadata(_message.Message):
-    __slots__ = ["tags"]
+    __slots__ = ("tags",)
     TAGS_FIELD_NUMBER: _ClassVar[int]
     tags: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, tags: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class Instrument(_message.Message):
-    __slots__ = ["id", "code", "name", "metadata", "future", "spot", "perpetual"]
+    __slots__ = ("id", "code", "name", "metadata", "future", "spot", "perpetual")
     ID_FIELD_NUMBER: _ClassVar[int]
     CODE_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
@@ -178,7 +178,7 @@ class Instrument(_message.Message):
     ) -> None: ...
 
 class LogNormalRiskModel(_message.Message):
-    __slots__ = ["risk_aversion_parameter", "tau", "params"]
+    __slots__ = ("risk_aversion_parameter", "tau", "params")
     RISK_AVERSION_PARAMETER_FIELD_NUMBER: _ClassVar[int]
     TAU_FIELD_NUMBER: _ClassVar[int]
     PARAMS_FIELD_NUMBER: _ClassVar[int]
@@ -193,7 +193,7 @@ class LogNormalRiskModel(_message.Message):
     ) -> None: ...
 
 class LogNormalModelParams(_message.Message):
-    __slots__ = ["mu", "r", "sigma"]
+    __slots__ = ("mu", "r", "sigma")
     MU_FIELD_NUMBER: _ClassVar[int]
     R_FIELD_NUMBER: _ClassVar[int]
     SIGMA_FIELD_NUMBER: _ClassVar[int]
@@ -208,7 +208,7 @@ class LogNormalModelParams(_message.Message):
     ) -> None: ...
 
 class SimpleRiskModel(_message.Message):
-    __slots__ = ["params"]
+    __slots__ = ("params",)
     PARAMS_FIELD_NUMBER: _ClassVar[int]
     params: SimpleModelParams
     def __init__(
@@ -216,13 +216,13 @@ class SimpleRiskModel(_message.Message):
     ) -> None: ...
 
 class SimpleModelParams(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "factor_long",
         "factor_short",
         "max_move_up",
         "min_move_down",
         "probability_of_trading",
-    ]
+    )
     FACTOR_LONG_FIELD_NUMBER: _ClassVar[int]
     FACTOR_SHORT_FIELD_NUMBER: _ClassVar[int]
     MAX_MOVE_UP_FIELD_NUMBER: _ClassVar[int]
@@ -243,7 +243,7 @@ class SimpleModelParams(_message.Message):
     ) -> None: ...
 
 class ScalingFactors(_message.Message):
-    __slots__ = ["search_level", "initial_margin", "collateral_release"]
+    __slots__ = ("search_level", "initial_margin", "collateral_release")
     SEARCH_LEVEL_FIELD_NUMBER: _ClassVar[int]
     INITIAL_MARGIN_FIELD_NUMBER: _ClassVar[int]
     COLLATERAL_RELEASE_FIELD_NUMBER: _ClassVar[int]
@@ -258,7 +258,7 @@ class ScalingFactors(_message.Message):
     ) -> None: ...
 
 class MarginCalculator(_message.Message):
-    __slots__ = ["scaling_factors"]
+    __slots__ = ("scaling_factors",)
     SCALING_FACTORS_FIELD_NUMBER: _ClassVar[int]
     scaling_factors: ScalingFactors
     def __init__(
@@ -266,12 +266,12 @@ class MarginCalculator(_message.Message):
     ) -> None: ...
 
 class TradableInstrument(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "instrument",
         "margin_calculator",
         "log_normal_risk_model",
         "simple_risk_model",
-    ]
+    )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     MARGIN_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
     LOG_NORMAL_RISK_MODEL_FIELD_NUMBER: _ClassVar[int]
@@ -289,7 +289,7 @@ class TradableInstrument(_message.Message):
     ) -> None: ...
 
 class FeeFactors(_message.Message):
-    __slots__ = ["maker_fee", "infrastructure_fee", "liquidity_fee"]
+    __slots__ = ("maker_fee", "infrastructure_fee", "liquidity_fee")
     MAKER_FEE_FIELD_NUMBER: _ClassVar[int]
     INFRASTRUCTURE_FEE_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_FIELD_NUMBER: _ClassVar[int]
@@ -304,15 +304,19 @@ class FeeFactors(_message.Message):
     ) -> None: ...
 
 class Fees(_message.Message):
-    __slots__ = ["factors"]
+    __slots__ = ("factors", "liquidity_fee_settings")
     FACTORS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     factors: FeeFactors
+    liquidity_fee_settings: LiquidityFeeSettings
     def __init__(
-        self, factors: _Optional[_Union[FeeFactors, _Mapping]] = ...
+        self,
+        factors: _Optional[_Union[FeeFactors, _Mapping]] = ...,
+        liquidity_fee_settings: _Optional[_Union[LiquidityFeeSettings, _Mapping]] = ...,
     ) -> None: ...
 
 class PriceMonitoringTrigger(_message.Message):
-    __slots__ = ["horizon", "probability", "auction_extension"]
+    __slots__ = ("horizon", "probability", "auction_extension")
     HORIZON_FIELD_NUMBER: _ClassVar[int]
     PROBABILITY_FIELD_NUMBER: _ClassVar[int]
     AUCTION_EXTENSION_FIELD_NUMBER: _ClassVar[int]
@@ -327,7 +331,7 @@ class PriceMonitoringTrigger(_message.Message):
     ) -> None: ...
 
 class PriceMonitoringParameters(_message.Message):
-    __slots__ = ["triggers"]
+    __slots__ = ("triggers",)
     TRIGGERS_FIELD_NUMBER: _ClassVar[int]
     triggers: _containers.RepeatedCompositeFieldContainer[PriceMonitoringTrigger]
     def __init__(
@@ -336,7 +340,7 @@ class PriceMonitoringParameters(_message.Message):
     ) -> None: ...
 
 class PriceMonitoringSettings(_message.Message):
-    __slots__ = ["parameters"]
+    __slots__ = ("parameters",)
     PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     parameters: PriceMonitoringParameters
     def __init__(
@@ -344,7 +348,7 @@ class PriceMonitoringSettings(_message.Message):
     ) -> None: ...
 
 class LiquidityMonitoringParameters(_message.Message):
-    __slots__ = ["target_stake_parameters", "triggering_ratio", "auction_extension"]
+    __slots__ = ("target_stake_parameters", "triggering_ratio", "auction_extension")
     TARGET_STAKE_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     TRIGGERING_RATIO_FIELD_NUMBER: _ClassVar[int]
     AUCTION_EXTENSION_FIELD_NUMBER: _ClassVar[int]
@@ -361,12 +365,12 @@ class LiquidityMonitoringParameters(_message.Message):
     ) -> None: ...
 
 class LiquiditySLAParameters(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "price_range",
         "commitment_min_time_fraction",
         "performance_hysteresis_epochs",
         "sla_competition_factor",
-    ]
+    )
     PRICE_RANGE_FIELD_NUMBER: _ClassVar[int]
     COMMITMENT_MIN_TIME_FRACTION_FIELD_NUMBER: _ClassVar[int]
     PERFORMANCE_HYSTERESIS_EPOCHS_FIELD_NUMBER: _ClassVar[int]
@@ -383,8 +387,31 @@ class LiquiditySLAParameters(_message.Message):
         sla_competition_factor: _Optional[str] = ...,
     ) -> None: ...
 
+class LiquidityFeeSettings(_message.Message):
+    __slots__ = ("method", "fee_constant")
+
+    class Method(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        METHOD_UNSPECIFIED: _ClassVar[LiquidityFeeSettings.Method]
+        METHOD_MARGINAL_COST: _ClassVar[LiquidityFeeSettings.Method]
+        METHOD_WEIGHTED_AVERAGE: _ClassVar[LiquidityFeeSettings.Method]
+        METHOD_CONSTANT: _ClassVar[LiquidityFeeSettings.Method]
+    METHOD_UNSPECIFIED: LiquidityFeeSettings.Method
+    METHOD_MARGINAL_COST: LiquidityFeeSettings.Method
+    METHOD_WEIGHTED_AVERAGE: LiquidityFeeSettings.Method
+    METHOD_CONSTANT: LiquidityFeeSettings.Method
+    METHOD_FIELD_NUMBER: _ClassVar[int]
+    FEE_CONSTANT_FIELD_NUMBER: _ClassVar[int]
+    method: LiquidityFeeSettings.Method
+    fee_constant: str
+    def __init__(
+        self,
+        method: _Optional[_Union[LiquidityFeeSettings.Method, str]] = ...,
+        fee_constant: _Optional[str] = ...,
+    ) -> None: ...
+
 class TargetStakeParameters(_message.Message):
-    __slots__ = ["time_window", "scaling_factor"]
+    __slots__ = ("time_window", "scaling_factor")
     TIME_WINDOW_FIELD_NUMBER: _ClassVar[int]
     SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     time_window: int
@@ -394,7 +421,7 @@ class TargetStakeParameters(_message.Message):
     ) -> None: ...
 
 class Market(_message.Message):
-    __slots__ = [
+    __slots__ = (
         "id",
         "tradable_instrument",
         "decimal_places",
@@ -413,10 +440,11 @@ class Market(_message.Message):
         "insurance_pool_fraction",
         "successor_market_id",
         "liquidity_sla_params",
-    ]
+        "liquidation_strategy",
+    )
 
     class State(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         STATE_UNSPECIFIED: _ClassVar[Market.State]
         STATE_PROPOSED: _ClassVar[Market.State]
         STATE_REJECTED: _ClassVar[Market.State]
@@ -441,7 +469,7 @@ class Market(_message.Message):
     STATE_SUSPENDED_VIA_GOVERNANCE: Market.State
 
     class TradingMode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = []
+        __slots__ = ()
         TRADING_MODE_UNSPECIFIED: _ClassVar[Market.TradingMode]
         TRADING_MODE_CONTINUOUS: _ClassVar[Market.TradingMode]
         TRADING_MODE_BATCH_AUCTION: _ClassVar[Market.TradingMode]
@@ -474,6 +502,7 @@ class Market(_message.Message):
     INSURANCE_POOL_FRACTION_FIELD_NUMBER: _ClassVar[int]
     SUCCESSOR_MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
     id: str
     tradable_instrument: TradableInstrument
     decimal_places: int
@@ -492,6 +521,7 @@ class Market(_message.Message):
     insurance_pool_fraction: str
     successor_market_id: str
     liquidity_sla_params: LiquiditySLAParameters
+    liquidation_strategy: LiquidationStrategy
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -516,10 +546,11 @@ class Market(_message.Message):
         insurance_pool_fraction: _Optional[str] = ...,
         successor_market_id: _Optional[str] = ...,
         liquidity_sla_params: _Optional[_Union[LiquiditySLAParameters, _Mapping]] = ...,
+        liquidation_strategy: _Optional[_Union[LiquidationStrategy, _Mapping]] = ...,
     ) -> None: ...
 
 class MarketTimestamps(_message.Message):
-    __slots__ = ["proposed", "pending", "open", "close"]
+    __slots__ = ("proposed", "pending", "open", "close")
     PROPOSED_FIELD_NUMBER: _ClassVar[int]
     PENDING_FIELD_NUMBER: _ClassVar[int]
     OPEN_FIELD_NUMBER: _ClassVar[int]
@@ -534,4 +565,27 @@ class MarketTimestamps(_message.Message):
         pending: _Optional[int] = ...,
         open: _Optional[int] = ...,
         close: _Optional[int] = ...,
+    ) -> None: ...
+
+class LiquidationStrategy(_message.Message):
+    __slots__ = (
+        "disposal_time_step",
+        "disposal_fraction",
+        "full_disposal_size",
+        "max_fraction_consumed",
+    )
+    DISPOSAL_TIME_STEP_FIELD_NUMBER: _ClassVar[int]
+    DISPOSAL_FRACTION_FIELD_NUMBER: _ClassVar[int]
+    FULL_DISPOSAL_SIZE_FIELD_NUMBER: _ClassVar[int]
+    MAX_FRACTION_CONSUMED_FIELD_NUMBER: _ClassVar[int]
+    disposal_time_step: int
+    disposal_fraction: str
+    full_disposal_size: int
+    max_fraction_consumed: str
+    def __init__(
+        self,
+        disposal_time_step: _Optional[int] = ...,
+        disposal_fraction: _Optional[str] = ...,
+        full_disposal_size: _Optional[int] = ...,
+        max_fraction_consumed: _Optional[str] = ...,
     ) -> None: ...

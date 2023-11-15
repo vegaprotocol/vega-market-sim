@@ -459,6 +459,19 @@ def get_network_parameter(
 
 
 @_retry(3)
+def list_network_parameters(
+    data_client: vac.VegaTradingDataClientV2,
+) -> List[vega_protos.vega.NetworkParameter]:
+    base_request = data_node_protos_v2.trading_data.ListNetworkParametersRequest()
+
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListNetworkParameters(x).network_parameters,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
 def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
