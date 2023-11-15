@@ -405,14 +405,12 @@ class InstrumentConfiguration(Config):
 
         self.name = config["name"]
         self.code = config["code"]
-        self.future = None
-        future_config = config["future"]
-        if future_config != None:
-            self.future = FutureProduct(opt=future_config)
-        self.perp = None
-        perp_config = config["perp"]
-        if perp_config != None:
-            self.perp = PerpetualProduct(perp_config)
+        self.future = (
+            None if config["future"] is None else FutureProduct(opt=config["future"])
+        )
+        self.perp = (
+            None if config["perp"] is None else PerpetualProduct(opt=config["perp"])
+        )
 
     def build(self):
         if self.future != None:

@@ -168,7 +168,9 @@ if __name__ == "__main__":
             is_amendment=True,
         )
 
-        position = vega.positions_by_market(key_name=MM_WALLET2.name, market_id=market_id)
+        position = vega.positions_by_market(
+            key_name=MM_WALLET2.name, market_id=market_id
+        )
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Position is: {position}")
         print(f"Margin levels are: {margin_levels}")

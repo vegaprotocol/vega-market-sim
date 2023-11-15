@@ -1,7 +1,7 @@
 import logging
 import copy
 import os
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Iterable
 
 import pandas as pd
 from numpy import array
@@ -817,9 +817,10 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         market_agents: Optional[Dict[str, List[StateAgentWithWallet]]] = None,
         stake_key: bool = False,
-        perp_settlement_key_name: Optional[str] = None,
-        perp_close_on_finalise: bool = True,
+        perp_settlement_data_generator: Optional[Iterable[float]] = None,
+        perp_sample_settlement_every_n_steps: int = 10,
         perp_options: Optional[PerpProductOptions] = None,
+        perp_close_on_finalise: bool = True,
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
@@ -847,9 +848,9 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig()
         )
 
-        if self.market_config.is_perp() and perp_settlement_key_name == None:
+        if self.market_config.is_perp() and perp_settlement_data_generator == None:
             raise ValueError(
-                "'perp_settlement_wallet_name' must be supplied when `market_config` indicated as perp market"
+                "'perp_settlement_data_generator' must be supplied when 'market_config' indicates a perp market"
             )
 
         self.settlement_price = settlement_price
@@ -857,7 +858,11 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         self.stake_key = stake_key
         self.perp_options = perp_options
         self.perp_close_at_settlement_price = perp_close_on_finalise
-        self.perp_settlement_key_name = perp_settlement_key_name
+        self.current_step = 0
+        self.prev_perp_settlement_data = None
+        self.curr_perp_settlement_data = None
+        self.perp_settlement_data_generator = perp_settlement_data_generator
+        self.perp_sample_settlement_every_n_steps = perp_sample_settlement_every_n_steps
 
     def _get_termination_key_name(self):
         return (
@@ -958,7 +963,8 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             mkt_config.set(
                 "instrument.perp.settlement_key",
                 self.vega.wallet.public_key(
-                    name=self.perp_settlement_key_name,
+                    wallet_name=self.termination_wallet_name,
+                    name=self._get_termination_key_name(),
                 ),
             )
             if self.perp_options != None:
@@ -1036,6 +1042,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 self.vega.wait_for_total_catchup()
 
     def step(self, vega_state) -> None:
+        self.current_step += 1
         if self.needs_to_update_markets:
             self.vega.submit_termination_and_settlement_data(
                 self.old_termination_key,
@@ -1067,6 +1074,19 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
             self._create_latest_market(parent_market_id=self.market_id)
             self.needs_to_update_markets = True
+
+        # submit perp settlement data
+        if self.market_config.is_perp():
+            self.prev_perp_settlement_data = self.curr_perp_settlement_data
+            self.curr_perp_settlement_data = next(self.perp_settlement_data_generator)
+
+            if (self.current_step - 1) % self.perp_sample_settlement_every_n_steps == 0:
+                self.vega.submit_settlement_data(
+                    settlement_key=self._get_termination_key_name(),
+                    wallet_name=self.termination_wallet_name,
+                    settlement_price=self.curr_perp_settlement_data,
+                    market_id=self.market_id,
+                )
 
 
 class FuzzyReferralProgramManager(StateAgentWithWallet):

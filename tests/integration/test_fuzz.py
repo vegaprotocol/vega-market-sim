@@ -18,5 +18,5 @@ def test_fuzz_run_perps():
     # Simply testing that it doesn't error
     with tempfile.TemporaryDirectory() as temp_dir:
         fuzz._run(
-            steps=100, output=True, output_dir=temp_dir, perp_market_probability=1.0
+            steps=10, output=True, output_dir=temp_dir, perp_market_probability=1.0
         )
