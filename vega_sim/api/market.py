@@ -193,10 +193,10 @@ class MarketConfig(Config):
         rsetattr(self, attr=parameter, val=value)
 
     def is_future(self) -> bool:
-        return self.instrument.future != None
+        return self.instrument.future is not None
 
     def is_perp(self) -> bool:
-        return self.instrument.perp != None
+        return self.instrument.perp is not None
 
 
 class Successor(Config):
