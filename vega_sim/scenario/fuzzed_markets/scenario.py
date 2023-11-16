@@ -156,7 +156,8 @@ class FuzzingScenario(Scenario):
     ):
         if perps_market_probability < 0 or perps_market_probability > 1:
             raise ValueError(
-                f"'perps_market_probability' must be in range [0,1], got '{perps_market_probability}'"
+                "'perps_market_probability' must be in range [0,1], got"
+                f" '{perps_market_probability}'"
             )
 
         super().__init__(
