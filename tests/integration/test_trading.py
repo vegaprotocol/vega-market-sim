@@ -157,7 +157,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     assert len(all_transfers_t1) == 1
     assert len(live_transfers_t1) == 0
 
-    assert party_a_accounts_t1.general == 499.5
+    assert party_a_accounts_t1.general == 499.99999
     assert party_b_accounts_t1.general == 1500
 
     vega.one_off_transfer(
@@ -266,7 +266,7 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
     party_b_accounts_t1 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
 
-    assert party_a_accounts_t1[0].balance == 499.5
+    assert party_a_accounts_t1[0].balance == 499.99999
     assert party_b_accounts_t1[0].balance == 1500
 
     # Forward one epoch
@@ -333,14 +333,14 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
 
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t1[0].balance == 899.9
+    assert party_a_accounts_t1[0].balance == 899.99999
 
     # Forward one epoch
     next_epoch(vega=vega)
 
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 899.9
+    assert party_a_accounts_t2[0].balance == 899.99999
 
 
 @pytest.mark.integration
