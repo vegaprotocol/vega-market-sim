@@ -248,6 +248,26 @@ class CFMScenario(Scenario):
             for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
         ]
 
+        market_agents["market_makers_exp"] = [
+            ExponentialShapedMarketMaker(
+                wallet_name="MARKET_MAKERS",
+                key_name=f"MARKET_{str(i_market).zfill(3)}",
+                price_process_generator=iter(price_process),
+                initial_asset_mint=self.initial_asset_mint,
+                market_name=market_name,
+                asset_name=asset_name,
+                commitment_amount=1e6,
+                market_decimal_places=market_config.decimal_places,
+                asset_decimal_places=asset_dp,
+                num_steps=self.num_steps,
+                kappa=2.4,
+                tick_spacing=0.05,
+                market_kappa=50,
+                state_update_freq=10,
+                tag=f"MARKET_{str(i_market).zfill(3)}",
+            )
+            for i_market in range(6)
+        ]
         market_agents["market_makers"] = [
             # ExponentialShapedMarketMaker(
             #     wallet_name="MARKET_MAKERS",
@@ -299,14 +319,15 @@ class CFMScenario(Scenario):
                 initial_price=price_process[0],
                 num_levels=200,
                 tick_spacing=0.1,
-                price_width_above=0.2,
-                price_width_below=0.2,
+                price_width_above=0.8,
+                price_width_below=0.8,
                 margin_usage_at_bound_above=0.8,
                 margin_usage_at_bound_below=0.8,
                 asset_decimal_places=asset_dp,
                 price_process_generator=iter(price_process),
-                tag="MARKET_CFM",
+                tag=f"MARKET_CFM_{i}",
             )
+            for i in range(1)
         ]
 
         # market_agents["price_sensitive_traders"] = [
