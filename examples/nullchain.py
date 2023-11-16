@@ -211,7 +211,8 @@ if __name__ == "__main__":
 
         # suspend market
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
         update_type = MarketStateUpdateType.Suspend
         print(f"submitting proposal: {update_type}")
@@ -219,7 +220,8 @@ if __name__ == "__main__":
             proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
         # resume market
         vega.wait_for_total_catchup()
@@ -229,7 +231,8 @@ if __name__ == "__main__":
             proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
 
         input("Pausing to observe the market, press Enter to continue.")
@@ -251,7 +254,8 @@ if __name__ == "__main__":
             )
         vega.wait_for_total_catchup()
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
 
         vega.forward("10s")
