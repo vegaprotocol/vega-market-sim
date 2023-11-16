@@ -363,6 +363,42 @@ def submit_liquidity(
     logger.debug(f"Submitted liquidity on market {market_id}")
 
 
+def cancel_liquidity(
+    wallet_name: str,
+    wallet: Wallet,
+    market_id: str,
+    key_name: Optional[str] = None,
+):
+    """Cancel a custom liquidity profile.
+
+    Args:
+        wallet_name:
+            str, the wallet name performing the action
+        wallet:
+            Wallet, wallet client
+        market_id:
+            str, The ID of the market to place the commitment on
+        commitment_amount:
+            int, The amount in asset decimals of market asset to commit
+            to liquidity provision
+        fee:
+            float, The fee level at which to set the LP fee
+             (in %, e.g. 0.01 == 1% and 1 == 100%)
+        key_name:
+            Optional[str], key name stored in metadata. Defaults to None.
+    """
+
+    wallet.submit_transaction(
+        transaction=vega_protos.commands.v1.commands.LiquidityProvisionCancellation(
+            market_id=market_id,
+        ),
+        wallet_name=wallet_name,
+        transaction_type="liquidity_provision_cancellation",
+        key_name=key_name,
+    )
+    logger.debug(f"Cancelled liquidity on market {market_id}")
+
+
 def pegged_order(
     reference: vega_protos.vega.PeggedReference,
     offset: str,

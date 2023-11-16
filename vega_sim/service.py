@@ -571,11 +571,13 @@ class VegaService(ABC):
             if not self.get_network_parameter(key=perps_netparam, to_type="int"):
                 if raise_on_failure:
                     raise ValueError(
-                        "perps market proposals not allowed by default, allowing via network parameter change failed"
+                        "perps market proposals not allowed by default, allowing via"
+                        " network parameter change failed"
                     )
             else:
                 logger.info(
-                    f"successfully updated network parameter '{perps_netparam}' to '{desired_value}'"
+                    f"successfully updated network parameter '{perps_netparam}' to"
+                    f" '{desired_value}'"
                 )
 
     def create_simple_perps_market(
@@ -1420,7 +1422,8 @@ class VegaService(ABC):
         oracle_name = filter_key.name
 
         logger.info(
-            f"Submitting market termination signal and settlement price {settlement_price} for {oracle_name}"
+            "Submitting market termination signal and settlement price"
+            f" {settlement_price} for {oracle_name}"
         )
 
         gov.submit_termination_and_settlement_data(
@@ -1862,6 +1865,38 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
+            key_name=key_name,
+        )
+
+    def cancel_liquidity(
+        self,
+        key_name: str,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+    ):
+        """Cancel a custom liquidity profile.
+
+        Args:
+            key_name:
+                str, the key name performing the action
+            market_id:
+                str, The ID of the market to place the commitment on
+            commitment_amount:
+                int, The amount in asset decimals of market asset to commit
+                to liquidity provision
+            fee:
+                float, The fee level at which to set the LP fee
+                 (in %, e.g. 0.01 == 1% and 1 == 100%)
+            is_amendment:
+                Optional bool, Is the submission an amendment to an existing provision
+                    If None, will query the network to check.
+            wallet_name:
+                optional, str name of wallet to use
+        """
+        return trading.cancel_liquidity(
+            market_id=market_id,
+            wallet=self.wallet,
+            wallet_name=wallet_name,
             key_name=key_name,
         )
 
@@ -2578,9 +2613,11 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
-            if to_key_name is not None
-            else "0000000000000000000000000000000000000000000000000000000000000000",
+            to=(
+                self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+                if to_key_name is not None
+                else "0000000000000000000000000000000000000000000000000000000000000000"
+            ),
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, adp)),
@@ -3164,9 +3201,11 @@ class VegaService(ABC):
             market_id=market_id,
             asset_id=asset_id,
             epoch_seq=epoch_seq,
-            party_id=self.wallet.public_key(key_name, wallet_name)
-            if key_name is not None
-            else None,
+            party_id=(
+                self.wallet.public_key(key_name, wallet_name)
+                if key_name is not None
+                else None
+            ),
             asset_decimals=self.asset_decimals,
         )
 
@@ -3254,9 +3293,11 @@ class VegaService(ABC):
         return data.list_teams(
             data_client=self.trading_data_client_v2,
             team_id=team_id,
-            party_id=None
-            if key_name is None
-            else self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+            party_id=(
+                None
+                if key_name is None
+                else self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+            ),
         )
 
     def list_team_referees(

@@ -613,6 +613,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         commitment_factor_min: float = 0.1,
         commitment_factor_max: float = 0.6,
         initial_asset_mint: float = 1e5,
+        probability_cancel: float = 0.01,
     ):
         super().__init__(key_name, tag, wallet_name, state_update_freq)
 
@@ -621,6 +622,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
 
         self.commitment_factor_min = commitment_factor_min
         self.commitment_factor_max = commitment_factor_max
+        self.probability_cancel = probability_cancel
         self.random_state = random_state if random_state is not None else RandomState()
         self.initial_asset_mint = initial_asset_mint
 
@@ -668,6 +670,14 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         )
 
     def step(self, vega_state):
+        if self.random_state.random() < self.probability_cancel:
+            self.vega.cancel_liquidity(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+            )
+            return
+
         commitment_factor = (
             self.random_state.random_sample()
             * (self.commitment_factor_max - self.commitment_factor_min)
@@ -850,7 +860,8 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
         if self.market_config.is_perp() and perp_settlement_data_generator == None:
             raise ValueError(
-                "'perp_settlement_data_generator' must be supplied when 'market_config' indicates a perp market"
+                "'perp_settlement_data_generator' must be supplied when 'market_config'"
+                " indicates a perp market"
             )
 
         self.settlement_price = settlement_price
@@ -1147,7 +1158,8 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 ):
                     continue
             logging.info(
-                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
+                " proposal."
             )
             self._sensible_proposal()
 
@@ -1274,7 +1286,8 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 ):
                     continue
             logging.info(
-                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible proposal."
+                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
+                " proposal."
             )
             self._sensible_proposal()
 
@@ -1512,5 +1525,7 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
 
     def finalise(self):
         logging.debug(
-            f"Agent {self.name()} proposed {self.accepted_proposals}/{self.proposals} valid governance transfer proposals."
+            f"Agent {self.name()} proposed"
+            f" {self.accepted_proposals}/{self.proposals} valid governance transfer"
+            " proposals."
         )
