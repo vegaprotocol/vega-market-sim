@@ -26,7 +26,7 @@ def _run(
     output_dir: str = "fuzz_plots",
     core_metrics_port: int = 2723,
     data_node_metrics_port: int = 3651,
-    perp_market_probability: float = 0.5,
+    perp_market_probability: float = 1.0,
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
