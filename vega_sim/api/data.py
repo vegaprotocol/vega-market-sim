@@ -561,9 +561,11 @@ def _order_submission_from_proto(
         size=num_from_padded_int(order_submission.size, decimal_spec.position_decimals),
         side=order_submission.side,
         time_in_force=order_submission.time_in_force,
-        expires_at=datetime.datetime.fromtimestamp(order_submission.expires_at / 1e9)
-        if order_submission.expires_at != 0
-        else None,
+        expires_at=(
+            datetime.datetime.fromtimestamp(order_submission.expires_at / 1e9)
+            if order_submission.expires_at != 0
+            else None
+        ),
         type=order_submission.type,
         reference=order_submission.reference,
         pegged_order=_pegged_order_from_proto(
@@ -583,28 +585,38 @@ def _stop_order_from_proto(
     return StopOrder(
         id=stop_order.id,
         oco_link_id=stop_order.oco_link_id,
-        expires_at=datetime.datetime.fromtimestamp(stop_order.expires_at / 1e9)
-        if stop_order.expires_at != 0
-        else None,
+        expires_at=(
+            datetime.datetime.fromtimestamp(stop_order.expires_at / 1e9)
+            if stop_order.expires_at != 0
+            else None
+        ),
         expiry_strategy=stop_order.expiry_strategy,
         trigger_direction=stop_order.trigger_direction,
         status=stop_order.status,
-        created_at=datetime.datetime.fromtimestamp(stop_order.created_at / 1e9)
-        if stop_order.created_at != 0
-        else None,
-        updated_at=datetime.datetime.fromtimestamp(stop_order.updated_at / 1e9)
-        if stop_order.updated_at != 0
-        else None,
+        created_at=(
+            datetime.datetime.fromtimestamp(stop_order.created_at / 1e9)
+            if stop_order.created_at != 0
+            else None
+        ),
+        updated_at=(
+            datetime.datetime.fromtimestamp(stop_order.updated_at / 1e9)
+            if stop_order.updated_at != 0
+            else None
+        ),
         order_id=stop_order.order_id,
         party_id=stop_order.party_id,
         market_id=stop_order.market_id,
         rejection_reason=stop_order.rejection_reason,
-        price=num_from_padded_int(stop_order.price, decimal_spec.price_decimals)
-        if stop_order.price is not None
-        else None,
-        trailing_percent_offset=float(stop_order.trailing_percent_offset)
-        if stop_order.trailing_percent_offset != ""
-        else None,
+        price=(
+            num_from_padded_int(stop_order.price, decimal_spec.price_decimals)
+            if stop_order.price is not None
+            else None
+        ),
+        trailing_percent_offset=(
+            float(stop_order.trailing_percent_offset)
+            if stop_order.trailing_percent_offset != ""
+            else None
+        ),
     )
 
 
@@ -966,11 +978,6 @@ def positions_by_market(
                 )
 
             market_to_asset_map[pos.market_id] = settlement_asset_id
-
-        if len(market_to_asset_map[market_id]) < 1:
-            market_to_asset_map[
-                market_id
-            ] = resp.tradable_instrument.instrument.perpetual.settlement_asset
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -2442,13 +2449,13 @@ def list_referral_sets(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, ReferralSet]:
-    response: List[
-        data_node_protos_v2.trading_data.ReferralSet
-    ] = data_raw.list_referral_sets(
-        data_client=data_client,
-        referral_set_id=referral_set_id,
-        referrer=referrer,
-        referee=referee,
+    response: List[data_node_protos_v2.trading_data.ReferralSet] = (
+        data_raw.list_referral_sets(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
     )
     referral_sets = {}
     for referral_set in response:
@@ -2462,13 +2469,13 @@ def list_referral_set_referees(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, Dict[str, ReferralSetReferee]]:
-    response: List[
-        data_node_protos_v2.trading_data.ReferralSetReferee
-    ] = data_raw.list_referral_set_referees(
-        data_client=data_client,
-        referral_set_id=referral_set_id,
-        referrer=referrer,
-        referee=referee,
+    response: List[data_node_protos_v2.trading_data.ReferralSetReferee] = (
+        data_raw.list_referral_set_referees(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
     )
     referral_set_referees = defaultdict(dict)
     for referral_set_referee in response:
