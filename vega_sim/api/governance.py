@@ -419,7 +419,7 @@ def propose_perps_market(
     data_client: vac.VegaTradingDataClientV2,
     settlement_data_pub_key: str,
     governance_asset: str = "VOTE",
-    future_asset: str = "BTC",
+    perp_asset: str = "BTC",
     position_decimals: Optional[int] = None,
     market_decimals: Optional[int] = None,
     margin_funding_factor: Optional[float] = None,
@@ -462,8 +462,8 @@ def propose_perps_market(
             str, the public key of the oracle to be used for trading termination
         governance_asset:
             str, the governance asset on the market
-        future_asset:
-            str, the symbol of the future asset used
+        perp_asset:
+            str, the symbol of the perp asset used
                 (used for generating/linking names of oracles)
         position_decimals:
             int, the decimal place precision to use for positions
@@ -513,7 +513,7 @@ def propose_perps_market(
                 filters=[
                     oracles_protos.spec.Filter(
                         key=oracles_protos.spec.PropertyKey(
-                            name=f"price.{future_asset}.value",
+                            name=f"price.{perp_asset}.value",
                             type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
                             number_decimal_places=price_decimals,
                         ),
@@ -546,7 +546,7 @@ def propose_perps_market(
         code=market_name,
         perpetual=vega_protos.governance.PerpetualProduct(
             settlement_asset=settlement_asset_id,
-            quote_name=future_asset,
+            quote_name=perp_asset,
             margin_funding_factor="0"
             if margin_funding_factor is None
             else str(margin_funding_factor),
@@ -560,7 +560,7 @@ def propose_perps_market(
             data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_binding=vega_protos.markets.DataSourceSpecToPerpetualBinding(
-                settlement_data_property=f"price.{future_asset}.value",
+                settlement_data_property=f"price.{perp_asset}.value",
                 settlement_schedule_property="vegaprotocol.builtin.timetrigger",
             ),
         ),
@@ -571,7 +571,7 @@ def propose_perps_market(
         instrument=instrument,
         data_client=data_client,
         governance_asset=governance_asset,
-        future_asset=future_asset,
+        future_asset=perp_asset,
         position_decimals=position_decimals,
         price_decimals=price_decimals,
         closing_time=closing_time,

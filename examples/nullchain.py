@@ -80,24 +80,6 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
 
         if args.perps:
-            perps_netparam = "limits.markets.proposePerpetualEnabled"
-            if not vega.get_network_parameter(key=perps_netparam, to_type="int"):
-                new_val = "1"
-                vega.update_network_parameter(
-                    proposal_key=MM_WALLET.name,
-                    parameter=perps_netparam,
-                    new_value=new_val,
-                )
-                vega.wait_for_total_catchup()
-                if not vega.get_network_parameter(key=perps_netparam, to_type="int"):
-                    exit(
-                        "perps market proposals not allowed by default, allowing via network parameter change failed"
-                    )
-                else:
-                    print(
-                        f"successfully updated network parameter '{perps_netparam}' to '{new_val}'"
-                    )
-
             vega.create_simple_perps_market(
                 market_name="BTC:DAI_Perpetual",
                 proposal_key=MM_WALLET.name,
@@ -186,7 +168,9 @@ if __name__ == "__main__":
             is_amendment=True,
         )
 
-        position = vega.positions_by_market(key_name=MM_WALLET2.name)
+        position = vega.positions_by_market(
+            key_name=MM_WALLET2.name, market_id=market_id
+        )
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Position is: {position}")
         print(f"Margin levels are: {margin_levels}")
