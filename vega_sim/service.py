@@ -551,6 +551,33 @@ class VegaService(ABC):
         self.wait_for_thread_catchup()
         return proposal_id
 
+    def try_enable_perp_markets(
+        self, proposal_key: str, wallet_name: str = None, raise_on_failure: bool = False
+    ):
+        perps_netparam = "limits.markets.proposePerpetualEnabled"
+        desired_value = "1"
+        if (
+            self.get_network_parameter(key=perps_netparam, to_type="str")
+            != desired_value
+        ):
+            logger.info(f"Submitting proposal to enable perpetual markets")
+            self.update_network_parameter(
+                proposal_key=proposal_key,
+                parameter=perps_netparam,
+                new_value=desired_value,
+                wallet_name=wallet_name,
+            )
+            self.wait_for_total_catchup()
+            if not self.get_network_parameter(key=perps_netparam, to_type="int"):
+                if raise_on_failure:
+                    raise ValueError(
+                        "perps market proposals not allowed by default, allowing via network parameter change failed"
+                    )
+            else:
+                logger.info(
+                    f"successfully updated network parameter '{perps_netparam}' to '{desired_value}'"
+                )
+
     def create_simple_perps_market(
         self,
         market_name: str,
@@ -621,7 +648,7 @@ class VegaService(ABC):
         """
         additional_kwargs = {}
         if asset is not None:
-            additional_kwargs["future_asset"] = asset
+            additional_kwargs["perp_asset"] = asset
 
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 

@@ -28,7 +28,17 @@ A MarketConfig class has the following attributes which can be set:
 • instrument.code
 • instrument.future.settlement_asset
 • instrument.future.quote_name
+• instrument.future.number_decimal_places
 • instrument.future.terminating_key
+• instrument.perp.settlement_asset
+• instrument.perp.quote_name
+• instrument.perp.number_decimal_places
+• instrument.perp.settlement_key
+• instrument.perp.funding_payment_frequency_in_seconds
+• instrument.perp.margin_funding_factor
+• instrument.perp.interest_rate
+• instrument.perp.clamp_lower_bound
+• instrument.perp.clamp_upper_bound
 
 
 Examples:
@@ -117,7 +127,20 @@ class MarketConfig(Config):
             "quadratic_slippage_factor": 0,
             "successor": None,
             "liquidity_sla_parameters": "default",
-        }
+        },
+        "perp": {
+            "decimal_places": 4,
+            "position_decimal_places": 2,
+            "metadata": None,
+            "price_monitoring_parameters": "default",
+            "liquidity_monitoring_parameters": "default",
+            "log_normal": "default",
+            "instrument": "perp",
+            "linear_slippage_factor": 1e-3,
+            "quadratic_slippage_factor": 0,
+            "successor": None,
+            "liquidity_sla_parameters": "default",
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -168,6 +191,12 @@ class MarketConfig(Config):
 
     def set(self, parameter, value):
         rsetattr(self, attr=parameter, val=value)
+
+    def is_future(self) -> bool:
+        return self.instrument.future is not None
+
+    def is_perp(self) -> bool:
+        return self.instrument.perp is not None
 
 
 class Successor(Config):
@@ -361,7 +390,14 @@ class InstrumentConfiguration(Config):
             "name": None,
             "code": None,
             "future": "default",
-        }
+            "perp": None,
+        },
+        "perp": {
+            "name": None,
+            "code": None,
+            "future": None,
+            "perp": "default",
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -369,12 +405,23 @@ class InstrumentConfiguration(Config):
 
         self.name = config["name"]
         self.code = config["code"]
-        self.future = FutureProduct(opt=config["future"])
+        self.future = (
+            None if config["future"] is None else FutureProduct(opt=config["future"])
+        )
+        self.perp = (
+            None if config["perp"] is None else PerpetualProduct(opt=config["perp"])
+        )
 
     def build(self):
-        return vega_protos.governance.InstrumentConfiguration(
-            name=self.name, code=self.code, future=self.future.build()
-        )
+        if self.future != None:
+            return vega_protos.governance.InstrumentConfiguration(
+                name=self.name, code=self.code, future=self.future.build()
+            )
+        if self.perp != None:
+            return vega_protos.governance.InstrumentConfiguration(
+                name=self.name, code=self.code, perpetual=self.perp.build()
+            )
+        raise ValueError("No product specified for the instrument")
 
 
 class FutureProduct(Config):
@@ -457,5 +504,103 @@ class FutureProduct(Config):
             quote_name=self.quote_name,
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
+            data_source_spec_binding=data_source_spec_binding,
+        )
+
+
+class PerpetualProduct(Config):
+    OPTS = {
+        "default": {
+            "settlement_asset": None,
+            "quote_name": None,
+            "number_decimal_places": None,
+            "settlement_key": None,
+            "funding_payment_frequency_in_seconds": 60,
+            "margin_funding_factor": 1,
+            "interest_rate": 0,
+            "clamp_lower_bound": 0,
+            "clamp_upper_bound": 0,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+
+        self.settlement_asset = config["settlement_asset"]
+        self.quote_name = config["quote_name"]
+        self.number_decimal_places = config["number_decimal_places"]
+        self.settlement_key = config["settlement_key"]
+        self.funding_payment_frequency_in_seconds = config[
+            "funding_payment_frequency_in_seconds"
+        ]
+        self.margin_funding_factor = config["margin_funding_factor"]
+        self.interest_rate = config["interest_rate"]
+        self.clamp_lower_bound = config["clamp_lower_bound"]
+        self.clamp_upper_bound = config["clamp_upper_bound"]
+
+    def build(self):
+        if None in [
+            self.settlement_asset,
+            self.quote_name,
+            self.number_decimal_places,
+            self.settlement_key,
+        ]:
+            raise ValueError(
+                "MarketConfig has not been updated with settlement asset information."
+            )
+
+        data_source_spec_for_settlement_schedule = data_source_protos.DataSourceDefinition(
+            internal=data_source_protos.DataSourceDefinitionInternal(
+                time_trigger=data_source_protos.DataSourceSpecConfigurationTimeTrigger(
+                    conditions=[
+                        oracles_protos.spec.Condition(
+                            operator="OPERATOR_GREATER_THAN_OR_EQUAL", value="0"
+                        )
+                    ],
+                    triggers=[
+                        oracles_protos.spec.InternalTimeTrigger(
+                            every=self.funding_payment_frequency_in_seconds
+                        )
+                    ],
+                )
+            )
+        )
+
+        data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
+            external=data_source_protos.DataSourceDefinitionExternal(
+                oracle=data_source_protos.DataSourceSpecConfiguration(
+                    signers=[
+                        oracles_protos.data.Signer(
+                            pub_key=oracles_protos.data.PubKey(key=self.settlement_key)
+                        )
+                    ],
+                    filters=[
+                        oracles_protos.spec.Filter(
+                            key=oracles_protos.spec.PropertyKey(
+                                name=f"price.{self.quote_name}.value",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                                number_decimal_places=self.number_decimal_places,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
+            )
+        )
+
+        data_source_spec_binding = vega_protos.markets.DataSourceSpecToPerpetualBinding(
+            settlement_data_property=f"price.{self.quote_name}.value",
+            settlement_schedule_property="vegaprotocol.builtin.timetrigger",
+        )
+
+        return vega_protos.governance.PerpetualProduct(
+            settlement_asset=self.settlement_asset,
+            quote_name=self.quote_name,
+            margin_funding_factor=str(self.margin_funding_factor),
+            interest_rate=str(self.interest_rate),
+            clamp_lower_bound=str(self.clamp_lower_bound),
+            clamp_upper_bound=str(self.clamp_upper_bound),
+            data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
+            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_binding=data_source_spec_binding,
         )
