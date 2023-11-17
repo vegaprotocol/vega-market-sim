@@ -1386,7 +1386,12 @@ class VegaService(ABC):
             liquidation_strategy=(
                 updated_liquidation_strategy
                 if updated_liquidation_strategy is not None
-                else current_market.liquidation_strategy
+                else vega_protos.markets.LiquidationStrategy(
+                    disposal_time_step=1,
+                    disposal_fraction="1",
+                    full_disposal_size=1000000000,
+                    max_fraction_consumed="0.5",
+                )
             ),
         )
 

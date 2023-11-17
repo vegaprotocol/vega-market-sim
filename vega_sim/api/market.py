@@ -400,7 +400,7 @@ class LiquidationStrategy(Config):
         }
     }
 
-    def load(self, opt: dict | str | None = None) -> dict:
+    def load(self, opt: Optional[str] = None):
         config = super().load(opt=opt)
 
         self.disposal_time_step = config["disposal_time_step"]
