@@ -53,6 +53,7 @@ from vega_sim.proto.vega.markets_pb2 import (
     PriceMonitoringParameters,
     LiquiditySLAParameters,
     SimpleModelParams,
+    LiquidationStrategy,
 )
 from vega_sim.wallet.base import Wallet
 
@@ -571,11 +572,13 @@ class VegaService(ABC):
             if not self.get_network_parameter(key=perps_netparam, to_type="int"):
                 if raise_on_failure:
                     raise ValueError(
-                        "perps market proposals not allowed by default, allowing via network parameter change failed"
+                        "perps market proposals not allowed by default, allowing via"
+                        " network parameter change failed"
                     )
             else:
                 logger.info(
-                    f"successfully updated network parameter '{perps_netparam}' to '{desired_value}'"
+                    f"successfully updated network parameter '{perps_netparam}' to"
+                    f" '{desired_value}'"
                 )
 
     def create_simple_perps_market(
@@ -1288,6 +1291,7 @@ class VegaService(ABC):
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
         updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
+        updated_liquidation_strategy=Optional[LiquidationStrategy] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1379,6 +1383,7 @@ class VegaService(ABC):
             ),
             linear_slippage_factor=current_market.linear_slippage_factor,
             quadratic_slippage_factor=current_market.quadratic_slippage_factor,
+            liquidation_strategy=current_market.liquidation_strategy,
         )
 
         proposal_id = gov.propose_market_update(
@@ -1420,7 +1425,8 @@ class VegaService(ABC):
         oracle_name = filter_key.name
 
         logger.info(
-            f"Submitting market termination signal and settlement price {settlement_price} for {oracle_name}"
+            "Submitting market termination signal and settlement price"
+            f" {settlement_price} for {oracle_name}"
         )
 
         gov.submit_termination_and_settlement_data(
@@ -2578,9 +2584,11 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
-            if to_key_name is not None
-            else "0000000000000000000000000000000000000000000000000000000000000000",
+            to=(
+                self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+                if to_key_name is not None
+                else "0000000000000000000000000000000000000000000000000000000000000000"
+            ),
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, adp)),
@@ -3164,9 +3172,11 @@ class VegaService(ABC):
             market_id=market_id,
             asset_id=asset_id,
             epoch_seq=epoch_seq,
-            party_id=self.wallet.public_key(key_name, wallet_name)
-            if key_name is not None
-            else None,
+            party_id=(
+                self.wallet.public_key(key_name, wallet_name)
+                if key_name is not None
+                else None
+            ),
             asset_decimals=self.asset_decimals,
         )
 
@@ -3254,9 +3264,11 @@ class VegaService(ABC):
         return data.list_teams(
             data_client=self.trading_data_client_v2,
             team_id=team_id,
-            party_id=None
-            if key_name is None
-            else self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+            party_id=(
+                None
+                if key_name is None
+                else self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+            ),
         )
 
     def list_team_referees(
