@@ -1515,7 +1515,7 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
                     wallet_name=self.wallet_name,
                 )
                 self.accepted_proposals += 1
-                continue
+                break
             except (
                 HTTPError,
                 ProposalNotAcceptedError,

@@ -218,6 +218,12 @@ def __propose_market(
                 performance_hysteresis_epochs=int(performance_hysteresis_epochs),
                 sla_competition_factor=str(sla_competition_factor),
             ),
+            liquidation_strategy=vega_protos.markets.LiquidationStrategy(
+                disposal_time_step=1,
+                disposal_fraction="1",
+                full_disposal_size=1000000000,
+                max_fraction_consumed="0.5",
+            ),
         ),
     )
     if parent_market_id is not None:
@@ -533,9 +539,11 @@ def propose_perps_market(
                 ],
                 triggers=[
                     oracles_protos.spec.InternalTimeTrigger(
-                        every=60
-                        if funding_payment_frequency_in_seconds is None
-                        else funding_payment_frequency_in_seconds
+                        every=(
+                            60
+                            if funding_payment_frequency_in_seconds is None
+                            else funding_payment_frequency_in_seconds
+                        )
                     )
                 ],
             )
@@ -547,16 +555,16 @@ def propose_perps_market(
         perpetual=vega_protos.governance.PerpetualProduct(
             settlement_asset=settlement_asset_id,
             quote_name=perp_asset,
-            margin_funding_factor="0"
-            if margin_funding_factor is None
-            else str(margin_funding_factor),
+            margin_funding_factor=(
+                "0" if margin_funding_factor is None else str(margin_funding_factor)
+            ),
             interest_rate="0" if interest_rate is None else str(interest_rate),
-            clamp_lower_bound="0"
-            if clamp_lower_bound is None
-            else str(clamp_lower_bound),
-            clamp_upper_bound="0"
-            if clamp_upper_bound is None
-            else str(clamp_upper_bound),
+            clamp_lower_bound=(
+                "0" if clamp_lower_bound is None else str(clamp_lower_bound)
+            ),
+            clamp_upper_bound=(
+                "0" if clamp_upper_bound is None else str(clamp_upper_bound)
+            ),
             data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_binding=vega_protos.markets.DataSourceSpecToPerpetualBinding(

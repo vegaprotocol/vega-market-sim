@@ -127,6 +127,7 @@ class MarketConfig(Config):
             "quadratic_slippage_factor": 0,
             "successor": None,
             "liquidity_sla_parameters": "default",
+            "liquidation_strategy": "default",
         },
         "perp": {
             "decimal_places": 4,
@@ -140,6 +141,7 @@ class MarketConfig(Config):
             "quadratic_slippage_factor": 0,
             "successor": None,
             "liquidity_sla_parameters": "default",
+            "liquidation_strategy": "default",
         },
     }
 
@@ -169,6 +171,9 @@ class MarketConfig(Config):
             opt=config["liquidity_monitoring_parameters"]
         )
         self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
+        self.liquidation_strategy = LiquidationStrategy(
+            opt=config["liquidation_strategy"]
+        )
 
     def build(self):
         new_market = vega_protos.governance.NewMarket(
@@ -183,6 +188,7 @@ class MarketConfig(Config):
                 log_normal=self.log_normal.build(),
                 linear_slippage_factor=self.linear_slippage_factor,
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
+                liquidation_strategy=self.liquidation_strategy.build(),
             )
         )
         if self.successor is not None:
@@ -381,6 +387,33 @@ class LogNormalModelParams(Config):
             mu=self.mu,
             r=self.r,
             sigma=self.sigma,
+        )
+
+
+class LiquidationStrategy(Config):
+    OPTS = {
+        "default": {
+            "disposal_time_step": 1,
+            "disposal_fraction": 1,
+            "full_disposal_size": 10000000,
+            "max_fraction_consumed": 0.5,
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.disposal_time_step = config["disposal_time_step"]
+        self.disposal_fraction = config["disposal_fraction"]
+        self.full_disposal_size = config["full_disposal_size"]
+        self.max_fraction_consumed = config["max_fraction_consumed"]
+
+    def build(self):
+        return vega_protos.markets.LiquidationStrategy(
+            disposal_time_step=self.disposal_time_step,
+            disposal_fraction=str(self.disposal_fraction),
+            full_disposal_size=self.full_disposal_size,
+            max_fraction_consumed=str(self.max_fraction_consumed),
         )
 
 
