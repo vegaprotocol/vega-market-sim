@@ -1121,21 +1121,34 @@ class MarketDataConnection(_message.Message):
     ) -> None: ...
 
 class ListTransfersRequest(_message.Message):
-    __slots__ = ("pubkey", "direction", "pagination", "is_reward")
+    __slots__ = (
+        "pubkey",
+        "direction",
+        "pagination",
+        "is_reward",
+        "from_epoch",
+        "to_epoch",
+    )
     PUBKEY_FIELD_NUMBER: _ClassVar[int]
     DIRECTION_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     IS_REWARD_FIELD_NUMBER: _ClassVar[int]
+    FROM_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TO_EPOCH_FIELD_NUMBER: _ClassVar[int]
     pubkey: str
     direction: TransferDirection
     pagination: Pagination
     is_reward: bool
+    from_epoch: int
+    to_epoch: int
     def __init__(
         self,
         pubkey: _Optional[str] = ...,
         direction: _Optional[_Union[TransferDirection, str]] = ...,
         pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
         is_reward: bool = ...,
+        from_epoch: _Optional[int] = ...,
+        to_epoch: _Optional[int] = ...,
     ) -> None: ...
 
 class ListTransfersResponse(_message.Message):
