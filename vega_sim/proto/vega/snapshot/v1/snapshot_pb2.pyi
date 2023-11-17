@@ -1510,6 +1510,36 @@ class DataPoint(_message.Message):
         self, price: _Optional[str] = ..., timestamp: _Optional[int] = ...
     ) -> None: ...
 
+class AuctionIntervals(_message.Message):
+    __slots__ = ("t", "auction_start", "total")
+    T_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_START_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_FIELD_NUMBER: _ClassVar[int]
+    t: _containers.RepeatedScalarFieldContainer[int]
+    auction_start: int
+    total: int
+    def __init__(
+        self,
+        t: _Optional[_Iterable[int]] = ...,
+        auction_start: _Optional[int] = ...,
+        total: _Optional[int] = ...,
+    ) -> None: ...
+
+class TWAPData(_message.Message):
+    __slots__ = ("start", "end", "sum_product")
+    START_FIELD_NUMBER: _ClassVar[int]
+    END_FIELD_NUMBER: _ClassVar[int]
+    SUM_PRODUCT_FIELD_NUMBER: _ClassVar[int]
+    start: int
+    end: int
+    sum_product: str
+    def __init__(
+        self,
+        start: _Optional[int] = ...,
+        end: _Optional[int] = ...,
+        sum_product: _Optional[str] = ...,
+    ) -> None: ...
+
 class Perps(_message.Message):
     __slots__ = (
         "id",
@@ -1517,17 +1547,26 @@ class Perps(_message.Message):
         "internal_data_point",
         "seq",
         "started_at",
+        "external_twap_data",
+        "internal_twap_data",
+        "auction_intervals",
     )
     ID_FIELD_NUMBER: _ClassVar[int]
     EXTERNAL_DATA_POINT_FIELD_NUMBER: _ClassVar[int]
     INTERNAL_DATA_POINT_FIELD_NUMBER: _ClassVar[int]
     SEQ_FIELD_NUMBER: _ClassVar[int]
     STARTED_AT_FIELD_NUMBER: _ClassVar[int]
+    EXTERNAL_TWAP_DATA_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_TWAP_DATA_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_INTERVALS_FIELD_NUMBER: _ClassVar[int]
     id: str
     external_data_point: _containers.RepeatedCompositeFieldContainer[DataPoint]
     internal_data_point: _containers.RepeatedCompositeFieldContainer[DataPoint]
     seq: int
     started_at: int
+    external_twap_data: TWAPData
+    internal_twap_data: TWAPData
+    auction_intervals: AuctionIntervals
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -1535,6 +1574,9 @@ class Perps(_message.Message):
         internal_data_point: _Optional[_Iterable[_Union[DataPoint, _Mapping]]] = ...,
         seq: _Optional[int] = ...,
         started_at: _Optional[int] = ...,
+        external_twap_data: _Optional[_Union[TWAPData, _Mapping]] = ...,
+        internal_twap_data: _Optional[_Union[TWAPData, _Mapping]] = ...,
+        auction_intervals: _Optional[_Union[AuctionIntervals, _Mapping]] = ...,
     ) -> None: ...
 
 class OrdersAtPrice(_message.Message):
