@@ -1291,7 +1291,7 @@ class VegaService(ABC):
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
         updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
-        updated_liquidation_strategy=Optional[LiquidationStrategy] = None,
+        updated_liquidation_strategy: Optional[LiquidationStrategy] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1383,7 +1383,11 @@ class VegaService(ABC):
             ),
             linear_slippage_factor=current_market.linear_slippage_factor,
             quadratic_slippage_factor=current_market.quadratic_slippage_factor,
-            liquidation_strategy=current_market.liquidation_strategy,
+            liquidation_strategy=(
+                updated_liquidation_strategy
+                if updated_liquidation_strategy is not None
+                else current_market.liquidation_strategy
+            ),
         )
 
         proposal_id = gov.propose_market_update(
