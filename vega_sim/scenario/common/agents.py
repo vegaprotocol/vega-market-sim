@@ -25,7 +25,7 @@ from numpy.typing import ArrayLike
 
 import vega_sim.api.faucet as faucet
 import vega_sim.builders as build
-from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
+from vega_sim.api.data import AccountData, MarketDepth, Order, Trade, Position
 from vega_sim.api.helpers import get_enum
 from vega_sim.api.trading import OrderRejectedError
 from vega_sim.environment import VegaState
@@ -48,6 +48,7 @@ class MarketHistoryData:
     accounts: List[AccountData]
     market_depth: Dict[str, MarketDepth]
     trades: Dict[str, List[Trade]]
+    positions: List[Position]
 
 
 # Send selling/buying MOs to hit LP orders
@@ -2871,6 +2872,8 @@ class Snitch(StateAgent):
                     self.seen_trades.add(trade.id)
                     market_trades.setdefault(market.id, []).append(trade)
 
+            positions = self.vega.list_all_positions()
+
             accounts = self.vega.get_accounts_from_stream()
             self.states.append(
                 MarketHistoryData(
@@ -2880,6 +2883,7 @@ class Snitch(StateAgent):
                     accounts=accounts,
                     market_depth=market_depths,
                     trades=market_trades,
+                    positions=positions,
                 )
             )
 

@@ -24,6 +24,7 @@ RESOURCES_FILE_NAME = "resources.csv"
 ASSETS_FILE_NAME = "assets.csv"
 MARKET_CHAIN_FILE_NAME = "market_chain.json"
 LEDGER_ENTRIES_FILE_NAME = "ledger_entries.csv"
+POSITIONS_FILE_NAME = "positions.csv"
 
 
 def resource_data_to_row(data: ResourceData):
@@ -122,6 +123,21 @@ def history_data_to_account_rows(data: MarketHistoryData) -> List[dict]:
         }
 
 
+def history_data_to_position_rows(data: MarketHistoryData) -> List[dict]:
+    for position in data.positions:
+        yield {
+            "market_id": position.market_id,
+            "party_id": position.party_id,
+            "open_volume": position.open_volume,
+            "realised_pnl": position.realised_pnl,
+            "unrealised_pnl": position.unrealised_pnl,
+            "average_entry_price": position.average_entry_price,
+            "updated_at": position.updated_at,
+            "loss_socialisation_amount": position.loss_socialisation_amount,
+            "position_status": position.position_status,
+        }
+
+
 def _market_data_standard_output(
     market_history_data: List[MarketHistoryData],
     file_name: str,
@@ -162,6 +178,7 @@ def market_data_standard_output(
             ORDER_BOOK_FILE_NAME: history_data_to_order_book_rows,
             TRADES_FILE_NAME: history_data_to_trade_rows,
             ACCOUNTS_FILE_NAME: history_data_to_account_rows,
+            POSITIONS_FILE_NAME: history_data_to_position_rows,
         }
     )
     for file_name, data_fn in data_fns.items():
@@ -399,4 +416,15 @@ def load_ledger_entries_df(
     df = pd.read_csv(os.path.join(output_path, run_name, LEDGER_ENTRIES_FILE_NAME))
     if not df.empty:
         df["time"] = pd.to_datetime(df.time)
+    return df.drop_duplicates()
+
+
+def load_positions_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    df = pd.read_csv(os.path.join(output_path, run_name, POSITIONS_FILE_NAME))
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.updated_at)
     return df.drop_duplicates()
