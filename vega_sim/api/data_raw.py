@@ -926,3 +926,26 @@ def list_deposits(
         request_func=lambda x: data_client.ListDeposits(x).deposits,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+@_retry(3)
+def list_all_positions(
+    data_client: vac.VegaTradingDataClientV2,
+    party_ids: Optional[List[str]] = None,
+    market_ids: Optional[List[str]] = None,
+) -> List[vega_protos.vega.Position]:
+    """Output positions of a party."""
+
+    filter = data_node_protos_v2.trading_data.PositionsFilter()
+    if party_ids is not None:
+        filter.party_ids.extend(party_ids)
+    if market_ids is not None:
+        filter.party_ids.extend(market_ids)
+    base_request = data_node_protos_v2.trading_data.ListAllPositionsRequest(
+        filter=filter
+    )
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListAllPositions(x).positions,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

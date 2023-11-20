@@ -84,20 +84,6 @@ class Order:
     iceberg_order: Optional[IcebergOrder]
 
 
-Position = namedtuple(
-    "Position",
-    [
-        "party_id",
-        "market_id",
-        "open_volume",
-        "realised_pnl",
-        "unrealised_pnl",
-        "average_entry_price",
-        "updated_at",
-        "loss_socialisation_amount",
-    ],
-)
-
 MarginLevels = namedtuple(
     "MarginLevels",
     [
@@ -373,6 +359,19 @@ class MakerFeesGenerated:
 class NetworkParameter:
     key: str
     value: str
+
+
+@dataclass(frozen=True)
+class Position:
+    market_id: str
+    party_id: str
+    open_volume: float
+    realised_pnl: float
+    unrealised_pnl: float
+    average_entry_price: float
+    updated_at: datetime.datetime
+    loss_socialisation_amount: float
+    position_status: vega_protos.vega.PositionStatus
 
 
 def _network_parameter_from_proto(network_parameter: vega_protos.vega.NetworkParameter):
@@ -906,8 +905,8 @@ def _position_from_proto(
     decimal_spec: DecimalSpec,
 ) -> Position:
     return Position(
-        party_id=position.party_id,
         market_id=position.market_id,
+        party_id=position.party_id,
         open_volume=num_from_padded_int(
             position.open_volume, decimal_spec.position_decimals
         ),
@@ -920,11 +919,12 @@ def _position_from_proto(
         average_entry_price=num_from_padded_int(
             position.average_entry_price, decimal_spec.price_decimals
         ),
+        updated_at=datetime.datetime.fromtimestamp(int(position.updated_at / 1e9)),
         loss_socialisation_amount=num_from_padded_int(
             position.loss_socialisation_amount,
             decimal_spec.asset_decimals,
         ),
-        updated_at=position.updated_at,
+        position_status=position.position_status,
     )
 
 
@@ -2798,3 +2798,32 @@ def list_network_parameters(
     return [
         _network_parameter_from_proto(network_parameter=proto) for proto in response
     ]
+
+
+def list_all_positions(
+    data_client: vac.VegaTradingDataClientV2,
+    party_ids: Optional[List[str]] = None,
+    market_ids: Optional[List[str]] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> List[vega_protos.vega.Position]:
+    response = data_raw.list_all_positions(
+        data_client=data_client, party_ids=party_ids, market_ids=market_ids
+    )
+    positions = []
+    for position in response:
+        positions.append(
+            _position_from_proto(
+                position=position,
+                decimal_spec=DecimalSpec(
+                    price_decimals=market_price_decimals_map[position.market_id],
+                    position_decimals=market_position_decimals_map[position.market_id],
+                    asset_decimals=asset_decimals_map[
+                        market_to_asset_map[position.market_id]
+                    ],
+                ),
+            )
+        )
+    return positions
