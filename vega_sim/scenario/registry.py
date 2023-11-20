@@ -13,6 +13,7 @@ from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
 from vega_sim.scenario.parameter_experiment.scenario import ParameterExperiment
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 from vega_sim.scenario.sla.scenario import SLAScenario
+from vega_sim.scenario.liquidations.scenario import LiquidationScenario
 
 
 from vega_sim.scenario.common.utils.price_process import (
@@ -249,5 +250,11 @@ SCENARIOS = {
         lps_offset=[0.5, 0.8],
         lps_target_time_on_book=[0.91, 0.91],
         lps_commitment_amount=[100000, 100000],
+    ),
+    "liq_a": lambda: LiquidationScenario(
+        num_steps=500,
+        step_length_seconds=1,
+        block_length_seconds=1,
+        transactions_per_block=4096,
     ),
 }
