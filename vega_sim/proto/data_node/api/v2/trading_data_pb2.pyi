@@ -1128,19 +1128,34 @@ class ListTransfersRequest(_message.Message):
         "is_reward",
         "from_epoch",
         "to_epoch",
+        "status",
+        "scope",
     )
+
+    class Scope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        SCOPE_UNSPECIFIED: _ClassVar[ListTransfersRequest.Scope]
+        SCOPE_INDIVIDUAL: _ClassVar[ListTransfersRequest.Scope]
+        SCOPE_TEAM: _ClassVar[ListTransfersRequest.Scope]
+    SCOPE_UNSPECIFIED: ListTransfersRequest.Scope
+    SCOPE_INDIVIDUAL: ListTransfersRequest.Scope
+    SCOPE_TEAM: ListTransfersRequest.Scope
     PUBKEY_FIELD_NUMBER: _ClassVar[int]
     DIRECTION_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     IS_REWARD_FIELD_NUMBER: _ClassVar[int]
     FROM_EPOCH_FIELD_NUMBER: _ClassVar[int]
     TO_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    SCOPE_FIELD_NUMBER: _ClassVar[int]
     pubkey: str
     direction: TransferDirection
     pagination: Pagination
     is_reward: bool
     from_epoch: int
     to_epoch: int
+    status: _events_pb2.Transfer.Status
+    scope: ListTransfersRequest.Scope
     def __init__(
         self,
         pubkey: _Optional[str] = ...,
@@ -1149,6 +1164,8 @@ class ListTransfersRequest(_message.Message):
         is_reward: bool = ...,
         from_epoch: _Optional[int] = ...,
         to_epoch: _Optional[int] = ...,
+        status: _Optional[_Union[_events_pb2.Transfer.Status, str]] = ...,
+        scope: _Optional[_Union[ListTransfersRequest.Scope, str]] = ...,
     ) -> None: ...
 
 class ListTransfersResponse(_message.Message):
@@ -4960,3 +4977,56 @@ class ObserveTransactionResultsResponse(_message.Message):
             _Iterable[_Union[_events_pb2.TransactionResult, _Mapping]]
         ] = ...,
     ) -> None: ...
+
+class EstimateTransferFeeRequest(_message.Message):
+    __slots__ = (
+        "from_account",
+        "from_account_type",
+        "to_account",
+        "amount",
+        "asset_id",
+    )
+    FROM_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
+    FROM_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TO_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    ASSET_ID_FIELD_NUMBER: _ClassVar[int]
+    from_account: str
+    from_account_type: _vega_pb2.AccountType
+    to_account: str
+    amount: str
+    asset_id: str
+    def __init__(
+        self,
+        from_account: _Optional[str] = ...,
+        from_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        to_account: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+        asset_id: _Optional[str] = ...,
+    ) -> None: ...
+
+class EstimateTransferFeeResponse(_message.Message):
+    __slots__ = ("fee", "discount")
+    FEE_FIELD_NUMBER: _ClassVar[int]
+    DISCOUNT_FIELD_NUMBER: _ClassVar[int]
+    fee: str
+    discount: str
+    def __init__(
+        self, fee: _Optional[str] = ..., discount: _Optional[str] = ...
+    ) -> None: ...
+
+class GetTotalTransferFeeDiscountRequest(_message.Message):
+    __slots__ = ("party_id", "asset_id")
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    ASSET_ID_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    asset_id: str
+    def __init__(
+        self, party_id: _Optional[str] = ..., asset_id: _Optional[str] = ...
+    ) -> None: ...
+
+class GetTotalTransferFeeDiscountResponse(_message.Message):
+    __slots__ = ("total_discount",)
+    TOTAL_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
+    total_discount: str
+    def __init__(self, total_discount: _Optional[str] = ...) -> None: ...
