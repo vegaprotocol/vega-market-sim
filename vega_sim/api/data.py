@@ -1992,7 +1992,12 @@ def ping(data_client: vac.VegaTradingDataClientV2):
 def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
-    direction: data_node_protos_v2.trading_data.TransferDirection = None,
+    direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+    is_reward: Optional[bool] = None,
+    from_epoch: Optional[int] = None,
+    to_epoch: Optional[int] = None,
+    status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+    scope: Optional[data_node_protos_v2.trading_data.ListTransfersRequest.Scope] = None,
 ) -> List[Transfer]:
     """Returns a list of processed transfers.
 
@@ -2013,6 +2018,11 @@ def list_transfers(
         data_client=data_client,
         party_id=party_id,
         direction=direction,
+        is_reward=is_reward,
+        from_epoch=from_epoch,
+        to_epoch=to_epoch,
+        status=status,
+        scope=scope,
     )
 
     asset_dp = {}

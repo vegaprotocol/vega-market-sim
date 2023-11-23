@@ -476,6 +476,11 @@ def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
     direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+    is_reward: Optional[bool] = None,
+    from_epoch: Optional[int] = None,
+    to_epoch: Optional[int] = None,
+    status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+    scope: Optional[data_node_protos_v2.trading_data.ListTransfersRequest.Scope] = None,
 ) -> List[data_node_protos_v2.trading_data.TransferNode]:
     """Returns a list of raw transfers.
 
@@ -506,6 +511,16 @@ def list_transfers(
             "direction",
             data_node_protos_v2.trading_data.TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM,
         )
+    if is_reward is not None:
+        setattr(base_request, "is_reward", is_reward)
+    if from_epoch is not None:
+        setattr(base_request, "from_epoch", from_epoch)
+    if to_epoch is not None:
+        setattr(base_request, "to_epoch", to_epoch)
+    if status is not None:
+        setattr(base_request, "status", status)
+    if scope is not None:
+        setattr(base_request, "scope", scope)
 
     return unroll_v2_pagination(
         base_request=base_request,

@@ -2786,6 +2786,13 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         key_name: Optional[str] = None,
         direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+        is_reward: Optional[bool] = None,
+        from_epoch: Optional[int] = None,
+        to_epoch: Optional[int] = None,
+        status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+        scope: Optional[
+            data_node_protos_v2.trading_data.ListTransfersRequest.Scope
+        ] = None,
     ) -> List[data.Transfer]:
         """Returns a list of processed transfers.
 
@@ -2812,6 +2819,11 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             party_id=party_id,
             direction=direction,
+            is_reward=is_reward,
+            from_epoch=from_epoch,
+            to_epoch=to_epoch,
+            status=status,
+            scope=scope,
         )
 
     def get_liquidity_fee_shares(
