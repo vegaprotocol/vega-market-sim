@@ -190,6 +190,8 @@ class Payload(_message.Message):
         "volume_discount_program",
         "liquidity_v2_parameters",
         "liquidity_v2_paid_fees_stats",
+        "liquidation",
+        "banking_transfer_fee_discounts",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -263,6 +265,8 @@ class Payload(_message.Message):
     VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_V2_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_V2_PAID_FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
+    BANKING_TRANSFER_FEE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -335,6 +339,8 @@ class Payload(_message.Message):
     volume_discount_program: VolumeDiscountProgram
     liquidity_v2_parameters: LiquidityV2Parameters
     liquidity_v2_paid_fees_stats: LiquidityV2PaidFeesStats
+    liquidation: Liquidation
+    banking_transfer_fee_discounts: BankingTransferFeeDiscounts
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -454,6 +460,10 @@ class Payload(_message.Message):
         ] = ...,
         liquidity_v2_paid_fees_stats: _Optional[
             _Union[LiquidityV2PaidFeesStats, _Mapping]
+        ] = ...,
+        liquidation: _Optional[_Union[Liquidation, _Mapping]] = ...,
+        banking_transfer_fee_discounts: _Optional[
+            _Union[BankingTransferFeeDiscounts, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -1406,6 +1416,7 @@ class Market(_message.Message):
         "expiring_stop_orders",
         "product",
         "fees_stats",
+        "party_margin_factor",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1434,6 +1445,7 @@ class Market(_message.Message):
     EXPIRING_STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     PRODUCT_FIELD_NUMBER: _ClassVar[int]
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    PARTY_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1461,6 +1473,7 @@ class Market(_message.Message):
     expiring_stop_orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
     product: Product
     fees_stats: _events_pb2.FeesStats
+    party_margin_factor: _containers.RepeatedCompositeFieldContainer[PartyMarginFactor]
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1492,6 +1505,19 @@ class Market(_message.Message):
         ] = ...,
         product: _Optional[_Union[Product, _Mapping]] = ...,
         fees_stats: _Optional[_Union[_events_pb2.FeesStats, _Mapping]] = ...,
+        party_margin_factor: _Optional[
+            _Iterable[_Union[PartyMarginFactor, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class PartyMarginFactor(_message.Message):
+    __slots__ = ("party", "margin_factor")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    margin_factor: str
+    def __init__(
+        self, party: _Optional[str] = ..., margin_factor: _Optional[str] = ...
     ) -> None: ...
 
 class Product(_message.Message):
@@ -3591,4 +3617,48 @@ class PartyVolume(_message.Message):
     volume: bytes
     def __init__(
         self, party: _Optional[str] = ..., volume: _Optional[bytes] = ...
+    ) -> None: ...
+
+class Liquidation(_message.Message):
+    __slots__ = ("market_id", "network_pos", "next_step", "config")
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    NETWORK_POS_FIELD_NUMBER: _ClassVar[int]
+    NEXT_STEP_FIELD_NUMBER: _ClassVar[int]
+    CONFIG_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    network_pos: int
+    next_step: int
+    config: _markets_pb2.LiquidationStrategy
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        network_pos: _Optional[int] = ...,
+        next_step: _Optional[int] = ...,
+        config: _Optional[_Union[_markets_pb2.LiquidationStrategy, _Mapping]] = ...,
+    ) -> None: ...
+
+class PartyAssetAmount(_message.Message):
+    __slots__ = ("party", "asset", "amount")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    asset: str
+    amount: str
+    def __init__(
+        self,
+        party: _Optional[str] = ...,
+        asset: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+    ) -> None: ...
+
+class BankingTransferFeeDiscounts(_message.Message):
+    __slots__ = ("party_asset_discount",)
+    PARTY_ASSET_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
+    party_asset_discount: _containers.RepeatedCompositeFieldContainer[PartyAssetAmount]
+    def __init__(
+        self,
+        party_asset_discount: _Optional[
+            _Iterable[_Union[PartyAssetAmount, _Mapping]]
+        ] = ...,
     ) -> None: ...

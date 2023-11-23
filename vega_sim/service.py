@@ -3464,3 +3464,20 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+
+    def update_margin_mode(
+        self,
+        key_name: str,
+        market_id: str,
+        margin_mode: Union[str, vega_protos.commands.v1.commands.UpdateMarginMode.Mode],
+        wallet_name: Optional[str] = None,
+        margin_factor: Optional[float] = None,
+    ):
+        trading.update_margin_mode(
+            wallet=self.wallet,
+            key_name=key_name,
+            market_id=market_id,
+            margin_mode=margin_mode,
+            wallet_name=wallet_name,
+            margin_factor=str(margin_factor),
+        )

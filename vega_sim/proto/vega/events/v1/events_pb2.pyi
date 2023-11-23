@@ -115,6 +115,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_PAID_LIQUIDITY_FEES_STATS_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_VESTING_SUMMARY: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TRANSFER_FEES_PAID: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -206,6 +207,7 @@ BUS_EVENT_TYPE_FUNDING_PAYMENTS: BusEventType
 BUS_EVENT_TYPE_PAID_LIQUIDITY_FEES_STATS_UPDATED: BusEventType
 BUS_EVENT_TYPE_VESTING_SUMMARY: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_PAID: BusEventType
+BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -338,6 +340,7 @@ class FeesStats(_message.Message):
         "volume_discount_applied",
         "total_maker_fees_received",
         "maker_fees_generated",
+        "trading_fees_generated",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -348,6 +351,7 @@ class FeesStats(_message.Message):
     VOLUME_DISCOUNT_APPLIED_FIELD_NUMBER: _ClassVar[int]
     TOTAL_MAKER_FEES_RECEIVED_FIELD_NUMBER: _ClassVar[int]
     MAKER_FEES_GENERATED_FIELD_NUMBER: _ClassVar[int]
+    TRADING_FEES_GENERATED_FIELD_NUMBER: _ClassVar[int]
     market: str
     asset: str
     epoch_seq: int
@@ -360,6 +364,9 @@ class FeesStats(_message.Message):
     total_maker_fees_received: _containers.RepeatedCompositeFieldContainer[PartyAmount]
     maker_fees_generated: _containers.RepeatedCompositeFieldContainer[
         MakerFeesGenerated
+    ]
+    trading_fees_generated: _containers.RepeatedCompositeFieldContainer[
+        TradingFeesGenerated
     ]
     def __init__(
         self,
@@ -383,6 +390,9 @@ class FeesStats(_message.Message):
         ] = ...,
         maker_fees_generated: _Optional[
             _Iterable[_Union[MakerFeesGenerated, _Mapping]]
+        ] = ...,
+        trading_fees_generated: _Optional[
+            _Iterable[_Union[TradingFeesGenerated, _Mapping]]
         ] = ...,
     ) -> None: ...
 
@@ -408,6 +418,18 @@ class MakerFeesGenerated(_message.Message):
         self,
         taker: _Optional[str] = ...,
         maker_fees_paid: _Optional[_Iterable[_Union[PartyAmount, _Mapping]]] = ...,
+    ) -> None: ...
+
+class TradingFeesGenerated(_message.Message):
+    __slots__ = ("taker", "trading_fees_paid")
+    TAKER_FIELD_NUMBER: _ClassVar[int]
+    TRADING_FEES_PAID_FIELD_NUMBER: _ClassVar[int]
+    taker: str
+    trading_fees_paid: _containers.RepeatedCompositeFieldContainer[PartyAmount]
+    def __init__(
+        self,
+        taker: _Optional[str] = ...,
+        trading_fees_paid: _Optional[_Iterable[_Union[PartyAmount, _Mapping]]] = ...,
     ) -> None: ...
 
 class PartyAmount(_message.Message):
@@ -1078,16 +1100,37 @@ class MarketEvent(_message.Message):
     ) -> None: ...
 
 class TransferFees(_message.Message):
-    __slots__ = ("transfer_id", "amount", "epoch")
+    __slots__ = ("transfer_id", "amount", "epoch", "discount_applied")
     TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FIELD_NUMBER: _ClassVar[int]
+    DISCOUNT_APPLIED_FIELD_NUMBER: _ClassVar[int]
     transfer_id: str
+    amount: str
+    epoch: int
+    discount_applied: str
+    def __init__(
+        self,
+        transfer_id: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+        epoch: _Optional[int] = ...,
+        discount_applied: _Optional[str] = ...,
+    ) -> None: ...
+
+class TransferFeesDiscount(_message.Message):
+    __slots__ = ("party", "asset", "amount", "epoch")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    asset: str
     amount: str
     epoch: int
     def __init__(
         self,
-        transfer_id: _Optional[str] = ...,
+        party: _Optional[str] = ...,
+        asset: _Optional[str] = ...,
         amount: _Optional[str] = ...,
         epoch: _Optional[int] = ...,
     ) -> None: ...
@@ -2290,6 +2333,7 @@ class BusEvent(_message.Message):
         "paid_liquidity_fees_stats",
         "vesting_balances_summary",
         "transfer_fees",
+        "transfer_fees_discount",
         "market",
         "tx_err_event",
         "version",
@@ -2379,6 +2423,7 @@ class BusEvent(_message.Message):
     PAID_LIQUIDITY_FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     VESTING_BALANCES_SUMMARY_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_FEES_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_FEES_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2467,6 +2512,7 @@ class BusEvent(_message.Message):
     paid_liquidity_fees_stats: PaidLiquidityFeesStats
     vesting_balances_summary: VestingBalancesSummary
     transfer_fees: TransferFees
+    transfer_fees_discount: TransferFeesDiscount
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2597,6 +2643,7 @@ class BusEvent(_message.Message):
             _Union[VestingBalancesSummary, _Mapping]
         ] = ...,
         transfer_fees: _Optional[_Union[TransferFees, _Mapping]] = ...,
+        transfer_fees_discount: _Optional[_Union[TransferFeesDiscount, _Mapping]] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,

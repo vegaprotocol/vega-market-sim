@@ -22,12 +22,14 @@ class BatchMarketInstructions(_message.Message):
         "submissions",
         "stop_orders_cancellation",
         "stop_orders_submission",
+        "update_margin_mode",
     )
     CANCELLATIONS_FIELD_NUMBER: _ClassVar[int]
     AMENDMENTS_FIELD_NUMBER: _ClassVar[int]
     SUBMISSIONS_FIELD_NUMBER: _ClassVar[int]
     STOP_ORDERS_CANCELLATION_FIELD_NUMBER: _ClassVar[int]
     STOP_ORDERS_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     cancellations: _containers.RepeatedCompositeFieldContainer[OrderCancellation]
     amendments: _containers.RepeatedCompositeFieldContainer[OrderAmendment]
     submissions: _containers.RepeatedCompositeFieldContainer[OrderSubmission]
@@ -37,6 +39,7 @@ class BatchMarketInstructions(_message.Message):
     stop_orders_submission: _containers.RepeatedCompositeFieldContainer[
         StopOrdersSubmission
     ]
+    update_margin_mode: UpdateMarginMode
     def __init__(
         self,
         cancellations: _Optional[_Iterable[_Union[OrderCancellation, _Mapping]]] = ...,
@@ -48,6 +51,7 @@ class BatchMarketInstructions(_message.Message):
         stop_orders_submission: _Optional[
             _Iterable[_Union[StopOrdersSubmission, _Mapping]]
         ] = ...,
+        update_margin_mode: _Optional[_Union[UpdateMarginMode, _Mapping]] = ...,
     ) -> None: ...
 
 class StopOrdersSubmission(_message.Message):

@@ -803,4 +803,22 @@ def submit_stop_orders(
         transaction_type="stop_orders_submission",
         key_name=key_name,
     )
-    logger.debug(f"Submitted stop orders.")
+    logger.debug("Submitted stop orders.")
+
+
+def update_margin_mode(
+    wallet: Wallet,
+    key_name: str,
+    market_id: str,
+    margin_mode: Union[str, vega_protos.commands.v1.commands.UpdateMarginMode.Mode],
+    wallet_name: Optional[str] = None,
+    margin_factor: Optional[str] = None,
+):
+    wallet.submit_transaction(
+        transaction=vega_protos.commands.v1.commands.UpdateMarginMode(
+            market_id=market_id, mode=margin_mode, margin_factor=margin_factor
+        ),
+        wallet_name=wallet_name,
+        key_name=key_name,
+        transaction_type="update_margin_mode",
+    )

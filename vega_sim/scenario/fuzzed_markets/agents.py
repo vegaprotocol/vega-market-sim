@@ -44,6 +44,7 @@ class FuzzingAgent(StateAgentWithWallet):
             "PEGGED_REFERENCE",
             "POST_ONLY",
             "REDUCE_ONLY",
+            "MARGIN_MODE",
         )
     }
     # Set the output flag which all instances can modify
@@ -120,6 +121,20 @@ class FuzzingAgent(StateAgentWithWallet):
             cancellations=cancellations,
             stop_orders_submission=stop_orders_submissions,
         )
+        self.fuzz_isolated_margin_state()
+
+    def fuzz_isolated_margin_state(self):
+        if self.random_state.random() > 0.95:
+            FuzzingAgent.MEMORY["MARGIN_MODE"].append(
+                self.random_state.choice(["MODE_CROSS_MARGIN", "MODE_ISOLATED_MARGIN"])
+            )
+            self.vega.update_margin_mode(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                margin_mode=FuzzingAgent.MEMORY["MARGIN_MODE"][-1],
+                margin_factor=self.random_state.random(),
+            )
 
     def create_fuzzed_cancellation(self, vega_state):
         order_id = self._select_order_id()

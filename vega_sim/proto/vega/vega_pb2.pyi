@@ -108,6 +108,7 @@ class OrderError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ORDER_ERROR_TOO_MANY_PEGGED_ORDERS: _ClassVar[OrderError]
     ORDER_ERROR_POST_ONLY_ORDER_WOULD_TRADE: _ClassVar[OrderError]
     ORDER_ERROR_REDUCE_ONLY_ORDER_WOULD_NOT_REDUCE_POSITION: _ClassVar[OrderError]
+    ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: _ClassVar[OrderError]
 
 class ChainStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -189,6 +190,10 @@ class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     TRANSFER_TYPE_REWARDS_VESTED: _ClassVar[TransferType]
     TRANSFER_TYPE_FEE_REFERRER_REWARD_PAY: _ClassVar[TransferType]
     TRANSFER_TYPE_FEE_REFERRER_REWARD_DISTRIBUTE: _ClassVar[TransferType]
+    TRANSFER_TYPE_ORDER_MARGIN_LOW: _ClassVar[TransferType]
+    TRANSFER_TYPE_ORDER_MARGIN_HIGH: _ClassVar[TransferType]
+    TRANSFER_TYPE_ISOLATED_MARGIN_LOW: _ClassVar[TransferType]
+    TRANSFER_TYPE_ISOLATED_MARGIN_HIGH: _ClassVar[TransferType]
 
 class DispatchMetric(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -322,6 +327,7 @@ ORDER_ERROR_NON_PERSISTENT_ORDER_OUT_OF_PRICE_BOUNDS: OrderError
 ORDER_ERROR_TOO_MANY_PEGGED_ORDERS: OrderError
 ORDER_ERROR_POST_ONLY_ORDER_WOULD_TRADE: OrderError
 ORDER_ERROR_REDUCE_ONLY_ORDER_WOULD_NOT_REDUCE_POSITION: OrderError
+ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: OrderError
 CHAIN_STATUS_UNSPECIFIED: ChainStatus
 CHAIN_STATUS_DISCONNECTED: ChainStatus
 CHAIN_STATUS_REPLAYING: ChainStatus
@@ -394,6 +400,10 @@ TRANSFER_TYPE_PERPETUALS_FUNDING_WIN: TransferType
 TRANSFER_TYPE_REWARDS_VESTED: TransferType
 TRANSFER_TYPE_FEE_REFERRER_REWARD_PAY: TransferType
 TRANSFER_TYPE_FEE_REFERRER_REWARD_DISTRIBUTE: TransferType
+TRANSFER_TYPE_ORDER_MARGIN_LOW: TransferType
+TRANSFER_TYPE_ORDER_MARGIN_HIGH: TransferType
+TRANSFER_TYPE_ISOLATED_MARGIN_LOW: TransferType
+TRANSFER_TYPE_ISOLATED_MARGIN_HIGH: TransferType
 DISPATCH_METRIC_UNSPECIFIED: DispatchMetric
 DISPATCH_METRIC_MAKER_FEES_PAID: DispatchMetric
 DISPATCH_METRIC_MAKER_FEES_RECEIVED: DispatchMetric
@@ -1438,6 +1448,9 @@ class MarginLevels(_message.Message):
         "market_id",
         "asset",
         "timestamp",
+        "order_margin",
+        "margin_mode",
+        "margin_factor",
     )
     MAINTENANCE_MARGIN_FIELD_NUMBER: _ClassVar[int]
     SEARCH_LEVEL_FIELD_NUMBER: _ClassVar[int]
@@ -1447,6 +1460,9 @@ class MarginLevels(_message.Message):
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    ORDER_MARGIN_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
     maintenance_margin: str
     search_level: str
     initial_margin: str
@@ -1455,6 +1471,9 @@ class MarginLevels(_message.Message):
     market_id: str
     asset: str
     timestamp: int
+    order_margin: str
+    margin_mode: MarginMode
+    margin_factor: str
     def __init__(
         self,
         maintenance_margin: _Optional[str] = ...,
@@ -1465,6 +1484,9 @@ class MarginLevels(_message.Message):
         market_id: _Optional[str] = ...,
         asset: _Optional[str] = ...,
         timestamp: _Optional[int] = ...,
+        order_margin: _Optional[str] = ...,
+        margin_mode: _Optional[_Union[MarginMode, str]] = ...,
+        margin_factor: _Optional[str] = ...,
     ) -> None: ...
 
 class PerpetualData(_message.Message):

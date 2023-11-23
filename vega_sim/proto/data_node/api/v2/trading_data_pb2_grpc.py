@@ -572,6 +572,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
         )
+        self.EstimateTransferFee = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/EstimateTransferFee",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.FromString,
+        )
+        self.GetTotalTransferFeeDiscount = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetTotalTransferFeeDiscount",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1645,6 +1655,24 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def EstimateTransferFee(self, request, context):
+        """Estimate transfer fee costs
+
+        Estimate transfer fee costs with potential discount applied
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetTotalTransferFeeDiscount(self, request, context):
+        """Available transfer fee discount
+
+        Returns available per party per asset transfer discount
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -2278,6 +2306,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ObserveTransactionResults,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.SerializeToString,
+        ),
+        "EstimateTransferFee": grpc.unary_unary_rpc_method_handler(
+            servicer.EstimateTransferFee,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.SerializeToString,
+        ),
+        "GetTotalTransferFeeDiscount": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTotalTransferFeeDiscount,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5509,6 +5547,64 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def EstimateTransferFee(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/EstimateTransferFee",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetTotalTransferFeeDiscount(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetTotalTransferFeeDiscount",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
             options,
             channel_credentials,
             insecure,
