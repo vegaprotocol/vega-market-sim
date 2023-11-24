@@ -1000,6 +1000,7 @@ class RewardPayoutEvent(_message.Message):
         "reward_type",
         "market",
         "locked_until_epoch",
+        "quantum_amount",
     )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -1010,6 +1011,7 @@ class RewardPayoutEvent(_message.Message):
     REWARD_TYPE_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     LOCKED_UNTIL_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     party: str
     epoch_seq: str
     asset: str
@@ -1019,6 +1021,7 @@ class RewardPayoutEvent(_message.Message):
     reward_type: str
     market: str
     locked_until_epoch: str
+    quantum_amount: str
     def __init__(
         self,
         party: _Optional[str] = ...,
@@ -1030,6 +1033,7 @@ class RewardPayoutEvent(_message.Message):
         reward_type: _Optional[str] = ...,
         market: _Optional[str] = ...,
         locked_until_epoch: _Optional[str] = ...,
+        quantum_amount: _Optional[str] = ...,
     ) -> None: ...
 
 class ValidatorScoreEvent(_message.Message):
