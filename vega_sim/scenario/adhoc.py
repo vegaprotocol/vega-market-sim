@@ -1,5 +1,6 @@
 import argparse
 import logging
+import datetime
 
 from vega_sim.scenario.constants import Network
 
@@ -51,6 +52,7 @@ def main():
             ),
             retain_log_files=True,
             use_full_vega_wallet=False,
+            genesis_time=datetime.datetime.utcnow(),
         ) as vega:
             scenario.run_iteration(
                 vega=vega,
