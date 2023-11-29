@@ -1157,8 +1157,12 @@ class VegaService(ABC):
         )
 
     def update_network_parameter(
-        self, proposal_key: str, parameter: str, new_value: str, 
-        wallet_name: str = None, approve: bool = True
+        self,
+        proposal_key: str,
+        parameter: str,
+        new_value: str,
+        wallet_name: str = None,
+        approve: bool = True,
     ):
         """
         Updates a network parameter by first proposing and then optionally voting to approve
@@ -1207,7 +1211,6 @@ class VegaService(ABC):
             self.wait_for_thread_catchup()
 
         return proposal_id
-
 
     def update_market_state(
         self,
