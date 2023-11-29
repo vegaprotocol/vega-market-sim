@@ -1157,13 +1157,15 @@ class VegaService(ABC):
         )
 
     def update_network_parameter(
-        self, proposal_key: str, parameter: str, new_value: str, wallet_name: str = None
+        self, proposal_key: str, parameter: str, new_value: str, 
+        wallet_name: str = None, approve: bool = True
     ):
-        """Updates a network parameter by first proposing and then voting to approve
+        """
+        Updates a network parameter by first proposing and then optionally voting to approve
         the change, followed by advancing the network time period forwards.
 
-        If the genesis setup of the market is such that this meets requirements then
-        the proposal will be approved. Otherwise others may need to vote too.
+        If 'approve' is set to False, this function will skip the approval step and return
+        the proposal ID immediately after proposing.
 
         Args:
             proposal_key:
@@ -1174,6 +1176,9 @@ class VegaService(ABC):
                 str, the new value to set
             wallet_name:
                 str, optional, the wallet proposing the change
+            approve:
+                bool, optional, whether to approve the proposal or not, default is True
+
         Returns:
             str, the ID of the proposal
         """
@@ -1190,14 +1195,19 @@ class VegaService(ABC):
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=proposal_key,
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=wallet_name,
-            key_name=proposal_key,
-        )
-        self.wait_fn(60)
-        self.wait_for_thread_catchup()
+
+        if approve:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+            self.wait_fn(60)
+            self.wait_for_thread_catchup()
+
+        return proposal_id
+
 
     def update_market_state(
         self,
