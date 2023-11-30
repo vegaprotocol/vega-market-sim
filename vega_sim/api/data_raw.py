@@ -904,3 +904,19 @@ def list_stop_orders(
         request_func=lambda x: data_client.ListStopOrders(x).orders,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+@_retry(3)
+def list_deposits(
+    data_client: vac.trading_data_grpc_v2,
+    party_id: Optional[str] = None,
+    date_range: Optional[vega_protos.vega.DateRange] = None,
+) -> List[vega_protos.vega.Deposit]:
+    base_request = data_node_protos_v2.trading_data.ListDepositsRequest()
+    if party_id is not None:
+        setattr(base_request, "party_id", party_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListDeposits(x).deposits,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
