@@ -16,6 +16,7 @@ from collections import namedtuple
 from typing import Optional, Tuple
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import PeggedOrder
+from vega_sim.api.market import MarketConfig
 
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
@@ -45,6 +46,10 @@ def continuous_market(
     vega: VegaServiceNull,
     price: float,
     spread: float,
+    maker_fee: float = 0,
+    liquidity_fee: float = 0,
+    infrastructure_fee: float = 0,
+    price_monitoring: bool = False,
 ):
     """Creates a default market and exits the auction into continuous trading.
 
@@ -65,11 +70,26 @@ def continuous_market(
 
     mint_governance_asset(vega=vega)
 
+    vega.update_network_parameter(
+        wallet_name=AUX_PARTY_A.wallet_name,
+        proposal_key=AUX_PARTY_A.key_name,
+        parameter="market.fee.factors.infrastructureFee",
+        new_value=str(infrastructure_fee),
+    )
+    vega.wait_for_total_catchup()
+    vega.update_network_parameter(
+        wallet_name=AUX_PARTY_A.wallet_name,
+        proposal_key=AUX_PARTY_A.key_name,
+        parameter="market.fee.factors.makerFee",
+        new_value=str(maker_fee),
+    )
+    vega.wait_for_total_catchup()
+
     asset_id = propose_asset(vega=vega)
     mint_settlement_asset(vega=vega, asset_id=asset_id)
 
-    market_id = propose_market(vega=vega, asset_id=asset_id)
-    provide_liquidity(vega=vega, market_id=market_id)
+    market_id = propose_market(vega=vega, asset_id=asset_id, price_monitoring=price_monitoring)
+    provide_liquidity(vega=vega, market_id=market_id, fee=liquidity_fee)
 
     best_ask_id, best_bid_id = exit_auction(
         vega=vega,
@@ -181,6 +201,7 @@ def propose_asset(
 def propose_market(
     vega: VegaServiceNull,
     asset_id: str,
+    price_monitoring: bool = False,
 ) -> str:
     """Creates a market and returns the market id.
 
@@ -194,28 +215,26 @@ def propose_market(
         str:
             Market id.
     """
-    vega.update_network_parameter(
-        wallet_name=AUX_PARTY_A.wallet_name,
-        proposal_key=AUX_PARTY_A.key_name,
-        parameter="market.fee.factors.infrastructureFee",
-        new_value="0.0",
+    market_config = MarketConfig()
+    market_config.set("instrument.name", "XYZ:DAI Visualisation Example")
+    market_config.set("instrument.code", "XYZ:DAI")
+    market_config.set("instrument.future.settlement_asset", asset_id)
+    market_config.set("instrument.future.quote_name", "fDAI")
+    market_config.set("instrument.future.number_decimal_places", 4)
+    market_config.set(
+        "instrument.future.terminating_key",
+        vega.wallet.public_key(
+            wallet_name=AUX_PARTY_A.wallet_name,
+            name=AUX_PARTY_A.key_name,
+        ),
     )
-    vega.wait_for_total_catchup()
-    vega.update_network_parameter(
-        wallet_name=AUX_PARTY_A.wallet_name,
-        proposal_key=AUX_PARTY_A.key_name,
-        parameter="market.fee.factors.makerFee",
-        new_value="0.0",
-    )
-    vega.wait_for_total_catchup()
-    vega.create_simple_market(
-        market_name="XYZ:DAI Visualisation Example",
-        wallet_name=AUX_PARTY_A.wallet_name,
-        proposal_key=AUX_PARTY_A.key_name,
-        termination_wallet_name=AUX_PARTY_A.wallet_name,
-        termination_key=AUX_PARTY_A.key_name,
-        settlement_asset_id=asset_id,
-        market_decimals=3,
+    if not price_monitoring:
+        market_config.set("price_monitoring_parameters.triggers", [])
+        
+    vega.create_market_from_config(
+        proposal_wallet_name=AUX_PARTY_A.wallet_name,
+        proposal_key_name=AUX_PARTY_A.key_name,
+        market_config=market_config,
     )
     vega.wait_for_total_catchup()
     return vega.all_markets()[0].id
@@ -224,6 +243,7 @@ def propose_market(
 def provide_liquidity(
     vega: VegaServiceNull,
     market_id: str,
+    fee: float = 0,
 ):
     """Submits a default liquidity provision to the specified market.
 
@@ -242,7 +262,7 @@ def provide_liquidity(
         market_id=market_id,
         is_amendment=False,
         commitment_amount=10000,
-        fee=0.00,
+        fee=fee,
     )
 
     vega.submit_order(
