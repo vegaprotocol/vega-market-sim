@@ -184,6 +184,7 @@ class VegaService(ABC):
         self.seconds_per_block = seconds_per_block
 
         self.governance_symbol = governance_symbol
+        self.asset_mint_map = defaultdict(lambda: 0)
 
     @property
     def market_price_decimals(self) -> int:
@@ -405,10 +406,11 @@ class VegaService(ABC):
             wallet_name=wallet_name, asset_id=asset, key_name=key_name
         ).general
 
+        padded_amount = num_to_padded_int(amount, asset_decimals)
         faucet.mint(
             self.wallet.public_key(wallet_name=wallet_name, name=key_name),
             asset,
-            num_to_padded_int(amount, asset_decimals),
+            padded_amount,
             faucet_url=self.faucet_url,
         )
 
@@ -424,6 +426,7 @@ class VegaService(ABC):
                 key_name=key_name,
             ).general
             if post_acct > curr_acct:
+                self.asset_mint_map[asset] += padded_amount
                 return
             self.wait_fn(1)
 
@@ -3476,3 +3479,29 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+
+    def check_balances_equal_deposits(self, asset: Optional[str] = None):
+        accounts = data_raw.list_accounts(
+            data_client=self.trading_data_client_v2,
+            asset_id=asset,
+        )
+
+        class BalanceDepositInequity(Exception):
+            def __init__(self, asset, minted, balance):
+                super().__init__(
+                    f"Funds in accounts ({balance}) do not match deposited/minted funds ({minted}) for asset {asset}"
+                )
+
+        asset_balance_map = {key: 0 for key in self.asset_mint_map.keys()}
+        for account in accounts:
+            asset_balance_map[account.asset] += int(account.balance)
+
+        try:
+            for asset in self.asset_mint_map:
+                assert self.asset_mint_map[asset] == asset_balance_map[asset]
+        except AssertionError:
+            raise BalanceDepositInequity(
+                asset,
+                minted=self.asset_mint_map[asset],
+                balance=asset_balance_map[asset],
+            )
