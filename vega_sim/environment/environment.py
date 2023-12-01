@@ -274,11 +274,10 @@ class MarketEnvironment:
                     f"Environment run at step {i}. Pausing to allow inspection of"
                     " state. Press Enter to continue"
                 )
-            vega.check_balances_equal_deposits()
-
             if step_end_callback is not None:
                 step_end_callback()
 
+        vega.check_balances_equal_deposits()
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
 
         if pause_at_completion:

@@ -3500,20 +3500,22 @@ class VegaService(ABC):
             ):
                 asset_deposit_map[deposit.asset] += int(deposit.amount)
 
-            for asset in asset_balance_map:
-                total_balance_amount = asset_balance_map[asset]
-                total_deposit_amount = asset_deposit_map[asset]
-                try:
+            try:
+                for asset in asset_balance_map:
+                    total_balance_amount = asset_balance_map[asset]
+                    total_deposit_amount = asset_deposit_map[asset]
                     assert asset_balance_map[asset] == asset_deposit_map[asset]
                     logging.debug(
                         f"Balance in accounts matches deposited funds for asset {asset}"
                     )
-                    return
-                except AssertionError:
-                    logging.debug(
-                        "Balances don't match deposits, waiting to ensure datanode has finished consuming events."
-                    )
-                    time.sleep(0.0005 * 1.1**attempts)
+                return
+            except AssertionError:
+                logging.debug(
+                    "Balances don't match deposits, waiting to ensure datanode has finished consuming events."
+                )
+                time.sleep(0.0001 * 1.1**attempts)
+                continue
+
         raise BalanceDepositInequity(
             asset=asset,
             total_balance_amount=total_balance_amount,
