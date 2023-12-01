@@ -88,7 +88,9 @@ def continuous_market(
     asset_id = propose_asset(vega=vega)
     mint_settlement_asset(vega=vega, asset_id=asset_id)
 
-    market_id = propose_market(vega=vega, asset_id=asset_id, price_monitoring=price_monitoring)
+    market_id = propose_market(
+        vega=vega, asset_id=asset_id, price_monitoring=price_monitoring
+    )
     provide_liquidity(vega=vega, market_id=market_id, fee=liquidity_fee)
 
     best_ask_id, best_bid_id = exit_auction(
@@ -230,7 +232,7 @@ def propose_market(
     )
     if not price_monitoring:
         market_config.set("price_monitoring_parameters.triggers", [])
-        
+
     vega.create_market_from_config(
         proposal_wallet_name=AUX_PARTY_A.wallet_name,
         proposal_key_name=AUX_PARTY_A.key_name,
