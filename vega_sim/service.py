@@ -82,6 +82,15 @@ class VegaFaucetError(Exception):
     pass
 
 
+class BalanceDepositInequity(Exception):
+    def __init__(self, asset, total_balance_amount, total_deposit_amount):
+        if total_balance_amount > total_deposit_amount:
+            msg = f"Balance in accounts greater than deposited funds ({total_balance_amount}>{total_deposit_amount}) for asset {asset}"
+        if total_balance_amount < total_deposit_amount:
+            msg = f"Balance in accounts less than deposited funds ({total_balance_amount}<{total_deposit_amount}) for asset {asset}"
+        super().__init__(msg)
+
+
 class MarketStateUpdateType(Enum):
     Unspecified = (
         vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_UNSPECIFIED
@@ -3476,3 +3485,39 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+
+    def check_balances_equal_deposits(self):
+        for attempts in range(100):
+            asset_balance_map = defaultdict(lambda: 0)
+            asset_deposit_map = defaultdict(lambda: 0)
+
+            for account in data_raw.list_accounts(
+                data_client=self.trading_data_client_v2
+            ):
+                asset_balance_map[account.asset] += int(account.balance)
+            for deposit in data_raw.list_deposits(
+                data_client=self.trading_data_client_v2
+            ):
+                asset_deposit_map[deposit.asset] += int(deposit.amount)
+
+            try:
+                for asset in asset_balance_map:
+                    total_balance_amount = asset_balance_map[asset]
+                    total_deposit_amount = asset_deposit_map[asset]
+                    assert asset_balance_map[asset] == asset_deposit_map[asset]
+                    logging.debug(
+                        f"Balance in accounts matches deposited funds for asset {asset}"
+                    )
+                return
+            except AssertionError:
+                logging.debug(
+                    "Balances don't match deposits, waiting to ensure datanode has finished consuming events."
+                )
+                time.sleep(0.0001 * 1.1**attempts)
+                continue
+
+        raise BalanceDepositInequity(
+            asset=asset,
+            total_balance_amount=total_balance_amount,
+            total_deposit_amount=total_deposit_amount,
+        )

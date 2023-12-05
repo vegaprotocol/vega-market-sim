@@ -24,6 +24,7 @@ def _run(
     console: bool = False,
     output: bool = False,
     output_dir: str = "fuzz_plots",
+    lite: bool = False,
     core_metrics_port: int = 2723,
     data_node_metrics_port: int = 3651,
     perp_market_probability: float = 1.0,
@@ -35,6 +36,7 @@ def _run(
         transactions_per_block=4096,
         perps_market_probability=perp_market_probability,
         output=output,
+        lite=lite,
     )
 
     with VegaServiceNull(
@@ -98,6 +100,7 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument("--console", action="store_true")
+    parser.add_argument("-l", "--lite", action="store_true")
     parser.add_argument("--core-metrics-port", default=2723, type=int)
     parser.add_argument("--data-node-metrics-port", default=3651, type=int)
     args = parser.parse_args()
@@ -111,6 +114,7 @@ if __name__ == "__main__":
         steps=args.steps,
         console=args.console,
         output=True,
+        lite=args.lite,
         core_metrics_port=args.core_metrics_port,
         data_node_metrics_port=args.data_node_metrics_port,
     )
