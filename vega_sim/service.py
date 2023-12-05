@@ -129,6 +129,9 @@ class DecimalsCache(defaultdict):
 
 
 class VegaService(ABC):
+    WALLET_NAME = "VegaService"
+    KEY_NAME = "VegaService"
+
     def __init__(
         self,
         can_control_time: bool = False,
@@ -396,8 +399,12 @@ class VegaService(ABC):
         asset: str,
         amount: float,
         wallet_name: Optional[str] = None,
+        from_faucet: bool = False,
     ) -> None:
-        """Mints a given amount of requested asset into the associated wallet
+        """Mints a given amount of requested asset into the associated wallet.
+
+        Default behaviour is to transfer funds from the Vega Service "treasury", to mint
+        funds directly from the faucet the optional from_faucet arg can be set.
 
         Args:
             wallet_name:
@@ -409,17 +416,28 @@ class VegaService(ABC):
             key_name:
                 Optional[str], key name stored in metadata. Defaults to None.
         """
-        asset_decimals = self.asset_decimals[asset]
         curr_acct = self.party_account(
             wallet_name=wallet_name, asset_id=asset, key_name=key_name
         ).general
 
-        faucet.mint(
-            self.wallet.public_key(wallet_name=wallet_name, name=key_name),
-            asset,
-            num_to_padded_int(amount, asset_decimals),
-            faucet_url=self.faucet_url,
-        )
+        if from_faucet:
+            faucet.mint(
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name),
+                asset,
+                num_to_padded_int(amount, self.asset_decimals[asset]),
+                faucet_url=self.faucet_url,
+            )
+        else:
+            self.one_off_transfer(
+                from_wallet_name=self.WALLET_NAME,
+                from_key_name=self.KEY_NAME,
+                from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                asset=asset,
+                amount=amount,
+                to_key_name=key_name,
+                to_wallet_name=wallet_name,
+            )
 
         self.wait_fn(1)
         self.wait_for_total_catchup()
@@ -487,13 +505,14 @@ class VegaService(ABC):
         """
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
+        padded_max_faucet_amount = num_to_padded_int(max_faucet_amount, decimals)
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
             wallet_name=wallet_name,
             name=name,
             symbol=symbol,
             decimals=decimals,
-            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
+            max_faucet_amount=padded_max_faucet_amount,
             quantum=quantum,
             data_client=self.trading_data_client_v2,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
@@ -511,6 +530,18 @@ class VegaService(ABC):
         )
         self.wait_fn(60)
         self.wait_for_thread_catchup()
+
+        asset_id = self.find_asset_id(
+            symbol=symbol, enabled=True, raise_on_missing=True
+        )
+        for _ in range(20):
+            self.mint(
+                wallet_name=self.WALLET_NAME,
+                key_name=self.KEY_NAME,
+                asset=asset_id,
+                amount=max_faucet_amount,
+                from_faucet=True,
+            )
 
     def create_market_from_config(
         self,
@@ -3091,7 +3122,7 @@ class VegaService(ABC):
             asset_decimals=self.asset_decimals[asset_id],
         )
 
-    def get_asset(self, asset_id: str):
+    def get_asset(self, asset_id: str) -> data.Asset:
         return data.get_asset(
             data_client=self.trading_data_client_v2, asset_id=asset_id
         )
