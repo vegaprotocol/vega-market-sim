@@ -109,9 +109,15 @@ def market_info(
 
 
 @_retry(3)
-def list_assets(data_client: vac.VegaTradingDataClientV2):
+def list_assets(
+    data_client: vac.VegaTradingDataClientV2,
+    asset_id: Optional[str] = None,
+) -> List[vega_protos.assets.Asset]:
+    base_request = data_node_protos_v2.trading_data.ListAssetsRequest()
+    if asset_id is not None:
+        setattr(base_request, "asset_id", asset_id)
     return unroll_v2_pagination(
-        base_request=data_node_protos_v2.trading_data.ListAssetsRequest(),
+        base_request=base_request,
         request_func=lambda x: data_client.ListAssets(x).assets,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
@@ -121,7 +127,7 @@ def list_assets(data_client: vac.VegaTradingDataClientV2):
 def asset_info(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
-) -> vac.vega.assets.Asset:
+) -> vega_protos.assets.Asset:
     """Returns information on a given asset selected by its ID
 
     Args:

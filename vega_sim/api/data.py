@@ -528,6 +528,87 @@ class StopOrder:
 
 
 @dataclass(frozen=True)
+class Asset:
+    id: str
+    details: AssetDetails
+    status: vega_protos.assets.Asset.Status
+
+
+@dataclass(frozen=True)
+class AssetDetails:
+    name: str
+    symbol: str
+    decimals: int
+    quantum: float
+    builtin_asset: Optional[BuiltinAsset] = None
+    erc20: Optional[ERC20] = None
+
+
+@dataclass(frozen=True)
+class BuiltinAsset:
+    max_faucet_amount_mint: float
+
+
+@dataclass(frozen=True)
+class ERC20:
+    contract_address: str
+    lifetime_limit: float
+    withdraw_threshold: float
+
+
+def _asset_from_proto(asset: vega_protos.assets.Asset, decimal_spec: DecimalSpec):
+    return Asset(
+        id=asset.id,
+        details=_asset_details_from_proto(asset.details, decimal_spec=decimal_spec),
+        status=asset.status,
+    )
+
+
+def _asset_details_from_proto(
+    asset_details: vega_protos.assets.AssetDetails, decimal_spec: DecimalSpec
+) -> AssetDetails:
+    return AssetDetails(
+        name=asset_details.name,
+        symbol=asset_details.symbol,
+        decimals=asset_details.decimals,
+        quantum=asset_details.quantum,
+        builtin_asset=_builtin_asset_from_proto(
+            builtin_asset=asset_details.builtin_asset, decimal_spec=decimal_spec
+        )
+        if asset_details.builtin_asset is not None
+        else None,
+        erc20=_erc20_from_proto(erc20=asset_details.erc20, decimal_spec=decimal_spec)
+        if asset_details.erc20 is not None
+        else None,
+    )
+
+
+def _builtin_asset_from_proto(
+    builtin_asset: vega_protos.assets.BuiltinAsset, decimal_spec: DecimalSpec
+) -> BuiltinAsset:
+    return BuiltinAsset(
+        max_faucet_amount_mint=num_from_padded_int(
+            to_convert=builtin_asset.max_faucet_amount_mint,
+            decimals=decimal_spec.asset_decimals,
+        )
+    )
+
+
+def _erc20_from_proto(
+    erc20: vega_protos.assets.ERC20, decimal_spec: DecimalSpec
+) -> ERC20:
+    return ERC20(
+        contract_address=erc20.contract_address,
+        lifetime_limit=num_from_padded_int(
+            to_convert=erc20.lifetime_limit, decimals=decimal_spec.asset_decimals
+        ),
+        withdraw_threshold=num_from_padded_int(
+            to_convert=erc20.withdraw_threshold, decimals=decimal_spec.asset_decimals
+        ),
+    )
+
+
+@dataclass(frozen=True)
 class StopOrderEvent:
     submission: OrderSubmission
     stop_order: StopOrder
@@ -2449,8 +2530,11 @@ def get_stake(
 def get_asset(
     data_client: vac.trading_data_grpc_v2,
     asset_id: str,
-):
-    return data_raw.asset_info(data_client=data_client, asset_id=asset_id)
+) -> Asset:
+    asset = data_raw.asset_info(data_client=data_client, asset_id=asset_id)
+    return _asset_from_proto(
+        asset, decimal_spec=DecimalSpec(asset_decimals=asset.details.decimals)
+    )
 
 
 def list_referral_sets(
