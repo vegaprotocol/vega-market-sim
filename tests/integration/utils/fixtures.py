@@ -51,7 +51,7 @@ def build_basic_market(
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.forward("10s")

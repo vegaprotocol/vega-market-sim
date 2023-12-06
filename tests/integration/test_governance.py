@@ -16,7 +16,11 @@ def test_governance_transfer(vega_service: vega_service):
 
     vega.wallet.create_key(name=PARTY_A.name)
 
-    vega.mint(key_name=PARTY_A.name, asset="VOTE", amount=1000)
+    vega.mint(
+        key_name=PARTY_A.name,
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
+        amount=1000,
+    )
     vega.wait_for_total_catchup()
 
     vega.create_asset(key_name=PARTY_A.name, name="USDT", symbol="USDT")

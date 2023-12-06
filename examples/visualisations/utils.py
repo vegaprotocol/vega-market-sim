@@ -118,7 +118,7 @@ def mint_governance_asset(
         vega.mint(
             wallet_name=party.wallet_name,
             key_name=party.key_name,
-            asset="VOTE",
+            asset=vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1000,
         )
         vega.wait_for_total_catchup()

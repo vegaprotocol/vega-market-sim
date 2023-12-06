@@ -110,7 +110,7 @@ class MarketMaker(StateAgentWithWallet):
         # Faucet ourselves some VOTE tokens
         self.vega.mint(
             self.wallet_name,
-            asset="VOTE",
+            asset=vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
         )
         self.vega.forward("20s")

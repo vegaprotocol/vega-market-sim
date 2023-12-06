@@ -627,7 +627,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -1008,7 +1008,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -1279,7 +1279,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)

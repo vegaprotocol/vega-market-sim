@@ -144,7 +144,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
         self.vega.mint(
             wallet_name=self.wallet_name,
-            asset="VOTE",
+            asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
             key_name=self.key_name,
         )

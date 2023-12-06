@@ -74,7 +74,7 @@ def _run_parameter_iteration(
         vega.create_key(PARAMETER_AMEND_WALLET[0])
         vega.mint(
             PARAMETER_AMEND_WALLET[0],
-            asset="VOTE",
+            asset=vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
         )
 

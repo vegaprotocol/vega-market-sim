@@ -140,7 +140,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.wait_for_datanode_sync()
         self.vega.mint(
             self.wallet_name,
-            asset="VOTE",
+            asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
             key_name=self.key_name,
         )
