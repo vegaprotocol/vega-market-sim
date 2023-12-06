@@ -1145,13 +1145,22 @@ class VegaService(ABC):
         )
 
     def update_network_parameter(
-        self, proposal_key: str, parameter: str, new_value: str, wallet_name: str = None
+        self,
+        proposal_key: str,
+        parameter: str,
+        new_value: str,
+        wallet_name: str = None,
+        closing_time: Optional[datetime.datetime] = None,
+        enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
     ):
-        """Updates a network parameter by first proposing and then voting to approve
+        """
+        Updates a network parameter by first proposing and then optionally voting to approve
         the change, followed by advancing the network time period forwards.
 
-        If the genesis setup of the market is such that this meets requirements then
-        the proposal will be approved. Otherwise others may need to vote too.
+        If 'approve' is set to False, this function will skip the approval step and return
+        the proposal ID immediately after proposing.
 
         Args:
             proposal_key:
@@ -1162,10 +1171,26 @@ class VegaService(ABC):
                 str, the new value to set
             wallet_name:
                 str, optional, the wallet proposing the change
+            vote_closing_time:
+                Optional[datetime], The time at which the vote should close
+            vote_enactment_time:
+                Optional[datetime], The time at which the vote should enact
+            approve_proposal:
+                bool, default True, Whether to automatically approve the proposal
+            forward_time_to_enactment:
+                bool, default True, Whether to forward time to enactment of the
+                    proposal
+
         Returns:
             str, the ID of the proposal
         """
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if enactment_time is None
+            else int(enactment_time.timestamp())
+        )
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
@@ -1173,19 +1198,31 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if closing_time is None
+                else int(closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=proposal_key,
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=wallet_name,
-            key_name=proposal_key,
-        )
-        self.wait_fn(60)
-        self.wait_for_thread_catchup()
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        return proposal_id
 
     def update_market_state(
         self,
