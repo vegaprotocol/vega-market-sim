@@ -582,6 +582,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
         )
+        self.ListGames = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListGames",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1673,6 +1678,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListGames(self, request, context):
+        """List games
+
+        Get a list of games and corresponding game data, given the provided filters
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -2316,6 +2330,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetTotalTransferFeeDiscount,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.SerializeToString,
+        ),
+        "ListGames": grpc.unary_unary_rpc_method_handler(
+            servicer.ListGames,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5605,6 +5624,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetTotalTransferFeeDiscount",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListGames(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListGames",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
             options,
             channel_credentials,
             insecure,
