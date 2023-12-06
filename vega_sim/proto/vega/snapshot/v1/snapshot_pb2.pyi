@@ -951,14 +951,17 @@ class GovernanceActive(_message.Message):
     ) -> None: ...
 
 class GovernanceNode(_message.Message):
-    __slots__ = ("proposals",)
+    __slots__ = ("proposals", "proposal_data")
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    PROPOSAL_DATA_FIELD_NUMBER: _ClassVar[int]
     proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
+    proposal_data: _containers.RepeatedCompositeFieldContainer[ProposalData]
     def __init__(
         self,
         proposals: _Optional[
             _Iterable[_Union[_governance_pb2.Proposal, _Mapping]]
         ] = ...,
+        proposal_data: _Optional[_Iterable[_Union[ProposalData, _Mapping]]] = ...,
     ) -> None: ...
 
 class StakingAccount(_message.Message):

@@ -2250,6 +2250,8 @@ class Reward(_message.Message):
         "market_id",
         "reward_type",
         "locked_until_epoch",
+        "quantum_amount",
+        "game_id",
     )
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -2260,6 +2262,8 @@ class Reward(_message.Message):
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     REWARD_TYPE_FIELD_NUMBER: _ClassVar[int]
     LOCKED_UNTIL_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
     party_id: str
     epoch: int
@@ -2269,6 +2273,8 @@ class Reward(_message.Message):
     market_id: str
     reward_type: str
     locked_until_epoch: int
+    quantum_amount: str
+    game_id: str
     def __init__(
         self,
         asset_id: _Optional[str] = ...,
@@ -2280,6 +2286,8 @@ class Reward(_message.Message):
         market_id: _Optional[str] = ...,
         reward_type: _Optional[str] = ...,
         locked_until_epoch: _Optional[int] = ...,
+        quantum_amount: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
     ) -> None: ...
 
 class RewardSummary(_message.Message):

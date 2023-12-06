@@ -203,6 +203,9 @@ class PerpetualProduct(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
+        "funding_rate_scaling_factor",
+        "funding_rate_lower_bound",
+        "funding_rate_upper_bound",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -213,6 +216,9 @@ class PerpetualProduct(_message.Message):
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_SCHEDULE_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     margin_funding_factor: str
@@ -222,6 +228,9 @@ class PerpetualProduct(_message.Message):
     data_source_spec_for_settlement_schedule: _data_source_pb2.DataSourceDefinition
     data_source_spec_for_settlement_data: _data_source_pb2.DataSourceDefinition
     data_source_spec_binding: _markets_pb2.DataSourceSpecToPerpetualBinding
+    funding_rate_scaling_factor: str
+    funding_rate_lower_bound: str
+    funding_rate_upper_bound: str
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -239,6 +248,9 @@ class PerpetualProduct(_message.Message):
         data_source_spec_binding: _Optional[
             _Union[_markets_pb2.DataSourceSpecToPerpetualBinding, _Mapping]
         ] = ...,
+        funding_rate_scaling_factor: _Optional[str] = ...,
+        funding_rate_lower_bound: _Optional[str] = ...,
+        funding_rate_upper_bound: _Optional[str] = ...,
     ) -> None: ...
 
 class InstrumentConfiguration(_message.Message):
@@ -608,6 +620,9 @@ class UpdatePerpetualProduct(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
+        "funding_rate_scaling_factor",
+        "funding_rate_lower_bound",
+        "funding_rate_upper_bound",
     )
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -617,6 +632,9 @@ class UpdatePerpetualProduct(_message.Message):
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_SCHEDULE_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
     quote_name: str
     margin_funding_factor: str
     interest_rate: str
@@ -625,6 +643,9 @@ class UpdatePerpetualProduct(_message.Message):
     data_source_spec_for_settlement_schedule: _data_source_pb2.DataSourceDefinition
     data_source_spec_for_settlement_data: _data_source_pb2.DataSourceDefinition
     data_source_spec_binding: _markets_pb2.DataSourceSpecToPerpetualBinding
+    funding_rate_scaling_factor: str
+    funding_rate_lower_bound: str
+    funding_rate_upper_bound: str
     def __init__(
         self,
         quote_name: _Optional[str] = ...,
@@ -641,6 +662,9 @@ class UpdatePerpetualProduct(_message.Message):
         data_source_spec_binding: _Optional[
             _Union[_markets_pb2.DataSourceSpecToPerpetualBinding, _Mapping]
         ] = ...,
+        funding_rate_scaling_factor: _Optional[str] = ...,
+        funding_rate_lower_bound: _Optional[str] = ...,
+        funding_rate_upper_bound: _Optional[str] = ...,
     ) -> None: ...
 
 class UpdateNetworkParameter(_message.Message):

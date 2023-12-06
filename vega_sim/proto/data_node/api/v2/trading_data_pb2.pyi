@@ -5030,3 +5030,172 @@ class GetTotalTransferFeeDiscountResponse(_message.Message):
     TOTAL_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
     total_discount: str
     def __init__(self, total_discount: _Optional[str] = ...) -> None: ...
+
+class ListGamesRequest(_message.Message):
+    __slots__ = ("game_id", "epoch_from", "epoch_to", "entity_scope", "pagination")
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_FROM_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_TO_FIELD_NUMBER: _ClassVar[int]
+    ENTITY_SCOPE_FIELD_NUMBER: _ClassVar[int]
+    PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    game_id: str
+    epoch_from: int
+    epoch_to: int
+    entity_scope: _vega_pb2.EntityScope
+    pagination: Pagination
+    def __init__(
+        self,
+        game_id: _Optional[str] = ...,
+        epoch_from: _Optional[int] = ...,
+        epoch_to: _Optional[int] = ...,
+        entity_scope: _Optional[_Union[_vega_pb2.EntityScope, str]] = ...,
+        pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+    ) -> None: ...
+
+class ListGamesResponse(_message.Message):
+    __slots__ = ("games",)
+    GAMES_FIELD_NUMBER: _ClassVar[int]
+    games: GamesConnection
+    def __init__(
+        self, games: _Optional[_Union[GamesConnection, _Mapping]] = ...
+    ) -> None: ...
+
+class GamesConnection(_message.Message):
+    __slots__ = ("edges", "page_info")
+    EDGES_FIELD_NUMBER: _ClassVar[int]
+    PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
+    edges: _containers.RepeatedCompositeFieldContainer[GameEdge]
+    page_info: PageInfo
+    def __init__(
+        self,
+        edges: _Optional[_Iterable[_Union[GameEdge, _Mapping]]] = ...,
+        page_info: _Optional[_Union[PageInfo, _Mapping]] = ...,
+    ) -> None: ...
+
+class GameEdge(_message.Message):
+    __slots__ = ("node", "cursor")
+    NODE_FIELD_NUMBER: _ClassVar[int]
+    CURSOR_FIELD_NUMBER: _ClassVar[int]
+    node: Game
+    cursor: str
+    def __init__(
+        self,
+        node: _Optional[_Union[Game, _Mapping]] = ...,
+        cursor: _Optional[str] = ...,
+    ) -> None: ...
+
+class Game(_message.Message):
+    __slots__ = ("id", "epoch", "participants", "team", "individual")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    PARTICIPANTS_FIELD_NUMBER: _ClassVar[int]
+    TEAM_FIELD_NUMBER: _ClassVar[int]
+    INDIVIDUAL_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    epoch: int
+    participants: int
+    team: TeamGameEntities
+    individual: IndividualGameEntities
+    def __init__(
+        self,
+        id: _Optional[str] = ...,
+        epoch: _Optional[int] = ...,
+        participants: _Optional[int] = ...,
+        team: _Optional[_Union[TeamGameEntities, _Mapping]] = ...,
+        individual: _Optional[_Union[IndividualGameEntities, _Mapping]] = ...,
+    ) -> None: ...
+
+class TeamGameEntities(_message.Message):
+    __slots__ = ("team",)
+    TEAM_FIELD_NUMBER: _ClassVar[int]
+    team: _containers.RepeatedCompositeFieldContainer[TeamGameEntity]
+    def __init__(
+        self, team: _Optional[_Iterable[_Union[TeamGameEntity, _Mapping]]] = ...
+    ) -> None: ...
+
+class IndividualGameEntities(_message.Message):
+    __slots__ = ("individual",)
+    INDIVIDUAL_FIELD_NUMBER: _ClassVar[int]
+    individual: _containers.RepeatedCompositeFieldContainer[IndividualGameEntity]
+    def __init__(
+        self,
+        individual: _Optional[_Iterable[_Union[IndividualGameEntity, _Mapping]]] = ...,
+    ) -> None: ...
+
+class TeamGameEntity(_message.Message):
+    __slots__ = (
+        "team",
+        "rank",
+        "volume",
+        "reward_metric",
+        "reward_earned",
+        "total_rewards_earned",
+    )
+    TEAM_FIELD_NUMBER: _ClassVar[int]
+    RANK_FIELD_NUMBER: _ClassVar[int]
+    VOLUME_FIELD_NUMBER: _ClassVar[int]
+    REWARD_METRIC_FIELD_NUMBER: _ClassVar[int]
+    REWARD_EARNED_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_REWARDS_EARNED_FIELD_NUMBER: _ClassVar[int]
+    team: TeamGameParticipation
+    rank: int
+    volume: str
+    reward_metric: str
+    reward_earned: str
+    total_rewards_earned: str
+    def __init__(
+        self,
+        team: _Optional[_Union[TeamGameParticipation, _Mapping]] = ...,
+        rank: _Optional[int] = ...,
+        volume: _Optional[str] = ...,
+        reward_metric: _Optional[str] = ...,
+        reward_earned: _Optional[str] = ...,
+        total_rewards_earned: _Optional[str] = ...,
+    ) -> None: ...
+
+class TeamGameParticipation(_message.Message):
+    __slots__ = ("team_id", "members_participating")
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    MEMBERS_PARTICIPATING_FIELD_NUMBER: _ClassVar[int]
+    team_id: str
+    members_participating: _containers.RepeatedCompositeFieldContainer[
+        IndividualGameEntity
+    ]
+    def __init__(
+        self,
+        team_id: _Optional[str] = ...,
+        members_participating: _Optional[
+            _Iterable[_Union[IndividualGameEntity, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class IndividualGameEntity(_message.Message):
+    __slots__ = (
+        "individual",
+        "rank",
+        "volume",
+        "reward_metric",
+        "reward_earned",
+        "total_rewards_earned",
+    )
+    INDIVIDUAL_FIELD_NUMBER: _ClassVar[int]
+    RANK_FIELD_NUMBER: _ClassVar[int]
+    VOLUME_FIELD_NUMBER: _ClassVar[int]
+    REWARD_METRIC_FIELD_NUMBER: _ClassVar[int]
+    REWARD_EARNED_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_REWARDS_EARNED_FIELD_NUMBER: _ClassVar[int]
+    individual: str
+    rank: int
+    volume: str
+    reward_metric: str
+    reward_earned: str
+    total_rewards_earned: str
+    def __init__(
+        self,
+        individual: _Optional[str] = ...,
+        rank: _Optional[int] = ...,
+        volume: _Optional[str] = ...,
+        reward_metric: _Optional[str] = ...,
+        reward_earned: _Optional[str] = ...,
+        total_rewards_earned: _Optional[str] = ...,
+    ) -> None: ...
