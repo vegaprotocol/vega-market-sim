@@ -18,6 +18,8 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import PeggedOrder
 from vega_sim.api.market import MarketConfig
 
+import vega_sim.proto.vega as vega_protos
+
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])
 
@@ -49,7 +51,7 @@ def continuous_market(
     maker_fee: float = 0,
     liquidity_fee: float = 0,
     infrastructure_fee: float = 0,
-    price_monitoring: bool = False,
+    simple_price_monitoring: bool = True,
 ):
     """Creates a default market and exits the auction into continuous trading.
 
@@ -89,7 +91,7 @@ def continuous_market(
     mint_settlement_asset(vega=vega, asset_id=asset_id)
 
     market_id = propose_market(
-        vega=vega, asset_id=asset_id, price_monitoring=price_monitoring
+        vega=vega, asset_id=asset_id, simple_price_monitoring=simple_price_monitoring
     )
     provide_liquidity(vega=vega, market_id=market_id, fee=liquidity_fee)
 
@@ -203,7 +205,7 @@ def propose_asset(
 def propose_market(
     vega: VegaServiceNull,
     asset_id: str,
-    price_monitoring: bool = False,
+    simple_price_monitoring: bool = True,
 ) -> str:
     """Creates a market and returns the market id.
 
@@ -230,8 +232,15 @@ def propose_market(
             name=AUX_PARTY_A.key_name,
         ),
     )
-    if not price_monitoring:
-        market_config.set("price_monitoring_parameters.triggers", [])
+    if simple_price_monitoring:
+        market_config.set(
+            "price_monitoring_parameters.triggers",
+            [
+                vega_protos.markets.PriceMonitoringTrigger(
+                    horizon=24 * 3600, probability="0.999999", auction_extension=5
+                )
+            ],
+        )
 
     vega.create_market_from_config(
         proposal_wallet_name=AUX_PARTY_A.wallet_name,

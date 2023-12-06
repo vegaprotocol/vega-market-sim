@@ -56,7 +56,7 @@ class AuctionExitVisualisation(Visualisation):
             maker_fee=0.001,
             liquidity_fee=0.001,
             infrastructure_fee=0.001,
-            price_monitoring=True,
+            simple_price_monitoring=False,
         )
 
         # Create wallets and keys for traders
