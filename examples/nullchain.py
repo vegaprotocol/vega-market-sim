@@ -58,7 +58,6 @@ if __name__ == "__main__":
             name="tDAI",
             symbol="tDAI",
             decimals=5,
-            max_faucet_amount=1e10,
         )
 
         vega.wait_for_total_catchup()

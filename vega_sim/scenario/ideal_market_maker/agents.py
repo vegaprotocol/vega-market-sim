@@ -152,7 +152,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
             name=self.asset_name,
             symbol=self.asset_name,
             decimals=self.adp,
-            max_faucet_amount=1e20,
             key_name=self.key_name,
         )
         self.vega.wait_fn(5)

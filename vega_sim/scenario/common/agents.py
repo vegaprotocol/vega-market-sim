@@ -984,7 +984,6 @@ class MarketManager(StateAgentWithWallet):
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.adp,
-                max_faucet_amount=5e10,
                 key_name=self.key_name,
             )
         self.vega.wait_fn(5)
@@ -3257,7 +3256,6 @@ class RewardFunder(StateAgentWithWallet):
                 name=self.reward_asset_name,
                 symbol=self.reward_asset_name,
                 decimals=18,
-                max_faucet_amount=5e10,
                 key_name=self.key_name,
             )
         self.vega.wait_fn(1)

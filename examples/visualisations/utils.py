@@ -172,7 +172,6 @@ def propose_asset(
         name="fDAI",
         symbol="fDAI",
         decimals=5,
-        max_faucet_amount=1e9,
     )
     vega.wait_for_total_catchup()
     return vega.find_asset_id(symbol="fDAI")

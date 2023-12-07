@@ -63,7 +63,6 @@ def build_basic_market(
             name=ASSET_NAME,
             symbol=ASSET_NAME,
             decimals=5,
-            max_faucet_amount=10 * mint_amount * 1e5,
         )
         vega.forward("10s")
         vega.wait_for_total_catchup()
