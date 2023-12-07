@@ -102,3 +102,21 @@ jobs:
             echo $LATEST_REQ
             exit 1
           fi
+
+  check_version_tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Check Vega core version tags are up-to-date
+        run: |
+          poetry run scripts/check_tagged_versions.py
