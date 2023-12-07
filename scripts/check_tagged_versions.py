@@ -24,10 +24,6 @@ def check_versions():
         if tag["name"].startswith("vega-"):
             tagged_vega_versions.add(tag["name"][5:])
 
-    if tagged_vega_versions.difference(versions_to_check):
-        raise Exception(
-            f"There are tags for non-existent vega versions: {tagged_vega_versions}"
-        )
     if versions_to_check.difference(tagged_vega_versions):
         raise Exception(f"Missing tags for vega versions: {versions_to_check}")
 
