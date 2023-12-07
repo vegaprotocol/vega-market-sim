@@ -119,4 +119,4 @@ jobs:
 
       - name: Check Vega core version tags are up-to-date
         run: |
-          poetry run scripts/check_tagged_versions.py
+          poetry run python scripts/check_tagged_versions.py
