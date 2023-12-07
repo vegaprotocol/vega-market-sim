@@ -32,14 +32,14 @@
   "app_hash": "",
   "app_state": {
     "assets": {
-      "VOTE": {
+      "0000000000000000000000000000000000000000000000000000000000000000": {
         "name": "VOTE",
         "symbol": "VOTE",
         "decimals": 5,
         "min_lp_stake": "1",
         "source": {
           "builtin_asset": {
-            "max_faucet_amount_mint": "100000000000"
+            "max_faucet_amount_mint": "100000000000000000"
           }
         }
       }
@@ -170,7 +170,7 @@
       "network.validators.minimumEthereumEventsForNewValidator": "3",
       "network.validators.multisig.numberOfSigners": "13",
       "network.validators.tendermint.number": "13",
-      "reward.asset": "VOTE",
+      "reward.asset": "0000000000000000000000000000000000000000000000000000000000000000",
       "reward.staking.delegation.competitionLevel": "1.3",
       "reward.staking.delegation.delegatorShare": "0.8",
       "reward.staking.delegation.maxPayoutPerEpoch": "9890000000000000000000",
@@ -199,7 +199,7 @@
       "spam.protection.voting.min.tokens": "1000000000000000000",
       "spam.protection.applyReferral.min.funds": "0",
       "transfer.fee.factor": "0.001",
-      "transfer.minTransferQuantumMultiple": "100",
+      "transfer.minTransferQuantumMultiple": "0",
       "transfer.fee.maxQuantumAmount": "100",
       "transfer.feeDiscountMinimumTrackedAmount": "0.001",
       "transfer.feeDiscountDecayFraction": "0.5",

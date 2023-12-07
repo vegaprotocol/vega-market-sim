@@ -971,7 +971,7 @@ class MarketManager(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
         self.vega.mint(
             wallet_name=self.wallet_name,
-            asset="VOTE",
+            asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
             key_name=self.key_name,
         )
@@ -984,7 +984,6 @@ class MarketManager(StateAgentWithWallet):
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.adp,
-                max_faucet_amount=5e10,
                 key_name=self.key_name,
             )
         self.vega.wait_fn(5)
@@ -3237,7 +3236,7 @@ class RewardFunder(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -3257,7 +3256,6 @@ class RewardFunder(StateAgentWithWallet):
                 name=self.reward_asset_name,
                 symbol=self.reward_asset_name,
                 decimals=18,
-                max_faucet_amount=5e10,
                 key_name=self.key_name,
             )
         self.vega.wait_fn(1)

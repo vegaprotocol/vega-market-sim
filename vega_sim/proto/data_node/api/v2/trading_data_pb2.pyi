@@ -2188,17 +2188,29 @@ class MarginConnection(_message.Message):
     ) -> None: ...
 
 class ListRewardsRequest(_message.Message):
-    __slots__ = ("party_id", "asset_id", "pagination", "from_epoch", "to_epoch")
+    __slots__ = (
+        "party_id",
+        "asset_id",
+        "pagination",
+        "from_epoch",
+        "to_epoch",
+        "team_id",
+        "game_id",
+    )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
     FROM_EPOCH_FIELD_NUMBER: _ClassVar[int]
     TO_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     asset_id: str
     pagination: Pagination
     from_epoch: int
     to_epoch: int
+    team_id: str
+    game_id: str
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -2206,6 +2218,8 @@ class ListRewardsRequest(_message.Message):
         pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
         from_epoch: _Optional[int] = ...,
         to_epoch: _Optional[int] = ...,
+        team_id: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ListRewardsResponse(_message.Message):

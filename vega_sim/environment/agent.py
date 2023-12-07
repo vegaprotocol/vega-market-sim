@@ -24,7 +24,7 @@ class Agent(ABC):
 
     def initialise(
         self,
-        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        vega: VegaServiceNull,
         create_key: bool = False,
         mint_key: bool = False,
     ):
