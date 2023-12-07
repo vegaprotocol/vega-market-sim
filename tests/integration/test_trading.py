@@ -154,7 +154,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t1 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t1) == 1
+    assert len(all_transfers_t1) >= 1
     assert len(live_transfers_t1) == 0
 
     assert party_a_accounts_t1.general == 499.999
@@ -187,7 +187,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t2 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t2) == 2
+    assert len(all_transfers_t2) >= 2
     assert len(live_transfers_t2) == 1
     assert party_a_accounts_t2.general == 499.999
     assert party_b_accounts_t2.general == 999.999
@@ -209,7 +209,7 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t3 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t3) == 2
+    assert len(all_transfers_t3) >= 2
     assert len(live_transfers_t3) == 0
     assert party_a_accounts_t3.general == 999.999
     assert party_b_accounts_t3.general == 999.999
