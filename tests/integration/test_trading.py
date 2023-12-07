@@ -1,5 +1,4 @@
 import pytest
-import logging
 from collections import namedtuple
 import vega_sim.proto.vega as vega_protos
 from examples.visualisations.utils import continuous_market, move_market
@@ -505,15 +504,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    logging.info(
-        "Trader A Party: public_key ="
-        f" {vega.wallet.public_key(name=trader_a.key_name, wallet_name=trader_a.wallet_name)}"
-    )
-    logging.info(
-        "Trader B Party: public_key ="
-        f" {vega.wallet.public_key(name=trader_b.key_name, wallet_name=trader_b.wallet_name)}"
-    )
-
     # 0012-NP-LIPE-002: An estimate is obtained for a short position with no open orders, mark price keeps going up in small increments and the actual liquidation takes place within the estimated range.
     vega.submit_order(
         trading_wallet=trader_a.wallet_name,
@@ -543,8 +533,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
         market_id=market_id,
     )
     collateral = account_TRADER_B.margin + account_TRADER_B.general
-    print(f"traderB.margin1 = {account_TRADER_B.margin}")
-    print(f"traderB.general1 = {account_TRADER_B.general}")
     market_data = vega.get_latest_market_data(market_id=market_id)
 
     _, estimate_liquidation_price_initial = vega.estimate_position(
@@ -565,15 +553,8 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
         is_market_order=[True],
         collateral_available=collateral,
     )
-    # assert estimate_liquidation_price_initial.best_case.open_volume_only == estimate_liquidation_price_MO.best_case.including_sell_orders
-    print(
-        f"estimate_liquidation_price.best_case.open_volume_only={ estimate_liquidation_price_initial.best_case.open_volume_only}"
-    )
-    print(
-        f"estimate_liquidation_price.worst_case.open_volume_only={ estimate_liquidation_price_initial.worst_case.open_volume_only}"
-    )
 
-    for price in [519, 520, 521.5, 522]:
+    for price in [519, 520, 543, 543.5]:
         move_market(
             vega=vega,
             market_id=market_id,
