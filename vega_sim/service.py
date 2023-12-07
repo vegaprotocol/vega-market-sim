@@ -479,7 +479,7 @@ class VegaService(ABC):
         symbol: str,
         decimals: int = 0,
         quantum: int = 1,
-        max_faucet_amount: int = 10e9,
+        max_faucet_amount: int = 1e48,
         wallet_name: Optional[str] = None,
     ):
         """Creates a simple asset and automatically approves the proposal (assuming the
@@ -505,14 +505,12 @@ class VegaService(ABC):
         """
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
-        padded_max_faucet_amount = num_to_padded_int(max_faucet_amount, decimals)
         proposal_id = gov.propose_asset(
             wallet=self.wallet,
             wallet_name=wallet_name,
             name=name,
             symbol=symbol,
             decimals=decimals,
-            max_faucet_amount=padded_max_faucet_amount,
             quantum=quantum,
             data_client=self.trading_data_client_v2,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
@@ -520,6 +518,7 @@ class VegaService(ABC):
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=key_name,
+            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
         )
         self.wait_fn(1)
         gov.approve_proposal(
@@ -534,14 +533,13 @@ class VegaService(ABC):
         asset_id = self.find_asset_id(
             symbol=symbol, enabled=True, raise_on_missing=True
         )
-        for _ in range(20):
-            self.mint(
-                wallet_name=self.WALLET_NAME,
-                key_name=self.KEY_NAME,
-                asset=asset_id,
-                amount=max_faucet_amount,
-                from_faucet=True,
-            )
+        self.mint(
+            wallet_name=self.WALLET_NAME,
+            key_name=self.KEY_NAME,
+            asset=asset_id,
+            amount=max_faucet_amount,
+            from_faucet=True,
+        )
 
     def create_market_from_config(
         self,

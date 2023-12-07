@@ -1020,14 +1020,13 @@ class VegaServiceNull(VegaService):
             self.find_asset_id(symbol="VOTE", enabled=True, raise_on_missing=True)
         )
         self.wallet.create_key(wallet_name=self.WALLET_NAME, name=self.KEY_NAME)
-        for _ in range(10):
-            self.mint(
-                wallet_name=self.WALLET_NAME,
-                key_name=self.KEY_NAME,
-                asset=governance_asset.id,
-                amount=governance_asset.details.builtin_asset.max_faucet_amount_mint,
-                from_faucet=True,
-            )
+        self.mint(
+            wallet_name=self.WALLET_NAME,
+            key_name=self.KEY_NAME,
+            asset=governance_asset.id,
+            amount=governance_asset.details.builtin_asset.max_faucet_amount_mint,
+            from_faucet=True,
+        )
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

@@ -39,7 +39,7 @@
         "min_lp_stake": "1",
         "source": {
           "builtin_asset": {
-            "max_faucet_amount_mint": "100000000000"
+            "max_faucet_amount_mint": "100000000000000000"
           }
         }
       }
