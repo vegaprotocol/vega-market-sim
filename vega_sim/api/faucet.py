@@ -1,3 +1,4 @@
+import time
 import requests
 from logging import getLogger
 
@@ -13,9 +14,13 @@ def mint(pub_key: str, asset: str, amount: int, faucet_url: str) -> None:
         "amount": str(int(amount)),
         "asset": asset,
     }
-    req = requests.post(url, json=payload)
-    try:
-        req.raise_for_status()
-    except Exception as e:
-        logger.exception(f"Exception in minting: {req.json()}")
-        raise e
+    for i in range(20):
+        try:
+            req = requests.post(url, json=payload)
+            req.raise_for_status()
+            return
+        except Exception as e:
+            time.sleep(0.1 * 1.2**i)
+
+    logger.exception(f"Exception in minting with payload {payload}: {req.json()}")
+    raise e
