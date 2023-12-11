@@ -47,6 +47,7 @@ from vega_sim.tools.scenario_plots import (
 class MarketHistoryAdditionalData:
     at_time: datetime.datetime
     external_prices: Dict[str, float]
+    posn: float
 
 
 @dataclass
@@ -81,13 +82,17 @@ def state_extraction_fn(vega: VegaServiceNull, agents: dict):
 
     external_prices = {}
 
+    posn = 0
     for _, agent in agents.items():
         if isinstance(agent, (CFMMarketMaker, CFMV3MarketMaker)):
             external_prices[agent.market_id] = agent.curr_price
+            vega_posn = vega.positions_by_market(
+                agent.key_name, agent.market_id, agent.wallet_name
+            )
+            posn = vega_posn.open_volume if vega_posn else 0
 
     return MarketHistoryAdditionalData(
-        at_time=at_time,
-        external_prices=external_prices,
+        at_time=at_time, external_prices=external_prices, posn=posn
     )
 
 
@@ -118,6 +123,7 @@ def additional_data_to_rows(data) -> List[pd.Series]:
                 "time": data.at_time,
                 "market_id": market_id,
                 "external_price": data.external_prices.get(market_id, np.NaN),
+                "position": data.posn,
             }
         )
     return results
@@ -188,12 +194,13 @@ class CFMScenario(Scenario):
         i_market = 0
         # Create fuzzed price process
         # price_process = [1000] * self.num_steps
-        # price_process = random_walk(
-        #     random_state=self.random_state,
-        #     starting_price=1000,
-        #     num_steps=self.num_steps,
-        #     decimal_precision=int(market_config.decimal_places),
-        # )
+        price_process = random_walk(
+            random_state=self.random_state,
+            starting_price=1000,
+            sigma=1,
+            num_steps=self.num_steps,
+            decimal_precision=int(market_config.decimal_places),
+        )
         # price_process = get_historic_price_series(
         #     product_id="ETH-USD",
         #     granularity=Granularity.MINUTE,
@@ -209,12 +216,12 @@ class CFMScenario(Scenario):
         #     end=str(datetime.datetime(2022, 11, 8) + datetime.timedelta(minutes=1000)),
         # ).values
 
-        price_process = get_historic_price_series(
-            product_id="ETH-USD",
-            granularity=Granularity.MINUTE,
-            start=str(datetime.datetime(2023, 7, 8)),
-            end=str(datetime.datetime(2023, 7, 8) + datetime.timedelta(minutes=1000)),
-        ).values
+        # price_process = get_historic_price_series(
+        #     product_id="ETH-USD",
+        #     granularity=Granularity.MINUTE,
+        #     start=str(datetime.datetime(2023, 7, 8)),
+        #     end=str(datetime.datetime(2023, 7, 8) + datetime.timedelta(minutes=1000)),
+        # ).values
 
         # Create fuzzed market managers
         market_agents["market_managers"] = [
@@ -248,26 +255,26 @@ class CFMScenario(Scenario):
             for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
         ]
 
-        market_agents["market_makers_exp"] = [
-            ExponentialShapedMarketMaker(
-                wallet_name="MARKET_MAKERS",
-                key_name=f"MARKET_{str(i_market).zfill(3)}",
-                price_process_generator=iter(price_process),
-                initial_asset_mint=self.initial_asset_mint,
-                market_name=market_name,
-                asset_name=asset_name,
-                commitment_amount=1e6,
-                market_decimal_places=market_config.decimal_places,
-                asset_decimal_places=asset_dp,
-                num_steps=self.num_steps,
-                kappa=2.4,
-                tick_spacing=0.05,
-                market_kappa=50,
-                state_update_freq=10,
-                tag=f"MARKET_{str(i_market).zfill(3)}",
-            )
-            for i_market in range(6)
-        ]
+        # market_agents["market_makers_exp"] = [
+        #     ExponentialShapedMarketMaker(
+        #         wallet_name="MARKET_MAKERS",
+        #         key_name=f"MARKET_{str(i_market).zfill(3)}",
+        #         price_process_generator=iter(price_process),
+        #         initial_asset_mint=self.initial_asset_mint,
+        #         market_name=market_name,
+        #         asset_name=asset_name,
+        #         commitment_amount=1e6,
+        #         market_decimal_places=market_config.decimal_places,
+        #         asset_decimal_places=asset_dp,
+        #         num_steps=self.num_steps,
+        #         kappa=2.4,
+        #         tick_spacing=0.05,
+        #         market_kappa=50,
+        #         state_update_freq=10,
+        #         tag=f"MARKET_{str(i_market).zfill(3)}",
+        #     )
+        #     for i_market in range(6)
+        # ]
         market_agents["market_makers"] = [
             # ExponentialShapedMarketMaker(
             #     wallet_name="MARKET_MAKERS",
@@ -319,8 +326,8 @@ class CFMScenario(Scenario):
                 initial_price=price_process[0],
                 num_levels=200,
                 tick_spacing=0.1,
-                price_width_above=0.8,
-                price_width_below=0.8,
+                price_width_above=0.003,
+                price_width_below=0.003,
                 margin_usage_at_bound_above=0.8,
                 margin_usage_at_bound_below=0.8,
                 asset_decimal_places=asset_dp,
@@ -360,7 +367,7 @@ class CFMScenario(Scenario):
                 spread_offset=0.0001,
                 tag=f"ARB_AGENT_{str(i_agent).zfill(3)}",
                 random_state=random_state,
-                base_order_size=0.1,
+                base_order_size=1,
                 wallet_name="ARB_TRADERS",
             )
             for i_agent in range(2)

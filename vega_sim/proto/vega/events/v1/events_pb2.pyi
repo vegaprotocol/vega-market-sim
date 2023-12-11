@@ -540,7 +540,6 @@ class FundingPeriodDataPoint(_message.Message):
         SOURCE_UNSPECIFIED: _ClassVar[FundingPeriodDataPoint.Source]
         SOURCE_EXTERNAL: _ClassVar[FundingPeriodDataPoint.Source]
         SOURCE_INTERNAL: _ClassVar[FundingPeriodDataPoint.Source]
-
     SOURCE_UNSPECIFIED: FundingPeriodDataPoint.Source
     SOURCE_EXTERNAL: FundingPeriodDataPoint.Source
     SOURCE_INTERNAL: FundingPeriodDataPoint.Source
@@ -684,7 +683,6 @@ class Transfer(_message.Message):
         STATUS_REJECTED: _ClassVar[Transfer.Status]
         STATUS_STOPPED: _ClassVar[Transfer.Status]
         STATUS_CANCELLED: _ClassVar[Transfer.Status]
-
     STATUS_UNSPECIFIED: Transfer.Status
     STATUS_PENDING: Transfer.Status
     STATUS_DONE: Transfer.Status
@@ -811,7 +809,6 @@ class StakeLinking(_message.Message):
         TYPE_UNSPECIFIED: _ClassVar[StakeLinking.Type]
         TYPE_LINK: _ClassVar[StakeLinking.Type]
         TYPE_UNLINK: _ClassVar[StakeLinking.Type]
-
     TYPE_UNSPECIFIED: StakeLinking.Type
     TYPE_LINK: StakeLinking.Type
     TYPE_UNLINK: StakeLinking.Type
@@ -822,7 +819,6 @@ class StakeLinking(_message.Message):
         STATUS_PENDING: _ClassVar[StakeLinking.Status]
         STATUS_ACCEPTED: _ClassVar[StakeLinking.Status]
         STATUS_REJECTED: _ClassVar[StakeLinking.Status]
-
     STATUS_UNSPECIFIED: StakeLinking.Status
     STATUS_PENDING: StakeLinking.Status
     STATUS_ACCEPTED: StakeLinking.Status
@@ -884,7 +880,6 @@ class ERC20MultiSigSignerEvent(_message.Message):
         TYPE_UNSPECIFIED: _ClassVar[ERC20MultiSigSignerEvent.Type]
         TYPE_ADDED: _ClassVar[ERC20MultiSigSignerEvent.Type]
         TYPE_REMOVED: _ClassVar[ERC20MultiSigSignerEvent.Type]
-
     TYPE_UNSPECIFIED: ERC20MultiSigSignerEvent.Type
     TYPE_ADDED: ERC20MultiSigSignerEvent.Type
     TYPE_REMOVED: ERC20MultiSigSignerEvent.Type

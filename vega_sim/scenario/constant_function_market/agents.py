@@ -786,7 +786,7 @@ if __name__ == "__main__":
         num_steps=12,
         initial_price=2000,
         price_width_above=0.1,
-        price_width_below=1,
+        price_width_below=0.1,
         margin_usage_at_bound_above=0.8,
         margin_usage_at_bound_below=0.8,
         initial_asset_mint=100_000,
@@ -815,7 +815,7 @@ if __name__ == "__main__":
         * mm.lower_liq_factor
     )
 
-    to_price = 2000
+    to_price = 1850
     pos = mm._quantity_for_move(
         mm.base_price_sqrt,
         to_price**0.5,
@@ -827,16 +827,34 @@ if __name__ == "__main__":
         balance=balance, average_entry=to_price, position=pos
     )
 
+    # x = []
+    # y = []
+
+    # cumsum = 0
+    # for bid in bids:
+    #     x.append(bid.price)
+    #     cumsum += bid.size
+    #     y.append(cumsum)
+
+    # plt.plot(x, y, color="blue")
     x = []
     y = []
+
+    # cumsum = 0
+    # for ask in asks:
+    #     x.append(ask.price)
+    #     cumsum += ask.size
+    #     y.append(cumsum)
+    # plt.plot(x, y, color="red")
+    # plt.show()
 
     cumsum = 0
     for bid in bids:
         x.append(bid.price)
         cumsum += bid.size
-        y.append(cumsum)
+        y.append(bid.size)
 
-    plt.plot(x, y, color="blue")
+    plt.bar(x, y, color="blue")
     x = []
     y = []
 
@@ -844,6 +862,6 @@ if __name__ == "__main__":
     for ask in asks:
         x.append(ask.price)
         cumsum += ask.size
-        y.append(cumsum)
-    plt.plot(x, y, color="red")
+        y.append(ask.size)
+    plt.bar(x, y, color="red")
     plt.show()

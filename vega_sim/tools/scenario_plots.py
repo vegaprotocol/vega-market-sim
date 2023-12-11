@@ -433,23 +433,65 @@ def plot_price_comparison(
     ax0.set_ylim(ax0.get_ylim())
     ax0.plot(external_price_series, linewidth=0.8, alpha=0.8)
 
-    ep_volatility = external_price_series.var() / external_price_series.size
-    mp_volatility = mark_price_series.var() / mark_price_series.size
+    # ep_volatility = external_price_series.var() / external_price_series.size
+    # mp_volatility = mark_price_series.var() / mark_price_series.size
 
-    ax0.text(
-        x=0.1,
-        y=0.1,
-        s=(
-            f"external-price volatility = {round(ep_volatility, 1)}\nmark-price"
-            f" volatility = {round(mp_volatility, 1)}"
-        ),
-        fontsize=8,
-        bbox=dict(facecolor="white", alpha=1),
-        transform=ax0.transAxes,
-    )
+    # ax0.text(
+    #     x=0.1,
+    #     y=0.1,
+    #     s=(
+    #         f"external-price volatility = {round(ep_volatility, 1)}\nmark-price"
+    #         f" volatility = {round(mp_volatility, 1)}"
+    #     ),
+    #     fontsize=8,
+    #     bbox=dict(facecolor="white", alpha=1),
+    #     transform=ax0.transAxes,
+    # )
 
     ax0.set_ylabel("PRICE")
+    ax0.autoscale(enable=True, axis="y")
     ax0.legend(labels=["mark price", "external price"])
+
+
+def plot_position(
+    fig: Figure,
+    fuzzing_df: pd.DataFrame,
+    ss: Optional[SubplotSpec],
+):
+    """Plots the external price and mark price along with their respective volatilities.
+
+    Args:
+        fig (Figure):
+            Figure object to plot the data on.
+        fuzzing_df (pd.DataFrame):
+            DataFrame containing fuzzing data.
+        data_df (pd.DataFrame):
+            DataFrame containing market data.
+        ss (Optional[SubplotSpec]):
+            SubplotSpec object representing the position of the subplot on the figure.
+    """
+    if ss is None:
+        gs = GridSpec(
+            nrows=1,
+            ncols=1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=1,
+            ncols=1,
+        )
+    ax0 = fig.add_subplot(gs[0, 0])
+
+    ax0.set_title("Position", loc="left", fontsize=12, color=(0.3, 0.3, 0.3))
+
+    posn_series = fuzzing_df["position"].replace(0, np.nan)
+
+    ax0.plot(posn_series)
+    ax0.set_ylim(ax0.get_ylim())
+
+    ax0.set_ylabel("Position")
+    ax0.autoscale(enable=True, axis="y")
 
 
 def plot_risky_close_outs(
@@ -590,6 +632,7 @@ def price_comp_plots(run_name: Optional[str] = None) -> Figure:
             data_df=market_data_df,
             fuzzing_df=market_fuzzing_df,
         )
+        plot_position(fig, ss=gs[2, 0], fuzzing_df=market_fuzzing_df)
         figs[market_id] = fig
     return figs
 
@@ -688,6 +731,7 @@ def account_and_margin_plots(
     for i, agent_type in enumerate(agent_types):
         tot_plt = fig.add_subplot(gs[2 * i, 0])
         margin_plt = fig.add_subplot(gs[2 * i + 1, 0])
+        pos_plt = fig.add_subplot(gs[2 * i + 1, 0])
 
         tot_plt.set_title(
             f"Total Account Balance: {agent_type.__name__}",
@@ -697,6 +741,13 @@ def account_and_margin_plots(
         )
         margin_plt.set_title(
             f"Margin Account Balance: {agent_type.__name__}",
+            loc="left",
+            fontsize=12,
+            color=(0.3, 0.3, 0.3),
+        )
+
+        margin_plt.set_title(
+            f"Position: {agent_type.__name__}",
             loc="left",
             fontsize=12,
             color=(0.3, 0.3, 0.3),
