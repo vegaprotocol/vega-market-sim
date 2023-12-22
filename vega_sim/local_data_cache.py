@@ -671,8 +671,11 @@ class LocalDataCache:
                     and acct.type != vega_protos.vega.AccountType.ACCOUNT_TYPE_GENERAL
                 ):
                     continue
-                if market_id is None and acct.market_id != "":
-                    continue
+                # TODO: Temporarily remove this to allow from feed to pull all accounts.
+                # if market_id is None and acct.market_id != "":
+                #     if acct.type == 19:
+                #         print("continue 3")
+                #     continue
                 if asset_id is not None and acct.asset != asset_id:
                     continue
                 results.append(acct)
