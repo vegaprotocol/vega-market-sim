@@ -30,15 +30,15 @@ A MarketConfig class has the following attributes which can be set:
 • instrument.future.quote_name
 • instrument.future.number_decimal_places
 • instrument.future.terminating_key
-• instrument.perp.settlement_asset
-• instrument.perp.quote_name
-• instrument.perp.number_decimal_places
-• instrument.perp.settlement_key
-• instrument.perp.funding_payment_frequency_in_seconds
-• instrument.perp.margin_funding_factor
-• instrument.perp.interest_rate
-• instrument.perp.clamp_lower_bound
-• instrument.perp.clamp_upper_bound
+• instrument.perpetual.settlement_asset
+• instrument.perpetual.quote_name
+• instrument.perpetual.number_decimal_places
+• instrument.perpetual.settlement_key
+• instrument.perpetual.funding_payment_frequency_in_seconds
+• instrument.perpetual.margin_funding_factor
+• instrument.perpetual.interest_rate
+• instrument.perpetual.clamp_lower_bound
+• instrument.perpetual.clamp_upper_bound
 
 
 Examples:
@@ -129,14 +129,14 @@ class MarketConfig(Config):
             "liquidity_sla_parameters": "default",
             "liquidation_strategy": "default",
         },
-        "perp": {
+        "perpetual": {
             "decimal_places": 4,
             "position_decimal_places": 2,
             "metadata": None,
             "price_monitoring_parameters": "default",
             "liquidity_monitoring_parameters": "default",
             "log_normal": "default",
-            "instrument": "perp",
+            "instrument": "perpetual",
             "linear_slippage_factor": 1e-3,
             "quadratic_slippage_factor": 0,
             "successor": None,
@@ -202,7 +202,7 @@ class MarketConfig(Config):
         return self.instrument.future is not None
 
     def is_perp(self) -> bool:
-        return self.instrument.perp is not None
+        return self.instrument.perpetual is not None
 
 
 class Successor(Config):
@@ -423,13 +423,13 @@ class InstrumentConfiguration(Config):
             "name": None,
             "code": None,
             "future": "default",
-            "perp": None,
+            "perpetual": None,
         },
-        "perp": {
+        "perpetual": {
             "name": None,
             "code": None,
             "future": None,
-            "perp": "default",
+            "perpetual": "default",
         },
     }
 
@@ -441,8 +441,10 @@ class InstrumentConfiguration(Config):
         self.future = (
             None if config["future"] is None else FutureProduct(opt=config["future"])
         )
-        self.perp = (
-            None if config["perp"] is None else PerpetualProduct(opt=config["perp"])
+        self.perpetual = (
+            None
+            if config["perpetual"] is None
+            else PerpetualProduct(opt=config["perpetual"])
         )
 
     def build(self):
@@ -450,9 +452,9 @@ class InstrumentConfiguration(Config):
             return vega_protos.governance.InstrumentConfiguration(
                 name=self.name, code=self.code, future=self.future.build()
             )
-        if self.perp != None:
+        if self.perpetual != None:
             return vega_protos.governance.InstrumentConfiguration(
-                name=self.name, code=self.code, perpetual=self.perp.build()
+                name=self.name, code=self.code, perpetual=self.perpetual.build()
             )
         raise ValueError("No product specified for the instrument")
 

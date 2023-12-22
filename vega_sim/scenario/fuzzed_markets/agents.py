@@ -982,11 +982,11 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 ),
             )
         if mkt_config.is_perp():
-            mkt_config.set("instrument.perp.settlement_asset", self.asset_id)
-            mkt_config.set("instrument.perp.quote_name", self.asset_name)
-            mkt_config.set("instrument.perp.number_decimal_places", self.asset_dp)
+            mkt_config.set("instrument.perpetual.settlement_asset", self.asset_id)
+            mkt_config.set("instrument.perpetual.quote_name", self.asset_name)
+            mkt_config.set("instrument.perpetual.number_decimal_places", self.asset_dp)
             mkt_config.set(
-                "instrument.perp.settlement_key",
+                "instrument.perpetual.settlement_key",
                 self.vega.wallet.public_key(
                     wallet_name=self.termination_wallet_name,
                     name=self._get_termination_key_name(),
@@ -995,25 +995,26 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             if self.perp_options != None:
                 if self.perp_options.funding_payment_frequency_in_seconds != None:
                     mkt_config.set(
-                        "instrument.perp.funding_payment_frequency_in_seconds"
+                        "instrument.perpetual.funding_payment_frequency_in_seconds"
                     )
                 if self.perp_options.margin_funding_factor != None:
                     mkt_config.set(
-                        "instrument.perp.margin_funding_factor",
+                        "instrument.perpetual.margin_funding_factor",
                         self.perp_options.margin_funding_factor,
                     )
                 if self.perp_options.interest_rate != None:
                     mkt_config.set(
-                        "instrument.perp.interest_rate", self.perp_options.interest_rate
+                        "instrument.perpetual.interest_rate",
+                        self.perp_options.interest_rate,
                     )
                 if self.perp_options.clamp_lower_bound != None:
                     mkt_config.set(
-                        "instrument.perp.clamp_lower_bound",
+                        "instrument.perpetual.clamp_lower_bound",
                         self.perp_options.clamp_lower_bound,
                     )
                 if self.perp_options.clamp_upper_bound != None:
                     mkt_config.set(
-                        "instrument.perp.clamp_upper_bound",
+                        "instrument.perpetual.clamp_upper_bound",
                         self.perp_options.clamp_upper_bound,
                     )
 
