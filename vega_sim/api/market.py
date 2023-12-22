@@ -581,7 +581,11 @@ class PerpetualProduct(Config):
                                 type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
                                 number_decimal_places=self.number_decimal_places,
                             ),
-                            conditions=[],
+                            conditions=[
+                                oracles_protos.spec.Condition(
+                                    operator="OPERATOR_GREATER_THAN_OR_EQUAL", value="0"
+                                )
+                            ],
                         )
                     ],
                 )

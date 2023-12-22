@@ -517,7 +517,11 @@ def propose_perps_market(
                             type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
                             number_decimal_places=price_decimals,
                         ),
-                        conditions=[],
+                        conditions=[
+                            oracles_protos.spec.Condition(
+                                operator="OPERATOR_GREATER_THAN_OR_EQUAL", value="0"
+                            )
+                        ],
                     )
                 ],
             )
