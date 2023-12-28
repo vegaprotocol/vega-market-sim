@@ -192,6 +192,7 @@ class Payload(_message.Message):
         "liquidity_v2_paid_fees_stats",
         "liquidation",
         "banking_transfer_fee_discounts",
+        "governance_batch_active",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -267,6 +268,7 @@ class Payload(_message.Message):
     LIQUIDITY_V2_PAID_FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
     BANKING_TRANSFER_FEE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
+    GOVERNANCE_BATCH_ACTIVE_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -341,6 +343,7 @@ class Payload(_message.Message):
     liquidity_v2_paid_fees_stats: LiquidityV2PaidFeesStats
     liquidation: Liquidation
     banking_transfer_fee_discounts: BankingTransferFeeDiscounts
+    governance_batch_active: GovernanceBatchActive
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -464,6 +467,9 @@ class Payload(_message.Message):
         liquidation: _Optional[_Union[Liquidation, _Mapping]] = ...,
         banking_transfer_fee_discounts: _Optional[
             _Union[BankingTransferFeeDiscounts, _Mapping]
+        ] = ...,
+        governance_batch_active: _Optional[
+            _Union[GovernanceBatchActive, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -950,6 +956,31 @@ class GovernanceActive(_message.Message):
         self, proposals: _Optional[_Iterable[_Union[ProposalData, _Mapping]]] = ...
     ) -> None: ...
 
+class BatchProposalData(_message.Message):
+    __slots__ = ("batch_proposal", "proposals")
+    BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
+    PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    batch_proposal: ProposalData
+    proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
+    def __init__(
+        self,
+        batch_proposal: _Optional[_Union[ProposalData, _Mapping]] = ...,
+        proposals: _Optional[
+            _Iterable[_Union[_governance_pb2.Proposal, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class GovernanceBatchActive(_message.Message):
+    __slots__ = ("batch_proposals",)
+    BATCH_PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    batch_proposals: _containers.RepeatedCompositeFieldContainer[BatchProposalData]
+    def __init__(
+        self,
+        batch_proposals: _Optional[
+            _Iterable[_Union[BatchProposalData, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
 class GovernanceNode(_message.Message):
     __slots__ = ("proposals", "proposal_data")
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
@@ -1419,6 +1450,7 @@ class Market(_message.Message):
         "expiring_stop_orders",
         "product",
         "fees_stats",
+        "party_margin_factor",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1447,6 +1479,7 @@ class Market(_message.Message):
     EXPIRING_STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     PRODUCT_FIELD_NUMBER: _ClassVar[int]
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    PARTY_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1474,6 +1507,7 @@ class Market(_message.Message):
     expiring_stop_orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
     product: Product
     fees_stats: _events_pb2.FeesStats
+    party_margin_factor: _containers.RepeatedCompositeFieldContainer[PartyMarginFactor]
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1505,6 +1539,19 @@ class Market(_message.Message):
         ] = ...,
         product: _Optional[_Union[Product, _Mapping]] = ...,
         fees_stats: _Optional[_Union[_events_pb2.FeesStats, _Mapping]] = ...,
+        party_margin_factor: _Optional[
+            _Iterable[_Union[PartyMarginFactor, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class PartyMarginFactor(_message.Message):
+    __slots__ = ("party", "margin_factor")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    margin_factor: str
+    def __init__(
+        self, party: _Optional[str] = ..., margin_factor: _Optional[str] = ...
     ) -> None: ...
 
 class Product(_message.Message):

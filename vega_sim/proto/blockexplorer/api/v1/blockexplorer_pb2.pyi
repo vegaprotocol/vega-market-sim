@@ -45,7 +45,6 @@ class GetTransactionResponse(_message.Message):
 
 class ListTransactionsRequest(_message.Message):
     __slots__ = (
-        "limit",
         "before",
         "after",
         "filters",
@@ -65,7 +64,6 @@ class ListTransactionsRequest(_message.Message):
         def __init__(
             self, key: _Optional[str] = ..., value: _Optional[str] = ...
         ) -> None: ...
-    LIMIT_FIELD_NUMBER: _ClassVar[int]
     BEFORE_FIELD_NUMBER: _ClassVar[int]
     AFTER_FIELD_NUMBER: _ClassVar[int]
     FILTERS_FIELD_NUMBER: _ClassVar[int]
@@ -74,7 +72,6 @@ class ListTransactionsRequest(_message.Message):
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     FIRST_FIELD_NUMBER: _ClassVar[int]
     LAST_FIELD_NUMBER: _ClassVar[int]
-    limit: int
     before: str
     after: str
     filters: _containers.ScalarMap[str, str]
@@ -85,7 +82,6 @@ class ListTransactionsRequest(_message.Message):
     last: int
     def __init__(
         self,
-        limit: _Optional[int] = ...,
         before: _Optional[str] = ...,
         after: _Optional[str] = ...,
         filters: _Optional[_Mapping[str, str]] = ...,

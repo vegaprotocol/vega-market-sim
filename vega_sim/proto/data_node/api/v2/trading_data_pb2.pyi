@@ -1219,15 +1219,11 @@ class GetTransferRequest(_message.Message):
     def __init__(self, transfer_id: _Optional[str] = ...) -> None: ...
 
 class GetTransferResponse(_message.Message):
-    __slots__ = ("transfer", "fees")
-    TRANSFER_FIELD_NUMBER: _ClassVar[int]
-    FEES_FIELD_NUMBER: _ClassVar[int]
-    transfer: _events_pb2.Transfer
-    fees: _containers.RepeatedCompositeFieldContainer[_events_pb2.TransferFees]
+    __slots__ = ("transfer_node",)
+    TRANSFER_NODE_FIELD_NUMBER: _ClassVar[int]
+    transfer_node: TransferNode
     def __init__(
-        self,
-        transfer: _Optional[_Union[_events_pb2.Transfer, _Mapping]] = ...,
-        fees: _Optional[_Iterable[_Union[_events_pb2.TransferFees, _Mapping]]] = ...,
+        self, transfer_node: _Optional[_Union[TransferNode, _Mapping]] = ...
     ) -> None: ...
 
 class GetNetworkLimitsRequest(_message.Message):
@@ -4641,6 +4637,180 @@ class ListTeamsResponse(_message.Message):
     teams: TeamConnection
     def __init__(
         self, teams: _Optional[_Union[TeamConnection, _Mapping]] = ...
+    ) -> None: ...
+
+class ListTeamsStatisticsRequest(_message.Message):
+    __slots__ = ("team_id", "aggregation_epochs", "pagination")
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    AGGREGATION_EPOCHS_FIELD_NUMBER: _ClassVar[int]
+    PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    team_id: str
+    aggregation_epochs: int
+    pagination: Pagination
+    def __init__(
+        self,
+        team_id: _Optional[str] = ...,
+        aggregation_epochs: _Optional[int] = ...,
+        pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+    ) -> None: ...
+
+class ListTeamsStatisticsResponse(_message.Message):
+    __slots__ = ("statistics",)
+    STATISTICS_FIELD_NUMBER: _ClassVar[int]
+    statistics: TeamsStatisticsConnection
+    def __init__(
+        self, statistics: _Optional[_Union[TeamsStatisticsConnection, _Mapping]] = ...
+    ) -> None: ...
+
+class TeamsStatisticsConnection(_message.Message):
+    __slots__ = ("edges", "page_info")
+    EDGES_FIELD_NUMBER: _ClassVar[int]
+    PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
+    edges: _containers.RepeatedCompositeFieldContainer[TeamStatisticsEdge]
+    page_info: PageInfo
+    def __init__(
+        self,
+        edges: _Optional[_Iterable[_Union[TeamStatisticsEdge, _Mapping]]] = ...,
+        page_info: _Optional[_Union[PageInfo, _Mapping]] = ...,
+    ) -> None: ...
+
+class TeamStatisticsEdge(_message.Message):
+    __slots__ = ("node", "cursor")
+    NODE_FIELD_NUMBER: _ClassVar[int]
+    CURSOR_FIELD_NUMBER: _ClassVar[int]
+    node: TeamStatistics
+    cursor: str
+    def __init__(
+        self,
+        node: _Optional[_Union[TeamStatistics, _Mapping]] = ...,
+        cursor: _Optional[str] = ...,
+    ) -> None: ...
+
+class TeamStatistics(_message.Message):
+    __slots__ = (
+        "team_id",
+        "total_quantum_volume",
+        "total_quantum_rewards",
+        "quantum_rewards",
+        "total_games_played",
+        "games_played",
+    )
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_QUANTUM_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
+    GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
+    team_id: str
+    total_quantum_volume: str
+    total_quantum_rewards: str
+    quantum_rewards: _containers.RepeatedCompositeFieldContainer[QuantumRewardsPerEpoch]
+    total_games_played: int
+    games_played: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(
+        self,
+        team_id: _Optional[str] = ...,
+        total_quantum_volume: _Optional[str] = ...,
+        total_quantum_rewards: _Optional[str] = ...,
+        quantum_rewards: _Optional[
+            _Iterable[_Union[QuantumRewardsPerEpoch, _Mapping]]
+        ] = ...,
+        total_games_played: _Optional[int] = ...,
+        games_played: _Optional[_Iterable[str]] = ...,
+    ) -> None: ...
+
+class QuantumRewardsPerEpoch(_message.Message):
+    __slots__ = ("epoch", "total_quantum_rewards")
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
+    epoch: int
+    total_quantum_rewards: str
+    def __init__(
+        self, epoch: _Optional[int] = ..., total_quantum_rewards: _Optional[str] = ...
+    ) -> None: ...
+
+class ListTeamMembersStatisticsRequest(_message.Message):
+    __slots__ = ("team_id", "party_id", "aggregation_epochs", "pagination")
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    AGGREGATION_EPOCHS_FIELD_NUMBER: _ClassVar[int]
+    PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    team_id: str
+    party_id: str
+    aggregation_epochs: int
+    pagination: Pagination
+    def __init__(
+        self,
+        team_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        aggregation_epochs: _Optional[int] = ...,
+        pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+    ) -> None: ...
+
+class ListTeamMembersStatisticsResponse(_message.Message):
+    __slots__ = ("statistics",)
+    STATISTICS_FIELD_NUMBER: _ClassVar[int]
+    statistics: TeamMembersStatisticsConnection
+    def __init__(
+        self,
+        statistics: _Optional[_Union[TeamMembersStatisticsConnection, _Mapping]] = ...,
+    ) -> None: ...
+
+class TeamMembersStatisticsConnection(_message.Message):
+    __slots__ = ("edges", "page_info")
+    EDGES_FIELD_NUMBER: _ClassVar[int]
+    PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
+    edges: _containers.RepeatedCompositeFieldContainer[TeamMemberStatisticsEdge]
+    page_info: PageInfo
+    def __init__(
+        self,
+        edges: _Optional[_Iterable[_Union[TeamMemberStatisticsEdge, _Mapping]]] = ...,
+        page_info: _Optional[_Union[PageInfo, _Mapping]] = ...,
+    ) -> None: ...
+
+class TeamMemberStatisticsEdge(_message.Message):
+    __slots__ = ("node", "cursor")
+    NODE_FIELD_NUMBER: _ClassVar[int]
+    CURSOR_FIELD_NUMBER: _ClassVar[int]
+    node: TeamMemberStatistics
+    cursor: str
+    def __init__(
+        self,
+        node: _Optional[_Union[TeamMemberStatistics, _Mapping]] = ...,
+        cursor: _Optional[str] = ...,
+    ) -> None: ...
+
+class TeamMemberStatistics(_message.Message):
+    __slots__ = (
+        "party_id",
+        "total_quantum_volume",
+        "total_quantum_rewards",
+        "quantum_rewards",
+        "total_games_played",
+        "games_played",
+    )
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_QUANTUM_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
+    GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    total_quantum_volume: str
+    total_quantum_rewards: str
+    quantum_rewards: _containers.RepeatedCompositeFieldContainer[QuantumRewardsPerEpoch]
+    total_games_played: int
+    games_played: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(
+        self,
+        party_id: _Optional[str] = ...,
+        total_quantum_volume: _Optional[str] = ...,
+        total_quantum_rewards: _Optional[str] = ...,
+        quantum_rewards: _Optional[
+            _Iterable[_Union[QuantumRewardsPerEpoch, _Mapping]]
+        ] = ...,
+        total_games_played: _Optional[int] = ...,
+        games_played: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class ListTeamRefereesRequest(_message.Message):
