@@ -1423,6 +1423,7 @@ class VegaService(ABC):
             )
             updated_instrument = UpdateInstrumentConfiguration(
                 code=curr_inst.code,
+                name=curr_inst.name,
                 future=curr_fut_prod,
             )
         if updated_simple_model_params is None:
