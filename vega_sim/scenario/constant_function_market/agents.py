@@ -396,9 +396,14 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         #     self.upper_liq_factor,
         # )
         lower_L = (
-            self.margin_usage_at_bound_below
-            * (balance / self.long_factor)
-            * self.lower_liq_factor
+            (
+                self.margin_usage_at_bound_below
+                * (balance / self.long_factor)
+                / self.lower_price
+            )
+            * self.lower_price_sqrt
+            * self.base_price_sqrt
+            / (self.base_price_sqrt - self.lower_price_sqrt)
         )
         # self._calculate_liq_val(
         #     self.margin_usage_at_bound_below,
@@ -661,12 +666,16 @@ class CFMV3LastTradeMarketMaker(ShapedMarketMaker):
                 L = lower_L
                 lower_bound = self.lower_price_sqrt
                 upper_bound = self.base_price
-                usd_total = self.margin_usage_at_bound_below * balance
+                usd_total = (
+                    self.margin_usage_at_bound_below * balance / self.long_factor
+                )
             else:
                 L = upper_L
                 lower_bound = self.base_price
                 upper_bound = self.upper_price_sqrt
-                usd_total = self.margin_usage_at_bound_above * balance
+                usd_total = (
+                    self.margin_usage_at_bound_above * balance / self.short_factor
+                )
             if L == 0:
                 ref_price = self.base_price
             else:
@@ -785,16 +794,16 @@ if __name__ == "__main__":
         "fawfa",
         num_steps=12,
         initial_price=2000,
-        price_width_above=0.1,
-        price_width_below=0.1,
+        price_width_above=10,
+        price_width_below=0.9,
         margin_usage_at_bound_above=0.8,
         margin_usage_at_bound_below=0.8,
         initial_asset_mint=100_000,
         market_name="MKT",
-        num_levels=300,
+        num_levels=2000,
         tick_spacing=1,
     )
-    balance = 100_000
+    balance = 1000
 
     mm.short_factor = 0.02
     mm.long_factor = 0.02
@@ -815,7 +824,7 @@ if __name__ == "__main__":
         * mm.lower_liq_factor
     )
 
-    to_price = 1850
+    to_price = 2000
     pos = mm._quantity_for_move(
         mm.base_price_sqrt,
         to_price**0.5,
