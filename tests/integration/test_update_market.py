@@ -119,6 +119,7 @@ def test_update_market_instrument(vega_service_with_market: VegaServiceNull):
     )
     updated_instrument = vega_protos.governance.UpdateInstrumentConfiguration(
         code="BTCUSD",
+        name="BTCUSD",
         future=curr_fut_prod,
     )
     vega.update_market(

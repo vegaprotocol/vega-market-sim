@@ -39,7 +39,7 @@ class BatchMarketInstructions(_message.Message):
     stop_orders_submission: _containers.RepeatedCompositeFieldContainer[
         StopOrdersSubmission
     ]
-    update_margin_mode: UpdateMarginMode
+    update_margin_mode: _containers.RepeatedCompositeFieldContainer[UpdateMarginMode]
     def __init__(
         self,
         cancellations: _Optional[_Iterable[_Union[OrderCancellation, _Mapping]]] = ...,
@@ -51,7 +51,9 @@ class BatchMarketInstructions(_message.Message):
         stop_orders_submission: _Optional[
             _Iterable[_Union[StopOrdersSubmission, _Mapping]]
         ] = ...,
-        update_margin_mode: _Optional[_Union[UpdateMarginMode, _Mapping]] = ...,
+        update_margin_mode: _Optional[
+            _Iterable[_Union[UpdateMarginMode, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class StopOrdersSubmission(_message.Message):
@@ -71,17 +73,23 @@ class StopOrderSetup(_message.Message):
         "order_submission",
         "expires_at",
         "expiry_strategy",
+        "size_override_setting",
+        "size_override_value",
         "price",
         "trailing_percent_offset",
     )
     ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
     EXPIRY_STRATEGY_FIELD_NUMBER: _ClassVar[int]
+    SIZE_OVERRIDE_SETTING_FIELD_NUMBER: _ClassVar[int]
+    SIZE_OVERRIDE_VALUE_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     TRAILING_PERCENT_OFFSET_FIELD_NUMBER: _ClassVar[int]
     order_submission: OrderSubmission
     expires_at: int
     expiry_strategy: _vega_pb2.StopOrder.ExpiryStrategy
+    size_override_setting: _vega_pb2.StopOrder.SizeOverrideSetting
+    size_override_value: _vega_pb2.StopOrder.SizeOverrideValue
     price: str
     trailing_percent_offset: str
     def __init__(
@@ -90,6 +98,12 @@ class StopOrderSetup(_message.Message):
         expires_at: _Optional[int] = ...,
         expiry_strategy: _Optional[
             _Union[_vega_pb2.StopOrder.ExpiryStrategy, str]
+        ] = ...,
+        size_override_setting: _Optional[
+            _Union[_vega_pb2.StopOrder.SizeOverrideSetting, str]
+        ] = ...,
+        size_override_value: _Optional[
+            _Union[_vega_pb2.StopOrder.SizeOverrideValue, _Mapping]
         ] = ...,
         price: _Optional[str] = ...,
         trailing_percent_offset: _Optional[str] = ...,
@@ -177,10 +191,10 @@ class UpdateMarginMode(_message.Message):
 
     class Mode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
-        MODE_CROSS_UNSPECIFIED: _ClassVar[UpdateMarginMode.Mode]
+        MODE_UNSPECIFIED: _ClassVar[UpdateMarginMode.Mode]
         MODE_CROSS_MARGIN: _ClassVar[UpdateMarginMode.Mode]
         MODE_ISOLATED_MARGIN: _ClassVar[UpdateMarginMode.Mode]
-    MODE_CROSS_UNSPECIFIED: UpdateMarginMode.Mode
+    MODE_UNSPECIFIED: UpdateMarginMode.Mode
     MODE_CROSS_MARGIN: UpdateMarginMode.Mode
     MODE_ISOLATED_MARGIN: UpdateMarginMode.Mode
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -318,6 +332,37 @@ class ProposalSubmission(_message.Message):
         self,
         reference: _Optional[str] = ...,
         terms: _Optional[_Union[_governance_pb2.ProposalTerms, _Mapping]] = ...,
+        rationale: _Optional[_Union[_governance_pb2.ProposalRationale, _Mapping]] = ...,
+    ) -> None: ...
+
+class BatchProposalSubmissionTerms(_message.Message):
+    __slots__ = ("closing_timestamp", "changes")
+    CLOSING_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    CHANGES_FIELD_NUMBER: _ClassVar[int]
+    closing_timestamp: int
+    changes: _containers.RepeatedCompositeFieldContainer[
+        _governance_pb2.BatchProposalTermsChange
+    ]
+    def __init__(
+        self,
+        closing_timestamp: _Optional[int] = ...,
+        changes: _Optional[
+            _Iterable[_Union[_governance_pb2.BatchProposalTermsChange, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class BatchProposalSubmission(_message.Message):
+    __slots__ = ("reference", "terms", "rationale")
+    REFERENCE_FIELD_NUMBER: _ClassVar[int]
+    TERMS_FIELD_NUMBER: _ClassVar[int]
+    RATIONALE_FIELD_NUMBER: _ClassVar[int]
+    reference: str
+    terms: BatchProposalSubmissionTerms
+    rationale: _governance_pb2.ProposalRationale
+    def __init__(
+        self,
+        reference: _Optional[str] = ...,
+        terms: _Optional[_Union[BatchProposalSubmissionTerms, _Mapping]] = ...,
         rationale: _Optional[_Union[_governance_pb2.ProposalRationale, _Mapping]] = ...,
     ) -> None: ...
 

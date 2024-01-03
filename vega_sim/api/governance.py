@@ -720,7 +720,7 @@ def propose_asset(
     decimals: int,
     data_client: vac.VegaTradingDataClientV2,
     quantum: int = 1,
-    max_faucet_amount: int = 10e9,
+    max_faucet_amount: int = 1e48,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,

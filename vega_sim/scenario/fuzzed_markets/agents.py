@@ -928,7 +928,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -949,7 +949,6 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 symbol=self.asset_name,
                 decimals=self.asset_dp,
                 quantum=int(10 ** (self.asset_dp)),
-                max_faucet_amount=10_000_000_000,
                 key_name=self.key_name,
             )
 
@@ -1146,7 +1145,7 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -1274,7 +1273,7 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -1481,7 +1480,7 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
             )
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )

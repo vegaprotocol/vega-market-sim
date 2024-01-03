@@ -340,7 +340,7 @@ class FeesStats(_message.Message):
         "volume_discount_applied",
         "total_maker_fees_received",
         "maker_fees_generated",
-        "trading_fees_generated",
+        "total_fees_paid_and_received",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -351,7 +351,7 @@ class FeesStats(_message.Message):
     VOLUME_DISCOUNT_APPLIED_FIELD_NUMBER: _ClassVar[int]
     TOTAL_MAKER_FEES_RECEIVED_FIELD_NUMBER: _ClassVar[int]
     MAKER_FEES_GENERATED_FIELD_NUMBER: _ClassVar[int]
-    TRADING_FEES_GENERATED_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_FEES_PAID_AND_RECEIVED_FIELD_NUMBER: _ClassVar[int]
     market: str
     asset: str
     epoch_seq: int
@@ -365,8 +365,8 @@ class FeesStats(_message.Message):
     maker_fees_generated: _containers.RepeatedCompositeFieldContainer[
         MakerFeesGenerated
     ]
-    trading_fees_generated: _containers.RepeatedCompositeFieldContainer[
-        TradingFeesGenerated
+    total_fees_paid_and_received: _containers.RepeatedCompositeFieldContainer[
+        PartyAmount
     ]
     def __init__(
         self,
@@ -391,8 +391,8 @@ class FeesStats(_message.Message):
         maker_fees_generated: _Optional[
             _Iterable[_Union[MakerFeesGenerated, _Mapping]]
         ] = ...,
-        trading_fees_generated: _Optional[
-            _Iterable[_Union[TradingFeesGenerated, _Mapping]]
+        total_fees_paid_and_received: _Optional[
+            _Iterable[_Union[PartyAmount, _Mapping]]
         ] = ...,
     ) -> None: ...
 
@@ -418,18 +418,6 @@ class MakerFeesGenerated(_message.Message):
         self,
         taker: _Optional[str] = ...,
         maker_fees_paid: _Optional[_Iterable[_Union[PartyAmount, _Mapping]]] = ...,
-    ) -> None: ...
-
-class TradingFeesGenerated(_message.Message):
-    __slots__ = ("taker", "trading_fees_paid")
-    TAKER_FIELD_NUMBER: _ClassVar[int]
-    TRADING_FEES_PAID_FIELD_NUMBER: _ClassVar[int]
-    taker: str
-    trading_fees_paid: _containers.RepeatedCompositeFieldContainer[PartyAmount]
-    def __init__(
-        self,
-        taker: _Optional[str] = ...,
-        trading_fees_paid: _Optional[_Iterable[_Union[PartyAmount, _Mapping]]] = ...,
     ) -> None: ...
 
 class PartyAmount(_message.Message):
@@ -691,6 +679,7 @@ class Transfer(_message.Message):
         "status",
         "timestamp",
         "reason",
+        "game_id",
         "one_off",
         "recurring",
         "one_off_governance",
@@ -722,6 +711,7 @@ class Transfer(_message.Message):
     STATUS_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     REASON_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     ONE_OFF_FIELD_NUMBER: _ClassVar[int]
     RECURRING_FIELD_NUMBER: _ClassVar[int]
     ONE_OFF_GOVERNANCE_FIELD_NUMBER: _ClassVar[int]
@@ -736,6 +726,7 @@ class Transfer(_message.Message):
     status: Transfer.Status
     timestamp: int
     reason: str
+    game_id: str
     one_off: OneOffTransfer
     recurring: RecurringTransfer
     one_off_governance: OneOffGovernanceTransfer
@@ -752,6 +743,7 @@ class Transfer(_message.Message):
         status: _Optional[_Union[Transfer.Status, str]] = ...,
         timestamp: _Optional[int] = ...,
         reason: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
         one_off: _Optional[_Union[OneOffTransfer, _Mapping]] = ...,
         recurring: _Optional[_Union[RecurringTransfer, _Mapping]] = ...,
         one_off_governance: _Optional[_Union[OneOffGovernanceTransfer, _Mapping]] = ...,
@@ -998,9 +990,9 @@ class RewardPayoutEvent(_message.Message):
         "percent_of_total_reward",
         "timestamp",
         "reward_type",
-        "market",
         "locked_until_epoch",
         "quantum_amount",
+        "game_id",
     )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -1009,9 +1001,9 @@ class RewardPayoutEvent(_message.Message):
     PERCENT_OF_TOTAL_REWARD_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     REWARD_TYPE_FIELD_NUMBER: _ClassVar[int]
-    MARKET_FIELD_NUMBER: _ClassVar[int]
     LOCKED_UNTIL_EPOCH_FIELD_NUMBER: _ClassVar[int]
     QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     party: str
     epoch_seq: str
     asset: str
@@ -1019,9 +1011,9 @@ class RewardPayoutEvent(_message.Message):
     percent_of_total_reward: str
     timestamp: int
     reward_type: str
-    market: str
     locked_until_epoch: str
     quantum_amount: str
+    game_id: str
     def __init__(
         self,
         party: _Optional[str] = ...,
@@ -1031,9 +1023,9 @@ class RewardPayoutEvent(_message.Message):
         percent_of_total_reward: _Optional[str] = ...,
         timestamp: _Optional[int] = ...,
         reward_type: _Optional[str] = ...,
-        market: _Optional[str] = ...,
         locked_until_epoch: _Optional[str] = ...,
         quantum_amount: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ValidatorScoreEvent(_message.Message):
@@ -1171,6 +1163,7 @@ class TransactionResult(_message.Message):
         "apply_referral_code",
         "update_margin_mode",
         "join_team",
+        "batch_proposal",
         "success",
         "failure",
     )
@@ -1214,6 +1207,7 @@ class TransactionResult(_message.Message):
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
     UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
+    BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1246,6 +1240,7 @@ class TransactionResult(_message.Message):
     apply_referral_code: _commands_pb2.ApplyReferralCode
     update_margin_mode: _commands_pb2.UpdateMarginMode
     join_team: _commands_pb2.JoinTeam
+    batch_proposal: _commands_pb2.BatchProposalSubmission
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1328,6 +1323,9 @@ class TransactionResult(_message.Message):
             _Union[_commands_pb2.UpdateMarginMode, _Mapping]
         ] = ...,
         join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
+        batch_proposal: _Optional[
+            _Union[_commands_pb2.BatchProposalSubmission, _Mapping]
+        ] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
     ) -> None: ...

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import atexit
 import datetime
 import functools
@@ -361,6 +362,7 @@ def manage_vega_processes(
     replay_from_path: Optional[str] = None,
     store_transactions: bool = True,
     log_level: Optional[int] = None,
+    genesis_time: Optional[datetime.datetime] = None,
 ) -> None:
     logger.addHandler(QueueHandler(log_queue))
     logger.setLevel(log_level if log_level is not None else logging.INFO)
@@ -400,6 +402,12 @@ def manage_vega_processes(
         os.utime(dirpath, None)
         for file in filenames:
             os.utime(os.path.join(dirpath, file), None)
+    if genesis_time is not None:
+        with open(f"{dest_dir}/genesis.json", "r") as file:
+            data = json.load(file)
+        data["genesis_time"] = genesis_time.isoformat() + "Z"
+        with open(f"{dest_dir}/genesis.json", "w") as file:
+            json.dump(data, file, indent=2)
 
     tmp_vega_home = tmp_vega_dir + "/vegahome"
     _update_node_config(
@@ -780,6 +788,7 @@ class VegaServiceNull(VegaService):
         replay_from_path: Optional[str] = None,
         listen_for_high_volume_stream_updates: bool = False,
         check_for_binaries: bool = False,
+        genesis_time: Optional[datetime.datetime] = None,
     ):
         super().__init__(
             can_control_time=True,
@@ -801,6 +810,7 @@ class VegaServiceNull(VegaService):
         self.proc = None
         self.run_with_console = run_with_console
         self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
+        self.genesis_time = genesis_time
 
         self.transactions_per_block = transactions_per_block
         self.seconds_per_block = seconds_per_block
@@ -928,6 +938,7 @@ class VegaServiceNull(VegaService):
                 "store_transactions": self.store_transactions,
                 "replay_from_path": self.replay_from_path,
                 "log_level": logging.getLogger().level,
+                "genesis_time": self.genesis_time,
             },
         )
         self.proc.start()
@@ -1003,6 +1014,19 @@ class VegaServiceNull(VegaService):
             webbrowser.open(
                 f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/graphql", new=2
             )
+
+        # Create the VegaService key and mint assets to the treasury
+        governance_asset = self.get_asset(
+            self.find_asset_id(symbol="VOTE", enabled=True, raise_on_missing=True)
+        )
+        self.wallet.create_key(wallet_name=self.WALLET_NAME, name=self.KEY_NAME)
+        self.mint(
+            wallet_name=self.WALLET_NAME,
+            key_name=self.KEY_NAME,
+            asset=governance_asset.id,
+            amount=governance_asset.details.builtin_asset.max_faucet_amount_mint,
+            from_faucet=True,
+        )
 
     # Class internal as at some point the host may vary as well as the port
     @staticmethod

@@ -192,6 +192,7 @@ class Payload(_message.Message):
         "liquidity_v2_paid_fees_stats",
         "liquidation",
         "banking_transfer_fee_discounts",
+        "governance_batch_active",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -267,6 +268,7 @@ class Payload(_message.Message):
     LIQUIDITY_V2_PAID_FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
     BANKING_TRANSFER_FEE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
+    GOVERNANCE_BATCH_ACTIVE_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -341,6 +343,7 @@ class Payload(_message.Message):
     liquidity_v2_paid_fees_stats: LiquidityV2PaidFeesStats
     liquidation: Liquidation
     banking_transfer_fee_discounts: BankingTransferFeeDiscounts
+    governance_batch_active: GovernanceBatchActive
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -464,6 +467,9 @@ class Payload(_message.Message):
         liquidation: _Optional[_Union[Liquidation, _Mapping]] = ...,
         banking_transfer_fee_discounts: _Optional[
             _Union[BankingTransferFeeDiscounts, _Mapping]
+        ] = ...,
+        governance_batch_active: _Optional[
+            _Union[GovernanceBatchActive, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -950,15 +956,43 @@ class GovernanceActive(_message.Message):
         self, proposals: _Optional[_Iterable[_Union[ProposalData, _Mapping]]] = ...
     ) -> None: ...
 
-class GovernanceNode(_message.Message):
-    __slots__ = ("proposals",)
+class BatchProposalData(_message.Message):
+    __slots__ = ("batch_proposal", "proposals")
+    BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    batch_proposal: ProposalData
     proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
+    def __init__(
+        self,
+        batch_proposal: _Optional[_Union[ProposalData, _Mapping]] = ...,
+        proposals: _Optional[
+            _Iterable[_Union[_governance_pb2.Proposal, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class GovernanceBatchActive(_message.Message):
+    __slots__ = ("batch_proposals",)
+    BATCH_PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    batch_proposals: _containers.RepeatedCompositeFieldContainer[BatchProposalData]
+    def __init__(
+        self,
+        batch_proposals: _Optional[
+            _Iterable[_Union[BatchProposalData, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class GovernanceNode(_message.Message):
+    __slots__ = ("proposals", "proposal_data")
+    PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    PROPOSAL_DATA_FIELD_NUMBER: _ClassVar[int]
+    proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
+    proposal_data: _containers.RepeatedCompositeFieldContainer[ProposalData]
     def __init__(
         self,
         proposals: _Optional[
             _Iterable[_Union[_governance_pb2.Proposal, _Mapping]]
         ] = ...,
+        proposal_data: _Optional[_Iterable[_Union[ProposalData, _Mapping]]] = ...,
     ) -> None: ...
 
 class StakingAccount(_message.Message):

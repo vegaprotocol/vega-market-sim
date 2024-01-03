@@ -26,9 +26,14 @@ class Interval(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     INTERVAL_I1M: _ClassVar[Interval]
     INTERVAL_I5M: _ClassVar[Interval]
     INTERVAL_I15M: _ClassVar[Interval]
+    INTERVAL_I30M: _ClassVar[Interval]
     INTERVAL_I1H: _ClassVar[Interval]
+    INTERVAL_I4H: _ClassVar[Interval]
     INTERVAL_I6H: _ClassVar[Interval]
+    INTERVAL_I8H: _ClassVar[Interval]
+    INTERVAL_I12H: _ClassVar[Interval]
     INTERVAL_I1D: _ClassVar[Interval]
+    INTERVAL_I7D: _ClassVar[Interval]
 
 class PositionStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -109,6 +114,7 @@ class OrderError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ORDER_ERROR_POST_ONLY_ORDER_WOULD_TRADE: _ClassVar[OrderError]
     ORDER_ERROR_REDUCE_ONLY_ORDER_WOULD_NOT_REDUCE_POSITION: _ClassVar[OrderError]
     ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: _ClassVar[OrderError]
+    ORDER_ERROR_PEGGED_ORDERS_NOT_ALLOWED_IN_ISOLATED_MARGIN_MODE: _ClassVar[OrderError]
 
 class ChainStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -259,9 +265,14 @@ INTERVAL_BLOCK: Interval
 INTERVAL_I1M: Interval
 INTERVAL_I5M: Interval
 INTERVAL_I15M: Interval
+INTERVAL_I30M: Interval
 INTERVAL_I1H: Interval
+INTERVAL_I4H: Interval
 INTERVAL_I6H: Interval
+INTERVAL_I8H: Interval
+INTERVAL_I12H: Interval
 INTERVAL_I1D: Interval
+INTERVAL_I7D: Interval
 POSITION_STATUS_UNSPECIFIED: PositionStatus
 POSITION_STATUS_ORDERS_CLOSED: PositionStatus
 POSITION_STATUS_CLOSED_OUT: PositionStatus
@@ -328,6 +339,7 @@ ORDER_ERROR_TOO_MANY_PEGGED_ORDERS: OrderError
 ORDER_ERROR_POST_ONLY_ORDER_WOULD_TRADE: OrderError
 ORDER_ERROR_REDUCE_ONLY_ORDER_WOULD_NOT_REDUCE_POSITION: OrderError
 ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: OrderError
+ORDER_ERROR_PEGGED_ORDERS_NOT_ALLOWED_IN_ISOLATED_MARGIN_MODE: OrderError
 CHAIN_STATUS_UNSPECIFIED: ChainStatus
 CHAIN_STATUS_DISCONNECTED: ChainStatus
 CHAIN_STATUS_REPLAYING: ChainStatus
@@ -451,9 +463,20 @@ class StopOrder(_message.Message):
         "party_id",
         "market_id",
         "rejection_reason",
+        "size_override_setting",
+        "size_override_value",
         "price",
         "trailing_percent_offset",
     )
+
+    class SizeOverrideSetting(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        SIZE_OVERRIDE_SETTING_UNSPECIFIED: _ClassVar[StopOrder.SizeOverrideSetting]
+        SIZE_OVERRIDE_SETTING_NONE: _ClassVar[StopOrder.SizeOverrideSetting]
+        SIZE_OVERRIDE_SETTING_POSITION: _ClassVar[StopOrder.SizeOverrideSetting]
+    SIZE_OVERRIDE_SETTING_UNSPECIFIED: StopOrder.SizeOverrideSetting
+    SIZE_OVERRIDE_SETTING_NONE: StopOrder.SizeOverrideSetting
+    SIZE_OVERRIDE_SETTING_POSITION: StopOrder.SizeOverrideSetting
 
     class ExpiryStrategy(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
@@ -505,6 +528,9 @@ class StopOrder(_message.Message):
         REJECTION_REASON_STOP_ORDER_NOT_CLOSING_THE_POSITION: _ClassVar[
             StopOrder.RejectionReason
         ]
+        REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: _ClassVar[
+            StopOrder.RejectionReason
+        ]
     REJECTION_REASON_UNSPECIFIED: StopOrder.RejectionReason
     REJECTION_REASON_TRADING_NOT_ALLOWED: StopOrder.RejectionReason
     REJECTION_REASON_EXPIRY_IN_THE_PAST: StopOrder.RejectionReason
@@ -512,6 +538,13 @@ class StopOrder(_message.Message):
     REJECTION_REASON_MAX_STOP_ORDERS_PER_PARTY_REACHED: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_WITHOUT_A_POSITION: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_NOT_CLOSING_THE_POSITION: StopOrder.RejectionReason
+    REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: StopOrder.RejectionReason
+
+    class SizeOverrideValue(_message.Message):
+        __slots__ = ("percentage",)
+        PERCENTAGE_FIELD_NUMBER: _ClassVar[int]
+        percentage: str
+        def __init__(self, percentage: _Optional[str] = ...) -> None: ...
     ID_FIELD_NUMBER: _ClassVar[int]
     OCO_LINK_ID_FIELD_NUMBER: _ClassVar[int]
     EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
@@ -524,6 +557,8 @@ class StopOrder(_message.Message):
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     REJECTION_REASON_FIELD_NUMBER: _ClassVar[int]
+    SIZE_OVERRIDE_SETTING_FIELD_NUMBER: _ClassVar[int]
+    SIZE_OVERRIDE_VALUE_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
     TRAILING_PERCENT_OFFSET_FIELD_NUMBER: _ClassVar[int]
     id: str
@@ -538,6 +573,8 @@ class StopOrder(_message.Message):
     party_id: str
     market_id: str
     rejection_reason: StopOrder.RejectionReason
+    size_override_setting: StopOrder.SizeOverrideSetting
+    size_override_value: StopOrder.SizeOverrideValue
     price: str
     trailing_percent_offset: str
     def __init__(
@@ -554,6 +591,12 @@ class StopOrder(_message.Message):
         party_id: _Optional[str] = ...,
         market_id: _Optional[str] = ...,
         rejection_reason: _Optional[_Union[StopOrder.RejectionReason, str]] = ...,
+        size_override_setting: _Optional[
+            _Union[StopOrder.SizeOverrideSetting, str]
+        ] = ...,
+        size_override_value: _Optional[
+            _Union[StopOrder.SizeOverrideValue, _Mapping]
+        ] = ...,
         price: _Optional[str] = ...,
         trailing_percent_offset: _Optional[str] = ...,
     ) -> None: ...
@@ -1490,21 +1533,34 @@ class MarginLevels(_message.Message):
     ) -> None: ...
 
 class PerpetualData(_message.Message):
-    __slots__ = ("funding_payment", "funding_rate", "internal_twap", "external_twap")
+    __slots__ = (
+        "funding_payment",
+        "funding_rate",
+        "internal_twap",
+        "external_twap",
+        "seq_num",
+        "start_time",
+    )
     FUNDING_PAYMENT_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_FIELD_NUMBER: _ClassVar[int]
     INTERNAL_TWAP_FIELD_NUMBER: _ClassVar[int]
     EXTERNAL_TWAP_FIELD_NUMBER: _ClassVar[int]
+    SEQ_NUM_FIELD_NUMBER: _ClassVar[int]
+    START_TIME_FIELD_NUMBER: _ClassVar[int]
     funding_payment: str
     funding_rate: str
     internal_twap: str
     external_twap: str
+    seq_num: int
+    start_time: int
     def __init__(
         self,
         funding_payment: _Optional[str] = ...,
         funding_rate: _Optional[str] = ...,
         internal_twap: _Optional[str] = ...,
         external_twap: _Optional[str] = ...,
+        seq_num: _Optional[int] = ...,
+        start_time: _Optional[int] = ...,
     ) -> None: ...
 
 class ProductData(_message.Message):
@@ -1549,6 +1605,7 @@ class MarketData(_message.Message):
         "market_growth",
         "product_data",
         "liquidity_provider_sla",
+        "next_network_closeout",
     )
     MARK_PRICE_FIELD_NUMBER: _ClassVar[int]
     BEST_BID_PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -1582,6 +1639,7 @@ class MarketData(_message.Message):
     MARKET_GROWTH_FIELD_NUMBER: _ClassVar[int]
     PRODUCT_DATA_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_PROVIDER_SLA_FIELD_NUMBER: _ClassVar[int]
+    NEXT_NETWORK_CLOSEOUT_FIELD_NUMBER: _ClassVar[int]
     mark_price: str
     best_bid_price: str
     best_bid_volume: int
@@ -1620,6 +1678,7 @@ class MarketData(_message.Message):
     liquidity_provider_sla: _containers.RepeatedCompositeFieldContainer[
         LiquidityProviderSLA
     ]
+    next_network_closeout: int
     def __init__(
         self,
         mark_price: _Optional[str] = ...,
@@ -1662,6 +1721,7 @@ class MarketData(_message.Message):
         liquidity_provider_sla: _Optional[
             _Iterable[_Union[LiquidityProviderSLA, _Mapping]]
         ] = ...,
+        next_network_closeout: _Optional[int] = ...,
     ) -> None: ...
 
 class LiquidityProviderFeeShare(_message.Message):
@@ -2273,6 +2333,8 @@ class Reward(_message.Message):
         "reward_type",
         "locked_until_epoch",
         "quantum_amount",
+        "game_id",
+        "team_id",
     )
     ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -2284,6 +2346,8 @@ class Reward(_message.Message):
     REWARD_TYPE_FIELD_NUMBER: _ClassVar[int]
     LOCKED_UNTIL_EPOCH_FIELD_NUMBER: _ClassVar[int]
     QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     asset_id: str
     party_id: str
     epoch: int
@@ -2294,6 +2358,8 @@ class Reward(_message.Message):
     reward_type: str
     locked_until_epoch: int
     quantum_amount: str
+    game_id: str
+    team_id: str
     def __init__(
         self,
         asset_id: _Optional[str] = ...,
@@ -2306,6 +2372,8 @@ class Reward(_message.Message):
         reward_type: _Optional[str] = ...,
         locked_until_epoch: _Optional[int] = ...,
         quantum_amount: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
+        team_id: _Optional[str] = ...,
     ) -> None: ...
 
 class RewardSummary(_message.Message):

@@ -82,6 +82,15 @@ class VegaFaucetError(Exception):
     pass
 
 
+class BalanceDepositInequity(Exception):
+    def __init__(self, asset, total_balance_amount, total_deposit_amount):
+        if total_balance_amount > total_deposit_amount:
+            msg = f"Balance in accounts greater than deposited funds ({total_balance_amount}>{total_deposit_amount}) for asset {asset}"
+        if total_balance_amount < total_deposit_amount:
+            msg = f"Balance in accounts less than deposited funds ({total_balance_amount}<{total_deposit_amount}) for asset {asset}"
+        super().__init__(msg)
+
+
 class MarketStateUpdateType(Enum):
     Unspecified = (
         vega_protos.governance.MarketStateUpdateType.MARKET_STATE_UPDATE_TYPE_UNSPECIFIED
@@ -120,6 +129,9 @@ class DecimalsCache(defaultdict):
 
 
 class VegaService(ABC):
+    WALLET_NAME = "VegaService"
+    KEY_NAME = "VegaService"
+
     def __init__(
         self,
         can_control_time: bool = False,
@@ -387,8 +399,12 @@ class VegaService(ABC):
         asset: str,
         amount: float,
         wallet_name: Optional[str] = None,
+        from_faucet: bool = False,
     ) -> None:
-        """Mints a given amount of requested asset into the associated wallet
+        """Mints a given amount of requested asset into the associated wallet.
+
+        Default behaviour is to transfer funds from the Vega Service "treasury", to mint
+        funds directly from the faucet the optional from_faucet arg can be set.
 
         Args:
             wallet_name:
@@ -400,17 +416,28 @@ class VegaService(ABC):
             key_name:
                 Optional[str], key name stored in metadata. Defaults to None.
         """
-        asset_decimals = self.asset_decimals[asset]
         curr_acct = self.party_account(
             wallet_name=wallet_name, asset_id=asset, key_name=key_name
         ).general
 
-        faucet.mint(
-            self.wallet.public_key(wallet_name=wallet_name, name=key_name),
-            asset,
-            num_to_padded_int(amount, asset_decimals),
-            faucet_url=self.faucet_url,
-        )
+        if from_faucet:
+            faucet.mint(
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name),
+                asset,
+                num_to_padded_int(amount, self.asset_decimals[asset]),
+                faucet_url=self.faucet_url,
+            )
+        else:
+            self.one_off_transfer(
+                from_wallet_name=self.WALLET_NAME,
+                from_key_name=self.KEY_NAME,
+                from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                asset=asset,
+                amount=amount,
+                to_key_name=key_name,
+                to_wallet_name=wallet_name,
+            )
 
         self.wait_fn(1)
         self.wait_for_total_catchup()
@@ -452,7 +479,7 @@ class VegaService(ABC):
         symbol: str,
         decimals: int = 0,
         quantum: int = 1,
-        max_faucet_amount: int = 10e9,
+        max_faucet_amount: int = 1e48,
         wallet_name: Optional[str] = None,
     ):
         """Creates a simple asset and automatically approves the proposal (assuming the
@@ -484,7 +511,6 @@ class VegaService(ABC):
             name=name,
             symbol=symbol,
             decimals=decimals,
-            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
             quantum=quantum,
             data_client=self.trading_data_client_v2,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
@@ -492,6 +518,7 @@ class VegaService(ABC):
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=key_name,
+            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
         )
         self.wait_fn(1)
         gov.approve_proposal(
@@ -502,6 +529,17 @@ class VegaService(ABC):
         )
         self.wait_fn(60)
         self.wait_for_thread_catchup()
+
+        asset_id = self.find_asset_id(
+            symbol=symbol, enabled=True, raise_on_missing=True
+        )
+        self.mint(
+            wallet_name=self.WALLET_NAME,
+            key_name=self.KEY_NAME,
+            asset=asset_id,
+            amount=max_faucet_amount,
+            from_faucet=True,
+        )
 
     def create_market_from_config(
         self,
@@ -1148,13 +1186,22 @@ class VegaService(ABC):
         )
 
     def update_network_parameter(
-        self, proposal_key: str, parameter: str, new_value: str, wallet_name: str = None
+        self,
+        proposal_key: str,
+        parameter: str,
+        new_value: str,
+        wallet_name: str = None,
+        closing_time: Optional[datetime.datetime] = None,
+        enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
     ):
-        """Updates a network parameter by first proposing and then voting to approve
+        """
+        Updates a network parameter by first proposing and then optionally voting to approve
         the change, followed by advancing the network time period forwards.
 
-        If the genesis setup of the market is such that this meets requirements then
-        the proposal will be approved. Otherwise others may need to vote too.
+        If 'approve' is set to False, this function will skip the approval step and return
+        the proposal ID immediately after proposing.
 
         Args:
             proposal_key:
@@ -1165,10 +1212,26 @@ class VegaService(ABC):
                 str, the new value to set
             wallet_name:
                 str, optional, the wallet proposing the change
+            vote_closing_time:
+                Optional[datetime], The time at which the vote should close
+            vote_enactment_time:
+                Optional[datetime], The time at which the vote should enact
+            approve_proposal:
+                bool, default True, Whether to automatically approve the proposal
+            forward_time_to_enactment:
+                bool, default True, Whether to forward time to enactment of the
+                    proposal
+
         Returns:
             str, the ID of the proposal
         """
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if enactment_time is None
+            else int(enactment_time.timestamp())
+        )
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
@@ -1176,19 +1239,31 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if closing_time is None
+                else int(closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=proposal_key,
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=wallet_name,
-            key_name=proposal_key,
-        )
-        self.wait_fn(60)
-        self.wait_for_thread_catchup()
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        return proposal_id
 
     def update_market_state(
         self,
@@ -1348,6 +1423,7 @@ class VegaService(ABC):
             )
             updated_instrument = UpdateInstrumentConfiguration(
                 code=curr_inst.code,
+                name=curr_inst.name,
                 future=curr_fut_prod,
             )
         if updated_simple_model_params is None:
@@ -2786,6 +2862,13 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         key_name: Optional[str] = None,
         direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+        is_reward: Optional[bool] = None,
+        from_epoch: Optional[int] = None,
+        to_epoch: Optional[int] = None,
+        status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+        scope: Optional[
+            data_node_protos_v2.trading_data.ListTransfersRequest.Scope
+        ] = None,
     ) -> List[data.Transfer]:
         """Returns a list of processed transfers.
 
@@ -2812,6 +2895,11 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             party_id=party_id,
             direction=direction,
+            is_reward=is_reward,
+            from_epoch=from_epoch,
+            to_epoch=to_epoch,
+            status=status,
+            scope=scope,
         )
 
     def get_liquidity_fee_shares(
@@ -3033,7 +3121,7 @@ class VegaService(ABC):
             asset_decimals=self.asset_decimals[asset_id],
         )
 
-    def get_asset(self, asset_id: str):
+    def get_asset(self, asset_id: str) -> data.Asset:
         return data.get_asset(
             data_client=self.trading_data_client_v2, asset_id=asset_id
         )
@@ -3480,4 +3568,40 @@ class VegaService(ABC):
             margin_mode=margin_mode,
             wallet_name=wallet_name,
             margin_factor=str(margin_factor),
+        )
+
+    def check_balances_equal_deposits(self):
+        for attempts in range(100):
+            asset_balance_map = defaultdict(lambda: 0)
+            asset_deposit_map = defaultdict(lambda: 0)
+
+            for account in data_raw.list_accounts(
+                data_client=self.trading_data_client_v2
+            ):
+                asset_balance_map[account.asset] += int(account.balance)
+            for deposit in data_raw.list_deposits(
+                data_client=self.trading_data_client_v2
+            ):
+                asset_deposit_map[deposit.asset] += int(deposit.amount)
+
+            try:
+                for asset in asset_balance_map:
+                    total_balance_amount = asset_balance_map[asset]
+                    total_deposit_amount = asset_deposit_map[asset]
+                    assert asset_balance_map[asset] == asset_deposit_map[asset]
+                    logging.debug(
+                        f"Balance in accounts matches deposited funds for asset {asset}"
+                    )
+                return
+            except AssertionError:
+                logging.debug(
+                    "Balances don't match deposits, waiting to ensure datanode has finished consuming events."
+                )
+                time.sleep(0.0001 * 1.1**attempts)
+                continue
+
+        raise BalanceDepositInequity(
+            asset=asset,
+            total_balance_amount=total_balance_amount,
+            total_deposit_amount=total_deposit_amount,
         )

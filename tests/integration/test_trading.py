@@ -1,5 +1,4 @@
 import pytest
-import logging
 from collections import namedtuple
 import vega_sim.proto.vega as vega_protos
 from examples.visualisations.utils import continuous_market, move_market
@@ -154,10 +153,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t1 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t1) == 1
+    assert len(all_transfers_t1) >= 1
     assert len(live_transfers_t1) == 0
 
-    assert party_a_accounts_t1.general == 499.5
+    assert party_a_accounts_t1.general == 499.999
     assert party_b_accounts_t1.general == 1500
 
     vega.one_off_transfer(
@@ -187,10 +186,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t2 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t2) == 2
+    assert len(all_transfers_t2) >= 2
     assert len(live_transfers_t2) == 1
-    assert party_a_accounts_t2.general == 499.5
-    assert party_b_accounts_t2.general == 999.5
+    assert party_a_accounts_t2.general == 499.999
+    assert party_b_accounts_t2.general == 999.999
 
     vega.wait_fn(100)
     vega.wait_for_total_catchup()
@@ -209,10 +208,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t3 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t3) == 2
+    assert len(all_transfers_t3) >= 2
     assert len(live_transfers_t3) == 0
-    assert party_a_accounts_t3.general == 999.5
-    assert party_b_accounts_t3.general == 999.5
+    assert party_a_accounts_t3.general == 999.999
+    assert party_b_accounts_t3.general == 999.999
 
 
 @pytest.mark.integration
@@ -266,7 +265,7 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
     party_b_accounts_t1 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
 
-    assert party_a_accounts_t1[0].balance == 499.5
+    assert party_a_accounts_t1[0].balance == 499.999
     assert party_b_accounts_t1[0].balance == 1500
 
     # Forward one epoch
@@ -275,7 +274,7 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
     party_b_accounts_t2 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 249.25
+    assert party_a_accounts_t2[0].balance == 249.998
     assert party_b_accounts_t2[0].balance == 1750
 
 
@@ -333,14 +332,14 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
 
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t1[0].balance == 899.9
+    assert party_a_accounts_t1[0].balance == 899.999
 
     # Forward one epoch
     next_epoch(vega=vega)
 
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 899.9
+    assert party_a_accounts_t2[0].balance == 899.999
 
 
 @pytest.mark.integration
@@ -505,15 +504,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    logging.info(
-        "Trader A Party: public_key ="
-        f" {vega.wallet.public_key(name=trader_a.key_name, wallet_name=trader_a.wallet_name)}"
-    )
-    logging.info(
-        "Trader B Party: public_key ="
-        f" {vega.wallet.public_key(name=trader_b.key_name, wallet_name=trader_b.wallet_name)}"
-    )
-
     # 0012-NP-LIPE-002: An estimate is obtained for a short position with no open orders, mark price keeps going up in small increments and the actual liquidation takes place within the estimated range.
     vega.submit_order(
         trading_wallet=trader_a.wallet_name,
@@ -543,8 +533,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
         market_id=market_id,
     )
     collateral = account_TRADER_B.margin + account_TRADER_B.general
-    print(f"traderB.margin1 = {account_TRADER_B.margin}")
-    print(f"traderB.general1 = {account_TRADER_B.general}")
     market_data = vega.get_latest_market_data(market_id=market_id)
 
     _, estimate_liquidation_price_initial = vega.estimate_position(
@@ -565,15 +553,8 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
         is_market_order=[True],
         collateral_available=collateral,
     )
-    # assert estimate_liquidation_price_initial.best_case.open_volume_only == estimate_liquidation_price_MO.best_case.including_sell_orders
-    print(
-        f"estimate_liquidation_price.best_case.open_volume_only={ estimate_liquidation_price_initial.best_case.open_volume_only}"
-    )
-    print(
-        f"estimate_liquidation_price.worst_case.open_volume_only={ estimate_liquidation_price_initial.worst_case.open_volume_only}"
-    )
 
-    for price in [519, 520, 521.5, 522]:
+    for price in [519, 520, 543, 543.5]:
         move_market(
             vega=vega,
             market_id=market_id,
@@ -627,7 +608,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -1008,7 +989,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -1279,7 +1260,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)

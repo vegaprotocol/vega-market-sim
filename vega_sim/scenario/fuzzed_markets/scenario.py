@@ -153,6 +153,7 @@ class FuzzingScenario(Scenario):
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
         output: bool = True,
+        lite: bool = False,
     ):
         if perps_market_probability < 0 or perps_market_probability > 1:
             raise ValueError(
@@ -183,6 +184,7 @@ class FuzzingScenario(Scenario):
         self.transactions_per_block = transactions_per_block
 
         self.output = output
+        self.lite = lite
 
     def configure_agents(
         self,
@@ -215,7 +217,7 @@ class FuzzingScenario(Scenario):
             )
         )
 
-        for i_market in range(self.n_markets):
+        for i_market in range(self.n_markets if not self.lite else 1):
             # Determine if we should use perps market, otherwise use futures
             perps_market = self.random_state.random() < self.perps_probability
 
@@ -399,7 +401,7 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                 )
-                for i_agent in range(10)
+                for i_agent in range(10 if not self.lite else 1)
             ]
 
             market_agents["risky_traders"] = [
@@ -415,7 +417,7 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )
                 for side in ["SIDE_BUY", "SIDE_SELL"]
-                for i_agent in range(10)
+                for i_agent in range(10 if not self.lite else 1)
             ]
 
             market_agents["risky_liquidity_providers"] = [
@@ -429,10 +431,10 @@ class FuzzingScenario(Scenario):
                     step_bias=0.1,
                     tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                 )
-                for i_agent in range(5)
+                for i_agent in range(5 if not self.lite else 1)
             ]
 
-            for i_agent in range(45):
+            for i_agent in range(45 if not self.lite else 1):
                 market_agents["risky_liquidity_providers"].append(
                     RiskySimpleLiquidityProvider(
                         wallet_name="risky_liquidity_providers",

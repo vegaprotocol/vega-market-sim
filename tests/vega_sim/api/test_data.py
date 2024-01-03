@@ -1362,6 +1362,7 @@ def test_list_stop_orders(trading_data_v2_servicer_and_port):
         market_price_decimals_map={"market_id": 0},
         market_position_decimals_map={"market_id": 2},
     )
+
     assert stop_orders == [
         StopOrderEvent(
             submission=OrderSubmission(
