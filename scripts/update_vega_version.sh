@@ -8,7 +8,7 @@ VEGA_SIM_NETWORKS_TAG=master" > .env
 
 make
 make proto
-# pytest -s -v --log-cli-level INFO -m "not integration and not api"
+pytest -s -v --log-cli-level INFO -m "not integration and not api"
 if [ "$?" == 0 ]
 then
     echo "Test run successful, keeping updated versions"
