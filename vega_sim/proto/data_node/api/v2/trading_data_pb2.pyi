@@ -5383,3 +5383,88 @@ class IndividualGameEntity(_message.Message):
         reward_earned: _Optional[str] = ...,
         total_rewards_earned: _Optional[str] = ...,
     ) -> None: ...
+
+class ListPartyMarginModesRequest(_message.Message):
+    __slots__ = ("market_id", "party_id", "pagination")
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    party_id: str
+    pagination: Pagination
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+    ) -> None: ...
+
+class ListPartyMarginModesResponse(_message.Message):
+    __slots__ = ("party_margin_modes",)
+    PARTY_MARGIN_MODES_FIELD_NUMBER: _ClassVar[int]
+    party_margin_modes: PartyMarginModesConnection
+    def __init__(
+        self,
+        party_margin_modes: _Optional[
+            _Union[PartyMarginModesConnection, _Mapping]
+        ] = ...,
+    ) -> None: ...
+
+class PartyMarginModesConnection(_message.Message):
+    __slots__ = ("edges", "page_info")
+    EDGES_FIELD_NUMBER: _ClassVar[int]
+    PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
+    edges: _containers.RepeatedCompositeFieldContainer[PartyMarginModeEdge]
+    page_info: PageInfo
+    def __init__(
+        self,
+        edges: _Optional[_Iterable[_Union[PartyMarginModeEdge, _Mapping]]] = ...,
+        page_info: _Optional[_Union[PageInfo, _Mapping]] = ...,
+    ) -> None: ...
+
+class PartyMarginModeEdge(_message.Message):
+    __slots__ = ("node", "cursor")
+    NODE_FIELD_NUMBER: _ClassVar[int]
+    CURSOR_FIELD_NUMBER: _ClassVar[int]
+    node: PartyMarginMode
+    cursor: str
+    def __init__(
+        self,
+        node: _Optional[_Union[PartyMarginMode, _Mapping]] = ...,
+        cursor: _Optional[str] = ...,
+    ) -> None: ...
+
+class PartyMarginMode(_message.Message):
+    __slots__ = (
+        "market_id",
+        "party_id",
+        "margin_mode",
+        "margin_factor",
+        "min_theoretical_margin_factor",
+        "max_theoretical_leverage",
+        "at_epoch",
+    )
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MIN_THEORETICAL_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MAX_THEORETICAL_LEVERAGE_FIELD_NUMBER: _ClassVar[int]
+    AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    party_id: str
+    margin_mode: _vega_pb2.MarginMode
+    margin_factor: str
+    min_theoretical_margin_factor: str
+    max_theoretical_leverage: str
+    at_epoch: int
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        margin_mode: _Optional[_Union[_vega_pb2.MarginMode, str]] = ...,
+        margin_factor: _Optional[str] = ...,
+        min_theoretical_margin_factor: _Optional[str] = ...,
+        max_theoretical_leverage: _Optional[str] = ...,
+        at_epoch: _Optional[int] = ...,
+    ) -> None: ...

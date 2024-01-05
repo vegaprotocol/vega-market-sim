@@ -597,6 +597,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
         )
+        self.ListPartyMarginModes = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListPartyMarginModes",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.FromString,
+        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -1717,6 +1722,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListPartyMarginModes(self, request, context):
+        """List margin modes per party per market
+
+        Get a list of all margin modes, or for a specific market ID, or party ID.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -2375,6 +2389,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListGames,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.SerializeToString,
+        ),
+        "ListPartyMarginModes": grpc.unary_unary_rpc_method_handler(
+            servicer.ListPartyMarginModes,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5751,6 +5770,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListGames",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListPartyMarginModes(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListPartyMarginModes",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.FromString,
             options,
             channel_credentials,
             insecure,
