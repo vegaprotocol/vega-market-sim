@@ -1999,7 +1999,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         self,
         vega: VegaService,
         create_key: bool = True,
-        mint_key: bool = False,
+        mint_key: bool = True,
     ):
         """Initialise the agents wallet and mint the required market asset.
 
@@ -2874,7 +2874,7 @@ class Snitch(StateAgent):
 
             positions = self.vega.list_all_positions()
 
-            accounts = self.vega.get_accounts_from_stream()
+            accounts = self.vega.list_accounts()
             self.states.append(
                 MarketHistoryData(
                     at_time=start_time,

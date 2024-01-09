@@ -15,60 +15,17 @@ from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
 
 # Import agents
-from vega_sim.scenario.common.agents import ExponentialShapedMarketMaker
+from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.scenario.common.agents import (
     StateAgent,
-    UncrossAuctionAgent,
     ExponentialShapedMarketMaker,
+    UncrossAuctionAgent,
+    MarketOrderTrader,
+    LimitOrderTrader,
 )
-from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
 from vega_sim.scenario.fuzzed_markets.agents import (
     RiskyMarketOrderTrader,
 )
-
-
-def _create_price_process(
-    random_state: np.random.RandomState, num_steps, decimal_places
-):
-    price_process = [1500]
-
-    while len(price_process) < num_steps + 1:
-        # Add a stable price-process with a random duration of 5-20% of the sim
-        price_process = np.concatenate(
-            (
-                price_process,
-                random_walk(
-                    num_steps=random_state.randint(
-                        int(0.05 * num_steps), int(0.20 * num_steps)
-                    ),
-                    sigma=2,
-                    starting_price=price_process[-1],
-                    decimal_precision=decimal_places,
-                ),
-            )
-        )
-        # Add an unstable price-process with a random duration of 5-10% of the sim
-        price_process = np.concatenate(
-            (
-                price_process,
-                random_walk(
-                    num_steps=random_state.randint(
-                        int(0.05 * num_steps), int(0.10 * num_steps)
-                    ),
-                    sigma=2,
-                    drift=random_state.uniform(-1, 1),
-                    starting_price=price_process[-1],
-                    decimal_precision=decimal_places,
-                ),
-            )
-        )
-
-    # Add spikes to the price monitoring auction
-    spike_at = random_state.randint(0, num_steps, size=3)
-    for i in spike_at:
-        price_process[i] = price_process[i] * random_state.choice([0.95, 1.05])
-
-    return price_process
 
 
 class LiquidationScenario(Scenario):
@@ -78,6 +35,15 @@ class LiquidationScenario(Scenario):
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
         step_length_seconds: Optional[float] = None,
+        disposal_time_step: Optional[int] = None,
+        disposal_fraction: Optional[float] = None,
+        full_disposal_size: Optional[int] = None,
+        max_fraction_consumed: Optional[float] = None,
+        supplied_liquidity: float = 1e6,
+        number_risky_traders: int = 5,
+        mint_risky_traders: float = 1e3,
+        price_sigma: Optional[float] = 1,
+        price_drift: Optional[float] = 0,
     ):
         super().__init__()
         self.num_steps = num_steps
@@ -88,6 +54,18 @@ class LiquidationScenario(Scenario):
         )
         self.block_length_seconds = block_length_seconds
         self.transactions_per_block = transactions_per_block
+
+        self.disposal_time_step = disposal_time_step
+        self.disposal_fraction = disposal_fraction
+        self.full_disposal_size = full_disposal_size
+        self.max_fraction_consumed = max_fraction_consumed
+
+        self.supplied_liquidity = supplied_liquidity
+        self.number_risky_traders = number_risky_traders
+        self.mint_risky_traders = mint_risky_traders
+
+        self.price_sigma = price_sigma
+        self.price_drift = price_drift
 
     def configure_agents(
         self,
@@ -100,21 +78,29 @@ class LiquidationScenario(Scenario):
             random_state if random_state is not None else np.random.RandomState()
         )
 
+        self.agents = []
+
+        # Create market configuration
+        market_config = MarketConfig()
         market_name = "ETH/USDT Expiry 2023 Sept 30th"
         market_code = "ETH/USDT-230930"
         asset_name = "USDT"
         asset_dp = 18
-
-        self.agents = []
-        self.initial_asset_mint = 10e9
-
-        market_config = MarketConfig()
-
-        # Create fuzzed price process
-        price_process = _create_price_process(
-            random_state=self.random_state,
+        for key, value in [
+            ("liquidation_strategy.disposal_time_step", self.disposal_time_step),
+            ("liquidation_strategy.disposal_fraction", self.disposal_fraction),
+            ("liquidation_strategy.full_disposal_size", self.full_disposal_size),
+            ("liquidation_strategy.max_fraction_consumed", self.max_fraction_consumed),
+        ]:
+            if value is not None:
+                market_config.set(key, value)
+        # Create price process for market
+        price_process = random_walk(
             num_steps=self.num_steps,
-            decimal_places=int(market_config.decimal_places),
+            sigma=self.price_sigma,
+            drift=self.price_drift,
+            starting_price=1000,
+            decimal_precision=market_config.decimal_places,
         )
 
         agents: List[StateAgent] = []
@@ -136,15 +122,15 @@ class LiquidationScenario(Scenario):
             ExponentialShapedMarketMaker(
                 key_name="MARKET_MAKER",
                 price_process_generator=iter(price_process),
-                initial_asset_mint=self.initial_asset_mint,
+                initial_asset_mint=self.supplied_liquidity * 10,
                 market_name=market_name,
                 asset_name=asset_name,
-                commitment_amount=1e6,
+                commitment_amount=self.supplied_liquidity,
                 market_decimal_places=market_config.decimal_places,
                 asset_decimal_places=asset_dp,
                 num_steps=self.num_steps,
                 kappa=2.4,
-                tick_spacing=0.05,
+                tick_spacing=0.1,
                 market_kappa=50,
                 state_update_freq=10,
                 tag="MARKET_MAKER",
@@ -154,36 +140,73 @@ class LiquidationScenario(Scenario):
         agents.extend(
             [
                 UncrossAuctionAgent(
-                    key_name=f"AGENT_{str(i_agent).zfill(3)}",
+                    key_name=f"UA_AGENT_{str(i_agent).zfill(3)}",
                     side=side,
-                    initial_asset_mint=self.initial_asset_mint,
+                    initial_asset_mint=1e6,
                     price_process=iter(price_process),
                     market_name=market_name,
                     asset_name=asset_name,
                     uncrossing_size=20,
-                    tag=(f"AGENT_{str(i_agent).zfill(3)}"),
+                    tag=str(i_agent).zfill(3),
                 )
                 for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
             ]
         )
-
         agents.extend(
             [
-                RiskyMarketOrderTrader(
-                    key_name=f"SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
+                MarketOrderTrader(
+                    key_name=f"MO_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
                     asset_name=asset_name,
-                    side=side,
-                    initial_asset_mint=1_000,
-                    size_factor=0.6,
+                    buy_intensity=10,
+                    sell_intensity=10,
+                    base_order_size=0.01,
                     step_bias=0.1,
-                    tag=f"SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
+                    tag=str(i_agent).zfill(3),
                 )
-                for side in ["SIDE_BUY", "SIDE_SELL"]
                 for i_agent in range(10)
             ]
         )
-
+        agents.extend(
+            [
+                LimitOrderTrader(
+                    key_name=f"LO_AGENT_{str(i_agent).zfill(3)}",
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
+                    buy_volume=0.001,
+                    sell_volume=0.001,
+                    buy_intensity=10,
+                    sell_intensity=10,
+                    submit_bias=1,
+                    cancel_bias=0,
+                    duration=120,
+                    price_process=price_process,
+                    spread=0,
+                    mean=-3,
+                    sigma=0.5,
+                    initial_asset_mint=1e9,
+                    tag=str(i_agent).zfill(3),
+                )
+                for i_agent in range(10)
+            ]
+        )
+        agents.extend(
+            [
+                RiskyMarketOrderTrader(
+                    key_name=f"RO_AGENT_{str(i_agent).zfill(3)}_SIDE_{side}",
+                    market_name=market_name,
+                    asset_name=asset_name,
+                    side=side,
+                    initial_asset_mint=self.mint_risky_traders,
+                    size_factor=0.6,
+                    step_bias=0.1,
+                    tag=f"{side}_{str(i_agent).zfill(3)}",
+                )
+                for side in ["SIDE_BUY", "SIDE_SELL"]
+                for i_agent in range(self.number_risky_traders)
+            ]
+        )
         return {agent.name(): agent for agent in agents}
 
     def configure_environment(

@@ -919,7 +919,7 @@ def _position_from_proto(
         average_entry_price=num_from_padded_int(
             position.average_entry_price, decimal_spec.price_decimals
         ),
-        updated_at=datetime.datetime.fromtimestamp(int(position.updated_at / 1e9)),
+        updated_at=datetime.datetime.fromtimestamp(position.updated_at / 1e9),
         loss_socialisation_amount=num_from_padded_int(
             position.loss_socialisation_amount,
             decimal_spec.asset_decimals,

@@ -393,10 +393,10 @@ class LogNormalModelParams(Config):
 class LiquidationStrategy(Config):
     OPTS = {
         "default": {
-            "disposal_time_step": 1,
-            "disposal_fraction": 1,
-            "full_disposal_size": 10000000,
-            "max_fraction_consumed": 0.5,
+            "disposal_time_step": 30,
+            "disposal_fraction": 0.1,
+            "full_disposal_size": 0,
+            "max_fraction_consumed": 0.1,
         }
     }
 
