@@ -106,6 +106,12 @@ if __name__ == "__main__":
             is_amendment=False,
         )
 
+        vega.update_margin_mode(
+            key_name=MM_WALLET.name,
+            margin_mode="MODE_ISOLATED_MARGIN",
+            margin_factor=0.5,
+            market_id=market_id,
+        )
         vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,

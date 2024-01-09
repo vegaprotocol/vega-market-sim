@@ -120,6 +120,19 @@ class FuzzingAgent(StateAgentWithWallet):
             cancellations=cancellations,
             stop_orders_submission=stop_orders_submissions,
         )
+        self.fuzz_isolated_margin_state()
+
+    def fuzz_isolated_margin_state(self):
+        if self.random_state.random() > 0.95:
+            self.vega.update_margin_mode(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+                margin_mode=self.random_state.choice(
+                    ["MODE_CROSS_MARGIN", "MODE_ISOLATED_MARGIN"]
+                ),
+                margin_factor=self.random_state.random(),
+            )
 
     def create_fuzzed_cancellation(self, vega_state):
         order_id = self._select_order_id()
@@ -328,6 +341,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 import plotly.express as px
 
                 FuzzingAgent.OUTPUTTED = True
+
                 df = pd.DataFrame.from_dict(FuzzingAgent.MEMORY)
                 df = (
                     df.groupby(list(FuzzingAgent.MEMORY.keys()))

@@ -116,6 +116,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_VESTING_SUMMARY: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TRANSFER_FEES_PAID: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -208,6 +209,7 @@ BUS_EVENT_TYPE_PAID_LIQUIDITY_FEES_STATS_UPDATED: BusEventType
 BUS_EVENT_TYPE_VESTING_SUMMARY: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_PAID: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: BusEventType
+BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -2250,6 +2252,41 @@ class PaidLiquidityFeesStats(_message.Message):
         fees_paid_per_party: _Optional[_Iterable[_Union[PartyAmount, _Mapping]]] = ...,
     ) -> None: ...
 
+class PartyMarginModeUpdated(_message.Message):
+    __slots__ = (
+        "market_id",
+        "party_id",
+        "margin_mode",
+        "margin_factor",
+        "min_theoretical_margin_factor",
+        "max_theoretical_leverage",
+        "at_epoch",
+    )
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MIN_THEORETICAL_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MAX_THEORETICAL_LEVERAGE_FIELD_NUMBER: _ClassVar[int]
+    AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    party_id: str
+    margin_mode: _vega_pb2.MarginMode
+    margin_factor: str
+    min_theoretical_margin_factor: str
+    max_theoretical_leverage: str
+    at_epoch: int
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        margin_mode: _Optional[_Union[_vega_pb2.MarginMode, str]] = ...,
+        margin_factor: _Optional[str] = ...,
+        min_theoretical_margin_factor: _Optional[str] = ...,
+        max_theoretical_leverage: _Optional[str] = ...,
+        at_epoch: _Optional[int] = ...,
+    ) -> None: ...
+
 class BusEvent(_message.Message):
     __slots__ = (
         "id",
@@ -2336,6 +2373,7 @@ class BusEvent(_message.Message):
         "vesting_balances_summary",
         "transfer_fees",
         "transfer_fees_discount",
+        "party_margin_mode_updated",
         "market",
         "tx_err_event",
         "version",
@@ -2426,6 +2464,7 @@ class BusEvent(_message.Message):
     VESTING_BALANCES_SUMMARY_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_FEES_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_FEES_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
+    PARTY_MARGIN_MODE_UPDATED_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2515,6 +2554,7 @@ class BusEvent(_message.Message):
     vesting_balances_summary: VestingBalancesSummary
     transfer_fees: TransferFees
     transfer_fees_discount: TransferFeesDiscount
+    party_margin_mode_updated: PartyMarginModeUpdated
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2646,6 +2686,9 @@ class BusEvent(_message.Message):
         ] = ...,
         transfer_fees: _Optional[_Union[TransferFees, _Mapping]] = ...,
         transfer_fees_discount: _Optional[_Union[TransferFeesDiscount, _Mapping]] = ...,
+        party_margin_mode_updated: _Optional[
+            _Union[PartyMarginModeUpdated, _Mapping]
+        ] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,
