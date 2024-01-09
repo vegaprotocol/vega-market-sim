@@ -1946,6 +1946,7 @@ class TeamCreated(_message.Message):
         "created_at",
         "closed",
         "at_epoch",
+        "allow_list",
     )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -1955,6 +1956,7 @@ class TeamCreated(_message.Message):
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     referrer: str
     name: str
@@ -1963,6 +1965,7 @@ class TeamCreated(_message.Message):
     created_at: int
     closed: bool
     at_epoch: int
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -1973,20 +1976,23 @@ class TeamCreated(_message.Message):
         created_at: _Optional[int] = ...,
         closed: bool = ...,
         at_epoch: _Optional[int] = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class TeamUpdated(_message.Message):
-    __slots__ = ("team_id", "name", "team_url", "avatar_url", "closed")
+    __slots__ = ("team_id", "name", "team_url", "avatar_url", "closed", "allow_list")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     TEAM_URL_FIELD_NUMBER: _ClassVar[int]
     AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     name: str
     team_url: str
     avatar_url: str
     closed: bool
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -1994,6 +2000,7 @@ class TeamUpdated(_message.Message):
         team_url: _Optional[str] = ...,
         avatar_url: _Optional[str] = ...,
         closed: bool = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class RefereeSwitchedTeam(_message.Message):

@@ -531,6 +531,9 @@ class StopOrder(_message.Message):
         REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: _ClassVar[
             StopOrder.RejectionReason
         ]
+        REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_DURING_OPENING_AUCTION: _ClassVar[
+            StopOrder.RejectionReason
+        ]
     REJECTION_REASON_UNSPECIFIED: StopOrder.RejectionReason
     REJECTION_REASON_TRADING_NOT_ALLOWED: StopOrder.RejectionReason
     REJECTION_REASON_EXPIRY_IN_THE_PAST: StopOrder.RejectionReason
@@ -539,6 +542,7 @@ class StopOrder(_message.Message):
     REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_WITHOUT_A_POSITION: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_NOT_CLOSING_THE_POSITION: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: StopOrder.RejectionReason
+    REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_DURING_OPENING_AUCTION: StopOrder.RejectionReason
 
     class SizeOverrideValue(_message.Message):
         __slots__ = ("percentage",)

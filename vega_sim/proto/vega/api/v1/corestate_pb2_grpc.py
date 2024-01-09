@@ -82,7 +82,7 @@ class CoreStateServiceServicer(object):
     def ListAccounts(self, request, context):
         """Accounts list
 
-        Get a list of accounts
+        Get a list of accounts. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -91,7 +91,7 @@ class CoreStateServiceServicer(object):
     def ListAssets(self, request, context):
         """Assets list
 
-        Get a list of assets
+        Get a list of assets. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -100,7 +100,7 @@ class CoreStateServiceServicer(object):
     def ListNetworkParameters(self, request, context):
         """Network parameters list
 
-        Get a list of network parameters
+        Get a list of network parameters. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -109,7 +109,7 @@ class CoreStateServiceServicer(object):
     def ListNetworkLimits(self, request, context):
         """Network limits list
 
-        Get a list of network limits
+        Get a list of network limits. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -118,7 +118,7 @@ class CoreStateServiceServicer(object):
     def ListParties(self, request, context):
         """Parties list
 
-        Get a list of parties
+        Get a list of parties. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -127,7 +127,7 @@ class CoreStateServiceServicer(object):
     def ListValidators(self, request, context):
         """Validators list
 
-        Get a list of validators
+        Get a list of validators. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -136,7 +136,7 @@ class CoreStateServiceServicer(object):
     def ListMarkets(self, request, context):
         """Markets list
 
-        Get a list of markets
+        Get a list of markets. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -145,7 +145,7 @@ class CoreStateServiceServicer(object):
     def ListProposals(self, request, context):
         """Proposals list
 
-        Get a list of proposals
+        Get a list of proposals. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -154,7 +154,7 @@ class CoreStateServiceServicer(object):
     def ListMarketsData(self, request, context):
         """Markets data list
 
-        Get a list of markets data
+        Get a list of markets' data. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -163,7 +163,7 @@ class CoreStateServiceServicer(object):
     def ListVotes(self, request, context):
         """Votes list
 
-        Get a list of votes
+        Get a list of votes. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -172,7 +172,7 @@ class CoreStateServiceServicer(object):
     def ListPartiesStake(self, request, context):
         """Parties stake list
 
-        Get a list of parties stake
+        Get a list of parties' stake. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -181,7 +181,7 @@ class CoreStateServiceServicer(object):
     def ListDelegations(self, request, context):
         """Delegations list
 
-        Get a list of delegations
+        Get a list of delegations. This endpoint may not be exposed by mainnet nodes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
