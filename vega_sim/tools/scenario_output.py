@@ -1,7 +1,7 @@
 import csv
-import itertools
 import json
 import os
+import datetime
 import os.path
 from typing import Callable, Dict, List, Optional
 
@@ -24,12 +24,13 @@ RESOURCES_FILE_NAME = "resources.csv"
 ASSETS_FILE_NAME = "assets.csv"
 MARKET_CHAIN_FILE_NAME = "market_chain.json"
 LEDGER_ENTRIES_FILE_NAME = "ledger_entries.csv"
+POSITIONS_FILE_NAME = "positions.csv"
 
 
 def resource_data_to_row(data: ResourceData):
     return [
         {
-            "time": data.at_time,
+            "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
             "vega_cpu_per": data.vega_cpu_per,
             "vega_mem_rss": data.vega_mem_rss,
             "vega_mem_vms": data.vega_mem_vms,
@@ -45,7 +46,7 @@ def history_data_to_row(data: MarketHistoryData) -> List[pd.Series]:
         market_data = data.market_data[market_id]
 
         yield {
-            "time": data.at_time,
+            "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
             "mark_price": market_data.mark_price,
             "market_id": market_id,
             "mark_price": market_data.mark_price,
@@ -74,7 +75,7 @@ def history_data_to_order_book_rows(data: MarketHistoryData) -> List[dict]:
         for side, side_vals in [("BID", depth.buys), ("ASK", depth.sells)]:
             for i, level_data in enumerate(side_vals):
                 yield {
-                    "time": data.at_time,
+                    "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
                     "side": side,
                     "price": level_data.price,
                     "volume": level_data.volume,
@@ -87,8 +88,8 @@ def history_data_to_trade_rows(data: MarketHistoryData) -> List[dict]:
     for market_id, trades in data.trades.items():
         for trade in trades:
             yield {
-                "time": trade.timestamp,
-                "seen_at": data.at_time,
+                "time": datetime.datetime.fromtimestamp(trade.timestamp / 1e9),
+                "seen_at": datetime.datetime.fromtimestamp(data.at_time / 1e9),
                 "id": trade.id,
                 "price": trade.price,
                 "size": trade.size,
@@ -113,12 +114,28 @@ def history_data_to_trade_rows(data: MarketHistoryData) -> List[dict]:
 def history_data_to_account_rows(data: MarketHistoryData) -> List[dict]:
     for account in data.accounts:
         yield {
-            "time": data.at_time,
+            "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
             "party_id": account.owner,
             "balance": account.balance,
             "market_id": account.market_id,
             "asset": account.asset,
             "type": account.type,
+        }
+
+
+def history_data_to_position_rows(data: MarketHistoryData) -> List[dict]:
+    for position in data.positions:
+        yield {
+            "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
+            "market_id": position.market_id,
+            "party_id": position.party_id,
+            "open_volume": position.open_volume,
+            "realised_pnl": position.realised_pnl,
+            "unrealised_pnl": position.unrealised_pnl,
+            "average_entry_price": position.average_entry_price,
+            "updated_at": position.updated_at,
+            "loss_socialisation_amount": position.loss_socialisation_amount,
+            "position_status": position.position_status,
         }
 
 
@@ -162,6 +179,7 @@ def market_data_standard_output(
             ORDER_BOOK_FILE_NAME: history_data_to_order_book_rows,
             TRADES_FILE_NAME: history_data_to_trade_rows,
             ACCOUNTS_FILE_NAME: history_data_to_account_rows,
+            POSITIONS_FILE_NAME: history_data_to_position_rows,
         }
     )
     for file_name, data_fn in data_fns.items():
@@ -397,6 +415,17 @@ def load_ledger_entries_df(
 ) -> pd.DataFrame:
     run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
     df = pd.read_csv(os.path.join(output_path, run_name, LEDGER_ENTRIES_FILE_NAME))
+    if not df.empty:
+        df["time"] = pd.to_datetime(df.time)
+    return df.drop_duplicates()
+
+
+def load_positions_df(
+    run_name: Optional[str] = None,
+    output_path: str = DEFAULT_PATH,
+) -> pd.DataFrame:
+    run_name = run_name if run_name is not None else DEFAULT_RUN_NAME
+    df = pd.read_csv(os.path.join(output_path, run_name, POSITIONS_FILE_NAME))
     if not df.empty:
         df["time"] = pd.to_datetime(df.time)
     return df.drop_duplicates()

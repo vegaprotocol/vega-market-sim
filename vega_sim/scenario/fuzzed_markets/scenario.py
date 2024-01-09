@@ -87,7 +87,7 @@ def state_extraction_fn(vega: VegaServiceNull, agents: dict):
 def additional_data_to_rows(data) -> List[pd.Series]:
     for market_id in data.external_prices.keys():
         yield {
-            "time": data.at_time,
+            "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
             "market_id": market_id,
             "external_price": data.external_prices.get(market_id, np.NaN),
             "trader_close_outs": data.trader_close_outs.get(market_id, 0),

@@ -3605,3 +3605,18 @@ class VegaService(ABC):
             total_balance_amount=total_balance_amount,
             total_deposit_amount=total_deposit_amount,
         )
+
+    def list_all_positions(
+        self,
+        party_ids: Optional[List[str]] = None,
+        market_ids: Optional[List[str]] = None,
+    ) -> List[data.Position]:
+        return data.list_all_positions(
+            data_client=self.trading_data_client_v2,
+            party_ids=party_ids,
+            market_ids=market_ids,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_to_asset_map=self.market_to_asset,
+            asset_decimals_map=self.asset_decimals,
+        )

@@ -13,6 +13,7 @@ from vega_sim.scenario.hedged_market_maker.scenario import HedgedMarket
 from vega_sim.scenario.parameter_experiment.scenario import ParameterExperiment
 from vega_sim.scenario.fuzzed_markets.scenario import FuzzingScenario
 from vega_sim.scenario.sla.scenario import SLAScenario
+from vega_sim.scenario.liquidations.scenario import LiquidationScenario
 
 
 from vega_sim.scenario.common.utils.price_process import (
@@ -249,5 +250,50 @@ SCENARIOS = {
         lps_offset=[0.5, 0.8],
         lps_target_time_on_book=[0.91, 0.91],
         lps_commitment_amount=[100000, 100000],
+    ),
+    "liquidation_small_degens": lambda: LiquidationScenario(
+        num_steps=600,
+        step_length_seconds=5,
+        block_length_seconds=1,
+        transactions_per_block=4096,
+        supplied_liquidity=10e6,
+        number_risky_traders=1,
+        mint_risky_traders=1e3,
+        price_sigma=1,
+        price_drift=0,
+        disposal_time_step=30,
+        disposal_fraction=0.5,
+        full_disposal_size=0,
+        max_fraction_consumed=0.5,
+    ),
+    "liquidation_large_degens": lambda: LiquidationScenario(
+        num_steps=600,
+        step_length_seconds=5,
+        block_length_seconds=1,
+        transactions_per_block=4096,
+        supplied_liquidity=10e6,
+        number_risky_traders=5,
+        mint_risky_traders=1e5,
+        price_sigma=1,
+        price_drift=0,
+        disposal_time_step=30,
+        disposal_fraction=0.5,
+        full_disposal_size=0,
+        max_fraction_consumed=0.5,
+    ),
+    "liquidation_falling_market": lambda: LiquidationScenario(
+        num_steps=600,
+        step_length_seconds=5,
+        block_length_seconds=1,
+        transactions_per_block=4096,
+        supplied_liquidity=1e6,
+        number_risky_traders=5,
+        mint_risky_traders=1e3,
+        price_sigma=1,
+        price_drift=-0.05,
+        disposal_time_step=30,
+        disposal_fraction=0.5,
+        full_disposal_size=0,
+        max_fraction_consumed=0.5,
     ),
 }

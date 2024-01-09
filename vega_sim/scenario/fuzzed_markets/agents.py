@@ -470,6 +470,7 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
                     trading_key=self.key_name,
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
+                    fill_or_kill=False,
                     side=self.side,
                     volume=size,
                     wait=False,
