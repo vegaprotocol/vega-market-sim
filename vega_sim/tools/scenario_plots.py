@@ -984,7 +984,7 @@ def plot_account_by_party(
     ss: Optional[GridSpecFromSubplotSpec] = None,
     asset_id: Optional[str] = None,
     market_id: Optional[str] = None,
-    account_type: Optional[vega_protos.vega.AccountType] = None,
+    account_type: Optional[vega_protos.vega.AccountType.Value] = None,
 ):
     # Get account data
     accounts = load_accounts_df(run_name=run_name).set_index(
