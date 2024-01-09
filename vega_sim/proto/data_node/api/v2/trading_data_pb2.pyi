@@ -4563,6 +4563,7 @@ class Team(_message.Message):
         "created_at",
         "closed",
         "created_at_epoch",
+        "allow_list",
     )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -4572,6 +4573,7 @@ class Team(_message.Message):
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     referrer: str
     name: str
@@ -4580,6 +4582,7 @@ class Team(_message.Message):
     created_at: int
     closed: bool
     created_at_epoch: int
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -4590,6 +4593,7 @@ class Team(_message.Message):
         created_at: _Optional[int] = ...,
         closed: bool = ...,
         created_at_epoch: _Optional[int] = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class TeamEdge(_message.Message):

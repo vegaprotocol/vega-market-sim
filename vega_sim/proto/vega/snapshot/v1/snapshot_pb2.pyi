@@ -3313,6 +3313,7 @@ class Team(_message.Message):
         "avatar_url",
         "created_at",
         "closed",
+        "allow_list",
     )
     ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -3322,6 +3323,7 @@ class Team(_message.Message):
     AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     id: str
     referrer: Membership
     referees: _containers.RepeatedCompositeFieldContainer[Membership]
@@ -3330,6 +3332,7 @@ class Team(_message.Message):
     avatar_url: str
     created_at: int
     closed: bool
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -3340,6 +3343,7 @@ class Team(_message.Message):
         avatar_url: _Optional[str] = ...,
         created_at: _Optional[int] = ...,
         closed: bool = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class Membership(_message.Message):

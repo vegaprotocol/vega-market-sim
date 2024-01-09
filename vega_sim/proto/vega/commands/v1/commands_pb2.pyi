@@ -502,21 +502,24 @@ class CreateReferralSet(_message.Message):
     __slots__ = ("is_team", "team")
 
     class Team(_message.Message):
-        __slots__ = ("name", "team_url", "avatar_url", "closed")
+        __slots__ = ("name", "team_url", "avatar_url", "closed", "allow_list")
         NAME_FIELD_NUMBER: _ClassVar[int]
         TEAM_URL_FIELD_NUMBER: _ClassVar[int]
         AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
         CLOSED_FIELD_NUMBER: _ClassVar[int]
+        ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
         name: str
         team_url: str
         avatar_url: str
         closed: bool
+        allow_list: _containers.RepeatedScalarFieldContainer[str]
         def __init__(
             self,
             name: _Optional[str] = ...,
             team_url: _Optional[str] = ...,
             avatar_url: _Optional[str] = ...,
             closed: bool = ...,
+            allow_list: _Optional[_Iterable[str]] = ...,
         ) -> None: ...
     IS_TEAM_FIELD_NUMBER: _ClassVar[int]
     TEAM_FIELD_NUMBER: _ClassVar[int]
@@ -532,21 +535,24 @@ class UpdateReferralSet(_message.Message):
     __slots__ = ("id", "is_team", "team")
 
     class Team(_message.Message):
-        __slots__ = ("name", "team_url", "avatar_url", "closed")
+        __slots__ = ("name", "team_url", "avatar_url", "closed", "allow_list")
         NAME_FIELD_NUMBER: _ClassVar[int]
         TEAM_URL_FIELD_NUMBER: _ClassVar[int]
         AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
         CLOSED_FIELD_NUMBER: _ClassVar[int]
+        ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
         name: str
         team_url: str
         avatar_url: str
         closed: bool
+        allow_list: _containers.RepeatedScalarFieldContainer[str]
         def __init__(
             self,
             name: _Optional[str] = ...,
             team_url: _Optional[str] = ...,
             avatar_url: _Optional[str] = ...,
             closed: bool = ...,
+            allow_list: _Optional[_Iterable[str]] = ...,
         ) -> None: ...
     ID_FIELD_NUMBER: _ClassVar[int]
     IS_TEAM_FIELD_NUMBER: _ClassVar[int]
