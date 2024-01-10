@@ -1451,6 +1451,9 @@ class Market(_message.Message):
         "product",
         "fees_stats",
         "party_margin_factor",
+        "mark_price_calculator",
+        "index_price_calculator",
+        "next_index_price_calc",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1480,6 +1483,9 @@ class Market(_message.Message):
     PRODUCT_FIELD_NUMBER: _ClassVar[int]
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     PARTY_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
+    INDEX_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
+    NEXT_INDEX_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1508,6 +1514,9 @@ class Market(_message.Message):
     product: Product
     fees_stats: _events_pb2.FeesStats
     party_margin_factor: _containers.RepeatedCompositeFieldContainer[PartyMarginFactor]
+    mark_price_calculator: CompositePriceCalculator
+    index_price_calculator: CompositePriceCalculator
+    next_index_price_calc: int
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1542,6 +1551,13 @@ class Market(_message.Message):
         party_margin_factor: _Optional[
             _Iterable[_Union[PartyMarginFactor, _Mapping]]
         ] = ...,
+        mark_price_calculator: _Optional[
+            _Union[CompositePriceCalculator, _Mapping]
+        ] = ...,
+        index_price_calculator: _Optional[
+            _Union[CompositePriceCalculator, _Mapping]
+        ] = ...,
+        next_index_price_calc: _Optional[int] = ...,
     ) -> None: ...
 
 class PartyMarginFactor(_message.Message):
@@ -3699,4 +3715,37 @@ class BankingTransferFeeDiscounts(_message.Message):
         party_asset_discount: _Optional[
             _Iterable[_Union[PartyAssetAmount, _Mapping]]
         ] = ...,
+    ) -> None: ...
+
+class CompositePriceCalculator(_message.Message):
+    __slots__ = (
+        "composite_price",
+        "price_configuration",
+        "trades",
+        "price_sources",
+        "price_source_last_update",
+        "book_price_at_time",
+    )
+    COMPOSITE_PRICE_FIELD_NUMBER: _ClassVar[int]
+    PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
+    TRADES_FIELD_NUMBER: _ClassVar[int]
+    PRICE_SOURCES_FIELD_NUMBER: _ClassVar[int]
+    PRICE_SOURCE_LAST_UPDATE_FIELD_NUMBER: _ClassVar[int]
+    BOOK_PRICE_AT_TIME_FIELD_NUMBER: _ClassVar[int]
+    composite_price: str
+    price_configuration: _markets_pb2.CompositePriceConfiguration
+    trades: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Trade]
+    price_sources: _containers.RepeatedScalarFieldContainer[str]
+    price_source_last_update: _containers.RepeatedScalarFieldContainer[int]
+    book_price_at_time: _containers.RepeatedCompositeFieldContainer[TimePrice]
+    def __init__(
+        self,
+        composite_price: _Optional[str] = ...,
+        price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
+        ] = ...,
+        trades: _Optional[_Iterable[_Union[_vega_pb2.Trade, _Mapping]]] = ...,
+        price_sources: _Optional[_Iterable[str]] = ...,
+        price_source_last_update: _Optional[_Iterable[int]] = ...,
+        book_price_at_time: _Optional[_Iterable[_Union[TimePrice, _Mapping]]] = ...,
     ) -> None: ...

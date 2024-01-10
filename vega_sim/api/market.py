@@ -128,6 +128,7 @@ class MarketConfig(Config):
             "successor": None,
             "liquidity_sla_parameters": "default",
             "liquidation_strategy": "default",
+            "mark_price_configuration": "default",
         },
         "perp": {
             "decimal_places": 4,
@@ -142,6 +143,7 @@ class MarketConfig(Config):
             "successor": None,
             "liquidity_sla_parameters": "default",
             "liquidation_strategy": "default",
+            "mark_price_configuration": "default",
         },
     }
 
@@ -174,6 +176,9 @@ class MarketConfig(Config):
         self.liquidation_strategy = LiquidationStrategy(
             opt=config["liquidation_strategy"]
         )
+        self.mark_price_configuration = MarkPriceConfiguration(
+            opt=config["mark_price_configuration"]
+        )
 
     def build(self):
         new_market = vega_protos.governance.NewMarket(
@@ -189,6 +194,7 @@ class MarketConfig(Config):
                 linear_slippage_factor=self.linear_slippage_factor,
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
                 liquidation_strategy=self.liquidation_strategy.build(),
+                mark_price_configuration=self.mark_price_configuration.build(),
             )
         )
         if self.successor is not None:
@@ -387,6 +393,39 @@ class LogNormalModelParams(Config):
             mu=self.mu,
             r=self.r,
             sigma=self.sigma,
+        )
+
+
+class MarkPriceConfiguration(Config):
+    OPTS = {
+        "default": {
+            "decay_weight": 0,
+            "composite_price_type": vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
+            "source_staleness_tolerance": ["100h"],
+            "decay_power": 1,
+            "cash_amount": 0,
+            "source_weights": [1],
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.decay_weight = str(config["decay_weight"])
+        self.composite_price_type = config["composite_price_type"]
+        self.source_staleness_tolerance = config["source_staleness_tolerance"]
+        self.decay_power = config["decay_power"]
+        self.cash_amount = str(config["cash_amount"])
+        self.source_weights = [str(w) for w in config["source_weights"]]
+
+    def build(self):
+        return vega_protos.markets.CompositePriceConfiguration(
+            decay_weight=self.decay_weight,
+            composite_price_type=self.composite_price_type,
+            source_staleness_tolerance=self.source_staleness_tolerance,
+            decay_power=self.decay_power,
+            cash_amount=self.cash_amount,
+            source_weights=self.source_weights,
         )
 
 
