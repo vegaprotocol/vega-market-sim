@@ -567,11 +567,6 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.FromString,
         )
-        self.ObserveTransactionResults = channel.unary_stream(
-            "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
-            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
-            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
-        )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
@@ -715,6 +710,11 @@ class TradingDataServiceServicer(object):
         - receiving account (market ID, asset ID, account type)
         - sending AND receiving account
         - transfer type either in addition to the above filters or as a standalone option
+        Note: The date range is restricted to any 5 days.
+        If no start or end date is provided, only ledger entries from the last 5 days will be returned.
+        If a start and end date are provided, but the end date is more than 5 days after the start date, only data up to 5 days after the start date will be returned.
+        If a start date is provided but no end date, the end date will be set to 5 days after the start date.
+        If no start date is provided, but the end date is, the start date will be set to 5 days before the end date.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1631,15 +1631,6 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def ObserveTransactionResults(self, request, context):
-        """Observe transaction results
-
-        Subscribe to a stream of transaction results, optionally filtered by party/hash/status
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -2268,11 +2259,6 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.GetPartyVestingStats,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.SerializeToString,
-        ),
-        "ObserveTransactionResults": grpc.unary_stream_rpc_method_handler(
-            servicer.ObserveTransactionResults,
-            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.FromString,
-            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -5475,35 +5461,6 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/GetPartyVestingStats",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
-
-    @staticmethod
-    def ObserveTransactionResults(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        insecure=False,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
-            data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
             options,
             channel_credentials,
             insecure,

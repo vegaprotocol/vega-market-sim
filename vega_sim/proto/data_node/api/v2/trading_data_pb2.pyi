@@ -696,25 +696,21 @@ class LedgerEntryFilter(_message.Message):
         "from_account_filter",
         "to_account_filter",
         "transfer_types",
-        "transfer_id",
     )
     CLOSE_ON_ACCOUNT_FILTERS_FIELD_NUMBER: _ClassVar[int]
     FROM_ACCOUNT_FILTER_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_FILTER_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_TYPES_FIELD_NUMBER: _ClassVar[int]
-    TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     close_on_account_filters: bool
     from_account_filter: AccountFilter
     to_account_filter: AccountFilter
     transfer_types: _containers.RepeatedScalarFieldContainer[_vega_pb2.TransferType]
-    transfer_id: str
     def __init__(
         self,
         close_on_account_filters: bool = ...,
         from_account_filter: _Optional[_Union[AccountFilter, _Mapping]] = ...,
         to_account_filter: _Optional[_Union[AccountFilter, _Mapping]] = ...,
         transfer_types: _Optional[_Iterable[_Union[_vega_pb2.TransferType, str]]] = ...,
-        transfer_id: _Optional[str] = ...,
     ) -> None: ...
 
 class AggregatedLedgerEntry(_message.Message):
@@ -4918,32 +4914,4 @@ class FeesStatsForParty(_message.Message):
         referees_discount_applied: _Optional[str] = ...,
         volume_discount_applied: _Optional[str] = ...,
         total_maker_fees_received: _Optional[str] = ...,
-    ) -> None: ...
-
-class ObserveTransactionResultsRequest(_message.Message):
-    __slots__ = ("party_ids", "hashes", "status")
-    PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
-    HASHES_FIELD_NUMBER: _ClassVar[int]
-    STATUS_FIELD_NUMBER: _ClassVar[int]
-    party_ids: _containers.RepeatedScalarFieldContainer[str]
-    hashes: _containers.RepeatedScalarFieldContainer[str]
-    status: bool
-    def __init__(
-        self,
-        party_ids: _Optional[_Iterable[str]] = ...,
-        hashes: _Optional[_Iterable[str]] = ...,
-        status: bool = ...,
-    ) -> None: ...
-
-class ObserveTransactionResultsResponse(_message.Message):
-    __slots__ = ("transaction_results",)
-    TRANSACTION_RESULTS_FIELD_NUMBER: _ClassVar[int]
-    transaction_results: _containers.RepeatedCompositeFieldContainer[
-        _events_pb2.TransactionResult
-    ]
-    def __init__(
-        self,
-        transaction_results: _Optional[
-            _Iterable[_Union[_events_pb2.TransactionResult, _Mapping]]
-        ] = ...,
     ) -> None: ...

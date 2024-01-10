@@ -1122,8 +1122,6 @@ class TransactionResult(_message.Message):
         "create_referral_set",
         "update_referral_set",
         "apply_referral_code",
-        "update_margin_mode",
-        "join_team",
         "success",
         "failure",
     )
@@ -1165,8 +1163,6 @@ class TransactionResult(_message.Message):
     CREATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
-    UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
-    JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1197,8 +1193,6 @@ class TransactionResult(_message.Message):
     create_referral_set: _commands_pb2.CreateReferralSet
     update_referral_set: _commands_pb2.UpdateReferralSet
     apply_referral_code: _commands_pb2.ApplyReferralCode
-    update_margin_mode: _commands_pb2.UpdateMarginMode
-    join_team: _commands_pb2.JoinTeam
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1277,10 +1271,6 @@ class TransactionResult(_message.Message):
         apply_referral_code: _Optional[
             _Union[_commands_pb2.ApplyReferralCode, _Mapping]
         ] = ...,
-        update_margin_mode: _Optional[
-            _Union[_commands_pb2.UpdateMarginMode, _Mapping]
-        ] = ...,
-        join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
     ) -> None: ...

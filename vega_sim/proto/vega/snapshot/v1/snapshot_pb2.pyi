@@ -1714,7 +1714,6 @@ class Position(_message.Message):
         "buy_sum_product",
         "sell_sum_product",
         "distressed",
-        "average_entry_price",
     )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
@@ -1724,7 +1723,6 @@ class Position(_message.Message):
     BUY_SUM_PRODUCT_FIELD_NUMBER: _ClassVar[int]
     SELL_SUM_PRODUCT_FIELD_NUMBER: _ClassVar[int]
     DISTRESSED_FIELD_NUMBER: _ClassVar[int]
-    AVERAGE_ENTRY_PRICE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     size: int
     buy: int
@@ -1733,7 +1731,6 @@ class Position(_message.Message):
     buy_sum_product: str
     sell_sum_product: str
     distressed: bool
-    average_entry_price: bytes
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -1744,7 +1741,6 @@ class Position(_message.Message):
         buy_sum_product: _Optional[str] = ...,
         sell_sum_product: _Optional[str] = ...,
         distressed: bool = ...,
-        average_entry_price: _Optional[bytes] = ...,
     ) -> None: ...
 
 class MarketPositions(_message.Message):
@@ -2638,17 +2634,20 @@ class LiquidityV2Parameters(_message.Message):
         "stake_to_volume",
         "bond_penalty_slope",
         "bond_penalty_max",
+        "bond_penalties_disabled_remaining_epochs",
     )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     STAKE_TO_VOLUME_FIELD_NUMBER: _ClassVar[int]
     BOND_PENALTY_SLOPE_FIELD_NUMBER: _ClassVar[int]
     BOND_PENALTY_MAX_FIELD_NUMBER: _ClassVar[int]
+    BOND_PENALTIES_DISABLED_REMAINING_EPOCHS_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     market_sla_parameters: _markets_pb2.LiquiditySLAParameters
     stake_to_volume: str
     bond_penalty_slope: str
     bond_penalty_max: str
+    bond_penalties_disabled_remaining_epochs: int
     def __init__(
         self,
         market_id: _Optional[str] = ...,
@@ -2658,6 +2657,7 @@ class LiquidityV2Parameters(_message.Message):
         stake_to_volume: _Optional[str] = ...,
         bond_penalty_slope: _Optional[str] = ...,
         bond_penalty_max: _Optional[str] = ...,
+        bond_penalties_disabled_remaining_epochs: _Optional[int] = ...,
     ) -> None: ...
 
 class LiquidityV2PaidFeesStats(_message.Message):

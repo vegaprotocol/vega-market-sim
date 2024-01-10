@@ -146,7 +146,6 @@ class AccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY: _ClassVar[AccountType]
     ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: _ClassVar[AccountType]
     ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: _ClassVar[AccountType]
-    ACCOUNT_TYPE_ORDER_MARGIN: _ClassVar[AccountType]
 
 class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -239,12 +238,6 @@ class ValidatorNodeStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     VALIDATOR_NODE_STATUS_TENDERMINT: _ClassVar[ValidatorNodeStatus]
     VALIDATOR_NODE_STATUS_ERSATZ: _ClassVar[ValidatorNodeStatus]
     VALIDATOR_NODE_STATUS_PENDING: _ClassVar[ValidatorNodeStatus]
-
-class MarginMode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
-    MARGIN_MODE_UNSPECIFIED: _ClassVar[MarginMode]
-    MARGIN_MODE_CROSS_MARGIN: _ClassVar[MarginMode]
-    MARGIN_MODE_ISOLATED_MARGIN: _ClassVar[MarginMode]
 
 SIDE_UNSPECIFIED: Side
 SIDE_BUY: Side
@@ -354,7 +347,6 @@ ACCOUNT_TYPE_REWARD_RELATIVE_RETURN: AccountType
 ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY: AccountType
 ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: AccountType
 ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: AccountType
-ACCOUNT_TYPE_ORDER_MARGIN: AccountType
 TRANSFER_TYPE_UNSPECIFIED: TransferType
 TRANSFER_TYPE_LOSS: TransferType
 TRANSFER_TYPE_WIN: TransferType
@@ -423,9 +415,6 @@ VALIDATOR_NODE_STATUS_UNSPECIFIED: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_TENDERMINT: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_ERSATZ: ValidatorNodeStatus
 VALIDATOR_NODE_STATUS_PENDING: ValidatorNodeStatus
-MARGIN_MODE_UNSPECIFIED: MarginMode
-MARGIN_MODE_CROSS_MARGIN: MarginMode
-MARGIN_MODE_ISOLATED_MARGIN: MarginMode
 
 class StopOrder(_message.Message):
     __slots__ = (
@@ -495,6 +484,12 @@ class StopOrder(_message.Message):
         REJECTION_REASON_STOP_ORDER_NOT_CLOSING_THE_POSITION: _ClassVar[
             StopOrder.RejectionReason
         ]
+        REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: _ClassVar[
+            StopOrder.RejectionReason
+        ]
+        REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_DURING_OPENING_AUCTION: _ClassVar[
+            StopOrder.RejectionReason
+        ]
     REJECTION_REASON_UNSPECIFIED: StopOrder.RejectionReason
     REJECTION_REASON_TRADING_NOT_ALLOWED: StopOrder.RejectionReason
     REJECTION_REASON_EXPIRY_IN_THE_PAST: StopOrder.RejectionReason
@@ -502,6 +497,8 @@ class StopOrder(_message.Message):
     REJECTION_REASON_MAX_STOP_ORDERS_PER_PARTY_REACHED: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_WITHOUT_A_POSITION: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_NOT_CLOSING_THE_POSITION: StopOrder.RejectionReason
+    REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: StopOrder.RejectionReason
+    REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_DURING_OPENING_AUCTION: StopOrder.RejectionReason
     ID_FIELD_NUMBER: _ClassVar[int]
     OCO_LINK_ID_FIELD_NUMBER: _ClassVar[int]
     EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
@@ -1374,7 +1371,6 @@ class LedgerEntry(_message.Message):
         "timestamp",
         "from_account_balance",
         "to_account_balance",
-        "transfer_id",
     )
     FROM_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -1383,7 +1379,6 @@ class LedgerEntry(_message.Message):
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     FROM_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
-    TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     from_account: AccountDetails
     to_account: AccountDetails
     amount: str
@@ -1391,7 +1386,6 @@ class LedgerEntry(_message.Message):
     timestamp: int
     from_account_balance: str
     to_account_balance: str
-    transfer_id: str
     def __init__(
         self,
         from_account: _Optional[_Union[AccountDetails, _Mapping]] = ...,
@@ -1401,7 +1395,6 @@ class LedgerEntry(_message.Message):
         timestamp: _Optional[int] = ...,
         from_account_balance: _Optional[str] = ...,
         to_account_balance: _Optional[str] = ...,
-        transfer_id: _Optional[str] = ...,
     ) -> None: ...
 
 class PostTransferBalance(_message.Message):
