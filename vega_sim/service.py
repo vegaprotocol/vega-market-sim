@@ -54,6 +54,7 @@ from vega_sim.proto.vega.markets_pb2 import (
     LiquiditySLAParameters,
     SimpleModelParams,
     LiquidationStrategy,
+    CompositePriceConfiguration,
 )
 from vega_sim.wallet.base import Wallet
 
@@ -1367,6 +1368,7 @@ class VegaService(ABC):
         wallet_name: Optional[int] = None,
         updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
         updated_liquidation_strategy: Optional[LiquidationStrategy] = None,
+        updated_mark_price_configuration: Optional[CompositePriceConfiguration] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1436,6 +1438,19 @@ class VegaService(ABC):
             updated_log_normal_risk_model = (
                 current_market.tradable_instrument.log_normal_risk_model
             )
+        new_mark_price_config = (
+            updated_mark_price_configuration
+            if updated_mark_price_configuration is not None
+            else current_market.mark_price_configuration
+        )
+
+        if (
+            new_mark_price_config.composite_price_type
+            == vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE
+        ):
+            new_mark_price_config = CompositePriceConfiguration(
+                composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE
+            )
 
         update_configuration = UpdateMarketConfiguration(
             instrument=updated_instrument,
@@ -1469,6 +1484,7 @@ class VegaService(ABC):
                     max_fraction_consumed="0.5",
                 )
             ),
+            mark_price_configuration=new_mark_price_config,
         )
 
         proposal_id = gov.propose_market_update(

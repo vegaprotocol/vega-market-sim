@@ -634,6 +634,8 @@ class CompositePriceConfiguration(_message.Message):
         "source_weights",
         "source_staleness_tolerance",
         "composite_price_type",
+        "data_sources_spec",
+        "data_sources_spec_binding",
     )
     DECAY_WEIGHT_FIELD_NUMBER: _ClassVar[int]
     DECAY_POWER_FIELD_NUMBER: _ClassVar[int]
@@ -641,12 +643,20 @@ class CompositePriceConfiguration(_message.Message):
     SOURCE_WEIGHTS_FIELD_NUMBER: _ClassVar[int]
     SOURCE_STALENESS_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
     COMPOSITE_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
+    DATA_SOURCES_SPEC_FIELD_NUMBER: _ClassVar[int]
+    DATA_SOURCES_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
     decay_weight: str
     decay_power: int
     cash_amount: str
     source_weights: _containers.RepeatedScalarFieldContainer[str]
     source_staleness_tolerance: _containers.RepeatedScalarFieldContainer[str]
     composite_price_type: CompositePriceType
+    data_sources_spec: _containers.RepeatedCompositeFieldContainer[
+        _data_source_pb2.DataSourceDefinition
+    ]
+    data_sources_spec_binding: _containers.RepeatedCompositeFieldContainer[
+        _data_source_pb2.SpecBindingForCompositePrice
+    ]
     def __init__(
         self,
         decay_weight: _Optional[str] = ...,
@@ -655,4 +665,10 @@ class CompositePriceConfiguration(_message.Message):
         source_weights: _Optional[_Iterable[str]] = ...,
         source_staleness_tolerance: _Optional[_Iterable[str]] = ...,
         composite_price_type: _Optional[_Union[CompositePriceType, str]] = ...,
+        data_sources_spec: _Optional[
+            _Iterable[_Union[_data_source_pb2.DataSourceDefinition, _Mapping]]
+        ] = ...,
+        data_sources_spec_binding: _Optional[
+            _Iterable[_Union[_data_source_pb2.SpecBindingForCompositePrice, _Mapping]]
+        ] = ...,
     ) -> None: ...

@@ -27,6 +27,12 @@ class DataSourceDefinition(_message.Message):
         external: _Optional[_Union[DataSourceDefinitionExternal, _Mapping]] = ...,
     ) -> None: ...
 
+class SpecBindingForCompositePrice(_message.Message):
+    __slots__ = ("price_source_property",)
+    PRICE_SOURCE_PROPERTY_FIELD_NUMBER: _ClassVar[int]
+    price_source_property: str
+    def __init__(self, price_source_property: _Optional[str] = ...) -> None: ...
+
 class DataSourceSpecConfigurationTime(_message.Message):
     __slots__ = ("conditions",)
     CONDITIONS_FIELD_NUMBER: _ClassVar[int]

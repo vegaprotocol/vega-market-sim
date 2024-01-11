@@ -399,12 +399,12 @@ class LogNormalModelParams(Config):
 class MarkPriceConfiguration(Config):
     OPTS = {
         "default": {
-            "decay_weight": 0,
+            "decay_weight": None,
             "composite_price_type": vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
-            "source_staleness_tolerance": ["100h"],
-            "decay_power": 1,
-            "cash_amount": 0,
-            "source_weights": [1],
+            "source_staleness_tolerance": None,
+            "decay_power": None,
+            "cash_amount": None,
+            "source_weights": None,
         }
     }
 
@@ -415,18 +415,30 @@ class MarkPriceConfiguration(Config):
         self.composite_price_type = config["composite_price_type"]
         self.source_staleness_tolerance = config["source_staleness_tolerance"]
         self.decay_power = config["decay_power"]
-        self.cash_amount = str(config["cash_amount"])
-        self.source_weights = [str(w) for w in config["source_weights"]]
+        self.cash_amount = (
+            str(config["cash_amount"]) if config["cash_amount"] is not None else None
+        )
+        self.source_weights = (
+            [str(w) for w in config["source_weights"]]
+            if config["source_weights"] is not None
+            else None
+        )
 
     def build(self):
-        return vega_protos.markets.CompositePriceConfiguration(
-            decay_weight=self.decay_weight,
-            composite_price_type=self.composite_price_type,
+        price_config = vega_protos.markets.CompositePriceConfiguration(
             source_staleness_tolerance=self.source_staleness_tolerance,
-            decay_power=self.decay_power,
-            cash_amount=self.cash_amount,
-            source_weights=self.source_weights,
         )
+        if self.source_weights is not None:
+            price_config.source_weights = self.source_weights
+        if self.cash_amount is not None:
+            price_config.cash_amount = self.cash_amount
+        if self.decay_power is not None:
+            price_config.decay_power = self.decay_power
+        if self.source_staleness_tolerance is not None:
+            price_config.source_staleness_tolerance = self.source_staleness_tolerance
+        if self.decay_weight is not None:
+            price_config.decay_weight = self.decay_weight
+        return price_config
 
 
 class LiquidationStrategy(Config):

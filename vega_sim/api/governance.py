@@ -225,12 +225,7 @@ def __propose_market(
                 max_fraction_consumed="0.5",
             ),
             mark_price_configuration=vega_protos.markets.CompositePriceConfiguration(
-                decay_weight="0",
                 composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
-                source_staleness_tolerance=["100h"],
-                decay_power=1,
-                cash_amount="0",
-                source_weights=["1"],
             ),
         ),
     )
