@@ -411,7 +411,9 @@ class MarkPriceConfiguration(Config):
     def load(self, opt: Optional[str] = None):
         config = super().load(opt=opt)
 
-        self.decay_weight = str(config["decay_weight"])
+        self.decay_weight = (
+            str(config["decay_weight"]) if config["decay_weight"] is not None else None
+        )
         self.composite_price_type = config["composite_price_type"]
         self.source_staleness_tolerance = config["source_staleness_tolerance"]
         self.decay_power = config["decay_power"]
@@ -426,7 +428,7 @@ class MarkPriceConfiguration(Config):
 
     def build(self):
         price_config = vega_protos.markets.CompositePriceConfiguration(
-            source_staleness_tolerance=self.source_staleness_tolerance,
+            composite_price_type=self.composite_price_type,
         )
         if self.source_weights is not None:
             price_config.source_weights = self.source_weights
