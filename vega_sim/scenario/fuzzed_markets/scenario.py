@@ -228,7 +228,7 @@ class FuzzingScenario(Scenario):
 
             market_agents = {}
             # Create fuzzed market config
-            market_config = MarketConfig("perp" if perps_market else None)
+            market_config = MarketConfig("perpetual" if perps_market else None)
             market_config.set(
                 "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
                 1e-4,

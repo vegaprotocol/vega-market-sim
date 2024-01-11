@@ -978,6 +978,87 @@ def reward_plots(run_name: Optional[str] = None):
     return fig
 
 
+def plot_account_by_party(
+    run_name: Optional[str] = None,
+    fig: Optional[Figure] = None,
+    ss: Optional[GridSpecFromSubplotSpec] = None,
+    asset_id: Optional[str] = None,
+    market_id: Optional[str] = None,
+    account_type: Optional[vega_protos.vega.AccountType.Value] = None,
+):
+    # Get account data
+    accounts = load_accounts_df(run_name=run_name).set_index(
+        ["asset", "market_id", "type"], append=True
+    )
+    # Create a boolean mask based on conditions
+    mask = (
+        (
+            accounts.index.get_level_values("asset") == asset_id
+            if asset_id is not None
+            else True
+        )
+        & (
+            accounts.index.get_level_values("market_id") == market_id
+            if market_id is not None
+            else True
+        )
+        & (
+            accounts.index.get_level_values("type") == account_type
+            if account_type is not None
+            else True
+        )
+    )
+    # Apply the mask using loc
+    accounts = accounts.loc[mask]
+
+    if fig is None:
+        fig = plt.figure(figsize=[10, 8])
+        fig.suptitle(
+            f"Accounts Plot",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+    if ss is None:
+        gs = GridSpec(
+            nrows=1,
+            ncols=1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=1,
+            ncols=1,
+        )
+
+    axs: list[plt.Axes] = []
+    axs.append(fig.add_subplot(gs[0, 0]))
+    axs[-1].set_title(
+        (f"asset: {asset_id[:6]} | " if asset_id is not None else "")
+        + (f"market: {market_id[:6]} | " if market_id is not None else "")
+        + (
+            f"account_type: {vega_protos.vega.AccountType.Name(account_type)}"
+            if account_type is not None
+            else ""
+        ),
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    final_values = (
+        accounts.groupby("party_id")["balance"].last().sort_values(ascending=False)
+    )
+    for party in final_values.index.values:
+        group = accounts[accounts["party_id"] == party]
+        axs[-1].step(
+            group.index.get_level_values(0),
+            group["balance"],
+            label=(party[:5] if party != "network" else "network"),
+        )
+    axs[-1].legend()
+
+
 def sla_plot(run_name: Optional[str] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     ledger_entries_df = load_ledger_entries_df(run_name=run_name)

@@ -99,10 +99,9 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
         if self.network_parameters is not None:
-            [
+            for key, item in self.network_parameters.items():
                 self.vega.update_network_parameter(self.key_name, key, item)
-                for key, item in self.network_parameters.items()
-            ]
+                vega.wait_for_total_catchup()
 
         if self.vega.find_asset_id(symbol=self.asset_name) is None:
             self.vega.create_asset(
@@ -127,22 +126,9 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             )
 
         if self.vega.find_market_id(name=self.market_name) is None:
-            # Add market information and asset information to market config
             self.market_config.set("instrument.name", self.market_name)
             self.market_config.set("instrument.code", self.market_code)
-            self.market_config.set("instrument.future.settlement_asset", self.asset_id)
-            self.market_config.set("instrument.future.quote_name", self.asset_name)
-            self.market_config.set(
-                "instrument.future.number_decimal_places", self.asset_dp
-            )
-            self.market_config.set(
-                "instrument.future.terminating_key",
-                self.vega.wallet.public_key(
-                    wallet_name=self.termination_wallet_name,
-                    name=self.termination_key_name,
-                ),
-            )
-
+            self._set_product_variables()
             self.vega.wait_for_total_catchup()
             self.vega.create_market_from_config(
                 proposal_wallet_name=self.wallet_name,
@@ -162,3 +148,33 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 self.termination_wallet_name,
             )
             self.vega.wait_for_total_catchup()
+
+    def _set_product_variables(self):
+        if self.market_config.instrument.future is not None:
+            self.market_config.set("instrument.future.settlement_asset", self.asset_id)
+            self.market_config.set("instrument.future.quote_name", self.asset_name)
+            self.market_config.set(
+                "instrument.future.number_decimal_places", self.asset_dp
+            )
+            self.market_config.set(
+                "instrument.future.terminating_key",
+                self.vega.wallet.public_key(
+                    wallet_name=self.termination_wallet_name,
+                    name=self.termination_key_name,
+                ),
+            )
+        if self.market_config.instrument.perpetual is not None:
+            self.market_config.set(
+                "instrument.perpetual.settlement_asset", self.asset_id
+            )
+            self.market_config.set("instrument.perpetual.quote_name", self.asset_name)
+            self.market_config.set(
+                "instrument.perpetual.number_decimal_places", self.asset_dp
+            )
+            self.market_config.set(
+                "instrument.perpetual.settlement_key",
+                self.vega.wallet.public_key(
+                    wallet_name=self.termination_wallet_name,
+                    name=self.termination_key_name,
+                ),
+            )
