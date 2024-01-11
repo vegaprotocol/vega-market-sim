@@ -1363,6 +1363,7 @@ def test_list_stop_orders(trading_data_v2_servicer_and_port):
         market_position_decimals_map={"market_id": 2},
     )
 
+    expected_expiry = datetime.datetime.fromtimestamp(1672531200)
     assert stop_orders == [
         StopOrderEvent(
             submission=OrderSubmission(
@@ -1387,12 +1388,12 @@ def test_list_stop_orders(trading_data_v2_servicer_and_port):
             stop_order=StopOrder(
                 id="id",
                 oco_link_id="oco_link_id",
-                expires_at=datetime.datetime(2023, 1, 1, 0, 0),
+                expires_at=expected_expiry,
                 expiry_strategy=vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
                 trigger_direction=vega_protos.vega.StopOrder.TRIGGER_DIRECTION_RISES_ABOVE,
                 status=vega_protos.vega.StopOrder.STATUS_PENDING,
-                created_at=datetime.datetime(2023, 1, 1, 0, 0),
-                updated_at=datetime.datetime(2023, 1, 1, 0, 0),
+                created_at=expected_expiry,
+                updated_at=expected_expiry,
                 order_id="order_id",
                 party_id="party_id",
                 market_id="market_id",

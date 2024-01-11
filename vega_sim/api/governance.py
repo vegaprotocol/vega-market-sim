@@ -224,6 +224,9 @@ def __propose_market(
                 full_disposal_size=1000000000,
                 max_fraction_consumed="0.5",
             ),
+            mark_price_configuration=vega_protos.markets.CompositePriceConfiguration(
+                composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
+            ),
         ),
     )
     if parent_market_id is not None:

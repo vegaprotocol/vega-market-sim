@@ -13,6 +13,18 @@ from typing import (
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class CompositePriceType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    COMPOSITE_PRICE_TYPE_UNSPECIFIED: _ClassVar[CompositePriceType]
+    COMPOSITE_PRICE_TYPE_WEIGHTED: _ClassVar[CompositePriceType]
+    COMPOSITE_PRICE_TYPE_MEDIAN: _ClassVar[CompositePriceType]
+    COMPOSITE_PRICE_TYPE_LAST_TRADE: _ClassVar[CompositePriceType]
+
+COMPOSITE_PRICE_TYPE_UNSPECIFIED: CompositePriceType
+COMPOSITE_PRICE_TYPE_WEIGHTED: CompositePriceType
+COMPOSITE_PRICE_TYPE_MEDIAN: CompositePriceType
+COMPOSITE_PRICE_TYPE_LAST_TRADE: CompositePriceType
+
 class AuctionDuration(_message.Message):
     __slots__ = ("duration", "volume")
     DURATION_FIELD_NUMBER: _ClassVar[int]
@@ -85,6 +97,7 @@ class Perpetual(_message.Message):
         "funding_rate_scaling_factor",
         "funding_rate_lower_bound",
         "funding_rate_upper_bound",
+        "index_price_config",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -98,6 +111,7 @@ class Perpetual(_message.Message):
     FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    INDEX_PRICE_CONFIG_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     margin_funding_factor: str
@@ -110,6 +124,7 @@ class Perpetual(_message.Message):
     funding_rate_scaling_factor: str
     funding_rate_lower_bound: str
     funding_rate_upper_bound: str
+    index_price_config: CompositePriceConfiguration
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -130,6 +145,9 @@ class Perpetual(_message.Message):
         funding_rate_scaling_factor: _Optional[str] = ...,
         funding_rate_lower_bound: _Optional[str] = ...,
         funding_rate_upper_bound: _Optional[str] = ...,
+        index_price_config: _Optional[
+            _Union[CompositePriceConfiguration, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class DataSourceSpecToFutureBinding(_message.Message):
@@ -453,6 +471,7 @@ class Market(_message.Message):
         "successor_market_id",
         "liquidity_sla_params",
         "liquidation_strategy",
+        "mark_price_configuration",
     )
 
     class State(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -515,6 +534,7 @@ class Market(_message.Message):
     SUCCESSOR_MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     id: str
     tradable_instrument: TradableInstrument
     decimal_places: int
@@ -534,6 +554,7 @@ class Market(_message.Message):
     successor_market_id: str
     liquidity_sla_params: LiquiditySLAParameters
     liquidation_strategy: LiquidationStrategy
+    mark_price_configuration: CompositePriceConfiguration
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -559,6 +580,9 @@ class Market(_message.Message):
         successor_market_id: _Optional[str] = ...,
         liquidity_sla_params: _Optional[_Union[LiquiditySLAParameters, _Mapping]] = ...,
         liquidation_strategy: _Optional[_Union[LiquidationStrategy, _Mapping]] = ...,
+        mark_price_configuration: _Optional[
+            _Union[CompositePriceConfiguration, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class MarketTimestamps(_message.Message):
@@ -600,4 +624,51 @@ class LiquidationStrategy(_message.Message):
         disposal_fraction: _Optional[str] = ...,
         full_disposal_size: _Optional[int] = ...,
         max_fraction_consumed: _Optional[str] = ...,
+    ) -> None: ...
+
+class CompositePriceConfiguration(_message.Message):
+    __slots__ = (
+        "decay_weight",
+        "decay_power",
+        "cash_amount",
+        "source_weights",
+        "source_staleness_tolerance",
+        "composite_price_type",
+        "data_sources_spec",
+        "data_sources_spec_binding",
+    )
+    DECAY_WEIGHT_FIELD_NUMBER: _ClassVar[int]
+    DECAY_POWER_FIELD_NUMBER: _ClassVar[int]
+    CASH_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_WEIGHTS_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_STALENESS_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
+    COMPOSITE_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
+    DATA_SOURCES_SPEC_FIELD_NUMBER: _ClassVar[int]
+    DATA_SOURCES_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    decay_weight: str
+    decay_power: int
+    cash_amount: str
+    source_weights: _containers.RepeatedScalarFieldContainer[str]
+    source_staleness_tolerance: _containers.RepeatedScalarFieldContainer[str]
+    composite_price_type: CompositePriceType
+    data_sources_spec: _containers.RepeatedCompositeFieldContainer[
+        _data_source_pb2.DataSourceDefinition
+    ]
+    data_sources_spec_binding: _containers.RepeatedCompositeFieldContainer[
+        _data_source_pb2.SpecBindingForCompositePrice
+    ]
+    def __init__(
+        self,
+        decay_weight: _Optional[str] = ...,
+        decay_power: _Optional[int] = ...,
+        cash_amount: _Optional[str] = ...,
+        source_weights: _Optional[_Iterable[str]] = ...,
+        source_staleness_tolerance: _Optional[_Iterable[str]] = ...,
+        composite_price_type: _Optional[_Union[CompositePriceType, str]] = ...,
+        data_sources_spec: _Optional[
+            _Iterable[_Union[_data_source_pb2.DataSourceDefinition, _Mapping]]
+        ] = ...,
+        data_sources_spec_binding: _Optional[
+            _Iterable[_Union[_data_source_pb2.SpecBindingForCompositePrice, _Mapping]]
+        ] = ...,
     ) -> None: ...

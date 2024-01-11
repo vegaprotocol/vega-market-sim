@@ -210,6 +210,7 @@ class PerpetualProduct(_message.Message):
         "funding_rate_scaling_factor",
         "funding_rate_lower_bound",
         "funding_rate_upper_bound",
+        "index_price_configuration",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -223,6 +224,7 @@ class PerpetualProduct(_message.Message):
     FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    INDEX_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     margin_funding_factor: str
@@ -235,6 +237,7 @@ class PerpetualProduct(_message.Message):
     funding_rate_scaling_factor: str
     funding_rate_lower_bound: str
     funding_rate_upper_bound: str
+    index_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -255,6 +258,9 @@ class PerpetualProduct(_message.Message):
         funding_rate_scaling_factor: _Optional[str] = ...,
         funding_rate_lower_bound: _Optional[str] = ...,
         funding_rate_upper_bound: _Optional[str] = ...,
+        index_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class InstrumentConfiguration(_message.Message):
@@ -350,6 +356,7 @@ class NewMarketConfiguration(_message.Message):
         "liquidity_sla_parameters",
         "liquidity_fee_settings",
         "liquidation_strategy",
+        "mark_price_configuration",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -366,6 +373,7 @@ class NewMarketConfiguration(_message.Message):
     LIQUIDITY_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -381,6 +389,7 @@ class NewMarketConfiguration(_message.Message):
     liquidity_sla_parameters: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     liquidation_strategy: _markets_pb2.LiquidationStrategy
+    mark_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -407,6 +416,9 @@ class NewMarketConfiguration(_message.Message):
         ] = ...,
         liquidation_strategy: _Optional[
             _Union[_markets_pb2.LiquidationStrategy, _Mapping]
+        ] = ...,
+        mark_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -476,6 +488,7 @@ class UpdateMarketConfiguration(_message.Message):
         "liquidity_sla_parameters",
         "liquidity_fee_settings",
         "liquidation_strategy",
+        "mark_price_configuration",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -489,6 +502,7 @@ class UpdateMarketConfiguration(_message.Message):
     LIQUIDITY_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     instrument: UpdateInstrumentConfiguration
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
@@ -501,6 +515,7 @@ class UpdateMarketConfiguration(_message.Message):
     liquidity_sla_parameters: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     liquidation_strategy: _markets_pb2.LiquidationStrategy
+    mark_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         instrument: _Optional[_Union[UpdateInstrumentConfiguration, _Mapping]] = ...,
@@ -524,6 +539,9 @@ class UpdateMarketConfiguration(_message.Message):
         ] = ...,
         liquidation_strategy: _Optional[
             _Union[_markets_pb2.LiquidationStrategy, _Mapping]
+        ] = ...,
+        mark_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -630,6 +648,7 @@ class UpdatePerpetualProduct(_message.Message):
         "funding_rate_scaling_factor",
         "funding_rate_lower_bound",
         "funding_rate_upper_bound",
+        "index_price_configuration",
     )
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -642,6 +661,7 @@ class UpdatePerpetualProduct(_message.Message):
     FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    INDEX_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     quote_name: str
     margin_funding_factor: str
     interest_rate: str
@@ -653,6 +673,7 @@ class UpdatePerpetualProduct(_message.Message):
     funding_rate_scaling_factor: str
     funding_rate_lower_bound: str
     funding_rate_upper_bound: str
+    index_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         quote_name: _Optional[str] = ...,
@@ -672,6 +693,9 @@ class UpdatePerpetualProduct(_message.Message):
         funding_rate_scaling_factor: _Optional[str] = ...,
         funding_rate_lower_bound: _Optional[str] = ...,
         funding_rate_upper_bound: _Optional[str] = ...,
+        index_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class UpdateNetworkParameter(_message.Message):

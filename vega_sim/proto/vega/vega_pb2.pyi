@@ -1544,6 +1544,9 @@ class PerpetualData(_message.Message):
         "external_twap",
         "seq_num",
         "start_time",
+        "index_price",
+        "next_index_price_calc",
+        "index_price_type",
     )
     FUNDING_PAYMENT_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_FIELD_NUMBER: _ClassVar[int]
@@ -1551,12 +1554,18 @@ class PerpetualData(_message.Message):
     EXTERNAL_TWAP_FIELD_NUMBER: _ClassVar[int]
     SEQ_NUM_FIELD_NUMBER: _ClassVar[int]
     START_TIME_FIELD_NUMBER: _ClassVar[int]
+    INDEX_PRICE_FIELD_NUMBER: _ClassVar[int]
+    NEXT_INDEX_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
+    INDEX_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
     funding_payment: str
     funding_rate: str
     internal_twap: str
     external_twap: str
     seq_num: int
     start_time: int
+    index_price: str
+    next_index_price_calc: int
+    index_price_type: _markets_pb2.CompositePriceType
     def __init__(
         self,
         funding_payment: _Optional[str] = ...,
@@ -1565,6 +1574,9 @@ class PerpetualData(_message.Message):
         external_twap: _Optional[str] = ...,
         seq_num: _Optional[int] = ...,
         start_time: _Optional[int] = ...,
+        index_price: _Optional[str] = ...,
+        next_index_price_calc: _Optional[int] = ...,
+        index_price_type: _Optional[_Union[_markets_pb2.CompositePriceType, str]] = ...,
     ) -> None: ...
 
 class ProductData(_message.Message):
@@ -1610,6 +1622,7 @@ class MarketData(_message.Message):
         "product_data",
         "liquidity_provider_sla",
         "next_network_closeout",
+        "mark_price_type",
     )
     MARK_PRICE_FIELD_NUMBER: _ClassVar[int]
     BEST_BID_PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -1644,6 +1657,7 @@ class MarketData(_message.Message):
     PRODUCT_DATA_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_PROVIDER_SLA_FIELD_NUMBER: _ClassVar[int]
     NEXT_NETWORK_CLOSEOUT_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
     mark_price: str
     best_bid_price: str
     best_bid_volume: int
@@ -1683,6 +1697,7 @@ class MarketData(_message.Message):
         LiquidityProviderSLA
     ]
     next_network_closeout: int
+    mark_price_type: _markets_pb2.CompositePriceType
     def __init__(
         self,
         mark_price: _Optional[str] = ...,
@@ -1726,6 +1741,7 @@ class MarketData(_message.Message):
             _Iterable[_Union[LiquidityProviderSLA, _Mapping]]
         ] = ...,
         next_network_closeout: _Optional[int] = ...,
+        mark_price_type: _Optional[_Union[_markets_pb2.CompositePriceType, str]] = ...,
     ) -> None: ...
 
 class LiquidityProviderFeeShare(_message.Message):
