@@ -25,7 +25,9 @@ def check_versions():
             tagged_vega_versions.add(tag["name"][5:])
 
     if versions_to_check.difference(tagged_vega_versions):
-        raise Exception(f"Missing tags for vega versions: {versions_to_check}")
+        raise Exception(
+            f"Missing tags for vega versions: {versions_to_check - tagged_vega_versions}"
+        )
 
 
 if __name__ == "__main__":
