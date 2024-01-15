@@ -28,6 +28,20 @@ from vega_sim.proto.vega import markets
 
 import numpy as np
 
+import logging
+from functools import wraps
+
+logger = logging.getLogger(__name__)
+
+
+def log_plotting_function(func):
+    @wraps(func)
+    def wrapped_fn(*args, **kwargs):
+        logger.info(f"Calling func {func.__name__}")
+        return func(*args, **kwargs)
+
+    return wrapped_fn
+
 
 TRADING_MODE_COLORS = {
     0: (200 / 255, 200 / 255, 200 / 255),
@@ -137,6 +151,7 @@ def _series_df_to_single_series(
     return df_clone.merge(selector, on=["time", "market_id"]).set_index("time")
 
 
+@log_plotting_function
 def plot_trading_summary(
     ax: Axes,
     trade_df: pd.DataFrame,
@@ -180,6 +195,7 @@ def plot_trading_summary(
     )
 
 
+@log_plotting_function
 def plot_total_traded_volume(ax: Axes, trades_df: pd.DataFrame) -> None:
     if trades_df.empty:
         return
@@ -191,6 +207,7 @@ def plot_total_traded_volume(ax: Axes, trades_df: pd.DataFrame) -> None:
     ax.plot(traded)
 
 
+@log_plotting_function
 def plot_open_interest(ax: Axes, market_data_df: pd.DataFrame):
     ax.set_title("Open Interest")
 
@@ -198,6 +215,7 @@ def plot_open_interest(ax: Axes, market_data_df: pd.DataFrame):
     ax.plot(market_data_df["open_interest"])
 
 
+@log_plotting_function
 def plot_open_notional(
     ax: Axes,
     market_data_df: pd.DataFrame,
@@ -211,6 +229,7 @@ def plot_open_notional(
     ax.plot(market_data_df["open_interest"] * price_df["price"])
 
 
+@log_plotting_function
 def plot_spread(ax: Axes, order_book_df: pd.DataFrame) -> None:
     if order_book_df.empty:
         return
@@ -229,6 +248,7 @@ def plot_spread(ax: Axes, order_book_df: pd.DataFrame) -> None:
     ax.plot(spread_df)
 
 
+@log_plotting_function
 def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame) -> None:
     if accounts_df.empty:
         return
@@ -243,6 +263,7 @@ def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame) -> None:
     ax.plot(grouped_df)
 
 
+@log_plotting_function
 def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame) -> None:
     if market_data_df.empty:
         return
@@ -252,6 +273,7 @@ def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame) -> None:
     ax.plot(market_data_df["target_stake"])
 
 
+@log_plotting_function
 def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
     order_df = load_order_book_df(run_name=run_name)
     trades_df = load_trades_df(run_name=run_name)
@@ -312,6 +334,7 @@ def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
     return figs
 
 
+@log_plotting_function
 def plot_trading_mode(
     fig: Figure, data_df: pd.DataFrame, ss: Optional[SubplotSpec] = None
 ):
@@ -391,6 +414,7 @@ def plot_trading_mode(
     ax1.legend(labels=names, loc="lower right")
 
 
+@log_plotting_function
 def plot_price_comparison(
     fig: Figure,
     data_df: pd.DataFrame,
@@ -450,6 +474,7 @@ def plot_price_comparison(
     ax0.legend(labels=["external price", "mark price"])
 
 
+@log_plotting_function
 def plot_risky_close_outs(
     fig: Figure,
     accounts_df: pd.DataFrame,
@@ -547,6 +572,7 @@ def plot_risky_close_outs(
     ax1r.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
 
 
+@log_plotting_function
 def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     data_df = load_market_data_df(run_name=run_name)
     accounts_df = load_accounts_df(run_name=run_name)
@@ -606,6 +632,7 @@ def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     return figs
 
 
+@log_plotting_function
 def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     agents_df = load_agents_df(run_name=run_name)
@@ -657,6 +684,7 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
     return fig
 
 
+@log_plotting_function
 def plot_price_monitoring(
     run_name: Optional[str] = None,
     fig: Optional[Figure] = None,
@@ -815,6 +843,7 @@ def plot_price_monitoring(
     return figs
 
 
+@log_plotting_function
 def resource_monitoring_plot(run_name: Optional[str] = None):
     resource_df = load_resource_df(
         run_name=run_name,
@@ -878,6 +907,7 @@ def resource_monitoring_plot(run_name: Optional[str] = None):
     return fig
 
 
+@log_plotting_function
 def reward_plots(run_name: Optional[str] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     assets_df = load_assets_df(run_name=run_name)
@@ -980,6 +1010,7 @@ def reward_plots(run_name: Optional[str] = None):
     return fig
 
 
+@log_plotting_function
 def plot_account_by_party(
     run_name: Optional[str] = None,
     fig: Optional[Figure] = None,
@@ -1061,6 +1092,7 @@ def plot_account_by_party(
     axs[-1].legend()
 
 
+@log_plotting_function
 def sla_plot(run_name: Optional[str] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     ledger_entries_df = load_ledger_entries_df(run_name=run_name)
@@ -1207,6 +1239,7 @@ def sla_plot(run_name: Optional[str] = None):
     return fig
 
 
+@log_plotting_function
 def price_series_plot(
     run_name: Optional[str] = None,
     fig: Optional[Figure] = None,
@@ -1298,6 +1331,7 @@ def price_series_plot(
     return fig
 
 
+@log_plotting_function
 def liquidation_plot(
     run_name: Optional[str] = None,
     fig: Optional[Figure] = None,
@@ -1450,6 +1484,7 @@ def liquidation_plot(
     return fig
 
 
+@log_plotting_function
 def plot_overlay_auctions(ax: Axes, chained_market_data: pd.DataFrame):
     twinx = ax.twinx()
     twinx.set_ylim(0, 1)
@@ -1550,5 +1585,4 @@ if __name__ == "__main__":
             fig.savefig(f"{dir}/price.jpg")
 
     if args.show:
-        plt.ion()
         plt.show()
