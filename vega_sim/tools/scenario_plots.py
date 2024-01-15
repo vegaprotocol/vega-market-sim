@@ -966,6 +966,8 @@ def reward_plots(run_name: Optional[str] = None):
         axs[-1].set_title(f"Asset: {plot[2]}")
         accounts_for_asset = joined_df[joined_df.symbol == str(plot[2])]
         grouped = accounts_for_asset.groupby(["agent_type", "time"])["balance"].sum()
+        if len(grouped.index.get_level_values(0).unique().values) == 1:
+            continue
         for index in grouped.index.get_level_values(0).unique():
             if index == "RewardFunder":
                 continue
