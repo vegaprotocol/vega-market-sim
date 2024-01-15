@@ -299,7 +299,7 @@ def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
         ax6 = plt.subplot(427)
         ax7 = plt.subplot(428)
 
-        plot_trading_summary(ax, market_trades_df, market_order_df, market_mid_df)
+        # plot_trading_summary(ax, market_trades_df, market_order_df, market_mid_df)
         plot_total_traded_volume(ax2, market_trades_df)
         plot_spread(ax3, order_book_df=market_order_df)
         plot_open_interest(ax4, market_data_df)
