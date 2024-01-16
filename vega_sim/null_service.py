@@ -789,6 +789,7 @@ class VegaServiceNull(VegaService):
         listen_for_high_volume_stream_updates: bool = False,
         check_for_binaries: bool = False,
         genesis_time: Optional[datetime.datetime] = None,
+        log_dir: Optional[str] = None,
     ):
         super().__init__(
             can_control_time=True,
@@ -819,7 +820,9 @@ class VegaServiceNull(VegaService):
         self._use_full_vega_wallet = use_full_vega_wallet
         self.store_transactions = store_transactions
 
-        self.log_dir = tempfile.mkdtemp(prefix="vega-sim-")
+        self.log_dir = (
+            tempfile.mkdtemp(prefix="vega-sim-") if log_dir is None else log_dir
+        )
 
         self.launch_graphql = launch_graphql
         self.replay_from_path = replay_from_path
