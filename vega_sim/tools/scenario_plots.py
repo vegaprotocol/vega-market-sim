@@ -1351,10 +1351,10 @@ def liquidation_plot(
     else:
         gs = GridSpecFromSubplotSpec(
             subplot_spec=ss,
-            nrows=3,
+            nrows=4,
             ncols=1,
             hspace=0.3,
-            height_ratios=[1, 3, 3],
+            height_ratios=[1, 3, 3, 3],
         )
 
     market_data = load_market_data_df(run_name=run_name)
@@ -1481,6 +1481,29 @@ def liquidation_plot(
     )
     axs[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     plot_overlay_auctions(ax=axs[-1], chained_market_data=market_data)
+
+    # NETWORK PROFIT AND LOSS
+    axs.append(fig.add_subplot(gs[3, 0], sharex=axs[-1]))
+    axs[-1].set_title(
+        f"Network Profit and Loss",
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    plt.axhline(y=0, color="k", alpha=0.5, linewidth=1)
+    plt.step(
+        network_positions.index.get_level_values(0),
+        network_positions["realised_pnl"],
+        "g",
+    )
+    plt.step(
+        network_positions.index.get_level_values(0),
+        network_positions["unrealised_pnl"],
+        "r",
+    )
+    axs[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    plot_overlay_auctions(ax=axs[-1], chained_market_data=market_data)
+
     return fig
 
 
