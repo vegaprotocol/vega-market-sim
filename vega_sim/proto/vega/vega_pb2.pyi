@@ -449,6 +449,31 @@ MARGIN_MODE_UNSPECIFIED: MarginMode
 MARGIN_MODE_CROSS_MARGIN: MarginMode
 MARGIN_MODE_ISOLATED_MARGIN: MarginMode
 
+class PartyProfile(_message.Message):
+    __slots__ = ("party_id", "alias", "metadata")
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    ALIAS_FIELD_NUMBER: _ClassVar[int]
+    METADATA_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    alias: str
+    metadata: _containers.RepeatedCompositeFieldContainer[Metadata]
+    def __init__(
+        self,
+        party_id: _Optional[str] = ...,
+        alias: _Optional[str] = ...,
+        metadata: _Optional[_Iterable[_Union[Metadata, _Mapping]]] = ...,
+    ) -> None: ...
+
+class Metadata(_message.Message):
+    __slots__ = ("key", "value")
+    KEY_FIELD_NUMBER: _ClassVar[int]
+    VALUE_FIELD_NUMBER: _ClassVar[int]
+    key: str
+    value: str
+    def __init__(
+        self, key: _Optional[str] = ..., value: _Optional[str] = ...
+    ) -> None: ...
+
 class StopOrder(_message.Message):
     __slots__ = (
         "id",
@@ -534,6 +559,9 @@ class StopOrder(_message.Message):
         REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_DURING_OPENING_AUCTION: _ClassVar[
             StopOrder.RejectionReason
         ]
+        REJECTION_REASON_STOP_ORDER_CANNOT_MATCH_OCO_EXPIRY_TIMES: _ClassVar[
+            StopOrder.RejectionReason
+        ]
     REJECTION_REASON_UNSPECIFIED: StopOrder.RejectionReason
     REJECTION_REASON_TRADING_NOT_ALLOWED: StopOrder.RejectionReason
     REJECTION_REASON_EXPIRY_IN_THE_PAST: StopOrder.RejectionReason
@@ -543,6 +571,7 @@ class StopOrder(_message.Message):
     REJECTION_REASON_STOP_ORDER_NOT_CLOSING_THE_POSITION: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_LINKED_PERCENTAGE_INVALID: StopOrder.RejectionReason
     REJECTION_REASON_STOP_ORDER_NOT_ALLOWED_DURING_OPENING_AUCTION: StopOrder.RejectionReason
+    REJECTION_REASON_STOP_ORDER_CANNOT_MATCH_OCO_EXPIRY_TIMES: StopOrder.RejectionReason
 
     class SizeOverrideValue(_message.Message):
         __slots__ = ("percentage",)
@@ -606,10 +635,19 @@ class StopOrder(_message.Message):
     ) -> None: ...
 
 class Party(_message.Message):
-    __slots__ = ("id",)
+    __slots__ = ("id", "alias", "metadata")
     ID_FIELD_NUMBER: _ClassVar[int]
+    ALIAS_FIELD_NUMBER: _ClassVar[int]
+    METADATA_FIELD_NUMBER: _ClassVar[int]
     id: str
-    def __init__(self, id: _Optional[str] = ...) -> None: ...
+    alias: str
+    metadata: _containers.RepeatedCompositeFieldContainer[Metadata]
+    def __init__(
+        self,
+        id: _Optional[str] = ...,
+        alias: _Optional[str] = ...,
+        metadata: _Optional[_Iterable[_Union[Metadata, _Mapping]]] = ...,
+    ) -> None: ...
 
 class RiskFactor(_message.Message):
     __slots__ = ("market", "short", "long")
@@ -1997,6 +2035,32 @@ class LiquidityProvision(_message.Message):
         version: _Optional[int] = ...,
         status: _Optional[_Union[LiquidityProvision.Status, str]] = ...,
         reference: _Optional[str] = ...,
+    ) -> None: ...
+
+class EthereumL2Config(_message.Message):
+    __slots__ = ("network_id", "chain_id", "confirmations", "name")
+    NETWORK_ID_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
+    CONFIRMATIONS_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    network_id: str
+    chain_id: str
+    confirmations: int
+    name: str
+    def __init__(
+        self,
+        network_id: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
+        confirmations: _Optional[int] = ...,
+        name: _Optional[str] = ...,
+    ) -> None: ...
+
+class EthereumL2Configs(_message.Message):
+    __slots__ = ("configs",)
+    CONFIGS_FIELD_NUMBER: _ClassVar[int]
+    configs: _containers.RepeatedCompositeFieldContainer[EthereumL2Config]
+    def __init__(
+        self, configs: _Optional[_Iterable[_Union[EthereumL2Config, _Mapping]]] = ...
     ) -> None: ...
 
 class EthereumConfig(_message.Message):

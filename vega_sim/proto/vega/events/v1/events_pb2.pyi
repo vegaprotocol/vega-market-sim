@@ -117,6 +117,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_TRANSFER_FEES_PAID: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -210,6 +211,7 @@ BUS_EVENT_TYPE_VESTING_SUMMARY: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_PAID: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: BusEventType
 BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: BusEventType
+BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -1166,6 +1168,7 @@ class TransactionResult(_message.Message):
         "update_margin_mode",
         "join_team",
         "batch_proposal",
+        "update_party_profile",
         "success",
         "failure",
     )
@@ -1210,6 +1213,7 @@ class TransactionResult(_message.Message):
     UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1243,6 +1247,7 @@ class TransactionResult(_message.Message):
     update_margin_mode: _commands_pb2.UpdateMarginMode
     join_team: _commands_pb2.JoinTeam
     batch_proposal: _commands_pb2.BatchProposalSubmission
+    update_party_profile: _commands_pb2.UpdatePartyProfile
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1327,6 +1332,9 @@ class TransactionResult(_message.Message):
         join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
         batch_proposal: _Optional[
             _Union[_commands_pb2.BatchProposalSubmission, _Mapping]
+        ] = ...,
+        update_party_profile: _Optional[
+            _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
         ] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
@@ -2294,6 +2302,14 @@ class PartyMarginModeUpdated(_message.Message):
         at_epoch: _Optional[int] = ...,
     ) -> None: ...
 
+class PartyProfileUpdated(_message.Message):
+    __slots__ = ("updated_profile",)
+    UPDATED_PROFILE_FIELD_NUMBER: _ClassVar[int]
+    updated_profile: _vega_pb2.PartyProfile
+    def __init__(
+        self, updated_profile: _Optional[_Union[_vega_pb2.PartyProfile, _Mapping]] = ...
+    ) -> None: ...
+
 class BusEvent(_message.Message):
     __slots__ = (
         "id",
@@ -2381,6 +2397,7 @@ class BusEvent(_message.Message):
         "transfer_fees",
         "transfer_fees_discount",
         "party_margin_mode_updated",
+        "party_profile_updated",
         "market",
         "tx_err_event",
         "version",
@@ -2472,6 +2489,7 @@ class BusEvent(_message.Message):
     TRANSFER_FEES_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_FEES_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
     PARTY_MARGIN_MODE_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    PARTY_PROFILE_UPDATED_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2562,6 +2580,7 @@ class BusEvent(_message.Message):
     transfer_fees: TransferFees
     transfer_fees_discount: TransferFeesDiscount
     party_margin_mode_updated: PartyMarginModeUpdated
+    party_profile_updated: PartyProfileUpdated
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2696,6 +2715,7 @@ class BusEvent(_message.Message):
         party_margin_mode_updated: _Optional[
             _Union[PartyMarginModeUpdated, _Mapping]
         ] = ...,
+        party_profile_updated: _Optional[_Union[PartyProfileUpdated, _Mapping]] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,

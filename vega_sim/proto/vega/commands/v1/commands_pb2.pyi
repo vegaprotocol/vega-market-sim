@@ -578,3 +578,15 @@ class JoinTeam(_message.Message):
     ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...
+
+class UpdatePartyProfile(_message.Message):
+    __slots__ = ("alias", "metadata")
+    ALIAS_FIELD_NUMBER: _ClassVar[int]
+    METADATA_FIELD_NUMBER: _ClassVar[int]
+    alias: str
+    metadata: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Metadata]
+    def __init__(
+        self,
+        alias: _Optional[str] = ...,
+        metadata: _Optional[_Iterable[_Union[_vega_pb2.Metadata, _Mapping]]] = ...,
+    ) -> None: ...

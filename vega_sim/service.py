@@ -3038,12 +3038,21 @@ class VegaService(ABC):
         self,
         market_id: str,
         open_volume: float,
+        average_entry_price: float,
+        margin_account_balance: float,
+        general_account_balance: float,
+        order_margin_account_balance: float,
+        margin_mode: vega_protos.vega.MarginMode,
+        margin_factor: Optional[float] = None,
         side: List[str] = None,
         price: List[float] = None,
         remaining: List[float] = None,
         is_market_order: List[bool] = None,
-        collateral_available: float = None,
-    ) -> Tuple[data.MarginEstimate, data.LiquidationEstimate]:
+        include_collateral_increase_in_available_collateral: bool = False,
+        scale_liquidation_price_to_market_decimals: bool = False,
+    ) -> Tuple[
+        data.MarginEstimate, data.CollateralIncreaseEstimate, data.LiquidationEstimate
+    ]:
         """
         Estimates the best and worst case margin requirements and liquidation prices.
 
@@ -3112,17 +3121,26 @@ class VegaService(ABC):
             open_volume=num_to_padded_int(
                 open_volume, decimals=self.market_pos_decimals[market_id]
             ),
-            orders=orders,
-            collateral_available=(
-                str(
-                    num_to_padded_int(
-                        collateral_available,
-                        self.asset_decimals[self.market_to_asset[market_id]],
-                    )
-                )
-                if collateral_available is not None
-                else None
+            average_entry_price=num_to_padded_int(
+                average_entry_price, decimals=self.market_price_decimals[market_id]
             ),
+            margin_account_balance=num_to_padded_int(
+                margin_account_balance,
+                decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            ),
+            general_account_balance=num_to_padded_int(
+                general_account_balance,
+                decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            ),
+            order_margin_account_balance=num_to_padded_int(
+                order_margin_account_balance,
+                decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            ),
+            margin_mode=margin_mode,
+            orders=orders,
+            margin_factor=margin_factor,
+            include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+            scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
             asset_decimals=self.asset_decimals,
         )
 

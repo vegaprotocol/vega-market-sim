@@ -2094,6 +2094,50 @@ class PartyConnection(_message.Message):
         page_info: _Optional[_Union[PageInfo, _Mapping]] = ...,
     ) -> None: ...
 
+class ListPartiesProfilesRequest(_message.Message):
+    __slots__ = ("parties", "pagination")
+    PARTIES_FIELD_NUMBER: _ClassVar[int]
+    PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    parties: _containers.RepeatedScalarFieldContainer[str]
+    pagination: Pagination
+    def __init__(
+        self,
+        parties: _Optional[_Iterable[str]] = ...,
+        pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+    ) -> None: ...
+
+class ListPartiesProfilesResponse(_message.Message):
+    __slots__ = ("profiles",)
+    PROFILES_FIELD_NUMBER: _ClassVar[int]
+    profiles: PartiesProfilesConnection
+    def __init__(
+        self, profiles: _Optional[_Union[PartiesProfilesConnection, _Mapping]] = ...
+    ) -> None: ...
+
+class PartyProfileEdge(_message.Message):
+    __slots__ = ("node", "cursor")
+    NODE_FIELD_NUMBER: _ClassVar[int]
+    CURSOR_FIELD_NUMBER: _ClassVar[int]
+    node: _vega_pb2.PartyProfile
+    cursor: str
+    def __init__(
+        self,
+        node: _Optional[_Union[_vega_pb2.PartyProfile, _Mapping]] = ...,
+        cursor: _Optional[str] = ...,
+    ) -> None: ...
+
+class PartiesProfilesConnection(_message.Message):
+    __slots__ = ("edges", "page_info")
+    EDGES_FIELD_NUMBER: _ClassVar[int]
+    PAGE_INFO_FIELD_NUMBER: _ClassVar[int]
+    edges: _containers.RepeatedCompositeFieldContainer[PartyProfileEdge]
+    page_info: PageInfo
+    def __init__(
+        self,
+        edges: _Optional[_Iterable[_Union[PartyProfileEdge, _Mapping]]] = ...,
+        page_info: _Optional[_Union[PageInfo, _Mapping]] = ...,
+    ) -> None: ...
+
 class OrderEdge(_message.Message):
     __slots__ = ("node", "cursor")
     NODE_FIELD_NUMBER: _ClassVar[int]
@@ -4169,39 +4213,78 @@ class EstimatePositionRequest(_message.Message):
     __slots__ = (
         "market_id",
         "open_volume",
+        "average_entry_price",
         "orders",
-        "collateral_available",
+        "margin_account_balance",
+        "general_account_balance",
+        "order_margin_account_balance",
+        "margin_mode",
+        "margin_factor",
+        "include_collateral_increase_in_available_collateral",
         "scale_liquidation_price_to_market_decimals",
     )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     OPEN_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    AVERAGE_ENTRY_PRICE_FIELD_NUMBER: _ClassVar[int]
     ORDERS_FIELD_NUMBER: _ClassVar[int]
-    COLLATERAL_AVAILABLE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    GENERAL_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    ORDER_MARGIN_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    INCLUDE_COLLATERAL_INCREASE_IN_AVAILABLE_COLLATERAL_FIELD_NUMBER: _ClassVar[int]
     SCALE_LIQUIDATION_PRICE_TO_MARKET_DECIMALS_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     open_volume: int
+    average_entry_price: str
     orders: _containers.RepeatedCompositeFieldContainer[OrderInfo]
-    collateral_available: str
+    margin_account_balance: str
+    general_account_balance: str
+    order_margin_account_balance: str
+    margin_mode: _vega_pb2.MarginMode
+    margin_factor: str
+    include_collateral_increase_in_available_collateral: bool
     scale_liquidation_price_to_market_decimals: bool
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         open_volume: _Optional[int] = ...,
+        average_entry_price: _Optional[str] = ...,
         orders: _Optional[_Iterable[_Union[OrderInfo, _Mapping]]] = ...,
-        collateral_available: _Optional[str] = ...,
+        margin_account_balance: _Optional[str] = ...,
+        general_account_balance: _Optional[str] = ...,
+        order_margin_account_balance: _Optional[str] = ...,
+        margin_mode: _Optional[_Union[_vega_pb2.MarginMode, str]] = ...,
+        margin_factor: _Optional[str] = ...,
+        include_collateral_increase_in_available_collateral: bool = ...,
         scale_liquidation_price_to_market_decimals: bool = ...,
     ) -> None: ...
 
 class EstimatePositionResponse(_message.Message):
-    __slots__ = ("margin", "liquidation")
+    __slots__ = ("margin", "collateral_increase_estimate", "liquidation")
     MARGIN_FIELD_NUMBER: _ClassVar[int]
+    COLLATERAL_INCREASE_ESTIMATE_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
     margin: MarginEstimate
+    collateral_increase_estimate: CollateralIncreaseEstimate
     liquidation: LiquidationEstimate
     def __init__(
         self,
         margin: _Optional[_Union[MarginEstimate, _Mapping]] = ...,
+        collateral_increase_estimate: _Optional[
+            _Union[CollateralIncreaseEstimate, _Mapping]
+        ] = ...,
         liquidation: _Optional[_Union[LiquidationEstimate, _Mapping]] = ...,
+    ) -> None: ...
+
+class CollateralIncreaseEstimate(_message.Message):
+    __slots__ = ("worst_case", "best_case")
+    WORST_CASE_FIELD_NUMBER: _ClassVar[int]
+    BEST_CASE_FIELD_NUMBER: _ClassVar[int]
+    worst_case: str
+    best_case: str
+    def __init__(
+        self, worst_case: _Optional[str] = ..., best_case: _Optional[str] = ...
     ) -> None: ...
 
 class MarginEstimate(_message.Message):
