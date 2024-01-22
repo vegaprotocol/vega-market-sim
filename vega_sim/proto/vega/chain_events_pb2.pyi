@@ -10,17 +10,26 @@ from typing import (
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class EthContractCallEvent(_message.Message):
-    __slots__ = ("spec_id", "block_height", "block_time", "result", "error")
+    __slots__ = (
+        "spec_id",
+        "block_height",
+        "block_time",
+        "result",
+        "error",
+        "source_chain_id",
+    )
     SPEC_ID_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
     RESULT_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     spec_id: str
     block_height: int
     block_time: int
     result: bytes
     error: str
+    source_chain_id: int
     def __init__(
         self,
         spec_id: _Optional[str] = ...,
@@ -28,6 +37,7 @@ class EthContractCallEvent(_message.Message):
         block_time: _Optional[int] = ...,
         result: _Optional[bytes] = ...,
         error: _Optional[str] = ...,
+        source_chain_id: _Optional[int] = ...,
     ) -> None: ...
 
 class BuiltinAssetDeposit(_message.Message):

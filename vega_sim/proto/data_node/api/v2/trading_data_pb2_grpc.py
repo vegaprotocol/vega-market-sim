@@ -247,6 +247,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.FromString,
         )
+        self.ListPartiesProfiles = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListPartiesProfiles",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.FromString,
+        )
         self.ListMarginLevels = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListMarginLevels",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarginLevelsRequest.SerializeToString,
@@ -1061,6 +1066,15 @@ class TradingDataServiceServicer(object):
         """List parties
 
         Get a list of parties
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListPartiesProfiles(self, request, context):
+        """List parties' profiles
+
+        Get a list of profiles for multiple parties
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -2039,6 +2053,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListParties,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.SerializeToString,
+        ),
+        "ListPartiesProfiles": grpc.unary_unary_rpc_method_handler(
+            servicer.ListPartiesProfiles,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.SerializeToString,
         ),
         "ListMarginLevels": grpc.unary_unary_rpc_method_handler(
             servicer.ListMarginLevels,
@@ -3740,6 +3759,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListParties",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListPartiesProfiles(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListPartiesProfiles",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.FromString,
             options,
             channel_credentials,
             insecure,

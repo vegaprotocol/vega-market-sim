@@ -61,6 +61,7 @@ class InputData(_message.Message):
         "issue_signatures",
         "oracle_data_submission",
         "batch_proposal_submission",
+        "update_party_profile",
     )
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
@@ -97,6 +98,7 @@ class InputData(_message.Message):
     ISSUE_SIGNATURES_FIELD_NUMBER: _ClassVar[int]
     ORACLE_DATA_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     BATCH_PROPOSAL_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
     nonce: int
     block_height: int
     order_submission: _commands_pb2.OrderSubmission
@@ -132,6 +134,7 @@ class InputData(_message.Message):
     issue_signatures: _commands_pb2.IssueSignatures
     oracle_data_submission: _data_pb2.OracleDataSubmission
     batch_proposal_submission: _commands_pb2.BatchProposalSubmission
+    update_party_profile: _commands_pb2.UpdatePartyProfile
     def __init__(
         self,
         nonce: _Optional[int] = ...,
@@ -228,6 +231,9 @@ class InputData(_message.Message):
         ] = ...,
         batch_proposal_submission: _Optional[
             _Union[_commands_pb2.BatchProposalSubmission, _Mapping]
+        ] = ...,
+        update_party_profile: _Optional[
+            _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
         ] = ...,
     ) -> None: ...
 

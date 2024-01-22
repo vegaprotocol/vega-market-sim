@@ -193,6 +193,8 @@ class Payload(_message.Message):
         "liquidation",
         "banking_transfer_fee_discounts",
         "governance_batch_active",
+        "parties",
+        "l2_eth_oracles",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -269,6 +271,8 @@ class Payload(_message.Message):
     LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
     BANKING_TRANSFER_FEE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
     GOVERNANCE_BATCH_ACTIVE_FIELD_NUMBER: _ClassVar[int]
+    PARTIES_FIELD_NUMBER: _ClassVar[int]
+    L2_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -344,6 +348,8 @@ class Payload(_message.Message):
     liquidation: Liquidation
     banking_transfer_fee_discounts: BankingTransferFeeDiscounts
     governance_batch_active: GovernanceBatchActive
+    parties: Parties
+    l2_eth_oracles: L2EthOracles
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -471,6 +477,8 @@ class Payload(_message.Message):
         governance_batch_active: _Optional[
             _Union[GovernanceBatchActive, _Mapping]
         ] = ...,
+        parties: _Optional[_Union[Parties, _Mapping]] = ...,
+        l2_eth_oracles: _Optional[_Union[L2EthOracles, _Mapping]] = ...,
     ) -> None: ...
 
 class OrderHoldingQuantities(_message.Message):
@@ -2342,6 +2350,32 @@ class StakeVerifierPending(_message.Message):
         id: _Optional[str] = ...,
     ) -> None: ...
 
+class L2EthOracles(_message.Message):
+    __slots__ = ("chain_id_eth_oracles",)
+    CHAIN_ID_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
+    chain_id_eth_oracles: _containers.RepeatedCompositeFieldContainer[ChainIdEthOracles]
+    def __init__(
+        self,
+        chain_id_eth_oracles: _Optional[
+            _Iterable[_Union[ChainIdEthOracles, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class ChainIdEthOracles(_message.Message):
+    __slots__ = ("source_chain_id", "last_block", "call_results")
+    SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
+    LAST_BLOCK_FIELD_NUMBER: _ClassVar[int]
+    CALL_RESULTS_FIELD_NUMBER: _ClassVar[int]
+    source_chain_id: str
+    last_block: EthOracleVerifierLastBlock
+    call_results: EthContractCallResults
+    def __init__(
+        self,
+        source_chain_id: _Optional[str] = ...,
+        last_block: _Optional[_Union[EthOracleVerifierLastBlock, _Mapping]] = ...,
+        call_results: _Optional[_Union[EthContractCallResults, _Mapping]] = ...,
+    ) -> None: ...
+
 class EthOracleVerifierLastBlock(_message.Message):
     __slots__ = ("block_height", "block_time")
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
@@ -3748,4 +3782,27 @@ class CompositePriceCalculator(_message.Message):
         price_sources: _Optional[_Iterable[str]] = ...,
         price_source_last_update: _Optional[_Iterable[int]] = ...,
         book_price_at_time: _Optional[_Iterable[_Union[TimePrice, _Mapping]]] = ...,
+    ) -> None: ...
+
+class Parties(_message.Message):
+    __slots__ = ("profiles",)
+    PROFILES_FIELD_NUMBER: _ClassVar[int]
+    profiles: _containers.RepeatedCompositeFieldContainer[PartyProfile]
+    def __init__(
+        self, profiles: _Optional[_Iterable[_Union[PartyProfile, _Mapping]]] = ...
+    ) -> None: ...
+
+class PartyProfile(_message.Message):
+    __slots__ = ("party_id", "alias", "metadata")
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    ALIAS_FIELD_NUMBER: _ClassVar[int]
+    METADATA_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    alias: str
+    metadata: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Metadata]
+    def __init__(
+        self,
+        party_id: _Optional[str] = ...,
+        alias: _Optional[str] = ...,
+        metadata: _Optional[_Iterable[_Union[_vega_pb2.Metadata, _Mapping]]] = ...,
     ) -> None: ...

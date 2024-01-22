@@ -104,6 +104,7 @@ class EthCallSpec(_message.Message):
         "required_confirmations",
         "filters",
         "normalisers",
+        "source_chain_id",
     )
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     ABI_FIELD_NUMBER: _ClassVar[int]
@@ -113,6 +114,7 @@ class EthCallSpec(_message.Message):
     REQUIRED_CONFIRMATIONS_FIELD_NUMBER: _ClassVar[int]
     FILTERS_FIELD_NUMBER: _ClassVar[int]
     NORMALISERS_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     address: str
     abi: str
     method: str
@@ -121,6 +123,7 @@ class EthCallSpec(_message.Message):
     required_confirmations: int
     filters: _containers.RepeatedCompositeFieldContainer[_spec_pb2.Filter]
     normalisers: _containers.RepeatedCompositeFieldContainer[Normaliser]
+    source_chain_id: int
     def __init__(
         self,
         address: _Optional[str] = ...,
@@ -131,6 +134,7 @@ class EthCallSpec(_message.Message):
         required_confirmations: _Optional[int] = ...,
         filters: _Optional[_Iterable[_Union[_spec_pb2.Filter, _Mapping]]] = ...,
         normalisers: _Optional[_Iterable[_Union[Normaliser, _Mapping]]] = ...,
+        source_chain_id: _Optional[int] = ...,
     ) -> None: ...
 
 class Normaliser(_message.Message):
