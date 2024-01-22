@@ -683,25 +683,37 @@ def estimate_position(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     open_volume: int,
+    average_entry_price: int,
+    margin_account_balance: int,
+    general_account_balance: int,
+    order_margin_account_balance: int,
+    margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[data_node_protos_v2.trading_data.OrderInfo]] = None,
-    collateral_available: Optional[str] = None,
+    margin_factor: Optional[float] = None,
+    include_collateral_increase_in_available_collateral: bool = True,
+    scale_liquidation_price_to_market_decimals: bool = False,
 ) -> Tuple[
     data_node_protos_v2.trading_data.MarginEstimate,
+    data_node_protos_v2.trading_data.CollateralIncreaseEstimate,
     data_node_protos_v2.trading_data.LiquidationEstimate,
 ]:
     base_request = data_node_protos_v2.trading_data.EstimatePositionRequest(
         market_id=market_id,
         open_volume=open_volume,
+        average_entry_price=str(average_entry_price),
+        orders=orders,
+        margin_account_balance=str(margin_account_balance),
+        general_account_balance=str(general_account_balance),
+        order_margin_account_balance=str(order_margin_account_balance),
+        margin_mode=margin_mode,
+        margin_factor=str(margin_factor) if margin_factor is not None else None,
+        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
-
-    if orders is not None:
-        [base_request.orders.append(order) for order in orders]
-    if collateral_available is not None:
-        setattr(base_request, "collateral_available", collateral_available)
 
     response = data_client.EstimatePosition(base_request)
 
-    return response.margin, response.liquidation
+    return response.margin, response.collateral_increase_estimate, response.liquidation
 
 
 @_retry(3)

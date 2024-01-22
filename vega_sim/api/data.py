@@ -169,6 +169,12 @@ class MarginEstimate:
 
 
 @dataclass(frozen=True)
+class CollateralIncreaseEstimate:
+    best_case: float
+    worst_case: float
+
+
+@dataclass(frozen=True)
 class LiquidationEstimate:
     best_case: LiquidationPrice
     worst_case: LiquidationPrice
@@ -983,6 +989,15 @@ def _margin_estimate_from_proto(
         worst_case=_margin_level_from_proto(
             margin_level=margin_estimate.worst_case, decimal_spec=decimal_spec
         ),
+    )
+
+
+def _collateral_increase_estimate_from_proto(
+    collateral_increase_estimate: data_node_protos_v2.trading_data.CollateralIncreaseEstimate,
+) -> CollateralIncreaseEstimate:
+    return CollateralIncreaseEstimate(
+        worst_case=collateral_increase_estimate.worst_case,
+        best_case=collateral_increase_estimate.best_case,
     )
 
 
@@ -2476,8 +2491,15 @@ def estimate_position(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     open_volume: int,
+    average_entry_price: int,
+    margin_account_balance: int,
+    general_account_balance: int,
+    order_margin_account_balance: int,
+    margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[Tuple[str, str, int, bool]]] = None,
-    collateral_available: Optional[str] = None,
+    margin_factor: Optional[float] = None,
+    include_collateral_increase_in_available_collateral: bool = True,
+    scale_liquidation_price_to_market_decimals: bool = False,
     asset_decimals: Optional[Dict[str, int]] = {},
 ) -> Tuple[MarginEstimate, LiquidationEstimate,]:
     if orders is not None:
@@ -2491,12 +2513,23 @@ def estimate_position(
             for order in orders
         ]
 
-    margin_estimate, liquidation_estimate = data_raw.estimate_position(
+    (
+        margin_estimate,
+        collateral_increase_estimate,
+        liquidation_estimate,
+    ) = data_raw.estimate_position(
         data_client=data_client,
         market_id=market_id,
         open_volume=open_volume,
+        average_entry_price=average_entry_price,
+        margin_account_balance=margin_account_balance,
+        general_account_balance=general_account_balance,
+        order_margin_account_balance=order_margin_account_balance,
+        margin_mode=margin_mode,
         orders=proto_orders if orders is not None else None,
-        collateral_available=collateral_available,
+        margin_factor=margin_factor,
+        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
 
     if margin_estimate.best_case.asset not in asset_decimals:
@@ -2511,11 +2544,19 @@ def estimate_position(
         ),
     )
 
+    converted_collateral_increase_estimate = _collateral_increase_estimate_from_proto(
+        collateral_increase_estimate=collateral_increase_estimate
+    )
+
     converted_liquidation_estimate = _liquidation_estimate_from_proto(
         liquidation_estimate=liquidation_estimate,
     )
 
-    return converted_margin_estimate, converted_liquidation_estimate
+    return (
+        converted_margin_estimate,
+        converted_collateral_increase_estimate,
+        converted_liquidation_estimate,
+    )
 
 
 def get_stake(
