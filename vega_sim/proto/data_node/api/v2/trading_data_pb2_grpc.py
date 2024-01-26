@@ -1337,8 +1337,8 @@ class TradingDataServiceServicer(object):
     def EstimatePosition(self, request, context):
         """Estimate position
 
-        Estimate the margin that would be required for maintaining the specified position. Margin estimates are scaled to asset decimal places.
-        If the optional collateral available argument is supplied, the response also contains the estimate of the liquidation price.
+        Estimate the margin that would be required for maintaining the specified position, collateral increase needed to open the specified position and the liquidation price estimate.
+        Margin estimates are scaled to asset decimal places.
         Liquidation price estimates are scaled to asset decimal places by default, unless an argument to scale to market decimal places is specified in the request.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
