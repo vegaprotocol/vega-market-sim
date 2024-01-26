@@ -4,15 +4,15 @@ from typing import Callable
 from functools import wraps
 
 
-def raise_custom_build_errors(func: Callable):
+def raise_custom_build_errors(func):
     @wraps(func)
-    def wrapped_fn(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except ValueError as ve:
             raise VegaProtoValueError(ve)
 
-    return wrapped_fn
+    return wrapper
 
 
 class VegaProtoValueError(ValueError):
