@@ -618,8 +618,8 @@ class VegaServiceNetwork(VegaService):
                     self.data_node_grpc_url,
                     options=(
                         ("grpc.enable_http_proxy", 0),
-                        ("grpc.max_send_message_length", 1024 * 1024 * 20),
-                        ("grpc.max_receive_message_length", 1024 * 1024 * 20),
+                        ("grpc.max_send_message_length", 1024 * 1024 * 128),
+                        ("grpc.max_receive_message_length", 1024 * 1024 * 128),
                     ),
                 )
                 grpc.channel_ready_future(channel).result(timeout=30)
