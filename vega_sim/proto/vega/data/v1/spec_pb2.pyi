@@ -36,6 +36,7 @@ class PropertyKey(_message.Message):
         TYPE_BOOLEAN: _ClassVar[PropertyKey.Type]
         TYPE_DECIMAL: _ClassVar[PropertyKey.Type]
         TYPE_TIMESTAMP: _ClassVar[PropertyKey.Type]
+
     TYPE_UNSPECIFIED: PropertyKey.Type
     TYPE_EMPTY: PropertyKey.Type
     TYPE_INTEGER: PropertyKey.Type
@@ -67,6 +68,7 @@ class Condition(_message.Message):
         OPERATOR_GREATER_THAN_OR_EQUAL: _ClassVar[Condition.Operator]
         OPERATOR_LESS_THAN: _ClassVar[Condition.Operator]
         OPERATOR_LESS_THAN_OR_EQUAL: _ClassVar[Condition.Operator]
+
     OPERATOR_UNSPECIFIED: Condition.Operator
     OPERATOR_EQUALS: Condition.Operator
     OPERATOR_GREATER_THAN: Condition.Operator

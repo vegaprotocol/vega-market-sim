@@ -178,6 +178,7 @@ class DataSourceSpec(_message.Message):
         STATUS_UNSPECIFIED: _ClassVar[DataSourceSpec.Status]
         STATUS_ACTIVE: _ClassVar[DataSourceSpec.Status]
         STATUS_DEACTIVATED: _ClassVar[DataSourceSpec.Status]
+
     STATUS_UNSPECIFIED: DataSourceSpec.Status
     STATUS_ACTIVE: DataSourceSpec.Status
     STATUS_DEACTIVATED: DataSourceSpec.Status

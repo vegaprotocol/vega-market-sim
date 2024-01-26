@@ -946,9 +946,7 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount)
-            if commitment_amount is not None
-            else 100
+            else (2 * commitment_amount) if commitment_amount is not None else 100
         )
 
         self.market_name = market_name
@@ -3290,13 +3288,15 @@ class RewardFunder(StateAgentWithWallet):
             to_account_type=self.account_type,
             amount=self.transfer_amount,
             asset=reward_asset_id,
-            asset_for_metric=asset_for_metric_id
-            if self.metric
-            not in [
-                vega_protos.DISPATCH_METRIC_MARKET_VALUE,
-                vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
-            ]
-            else None,
+            asset_for_metric=(
+                asset_for_metric_id
+                if self.metric
+                not in [
+                    vega_protos.DISPATCH_METRIC_MARKET_VALUE,
+                    vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
+                ]
+                else None
+            ),
             metric=self.metric,
             window_length=3,
         )

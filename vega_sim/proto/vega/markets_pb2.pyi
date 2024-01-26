@@ -426,6 +426,7 @@ class LiquidityFeeSettings(_message.Message):
         METHOD_MARGINAL_COST: _ClassVar[LiquidityFeeSettings.Method]
         METHOD_WEIGHTED_AVERAGE: _ClassVar[LiquidityFeeSettings.Method]
         METHOD_CONSTANT: _ClassVar[LiquidityFeeSettings.Method]
+
     METHOD_UNSPECIFIED: LiquidityFeeSettings.Method
     METHOD_MARGINAL_COST: LiquidityFeeSettings.Method
     METHOD_WEIGHTED_AVERAGE: LiquidityFeeSettings.Method
@@ -487,6 +488,7 @@ class Market(_message.Message):
         STATE_TRADING_TERMINATED: _ClassVar[Market.State]
         STATE_SETTLED: _ClassVar[Market.State]
         STATE_SUSPENDED_VIA_GOVERNANCE: _ClassVar[Market.State]
+
     STATE_UNSPECIFIED: Market.State
     STATE_PROPOSED: Market.State
     STATE_REJECTED: Market.State
@@ -508,6 +510,7 @@ class Market(_message.Message):
         TRADING_MODE_MONITORING_AUCTION: _ClassVar[Market.TradingMode]
         TRADING_MODE_NO_TRADING: _ClassVar[Market.TradingMode]
         TRADING_MODE_SUSPENDED_VIA_GOVERNANCE: _ClassVar[Market.TradingMode]
+
     TRADING_MODE_UNSPECIFIED: Market.TradingMode
     TRADING_MODE_CONTINUOUS: Market.TradingMode
     TRADING_MODE_BATCH_AUCTION: Market.TradingMode

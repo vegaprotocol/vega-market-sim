@@ -125,6 +125,7 @@ class NodeVote(_message.Message):
         TYPE_SIGNER_THRESHOLD_SET: _ClassVar[NodeVote.Type]
         TYPE_GOVERNANCE_VALIDATE_ASSET: _ClassVar[NodeVote.Type]
         TYPE_ETHEREUM_CONTRACT_CALL_RESULT: _ClassVar[NodeVote.Type]
+
     TYPE_UNSPECIFIED: NodeVote.Type
     TYPE_STAKE_DEPOSITED: NodeVote.Type
     TYPE_STAKE_REMOVED: NodeVote.Type

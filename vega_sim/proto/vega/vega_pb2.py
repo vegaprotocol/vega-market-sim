@@ -25,9 +25,9 @@ _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.vega_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals[
-        "DESCRIPTOR"
-    ]._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
+    _globals["DESCRIPTOR"]._serialized_options = (
+        b"Z%code.vegaprotocol.io/vega/protos/vega"
+    )
     _globals["_AUCTIONTRIGGER"].values_by_name[
         "AUCTION_TRIGGER_UNABLE_TO_DEPLOY_LP_ORDERS"
     ]._options = None

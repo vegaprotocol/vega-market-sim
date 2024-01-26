@@ -36,9 +36,9 @@ _builder.BuildTopDescriptorsAndMessages(
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals[
-        "DESCRIPTOR"
-    ]._serialized_options = b"Z5code.vegaprotocol.io/vega/protos/blockexplorer/api/v1\222AB\022'\n\030Vega block explorer APIs2\013v0.74.0-dev\032\023lb.testnet.vega.xyz*\002\001\002"
+    _globals["DESCRIPTOR"]._serialized_options = (
+        b"Z5code.vegaprotocol.io/vega/protos/blockexplorer/api/v1\222AB\022'\n\030Vega block explorer APIs2\013v0.74.0-dev\032\023lb.testnet.vega.xyz*\002\001\002"
+    )
     _globals["_GETTRANSACTIONREQUEST"].fields_by_name["hash"]._options = None
     _globals["_GETTRANSACTIONREQUEST"].fields_by_name[
         "hash"
