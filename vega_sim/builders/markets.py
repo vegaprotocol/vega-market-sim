@@ -157,26 +157,31 @@ def liquidation_strategy(
 
 @raise_custom_build_errors
 def composite_price_process(
-    decay_weight: float,
-    decay_power: int,
-    cash_amount: int,
-    source_weights: List[float],
-    source_staleness_tolerance: List[int],
     composite_price_type: vega_protos.markets.CompositePriceType.Value,
-    data_source_spec: List[vega_protos.data_source.DataSourceDefinition] = None,
-    data_source_spec_binding: List[
+    decay_weight: Optional[float] = None,
+    decay_power: Optional[int] = None,
+    cash_amount: Optional[int] = None,
+    source_weights: Optional[List[float]] = None,
+    source_staleness_tolerance: Optional[List[int]] = None,
+    data_sources_spec: List[vega_protos.data_source.DataSourceDefinition] = None,
+    data_sources_spec_binding: List[
         vega_protos.data_source.SpecBindingForCompositePrice
     ] = None,
 ) -> vega_protos.markets.CompositePriceConfiguration:
-    return vega_protos.markets.CompositePriceConfiguration(
-        decay_weight=str(decay_weight),
-        decay_power=int(decay_power),
-        cash_amount=str(cash_amount),
-        source_weights=[str(weight) for weight in source_weights],
-        source_staleness_tolerance=[
-            f"{tolerance}s" for tolerance in source_staleness_tolerance
-        ],
+    proto = vega_protos.markets.CompositePriceConfiguration(
         composite_price_type=composite_price_type,
-        data_sources_spec=data_source_spec,
-        data_sources_spec_binding=data_source_spec_binding,
+        decay_weight=str(decay_weight) if decay_weight is not None else None,
+        decay_power=int(decay_power) if decay_power is not None else None,
+        cash_amount=str(cash_amount) if cash_amount is not None else None,
     )
+    if source_weights is not None:
+        proto.source_weights.extend([str(weight) for weight in source_weights])
+    if source_staleness_tolerance is not None:
+        proto.source_staleness_tolerance.extend(
+            [f"{tolerance}s" for tolerance in source_staleness_tolerance]
+        )
+    if data_sources_spec is not None:
+        proto.data_sources_spec.extend(data_sources_spec)
+    if data_sources_spec_binding is not None:
+        proto.data_sources_spec_binding.extend(data_sources_spec_binding)
+    return proto

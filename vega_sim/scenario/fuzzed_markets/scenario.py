@@ -274,6 +274,7 @@ class FuzzingScenario(Scenario):
                     successor_probability=0.01,
                     perp_close_on_finalise=True,
                     perp_settlement_data_generator=iter(perps_external_price_process),
+                    fuzz_market_configuration=True,
                 ),
             ]
 
@@ -518,28 +519,28 @@ class FuzzingScenario(Scenario):
                     ]
                 )
             ]
-            market_agents["fuzzy_reward_funders"] = [
-                FuzzyRewardFunder(
-                    wallet_name="REWARD_FUNDERS",
-                    key_name=f"MARKET_{str(i_market).zfill(3)}",
-                    asset_name=asset_name,
-                    step_bias=1,
-                    validity_bias=0.8,
-                    attempts_per_step=10,
-                    tag=f"MARKET_{str(i_market).zfill(3)}",
-                )
-            ]
-            market_agents["fuzzy_governance_transfer_agents"] = [
-                FuzzyGovernanceTransferAgent(
-                    wallet_name="REWARD_FUNDERS",
-                    key_name=f"MARKET_{str(i_market).zfill(3)}",
-                    asset_name=asset_name,
-                    step_bias=1,
-                    validity_bias=0.99,
-                    attempts_per_step=10,
-                    tag=f"MARKET_{str(i_market).zfill(3)}",
-                )
-            ]
+            # market_agents["fuzzy_reward_funders"] = [
+            #     FuzzyRewardFunder(
+            #         wallet_name="REWARD_FUNDERS",
+            #         key_name=f"MARKET_{str(i_market).zfill(3)}",
+            #         asset_name=asset_name,
+            #         step_bias=1,
+            #         validity_bias=0.8,
+            #         attempts_per_step=10,
+            #         tag=f"MARKET_{str(i_market).zfill(3)}",
+            #     )
+            # ]
+            # market_agents["fuzzy_governance_transfer_agents"] = [
+            #     FuzzyGovernanceTransferAgent(
+            #         wallet_name="REWARD_FUNDERS",
+            #         key_name=f"MARKET_{str(i_market).zfill(3)}",
+            #         asset_name=asset_name,
+            #         step_bias=1,
+            #         validity_bias=0.99,
+            #         attempts_per_step=10,
+            #         tag=f"MARKET_{str(i_market).zfill(3)}",
+            #     )
+            # ]
             for _, agent_list in market_agents.items():
                 self.agents.extend(agent_list)
 

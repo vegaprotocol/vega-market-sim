@@ -437,20 +437,14 @@ class MarkPriceConfiguration(Config):
         )
 
     def build(self):
-        price_config = vega_protos.markets.CompositePriceConfiguration(
+        return build.markets.composite_price_process(
             composite_price_type=self.composite_price_type,
+            decay_weight=self.decay_weight,
+            decay_power=self.decay_power,
+            cash_amount=self.cash_amount,
+            source_weights=self.source_weights,
+            source_staleness_tolerance=self.source_staleness_tolerance,
         )
-        if self.source_weights is not None:
-            price_config.source_weights = self.source_weights
-        if self.cash_amount is not None:
-            price_config.cash_amount = self.cash_amount
-        if self.decay_power is not None:
-            price_config.decay_power = self.decay_power
-        if self.source_staleness_tolerance is not None:
-            price_config.source_staleness_tolerance = self.source_staleness_tolerance
-        if self.decay_weight is not None:
-            price_config.decay_weight = self.decay_weight
-        return price_config
 
 
 class LiquidityFeeSettings(Config):
