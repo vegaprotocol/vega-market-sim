@@ -194,6 +194,7 @@ class UpdateMarginMode(_message.Message):
         MODE_UNSPECIFIED: _ClassVar[UpdateMarginMode.Mode]
         MODE_CROSS_MARGIN: _ClassVar[UpdateMarginMode.Mode]
         MODE_ISOLATED_MARGIN: _ClassVar[UpdateMarginMode.Mode]
+
     MODE_UNSPECIFIED: UpdateMarginMode.Mode
     MODE_CROSS_MARGIN: UpdateMarginMode.Mode
     MODE_ISOLATED_MARGIN: UpdateMarginMode.Mode
@@ -396,6 +397,7 @@ class UndelegateSubmission(_message.Message):
         METHOD_UNSPECIFIED: _ClassVar[UndelegateSubmission.Method]
         METHOD_NOW: _ClassVar[UndelegateSubmission.Method]
         METHOD_AT_END_OF_EPOCH: _ClassVar[UndelegateSubmission.Method]
+
     METHOD_UNSPECIFIED: UndelegateSubmission.Method
     METHOD_NOW: UndelegateSubmission.Method
     METHOD_AT_END_OF_EPOCH: UndelegateSubmission.Method
@@ -521,6 +523,7 @@ class CreateReferralSet(_message.Message):
             closed: bool = ...,
             allow_list: _Optional[_Iterable[str]] = ...,
         ) -> None: ...
+
     IS_TEAM_FIELD_NUMBER: _ClassVar[int]
     TEAM_FIELD_NUMBER: _ClassVar[int]
     is_team: bool
@@ -554,6 +557,7 @@ class UpdateReferralSet(_message.Message):
             closed: bool = ...,
             allow_list: _Optional[_Iterable[str]] = ...,
         ) -> None: ...
+
     ID_FIELD_NUMBER: _ClassVar[int]
     IS_TEAM_FIELD_NUMBER: _ClassVar[int]
     TEAM_FIELD_NUMBER: _ClassVar[int]

@@ -6,6 +6,7 @@ vega/protos/sources/vega/governance.proto
 Attributes:
     logger (logging.Logger): module level logger
 """
+
 import logging
 import datetime
 

@@ -1137,6 +1137,7 @@ class ListTransfersRequest(_message.Message):
         SCOPE_UNSPECIFIED: _ClassVar[ListTransfersRequest.Scope]
         SCOPE_INDIVIDUAL: _ClassVar[ListTransfersRequest.Scope]
         SCOPE_TEAM: _ClassVar[ListTransfersRequest.Scope]
+
     SCOPE_UNSPECIFIED: ListTransfersRequest.Scope
     SCOPE_INDIVIDUAL: ListTransfersRequest.Scope
     SCOPE_TEAM: ListTransfersRequest.Scope
@@ -2901,6 +2902,7 @@ class ListGovernanceDataRequest(_message.Message):
         TYPE_UPDATE_MARKET_STATE: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_REFERRAL_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
+
     TYPE_UNSPECIFIED: ListGovernanceDataRequest.Type
     TYPE_ALL: ListGovernanceDataRequest.Type
     TYPE_NEW_MARKET: ListGovernanceDataRequest.Type
@@ -5411,7 +5413,7 @@ class TeamGameEntity(_message.Message):
     team: TeamGameParticipation
     rank: int
     volume: str
-    reward_metric: str
+    reward_metric: _vega_pb2.DispatchMetric
     reward_earned: str
     total_rewards_earned: str
     def __init__(
@@ -5419,7 +5421,7 @@ class TeamGameEntity(_message.Message):
         team: _Optional[_Union[TeamGameParticipation, _Mapping]] = ...,
         rank: _Optional[int] = ...,
         volume: _Optional[str] = ...,
-        reward_metric: _Optional[str] = ...,
+        reward_metric: _Optional[_Union[_vega_pb2.DispatchMetric, str]] = ...,
         reward_earned: _Optional[str] = ...,
         total_rewards_earned: _Optional[str] = ...,
     ) -> None: ...
@@ -5458,7 +5460,7 @@ class IndividualGameEntity(_message.Message):
     individual: str
     rank: int
     volume: str
-    reward_metric: str
+    reward_metric: _vega_pb2.DispatchMetric
     reward_earned: str
     total_rewards_earned: str
     def __init__(
@@ -5466,7 +5468,7 @@ class IndividualGameEntity(_message.Message):
         individual: _Optional[str] = ...,
         rank: _Optional[int] = ...,
         volume: _Optional[str] = ...,
-        reward_metric: _Optional[str] = ...,
+        reward_metric: _Optional[_Union[_vega_pb2.DispatchMetric, str]] = ...,
         reward_earned: _Optional[str] = ...,
         total_rewards_earned: _Optional[str] = ...,
     ) -> None: ...

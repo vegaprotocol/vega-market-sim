@@ -33,17 +33,30 @@ def test_update_market_liquidity_monitoring(vega_service_with_market: VegaServic
         market_id=market_id,
         updated_liquidity_monitoring_parameters=vega_protos.markets.LiquidityMonitoringParameters(
             target_stake_parameters=vega_protos.markets.TargetStakeParameters(
-                time_window=3600, scaling_factor=1
+                time_window=100, scaling_factor=10
             ),
-            triggering_ratio="0.6",
-            auction_extension=0,
         ),
     )
     vega.wait_for_total_catchup()
     after_market = vega.market_info(market_id)
 
-    assert pre_market.liquidity_monitoring_parameters.triggering_ratio == "0.7"
-    assert after_market.liquidity_monitoring_parameters.triggering_ratio == "0.6"
+    assert (
+        pre_market.liquidity_monitoring_parameters.target_stake_parameters.time_window
+        == 3600
+    )
+    assert (
+        after_market.liquidity_monitoring_parameters.target_stake_parameters.time_window
+        == 100
+    )
+
+    assert (
+        pre_market.liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
+        == 1
+    )
+    assert (
+        after_market.liquidity_monitoring_parameters.target_stake_parameters.scaling_factor
+        == 10
+    )
 
 
 @pytest.mark.integration

@@ -182,9 +182,11 @@ class IdealMarketMaker(Scenario):
             key_name=AUCTION1_WALLET.name,
             side="SIDE_BUY",
             initial_asset_mint=self.initial_asset_mint,
-            initial_price=self.initial_price
-            if self.initial_price is not None
-            else price_process[0],
+            initial_price=(
+                self.initial_price
+                if self.initial_price is not None
+                else price_process[0]
+            ),
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
@@ -195,9 +197,11 @@ class IdealMarketMaker(Scenario):
             key_name=AUCTION2_WALLET.name,
             side="SIDE_SELL",
             initial_asset_mint=self.initial_asset_mint,
-            initial_price=self.initial_price
-            if self.initial_price is not None
-            else price_process[0],
+            initial_price=(
+                self.initial_price
+                if self.initial_price is not None
+                else price_process[0]
+            ),
             market_name=market_name,
             asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,

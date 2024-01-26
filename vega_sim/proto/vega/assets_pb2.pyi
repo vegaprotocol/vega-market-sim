@@ -20,6 +20,7 @@ class Asset(_message.Message):
         STATUS_REJECTED: _ClassVar[Asset.Status]
         STATUS_PENDING_LISTING: _ClassVar[Asset.Status]
         STATUS_ENABLED: _ClassVar[Asset.Status]
+
     STATUS_UNSPECIFIED: Asset.Status
     STATUS_PROPOSED: Asset.Status
     STATUS_REJECTED: Asset.Status

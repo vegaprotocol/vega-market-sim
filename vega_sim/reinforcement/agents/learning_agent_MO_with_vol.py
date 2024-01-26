@@ -50,9 +50,15 @@ class Action(AbstractAction):
 
 @dataclass
 class SoftActionWithVol:
-    z_sell: torch.Tensor  # sample from N(mu_sell, sigma_sell) to generate selling volume from lognormal
-    z_buy: torch.Tensor  # sample from N(mu_buy, sigma_buy) to generate buying volume from lognormal
-    c: torch.Tensor  # sell / buy / do nothing probabilities if training. If simulating, value in {0,1,2} indicating sampled action
+    z_sell: (
+        torch.Tensor
+    )  # sample from N(mu_sell, sigma_sell) to generate selling volume from lognormal
+    z_buy: (
+        torch.Tensor
+    )  # sample from N(mu_buy, sigma_buy) to generate buying volume from lognormal
+    c: (
+        torch.Tensor
+    )  # sell / buy / do nothing probabilities if training. If simulating, value in {0,1,2} indicating sampled action
     mu: torch.Tensor  # [mu_sell, mu_buy]
     sigma: torch.Tensor  # [sigma_sell, sigma_buy]
     volume_sell: torch.Tensor  # sampled volume sell
