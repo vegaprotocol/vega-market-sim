@@ -27,7 +27,7 @@ from vega_sim.environment.environment import (
     Agent,
 )
 from vega_sim.scenario.common.utils.price_process import (
-    LivePrice,
+    get_live_price,
     get_historic_price_series,
 )
 from vega_sim.scenario.common.agents import (
@@ -202,6 +202,7 @@ class DevOpsScenario(Scenario):
                         else self.market_manager_args.market_name
                     ),
                     asset_name=self.market_manager_args.asset_name,
+                    opening_auction_trade_amount=self.auction_trader_args.initial_volume,
                     initial_asset_mint=self.auction_trader_args.initial_mint,
                     initial_price=self.price_process[0],
                     side=["SIDE_BUY", "SIDE_SELL"][i],
