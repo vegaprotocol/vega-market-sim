@@ -27,7 +27,7 @@ from vega_sim.environment.environment import (
     Agent,
 )
 from vega_sim.scenario.common.utils.price_process import (
-    LivePrice,
+    get_live_price,
     get_historic_price_series,
 )
 from vega_sim.scenario.common.agents import (
