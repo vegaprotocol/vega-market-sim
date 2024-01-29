@@ -274,6 +274,7 @@ class FuzzingScenario(Scenario):
                     successor_probability=0.01,
                     perp_close_on_finalise=True,
                     perp_settlement_data_generator=iter(perps_external_price_process),
+                    fuzz_market_configuration=True,
                 ),
             ]
 

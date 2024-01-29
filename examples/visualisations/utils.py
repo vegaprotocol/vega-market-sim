@@ -235,9 +235,11 @@ def propose_market(
         market_config.set(
             "price_monitoring_parameters.triggers",
             [
-                vega_protos.markets.PriceMonitoringTrigger(
-                    horizon=24 * 3600, probability="0.999999", auction_extension=5
-                )
+                {
+                    "horizon": 24 * 3600,
+                    "probability": "0.999999",
+                    "auction_extension": 5,
+                }
             ],
         )
 
