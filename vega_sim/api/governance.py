@@ -89,6 +89,7 @@ def propose_market_from_config(
     closing_time: Union[str, int],
     enactment_time: Union[str, int],
     time_forward_fn: Optional[Callable[[], None]] = None,
+    sync_fn: Optional[Callable[[], None]] = None,
     governance_asset: Optional[str] = "VOTE",
     proposal_wallet_name: Optional[str] = None,
 ) -> str:
@@ -135,6 +136,7 @@ def propose_market_from_config(
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
+        sync_fn=sync_fn,
     ).proposal.id
 
 
@@ -806,6 +808,7 @@ def _make_and_wait_for_proposal(
     proposal: commands_protos.commands.ProposalSubmission,
     data_client: vac.VegaTradingDataClientV2,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    sync_fn: Optional[Callable[[], None]] = None,
     wallet_name: Optional[str] = None,
 ) -> ProposalSubmission:
     wallet.submit_transaction(
@@ -818,13 +821,19 @@ def _make_and_wait_for_proposal(
 
     # Allow one failure, forward once more
     try:
-        time_forward_fn()
+        if time_forward_fn is not None:
+            time_forward_fn()
+        if sync_fn is not None:
+            sync_fn()
         proposal = wait_for_acceptance(
             proposal.reference,
             lambda p: _proposal_loader(p, data_client),
         )
     except ProposalNotAcceptedError:
-        time_forward_fn()
+        if time_forward_fn is not None:
+            time_forward_fn()
+        if sync_fn is not None:
+            sync_fn()
         proposal = wait_for_acceptance(
             proposal.reference,
             lambda p: _proposal_loader(p, data_client),
