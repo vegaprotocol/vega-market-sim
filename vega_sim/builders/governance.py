@@ -255,7 +255,7 @@ def instrument_configuration(
 def successor_configuration(
     parent_market_id: str, insurance_pool_fraction: float
 ) -> vega_protos.governance.SuccessorConfiguration:
-    vega_protos.governance.SuccessorConfiguration(
+    return vega_protos.governance.SuccessorConfiguration(
         parent_market_id=parent_market_id,
         insurance_pool_fraction=str(insurance_pool_fraction),
     )
