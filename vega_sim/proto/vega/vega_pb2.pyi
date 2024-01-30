@@ -1598,9 +1598,9 @@ class PerpetualData(_message.Message):
         "external_twap",
         "seq_num",
         "start_time",
-        "index_price",
-        "next_index_price_calc",
-        "index_price_type",
+        "internal_composite_price",
+        "next_internal_composite_price_calc",
+        "internal_composite_price_type",
     )
     FUNDING_PAYMENT_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_FIELD_NUMBER: _ClassVar[int]
@@ -1608,18 +1608,18 @@ class PerpetualData(_message.Message):
     EXTERNAL_TWAP_FIELD_NUMBER: _ClassVar[int]
     SEQ_NUM_FIELD_NUMBER: _ClassVar[int]
     START_TIME_FIELD_NUMBER: _ClassVar[int]
-    INDEX_PRICE_FIELD_NUMBER: _ClassVar[int]
-    NEXT_INDEX_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
-    INDEX_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_FIELD_NUMBER: _ClassVar[int]
+    NEXT_INTERNAL_COMPOSITE_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
     funding_payment: str
     funding_rate: str
     internal_twap: str
     external_twap: str
     seq_num: int
     start_time: int
-    index_price: str
-    next_index_price_calc: int
-    index_price_type: _markets_pb2.CompositePriceType
+    internal_composite_price: str
+    next_internal_composite_price_calc: int
+    internal_composite_price_type: _markets_pb2.CompositePriceType
     def __init__(
         self,
         funding_payment: _Optional[str] = ...,
@@ -1628,9 +1628,11 @@ class PerpetualData(_message.Message):
         external_twap: _Optional[str] = ...,
         seq_num: _Optional[int] = ...,
         start_time: _Optional[int] = ...,
-        index_price: _Optional[str] = ...,
-        next_index_price_calc: _Optional[int] = ...,
-        index_price_type: _Optional[_Union[_markets_pb2.CompositePriceType, str]] = ...,
+        internal_composite_price: _Optional[str] = ...,
+        next_internal_composite_price_calc: _Optional[int] = ...,
+        internal_composite_price_type: _Optional[
+            _Union[_markets_pb2.CompositePriceType, str]
+        ] = ...,
     ) -> None: ...
 
 class ProductData(_message.Message):

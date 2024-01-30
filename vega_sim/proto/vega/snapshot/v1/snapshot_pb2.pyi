@@ -695,11 +695,27 @@ class Resource(_message.Message):
         state: _Optional[int] = ...,
     ) -> None: ...
 
+class EventForwarderBucket(_message.Message):
+    __slots__ = ("ts", "hashes")
+    TS_FIELD_NUMBER: _ClassVar[int]
+    HASHES_FIELD_NUMBER: _ClassVar[int]
+    ts: int
+    hashes: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(
+        self, ts: _Optional[int] = ..., hashes: _Optional[_Iterable[str]] = ...
+    ) -> None: ...
+
 class EventForwarder(_message.Message):
-    __slots__ = ("acked_events",)
+    __slots__ = ("acked_events", "buckets")
     ACKED_EVENTS_FIELD_NUMBER: _ClassVar[int]
+    BUCKETS_FIELD_NUMBER: _ClassVar[int]
     acked_events: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, acked_events: _Optional[_Iterable[str]] = ...) -> None: ...
+    buckets: _containers.RepeatedCompositeFieldContainer[EventForwarderBucket]
+    def __init__(
+        self,
+        acked_events: _Optional[_Iterable[str]] = ...,
+        buckets: _Optional[_Iterable[_Union[EventForwarderBucket, _Mapping]]] = ...,
+    ) -> None: ...
 
 class CollateralAccounts(_message.Message):
     __slots__ = ("accounts", "next_balance_snapshot")
@@ -1460,8 +1476,8 @@ class Market(_message.Message):
         "fees_stats",
         "party_margin_factor",
         "mark_price_calculator",
-        "index_price_calculator",
-        "next_index_price_calc",
+        "internal_composite_price_calculator",
+        "next_internal_composite_price_calc",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1492,8 +1508,8 @@ class Market(_message.Message):
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     PARTY_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
     MARK_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
-    INDEX_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
-    NEXT_INDEX_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
+    NEXT_INTERNAL_COMPOSITE_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1523,8 +1539,8 @@ class Market(_message.Message):
     fees_stats: _events_pb2.FeesStats
     party_margin_factor: _containers.RepeatedCompositeFieldContainer[PartyMarginFactor]
     mark_price_calculator: CompositePriceCalculator
-    index_price_calculator: CompositePriceCalculator
-    next_index_price_calc: int
+    internal_composite_price_calculator: CompositePriceCalculator
+    next_internal_composite_price_calc: int
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1562,10 +1578,10 @@ class Market(_message.Message):
         mark_price_calculator: _Optional[
             _Union[CompositePriceCalculator, _Mapping]
         ] = ...,
-        index_price_calculator: _Optional[
+        internal_composite_price_calculator: _Optional[
             _Union[CompositePriceCalculator, _Mapping]
         ] = ...,
-        next_index_price_calc: _Optional[int] = ...,
+        next_internal_composite_price_calc: _Optional[int] = ...,
     ) -> None: ...
 
 class PartyMarginFactor(_message.Message):

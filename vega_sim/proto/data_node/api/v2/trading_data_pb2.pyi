@@ -4381,21 +4381,24 @@ class ReferralProgram(_message.Message):
     ) -> None: ...
 
 class ReferralSet(_message.Message):
-    __slots__ = ("id", "referrer", "created_at", "updated_at")
+    __slots__ = ("id", "referrer", "created_at", "updated_at", "total_members")
     ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     UPDATED_AT_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_MEMBERS_FIELD_NUMBER: _ClassVar[int]
     id: str
     referrer: str
     created_at: int
     updated_at: int
+    total_members: int
     def __init__(
         self,
         id: _Optional[str] = ...,
         referrer: _Optional[str] = ...,
         created_at: _Optional[int] = ...,
         updated_at: _Optional[int] = ...,
+        total_members: _Optional[int] = ...,
     ) -> None: ...
 
 class ReferralSetEdge(_message.Message):
@@ -4649,6 +4652,7 @@ class Team(_message.Message):
         "closed",
         "created_at_epoch",
         "allow_list",
+        "total_members",
     )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -4659,6 +4663,7 @@ class Team(_message.Message):
     CLOSED_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
     ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_MEMBERS_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     referrer: str
     name: str
@@ -4668,6 +4673,7 @@ class Team(_message.Message):
     closed: bool
     created_at_epoch: int
     allow_list: _containers.RepeatedScalarFieldContainer[str]
+    total_members: int
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -4679,6 +4685,7 @@ class Team(_message.Message):
         closed: bool = ...,
         created_at_epoch: _Optional[int] = ...,
         allow_list: _Optional[_Iterable[str]] = ...,
+        total_members: _Optional[int] = ...,
     ) -> None: ...
 
 class TeamEdge(_message.Message):
