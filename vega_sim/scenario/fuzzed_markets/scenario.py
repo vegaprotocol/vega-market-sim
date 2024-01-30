@@ -147,19 +147,12 @@ class FuzzingScenario(Scenario):
         num_steps: int = 60 * 24 * 30 * 3,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
-        n_markets: int = 2,
-        perps_market_probability: float = 0.5,
         perps_data_perturbation: float = 0.5,
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
         output: bool = True,
         lite: bool = False,
     ):
-        if perps_market_probability < 0 or perps_market_probability > 1:
-            raise ValueError(
-                "'perps_market_probability' must be in range [0,1], got"
-                f" '{perps_market_probability}'"
-            )
 
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
@@ -168,8 +161,6 @@ class FuzzingScenario(Scenario):
             },
         )
 
-        self.n_markets = n_markets
-        self.perps_probability = perps_market_probability
         self.perps_data_perturbation = perps_data_perturbation
         self.fuzz_market_config = fuzz_market_config
 
@@ -217,9 +208,16 @@ class FuzzingScenario(Scenario):
             )
         )
 
-        for i_market in range(self.n_markets if not self.lite else 1):
+        for i_market, market in enumerate(
+            [
+                {"fuzz": False, "perp": False},
+                {"fuzz": False, "perp": True},
+                {"fuzz": True, "perp": False},
+                {"fuzz": True, "perp": True},
+            ]
+        ):
             # Determine if we should use perps market, otherwise use futures
-            perps_market = self.random_state.random() < self.perps_probability
+            perps_market = market["perp"]
 
             # Define the market and the asset:
             market_name = f"ASSET_{str(i_market).zfill(3)}"
@@ -274,7 +272,7 @@ class FuzzingScenario(Scenario):
                     successor_probability=0.01,
                     perp_close_on_finalise=True,
                     perp_settlement_data_generator=iter(perps_external_price_process),
-                    fuzz_market_configuration=True,
+                    fuzz_market_configuration=market["fuzz"],
                 ),
             ]
 
