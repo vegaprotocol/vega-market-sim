@@ -1155,15 +1155,15 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 )
 
                 self.vega.wait_for_total_catchup()
-                self.market_id = self.vega.find_market_id(name=self._get_market_name())
-                assert self.market_id != None
-                self.market_config = mkt_config
+                self.market_id = self.vega.find_market_id(
+                    name=self._get_market_name(), raise_on_missing=True
+                )
+                return
 
             except (
                 HTTPError,
                 ProposalNotAcceptedError,
                 builders.exceptions.VegaProtoValueError,
-                AssertionError,
             ):
                 continue
 
