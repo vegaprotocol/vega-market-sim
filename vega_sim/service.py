@@ -573,6 +573,7 @@ class VegaService(ABC):
             ),
             enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
+            sync_fn=lambda: self.wait_for_total_catchup(),
         )
         if approve_proposal:
             gov.approve_proposal(

@@ -97,7 +97,7 @@ class Perpetual(_message.Message):
         "funding_rate_scaling_factor",
         "funding_rate_lower_bound",
         "funding_rate_upper_bound",
-        "index_price_config",
+        "internal_composite_price_config",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -111,7 +111,7 @@ class Perpetual(_message.Message):
     FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
-    INDEX_PRICE_CONFIG_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CONFIG_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     margin_funding_factor: str
@@ -124,7 +124,7 @@ class Perpetual(_message.Message):
     funding_rate_scaling_factor: str
     funding_rate_lower_bound: str
     funding_rate_upper_bound: str
-    index_price_config: CompositePriceConfiguration
+    internal_composite_price_config: CompositePriceConfiguration
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -145,7 +145,7 @@ class Perpetual(_message.Message):
         funding_rate_scaling_factor: _Optional[str] = ...,
         funding_rate_lower_bound: _Optional[str] = ...,
         funding_rate_upper_bound: _Optional[str] = ...,
-        index_price_config: _Optional[
+        internal_composite_price_config: _Optional[
             _Union[CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...

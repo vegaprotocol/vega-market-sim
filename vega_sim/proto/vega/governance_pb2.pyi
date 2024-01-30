@@ -210,7 +210,7 @@ class PerpetualProduct(_message.Message):
         "funding_rate_scaling_factor",
         "funding_rate_lower_bound",
         "funding_rate_upper_bound",
-        "index_price_configuration",
+        "internal_composite_price_configuration",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -224,7 +224,7 @@ class PerpetualProduct(_message.Message):
     FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
-    INDEX_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     margin_funding_factor: str
@@ -237,7 +237,7 @@ class PerpetualProduct(_message.Message):
     funding_rate_scaling_factor: str
     funding_rate_lower_bound: str
     funding_rate_upper_bound: str
-    index_price_configuration: _markets_pb2.CompositePriceConfiguration
+    internal_composite_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -258,7 +258,7 @@ class PerpetualProduct(_message.Message):
         funding_rate_scaling_factor: _Optional[str] = ...,
         funding_rate_lower_bound: _Optional[str] = ...,
         funding_rate_upper_bound: _Optional[str] = ...,
-        index_price_configuration: _Optional[
+        internal_composite_price_configuration: _Optional[
             _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
@@ -648,7 +648,7 @@ class UpdatePerpetualProduct(_message.Message):
         "funding_rate_scaling_factor",
         "funding_rate_lower_bound",
         "funding_rate_upper_bound",
-        "index_price_configuration",
+        "internal_composite_price_configuration",
     )
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -661,7 +661,7 @@ class UpdatePerpetualProduct(_message.Message):
     FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
-    INDEX_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     quote_name: str
     margin_funding_factor: str
     interest_rate: str
@@ -673,7 +673,7 @@ class UpdatePerpetualProduct(_message.Message):
     funding_rate_scaling_factor: str
     funding_rate_lower_bound: str
     funding_rate_upper_bound: str
-    index_price_configuration: _markets_pb2.CompositePriceConfiguration
+    internal_composite_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         quote_name: _Optional[str] = ...,
@@ -693,7 +693,7 @@ class UpdatePerpetualProduct(_message.Message):
         funding_rate_scaling_factor: _Optional[str] = ...,
         funding_rate_lower_bound: _Optional[str] = ...,
         funding_rate_upper_bound: _Optional[str] = ...,
-        index_price_configuration: _Optional[
+        internal_composite_price_configuration: _Optional[
             _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...

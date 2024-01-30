@@ -50,6 +50,8 @@ class InputData(_message.Message):
         "apply_referral_code",
         "update_margin_mode",
         "join_team",
+        "batch_proposal_submission",
+        "update_party_profile",
         "node_vote",
         "node_signature",
         "chain_event",
@@ -60,8 +62,6 @@ class InputData(_message.Message):
         "protocol_upgrade_proposal",
         "issue_signatures",
         "oracle_data_submission",
-        "batch_proposal_submission",
-        "update_party_profile",
     )
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
@@ -87,6 +87,8 @@ class InputData(_message.Message):
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
     UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
+    BATCH_PROPOSAL_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
     NODE_VOTE_FIELD_NUMBER: _ClassVar[int]
     NODE_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     CHAIN_EVENT_FIELD_NUMBER: _ClassVar[int]
@@ -97,8 +99,6 @@ class InputData(_message.Message):
     PROTOCOL_UPGRADE_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     ISSUE_SIGNATURES_FIELD_NUMBER: _ClassVar[int]
     ORACLE_DATA_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
-    BATCH_PROPOSAL_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
-    UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
     nonce: int
     block_height: int
     order_submission: _commands_pb2.OrderSubmission
@@ -123,6 +123,8 @@ class InputData(_message.Message):
     apply_referral_code: _commands_pb2.ApplyReferralCode
     update_margin_mode: _commands_pb2.UpdateMarginMode
     join_team: _commands_pb2.JoinTeam
+    batch_proposal_submission: _commands_pb2.BatchProposalSubmission
+    update_party_profile: _commands_pb2.UpdatePartyProfile
     node_vote: _validator_commands_pb2.NodeVote
     node_signature: _validator_commands_pb2.NodeSignature
     chain_event: _validator_commands_pb2.ChainEvent
@@ -133,8 +135,6 @@ class InputData(_message.Message):
     protocol_upgrade_proposal: _validator_commands_pb2.ProtocolUpgradeProposal
     issue_signatures: _commands_pb2.IssueSignatures
     oracle_data_submission: _data_pb2.OracleDataSubmission
-    batch_proposal_submission: _commands_pb2.BatchProposalSubmission
-    update_party_profile: _commands_pb2.UpdatePartyProfile
     def __init__(
         self,
         nonce: _Optional[int] = ...,
@@ -201,6 +201,12 @@ class InputData(_message.Message):
             _Union[_commands_pb2.UpdateMarginMode, _Mapping]
         ] = ...,
         join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
+        batch_proposal_submission: _Optional[
+            _Union[_commands_pb2.BatchProposalSubmission, _Mapping]
+        ] = ...,
+        update_party_profile: _Optional[
+            _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
+        ] = ...,
         node_vote: _Optional[_Union[_validator_commands_pb2.NodeVote, _Mapping]] = ...,
         node_signature: _Optional[
             _Union[_validator_commands_pb2.NodeSignature, _Mapping]
@@ -228,12 +234,6 @@ class InputData(_message.Message):
         ] = ...,
         oracle_data_submission: _Optional[
             _Union[_data_pb2.OracleDataSubmission, _Mapping]
-        ] = ...,
-        batch_proposal_submission: _Optional[
-            _Union[_commands_pb2.BatchProposalSubmission, _Mapping]
-        ] = ...,
-        update_party_profile: _Optional[
-            _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
         ] = ...,
     ) -> None: ...
 

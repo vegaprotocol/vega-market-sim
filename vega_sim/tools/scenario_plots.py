@@ -455,21 +455,6 @@ def plot_price_comparison(
     ax0.set_ylim(ax0.get_ylim())
     ax0.plot(external_price_series, linewidth=0.8, alpha=0.8)
 
-    ep_volatility = external_price_series.var() / external_price_series.size
-    mp_volatility = mark_price_series.var() / mark_price_series.size
-
-    ax0.text(
-        x=0.1,
-        y=0.1,
-        s=(
-            f"external-price volatility = {round(ep_volatility, 1)}\nmark-price"
-            f" volatility = {round(mp_volatility, 1)}"
-        ),
-        fontsize=8,
-        bbox=dict(facecolor="white", alpha=1),
-        transform=ax0.transAxes,
-    )
-
     ax0.set_ylabel("PRICE")
     ax0.legend(labels=["external price", "mark price"])
 

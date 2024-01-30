@@ -27,14 +27,12 @@ def _run(
     lite: bool = False,
     core_metrics_port: int = 2723,
     data_node_metrics_port: int = 3651,
-    perp_market_probability: float = 1.0,
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
         # step_length_seconds=30,
         block_length_seconds=1,
         transactions_per_block=4096,
-        perps_market_probability=perp_market_probability,
         output=output,
         lite=lite,
     )
