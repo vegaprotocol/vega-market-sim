@@ -14,7 +14,6 @@ class OracleDataSubmission(_message.Message):
         ORACLE_SOURCE_OPEN_ORACLE: _ClassVar[OracleDataSubmission.OracleSource]
         ORACLE_SOURCE_JSON: _ClassVar[OracleDataSubmission.OracleSource]
         ORACLE_SOURCE_ETHEREUM: _ClassVar[OracleDataSubmission.OracleSource]
-
     ORACLE_SOURCE_UNSPECIFIED: OracleDataSubmission.OracleSource
     ORACLE_SOURCE_OPEN_ORACLE: OracleDataSubmission.OracleSource
     ORACLE_SOURCE_JSON: OracleDataSubmission.OracleSource

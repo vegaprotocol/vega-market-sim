@@ -946,7 +946,9 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount) if commitment_amount is not None else 100
+            else (2 * commitment_amount)
+            if commitment_amount is not None
+            else 100
         )
 
         self.market_name = market_name
@@ -3123,6 +3125,8 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         tag: str = "",
         wallet_name: str = None,
         auto_top_up: bool = False,
+        leave_opening_auction_prob: float = 1,
+        random_state: Optional[np.random.RandomState] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.side = side
@@ -3133,6 +3137,10 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.uncrossing_size = uncrossing_size
         self.auto_top_up = auto_top_up
         self.mint_key = False
+        self.leave_opening_auction_prob = leave_opening_auction_prob
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
 
     def initialise(
         self,
@@ -3169,6 +3177,12 @@ class UncrossAuctionAgent(StateAgentWithWallet):
             markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
             markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
         ]:
+            if (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION
+            ):
+                if self.random_state.random() > self.leave_opening_auction_prob:
+                    return
             if self.auto_top_up and self.mint_key:
                 account = self.vega.party_account(
                     key_name=self.key_name,

@@ -27,9 +27,9 @@ _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.data_source_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b"Z%code.vegaprotocol.io/vega/protos/vega"
-    )
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
     _globals["_DATASOURCEDEFINITION"]._serialized_start = 113
     _globals["_DATASOURCEDEFINITION"]._serialized_end = 282
     _globals["_SPECBINDINGFORCOMPOSITEPRICE"]._serialized_start = 284

@@ -24,9 +24,9 @@ _builder.BuildTopDescriptorsAndMessages(
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b"Z1code.vegaprotocol.io/vega/protos/vega/commands/v1"
-    )
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/vega/commands/v1"
     _globals["_SIGNATURE"]._serialized_start = 54
     _globals["_SIGNATURE"]._serialized_end = 133
 # @@protoc_insertion_point(module_scope)

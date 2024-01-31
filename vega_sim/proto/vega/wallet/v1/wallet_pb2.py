@@ -31,9 +31,9 @@ _builder.BuildTopDescriptorsAndMessages(
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b"Z/code.vegaprotocol.io/vega/protos/vega/wallet/v1"
-    )
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z/code.vegaprotocol.io/vega/protos/vega/wallet/v1"
     _globals["_SUBMITTRANSACTIONREQUEST"]._serialized_start = 153
     _globals["_SUBMITTRANSACTIONREQUEST"]._serialized_end = 3318
 # @@protoc_insertion_point(module_scope)

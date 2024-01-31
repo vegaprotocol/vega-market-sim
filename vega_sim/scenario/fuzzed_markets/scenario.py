@@ -153,7 +153,6 @@ class FuzzingScenario(Scenario):
         output: bool = True,
         lite: bool = False,
     ):
-
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
             additional_data_output_fns={
@@ -323,6 +322,7 @@ class FuzzingScenario(Scenario):
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
+                    leave_opening_auction_prob=0.1,
                 )
                 for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
             ]

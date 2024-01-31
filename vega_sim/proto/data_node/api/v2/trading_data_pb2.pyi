@@ -1137,7 +1137,6 @@ class ListTransfersRequest(_message.Message):
         SCOPE_UNSPECIFIED: _ClassVar[ListTransfersRequest.Scope]
         SCOPE_INDIVIDUAL: _ClassVar[ListTransfersRequest.Scope]
         SCOPE_TEAM: _ClassVar[ListTransfersRequest.Scope]
-
     SCOPE_UNSPECIFIED: ListTransfersRequest.Scope
     SCOPE_INDIVIDUAL: ListTransfersRequest.Scope
     SCOPE_TEAM: ListTransfersRequest.Scope
@@ -2902,7 +2901,6 @@ class ListGovernanceDataRequest(_message.Message):
         TYPE_UPDATE_MARKET_STATE: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_REFERRAL_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
-
     TYPE_UNSPECIFIED: ListGovernanceDataRequest.Type
     TYPE_ALL: ListGovernanceDataRequest.Type
     TYPE_NEW_MARKET: ListGovernanceDataRequest.Type

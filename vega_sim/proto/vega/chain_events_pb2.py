@@ -22,9 +22,9 @@ _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.chain_events_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b"Z%code.vegaprotocol.io/vega/protos/vega"
-    )
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
     _globals["_ETHCONTRACTCALLEVENT"]._serialized_start = 34
     _globals["_ETHCONTRACTCALLEVENT"]._serialized_end = 273
     _globals["_BUILTINASSETDEPOSIT"]._serialized_start = 275

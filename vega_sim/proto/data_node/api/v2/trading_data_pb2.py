@@ -40,9 +40,9 @@ _builder.BuildTopDescriptorsAndMessages(
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b'Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222A\223\001\022"\n\023Vega data node APIs2\013v0.74.0-dev\032\034https://api.testnet.vega.xyz*\002\001\0022\020application/jsonR9\n\003500\0222\n\030An internal server error\022\026\n\024\032\022.google.rpc.Status'
-    )
+    _globals[
+        "DESCRIPTOR"
+    ]._serialized_options = b'Z1code.vegaprotocol.io/vega/protos/data-node/api/v2\222A\223\001\022"\n\023Vega data node APIs2\013v0.74.0-dev\032\034https://api.testnet.vega.xyz*\002\001\0022\020application/jsonR9\n\003500\0222\n\030An internal server error\022\026\n\024\032\022.google.rpc.Status'
     _globals["_GETPARTYVESTINGSTATSREQUEST"].fields_by_name["party_id"]._options = None
     _globals["_GETPARTYVESTINGSTATSREQUEST"].fields_by_name[
         "party_id"
