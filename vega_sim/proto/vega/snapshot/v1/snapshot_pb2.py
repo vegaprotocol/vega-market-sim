@@ -36,9 +36,9 @@ _builder.BuildTopDescriptorsAndMessages(
 )
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals[
-        "DESCRIPTOR"
-    ]._serialized_options = b"Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1"
+    _globals["DESCRIPTOR"]._serialized_options = (
+        b"Z1code.vegaprotocol.io/vega/protos/vega/snapshot/v1"
+    )
     _globals["_FORMAT"]._serialized_start = 39261
     _globals["_FORMAT"]._serialized_end = 39357
     _globals["_SNAPSHOT"]._serialized_start = 249

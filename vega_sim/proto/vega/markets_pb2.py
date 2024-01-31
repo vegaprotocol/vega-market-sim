@@ -25,9 +25,9 @@ _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "vega.markets_pb2", _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
     _globals["DESCRIPTOR"]._options = None
-    _globals[
-        "DESCRIPTOR"
-    ]._serialized_options = b"Z%code.vegaprotocol.io/vega/protos/vega"
+    _globals["DESCRIPTOR"]._serialized_options = (
+        b"Z%code.vegaprotocol.io/vega/protos/vega"
+    )
     _globals["_COMPOSITEPRICETYPE"]._serialized_start = 7282
     _globals["_COMPOSITEPRICETYPE"]._serialized_end = 7445
     _globals["_AUCTIONDURATION"]._serialized_start = 52

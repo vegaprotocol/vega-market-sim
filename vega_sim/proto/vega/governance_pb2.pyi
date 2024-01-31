@@ -963,6 +963,7 @@ class GovernanceData(_message.Message):
         __slots__ = ()
         TYPE_SINGLE_OR_UNSPECIFIED: _ClassVar[GovernanceData.Type]
         TYPE_BATCH: _ClassVar[GovernanceData.Type]
+
     TYPE_SINGLE_OR_UNSPECIFIED: GovernanceData.Type
     TYPE_BATCH: GovernanceData.Type
 
@@ -989,6 +990,7 @@ class GovernanceData(_message.Message):
             key: _Optional[str] = ...,
             value: _Optional[_Union[Vote, _Mapping]] = ...,
         ) -> None: ...
+
     PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     YES_FIELD_NUMBER: _ClassVar[int]
     NO_FIELD_NUMBER: _ClassVar[int]
@@ -1043,6 +1045,7 @@ class Proposal(_message.Message):
         STATE_DECLINED: _ClassVar[Proposal.State]
         STATE_ENACTED: _ClassVar[Proposal.State]
         STATE_WAITING_FOR_NODE_VOTE: _ClassVar[Proposal.State]
+
     STATE_UNSPECIFIED: Proposal.State
     STATE_FAILED: Proposal.State
     STATE_OPEN: Proposal.State
@@ -1117,6 +1120,7 @@ class Vote(_message.Message):
         VALUE_UNSPECIFIED: _ClassVar[Vote.Value]
         VALUE_NO: _ClassVar[Vote.Value]
         VALUE_YES: _ClassVar[Vote.Value]
+
     VALUE_UNSPECIFIED: Vote.Value
     VALUE_NO: Vote.Value
     VALUE_YES: Vote.Value
@@ -1130,6 +1134,7 @@ class Vote(_message.Message):
         def __init__(
             self, key: _Optional[str] = ..., value: _Optional[str] = ...
         ) -> None: ...
+
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]

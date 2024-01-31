@@ -47,6 +47,7 @@ class SubmitTransactionRequest(_message.Message):
         TYPE_ASYNC: _ClassVar[SubmitTransactionRequest.Type]
         TYPE_SYNC: _ClassVar[SubmitTransactionRequest.Type]
         TYPE_COMMIT: _ClassVar[SubmitTransactionRequest.Type]
+
     TYPE_UNSPECIFIED: SubmitTransactionRequest.Type
     TYPE_ASYNC: SubmitTransactionRequest.Type
     TYPE_SYNC: SubmitTransactionRequest.Type
@@ -129,6 +130,7 @@ class SubmitRawTransactionRequest(_message.Message):
         TYPE_ASYNC: _ClassVar[SubmitRawTransactionRequest.Type]
         TYPE_SYNC: _ClassVar[SubmitRawTransactionRequest.Type]
         TYPE_COMMIT: _ClassVar[SubmitRawTransactionRequest.Type]
+
     TYPE_UNSPECIFIED: SubmitRawTransactionRequest.Type
     TYPE_ASYNC: SubmitRawTransactionRequest.Type
     TYPE_SYNC: SubmitRawTransactionRequest.Type
