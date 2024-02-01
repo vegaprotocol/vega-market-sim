@@ -133,7 +133,9 @@ class DevOpsScenario(Scenario):
                 random_state=random_state
             )
         else:
-            self.price_process = get_live_price(product=self.binance_code, multiplier=self.feed_price_multiplier)
+            self.price_process = get_live_price(
+                product=self.binance_code, multiplier=self.feed_price_multiplier
+            )
 
         if self.scenario_wallet.market_creator_agent is None:
             raise ValueError(
