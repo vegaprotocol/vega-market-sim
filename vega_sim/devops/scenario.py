@@ -54,12 +54,12 @@ class DevOpsScenario(Scenario):
     def __init__(
         self,
         binance_code: str,
-        feed_price_multiplier: int,
         market_manager_args: MarketManagerArgs,
         market_maker_args: MarketMakerArgs,
         auction_trader_args: AuctionTraderArgs,
         random_trader_args: RandomTraderArgs,
         sensitive_trader_args: SensitiveTraderArgs,
+        feed_price_multiplier: int = 1,
         simulation_args: Optional[SimulationArgs] = None,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, Dict[str, Agent]], Any]
