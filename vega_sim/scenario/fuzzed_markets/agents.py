@@ -1158,6 +1158,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 self.market_id = self.vega.find_market_id(
                     name=self._get_market_name(), raise_on_missing=True
                 )
+                self.market_config = mkt_config
                 return
 
             except (

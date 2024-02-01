@@ -153,7 +153,6 @@ class FuzzingScenario(Scenario):
         output: bool = True,
         lite: bool = False,
     ):
-
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
             additional_data_output_fns={
