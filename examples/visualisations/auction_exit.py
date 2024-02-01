@@ -45,7 +45,7 @@ TRADER_B = PartyConfig(wallet_name=WALLET_NAME, key_name="Trader B Party")
 class AuctionExitVisualisation(Visualisation):
     START_PRICE = 500
 
-    SEED = None
+    SEED = 1
 
     def run(self, pause: bool = False, test: bool = False):
         # Setup a market and move it into a continuous trading state
