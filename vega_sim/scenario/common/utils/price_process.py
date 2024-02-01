@@ -249,7 +249,7 @@ def get_live_price(product: str, multiplier: int) -> LivePrice:
 
     with _live_prices_lock:
         if not feed_key in _live_prices:
-            _live_prices[feed_key] = LivePrice(product=product, multiplier = multiplier)
+            _live_prices[feed_key] = LivePrice(product=product, multiplier=multiplier)
         return _live_prices[feed_key]
 
 
