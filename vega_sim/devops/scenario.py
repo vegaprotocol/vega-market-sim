@@ -54,6 +54,7 @@ class DevOpsScenario(Scenario):
     def __init__(
         self,
         binance_code: str,
+        feed_price_multiplier: int,
         market_manager_args: MarketManagerArgs,
         market_maker_args: MarketMakerArgs,
         auction_trader_args: AuctionTraderArgs,
@@ -70,6 +71,7 @@ class DevOpsScenario(Scenario):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
         self.binance_code = binance_code
+        self.feed_price_multiplier = feed_price_multiplier
 
         self.market_manager_args = market_manager_args
         self.market_maker_args = market_maker_args
@@ -131,7 +133,7 @@ class DevOpsScenario(Scenario):
                 random_state=random_state
             )
         else:
-            self.price_process = get_live_price(product=self.binance_code)
+            self.price_process = get_live_price(product=self.binance_code, multiplier=self.feed_price_multiplier)
 
         if self.scenario_wallet.market_creator_agent is None:
             raise ValueError(
