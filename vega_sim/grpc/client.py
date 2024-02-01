@@ -21,9 +21,8 @@ class GRPCClient(ABC):
             channel = grpc.insecure_channel(
                 self.url,
                 options=[
-                    ("grpc.max_message_length", 1024 * 1024 * 128),
-                    ("grpc.max_send_message_length", 1024 * 1024 * 128),
-                    ("grpc.max_receive_message_length", 1024 * 1024 * 128),
+                    ("grpc.max_send_message_length", 1024 * 1024 * 64),
+                    ("grpc.max_receive_message_length", 1024 * 1024 * 64),
                 ],
             )
             grpc.channel_ready_future(channel).result(timeout=10)
