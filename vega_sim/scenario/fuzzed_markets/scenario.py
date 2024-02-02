@@ -322,6 +322,7 @@ class FuzzingScenario(Scenario):
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
+                    leave_opening_auction_prob=0.1,
                 )
                 for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
             ]
