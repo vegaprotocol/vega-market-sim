@@ -48,7 +48,7 @@ class BlockExplorerServiceServicer(object):
     def ListTransactions(self, request, context):
         """List transactions
 
-        List transactions from the Vega blockchain
+        List transactions from the Vega blockchain from the newest to the oldest transactions.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")

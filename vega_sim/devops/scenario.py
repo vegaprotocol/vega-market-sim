@@ -151,9 +151,11 @@ class DevOpsScenario(Scenario):
                 termination_wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
                 termination_key_name=self.scenario_wallet.market_creator_agent.key_name,
                 market_config=MarketConfig(),
-                market_name=self.market_name
-                if self.market_name is not None
-                else self.market_manager_args.market_name,
+                market_name=(
+                    self.market_name
+                    if self.market_name is not None
+                    else self.market_manager_args.market_name
+                ),
                 market_code=self.market_manager_args.market_code,
                 asset_name=self.market_manager_args.asset_name,
                 asset_dp=self.market_manager_args.adp,
@@ -166,9 +168,11 @@ class DevOpsScenario(Scenario):
             market_maker = ExponentialShapedMarketMaker(
                 wallet_name=self.scenario_wallet.market_maker_agent.wallet_name,
                 key_name=self.scenario_wallet.market_maker_agent.key_name,
-                market_name=self.market_name
-                if self.market_name is not None
-                else self.market_manager_args.market_name,
+                market_name=(
+                    self.market_name
+                    if self.market_name is not None
+                    else self.market_manager_args.market_name
+                ),
                 asset_name=self.market_manager_args.asset_name,
                 initial_asset_mint=self.market_maker_args.initial_mint,
                 commitment_amount=self.market_maker_args.commitment_amount,
@@ -191,9 +195,11 @@ class DevOpsScenario(Scenario):
                 OpenAuctionPass(
                     wallet_name=party.wallet_name,
                     key_name=party.key_name,
-                    market_name=self.market_name
-                    if self.market_name is not None
-                    else self.market_manager_args.market_name,
+                    market_name=(
+                        self.market_name
+                        if self.market_name is not None
+                        else self.market_manager_args.market_name
+                    ),
                     asset_name=self.market_manager_args.asset_name,
                     initial_asset_mint=self.auction_trader_args.initial_mint,
                     initial_price=self.price_process[0],
@@ -208,9 +214,11 @@ class DevOpsScenario(Scenario):
                 MarketOrderTrader(
                     wallet_name=party.wallet_name,
                     key_name=party.key_name,
-                    market_name=self.market_name
-                    if self.market_name is not None
-                    else self.market_manager_args.market_name,
+                    market_name=(
+                        self.market_name
+                        if self.market_name is not None
+                        else self.market_manager_args.market_name
+                    ),
                     asset_name=self.market_manager_args.asset_name,
                     initial_asset_mint=self.random_trader_args.initial_mint,
                     buy_intensity=self.random_trader_args.order_intensity[i],
@@ -227,9 +235,11 @@ class DevOpsScenario(Scenario):
                 PriceSensitiveLimitOrderTrader(
                     wallet_name=party.wallet_name,
                     key_name=party.key_name,
-                    market_name=self.market_name
-                    if self.market_name is not None
-                    else self.market_manager_args.market_name,
+                    market_name=(
+                        self.market_name
+                        if self.market_name is not None
+                        else self.market_manager_args.market_name
+                    ),
                     asset_name=self.market_manager_args.asset_name,
                     price_process_generator=iter(self.price_process),
                     initial_asset_mint=self.sensitive_trader_args.initial_mint,

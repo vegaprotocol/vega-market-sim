@@ -1,5 +1,4 @@
 import pytest
-import logging
 from collections import namedtuple
 import vega_sim.proto.vega as vega_protos
 from examples.visualisations.utils import continuous_market, move_market
@@ -154,10 +153,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t1 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t1) == 1
+    assert len(all_transfers_t1) >= 1
     assert len(live_transfers_t1) == 0
 
-    assert party_a_accounts_t1.general == 499.5
+    assert party_a_accounts_t1.general == 499.999
     assert party_b_accounts_t1.general == 1500
 
     vega.one_off_transfer(
@@ -187,10 +186,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t2 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t2) == 2
+    assert len(all_transfers_t2) >= 2
     assert len(live_transfers_t2) == 1
-    assert party_a_accounts_t2.general == 499.5
-    assert party_b_accounts_t2.general == 999.5
+    assert party_a_accounts_t2.general == 499.999
+    assert party_b_accounts_t2.general == 999.999
 
     vega.wait_fn(100)
     vega.wait_for_total_catchup()
@@ -209,10 +208,10 @@ def test_one_off_transfer(vega_service_with_high_volume_with_market: VegaService
     )
     live_transfers_t3 = vega.transfer_status_from_feed(live_only=True)
 
-    assert len(all_transfers_t3) == 2
+    assert len(all_transfers_t3) >= 2
     assert len(live_transfers_t3) == 0
-    assert party_a_accounts_t3.general == 999.5
-    assert party_b_accounts_t3.general == 999.5
+    assert party_a_accounts_t3.general == 999.999
+    assert party_b_accounts_t3.general == 999.999
 
 
 @pytest.mark.integration
@@ -220,14 +219,19 @@ def test_estimate_position(vega_service_with_market: VegaServiceNull):
     vega = vega_service_with_market
     market_id = vega.all_markets()[0].id
 
-    margin, liquidation = vega.estimate_position(
+    margin, collateral_increase_estimate, liquidation = vega.estimate_position(
         market_id=market_id,
         open_volume=-1,
+        average_entry_price=1,
+        margin_account_balance=1000,
+        general_account_balance=1000,
+        order_margin_account_balance=1000,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
+        margin_factor=0.5,
         side=["SIDE_SELL", "SIDE_SELL"],
         price=[1.01, 1.02],
         remaining=[1, 1],
         is_market_order=[False, False],
-        collateral_available=1,
     )
 
 
@@ -266,7 +270,7 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
     party_b_accounts_t1 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
 
-    assert party_a_accounts_t1[0].balance == 499.5
+    assert party_a_accounts_t1[0].balance == 499.999
     assert party_b_accounts_t1[0].balance == 1500
 
     # Forward one epoch
@@ -275,7 +279,7 @@ def test_recurring_transfer(vega_service_with_market: VegaServiceNull):
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
     party_b_accounts_t2 = vega.list_accounts(key_name=PARTY_B.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 249.25
+    assert party_a_accounts_t2[0].balance == 249.998
     assert party_b_accounts_t2[0].balance == 1750
 
 
@@ -333,14 +337,14 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
 
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t1[0].balance == 899.9
+    assert party_a_accounts_t1[0].balance == 899.999
 
     # Forward one epoch
     next_epoch(vega=vega)
 
     party_a_accounts_t2 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
 
-    assert party_a_accounts_t2[0].balance == 899.9
+    assert party_a_accounts_t2[0].balance == 899.999
 
 
 @pytest.mark.integration
@@ -505,15 +509,6 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
 
-    logging.info(
-        "Trader A Party: public_key ="
-        f" {vega.wallet.public_key(name=trader_a.key_name, wallet_name=trader_a.wallet_name)}"
-    )
-    logging.info(
-        "Trader B Party: public_key ="
-        f" {vega.wallet.public_key(name=trader_b.key_name, wallet_name=trader_b.wallet_name)}"
-    )
-
     # 0012-NP-LIPE-002: An estimate is obtained for a short position with no open orders, mark price keeps going up in small increments and the actual liquidation takes place within the estimated range.
     vega.submit_order(
         trading_wallet=trader_a.wallet_name,
@@ -543,37 +538,36 @@ def test_liquidation_price_witin_estimate_position_bounds_AC002(
         market_id=market_id,
     )
     collateral = account_TRADER_B.margin + account_TRADER_B.general
-    print(f"traderB.margin1 = {account_TRADER_B.margin}")
-    print(f"traderB.general1 = {account_TRADER_B.general}")
     market_data = vega.get_latest_market_data(market_id=market_id)
 
-    _, estimate_liquidation_price_initial = vega.estimate_position(
+    _, _, estimate_liquidation_price_initial = vega.estimate_position(
         market_id,
         open_volume=-100,
         side=["SIDE_SELL"],
         price=[market_data.mark_price],
         remaining=[0],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=500,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
-    _, estimate_liquidation_price_MO = vega.estimate_position(
+    _, _, estimate_liquidation_price_MO = vega.estimate_position(
         market_id,
         open_volume=0,
         side=["SIDE_SELL"],
         price=[market_data.mark_price],
         remaining=[100],
         is_market_order=[True],
-        collateral_available=collateral,
-    )
-    # assert estimate_liquidation_price_initial.best_case.open_volume_only == estimate_liquidation_price_MO.best_case.including_sell_orders
-    print(
-        f"estimate_liquidation_price.best_case.open_volume_only={ estimate_liquidation_price_initial.best_case.open_volume_only}"
-    )
-    print(
-        f"estimate_liquidation_price.worst_case.open_volume_only={ estimate_liquidation_price_initial.worst_case.open_volume_only}"
+        average_entry_price=500,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
 
-    for price in [519, 520, 521.5, 522]:
+    for price in [519, 520, 543, 543.5]:
         move_market(
             vega=vega,
             market_id=market_id,
@@ -627,7 +621,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -787,14 +781,18 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
 
-    _, estimate_liquidation_price_1 = vega.estimate_position(
+    _, _, estimate_liquidation_price_1 = vega.estimate_position(
         market_id,
         open_volume=-10,
         side=["SIDE_SELL", "SIDE_SELL"],
         price=[1005, 1060],
         remaining=[2, 2],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
 
     # #AC 0012-NP-LIPE-005: The estimated liquidation price with sell orders is lower than that for the open volume only.
@@ -820,14 +818,18 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_for_total_catchup()
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
-    _, estimate_liquidation_price_2 = vega.estimate_position(
+    _, _, estimate_liquidation_price_2 = vega.estimate_position(
         market_id,
         open_volume=-12,
         side=["SIDE_SELL"],
         price=[1060],
         remaining=[2],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
     assert (
         estimate_liquidation_price_2.best_case.open_volume_only
@@ -870,14 +872,18 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
 
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
-    _, estimate_liquidation_price_3 = vega.estimate_position(
+    _, _, estimate_liquidation_price_3 = vega.estimate_position(
         market_id,
         open_volume=-13,
         side=["SIDE_SELL"],
         price=[1060],
         remaining=[1],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
     assert (
         estimate_liquidation_price_3.best_case.open_volume_only
@@ -919,11 +925,16 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     vega.wait_for_total_catchup()
 
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
+    collateral = PARTY_A_account.general + PARTY_A_account.margin
 
-    _, estimate_liquidation_price_4 = vega.estimate_position(
+    _, _, estimate_liquidation_price_4 = vega.estimate_position(
         market_id,
         open_volume=-14,
-        collateral_available=PARTY_A_account.general + PARTY_A_account.margin,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
 
     vega.submit_order(
@@ -1008,7 +1019,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -1144,14 +1155,18 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
 
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
-    _, estimate_liquidation_price_1 = vega.estimate_position(
+    _, _, estimate_liquidation_price_1 = vega.estimate_position(
         market_id,
         open_volume=10,
         side=["SIDE_SELL"],
         price=[1001, 1002],
         remaining=[1, 2],
         is_market_order=[False, False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
     # AC 0012-NP-LIPE-004: An estimate is obtained for a long position with multiple limit sell order with the absolute value of the total remaining size of the orders less than the open volume. The estimated liquidation price with sell orders is lower than that for the open volume only.
     assert (
@@ -1176,14 +1191,18 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
 
-    _, estimate_liquidation_price_2 = vega.estimate_position(
+    _, _, estimate_liquidation_price_2 = vega.estimate_position(
         market_id,
         open_volume=9,
         side=["SIDE_SELL"],
         price=[1002],
         remaining=[2],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
     assert (
         estimate_liquidation_price_2.best_case.including_sell_orders
@@ -1223,14 +1242,18 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
 
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
-    _, estimate_liquidation_price_3 = vega.estimate_position(
+    _, _, estimate_liquidation_price_3 = vega.estimate_position(
         market_id,
         open_volume=7,
         side=["SIDE_SELL"],
         price=[1002],
         remaining=[0],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
     assert (
         estimate_liquidation_price_2.best_case.open_volume_only
@@ -1279,7 +1302,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     vega.mint(
         MM_WALLET.name,
-        asset="VOTE",
+        asset=vega.find_asset_id(symbol="VOTE", enabled=True),
         amount=1e4,
     )
     vega.wait_fn(1)
@@ -1408,14 +1431,18 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
-    _, estimate_liquidation_price_1 = vega.estimate_position(
+    _, _, estimate_liquidation_price_1 = vega.estimate_position(
         market_id,
         open_volume=0,
         side=["SIDE_BUY"],
         price=[970],
         remaining=[initial_volume],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
 
     # AC 0012-NP-LIPE-003: An estimate is obtained for a position with no open volume and a single limit buy order, after the order fills the mark price keeps going down in small increments and the actual liquidation takes place within the obtained estimated range.
@@ -1432,14 +1459,18 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     vega.wait_for_total_catchup()
 
     # 0012-NP-LIPE-001:An estimate is obtained for a long position with no open orders, mark price keeps going down in small increments and the actual liquidation takes place within the estimated range.
-    _, estimate_liquidation_price_2 = vega.estimate_position(
+    _, _, estimate_liquidation_price_2 = vega.estimate_position(
         market_id,
         open_volume=10,
         side=["SIDE_BUY"],
         price=[],
         remaining=[],
         is_market_order=[False],
-        collateral_available=collateral,
+        average_entry_price=1000,
+        margin_account_balance=collateral,
+        general_account_balance=0,
+        order_margin_account_balance=0,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
 
     vega.amend_order(

@@ -54,6 +54,8 @@ from vega_sim.proto.vega.markets_pb2 import (
     PriceMonitoringParameters,
     LiquiditySLAParameters,
     SimpleModelParams,
+    LiquidationStrategy,
+    CompositePriceConfiguration,
 )
 from vega_sim.wallet.base import Wallet
 
@@ -80,6 +82,15 @@ class DatanodeSlowResponseError(Exception):
 
 class VegaFaucetError(Exception):
     pass
+
+
+class BalanceDepositInequity(Exception):
+    def __init__(self, asset, total_balance_amount, total_deposit_amount):
+        if total_balance_amount > total_deposit_amount:
+            msg = f"Balance in accounts greater than deposited funds ({total_balance_amount}>{total_deposit_amount}) for asset {asset}"
+        if total_balance_amount < total_deposit_amount:
+            msg = f"Balance in accounts less than deposited funds ({total_balance_amount}<{total_deposit_amount}) for asset {asset}"
+        super().__init__(msg)
 
 
 class MarketStateUpdateType(Enum):
@@ -120,6 +131,9 @@ class DecimalsCache(defaultdict):
 
 
 class VegaService(ABC):
+    WALLET_NAME = "VegaService"
+    KEY_NAME = "VegaService"
+
     def __init__(
         self,
         can_control_time: bool = False,
@@ -387,8 +401,12 @@ class VegaService(ABC):
         asset: str,
         amount: float,
         wallet_name: Optional[str] = None,
+        from_faucet: bool = False,
     ) -> None:
-        """Mints a given amount of requested asset into the associated wallet
+        """Mints a given amount of requested asset into the associated wallet.
+
+        Default behaviour is to transfer funds from the Vega Service "treasury", to mint
+        funds directly from the faucet the optional from_faucet arg can be set.
 
         Args:
             wallet_name:
@@ -400,17 +418,28 @@ class VegaService(ABC):
             key_name:
                 Optional[str], key name stored in metadata. Defaults to None.
         """
-        asset_decimals = self.asset_decimals[asset]
         curr_acct = self.party_account(
             wallet_name=wallet_name, asset_id=asset, key_name=key_name
         ).general
 
-        faucet.mint(
-            self.wallet.public_key(wallet_name=wallet_name, name=key_name),
-            asset,
-            num_to_padded_int(amount, asset_decimals),
-            faucet_url=self.faucet_url,
-        )
+        if from_faucet:
+            faucet.mint(
+                self.wallet.public_key(wallet_name=wallet_name, name=key_name),
+                asset,
+                num_to_padded_int(amount, self.asset_decimals[asset]),
+                faucet_url=self.faucet_url,
+            )
+        else:
+            self.one_off_transfer(
+                from_wallet_name=self.WALLET_NAME,
+                from_key_name=self.KEY_NAME,
+                from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
+                asset=asset,
+                amount=amount,
+                to_key_name=key_name,
+                to_wallet_name=wallet_name,
+            )
 
         self.wait_fn(1)
         self.wait_for_total_catchup()
@@ -452,7 +481,7 @@ class VegaService(ABC):
         symbol: str,
         decimals: int = 0,
         quantum: int = 1,
-        max_faucet_amount: int = 10e9,
+        max_faucet_amount: int = 1e48,
         wallet_name: Optional[str] = None,
     ):
         """Creates a simple asset and automatically approves the proposal (assuming the
@@ -484,7 +513,6 @@ class VegaService(ABC):
             name=name,
             symbol=symbol,
             decimals=decimals,
-            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
             quantum=quantum,
             data_client=self.trading_data_client_v2,
             validation_time=blockchain_time_seconds + self.seconds_per_block * 30,
@@ -492,6 +520,7 @@ class VegaService(ABC):
             enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=key_name,
+            max_faucet_amount=num_to_padded_int(max_faucet_amount, decimals),
         )
         self.wait_fn(1)
         gov.approve_proposal(
@@ -502,6 +531,17 @@ class VegaService(ABC):
         )
         self.wait_fn(60)
         self.wait_for_thread_catchup()
+
+        asset_id = self.find_asset_id(
+            symbol=symbol, enabled=True, raise_on_missing=True
+        )
+        self.mint(
+            wallet_name=self.WALLET_NAME,
+            key_name=self.KEY_NAME,
+            asset=asset_id,
+            amount=max_faucet_amount,
+            from_faucet=True,
+        )
 
     def create_market_from_config(
         self,
@@ -534,6 +574,7 @@ class VegaService(ABC):
             ),
             enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
+            sync_fn=lambda: self.wait_for_total_catchup(),
         )
         if approve_proposal:
             gov.approve_proposal(
@@ -551,6 +592,35 @@ class VegaService(ABC):
 
         self.wait_for_thread_catchup()
         return proposal_id
+
+    def try_enable_perp_markets(
+        self, proposal_key: str, wallet_name: str = None, raise_on_failure: bool = False
+    ):
+        perps_netparam = "limits.markets.proposePerpetualEnabled"
+        desired_value = "1"
+        if (
+            self.get_network_parameter(key=perps_netparam, to_type="str")
+            != desired_value
+        ):
+            logger.info(f"Submitting proposal to enable perpetual markets")
+            self.update_network_parameter(
+                proposal_key=proposal_key,
+                parameter=perps_netparam,
+                new_value=desired_value,
+                wallet_name=wallet_name,
+            )
+            self.wait_for_total_catchup()
+            if not self.get_network_parameter(key=perps_netparam, to_type="int"):
+                if raise_on_failure:
+                    raise ValueError(
+                        "perps market proposals not allowed by default, allowing via"
+                        " network parameter change failed"
+                    )
+            else:
+                logger.info(
+                    f"successfully updated network parameter '{perps_netparam}' to"
+                    f" '{desired_value}'"
+                )
 
     def create_simple_perps_market(
         self,
@@ -622,7 +692,7 @@ class VegaService(ABC):
         """
         additional_kwargs = {}
         if asset is not None:
-            additional_kwargs["future_asset"] = asset
+            additional_kwargs["perp_asset"] = asset
 
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
@@ -1119,13 +1189,22 @@ class VegaService(ABC):
         )
 
     def update_network_parameter(
-        self, proposal_key: str, parameter: str, new_value: str, wallet_name: str = None
+        self,
+        proposal_key: str,
+        parameter: str,
+        new_value: str,
+        wallet_name: str = None,
+        closing_time: Optional[datetime.datetime] = None,
+        enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
     ):
-        """Updates a network parameter by first proposing and then voting to approve
+        """
+        Updates a network parameter by first proposing and then optionally voting to approve
         the change, followed by advancing the network time period forwards.
 
-        If the genesis setup of the market is such that this meets requirements then
-        the proposal will be approved. Otherwise others may need to vote too.
+        If 'approve' is set to False, this function will skip the approval step and return
+        the proposal ID immediately after proposing.
 
         Args:
             proposal_key:
@@ -1136,10 +1215,26 @@ class VegaService(ABC):
                 str, the new value to set
             wallet_name:
                 str, optional, the wallet proposing the change
+            vote_closing_time:
+                Optional[datetime], The time at which the vote should close
+            vote_enactment_time:
+                Optional[datetime], The time at which the vote should enact
+            approve_proposal:
+                bool, default True, Whether to automatically approve the proposal
+            forward_time_to_enactment:
+                bool, default True, Whether to forward time to enactment of the
+                    proposal
+
         Returns:
             str, the ID of the proposal
         """
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if enactment_time is None
+            else int(enactment_time.timestamp())
+        )
 
         proposal_id = gov.propose_network_parameter_change(
             parameter=parameter,
@@ -1147,19 +1242,31 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             data_client=self.trading_data_client_v2,
-            closing_time=blockchain_time_seconds + self.seconds_per_block * 40,
-            enactment_time=blockchain_time_seconds + self.seconds_per_block * 50,
+            closing_time=(
+                blockchain_time_seconds + self.seconds_per_block * 40
+                if closing_time is None
+                else int(closing_time.timestamp())
+            ),
+            enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
             key_name=proposal_key,
         )
-        gov.approve_proposal(
-            proposal_id=proposal_id,
-            wallet=self.wallet,
-            wallet_name=wallet_name,
-            key_name=proposal_key,
-        )
-        self.wait_fn(60)
-        self.wait_for_thread_catchup()
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=wallet_name,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+
+        return proposal_id
 
     def update_market_state(
         self,
@@ -1262,6 +1369,8 @@ class VegaService(ABC):
         updated_log_normal_risk_model: Optional[LogNormalRiskModel] = None,
         wallet_name: Optional[int] = None,
         updated_sla_parameters: Optional[LiquiditySLAParameters] = None,
+        updated_liquidation_strategy: Optional[LiquidationStrategy] = None,
+        updated_mark_price_configuration: Optional[CompositePriceConfiguration] = None,
     ):
         """Updates a market based on proposal parameters. Will attempt to propose
         and then immediately vote on the market change before forwarding time for
@@ -1318,6 +1427,7 @@ class VegaService(ABC):
             )
             updated_instrument = UpdateInstrumentConfiguration(
                 code=curr_inst.code,
+                name=curr_inst.name,
                 future=curr_fut_prod,
             )
         if updated_simple_model_params is None:
@@ -1329,6 +1439,19 @@ class VegaService(ABC):
         if updated_log_normal_risk_model is None:
             updated_log_normal_risk_model = (
                 current_market.tradable_instrument.log_normal_risk_model
+            )
+        new_mark_price_config = (
+            updated_mark_price_configuration
+            if updated_mark_price_configuration is not None
+            else current_market.mark_price_configuration
+        )
+
+        if (
+            new_mark_price_config.composite_price_type
+            == vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE
+        ):
+            new_mark_price_config = CompositePriceConfiguration(
+                composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE
             )
 
         update_configuration = UpdateMarketConfiguration(
@@ -1353,6 +1476,17 @@ class VegaService(ABC):
             ),
             linear_slippage_factor=current_market.linear_slippage_factor,
             quadratic_slippage_factor=current_market.quadratic_slippage_factor,
+            liquidation_strategy=(
+                updated_liquidation_strategy
+                if updated_liquidation_strategy is not None
+                else vega_protos.markets.LiquidationStrategy(
+                    disposal_time_step=1,
+                    disposal_fraction="1",
+                    full_disposal_size=1000000000,
+                    max_fraction_consumed="0.5",
+                )
+            ),
+            mark_price_configuration=new_mark_price_config,
         )
 
         proposal_id = gov.propose_market_update(
@@ -1840,6 +1974,38 @@ class VegaService(ABC):
             wallet=self.wallet,
             wallet_name=wallet_name,
             is_amendment=is_amendment,
+            key_name=key_name,
+        )
+
+    def cancel_liquidity(
+        self,
+        key_name: str,
+        market_id: str,
+        wallet_name: Optional[str] = None,
+    ):
+        """Cancel a custom liquidity profile.
+
+        Args:
+            key_name:
+                str, the key name performing the action
+            market_id:
+                str, The ID of the market to place the commitment on
+            commitment_amount:
+                int, The amount in asset decimals of market asset to commit
+                to liquidity provision
+            fee:
+                float, The fee level at which to set the LP fee
+                 (in %, e.g. 0.01 == 1% and 1 == 100%)
+            is_amendment:
+                Optional bool, Is the submission an amendment to an existing provision
+                    If None, will query the network to check.
+            wallet_name:
+                optional, str name of wallet to use
+        """
+        return trading.cancel_liquidity(
+            market_id=market_id,
+            wallet=self.wallet,
+            wallet_name=wallet_name,
             key_name=key_name,
         )
 
@@ -2556,9 +2722,11 @@ class VegaService(ABC):
             wallet_name=from_wallet_name,
             key_name=from_key_name,
             from_account_type=from_account_type,
-            to=self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
-            if to_key_name is not None
-            else "0000000000000000000000000000000000000000000000000000000000000000",
+            to=(
+                self.wallet.public_key(wallet_name=to_wallet_name, name=to_key_name)
+                if to_key_name is not None
+                else "0000000000000000000000000000000000000000000000000000000000000000"
+            ),
             to_account_type=to_account_type,
             asset=asset,
             amount=str(num_to_padded_int(amount, adp)),
@@ -2715,6 +2883,13 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         key_name: Optional[str] = None,
         direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+        is_reward: Optional[bool] = None,
+        from_epoch: Optional[int] = None,
+        to_epoch: Optional[int] = None,
+        status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+        scope: Optional[
+            data_node_protos_v2.trading_data.ListTransfersRequest.Scope
+        ] = None,
     ) -> List[data.Transfer]:
         """Returns a list of processed transfers.
 
@@ -2741,6 +2916,11 @@ class VegaService(ABC):
             data_client=self.trading_data_client_v2,
             party_id=party_id,
             direction=direction,
+            is_reward=is_reward,
+            from_epoch=from_epoch,
+            to_epoch=to_epoch,
+            status=status,
+            scope=scope,
         )
 
     def get_liquidity_fee_shares(
@@ -2870,12 +3050,21 @@ class VegaService(ABC):
         self,
         market_id: str,
         open_volume: float,
+        average_entry_price: float,
+        margin_account_balance: float,
+        general_account_balance: float,
+        order_margin_account_balance: float,
+        margin_mode: vega_protos.vega.MarginMode,
+        margin_factor: Optional[float] = None,
         side: List[str] = None,
         price: List[float] = None,
         remaining: List[float] = None,
         is_market_order: List[bool] = None,
-        collateral_available: float = None,
-    ) -> Tuple[data.MarginEstimate, data.LiquidationEstimate]:
+        include_collateral_increase_in_available_collateral: bool = False,
+        scale_liquidation_price_to_market_decimals: bool = False,
+    ) -> Tuple[
+        data.MarginEstimate, data.CollateralIncreaseEstimate, data.LiquidationEstimate
+    ]:
         """
         Estimates the best and worst case margin requirements and liquidation prices.
 
@@ -2944,17 +3133,26 @@ class VegaService(ABC):
             open_volume=num_to_padded_int(
                 open_volume, decimals=self.market_pos_decimals[market_id]
             ),
-            orders=orders,
-            collateral_available=(
-                str(
-                    num_to_padded_int(
-                        collateral_available,
-                        self.asset_decimals[self.market_to_asset[market_id]],
-                    )
-                )
-                if collateral_available is not None
-                else None
+            average_entry_price=num_to_padded_int(
+                average_entry_price, decimals=self.market_price_decimals[market_id]
             ),
+            margin_account_balance=num_to_padded_int(
+                margin_account_balance,
+                decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            ),
+            general_account_balance=num_to_padded_int(
+                general_account_balance,
+                decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            ),
+            order_margin_account_balance=num_to_padded_int(
+                order_margin_account_balance,
+                decimals=self.asset_decimals[self.market_to_asset[market_id]],
+            ),
+            margin_mode=margin_mode,
+            orders=orders,
+            margin_factor=margin_factor,
+            include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+            scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
             asset_decimals=self.asset_decimals,
         )
 
@@ -2969,7 +3167,7 @@ class VegaService(ABC):
             asset_decimals=self.asset_decimals[asset_id],
         )
 
-    def get_asset(self, asset_id: str):
+    def get_asset(self, asset_id: str) -> data.Asset:
         return data.get_asset(
             data_client=self.trading_data_client_v2, asset_id=asset_id
         )
@@ -3241,9 +3439,11 @@ class VegaService(ABC):
         return data.list_teams(
             data_client=self.trading_data_client_v2,
             team_id=team_id,
-            party_id=None
-            if key_name is None
-            else self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+            party_id=(
+                None
+                if key_name is None
+                else self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+            ),
         )
 
     def list_team_referees(
@@ -3398,3 +3598,71 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
 
         self.wait_for_thread_catchup()
+
+    def update_margin_mode(
+        self,
+        key_name: str,
+        market_id: str,
+        margin_mode: Union[str, vega_protos.commands.v1.commands.UpdateMarginMode.Mode],
+        wallet_name: Optional[str] = None,
+        margin_factor: Optional[float] = None,
+    ):
+        trading.update_margin_mode(
+            wallet=self.wallet,
+            key_name=key_name,
+            market_id=market_id,
+            margin_mode=margin_mode,
+            wallet_name=wallet_name,
+            margin_factor=str(margin_factor),
+        )
+
+    def check_balances_equal_deposits(self):
+        for attempts in range(100):
+            asset_balance_map = defaultdict(lambda: 0)
+            asset_deposit_map = defaultdict(lambda: 0)
+
+            for account in data_raw.list_accounts(
+                data_client=self.trading_data_client_v2
+            ):
+                asset_balance_map[account.asset] += int(account.balance)
+            for deposit in data_raw.list_deposits(
+                data_client=self.trading_data_client_v2
+            ):
+                asset_deposit_map[deposit.asset] += int(deposit.amount)
+
+            try:
+                for asset in asset_balance_map:
+                    total_balance_amount = asset_balance_map[asset]
+                    total_deposit_amount = asset_deposit_map[asset]
+                    assert asset_balance_map[asset] == asset_deposit_map[asset]
+                    logging.debug(
+                        f"Balance in accounts matches deposited funds for asset {asset}"
+                    )
+                return
+            except AssertionError:
+                logging.debug(
+                    "Balances don't match deposits, waiting to ensure datanode has finished consuming events."
+                )
+                time.sleep(0.0001 * 1.1**attempts)
+                continue
+
+        raise BalanceDepositInequity(
+            asset=asset,
+            total_balance_amount=total_balance_amount,
+            total_deposit_amount=total_deposit_amount,
+        )
+
+    def list_all_positions(
+        self,
+        party_ids: Optional[List[str]] = None,
+        market_ids: Optional[List[str]] = None,
+    ) -> List[data.Position]:
+        return data.list_all_positions(
+            data_client=self.trading_data_client_v2,
+            party_ids=party_ids,
+            market_ids=market_ids,
+            market_price_decimals_map=self.market_price_decimals,
+            market_position_decimals_map=self.market_pos_decimals,
+            market_to_asset_map=self.market_to_asset,
+            asset_decimals_map=self.asset_decimals,
+        )

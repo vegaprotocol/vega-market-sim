@@ -908,16 +908,22 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    margin, liquidation = estimate_position(
+    margin, collateral_increase_estimate, liquidation = estimate_position(
         data_client=data_client,
         market_id=expected_market_id,
         open_volume=1,
+        average_entry_price=100,
+        margin_account_balance=10000,
+        general_account_balance=10000,
+        order_margin_account_balance=10000,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
         orders=[(vega_protos.vega.SIDE_BUY, "500.00", 1, False)],
-        collateral_available="100",
+        margin_factor=0.5,
         asset_decimals={"asset": 1},
     )
 
     assert margin == expected_margin
+    assert collateral_increase_estimate == collateral_increase_estimate
     assert liquidation == expected_liquidation
 
 
@@ -1362,6 +1368,8 @@ def test_list_stop_orders(trading_data_v2_servicer_and_port):
         market_price_decimals_map={"market_id": 0},
         market_position_decimals_map={"market_id": 2},
     )
+
+    expected_expiry = datetime.datetime.fromtimestamp(1672531200)
     assert stop_orders == [
         StopOrderEvent(
             submission=OrderSubmission(
@@ -1386,12 +1394,12 @@ def test_list_stop_orders(trading_data_v2_servicer_and_port):
             stop_order=StopOrder(
                 id="id",
                 oco_link_id="oco_link_id",
-                expires_at=datetime.datetime(2023, 1, 1, 0, 0),
+                expires_at=expected_expiry,
                 expiry_strategy=vega_protos.vega.StopOrder.EXPIRY_STRATEGY_CANCELS,
                 trigger_direction=vega_protos.vega.StopOrder.TRIGGER_DIRECTION_RISES_ABOVE,
                 status=vega_protos.vega.StopOrder.STATUS_PENDING,
-                created_at=datetime.datetime(2023, 1, 1, 0, 0),
-                updated_at=datetime.datetime(2023, 1, 1, 0, 0),
+                created_at=expected_expiry,
+                updated_at=expected_expiry,
                 order_id="order_id",
                 party_id="party_id",
                 market_id="market_id",

@@ -7,6 +7,7 @@ import argparse
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import vega_sim.proto.vega as vega_protos
 
 from typing import Optional, List
@@ -26,6 +27,20 @@ from vega_sim.scenario.fuzzed_markets.agents import (
 from vega_sim.proto.vega import markets
 
 import numpy as np
+
+import logging
+from functools import wraps
+
+logger = logging.getLogger(__name__)
+
+
+def log_plotting_function(func):
+    @wraps(func)
+    def wrapped_fn(*args, **kwargs):
+        logger.info(f"Calling func {func.__name__}")
+        return func(*args, **kwargs)
+
+    return wrapped_fn
 
 
 TRADING_MODE_COLORS = {
@@ -86,6 +101,7 @@ from vega_sim.tools.scenario_output import (
     load_resource_df,
     load_assets_df,
     load_ledger_entries_df,
+    load_positions_df,
 )
 
 
@@ -139,6 +155,7 @@ def _series_df_to_single_series(
     return df_clone.merge(selector, on=["time", "market_id"]).set_index("time")
 
 
+@log_plotting_function
 def plot_trading_summary(
     ax: Axes,
     trade_df: pd.DataFrame,
@@ -182,6 +199,7 @@ def plot_trading_summary(
     )
 
 
+@log_plotting_function
 def plot_total_traded_volume(ax: Axes, trades_df: pd.DataFrame) -> None:
     if trades_df.empty:
         return
@@ -193,6 +211,7 @@ def plot_total_traded_volume(ax: Axes, trades_df: pd.DataFrame) -> None:
     ax.plot(traded)
 
 
+@log_plotting_function
 def plot_open_interest(ax: Axes, market_data_df: pd.DataFrame):
     ax.set_title("Open Interest")
 
@@ -200,6 +219,7 @@ def plot_open_interest(ax: Axes, market_data_df: pd.DataFrame):
     ax.plot(market_data_df["open_interest"])
 
 
+@log_plotting_function
 def plot_open_notional(
     ax: Axes,
     market_data_df: pd.DataFrame,
@@ -213,6 +233,7 @@ def plot_open_notional(
     ax.plot(market_data_df["open_interest"] * price_df["price"])
 
 
+@log_plotting_function
 def plot_spread(ax: Axes, order_book_df: pd.DataFrame) -> None:
     if order_book_df.empty:
         return
@@ -231,6 +252,7 @@ def plot_spread(ax: Axes, order_book_df: pd.DataFrame) -> None:
     ax.plot(spread_df)
 
 
+@log_plotting_function
 def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame) -> None:
     if accounts_df.empty:
         return
@@ -245,6 +267,7 @@ def plot_margin_totals(ax: Axes, accounts_df: pd.DataFrame) -> None:
     ax.plot(grouped_df)
 
 
+@log_plotting_function
 def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame) -> None:
     if market_data_df.empty:
         return
@@ -254,6 +277,7 @@ def plot_target_stake(ax: Axes, market_data_df: pd.DataFrame) -> None:
     ax.plot(market_data_df["target_stake"])
 
 
+@log_plotting_function
 def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
     order_df = load_order_book_df(run_name=run_name)
     trades_df = load_trades_df(run_name=run_name)
@@ -301,7 +325,7 @@ def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
         ax6 = plt.subplot(427)
         ax7 = plt.subplot(428)
 
-        plot_trading_summary(ax, market_trades_df, market_order_df, market_mid_df)
+        # plot_trading_summary(ax, market_trades_df, market_order_df, market_mid_df)
         plot_total_traded_volume(ax2, market_trades_df)
         plot_spread(ax3, order_book_df=market_order_df)
         plot_open_interest(ax4, market_data_df)
@@ -314,6 +338,7 @@ def plot_run_outputs(run_name: Optional[str] = None) -> list[Figure]:
     return figs
 
 
+@log_plotting_function
 def plot_trading_mode(
     fig: Figure, data_df: pd.DataFrame, ss: Optional[SubplotSpec] = None
 ):
@@ -393,6 +418,7 @@ def plot_trading_mode(
     ax1.legend(labels=names, loc="lower right")
 
 
+@log_plotting_function
 def plot_price_comparison(
     fig: Figure,
     data_df: pd.DataFrame,
@@ -432,21 +458,6 @@ def plot_price_comparison(
     ax0.plot(mark_price_series)
     ax0.set_ylim(ax0.get_ylim())
     ax0.plot(external_price_series, linewidth=0.8, alpha=0.8)
-
-    # ep_volatility = external_price_series.var() / external_price_series.size
-    # mp_volatility = mark_price_series.var() / mark_price_series.size
-
-    # ax0.text(
-    #     x=0.1,
-    #     y=0.1,
-    #     s=(
-    #         f"external-price volatility = {round(ep_volatility, 1)}\nmark-price"
-    #         f" volatility = {round(mp_volatility, 1)}"
-    #     ),
-    #     fontsize=8,
-    #     bbox=dict(facecolor="white", alpha=1),
-    #     transform=ax0.transAxes,
-    # )
 
     ax0.set_ylabel("PRICE")
     ax0.autoscale(enable=True, axis="y")
@@ -494,6 +505,7 @@ def plot_position(
     ax0.autoscale(enable=True, axis="y")
 
 
+@log_plotting_function
 def plot_risky_close_outs(
     fig: Figure,
     accounts_df: pd.DataFrame,
@@ -591,6 +603,7 @@ def plot_risky_close_outs(
     ax1r.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
 
 
+@log_plotting_function
 def price_comp_plots(run_name: Optional[str] = None) -> Figure:
     data_df = load_market_data_df(run_name=run_name)
     fuzzing_df = load_fuzzing_df(run_name=run_name)
@@ -637,6 +650,7 @@ def price_comp_plots(run_name: Optional[str] = None) -> Figure:
     return figs
 
 
+@log_plotting_function
 def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     data_df = load_market_data_df(run_name=run_name)
     accounts_df = load_accounts_df(run_name=run_name)
@@ -696,6 +710,7 @@ def fuzz_plots(run_name: Optional[str] = None) -> Figure:
     return figs
 
 
+@log_plotting_function
 def account_and_margin_plots(
     run_name: Optional[str] = None, agent_types: Optional[list] = None
 ):
@@ -781,6 +796,7 @@ def account_and_margin_plots(
     return fig
 
 
+@log_plotting_function
 def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     agents_df = load_agents_df(run_name=run_name)
@@ -836,13 +852,34 @@ def account_plots(run_name: Optional[str] = None, agent_types: Optional[list] = 
     return fig
 
 
-def plot_price_monitoring(run_name: Optional[str] = None):
+@log_plotting_function
+def plot_price_monitoring(
+    run_name: Optional[str] = None,
+    fig: Optional[Figure] = None,
+    ss: Optional[SubplotSpec] = None,
+):
     data_df = load_market_data_df(run_name=run_name)
     market_chains = load_market_chain(run_name=run_name)
     if not market_chains:
         market_chains = {
             market_id: [market_id] for market_id in data_df["market_id"].unique()
         }
+
+    if ss is None:
+        gs = GridSpec(
+            nrows=2,
+            ncols=1,
+            height_ratios=[1, 5],
+            hspace=0.1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=2,
+            ncols=1,
+            height_ratios=[1, 5],
+            hspace=0.1,
+        )
 
     figs = {}
     for market_id, market_children in market_chains.items():
@@ -924,7 +961,7 @@ def plot_price_monitoring(run_name: Optional[str] = None):
             label="extension",
         )
 
-        ax.plot(
+        ax.step(
             valid_prices["datetime"],
             valid_prices["min_valid_price"],
             "r-",
@@ -932,7 +969,7 @@ def plot_price_monitoring(run_name: Optional[str] = None):
             alpha=0.4,
             label="valid price bounds",
         )
-        ax.plot(
+        ax.step(
             valid_prices["datetime"],
             valid_prices["max_valid_price"],
             "r-",
@@ -941,21 +978,21 @@ def plot_price_monitoring(run_name: Optional[str] = None):
             label="_nolegend",
         )
 
-        ax.plot(
+        ax.step(
             market_data_df.index,
             market_data_df["mark_price"].replace(0, np.nan),
             "b-",
             alpha=1.0,
             label="mark price",
         )
-        ax.plot(
+        ax.step(
             market_data_df.index,
             market_data_df["mid_price"].replace(0, np.nan),
             "b-",
             alpha=0.4,
             label="mid price",
         )
-        ax.plot(
+        ax.step(
             market_data_df.index,
             market_data_df["indicative_price"].replace(0, np.nan),
             "g-",
@@ -974,6 +1011,7 @@ def plot_price_monitoring(run_name: Optional[str] = None):
     return figs
 
 
+@log_plotting_function
 def resource_monitoring_plot(run_name: Optional[str] = None):
     resource_df = load_resource_df(
         run_name=run_name,
@@ -1037,6 +1075,7 @@ def resource_monitoring_plot(run_name: Optional[str] = None):
     return fig
 
 
+@log_plotting_function
 def reward_plots(run_name: Optional[str] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     assets_df = load_assets_df(run_name=run_name)
@@ -1125,6 +1164,8 @@ def reward_plots(run_name: Optional[str] = None):
         axs[-1].set_title(f"Asset: {plot[2]}")
         accounts_for_asset = joined_df[joined_df.symbol == str(plot[2])]
         grouped = accounts_for_asset.groupby(["agent_type", "time"])["balance"].sum()
+        if len(grouped.index.get_level_values(0).unique().values) == 1:
+            continue
         for index in grouped.index.get_level_values(0).unique():
             if index == "RewardFunder":
                 continue
@@ -1137,6 +1178,89 @@ def reward_plots(run_name: Optional[str] = None):
     return fig
 
 
+@log_plotting_function
+def plot_account_by_party(
+    run_name: Optional[str] = None,
+    fig: Optional[Figure] = None,
+    ss: Optional[GridSpecFromSubplotSpec] = None,
+    asset_id: Optional[str] = None,
+    market_id: Optional[str] = None,
+    account_type: Optional[vega_protos.vega.AccountType.Value] = None,
+):
+    # Get account data
+    accounts = load_accounts_df(run_name=run_name).set_index(
+        ["asset", "market_id", "type"], append=True
+    )
+    # Create a boolean mask based on conditions
+    mask = (
+        (
+            accounts.index.get_level_values("asset") == asset_id
+            if asset_id is not None
+            else True
+        )
+        & (
+            accounts.index.get_level_values("market_id") == market_id
+            if market_id is not None
+            else True
+        )
+        & (
+            accounts.index.get_level_values("type") == account_type
+            if account_type is not None
+            else True
+        )
+    )
+    # Apply the mask using loc
+    accounts = accounts.loc[mask]
+
+    if fig is None:
+        fig = plt.figure(figsize=[10, 8])
+        fig.suptitle(
+            f"Accounts Plot",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+    if ss is None:
+        gs = GridSpec(
+            nrows=1,
+            ncols=1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=1,
+            ncols=1,
+        )
+
+    axs: list[plt.Axes] = []
+    axs.append(fig.add_subplot(gs[0, 0]))
+    axs[-1].set_title(
+        (f"asset: {asset_id[:6]} | " if asset_id is not None else "")
+        + (f"market: {market_id[:6]} | " if market_id is not None else "")
+        + (
+            f"account_type: {vega_protos.vega.AccountType.Name(account_type)}"
+            if account_type is not None
+            else ""
+        ),
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    final_values = (
+        accounts.groupby("party_id")["balance"].last().sort_values(ascending=False)
+    )
+    for party in final_values.index.values:
+        group = accounts[accounts["party_id"] == party]
+        axs[-1].step(
+            group.index.get_level_values(0),
+            group["balance"],
+            label=(party[:5] if party != "network" else "network"),
+        )
+    axs[-1].legend()
+
+
+@log_plotting_function
 def sla_plot(run_name: Optional[str] = None):
     accounts_df = load_accounts_df(run_name=run_name)
     ledger_entries_df = load_ledger_entries_df(run_name=run_name)
@@ -1283,6 +1407,282 @@ def sla_plot(run_name: Optional[str] = None):
     return fig
 
 
+@log_plotting_function
+def price_series_plot(
+    run_name: Optional[str] = None,
+    fig: Optional[Figure] = None,
+    ss: Optional[GridSpecFromSubplotSpec] = None,
+    overlay_mid: bool = False,
+    overlay_bounds: bool = False,
+    overlay_auctions: bool = False,
+):
+    """Plots the mark price against time.
+
+    Optionally can overlay the mid price, price monitoring bounds, and auction periods
+    on the right hand axis.
+    """
+    # Get market data
+    market_data = load_market_data_df(run_name=run_name)
+
+    if fig is None:
+        fig = plt.figure(figsize=[10, 8])
+        fig.suptitle(
+            f"Market Depth Plot",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+    if ss is None:
+        gs = GridSpec(
+            nrows=1,
+            ncols=1,
+        )
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=1,
+            ncols=1,
+        )
+
+    axs: list[plt.Axes] = []
+    axs.append(fig.add_subplot(gs[0, 0]))
+    axs[-1].set_title(
+        f"Price History",
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+
+    valid_prices = defaultdict(lambda: [])
+    for index in market_data.index:
+        all_bounds = ast.literal_eval(market_data.loc[index]["price_monitoring_bounds"])
+        valid_prices["datetime"].append(index)
+        valid_prices["min_valid_price"].append(np.nan)
+        valid_prices["max_valid_price"].append(np.nan)
+
+        for _, individual_bound in enumerate(all_bounds):
+            valid_prices["min_valid_price"][-1] = (
+                individual_bound[0]
+                if valid_prices["min_valid_price"][-1] is np.nan
+                else max(individual_bound[0], valid_prices["min_valid_price"][-1])
+            )
+            valid_prices["max_valid_price"][-1] = (
+                individual_bound[1]
+                if valid_prices["max_valid_price"][-1] is np.nan
+                else min(individual_bound[1], valid_prices["max_valid_price"][-1])
+            )
+
+    market_data.mid_price.replace(0, np.nan, inplace=True)
+    market_data.mark_price.replace(0, np.nan, inplace=True)
+    market_data.indicative_price.replace(0, np.nan, inplace=True)
+
+    axs[-1].step(
+        market_data.index.values, market_data.mark_price, "b", label="mark price"
+    )
+    axs[-1].step(market_data.index.values, market_data.indicative_price, "g")
+    if overlay_mid:
+        axs[-1].step(
+            market_data.index.values, market_data.mid_price, "b", linewidth="0.1"
+        )
+    if overlay_bounds:
+        axs[-1].step(
+            valid_prices["datetime"],
+            valid_prices["min_valid_price"],
+            "r-",
+            label="price monitoring bounds",
+        )
+        axs[-1].step(valid_prices["datetime"], valid_prices["max_valid_price"], "r-")
+    plt.legend()
+    if overlay_auctions:
+        plot_overlay_auctions(ax=axs[-1], chained_market_data=market_data)
+    return fig
+
+
+@log_plotting_function
+def liquidation_plot(
+    run_name: Optional[str] = None,
+    fig: Optional[Figure] = None,
+    ss: Optional[SubplotSpec] = None,
+):
+    if fig is None:
+        fig = plt.figure(figsize=[10, 8])
+        fig.suptitle(
+            f"Market Depth Plot",
+            fontsize=18,
+            fontweight="bold",
+            color=(0.2, 0.2, 0.2),
+        )
+        fig.tight_layout()
+    if ss is None:
+        gs = GridSpec(nrows=4, ncols=1, hspace=0.6, height_ratios=[1, 1, 1, 1])
+    else:
+        gs = GridSpecFromSubplotSpec(
+            subplot_spec=ss,
+            nrows=3,
+            ncols=1,
+            hspace=0.3,
+            height_ratios=[1, 3, 3],
+        )
+
+    market_data = load_market_data_df(run_name=run_name)
+    network_accounts: pd.DataFrame = (
+        load_accounts_df(run_name=run_name)
+        .set_index(["party_id", "market_id", "type"], append=True)
+        .xs(
+            (
+                "network",
+                vega_protos.vega.ACCOUNT_TYPE_INSURANCE,
+            ),
+            level=(
+                1,
+                3,
+            ),
+        )
+    )
+    loss_socialisation: pd.DataFrame = (
+        load_positions_df(run_name=run_name)
+        .set_index("time")
+        .groupby("time")["loss_socialisation_amount"]
+        .sum()
+    )
+    network_positions: pd.DataFrame = (
+        load_positions_df(run_name=run_name)
+        .set_index(
+            ["time", "party_id", "market_id"],
+        )
+        .xs(
+            ("network",),
+            level=(1,),
+        )
+    )
+    trades_df: pd.DataFrame = load_trades_df(run_name=run_name)
+    network_buy_trades = (
+        trades_df[
+            (trades_df["buyer"] == "network")
+            & (trades_df["aggressor"] == 1)
+            & (trades_df["trade_type"] == 3)
+        ]
+        .groupby("time")["size"]
+        .sum()
+    )
+    network_sell_trades = (
+        trades_df[
+            (trades_df["seller"] == "network")
+            & (trades_df["aggressor"] == 2)
+            & (trades_df["trade_type"] == 3)
+        ]
+        .groupby("time")["size"]
+        .sum()
+    )
+
+    axs: list[plt.Axes] = []
+    # CLOSE OUT PLOTS
+    axs.append(fig.add_subplot(gs[0, 0]))
+    axs[-1].set_title(
+        f"Positions Liquidated",
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    plt.axhline(y=0, color="k", alpha=0.5, linewidth=1)
+    plt.bar(
+        network_buy_trades.index,
+        network_buy_trades.values,
+        color="g",
+        label="longs",
+        width=0.0001,
+        align="edge",
+    )
+    plt.bar(
+        network_sell_trades.index,
+        -network_sell_trades.values,
+        color="r",
+        label="shorts",
+        width=0.0001,
+        align="edge",
+    )
+    plt.legend(fontsize="6")
+    plot_overlay_auctions(ax=axs[-1], chained_market_data=market_data)
+    axs[-1].tick_params(
+        axis="x", which="both", bottom=False, top=False, labelbottom=False
+    )
+    axs[-1].tick_params(axis="y", which="both", left=False, labelleft=False)
+
+    # MARKET INSURANCE POOL AND LOSS SOCIALISATION
+    axs.append(fig.add_subplot(gs[1, 0], sharex=axs[-1]))
+    axs[-1].set_title(
+        f"Market Insurance Pool",
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    plt.axhline(y=0, color="k", alpha=0.5, linewidth=1)
+    plt.step(
+        network_accounts.index.get_level_values(0),
+        network_accounts["balance"].values,
+        label="balance",
+    )
+    axs[-1].twinx().step(
+        loss_socialisation.index.values,
+        loss_socialisation.values,
+        "r",
+        label="loss socialisation",
+    )
+    plt.legend()
+    plot_overlay_auctions(ax=axs[-1], chained_market_data=market_data)
+    axs[-1].tick_params(
+        axis="x", which="both", bottom=False, top=False, labelbottom=False
+    )
+
+    # NETWORK POSITION
+    axs.append(fig.add_subplot(gs[2, 0], sharex=axs[-1]))
+    axs[-1].set_title(
+        f"Network Position",
+        loc="left",
+        fontsize=12,
+        color=(0.3, 0.3, 0.3),
+    )
+    plt.axhline(y=0, color="k", alpha=0.5, linewidth=1)
+    plt.step(
+        network_positions.index.get_level_values(0), network_positions["open_volume"]
+    )
+    axs[-1].xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    plot_overlay_auctions(ax=axs[-1], chained_market_data=market_data)
+    return fig
+
+
+@log_plotting_function
+def plot_overlay_auctions(ax: Axes, chained_market_data: pd.DataFrame):
+    twinx = ax.twinx()
+    twinx.set_ylim(0, 1)
+    # Plot period where auctions triggered (but not extended)
+    series = (chained_market_data["trigger"] == 3).astype(int) & (
+        chained_market_data["extension_trigger"] != 3
+    ).astype(int)
+    twinx.fill_between(
+        series.index,
+        series,
+        step="post",
+        alpha=0.1,
+        color="r",
+        linewidth=0,
+        label="auction",
+    )
+    # Plot periods where auctions extended
+    series = (chained_market_data["extension_trigger"] == 3).astype(int)
+    twinx.fill_between(
+        series.index,
+        series,
+        step="post",
+        alpha=0.1,
+        color="orange",
+        linewidth=0,
+        label="extension",
+    )
+    twinx.tick_params(axis="y", which="both", right=False, labelright=False)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--fuzzing", action="store_true")
@@ -1292,6 +1692,8 @@ if __name__ == "__main__":
     parser.add_argument("--rewards", action="store_true")
     parser.add_argument("--resources", action="store_true")
     parser.add_argument("--sla", action="store_true")
+    parser.add_argument("--liquidation", action="store_true")
+    parser.add_argument("--price", action="store_true")
     parser.add_argument("--all", action="store_true")
 
     parser.add_argument("--show", action="store_true")
@@ -1321,7 +1723,6 @@ if __name__ == "__main__":
                 fig.savefig(f"{dir}/monitoring-{i}.jpg")
 
     if args.accounts or args.all:
-        print("accounting")
         fig = account_plots()
         if args.save:
             fig.savefig(f"{dir}/accounts.jpg")
@@ -1340,6 +1741,16 @@ if __name__ == "__main__":
         fig = sla_plot()
         if args.save:
             fig.savefig(f"{dir}/sla.jpg")
+
+    if args.liquidation or args.all:
+        fig = liquidation_plot()
+        if args.save:
+            fig.savefig(f"{dir}/liquidation.jpg")
+
+    if args.price or args.all:
+        fig = price_series_plot()()
+        if args.save:
+            fig.savefig(f"{dir}/price.jpg")
 
     if args.show:
         plt.show()

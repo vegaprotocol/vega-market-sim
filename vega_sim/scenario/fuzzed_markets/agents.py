@@ -1,19 +1,24 @@
 import logging
 import copy
 import os
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Iterable
 
 import pandas as pd
 from numpy import array
 from numpy.random import RandomState
 from datetime import datetime
+from typing import NamedTuple
 
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import VegaService, PeggedOrder
+from vega_sim.service import (
+    VegaService,
+    PeggedOrder,
+    MarketStateUpdateType,
+)
 from vega_sim.api.governance import ProposalNotAcceptedError
 from requests.exceptions import HTTPError
 
@@ -115,6 +120,22 @@ class FuzzingAgent(StateAgentWithWallet):
             cancellations=cancellations,
             stop_orders_submission=stop_orders_submissions,
         )
+        self.fuzz_isolated_margin_state()
+
+    def fuzz_isolated_margin_state(self):
+        if self.random_state.random() > 0.95:
+            try:
+                self.vega.update_margin_mode(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                    margin_mode=self.random_state.choice(
+                        ["MODE_CROSS_MARGIN", "MODE_ISOLATED_MARGIN"]
+                    ),
+                    margin_factor=self.random_state.random(),
+                )
+            except HTTPError:
+                pass
 
     def create_fuzzed_cancellation(self, vega_state):
         order_id = self._select_order_id()
@@ -323,6 +344,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 import plotly.express as px
 
                 FuzzingAgent.OUTPUTTED = True
+
                 df = pd.DataFrame.from_dict(FuzzingAgent.MEMORY)
                 df = (
                     df.groupby(list(FuzzingAgent.MEMORY.keys()))
@@ -451,6 +473,7 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
                     trading_key=self.key_name,
                     trading_wallet=self.wallet_name,
                     market_id=self.market_id,
+                    fill_or_kill=False,
                     side=self.side,
                     volume=size,
                     wait=False,
@@ -605,6 +628,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         commitment_factor_min: float = 0.1,
         commitment_factor_max: float = 0.6,
         initial_asset_mint: float = 1e5,
+        probability_cancel: float = 0.01,
     ):
         super().__init__(key_name, tag, wallet_name, state_update_freq)
 
@@ -613,6 +637,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
 
         self.commitment_factor_min = commitment_factor_min
         self.commitment_factor_max = commitment_factor_max
+        self.probability_cancel = probability_cancel
         self.random_state = random_state if random_state is not None else RandomState()
         self.initial_asset_mint = initial_asset_mint
 
@@ -660,6 +685,14 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
         )
 
     def step(self, vega_state):
+        if self.random_state.random() < self.probability_cancel:
+            self.vega.cancel_liquidity(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+            )
+            return
+
         commitment_factor = (
             self.random_state.random_sample()
             * (self.commitment_factor_max - self.commitment_factor_min)
@@ -782,6 +815,14 @@ class SuccessorMarketCreatorAgent(StateAgentWithWallet):
         self.vega.wait_fn(5)
 
 
+class PerpProductOptions(NamedTuple):
+    funding_payment_frequency_in_seconds: Optional[int]
+    margin_funding_factor: Optional[float]
+    interest_rate: Optional[float]
+    clamp_lower_bound: Optional[float]
+    clamp_upper_bound: Optional[float]
+
+
 class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
     def __init__(
         self,
@@ -801,6 +842,11 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         market_agents: Optional[Dict[str, List[StateAgentWithWallet]]] = None,
         stake_key: bool = False,
+        perp_settlement_data_generator: Optional[Iterable[float]] = None,
+        perp_sample_settlement_every_n_steps: int = 10,
+        perp_options: Optional[PerpProductOptions] = None,
+        perp_close_on_finalise: bool = True,
+        fuzz_market_configuration: bool = False,
     ):
         super().__init__(
             wallet_name=proposal_wallet_name,
@@ -828,9 +874,24 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig()
         )
 
+        if self.market_config.is_perp() and perp_settlement_data_generator == None:
+            raise ValueError(
+                "'perp_settlement_data_generator' must be supplied when 'market_config'"
+                " indicates a perp market"
+            )
+
         self.settlement_price = settlement_price
         self.needs_to_update_markets = False
         self.stake_key = stake_key
+        self.perp_options = perp_options
+        self.perp_close_at_settlement_price = perp_close_on_finalise
+        self.current_step = 0
+        self.prev_perp_settlement_data = None
+        self.curr_perp_settlement_data = None
+        self.perp_settlement_data_generator = perp_settlement_data_generator
+        self.perp_sample_settlement_every_n_steps = perp_sample_settlement_every_n_steps
+
+        self.fuzz_market_configuration = fuzz_market_configuration
 
     def _get_termination_key_name(self):
         return (
@@ -870,7 +931,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -891,7 +952,6 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 symbol=self.asset_name,
                 decimals=self.asset_dp,
                 quantum=int(10 ** (self.asset_dp)),
-                max_faucet_amount=10_000_000_000,
                 key_name=self.key_name,
             )
 
@@ -909,58 +969,224 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
         self.vega.wait_for_total_catchup()
         self.market_id = self.vega.find_market_id(name=self._get_market_name())
-
         if self.market_id is None:
             self._create_latest_market()
 
-    def _create_latest_market(self, parent_market_id: Optional[str] = None):
-        # Add market information and asset information to market config
-        mkt_config = copy.deepcopy(self.market_config)
-        mkt_config.set("instrument.name", self._get_market_name())
-        mkt_config.set("instrument.code", self._get_market_code())
-        mkt_config.set("instrument.future.settlement_asset", self.asset_id)
-        mkt_config.set("instrument.future.quote_name", self.asset_name)
-        mkt_config.set("instrument.future.number_decimal_places", self.asset_dp)
-        mkt_config.set(
-            "instrument.future.terminating_key",
-            self.vega.wallet.public_key(
-                wallet_name=self.termination_wallet_name,
-                name=self._get_termination_key_name(),
-            ),
-        )
-
-        if parent_market_id is not None:
+    def _set_product_variables(self, mkt_config: MarketConfig):
+        if mkt_config.is_future():
+            mkt_config.set("instrument.future.settlement_asset", self.asset_id)
+            mkt_config.set("instrument.future.quote_name", self.asset_name)
+            mkt_config.set("instrument.future.number_decimal_places", self.asset_dp)
             mkt_config.set(
-                "successor",
-                Successor(
-                    opt={
-                        "parent_market_id": parent_market_id,
-                        "insurance_pool_fraction": 1,
-                    }
+                "instrument.future.terminating_key",
+                self.vega.wallet.public_key(
+                    wallet_name=self.termination_wallet_name,
+                    name=self._get_termination_key_name(),
                 ),
             )
+        if mkt_config.is_perp():
+            mkt_config.set("instrument.perpetual.settlement_asset", self.asset_id)
+            mkt_config.set("instrument.perpetual.quote_name", self.asset_name)
+            mkt_config.set("instrument.perpetual.number_decimal_places", self.asset_dp)
+            mkt_config.set(
+                "instrument.perpetual.settlement_key",
+                self.vega.wallet.public_key(
+                    wallet_name=self.termination_wallet_name,
+                    name=self._get_termination_key_name(),
+                ),
+            )
+            if self.perp_options != None:
+                if self.perp_options.funding_payment_frequency_in_seconds != None:
+                    mkt_config.set(
+                        "instrument.perpetual.funding_payment_frequency_in_seconds"
+                    )
+                if self.perp_options.margin_funding_factor != None:
+                    mkt_config.set(
+                        "instrument.perpetual.margin_funding_factor",
+                        self.perp_options.margin_funding_factor,
+                    )
+                if self.perp_options.interest_rate != None:
+                    mkt_config.set(
+                        "instrument.perpetual.interest_rate",
+                        self.perp_options.interest_rate,
+                    )
+                if self.perp_options.clamp_lower_bound != None:
+                    mkt_config.set(
+                        "instrument.perpetual.clamp_lower_bound",
+                        self.perp_options.clamp_lower_bound,
+                    )
+                if self.perp_options.clamp_upper_bound != None:
+                    mkt_config.set(
+                        "instrument.perpetual.clamp_upper_bound",
+                        self.perp_options.clamp_upper_bound,
+                    )
 
-        self.vega.wait_for_total_catchup()
-        self.vega.create_market_from_config(
-            proposal_wallet_name=self.wallet_name,
-            proposal_key_name=self.key_name,
-            market_config=mkt_config,
+    def _fuzz_market_variables(self, mkt_config: MarketConfig):
+        # Fuzz price and position decimals
+        mkt_config.decimal_places = self.random_state.randint(0, 5)
+        mkt_config.position_decimal_places = self.random_state.randint(-5, 5)
+        # Fuzz price monitoring parameters
+        mkt_config.price_monitoring_parameters.triggers = [
+            {
+                "horizon": int(self.random_state.lognormal(mean=8, sigma=0.5)),
+                "probability": self.random_state.uniform(0.9, 1),
+                "auction_extension": int(
+                    self.random_state.lognormal(mean=5, sigma=0.8)
+                ),
+            }
+            for _ in range(self.random_state.randint(5))
+        ]
+        # Fuzz liquidity monitoring parameters
+        mkt_config.liquidity_monitoring_parameters.target_stake_parameters.time_window = self.random_state.randint(
+            0, 3600
+        )
+        mkt_config.liquidity_monitoring_parameters.target_stake_parameters.scaling_factor = self.random_state.uniform(
+            0, 1
+        )
+        mkt_config.liquidity_monitoring_parameters.triggering_ratio = (
+            self.random_state.uniform(0, 1)
+        )
+        mkt_config.liquidity_monitoring_parameters.auction_extension = (
+            self.random_state.randint(0, 300)
+        )
+        # Fuzz risk model parameters
+        mkt_config.log_normal.params.mu = self.random_state.uniform(-1e-6, 1e-6)
+        mkt_config.log_normal.params.r = self.random_state.uniform(-1, 1)
+        mkt_config.log_normal.params.sigma = self.random_state.uniform(-1e-3, 50)
+        mkt_config.log_normal.risk_aversion_parameter = self.random_state.uniform(
+            1e-8, 0.1
+        )
+        mkt_config.log_normal.tau = self.random_state.uniform(1e-8, 1)
+        # Fuzz liquidity sla parameters
+        mkt_config.liquidity_sla_parameters.price_range = self.random_state.uniform(
+            0, 20
+        )
+        mkt_config.liquidity_sla_parameters.commitment_min_time_fraction = (
+            self.random_state.uniform(0, 1)
+        )
+        mkt_config.liquidity_sla_parameters.performance_hysteresis_epochs = (
+            self.random_state.randint(0, 366)
+        )
+        mkt_config.liquidity_sla_parameters.sla_competition_factor = (
+            self.random_state.uniform(0, 1)
+        )
+        # Fuzz liquidity fee settings
+        mkt_config.liquidity_fee_settings.method = self.random_state.choice(
+            vega_protos.markets.LiquidityFeeSettings.Method.values()
+        )
+        mkt_config.liquidity_fee_settings.fee_constant = (
+            self.random_state.uniform(0, 1)
+            if mkt_config.liquidity_fee_settings.method
+            == vega_protos.markets.LiquidityFeeSettings.Method.METHOD_CONSTANT
+            else None
+        )
+        # Fuzz liquidation strategy
+        mkt_config.liquidation_strategy.disposal_time_step = self.random_state.randint(
+            1, 3600
+        )
+        mkt_config.liquidation_strategy.disposal_fraction = self.random_state.uniform(
+            0, 1
+        )
+        mkt_config.liquidation_strategy.full_disposal_size = (
+            self.random_state.lognormal(mean=5, sigma=1)
+        )
+        mkt_config.liquidation_strategy.max_fraction_consumed = (
+            self.random_state.uniform(0, 1)
+        )
+        # Fuzz mark price configuration
+        mkt_config.mark_price_configuration.decay_weight = self.random_state.uniform(
+            0, 1
+        )
+        mkt_config.mark_price_configuration.decay_power = self.random_state.randint(
+            1, 3
+        )
+        mkt_config.mark_price_configuration.cash_amount = self.random_state.randint(
+            0, 10000
+        )
+        mkt_config.mark_price_configuration.composite_price_type = (
+            self.random_state.choice(vega_protos.markets.CompositePriceType.values())
+        )
+        mkt_config.mark_price_configuration.source_weights = (
+            self.random_state.randint(0, 100, size=3)
+            if mkt_config.mark_price_configuration.composite_price_type
+            == vega_protos.markets.CompositePriceType.COMPOSITE_PRICE_TYPE_WEIGHTED
+            else None
+        )
+        mkt_config.mark_price_configuration.source_staleness_tolerance = (
+            self.random_state.randint(0, 100, size=3)
+            if mkt_config.mark_price_configuration.composite_price_type
+            == vega_protos.markets.CompositePriceType.COMPOSITE_PRICE_TYPE_WEIGHTED
+            else None
         )
 
-        self.vega.wait_for_total_catchup()
-        self.market_id = self.vega.find_market_id(name=self._get_market_name())
+    def _create_latest_market(self, parent_market_id: Optional[str] = None):
+        max_attempts = 10
+        for attempt in range(max_attempts):
+            try:
+                # Add market information and asset information to market config
+                mkt_config = copy.deepcopy(self.market_config)
+                mkt_config.set("instrument.name", self._get_market_name())
+                mkt_config.set("instrument.code", self._get_market_code())
+                self._set_product_variables(mkt_config)
+
+                # If final attempt don't fuzz configuration so we get a sensible market
+                if (attempt != max_attempts - 1) and (self.fuzz_market_configuration):
+                    self._fuzz_market_variables(mkt_config)
+
+                if parent_market_id is not None:
+                    mkt_config.set(
+                        "successor",
+                        Successor(
+                            opt={
+                                "parent_market_id": parent_market_id,
+                                "insurance_pool_fraction": 1,
+                            }
+                        ),
+                    )
+                self.vega.wait_for_total_catchup()
+
+                self.vega.create_market_from_config(
+                    proposal_wallet_name=self.wallet_name,
+                    proposal_key_name=self.key_name,
+                    market_config=mkt_config,
+                )
+
+                self.vega.wait_for_total_catchup()
+                self.market_id = self.vega.find_market_id(
+                    name=self._get_market_name(), raise_on_missing=True
+                )
+                self.market_config = mkt_config
+                return
+
+            except (
+                HTTPError,
+                ProposalNotAcceptedError,
+                builders.exceptions.VegaProtoValueError,
+            ):
+                continue
 
     def finalise(self):
         if self.settlement_price is not None:
-            self.vega.submit_termination_and_settlement_data(
-                self._get_termination_key_name(),
-                self.settlement_price,
-                self.market_id,
-                self.termination_wallet_name,
-            )
-            self.vega.wait_for_total_catchup()
+            if self.market_config.is_future():
+                self.vega.submit_termination_and_settlement_data(
+                    self._get_termination_key_name(),
+                    self.settlement_price,
+                    self.market_id,
+                    self.termination_wallet_name,
+                )
+                self.vega.wait_for_total_catchup()
+            if self.perp_close_at_settlement_price and self.market_config.is_perp():
+                self.vega.update_market_state(
+                    market_id=self.market_id,
+                    proposal_key=self.key_name,
+                    wallet_name=self.wallet_name,
+                    market_state=MarketStateUpdateType.Terminate,
+                    price=self.settlement_price,
+                )
+                self.vega.wait_for_total_catchup()
 
     def step(self, vega_state) -> None:
+        self.current_step += 1
         if self.needs_to_update_markets:
             self.vega.submit_termination_and_settlement_data(
                 self.old_termination_key,
@@ -976,7 +1202,11 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                     agent.market_name = self._get_market_name()
             self.needs_to_update_markets = False
 
-        if self.random_state.random() < self.successor_probability:
+        # current successor market implementation requires both markets to be futures markets
+        if (
+            not self.market_config.is_perp()
+            and self.random_state.random() < self.successor_probability
+        ):
             self.old_market_id = self.market_id
             self.old_termination_key = self._get_termination_key_name()
             self.latest_key_idx += 1
@@ -988,6 +1218,19 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
 
             self._create_latest_market(parent_market_id=self.market_id)
             self.needs_to_update_markets = True
+
+        # submit perp settlement data
+        if self.market_config.is_perp():
+            self.prev_perp_settlement_data = self.curr_perp_settlement_data
+            self.curr_perp_settlement_data = next(self.perp_settlement_data_generator)
+
+            if (self.current_step - 1) % self.perp_sample_settlement_every_n_steps == 0:
+                self.vega.submit_settlement_data(
+                    settlement_key=self._get_termination_key_name(),
+                    wallet_name=self.termination_wallet_name,
+                    settlement_price=self.curr_perp_settlement_data,
+                    market_id=self.market_id,
+                )
 
 
 class FuzzyReferralProgramManager(StateAgentWithWallet):
@@ -1021,7 +1264,7 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -1149,7 +1392,7 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -1356,7 +1599,7 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
             )
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -1405,7 +1648,7 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
                     wallet_name=self.wallet_name,
                 )
                 self.accepted_proposals += 1
-                continue
+                break
             except (
                 HTTPError,
                 ProposalNotAcceptedError,
@@ -1415,5 +1658,7 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
 
     def finalise(self):
         logging.debug(
-            f"Agent {self.name()} proposed {self.accepted_proposals}/{self.proposals} valid governance transfer proposals."
+            f"Agent {self.name()} proposed"
+            f" {self.accepted_proposals}/{self.proposals} valid governance transfer"
+            " proposals."
         )

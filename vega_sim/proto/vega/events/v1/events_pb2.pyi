@@ -115,6 +115,9 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_PAID_LIQUIDITY_FEES_STATS_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_VESTING_SUMMARY: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TRANSFER_FEES_PAID: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -206,6 +209,9 @@ BUS_EVENT_TYPE_FUNDING_PAYMENTS: BusEventType
 BUS_EVENT_TYPE_PAID_LIQUIDITY_FEES_STATS_UPDATED: BusEventType
 BUS_EVENT_TYPE_VESTING_SUMMARY: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_PAID: BusEventType
+BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: BusEventType
+BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: BusEventType
+BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -338,6 +344,7 @@ class FeesStats(_message.Message):
         "volume_discount_applied",
         "total_maker_fees_received",
         "maker_fees_generated",
+        "total_fees_paid_and_received",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -348,6 +355,7 @@ class FeesStats(_message.Message):
     VOLUME_DISCOUNT_APPLIED_FIELD_NUMBER: _ClassVar[int]
     TOTAL_MAKER_FEES_RECEIVED_FIELD_NUMBER: _ClassVar[int]
     MAKER_FEES_GENERATED_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_FEES_PAID_AND_RECEIVED_FIELD_NUMBER: _ClassVar[int]
     market: str
     asset: str
     epoch_seq: int
@@ -360,6 +368,9 @@ class FeesStats(_message.Message):
     total_maker_fees_received: _containers.RepeatedCompositeFieldContainer[PartyAmount]
     maker_fees_generated: _containers.RepeatedCompositeFieldContainer[
         MakerFeesGenerated
+    ]
+    total_fees_paid_and_received: _containers.RepeatedCompositeFieldContainer[
+        PartyAmount
     ]
     def __init__(
         self,
@@ -383,6 +394,9 @@ class FeesStats(_message.Message):
         ] = ...,
         maker_fees_generated: _Optional[
             _Iterable[_Union[MakerFeesGenerated, _Mapping]]
+        ] = ...,
+        total_fees_paid_and_received: _Optional[
+            _Iterable[_Union[PartyAmount, _Mapping]]
         ] = ...,
     ) -> None: ...
 
@@ -540,6 +554,7 @@ class FundingPeriodDataPoint(_message.Message):
         SOURCE_UNSPECIFIED: _ClassVar[FundingPeriodDataPoint.Source]
         SOURCE_EXTERNAL: _ClassVar[FundingPeriodDataPoint.Source]
         SOURCE_INTERNAL: _ClassVar[FundingPeriodDataPoint.Source]
+
     SOURCE_UNSPECIFIED: FundingPeriodDataPoint.Source
     SOURCE_EXTERNAL: FundingPeriodDataPoint.Source
     SOURCE_INTERNAL: FundingPeriodDataPoint.Source
@@ -669,6 +684,7 @@ class Transfer(_message.Message):
         "status",
         "timestamp",
         "reason",
+        "game_id",
         "one_off",
         "recurring",
         "one_off_governance",
@@ -683,6 +699,7 @@ class Transfer(_message.Message):
         STATUS_REJECTED: _ClassVar[Transfer.Status]
         STATUS_STOPPED: _ClassVar[Transfer.Status]
         STATUS_CANCELLED: _ClassVar[Transfer.Status]
+
     STATUS_UNSPECIFIED: Transfer.Status
     STATUS_PENDING: Transfer.Status
     STATUS_DONE: Transfer.Status
@@ -700,6 +717,7 @@ class Transfer(_message.Message):
     STATUS_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     REASON_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     ONE_OFF_FIELD_NUMBER: _ClassVar[int]
     RECURRING_FIELD_NUMBER: _ClassVar[int]
     ONE_OFF_GOVERNANCE_FIELD_NUMBER: _ClassVar[int]
@@ -714,6 +732,7 @@ class Transfer(_message.Message):
     status: Transfer.Status
     timestamp: int
     reason: str
+    game_id: str
     one_off: OneOffTransfer
     recurring: RecurringTransfer
     one_off_governance: OneOffGovernanceTransfer
@@ -730,6 +749,7 @@ class Transfer(_message.Message):
         status: _Optional[_Union[Transfer.Status, str]] = ...,
         timestamp: _Optional[int] = ...,
         reason: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
         one_off: _Optional[_Union[OneOffTransfer, _Mapping]] = ...,
         recurring: _Optional[_Union[RecurringTransfer, _Mapping]] = ...,
         one_off_governance: _Optional[_Union[OneOffGovernanceTransfer, _Mapping]] = ...,
@@ -809,6 +829,7 @@ class StakeLinking(_message.Message):
         TYPE_UNSPECIFIED: _ClassVar[StakeLinking.Type]
         TYPE_LINK: _ClassVar[StakeLinking.Type]
         TYPE_UNLINK: _ClassVar[StakeLinking.Type]
+
     TYPE_UNSPECIFIED: StakeLinking.Type
     TYPE_LINK: StakeLinking.Type
     TYPE_UNLINK: StakeLinking.Type
@@ -819,6 +840,7 @@ class StakeLinking(_message.Message):
         STATUS_PENDING: _ClassVar[StakeLinking.Status]
         STATUS_ACCEPTED: _ClassVar[StakeLinking.Status]
         STATUS_REJECTED: _ClassVar[StakeLinking.Status]
+
     STATUS_UNSPECIFIED: StakeLinking.Status
     STATUS_PENDING: StakeLinking.Status
     STATUS_ACCEPTED: StakeLinking.Status
@@ -880,6 +902,7 @@ class ERC20MultiSigSignerEvent(_message.Message):
         TYPE_UNSPECIFIED: _ClassVar[ERC20MultiSigSignerEvent.Type]
         TYPE_ADDED: _ClassVar[ERC20MultiSigSignerEvent.Type]
         TYPE_REMOVED: _ClassVar[ERC20MultiSigSignerEvent.Type]
+
     TYPE_UNSPECIFIED: ERC20MultiSigSignerEvent.Type
     TYPE_ADDED: ERC20MultiSigSignerEvent.Type
     TYPE_REMOVED: ERC20MultiSigSignerEvent.Type
@@ -976,8 +999,9 @@ class RewardPayoutEvent(_message.Message):
         "percent_of_total_reward",
         "timestamp",
         "reward_type",
-        "market",
         "locked_until_epoch",
+        "quantum_amount",
+        "game_id",
     )
     PARTY_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
@@ -986,8 +1010,9 @@ class RewardPayoutEvent(_message.Message):
     PERCENT_OF_TOTAL_REWARD_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     REWARD_TYPE_FIELD_NUMBER: _ClassVar[int]
-    MARKET_FIELD_NUMBER: _ClassVar[int]
     LOCKED_UNTIL_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     party: str
     epoch_seq: str
     asset: str
@@ -995,8 +1020,9 @@ class RewardPayoutEvent(_message.Message):
     percent_of_total_reward: str
     timestamp: int
     reward_type: str
-    market: str
     locked_until_epoch: str
+    quantum_amount: str
+    game_id: str
     def __init__(
         self,
         party: _Optional[str] = ...,
@@ -1006,8 +1032,9 @@ class RewardPayoutEvent(_message.Message):
         percent_of_total_reward: _Optional[str] = ...,
         timestamp: _Optional[int] = ...,
         reward_type: _Optional[str] = ...,
-        market: _Optional[str] = ...,
         locked_until_epoch: _Optional[str] = ...,
+        quantum_amount: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ValidatorScoreEvent(_message.Message):
@@ -1078,16 +1105,37 @@ class MarketEvent(_message.Message):
     ) -> None: ...
 
 class TransferFees(_message.Message):
-    __slots__ = ("transfer_id", "amount", "epoch")
+    __slots__ = ("transfer_id", "amount", "epoch", "discount_applied")
     TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FIELD_NUMBER: _ClassVar[int]
+    DISCOUNT_APPLIED_FIELD_NUMBER: _ClassVar[int]
     transfer_id: str
+    amount: str
+    epoch: int
+    discount_applied: str
+    def __init__(
+        self,
+        transfer_id: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+        epoch: _Optional[int] = ...,
+        discount_applied: _Optional[str] = ...,
+    ) -> None: ...
+
+class TransferFeesDiscount(_message.Message):
+    __slots__ = ("party", "asset", "amount", "epoch")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    asset: str
     amount: str
     epoch: int
     def __init__(
         self,
-        transfer_id: _Optional[str] = ...,
+        party: _Optional[str] = ...,
+        asset: _Optional[str] = ...,
         amount: _Optional[str] = ...,
         epoch: _Optional[int] = ...,
     ) -> None: ...
@@ -1124,6 +1172,8 @@ class TransactionResult(_message.Message):
         "apply_referral_code",
         "update_margin_mode",
         "join_team",
+        "batch_proposal",
+        "update_party_profile",
         "success",
         "failure",
     )
@@ -1137,6 +1187,7 @@ class TransactionResult(_message.Message):
         ERROR_FIELD_NUMBER: _ClassVar[int]
         error: str
         def __init__(self, error: _Optional[str] = ...) -> None: ...
+
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     HASH_FIELD_NUMBER: _ClassVar[int]
@@ -1167,6 +1218,8 @@ class TransactionResult(_message.Message):
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
     UPDATE_MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
+    BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1199,6 +1252,8 @@ class TransactionResult(_message.Message):
     apply_referral_code: _commands_pb2.ApplyReferralCode
     update_margin_mode: _commands_pb2.UpdateMarginMode
     join_team: _commands_pb2.JoinTeam
+    batch_proposal: _commands_pb2.BatchProposalSubmission
+    update_party_profile: _commands_pb2.UpdatePartyProfile
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1281,6 +1336,12 @@ class TransactionResult(_message.Message):
             _Union[_commands_pb2.UpdateMarginMode, _Mapping]
         ] = ...,
         join_team: _Optional[_Union[_commands_pb2.JoinTeam, _Mapping]] = ...,
+        batch_proposal: _Optional[
+            _Union[_commands_pb2.BatchProposalSubmission, _Mapping]
+        ] = ...,
+        update_party_profile: _Optional[
+            _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
+        ] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
     ) -> None: ...
@@ -1899,6 +1960,7 @@ class TeamCreated(_message.Message):
         "created_at",
         "closed",
         "at_epoch",
+        "allow_list",
     )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -1908,6 +1970,7 @@ class TeamCreated(_message.Message):
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
     AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     referrer: str
     name: str
@@ -1916,6 +1979,7 @@ class TeamCreated(_message.Message):
     created_at: int
     closed: bool
     at_epoch: int
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -1926,20 +1990,23 @@ class TeamCreated(_message.Message):
         created_at: _Optional[int] = ...,
         closed: bool = ...,
         at_epoch: _Optional[int] = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class TeamUpdated(_message.Message):
-    __slots__ = ("team_id", "name", "team_url", "avatar_url", "closed")
+    __slots__ = ("team_id", "name", "team_url", "avatar_url", "closed", "allow_list")
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     TEAM_URL_FIELD_NUMBER: _ClassVar[int]
     AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     name: str
     team_url: str
     avatar_url: str
     closed: bool
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -1947,6 +2014,7 @@ class TeamUpdated(_message.Message):
         team_url: _Optional[str] = ...,
         avatar_url: _Optional[str] = ...,
         closed: bool = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class RefereeSwitchedTeam(_message.Message):
@@ -2205,6 +2273,49 @@ class PaidLiquidityFeesStats(_message.Message):
         fees_paid_per_party: _Optional[_Iterable[_Union[PartyAmount, _Mapping]]] = ...,
     ) -> None: ...
 
+class PartyMarginModeUpdated(_message.Message):
+    __slots__ = (
+        "market_id",
+        "party_id",
+        "margin_mode",
+        "margin_factor",
+        "min_theoretical_margin_factor",
+        "max_theoretical_leverage",
+        "at_epoch",
+    )
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MIN_THEORETICAL_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MAX_THEORETICAL_LEVERAGE_FIELD_NUMBER: _ClassVar[int]
+    AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    party_id: str
+    margin_mode: _vega_pb2.MarginMode
+    margin_factor: str
+    min_theoretical_margin_factor: str
+    max_theoretical_leverage: str
+    at_epoch: int
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        margin_mode: _Optional[_Union[_vega_pb2.MarginMode, str]] = ...,
+        margin_factor: _Optional[str] = ...,
+        min_theoretical_margin_factor: _Optional[str] = ...,
+        max_theoretical_leverage: _Optional[str] = ...,
+        at_epoch: _Optional[int] = ...,
+    ) -> None: ...
+
+class PartyProfileUpdated(_message.Message):
+    __slots__ = ("updated_profile",)
+    UPDATED_PROFILE_FIELD_NUMBER: _ClassVar[int]
+    updated_profile: _vega_pb2.PartyProfile
+    def __init__(
+        self, updated_profile: _Optional[_Union[_vega_pb2.PartyProfile, _Mapping]] = ...
+    ) -> None: ...
+
 class BusEvent(_message.Message):
     __slots__ = (
         "id",
@@ -2290,6 +2401,9 @@ class BusEvent(_message.Message):
         "paid_liquidity_fees_stats",
         "vesting_balances_summary",
         "transfer_fees",
+        "transfer_fees_discount",
+        "party_margin_mode_updated",
+        "party_profile_updated",
         "market",
         "tx_err_event",
         "version",
@@ -2379,6 +2493,9 @@ class BusEvent(_message.Message):
     PAID_LIQUIDITY_FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     VESTING_BALANCES_SUMMARY_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_FEES_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_FEES_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
+    PARTY_MARGIN_MODE_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    PARTY_PROFILE_UPDATED_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2467,6 +2584,9 @@ class BusEvent(_message.Message):
     paid_liquidity_fees_stats: PaidLiquidityFeesStats
     vesting_balances_summary: VestingBalancesSummary
     transfer_fees: TransferFees
+    transfer_fees_discount: TransferFeesDiscount
+    party_margin_mode_updated: PartyMarginModeUpdated
+    party_profile_updated: PartyProfileUpdated
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2597,6 +2717,11 @@ class BusEvent(_message.Message):
             _Union[VestingBalancesSummary, _Mapping]
         ] = ...,
         transfer_fees: _Optional[_Union[TransferFees, _Mapping]] = ...,
+        transfer_fees_discount: _Optional[_Union[TransferFeesDiscount, _Mapping]] = ...,
+        party_margin_mode_updated: _Optional[
+            _Union[PartyMarginModeUpdated, _Mapping]
+        ] = ...,
+        party_profile_updated: _Optional[_Union[PartyProfileUpdated, _Mapping]] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,

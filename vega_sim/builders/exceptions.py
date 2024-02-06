@@ -4,7 +4,7 @@ from typing import Callable
 from functools import wraps
 
 
-def raise_custom_build_errors(func: Callable):
+def raise_custom_build_errors(func):
     @wraps(func)
     def wrapped_fn(*args, **kwargs):
         try:

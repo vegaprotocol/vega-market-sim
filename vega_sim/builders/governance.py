@@ -6,12 +6,13 @@ vega/protos/sources/vega/governance.proto
 Attributes:
     logger (logging.Logger): module level logger
 """
+
 import logging
 import datetime
 
 import vega_sim.proto.vega as vega_protos
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from vega_sim.api.helpers import num_to_padded_int
 from vega_sim.builders.exceptions import raise_custom_build_errors
 
@@ -167,3 +168,136 @@ def vote_submission(proposal_id: str, value: vega_protos.governance.Vote.Value.V
     return vega_protos.commands.v1.commands.VoteSubmission(
         proposal_id=proposal_id, value=value
     )
+
+
+@raise_custom_build_errors
+def future_product(
+    settlement_asset: str,
+    quote_name: str,
+    data_source_spec_for_settlement_data: vega_protos.data_source.DataSourceDefinition,
+    data_source_spec_for_trading_termination: vega_protos.data_source.DataSourceDefinition,
+    data_source_spec_binding: vega_protos.markets.DataSourceSpecToFutureBinding,
+) -> vega_protos.governance.FutureProduct:
+    return vega_protos.governance.FutureProduct(
+        settlement_asset=settlement_asset,
+        quote_name=quote_name,
+        data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+        data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
+        data_source_spec_binding=data_source_spec_binding,
+    )
+
+
+@raise_custom_build_errors
+def perpetual_product(
+    settlement_asset: str,
+    quote_name: str,
+    margin_funding_factor: float,
+    interest_rate: float,
+    clamp_lower_bound: float,
+    clamp_upper_bound: float,
+    data_source_spec_for_settlement_data: vega_protos.data_source.DataSourceDefinition,
+    data_source_spec_for_settlement_schedule: vega_protos.data_source.DataSourceDefinition,
+    data_source_spec_binding: vega_protos.markets.DataSourceSpecToPerpetualBinding,
+    funding_rate_scaling_factor: Optional[float] = None,
+    funding_rate_lower_bound: Optional[float] = None,
+    funding_rate_upper_bound: Optional[float] = None,
+) -> vega_protos.governance.PerpetualProduct:
+    perpetual_product = vega_protos.governance.PerpetualProduct(
+        settlement_asset=settlement_asset,
+        quote_name=quote_name,
+        margin_funding_factor=str(margin_funding_factor),
+        interest_rate=str(interest_rate),
+        clamp_lower_bound=str(clamp_lower_bound),
+        clamp_upper_bound=str(clamp_upper_bound),
+        data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+        data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
+        data_source_spec_binding=data_source_spec_binding,
+    )
+    if funding_rate_scaling_factor is not None:
+        setattr(
+            perpetual_product,
+            "funding_rate_scaling_factor",
+            str(funding_rate_scaling_factor),
+        )
+    if funding_rate_lower_bound is not None:
+        setattr(
+            perpetual_product, "funding_rate_lower_bound", str(funding_rate_lower_bound)
+        )
+    if funding_rate_upper_bound is not None:
+        setattr(
+            perpetual_product, "funding_rate_upper_bound", str(funding_rate_upper_bound)
+        )
+    return perpetual_product
+
+
+@raise_custom_build_errors
+def instrument_configuration(
+    name: str,
+    code: str,
+    future: Optional[vega_protos.governance.FutureProduct] = None,
+    spot: Optional[vega_protos.governance.SpotProduct] = None,
+    perpetual: Optional[vega_protos.governance.SpotProduct] = None,
+) -> vega_protos.governance.InstrumentConfiguration:
+    proto = vega_protos.governance.InstrumentConfiguration(
+        name=name,
+        code=code,
+    )
+    if future is not None:
+        proto.future.CopyFrom(future)
+    if spot is not None:
+        proto.spot.CopyFrom(spot)
+    if perpetual is not None:
+        proto.perpetual.CopyFrom(perpetual)
+    return proto
+
+
+@raise_custom_build_errors
+def successor_configuration(
+    parent_market_id: str, insurance_pool_fraction: float
+) -> vega_protos.governance.SuccessorConfiguration:
+    return vega_protos.governance.SuccessorConfiguration(
+        parent_market_id=parent_market_id,
+        insurance_pool_fraction=str(insurance_pool_fraction),
+    )
+
+
+@raise_custom_build_errors
+def new_market_configuration(
+    instrument: vega_protos.governance.InstrumentConfiguration,
+    decimal_places: int,
+    price_monitoring_parameters: vega_protos.markets.PriceMonitoringParameters,
+    liquidity_monitoring_parameters: vega_protos.markets.LiquidityMonitoringParameters,
+    log_normal: vega_protos.markets.LogNormalRiskModel,
+    position_decimal_places: int,
+    linear_slippage_factor: float,
+    quadratic_slippage_factor: float,
+    liquidity_sla_parameters: vega_protos.markets.LiquiditySLAParameters,
+    liquidity_fee_settings: vega_protos.markets.LiquidityFeeSettings,
+    liquidation_strategy: vega_protos.markets.LiquidationStrategy,
+    mark_price_configuration: vega_protos.markets.CompositePriceConfiguration,
+    metadata: Optional[List[str]] = None,
+    lp_price_range: Optional[float] = None,
+    successor: Optional[vega_protos.governance.SuccessorConfiguration] = None,
+) -> vega_protos.governance.NewMarketConfiguration:
+    proto = vega_protos.governance.NewMarketConfiguration(
+        instrument=instrument,
+        decimal_places=int(decimal_places),
+        price_monitoring_parameters=price_monitoring_parameters,
+        liquidity_monitoring_parameters=liquidity_monitoring_parameters,
+        log_normal=log_normal,
+        position_decimal_places=int(position_decimal_places),
+        linear_slippage_factor=str(linear_slippage_factor),
+        quadratic_slippage_factor=str(quadratic_slippage_factor),
+        successor=successor,
+        liquidity_sla_parameters=liquidity_sla_parameters,
+        liquidity_fee_settings=liquidity_fee_settings,
+        liquidation_strategy=liquidation_strategy,
+        mark_price_configuration=mark_price_configuration,
+    )
+    if lp_price_range is not None:
+        setattr(proto, "lp_price_range", str(lp_price_range))
+    if successor is not None:
+        proto.successor.CopyFrom(successor)
+    if metadata is not None:
+        proto.metadata.extend(metadata)
+    return proto

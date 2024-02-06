@@ -87,7 +87,7 @@ def state_extraction_fn(vega: VegaServiceNull, agents: dict):
 def additional_data_to_rows(data) -> List[pd.Series]:
     for market_id in data.external_prices.keys():
         yield {
-            "time": data.at_time,
+            "time": datetime.datetime.fromtimestamp(data.at_time / 1e9),
             "market_id": market_id,
             "external_price": data.external_prices.get(market_id, np.NaN),
             "trader_close_outs": data.trader_close_outs.get(market_id, 0),
@@ -147,10 +147,11 @@ class FuzzingScenario(Scenario):
         num_steps: int = 60 * 24 * 30 * 3,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
-        n_markets: int = 2,
+        perps_data_perturbation: float = 0.5,
         step_length_seconds: Optional[float] = None,
         fuzz_market_config: Optional[dict] = None,
         output: bool = True,
+        lite: bool = False,
     ):
         super().__init__(
             state_extraction_fn=lambda vega, agents: state_extraction_fn(vega, agents),
@@ -159,7 +160,7 @@ class FuzzingScenario(Scenario):
             },
         )
 
-        self.n_markets = n_markets
+        self.perps_data_perturbation = perps_data_perturbation
         self.fuzz_market_config = fuzz_market_config
 
         self.num_steps = num_steps
@@ -173,6 +174,7 @@ class FuzzingScenario(Scenario):
         self.transactions_per_block = transactions_per_block
 
         self.output = output
+        self.lite = lite
 
     def configure_agents(
         self,
@@ -205,7 +207,17 @@ class FuzzingScenario(Scenario):
             )
         )
 
-        for i_market in range(self.n_markets):
+        for i_market, market in enumerate(
+            [
+                {"fuzz": False, "perp": False},
+                {"fuzz": False, "perp": True},
+                {"fuzz": True, "perp": False},
+                {"fuzz": True, "perp": True},
+            ]
+        ):
+            # Determine if we should use perps market, otherwise use futures
+            perps_market = market["perp"]
+
             # Define the market and the asset:
             market_name = f"ASSET_{str(i_market).zfill(3)}"
             asset_name = f"ASSET_{str(i_market).zfill(3)}"
@@ -213,7 +225,7 @@ class FuzzingScenario(Scenario):
 
             market_agents = {}
             # Create fuzzed market config
-            market_config = MarketConfig()
+            market_config = MarketConfig("perpetual" if perps_market else None)
             market_config.set(
                 "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
                 1e-4,
@@ -228,6 +240,17 @@ class FuzzingScenario(Scenario):
                 num_steps=self.num_steps,
                 decimal_places=int(market_config.decimal_places),
             )
+
+            perps_external_price_process = price_process
+            if perps_market:
+                perps_external_price_process = np.multiply(
+                    price_process,
+                    self.random_state.uniform(
+                        low=1 - self.perps_data_perturbation,
+                        high=1 + self.perps_data_perturbation,
+                        size=len(price_process),
+                    ),
+                )
 
             # Create fuzzed market managers
             market_agents["market_managers"] = [
@@ -246,7 +269,10 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}",
                     market_agents=market_agents,
                     successor_probability=0.01,
-                )
+                    perp_close_on_finalise=True,
+                    perp_settlement_data_generator=iter(perps_external_price_process),
+                    fuzz_market_configuration=market["fuzz"],
+                ),
             ]
 
             market_agents["market_makers"] = [
@@ -296,6 +322,7 @@ class FuzzingScenario(Scenario):
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
+                    leave_opening_auction_prob=0.1,
                 )
                 for i_agent, side in enumerate(["SIDE_BUY", "SIDE_SELL"])
             ]
@@ -373,7 +400,7 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                 )
-                for i_agent in range(10)
+                for i_agent in range(10 if not self.lite else 1)
             ]
 
             market_agents["risky_traders"] = [
@@ -389,7 +416,7 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )
                 for side in ["SIDE_BUY", "SIDE_SELL"]
-                for i_agent in range(10)
+                for i_agent in range(10 if not self.lite else 1)
             ]
 
             market_agents["risky_liquidity_providers"] = [
@@ -403,10 +430,10 @@ class FuzzingScenario(Scenario):
                     step_bias=0.1,
                     tag=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                 )
-                for i_agent in range(5)
+                for i_agent in range(5 if not self.lite else 1)
             ]
 
-            for i_agent in range(45):
+            for i_agent in range(45 if not self.lite else 1):
                 market_agents["risky_liquidity_providers"].append(
                     RiskySimpleLiquidityProvider(
                         wallet_name="risky_liquidity_providers",

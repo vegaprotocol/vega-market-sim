@@ -5,6 +5,7 @@ scenario runs a network with three markets each with a configurable number of ma
 order trader agents.
 
 """
+
 from collections import namedtuple
 
 PartyConfig = namedtuple("AgentConfig", ["wallet_name", "key_name"])

@@ -27,6 +27,12 @@ class DataSourceDefinition(_message.Message):
         external: _Optional[_Union[DataSourceDefinitionExternal, _Mapping]] = ...,
     ) -> None: ...
 
+class SpecBindingForCompositePrice(_message.Message):
+    __slots__ = ("price_source_property",)
+    PRICE_SOURCE_PROPERTY_FIELD_NUMBER: _ClassVar[int]
+    price_source_property: str
+    def __init__(self, price_source_property: _Optional[str] = ...) -> None: ...
+
 class DataSourceSpecConfigurationTime(_message.Message):
     __slots__ = ("conditions",)
     CONDITIONS_FIELD_NUMBER: _ClassVar[int]
@@ -98,6 +104,7 @@ class EthCallSpec(_message.Message):
         "required_confirmations",
         "filters",
         "normalisers",
+        "source_chain_id",
     )
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
     ABI_FIELD_NUMBER: _ClassVar[int]
@@ -107,6 +114,7 @@ class EthCallSpec(_message.Message):
     REQUIRED_CONFIRMATIONS_FIELD_NUMBER: _ClassVar[int]
     FILTERS_FIELD_NUMBER: _ClassVar[int]
     NORMALISERS_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     address: str
     abi: str
     method: str
@@ -115,6 +123,7 @@ class EthCallSpec(_message.Message):
     required_confirmations: int
     filters: _containers.RepeatedCompositeFieldContainer[_spec_pb2.Filter]
     normalisers: _containers.RepeatedCompositeFieldContainer[Normaliser]
+    source_chain_id: int
     def __init__(
         self,
         address: _Optional[str] = ...,
@@ -125,6 +134,7 @@ class EthCallSpec(_message.Message):
         required_confirmations: _Optional[int] = ...,
         filters: _Optional[_Iterable[_Union[_spec_pb2.Filter, _Mapping]]] = ...,
         normalisers: _Optional[_Iterable[_Union[Normaliser, _Mapping]]] = ...,
+        source_chain_id: _Optional[int] = ...,
     ) -> None: ...
 
 class Normaliser(_message.Message):
@@ -168,6 +178,7 @@ class DataSourceSpec(_message.Message):
         STATUS_UNSPECIFIED: _ClassVar[DataSourceSpec.Status]
         STATUS_ACTIVE: _ClassVar[DataSourceSpec.Status]
         STATUS_DEACTIVATED: _ClassVar[DataSourceSpec.Status]
+
     STATUS_UNSPECIFIED: DataSourceSpec.Status
     STATUS_ACTIVE: DataSourceSpec.Status
     STATUS_DEACTIVATED: DataSourceSpec.Status

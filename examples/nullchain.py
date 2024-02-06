@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
         vega.mint(
             MM_WALLET.name,
-            asset="VOTE",
+            asset=vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
         )
 
@@ -58,7 +58,6 @@ if __name__ == "__main__":
             name="tDAI",
             symbol="tDAI",
             decimals=5,
-            max_faucet_amount=1e10,
         )
 
         vega.wait_for_total_catchup()
@@ -80,24 +79,6 @@ if __name__ == "__main__":
         vega.wait_for_total_catchup()
 
         if args.perps:
-            perps_netparam = "limits.markets.proposePerpetualEnabled"
-            if not vega.get_network_parameter(key=perps_netparam, to_type="int"):
-                new_val = "1"
-                vega.update_network_parameter(
-                    proposal_key=MM_WALLET.name,
-                    parameter=perps_netparam,
-                    new_value=new_val,
-                )
-                vega.wait_for_total_catchup()
-                if not vega.get_network_parameter(key=perps_netparam, to_type="int"):
-                    exit(
-                        "perps market proposals not allowed by default, allowing via network parameter change failed"
-                    )
-                else:
-                    print(
-                        f"successfully updated network parameter '{perps_netparam}' to '{new_val}'"
-                    )
-
             vega.create_simple_perps_market(
                 market_name="BTC:DAI_Perpetual",
                 proposal_key=MM_WALLET.name,
@@ -125,6 +106,12 @@ if __name__ == "__main__":
             is_amendment=False,
         )
 
+        vega.update_margin_mode(
+            key_name=MM_WALLET.name,
+            margin_mode="MODE_ISOLATED_MARGIN",
+            margin_factor=0.5,
+            market_id=market_id,
+        )
         vega.submit_order(
             trading_key=MM_WALLET.name,
             market_id=market_id,
@@ -186,7 +173,9 @@ if __name__ == "__main__":
             is_amendment=True,
         )
 
-        position = vega.positions_by_market(key_name=MM_WALLET2.name)
+        position = vega.positions_by_market(
+            key_name=MM_WALLET2.name, market_id=market_id
+        )
         margin_levels = vega.margin_levels(MM_WALLET2.name)
         print(f"Position is: {position}")
         print(f"Margin levels are: {margin_levels}")
@@ -227,7 +216,8 @@ if __name__ == "__main__":
 
         # suspend market
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
         update_type = MarketStateUpdateType.Suspend
         print(f"submitting proposal: {update_type}")
@@ -235,7 +225,8 @@ if __name__ == "__main__":
             proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
         # resume market
         vega.wait_for_total_catchup()
@@ -245,7 +236,8 @@ if __name__ == "__main__":
             proposal_key=MM_WALLET.name, market_id=market_id, market_state=update_type
         )
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
 
         input("Pausing to observe the market, press Enter to continue.")
@@ -267,7 +259,8 @@ if __name__ == "__main__":
             )
         vega.wait_for_total_catchup()
         print(
-            f"market state: {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
+            "market state:"
+            f" {vega_protos.markets.Market.State.Name(vega.get_latest_market_data(market_id).market_state)}"
         )
 
         vega.forward("10s")

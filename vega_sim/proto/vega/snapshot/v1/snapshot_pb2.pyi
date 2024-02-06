@@ -190,6 +190,11 @@ class Payload(_message.Message):
         "volume_discount_program",
         "liquidity_v2_parameters",
         "liquidity_v2_paid_fees_stats",
+        "liquidation",
+        "banking_transfer_fee_discounts",
+        "governance_batch_active",
+        "parties",
+        "l2_eth_oracles",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -263,6 +268,11 @@ class Payload(_message.Message):
     VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_V2_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_V2_PAID_FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    LIQUIDATION_FIELD_NUMBER: _ClassVar[int]
+    BANKING_TRANSFER_FEE_DISCOUNTS_FIELD_NUMBER: _ClassVar[int]
+    GOVERNANCE_BATCH_ACTIVE_FIELD_NUMBER: _ClassVar[int]
+    PARTIES_FIELD_NUMBER: _ClassVar[int]
+    L2_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -335,6 +345,11 @@ class Payload(_message.Message):
     volume_discount_program: VolumeDiscountProgram
     liquidity_v2_parameters: LiquidityV2Parameters
     liquidity_v2_paid_fees_stats: LiquidityV2PaidFeesStats
+    liquidation: Liquidation
+    banking_transfer_fee_discounts: BankingTransferFeeDiscounts
+    governance_batch_active: GovernanceBatchActive
+    parties: Parties
+    l2_eth_oracles: L2EthOracles
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -455,6 +470,15 @@ class Payload(_message.Message):
         liquidity_v2_paid_fees_stats: _Optional[
             _Union[LiquidityV2PaidFeesStats, _Mapping]
         ] = ...,
+        liquidation: _Optional[_Union[Liquidation, _Mapping]] = ...,
+        banking_transfer_fee_discounts: _Optional[
+            _Union[BankingTransferFeeDiscounts, _Mapping]
+        ] = ...,
+        governance_batch_active: _Optional[
+            _Union[GovernanceBatchActive, _Mapping]
+        ] = ...,
+        parties: _Optional[_Union[Parties, _Mapping]] = ...,
+        l2_eth_oracles: _Optional[_Union[L2EthOracles, _Mapping]] = ...,
     ) -> None: ...
 
 class OrderHoldingQuantities(_message.Message):
@@ -671,11 +695,27 @@ class Resource(_message.Message):
         state: _Optional[int] = ...,
     ) -> None: ...
 
+class EventForwarderBucket(_message.Message):
+    __slots__ = ("ts", "hashes")
+    TS_FIELD_NUMBER: _ClassVar[int]
+    HASHES_FIELD_NUMBER: _ClassVar[int]
+    ts: int
+    hashes: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(
+        self, ts: _Optional[int] = ..., hashes: _Optional[_Iterable[str]] = ...
+    ) -> None: ...
+
 class EventForwarder(_message.Message):
-    __slots__ = ("acked_events",)
+    __slots__ = ("acked_events", "buckets")
     ACKED_EVENTS_FIELD_NUMBER: _ClassVar[int]
+    BUCKETS_FIELD_NUMBER: _ClassVar[int]
     acked_events: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, acked_events: _Optional[_Iterable[str]] = ...) -> None: ...
+    buckets: _containers.RepeatedCompositeFieldContainer[EventForwarderBucket]
+    def __init__(
+        self,
+        acked_events: _Optional[_Iterable[str]] = ...,
+        buckets: _Optional[_Iterable[_Union[EventForwarderBucket, _Mapping]]] = ...,
+    ) -> None: ...
 
 class CollateralAccounts(_message.Message):
     __slots__ = ("accounts", "next_balance_snapshot")
@@ -940,15 +980,43 @@ class GovernanceActive(_message.Message):
         self, proposals: _Optional[_Iterable[_Union[ProposalData, _Mapping]]] = ...
     ) -> None: ...
 
-class GovernanceNode(_message.Message):
-    __slots__ = ("proposals",)
+class BatchProposalData(_message.Message):
+    __slots__ = ("batch_proposal", "proposals")
+    BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    batch_proposal: ProposalData
     proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
+    def __init__(
+        self,
+        batch_proposal: _Optional[_Union[ProposalData, _Mapping]] = ...,
+        proposals: _Optional[
+            _Iterable[_Union[_governance_pb2.Proposal, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class GovernanceBatchActive(_message.Message):
+    __slots__ = ("batch_proposals",)
+    BATCH_PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    batch_proposals: _containers.RepeatedCompositeFieldContainer[BatchProposalData]
+    def __init__(
+        self,
+        batch_proposals: _Optional[
+            _Iterable[_Union[BatchProposalData, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class GovernanceNode(_message.Message):
+    __slots__ = ("proposals", "proposal_data")
+    PROPOSALS_FIELD_NUMBER: _ClassVar[int]
+    PROPOSAL_DATA_FIELD_NUMBER: _ClassVar[int]
+    proposals: _containers.RepeatedCompositeFieldContainer[_governance_pb2.Proposal]
+    proposal_data: _containers.RepeatedCompositeFieldContainer[ProposalData]
     def __init__(
         self,
         proposals: _Optional[
             _Iterable[_Union[_governance_pb2.Proposal, _Mapping]]
         ] = ...,
+        proposal_data: _Optional[_Iterable[_Union[ProposalData, _Mapping]]] = ...,
     ) -> None: ...
 
 class StakingAccount(_message.Message):
@@ -1406,6 +1474,10 @@ class Market(_message.Message):
         "expiring_stop_orders",
         "product",
         "fees_stats",
+        "party_margin_factor",
+        "mark_price_calculator",
+        "internal_composite_price_calculator",
+        "next_internal_composite_price_calc",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1434,6 +1506,10 @@ class Market(_message.Message):
     EXPIRING_STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     PRODUCT_FIELD_NUMBER: _ClassVar[int]
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    PARTY_MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
+    NEXT_INTERNAL_COMPOSITE_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1461,6 +1537,10 @@ class Market(_message.Message):
     expiring_stop_orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
     product: Product
     fees_stats: _events_pb2.FeesStats
+    party_margin_factor: _containers.RepeatedCompositeFieldContainer[PartyMarginFactor]
+    mark_price_calculator: CompositePriceCalculator
+    internal_composite_price_calculator: CompositePriceCalculator
+    next_internal_composite_price_calc: int
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1492,6 +1572,26 @@ class Market(_message.Message):
         ] = ...,
         product: _Optional[_Union[Product, _Mapping]] = ...,
         fees_stats: _Optional[_Union[_events_pb2.FeesStats, _Mapping]] = ...,
+        party_margin_factor: _Optional[
+            _Iterable[_Union[PartyMarginFactor, _Mapping]]
+        ] = ...,
+        mark_price_calculator: _Optional[
+            _Union[CompositePriceCalculator, _Mapping]
+        ] = ...,
+        internal_composite_price_calculator: _Optional[
+            _Union[CompositePriceCalculator, _Mapping]
+        ] = ...,
+        next_internal_composite_price_calc: _Optional[int] = ...,
+    ) -> None: ...
+
+class PartyMarginFactor(_message.Message):
+    __slots__ = ("party", "margin_factor")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    margin_factor: str
+    def __init__(
+        self, party: _Optional[str] = ..., margin_factor: _Optional[str] = ...
     ) -> None: ...
 
 class Product(_message.Message):
@@ -1510,6 +1610,36 @@ class DataPoint(_message.Message):
         self, price: _Optional[str] = ..., timestamp: _Optional[int] = ...
     ) -> None: ...
 
+class AuctionIntervals(_message.Message):
+    __slots__ = ("t", "auction_start", "total")
+    T_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_START_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_FIELD_NUMBER: _ClassVar[int]
+    t: _containers.RepeatedScalarFieldContainer[int]
+    auction_start: int
+    total: int
+    def __init__(
+        self,
+        t: _Optional[_Iterable[int]] = ...,
+        auction_start: _Optional[int] = ...,
+        total: _Optional[int] = ...,
+    ) -> None: ...
+
+class TWAPData(_message.Message):
+    __slots__ = ("start", "end", "sum_product")
+    START_FIELD_NUMBER: _ClassVar[int]
+    END_FIELD_NUMBER: _ClassVar[int]
+    SUM_PRODUCT_FIELD_NUMBER: _ClassVar[int]
+    start: int
+    end: int
+    sum_product: str
+    def __init__(
+        self,
+        start: _Optional[int] = ...,
+        end: _Optional[int] = ...,
+        sum_product: _Optional[str] = ...,
+    ) -> None: ...
+
 class Perps(_message.Message):
     __slots__ = (
         "id",
@@ -1517,17 +1647,26 @@ class Perps(_message.Message):
         "internal_data_point",
         "seq",
         "started_at",
+        "external_twap_data",
+        "internal_twap_data",
+        "auction_intervals",
     )
     ID_FIELD_NUMBER: _ClassVar[int]
     EXTERNAL_DATA_POINT_FIELD_NUMBER: _ClassVar[int]
     INTERNAL_DATA_POINT_FIELD_NUMBER: _ClassVar[int]
     SEQ_FIELD_NUMBER: _ClassVar[int]
     STARTED_AT_FIELD_NUMBER: _ClassVar[int]
+    EXTERNAL_TWAP_DATA_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_TWAP_DATA_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_INTERVALS_FIELD_NUMBER: _ClassVar[int]
     id: str
     external_data_point: _containers.RepeatedCompositeFieldContainer[DataPoint]
     internal_data_point: _containers.RepeatedCompositeFieldContainer[DataPoint]
     seq: int
     started_at: int
+    external_twap_data: TWAPData
+    internal_twap_data: TWAPData
+    auction_intervals: AuctionIntervals
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -1535,6 +1674,9 @@ class Perps(_message.Message):
         internal_data_point: _Optional[_Iterable[_Union[DataPoint, _Mapping]]] = ...,
         seq: _Optional[int] = ...,
         started_at: _Optional[int] = ...,
+        external_twap_data: _Optional[_Union[TWAPData, _Mapping]] = ...,
+        internal_twap_data: _Optional[_Union[TWAPData, _Mapping]] = ...,
+        auction_intervals: _Optional[_Union[AuctionIntervals, _Mapping]] = ...,
     ) -> None: ...
 
 class OrdersAtPrice(_message.Message):
@@ -2222,6 +2364,32 @@ class StakeVerifierPending(_message.Message):
         log_index: _Optional[int] = ...,
         tx_id: _Optional[str] = ...,
         id: _Optional[str] = ...,
+    ) -> None: ...
+
+class L2EthOracles(_message.Message):
+    __slots__ = ("chain_id_eth_oracles",)
+    CHAIN_ID_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
+    chain_id_eth_oracles: _containers.RepeatedCompositeFieldContainer[ChainIdEthOracles]
+    def __init__(
+        self,
+        chain_id_eth_oracles: _Optional[
+            _Iterable[_Union[ChainIdEthOracles, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class ChainIdEthOracles(_message.Message):
+    __slots__ = ("source_chain_id", "last_block", "call_results")
+    SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
+    LAST_BLOCK_FIELD_NUMBER: _ClassVar[int]
+    CALL_RESULTS_FIELD_NUMBER: _ClassVar[int]
+    source_chain_id: str
+    last_block: EthOracleVerifierLastBlock
+    call_results: EthContractCallResults
+    def __init__(
+        self,
+        source_chain_id: _Optional[str] = ...,
+        last_block: _Optional[_Union[EthOracleVerifierLastBlock, _Mapping]] = ...,
+        call_results: _Optional[_Union[EthContractCallResults, _Mapping]] = ...,
     ) -> None: ...
 
 class EthOracleVerifierLastBlock(_message.Message):
@@ -3211,6 +3379,7 @@ class Team(_message.Message):
         "avatar_url",
         "created_at",
         "closed",
+        "allow_list",
     )
     ID_FIELD_NUMBER: _ClassVar[int]
     REFERRER_FIELD_NUMBER: _ClassVar[int]
@@ -3220,6 +3389,7 @@ class Team(_message.Message):
     AVATAR_URL_FIELD_NUMBER: _ClassVar[int]
     CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     CLOSED_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_LIST_FIELD_NUMBER: _ClassVar[int]
     id: str
     referrer: Membership
     referees: _containers.RepeatedCompositeFieldContainer[Membership]
@@ -3228,6 +3398,7 @@ class Team(_message.Message):
     avatar_url: str
     created_at: int
     closed: bool
+    allow_list: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -3238,6 +3409,7 @@ class Team(_message.Message):
         avatar_url: _Optional[str] = ...,
         created_at: _Optional[int] = ...,
         closed: bool = ...,
+        allow_list: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class Membership(_message.Message):
@@ -3549,4 +3721,104 @@ class PartyVolume(_message.Message):
     volume: bytes
     def __init__(
         self, party: _Optional[str] = ..., volume: _Optional[bytes] = ...
+    ) -> None: ...
+
+class Liquidation(_message.Message):
+    __slots__ = ("market_id", "network_pos", "next_step", "config")
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    NETWORK_POS_FIELD_NUMBER: _ClassVar[int]
+    NEXT_STEP_FIELD_NUMBER: _ClassVar[int]
+    CONFIG_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    network_pos: int
+    next_step: int
+    config: _markets_pb2.LiquidationStrategy
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        network_pos: _Optional[int] = ...,
+        next_step: _Optional[int] = ...,
+        config: _Optional[_Union[_markets_pb2.LiquidationStrategy, _Mapping]] = ...,
+    ) -> None: ...
+
+class PartyAssetAmount(_message.Message):
+    __slots__ = ("party", "asset", "amount")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    asset: str
+    amount: str
+    def __init__(
+        self,
+        party: _Optional[str] = ...,
+        asset: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+    ) -> None: ...
+
+class BankingTransferFeeDiscounts(_message.Message):
+    __slots__ = ("party_asset_discount",)
+    PARTY_ASSET_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
+    party_asset_discount: _containers.RepeatedCompositeFieldContainer[PartyAssetAmount]
+    def __init__(
+        self,
+        party_asset_discount: _Optional[
+            _Iterable[_Union[PartyAssetAmount, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class CompositePriceCalculator(_message.Message):
+    __slots__ = (
+        "composite_price",
+        "price_configuration",
+        "trades",
+        "price_sources",
+        "price_source_last_update",
+        "book_price_at_time",
+    )
+    COMPOSITE_PRICE_FIELD_NUMBER: _ClassVar[int]
+    PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
+    TRADES_FIELD_NUMBER: _ClassVar[int]
+    PRICE_SOURCES_FIELD_NUMBER: _ClassVar[int]
+    PRICE_SOURCE_LAST_UPDATE_FIELD_NUMBER: _ClassVar[int]
+    BOOK_PRICE_AT_TIME_FIELD_NUMBER: _ClassVar[int]
+    composite_price: str
+    price_configuration: _markets_pb2.CompositePriceConfiguration
+    trades: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Trade]
+    price_sources: _containers.RepeatedScalarFieldContainer[str]
+    price_source_last_update: _containers.RepeatedScalarFieldContainer[int]
+    book_price_at_time: _containers.RepeatedCompositeFieldContainer[TimePrice]
+    def __init__(
+        self,
+        composite_price: _Optional[str] = ...,
+        price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
+        ] = ...,
+        trades: _Optional[_Iterable[_Union[_vega_pb2.Trade, _Mapping]]] = ...,
+        price_sources: _Optional[_Iterable[str]] = ...,
+        price_source_last_update: _Optional[_Iterable[int]] = ...,
+        book_price_at_time: _Optional[_Iterable[_Union[TimePrice, _Mapping]]] = ...,
+    ) -> None: ...
+
+class Parties(_message.Message):
+    __slots__ = ("profiles",)
+    PROFILES_FIELD_NUMBER: _ClassVar[int]
+    profiles: _containers.RepeatedCompositeFieldContainer[PartyProfile]
+    def __init__(
+        self, profiles: _Optional[_Iterable[_Union[PartyProfile, _Mapping]]] = ...
+    ) -> None: ...
+
+class PartyProfile(_message.Message):
+    __slots__ = ("party_id", "alias", "metadata")
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    ALIAS_FIELD_NUMBER: _ClassVar[int]
+    METADATA_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    alias: str
+    metadata: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Metadata]
+    def __init__(
+        self,
+        party_id: _Optional[str] = ...,
+        alias: _Optional[str] = ...,
+        metadata: _Optional[_Iterable[_Union[_vega_pb2.Metadata, _Mapping]]] = ...,
     ) -> None: ...

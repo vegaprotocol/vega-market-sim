@@ -70,6 +70,8 @@ class ProposalError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     PROPOSAL_ERROR_INVALID_PERPETUAL_PRODUCT: _ClassVar[ProposalError]
     PROPOSAL_ERROR_INVALID_REFERRAL_PROGRAM: _ClassVar[ProposalError]
     PROPOSAL_ERROR_INVALID_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ProposalError]
+    PROPOSAL_ERROR_PROPOSAL_IN_BATCH_REJECTED: _ClassVar[ProposalError]
+    PROPOSAL_ERROR_PROPOSAL_IN_BATCH_DECLINED: _ClassVar[ProposalError]
 
 class MarketStateUpdateType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -136,6 +138,8 @@ PROPOSAL_ERROR_MISSING_SLA_PARAMS: ProposalError
 PROPOSAL_ERROR_INVALID_PERPETUAL_PRODUCT: ProposalError
 PROPOSAL_ERROR_INVALID_REFERRAL_PROGRAM: ProposalError
 PROPOSAL_ERROR_INVALID_VOLUME_DISCOUNT_PROGRAM: ProposalError
+PROPOSAL_ERROR_PROPOSAL_IN_BATCH_REJECTED: ProposalError
+PROPOSAL_ERROR_PROPOSAL_IN_BATCH_DECLINED: ProposalError
 MARKET_STATE_UPDATE_TYPE_UNSPECIFIED: MarketStateUpdateType
 MARKET_STATE_UPDATE_TYPE_TERMINATE: MarketStateUpdateType
 MARKET_STATE_UPDATE_TYPE_SUSPEND: MarketStateUpdateType
@@ -203,6 +207,10 @@ class PerpetualProduct(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
+        "funding_rate_scaling_factor",
+        "funding_rate_lower_bound",
+        "funding_rate_upper_bound",
+        "internal_composite_price_configuration",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -213,6 +221,10 @@ class PerpetualProduct(_message.Message):
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_SCHEDULE_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     margin_funding_factor: str
@@ -222,6 +234,10 @@ class PerpetualProduct(_message.Message):
     data_source_spec_for_settlement_schedule: _data_source_pb2.DataSourceDefinition
     data_source_spec_for_settlement_data: _data_source_pb2.DataSourceDefinition
     data_source_spec_binding: _markets_pb2.DataSourceSpecToPerpetualBinding
+    funding_rate_scaling_factor: str
+    funding_rate_lower_bound: str
+    funding_rate_upper_bound: str
+    internal_composite_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -238,6 +254,12 @@ class PerpetualProduct(_message.Message):
         ] = ...,
         data_source_spec_binding: _Optional[
             _Union[_markets_pb2.DataSourceSpecToPerpetualBinding, _Mapping]
+        ] = ...,
+        funding_rate_scaling_factor: _Optional[str] = ...,
+        funding_rate_lower_bound: _Optional[str] = ...,
+        funding_rate_upper_bound: _Optional[str] = ...,
+        internal_composite_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -334,6 +356,7 @@ class NewMarketConfiguration(_message.Message):
         "liquidity_sla_parameters",
         "liquidity_fee_settings",
         "liquidation_strategy",
+        "mark_price_configuration",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -350,6 +373,7 @@ class NewMarketConfiguration(_message.Message):
     LIQUIDITY_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -365,6 +389,7 @@ class NewMarketConfiguration(_message.Message):
     liquidity_sla_parameters: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     liquidation_strategy: _markets_pb2.LiquidationStrategy
+    mark_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -391,6 +416,9 @@ class NewMarketConfiguration(_message.Message):
         ] = ...,
         liquidation_strategy: _Optional[
             _Union[_markets_pb2.LiquidationStrategy, _Mapping]
+        ] = ...,
+        mark_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -460,6 +488,7 @@ class UpdateMarketConfiguration(_message.Message):
         "liquidity_sla_parameters",
         "liquidity_fee_settings",
         "liquidation_strategy",
+        "mark_price_configuration",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -473,6 +502,7 @@ class UpdateMarketConfiguration(_message.Message):
     LIQUIDITY_SLA_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     instrument: UpdateInstrumentConfiguration
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
@@ -485,6 +515,7 @@ class UpdateMarketConfiguration(_message.Message):
     liquidity_sla_parameters: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     liquidation_strategy: _markets_pb2.LiquidationStrategy
+    mark_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         instrument: _Optional[_Union[UpdateInstrumentConfiguration, _Mapping]] = ...,
@@ -508,6 +539,9 @@ class UpdateMarketConfiguration(_message.Message):
         ] = ...,
         liquidation_strategy: _Optional[
             _Union[_markets_pb2.LiquidationStrategy, _Mapping]
+        ] = ...,
+        mark_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -555,16 +589,19 @@ class UpdateSpotMarketConfiguration(_message.Message):
     ) -> None: ...
 
 class UpdateInstrumentConfiguration(_message.Message):
-    __slots__ = ("code", "future", "perpetual")
+    __slots__ = ("code", "name", "future", "perpetual")
     CODE_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
     FUTURE_FIELD_NUMBER: _ClassVar[int]
     PERPETUAL_FIELD_NUMBER: _ClassVar[int]
     code: str
+    name: str
     future: UpdateFutureProduct
     perpetual: UpdatePerpetualProduct
     def __init__(
         self,
         code: _Optional[str] = ...,
+        name: _Optional[str] = ...,
         future: _Optional[_Union[UpdateFutureProduct, _Mapping]] = ...,
         perpetual: _Optional[_Union[UpdatePerpetualProduct, _Mapping]] = ...,
     ) -> None: ...
@@ -608,6 +645,10 @@ class UpdatePerpetualProduct(_message.Message):
         "data_source_spec_for_settlement_schedule",
         "data_source_spec_for_settlement_data",
         "data_source_spec_binding",
+        "funding_rate_scaling_factor",
+        "funding_rate_lower_bound",
+        "funding_rate_upper_bound",
+        "internal_composite_price_configuration",
     )
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FUNDING_FACTOR_FIELD_NUMBER: _ClassVar[int]
@@ -617,6 +658,10 @@ class UpdatePerpetualProduct(_message.Message):
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_SCHEDULE_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_SCALING_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_RATE_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     quote_name: str
     margin_funding_factor: str
     interest_rate: str
@@ -625,6 +670,10 @@ class UpdatePerpetualProduct(_message.Message):
     data_source_spec_for_settlement_schedule: _data_source_pb2.DataSourceDefinition
     data_source_spec_for_settlement_data: _data_source_pb2.DataSourceDefinition
     data_source_spec_binding: _markets_pb2.DataSourceSpecToPerpetualBinding
+    funding_rate_scaling_factor: str
+    funding_rate_lower_bound: str
+    funding_rate_upper_bound: str
+    internal_composite_price_configuration: _markets_pb2.CompositePriceConfiguration
     def __init__(
         self,
         quote_name: _Optional[str] = ...,
@@ -640,6 +689,12 @@ class UpdatePerpetualProduct(_message.Message):
         ] = ...,
         data_source_spec_binding: _Optional[
             _Union[_markets_pb2.DataSourceSpecToPerpetualBinding, _Mapping]
+        ] = ...,
+        funding_rate_scaling_factor: _Optional[str] = ...,
+        funding_rate_lower_bound: _Optional[str] = ...,
+        funding_rate_upper_bound: _Optional[str] = ...,
+        internal_composite_price_configuration: _Optional[
+            _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -752,6 +807,137 @@ class ProposalTerms(_message.Message):
         ] = ...,
     ) -> None: ...
 
+class BatchProposalTermsChange(_message.Message):
+    __slots__ = (
+        "enactment_timestamp",
+        "update_market",
+        "new_market",
+        "update_network_parameter",
+        "new_freeform",
+        "update_asset",
+        "new_spot_market",
+        "update_spot_market",
+        "new_transfer",
+        "cancel_transfer",
+        "update_market_state",
+        "update_referral_program",
+        "update_volume_discount_program",
+    )
+    ENACTMENT_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_MARKET_FIELD_NUMBER: _ClassVar[int]
+    NEW_MARKET_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_NETWORK_PARAMETER_FIELD_NUMBER: _ClassVar[int]
+    NEW_FREEFORM_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_ASSET_FIELD_NUMBER: _ClassVar[int]
+    NEW_SPOT_MARKET_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_SPOT_MARKET_FIELD_NUMBER: _ClassVar[int]
+    NEW_TRANSFER_FIELD_NUMBER: _ClassVar[int]
+    CANCEL_TRANSFER_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_MARKET_STATE_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_REFERRAL_PROGRAM_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
+    enactment_timestamp: int
+    update_market: UpdateMarket
+    new_market: NewMarket
+    update_network_parameter: UpdateNetworkParameter
+    new_freeform: NewFreeform
+    update_asset: UpdateAsset
+    new_spot_market: NewSpotMarket
+    update_spot_market: UpdateSpotMarket
+    new_transfer: NewTransfer
+    cancel_transfer: CancelTransfer
+    update_market_state: UpdateMarketState
+    update_referral_program: UpdateReferralProgram
+    update_volume_discount_program: UpdateVolumeDiscountProgram
+    def __init__(
+        self,
+        enactment_timestamp: _Optional[int] = ...,
+        update_market: _Optional[_Union[UpdateMarket, _Mapping]] = ...,
+        new_market: _Optional[_Union[NewMarket, _Mapping]] = ...,
+        update_network_parameter: _Optional[
+            _Union[UpdateNetworkParameter, _Mapping]
+        ] = ...,
+        new_freeform: _Optional[_Union[NewFreeform, _Mapping]] = ...,
+        update_asset: _Optional[_Union[UpdateAsset, _Mapping]] = ...,
+        new_spot_market: _Optional[_Union[NewSpotMarket, _Mapping]] = ...,
+        update_spot_market: _Optional[_Union[UpdateSpotMarket, _Mapping]] = ...,
+        new_transfer: _Optional[_Union[NewTransfer, _Mapping]] = ...,
+        cancel_transfer: _Optional[_Union[CancelTransfer, _Mapping]] = ...,
+        update_market_state: _Optional[_Union[UpdateMarketState, _Mapping]] = ...,
+        update_referral_program: _Optional[
+            _Union[UpdateReferralProgram, _Mapping]
+        ] = ...,
+        update_volume_discount_program: _Optional[
+            _Union[UpdateVolumeDiscountProgram, _Mapping]
+        ] = ...,
+    ) -> None: ...
+
+class ProposalParameters(_message.Message):
+    __slots__ = (
+        "min_close",
+        "max_close",
+        "min_enact",
+        "max_enact",
+        "required_participation",
+        "required_majority",
+        "min_proposer_balance",
+        "min_voter_balance",
+        "required_participation_lp",
+        "required_majority_lp",
+        "min_equity_like_share",
+    )
+    MIN_CLOSE_FIELD_NUMBER: _ClassVar[int]
+    MAX_CLOSE_FIELD_NUMBER: _ClassVar[int]
+    MIN_ENACT_FIELD_NUMBER: _ClassVar[int]
+    MAX_ENACT_FIELD_NUMBER: _ClassVar[int]
+    REQUIRED_PARTICIPATION_FIELD_NUMBER: _ClassVar[int]
+    REQUIRED_MAJORITY_FIELD_NUMBER: _ClassVar[int]
+    MIN_PROPOSER_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    MIN_VOTER_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    REQUIRED_PARTICIPATION_LP_FIELD_NUMBER: _ClassVar[int]
+    REQUIRED_MAJORITY_LP_FIELD_NUMBER: _ClassVar[int]
+    MIN_EQUITY_LIKE_SHARE_FIELD_NUMBER: _ClassVar[int]
+    min_close: int
+    max_close: int
+    min_enact: int
+    max_enact: int
+    required_participation: str
+    required_majority: str
+    min_proposer_balance: str
+    min_voter_balance: str
+    required_participation_lp: str
+    required_majority_lp: str
+    min_equity_like_share: str
+    def __init__(
+        self,
+        min_close: _Optional[int] = ...,
+        max_close: _Optional[int] = ...,
+        min_enact: _Optional[int] = ...,
+        max_enact: _Optional[int] = ...,
+        required_participation: _Optional[str] = ...,
+        required_majority: _Optional[str] = ...,
+        min_proposer_balance: _Optional[str] = ...,
+        min_voter_balance: _Optional[str] = ...,
+        required_participation_lp: _Optional[str] = ...,
+        required_majority_lp: _Optional[str] = ...,
+        min_equity_like_share: _Optional[str] = ...,
+    ) -> None: ...
+
+class BatchProposalTerms(_message.Message):
+    __slots__ = ("closing_timestamp", "proposal_params", "changes")
+    CLOSING_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    PROPOSAL_PARAMS_FIELD_NUMBER: _ClassVar[int]
+    CHANGES_FIELD_NUMBER: _ClassVar[int]
+    closing_timestamp: int
+    proposal_params: ProposalParameters
+    changes: _containers.RepeatedCompositeFieldContainer[BatchProposalTermsChange]
+    def __init__(
+        self,
+        closing_timestamp: _Optional[int] = ...,
+        proposal_params: _Optional[_Union[ProposalParameters, _Mapping]] = ...,
+        changes: _Optional[_Iterable[_Union[BatchProposalTermsChange, _Mapping]]] = ...,
+    ) -> None: ...
+
 class ProposalRationale(_message.Message):
     __slots__ = ("description", "title")
     DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
@@ -763,7 +949,23 @@ class ProposalRationale(_message.Message):
     ) -> None: ...
 
 class GovernanceData(_message.Message):
-    __slots__ = ("proposal", "yes", "no", "yes_party", "no_party")
+    __slots__ = (
+        "proposal",
+        "yes",
+        "no",
+        "yes_party",
+        "no_party",
+        "proposal_type",
+        "proposals",
+    )
+
+    class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        TYPE_SINGLE_OR_UNSPECIFIED: _ClassVar[GovernanceData.Type]
+        TYPE_BATCH: _ClassVar[GovernanceData.Type]
+
+    TYPE_SINGLE_OR_UNSPECIFIED: GovernanceData.Type
+    TYPE_BATCH: GovernanceData.Type
 
     class YesPartyEntry(_message.Message):
         __slots__ = ("key", "value")
@@ -788,16 +990,21 @@ class GovernanceData(_message.Message):
             key: _Optional[str] = ...,
             value: _Optional[_Union[Vote, _Mapping]] = ...,
         ) -> None: ...
+
     PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     YES_FIELD_NUMBER: _ClassVar[int]
     NO_FIELD_NUMBER: _ClassVar[int]
     YES_PARTY_FIELD_NUMBER: _ClassVar[int]
     NO_PARTY_FIELD_NUMBER: _ClassVar[int]
+    PROPOSAL_TYPE_FIELD_NUMBER: _ClassVar[int]
+    PROPOSALS_FIELD_NUMBER: _ClassVar[int]
     proposal: Proposal
     yes: _containers.RepeatedCompositeFieldContainer[Vote]
     no: _containers.RepeatedCompositeFieldContainer[Vote]
     yes_party: _containers.MessageMap[str, Vote]
     no_party: _containers.MessageMap[str, Vote]
+    proposal_type: GovernanceData.Type
+    proposals: _containers.RepeatedCompositeFieldContainer[Proposal]
     def __init__(
         self,
         proposal: _Optional[_Union[Proposal, _Mapping]] = ...,
@@ -805,6 +1012,8 @@ class GovernanceData(_message.Message):
         no: _Optional[_Iterable[_Union[Vote, _Mapping]]] = ...,
         yes_party: _Optional[_Mapping[str, Vote]] = ...,
         no_party: _Optional[_Mapping[str, Vote]] = ...,
+        proposal_type: _Optional[_Union[GovernanceData.Type, str]] = ...,
+        proposals: _Optional[_Iterable[_Union[Proposal, _Mapping]]] = ...,
     ) -> None: ...
 
 class Proposal(_message.Message):
@@ -822,6 +1031,8 @@ class Proposal(_message.Message):
         "required_majority",
         "required_liquidity_provider_participation",
         "required_liquidity_provider_majority",
+        "batch_terms",
+        "batch_id",
     )
 
     class State(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -834,6 +1045,7 @@ class Proposal(_message.Message):
         STATE_DECLINED: _ClassVar[Proposal.State]
         STATE_ENACTED: _ClassVar[Proposal.State]
         STATE_WAITING_FOR_NODE_VOTE: _ClassVar[Proposal.State]
+
     STATE_UNSPECIFIED: Proposal.State
     STATE_FAILED: Proposal.State
     STATE_OPEN: Proposal.State
@@ -855,6 +1067,8 @@ class Proposal(_message.Message):
     REQUIRED_MAJORITY_FIELD_NUMBER: _ClassVar[int]
     REQUIRED_LIQUIDITY_PROVIDER_PARTICIPATION_FIELD_NUMBER: _ClassVar[int]
     REQUIRED_LIQUIDITY_PROVIDER_MAJORITY_FIELD_NUMBER: _ClassVar[int]
+    BATCH_TERMS_FIELD_NUMBER: _ClassVar[int]
+    BATCH_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     reference: str
     party_id: str
@@ -868,6 +1082,8 @@ class Proposal(_message.Message):
     required_majority: str
     required_liquidity_provider_participation: str
     required_liquidity_provider_majority: str
+    batch_terms: BatchProposalTerms
+    batch_id: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -883,6 +1099,8 @@ class Proposal(_message.Message):
         required_majority: _Optional[str] = ...,
         required_liquidity_provider_participation: _Optional[str] = ...,
         required_liquidity_provider_majority: _Optional[str] = ...,
+        batch_terms: _Optional[_Union[BatchProposalTerms, _Mapping]] = ...,
+        batch_id: _Optional[str] = ...,
     ) -> None: ...
 
 class Vote(_message.Message):
@@ -894,6 +1112,7 @@ class Vote(_message.Message):
         "total_governance_token_balance",
         "total_governance_token_weight",
         "total_equity_like_share_weight",
+        "per_market_equity_like_share_weight",
     )
 
     class Value(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -901,9 +1120,21 @@ class Vote(_message.Message):
         VALUE_UNSPECIFIED: _ClassVar[Vote.Value]
         VALUE_NO: _ClassVar[Vote.Value]
         VALUE_YES: _ClassVar[Vote.Value]
+
     VALUE_UNSPECIFIED: Vote.Value
     VALUE_NO: Vote.Value
     VALUE_YES: Vote.Value
+
+    class PerMarketEquityLikeShareWeightEntry(_message.Message):
+        __slots__ = ("key", "value")
+        KEY_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        key: str
+        value: str
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
@@ -911,6 +1142,7 @@ class Vote(_message.Message):
     TOTAL_GOVERNANCE_TOKEN_BALANCE_FIELD_NUMBER: _ClassVar[int]
     TOTAL_GOVERNANCE_TOKEN_WEIGHT_FIELD_NUMBER: _ClassVar[int]
     TOTAL_EQUITY_LIKE_SHARE_WEIGHT_FIELD_NUMBER: _ClassVar[int]
+    PER_MARKET_EQUITY_LIKE_SHARE_WEIGHT_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     value: Vote.Value
     proposal_id: str
@@ -918,6 +1150,7 @@ class Vote(_message.Message):
     total_governance_token_balance: str
     total_governance_token_weight: str
     total_equity_like_share_weight: str
+    per_market_equity_like_share_weight: _containers.ScalarMap[str, str]
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -927,6 +1160,7 @@ class Vote(_message.Message):
         total_governance_token_balance: _Optional[str] = ...,
         total_governance_token_weight: _Optional[str] = ...,
         total_equity_like_share_weight: _Optional[str] = ...,
+        per_market_equity_like_share_weight: _Optional[_Mapping[str, str]] = ...,
     ) -> None: ...
 
 class UpdateVolumeDiscountProgram(_message.Message):

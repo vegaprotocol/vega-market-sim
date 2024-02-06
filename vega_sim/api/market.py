@@ -28,7 +28,17 @@ A MarketConfig class has the following attributes which can be set:
 • instrument.code
 • instrument.future.settlement_asset
 • instrument.future.quote_name
+• instrument.future.number_decimal_places
 • instrument.future.terminating_key
+• instrument.perpetual.settlement_asset
+• instrument.perpetual.quote_name
+• instrument.perpetual.number_decimal_places
+• instrument.perpetual.settlement_key
+• instrument.perpetual.funding_payment_frequency_in_seconds
+• instrument.perpetual.margin_funding_factor
+• instrument.perpetual.interest_rate
+• instrument.perpetual.clamp_lower_bound
+• instrument.perpetual.clamp_upper_bound
 
 
 Examples:
@@ -61,6 +71,8 @@ from typing import Optional, Union
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data.v1 as oracles_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
+
+import vega_sim.builders as build
 
 
 def rsetattr(obj, attr, val):
@@ -116,7 +128,26 @@ class MarketConfig(Config):
             "quadratic_slippage_factor": 0,
             "successor": None,
             "liquidity_sla_parameters": "default",
-        }
+            "liquidity_fee_settings": "default",
+            "liquidation_strategy": "default",
+            "mark_price_configuration": "default",
+        },
+        "perpetual": {
+            "decimal_places": 4,
+            "position_decimal_places": 2,
+            "metadata": None,
+            "price_monitoring_parameters": "default",
+            "liquidity_monitoring_parameters": "default",
+            "log_normal": "default",
+            "instrument": "perpetual",
+            "linear_slippage_factor": 1e-3,
+            "quadratic_slippage_factor": 0,
+            "successor": None,
+            "liquidity_sla_parameters": "default",
+            "liquidity_fee_settings": "default",
+            "liquidation_strategy": "default",
+            "mark_price_configuration": "default",
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -145,10 +176,19 @@ class MarketConfig(Config):
             opt=config["liquidity_monitoring_parameters"]
         )
         self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
+        self.liquidity_fee_settings = LiquidityFeeSettings(
+            opt=config["liquidity_fee_settings"]
+        )
+        self.liquidation_strategy = LiquidationStrategy(
+            opt=config["liquidation_strategy"]
+        )
+        self.mark_price_configuration = MarkPriceConfiguration(
+            opt=config["mark_price_configuration"]
+        )
 
     def build(self):
         new_market = vega_protos.governance.NewMarket(
-            changes=vega_protos.governance.NewMarketConfiguration(
+            changes=build.governance.new_market_configuration(
                 decimal_places=self.decimal_places,
                 position_decimal_places=self.position_decimal_places,
                 liquidity_sla_parameters=self.liquidity_sla_parameters.build(),
@@ -159,14 +199,24 @@ class MarketConfig(Config):
                 log_normal=self.log_normal.build(),
                 linear_slippage_factor=self.linear_slippage_factor,
                 quadratic_slippage_factor=self.quadratic_slippage_factor,
+                successor=(
+                    self.successor.build() if self.successor is not None else None
+                ),
+                liquidity_fee_settings=self.liquidity_fee_settings.build(),
+                liquidation_strategy=self.liquidation_strategy.build(),
+                mark_price_configuration=self.mark_price_configuration.build(),
             )
         )
-        if self.successor is not None:
-            new_market.changes.successor.CopyFrom(self.successor.build())
         return new_market
 
     def set(self, parameter, value):
         rsetattr(self, attr=parameter, val=value)
+
+    def is_future(self) -> bool:
+        return self.instrument.future is not None
+
+    def is_perp(self) -> bool:
+        return self.instrument.perpetual is not None
 
 
 class Successor(Config):
@@ -184,9 +234,9 @@ class Successor(Config):
 
     def build(self) -> Optional[vega_protos.governance.SuccessorConfiguration]:
         if self.parent_market_id is not None:
-            return vega_protos.governance.SuccessorConfiguration(
+            return build.governance.successor_configuration(
                 parent_market_id=self.parent_market_id,
-                insurance_pool_fraction=str(self.insurance_pool_fraction),
+                insurance_pool_fraction=self.insurance_pool_fraction,
             )
 
 
@@ -223,14 +273,21 @@ class PriceMonitoringParameters(Config):
         self.triggers = config["triggers"]
 
     def build(self):
-        return vega_protos.markets.PriceMonitoringParameters(triggers=self.triggers)
+        return build.markets.price_monitoring_parameters(
+            triggers=[
+                build.markets.price_monitoring_trigger(
+                    trigger["horizon"],
+                    trigger["probability"],
+                    trigger["auction_extension"],
+                )
+                for trigger in self.triggers
+            ]
+        )
 
 
 class LiquidityMonitoringParameters(Config):
     OPTS = {
         "default": {
-            "triggering_ratio": "0.7",
-            "auction_extension": 0,
             "target_stake_parameters": "default",
         }
     }
@@ -238,17 +295,12 @@ class LiquidityMonitoringParameters(Config):
     def load(self, opt: Optional[str] = None):
         config = super().load(opt=opt)
 
-        self.triggering_ratio = config["triggering_ratio"]
-        self.auction_extension = config["auction_extension"]
-
         self.target_stake_parameters = TargetStakeParameters(
             opt=config["target_stake_parameters"]
         )
 
     def build(self):
-        return vega_protos.markets.LiquidityMonitoringParameters(
-            triggering_ratio=self.triggering_ratio,
-            auction_extension=self.auction_extension,
+        return build.markets.liquidity_monitoring_parameters(
             target_stake_parameters=self.target_stake_parameters.build(),
         )
 
@@ -256,10 +308,10 @@ class LiquidityMonitoringParameters(Config):
 class LiquiditySLAParameters(Config):
     OPTS = {
         "default": {
-            "price_range": "0.5",
-            "commitment_min_time_fraction": "1",
+            "price_range": 0.5,
+            "commitment_min_time_fraction": 1,
             "performance_hysteresis_epochs": 1,
-            "sla_competition_factor": "1",
+            "sla_competition_factor": 1,
         }
     }
 
@@ -273,7 +325,7 @@ class LiquiditySLAParameters(Config):
         self.sla_competition_factor = config["sla_competition_factor"]
 
     def build(self):
-        return vega_protos.markets.LiquiditySLAParameters(
+        return build.markets.liquidity_sla_parameters(
             price_range=self.price_range,
             commitment_min_time_fraction=self.commitment_min_time_fraction,
             performance_hysteresis_epochs=self.performance_hysteresis_epochs,
@@ -296,9 +348,8 @@ class TargetStakeParameters(Config):
         self.scaling_factor = config["scaling_factor"]
 
     def build(self):
-        return vega_protos.markets.TargetStakeParameters(
-            time_window=self.time_window,
-            scaling_factor=self.scaling_factor,
+        return build.markets.target_stake_parameters(
+            time_window=self.time_window, scaling_factor=self.scaling_factor
         )
 
 
@@ -320,7 +371,7 @@ class LogNormalRiskModel(Config):
         self.params = LogNormalModelParams(opt=config["params"])
 
     def build(self):
-        return vega_protos.markets.LogNormalRiskModel(
+        return build.markets.log_normal_risk_model(
             risk_aversion_parameter=self.risk_aversion_parameter,
             tau=self.tau,
             params=self.params.build(),
@@ -347,10 +398,99 @@ class LogNormalModelParams(Config):
         self.sigma = config["sigma"]
 
     def build(self):
-        return vega_protos.markets.LogNormalModelParams(
+        return build.markets.log_normal_model_params(
             mu=self.mu,
             r=self.r,
             sigma=self.sigma,
+        )
+
+
+class MarkPriceConfiguration(Config):
+    OPTS = {
+        "default": {
+            "decay_weight": None,
+            "composite_price_type": vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
+            "source_staleness_tolerance": None,
+            "decay_power": None,
+            "cash_amount": None,
+            "source_weights": None,
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.decay_weight = (
+            str(config["decay_weight"]) if config["decay_weight"] is not None else None
+        )
+        self.composite_price_type = config["composite_price_type"]
+        self.source_staleness_tolerance = config["source_staleness_tolerance"]
+        self.decay_power = config["decay_power"]
+        self.cash_amount = (
+            str(config["cash_amount"]) if config["cash_amount"] is not None else None
+        )
+        self.source_weights = (
+            [str(w) for w in config["source_weights"]]
+            if config["source_weights"] is not None
+            else None
+        )
+
+    def build(self):
+        return build.markets.composite_price_process(
+            composite_price_type=self.composite_price_type,
+            decay_weight=self.decay_weight,
+            decay_power=self.decay_power,
+            cash_amount=self.cash_amount,
+            source_weights=self.source_weights,
+            source_staleness_tolerance=self.source_staleness_tolerance,
+        )
+
+
+class LiquidityFeeSettings(Config):
+    OPTS = {
+        "default": {
+            "method": vega_protos.markets.LiquidityFeeSettings.Method.METHOD_MARGINAL_COST,
+            "fee_constant": None,
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.method = config["method"]
+        self.fee_constant = config["fee_constant"]
+
+    def build(self):
+        return build.markets.liquidity_fee_settings(
+            method=self.method,
+            fee_constant=self.fee_constant,
+        )
+
+
+class LiquidationStrategy(Config):
+    OPTS = {
+        "default": {
+            "disposal_time_step": 30,
+            "disposal_fraction": 0.1,
+            "full_disposal_size": 0,
+            "max_fraction_consumed": 0.1,
+        }
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.disposal_time_step = config["disposal_time_step"]
+        self.disposal_fraction = config["disposal_fraction"]
+        self.full_disposal_size = config["full_disposal_size"]
+        self.max_fraction_consumed = config["max_fraction_consumed"]
+
+    def build(self):
+        return build.markets.liquidation_strategy(
+            disposal_time_step=self.disposal_time_step,
+            disposal_fraction=self.disposal_fraction,
+            full_disposal_size=self.full_disposal_size,
+            max_fraction_consumed=self.max_fraction_consumed,
         )
 
 
@@ -360,7 +500,14 @@ class InstrumentConfiguration(Config):
             "name": None,
             "code": None,
             "future": "default",
-        }
+            "perpetual": None,
+        },
+        "perpetual": {
+            "name": None,
+            "code": None,
+            "future": None,
+            "perpetual": "default",
+        },
     }
 
     def load(self, opt: Optional[str] = None):
@@ -368,12 +515,25 @@ class InstrumentConfiguration(Config):
 
         self.name = config["name"]
         self.code = config["code"]
-        self.future = FutureProduct(opt=config["future"])
+        self.future = (
+            None if config["future"] is None else FutureProduct(opt=config["future"])
+        )
+        self.perpetual = (
+            None
+            if config["perpetual"] is None
+            else PerpetualProduct(opt=config["perpetual"])
+        )
 
     def build(self):
-        return vega_protos.governance.InstrumentConfiguration(
-            name=self.name, code=self.code, future=self.future.build()
-        )
+        if self.future != None:
+            return vega_protos.governance.InstrumentConfiguration(
+                name=self.name, code=self.code, future=self.future.build()
+            )
+        if self.perpetual != None:
+            return vega_protos.governance.InstrumentConfiguration(
+                name=self.name, code=self.code, perpetual=self.perpetual.build()
+            )
+        raise ValueError("No product specified for the instrument")
 
 
 class FutureProduct(Config):
@@ -405,12 +565,131 @@ class FutureProduct(Config):
                 "MarketConfig has not been updated with settlement asset information."
             )
 
+        data_source_spec_for_settlement_data = build.data_source.data_source_definition(
+            external=build.data_source.data_source_definition_external(
+                oracle=build.data_source.data_source_spec_configuration(
+                    signers=[
+                        build.data.data.signer(
+                            pub_key=build.data.data.pub_key(key=self.terminating_key)
+                        )
+                    ],
+                    filters=[
+                        build.data.spec.filter(
+                            key=build.data.spec.property_key(
+                                name=f"price.{self.quote_name}.value",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
+                                number_decimal_places=self.number_decimal_places,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
+            )
+        )
+        data_source_spec_for_trading_termination = build.data_source.data_source_definition(
+            external=build.data_source.data_source_definition_external(
+                oracle=build.data_source.data_source_spec_configuration(
+                    signers=[
+                        build.data.data.signer(
+                            pub_key=build.data.data.pub_key(key=self.terminating_key)
+                        )
+                    ],
+                    filters=[
+                        build.data.spec.filter(
+                            key=build.data.spec.property_key(
+                                name="trading.terminated",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
+            )
+        )
+        data_source_spec_binding = build.markets.data_source_spec_to_future_binding(
+            settlement_data_property=f"price.{self.quote_name}.value",
+            trading_termination_property="trading.terminated",
+        )
+
+        return build.governance.future_product(
+            settlement_asset=self.settlement_asset,
+            quote_name=self.quote_name,
+            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+            data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
+            data_source_spec_binding=data_source_spec_binding,
+        )
+
+
+class PerpetualProduct(Config):
+    OPTS = {
+        "default": {
+            "settlement_asset": None,
+            "quote_name": None,
+            "number_decimal_places": None,
+            "settlement_key": None,
+            "funding_payment_frequency_in_seconds": 60,
+            "margin_funding_factor": 1,
+            "interest_rate": 0,
+            "clamp_lower_bound": 0,
+            "clamp_upper_bound": 0,
+            "funding_rate_scaling_factor": None,
+            "funding_rate_lower_bound": None,
+            "funding_rate_upper_bound": None,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+
+        self.settlement_asset = config["settlement_asset"]
+        self.quote_name = config["quote_name"]
+        self.number_decimal_places = config["number_decimal_places"]
+        self.settlement_key = config["settlement_key"]
+        self.funding_payment_frequency_in_seconds = config[
+            "funding_payment_frequency_in_seconds"
+        ]
+        self.margin_funding_factor = config["margin_funding_factor"]
+        self.interest_rate = config["interest_rate"]
+        self.clamp_lower_bound = config["clamp_lower_bound"]
+        self.clamp_upper_bound = config["clamp_upper_bound"]
+        self.funding_rate_scaling_factor = config["funding_rate_scaling_factor"]
+        self.funding_rate_lower_bound = config["funding_rate_lower_bound"]
+        self.funding_rate_upper_bound = config["funding_rate_upper_bound"]
+
+    def build(self):
+        if None in [
+            self.settlement_asset,
+            self.quote_name,
+            self.number_decimal_places,
+            self.settlement_key,
+        ]:
+            raise ValueError(
+                "MarketConfig has not been updated with settlement asset information."
+            )
+
+        data_source_spec_for_settlement_schedule = data_source_protos.DataSourceDefinition(
+            internal=data_source_protos.DataSourceDefinitionInternal(
+                time_trigger=data_source_protos.DataSourceSpecConfigurationTimeTrigger(
+                    conditions=[
+                        oracles_protos.spec.Condition(
+                            operator="OPERATOR_GREATER_THAN_OR_EQUAL", value="0"
+                        )
+                    ],
+                    triggers=[
+                        oracles_protos.spec.InternalTimeTrigger(
+                            every=self.funding_payment_frequency_in_seconds
+                        )
+                    ],
+                )
+            )
+        )
+
         data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
             external=data_source_protos.DataSourceDefinitionExternal(
                 oracle=data_source_protos.DataSourceSpecConfiguration(
                     signers=[
                         oracles_protos.data.Signer(
-                            pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
+                            pub_key=oracles_protos.data.PubKey(key=self.settlement_key)
                         )
                     ],
                     filters=[
@@ -426,35 +705,23 @@ class FutureProduct(Config):
                 )
             )
         )
-        data_source_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
-            external=data_source_protos.DataSourceDefinitionExternal(
-                oracle=data_source_protos.DataSourceSpecConfiguration(
-                    signers=[
-                        oracles_protos.data.Signer(
-                            pub_key=oracles_protos.data.PubKey(key=self.terminating_key)
-                        )
-                    ],
-                    filters=[
-                        oracles_protos.spec.Filter(
-                            key=oracles_protos.spec.PropertyKey(
-                                name="trading.terminated",
-                                type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                            ),
-                            conditions=[],
-                        )
-                    ],
-                )
-            )
-        )
-        data_source_spec_binding = vega_protos.markets.DataSourceSpecToFutureBinding(
+
+        data_source_spec_binding = vega_protos.markets.DataSourceSpecToPerpetualBinding(
             settlement_data_property=f"price.{self.quote_name}.value",
-            trading_termination_property="trading.terminated",
+            settlement_schedule_property="vegaprotocol.builtin.timetrigger",
         )
 
-        return vega_protos.governance.FutureProduct(
+        return build.governance.perpetual_product(
             settlement_asset=self.settlement_asset,
             quote_name=self.quote_name,
+            margin_funding_factor=self.margin_funding_factor,
+            interest_rate=self.interest_rate,
+            clamp_lower_bound=self.clamp_lower_bound,
+            clamp_upper_bound=self.clamp_upper_bound,
+            data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
-            data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
             data_source_spec_binding=data_source_spec_binding,
+            funding_rate_scaling_factor=self.funding_rate_scaling_factor,
+            funding_rate_lower_bound=self.funding_rate_lower_bound,
+            funding_rate_upper_bound=self.funding_rate_upper_bound,
         )

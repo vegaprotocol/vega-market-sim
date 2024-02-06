@@ -84,20 +84,6 @@ class Order:
     iceberg_order: Optional[IcebergOrder]
 
 
-Position = namedtuple(
-    "Position",
-    [
-        "party_id",
-        "market_id",
-        "open_volume",
-        "realised_pnl",
-        "unrealised_pnl",
-        "average_entry_price",
-        "updated_at",
-        "loss_socialisation_amount",
-    ],
-)
-
 MarginLevels = namedtuple(
     "MarginLevels",
     [
@@ -180,6 +166,12 @@ class LiquidationPrice:
 class MarginEstimate:
     best_case: MarginLevels
     worst_case: MarginLevels
+
+
+@dataclass(frozen=True)
+class CollateralIncreaseEstimate:
+    best_case: float
+    worst_case: float
 
 
 @dataclass(frozen=True)
@@ -375,6 +367,19 @@ class NetworkParameter:
     value: str
 
 
+@dataclass(frozen=True)
+class Position:
+    market_id: str
+    party_id: str
+    open_volume: float
+    realised_pnl: float
+    unrealised_pnl: float
+    average_entry_price: float
+    updated_at: datetime.datetime
+    loss_socialisation_amount: float
+    position_status: vega_protos.vega.PositionStatus
+
+
 def _network_parameter_from_proto(network_parameter: vega_protos.vega.NetworkParameter):
     return NetworkParameter(key=network_parameter.key, value=network_parameter.value)
 
@@ -525,6 +530,91 @@ class StopOrder:
     oco_link_id: Optional[str] = None
     expires_at: Optional[datetime.datetime] = None
     expiry_strategy: Optional[vega_protos.vega.StopOrder.ExpiryStrategy] = None
+
+
+@dataclass(frozen=True)
+class Asset:
+    id: str
+    details: AssetDetails
+    status: vega_protos.assets.Asset.Status
+
+
+@dataclass(frozen=True)
+class AssetDetails:
+    name: str
+    symbol: str
+    decimals: int
+    quantum: float
+    builtin_asset: Optional[BuiltinAsset] = None
+    erc20: Optional[ERC20] = None
+
+
+@dataclass(frozen=True)
+class BuiltinAsset:
+    max_faucet_amount_mint: float
+
+
+@dataclass(frozen=True)
+class ERC20:
+    contract_address: str
+    lifetime_limit: float
+    withdraw_threshold: float
+
+
+def _asset_from_proto(asset: vega_protos.assets.Asset, decimal_spec: DecimalSpec):
+    return Asset(
+        id=asset.id,
+        details=_asset_details_from_proto(asset.details, decimal_spec=decimal_spec),
+        status=asset.status,
+    )
+
+
+def _asset_details_from_proto(
+    asset_details: vega_protos.assets.AssetDetails, decimal_spec: DecimalSpec
+) -> AssetDetails:
+    return AssetDetails(
+        name=asset_details.name,
+        symbol=asset_details.symbol,
+        decimals=asset_details.decimals,
+        quantum=asset_details.quantum,
+        builtin_asset=(
+            _builtin_asset_from_proto(
+                builtin_asset=asset_details.builtin_asset, decimal_spec=decimal_spec
+            )
+            if asset_details.builtin_asset is not None
+            else None
+        ),
+        erc20=(
+            _erc20_from_proto(erc20=asset_details.erc20, decimal_spec=decimal_spec)
+            if asset_details.erc20 is not None
+            else None
+        ),
+    )
+
+
+def _builtin_asset_from_proto(
+    builtin_asset: vega_protos.assets.BuiltinAsset, decimal_spec: DecimalSpec
+) -> BuiltinAsset:
+    return BuiltinAsset(
+        max_faucet_amount_mint=num_from_padded_int(
+            to_convert=builtin_asset.max_faucet_amount_mint,
+            decimals=decimal_spec.asset_decimals,
+        )
+    )
+
+
+def _erc20_from_proto(
+    erc20: vega_protos.assets.ERC20, decimal_spec: DecimalSpec
+) -> ERC20:
+    return ERC20(
+        contract_address=erc20.contract_address,
+        lifetime_limit=num_from_padded_int(
+            to_convert=erc20.lifetime_limit, decimals=decimal_spec.asset_decimals
+        ),
+        withdraw_threshold=num_from_padded_int(
+            to_convert=erc20.withdraw_threshold, decimals=decimal_spec.asset_decimals
+        ),
+    )
 
 
 @dataclass(frozen=True)
@@ -825,8 +915,8 @@ def _position_from_proto(
     decimal_spec: DecimalSpec,
 ) -> Position:
     return Position(
-        party_id=position.party_id,
         market_id=position.market_id,
+        party_id=position.party_id,
         open_volume=num_from_padded_int(
             position.open_volume, decimal_spec.position_decimals
         ),
@@ -839,11 +929,12 @@ def _position_from_proto(
         average_entry_price=num_from_padded_int(
             position.average_entry_price, decimal_spec.price_decimals
         ),
+        updated_at=datetime.datetime.fromtimestamp(position.updated_at / 1e9),
         loss_socialisation_amount=num_from_padded_int(
             position.loss_socialisation_amount,
             decimal_spec.asset_decimals,
         ),
-        updated_at=position.updated_at,
+        position_status=position.position_status,
     )
 
 
@@ -902,6 +993,15 @@ def _margin_estimate_from_proto(
         worst_case=_margin_level_from_proto(
             margin_level=margin_estimate.worst_case, decimal_spec=decimal_spec
         ),
+    )
+
+
+def _collateral_increase_estimate_from_proto(
+    collateral_increase_estimate: data_node_protos_v2.trading_data.CollateralIncreaseEstimate,
+) -> CollateralIncreaseEstimate:
+    return CollateralIncreaseEstimate(
+        worst_case=collateral_increase_estimate.worst_case,
+        best_case=collateral_increase_estimate.best_case,
     )
 
 
@@ -978,11 +1078,6 @@ def positions_by_market(
                 )
 
             market_to_asset_map[pos.market_id] = settlement_asset_id
-
-        if len(market_to_asset_map[market_id]) < 1:
-            market_to_asset_map[
-                market_id
-            ] = resp.tradable_instrument.instrument.perpetual.settlement_asset
 
         # Update maps if value does not exist for current asset id
         if market_to_asset_map[pos.market_id] not in asset_decimals_map:
@@ -1997,7 +2092,12 @@ def ping(data_client: vac.VegaTradingDataClientV2):
 def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
-    direction: data_node_protos_v2.trading_data.TransferDirection = None,
+    direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+    is_reward: Optional[bool] = None,
+    from_epoch: Optional[int] = None,
+    to_epoch: Optional[int] = None,
+    status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+    scope: Optional[data_node_protos_v2.trading_data.ListTransfersRequest.Scope] = None,
 ) -> List[Transfer]:
     """Returns a list of processed transfers.
 
@@ -2018,6 +2118,11 @@ def list_transfers(
         data_client=data_client,
         party_id=party_id,
         direction=direction,
+        is_reward=is_reward,
+        from_epoch=from_epoch,
+        to_epoch=to_epoch,
+        status=status,
+        scope=scope,
     )
 
     asset_dp = {}
@@ -2390,10 +2495,20 @@ def estimate_position(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     open_volume: int,
+    average_entry_price: int,
+    margin_account_balance: int,
+    general_account_balance: int,
+    order_margin_account_balance: int,
+    margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[Tuple[str, str, int, bool]]] = None,
-    collateral_available: Optional[str] = None,
+    margin_factor: Optional[float] = None,
+    include_collateral_increase_in_available_collateral: bool = True,
+    scale_liquidation_price_to_market_decimals: bool = False,
     asset_decimals: Optional[Dict[str, int]] = {},
-) -> Tuple[MarginEstimate, LiquidationEstimate,]:
+) -> Tuple[
+    MarginEstimate,
+    LiquidationEstimate,
+]:
     if orders is not None:
         proto_orders = [
             data_node_protos_v2.trading_data.OrderInfo(
@@ -2405,12 +2520,23 @@ def estimate_position(
             for order in orders
         ]
 
-    margin_estimate, liquidation_estimate = data_raw.estimate_position(
+    (
+        margin_estimate,
+        collateral_increase_estimate,
+        liquidation_estimate,
+    ) = data_raw.estimate_position(
         data_client=data_client,
         market_id=market_id,
         open_volume=open_volume,
+        average_entry_price=average_entry_price,
+        margin_account_balance=margin_account_balance,
+        general_account_balance=general_account_balance,
+        order_margin_account_balance=order_margin_account_balance,
+        margin_mode=margin_mode,
         orders=proto_orders if orders is not None else None,
-        collateral_available=collateral_available,
+        margin_factor=margin_factor,
+        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
 
     if margin_estimate.best_case.asset not in asset_decimals:
@@ -2425,11 +2551,19 @@ def estimate_position(
         ),
     )
 
+    converted_collateral_increase_estimate = _collateral_increase_estimate_from_proto(
+        collateral_increase_estimate=collateral_increase_estimate
+    )
+
     converted_liquidation_estimate = _liquidation_estimate_from_proto(
         liquidation_estimate=liquidation_estimate,
     )
 
-    return converted_margin_estimate, converted_liquidation_estimate
+    return (
+        converted_margin_estimate,
+        converted_collateral_increase_estimate,
+        converted_liquidation_estimate,
+    )
 
 
 def get_stake(
@@ -2444,8 +2578,11 @@ def get_stake(
 def get_asset(
     data_client: vac.trading_data_grpc_v2,
     asset_id: str,
-):
-    return data_raw.asset_info(data_client=data_client, asset_id=asset_id)
+) -> Asset:
+    asset = data_raw.asset_info(data_client=data_client, asset_id=asset_id)
+    return _asset_from_proto(
+        asset, decimal_spec=DecimalSpec(asset_decimals=asset.details.decimals)
+    )
 
 
 def list_referral_sets(
@@ -2454,13 +2591,13 @@ def list_referral_sets(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, ReferralSet]:
-    response: List[
-        data_node_protos_v2.trading_data.ReferralSet
-    ] = data_raw.list_referral_sets(
-        data_client=data_client,
-        referral_set_id=referral_set_id,
-        referrer=referrer,
-        referee=referee,
+    response: List[data_node_protos_v2.trading_data.ReferralSet] = (
+        data_raw.list_referral_sets(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
     )
     referral_sets = {}
     for referral_set in response:
@@ -2474,13 +2611,13 @@ def list_referral_set_referees(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, Dict[str, ReferralSetReferee]]:
-    response: List[
-        data_node_protos_v2.trading_data.ReferralSetReferee
-    ] = data_raw.list_referral_set_referees(
-        data_client=data_client,
-        referral_set_id=referral_set_id,
-        referrer=referrer,
-        referee=referee,
+    response: List[data_node_protos_v2.trading_data.ReferralSetReferee] = (
+        data_raw.list_referral_set_referees(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
     )
     referral_set_referees = defaultdict(dict)
     for referral_set_referee in response:
@@ -2709,3 +2846,32 @@ def list_network_parameters(
     return [
         _network_parameter_from_proto(network_parameter=proto) for proto in response
     ]
+
+
+def list_all_positions(
+    data_client: vac.VegaTradingDataClientV2,
+    party_ids: Optional[List[str]] = None,
+    market_ids: Optional[List[str]] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> List[vega_protos.vega.Position]:
+    response = data_raw.list_all_positions(
+        data_client=data_client, party_ids=party_ids, market_ids=market_ids
+    )
+    positions = []
+    for position in response:
+        positions.append(
+            _position_from_proto(
+                position=position,
+                decimal_spec=DecimalSpec(
+                    price_decimals=market_price_decimals_map[position.market_id],
+                    position_decimals=market_position_decimals_map[position.market_id],
+                    asset_decimals=asset_decimals_map[
+                        market_to_asset_map[position.market_id]
+                    ],
+                ),
+            )
+        )
+    return positions

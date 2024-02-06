@@ -247,6 +247,11 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.FromString,
         )
+        self.ListPartiesProfiles = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListPartiesProfiles",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.FromString,
+        )
         self.ListMarginLevels = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListMarginLevels",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarginLevelsRequest.SerializeToString,
@@ -527,6 +532,16 @@ class TradingDataServiceStub(object):
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsResponse.FromString,
         )
+        self.ListTeamsStatistics = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListTeamsStatistics",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsResponse.FromString,
+        )
+        self.ListTeamMembersStatistics = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListTeamMembersStatistics",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsResponse.FromString,
+        )
         self.ListTeamReferees = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTeamReferees",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesRequest.SerializeToString,
@@ -571,6 +586,26 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
+        )
+        self.EstimateTransferFee = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/EstimateTransferFee",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.FromString,
+        )
+        self.GetTotalTransferFeeDiscount = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/GetTotalTransferFeeDiscount",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
+        )
+        self.ListGames = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListGames",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
+        )
+        self.ListPartyMarginModes = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListPartyMarginModes",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.FromString,
         )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
@@ -715,6 +750,11 @@ class TradingDataServiceServicer(object):
         - receiving account (market ID, asset ID, account type)
         - sending AND receiving account
         - transfer type either in addition to the above filters or as a standalone option
+        Note: The date range is restricted to any 5 days.
+        If no start or end date is provided, only ledger entries from the last 5 days will be returned.
+        If a start and end date are provided, but the end date is more than 5 days after the start date, only data up to 5 days after the start date will be returned.
+        If a start date is provided but no end date, the end date will be set to 5 days after the start date.
+        If no start date is provided, but the end date is, the start date will be set to 5 days before the end date.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1031,6 +1071,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListPartiesProfiles(self, request, context):
+        """List parties' profiles
+
+        Get a list of profiles for multiple parties
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ListMarginLevels(self, request, context):
         """List margin levels
 
@@ -1288,8 +1337,8 @@ class TradingDataServiceServicer(object):
     def EstimatePosition(self, request, context):
         """Estimate position
 
-        Estimate the margin that would be required for maintaining the specified position. Margin estimates are scaled to asset decimal places.
-        If the optional collateral available argument is supplied, the response also contains the estimate of the liquidation price.
+        Estimate the margin that would be required for maintaining the specified position, collateral increase needed to open the specified position and the liquidation price estimate.
+        Margin estimates are scaled to asset decimal places.
         Liquidation price estimates are scaled to asset decimal places by default, unless an argument to scale to market decimal places is specified in the request.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1558,6 +1607,26 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListTeamsStatistics(self, request, context):
+        """List teams statistics
+
+        Get the statistics of all teams, or for a specific team by using team ID, over a number of epochs.
+        If a team does not have at least the number of epochs' worth of data, it is ignored.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListTeamMembersStatistics(self, request, context):
+        """List team members' statistics
+
+        Get the statistics for all members of a given team, or for a specific member by using party ID, over a number of epochs.
+        If a team does not have at least the number of epochs' worth of data, it is ignored.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ListTeamReferees(self, request, context):
         """List team referees
 
@@ -1635,6 +1704,42 @@ class TradingDataServiceServicer(object):
         """Observe transaction results
 
         Subscribe to a stream of transaction results, optionally filtered by party/hash/status
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def EstimateTransferFee(self, request, context):
+        """Estimate transfer fee costs
+
+        Estimate transfer fee costs with potential discount applied
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def GetTotalTransferFeeDiscount(self, request, context):
+        """Available transfer fee discount
+
+        Returns available per party per asset transfer discount
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListGames(self, request, context):
+        """List games
+
+        Get a list of games and corresponding game data, given the provided filters
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListPartyMarginModes(self, request, context):
+        """List margin modes per party per market
+
+        Get a list of all margin modes, or for a specific market ID, or party ID.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1949,6 +2054,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.SerializeToString,
         ),
+        "ListPartiesProfiles": grpc.unary_unary_rpc_method_handler(
+            servicer.ListPartiesProfiles,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.SerializeToString,
+        ),
         "ListMarginLevels": grpc.unary_unary_rpc_method_handler(
             servicer.ListMarginLevels,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarginLevelsRequest.FromString,
@@ -2229,6 +2339,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsResponse.SerializeToString,
         ),
+        "ListTeamsStatistics": grpc.unary_unary_rpc_method_handler(
+            servicer.ListTeamsStatistics,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsResponse.SerializeToString,
+        ),
+        "ListTeamMembersStatistics": grpc.unary_unary_rpc_method_handler(
+            servicer.ListTeamMembersStatistics,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsResponse.SerializeToString,
+        ),
         "ListTeamReferees": grpc.unary_unary_rpc_method_handler(
             servicer.ListTeamReferees,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesRequest.FromString,
@@ -2273,6 +2393,26 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ObserveTransactionResults,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.SerializeToString,
+        ),
+        "EstimateTransferFee": grpc.unary_unary_rpc_method_handler(
+            servicer.EstimateTransferFee,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.SerializeToString,
+        ),
+        "GetTotalTransferFeeDiscount": grpc.unary_unary_rpc_method_handler(
+            servicer.GetTotalTransferFeeDiscount,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.SerializeToString,
+        ),
+        "ListGames": grpc.unary_unary_rpc_method_handler(
+            servicer.ListGames,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.SerializeToString,
+        ),
+        "ListPartyMarginModes": grpc.unary_unary_rpc_method_handler(
+            servicer.ListPartyMarginModes,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.SerializeToString,
         ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
@@ -3619,6 +3759,35 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ListParties",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListPartiesProfiles(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListPartiesProfiles",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -5254,6 +5423,64 @@ class TradingDataService(object):
         )
 
     @staticmethod
+    def ListTeamsStatistics(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListTeamsStatistics",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListTeamMembersStatistics(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListTeamMembersStatistics",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
     def ListTeamReferees(
         request,
         target,
@@ -5504,6 +5731,122 @@ class TradingDataService(object):
             "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
             data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def EstimateTransferFee(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/EstimateTransferFee",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def GetTotalTransferFeeDiscount(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/GetTotalTransferFeeDiscount",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListGames(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListGames",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+        )
+
+    @staticmethod
+    def ListPartyMarginModes(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListPartyMarginModes",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.FromString,
             options,
             channel_credentials,
             insecure,

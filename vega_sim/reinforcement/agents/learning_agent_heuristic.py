@@ -49,7 +49,9 @@ class Action:
 
 @dataclass
 class SoftActionFixVol:
-    c: torch.Tensor  # sell / buy / do nothing probabilities if training. If simulating, value in {0,1,2} indicating sampled action
+    c: (
+        torch.Tensor
+    )  # sell / buy / do nothing probabilities if training. If simulating, value in {0,1,2} indicating sampled action
 
     def unravel(self):
         return self.c

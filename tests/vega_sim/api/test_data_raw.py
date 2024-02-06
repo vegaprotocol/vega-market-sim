@@ -873,6 +873,11 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
             timestamp=0000000000000000000,
         ),
     )
+    expected_collateral_increase_estimate = (
+        data_node_protos_v2.trading_data.CollateralIncreaseEstimate(
+            worst_case="0", best_case="100"
+        )
+    )
     expected_liquidation = data_node_protos_v2.trading_data.LiquidationEstimate(
         best_case=data_node_protos_v2.trading_data.LiquidationPrice(
             open_volume_only="1000",
@@ -910,6 +915,10 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
                     timestamp=0000000000000000000,
                 ),
             ),
+            collateral_increase_estimate=data_node_protos_v2.trading_data.CollateralIncreaseEstimate(
+                worst_case="0",
+                best_case="100",
+            ),
             liquidation=data_node_protos_v2.trading_data.LiquidationEstimate(
                 best_case=data_node_protos_v2.trading_data.LiquidationPrice(
                     open_volume_only="1000",
@@ -930,10 +939,15 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
     add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
 
     data_client = VegaTradingDataClientV2(f"localhost:{port}")
-    margin, liquidation = estimate_position(
+    margin, collateral_increase_estimate, liquidation = estimate_position(
         data_client=data_client,
         market_id=expected_market_id,
         open_volume=1,
+        average_entry_price=100,
+        margin_account_balance=10000,
+        general_account_balance=10000,
+        order_margin_account_balance=10000,
+        margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
         orders=[
             data_node_protos_v2.trading_data.OrderInfo(
                 side=vega_protos.vega.SIDE_BUY,
@@ -942,9 +956,12 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
                 is_market_order=True,
             )
         ],
-        collateral_available="1000",
+        margin_factor=0.1,
+        include_collateral_increase_in_available_collateral=False,
+        scale_liquidation_price_to_market_decimals=False,
     )
     assert margin == expected_margin
+    assert collateral_increase_estimate == expected_collateral_increase_estimate
     assert liquidation == expected_liquidation
 
 

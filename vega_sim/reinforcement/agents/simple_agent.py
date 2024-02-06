@@ -91,7 +91,6 @@ margin_balance = curr_acct.margin  # The balance already being used as margin
 #######################################################################
 """
 
-
 from vega_sim.environment.agent import AgentWithWallet
 from vega_sim.service import VegaService
 

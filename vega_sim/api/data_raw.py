@@ -109,9 +109,15 @@ def market_info(
 
 
 @_retry(3)
-def list_assets(data_client: vac.VegaTradingDataClientV2):
+def list_assets(
+    data_client: vac.VegaTradingDataClientV2,
+    asset_id: Optional[str] = None,
+) -> List[vega_protos.assets.Asset]:
+    base_request = data_node_protos_v2.trading_data.ListAssetsRequest()
+    if asset_id is not None:
+        setattr(base_request, "asset_id", asset_id)
     return unroll_v2_pagination(
-        base_request=data_node_protos_v2.trading_data.ListAssetsRequest(),
+        base_request=base_request,
         request_func=lambda x: data_client.ListAssets(x).assets,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
@@ -121,7 +127,7 @@ def list_assets(data_client: vac.VegaTradingDataClientV2):
 def asset_info(
     asset_id: str,
     data_client: vac.VegaTradingDataClientV2,
-) -> vac.vega.assets.Asset:
+) -> vega_protos.assets.Asset:
     """Returns information on a given asset selected by its ID
 
     Args:
@@ -476,6 +482,11 @@ def list_transfers(
     data_client: vac.VegaTradingDataClientV2,
     party_id: Optional[str] = None,
     direction: Optional[data_node_protos_v2.trading_data.TransferDirection] = None,
+    is_reward: Optional[bool] = None,
+    from_epoch: Optional[int] = None,
+    to_epoch: Optional[int] = None,
+    status: Optional[vega_protos.events.v1.events.Transfer.Status] = None,
+    scope: Optional[data_node_protos_v2.trading_data.ListTransfersRequest.Scope] = None,
 ) -> List[data_node_protos_v2.trading_data.TransferNode]:
     """Returns a list of raw transfers.
 
@@ -506,6 +517,16 @@ def list_transfers(
             "direction",
             data_node_protos_v2.trading_data.TRANSFER_DIRECTION_TRANSFER_TO_OR_FROM,
         )
+    if is_reward is not None:
+        setattr(base_request, "is_reward", is_reward)
+    if from_epoch is not None:
+        setattr(base_request, "from_epoch", from_epoch)
+    if to_epoch is not None:
+        setattr(base_request, "to_epoch", to_epoch)
+    if status is not None:
+        setattr(base_request, "status", status)
+    if scope is not None:
+        setattr(base_request, "scope", scope)
 
     return unroll_v2_pagination(
         base_request=base_request,
@@ -664,25 +685,37 @@ def estimate_position(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
     open_volume: int,
+    average_entry_price: int,
+    margin_account_balance: int,
+    general_account_balance: int,
+    order_margin_account_balance: int,
+    margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[data_node_protos_v2.trading_data.OrderInfo]] = None,
-    collateral_available: Optional[str] = None,
+    margin_factor: Optional[float] = None,
+    include_collateral_increase_in_available_collateral: bool = True,
+    scale_liquidation_price_to_market_decimals: bool = False,
 ) -> Tuple[
     data_node_protos_v2.trading_data.MarginEstimate,
+    data_node_protos_v2.trading_data.CollateralIncreaseEstimate,
     data_node_protos_v2.trading_data.LiquidationEstimate,
 ]:
     base_request = data_node_protos_v2.trading_data.EstimatePositionRequest(
         market_id=market_id,
         open_volume=open_volume,
+        average_entry_price=str(average_entry_price),
+        orders=orders,
+        margin_account_balance=str(margin_account_balance),
+        general_account_balance=str(general_account_balance),
+        order_margin_account_balance=str(order_margin_account_balance),
+        margin_mode=margin_mode,
+        margin_factor=str(margin_factor) if margin_factor is not None else None,
+        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
-
-    if orders is not None:
-        [base_request.orders.append(order) for order in orders]
-    if collateral_available is not None:
-        setattr(base_request, "collateral_available", collateral_available)
 
     response = data_client.EstimatePosition(base_request)
 
-    return response.margin, response.liquidation
+    return response.margin, response.collateral_increase_estimate, response.liquidation
 
 
 @_retry(3)
@@ -889,5 +922,44 @@ def list_stop_orders(
     return unroll_v2_pagination(
         base_request=base_request,
         request_func=lambda x: data_client.ListStopOrders(x).orders,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_deposits(
+    data_client: vac.trading_data_grpc_v2,
+    party_id: Optional[str] = None,
+    date_range: Optional[vega_protos.vega.DateRange] = None,
+) -> List[vega_protos.vega.Deposit]:
+    base_request = data_node_protos_v2.trading_data.ListDepositsRequest()
+    if party_id is not None:
+        setattr(base_request, "party_id", party_id)
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListDeposits(x).deposits,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_all_positions(
+    data_client: vac.VegaTradingDataClientV2,
+    party_ids: Optional[List[str]] = None,
+    market_ids: Optional[List[str]] = None,
+) -> List[vega_protos.vega.Position]:
+    """Output positions of a party."""
+
+    filter = data_node_protos_v2.trading_data.PositionsFilter()
+    if party_ids is not None:
+        filter.party_ids.extend(party_ids)
+    if market_ids is not None:
+        filter.party_ids.extend(market_ids)
+    base_request = data_node_protos_v2.trading_data.ListAllPositionsRequest(
+        filter=filter
+    )
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListAllPositions(x).positions,
         extraction_func=lambda res: [i.node for i in res.edges],
     )

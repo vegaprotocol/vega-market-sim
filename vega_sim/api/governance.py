@@ -89,6 +89,7 @@ def propose_market_from_config(
     closing_time: Union[str, int],
     enactment_time: Union[str, int],
     time_forward_fn: Optional[Callable[[], None]] = None,
+    sync_fn: Optional[Callable[[], None]] = None,
     governance_asset: Optional[str] = "VOTE",
     proposal_wallet_name: Optional[str] = None,
 ) -> str:
@@ -135,6 +136,7 @@ def propose_market_from_config(
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
+        sync_fn=sync_fn,
     ).proposal.id
 
 
@@ -217,6 +219,15 @@ def __propose_market(
                 commitment_min_time_fraction=str(commitment_min_time_fraction),
                 performance_hysteresis_epochs=int(performance_hysteresis_epochs),
                 sla_competition_factor=str(sla_competition_factor),
+            ),
+            liquidation_strategy=vega_protos.markets.LiquidationStrategy(
+                disposal_time_step=1,
+                disposal_fraction="1",
+                full_disposal_size=1000000000,
+                max_fraction_consumed="0.5",
+            ),
+            mark_price_configuration=vega_protos.markets.CompositePriceConfiguration(
+                composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
             ),
         ),
     )
@@ -419,7 +430,7 @@ def propose_perps_market(
     data_client: vac.VegaTradingDataClientV2,
     settlement_data_pub_key: str,
     governance_asset: str = "VOTE",
-    future_asset: str = "BTC",
+    perp_asset: str = "BTC",
     position_decimals: Optional[int] = None,
     market_decimals: Optional[int] = None,
     margin_funding_factor: Optional[float] = None,
@@ -462,8 +473,8 @@ def propose_perps_market(
             str, the public key of the oracle to be used for trading termination
         governance_asset:
             str, the governance asset on the market
-        future_asset:
-            str, the symbol of the future asset used
+        perp_asset:
+            str, the symbol of the perp asset used
                 (used for generating/linking names of oracles)
         position_decimals:
             int, the decimal place precision to use for positions
@@ -513,7 +524,7 @@ def propose_perps_market(
                 filters=[
                     oracles_protos.spec.Filter(
                         key=oracles_protos.spec.PropertyKey(
-                            name=f"price.{future_asset}.value",
+                            name=f"price.{perp_asset}.value",
                             type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
                             number_decimal_places=price_decimals,
                         ),
@@ -533,9 +544,11 @@ def propose_perps_market(
                 ],
                 triggers=[
                     oracles_protos.spec.InternalTimeTrigger(
-                        every=60
-                        if funding_payment_frequency_in_seconds is None
-                        else funding_payment_frequency_in_seconds
+                        every=(
+                            60
+                            if funding_payment_frequency_in_seconds is None
+                            else funding_payment_frequency_in_seconds
+                        )
                     )
                 ],
             )
@@ -546,21 +559,21 @@ def propose_perps_market(
         code=market_name,
         perpetual=vega_protos.governance.PerpetualProduct(
             settlement_asset=settlement_asset_id,
-            quote_name=future_asset,
-            margin_funding_factor="0"
-            if margin_funding_factor is None
-            else str(margin_funding_factor),
+            quote_name=perp_asset,
+            margin_funding_factor=(
+                "0" if margin_funding_factor is None else str(margin_funding_factor)
+            ),
             interest_rate="0" if interest_rate is None else str(interest_rate),
-            clamp_lower_bound="0"
-            if clamp_lower_bound is None
-            else str(clamp_lower_bound),
-            clamp_upper_bound="0"
-            if clamp_upper_bound is None
-            else str(clamp_upper_bound),
+            clamp_lower_bound=(
+                "0" if clamp_lower_bound is None else str(clamp_lower_bound)
+            ),
+            clamp_upper_bound=(
+                "0" if clamp_upper_bound is None else str(clamp_upper_bound)
+            ),
             data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_binding=vega_protos.markets.DataSourceSpecToPerpetualBinding(
-                settlement_data_property=f"price.{future_asset}.value",
+                settlement_data_property=f"price.{perp_asset}.value",
                 settlement_schedule_property="vegaprotocol.builtin.timetrigger",
             ),
         ),
@@ -571,7 +584,7 @@ def propose_perps_market(
         instrument=instrument,
         data_client=data_client,
         governance_asset=governance_asset,
-        future_asset=future_asset,
+        future_asset=perp_asset,
         position_decimals=position_decimals,
         price_decimals=price_decimals,
         closing_time=closing_time,
@@ -712,7 +725,7 @@ def propose_asset(
     decimals: int,
     data_client: vac.VegaTradingDataClientV2,
     quantum: int = 1,
-    max_faucet_amount: int = 10e9,
+    max_faucet_amount: int = 1e48,
     closing_time: Optional[int] = None,
     enactment_time: Optional[int] = None,
     validation_time: Optional[int] = None,
@@ -795,6 +808,7 @@ def _make_and_wait_for_proposal(
     proposal: commands_protos.commands.ProposalSubmission,
     data_client: vac.VegaTradingDataClientV2,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    sync_fn: Optional[Callable[[], None]] = None,
     wallet_name: Optional[str] = None,
 ) -> ProposalSubmission:
     wallet.submit_transaction(
@@ -807,13 +821,19 @@ def _make_and_wait_for_proposal(
 
     # Allow one failure, forward once more
     try:
-        time_forward_fn()
+        if time_forward_fn is not None:
+            time_forward_fn()
+        if sync_fn is not None:
+            sync_fn()
         proposal = wait_for_acceptance(
             proposal.reference,
             lambda p: _proposal_loader(p, data_client),
         )
     except ProposalNotAcceptedError:
-        time_forward_fn()
+        if time_forward_fn is not None:
+            time_forward_fn()
+        if sync_fn is not None:
+            sync_fn()
         proposal = wait_for_acceptance(
             proposal.reference,
             lambda p: _proposal_loader(p, data_client),

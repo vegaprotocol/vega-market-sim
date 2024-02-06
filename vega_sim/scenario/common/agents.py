@@ -25,7 +25,7 @@ from numpy.typing import ArrayLike
 
 import vega_sim.api.faucet as faucet
 import vega_sim.builders as build
-from vega_sim.api.data import AccountData, MarketDepth, Order, Trade
+from vega_sim.api.data import AccountData, MarketDepth, Order, Trade, Position
 from vega_sim.api.helpers import get_enum
 from vega_sim.api.trading import OrderRejectedError
 from vega_sim.environment import VegaState
@@ -48,6 +48,7 @@ class MarketHistoryData:
     accounts: List[AccountData]
     market_depth: Dict[str, MarketDepth]
     trades: Dict[str, List[Trade]]
+    positions: List[Position]
 
 
 # Send selling/buying MOs to hit LP orders
@@ -1124,7 +1125,7 @@ class MarketManager(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
         self.vega.mint(
             wallet_name=self.wallet_name,
-            asset="VOTE",
+            asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
             amount=1e4,
             key_name=self.key_name,
         )
@@ -1137,7 +1138,6 @@ class MarketManager(StateAgentWithWallet):
                 name=self.asset_name,
                 symbol=self.asset_name,
                 decimals=self.adp,
-                max_faucet_amount=5e10,
                 key_name=self.key_name,
             )
         self.vega.wait_fn(5)
@@ -2155,7 +2155,7 @@ class LimitOrderTrader(StateAgentWithWallet):
         self,
         vega: VegaService,
         create_key: bool = True,
-        mint_key: bool = False,
+        mint_key: bool = True,
     ):
         """Initialise the agents wallet and mint the required market asset.
 
@@ -3030,6 +3030,8 @@ class Snitch(StateAgent):
 
             accounts = self.vega.get_accounts_from_stream()
 
+            positions = self.vega.list_all_positions()
+
             self.states.append(
                 MarketHistoryData(
                     at_time=start_time,
@@ -3038,6 +3040,7 @@ class Snitch(StateAgent):
                     accounts=accounts,
                     market_depth=market_depths,
                     trades=market_trades,
+                    positions=positions,
                 )
             )
 
@@ -3279,6 +3282,8 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         tag: str = "",
         wallet_name: str = None,
         auto_top_up: bool = False,
+        leave_opening_auction_prob: float = 1,
+        random_state: Optional[np.random.RandomState] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.side = side
@@ -3289,6 +3294,10 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.uncrossing_size = uncrossing_size
         self.auto_top_up = auto_top_up
         self.mint_key = False
+        self.leave_opening_auction_prob = leave_opening_auction_prob
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
 
     def initialise(
         self,
@@ -3325,6 +3334,12 @@ class UncrossAuctionAgent(StateAgentWithWallet):
             markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
             markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
         ]:
+            if (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION
+            ):
+                if self.random_state.random() > self.leave_opening_auction_prob:
+                    return
             if self.auto_top_up and self.mint_key:
                 account = self.vega.party_account(
                     key_name=self.key_name,
@@ -3394,7 +3409,7 @@ class RewardFunder(StateAgentWithWallet):
         if mint_key:
             self.vega.mint(
                 wallet_name=self.wallet_name,
-                asset="VOTE",
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
                 amount=1e4,
                 key_name=self.key_name,
             )
@@ -3414,7 +3429,6 @@ class RewardFunder(StateAgentWithWallet):
                 name=self.reward_asset_name,
                 symbol=self.reward_asset_name,
                 decimals=18,
-                max_faucet_amount=5e10,
                 key_name=self.key_name,
             )
         self.vega.wait_fn(1)
@@ -3688,3 +3702,206 @@ class ReferralAgentWrapper:
 
     def name(self):
         return self._agent.name()
+
+
+class UniformLiquidityProvider(StateAgentWithWallet):
+    """Agent commits liquidity and submits orders within the specified bps range."""
+
+    NAME_BASE = "uniform_liquidity_provider"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        bps_range_min: float,
+        bps_range_max: float,
+        levels: int,
+        fee: float = 0.001,
+        commitment_amount: float = 1e5,
+        initial_asset_mint: float = 1e6,
+        tag: str = "",
+        wallet_name: Optional[str] = None,
+        random_state: Optional[np.random.RandomState] = None,
+        price_process: Optional[iter] = None,
+    ):
+        """Agent commits liquidity and submits orders within the specified bps range.
+
+        Args:
+            key_name (str): name of key agent will use
+            market_name (str): name of market agent will trade on
+            asset_name (str): name of asset agent will mint
+            bps_range_min (float): lower bound of range in which agent will place orders.
+            bps_range_max (float): upper bound of range in which agent will place orders.
+            levels (int): number of price levels at which agent will place orders.
+            fee (float, optional): fee specified in agents commitment. Defaults to 0.001.
+            commitment_amount (float, optional): amount specified in agents commitment. Defaults to 1e5.
+            initial_asset_mint (float, optional): initial amount agent will mint. Defaults to 1e6.
+            tag (str, optional): identifier for agent. Defaults to "".
+            wallet_name (Optional[str], optional): name of wallet agent will use. Defaults to None.
+            random_state (Optional[np.random.RandomState], optional): random generator agent will use. Defaults to None.
+            price_process (Optional[iter], optional): price process which can be used to set reference price. Defaults to None.
+        """
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+
+        self.bps_range_min = bps_range_min
+        self.bps_range_max = bps_range_max
+        self.levels = levels
+        self.commitment_amount = commitment_amount
+        self.initial_asset_mint = initial_asset_mint
+        self.fee = fee
+
+        self.random_state = (
+            np.random.RandomState() if random_state is None else random_state
+        )
+
+        self.price_process = price_process
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        super().initialise(vega=vega, create_key=create_key)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                key_name=self.key_name,
+            )
+            self.vega.wait_fn(2)
+
+        self.vega.submit_liquidity(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+            commitment_amount=self.commitment_amount,
+            fee=self.fee,
+            is_amendment=False,
+        )
+
+    def step(self, vega_state: VegaState):
+        market_data = vega_state.market_state[self.market_id]
+
+        if self.price_process is not None:
+            reference_price = next(self.price_process)
+        elif vega_state.market_state[self.market_id].trading_mode in [
+            markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION,
+            markets_protos.Market.TradingMode.TRADING_MODE_MONITORING_AUCTION,
+        ]:
+            if market_data.indicative_price != 0:
+                reference_price = market_data.indicative_price
+            elif market_data.last_traded_price != 0:
+                reference_price = market_data.last_traded_price
+            else:
+                return
+        else:
+            if market_data.midprice != 0:
+                reference_price = market_data.midprice
+            else:
+                return
+
+        min_offset = reference_price * self.bps_range_min * 0.001
+        max_offset = reference_price * self.bps_range_max * 0.001
+
+        # Each level must provide
+        level_notional = (
+            self.commitment_amount
+            / float(
+                self.vega.network_parameter_from_feed(
+                    "market.liquidity.stakeToCcyVolume"
+                ).value
+            )
+            / self.levels
+        )
+        bid_prices = np.linspace(
+            start=reference_price - min_offset,
+            stop=reference_price - max_offset,
+            num=self.levels,
+        )
+        ask_prices = np.linspace(
+            start=reference_price + min_offset,
+            stop=reference_price + max_offset,
+            num=self.levels,
+        )
+        bid_sizes = [level_notional / price for price in bid_prices]
+        ask_sizes = [level_notional / price for price in bid_prices]
+
+        cancellations = []
+        submissions = []
+        # Build cancellations
+        buys, sells = self._get_orders(vega_state=vega_state)
+        cancellations.extend(self._cancellations(buys))
+        cancellations.extend(self._cancellations(sells))
+        # Build submissions
+        submissions.extend(
+            self._submissions(side="SIDE_BUY", prices=bid_prices, sizes=bid_sizes)
+        )
+        submissions.extend(
+            self._submissions(side="SIDE_SELL", prices=ask_prices, sizes=ask_sizes)
+        )
+        # Submit batch
+        self.vega.submit_instructions(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            cancellations=cancellations,
+            submissions=submissions,
+        )
+
+    def _get_orders(self, vega_state) -> Tuple[List[Order], List[Order]]:
+        orders = list(
+            (
+                vega_state.market_state[self.market_id]
+                .orders.get(
+                    self.vega.wallet.public_key(
+                        wallet_name=self.wallet_name, name=self.key_name
+                    ),
+                    {},
+                )
+                .values()
+            )
+            if self.market_id in vega_state.market_state
+            else []
+        )
+        # Check buy_order_reference and sell_order_reference are still live:
+        buys = []
+        sells = []
+        for order in orders:
+            (
+                buys.append(order)
+                if order.side == vega_protos.SIDE_BUY
+                else sells.append(order)
+            )
+        return buys, sells
+
+    def _submissions(self, side, prices, sizes):
+        return [
+            self.vega.build_order_submission(
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                time_in_force="TIME_IN_FORCE_GTC",
+                side=side,
+                size=size * 1.5,
+                price=price,
+            )
+            for price, size in zip(prices, sizes)
+        ]
+
+    def _cancellations(self, orders):
+        cancellations = []
+        for order in orders:
+            cancellations.append(
+                self.vega.build_order_cancellation(
+                    market_id=self.market_id,
+                    order_id=order.id,
+                )
+            )
+        return cancellations

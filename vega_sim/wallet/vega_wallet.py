@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 import os
+import time
 import inflection
 
 import json
@@ -266,6 +267,7 @@ class VegaWallet(Wallet):
         transaction: Any,
         transaction_type: str,
         wallet_name: Optional[int] = None,
+        max_retries: int = 20,
     ):
         wallet_name = (
             wallet_name if wallet_name is not None else self.vega_default_wallet_name
@@ -296,18 +298,28 @@ class VegaWallet(Wallet):
         }
         url = f"{self.wallet_url}/api/v2/requests"
 
+        # Attempt to submit transaction, if client error raise error immediately, if
+        # server error retry submission un till max retries exceeded then raise error.
         response = None
-        if self._mutex is None:
-            response = requests.post(url, headers=headers, json=submission)
-        else:
-            with self._mutex:
-                response = requests.post(url, headers=headers, json=submission)
-
-        try:
-            response.raise_for_status()
-        except Exception as e:
-            logging.warning(f"Submission failed, response={response.json()}")
-            raise e
+        exception = None
+        for i in range(max_retries):
+            try:
+                if self._mutex is None:
+                    response = requests.post(url, headers=headers, json=submission)
+                else:
+                    with self._mutex:
+                        response = requests.post(url, headers=headers, json=submission)
+                response.raise_for_status()
+                return
+            except requests.exceptions.HTTPError as e:
+                exception = e
+                if 400 <= exception.response.status_code < 500:
+                    break
+                if 500 <= exception.response.status_code < 600:
+                    time.sleep(1.01 * i)
+                    continue
+        logging.warning(f"Submission failed, response={response.json()}")
+        raise exception
 
     def public_key(self, name: str, wallet_name: Optional[str] = None) -> str:
         """Return a public key for the given wallet name and key name.
