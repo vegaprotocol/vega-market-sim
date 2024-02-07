@@ -1174,7 +1174,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = int(position.open_volume) if position is not None else 0
+        current_position = (
+            int(position.open_volume) if position is not None and position else 0
+        )
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
             current_position, self.current_step
         )
