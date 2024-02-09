@@ -4222,7 +4222,7 @@ class EstimatePositionRequest(_message.Message):
         "order_margin_account_balance",
         "margin_mode",
         "margin_factor",
-        "include_collateral_increase_in_available_collateral",
+        "include_required_position_margin_in_available_collateral",
         "scale_liquidation_price_to_market_decimals",
     )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -4234,7 +4234,9 @@ class EstimatePositionRequest(_message.Message):
     ORDER_MARGIN_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
     MARGIN_MODE_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
-    INCLUDE_COLLATERAL_INCREASE_IN_AVAILABLE_COLLATERAL_FIELD_NUMBER: _ClassVar[int]
+    INCLUDE_REQUIRED_POSITION_MARGIN_IN_AVAILABLE_COLLATERAL_FIELD_NUMBER: _ClassVar[
+        int
+    ]
     SCALE_LIQUIDATION_PRICE_TO_MARKET_DECIMALS_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     open_volume: int
@@ -4245,7 +4247,7 @@ class EstimatePositionRequest(_message.Message):
     order_margin_account_balance: str
     margin_mode: _vega_pb2.MarginMode
     margin_factor: str
-    include_collateral_increase_in_available_collateral: bool
+    include_required_position_margin_in_available_collateral: bool
     scale_liquidation_price_to_market_decimals: bool
     def __init__(
         self,
@@ -4258,7 +4260,7 @@ class EstimatePositionRequest(_message.Message):
         order_margin_account_balance: _Optional[str] = ...,
         margin_mode: _Optional[_Union[_vega_pb2.MarginMode, str]] = ...,
         margin_factor: _Optional[str] = ...,
-        include_collateral_increase_in_available_collateral: bool = ...,
+        include_required_position_margin_in_available_collateral: bool = ...,
         scale_liquidation_price_to_market_decimals: bool = ...,
     ) -> None: ...
 
@@ -4790,6 +4792,7 @@ class TeamStatistics(_message.Message):
         "quantum_rewards",
         "total_games_played",
         "games_played",
+        "quantum_volumes",
     )
     TEAM_ID_FIELD_NUMBER: _ClassVar[int]
     TOTAL_QUANTUM_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -4797,12 +4800,14 @@ class TeamStatistics(_message.Message):
     QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
     TOTAL_GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
     GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_VOLUMES_FIELD_NUMBER: _ClassVar[int]
     team_id: str
     total_quantum_volume: str
     total_quantum_rewards: str
     quantum_rewards: _containers.RepeatedCompositeFieldContainer[QuantumRewardsPerEpoch]
     total_games_played: int
     games_played: _containers.RepeatedScalarFieldContainer[str]
+    quantum_volumes: _containers.RepeatedCompositeFieldContainer[QuantumVolumesPerEpoch]
     def __init__(
         self,
         team_id: _Optional[str] = ...,
@@ -4813,6 +4818,9 @@ class TeamStatistics(_message.Message):
         ] = ...,
         total_games_played: _Optional[int] = ...,
         games_played: _Optional[_Iterable[str]] = ...,
+        quantum_volumes: _Optional[
+            _Iterable[_Union[QuantumVolumesPerEpoch, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class QuantumRewardsPerEpoch(_message.Message):
@@ -4823,6 +4831,16 @@ class QuantumRewardsPerEpoch(_message.Message):
     total_quantum_rewards: str
     def __init__(
         self, epoch: _Optional[int] = ..., total_quantum_rewards: _Optional[str] = ...
+    ) -> None: ...
+
+class QuantumVolumesPerEpoch(_message.Message):
+    __slots__ = ("epoch", "total_quantum_volumes")
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_QUANTUM_VOLUMES_FIELD_NUMBER: _ClassVar[int]
+    epoch: int
+    total_quantum_volumes: str
+    def __init__(
+        self, epoch: _Optional[int] = ..., total_quantum_volumes: _Optional[str] = ...
     ) -> None: ...
 
 class ListTeamMembersStatisticsRequest(_message.Message):
@@ -4884,6 +4902,7 @@ class TeamMemberStatistics(_message.Message):
         "quantum_rewards",
         "total_games_played",
         "games_played",
+        "quantum_volumes",
     )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     TOTAL_QUANTUM_VOLUME_FIELD_NUMBER: _ClassVar[int]
@@ -4891,12 +4910,14 @@ class TeamMemberStatistics(_message.Message):
     QUANTUM_REWARDS_FIELD_NUMBER: _ClassVar[int]
     TOTAL_GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
     GAMES_PLAYED_FIELD_NUMBER: _ClassVar[int]
+    QUANTUM_VOLUMES_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     total_quantum_volume: str
     total_quantum_rewards: str
     quantum_rewards: _containers.RepeatedCompositeFieldContainer[QuantumRewardsPerEpoch]
     total_games_played: int
     games_played: _containers.RepeatedScalarFieldContainer[str]
+    quantum_volumes: _containers.RepeatedCompositeFieldContainer[QuantumVolumesPerEpoch]
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -4907,6 +4928,9 @@ class TeamMemberStatistics(_message.Message):
         ] = ...,
         total_games_played: _Optional[int] = ...,
         games_played: _Optional[_Iterable[str]] = ...,
+        quantum_volumes: _Optional[
+            _Iterable[_Union[QuantumVolumesPerEpoch, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class ListTeamRefereesRequest(_message.Message):
@@ -5365,17 +5389,19 @@ class GameEdge(_message.Message):
     ) -> None: ...
 
 class Game(_message.Message):
-    __slots__ = ("id", "epoch", "participants", "team", "individual")
+    __slots__ = ("id", "epoch", "participants", "team", "individual", "reward_asset_id")
     ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FIELD_NUMBER: _ClassVar[int]
     PARTICIPANTS_FIELD_NUMBER: _ClassVar[int]
     TEAM_FIELD_NUMBER: _ClassVar[int]
     INDIVIDUAL_FIELD_NUMBER: _ClassVar[int]
+    REWARD_ASSET_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     epoch: int
     participants: int
     team: TeamGameEntities
     individual: IndividualGameEntities
+    reward_asset_id: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -5383,6 +5409,7 @@ class Game(_message.Message):
         participants: _Optional[int] = ...,
         team: _Optional[_Union[TeamGameEntities, _Mapping]] = ...,
         individual: _Optional[_Union[IndividualGameEntities, _Mapping]] = ...,
+        reward_asset_id: _Optional[str] = ...,
     ) -> None: ...
 
 class TeamGameEntities(_message.Message):
@@ -5410,6 +5437,8 @@ class TeamGameEntity(_message.Message):
         "reward_metric",
         "reward_earned",
         "total_rewards_earned",
+        "reward_earned_quantum",
+        "total_rewards_earned_quantum",
     )
     TEAM_FIELD_NUMBER: _ClassVar[int]
     RANK_FIELD_NUMBER: _ClassVar[int]
@@ -5417,12 +5446,16 @@ class TeamGameEntity(_message.Message):
     REWARD_METRIC_FIELD_NUMBER: _ClassVar[int]
     REWARD_EARNED_FIELD_NUMBER: _ClassVar[int]
     TOTAL_REWARDS_EARNED_FIELD_NUMBER: _ClassVar[int]
+    REWARD_EARNED_QUANTUM_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_REWARDS_EARNED_QUANTUM_FIELD_NUMBER: _ClassVar[int]
     team: TeamGameParticipation
     rank: int
     volume: str
     reward_metric: _vega_pb2.DispatchMetric
     reward_earned: str
     total_rewards_earned: str
+    reward_earned_quantum: str
+    total_rewards_earned_quantum: str
     def __init__(
         self,
         team: _Optional[_Union[TeamGameParticipation, _Mapping]] = ...,
@@ -5431,6 +5464,8 @@ class TeamGameEntity(_message.Message):
         reward_metric: _Optional[_Union[_vega_pb2.DispatchMetric, str]] = ...,
         reward_earned: _Optional[str] = ...,
         total_rewards_earned: _Optional[str] = ...,
+        reward_earned_quantum: _Optional[str] = ...,
+        total_rewards_earned_quantum: _Optional[str] = ...,
     ) -> None: ...
 
 class TeamGameParticipation(_message.Message):
@@ -5457,6 +5492,8 @@ class IndividualGameEntity(_message.Message):
         "reward_metric",
         "reward_earned",
         "total_rewards_earned",
+        "reward_earned_quantum",
+        "total_rewards_earned_quantum",
     )
     INDIVIDUAL_FIELD_NUMBER: _ClassVar[int]
     RANK_FIELD_NUMBER: _ClassVar[int]
@@ -5464,12 +5501,16 @@ class IndividualGameEntity(_message.Message):
     REWARD_METRIC_FIELD_NUMBER: _ClassVar[int]
     REWARD_EARNED_FIELD_NUMBER: _ClassVar[int]
     TOTAL_REWARDS_EARNED_FIELD_NUMBER: _ClassVar[int]
+    REWARD_EARNED_QUANTUM_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_REWARDS_EARNED_QUANTUM_FIELD_NUMBER: _ClassVar[int]
     individual: str
     rank: int
     volume: str
     reward_metric: _vega_pb2.DispatchMetric
     reward_earned: str
     total_rewards_earned: str
+    reward_earned_quantum: str
+    total_rewards_earned_quantum: str
     def __init__(
         self,
         individual: _Optional[str] = ...,
@@ -5478,6 +5519,8 @@ class IndividualGameEntity(_message.Message):
         reward_metric: _Optional[_Union[_vega_pb2.DispatchMetric, str]] = ...,
         reward_earned: _Optional[str] = ...,
         total_rewards_earned: _Optional[str] = ...,
+        reward_earned_quantum: _Optional[str] = ...,
+        total_rewards_earned_quantum: _Optional[str] = ...,
     ) -> None: ...
 
 class ListPartyMarginModesRequest(_message.Message):

@@ -2502,7 +2502,7 @@ def estimate_position(
     margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[Tuple[str, str, int, bool]]] = None,
     margin_factor: Optional[float] = None,
-    include_collateral_increase_in_available_collateral: bool = True,
+    include_required_position_margin_in_available_collateral: bool = True,
     scale_liquidation_price_to_market_decimals: bool = False,
     asset_decimals: Optional[Dict[str, int]] = {},
 ) -> Tuple[
@@ -2535,7 +2535,7 @@ def estimate_position(
         margin_mode=margin_mode,
         orders=proto_orders if orders is not None else None,
         margin_factor=margin_factor,
-        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        include_required_position_margin_in_available_collateral=include_required_position_margin_in_available_collateral,
         scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
 

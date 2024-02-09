@@ -1601,6 +1601,8 @@ class PerpetualData(_message.Message):
         "internal_composite_price",
         "next_internal_composite_price_calc",
         "internal_composite_price_type",
+        "underlying_index_price",
+        "internal_composite_price_state",
     )
     FUNDING_PAYMENT_FIELD_NUMBER: _ClassVar[int]
     FUNDING_RATE_FIELD_NUMBER: _ClassVar[int]
@@ -1611,6 +1613,8 @@ class PerpetualData(_message.Message):
     INTERNAL_COMPOSITE_PRICE_FIELD_NUMBER: _ClassVar[int]
     NEXT_INTERNAL_COMPOSITE_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
     INTERNAL_COMPOSITE_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
+    UNDERLYING_INDEX_PRICE_FIELD_NUMBER: _ClassVar[int]
+    INTERNAL_COMPOSITE_PRICE_STATE_FIELD_NUMBER: _ClassVar[int]
     funding_payment: str
     funding_rate: str
     internal_twap: str
@@ -1620,6 +1624,8 @@ class PerpetualData(_message.Message):
     internal_composite_price: str
     next_internal_composite_price_calc: int
     internal_composite_price_type: _markets_pb2.CompositePriceType
+    underlying_index_price: str
+    internal_composite_price_state: CompositePriceState
     def __init__(
         self,
         funding_payment: _Optional[str] = ...,
@@ -1632,6 +1638,10 @@ class PerpetualData(_message.Message):
         next_internal_composite_price_calc: _Optional[int] = ...,
         internal_composite_price_type: _Optional[
             _Union[_markets_pb2.CompositePriceType, str]
+        ] = ...,
+        underlying_index_price: _Optional[str] = ...,
+        internal_composite_price_state: _Optional[
+            _Union[CompositePriceState, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -1679,6 +1689,7 @@ class MarketData(_message.Message):
         "liquidity_provider_sla",
         "next_network_closeout",
         "mark_price_type",
+        "mark_price_state",
     )
     MARK_PRICE_FIELD_NUMBER: _ClassVar[int]
     BEST_BID_PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -1714,6 +1725,7 @@ class MarketData(_message.Message):
     LIQUIDITY_PROVIDER_SLA_FIELD_NUMBER: _ClassVar[int]
     NEXT_NETWORK_CLOSEOUT_FIELD_NUMBER: _ClassVar[int]
     MARK_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
+    MARK_PRICE_STATE_FIELD_NUMBER: _ClassVar[int]
     mark_price: str
     best_bid_price: str
     best_bid_volume: int
@@ -1754,6 +1766,7 @@ class MarketData(_message.Message):
     ]
     next_network_closeout: int
     mark_price_type: _markets_pb2.CompositePriceType
+    mark_price_state: CompositePriceState
     def __init__(
         self,
         mark_price: _Optional[str] = ...,
@@ -1798,6 +1811,33 @@ class MarketData(_message.Message):
         ] = ...,
         next_network_closeout: _Optional[int] = ...,
         mark_price_type: _Optional[_Union[_markets_pb2.CompositePriceType, str]] = ...,
+        mark_price_state: _Optional[_Union[CompositePriceState, _Mapping]] = ...,
+    ) -> None: ...
+
+class CompositePriceSource(_message.Message):
+    __slots__ = ("price_source", "price", "last_updated")
+    PRICE_SOURCE_FIELD_NUMBER: _ClassVar[int]
+    PRICE_FIELD_NUMBER: _ClassVar[int]
+    LAST_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    price_source: str
+    price: str
+    last_updated: int
+    def __init__(
+        self,
+        price_source: _Optional[str] = ...,
+        price: _Optional[str] = ...,
+        last_updated: _Optional[int] = ...,
+    ) -> None: ...
+
+class CompositePriceState(_message.Message):
+    __slots__ = ("price_sources",)
+    PRICE_SOURCES_FIELD_NUMBER: _ClassVar[int]
+    price_sources: _containers.RepeatedCompositeFieldContainer[CompositePriceSource]
+    def __init__(
+        self,
+        price_sources: _Optional[
+            _Iterable[_Union[CompositePriceSource, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class LiquidityProviderFeeShare(_message.Message):

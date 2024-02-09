@@ -957,7 +957,7 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
             )
         ],
         margin_factor=0.1,
-        include_collateral_increase_in_available_collateral=False,
+        include_required_position_margin_in_available_collateral=False,
         scale_liquidation_price_to_market_decimals=False,
     )
     assert margin == expected_margin

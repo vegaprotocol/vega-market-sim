@@ -3073,14 +3073,22 @@ class NextTimeTrigger(_message.Message):
     ) -> None: ...
 
 class MarketTracker(_message.Message):
-    __slots__ = ("market_activity", "taker_notional_volume")
+    __slots__ = (
+        "market_activity",
+        "taker_notional_volume",
+        "market_to_party_taker_notional_volume",
+    )
     MARKET_ACTIVITY_FIELD_NUMBER: _ClassVar[int]
     TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    MARKET_TO_PARTY_TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
     market_activity: _containers.RepeatedCompositeFieldContainer[
         _checkpoint_pb2.MarketActivityTracker
     ]
     taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
         _checkpoint_pb2.TakerNotionalVolume
+    ]
+    market_to_party_taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
+        _checkpoint_pb2.MarketToPartyTakerNotionalVolume
     ]
     def __init__(
         self,
@@ -3089,6 +3097,11 @@ class MarketTracker(_message.Message):
         ] = ...,
         taker_notional_volume: _Optional[
             _Iterable[_Union[_checkpoint_pb2.TakerNotionalVolume, _Mapping]]
+        ] = ...,
+        market_to_party_taker_notional_volume: _Optional[
+            _Iterable[
+                _Union[_checkpoint_pb2.MarketToPartyTakerNotionalVolume, _Mapping]
+            ]
         ] = ...,
     ) -> None: ...
 
