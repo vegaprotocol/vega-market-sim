@@ -3140,7 +3140,7 @@ class VegaService(ABC):
             margin_mode=margin_mode,
             orders=orders,
             margin_factor=margin_factor,
-            include_required_position_margin_in_available_collateral=include_collinclude_required_position_margin_in_available_collateralateral_increase_in_available_collateral,
+            include_required_position_margin_in_available_collateral=include_required_position_margin_in_available_collateral,
             scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
             asset_decimals=self.asset_decimals,
         )
