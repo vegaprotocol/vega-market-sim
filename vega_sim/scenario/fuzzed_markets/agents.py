@@ -1198,7 +1198,9 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 self.termination_wallet_name,
             )
 
-            self.market_id = self.vega.find_market_id(name=self._get_market_name())
+            self.market_id = self.vega.find_market_id(
+                name=self._get_market_name(), raise_on_missing=True
+            )
             for agents in self.market_agents.values():
                 for agent in agents:
                     agent.market_id = self.market_id
