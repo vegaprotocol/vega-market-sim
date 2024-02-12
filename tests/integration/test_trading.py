@@ -1027,10 +1027,10 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
 
     configWithSlippage = MarketConfig()
     configWithSlippage.set(
-        "linear_slippage_factor", str(10000)
+        "linear_slippage_factor", str(0.01)
     )  # Set the linear_slippage_factor to 10000
     configWithSlippage.set(
-        "quadratic_slippage_factor", str(10000)
+        "quadratic_slippage_factor", str(0)
     )  # Set the quadratic_slippage_factor to 10000
     configWithSlippage.set(
         "decimal_places", int(0)
@@ -1187,7 +1187,6 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         price=1001,
         volume=1,
     )
-
     PARTY_A_account = vega.party_account(key_name=PARTY_A.name, market_id=market_id)
     collateral = PARTY_A_account.general + PARTY_A_account.margin
 
@@ -1204,6 +1203,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
         order_margin_account_balance=0,
         margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_CROSS_MARGIN,
     )
+
     assert (
         estimate_liquidation_price_2.best_case.including_sell_orders
         <= estimate_liquidation_price_2.best_case.open_volume_only
@@ -1310,10 +1310,10 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
 
     configWithSlippage = MarketConfig()
     configWithSlippage.set(
-        "linear_slippage_factor", str(10)
-    )  # Set the linear_slippage_factor to 10
+        "linear_slippage_factor", str(0.01)
+    )  # Set the linear_slippage_factor to 10000
     configWithSlippage.set(
-        "quadratic_slippage_factor", str(10)
+        "quadratic_slippage_factor", str(0)
     )  # Set the quadratic_slippage_factor to 10
     configWithSlippage.set(
         "decimal_places", int(0)
