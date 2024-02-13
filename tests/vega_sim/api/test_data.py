@@ -890,14 +890,14 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
             ),
             liquidation=data_node_protos_v2.trading_data.LiquidationEstimate(
                 best_case=data_node_protos_v2.trading_data.LiquidationPrice(
-                    open_volume_only="1000.00",
-                    including_buy_orders="2000.00",
-                    including_sell_orders="3000.00",
+                    open_volume_only="10000",
+                    including_buy_orders="20000",
+                    including_sell_orders="30000",
                 ),
                 worst_case=data_node_protos_v2.trading_data.LiquidationPrice(
-                    open_volume_only="1000.00",
-                    including_buy_orders="2000.00",
-                    including_sell_orders="3000.00",
+                    open_volume_only="10000",
+                    including_buy_orders="20000",
+                    including_sell_orders="30000",
                 ),
             ),
         )
