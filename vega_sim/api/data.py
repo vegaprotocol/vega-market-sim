@@ -1001,8 +1001,13 @@ def _collateral_increase_estimate_from_proto(
     decimal_spec: DecimalSpec,
 ) -> CollateralIncreaseEstimate:
     return CollateralIncreaseEstimate(
-        worst_case=num_from_padded_int(collateral_increase_estimate.worst_case, decimals=decimal_spec.asset_decimals),
-        best_case=num_from_padded_int(collateral_increase_estimate.best_case, decimals=decimal_spec.asset_decimals),
+        worst_case=num_from_padded_int(
+            collateral_increase_estimate.worst_case,
+            decimals=decimal_spec.asset_decimals,
+        ),
+        best_case=num_from_padded_int(
+            collateral_increase_estimate.best_case, decimals=decimal_spec.asset_decimals
+        ),
     )
 
 
@@ -1011,8 +1016,12 @@ def _liquidation_estimate_from_proto(
     decimal_spec: DecimalSpec,
 ):
     return LiquidationEstimate(
-        best_case=_liquidation_price_from_proto(liquidation_estimate.best_case, decimal_spec=decimal_spec),
-        worst_case=_liquidation_price_from_proto(liquidation_estimate.worst_case, decimal_spec=decimal_spec),
+        best_case=_liquidation_price_from_proto(
+            liquidation_estimate.best_case, decimal_spec=decimal_spec
+        ),
+        worst_case=_liquidation_price_from_proto(
+            liquidation_estimate.worst_case, decimal_spec=decimal_spec
+        ),
     )
 
 
@@ -1021,9 +1030,16 @@ def _liquidation_price_from_proto(
     decimal_spec: DecimalSpec,
 ):
     return LiquidationPrice(
-        open_volume_only=num_from_padded_int(liquidation_price.open_volume_only, decimals=decimal_spec.asset_decimals),
-        including_buy_orders=num_from_padded_int(liquidation_price.including_buy_orders, decimals=decimal_spec.asset_decimals),
-        including_sell_orders=num_from_padded_int(liquidation_price.including_sell_orders, decimals=decimal_spec.asset_decimals),
+        open_volume_only=num_from_padded_int(
+            liquidation_price.open_volume_only, decimals=decimal_spec.asset_decimals
+        ),
+        including_buy_orders=num_from_padded_int(
+            liquidation_price.including_buy_orders, decimals=decimal_spec.asset_decimals
+        ),
+        including_sell_orders=num_from_padded_int(
+            liquidation_price.including_sell_orders,
+            decimals=decimal_spec.asset_decimals,
+        ),
     )
 
 
