@@ -643,7 +643,7 @@ def fuzz_order_submission(
         )
 
     # Get network information
-    market_ids = [key for key, _ in vega.market_to_asset.items()]
+    market_ids = list(vega.market_to_asset.keys())
     market_id = _pick_market_id()
     market_data = vega.market_data_from_feed(market_id)
 
