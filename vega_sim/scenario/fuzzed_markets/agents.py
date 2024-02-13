@@ -140,7 +140,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 except HTTPError:
                     continue
         stop_orders_submissions = []
-        for _ in range(0):
+        for _ in range(15):
             stop_orders_submission = self.create_fuzzed_stop_orders_submission(
                 vega_state
             )

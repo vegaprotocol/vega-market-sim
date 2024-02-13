@@ -548,7 +548,7 @@ def fuzz_order_submission(
 
     def _pick_time_in_force():
         if rs.rand() < bias:
-            if type == vega_protos.vega.Order.Type.TYPE_MARKET:
+            if type_ == vega_protos.vega.Order.Type.TYPE_MARKET:
                 return rs.choice(
                     [
                         vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_FOK,
@@ -559,7 +559,7 @@ def fuzz_order_submission(
 
     def _pick_price():
         if rs.rand() < bias:
-            if type == vega_protos.vega.Order.Type.TYPE_MARKET:
+            if type_ == vega_protos.vega.Order.Type.TYPE_MARKET:
                 return None
             if pegged_order is not None:
                 return None
@@ -607,7 +607,7 @@ def fuzz_order_submission(
     def _pick_reduce_only():
         if rs.rand() < bias:
             if (
-                type == vega_protos.vega.Order.Type.TYPE_LIMIT
+                type_ == vega_protos.vega.Order.Type.TYPE_LIMIT
                 and time_in_force
                 not in [
                     vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_FOK,
@@ -619,7 +619,7 @@ def fuzz_order_submission(
 
     def _pick_post_only():
         if rs.rand() < bias:
-            if type == vega_protos.vega.Order.Type.TYPE_MARKET:
+            if type_ == vega_protos.vega.Order.Type.TYPE_MARKET:
                 return False
             if time_in_force in [
                 vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_FOK,
@@ -648,7 +648,7 @@ def fuzz_order_submission(
     market_data = vega.market_data_from_feed(market_id)
 
     # Pick driver fields
-    type = _pick_type()
+    type_ = _pick_type()
     time_in_force = _pick_time_in_force()
     pegged_order = _pick_pegged_order()
 
@@ -668,7 +668,7 @@ def fuzz_order_submission(
         size=size,
         side=side,
         time_in_force=time_in_force,
-        type=type,
+        type=type_,
         reference=None,
         pegged_order=pegged_order,
         post_only=post_only,
