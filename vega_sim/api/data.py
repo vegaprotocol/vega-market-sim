@@ -2524,7 +2524,10 @@ def estimate_position(
     include_required_position_margin_in_available_collateral: bool = True,
     scale_liquidation_price_to_market_decimals: bool = False,
     asset_decimals: Optional[Dict[str, int]] = {},
-) -> Tuple[MarginEstimate, LiquidationEstimate,]:
+) -> Tuple[
+    MarginEstimate,
+    LiquidationEstimate,
+]:
     if orders is not None:
         proto_orders = [
             data_node_protos_v2.trading_data.OrderInfo(
@@ -2613,13 +2616,13 @@ def list_referral_sets(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, ReferralSet]:
-    response: List[
-        data_node_protos_v2.trading_data.ReferralSet
-    ] = data_raw.list_referral_sets(
-        data_client=data_client,
-        referral_set_id=referral_set_id,
-        referrer=referrer,
-        referee=referee,
+    response: List[data_node_protos_v2.trading_data.ReferralSet] = (
+        data_raw.list_referral_sets(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
     )
     referral_sets = {}
     for referral_set in response:
@@ -2633,13 +2636,13 @@ def list_referral_set_referees(
     referrer: Optional[str] = None,
     referee: Optional[str] = None,
 ) -> Dict[str, Dict[str, ReferralSetReferee]]:
-    response: List[
-        data_node_protos_v2.trading_data.ReferralSetReferee
-    ] = data_raw.list_referral_set_referees(
-        data_client=data_client,
-        referral_set_id=referral_set_id,
-        referrer=referrer,
-        referee=referee,
+    response: List[data_node_protos_v2.trading_data.ReferralSetReferee] = (
+        data_raw.list_referral_set_referees(
+            data_client=data_client,
+            referral_set_id=referral_set_id,
+            referrer=referrer,
+            referee=referee,
+        )
     )
     referral_set_referees = defaultdict(dict)
     for referral_set_referee in response:
