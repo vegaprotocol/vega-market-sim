@@ -3655,3 +3655,17 @@ class VegaService(ABC):
             market_to_asset_map=self.market_to_asset,
             asset_decimals_map=self.asset_decimals,
         )
+
+    def submit_transaction(
+        self,
+        key_name: str,
+        transaction: Any,
+        transaction_type: str,
+        wallet_name: Optional[str] = None,
+    ):
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            wallet_name=wallet_name,
+            transaction_type=transaction_type,
+            key_name=key_name,
+        )

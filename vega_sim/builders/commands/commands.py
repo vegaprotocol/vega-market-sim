@@ -150,3 +150,87 @@ def pegged_order(
         reference=reference,
         offset=str(num_to_padded_int(offset, market_price_decimals[market_id])),
     )
+
+
+@raise_custom_build_errors
+def order_submission(
+    market_size_decimals: Dict[str, int],
+    market_price_decimals: Dict[str, int],
+    market_id: str,
+    size: float,
+    side: vega_protos.vega.Side.Value,
+    time_in_force: vega_protos.vega.Order.TimeInForce.Value,
+    type: vega_protos.vega.Order.Type.Value,
+    post_only: bool,
+    reduce_only: bool,
+    expires_at: Optional[datetime.datetime] = None,
+    price: Optional[float] = None,
+    reference: Optional[str] = None,
+    pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
+    iceberg_opts: Optional[vega_protos.commands.v1.commands.IcebergOpts] = None,
+) -> vega_protos.commands.v1.commands.OrderSubmission:
+    return vega_protos.commands.v1.commands.OrderSubmission(
+        market_id=market_id,
+        price=(
+            str(num_to_padded_int(price, market_price_decimals[market_id]))
+            if price is not None
+            else None
+        ),
+        size=num_to_padded_int(size, market_size_decimals[market_id]),
+        side=side,
+        time_in_force=time_in_force,
+        expires_at=(
+            int(expires_at.timestamp() * 1e9) if expires_at is not None else None
+        ),
+        type=type,
+        reference=reference,
+        pegged_order=pegged_order,
+        post_only=post_only,
+        reduce_only=reduce_only,
+        iceberg_opts=iceberg_opts,
+    )
+
+
+@raise_custom_build_errors
+def order_amendment(
+    market_size_decimals: Dict[str, int],
+    market_price_decimals: Dict[str, int],
+    order_id: str,
+    market_id: str,
+    time_in_force: Optional[vega_protos.vega.Order.TimeInForce.Value] = None,
+    size: Optional[float] = None,
+    size_delta: Optional[float] = None,
+    expires_at: Optional[datetime.datetime] = None,
+    price: Optional[float] = None,
+    pegged_offset: Optional[float] = None,
+    pegged_reference: Optional[vega_protos.vega.PeggedReference.Value] = None,
+) -> vega_protos.commands.v1.commands.OrderSubmission:
+    return vega_protos.commands.v1.commands.OrderAmendment(
+        order_id=order_id,
+        market_id=market_id,
+        price=(
+            str(num_to_padded_int(price, market_price_decimals[market_id]))
+            if price is not None
+            else None
+        ),
+        size_delta=(
+            num_to_padded_int(size_delta, market_size_decimals[market_id])
+            if size_delta is not None
+            else None
+        ),
+        expires_at=(
+            int(expires_at.timestamp() * 1e9) if expires_at is not None else None
+        ),
+        time_in_force=time_in_force,
+        pegged_offset=(
+            str(num_to_padded_int(pegged_offset, market_price_decimals[market_id]))
+            if pegged_offset is not None
+            else None
+        ),
+        pegged_reference=pegged_reference,
+        size=(
+            num_to_padded_int(size, market_size_decimals[market_id])
+            if size is not None
+            else None
+        ),
+    )

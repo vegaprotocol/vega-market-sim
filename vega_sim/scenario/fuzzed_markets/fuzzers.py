@@ -527,3 +527,219 @@ def fuzz_new_transfer_configuration(
         one_off=one_off,
         recurring=recurring,
     )
+
+
+def fuzz_order_submission(
+    vega: VegaService, rs: RandomState, bias: float
+) -> vega_protos.commands.v1.commands.OrderSubmission:
+    def _pick_market_id():
+        if len(market_ids) == 0:
+            return None
+        return rs.choice(market_ids)
+
+    def _pick_type():
+        return rs.choice(
+            [
+                vega_protos.vega.Order.Type.TYPE_MARKET,
+                vega_protos.vega.Order.Type.TYPE_LIMIT,
+            ],
+            p=[0.2, 0.8],
+        )
+
+    def _pick_time_in_force():
+        if rs.rand() < bias:
+            if type_ == vega_protos.vega.Order.Type.TYPE_MARKET:
+                return rs.choice(
+                    [
+                        vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_FOK,
+                        vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_IOC,
+                    ]
+                )
+        return rs.choice(vega_protos.vega.Order.TimeInForce.values())
+
+    def _pick_price():
+        if rs.rand() < bias:
+            if type_ == vega_protos.vega.Order.Type.TYPE_MARKET:
+                return None
+            if pegged_order is not None:
+                return None
+        return rs.choice(
+            [
+                market_data.mid_price + rs.normal(loc=0, scale=10),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    def _pick_size():
+        return rs.choice(
+            [
+                rs.poisson(100),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    def _pick_side():
+        opts = vega_protos.vega.Side.values()
+        if rs.rand() < bias:
+            opts.pop(0)
+        return rs.choice(opts)
+
+    def _pick_pegged_order():
+        return rs.choice(
+            [
+                build.commands.commands.pegged_order(
+                    market_price_decimals=vega.market_price_decimals,
+                    market_id=market_id,
+                    reference=rs.choice(vega_protos.vega.PeggedReference.values()),
+                    offset=rs.normal(loc=0, scale=10),
+                ),
+                None,
+            ],
+            p=[0.1, 0.9],
+        )
+
+    def _pick_reduce_only():
+        if rs.rand() < bias:
+            if (
+                type_ == vega_protos.vega.Order.Type.TYPE_LIMIT
+                and time_in_force
+                not in [
+                    vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_FOK,
+                    vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_IOC,
+                ]
+            ):
+                return False
+        return rs.choice([True, False], p=[0.2, 0.8])
+
+    def _pick_post_only():
+        if rs.rand() < bias:
+            if type_ == vega_protos.vega.Order.Type.TYPE_MARKET:
+                return False
+            if time_in_force in [
+                vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_FOK,
+                vega_protos.vega.Order.TimeInForce.TIME_IN_FORCE_IOC,
+            ]:
+                return False
+        return rs.choice([True, False], p=[0.2, 0.8])
+
+    def _pick_iceberg_opts():
+        return rs.choice(
+            [
+                build.commands.commands.iceberg_opts(
+                    market_pos_decimals=vega.market_pos_decimals,
+                    market_id=market_id,
+                    peak_size=rs.uniform(0, 1.1) * size,
+                    minimum_visible_size=rs.uniform(0, 0.6) * size,
+                ),
+                None,
+            ],
+            p=[0.1, 0.9],
+        )
+
+    # Get network information
+    market_ids = list(vega.market_to_asset.keys())
+    market_id = _pick_market_id()
+    market_data = vega.market_data_from_feed(market_id)
+
+    # Pick driver fields
+    type_ = _pick_type()
+    time_in_force = _pick_time_in_force()
+    pegged_order = _pick_pegged_order()
+
+    # Pick driven fields
+    price = _pick_price()
+    size = _pick_size()
+    side = _pick_side()
+    post_only = _pick_post_only()
+    reduce_only = _pick_reduce_only()
+    iceberg_opts = _pick_iceberg_opts()
+
+    return build.commands.commands.order_submission(
+        market_size_decimals=vega.market_pos_decimals,
+        market_price_decimals=vega.market_price_decimals,
+        market_id=market_id,
+        price=price,
+        size=size,
+        side=side,
+        time_in_force=time_in_force,
+        type=type_,
+        reference=None,
+        pegged_order=pegged_order,
+        post_only=post_only,
+        reduce_only=reduce_only,
+        iceberg_opts=iceberg_opts,
+    )
+
+
+def fuzz_order_amendment(
+    vega: VegaService, rs: RandomState, bias: float
+) -> vega_protos.commands.v1.commands.OrderSubmission:
+
+    def _pick_market_id():
+        if len(market_ids) == 0:
+            return None
+        return rs.choice(market_ids)
+
+    def _pick_order_id():
+        return None
+
+    def _pick_price():
+        return rs.choice(
+            [
+                market_data.mid_price + rs.normal(loc=0, scale=10),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    def _pick_size():
+        return rs.choice(
+            [
+                rs.poisson(100),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    def _pick_size_delta():
+        return rs.choice(
+            [
+                rs.normal(0, 10),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    # Get network information
+    market_ids = [key for key, _ in vega.market_to_asset.items()]
+    market_id = _pick_market_id()
+    market_data = vega.market_data_from_feed(market_id)
+
+    # Pick driven fields
+    order_id = _pick_order_id()
+    size = _pick_size()
+    size_delta = _pick_size_delta()
+    (size, size_delta) = (size, None) if rs.rand() < 0.5 else (None, size_delta)
+    price = _pick_price()
+
+    return build.commands.commands.order_amendment(
+        market_size_decimals=vega.market_pos_decimals,
+        market_price_decimals=vega.market_price_decimals,
+        order_id=order_id,
+        market_id=market_id,
+        size=size,
+        size_delta=size_delta,
+        price=price,
+    )
