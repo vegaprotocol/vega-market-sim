@@ -676,3 +676,70 @@ def fuzz_order_submission(
         iceberg_opts=iceberg_opts,
     )
 
+
+def fuzz_order_amendment(
+    vega: VegaService, rs: RandomState, bias: float
+) -> vega_protos.commands.v1.commands.OrderSubmission:
+
+    def _pick_market_id():
+        if len(market_ids) == 0:
+            return None
+        return rs.choice(market_ids)
+
+    def _pick_order_id():
+        return None
+
+    def _pick_price():
+        return rs.choice(
+            [
+                market_data.mid_price + rs.normal(loc=0, scale=10),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    def _pick_size():
+        return rs.choice(
+            [
+                rs.poisson(100),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    def _pick_size_delta():
+        return rs.choice(
+            [
+                rs.normal(0, 10),
+                rs.beta(a=0.001, b=0.001)
+                * (2**64 - 1)
+                / 10 ** vega.market_pos_decimals[market_id],
+            ],
+            p=[0.9, 0.1],
+        )
+
+    # Get network information
+    market_ids = [key for key, _ in vega.market_to_asset.items()]
+    market_id = _pick_market_id()
+    market_data = vega.market_data_from_feed(market_id)
+
+    # Pick driven fields
+    order_id = _pick_order_id()
+    size = _pick_size()
+    size_delta = _pick_size_delta()
+    (size, size_delta) = (size, None) if rs.rand() < 0.5 else (None, size_delta)
+    price = _pick_price()
+
+    return build.commands.commands.order_amendment(
+        market_size_decimals=vega.market_pos_decimals,
+        market_price_decimals=vega.market_price_decimals,
+        order_id=order_id,
+        market_id=market_id,
+        size=size,
+        size_delta=size_delta,
+        price=price,
+    )
