@@ -32,23 +32,6 @@ import vega_sim.scenario.fuzzed_markets.fuzzers as fuzzers
 class FuzzingAgent(StateAgentWithWallet):
     NAME_BASE = "fuzzing_agent"
 
-    # Set the memory which all instances can modify
-    MEMORY = {
-        key: []
-        for key in (
-            "TRADING_MODE",
-            "COMMAND",
-            "TYPE",
-            "SIDE",
-            "TIME_IN_FORCE",
-            "PEGGED_REFERENCE",
-            "POST_ONLY",
-            "REDUCE_ONLY",
-        )
-    }
-    # Set the output flag which all instances can modify
-    OUTPUTTED = False
-
     def __init__(
         self,
         key_name: str,
@@ -59,7 +42,6 @@ class FuzzingAgent(StateAgentWithWallet):
         state_update_freq: Optional[int] = None,
         initial_asset_mint: float = 1e9,
         random_state: Optional[RandomState] = None,
-        output_plot_on_finalise: bool = False,
     ):
         super().__init__(
             key_name=key_name,
@@ -72,7 +54,6 @@ class FuzzingAgent(StateAgentWithWallet):
         self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
         self.random_state = random_state if random_state is not None else RandomState()
-        self.output_plot_on_finalise = output_plot_on_finalise
 
     def initialise(
         self, vega: VegaServiceNull, create_key: bool = True, mint_key: bool = True
@@ -105,22 +86,93 @@ class FuzzingAgent(StateAgentWithWallet):
         self.curr_price = vega_state.market_state[self.market_id].midprice
         self.curr_time = self.vega.get_blockchain_time(in_seconds=True)
 
-        submissions = [self.create_fuzzed_submission(vega_state) for _ in range(20)]
-        amendments = [self.create_fuzzed_amendment(vega_state) for _ in range(10)]
-        cancellations = [self.create_fuzzed_cancellation(vega_state) for _ in range(1)]
-        stop_orders_submissions = [
-            self.create_fuzzed_stop_orders_submission(vega_state) for _ in range(10)
-        ]
-
-        self.vega.submit_instructions(
-            key_name=self.key_name,
-            wallet_name=self.wallet_name,
-            submissions=submissions,
-            amendments=amendments,
-            cancellations=cancellations,
-            stop_orders_submission=stop_orders_submissions,
-        )
-        self.fuzz_isolated_margin_state()
+        submissions = []
+        for _ in range(50):
+            submission = self.create_fuzzed_submission(vega_state)
+            if submission is None:
+                continue
+            if self.random_state.rand() < 0.1:
+                submissions.append(submission)
+            else:
+                try:
+                    self.vega.submit_transaction(
+                        key_name=self.key_name,
+                        wallet_name=self.wallet_name,
+                        transaction=submission,
+                        transaction_type="order_submission",
+                    )
+                except HTTPError:
+                    continue
+                except AttributeError as e:
+                    raise e
+        amendments = []
+        for _ in range(25):
+            amendment = self.create_fuzzed_amendment(vega_state)
+            if amendment is None:
+                continue
+            if self.random_state.rand() < 0.1:
+                amendments.append(amendment)
+            else:
+                try:
+                    self.vega.submit_transaction(
+                        key_name=self.key_name,
+                        wallet_name=self.wallet_name,
+                        transaction=amendment,
+                        transaction_type="order_amendment",
+                    )
+                except HTTPError:
+                    continue
+        cancellations = []
+        for _ in range(0):
+            cancellation = self.create_fuzzed_cancellation(vega_state)
+            if cancellation is None:
+                continue
+            if self.random_state.rand() < 0.1:
+                cancellations.append(cancellation)
+            else:
+                try:
+                    self.vega.submit_transaction(
+                        key_name=self.key_name,
+                        wallet_name=self.wallet_name,
+                        transaction=cancellation,
+                        transaction_type="order_cancellation",
+                    )
+                except HTTPError:
+                    continue
+        stop_orders_submissions = []
+        for _ in range(0):
+            stop_orders_submission = self.create_fuzzed_stop_orders_submission(
+                vega_state
+            )
+            if stop_orders_submission is None:
+                continue
+            if self.random_state.rand() < 0.1:
+                stop_orders_submissions.append(stop_orders_submission)
+            else:
+                try:
+                    self.vega.submit_transaction(
+                        key_name=self.key_name,
+                        wallet_name=self.wallet_name,
+                        transaction=stop_orders_submission,
+                        transaction_type="stop_orders_submission",
+                    )
+                except HTTPError:
+                    continue
+        try:
+            self.vega.submit_instructions(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                submissions=submissions,
+                amendments=amendments,
+                cancellations=cancellations,
+                stop_orders_submission=stop_orders_submissions,
+            )
+        except HTTPError:
+            pass
+        try:
+            self.fuzz_isolated_margin_state()
+        except HTTPError:
+            pass
 
     def fuzz_isolated_margin_state(self):
         if self.random_state.random() > 0.95:
@@ -142,150 +194,25 @@ class FuzzingAgent(StateAgentWithWallet):
 
         return self.vega.build_order_cancellation(
             order_id=order_id,
-            market_id=self.market_id,
+            # market_id=self.market_id,
         )
 
     def create_fuzzed_amendment(self, vega_state):
         order_id = self._select_order_id()
-
-        return self.vega.build_order_amendment(
-            order_id=order_id,
-            market_id=self.market_id,
-            size_delta=self.random_state.normal(loc=0, scale=5),
-            time_in_force=self.random_state.choice(
-                a=[
-                    "TIME_IN_FORCE_UNSPECIFIED",
-                    "TIME_IN_FORCE_GTC",
-                    "TIME_IN_FORCE_GTT",
-                    "TIME_IN_FORCE_GFN",
-                    "TIME_IN_FORCE_GFA",
-                    "TIME_IN_FORCE_FOK",
-                    "TIME_IN_FORCE_IOC",
-                ]
-            ),
-            price=self.random_state.choice(
-                a=[None, self.random_state.normal(loc=self.curr_price, scale=20)]
-            ),
-            expires_at=int(
-                vega_state.time + self.random_state.normal(loc=60, scale=60) * 1e9
-            ),
-            pegged_reference=self.random_state.choice(
-                a=[
-                    "PEGGED_REFERENCE_UNSPECIFIED",
-                    "PEGGED_REFERENCE_MID",
-                    "PEGGED_REFERENCE_BEST_BID",
-                    "PEGGED_REFERENCE_BEST_ASK",
-                ],
-                p=[0.5, 0.5 / 3, 0.5 / 3, 0.5 / 3],
-            ),
-            pegged_offset=self.random_state.normal(loc=0, scale=10),
-        )
+        try:
+            order_amendment = fuzzers.fuzz_order_amendment(
+                vega=self.vega, rs=self.random_state, bias=1.0
+            )
+            if order_id is not None:
+                setattr(order_amendment, "order_id", order_id)
+            return order_amendment
+        except builders.exceptions.VegaProtoValueError as e:
+            return None
 
     def create_fuzzed_submission(self, vega_state):
-        FuzzingAgent.MEMORY["TRADING_MODE"].append(
-            markets_protos.Market.TradingMode.Name(
-                vega_state.market_state[self.market_id].trading_mode
-            )
-        )
-        FuzzingAgent.MEMORY["COMMAND"].append("ORDER_SUBMISSION")
-        FuzzingAgent.MEMORY["SIDE"].append(
-            self.random_state.choice(
-                a=[
-                    "SIDE_UNSPECIFIED",
-                    "SIDE_BUY",
-                    "SIDE_SELL",
-                ]
-            )
-        )
-        FuzzingAgent.MEMORY["TYPE"].append(
-            self.random_state.choice(
-                a=[
-                    "TYPE_UNSPECIFIED",
-                    "TYPE_MARKET",
-                    "TYPE_LIMIT",
-                ]
-            )
-        )
-        FuzzingAgent.MEMORY["TIME_IN_FORCE"].append(
-            self.random_state.choice(
-                a=[
-                    "TIME_IN_FORCE_UNSPECIFIED",
-                    "TIME_IN_FORCE_GTC",
-                    "TIME_IN_FORCE_GTT",
-                    "TIME_IN_FORCE_GFN",
-                    "TIME_IN_FORCE_GFA",
-                    "TIME_IN_FORCE_FOK",
-                    "TIME_IN_FORCE_IOC",
-                ]
-            )
-        )
-        FuzzingAgent.MEMORY["PEGGED_REFERENCE"].append(
-            self.random_state.choice(
-                a=[
-                    vega_protos.vega.PEGGED_REFERENCE_UNSPECIFIED,
-                    vega_protos.vega.PEGGED_REFERENCE_MID,
-                    vega_protos.vega.PEGGED_REFERENCE_BEST_BID,
-                    vega_protos.vega.PEGGED_REFERENCE_BEST_ASK,
-                ],
-                p=[0.1, 0.3, 0.3, 0.3],
-            )
-        )
-        FuzzingAgent.MEMORY["REDUCE_ONLY"].append(
-            self.random_state.choice(
-                a=[
-                    True,
-                    False,
-                ],
-            )
-        )
-        FuzzingAgent.MEMORY["POST_ONLY"].append(
-            self.random_state.choice(
-                a=[
-                    True,
-                    False,
-                ],
-            )
-        )
-
         try:
-            return self.vega.build_order_submission(
-                market_id=self.market_id,
-                side=FuzzingAgent.MEMORY["SIDE"][-1],
-                size=self.random_state.poisson(lam=10),
-                order_type=FuzzingAgent.MEMORY["TYPE"][-1],
-                time_in_force=FuzzingAgent.MEMORY["TIME_IN_FORCE"][-1],
-                price=self.random_state.choice(
-                    a=[None, self.random_state.normal(loc=self.curr_price, scale=10)]
-                ),
-                expires_at=int(
-                    vega_state.time + self.random_state.normal(loc=60, scale=60) * 1e9
-                ),
-                pegged_order=self.random_state.choice(
-                    [
-                        None,
-                        builders.commands.commands.pegged_order(
-                            market_price_decimals=self.vega.market_price_decimals,
-                            market_id=self.market_id,
-                            reference=FuzzingAgent.MEMORY["PEGGED_REFERENCE"][-1],
-                            offset=self.random_state.normal(loc=0, scale=10),
-                        ),
-                    ]
-                ),
-                iceberg_opts=self.random_state.choice(
-                    [
-                        None,
-                        builders.commands.commands.iceberg_opts(
-                            market_pos_decimals=self.vega.market_pos_decimals,
-                            market_id=self.market_id,
-                            peak_size=self.random_state.normal(loc=100, scale=20),
-                            minimum_visible_size=self.random_state.normal(
-                                loc=100, scale=20
-                            ),
-                        ),
-                    ]
-                ),
-                reduce_only=FuzzingAgent.MEMORY["REDUCE_ONLY"][-1],
-                post_only=FuzzingAgent.MEMORY["POST_ONLY"][-1],
+            return fuzzers.fuzz_order_submission(
+                vega=self.vega, rs=self.random_state, bias=1.0
             )
         except builders.exceptions.VegaProtoValueError:
             return None
@@ -337,45 +264,6 @@ class FuzzingAgent(StateAgentWithWallet):
             return order.id if order is not None else None
         else:
             return None
-
-    def finalise(self):
-        if self.output_plot_on_finalise:
-            if not FuzzingAgent.OUTPUTTED:
-                import plotly.express as px
-
-                FuzzingAgent.OUTPUTTED = True
-
-                df = pd.DataFrame.from_dict(FuzzingAgent.MEMORY)
-                df = (
-                    df.groupby(list(FuzzingAgent.MEMORY.keys()))
-                    .size()
-                    .reset_index()
-                    .rename(columns={0: "count"})
-                )
-
-                range_color = (10, 5000)
-                custom_color_scale = [
-                    [0, "red"],
-                    [range_color[0] / range_color[1], "red"],
-                    [range_color[0] / range_color[1], "yellow"],
-                    [1, "green"],
-                ]
-
-                fig = px.treemap(
-                    df,
-                    title="Fuzzed Trader Coverage",
-                    path=list(self.__class__.MEMORY.keys()),
-                    values="count",
-                    color="count",
-                    color_continuous_scale=custom_color_scale,
-                    range_color=range_color,
-                )
-                fig.update_traces(marker=dict(cornerradius=5))
-
-                if not os.path.exists("fuzz_plots"):
-                    os.mkdir("fuzz_plots")
-
-                fig.write_html("fuzz_plots/coverage.html")
 
 
 class RiskyMarketOrderTrader(StateAgentWithWallet):
