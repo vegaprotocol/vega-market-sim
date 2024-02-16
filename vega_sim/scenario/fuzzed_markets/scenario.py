@@ -395,7 +395,6 @@ class FuzzingScenario(Scenario):
                     ),
                     market_name=market_name,
                     asset_name=asset_name,
-                    output_plot_on_finalise=self.output,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),

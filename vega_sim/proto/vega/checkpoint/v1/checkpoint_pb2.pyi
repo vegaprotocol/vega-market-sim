@@ -548,12 +548,20 @@ class MultisigControl(_message.Message):
     ) -> None: ...
 
 class MarketTracker(_message.Message):
-    __slots__ = ("market_activity", "taker_notional_volume")
+    __slots__ = (
+        "market_activity",
+        "taker_notional_volume",
+        "market_to_party_taker_notional_volume",
+    )
     MARKET_ACTIVITY_FIELD_NUMBER: _ClassVar[int]
     TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    MARKET_TO_PARTY_TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
     market_activity: _containers.RepeatedCompositeFieldContainer[MarketActivityTracker]
     taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
         TakerNotionalVolume
+    ]
+    market_to_party_taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
+        MarketToPartyTakerNotionalVolume
     ]
     def __init__(
         self,
@@ -562,6 +570,9 @@ class MarketTracker(_message.Message):
         ] = ...,
         taker_notional_volume: _Optional[
             _Iterable[_Union[TakerNotionalVolume, _Mapping]]
+        ] = ...,
+        market_to_party_taker_notional_volume: _Optional[
+            _Iterable[_Union[MarketToPartyTakerNotionalVolume, _Mapping]]
         ] = ...,
     ) -> None: ...
 
@@ -726,6 +737,22 @@ class TakerNotionalVolume(_message.Message):
     volume: bytes
     def __init__(
         self, party: _Optional[str] = ..., volume: _Optional[bytes] = ...
+    ) -> None: ...
+
+class MarketToPartyTakerNotionalVolume(_message.Message):
+    __slots__ = ("market", "taker_notional_volume")
+    MARKET_FIELD_NUMBER: _ClassVar[int]
+    TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    market: str
+    taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
+        TakerNotionalVolume
+    ]
+    def __init__(
+        self,
+        market: _Optional[str] = ...,
+        taker_notional_volume: _Optional[
+            _Iterable[_Union[TakerNotionalVolume, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class EpochReturnsData(_message.Message):

@@ -998,29 +998,48 @@ def _margin_estimate_from_proto(
 
 def _collateral_increase_estimate_from_proto(
     collateral_increase_estimate: data_node_protos_v2.trading_data.CollateralIncreaseEstimate,
+    decimal_spec: DecimalSpec,
 ) -> CollateralIncreaseEstimate:
     return CollateralIncreaseEstimate(
-        worst_case=collateral_increase_estimate.worst_case,
-        best_case=collateral_increase_estimate.best_case,
+        worst_case=num_from_padded_int(
+            collateral_increase_estimate.worst_case,
+            decimals=decimal_spec.asset_decimals,
+        ),
+        best_case=num_from_padded_int(
+            collateral_increase_estimate.best_case, decimals=decimal_spec.asset_decimals
+        ),
     )
 
 
 def _liquidation_estimate_from_proto(
     liquidation_estimate: data_node_protos_v2.trading_data.LiquidationEstimate,
+    decimal_spec: DecimalSpec,
 ):
     return LiquidationEstimate(
-        best_case=_liquidation_price_from_proto(liquidation_estimate.best_case),
-        worst_case=_liquidation_price_from_proto(liquidation_estimate.worst_case),
+        best_case=_liquidation_price_from_proto(
+            liquidation_estimate.best_case, decimal_spec=decimal_spec
+        ),
+        worst_case=_liquidation_price_from_proto(
+            liquidation_estimate.worst_case, decimal_spec=decimal_spec
+        ),
     )
 
 
 def _liquidation_price_from_proto(
     liquidation_price: data_node_protos_v2.trading_data.LiquidationPrice,
+    decimal_spec: DecimalSpec,
 ):
     return LiquidationPrice(
-        open_volume_only=float(liquidation_price.open_volume_only),
-        including_buy_orders=float(liquidation_price.including_buy_orders),
-        including_sell_orders=float(liquidation_price.including_sell_orders),
+        open_volume_only=num_from_padded_int(
+            liquidation_price.open_volume_only, decimals=decimal_spec.asset_decimals
+        ),
+        including_buy_orders=num_from_padded_int(
+            liquidation_price.including_buy_orders, decimals=decimal_spec.asset_decimals
+        ),
+        including_sell_orders=num_from_padded_int(
+            liquidation_price.including_sell_orders,
+            decimals=decimal_spec.asset_decimals,
+        ),
     )
 
 
@@ -2502,7 +2521,7 @@ def estimate_position(
     margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[Tuple[str, str, int, bool]]] = None,
     margin_factor: Optional[float] = None,
-    include_collateral_increase_in_available_collateral: bool = True,
+    include_required_position_margin_in_available_collateral: bool = True,
     scale_liquidation_price_to_market_decimals: bool = False,
     asset_decimals: Optional[Dict[str, int]] = {},
 ) -> Tuple[
@@ -2535,7 +2554,7 @@ def estimate_position(
         margin_mode=margin_mode,
         orders=proto_orders if orders is not None else None,
         margin_factor=margin_factor,
-        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        include_required_position_margin_in_available_collateral=include_required_position_margin_in_available_collateral,
         scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
 
@@ -2552,11 +2571,17 @@ def estimate_position(
     )
 
     converted_collateral_increase_estimate = _collateral_increase_estimate_from_proto(
-        collateral_increase_estimate=collateral_increase_estimate
+        collateral_increase_estimate=collateral_increase_estimate,
+        decimal_spec=DecimalSpec(
+            asset_decimals=asset_decimals[margin_estimate.best_case.asset]
+        ),
     )
 
     converted_liquidation_estimate = _liquidation_estimate_from_proto(
         liquidation_estimate=liquidation_estimate,
+        decimal_spec=DecimalSpec(
+            asset_decimals=asset_decimals[margin_estimate.best_case.asset]
+        ),
     )
 
     return (

@@ -692,7 +692,7 @@ def estimate_position(
     margin_mode: vega_protos.vega.MarginMode,
     orders: Optional[List[data_node_protos_v2.trading_data.OrderInfo]] = None,
     margin_factor: Optional[float] = None,
-    include_collateral_increase_in_available_collateral: bool = True,
+    include_required_position_margin_in_available_collateral: bool = True,
     scale_liquidation_price_to_market_decimals: bool = False,
 ) -> Tuple[
     data_node_protos_v2.trading_data.MarginEstimate,
@@ -709,7 +709,7 @@ def estimate_position(
         order_margin_account_balance=str(order_margin_account_balance),
         margin_mode=margin_mode,
         margin_factor=str(margin_factor) if margin_factor is not None else None,
-        include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+        include_required_position_margin_in_available_collateral=include_required_position_margin_in_available_collateral,
         scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
     )
 

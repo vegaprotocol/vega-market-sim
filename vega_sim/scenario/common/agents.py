@@ -1099,7 +1099,9 @@ class MarketManager(StateAgentWithWallet):
         self.initial_mint = (
             initial_mint
             if initial_mint is not None
-            else (2 * commitment_amount) if commitment_amount is not None else 100
+            else (2 * commitment_amount)
+            if commitment_amount is not None
+            else 100
         )
 
         self.market_name = market_name
@@ -1328,8 +1330,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        self.current_position = (
-            float(position.open_volume) if position is not None else 0
+        current_position = (
+            int(position.open_volume) if position is not None and position else 0
         )
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
             self.current_position, self.current_step

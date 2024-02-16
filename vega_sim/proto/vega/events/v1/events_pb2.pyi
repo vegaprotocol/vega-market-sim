@@ -118,6 +118,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_TEAMS_STATS_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -212,6 +213,7 @@ BUS_EVENT_TYPE_TRANSFER_FEES_PAID: BusEventType
 BUS_EVENT_TYPE_TRANSFER_FEES_DISCOUNT_UPDATED: BusEventType
 BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: BusEventType
 BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: BusEventType
+BUS_EVENT_TYPE_TEAMS_STATS_UPDATED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -2316,6 +2318,40 @@ class PartyProfileUpdated(_message.Message):
         self, updated_profile: _Optional[_Union[_vega_pb2.PartyProfile, _Mapping]] = ...
     ) -> None: ...
 
+class TeamsStatsUpdated(_message.Message):
+    __slots__ = ("at_epoch", "stats")
+    AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    STATS_FIELD_NUMBER: _ClassVar[int]
+    at_epoch: int
+    stats: _containers.RepeatedCompositeFieldContainer[TeamStats]
+    def __init__(
+        self,
+        at_epoch: _Optional[int] = ...,
+        stats: _Optional[_Iterable[_Union[TeamStats, _Mapping]]] = ...,
+    ) -> None: ...
+
+class TeamStats(_message.Message):
+    __slots__ = ("team_id", "members_stats")
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    MEMBERS_STATS_FIELD_NUMBER: _ClassVar[int]
+    team_id: str
+    members_stats: _containers.RepeatedCompositeFieldContainer[TeamMemberStats]
+    def __init__(
+        self,
+        team_id: _Optional[str] = ...,
+        members_stats: _Optional[_Iterable[_Union[TeamMemberStats, _Mapping]]] = ...,
+    ) -> None: ...
+
+class TeamMemberStats(_message.Message):
+    __slots__ = ("party_id", "notional_volume")
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    party_id: str
+    notional_volume: str
+    def __init__(
+        self, party_id: _Optional[str] = ..., notional_volume: _Optional[str] = ...
+    ) -> None: ...
+
 class BusEvent(_message.Message):
     __slots__ = (
         "id",
@@ -2404,6 +2440,7 @@ class BusEvent(_message.Message):
         "transfer_fees_discount",
         "party_margin_mode_updated",
         "party_profile_updated",
+        "teams_stats_updated",
         "market",
         "tx_err_event",
         "version",
@@ -2496,6 +2533,7 @@ class BusEvent(_message.Message):
     TRANSFER_FEES_DISCOUNT_FIELD_NUMBER: _ClassVar[int]
     PARTY_MARGIN_MODE_UPDATED_FIELD_NUMBER: _ClassVar[int]
     PARTY_PROFILE_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    TEAMS_STATS_UPDATED_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2587,6 +2625,7 @@ class BusEvent(_message.Message):
     transfer_fees_discount: TransferFeesDiscount
     party_margin_mode_updated: PartyMarginModeUpdated
     party_profile_updated: PartyProfileUpdated
+    teams_stats_updated: TeamsStatsUpdated
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2722,6 +2761,7 @@ class BusEvent(_message.Message):
             _Union[PartyMarginModeUpdated, _Mapping]
         ] = ...,
         party_profile_updated: _Optional[_Union[PartyProfileUpdated, _Mapping]] = ...,
+        teams_stats_updated: _Optional[_Union[TeamsStatsUpdated, _Mapping]] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,

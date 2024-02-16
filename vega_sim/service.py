@@ -3060,7 +3060,7 @@ class VegaService(ABC):
         price: List[float] = None,
         remaining: List[float] = None,
         is_market_order: List[bool] = None,
-        include_collateral_increase_in_available_collateral: bool = False,
+        include_required_position_margin_in_available_collateral: bool = False,
         scale_liquidation_price_to_market_decimals: bool = False,
     ) -> Tuple[
         data.MarginEstimate, data.CollateralIncreaseEstimate, data.LiquidationEstimate
@@ -3113,7 +3113,7 @@ class VegaService(ABC):
             ]
             padded_int_remaining = [
                 num_to_padded_int(
-                    individual_remaining, self.market_price_decimals[market_id]
+                    individual_remaining, self.market_pos_decimals[market_id]
                 )
                 for individual_remaining in remaining
             ]
@@ -3151,7 +3151,7 @@ class VegaService(ABC):
             margin_mode=margin_mode,
             orders=orders,
             margin_factor=margin_factor,
-            include_collateral_increase_in_available_collateral=include_collateral_increase_in_available_collateral,
+            include_required_position_margin_in_available_collateral=include_required_position_margin_in_available_collateral,
             scale_liquidation_price_to_market_decimals=scale_liquidation_price_to_market_decimals,
             asset_decimals=self.asset_decimals,
         )
@@ -3665,4 +3665,18 @@ class VegaService(ABC):
             market_position_decimals_map=self.market_pos_decimals,
             market_to_asset_map=self.market_to_asset,
             asset_decimals_map=self.asset_decimals,
+        )
+
+    def submit_transaction(
+        self,
+        key_name: str,
+        transaction: Any,
+        transaction_type: str,
+        wallet_name: Optional[str] = None,
+    ):
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            wallet_name=wallet_name,
+            transaction_type=transaction_type,
+            key_name=key_name,
         )
