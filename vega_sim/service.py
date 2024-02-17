@@ -3567,6 +3567,7 @@ class VegaService(ABC):
             proposal=proposal_submission,
             data_client=self.trading_data_client_v2,
             time_forward_fn=lambda: self.wait_fn((2)),
+            sync_fn=lambda: self.wait_for_total_catchup(),
         )
         if proposal_id is None:
             return
