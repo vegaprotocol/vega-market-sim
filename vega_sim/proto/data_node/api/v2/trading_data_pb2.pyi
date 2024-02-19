@@ -1130,6 +1130,7 @@ class ListTransfersRequest(_message.Message):
         "to_epoch",
         "status",
         "scope",
+        "game_id",
     )
 
     class Scope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -1149,6 +1150,7 @@ class ListTransfersRequest(_message.Message):
     TO_EPOCH_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     SCOPE_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
     pubkey: str
     direction: TransferDirection
     pagination: Pagination
@@ -1157,6 +1159,7 @@ class ListTransfersRequest(_message.Message):
     to_epoch: int
     status: _events_pb2.Transfer.Status
     scope: ListTransfersRequest.Scope
+    game_id: str
     def __init__(
         self,
         pubkey: _Optional[str] = ...,
@@ -1167,6 +1170,7 @@ class ListTransfersRequest(_message.Message):
         to_epoch: _Optional[int] = ...,
         status: _Optional[_Union[_events_pb2.Transfer.Status, str]] = ...,
         scope: _Optional[_Union[ListTransfersRequest.Scope, str]] = ...,
+        game_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ListTransfersResponse(_message.Message):
@@ -5336,17 +5340,29 @@ class GetTotalTransferFeeDiscountResponse(_message.Message):
     def __init__(self, total_discount: _Optional[str] = ...) -> None: ...
 
 class ListGamesRequest(_message.Message):
-    __slots__ = ("game_id", "epoch_from", "epoch_to", "entity_scope", "pagination")
+    __slots__ = (
+        "game_id",
+        "epoch_from",
+        "epoch_to",
+        "entity_scope",
+        "pagination",
+        "team_id",
+        "party_id",
+    )
     GAME_ID_FIELD_NUMBER: _ClassVar[int]
     EPOCH_FROM_FIELD_NUMBER: _ClassVar[int]
     EPOCH_TO_FIELD_NUMBER: _ClassVar[int]
     ENTITY_SCOPE_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     game_id: str
     epoch_from: int
     epoch_to: int
     entity_scope: _vega_pb2.EntityScope
     pagination: Pagination
+    team_id: str
+    party_id: str
     def __init__(
         self,
         game_id: _Optional[str] = ...,
@@ -5354,6 +5370,8 @@ class ListGamesRequest(_message.Message):
         epoch_to: _Optional[int] = ...,
         entity_scope: _Optional[_Union[_vega_pb2.EntityScope, str]] = ...,
         pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+        team_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ListGamesResponse(_message.Message):
