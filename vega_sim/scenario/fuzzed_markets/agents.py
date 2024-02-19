@@ -1055,6 +1055,9 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 builders.exceptions.VegaProtoValueError,
             ):
                 continue
+        logging.info("Unable to successfully propose fuzzed market.")
+        self.latest_key_idx += -1
+        self.needs_to_update_markets = False
 
     def finalise(self):
         if self.settlement_price is not None:
@@ -1109,8 +1112,8 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 name=self._get_termination_key_name(),
             )
 
-            self._create_latest_market(parent_market_id=self.market_id)
             self.needs_to_update_markets = True
+            self._create_latest_market(parent_market_id=self.market_id)
 
         # submit perp settlement data
         if self.market_config.is_perp():
