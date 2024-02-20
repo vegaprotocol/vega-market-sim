@@ -1196,6 +1196,9 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 logging.warning("Sensible UpdateReferralProgram failed.")
 
     def _sensible_proposal(self):
+        # Updating program requires method to get the current blockchain time. Ensure
+        # datanode is synced before requesting the current blockchain time.
+        self.vega.wait_for_datanode_sync()
         self.vega.update_referral_program(
             forward_time_to_enactment=False,
             proposal_key=self.key_name,
@@ -1322,6 +1325,9 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 " proposal."
             )
             try:
+                # Updating program requires method to get the current blockchain time. Ensure
+                # datanode is synced before requesting the current blockchain time.
+                self.vega.wait_for_datanode_sync()
                 self._sensible_proposal()
             except ProposalNotAcceptedError:
                 logging.warning("Sensible UpdateVolumeDiscountProgram proposal failed.")
