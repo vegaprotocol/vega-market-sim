@@ -1055,6 +1055,9 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 builders.exceptions.VegaProtoValueError,
             ):
                 continue
+        logging.info("Unable to successfully propose fuzzed market.")
+        self.latest_key_idx += -1
+        self.needs_to_update_markets = False
 
     def finalise(self):
         if self.settlement_price is not None:
@@ -1109,8 +1112,8 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 name=self._get_termination_key_name(),
             )
 
-            self._create_latest_market(parent_market_id=self.market_id)
             self.needs_to_update_markets = True
+            self._create_latest_market(parent_market_id=self.market_id)
 
         # submit perp settlement data
         if self.market_config.is_perp():
@@ -1187,9 +1190,15 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
                 " proposal."
             )
-            self._sensible_proposal()
+            try:
+                self._sensible_proposal()
+            except ProposalNotAcceptedError:
+                logging.warning("Sensible UpdateReferralProgram failed.")
 
     def _sensible_proposal(self):
+        # Updating program requires method to get the current blockchain time. Ensure
+        # datanode is synced before requesting the current blockchain time.
+        self.vega.wait_for_datanode_sync()
         self.vega.update_referral_program(
             forward_time_to_enactment=False,
             proposal_key=self.key_name,
@@ -1312,10 +1321,16 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 ):
                     continue
             logging.info(
-                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
+                "All fuzzed UpdateVolumeDiscountProgram proposals failed, submitting sensible"
                 " proposal."
             )
-            self._sensible_proposal()
+            try:
+                # Updating program requires method to get the current blockchain time. Ensure
+                # datanode is synced before requesting the current blockchain time.
+                self.vega.wait_for_datanode_sync()
+                self._sensible_proposal()
+            except ProposalNotAcceptedError:
+                logging.warning("Sensible UpdateVolumeDiscountProgram proposal failed.")
 
     def _sensible_proposal(self):
         self.vega.update_volume_discount_program(

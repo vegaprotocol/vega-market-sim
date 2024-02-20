@@ -2416,17 +2416,19 @@ class EthContractCallResults(_message.Message):
     ) -> None: ...
 
 class EthContractCallResult(_message.Message):
-    __slots__ = ("block_height", "block_time", "spec_id", "result", "error")
+    __slots__ = ("block_height", "block_time", "spec_id", "result", "error", "chain_id")
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
     SPEC_ID_FIELD_NUMBER: _ClassVar[int]
     RESULT_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     block_height: int
     block_time: int
     spec_id: str
     result: bytes
     error: str
+    chain_id: int
     def __init__(
         self,
         block_height: _Optional[int] = ...,
@@ -2434,6 +2436,7 @@ class EthContractCallResult(_message.Message):
         spec_id: _Optional[str] = ...,
         result: _Optional[bytes] = ...,
         error: _Optional[str] = ...,
+        chain_id: _Optional[int] = ...,
     ) -> None: ...
 
 class PendingKeyRotation(_message.Message):

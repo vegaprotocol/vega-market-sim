@@ -1142,6 +1142,7 @@ def submit_proposal(
     proposal: vega_protos.commands.v1.commands.ProposalSubmission,
     wallet_name: Optional[str] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
+    sync_fn: Optional[Callable[[], None]] = None,
 ):
     proposal = _make_and_wait_for_proposal(
         wallet_name=wallet_name,
@@ -1149,6 +1150,7 @@ def submit_proposal(
         proposal=proposal,
         data_client=data_client,
         time_forward_fn=time_forward_fn,
+        sync_fn=sync_fn,
         key_name=key_name,
     )
     return proposal.proposal.id
