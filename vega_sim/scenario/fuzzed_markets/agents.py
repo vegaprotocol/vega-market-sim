@@ -1190,7 +1190,10 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
                 " proposal."
             )
-            self._sensible_proposal()
+            try:
+                self._sensible_proposal()
+            except ProposalNotAcceptedError:
+                logging.warning("Sensible UpdateReferralProgram failed.")
 
     def _sensible_proposal(self):
         self.vega.update_referral_program(
@@ -1315,10 +1318,13 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 ):
                     continue
             logging.info(
-                "All fuzzed UpdateReferralProgram proposals failed, submitting sensible"
+                "All fuzzed UpdateVolumeDiscountProgram proposals failed, submitting sensible"
                 " proposal."
             )
-            self._sensible_proposal()
+            try:
+                self._sensible_proposal()
+            except ProposalNotAcceptedError:
+                logging.warning("Sensible UpdateVolumeDiscountProgram proposal failed.")
 
     def _sensible_proposal(self):
         self.vega.update_volume_discount_program(
