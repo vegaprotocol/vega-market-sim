@@ -321,10 +321,9 @@ class CFMV3MarketMaker(ShapedMarketMaker):
 
     def _scale_orders(
         self,
-        buy_shape: List[MMOrder],
-        sell_shape: List[MMOrder],
+        shape: List[MMOrder],
     ):
-        return (buy_shape, sell_shape)
+        return shape
 
     def _quantity_for_move(
         self,
@@ -411,6 +410,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         #     self.long_factor,
         #     self.lower_liq_factor,
         # )
+
         if self.use_last_price_as_ref:
             ref_price = self.vega.last_trade_price(market_id=self.market_id)
         else:
@@ -434,6 +434,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             else:
                 ref_price = virt_y / virt_x
 
+        print(f"quoting around fair price {ref_price}")
         return self._calculate_price_levels(
             ref_price=ref_price,
             balance=balance,
@@ -479,7 +480,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             if volume is not None:
                 if pos > 0 and pos - volume < 0:
                     volume = pos
-                agg_asks.append(MMOrder(volume, price))
+                agg_asks.append(MMOrder(volume, price, vega_protos.SIDE_SELL))
                 pos -= volume
 
         pos = position
@@ -499,13 +500,13 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             if volume is not None:
                 if pos < 0 and pos + volume > 0:
                     volume = pos
-                agg_bids.append(MMOrder(volume, price))
+                agg_bids.append(MMOrder(volume, price, vega_protos.SIDE_BUY))
                 pos += volume
 
         self.curr_bids = agg_bids
         self.curr_asks = agg_asks
 
-        return agg_bids, agg_asks
+        return agg_bids + agg_asks
 
 
 class CFMV3LastTradeMarketMaker(ShapedMarketMaker):

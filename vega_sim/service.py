@@ -1811,7 +1811,7 @@ class VegaService(ABC):
         """
         Output the tightest price bounds in the current market.
         """
-        market_data = self.get_latest_market_data(
+        market_data = self.market_data_from_feed(
             market_id=market_id,
         )
 

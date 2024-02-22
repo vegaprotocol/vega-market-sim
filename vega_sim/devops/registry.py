@@ -11,6 +11,8 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
 )
 
+from vega_sim.scenario.constant_function_market.agents import CFMV3MarketMaker
+
 from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
@@ -246,5 +248,21 @@ AGENTS = {
         orders_from_stream=False,
         state_update_freq=10,
         tag="agent",
+    ),
+    "amm_market_maker_ethusd": lambda: CFMV3MarketMaker(
+        wallet_name=None,
+        key_name=None,
+        market_name=None,
+        asset_name=None,
+        num_steps=0,
+        tick_spacing=1,
+        num_levels=10,
+        initial_asset_mint=0,
+        commitment_amount=0,
+        price_width_above=0.1,
+        price_width_below=0.1,
+        margin_usage_at_bound_above=0.1,
+        margin_usage_at_bound_below=0.1,
+        initial_price=2915.89,
     ),
 }

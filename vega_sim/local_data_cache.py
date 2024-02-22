@@ -318,7 +318,8 @@ class LocalDataCache:
             market_ids=market_ids,
             party_ids=party_ids,
         )
-        self.initialise_transfer_monitoring()
+        if start_high_load_feeds:
+            self.initialise_transfer_monitoring()
         self.initialise_market_data(
             market_ids,
         )
