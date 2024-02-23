@@ -802,19 +802,63 @@ def _build_generic_proposal(
     )
 
 
+def _build_batch_proposal(
+    pub_key: str,
+    data_client: vac.VegaTradingDataClientV2,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+) -> commands_protos.commands.ProposalSubmission:
+    # Set closing/enactment timestamps to valid time offsets
+    # from the current Vega blockchain time if not already set
+    none_times = [i is None for i in [closing_time, enactment_time]]
+    if any(none_times):
+        if not all(none_times):
+            logger.warn(
+                "Some times for proposal were not set. Defaulting all of them and"
+                " ignoring values for those which were"
+            )
+
+        blockchain_time_seconds = get_blockchain_time(data_client, in_seconds=True)
+
+        closing_time = blockchain_time_seconds + 172800
+        enactment_time = blockchain_time_seconds + 172900
+
+    # Propose market
+    proposal_ref = f"{pub_key}-{generate_id(6)}"
+
+    return commands_protos.commands.BatchProposalSubmission(
+        reference=proposal_ref,
+        terms=vega_protos.governance.BatchProposalTerms(
+            closing_timestamp=closing_time,
+            enactment_timestamp=enactment_time,
+        ),
+        rationale=vega_protos.governance.ProposalRationale(
+            description="Making a proposal", title="This is a proposal"
+        ),
+    )
+
+
 def _make_and_wait_for_proposal(
     key_name: str,
     wallet: Wallet,
-    proposal: commands_protos.commands.ProposalSubmission,
+    proposal: Union[
+        commands_protos.commands.ProposalSubmission,
+        commands_protos.commands.BatchProposalSubmission,
+    ],
     data_client: vac.VegaTradingDataClientV2,
     time_forward_fn: Optional[Callable[[], None]] = None,
     sync_fn: Optional[Callable[[], None]] = None,
     wallet_name: Optional[str] = None,
 ) -> ProposalSubmission:
+    if isinstance(proposal, commands_protos.commands.ProposalSubmission):
+        transaction_type = "proposal_submission"
+    else:
+        transaction_type = "batch_proposal_submission"
+
     wallet.submit_transaction(
         transaction=proposal,
         wallet_name=wallet_name,
-        transaction_type="proposal_submission",
+        transaction_type=transaction_type,
         key_name=key_name,
     )
     logger.debug("Waiting for proposal acceptance")
@@ -1139,7 +1183,10 @@ def submit_proposal(
     key_name: str,
     wallet: Wallet,
     data_client: vac.VegaTradingDataClientV2,
-    proposal: vega_protos.commands.v1.commands.ProposalSubmission,
+    proposal: Union[
+        commands_protos.commands.ProposalSubmission,
+        commands_protos.commands.BatchProposalSubmission,
+    ],
     wallet_name: Optional[str] = None,
     time_forward_fn: Optional[Callable[[], None]] = None,
     sync_fn: Optional[Callable[[], None]] = None,

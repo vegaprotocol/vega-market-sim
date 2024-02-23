@@ -1540,13 +1540,19 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
                     closing_timestamp=closing,
                     enactment_timestamp=enactment,
                     new_transfer=new_transfer,
+                    for_batch_proposal=True,
+                )
+                terms = builders.governance.batch_proposal_submission_terms(
+                    closing_timestamp=closing, changes=[terms]
                 )
                 rationale = builders.governance.proposal_rational(
                     description="fuzzed-proposal",
                     title="fuzzed-proposal",
                 )
-                proposal_submission = builders.commands.commands.proposal_submission(
-                    reference=str(uuid4()), terms=terms, rationale=rationale
+                proposal_submission = (
+                    builders.commands.commands.batch_proposal_submission(
+                        reference=str(uuid4()), terms=terms, rationale=rationale
+                    )
                 )
                 self.proposals += 1
                 self.vega.submit_proposal(

@@ -3589,6 +3589,17 @@ class VegaService(ABC):
 
         self.wait_for_thread_catchup()
 
+    def submit_batch_proposal(
+        self,
+        key_name: str,
+        closing_time: Optional[datetime.datetime] = None,
+        enactment_time: Optional[datetime.datetime] = None,
+        wallet_name: Optional[str] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        pass
+
     def update_margin_mode(
         self,
         key_name: str,
