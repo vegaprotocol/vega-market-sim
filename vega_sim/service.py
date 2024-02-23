@@ -3606,6 +3606,41 @@ class VegaService(ABC):
             margin_factor=str(margin_factor),
         )
 
+    def check_book_not_crossed(self, raise_exceptions: bool = True):
+        # Check needs to ensure all services are synced.
+        self.wait_for_total_catchup()
+        for market_id in self._market_to_asset.keys():
+            if (
+                data.get_latest_market_data(
+                    market_id=market_id,
+                    data_client=self.trading_data_client_v2,
+                    market_price_decimals_map=self.market_price_decimals,
+                    market_position_decimals_map=self.market_pos_decimals,
+                    market_to_asset_map=self.market_to_asset,
+                    asset_decimals_map=self.asset_decimals,
+                ).market_trading_mode
+                != vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            ):
+                continue
+            market_depth = data.market_depth(
+                market_id=market_id, data_client=self.trading_data_client_v2
+            )
+            if market_depth.buys == [] or market_depth.sells == []:
+                continue
+            max_bid_price = max(market_depth.buys, key=lambda x: x.price).price
+            min_ask_price = min(market_depth.sells, key=lambda x: x.price).price
+            try:
+                assert max_bid_price < min_ask_price
+                logging.debug(
+                    f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS and greatest bid < smallest ask ({max_bid_price:.2f} < {min_ask_price:.2f})"
+                )
+            except AssertionError as e:
+                logging.error(
+                    f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS but greatest bid > smallest ask ({max_bid_price:.2f} > {min_ask_price:.2f})"
+                )
+                if raise_exceptions:
+                    raise e
+
     def check_balances_equal_deposits(self):
         for attempts in range(100):
             asset_balance_map = defaultdict(lambda: 0)
