@@ -3630,13 +3630,13 @@ class VegaService(ABC):
             max_bid_price = max(market_depth.buys, key=lambda x: x.price).price
             min_ask_price = min(market_depth.sells, key=lambda x: x.price).price
             try:
-                assert max_bid.price < min_ask.price
+                assert max_bid_price < min_ask_price
                 logging.debug(
                     f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS and greatest bid < smallest ask ({max_bid_price:.2f} < {min_ask_price:.2f})"
                 )
             except AssertionError as e:
                 logging.error(
-                    f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS but greatest bid > smallest ask ({max_bid_price} > {min_ask_price})"
+                    f"Market {market_id} in TRADING_MODE_CONTINUOUS but greatest bid > smallest ask ({max_bid_price} > {min_ask_price})"
                 )
                 if raise_exceptions:
                     raise e
