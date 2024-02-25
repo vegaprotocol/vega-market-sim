@@ -3638,6 +3638,11 @@ class VegaService(ABC):
                 logging.error(
                     f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS but greatest bid > smallest ask ({max_bid_price:.2f} > {min_ask_price:.2f})"
                 )
+                for b in market_depth.buys:
+                    logging.error(f"buy:{b.id} {b.size}@{b.price}")
+                for o in in market_depth.sells:
+                    logging.error(f"sell:{o.id} {o.size}@{o.price}")
+                
                 if raise_exceptions:
                     raise e
 
