@@ -3640,7 +3640,7 @@ class VegaService(ABC):
                 )
                 for b in market_depth.buys:
                     logging.error(f"buy:{b.id} {b.size}@{b.price}")
-                for o in in market_depth.sells:
+                for o in market_depth.sells:
                     logging.error(f"sell:{o.id} {o.size}@{o.price}")
                 
                 if raise_exceptions:
