@@ -50,17 +50,18 @@ def proposal_terms(
     vega_protos.governance.BatchProposalTermsChange,
 ]:
     if not for_batch_proposal:
-        if closing_timestamp is None:
-            raise Exception(
-                "For non batch proposals changes closing timestamp must be set"
-            )
         proposal_terms = vega_protos.governance.ProposalTerms(
-            closing_timestamp=int(closing_timestamp.timestamp()),
-            enactment_timestamp=int(enactment_timestamp.timestamp()),
+            enactment_timestamp=int(enactment_timestamp.timestamp())
         )
         if validation_timestamp is not None:
             setattr(
-                proposal_terms, "validation_timestamp", validation_timestamp.timestamp()
+                proposal_terms,
+                "validation_timestamp",
+                int(validation_timestamp.timestamp()),
+            )
+        if closing_timestamp is not None:
+            setattr(
+                proposal_terms, "closing_timestamp", int(closing_timestamp.timestamp())
             )
     else:
         proposal_terms = vega_protos.governance.BatchProposalTermsChange(
