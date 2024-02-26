@@ -282,7 +282,7 @@ class MarketData:
     market_value_proxy: float
     price_monitoring_bounds: list
     liquidity_provider_fee_share: list
-    liquidity_sla: list
+    liquidity_sla: List[LiquidityProviderSLA]
     market_state: str
     next_mark_to_market: datetime.datetime
     last_traded_price: float
@@ -1123,7 +1123,6 @@ def positions_by_market(
     asset_decimals_map: Optional[Dict[str, int]] = None,
 ) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
-    data_raw
     raw_positions = data_raw.positions_by_market(
         pub_key=pub_key, market_id=market_id, data_client=data_client
     )
