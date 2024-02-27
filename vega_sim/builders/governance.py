@@ -12,7 +12,7 @@ import datetime
 
 import vega_sim.proto.vega as vega_protos
 
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 from vega_sim.api.helpers import num_to_padded_int
 from vega_sim.builders.exceptions import raise_custom_build_errors
 
@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 @raise_custom_build_errors
 def proposal_terms(
-    closing_timestamp: datetime.datetime,
     enactment_timestamp: datetime.datetime,
+    closing_timestamp: Optional[datetime.datetime] = None,
     validation_timestamp: Optional[datetime.datetime] = None,
     update_market: Optional[vega_protos.governance.UpdateMarket] = None,
     new_market: Optional[vega_protos.governance.NewMarket] = None,
@@ -44,14 +44,28 @@ def proposal_terms(
     update_volume_discount_program: Optional[
         vega_protos.governance.UpdateVolumeDiscountProgram
     ] = None,
-):
-    proposal_terms = vega_protos.governance.ProposalTerms(
-        closing_timestamp=int(closing_timestamp.timestamp()),
-        enactment_timestamp=int(enactment_timestamp.timestamp()),
-    )
-    if validation_timestamp is not None:
-        setattr(
-            proposal_terms, "validation_timestamp", validation_timestamp.timestamp()
+    for_batch_proposal: bool = False,
+) -> Union[
+    vega_protos.governance.ProposalTerms,
+    vega_protos.governance.BatchProposalTermsChange,
+]:
+    if not for_batch_proposal:
+        proposal_terms = vega_protos.governance.ProposalTerms(
+            enactment_timestamp=int(enactment_timestamp.timestamp())
+        )
+        if validation_timestamp is not None:
+            setattr(
+                proposal_terms,
+                "validation_timestamp",
+                int(validation_timestamp.timestamp()),
+            )
+        if closing_timestamp is not None:
+            setattr(
+                proposal_terms, "closing_timestamp", int(closing_timestamp.timestamp())
+            )
+    else:
+        proposal_terms = vega_protos.governance.BatchProposalTermsChange(
+            enactment_timestamp=int(enactment_timestamp.timestamp())
         )
     if update_market is not None:
         proposal_terms.update_market.CopyFrom(update_market)
@@ -92,6 +106,17 @@ def proposal_rational(
 ) -> vega_protos.governance.ProposalRationale:
     return vega_protos.governance.ProposalRationale(
         description=description, title=title
+    )
+
+
+@raise_custom_build_errors
+def batch_proposal_submission_terms(
+    closing_timestamp: datetime.datetime,
+    changes: List[vega_protos.governance.BatchProposalTermsChange],
+) -> vega_protos.commands.v1.commands.BatchProposalSubmissionTerms:
+    return vega_protos.commands.v1.commands.BatchProposalSubmissionTerms(
+        closing_timestamp=int(closing_timestamp.timestamp()),
+        changes=changes,
     )
 
 
