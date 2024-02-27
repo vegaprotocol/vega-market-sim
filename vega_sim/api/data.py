@@ -306,7 +306,7 @@ class LiquidityProviderFeeShare:
 
 
 @dataclass(frozen=True)
-class LiquiditySLA:
+class LiquidityProviderSLA:
     party: str
     current_epoch_fraction_of_time_on_book: float
     last_epoch_fraction_of_time_on_book: float
@@ -1336,10 +1336,10 @@ def _liquidity_provider_fee_share_from_proto(
 def _liquidity_sla_from_proto(
     liquidity_provider_sla: List[vega_protos.vega.LiquidityProviderSLA],
     decimal_spec: DecimalSpec,
-) -> List[LiquiditySLA]:
-    decimals = decimal_spec.price_decimals + decimal_spec.position_decimals
+) -> List[LiquidityProviderSLA]:
+    decimals = decimal_spec.asset_decimals
     return [
-        LiquiditySLA(
+        LiquidityProviderSLA(
             party=individual_liquidity_provider_sla.party,
             current_epoch_fraction_of_time_on_book=(
                 0
