@@ -731,6 +731,7 @@ class AggregatedLedgerEntry(_message.Message):
         "to_account_market_id",
         "from_account_balance",
         "to_account_balance",
+        "transfer_id",
     )
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     QUANTITY_FIELD_NUMBER: _ClassVar[int]
@@ -744,6 +745,7 @@ class AggregatedLedgerEntry(_message.Message):
     TO_ACCOUNT_MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     FROM_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
     TO_ACCOUNT_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_ID_FIELD_NUMBER: _ClassVar[int]
     timestamp: int
     quantity: str
     transfer_type: _vega_pb2.TransferType
@@ -756,6 +758,7 @@ class AggregatedLedgerEntry(_message.Message):
     to_account_market_id: str
     from_account_balance: str
     to_account_balance: str
+    transfer_id: str
     def __init__(
         self,
         timestamp: _Optional[int] = ...,
@@ -770,6 +773,7 @@ class AggregatedLedgerEntry(_message.Message):
         to_account_market_id: _Optional[str] = ...,
         from_account_balance: _Optional[str] = ...,
         to_account_balance: _Optional[str] = ...,
+        transfer_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ListLedgerEntriesRequest(_message.Message):
@@ -1131,6 +1135,8 @@ class ListTransfersRequest(_message.Message):
         "status",
         "scope",
         "game_id",
+        "from_account_type",
+        "to_account_type",
     )
 
     class Scope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -1151,6 +1157,8 @@ class ListTransfersRequest(_message.Message):
     STATUS_FIELD_NUMBER: _ClassVar[int]
     SCOPE_FIELD_NUMBER: _ClassVar[int]
     GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    FROM_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TO_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
     pubkey: str
     direction: TransferDirection
     pagination: Pagination
@@ -1160,6 +1168,8 @@ class ListTransfersRequest(_message.Message):
     status: _events_pb2.Transfer.Status
     scope: ListTransfersRequest.Scope
     game_id: str
+    from_account_type: _vega_pb2.AccountType
+    to_account_type: _vega_pb2.AccountType
     def __init__(
         self,
         pubkey: _Optional[str] = ...,
@@ -1171,6 +1181,8 @@ class ListTransfersRequest(_message.Message):
         status: _Optional[_Union[_events_pb2.Transfer.Status, str]] = ...,
         scope: _Optional[_Union[ListTransfersRequest.Scope, str]] = ...,
         game_id: _Optional[str] = ...,
+        from_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        to_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
     ) -> None: ...
 
 class ListTransfersResponse(_message.Message):
