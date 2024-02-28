@@ -1516,6 +1516,7 @@ class VegaService(ABC):
                 )
             ),
             mark_price_configuration=new_mark_price_config,
+            tick_size=current_market.tick_size,
         )
 
         proposal_id = gov.propose_market_update(

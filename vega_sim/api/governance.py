@@ -229,6 +229,7 @@ def __propose_market(
             mark_price_configuration=vega_protos.markets.CompositePriceConfiguration(
                 composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
             ),
+            tick_size="1",
         ),
     )
     if parent_market_id is not None:
