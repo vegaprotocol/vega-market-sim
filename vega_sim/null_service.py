@@ -1086,6 +1086,10 @@ class VegaServiceNull(VegaService):
         return self._build_url(self.vega_node_port)
 
     @property
+    def vega_node_rest_url(self) -> str:
+        return self._build_url(self.vega_node_rest_port)
+
+    @property
     def vega_node_grpc_url(self) -> str:
         return self._build_url(self.vega_node_grpc_port, prefix="")
 
