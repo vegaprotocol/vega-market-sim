@@ -300,6 +300,7 @@ def new_market_configuration(
     liquidity_fee_settings: vega_protos.markets.LiquidityFeeSettings,
     liquidation_strategy: vega_protos.markets.LiquidationStrategy,
     mark_price_configuration: vega_protos.markets.CompositePriceConfiguration,
+    tick_size: float,
     metadata: Optional[List[str]] = None,
     lp_price_range: Optional[float] = None,
     successor: Optional[vega_protos.governance.SuccessorConfiguration] = None,
@@ -318,6 +319,7 @@ def new_market_configuration(
         liquidity_fee_settings=liquidity_fee_settings,
         liquidation_strategy=liquidation_strategy,
         mark_price_configuration=mark_price_configuration,
+        tick_size=str(num_to_padded_int(tick_size, decimal_places)),
     )
     if lp_price_range is not None:
         setattr(proto, "lp_price_range", str(lp_price_range))

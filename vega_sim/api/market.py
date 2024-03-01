@@ -132,6 +132,7 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
+            "tick_size": 1e-4,
         },
         "perpetual": {
             "decimal_places": 4,
@@ -148,6 +149,7 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
+            "tick_size": 1e-4,
         },
     }
 
@@ -162,6 +164,7 @@ class MarketConfig(Config):
         self.linear_slippage_factor = str(config["linear_slippage_factor"])
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
+        self.tick_size = config["tick_size"]
 
         self.successor = (
             Successor(opt=config["successor"])
@@ -206,6 +209,7 @@ class MarketConfig(Config):
                 liquidity_fee_settings=self.liquidity_fee_settings.build(),
                 liquidation_strategy=self.liquidation_strategy.build(),
                 mark_price_configuration=self.mark_price_configuration.build(),
+                tick_size=self.tick_size,
             )
         )
         return new_market

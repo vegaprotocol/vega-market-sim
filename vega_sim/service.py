@@ -359,6 +359,10 @@ class VegaService(ABC):
                     "X-Block-Height"
                 )
             )
+            if attempts == 80:
+                logger.warning(
+                    f"Data node sync taking longer then (~10s). Core block height: {core_block_height}, Data node block height: {data_node_block_height}"
+                )
             if attempts >= max_attempts:
                 e = DatanodeBehindError(
                     f"Data node is behind core node after {attempts} attempts. Core block height: {core_block_height}, Data node block height: {data_node_block_height}"
@@ -1516,6 +1520,7 @@ class VegaService(ABC):
                 )
             ),
             mark_price_configuration=new_mark_price_config,
+            tick_size=current_market.tick_size,
         )
 
         proposal_id = gov.propose_market_update(

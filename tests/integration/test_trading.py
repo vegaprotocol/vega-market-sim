@@ -637,6 +637,7 @@ def test_liquidation_price_witin_estimate_position_bounds_AC005(
     configWithSlippage.set(
         "decimal_places", int(0)
     )  # Set the market decimal_places to 0
+    configWithSlippage.set("tick_size", 1)
     configWithSlippage.set("lp_price_range", str(1))
     triggers0 = [
         {
@@ -1035,6 +1036,7 @@ def test_estimated_liquidation_price_AC004(vega_service: VegaServiceNull):
     configWithSlippage.set(
         "decimal_places", int(0)
     )  # Set the market decimal_places to 0
+    configWithSlippage.set("tick_size", 1)
     configWithSlippage.set("lp_price_range", str(1))
     triggers0 = [
         {
@@ -1318,6 +1320,10 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     configWithSlippage.set(
         "decimal_places", int(1)
     )  # Set the market decimal_places to 1
+    configWithSlippage.set(
+        "tick_size",
+        0.1,
+    )
     configWithSlippage.set("lp_price_range", str(1))
     triggers0 = [
         {
