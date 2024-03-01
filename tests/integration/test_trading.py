@@ -1322,7 +1322,7 @@ def test_estimated_liquidation_price_AC001003(vega_service: VegaServiceNull):
     )  # Set the market decimal_places to 1
     configWithSlippage.set(
         "tick_size",
-        1,
+        0.1,
     )
     configWithSlippage.set("lp_price_range", str(1))
     triggers0 = [
