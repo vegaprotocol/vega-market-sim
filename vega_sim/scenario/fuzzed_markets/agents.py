@@ -73,8 +73,6 @@ class FuzzingAgent(StateAgentWithWallet):
                 wallet_name=self.wallet_name,
             )
 
-        self.vega.wait_fn(5)
-
     def step(self, vega_state):
         self.live_orders = self.vega.orders_for_party_from_feed(
             key_name=self.key_name,
@@ -312,8 +310,6 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
                 wallet_name=self.wallet_name,
             )
 
-        self.vega.wait_fn(5)
-
     def step(self, vega_state):
         account = self.vega.party_account(
             key_name=self.key_name,
@@ -418,8 +414,6 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 wallet_name=self.wallet_name,
             )
-
-        self.vega.wait_fn(5)
 
     def step(self, vega_state):
         account = self.vega.party_account(
@@ -547,8 +541,6 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 wallet_name=self.wallet_name,
             )
-
-        self.vega.wait_fn(5)
 
     def _gen_spec(self, side: vega_protos.vega.Side, is_valid: bool):
         refs = [
@@ -702,8 +694,6 @@ class SuccessorMarketCreatorAgent(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 wallet_name=self.wallet_name,
             )
-
-        self.vega.wait_fn(5)
 
 
 class PerpProductOptions(NamedTuple):

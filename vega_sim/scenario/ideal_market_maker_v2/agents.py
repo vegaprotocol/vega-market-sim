@@ -140,7 +140,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
         self.vega.create_key(self.terminate_key_name, self.wallet_name)
 
         # Faucet vega tokens
-        self.vega.wait_fn(10)
+
         self.vega.wait_for_total_catchup()
         self.vega.mint(
             wallet_name=self.wallet_name,
@@ -148,7 +148,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             amount=1e4,
             key_name=self.key_name,
         )
-        self.vega.wait_fn(10)
+
         self.vega.wait_for_total_catchup()
         if self.set_up_market:
             # Create asset
@@ -159,7 +159,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
                 decimals=self.adp,
                 key_name=self.key_name,
             )
-            self.vega.wait_fn(5)
+
             self.vega.wait_for_total_catchup()
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -170,7 +170,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             amount=self.initial_asset_mint,
             key_name=self.key_name,
         )
-        self.vega.wait_fn(10)
+
         self.vega.wait_for_total_catchup()
 
         if self.set_up_market:
