@@ -1330,7 +1330,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        self.current_position = float(position.open_volume) if position is not None and position else 0
+        self.current_position = (
+            float(position.open_volume) if position is not None and position else 0
+        )
 
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
             self.current_position, self.current_step
@@ -1562,6 +1564,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     ),
                     side=order.side,
                     expires_at=expires_at,
+                    post_only=False,
                 )
 
                 submissions.append(transaction)

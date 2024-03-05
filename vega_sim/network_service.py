@@ -199,6 +199,7 @@ def _find_network_config_toml(
             ),
         ]
     )
+
     for search_path in search_paths:
         full_path = path.join(
             search_path,

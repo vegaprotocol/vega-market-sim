@@ -11,3 +11,4 @@ class Network(Enum):
     MAINNET_MIRROR = "vegawallet-mainnet-mirror"
     TESTNET2 = "testnet2"
     CAPSULE = "config"
+    MAINNET1 = "mainnet1"

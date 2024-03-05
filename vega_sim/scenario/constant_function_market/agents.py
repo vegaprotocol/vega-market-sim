@@ -1,4 +1,5 @@
 from typing import Iterable, List, Optional, Tuple, Union
+from logging import getLogger
 
 import numpy as np
 
@@ -9,6 +10,8 @@ from vega_sim.scenario.common.agents import (
     ShapedMarketMaker,
     VegaState,
 )
+
+logger = getLogger(__name__)
 
 
 def _price_for_size(
@@ -310,6 +313,9 @@ class CFMV3MarketMaker(ShapedMarketMaker):
     ):
         super().initialise(vega=vega, create_key=create_key, mint_key=mint_key)
 
+        logger.info(
+            f"Quoting for key {self.vega.wallet.public_key(self.key_name, self.wallet_name)}"
+        )
         risk_factors = vega.get_risk_factors(self.market_id)
         self.short_factor, self.long_factor = risk_factors.short, risk_factors.long
 

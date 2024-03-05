@@ -2097,21 +2097,24 @@ class LiquidityProvision(_message.Message):
     ) -> None: ...
 
 class EthereumL2Config(_message.Message):
-    __slots__ = ("network_id", "chain_id", "confirmations", "name")
+    __slots__ = ("network_id", "chain_id", "confirmations", "name", "block_interval")
     NETWORK_ID_FIELD_NUMBER: _ClassVar[int]
     CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     CONFIRMATIONS_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
+    BLOCK_INTERVAL_FIELD_NUMBER: _ClassVar[int]
     network_id: str
     chain_id: str
     confirmations: int
     name: str
+    block_interval: int
     def __init__(
         self,
         network_id: _Optional[str] = ...,
         chain_id: _Optional[str] = ...,
         confirmations: _Optional[int] = ...,
         name: _Optional[str] = ...,
+        block_interval: _Optional[int] = ...,
     ) -> None: ...
 
 class EthereumL2Configs(_message.Message):
