@@ -32,6 +32,7 @@ from vega_sim.api.helpers import (
     forward,
     statistics,
     num_to_padded_int,
+    num_from_padded_int,
     wait_for_core_catchup,
     wait_for_datanode_sync,
 )
@@ -1743,6 +1744,9 @@ class VegaService(ABC):
             market_id=market_id, data_client=self.trading_data_client_v2
         )
 
+    def last_trade_price(self, market_id: str) -> float:
+        return self.market_data_from_feed(market_id=market_id).last_traded_price
+
     @raw_data
     def market_data_from_feed(
         self,
@@ -1842,7 +1846,7 @@ class VegaService(ABC):
         """
         Output the tightest price bounds in the current market.
         """
-        market_data = self.get_latest_market_data(
+        market_data = self.market_data_from_feed(
             market_id=market_id,
         )
 
@@ -3049,6 +3053,13 @@ class VegaService(ABC):
                 A list of all transfers matching the requested criteria
         """
 
+        to_datetime = (
+            to_datetime
+            if to_datetime is not None
+            else datetime.datetime.fromtimestamp(
+                (self.get_blockchain_time_from_feed() / 1e9) + 360
+            )
+        )
         return data.list_ledger_entries(
             data_client=self.trading_data_client_v2,
             asset_id=asset_id,

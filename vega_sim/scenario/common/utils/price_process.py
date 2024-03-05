@@ -54,10 +54,15 @@ def random_walk(
         # Simulate external midprice
         for i in range(1, len(S)):
             S[i] = S[i - 1] + drift + sigma * dW[i]
-
+            # if S[i] > starting_price and S[i] > S[i - 1]:
+            #     S[i] = S[i - 1] + 0.8 * (S[i] - S[i - 1])
+            # if S[i] < starting_price and S[i] < S[i - 1]:
+            #     S[i] = S[i - 1] - 0.8 * abs(S[i] - S[i - 1])
         # market decimal place
         if decimal_precision:
             S = np.round(S, decimal_precision)
+
+        S = S - S.mean()
 
         # If random state is passed then error if it generates a negative price
         # Otherwise retry with a new seed

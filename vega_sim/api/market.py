@@ -64,7 +64,6 @@ Examples:
 
 """
 
-import copy
 import functools
 import logging
 from typing import Optional, Union

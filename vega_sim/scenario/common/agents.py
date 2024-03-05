@@ -61,7 +61,7 @@ AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
 ITOrder = namedtuple("ITOrder", ["side", "size"])
-MMOrder = namedtuple("MMOrder", ["size", "price"])
+MMOrder = namedtuple("MMOrder", ["size", "price", "side"])
 
 LiquidityProvision = namedtuple("LiquidityProvision", ["amount", "fee"])
 
@@ -255,6 +255,24 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
             )
         self.vega.wait_fn(5)
 
+    def _execution_price(self, volume: float, side: vega_protos.Side):
+        book_depth = self.vega.market_depth(self.market_id)
+        remaining_volume = volume
+        vwap = None
+
+        levels = book_depth.buys if side == vega_protos.SIDE_SELL else book_depth.sells
+        idx = 0
+
+        while remaining_volume > 0:
+            if len(levels) > idx:
+                if vwap is None:
+                    vwap = 0
+                vwap += levels[idx].price * min(levels[idx].volume, remaining_volume)
+                remaining_volume -= levels[idx].volume
+            else:
+                break
+        return vwap
+
     def step(self, vega_state: VegaState):
         self.curr_price = next(self.price_process_generator)
 
@@ -263,13 +281,29 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
         buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
         sell_vol = self.random_state.poisson(self.sell_intensity) * self.base_order_size
 
-        best_bid, best_ask = self.vega.best_prices(self.market_id)
+        # best_bid, best_ask = self.vega.best_prices(self.market_id)
+        buy_vwap = self._execution_price(buy_vol, vega_protos.SIDE_BUY)
+        sell_vwap = self._execution_price(buy_vol, vega_protos.SIDE_SELL)
 
-        will_buy = self.random_state.rand() < np.exp(
-            -1 * self.probability_decay * max([best_ask - self.curr_price, 0])
+        will_buy = (
+            (
+                self.random_state.rand()
+                < np.exp(
+                    -1 * self.probability_decay * max([buy_vwap - self.curr_price, 0])
+                )
+            )
+            if buy_vwap is not None
+            else False
         )
-        will_sell = self.random_state.rand() < np.exp(
-            -1 * self.probability_decay * max([self.curr_price - best_bid, 0])
+        will_sell = (
+            (
+                self.random_state.rand()
+                < np.exp(
+                    -1 * self.probability_decay * max([self.curr_price - sell_vwap, 0])
+                )
+            )
+            if sell_vwap is not None
+            else False
         )
 
         if buy_first and will_buy:
@@ -310,6 +344,125 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
                 volume=volume,
                 wait=False,
                 fill_or_kill=False,
+                trading_wallet=self.wallet_name,
+            )
+
+
+class ArbitrageTrader(StateAgentWithWallet):
+    NAME_BASE = "arbitrage_trader"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        asset_name: str,
+        price_process_generator: Iterable[float],
+        initial_asset_mint: float = 1000000,
+        buy_intensity: float = 1,
+        sell_intensity: float = 1,
+        spread_offset: float = 0.01,
+        tag: str = "",
+        random_state: Optional[np.random.RandomState] = None,
+        base_order_size: float = 1,
+        wallet_name: str = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.initial_asset_mint = initial_asset_mint
+        self.buy_intensity = buy_intensity
+        self.sell_intensity = sell_intensity
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.random_state = (
+            random_state if random_state is not None else np.random.RandomState()
+        )
+        self.base_order_size = base_order_size
+        self.price_process_generator = price_process_generator
+        self.spread_offset = spread_offset
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+        # Get market id
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+
+        # Get asset id
+        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+        if mint_key:
+            # Top up asset
+            self.vega.mint(
+                key_name=self.key_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_fn(5)
+
+    def step(self, vega_state: VegaState):
+        self.curr_price = next(self.price_process_generator)
+
+        position = self.vega.positions_by_market(
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            key_name=self.key_name,
+        )
+
+        self.current_position = int(position.open_volume) if position is not None else 0
+
+        if abs(self.current_position) > 0:
+            self.place_order(
+                vega_state=vega_state,
+                volume=abs(self.current_position),
+                side=(
+                    vega_protos.SIDE_BUY
+                    if self.current_position < 0
+                    else vega_protos.SIDE_SELL
+                ),
+                price=self.curr_price,
+            )
+
+        buy_vol = self.random_state.poisson(self.buy_intensity) * self.base_order_size
+        sell_vol = self.random_state.poisson(self.sell_intensity) * self.base_order_size
+
+        self.place_order(
+            vega_state=vega_state,
+            volume=buy_vol,
+            side=vega_protos.SIDE_BUY,
+            price=self.curr_price * (1 - self.spread_offset),
+        )
+
+        self.place_order(
+            vega_state=vega_state,
+            volume=sell_vol,
+            side=vega_protos.SIDE_SELL,
+            price=self.curr_price * (1 + self.spread_offset),
+        )
+
+    def place_order(
+        self, vega_state: VegaState, volume: float, side: vega_protos.Side, price: float
+    ):
+        if (
+            (
+                vega_state.market_state[self.market_id].trading_mode
+                == markets_protos.Market.TradingMode.TRADING_MODE_CONTINUOUS
+            )
+            and vega_state.market_state[self.market_id].state
+            == markets_protos.Market.State.STATE_ACTIVE
+            and volume != 0
+        ):
+            self.vega.submit_order(
+                trading_key=self.key_name,
+                market_id=self.market_id,
+                order_type="TYPE_LIMIT",
+                side=side,
+                volume=volume,
+                price=price,
+                time_in_force="TIME_IN_FORCE_IOC",
+                wait=False,
                 trading_wallet=self.wallet_name,
             )
 
@@ -1053,14 +1206,14 @@ class ShapedMarketMaker(StateAgentWithWallet):
     def __init__(
         self,
         key_name: str,
-        price_process_generator: Iterable[float],
+        price_process_generator: Optional[Iterable[float]],
         best_price_offset_fn: Callable[[float, int], Tuple[float, float]],
         shape_fn: Callable[
             [
                 float,
                 float,
             ],
-            Tuple[List[MMOrder], List[MMOrder]],
+            List[MMOrder],
         ],
         liquidity_commitment_fn: Optional[
             Callable[[Optional[VegaState]], Optional[LiquidityProvision]]
@@ -1080,6 +1233,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         max_order_size: float = 10000,
         order_validity_length: Optional[float] = None,
         auto_top_up: bool = False,
+        move_orders_at_once: bool = True,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1111,6 +1265,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.auto_top_up = auto_top_up
         self.mint_key = False
 
+        self.move_orders_at_once = move_orders_at_once
         self.order_validity_length = order_validity_length
 
         self.supplied_amount = (
@@ -1162,8 +1317,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def step(self, vega_state: VegaState):
         self.current_step += 1
-        self.prev_price = self.curr_price
-        self.curr_price = next(self.price_process_generator)
+        if self.price_process_generator is not None:
+            self.prev_price = self.curr_price
+            self.curr_price = next(self.price_process_generator)
 
         self._update_state(current_step=self.current_step)
 
@@ -1174,19 +1330,16 @@ class ShapedMarketMaker(StateAgentWithWallet):
             key_name=self.key_name,
         )
 
-        current_position = (
-            int(position.open_volume) if position is not None and position else 0
-        )
+        self.current_position = float(position.open_volume) if position is not None and position else 0
+
         self.bid_depth, self.ask_depth = self.best_price_offset_fn(
-            current_position, self.current_step
+            self.current_position, self.current_step
         )
         if (self.bid_depth is None) or (self.ask_depth is None):
             return
 
-        new_buy_shape, new_sell_shape = self.shape_fn(self.bid_depth, self.ask_depth)
-        scaled_buy_shape, scaled_sell_shape = self._scale_orders(
-            buy_shape=new_buy_shape, sell_shape=new_sell_shape
-        )
+        new_shape = self.shape_fn(self.bid_depth, self.ask_depth)
+        scaled_shape = self._scale_orders(shape=new_shape)
 
         curr_buy_orders, curr_sell_orders = [], []
 
@@ -1219,33 +1372,50 @@ class ShapedMarketMaker(StateAgentWithWallet):
             else:
                 curr_sell_orders.append(order)
 
-        # We want to first make the spread wider by moving the side which is in the
-        # direction of the move (e.g. if price falls, the bids)
-        first_side = (
-            (
-                vega_protos.SIDE_BUY
-                if scaled_sell_shape[0].price < curr_buy_orders[0].price
-                else vega_protos.SIDE_SELL
+        try:
+            min_sell = min(
+                o.price for o in scaled_shape if o.side == vega_protos.SIDE_SELL
             )
-            if (scaled_sell_shape != []) and (curr_buy_orders != [])
-            else vega_protos.SIDE_BUY
-        )
-        if first_side == vega_protos.SIDE_BUY:
-            self._move_side(
-                vega_protos.SIDE_BUY,
-                curr_buy_orders,
-                scaled_buy_shape,
+        except ValueError:
+            min_sell = None
+
+        if not self.move_orders_at_once:
+            # We want to first make the spread wider by moving the side which is in the
+            # direction of the move (e.g. if price falls, the bids)
+            first_side = (
+                (
+                    vega_protos.SIDE_BUY
+                    if min_sell < curr_buy_orders[0].price
+                    else vega_protos.SIDE_SELL
+                )
+                if (min_sell is not None) and (curr_buy_orders != [])
+                else vega_protos.SIDE_BUY
             )
-        self._move_side(
-            vega_protos.SIDE_SELL,
-            curr_sell_orders,
-            scaled_sell_shape,
-        )
-        if first_side == vega_protos.SIDE_SELL:
+            if first_side == vega_protos.SIDE_BUY:
+                self._move_side(
+                    curr_buy_orders,
+                    scaled_shape,
+                    only_side=vega_protos.SIDE_BUY,
+                    cancel_and_replace=False,
+                )
             self._move_side(
-                vega_protos.SIDE_BUY,
-                curr_buy_orders,
-                scaled_buy_shape,
+                curr_sell_orders,
+                scaled_shape,
+                only_side=vega_protos.SIDE_SELL,
+                cancel_and_replace=False,
+            )
+            if first_side == vega_protos.SIDE_SELL:
+                self._move_side(
+                    curr_buy_orders,
+                    scaled_shape,
+                    only_side=vega_protos.SIDE_BUY,
+                    cancel_and_replace=False,
+                )
+        else:
+            self._move_side(
+                orders,
+                scaled_shape,
+                cancel_and_replace=True,
             )
 
         if (
@@ -1284,9 +1454,17 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def _scale_orders(
         self,
-        buy_shape: List[MMOrder],
-        sell_shape: List[MMOrder],
+        shape: List[MMOrder],
     ):
+        buy_shape = []
+        sell_shape = []
+
+        for o in shape:
+            if o.side == vega_protos.SIDE_BUY:
+                buy_shape.append(o)
+            else:
+                sell_shape.append(o)
+
         buy_scaling_factor = (
             self.safety_factor * self.supplied_amount * self.stake_to_ccy_volume
         ) / self._calculate_liquidity(
@@ -1302,7 +1480,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         # Scale the shapes
         scaled_buy_shape = [
             MMOrder(
-                min([order.size * buy_scaling_factor, self.max_order_size]), order.price
+                min([order.size * buy_scaling_factor, self.max_order_size]),
+                order.price,
+                vega_protos.SIDE_BUY,
             )
             for order in buy_shape
         ]
@@ -1310,11 +1490,12 @@ class ShapedMarketMaker(StateAgentWithWallet):
             MMOrder(
                 min([order.size * sell_scaling_factor, self.max_order_size]),
                 order.price,
+                vega_protos.SIDE_SELL,
             )
             for order in sell_shape
         ]
 
-        return scaled_buy_shape, scaled_sell_shape
+        return scaled_buy_shape + scaled_sell_shape
 
     def _calculate_liquidity(
         self,
@@ -1332,9 +1513,10 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
     def _move_side(
         self,
-        side: vega_protos.Side,
-        orders: List[Order],
+        existing_orders: List[Order],
         new_shape: List[MMOrder],
+        cancel_and_replace: bool = True,
+        only_side: Optional[vega_protos.Side] = None,
     ) -> None:
         amendments = []
         submissions = []
@@ -1345,10 +1527,12 @@ class ShapedMarketMaker(StateAgentWithWallet):
             if self.order_validity_length is not None
             else None
         )
+        if only_side is not None:
+            new_shape = [o for o in new_shape if o.side == only_side]
 
         for i, order in enumerate(new_shape):
-            if i < len(orders):
-                order_to_amend = orders[i]
+            if i < len(existing_orders) and not cancel_and_replace:
+                order_to_amend = existing_orders[i]
 
                 transaction = self.vega.build_order_amendment(
                     market_id=self.market_id,
@@ -1376,22 +1560,28 @@ class ShapedMarketMaker(StateAgentWithWallet):
                         if self.order_validity_length is not None
                         else "TIME_IN_FORCE_GTC"
                     ),
-                    side=side,
+                    side=order.side,
                     expires_at=expires_at,
                 )
 
                 submissions.append(transaction)
 
-        if len(orders) > len(new_shape):
-            for order in orders[len(new_shape) :]:
+        if not cancel_and_replace and len(existing_orders) > len(new_shape):
+            for order in existing_orders[len(new_shape) :]:
                 transaction = self.vega.build_order_cancellation(
                     order_id=order.id,
                     market_id=self.market_id,
                 )
 
                 cancellations.append(transaction)
+        if cancel_and_replace:
+            cancellations.append(
+                self.vega.build_order_cancellation(
+                    market_id=self.market_id, order_id=None
+                )
+            )
 
-        if submissions is not []:
+        if not all(val is [] for val in (submissions, amendments, cancellations)):
             self.vega.submit_instructions(
                 wallet_name=self.wallet_name,
                 key_name=self.key_name,
@@ -1566,7 +1756,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
 
     def _generate_shape(
         self, bid_price_depth: float, ask_price_depth: float
-    ) -> Tuple[List[MMOrder], List[MMOrder]]:
+    ) -> List[MMOrder]:
         bid_orders = self._calculate_price_volume_levels(
             bid_price_depth, vega_protos.Side.SIDE_BUY
         )
@@ -1575,7 +1765,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         )
         self.curr_bids = bid_orders
         self.curr_asks = ask_orders
-        return bid_orders, ask_orders
+        return bid_orders + ask_orders
 
     def _calculate_price_volume_levels(
         self,
@@ -1597,7 +1787,12 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         )
         level_price[level_price < 1 / 10**self.mdp] = 1 / 10**self.mdp
 
-        return [MMOrder(vol, price) for vol, price in zip(level_vol, level_price)]
+        return [
+            MMOrder(
+                vol, price, vega_protos.SIDE_BUY if is_buy else vega_protos.SIDE_SELL
+            )
+            for vol, price in zip(level_vol, level_price)
+        ]
 
 
 class HedgedMarketMaker(ExponentialShapedMarketMaker):
@@ -2872,9 +3067,10 @@ class Snitch(StateAgent):
                     self.seen_trades.add(trade.id)
                     market_trades.setdefault(market.id, []).append(trade)
 
+            accounts = self.vega.get_accounts_from_stream()
+
             positions = self.vega.list_all_positions()
 
-            accounts = self.vega.list_accounts()
             self.states.append(
                 MarketHistoryData(
                     at_time=start_time,
@@ -3484,7 +3680,8 @@ class ReferralAgentWrapper:
 
         if (not is_referrer) and (referrer_key_name is None):
             raise ValueError(
-                "ReferralWrapper must either designate the agent as a referrer or specify a referrer key name."
+                "ReferralWrapper must either designate the agent as a referrer or"
+                " specify a referrer key name."
             )
 
         self.is_referrer = is_referrer

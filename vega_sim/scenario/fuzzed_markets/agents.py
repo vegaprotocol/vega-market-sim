@@ -367,9 +367,6 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
                     wait=False,
                 )
             except Exception as e:
-                import pdb
-
-                pdb.set_trace()
                 print(f"There was an error {e}")
 
 

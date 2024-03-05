@@ -627,12 +627,14 @@ def list_ledger_entries(
         base_request.date_range.CopyFrom(
             data_node_protos_v2.trading_data.DateRange(
                 start_timestamp=(
-                    from_datetime.timestamp() * 1e9
+                    int(from_datetime.timestamp() * 1e9)
                     if from_datetime is not None
                     else None
                 ),
                 end_timestamp=(
-                    to_datetime.timestamp() * 1e9 if to_datetime is not None else None
+                    int(to_datetime.timestamp() * 1e9)
+                    if to_datetime is not None
+                    else None
                 ),
             )
         )

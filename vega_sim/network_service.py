@@ -117,6 +117,7 @@ def manage_vega_processes(
 
     if run_with_wallet:
         vega_wallet_path = environ.get("VEGA_WALLET_PATH", "vegawallet")
+
         vegaWalletProcess = _popen_process(
             popen_args=[
                 vega_wallet_path,

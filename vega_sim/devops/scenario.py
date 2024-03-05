@@ -131,7 +131,7 @@ class DevOpsScenario(Scenario):
                 random_state=random_state
             )
         else:
-            self.price_process = get_live_price(product=self.binance_code)
+            self.price_process = None  # get_live_price(product=self.binance_code)
 
         if self.scenario_wallet.market_creator_agent is None:
             raise ValueError(
@@ -270,7 +270,7 @@ class DevOpsScenario(Scenario):
             if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
                 kwargs["agent"].price_process_generator = iter(self.price_process)
 
-            kwargs["agent"].order_validity_length = self.step_length_seconds
+            kwargs["agent"].order_validity_length = 10 * self.step_length_seconds
 
             agents.append(kwargs.get("agent", None))
 
