@@ -916,7 +916,7 @@ class VegaServiceNull(VegaService):
         port_config = self._generate_port_config()
         self.queue = Queue()
 
-        self.logger_p = threading.Thread(target=logger_thread, args=(self.queue,))
+        self.logger_p = threading.Thread(target=logger_thread, args=(self.queue,), daemon=True)
         self.logger_p.start()
 
         self.proc = ctx.Process(
