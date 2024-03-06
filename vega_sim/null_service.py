@@ -916,7 +916,9 @@ class VegaServiceNull(VegaService):
         port_config = self._generate_port_config()
         self.queue = Queue()
 
-        self.logger_p = threading.Thread(target=logger_thread, args=(self.queue,))
+        self.logger_p = threading.Thread(
+            target=logger_thread, args=(self.queue,), daemon=True
+        )
         self.logger_p.start()
 
         self.proc = ctx.Process(
@@ -1084,6 +1086,10 @@ class VegaServiceNull(VegaService):
     @property
     def vega_node_url(self) -> str:
         return self._build_url(self.vega_node_port)
+
+    @property
+    def vega_node_rest_url(self) -> str:
+        return self._build_url(self.vega_node_rest_port)
 
     @property
     def vega_node_grpc_url(self) -> str:

@@ -31,6 +31,8 @@ from vega_sim.api.data_raw import (
     estimate_position,
     list_referral_sets,
     list_referral_set_referees,
+    list_funding_periods,
+    list_oracle_data,
 )
 
 from vega_sim.proto.data_node.api.v2.trading_data_pb2_grpc import (
@@ -1061,3 +1063,135 @@ def test_list_referral_set_referees(trading_data_v2_servicer_and_port):
             at_epoch=1,
         )
     ]
+
+
+def test_list_funding_periods(trading_data_v2_servicer_and_port):
+    def ListFundingPeriods(self, request, context):
+        return data_node_protos_v2.trading_data.ListFundingPeriodsResponse(
+            funding_periods=data_node_protos_v2.trading_data.FundingPeriodConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.FundingPeriodEdge(
+                        cursor="cursor",
+                        node=vega_protos.events.v1.events.FundingPeriod(
+                            market_id=request.market_id,
+                            start=1708589798000000000,
+                            end=1708618598000000000,
+                            internal_twap="3200000",
+                            external_twap="3316791",
+                            funding_payment="-115133",
+                            funding_rate="-0.0347121660665384",
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.FundingPeriodEdge(
+                        cursor="cursor",
+                        node=vega_protos.events.v1.events.FundingPeriod(
+                            market_id=request.market_id,
+                            start=1708618598000000000,
+                            end=None,
+                            internal_twap="3200000",
+                            external_twap=None,
+                            funding_payment=None,
+                            funding_rate=None,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListFundingPeriods = ListFundingPeriods
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+
+    assert list_funding_periods(data_client=data_client, market_id="id") == [
+        vega_protos.events.v1.events.FundingPeriod(
+            market_id="id",
+            start=1708589798000000000,
+            end=1708618598000000000,
+            internal_twap="3200000",
+            external_twap="3316791",
+            funding_payment="-115133",
+            funding_rate="-0.0347121660665384",
+        ),
+        vega_protos.events.v1.events.FundingPeriod(
+            market_id="id",
+            start=1708618598000000000,
+            end=None,
+            internal_twap="3200000",
+            external_twap=None,
+            funding_payment=None,
+            funding_rate=None,
+        ),
+    ]
+
+
+def test_list_oracle_data(trading_data_v2_servicer_and_port):
+    data_1 = vega_protos.oracle.OracleData(
+        external_data=vega_protos.data.v1.data.ExternalData(
+            data=vega_protos.data.v1.data.Data(
+                data=[
+                    vega_protos.data.v1.data.Property(
+                        name="property_1", value="value_1"
+                    ),
+                    vega_protos.data.v1.data.Property(
+                        name="property_2", value="value_2"
+                    ),
+                ]
+            )
+        )
+    )
+    data_2 = vega_protos.oracle.OracleData(
+        external_data=vega_protos.data.v1.data.ExternalData(
+            data=vega_protos.data.v1.data.Data(
+                data=[
+                    vega_protos.data.v1.data.Property(
+                        name="property_1", value="value_3"
+                    ),
+                    vega_protos.data.v1.data.Property(name="property_4", value=None),
+                ]
+            )
+        )
+    )
+
+    def ListOracleData(self, request, context):
+        return data_node_protos_v2.trading_data.ListOracleDataResponse(
+            oracle_data=data_node_protos_v2.trading_data.OracleDataConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.OracleDataEdge(
+                        cursor="cursor",
+                        node=data_1,
+                    ),
+                    data_node_protos_v2.trading_data.OracleDataEdge(
+                        cursor="cursor",
+                        node=data_2,
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListOracleData = ListOracleData
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+
+    oracle_data = list_oracle_data(
+        data_client=data_client, oracle_spec_id="oracle_spec_id"
+    )
+
+    assert oracle_data == [data_1, data_2]

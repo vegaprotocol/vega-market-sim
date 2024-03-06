@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, U
 from enum import Enum
 
 import grpc
+import requests
 
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
@@ -269,6 +270,10 @@ class VegaService(ABC):
         pass
 
     @property
+    def vega_node_rest_url(self) -> str:
+        pass
+
+    @property
     def vega_node_grpc_url(self) -> str:
         pass
 
@@ -339,8 +344,37 @@ class VegaService(ABC):
             )
         return self._core_client
 
-    def wait_for_datanode_sync(self) -> None:
-        wait_for_datanode_sync(self.trading_data_client_v2, self.core_client)
+    def wait_for_datanode_sync(
+        self, max_attempts: int = 115, raise_errors: bool = False
+    ) -> None:
+        core_block_height = int(
+            requests.get(f"{self.vega_node_rest_url}/blockchain/height").json()[
+                "height"
+            ]
+        )
+        data_node_block_height = 0
+        attempts = 0
+        while core_block_height > data_node_block_height:
+            data_node_block_height = int(
+                requests.get(f"{self.data_node_rest_url}/statistics").headers.get(
+                    "X-Block-Height"
+                )
+            )
+            if attempts == 80:
+                logger.warning(
+                    f"Data node sync taking longer then (~10s). Core block height: {core_block_height}, Data node block height: {data_node_block_height}"
+                )
+            if attempts >= max_attempts:
+                e = DatanodeBehindError(
+                    f"Data node is behind core node after {attempts} attempts. Core block height: {core_block_height}, Data node block height: {data_node_block_height}"
+                )
+                if raise_errors:
+                    raise e
+                else:
+                    logger.error(e)
+                    return
+            time.sleep(0.0005 * 1.1**attempts)
+            attempts += 1
 
     def wait_for_core_catchup(self) -> None:
         wait_for_core_catchup(self.core_client)
@@ -1487,6 +1521,7 @@ class VegaService(ABC):
                 )
             ),
             mark_price_configuration=new_mark_price_config,
+            tick_size=current_market.tick_size,
         )
 
         proposal_id = gov.propose_market_update(
@@ -3578,6 +3613,7 @@ class VegaService(ABC):
             proposal=proposal_submission,
             data_client=self.trading_data_client_v2,
             time_forward_fn=lambda: self.wait_fn((2)),
+            sync_fn=lambda: self.wait_for_total_catchup(),
         )
         if proposal_id is None:
             return

@@ -59,6 +59,8 @@ from vega_sim.api.data import (
     list_team_referee_history,
     list_stop_orders,
     list_network_parameters,
+    list_funding_periods,
+    FundingPeriod,
 )
 from vega_sim.grpc.client import (
     VegaTradingDataClientV2,
@@ -1459,4 +1461,101 @@ def test_list_network_parameters(trading_data_v2_servicer_and_port):
         NetworkParameter("key_a", "value_a"),
         NetworkParameter("key_b", "value_b"),
         NetworkParameter("key_c", "value_c"),
+    ]
+
+
+def test_list_funding_periods(trading_data_v2_servicer_and_port):
+    def ListFundingPeriods(self, request, context):
+        return data_node_protos_v2.trading_data.ListFundingPeriodsResponse(
+            funding_periods=data_node_protos_v2.trading_data.FundingPeriodConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.FundingPeriodEdge(
+                        cursor="cursor",
+                        node=vega_protos.events.v1.events.FundingPeriod(
+                            market_id=request.market_id,
+                            start=1708589798000000000,
+                            end=1708618598000000000,
+                            internal_twap="3200000",
+                            external_twap="3316791",
+                            funding_payment="-115133",
+                            funding_rate="-0.0347121660665384",
+                        ),
+                    ),
+                    data_node_protos_v2.trading_data.FundingPeriodEdge(
+                        cursor="cursor",
+                        node=vega_protos.events.v1.events.FundingPeriod(
+                            market_id=request.market_id,
+                            start=1708618598000000000,
+                            end=None,
+                            internal_twap="3200000",
+                            external_twap=None,
+                            funding_payment=None,
+                            funding_rate=None,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListFundingPeriods = ListFundingPeriods
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    market_id = "mkt_id"
+    funding_periods = list_funding_periods(
+        market_id=market_id,
+        data_client=data_client,
+        market_to_asset_map={market_id: "asset_id"},
+        asset_decimals_map={"asset_id": 6},
+    )
+    # Thu Feb 22 2024 16:16:38 GMT+0000
+    assert funding_periods == [
+        FundingPeriod(
+            start_time=datetime.datetime(
+                year=2024,
+                month=2,
+                day=22,
+                hour=8,
+                minute=16,
+                second=38,
+                tzinfo=datetime.timezone.utc,
+            ),
+            end_time=datetime.datetime(
+                year=2024,
+                month=2,
+                day=22,
+                hour=16,
+                minute=16,
+                second=38,
+                tzinfo=datetime.timezone.utc,
+            ),
+            internal_twap=3.2,
+            external_twap=3.316791,
+            funding_payment=-0.115133,
+            funding_rate=-0.0347121660665384,
+        ),
+        FundingPeriod(
+            start_time=datetime.datetime(
+                year=2024,
+                month=2,
+                day=22,
+                hour=16,
+                minute=16,
+                second=38,
+                tzinfo=datetime.timezone.utc,
+            ),
+            end_time=None,
+            internal_twap=3.2,
+            external_twap=None,
+            funding_payment=None,
+            funding_rate=None,
+        ),
     ]

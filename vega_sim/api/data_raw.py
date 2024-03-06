@@ -963,3 +963,38 @@ def list_all_positions(
         request_func=lambda x: data_client.ListAllPositions(x).positions,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+def list_funding_periods(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: str,
+    start: Optional[datetime.datetime] = None,
+    end: Optional[datetime.datetime] = None,
+) -> List[vega_protos.events.v1.events.FundingPeriod]:
+    base_request = data_node_protos_v2.trading_data.ListFundingPeriodsRequest(
+        market_id=market_id,
+        date_range=data_node_protos_v2.trading_data.DateRange(
+            start_timestamp=int(start.timestamp() * 1e9) if start is not None else None,
+            end_timestamp=int(end.timestamp() * 1e9) if end is not None else None,
+        ),
+    )
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListFundingPeriods(x).funding_periods,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )
+
+
+@_retry(3)
+def list_oracle_data(
+    data_client: vac.trading_data_grpc_v2,
+    oracle_spec_id: str,
+) -> List[vega_protos.oracle.OracleData]:
+    base_request = data_node_protos_v2.trading_data.ListOracleDataRequest(
+        oracle_spec_id=oracle_spec_id,
+    )
+    return unroll_v2_pagination(
+        base_request=base_request,
+        request_func=lambda x: data_client.ListOracleData(x).oracle_data,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

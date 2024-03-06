@@ -12,7 +12,7 @@ import datetime
 
 import vega_sim.proto.vega as vega_protos
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from vega_sim.api.helpers import num_to_padded_int
 from vega_sim.builders.exceptions import raise_custom_build_errors
 
@@ -28,6 +28,19 @@ def proposal_submission(
 ) -> vega_protos.commands.v1.commands.ProposalSubmission:
     return vega_protos.commands.v1.commands.ProposalSubmission(
         reference=reference, terms=terms, rationale=rationale
+    )
+
+
+@raise_custom_build_errors
+def batch_proposal_submission(
+    reference: str,
+    rationale: vega_protos.governance.ProposalRationale,
+    terms: vega_protos.commands.v1.commands.BatchProposalSubmissionTerms,
+) -> vega_protos.commands.v1.commands.BatchProposalSubmission:
+    return vega_protos.commands.v1.commands.BatchProposalSubmission(
+        reference=reference,
+        terms=terms,
+        rationale=rationale,
     )
 
 

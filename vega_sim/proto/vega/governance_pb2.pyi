@@ -296,6 +296,7 @@ class NewSpotMarketConfiguration(_message.Message):
         "position_decimal_places",
         "sla_params",
         "liquidity_fee_settings",
+        "tick_size",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -307,6 +308,7 @@ class NewSpotMarketConfiguration(_message.Message):
     POSITION_DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
     SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -317,6 +319,7 @@ class NewSpotMarketConfiguration(_message.Message):
     position_decimal_places: int
     sla_params: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
+    tick_size: str
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -337,6 +340,7 @@ class NewSpotMarketConfiguration(_message.Message):
         liquidity_fee_settings: _Optional[
             _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
         ] = ...,
+        tick_size: _Optional[str] = ...,
     ) -> None: ...
 
 class NewMarketConfiguration(_message.Message):
@@ -357,6 +361,7 @@ class NewMarketConfiguration(_message.Message):
         "liquidity_fee_settings",
         "liquidation_strategy",
         "mark_price_configuration",
+        "tick_size",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -374,6 +379,7 @@ class NewMarketConfiguration(_message.Message):
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
     MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
+    TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -390,6 +396,7 @@ class NewMarketConfiguration(_message.Message):
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     liquidation_strategy: _markets_pb2.LiquidationStrategy
     mark_price_configuration: _markets_pb2.CompositePriceConfiguration
+    tick_size: str
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -420,6 +427,7 @@ class NewMarketConfiguration(_message.Message):
         mark_price_configuration: _Optional[
             _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
+        tick_size: _Optional[str] = ...,
     ) -> None: ...
 
 class NewSpotMarket(_message.Message):
@@ -489,6 +497,7 @@ class UpdateMarketConfiguration(_message.Message):
         "liquidity_fee_settings",
         "liquidation_strategy",
         "mark_price_configuration",
+        "tick_size",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -503,6 +512,7 @@ class UpdateMarketConfiguration(_message.Message):
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDATION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
     MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
+    TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     instrument: UpdateInstrumentConfiguration
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
@@ -516,6 +526,7 @@ class UpdateMarketConfiguration(_message.Message):
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     liquidation_strategy: _markets_pb2.LiquidationStrategy
     mark_price_configuration: _markets_pb2.CompositePriceConfiguration
+    tick_size: str
     def __init__(
         self,
         instrument: _Optional[_Union[UpdateInstrumentConfiguration, _Mapping]] = ...,
@@ -543,6 +554,7 @@ class UpdateMarketConfiguration(_message.Message):
         mark_price_configuration: _Optional[
             _Union[_markets_pb2.CompositePriceConfiguration, _Mapping]
         ] = ...,
+        tick_size: _Optional[str] = ...,
     ) -> None: ...
 
 class UpdateSpotMarketConfiguration(_message.Message):
@@ -554,6 +566,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
         "log_normal",
         "sla_params",
         "liquidity_fee_settings",
+        "tick_size",
     )
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
@@ -562,6 +575,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     LOG_NORMAL_FIELD_NUMBER: _ClassVar[int]
     SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
+    TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
     target_stake_parameters: _markets_pb2.TargetStakeParameters
@@ -569,6 +583,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     log_normal: _markets_pb2.LogNormalRiskModel
     sla_params: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
+    tick_size: str
     def __init__(
         self,
         metadata: _Optional[_Iterable[str]] = ...,
@@ -586,6 +601,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
         liquidity_fee_settings: _Optional[
             _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
         ] = ...,
+        tick_size: _Optional[str] = ...,
     ) -> None: ...
 
 class UpdateInstrumentConfiguration(_message.Message):
@@ -1112,7 +1128,7 @@ class Vote(_message.Message):
         "total_governance_token_balance",
         "total_governance_token_weight",
         "total_equity_like_share_weight",
-        "per_market_equity_like_share_weight",
+        "els_per_market",
     )
 
     class Value(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -1124,17 +1140,6 @@ class Vote(_message.Message):
     VALUE_UNSPECIFIED: Vote.Value
     VALUE_NO: Vote.Value
     VALUE_YES: Vote.Value
-
-    class PerMarketEquityLikeShareWeightEntry(_message.Message):
-        __slots__ = ("key", "value")
-        KEY_FIELD_NUMBER: _ClassVar[int]
-        VALUE_FIELD_NUMBER: _ClassVar[int]
-        key: str
-        value: str
-        def __init__(
-            self, key: _Optional[str] = ..., value: _Optional[str] = ...
-        ) -> None: ...
-
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
@@ -1142,7 +1147,7 @@ class Vote(_message.Message):
     TOTAL_GOVERNANCE_TOKEN_BALANCE_FIELD_NUMBER: _ClassVar[int]
     TOTAL_GOVERNANCE_TOKEN_WEIGHT_FIELD_NUMBER: _ClassVar[int]
     TOTAL_EQUITY_LIKE_SHARE_WEIGHT_FIELD_NUMBER: _ClassVar[int]
-    PER_MARKET_EQUITY_LIKE_SHARE_WEIGHT_FIELD_NUMBER: _ClassVar[int]
+    ELS_PER_MARKET_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     value: Vote.Value
     proposal_id: str
@@ -1150,7 +1155,7 @@ class Vote(_message.Message):
     total_governance_token_balance: str
     total_governance_token_weight: str
     total_equity_like_share_weight: str
-    per_market_equity_like_share_weight: _containers.ScalarMap[str, str]
+    els_per_market: _containers.RepeatedCompositeFieldContainer[VoteELSPair]
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -1160,7 +1165,17 @@ class Vote(_message.Message):
         total_governance_token_balance: _Optional[str] = ...,
         total_governance_token_weight: _Optional[str] = ...,
         total_equity_like_share_weight: _Optional[str] = ...,
-        per_market_equity_like_share_weight: _Optional[_Mapping[str, str]] = ...,
+        els_per_market: _Optional[_Iterable[_Union[VoteELSPair, _Mapping]]] = ...,
+    ) -> None: ...
+
+class VoteELSPair(_message.Message):
+    __slots__ = ("market_id", "els")
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    ELS_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    els: str
+    def __init__(
+        self, market_id: _Optional[str] = ..., els: _Optional[str] = ...
     ) -> None: ...
 
 class UpdateVolumeDiscountProgram(_message.Message):

@@ -268,10 +268,10 @@ class MarketData:
     mid_price: float
     static_mid_price: float
     market_id: str
-    timestamp: str
+    timestamp: datetime.datetime
     open_interest: float
-    auction_end: str
-    auction_start: str
+    auction_end: Optional[datetime.datetime]
+    auction_start: Optional[datetime.datetime]
     indicative_price: float
     indicative_volume: float
     market_trading_mode: str
@@ -282,8 +282,9 @@ class MarketData:
     market_value_proxy: float
     price_monitoring_bounds: list
     liquidity_provider_fee_share: list
+    liquidity_sla: List[LiquidityProviderSLA]
     market_state: str
-    next_mark_to_market: float
+    next_mark_to_market: datetime.datetime
     last_traded_price: float
     product_data: ProductData
 
@@ -305,11 +306,25 @@ class LiquidityProviderFeeShare:
 
 
 @dataclass(frozen=True)
+class LiquidityProviderSLA:
+    party: str
+    current_epoch_fraction_of_time_on_book: float
+    last_epoch_fraction_of_time_on_book: float
+    last_epoch_fee_penalty: float
+    last_epoch_bond_penalty: float
+    hysteresis_period_fee_penalties: List[float]
+    required_liquidity: float
+    notional_volume_buys: float
+    notional_volume_sells: float
+
+
+@dataclass(frozen=True)
 class PerpetualData:
-    funding_payment: float
-    funding_rate: float
-    internal_twap: float
-    external_twap: float
+    start_time: datetime.datetime
+    funding_payment: Optional[float]
+    funding_rate: Optional[float]
+    internal_twap: Optional[float]
+    external_twap: Optional[float]
 
 
 @dataclass(frozen=True)
@@ -382,6 +397,51 @@ class Position:
 
 def _network_parameter_from_proto(network_parameter: vega_protos.vega.NetworkParameter):
     return NetworkParameter(key=network_parameter.key, value=network_parameter.value)
+
+
+def _funding_period_from_proto(
+    funding_period: vega_protos.events.v1.events.FundingPeriod,
+    decimal_spec: DecimalSpec,
+) -> FundingPeriod:
+    start_time = datetime.datetime.fromtimestamp(
+        funding_period.start / 1e9, tz=datetime.timezone.utc
+    )
+    end_time = None
+    if funding_period.HasField("end"):
+        end_time = datetime.datetime.fromtimestamp(
+            funding_period.end / 1e9, tz=datetime.timezone.utc
+        )
+
+    return FundingPeriod(
+        start_time=start_time,
+        end_time=end_time,
+        funding_payment=(
+            None
+            if not funding_period.funding_payment
+            else num_from_padded_int(
+                funding_period.funding_payment, decimal_spec.asset_decimals
+            )
+        ),
+        funding_rate=(
+            None
+            if not funding_period.funding_rate
+            else float(funding_period.funding_rate)
+        ),
+        internal_twap=(
+            None
+            if not funding_period.internal_twap
+            else num_from_padded_int(
+                funding_period.internal_twap, decimal_spec.asset_decimals
+            )
+        ),
+        external_twap=(
+            None
+            if not funding_period.external_twap
+            else num_from_padded_int(
+                funding_period.external_twap, decimal_spec.asset_decimals
+            )
+        ),
+    )
 
 
 def _maker_fees_generated_from_proto(
@@ -621,6 +681,16 @@ def _erc20_from_proto(
 class StopOrderEvent:
     submission: OrderSubmission
     stop_order: StopOrder
+
+
+@dataclass(frozen=True)
+class FundingPeriod:
+    start_time: datetime.datetime
+    end_time: Optional[datetime.datetime]
+    internal_twap: Optional[float]
+    external_twap: Optional[float]
+    funding_payment: Optional[float]
+    funding_rate: Optional[float]
 
 
 def _pegged_order_from_proto(pegged_order, decimal_spec: DecimalSpec) -> PeggedOrder:
@@ -1053,7 +1123,6 @@ def positions_by_market(
     asset_decimals_map: Optional[Dict[str, int]] = None,
 ) -> Union[Dict[str, Position], Position]:
     """Output positions of a party."""
-
     raw_positions = data_raw.positions_by_market(
         pub_key=pub_key, market_id=market_id, data_client=data_client
     )
@@ -1125,7 +1194,7 @@ def positions_by_market(
 def _market_data_from_proto(
     market_data: vega_protos.vega.MarketData,
     decimal_spec: DecimalSpec,
-):
+) -> MarketData:
     return MarketData(
         mark_price=num_from_padded_int(
             market_data.mark_price, decimal_spec.price_decimals
@@ -1161,10 +1230,24 @@ def _market_data_from_proto(
             market_data.static_mid_price, decimal_spec.price_decimals
         ),
         market_id=market_data.market,
-        timestamp=market_data.timestamp,
+        timestamp=datetime.datetime.fromtimestamp(
+            market_data.timestamp / 1e9, tz=datetime.timezone.utc
+        ),
         open_interest=market_data.open_interest,
-        auction_end=market_data.auction_end,
-        auction_start=market_data.auction_start,
+        auction_end=(
+            None
+            if market_data.auction_end == None
+            else datetime.datetime.fromtimestamp(
+                market_data.auction_end / 1e9, tz=datetime.timezone.utc
+            )
+        ),
+        auction_start=(
+            None
+            if market_data.auction_start == None
+            else datetime.datetime.fromtimestamp(
+                market_data.auction_start / 1e9, tz=datetime.timezone.utc
+            )
+        ),
         indicative_price=num_from_padded_int(
             market_data.indicative_price, decimal_spec.price_decimals
         ),
@@ -1190,8 +1273,13 @@ def _market_data_from_proto(
             market_data.liquidity_provider_fee_share,
             decimal_spec.asset_decimals,
         ),
+        liquidity_sla=_liquidity_sla_from_proto(
+            market_data.liquidity_provider_sla, decimal_spec
+        ),
         market_state=market_data.market_state,
-        next_mark_to_market=market_data.next_mark_to_market,
+        next_mark_to_market=datetime.datetime.fromtimestamp(
+            market_data.next_mark_to_market / 1e9, tz=datetime.timezone.utc
+        ),
         last_traded_price=num_from_padded_int(
             market_data.last_traded_price, decimal_spec.price_decimals
         ),
@@ -1226,7 +1314,7 @@ def _price_monitoring_bounds_from_proto(
 def _liquidity_provider_fee_share_from_proto(
     liquidity_provider_fee_share,
     asset_decimals,
-) -> List[PriceMonitoringBounds]:
+) -> List[LiquidityProviderFeeShare]:
     return [
         LiquidityProviderFeeShare(
             party=individual_liquidity_provider_fee_share.party,
@@ -1245,6 +1333,73 @@ def _liquidity_provider_fee_share_from_proto(
     ]
 
 
+def _liquidity_sla_from_proto(
+    liquidity_provider_sla: List[vega_protos.vega.LiquidityProviderSLA],
+    decimal_spec: DecimalSpec,
+) -> List[LiquidityProviderSLA]:
+    decimals = decimal_spec.asset_decimals
+    return [
+        LiquidityProviderSLA(
+            party=individual_liquidity_provider_sla.party,
+            current_epoch_fraction_of_time_on_book=(
+                0
+                if individual_liquidity_provider_sla.current_epoch_fraction_of_time_on_book
+                == ""
+                else float(
+                    individual_liquidity_provider_sla.current_epoch_fraction_of_time_on_book
+                )
+            ),
+            last_epoch_fraction_of_time_on_book=(
+                0
+                if individual_liquidity_provider_sla.last_epoch_fraction_of_time_on_book
+                == ""
+                else float(
+                    individual_liquidity_provider_sla.last_epoch_fraction_of_time_on_book
+                )
+            ),
+            last_epoch_fee_penalty=(
+                0
+                if individual_liquidity_provider_sla.last_epoch_fee_penalty == ""
+                else float(individual_liquidity_provider_sla.last_epoch_fee_penalty)
+            ),
+            last_epoch_bond_penalty=(
+                0
+                if individual_liquidity_provider_sla.last_epoch_bond_penalty == ""
+                else float(individual_liquidity_provider_sla.last_epoch_bond_penalty)
+            ),
+            hysteresis_period_fee_penalties=[
+                float(x)
+                for x in individual_liquidity_provider_sla.hysteresis_period_fee_penalties
+            ],
+            required_liquidity=(
+                0
+                if individual_liquidity_provider_sla.required_liquidity == ""
+                else num_from_padded_int(
+                    float(individual_liquidity_provider_sla.required_liquidity),
+                    decimals,
+                )
+            ),
+            notional_volume_buys=(
+                0
+                if individual_liquidity_provider_sla.notional_volume_buys == ""
+                else num_from_padded_int(
+                    float(individual_liquidity_provider_sla.notional_volume_buys),
+                    decimals,
+                )
+            ),
+            notional_volume_sells=(
+                0
+                if individual_liquidity_provider_sla.notional_volume_sells == ""
+                else num_from_padded_int(
+                    float(individual_liquidity_provider_sla.notional_volume_sells),
+                    decimals,
+                )
+            ),
+        )
+        for individual_liquidity_provider_sla in liquidity_provider_sla
+    ]
+
+
 def _product_data_from_proto(
     product_data: vega_protos.vega.ProductData, decimal_spec: DecimalSpec
 ) -> ProductData:
@@ -1254,15 +1409,30 @@ def _product_data_from_proto(
     if data_field == "perpetual_data":
         data = getattr(product_data, data_field)
         perpetual_data = PerpetualData(
-            funding_payment=num_from_padded_int(
-                data.funding_payment, decimal_spec.price_decimals
+            start_time=datetime.datetime.fromtimestamp(
+                data.start_time / 1e9, tz=datetime.timezone.utc
             ),
-            funding_rate=float(data.funding_rate),
-            internal_twap=num_from_padded_int(
-                data.internal_twap, decimal_spec.price_decimals
+            funding_payment=(
+                None
+                if not data.funding_payment
+                else num_from_padded_int(
+                    data.funding_payment, decimal_spec.asset_decimals
+                )
             ),
-            external_twap=num_from_padded_int(
-                data.external_twap, decimal_spec.price_decimals
+            funding_rate=None if not data.funding_rate else float(data.funding_rate),
+            internal_twap=(
+                None
+                if not data.internal_twap
+                else num_from_padded_int(
+                    data.internal_twap, decimal_spec.asset_decimals
+                )
+            ),
+            external_twap=(
+                None
+                if not data.external_twap
+                else num_from_padded_int(
+                    data.external_twap, decimal_spec.asset_decimals
+                )
             ),
         )
         return ProductData(perpetual_data=perpetual_data)
@@ -2496,6 +2666,70 @@ def get_latest_market_data(
     )
 
 
+def get_market_data_history(
+    market_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    start: Optional[datetime.datetime] = None,
+    end: Optional[datetime.datetime] = None,
+    market_price_decimals_map: Optional[Dict[str, int]] = None,
+    market_position_decimals_map: Optional[Dict[str, int]] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> MarketData:
+    # Get market data history
+    market_data_history = data_raw.market_data_history(
+        market_id=market_id, start=start, end=end, data_client=data_client
+    )
+
+    market_price_decimals_map = (
+        market_price_decimals_map if market_price_decimals_map is not None else {}
+    )
+    market_position_decimals_map = (
+        market_position_decimals_map if market_position_decimals_map is not None else {}
+    )
+    market_to_asset_map = market_to_asset_map if market_to_asset_map is not None else {}
+    asset_decimals_map = asset_decimals_map if asset_decimals_map is not None else {}
+
+    if market_id not in market_price_decimals_map:
+        market_price_decimals_map[market_id] = market_price_decimals(
+            market_id=market_id, data_client=data_client
+        )
+    if market_id not in market_position_decimals_map:
+        market_position_decimals_map[market_id] = market_position_decimals(
+            market_id=market_id, data_client=data_client
+        )
+    if market_id not in market_to_asset_map:
+        market_info = data_raw.market_info(market_id=market_id, data_client=data_client)
+        settlement_asset_id = (
+            market_info.tradable_instrument.instrument.future.settlement_asset
+        )
+        if not settlement_asset_id:
+            settlement_asset_id = (
+                market_info.tradable_instrument.instrument.perpetual.settlement_asset
+            )
+
+        market_to_asset_map[market_id] = settlement_asset_id
+    if market_to_asset_map[market_id] not in asset_decimals_map:
+        asset_decimals_map[market_to_asset_map[market_id]] = get_asset_decimals(
+            asset_id=market_to_asset_map[market_id],
+            data_client=data_client,
+        )
+    # Convert from proto
+    return [
+        _market_data_from_proto(
+            market_data=market_data,
+            decimal_spec=DecimalSpec(
+                price_decimals=market_price_decimals_map[market_data.market],
+                position_decimals=market_position_decimals_map[market_data.market],
+                asset_decimals=asset_decimals_map[
+                    market_to_asset_map[market_data.market]
+                ],
+            ),
+        )
+        for market_data in market_data_history
+    ]
+
+
 def get_risk_factors(
     data_client: vac.VegaTradingDataClientV2,
     market_id: str,
@@ -2900,3 +3134,23 @@ def list_all_positions(
             )
         )
     return positions
+
+
+def list_funding_periods(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: str,
+    start: Optional[datetime.datetime] = None,
+    end: Optional[datetime.datetime] = None,
+    market_to_asset_map: Optional[Dict[str, str]] = None,
+    asset_decimals_map: Optional[Dict[str, int]] = None,
+) -> List[FundingPeriod]:
+    response = data_raw.list_funding_periods(
+        data_client=data_client, market_id=market_id, start=start, end=end
+    )
+    decimal_spec = DecimalSpec(
+        asset_decimals=asset_decimals_map[market_to_asset_map[market_id]],
+    )
+    return [
+        _funding_period_from_proto(funding_period=proto, decimal_spec=decimal_spec)
+        for proto in response
+    ]
