@@ -59,7 +59,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
         self.initial_mint = initial_mint
 
         self.market_config = (
-            market_config if market_config is not None else MarketConfig()
+            market_config if market_config is not None else MarketConfig("future")
         )
 
         self.settlement_price = settlement_price

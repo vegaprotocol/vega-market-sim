@@ -218,7 +218,7 @@ def propose_market(
         str:
             Market id.
     """
-    market_config = MarketConfig()
+    market_config = MarketConfig("future")
     market_config.set("instrument.name", "XYZ:DAI Visualisation Example")
     market_config.set("instrument.code", "XYZ:DAI")
     market_config.set("instrument.future.settlement_asset", asset_id)

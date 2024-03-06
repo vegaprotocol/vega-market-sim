@@ -81,7 +81,7 @@ class LiquidationScenario(Scenario):
         self.agents = []
 
         # Create market configuration
-        market_config = MarketConfig()
+        market_config = MarketConfig("future")
         market_name = "ETH/USDT Expiry 2023 Sept 30th"
         market_code = "ETH/USDT-230930"
         asset_name = "USDT"

@@ -762,7 +762,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         self.initial_mint = initial_mint
 
         self.market_config = (
-            market_config if market_config is not None else MarketConfig()
+            market_config if market_config is not None else MarketConfig("future")
         )
 
         if self.market_config.is_perp() and perp_settlement_data_generator == None:

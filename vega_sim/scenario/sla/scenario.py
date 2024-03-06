@@ -147,7 +147,7 @@ class SLAScenario(Scenario):
             decimal_precision=self.asset_decimals,
         )
 
-        market_config = MarketConfig()
+        market_config = MarketConfig("future")
         market_config.set("liquidity_sla_parameters.price_range", self.price_range)
         market_config.set(
             "liquidity_sla_parameters.commitment_min_time_fraction",

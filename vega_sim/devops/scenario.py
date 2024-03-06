@@ -150,7 +150,7 @@ class DevOpsScenario(Scenario):
                 proposal_key_name=self.scenario_wallet.market_creator_agent.key_name,
                 termination_wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
                 termination_key_name=self.scenario_wallet.market_creator_agent.key_name,
-                market_config=MarketConfig(),
+                market_config=MarketConfig("future"),
                 market_name=(
                     self.market_name
                     if self.market_name is not None

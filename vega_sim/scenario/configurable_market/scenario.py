@@ -104,7 +104,9 @@ class ConfigurableMarket(Scenario):
         random_state: Optional[np.random.RandomState] = None,
         **kwargs,
     ) -> Dict[str, StateAgent]:
-        market_config = market_config if market_config is not None else MarketConfig()
+        market_config = (
+            market_config if market_config is not None else MarketConfig("future")
+        )
 
         random_state = (
             random_state if random_state is not None else np.random.RandomState()
