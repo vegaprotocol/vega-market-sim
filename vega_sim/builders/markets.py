@@ -91,7 +91,7 @@ def target_stake_parameters(
     time_window: float, scaling_factor: float
 ) -> vega_protos.markets.TargetStakeParameters:
     return vega_protos.markets.TargetStakeParameters(
-        time_window=int(time_window), scaling_factor=scaling_factor
+        time_window=int(time_window), scaling_factor=float(scaling_factor)
     )
 
 
@@ -123,7 +123,7 @@ def liquidity_sla_parameters(
     return vega_protos.markets.LiquiditySLAParameters(
         price_range=str(price_range),
         commitment_min_time_fraction=str(commitment_min_time_fraction),
-        performance_hysteresis_epochs=performance_hysteresis_epochs,
+        performance_hysteresis_epochs=int(performance_hysteresis_epochs),
         sla_competition_factor=str(sla_competition_factor),
     )
 
@@ -148,7 +148,7 @@ def liquidation_strategy(
     max_fraction_consumed: float,
 ) -> vega_protos.markets.LiquidationStrategy:
     return vega_protos.markets.LiquidationStrategy(
-        disposal_time_step=disposal_time_step,
+        disposal_time_step=int(disposal_time_step),
         disposal_fraction=str(disposal_fraction),
         full_disposal_size=num_to_padded_int(full_disposal_size, 1),
         max_fraction_consumed=str(max_fraction_consumed),

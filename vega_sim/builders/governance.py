@@ -319,7 +319,7 @@ def new_market_configuration(
         liquidity_fee_settings=liquidity_fee_settings,
         liquidation_strategy=liquidation_strategy,
         mark_price_configuration=mark_price_configuration,
-        tick_size=str(num_to_padded_int(tick_size, decimal_places)),
+        tick_size=str(tick_size),
     )
     if lp_price_range is not None:
         setattr(proto, "lp_price_range", str(lp_price_range))
