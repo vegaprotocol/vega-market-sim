@@ -70,6 +70,7 @@ class BenchmarkScenario(Scenario):
         market_config: MarketConfig,
         initial_price: int,
         annualised_volatility: float = 1.5,
+        notional_trade_volume: int = 1000,
         num_steps: int = 60 * 24 * 30 * 3,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
@@ -92,6 +93,7 @@ class BenchmarkScenario(Scenario):
 
         self.initial_price = initial_price
         self.annualised_volatility = annualised_volatility
+        self.notional_trade_volume = notional_trade_volume
 
     def configure_agents(
         self,
@@ -186,7 +188,7 @@ class BenchmarkScenario(Scenario):
                     asset_name=asset_name,
                     buy_intensity=100,
                     sell_intensity=100,
-                    base_order_size=10,
+                    base_order_size=self.initial_price/self.notional_trade_volume/100,
                     step_bias=1,
                     initial_asset_mint=1e8,
                     tag=f"MARKET_{self.market_config.instrument.code}_AGENT_{str(i_agent).zfill(3)}",
@@ -202,10 +204,10 @@ class BenchmarkScenario(Scenario):
                     market_name=market_name,
                     asset_name=asset_name,
                     time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
-                    buy_volume=10,
-                    sell_volume=10,
-                    buy_intensity=10,
-                    sell_intensity=10,
+                    buy_volume=self.initial_price/self.notional_trade_volume/100,
+                    sell_volume=self.initial_price/self.notional_trade_volume/100,
+                    buy_intensity=100,
+                    sell_intensity=100,
                     submit_bias=1,
                     cancel_bias=0,
                     duration=120,
@@ -214,6 +216,7 @@ class BenchmarkScenario(Scenario):
                     mean=-3,
                     sigma=0.5,
                     tag=f"MARKET_{self.market_config.instrument.code}_AGENT_{str(i_agent).zfill(3)}",
+                    initial_asset_mint=1e8
                 )
                 for i_agent in range(1)
             ]
