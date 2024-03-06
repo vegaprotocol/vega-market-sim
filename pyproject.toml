@@ -41,6 +41,8 @@ tensorboard = {version = "*", optional = true}
 pettingzoo = {version = "*", optional = true}
 numba = {version = "^0.57.1", optional = true}
 tianshou = {version = "*", optional = true}
+vegapy = {git = "https://github.com/cdummett/vegapy/", branch="preview/v0.75.0-preview.2"}
+
 
 
 [tool.poetry.group.dev.dependencies]
