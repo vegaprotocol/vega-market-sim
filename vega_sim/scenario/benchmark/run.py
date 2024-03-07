@@ -15,17 +15,6 @@ from vegapy.service.networks.constants import Network
 import vegapy.visualisations as vis
 import vegapy.protobuf.protos as protos
 
-PARSER = argparse.ArgumentParser()
-PARSER.add_argument("-m", "--market", required=True, type=str)
-PARSER.add_argument("-s", "--steps", default=600, type=int)
-PARSER.add_argument("-p", "--pause", action="store_true")
-PARSER.add_argument("-d", "--debug", action="store_true")
-PARSER.add_argument("-o", "--output", action="store_true")
-PARSER.add_argument("-c", "--console", action="store_true")
-PARSER.add_argument("-w", "--wallet", action="store_true")
-PARSER.add_argument("--core-metrics-port", default=2723, type=int)
-PARSER.add_argument("--data-node-metrics-port", default=3651, type=int)
-
 
 def _run(
     scenario: BenchmarkScenario,
@@ -140,7 +129,17 @@ def _run(
 
 if __name__ == "__main__":
 
-    args = PARSER.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--market", required=True, type=str)
+    parser.add_argument("-s", "--steps", default=600, type=int)
+    parser.add_argument("-p", "--pause", action="store_true")
+    parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("-o", "--output", action="store_true")
+    parser.add_argument("-c", "--console", action="store_true")
+    parser.add_argument("-w", "--wallet", action="store_true")
+    parser.add_argument("--core-metrics-port", default=2723, type=int)
+    parser.add_argument("--data-node-metrics-port", default=3651, type=int)
+    args = parser.parse_args()
 
     logging.basicConfig(
         level=logging.DEBUG if args.debug else logging.INFO,
