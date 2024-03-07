@@ -4239,4 +4239,4 @@ profile = ["pytest-profiling", "snakeviz"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "832074022088a2549e7a8caf2a6e68456e66fbf3c089c0d79fb09e535a3d0cf7"
+content-hash = "15f8010b8917cf8c0003b50e675d865eba75b68f0019a161da33835d7427a048"
