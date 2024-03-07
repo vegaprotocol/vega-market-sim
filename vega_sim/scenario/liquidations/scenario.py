@@ -199,7 +199,7 @@ class LiquidationScenario(Scenario):
                     asset_name=asset_name,
                     side=side,
                     initial_asset_mint=self.mint_risky_traders,
-                    size_factor=0.6,
+                    leverage_factor=0.5,
                     step_bias=0.1,
                     tag=f"{side}_{str(i_agent).zfill(3)}",
                 )

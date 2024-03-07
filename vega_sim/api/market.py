@@ -199,15 +199,15 @@ class MarketConfig(Config):
     def load(self, opt: Optional[str] = None):
         config = super().load(opt=opt)
 
-        self.decimal_places = config["decimal_places"]
-        self.position_decimal_places = config["position_decimal_places"]
+        self.decimal_places = int(config["decimal_places"])
+        self.position_decimal_places = int(config["position_decimal_places"])
         self.liquidity_sla_parameters = LiquiditySLAParameters(
             opt=config["liquidity_sla_parameters"]
         )
         self.linear_slippage_factor = str(config["linear_slippage_factor"])
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
-        self.tick_size = config["tick_size"]
+        self.tick_size = int(config["tick_size"])
 
         self.successor = (
             Successor(opt=config["successor"])
