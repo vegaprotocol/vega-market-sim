@@ -1080,6 +1080,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
         max_order_size: float = 10000,
         order_validity_length: Optional[float] = None,
         auto_top_up: bool = False,
+        isolated_margin_factor: Optional[float] = None,
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.price_process_generator = price_process_generator
@@ -1112,6 +1113,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.mint_key = False
 
         self.order_validity_length = order_validity_length
+        self.isolated_margin_factor = isolated_margin_factor
+        self.update_margin_mode = True if isolated_margin_factor is not None else False
 
         self.supplied_amount = (
             supplied_amount if supplied_amount is not None else commitment_amount
@@ -1166,6 +1169,26 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.curr_price = next(self.price_process_generator)
 
         self._update_state(current_step=self.current_step)
+
+        if (self.update_margin_mode) and (
+            vega_state.market_state[self.market_id].trading_mode
+            != markets_protos.Market.TradingMode.TRADING_MODE_OPENING_AUCTION
+        ):
+            self.vega.update_margin_mode(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                margin_mode="MODE_ISOLATED_MARGIN",
+                margin_factor=self.isolated_margin_factor,
+                market_id=self.market_id,
+            )
+            self.update_margin_mode = (
+                self.vega.party_margin_mode(
+                    key_name=self.key_name,
+                    wallet_name=self.wallet_name,
+                    market_id=self.market_id,
+                ).margin_mode
+                != vega_protos.MarginMode.MARGIN_MODE_ISOLATED_MARGIN
+            )
 
         # Each step, MM posts optimal bid/ask depths
         position = self.vega.positions_by_market(
@@ -1463,6 +1486,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         state_update_freq: Optional[int] = None,
         max_order_size: float = 10000,
         order_validity_length: Optional[float] = None,
+        isolated_margin_factor: Optional[float] = None,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -1483,6 +1507,7 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             state_update_freq=state_update_freq,
             max_order_size=max_order_size,
             order_validity_length=order_validity_length,
+            isolated_margin_factor=isolated_margin_factor,
         )
         self.kappa = kappa
         self.tick_spacing = tick_spacing
