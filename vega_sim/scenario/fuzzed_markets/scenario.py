@@ -278,7 +278,7 @@ class FuzzingScenario(Scenario):
             market_agents["market_makers"] = [
                 ExponentialShapedMarketMaker(
                     wallet_name="MARKET_MAKERS",
-                    key_name=f"MARKET_{str(i_market).zfill(3)}",
+                    key_name=f"MARKET_{str(i_market).zfill(3)}_{str(i).zfill(3)}",
                     price_process_generator=iter(price_process),
                     initial_asset_mint=self.initial_asset_mint,
                     market_name=market_name,
