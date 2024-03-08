@@ -291,8 +291,10 @@ class FuzzingScenario(Scenario):
                     tick_spacing=0.05,
                     market_kappa=50,
                     state_update_freq=10,
-                    tag=f"MARKET_{str(i_market).zfill(3)}",
+                    isolated_margin_factor=isolated_margin_factor,
+                    tag=f"MARKET_{str(i_market).zfill(3)}_{str(i).zfill(3)}",
                 )
+                for i, isolated_margin_factor in enumerate([None, 0.1])
             ]
 
             market_agents["at_touch_market_makers"] = [
