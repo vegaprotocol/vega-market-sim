@@ -1059,8 +1059,7 @@ class VegaService(ABC):
             else None
         )
         if round_to_tick and price is not None:
-            # TODO: Implement tick size into the local data cache to avoid API calls
-            market = self.market_info(market_id)
+            market = self.data_cache.market_from_feed(market_id)
             submit_price = helpers.round_to_tick(
                 submit_price,
                 tick_size=market.tick_size,
@@ -1180,8 +1179,7 @@ class VegaService(ABC):
             if price is not None
             else None
         )
-        # TODO: Implement tick size into the local data cache to avoid API calls
-        market = self.market_info(market_id)
+        market = self.data_cache.market_from_feed(market_id)
         if round_to_tick:
             price = helpers.round_to_tick(
                 price,
@@ -2540,8 +2538,7 @@ class VegaService(ABC):
             else None
         )
         if round_to_tick:
-            # TODO: Implement tick size into the local data cache to avoid API calls
-            market = self.market_info(market_id)
+            market = self.data_cache.market_from_feed(market_id)
             price = helpers.round_to_tick(
                 price=price,
                 tick_size=market.tick_size,
