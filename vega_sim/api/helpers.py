@@ -2,6 +2,7 @@ import logging
 import random
 import string
 import time
+import math
 import sys
 from decimal import Decimal
 from typing import Any, Callable, Optional, TypeVar, Union
@@ -11,6 +12,7 @@ from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
 from vega_sim.proto.vega.markets_pb2 import Market
+from vega_sim.proto.vega.vega_pb2 import Side
 from vega_sim.tools.retry import retry
 
 T = TypeVar("T")
@@ -48,6 +50,16 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
         return 0
     to_convert = int(to_convert) if isinstance(to_convert, str) else to_convert
     return float(to_convert) / 10**decimals
+
+
+def round_to_tick(price: float, tick_size: int, side: Optional[Side] = None) -> float:
+    ticks = int(tick_size)
+    if side == Side.SIDE_BUY:
+        return int(math.floor(price / ticks) * ticks)
+    if side == Side.SIDE_SELL:
+        return int(math.ceil(price / ticks) * ticks)
+    # To avoid having to pass the side of the order for amendments
+    return int(round(price / ticks) * ticks)
 
 
 def wait_for_datanode_sync(
