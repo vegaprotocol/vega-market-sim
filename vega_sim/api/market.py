@@ -158,7 +158,7 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
-            "tick_size": "2",
+            "tick_size": "1",
         },
         "future": {
             "decimal_places": 4,
@@ -175,7 +175,7 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
-            "tick_size": "2",
+            "tick_size": "1",
         },
         "perpetual": {
             "decimal_places": 4,
@@ -192,7 +192,7 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
-            "tick_size": "2",
+            "tick_size": "1",
         },
     }
 
