@@ -279,7 +279,7 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
         state_update_freq: Optional[int] = None,
         random_state: Optional[RandomState] = None,
         side: str = "SIDE_BUY",
-        size_factor: float = 0.6,
+        leverage_factor: float = 0.5,
         initial_asset_mint: float = 1e5,
         step_bias: float = 0.05,
     ):
@@ -288,7 +288,7 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
         self.market_name = market_name
         self.asset_name = asset_name
 
-        self.size_factor = size_factor
+        self.leverage_factor = leverage_factor
         self.side = side
         self.random_state = random_state if random_state is not None else RandomState()
         self.initial_asset_mint = initial_asset_mint
@@ -343,34 +343,23 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
         if self.random_state.rand() > self.step_bias:
             return
 
+        # If we have spare money in our general we need to increase our position
         if account.general > 0:
-            add_to_margin = max(
-                (account.general + account.margin) * self.size_factor - account.margin,
-                0,
-            )
 
             risk_factors = self.vega.get_risk_factors(market_id=self.market_id)
-            risk_factor = (
+            max_allowed_leverage = 1 / (
                 risk_factors.long if self.side == "SIDE_BUY" else risk_factors.short
             )
-
-            size = add_to_margin / (midprice * risk_factor + 1e-20)
-
-            try:
-                self.vega.submit_market_order(
-                    trading_key=self.key_name,
-                    trading_wallet=self.wallet_name,
-                    market_id=self.market_id,
-                    fill_or_kill=False,
-                    side=self.side,
-                    volume=size,
-                    wait=False,
-                )
-            except Exception as e:
-                import pdb
-
-                pdb.set_trace()
-                print(f"There was an error {e}")
+            target_leverage = max_allowed_leverage * self.leverage_factor
+            self.vega.submit_market_order(
+                trading_key=self.key_name,
+                trading_wallet=self.wallet_name,
+                market_id=self.market_id,
+                fill_or_kill=False,
+                side=self.side,
+                volume=(account.general * target_leverage) / midprice,
+                wait=False,
+            )
 
 
 class RiskySimpleLiquidityProvider(StateAgentWithWallet):
@@ -762,7 +751,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         self.initial_mint = initial_mint
 
         self.market_config = (
-            market_config if market_config is not None else MarketConfig()
+            market_config if market_config is not None else MarketConfig("future")
         )
 
         if self.market_config.is_perp() and perp_settlement_data_generator == None:

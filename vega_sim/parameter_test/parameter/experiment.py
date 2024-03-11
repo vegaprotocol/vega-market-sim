@@ -91,7 +91,7 @@ def _run_parameter_iteration(
             )
 
         # Create the MarketObject using vega-sim defaults
-        market_config = MarketConfig("default")
+        market_config = MarketConfig("future")
 
         # Update additional market parameters and the parameter to vary if running a
         # market parameter experiment

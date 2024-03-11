@@ -43,9 +43,9 @@ A MarketConfig class has the following attributes which can be set:
 
 Examples:
 
-    A default MarketConfig object can be built with the following:
+    A default futures MarketConfig object can be built with the following:
 
-    $ market_config = MarketConfig("default")
+    $ market_config = MarketConfig("futures")
 
 
     Pre-configured liquidity monitoring parameters can be loaded with the following:
@@ -72,6 +72,9 @@ from typing import Optional, Union
 import vega_sim.proto.vega as vega_protos
 import vega_sim.proto.vega.data.v1 as oracles_protos
 import vega_sim.proto.vega.data_source_pb2 as data_source_protos
+
+from vega_sim.api.helpers import get_enum
+
 
 import vega_sim.builders as build
 
@@ -105,6 +108,29 @@ class Config:
             return self.OPTS[opt]
 
         if isinstance(opt, dict):
+
+            # Recursively ensure all keys are in snake case for protos
+            def ensure_snake_case(config_dict: dict) -> str:
+                new_dict = {}
+                for key, value in config_dict.items():
+                    new_key = "".join(
+                        ["_" + c.lower() if c.isupper() else c for c in key]
+                    ).lstrip("_")
+                    if isinstance(value, dict):
+                        new_dict[new_key] = ensure_snake_case(value)
+                    elif isinstance(value, list):
+                        new_list = []
+                        for element in value:
+                            if isinstance(element, dict):
+                                new_list.append(ensure_snake_case(element))
+                            else:
+                                new_list.append(element)
+                        new_dict[new_key] = new_list
+                    else:
+                        new_dict[new_key] = value
+                return new_dict
+
+            opt = ensure_snake_case(opt)
             defaults = self.OPTS["default"]
             for key in defaults.keys():
                 if key not in opt.keys():
@@ -132,7 +158,24 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
-            "tick_size": 1e-4,
+            "tick_size": "1",
+        },
+        "future": {
+            "decimal_places": 4,
+            "position_decimal_places": 2,
+            "metadata": None,
+            "price_monitoring_parameters": "default",
+            "liquidity_monitoring_parameters": "default",
+            "log_normal": "default",
+            "instrument": "future",
+            "linear_slippage_factor": 1e-3,
+            "quadratic_slippage_factor": 0,
+            "successor": None,
+            "liquidity_sla_parameters": "default",
+            "liquidity_fee_settings": "default",
+            "liquidation_strategy": "default",
+            "mark_price_configuration": "default",
+            "tick_size": "1",
         },
         "perpetual": {
             "decimal_places": 4,
@@ -149,22 +192,22 @@ class MarketConfig(Config):
             "liquidity_fee_settings": "default",
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
-            "tick_size": 1e-4,
+            "tick_size": "1",
         },
     }
 
     def load(self, opt: Optional[str] = None):
         config = super().load(opt=opt)
 
-        self.decimal_places = config["decimal_places"]
-        self.position_decimal_places = config["position_decimal_places"]
+        self.decimal_places = int(config["decimal_places"])
+        self.position_decimal_places = int(config["position_decimal_places"])
         self.liquidity_sla_parameters = LiquiditySLAParameters(
             opt=config["liquidity_sla_parameters"]
         )
         self.linear_slippage_factor = str(config["linear_slippage_factor"])
         self.quadratic_slippage_factor = str(config["quadratic_slippage_factor"])
         self.metadata = config["metadata"]
-        self.tick_size = config["tick_size"]
+        self.tick_size = int(config["tick_size"])
 
         self.successor = (
             Successor(opt=config["successor"])
@@ -192,9 +235,9 @@ class MarketConfig(Config):
 
     def build(self):
         new_market = vega_protos.governance.NewMarket(
-            changes=build.governance.new_market_configuration(
-                decimal_places=self.decimal_places,
-                position_decimal_places=self.position_decimal_places,
+            changes=vega_protos.governance.NewMarketConfiguration(
+                decimal_places=int(self.decimal_places),
+                position_decimal_places=int(self.position_decimal_places),
                 liquidity_sla_parameters=self.liquidity_sla_parameters.build(),
                 metadata=self.metadata,
                 instrument=self.instrument.build(),
@@ -209,7 +252,7 @@ class MarketConfig(Config):
                 liquidity_fee_settings=self.liquidity_fee_settings.build(),
                 liquidation_strategy=self.liquidation_strategy.build(),
                 mark_price_configuration=self.mark_price_configuration.build(),
-                tick_size=self.tick_size,
+                tick_size=str(self.tick_size),
             )
         )
         return new_market
@@ -441,11 +484,15 @@ class MarkPriceConfiguration(Config):
         )
 
     def build(self):
-        return build.markets.composite_price_process(
-            composite_price_type=self.composite_price_type,
-            decay_weight=self.decay_weight,
-            decay_power=self.decay_power,
-            cash_amount=self.cash_amount,
+        return vega_protos.markets.CompositePriceConfiguration(
+            composite_price_type=get_enum(
+                self.composite_price_type, vega_protos.markets.CompositePriceType
+            ),
+            decay_weight=(
+                str(self.decay_weight) if self.decay_weight is not None else None
+            ),
+            decay_power=int(self.decay_power) if self.decay_power is not None else None,
+            cash_amount=str(self.cash_amount) if self.cash_amount is not None else None,
             source_weights=self.source_weights,
             source_staleness_tolerance=self.source_staleness_tolerance,
         )
@@ -504,6 +551,12 @@ class InstrumentConfiguration(Config):
         "default": {
             "name": None,
             "code": None,
+            "future": None,
+            "perpetual": None,
+        },
+        "future": {
+            "name": None,
+            "code": None,
             "future": "default",
             "perpetual": None,
         },
@@ -546,7 +599,7 @@ class FutureProduct(Config):
         "default": {
             "settlement_asset": None,
             "quote_name": None,
-            "number_decimal_places": None,
+            "number_decimal_places": 18,
             "terminating_key": None,
         }
     }
@@ -630,9 +683,9 @@ class PerpetualProduct(Config):
         "default": {
             "settlement_asset": None,
             "quote_name": None,
-            "number_decimal_places": None,
+            "number_decimal_places": 18,
             "settlement_key": None,
-            "funding_payment_frequency_in_seconds": 60,
+            "funding_payment_frequency_in_seconds": 300,
             "margin_funding_factor": 1,
             "interest_rate": 0,
             "clamp_lower_bound": 0,

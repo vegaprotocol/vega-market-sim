@@ -81,7 +81,7 @@ class LiquidationScenario(Scenario):
         self.agents = []
 
         # Create market configuration
-        market_config = MarketConfig()
+        market_config = MarketConfig("future")
         market_name = "ETH/USDT Expiry 2023 Sept 30th"
         market_code = "ETH/USDT-230930"
         asset_name = "USDT"
@@ -199,7 +199,7 @@ class LiquidationScenario(Scenario):
                     asset_name=asset_name,
                     side=side,
                     initial_asset_mint=self.mint_risky_traders,
-                    size_factor=0.6,
+                    leverage_factor=0.5,
                     step_bias=0.1,
                     tag=f"{side}_{str(i_agent).zfill(3)}",
                 )

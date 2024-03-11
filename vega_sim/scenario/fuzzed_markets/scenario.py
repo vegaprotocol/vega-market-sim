@@ -225,7 +225,7 @@ class FuzzingScenario(Scenario):
 
             market_agents = {}
             # Create fuzzed market config
-            market_config = MarketConfig("perpetual" if perps_market else None)
+            market_config = MarketConfig("perpetual" if perps_market else "future")
             market_config.set(
                 "liquidity_monitoring_parameters.target_stake_parameters.scaling_factor",
                 1e-4,
@@ -410,7 +410,7 @@ class FuzzingScenario(Scenario):
                     asset_name=asset_name,
                     side=side,
                     initial_asset_mint=1_000,
-                    size_factor=0.5,
+                    leverage_factor=0.5,
                     step_bias=0.1,
                     tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )

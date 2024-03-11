@@ -32,11 +32,7 @@ def generate_id(n: int) -> str:
 
 
 def get_enum(value: Union[str, T, int], enum_class: Any) -> T:
-    return (
-        value
-        if isinstance(value, (type(enum_class), int))
-        else getattr(enum_class, value)
-    )
+    return getattr(enum_class, value) if isinstance(value, str) else value
 
 
 def enum_to_str(e: Any, val: int) -> str:

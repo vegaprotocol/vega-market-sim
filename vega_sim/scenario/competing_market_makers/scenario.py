@@ -149,9 +149,8 @@ class CompetingMarketMakers(Scenario):
         self.asset_decimals = asset_decimals
 
         if market_config is None:
-            self.market_config = MarketConfig()
+            self.market_config = MarketConfig("perpetual")
             self.market_config.load(BTCUSDPERP)
-            self.market_config.instrument.future = None
 
         # Validate and set LP parameters
         lengths = [
