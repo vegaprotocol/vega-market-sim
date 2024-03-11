@@ -10,7 +10,7 @@ CONFIG = MarketConfig(
     {
         "decimalPlaces": "2",
         "positionDecimalPlaces": "1",
-        "tickSize": "1",
+        "tickSize": "2",
         "instrument": {
             "name": "Solana / Tether USD (Perpetual)",
             "code": "SOL/USDT",

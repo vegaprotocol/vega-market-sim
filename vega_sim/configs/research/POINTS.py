@@ -5,6 +5,7 @@ CONFIG = MarketConfig(
         "linearSlippageFactor": "0.001",
         "decimalPlaces": "5",
         "positionDecimalPlaces": "0",
+        "tick_size": "2",
         "instrument": {
             "name": "EigenLayer Points / USDT (Futures market)",
             "code": "EGLP/USDT.POINTS",
@@ -524,6 +525,5 @@ CONFIG = MarketConfig(
         "markPriceConfiguration": {
             "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE"
         },
-        "tick_size": 1,
     }
 )
