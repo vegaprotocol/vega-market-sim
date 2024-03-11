@@ -43,9 +43,9 @@ A MarketConfig class has the following attributes which can be set:
 
 Examples:
 
-    A default MarketConfig object can be built with the following:
+    A default futures MarketConfig object can be built with the following:
 
-    $ market_config = MarketConfig("default")
+    $ market_config = MarketConfig("futures")
 
 
     Pre-configured liquidity monitoring parameters can be loaded with the following:
