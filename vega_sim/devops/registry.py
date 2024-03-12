@@ -272,6 +272,7 @@ AGENTS = {
         num_levels=15,
         initial_asset_mint=0,
         commitment_amount=500,
+        bound_perc=0.17,
         fee_amount=0.001,
         price_width_above=2.0,
         price_width_below=0.99,

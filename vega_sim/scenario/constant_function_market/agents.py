@@ -257,6 +257,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         num_levels: int = 25,
         tick_spacing: float = 1,
         asset_decimal_places: int = 0,
+        bound_perc: float = 0.2,
         tag: str = "",
         wallet_name: str = None,
         orders_from_stream: Optional[bool] = True,
@@ -306,6 +307,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
 
         self.curr_bids, self.curr_asks = None, None
         self.use_last_price_as_ref = use_last_price_as_ref
+        self.bound_perc = bound_perc
 
     def initialise(
         self,
@@ -355,10 +357,49 @@ class CFMV3MarketMaker(ShapedMarketMaker):
 
         return abs(start_fut_pos - end_fut_pos)
 
+    def _add_orders_at_bounds(
+        self,
+        bound_perc: float,
+        existing_orders: List[MMOrder],
+    ) -> Tuple[List[MMOrder], List[MMOrder]]:
+        existing_buys = []
+        existing_sells = []
+
+        for o in existing_orders:
+            if o.side == vega_protos.SIDE_BUY:
+                existing_buys.append(o)
+            else:
+                existing_sells.append(o)
+        best_bid, best_ask = self.vega.best_prices(self.market_id)
+        mid = (best_ask + best_bid) / 2
+        lower = mid * (1 - bound_perc)
+        upper = mid * (1 + bound_perc)
+
+        buy_vol = sum(a.price * a.size for a in existing_buys if a.price >= lower)
+        sell_vol = sum(a.price * a.size for a in existing_sells if a.price <= upper)
+
+        required_vol = self.commitment_amount * 20
+
+        buy_orders = (
+            [MMOrder((required_vol - buy_vol) / lower, lower, vega_protos.SIDE_BUY)]
+            if buy_vol < required_vol
+            else []
+        )
+
+        sell_orders = (
+            [MMOrder((required_vol - sell_vol) / upper, upper, vega_protos.SIDE_SELL)]
+            if sell_vol < required_vol
+            else []
+        )
+        import pdb
+
+        pdb.set_trace()
+        return buy_orders + sell_orders
+
     def _generate_shape(
         self, bid_price_depth: float, ask_price_depth: float
     ) -> Tuple[List[MMOrder], List[MMOrder]]:
-        return self._generate_shape_calcs(
+        base_calcs = self._generate_shape_calcs(
             balance=sum(
                 a.balance
                 for a in self.vega.get_accounts_from_stream(
@@ -369,6 +410,10 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             ),
             position=self.current_position,
         )
+        additional_price_bounds = self._add_orders_at_bounds(
+            bound_perc=self.bound_perc, existing_orders=base_calcs
+        )
+        return base_calcs + additional_price_bounds
 
     def _generate_shape_calcs(
         self,
