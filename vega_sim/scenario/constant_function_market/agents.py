@@ -361,7 +361,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         self,
         bound_perc: float,
         existing_orders: List[MMOrder],
-    ) -> Tuple[List[MMOrder], List[MMOrder]]:
+    ) -> List[MMOrder]:
         existing_buys = []
         existing_sells = []
 
@@ -371,12 +371,24 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             else:
                 existing_sells.append(o)
         best_bid, best_ask = self.vega.best_prices(self.market_id)
+
+        if best_bid is None or best_ask is None:
+            return []
+
         mid = (best_ask + best_bid) / 2
         lower = mid * (1 - bound_perc)
         upper = mid * (1 + bound_perc)
 
-        buy_vol = sum(a.price * a.size for a in existing_buys if a.price >= lower)
-        sell_vol = sum(a.price * a.size for a in existing_sells if a.price <= upper)
+        buy_vol = sum(
+            a.price * 100 * round(a.size / 100)
+            for a in existing_buys
+            if a.price >= lower
+        )
+        sell_vol = sum(
+            a.price * 100 * round(a.size / 100)
+            for a in existing_sells
+            if a.price <= upper
+        )
 
         required_vol = self.commitment_amount * 20
 
