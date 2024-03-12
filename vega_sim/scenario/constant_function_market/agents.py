@@ -390,7 +390,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             if a.price <= upper
         )
 
-        required_vol = self.commitment_amount * 20
+        required_vol = self.commitment_amount * 22
 
         buy_orders = (
             [MMOrder((required_vol - buy_vol) / lower, lower, vega_protos.SIDE_BUY)]
@@ -403,9 +403,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             if sell_vol < required_vol
             else []
         )
-        import pdb
 
-        pdb.set_trace()
         return buy_orders + sell_orders
 
     def _generate_shape(
