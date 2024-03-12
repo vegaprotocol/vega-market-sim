@@ -1170,11 +1170,9 @@ class VegaService(ABC):
                 optional str, name of wallet to use
         """
         price = (
-            str(
-                num_to_padded_int(
-                    price,
-                    self.market_price_decimals[market_id],
-                )
+            num_to_padded_int(
+                price,
+                self.market_price_decimals[market_id],
             )
             if price is not None
             else None
@@ -1191,7 +1189,7 @@ class VegaService(ABC):
             wallet_name=wallet_name,
             market_id=market_id,
             order_id=order_id,
-            price=price,
+            price=str(price),
             expires_at=expires_at,
             pegged_offset=(
                 str(
