@@ -391,9 +391,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             if sell_vol < required_vol
             else []
         )
-        import pdb
 
-        pdb.set_trace()
         return buy_orders + sell_orders
 
     def _generate_shape(
