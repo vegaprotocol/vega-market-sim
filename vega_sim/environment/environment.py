@@ -544,6 +544,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
 
     def step(self, vega: VegaServiceNetwork) -> None:
         t = time.time()
+        print("Stepping")
         state = self.state_func(vega)
         logging.debug(f"Get state took {time.time() - t} seconds.")
         for agent in (
@@ -551,6 +552,7 @@ class NetworkEnvironment(MarketEnvironmentWithState):
             if self.random_agent_ordering
             else self.agents
         ):
+            agent.step(state)
             try:
                 agent.step(state)
             except Exception as e:

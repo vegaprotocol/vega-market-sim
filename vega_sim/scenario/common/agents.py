@@ -1564,10 +1564,11 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     ),
                     side=order.side,
                     expires_at=expires_at,
-                    post_only=False,
+                    post_only=True,
                 )
 
-                submissions.append(transaction)
+                if transaction is not None:
+                    submissions.append(transaction)
 
         if not cancel_and_replace and len(existing_orders) > len(new_shape):
             for order in existing_orders[len(new_shape) :]:

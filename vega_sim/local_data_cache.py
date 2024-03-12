@@ -361,7 +361,10 @@ class LocalDataCache:
                 self._asset_from_feed[asset.id] = asset
 
     def initialise_accounts(self):
-        base_accounts = data.list_accounts(data_client=self._trading_data_client)
+        base_accounts = data.list_accounts(
+            data_client=self._trading_data_client,
+            pub_key="683a68eab083f765a93d342bb15e2fed41a9d8f9a61212b6af1e11e883620125",
+        )
 
         with self.account_lock:
             for account in base_accounts:
@@ -448,6 +451,7 @@ class LocalDataCache:
     def initialise_transfer_monitoring(
         self,
     ):
+        return
         base_transfers = []
 
         base_transfers.extend(
@@ -459,6 +463,7 @@ class LocalDataCache:
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
     def initialise_network_parameters(self):
+        return
         base_network_parameters = data.list_network_parameters(
             data_client=self._trading_data_client
         )

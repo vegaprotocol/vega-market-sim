@@ -112,20 +112,14 @@ def main():
             run_with_wallet=True,
         ) as vega:
             if agent is not None:
-                agent.asset_name = vega.data_cache.asset_from_feed(
-                    asset_id=vega.market_info(
-                        vega.find_market_id(
-                            name=agent.market_name, raise_on_missing=True
-                        )
-                    ).tradable_instrument.instrument.perpetual.settlement_asset
-                    or vega.data_cache.asset_from_feed(
-                        asset_id=vega.market_info(
-                            vega.find_market_id(
-                                name=agent.market_name, raise_on_missing=True
-                            )
-                        ).tradable_instrument.instrument.future.settlement_asset
-                    ).details.symbol
+                market_info = vega.market_info(
+                    vega.find_market_id(name=agent.market_name, raise_on_missing=True)
                 )
+                agent.asset_name = (
+                    market_info.tradable_instrument.instrument.perpetual.settlement_asset
+                    or market_info.tradable_instrument.instrument.future.settlement_asset
+                )
+
             scenario.run_iteration(
                 vega=vega,
                 network=Network[args.network],

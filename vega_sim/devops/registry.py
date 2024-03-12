@@ -4,25 +4,21 @@ Module contains preconfigured scenarios.
 
 """
 
-from vega_sim.devops.scenario import DevOpsScenario
-
-from vega_sim.scenario.common.agents import (
-    ArbitrageLiquidityProvider,
-    ExponentialShapedMarketMaker,
-)
-
-from vega_sim.scenario.constant_function_market.agents import CFMV3MarketMaker
-
 from vega_sim.devops.classes import (
+    AuctionTraderArgs,
     MarketMakerArgs,
     MarketManagerArgs,
-    AuctionTraderArgs,
     RandomTraderArgs,
     SensitiveTraderArgs,
     SimulationArgs,
 )
-
+from vega_sim.devops.scenario import DevOpsScenario
+from vega_sim.scenario.common.agents import (
+    ArbitrageLiquidityProvider,
+    ExponentialShapedMarketMaker,
+)
 from vega_sim.scenario.common.utils.price_process import Granularity, LivePrice
+from vega_sim.scenario.constant_function_market.agents import CFMV3MarketMaker
 
 SCENARIOS = {
     "ETHUSD": lambda: DevOpsScenario(
@@ -255,14 +251,33 @@ AGENTS = {
         market_name=None,
         asset_name=None,
         num_steps=0,
-        tick_spacing=10,
-        num_levels=25,
+        tick_spacing=0.005,
+        num_levels=15,
         initial_asset_mint=0,
         commitment_amount=0,
-        price_width_above=0.1,
-        price_width_below=0.1,
-        margin_usage_at_bound_above=0.9,
-        margin_usage_at_bound_below=0.9,
-        initial_price=59200,
+        price_width_above=2.0,
+        price_width_below=0.98,
+        max_loss_at_bound_above=0.7,
+        max_loss_at_bound_below=0.7,
+        initial_price=0.1674,
+        base_balance=100_000,
+    ),
+    "amm_market_maker_kepusd_prod": lambda: CFMV3MarketMaker(
+        wallet_name=None,
+        key_name=None,
+        market_name=None,
+        asset_name=None,
+        num_steps=0,
+        tick_spacing=0.004,
+        num_levels=15,
+        initial_asset_mint=0,
+        commitment_amount=500,
+        fee_amount=0.001,
+        price_width_above=2.0,
+        price_width_below=0.99,
+        max_loss_at_bound_above=0.9,
+        max_loss_at_bound_below=0.9,
+        initial_price=0.125,
+        base_balance=3000,
     ),
 }

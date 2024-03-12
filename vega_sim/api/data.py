@@ -95,6 +95,8 @@ MarginLevels = namedtuple(
         "market_id",
         "asset",
         "timestamp",
+        "margin_mode",
+        "margin_factor",
     ],
 )
 
@@ -915,6 +917,7 @@ def _trade_from_proto(
 def _margin_level_from_proto(
     margin_level: vega_protos.vega.MarginLevels, decimal_spec: DecimalSpec
 ) -> MarginLevels:
+    print(margin_level)
     return MarginLevels(
         maintenance_margin=num_from_padded_int(
             margin_level.maintenance_margin, decimal_spec.asset_decimals
@@ -932,6 +935,8 @@ def _margin_level_from_proto(
         market_id=margin_level.market_id,
         asset=margin_level.asset,
         timestamp=margin_level.timestamp,
+        margin_mode=margin_level.margin_mode,
+        margin_factor=float(margin_level.margin_factor),
     )
 
 
