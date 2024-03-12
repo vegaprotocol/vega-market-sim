@@ -5637,3 +5637,63 @@ class PartyMarginMode(_message.Message):
         max_theoretical_leverage: _Optional[str] = ...,
         at_epoch: _Optional[int] = ...,
     ) -> None: ...
+
+class TimeWeightedNotionalPosition(_message.Message):
+    __slots__ = (
+        "asset_id",
+        "party_id",
+        "game_id",
+        "at_epoch",
+        "time_weighted_notional_position",
+        "last_updated",
+    )
+    ASSET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TIME_WEIGHTED_NOTIONAL_POSITION_FIELD_NUMBER: _ClassVar[int]
+    LAST_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    asset_id: str
+    party_id: str
+    game_id: str
+    at_epoch: int
+    time_weighted_notional_position: str
+    last_updated: int
+    def __init__(
+        self,
+        asset_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
+        at_epoch: _Optional[int] = ...,
+        time_weighted_notional_position: _Optional[str] = ...,
+        last_updated: _Optional[int] = ...,
+    ) -> None: ...
+
+class GetTimeWeightedNotionalPositionRequest(_message.Message):
+    __slots__ = ("asset_id", "party_id", "game_id", "at_epoch")
+    ASSET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    AT_EPOCH_FIELD_NUMBER: _ClassVar[int]
+    asset_id: str
+    party_id: str
+    game_id: str
+    at_epoch: int
+    def __init__(
+        self,
+        asset_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        game_id: _Optional[str] = ...,
+        at_epoch: _Optional[int] = ...,
+    ) -> None: ...
+
+class GetTimeWeightedNotionalPositionResponse(_message.Message):
+    __slots__ = ("time_weighted_notional_position",)
+    TIME_WEIGHTED_NOTIONAL_POSITION_FIELD_NUMBER: _ClassVar[int]
+    time_weighted_notional_position: TimeWeightedNotionalPosition
+    def __init__(
+        self,
+        time_weighted_notional_position: _Optional[
+            _Union[TimeWeightedNotionalPosition, _Mapping]
+        ] = ...,
+    ) -> None: ...

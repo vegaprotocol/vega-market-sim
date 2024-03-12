@@ -17,6 +17,7 @@ class EthContractCallEvent(_message.Message):
         "result",
         "error",
         "source_chain_id",
+        "heartbeat",
     )
     SPEC_ID_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
@@ -24,12 +25,14 @@ class EthContractCallEvent(_message.Message):
     RESULT_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
     SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
+    HEARTBEAT_FIELD_NUMBER: _ClassVar[int]
     spec_id: str
     block_height: int
     block_time: int
     result: bytes
     error: str
     source_chain_id: int
+    heartbeat: bool
     def __init__(
         self,
         spec_id: _Optional[str] = ...,
@@ -38,6 +41,7 @@ class EthContractCallEvent(_message.Message):
         result: _Optional[bytes] = ...,
         error: _Optional[str] = ...,
         source_chain_id: _Optional[int] = ...,
+        heartbeat: bool = ...,
     ) -> None: ...
 
 class BuiltinAssetDeposit(_message.Message):
