@@ -390,7 +390,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             if a.price <= upper
         )
 
-        required_vol = self.commitment_amount * 22
+        required_vol = self.commitment_amount * 23
 
         buy_orders = (
             [MMOrder((required_vol - buy_vol) / lower, lower, vega_protos.SIDE_BUY)]
