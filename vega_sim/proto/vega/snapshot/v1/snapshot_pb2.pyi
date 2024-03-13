@@ -195,6 +195,7 @@ class Payload(_message.Message):
         "governance_batch_active",
         "parties",
         "l2_eth_oracles",
+        "eth_oracle_verifier_misc",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -273,6 +274,7 @@ class Payload(_message.Message):
     GOVERNANCE_BATCH_ACTIVE_FIELD_NUMBER: _ClassVar[int]
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     L2_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
+    ETH_ORACLE_VERIFIER_MISC_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -350,6 +352,7 @@ class Payload(_message.Message):
     governance_batch_active: GovernanceBatchActive
     parties: Parties
     l2_eth_oracles: L2EthOracles
+    eth_oracle_verifier_misc: EthOracleVerifierMisc
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -479,6 +482,9 @@ class Payload(_message.Message):
         ] = ...,
         parties: _Optional[_Union[Parties, _Mapping]] = ...,
         l2_eth_oracles: _Optional[_Union[L2EthOracles, _Mapping]] = ...,
+        eth_oracle_verifier_misc: _Optional[
+            _Union[EthOracleVerifierMisc, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class OrderHoldingQuantities(_message.Message):
@@ -2378,18 +2384,21 @@ class L2EthOracles(_message.Message):
     ) -> None: ...
 
 class ChainIdEthOracles(_message.Message):
-    __slots__ = ("source_chain_id", "last_block", "call_results")
+    __slots__ = ("source_chain_id", "last_block", "call_results", "misc")
     SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     LAST_BLOCK_FIELD_NUMBER: _ClassVar[int]
     CALL_RESULTS_FIELD_NUMBER: _ClassVar[int]
+    MISC_FIELD_NUMBER: _ClassVar[int]
     source_chain_id: str
     last_block: EthOracleVerifierLastBlock
     call_results: EthContractCallResults
+    misc: EthOracleVerifierMisc
     def __init__(
         self,
         source_chain_id: _Optional[str] = ...,
         last_block: _Optional[_Union[EthOracleVerifierLastBlock, _Mapping]] = ...,
         call_results: _Optional[_Union[EthContractCallResults, _Mapping]] = ...,
+        misc: _Optional[_Union[EthOracleVerifierMisc, _Mapping]] = ...,
     ) -> None: ...
 
 class EthOracleVerifierLastBlock(_message.Message):
@@ -2400,6 +2409,18 @@ class EthOracleVerifierLastBlock(_message.Message):
     block_time: int
     def __init__(
         self, block_height: _Optional[int] = ..., block_time: _Optional[int] = ...
+    ) -> None: ...
+
+class EthOracleVerifierMisc(_message.Message):
+    __slots__ = ("buckets", "patch_block")
+    BUCKETS_FIELD_NUMBER: _ClassVar[int]
+    PATCH_BLOCK_FIELD_NUMBER: _ClassVar[int]
+    buckets: _containers.RepeatedCompositeFieldContainer[EthVerifierBucket]
+    patch_block: EthOracleVerifierLastBlock
+    def __init__(
+        self,
+        buckets: _Optional[_Iterable[_Union[EthVerifierBucket, _Mapping]]] = ...,
+        patch_block: _Optional[_Union[EthOracleVerifierLastBlock, _Mapping]] = ...,
     ) -> None: ...
 
 class EthContractCallResults(_message.Message):
@@ -2437,6 +2458,16 @@ class EthContractCallResult(_message.Message):
         result: _Optional[bytes] = ...,
         error: _Optional[str] = ...,
         chain_id: _Optional[int] = ...,
+    ) -> None: ...
+
+class EthVerifierBucket(_message.Message):
+    __slots__ = ("ts", "hashes")
+    TS_FIELD_NUMBER: _ClassVar[int]
+    HASHES_FIELD_NUMBER: _ClassVar[int]
+    ts: int
+    hashes: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(
+        self, ts: _Optional[int] = ..., hashes: _Optional[_Iterable[str]] = ...
     ) -> None: ...
 
 class PendingKeyRotation(_message.Message):
