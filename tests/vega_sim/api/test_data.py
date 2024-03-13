@@ -512,7 +512,8 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
             party_id="party",
             market_id="market",
             asset="asset",
-            timestamp=1251825938592,
+            timestamp=datetime.datetime(1970, 1, 1, 1, 0, 0),
+            margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
         )
     ]
 
@@ -536,7 +537,8 @@ def test_market_limits(mk_asset_decimals, trading_data_v2_servicer_and_port):
                             party_id="party",
                             market_id="market",
                             asset="asset",
-                            timestamp=1251825938592,
+                            timestamp=0,
+                            margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
                         ),
                     )
                 ],
@@ -840,7 +842,8 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
             party_id="party",
             market_id=expected_market_id,
             asset="asset",
-            timestamp=0000000000000000000,
+            timestamp=datetime.datetime(1970, 1, 1, 1, 0, 0),
+            margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
         ),
         worst_case=MarginLevels(
             maintenance_margin=10,
@@ -850,7 +853,8 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
             party_id="party",
             market_id=expected_market_id,
             asset="asset",
-            timestamp=0000000000000000000,
+            timestamp=datetime.datetime(1970, 1, 1, 1, 0, 0),
+            margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
         ),
     )
     expected_liquidation = LiquidationEstimate(
@@ -877,7 +881,8 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
                     party_id="party",
                     market_id=request.market_id,
                     asset="asset",
-                    timestamp=0000000000000000000,
+                    timestamp=0,
+                    margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
                 ),
                 worst_case=vega_protos.vega.MarginLevels(
                     maintenance_margin="100",
@@ -887,7 +892,8 @@ def test_estimate_position(trading_data_v2_servicer_and_port):
                     party_id="party",
                     market_id=request.market_id,
                     asset="asset",
-                    timestamp=0000000000000000000,
+                    timestamp=0,
+                    margin_mode=vega_protos.vega.MarginMode.MARGIN_MODE_ISOLATED_MARGIN,
                 ),
             ),
             liquidation=data_node_protos_v2.trading_data.LiquidationEstimate(

@@ -91,7 +91,7 @@ class MarginLevels:
     initial_margin: float
     collateral_release_level: float
     party_id: str
-    party_id: str
+    market_id: str
     asset: str
     timestamp: datetime.datetime
     margin_mode: vega_protos.vega.MarginMode
@@ -971,7 +971,7 @@ def _margin_level_from_proto(
         margin_mode=margin_level.margin_mode,
         margin_factor=(
             float(margin_level.margin_factor)
-            if margin_level.margin_factor is not None
+            if margin_level.margin_factor != ""
             else None
         ),
     )
