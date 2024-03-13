@@ -996,3 +996,18 @@ def list_oracle_data(
         request_func=lambda x: data_client.ListOracleData(x).oracle_data,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+@_retry(3)
+def list_party_margin_modes(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+) -> List[vega_protos.oracle.OracleData]:
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListPartyMarginModesRequest(
+            market_id=market_id, party_id=party_id
+        ),
+        request_func=lambda x: data_client.ListPartyMarginModes(x).party_margin_modes,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

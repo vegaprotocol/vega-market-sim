@@ -3740,3 +3740,13 @@ class VegaService(ABC):
             transaction_type=transaction_type,
             key_name=key_name,
         )
+
+    def party_margin_mode(
+        self, key_name: str, market_id: str, wallet_name: Optional[str] = None
+    ) -> data.PartyMarginMode:
+        party_margin_modes = data.list_party_margin_modes(
+            data_client=self.trading_data_client_v2,
+            party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
+            market_id=market_id,
+        )
+        return party_margin_modes[0] if party_margin_modes is not None else None

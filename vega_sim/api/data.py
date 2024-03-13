@@ -84,19 +84,18 @@ class Order:
     iceberg_order: Optional[IcebergOrder]
 
 
-MarginLevels = namedtuple(
-    "MarginLevels",
-    [
-        "maintenance_margin",
-        "search_level",
-        "initial_margin",
-        "collateral_release_level",
-        "party_id",
-        "market_id",
-        "asset",
-        "timestamp",
-    ],
-)
+@dataclass(frozen=True)
+class MarginLevels:
+    maintenance_margin: float
+    search_level: float
+    initial_margin: float
+    collateral_release_level: float
+    party_id: str
+    market_id: str
+    asset: str
+    timestamp: datetime.datetime
+    margin_mode: vega_protos.vega.MarginMode
+    margin_factor: Optional[float] = None
 
 
 # TODO: Implement class and add to _transfer_from_proto
@@ -693,6 +692,43 @@ class FundingPeriod:
     funding_rate: Optional[float]
 
 
+@dataclass(frozen=True)
+class PartyMarginMode:
+    market_id: str
+    party_id: str
+    margin_mode: vega_protos.vega.MarginMode
+    at_epoch: int
+    margin_factor: Optional[float]
+    min_theoretical_margin_factor: Optional[float]
+    max_theoretical_leverage: Optional[float]
+
+
+def _party_margin_mode_from_proto(
+    party_margin_mode: data_node_protos_v2.trading_data.PartyMarginMode,
+) -> PartyMarginMode:
+    return PartyMarginMode(
+        market_id=party_margin_mode.market_id,
+        party_id=party_margin_mode.party_id,
+        margin_mode=party_margin_mode.margin_mode,
+        at_epoch=int(party_margin_mode.at_epoch),
+        margin_factor=(
+            float(party_margin_mode.margin_factor)
+            if party_margin_mode.margin_factor != ""
+            else None
+        ),
+        min_theoretical_margin_factor=(
+            float(party_margin_mode.min_theoretical_margin_factor)
+            if party_margin_mode.min_theoretical_margin_factor != ""
+            else None
+        ),
+        max_theoretical_leverage=(
+            float(party_margin_mode.max_theoretical_leverage)
+            if party_margin_mode.max_theoretical_leverage != ""
+            else None
+        ),
+    )
+
+
 def _pegged_order_from_proto(pegged_order, decimal_spec: DecimalSpec) -> PeggedOrder:
     return PeggedOrder(
         reference=pegged_order.reference,
@@ -931,7 +967,16 @@ def _margin_level_from_proto(
         party_id=margin_level.party_id,
         market_id=margin_level.market_id,
         asset=margin_level.asset,
-        timestamp=margin_level.timestamp,
+        timestamp=datetime.datetime.fromtimestamp(
+            int(margin_level.timestamp / 1e9),
+            tz=datetime.timezone.utc,
+        ),
+        margin_mode=margin_level.margin_mode,
+        margin_factor=(
+            float(margin_level.margin_factor)
+            if margin_level.margin_factor != ""
+            else None
+        ),
     )
 
 
@@ -3153,4 +3198,17 @@ def list_funding_periods(
     return [
         _funding_period_from_proto(funding_period=proto, decimal_spec=decimal_spec)
         for proto in response
+    ]
+
+
+def list_party_margin_modes(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+):
+    return [
+        _party_margin_mode_from_proto(proto)
+        for proto in data_raw.list_party_margin_modes(
+            data_client=data_client, market_id=market_id, party_id=party_id
+        )
     ]
