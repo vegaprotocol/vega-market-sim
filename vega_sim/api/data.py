@@ -967,7 +967,10 @@ def _margin_level_from_proto(
         party_id=margin_level.party_id,
         market_id=margin_level.market_id,
         asset=margin_level.asset,
-        timestamp=datetime.datetime.fromtimestamp(int(margin_level.timestamp / 1e9)),
+        timestamp=datetime.datetime.fromtimestamp(
+            int(margin_level.timestamp / 1e9),
+            tz=datetime.timezone.utc,
+        ),
         margin_mode=margin_level.margin_mode,
         margin_factor=(
             float(margin_level.margin_factor)
