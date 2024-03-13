@@ -1112,7 +1112,7 @@ class Vote(_message.Message):
         "total_governance_token_balance",
         "total_governance_token_weight",
         "total_equity_like_share_weight",
-        "per_market_equity_like_share_weight",
+        "els_per_market",
     )
 
     class Value(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -1124,17 +1124,6 @@ class Vote(_message.Message):
     VALUE_UNSPECIFIED: Vote.Value
     VALUE_NO: Vote.Value
     VALUE_YES: Vote.Value
-
-    class PerMarketEquityLikeShareWeightEntry(_message.Message):
-        __slots__ = ("key", "value")
-        KEY_FIELD_NUMBER: _ClassVar[int]
-        VALUE_FIELD_NUMBER: _ClassVar[int]
-        key: str
-        value: str
-        def __init__(
-            self, key: _Optional[str] = ..., value: _Optional[str] = ...
-        ) -> None: ...
-
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     VALUE_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_ID_FIELD_NUMBER: _ClassVar[int]
@@ -1142,7 +1131,7 @@ class Vote(_message.Message):
     TOTAL_GOVERNANCE_TOKEN_BALANCE_FIELD_NUMBER: _ClassVar[int]
     TOTAL_GOVERNANCE_TOKEN_WEIGHT_FIELD_NUMBER: _ClassVar[int]
     TOTAL_EQUITY_LIKE_SHARE_WEIGHT_FIELD_NUMBER: _ClassVar[int]
-    PER_MARKET_EQUITY_LIKE_SHARE_WEIGHT_FIELD_NUMBER: _ClassVar[int]
+    ELS_PER_MARKET_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     value: Vote.Value
     proposal_id: str
@@ -1150,7 +1139,7 @@ class Vote(_message.Message):
     total_governance_token_balance: str
     total_governance_token_weight: str
     total_equity_like_share_weight: str
-    per_market_equity_like_share_weight: _containers.ScalarMap[str, str]
+    els_per_market: _containers.RepeatedCompositeFieldContainer[VoteELSPair]
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -1160,7 +1149,17 @@ class Vote(_message.Message):
         total_governance_token_balance: _Optional[str] = ...,
         total_governance_token_weight: _Optional[str] = ...,
         total_equity_like_share_weight: _Optional[str] = ...,
-        per_market_equity_like_share_weight: _Optional[_Mapping[str, str]] = ...,
+        els_per_market: _Optional[_Iterable[_Union[VoteELSPair, _Mapping]]] = ...,
+    ) -> None: ...
+
+class VoteELSPair(_message.Message):
+    __slots__ = ("market_id", "els")
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    ELS_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    els: str
+    def __init__(
+        self, market_id: _Optional[str] = ..., els: _Optional[str] = ...
     ) -> None: ...
 
 class UpdateVolumeDiscountProgram(_message.Message):
