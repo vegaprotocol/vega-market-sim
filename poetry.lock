@@ -3968,8 +3968,8 @@ toml = "^0.10.2"
 [package.source]
 type = "git"
 url = "https://github.com/cdummett/vegapy/"
-reference = "preview/v0.75.0-preview.2"
-resolved_reference = "aa845600edda749b7f0e5c1d20c2579de968d035"
+reference = "develop"
+resolved_reference = "651f61d6a431cb992b215bc29ad10b3bfc3d2989"
 
 [[package]]
 name = "wcwidth"
@@ -4239,4 +4239,4 @@ profile = ["pytest-profiling", "snakeviz"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.12"
-content-hash = "15f8010b8917cf8c0003b50e675d865eba75b68f0019a161da33835d7427a048"
+content-hash = "ae6d4a7a787921b76270a6636ad737cc1b30465c0b9da233ce395291bd654691"
