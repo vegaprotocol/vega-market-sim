@@ -3641,6 +3641,18 @@ class VegaService(ABC):
             margin_factor=str(margin_factor),
         )
 
+    def check_market_states_consistent(self, raise_exceptions: bool = True):
+        markets = self.all_markets()
+        for market in markets:
+            market_data = self.get_latest_market_data(market_id=market.id)
+            try:
+                assert market.state == market_data.market_state
+                assert market.trading_mode == market_data.market_trading_mode
+            except AssertionError as e:
+                if raise_exceptions:
+                    raise e
+                logging.error(e)
+
     def check_book_not_crossed(self, raise_exceptions: bool = True):
         # Check needs to ensure all services are synced.
         self.wait_for_total_catchup()
