@@ -2792,6 +2792,7 @@ class VegaService(ABC):
         lock_period: Optional[int] = None,
         distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
         rank_table: Optional[List[vega_protos.vega.Rank]] = None,
+        cap_reward_fee_multiple: Optional[str] = None,
     ):
         """Create a recurring transfer of funds.
 
@@ -2830,6 +2831,8 @@ class VegaService(ABC):
                 The dispatch metric. Defaults to None.
             markets (Optional[List[str]], optional):
                 The list of markets to apply the dispatch strategy. Defaults to None.
+            cap_reward_fee_multiple (Optional[str], optional):
+                A multiplier to cap reward fees. Defaults to None.
 
         Raises:
             Exception:
