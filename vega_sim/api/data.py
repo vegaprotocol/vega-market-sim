@@ -3008,6 +3008,7 @@ def dispatch_strategy(
     lock_period: Optional[int] = None,
     distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
     rank_table: Optional[List[vega_protos.vega.Rank]] = None,
+    cap_reward_fee_multiple: Optional[float] = None,
 ) -> vega_protos.vega.DispatchStrategy:
     # Set defaults for mandatory fields
     if entity_scope is None:
@@ -3048,6 +3049,11 @@ def dispatch_strategy(
         n_top_performers=(
             str(n_top_performers)
             if entity_scope == vega_protos.vega.ENTITY_SCOPE_TEAMS
+            else None
+        ),
+        cap_reward_fee_multiple=(
+            str(cap_reward_fee_multiple)
+            if cap_reward_fee_multiple is not None
             else None
         ),
     )
