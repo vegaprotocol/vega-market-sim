@@ -97,6 +97,43 @@ class TradeSignal(Enum):
     SELL = 2
 
 
+class NetworkParameterManager(StateAgentWithWallet):
+    """Agent for updating network parameters at the start of a scenario."""
+
+    NAME_BASE = "network_parameter_manager"
+
+    def __init__(
+        self,
+        key_name: str,
+        network_parameters: Dict[str, Any],
+        wallet_name: Optional[str] = None,
+        tag: str = "",
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+        self.network_parameters = network_parameters
+
+    def initialise(
+        self,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        super().initialise(vega=vega, create_key=create_key, mint_key=mint_key)
+        self.vega.mint(
+            wallet_name=self.wallet_name,
+            asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
+            amount=1e4,
+            key_name=self.key_name,
+        )
+        for key, value in self.network_parameters.items():
+            self.vega.update_network_parameter(
+                proposal_key=self.key_name,
+                wallet_name=self.wallet_name,
+                parameter=key,
+                new_value=str(value),
+            )
+
+
 class MarketOrderTrader(StateAgentWithWallet):
     NAME_BASE = "mo_trader"
 

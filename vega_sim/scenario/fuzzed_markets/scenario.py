@@ -19,6 +19,7 @@ from vega_sim.null_service import VegaServiceNull
 
 from vega_sim.scenario.common.agents import (
     StateAgent,
+    NetworkParameterManager,
     UncrossAuctionAgent,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
@@ -189,6 +190,13 @@ class FuzzingScenario(Scenario):
 
         self.agents = []
         self.initial_asset_mint = 10e9
+
+        self.agents.append(
+            NetworkParameterManager(
+                key_name="NETWORK_PARAMETER_MANAGER",
+                network_parameters={"validators.epoch.length": "25m"},
+            )
+        )
 
         self.agents.append(
             FuzzyReferralProgramManager(
