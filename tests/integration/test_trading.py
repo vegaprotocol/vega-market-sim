@@ -282,6 +282,8 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
         metric=vega_protos.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
         amount=100,
         factor=1.0,
+        cap_reward_fee_multiple=10,
+        lock_period=10,
     )
     # Generate trades for non-zero metrics
     vega.submit_order(
@@ -312,9 +314,14 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     next_epoch(vega=vega)
 
     party_a_accounts_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
+    party_c_vesting_account = [
+        account
+        for account in vega.list_accounts(key_name=PARTY_C.name, asset_id=asset_id)
+        if account.type == vega_protos.vega.AccountType.ACCOUNT_TYPE_VESTING_REWARDS
+    ][0]
 
     assert party_a_accounts_t1[0].balance == 899.999
-
+    assert party_c_vesting_account.balance == 6
     # Forward one epoch
     next_epoch(vega=vega)
 
