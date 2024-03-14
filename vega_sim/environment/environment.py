@@ -279,7 +279,7 @@ class MarketEnvironment:
             # TODO: Reduce frequency of check once mainnet updated to v0.75.0
             vega.check_book_not_crossed(raise_exceptions=True)
             # TODO: Reduce frequency of check once mainnet updated to v0.75.0
-            vega.check_market_states_consistent(raise_exceptions=False)
+            vega.check_market_states_consistent(raise_exceptions=True)
 
         vega.check_balances_equal_deposits()
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")
