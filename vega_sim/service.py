@@ -3765,4 +3765,8 @@ class VegaService(ABC):
             party_id=self.wallet.public_key(name=key_name, wallet_name=wallet_name),
             market_id=market_id,
         )
-        return party_margin_modes[0] if party_margin_modes is not None else None
+        return (
+            party_margin_modes[0]
+            if (party_margin_modes is not None) and (party_margin_modes != [])
+            else None
+        )
