@@ -3665,10 +3665,10 @@ class VegaService(ABC):
                         "Check failed, waiting to ensure sync then retrying check."
                     )
                     self.wait_for_total_catchup()
-                    continue
+                    break
         if raise_exceptions:
             raise exception
-        logging.error(exception)
+        logger.error(exception)
 
     def check_book_not_crossed(self, raise_exceptions: bool = True):
         # Check needs to ensure all services are synced.
