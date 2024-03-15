@@ -10,7 +10,7 @@ CONFIG = MarketConfig(
     {
         "decimalPlaces": "1",
         "positionDecimalPlaces": "4",
-        "tickSize": "1",
+        "tickSize": "2",
         "instrument": {
             "code": "BTC/USDT",
             "name": "Bitcoin / Tether USD (Perpetual)",

@@ -10,7 +10,7 @@ CONFIG = MarketConfig(
     {
         "decimalPlaces": "3",
         "positionDecimalPlaces": "1",
-        "tickSize": "1",
+        "tickSize": "2",
         "instrument": {
             "code": "SNX/USDT",
             "name": "Synthetix / Tether USD (Perpetual)",

@@ -10,7 +10,7 @@ CONFIG = MarketConfig(
     {
         "decimalPlaces": "4",
         "positionDecimalPlaces": "1",
-        "tickSize": "1",
+        "tickSize": "2",
         "instrument": {
             "code": "LDO/USDT",
             "name": "Lido / Tether USD (Perpetual)",

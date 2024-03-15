@@ -10,7 +10,7 @@ CONFIG = MarketConfig(
     {
         "decimalPlaces": "3",
         "positionDecimalPlaces": "1",
-        "tickSize": "1",
+        "tickSize": "2",
         "instrument": {
             "code": "INJ/USDT",
             "name": "Injective / Tether USD (Perpetual)",

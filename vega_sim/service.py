@@ -985,6 +985,7 @@ class VegaService(ABC):
         post_only: bool = False,
         peak_size: Optional[float] = None,
         minimum_visible_size: Optional[float] = None,
+        round_to_tick: bool = True,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -1057,6 +1058,13 @@ class VegaService(ABC):
             if price is not None
             else None
         )
+        if round_to_tick and price is not None:
+            market = self.data_cache.market_from_feed(market_id)
+            submit_price = helpers.round_to_tick(
+                submit_price,
+                tick_size=market.tick_size,
+                side=side,
+            )
         if submit_price is not None and submit_price <= 0:
             msg = "Not submitting order as price is 0 or less."
             if wait:
@@ -1133,6 +1141,7 @@ class VegaService(ABC):
         volume_delta: float = 0,
         time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
         wallet_name: Optional[str] = None,
+        round_to_tick: bool = True,
     ):
         """
         Amend a Limit order by orderID in the specified market
@@ -1160,22 +1169,27 @@ class VegaService(ABC):
             wallet_name:
                 optional str, name of wallet to use
         """
+        price = (
+            num_to_padded_int(
+                price,
+                self.market_price_decimals[market_id],
+            )
+            if price is not None
+            else None
+        )
+        market = self.data_cache.market_from_feed(market_id)
+        if round_to_tick:
+            price = helpers.round_to_tick(
+                price,
+                tick_size=market.tick_size,
+            )
         trading.amend_order(
             wallet=self.wallet,
             key_name=trading_key,
             wallet_name=wallet_name,
             market_id=market_id,
             order_id=order_id,
-            price=(
-                str(
-                    num_to_padded_int(
-                        price,
-                        self.market_price_decimals[market_id],
-                    )
-                )
-                if price is not None
-                else None
-            ),
+            price=str(price),
             expires_at=expires_at,
             pegged_offset=(
                 str(
@@ -2473,6 +2487,7 @@ class VegaService(ABC):
         post_only: bool = False,
         pegged_order: Optional[vega_protos.vega.PeggedOrder] = None,
         iceberg_opts: Optional[vega_protos.commands.v1.commands.IcebergOpts] = None,
+        round_to_tick: bool = True,
     ) -> OrderSubmission:
         """Returns a Vega OrderSubmission object
 
@@ -2514,14 +2529,19 @@ class VegaService(ABC):
         """
 
         price = (
-            price
-            if price is None
-            else (
-                num_to_padded_int(
-                    to_convert=price, decimals=self.market_price_decimals[market_id]
-                )
+            num_to_padded_int(
+                to_convert=price, decimals=self.market_price_decimals[market_id]
             )
+            if price is not None
+            else None
         )
+        if round_to_tick:
+            market = self.data_cache.market_from_feed(market_id)
+            price = helpers.round_to_tick(
+                price=price,
+                tick_size=market.tick_size,
+                side=side,
+            )
         size = (
             size
             if size is None
