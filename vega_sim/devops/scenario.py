@@ -192,7 +192,7 @@ class DevOpsScenario(Scenario):
                 orders_from_stream=False,
                 state_update_freq=10,
                 tag=None,
-                isolated_margin_factor=0.1,
+                isolated_margin_factor=self.market_maker_args.isolated_margin_factor,
             )
 
             # Setup agents for passing opening auction
