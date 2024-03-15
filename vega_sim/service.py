@@ -3646,6 +3646,7 @@ class VegaService(ABC):
         )
 
     def check_market_states_consistent(self, raise_exceptions: bool = True):
+        self.wait_for_total_catchup()
         markets = self.all_markets()
         for market in markets:
             market_data = self.get_latest_market_data(market_id=market.id)
