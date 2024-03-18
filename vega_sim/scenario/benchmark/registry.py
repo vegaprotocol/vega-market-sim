@@ -15,7 +15,7 @@ REGISTRY = {
         step_length_seconds=30,
         market_config=configs.mainnet.EGLPUSDT.CONFIG,
         initial_price=1,
-        annualised_volatility=5,
+        annualised_volatility=10,
     ),
     "mainnet-ETHUSDT": BenchmarkScenario(
         block_length_seconds=1,
@@ -57,13 +57,13 @@ REGISTRY = {
         step_length_seconds=30,
         market_config=configs.research.ESHRUSDT.CONFIG,
         initial_price=1,
-        annualised_volatility=5,
+        annualised_volatility=10,
     ),
     "research-HLPUSDT": BenchmarkScenario(
         block_length_seconds=1,
         step_length_seconds=30,
         market_config=configs.research.HLPUSDT.CONFIG,
         initial_price=1,
-        annualised_volatility=5,
+        annualised_volatility=10,
     ),
 }
