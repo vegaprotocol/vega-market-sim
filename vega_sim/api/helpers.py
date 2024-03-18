@@ -55,7 +55,6 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
 def round_to_tick(
     price: float, tick_size: int, side: Optional[Side.Value] = None
 ) -> float:
-    print(price, type(price))
     ticks = int(tick_size)
     if side == Side.SIDE_BUY:
         return int(math.floor(price / ticks) * ticks)
