@@ -126,6 +126,7 @@ class NetworkParameterManager(StateAgentWithWallet):
             key_name=self.key_name,
         )
         for key, value in self.network_parameters.items():
+            self.vega.wait_for_total_catchup()
             self.vega.update_network_parameter(
                 proposal_key=self.key_name,
                 wallet_name=self.wallet_name,
@@ -2517,7 +2518,7 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
             logging.warning("Missing bids, asks, or bounds")
             return
 
-        meet_commitment = self.random_state.rand() < self.target_time_on_book
+        self.meet_commitment = self.random_state.rand() < self.target_time_on_book
 
         bid_price = (
             bid_inner_bound
@@ -2534,22 +2535,17 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
 
         buys, sells = self._get_orders(vega_state=vega_state)
 
+        # Build match of cancellations and submissions
         cancellations = []
         submissions = []
-
-        # Cancel orders, no longer meet commitment
         cancellations.extend(self._cancel_orders(buys))
         cancellations.extend(self._cancel_orders(sells))
-
-        # Refresh orders
-        if meet_commitment:
-            submissions.extend(
-                self._submit_order(side="SIDE_BUY", price=bid_price, size=bid_size)
-            )
-            submissions.extend(
-                self._submit_order(side="SIDE_SELL", price=ask_price, size=ask_size)
-            )
-
+        submissions.extend(
+            self._submit_order(side="SIDE_BUY", price=bid_price, size=bid_size)
+        )
+        submissions.extend(
+            self._submit_order(side="SIDE_SELL", price=ask_price, size=ask_size)
+        )
         self.vega.submit_instructions(
             key_name=self.key_name,
             wallet_name=self.wallet_name,
@@ -2590,14 +2586,34 @@ class SimpleLiquidityProvider(StateAgentWithWallet):
                 order_type="TYPE_LIMIT",
                 time_in_force="TIME_IN_FORCE_GTC",
                 side=side,
-                size=size * self.commitment_amount_to_size_weighting,
+                size=(
+                    size
+                    * (
+                        self.commitment_amount_to_size_weighting
+                        if self.meet_commitment
+                        else 0.9
+                    )
+                ),
                 price=price,
                 iceberg_opts=build.commands.commands.iceberg_opts(
                     market_pos_decimals=self.vega.market_pos_decimals,
                     market_id=self.market_id,
-                    peak_size=size * self.commitment_amount_to_peak_weighting,
-                    minimum_visible_size=size
-                    * self.commitment_amount_to_minimum_weighting,
+                    peak_size=(
+                        size
+                        * (
+                            self.commitment_amount_to_peak_weighting
+                            if self.meet_commitment
+                            else 0.9
+                        )
+                    ),
+                    minimum_visible_size=(
+                        size
+                        * (
+                            self.commitment_amount_to_minimum_weighting
+                            if self.meet_commitment
+                            else 0.9
+                        )
+                    ),
                 ),
             )
         ]
