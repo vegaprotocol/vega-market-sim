@@ -36,7 +36,7 @@ from vega_sim.scenario.common.agents import (
     MarketOrderTrader,
     PriceSensitiveLimitOrderTrader,
 )
-from vega_sim.scenario.configurable_market.agents import ConfigurableMarketManager
+from vega_sim.configs.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
 from vega_sim.devops.wallet import ScenarioWallet, default_scenario_wallet
 
@@ -148,24 +148,15 @@ class DevOpsScenario(Scenario):
             )
 
         if kwargs.get("run_background", True):
-            # Setup agent for proposing and settling the market
             market_manager = ConfigurableMarketManager(
-                proposal_wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
-                proposal_key_name=self.scenario_wallet.market_creator_agent.key_name,
-                termination_wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
-                termination_key_name=self.scenario_wallet.market_creator_agent.key_name,
-                market_config=MarketConfig("future"),
-                market_name=(
-                    self.market_name
-                    if self.market_name is not None
-                    else self.market_manager_args.market_name
-                ),
-                market_code=self.market_manager_args.market_code,
-                asset_name=self.market_manager_args.asset_name,
-                asset_dp=self.market_manager_args.adp,
-                initial_mint=self.market_manager_args.initial_mint,
-                settlement_price=self.price_process[-1],
-                tag=None,
+                wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
+                key_name=self.scenario_wallet.market_creator_agent.key_name,
+                market_config=self.market_manager_args.market_config,
+                oracle_prices=iter(self.price_process),
+                oracle_submission=0.1,
+                oracle_difference=0.001,
+                tag=self.market_manager_args.market_config.instrument.code,
+                random_state=random_state,
             )
 
             # Setup agent for proving a market for traders
@@ -175,9 +166,8 @@ class DevOpsScenario(Scenario):
                 market_name=(
                     self.market_name
                     if self.market_name is not None
-                    else self.market_manager_args.market_name
+                    else self.market_manager_args.market_config.instrument.name
                 ),
-                asset_name=self.market_manager_args.asset_name,
                 initial_asset_mint=self.market_maker_args.initial_mint,
                 commitment_amount=self.market_maker_args.commitment_amount,
                 market_kappa=self.market_maker_args.market_kappa,
@@ -203,9 +193,8 @@ class DevOpsScenario(Scenario):
                     market_name=(
                         self.market_name
                         if self.market_name is not None
-                        else self.market_manager_args.market_name
+                        else self.market_manager_args.market_config.instrument.name
                     ),
-                    asset_name=self.market_manager_args.asset_name,
                     opening_auction_trade_amount=self.auction_trader_args.initial_volume,
                     initial_asset_mint=self.auction_trader_args.initial_mint,
                     initial_price=self.price_process[0],
@@ -223,9 +212,8 @@ class DevOpsScenario(Scenario):
                     market_name=(
                         self.market_name
                         if self.market_name is not None
-                        else self.market_manager_args.market_name
+                        else self.market_manager_args.market_config.instrument.name
                     ),
-                    asset_name=self.market_manager_args.asset_name,
                     initial_asset_mint=self.random_trader_args.initial_mint,
                     buy_intensity=self.random_trader_args.order_intensity[i],
                     sell_intensity=self.random_trader_args.order_intensity[i],
@@ -244,9 +232,8 @@ class DevOpsScenario(Scenario):
                     market_name=(
                         self.market_name
                         if self.market_name is not None
-                        else self.market_manager_args.market_name
+                        else self.market_manager_args.market_config.instrument.name
                     ),
-                    asset_name=self.market_manager_args.asset_name,
                     price_process_generator=iter(self.price_process),
                     initial_asset_mint=self.sensitive_trader_args.initial_mint,
                     scale=self.sensitive_trader_args.scale[i],
@@ -269,7 +256,9 @@ class DevOpsScenario(Scenario):
         if kwargs.get("agent", None) is not None:
             # If a market and asset were not specified, use scenario config values
             if kwargs["agent"].market_name is None:
-                kwargs["agent"].market_name = self.market_manager_args.market_name
+                kwargs["agent"].market_name = (
+                    self.market_manager_args.market_config.instrument.name
+                )
             if kwargs["agent"].asset_name is None:
                 kwargs["agent"].asset_name = self.market_manager_args.asset_name
             # If a sim, overwrite price process
