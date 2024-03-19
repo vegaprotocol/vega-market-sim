@@ -52,4 +52,11 @@ REGISTRY = {
         initial_price=1,
         annualised_volatility=5,
     ),
+    "research-SPOT": BenchmarkScenario(
+        block_length_seconds=1,
+        step_length_seconds=30,
+        market_config=configs.research.SPOT.CONFIG,
+        initial_price=70000,
+        annualised_volatility=2,
+    ),
 }
