@@ -567,6 +567,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
         "sla_params",
         "liquidity_fee_settings",
         "tick_size",
+        "instrument",
     )
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
@@ -576,6 +577,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
+    INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
     target_stake_parameters: _markets_pb2.TargetStakeParameters
@@ -584,6 +586,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     sla_params: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     tick_size: str
+    instrument: UpdateSpotInstrumentConfiguration
     def __init__(
         self,
         metadata: _Optional[_Iterable[str]] = ...,
@@ -602,6 +605,19 @@ class UpdateSpotMarketConfiguration(_message.Message):
             _Union[_markets_pb2.LiquidityFeeSettings, _Mapping]
         ] = ...,
         tick_size: _Optional[str] = ...,
+        instrument: _Optional[
+            _Union[UpdateSpotInstrumentConfiguration, _Mapping]
+        ] = ...,
+    ) -> None: ...
+
+class UpdateSpotInstrumentConfiguration(_message.Message):
+    __slots__ = ("code", "name")
+    CODE_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    code: str
+    name: str
+    def __init__(
+        self, code: _Optional[str] = ..., name: _Optional[str] = ...
     ) -> None: ...
 
 class UpdateInstrumentConfiguration(_message.Message):
