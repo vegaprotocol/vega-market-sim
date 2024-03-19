@@ -141,7 +141,6 @@ class MarketOrderTrader(StateAgentWithWallet):
         self,
         key_name: str,
         market_name: str,
-        asset_name: str,
         initial_asset_mint: float = 1000000,
         buy_intensity: float = 1,
         sell_intensity: float = 1,
@@ -156,7 +155,6 @@ class MarketOrderTrader(StateAgentWithWallet):
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
         self.market_name = market_name
-        self.asset_name = asset_name
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
@@ -174,17 +172,24 @@ class MarketOrderTrader(StateAgentWithWallet):
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
-        # Get asset id
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
-            # Top up asset
-            self.vega.mint(
-                key_name=self.key_name,
-                asset=self.asset_id,
-                amount=self.initial_asset_mint,
-                wallet_name=self.wallet_name,
-            )
-        self.vega.wait_fn(5)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
+
         self.pdp = self.vega.market_pos_decimals.get(self.market_id, {})
         self.mdp = self.vega.market_price_decimals.get(self.market_id, {})
         self.adp = self.vega.asset_decimals.get(self.asset_id, {})
@@ -358,7 +363,6 @@ class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
         self,
         key_name: str,
         market_name: str,
-        asset_name: str,
         price_process_generator: Iterable[float],
         initial_asset_mint: float = 1000000,
         scale: float = 0.5,
@@ -369,7 +373,6 @@ class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
     ):
         super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
         self.market_name = market_name
-        self.asset_name = asset_name
         self.price_process_generator = price_process_generator
         self.initial_asset_mint = initial_asset_mint
         self.scale = scale
@@ -389,17 +392,23 @@ class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
-        # Get asset id
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
-            # Top up asset
-            self.vega.mint(
-                key_name=self.key_name,
-                asset=self.asset_id,
-                amount=self.initial_asset_mint,
-                wallet_name=self.wallet_name,
-            )
-        self.vega.wait_fn(5)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
         self.curr_price = next(self.price_process_generator)
@@ -894,7 +903,6 @@ class OpenAuctionPass(StateAgentWithWallet):
         key_name: str,
         side: str,
         market_name: str,
-        asset_name: str,
         initial_asset_mint: float = 1000000,
         initial_price: float = 0.3,
         opening_auction_trade_amount: float = 1,
@@ -906,7 +914,6 @@ class OpenAuctionPass(StateAgentWithWallet):
         self.initial_asset_mint = initial_asset_mint
         self.initial_price = initial_price
         self.market_name = market_name
-        self.asset_name = asset_name
         self.opening_auction_trade_amount = opening_auction_trade_amount
 
     def initialise(
@@ -920,19 +927,23 @@ class OpenAuctionPass(StateAgentWithWallet):
         # Get market id
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
-        self.vega.wait_for_total_catchup()
-        # Get asset id
-        asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
-            # Top up asset
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=asset_id,
-                amount=self.initial_asset_mint,
-                key_name=self.key_name,
-            )
-        self.vega.wait_fn(10)
-        self.vega.wait_for_total_catchup()
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
 
         self.vega.submit_order(
             trading_wallet=self.wallet_name,
@@ -1104,11 +1115,9 @@ class ShapedMarketMaker(StateAgentWithWallet):
         ],
         initial_asset_mint: float = 1000000,
         market_name: Optional[str] = None,
-        asset_name: Optional[str] = None,
         commitment_amount: float = 6000,
         supplied_amount: Optional[float] = None,
         market_decimal_places: int = 5,
-        asset_decimal_places: int = 0,
         tag: str = "",
         wallet_name: str = None,
         orders_from_stream: Optional[bool] = True,
@@ -1124,7 +1133,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.commitment_amount = commitment_amount
         self.initial_asset_mint = initial_asset_mint
         self.mdp = market_decimal_places
-        self.adp = asset_decimal_places
 
         self.shape_fn = shape_fn
         self.best_price_offset_fn = best_price_offset_fn
@@ -1135,7 +1143,6 @@ class ShapedMarketMaker(StateAgentWithWallet):
         self.prev_price = None
 
         self.market_name = market_name
-        self.asset_name = asset_name
 
         self.orders_from_stream = orders_from_stream
 
@@ -1166,22 +1173,33 @@ class ShapedMarketMaker(StateAgentWithWallet):
         # Initialise wallet for LP/ Settle Party
         super().initialise(vega=vega, create_key=create_key)
 
-        # Get asset id
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-
-        self.mint_key = mint_key
-        if mint_key:
-            # Top up asset
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=self.asset_id,
-                amount=self.initial_asset_mint,
-                key_name=self.key_name,
-            )
-            self.vega.wait_for_total_catchup()
-
-        # Get market id
+        # Get market id and determine if it is a leveraged market
         self.market_id = self.vega.find_market_id(name=self.market_name)
+        self.market = self.vega.market_info(self.market_id)
+
+        # If the market is a spot market, do not allow the market-maker to iom.
+        if self.market.tradable_instrument.instrument.spot != markets_protos.Spot():
+            self.isolated_margin_factor = None
+            self.update_margin_mode = False
+
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+        self.asset_dp = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
 
         self._update_state(current_step=self.current_step)
 
@@ -1218,13 +1236,19 @@ class ShapedMarketMaker(StateAgentWithWallet):
                 margin_factor=self.isolated_margin_factor,
                 market_id=self.market_id,
             )
+            party_margin_mode = self.vega.party_margin_mode(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                market_id=self.market_id,
+            )
+            # If no party margin mode information exists, leave unchanged
             self.update_margin_mode = (
-                self.vega.party_margin_mode(
-                    key_name=self.key_name,
-                    wallet_name=self.wallet_name,
-                    market_id=self.market_id,
-                ).margin_mode
-                != vega_protos.MarginMode.MARGIN_MODE_ISOLATED_MARGIN
+                (
+                    party_margin_mode.margin_mode
+                    != vega_protos.MarginMode.MARGIN_MODE_ISOLATED_MARGIN
+                )
+                if party_margin_mode is not None
+                else self.update_margin_mode
             )
 
         # Each step, MM posts optimal bid/ask depths
@@ -1502,7 +1526,6 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         price_process_generator: Iterable[float],
         initial_asset_mint: float = 1000000,
         market_name: str = None,
-        asset_name: str = None,
         commitment_amount: float = 6000,
         supplied_amount: Optional[float] = None,
         market_decimal_places: int = 5,
@@ -1530,11 +1553,9 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
             price_process_generator=price_process_generator,
             initial_asset_mint=initial_asset_mint,
             market_name=market_name,
-            asset_name=asset_name,
             commitment_amount=commitment_amount,
             supplied_amount=supplied_amount,
             market_decimal_places=market_decimal_places,
-            asset_decimal_places=asset_decimal_places,
             tag=tag,
             shape_fn=self._generate_shape,
             best_price_offset_fn=self._optimal_strategy,
@@ -1962,7 +1983,6 @@ class LimitOrderTrader(StateAgentWithWallet):
         self,
         key_name: str,
         market_name: str,
-        asset_name: str,
         initial_asset_mint: float = 1000000,
         buy_volume: float = 1.0,
         sell_volume: float = 1.0,
@@ -1990,8 +2010,6 @@ class LimitOrderTrader(StateAgentWithWallet):
                 Passcode used by the agent to login to its wallet.
             market_name (str):
                 Name of the market the agent is to place orders in.
-            asset_name: (str):
-                Name of the asset needed for the market.
             initial_asset_mint (float, optional):
                 Quantity of the asset the agent should initially mint.
             buy_volume (float, optional):
@@ -2027,7 +2045,6 @@ class LimitOrderTrader(StateAgentWithWallet):
         self.current_step = 0
 
         self.market_name = market_name
-        self.asset_name = asset_name
         self.initial_asset_mint = initial_asset_mint
         self.buy_intensity = buy_intensity
         self.sell_intensity = sell_intensity
@@ -2072,16 +2089,22 @@ class LimitOrderTrader(StateAgentWithWallet):
 
         super().initialise(vega=vega, create_key=create_key)
         self.market_id = self.vega.find_market_id(name=self.market_name)
-
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=self.asset_id,
-                amount=self.initial_asset_mint,
-                key_name=self.key_name,
-            )
-        self.vega.wait_fn(2)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
         """Randomly submits and cancels limit orders.
@@ -3179,7 +3202,6 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self,
         key_name: str,
         market_name: str,
-        asset_name: str,
         side: str,
         price_process: list,
         uncrossing_size: float = 1,
@@ -3194,7 +3216,6 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.side = side
         self.initial_asset_mint = initial_asset_mint
         self.market_name = market_name
-        self.asset_name = asset_name
         self.price_process = price_process
         self.uncrossing_size = uncrossing_size
         self.auto_top_up = auto_top_up
@@ -3217,20 +3238,25 @@ class UncrossAuctionAgent(StateAgentWithWallet):
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
         self.vega.wait_for_total_catchup()
-        # Get asset id
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        self.mint_key = mint_key
 
-        if self.mint_key:
-            # Top up asset
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=self.asset_id,
-                amount=self.initial_asset_mint,
-                key_name=self.key_name,
-            )
-        self.vega.wait_fn(10)
-        self.vega.wait_for_total_catchup()
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+        self.asset_dp = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
         curr_price = next(self.price_process)

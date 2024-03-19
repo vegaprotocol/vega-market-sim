@@ -301,18 +301,22 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
 
         self.market_id = self.vega.find_market_id(name=self.market_name)
 
-        # Get asset id
-        self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
-        if mint_key:
-            # Top up asset
-            self.vega.mint(
-                key_name=self.key_name,
-                asset=self.asset_id,
-                amount=self.initial_asset_mint,
-                wallet_name=self.wallet_name,
-            )
-
-        self.vega.wait_fn(5)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
 
     def step(self, vega_state):
         account = self.vega.party_account(
