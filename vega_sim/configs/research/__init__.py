@@ -1,3 +1,3 @@
-from . import POINTS
+from . import POINTS, SPOT
 
-__all__ = ["POINTS"]
+__all__ = ["POINTS", "SPOT"]

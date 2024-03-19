@@ -141,6 +141,72 @@ class Config:
             raise TypeError(f"Invalid type '{type(opt)}' for arg 'opt'.")
 
 
+class SpotMarketConfig(Config):
+    OPTS = {
+        "default": {
+            "instrument": "spot",
+            "decimal_places": 4,
+            "metadata": None,
+            "price_monitoring_parameters": "default",
+            "target_stake_parameters": "default",
+            "log_normal": "default",
+            "position_decimal_places": 2,
+            "liquidity_sla_parameters": "default",
+            "liquidity_fee_settings": "default",
+            "tick_size": "2",
+        },
+    }
+
+    def load(self, opt: Optional[str] = None):
+        config = super().load(opt=opt)
+
+        self.decimal_places = int(config["decimal_places"])
+        self.position_decimal_places = int(config["position_decimal_places"])
+        self.metadata = config["metadata"]
+        self.tick_size = int(config["tick_size"])
+
+        self.instrument = InstrumentConfiguration(opt=config["instrument"])
+        self.liquidity_sla_parameters = LiquiditySLAParameters(
+            opt=config["liquidity_sla_parameters"]
+        )
+        self.price_monitoring_parameters = PriceMonitoringParameters(
+            opt=config["price_monitoring_parameters"]
+        )
+        self.target_stake_parameters = TargetStakeParameters(
+            opt=config["target_stake_parameters"]
+        )
+        self.log_normal = LogNormalRiskModel(opt=config["log_normal"])
+        self.liquidity_fee_settings = LiquidityFeeSettings(
+            opt=config["liquidity_fee_settings"]
+        )
+
+    def build(self):
+        new_spot_market = vega_protos.governance.NewSpotMarket(
+            changes=build.governance.new_spot_market_configuration(
+                instrument=self.instrument.build(),
+                decimal_places=int(self.decimal_places),
+                price_monitoring_parameters=self.price_monitoring_parameters.build(),
+                target_stake_parameters=self.target_stake_parameters.build(),
+                log_normal=self.log_normal.build(),
+                position_decimal_places=int(self.position_decimal_places),
+                sla_params=self.liquidity_sla_parameters.build(),
+                liquidity_fee_settings=self.liquidity_fee_settings.build(),
+                tick_size=str(self.tick_size),
+                metadata=self.metadata,
+            )
+        )
+        return new_spot_market
+
+    def is_future(self) -> bool:
+        return self.instrument.future is not None
+
+    def is_perp(self) -> bool:
+        return self.instrument.perpetual is not None
+
+    def is_spot(self) -> bool:
+        return self.instrument.spot is not None
+
+
 class MarketConfig(Config):
     OPTS = {
         "default": {
@@ -265,6 +331,9 @@ class MarketConfig(Config):
 
     def is_perp(self) -> bool:
         return self.instrument.perpetual is not None
+
+    def is_spot(self) -> bool:
+        return self.instrument.spot is not None
 
 
 class Successor(Config):
@@ -553,18 +622,28 @@ class InstrumentConfiguration(Config):
             "code": None,
             "future": None,
             "perpetual": None,
+            "spot": None,
         },
         "future": {
             "name": None,
             "code": None,
             "future": "default",
             "perpetual": None,
+            "spot": None,
         },
         "perpetual": {
             "name": None,
             "code": None,
             "future": None,
             "perpetual": "default",
+            "spot": None,
+        },
+        "spot": {
+            "name": None,
+            "code": None,
+            "future": None,
+            "perpetual": None,
+            "spot": "default",
         },
     }
 
@@ -581,6 +660,7 @@ class InstrumentConfiguration(Config):
             if config["perpetual"] is None
             else PerpetualProduct(opt=config["perpetual"])
         )
+        self.spot = None if config["spot"] is None else SpotProduct(opt=config["spot"])
 
     def build(self):
         if self.future != None:
@@ -590,6 +670,10 @@ class InstrumentConfiguration(Config):
         if self.perpetual != None:
             return vega_protos.governance.InstrumentConfiguration(
                 name=self.name, code=self.code, perpetual=self.perpetual.build()
+            )
+        if self.spot != None:
+            return vega_protos.governance.InstrumentConfiguration(
+                name=self.name, code=self.code, spot=self.spot.build()
             )
         raise ValueError("No product specified for the instrument")
 
@@ -782,4 +866,20 @@ class PerpetualProduct(Config):
             funding_rate_scaling_factor=self.funding_rate_scaling_factor,
             funding_rate_lower_bound=self.funding_rate_lower_bound,
             funding_rate_upper_bound=self.funding_rate_upper_bound,
+        )
+
+
+class SpotProduct(Config):
+    OPTS = {"default": {"base_asset": None, "quote_asset": None, "name": None}}
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+
+        self.base_asset = str(config["base_asset"])
+        self.quote_asset = str(config["base_asset"])
+        self.name = str(config["name"])
+
+    def build(self):
+        return build.governance.spot_product(
+            base_asset=self.base_asset, quote_asset=self.quote_asset, name=self.name
         )
