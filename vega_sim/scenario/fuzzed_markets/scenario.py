@@ -290,7 +290,6 @@ class FuzzingScenario(Scenario):
                     price_process_generator=iter(price_process),
                     initial_asset_mint=self.initial_asset_mint,
                     market_name=market_name,
-                    asset_name=asset_name,
                     commitment_amount=1e6,
                     market_decimal_places=market_config.decimal_places,
                     asset_decimal_places=asset_dp,
@@ -327,7 +326,6 @@ class FuzzingScenario(Scenario):
                     initial_asset_mint=self.initial_asset_mint,
                     price_process=iter(price_process),
                     market_name=market_name,
-                    asset_name=asset_name,
                     uncrossing_size=20,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
@@ -359,7 +357,6 @@ class FuzzingScenario(Scenario):
                         wallet_name="RANDOM_TRADERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         buy_intensity=10,
                         sell_intensity=10,
                         base_order_size=1,
@@ -380,7 +377,6 @@ class FuzzingScenario(Scenario):
                         wallet_name=f"RANDOM_TRADERS",
                         key_name=f"LIMIT_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                         buy_volume=1,
                         sell_volume=1,
