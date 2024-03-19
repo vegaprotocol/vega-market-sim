@@ -40,7 +40,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
 
     def initialise(
         self,
-        vega: VegaServiceNull | VegaServiceNetwork,
+        vega: Union[VegaServiceNull, VegaServiceNetwork],
         create_key: bool = True,
         mint_key: bool = True,
     ):
