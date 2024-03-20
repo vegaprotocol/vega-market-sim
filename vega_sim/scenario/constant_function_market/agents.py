@@ -243,8 +243,8 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         initial_price: float = 100,
         price_width_below: float = 0.05,
         price_width_above: float = 0.05,
-        max_loss_at_bound_above: float = 0.8,
-        max_loss_at_bound_below: float = 0.8,
+        margin_multiple_at_lower: float = 0.8,
+        margin_multiple_at_upper: float = 0.8,
         base_balance: float = 100,
         initial_asset_mint: float = 1000000,
         market_name: str = None,
@@ -265,6 +265,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         order_validity_length: Optional[float] = None,
         price_process_generator: Optional[Iterable[float]] = None,
         use_last_price_as_ref: bool = False,
+        position_offset: float = 0,
     ):
         super().__init__(
             wallet_name=wallet_name,
@@ -297,8 +298,11 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         self.upper_liq_factor = 1 / (self.upper_price_sqrt - self.base_price_sqrt)
 
         self.base_balance = base_balance
-        self.max_loss_at_bound_above = max_loss_at_bound_above
-        self.max_loss_at_bound_below = max_loss_at_bound_below
+        # self.max_loss_at_bound_above = max_loss_at_bound_above
+        # self.max_loss_at_bound_below = max_loss_at_bound_below
+
+        self.margin_multiple_at_lower = margin_multiple_at_lower
+        self.margin_multiple_at_upper = margin_multiple_at_upper
 
         self.tick_spacing = tick_spacing
         self.num_levels = num_levels
@@ -308,6 +312,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         self.curr_bids, self.curr_asks = None, None
         self.use_last_price_as_ref = use_last_price_as_ref
         self.bound_perc = bound_perc
+        self.position_offset = position_offset
 
     def initialise(
         self,
@@ -372,20 +377,25 @@ class CFMV3MarketMaker(ShapedMarketMaker):
                 existing_sells.append(o)
         best_bid, best_ask = self.vega.best_prices(self.market_id)
 
-        if best_bid is None or best_ask is None:
-            return []
+        best_ask = min(
+            min([x.price for x in existing_sells]),
+            best_ask if best_ask != 0.0 else 999999999,
+        )
+        best_bid = max(max([x.price for x in existing_buys]), best_bid)
 
         mid = (best_ask + best_bid) / 2
         lower = mid * (1 - bound_perc)
         upper = mid * (1 + bound_perc)
 
+        market_data = self.vega.market_info(self.market_id)
+        scaler = 10**market_data.decimal_places
         buy_vol = sum(
-            a.price * 100 * round(a.size / 100)
+            a.price * scaler * round(a.size / scaler)
             for a in existing_buys
             if a.price >= lower
         )
         sell_vol = sum(
-            a.price * 100 * round(a.size / 100)
+            a.price * scaler * round(a.size / scaler)
             for a in existing_sells
             if a.price <= upper
         )
@@ -418,7 +428,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
                     market_id=self.market_id,
                 )
             ),
-            position=self.current_position,
+            position=self.current_position + self.position_offset,
         )
         additional_price_bounds = self._add_orders_at_bounds(
             bound_perc=self.bound_perc, existing_orders=base_calcs
@@ -457,15 +467,32 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             * ((unit_upper_L / (unit_upper_L + self.upper_price_sqrt)) - 1)
         )
 
+        # volume_at_lower = (
+        #     self.base_balance
+        #     * self.max_loss_at_bound_below
+        #     / (aep_lower - self.lower_price)
+        # )
+        # volume_at_upper = (
+        #     self.base_balance
+        #     * self.max_loss_at_bound_above
+        #     / (self.upper_price - aep_upper)
+        # )
+
         volume_at_lower = (
-            self.base_balance
-            * self.max_loss_at_bound_below
-            / (aep_lower - self.lower_price)
+            self.margin_multiple_at_lower
+            * balance
+            / (
+                self.lower_price * (1 - self.margin_multiple_at_lower)
+                + self.margin_multiple_at_lower * aep_lower
+            )
         )
         volume_at_upper = (
-            self.base_balance
-            * self.max_loss_at_bound_above
-            / (self.upper_price - aep_upper)
+            self.margin_multiple_at_upper
+            * balance
+            / (
+                self.upper_price * (1 - self.margin_multiple_at_upper)
+                + self.margin_multiple_at_upper * aep_upper
+            )
         )
 
         upper_L = (
@@ -493,7 +520,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
                 (volume_at_upper + position) * upper_bound / L + 1
             )
 
-        print(f"quoting around fair price {rt_ref_price ** 2}")
+        print(f"At position {position} quoting around fair price {rt_ref_price ** 2}")
         return self._calculate_price_levels(
             ref_price=rt_ref_price**2,
             upper_L=upper_L,
@@ -720,7 +747,7 @@ class CFMV3LastTradeMarketMaker(ShapedMarketMaker):
                     market_id=self.market_id,
                     key_name=self.key_name,
                 ).average_entry_price
-                if self.current_position != 0
+                if self.current_position + self.position_offset != 0
                 else 0
             )
             if self.current_position > 0:
