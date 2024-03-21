@@ -27,7 +27,7 @@ from vega_sim.environment.environment import (
     Agent,
 )
 from vega_sim.scenario.common.utils.price_process import (
-    LivePrice,
+    get_live_price,
     get_historic_price_series,
 )
 from vega_sim.scenario.common.agents import (
@@ -59,6 +59,7 @@ class DevOpsScenario(Scenario):
         auction_trader_args: AuctionTraderArgs,
         random_trader_args: RandomTraderArgs,
         sensitive_trader_args: SensitiveTraderArgs,
+        feed_price_multiplier: int = 1,
         simulation_args: Optional[SimulationArgs] = None,
         state_extraction_fn: Optional[
             Callable[[VegaServiceNull, Dict[str, Agent]], Any]
@@ -70,6 +71,7 @@ class DevOpsScenario(Scenario):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
         self.binance_code = binance_code
+        self.feed_price_multiplier = feed_price_multiplier
 
         self.market_manager_args = market_manager_args
         self.market_maker_args = market_maker_args
@@ -131,7 +133,9 @@ class DevOpsScenario(Scenario):
                 random_state=random_state
             )
         else:
-            self.price_process = get_live_price(product=self.binance_code)
+            self.price_process = get_live_price(
+                product=self.binance_code, multiplier=self.feed_price_multiplier
+            )
 
         if self.scenario_wallet.market_creator_agent is None:
             raise ValueError(
@@ -178,7 +182,7 @@ class DevOpsScenario(Scenario):
                 orders_from_stream=False,
                 state_update_freq=10,
                 tag=None,
-                isolated_margin_factor=0.1,
+                isolated_margin_factor=self.market_maker_args.isolated_margin_factor,
             )
 
             # Setup agents for passing opening auction

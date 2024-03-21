@@ -210,9 +210,10 @@ class LivePrice:
 
     """
 
-    def __init__(self, product: str = "BTCBUSD"):
+    def __init__(self, product: str = "BTCBUSD", multiplier: int = 1):
         self.product = product
         self.latest_price = None
+        self.multiplier = multiplier
 
         self._forwarding_thread = threading.Thread(
             target=_price_listener,
@@ -233,20 +234,23 @@ class LivePrice:
     def _get_price(self):
         while self.latest_price is None:
             time.sleep(0.33)
-        return self.latest_price
+        return self.latest_price * self.multiplier
 
 
 _live_prices = {}
 _live_prices_lock = threading.Lock()
 
 
-def get_live_price(product: str) -> LivePrice:
+def get_live_price(product: str, multiplier: int) -> LivePrice:
     global _live_prices
     global _live_prices_lock
+
+    feed_key = f"{product}_{multiplier}"
+
     with _live_prices_lock:
-        if not product in _live_prices:
-            _live_prices[product] = LivePrice(product=product)
-        return _live_prices[product]
+        if not feed_key in _live_prices:
+            _live_prices[feed_key] = LivePrice(product=product, multiplier=multiplier)
+        return _live_prices[feed_key]
 
 
 if __name__ == "__main__":

@@ -30,6 +30,7 @@ class MarketMakerArgs:
     fee_amount: float
     commitment_amount: int
     initial_mint: Optional[int] = MAX_FAUCET
+    isolated_margin_factor: Optional[float] = None
 
 
 @dataclass
