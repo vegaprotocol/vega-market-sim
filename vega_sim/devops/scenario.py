@@ -148,16 +148,19 @@ class DevOpsScenario(Scenario):
             )
 
         if kwargs.get("run_background", True):
-            market_manager = ConfigurableMarketManager(
-                wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
-                key_name=self.scenario_wallet.market_creator_agent.key_name,
-                market_config=self.market_manager_args.market_config,
-                oracle_prices=iter(self.price_process),
-                oracle_submission=0.1,
-                oracle_difference=0.001,
-                tag=self.market_manager_args.market_config.instrument.code,
-                random_state=random_state,
-            )
+            market_manager = None
+
+            if kwargs.get("network", Network.FAIRGROUND) == Network.NULLCHAIN:
+                market_manager = ConfigurableMarketManager(
+                    wallet_name=self.scenario_wallet.market_creator_agent.wallet_name,
+                    key_name=self.scenario_wallet.market_creator_agent.key_name,
+                    market_config=self.market_manager_args.market_config,
+                    oracle_prices=iter(self.price_process),
+                    oracle_submission=0.1,
+                    oracle_difference=0.001,
+                    tag=self.market_manager_args.market_config.instrument.code,
+                    random_state=random_state,
+                )
 
             # Setup agent for proving a market for traders
             market_maker = ExponentialShapedMarketMaker(
@@ -243,12 +246,14 @@ class DevOpsScenario(Scenario):
                 for i, party in enumerate(self.scenario_wallet.sensitive_trader_agents)
             ]
 
-            agents = (
+
+
+            agents = list(filter(lambda x: not x is None, (
                 [market_manager, market_maker]
                 + auction_pass_agents
                 + random_market_order_traders
                 + sensitive_limit_order_traders
-            )
+            )))
 
         else:
             agents = []
