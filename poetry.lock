@@ -3969,7 +3969,7 @@ toml = "^0.10.2"
 type = "git"
 url = "https://github.com/cdummett/vegapy/"
 reference = "develop"
-resolved_reference = "651f61d6a431cb992b215bc29ad10b3bfc3d2989"
+resolved_reference = "bec191114ca9447614062188ae028f8d897fb744"
 
 [[package]]
 name = "wcwidth"

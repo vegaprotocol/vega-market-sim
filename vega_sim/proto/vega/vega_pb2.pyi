@@ -1206,11 +1206,13 @@ class Deposit(_message.Message):
         STATUS_OPEN: _ClassVar[Deposit.Status]
         STATUS_CANCELLED: _ClassVar[Deposit.Status]
         STATUS_FINALIZED: _ClassVar[Deposit.Status]
+        STATUS_DUPLICATE_REJECTED: _ClassVar[Deposit.Status]
 
     STATUS_UNSPECIFIED: Deposit.Status
     STATUS_OPEN: Deposit.Status
     STATUS_CANCELLED: Deposit.Status
     STATUS_FINALIZED: Deposit.Status
+    STATUS_DUPLICATE_REJECTED: Deposit.Status
     ID_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
