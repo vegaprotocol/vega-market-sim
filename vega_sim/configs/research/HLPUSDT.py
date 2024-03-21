@@ -1,14 +1,22 @@
+"""HLPUSDT.py
+
+NOTE! This proposal is current in discussion in forums and is not finalised.
+
+Market config matching forum proposal for HLP/USDT.POINTS market on mainnet.
+https://community.vega.xyz/t/vmp-37-create-hyperliquid-points-usdt-futures-market/4460
+"""
+
 from vega_sim.api.market import MarketConfig
 
 CONFIG = MarketConfig(
     {
+        "tickSize": "2",
         "linearSlippageFactor": "0.001",
-        "decimalPlaces": "5",
-        "positionDecimalPlaces": "0",
-        "tick_size": "2",
+        "decimalPlaces": "3",
+        "positionDecimalPlaces": "1",
         "instrument": {
-            "name": "EigenLayer Points / USDT (Futures market)",
-            "code": "EGLP/USDT.POINTS",
+            "name": "Hyperliquid Points / USDT (Futures market)",
+            "code": "HLP/USDT.POINTS",
             "future": {
                 "settlementAsset": "bf1e88d19db4b3ca0d1d5bdb73718a01686b18cf731ca26adedf3c8b83802bba",
                 "quoteName": "USDT",
@@ -21,29 +29,23 @@ CONFIG = MarketConfig(
                             "method": "getData",
                             "args": [
                                 {
-                                    "liveness": 120,
+                                    "liveness": 28800,
                                     "bondCurrency": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
                                     "minimumBond": 500000000,
                                     "maximumBond": 100000000000,
-                                    "ipfsLink": "ipfs:foo.bar",
-                                    "marketCode": "EGLP/USDT",
+                                    "ipfsLink": "ipfs://bafybeiepzqdjoxwzeh2vzwi5c4473vddemqjihc26tbuu32vkasisk537i",
+                                    "marketCode": "HLP/USDT.POINTS",
                                     "quoteName": "USDT",
-                                    "enactmentDate": "2024-03-06T11:00:00Z",
+                                    "enactmentDate": "2024-03-20T11:00:00Z",
                                 }
                             ],
                             "requiredConfirmations": "64",
                             "trigger": {"timeTrigger": {"every": "600"}},
                             "filters": [
                                 {
-                                    "key": {
-                                        "name": "resolved",
-                                        "type": "TYPE_BOOLEAN",
-                                    },
+                                    "key": {"name": "resolved", "type": "TYPE_BOOLEAN"},
                                     "conditions": [
-                                        {
-                                            "operator": "OPERATOR_EQUALS",
-                                            "value": "true",
-                                        }
+                                        {"operator": "OPERATOR_EQUALS", "value": "true"}
                                     ],
                                 },
                                 {
@@ -76,14 +78,14 @@ CONFIG = MarketConfig(
                             "method": "getData",
                             "args": [
                                 {
-                                    "liveness": 120,
+                                    "liveness": 28800,
                                     "bondCurrency": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
                                     "minimumBond": 500000000,
                                     "maximumBond": 100000000000,
-                                    "ipfsLink": "ipfs:foo.bar",
-                                    "marketCode": "EGLP/USDT",
+                                    "ipfsLink": "ipfs://bafybeiepzqdjoxwzeh2vzwi5c4473vddemqjihc26tbuu32vkasisk537i",
+                                    "marketCode": "HLP/USDT.POINTS",
                                     "quoteName": "USDT",
-                                    "enactmentDate": "2024-03-06T11:00:00Z",
+                                    "enactmentDate": "2024-03-20T11:00:00Z",
                                     "conditionalSettlementOracle": "0x302461E6dBF45e59acb3BE9a9c84C0a997779612",
                                 }
                             ],
@@ -91,15 +93,9 @@ CONFIG = MarketConfig(
                             "trigger": {"timeTrigger": {"every": "600"}},
                             "filters": [
                                 {
-                                    "key": {
-                                        "name": "resolved",
-                                        "type": "TYPE_BOOLEAN",
-                                    },
+                                    "key": {"name": "resolved", "type": "TYPE_BOOLEAN"},
                                     "conditions": [
-                                        {
-                                            "operator": "OPERATOR_EQUALS",
-                                            "value": "true",
-                                        }
+                                        {"operator": "OPERATOR_EQUALS", "value": "true"}
                                     ],
                                 },
                                 {
@@ -108,10 +104,7 @@ CONFIG = MarketConfig(
                                         "type": "TYPE_BOOLEAN",
                                     },
                                     "conditions": [
-                                        {
-                                            "operator": "OPERATOR_EQUALS",
-                                            "value": "true",
-                                        }
+                                        {"operator": "OPERATOR_EQUALS", "value": "true"}
                                     ],
                                 },
                             ],
@@ -129,15 +122,15 @@ CONFIG = MarketConfig(
             },
         },
         "metadata": [
-            "base:EGLPOINT",
+            "base:HLPOINT",
             "quote:USDT",
-            "enactment:2024-03-06T11:00:00Z",
+            "enactment:2024-03-20T11:00:00Z",
             "settlement:fromOracle",
             "class:fx/crypto",
             "oracle:uma",
             "sector:defi",
             "oracleChain:arbitrum",
-            "domain:eigenlayer.xyz",
+            "domain:hyperliquid.xyz",
         ],
         "priceMonitoringParameters": {
             "triggers": [
@@ -499,8 +492,8 @@ CONFIG = MarketConfig(
             ]
         },
         "logNormal": {
-            "tau": 0.001368925394,
-            "riskAversionParameter": 0.0001,
+            "tau": 0.0002281542323,
+            "riskAversionParameter": 0.01,
             "params": {"mu": 0, "r": 0, "sigma": 5.0},
         },
         "liquiditySlaParameters": {
@@ -517,10 +510,7 @@ CONFIG = MarketConfig(
         },
         "liquidityFeeSettings": {"method": "METHOD_MARGINAL_COST"},
         "liquidityMonitoringParameters": {
-            "targetStakeParameters": {
-                "timeWindow": "3600",
-                "scalingFactor": "0.05",
-            }
+            "targetStakeParameters": {"timeWindow": "3600", "scalingFactor": "0.05"}
         },
         "markPriceConfiguration": {
             "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE"
