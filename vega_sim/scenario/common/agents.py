@@ -1552,7 +1552,6 @@ class ExponentialShapedMarketMaker(ShapedMarketMaker):
         running_penalty_parameter: float = 5 * 10**-6,
         market_order_arrival_rate: float = 5,
         market_kappa: float = 1,
-        asset_decimal_places: int = 0,
         tag: str = "",
         wallet_name: str = None,
         orders_from_stream: Optional[bool] = True,
