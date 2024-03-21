@@ -156,7 +156,6 @@ class IdealMarketMaker(Scenario):
             key_name=TRADER_WALLET.name,
             initial_asset_mint=self.initial_asset_mint,
             market_name=market_name,
-            asset_name=asset_name,
             tag=str(tag),
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
@@ -167,7 +166,6 @@ class IdealMarketMaker(Scenario):
         background_market = BackgroundMarket(
             key_name=BACKGROUND_MARKET.name,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             price_process=price_process,
             spread=self.spread,
@@ -188,7 +186,6 @@ class IdealMarketMaker(Scenario):
                 else price_process[0]
             ),
             market_name=market_name,
-            asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=f"1_{tag}",
         )
@@ -203,7 +200,6 @@ class IdealMarketMaker(Scenario):
                 else price_process[0]
             ),
             market_name=market_name,
-            asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=f"2_{tag}",
         )

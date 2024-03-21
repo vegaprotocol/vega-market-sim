@@ -243,7 +243,6 @@ class BenchmarkScenario(Scenario):
                         wallet_name="risky_traders",
                         key_name=f"MARKET_{self.market_config.instrument.code}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         side=side,
                         initial_asset_mint=1_000,
                         leverage_factor=0.5,

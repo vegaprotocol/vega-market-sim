@@ -112,7 +112,6 @@ class LiquidationScenario(Scenario):
                 market_name=market_name,
                 market_code=market_code,
                 asset_dp=asset_dp,
-                asset_name=asset_name,
                 settlement_price=price_process[-1],
                 tag=f"MARKET_MANAGER",
             )
@@ -124,10 +123,8 @@ class LiquidationScenario(Scenario):
                 price_process_generator=iter(price_process),
                 initial_asset_mint=self.supplied_liquidity * 10,
                 market_name=market_name,
-                asset_name=asset_name,
                 commitment_amount=self.supplied_liquidity,
                 market_decimal_places=market_config.decimal_places,
-                asset_decimal_places=asset_dp,
                 num_steps=self.num_steps,
                 kappa=2.4,
                 tick_spacing=0.1,
@@ -145,7 +142,6 @@ class LiquidationScenario(Scenario):
                     initial_asset_mint=1e6,
                     price_process=iter(price_process),
                     market_name=market_name,
-                    asset_name=asset_name,
                     uncrossing_size=20,
                     tag=str(i_agent).zfill(3),
                 )
@@ -157,7 +153,6 @@ class LiquidationScenario(Scenario):
                 MarketOrderTrader(
                     key_name=f"MO_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     buy_intensity=10,
                     sell_intensity=10,
                     base_order_size=0.01,
@@ -172,7 +167,6 @@ class LiquidationScenario(Scenario):
                 LimitOrderTrader(
                     key_name=f"LO_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                     buy_volume=0.001,
                     sell_volume=0.001,
@@ -196,7 +190,6 @@ class LiquidationScenario(Scenario):
                 RiskyMarketOrderTrader(
                     key_name=f"RO_AGENT_{str(i_agent).zfill(3)}_SIDE_{side}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     side=side,
                     initial_asset_mint=self.mint_risky_traders,
                     leverage_factor=0.5,

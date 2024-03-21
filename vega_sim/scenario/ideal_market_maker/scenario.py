@@ -138,7 +138,6 @@ class IdealMarketMaker(Scenario):
             wallet_name=TRADER_WALLET.name,
             wallet_pass=TRADER_WALLET.passphrase,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
@@ -152,7 +151,6 @@ class IdealMarketMaker(Scenario):
             asset_decimal=self.asset_decimal,
             market_decimal=self.market_decimal,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             tag=str(tag),
         )
@@ -163,7 +161,6 @@ class IdealMarketMaker(Scenario):
             side="SIDE_BUY",
             initial_price=self.initial_price,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             tag=f"1_{tag}",
         )
@@ -174,7 +171,6 @@ class IdealMarketMaker(Scenario):
             side="SIDE_SELL",
             initial_price=self.initial_price,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             tag=f"2_{tag}",
         )
@@ -191,7 +187,6 @@ class IdealMarketMaker(Scenario):
             running_penalty_parameter=self.phi,
             initial_asset_mint=self.initial_asset_mint,
             market_name=market_name,
-            asset_name=asset_name,
             entry_step=5,
             commitamount=self.lp_commitamount,
             tag=str(tag),
@@ -202,7 +197,6 @@ class IdealMarketMaker(Scenario):
             wallet_pass=INFORMED_WALLET.passphrase,
             price_process=price_process,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             proportion_taken=self.proportion_taken,
             tag=str(tag),

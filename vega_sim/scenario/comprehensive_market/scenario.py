@@ -172,11 +172,10 @@ class ComprehensiveMarket(Scenario):
         )
 
         lp_agents = [
-            LiquidityProvider(
+            SimpleLiquidityProvider(
                 key_name=self.lp_wallets[i].name,
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
-                asset_name=asset_name,
                 tag=f"{i}_{tag}",
                 commitment_amount=self.lp_commitamount,
                 fee=0.001,
@@ -190,7 +189,6 @@ class ComprehensiveMarket(Scenario):
                 key_name=self.mo_wallets[i].name,
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
-                asset_name=asset_name,
                 tag=f"{i}_{tag}",
                 buy_intensity=self.market_order_trader_order_intensity,
                 sell_intensity=self.market_order_trader_order_intensity,
@@ -205,7 +203,6 @@ class ComprehensiveMarket(Scenario):
                 key_name=self.lo_wallets[i].name,
                 initial_asset_mint=self.initial_asset_mint,
                 market_name=market_name,
-                asset_name=asset_name,
                 tag=f"{i}_{tag}",
                 spread=self.spread,
                 price_process=price_process,
@@ -228,7 +225,6 @@ class ComprehensiveMarket(Scenario):
             MomentumTrader(
                 key_name=self.momentum_wallets[i].name,
                 market_name=market_name,
-                asset_name=asset_name,
                 initial_asset_mint=self.initial_asset_mint,
                 order_intensity=self.momentum_trader_order_intensity,
                 base_order_size=self.momentum_trader_order_size,
@@ -256,7 +252,6 @@ class ComprehensiveMarket(Scenario):
                 else price_process[0]
             ),
             market_name=market_name,
-            asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=f"1_{tag}",
         )
@@ -271,7 +266,6 @@ class ComprehensiveMarket(Scenario):
                 else price_process[0]
             ),
             market_name=market_name,
-            asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=f"2_{tag}",
         )

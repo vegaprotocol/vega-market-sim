@@ -292,7 +292,6 @@ class FuzzingScenario(Scenario):
                     market_name=market_name,
                     commitment_amount=1e6,
                     market_decimal_places=market_config.decimal_places,
-                    asset_decimal_places=asset_dp,
                     num_steps=self.num_steps,
                     kappa=2.4,
                     tick_spacing=0.05,
@@ -310,7 +309,6 @@ class FuzzingScenario(Scenario):
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
                     initial_asset_mint=1e5,
                     market_name=market_name,
-                    asset_name=asset_name,
                     order_size=1,
                     peg_offset=0,
                     max_position=5,
@@ -400,7 +398,6 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                     market_name=market_name,
-                    asset_name=asset_name,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
@@ -413,7 +410,6 @@ class FuzzingScenario(Scenario):
                     wallet_name="risky_traders",
                     key_name=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     side=side,
                     initial_asset_mint=1_000,
                     leverage_factor=0.5,
@@ -429,7 +425,6 @@ class FuzzingScenario(Scenario):
                     wallet_name="risky_liquidity_providers",
                     key_name=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     initial_asset_mint=20_000,
                     commitment_factor=0.5,
                     step_bias=0.1,
@@ -444,7 +439,6 @@ class FuzzingScenario(Scenario):
                         wallet_name="risky_liquidity_providers",
                         key_name=f"LOW_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         initial_asset_mint=20_000,
                         commitment_factor=0.3,
                         step_bias=0.1,
@@ -459,7 +453,6 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                     market_name=market_name,
-                    asset_name=asset_name,
                     initial_asset_mint=5_000,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
