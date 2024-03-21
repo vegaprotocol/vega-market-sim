@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Optional, List
+from typing import Optional, Dict, Any
 
 from vega_sim.api.market import MarketConfig
 from vega_sim.scenario.scenario import Scenario
@@ -14,6 +14,7 @@ from vega_sim.environment.environment import (
 from vega_sim.configs.agents import ConfigurableMarketManager
 from vega_sim.scenario.common.agents import (
     StateAgent,
+    NetworkParameterManager,
     UncrossAuctionAgent,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
@@ -75,6 +76,7 @@ class BenchmarkScenario(Scenario):
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
         step_length_seconds: Optional[float] = None,
+        initial_network_parameters: Dict[str, Any] = None,
         output: bool = True,
     ):
         super().__init__()
@@ -95,13 +97,17 @@ class BenchmarkScenario(Scenario):
         self.annualised_volatility = annualised_volatility
         self.notional_trade_volume = notional_trade_volume
 
+        self.initial_network_parameters = (
+            initial_network_parameters if initial_network_parameters is not None else {}
+        )
+
     def configure_agents(
         self,
         vega: VegaServiceNull,
         tag: str,
         random_state: Optional[np.random.RandomState],
         **kwargs,
-    ) -> List[StateAgent]:
+    ) -> Dict[str, StateAgent]:
         self.random_state = (
             random_state if random_state is not None else np.random.RandomState()
         )
@@ -126,6 +132,13 @@ class BenchmarkScenario(Scenario):
         )
 
         self.agents = []
+        self.agents.append(
+            NetworkParameterManager(
+                wallet_name="NETWORK_PARAMETER_MANAGER",
+                key_name="network_parameter_manager",
+                network_parameters=self.initial_network_parameters,
+            )
+        )
         self.agents.append(
             ConfigurableMarketManager(
                 wallet_name="MARKET_MANAGER",
