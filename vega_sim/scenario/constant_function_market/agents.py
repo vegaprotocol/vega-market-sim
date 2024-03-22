@@ -490,8 +490,8 @@ class CFMV3MarketMaker(ShapedMarketMaker):
             self.margin_multiple_at_upper
             * balance
             / (
-                self.upper_price * (1 - self.margin_multiple_at_upper)
-                + self.margin_multiple_at_upper * aep_upper
+                self.upper_price * (1 + self.margin_multiple_at_upper)
+                - self.margin_multiple_at_upper * aep_upper
             )
         )
 
