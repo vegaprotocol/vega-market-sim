@@ -62,6 +62,27 @@ from vega_sim.wallet.base import Wallet
 logger = logging.getLogger(__name__)
 
 
+def _retry(
+    wait: int = 6,
+    attempts: int = 10,
+):
+    def retry_decorator(fn):
+        @wraps(fn)
+        def auto_retry_fn(*args, **kwargs):
+            for i in range(attempts):
+                try:
+                    return fn(*args, **kwargs)
+                except AssertionError as e:
+                    if (i + 1) == attempts:
+                        raise e
+                    time.sleep(wait)
+                    logger.warning(e)
+
+        return auto_retry_fn
+
+    return retry_decorator
+
+
 @dataclass
 class PeggedOrder:
     reference: vega_protos.vega.PeggedReference
@@ -3665,35 +3686,60 @@ class VegaService(ABC):
             margin_factor=str(margin_factor),
         )
 
+    @_retry(wait=6, attempts=10)
     def check_market_states_consistent(
-        self, raise_exceptions: bool = True, max_attempts: int = 5
+        self,
     ):
-        exception = None
         self.wait_for_total_catchup()
-        for _ in range(max_attempts):
-            markets = self.all_markets()
-            for market in markets:
-                market_data = self.get_latest_market_data(market_id=market.id)
-                try:
-                    assert market.state == market_data.market_state
-                    assert market.trading_mode == market_data.market_trading_mode
-                    return
-                except AssertionError as e:
-                    exception = e
-                    time.sleep(5)
-                    logging.warning(
-                        "Check failed, waiting to ensure sync then retrying check."
-                    )
-                    self.wait_for_total_catchup()
-                    break
-        if raise_exceptions:
-            raise exception
-        logger.error(exception)
+        list_markets_block_height = int(
+            requests.get(f"{self.data_node_rest_url}/statistics").headers.get(
+                "X-Block-Height"
+            )
+        )
+        markets = self.all_markets()
+        for market in markets:
+            market_data = self.get_latest_market_data(market_id=market.id)
+            get_latest_market_data_block_height = int(
+                requests.get(f"{self.data_node_rest_url}/statistics").headers.get(
+                    "X-Block-Height"
+                )
+            )
+            try:
+                assert market.state == market_data.market_state
+            except AssertionError:
+                logger.info(
+                    f"Request to ListMarkets made at datanode block_height={list_markets_block_height}."
+                )
+                logger.info(
+                    f"Request to GetLatestMarketData made at datanode block_height={get_latest_market_data_block_height}."
+                )
+                raise AssertionError(
+                    f"Market {market.id[:6]}, market API says state {vega_protos.markets.Market.State.Name(market.state)} but market data API says {vega_protos.markets.Market.State.Name(market_data.market_state)}."
+                )
+            try:
+                assert market.trading_mode == market_data.market_trading_mode
+            except AssertionError:
+                logger.info(
+                    f"Request to ListMarkets made at datanode block_height={list_markets_block_height}."
+                )
+                logger.info(
+                    f"Request to GetLatestMarketData made at datanode block_height={get_latest_market_data_block_height}."
+                )
+                raise AssertionError(
+                    f"Market {market.id[:6]}, market API says trading mode {vega_protos.markets.Market.TradingMode.Name(market.trading_mode)} but market data API says {vega_protos.markets.Market.TradingMode.Name(market_data.market_trading_mode)}."
+                )
 
-    def check_book_not_crossed(self, raise_exceptions: bool = True):
-        # Check needs to ensure all services are synced.
+    @_retry(wait=6, attempts=10)
+    def check_book_not_crossed(
+        self,
+    ):
         self.wait_for_total_catchup()
         for market_id in self._market_to_asset.keys():
+            get_latest_market_data_block_height = int(
+                requests.get(f"{self.data_node_rest_url}/statistics").headers.get(
+                    "X-Block-Height"
+                )
+            )
             if (
                 data.get_latest_market_data(
                     market_id=market_id,
@@ -3706,6 +3752,11 @@ class VegaService(ABC):
                 != vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS
             ):
                 continue
+            get_latest_market_depth_block_height = int(
+                requests.get(f"{self.data_node_rest_url}/statistics").headers.get(
+                    "X-Block-Height"
+                )
+            )
             market_depth = data.market_depth(
                 market_id=market_id, data_client=self.trading_data_client_v2
             )
@@ -3715,15 +3766,19 @@ class VegaService(ABC):
             min_ask_price = min(market_depth.sells, key=lambda x: x.price).price
             try:
                 assert max_bid_price < min_ask_price
-                logging.debug(
-                    f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS and greatest bid < smallest ask ({max_bid_price:.2f} < {min_ask_price:.2f})"
+                logger.debug(
+                    f"Market {market_id[:6]} in TRADING_MODE_CONTINUOUS and greatest bid < smallest ask ({max_bid_price:.2f} < {min_ask_price:.2f})."
                 )
-            except AssertionError as e:
-                logging.error(
-                    f"Market {market_id} in TRADING_MODE_CONTINUOUS but greatest bid > smallest ask ({max_bid_price} > {min_ask_price})"
+            except AssertionError:
+                logger.info(
+                    f"Request to GetLatestMarketData made at datanode block_height={get_latest_market_data_block_height}."
                 )
-                if raise_exceptions:
-                    raise e
+                logger.info(
+                    f"Request to GetLatestMarketDepth made at datanode block_height={get_latest_market_depth_block_height}."
+                )
+                raise AssertionError(
+                    f"Market {market_id} in TRADING_MODE_CONTINUOUS but greatest bid > smallest ask ({max_bid_price} > {min_ask_price})."
+                )
 
     def check_balances_equal_deposits(self):
         for attempts in range(100):
