@@ -144,7 +144,6 @@ class OptimalMarketMaker(StateAgentWithWallet):
             amount=1e4,
             key_name=self.key_name,
         )
-        self.vega.wait_fn(5)
 
         # Create asset
         self.vega.create_asset(
@@ -154,7 +153,7 @@ class OptimalMarketMaker(StateAgentWithWallet):
             decimals=self.adp,
             key_name=self.key_name,
         )
-        self.vega.wait_fn(5)
+
         self.vega.wait_for_total_catchup()
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)

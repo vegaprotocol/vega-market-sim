@@ -185,7 +185,7 @@ class MarketOrderTrader(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 wallet_name=self.wallet_name,
             )
-        self.vega.wait_fn(5)
+
         self.pdp = self.vega.market_pos_decimals.get(self.market_id, {})
         self.mdp = self.vega.market_price_decimals.get(self.market_id, {})
         self.adp = self.vega.asset_decimals.get(self.asset_id, {})
@@ -291,7 +291,6 @@ class PriceSensitiveMarketOrderTrader(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 wallet_name=self.wallet_name,
             )
-        self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
         self.curr_price = next(self.price_process_generator)
@@ -400,7 +399,6 @@ class PriceSensitiveLimitOrderTrader(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 wallet_name=self.wallet_name,
             )
-        self.vega.wait_fn(5)
 
     def step(self, vega_state: VegaState):
         self.curr_price = next(self.price_process_generator)
@@ -932,7 +930,7 @@ class OpenAuctionPass(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 key_name=self.key_name,
             )
-        self.vega.wait_fn(10)
+
         self.vega.wait_for_total_catchup()
 
         self.vega.submit_order(
@@ -1012,7 +1010,7 @@ class MarketManager(StateAgentWithWallet):
             amount=1e4,
             key_name=self.key_name,
         )
-        self.vega.wait_fn(5)
+
         self.vega.wait_for_total_catchup()
         if vega.find_asset_id(symbol=self.asset_name) is None:
             # Create asset
@@ -1023,7 +1021,7 @@ class MarketManager(StateAgentWithWallet):
                 decimals=self.adp,
                 key_name=self.key_name,
             )
-        self.vega.wait_fn(5)
+
         self.vega.wait_for_total_catchup()
         # Get asset id
         self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
@@ -1035,7 +1033,6 @@ class MarketManager(StateAgentWithWallet):
                 amount=self.initial_mint,
                 key_name=self.key_name,
             )
-        self.vega.wait_fn(5)
 
         self.vega.wait_for_total_catchup()
         # Set up a future market
@@ -3245,7 +3242,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                 amount=self.initial_asset_mint,
                 key_name=self.key_name,
             )
-        self.vega.wait_fn(10)
+
         self.vega.wait_for_total_catchup()
 
     def step(self, vega_state: VegaState):
