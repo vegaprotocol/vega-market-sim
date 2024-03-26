@@ -55,8 +55,44 @@ def spot() -> vega_protos.markets.Spot:
 
 # TODO: Implement build methods for perpetual markets
 @raise_custom_build_errors
-def perpetual() -> vega_protos.markets.Perpetual:
-    pass
+def perpetual(
+    settlement_asset: str,
+    quote_name: str,
+    margin_funding_factor: float,
+    interest_rate: float,
+    clamp_lower_bound: float,
+    clamp_upper_bound: float,
+    data_source_spec_for_settlement_schedule: vega_protos.data_source.DataSourceSpec,
+    data_source_spec_for_settlement_data: vega_protos.data_source.DataSourceSpec,
+    data_source_spec_for_perpetual_binding: vega_protos.markets.DataSourceSpecToPerpetualBinding,
+    funding_rate_scaling_factor: float,
+    funding_rate_upper_bound: float,
+    funding_Rate_lower_bound: float,
+) -> vega_protos.markets.Perpetual:
+    return vega_protos.markets.Perpetual(
+        settlement_asset=settlement_asset,
+        quote_name=quote_name,
+        margin_funding_factor=str(margin_funding_factor),
+        interest_rate=str(interest_rate),
+        clamp_lower_bound=str(clamp_lower_bound),
+        clamp_upper_bound=str(clamp_upper_bound),
+        data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
+        data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
+        data_source_spec_for_perpetual_binding=data_source_spec_for_perpetual_binding,
+        funding_rate_scaling_factor=str(funding_rate_scaling_factor),
+        funding_Rate_lower_bound=str(funding_Rate_lower_bound),
+        funding_rate_upper_bound=str(funding_rate_upper_bound),
+    )
+
+
+@raise_custom_build_errors
+def data_source_spec_to_perpetual_binding(
+    settlement_data_property: str, settlement_schedule_property: str
+) -> vega_protos.markets.DataSourceSpecToPerpetualBinding:
+    return vega_protos.markets.DataSourceSpecToPerpetualBinding(
+        settlement_data_property=settlement_data_property,
+        settlement_schedule_property=settlement_schedule_property,
+    )
 
 
 @raise_custom_build_errors
@@ -156,7 +192,7 @@ def liquidation_strategy(
 
 
 @raise_custom_build_errors
-def composite_price_process(
+def composite_price_configuration(
     composite_price_type: vega_protos.markets.CompositePriceType.Value,
     decay_weight: Optional[float] = None,
     decay_power: Optional[int] = None,

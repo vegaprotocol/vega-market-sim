@@ -1006,6 +1006,8 @@ class VegaServiceNull(VegaService):
             time.sleep(6)
             self.process_pids = parent_conn.recv()
 
+        if self.replay_from_path is not None:
+            return
         # Initialise the data-cache
         self.data_cache
 

@@ -1,3 +1,3 @@
-from . import ESHRUSDT, HLPUSDT, SPOT
+from . import spot, future, perpetual, ESHRUSDT, HLPUSDT, SPOT
 
-__all__ = ["ESHRUSDT", "HLPUSDT", "SPOT"]
+__all__ = ["spot", "future", "perpetual", "ESHRUSDT", "HLPUSDT", "SPOT"]

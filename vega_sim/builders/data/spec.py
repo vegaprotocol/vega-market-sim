@@ -36,5 +36,20 @@ def property_key(
     number_decimal_places: Optional[int] = None,
 ) -> vega_protos.data.v1.spec.PropertyKey:
     return vega_protos.data.v1.spec.PropertyKey(
-        name=name, type=type, number_decimal_places=number_decimal_places
+        name=name,
+        type=type,
+        number_decimal_places=(
+            int(number_decimal_places) if number_decimal_places is not None else None
+        ),
+    )
+
+
+@raise_custom_build_errors
+def condition(
+    operator: vega_protos.data.v1.spec.Condition.Operator.Value,
+    value: int,
+) -> vega_protos.data.v1.spec.PropertyKey:
+    return vega_protos.data.v1.spec.Condition(
+        operator=operator,
+        value=str(value),
     )

@@ -1,19 +1,19 @@
-"""INJUSDT.py
+"""BTCUSDT.py
 
-Market config matching latest proposal for INJ/USDT market on mainnet.
-https://governance.vega.xyz/proposals/e62ca044c123068ead98934deaa6ba71e7d71ad1578f98074d1a6943fb8369c0
+Market config matching latest proposal for BTCUSD market on mainnet.
+https://governance.vega.xyz/proposals/dbde48b2ec84bf58d9e59aab2d9eb04dc888e2fd4aa7488c7a80e2dc44eba39e
 """
 
 from vega_sim.api.market import MarketConfig
 
 CONFIG = MarketConfig(
     {
-        "decimalPlaces": "3",
-        "positionDecimalPlaces": "1",
+        "decimalPlaces": "1",
+        "positionDecimalPlaces": "4",
         "tickSize": "2",
         "instrument": {
-            "code": "INJ/USDT",
-            "name": "Injective / Tether USD (Perpetual)",
+            "code": "BTC/USDT-PERP",
+            "name": "Bitcoin / Tether USD (Perpetual)",
             "perpetual": {
                 "quoteName": "USDT",
                 "marginFundingFactor": "0.9",
@@ -26,7 +26,7 @@ CONFIG = MarketConfig(
                             "conditions": [
                                 {"operator": "OPERATOR_GREATER_THAN", "value": "0"}
                             ],
-                            "triggers": [{"initial": "1708988400", "every": "28800"}],
+                            "triggers": [{"initial": "1709575200", "every": "28800"}],
                         }
                     }
                 },
@@ -36,15 +36,15 @@ CONFIG = MarketConfig(
                             "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
                             "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
                             "method": "getPrice",
-                            "args": ["elvB0rVq0CkEjNY5ZLOtJ3bq34Eu3BpDoxQGy1S/9ZI="],
+                            "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
                             "trigger": {
-                                "timeTrigger": {"initial": "1708988400", "every": "60"}
+                                "timeTrigger": {"initial": "1709575200", "every": "60"}
                             },
                             "requiredConfirmations": "3",
                             "filters": [
                                 {
                                     "key": {
-                                        "name": "inj.price",
+                                        "name": "btc.price",
                                         "type": "TYPE_INTEGER",
                                         "numberDecimalPlaces": "18",
                                     },
@@ -57,14 +57,14 @@ CONFIG = MarketConfig(
                                 }
                             ],
                             "normalisers": [
-                                {"name": "inj.price", "expression": "$[0]"}
+                                {"name": "btc.price", "expression": "$[0]"}
                             ],
                             "sourceChainId": "100",
                         }
                     }
                 },
                 "dataSourceSpecBinding": {
-                    "settlementDataProperty": "inj.price",
+                    "settlementDataProperty": "btc.price",
                     "settlementScheduleProperty": "vegaprotocol.builtin.timetrigger",
                 },
                 "fundingRateScalingFactor": "1",
@@ -85,14 +85,14 @@ CONFIG = MarketConfig(
                                     "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
                                     "method": "getPrice",
                                     "args": [
-                                        "elvB0rVq0CkEjNY5ZLOtJ3bq34Eu3BpDoxQGy1S/9ZI="
+                                        "5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="
                                     ],
                                     "trigger": {"timeTrigger": {"every": "60"}},
                                     "requiredConfirmations": "3",
                                     "filters": [
                                         {
                                             "key": {
-                                                "name": "inj.price",
+                                                "name": "btc.price",
                                                 "type": "TYPE_INTEGER",
                                                 "numberDecimalPlaces": "18",
                                             },
@@ -105,26 +105,26 @@ CONFIG = MarketConfig(
                                         }
                                     ],
                                     "normalisers": [
-                                        {"name": "inj.price", "expression": "$[0]"}
+                                        {"name": "btc.price", "expression": "$[0]"}
                                     ],
                                     "sourceChainId": "100",
                                 }
                             }
                         }
                     ],
-                    "dataSourcesSpecBinding": [{"priceSourceProperty": "inj.price"}],
+                    "dataSourcesSpecBinding": [{"priceSourceProperty": "btc.price"}],
                 },
             },
         },
         "metadata": [
-            "base:INJ",
+            "base:BTC",
             "quote:USDT",
             "oracle:pyth",
             "oracleChain:gnosis",
             "class:fx/crypto",
             "perpetual",
             "sector:defi",
-            "enactment:2024-02-04T15:00:00Z",
+            "enactment:2023-12-01T18:00:00Z",
         ],
         "priceMonitoringParameters": {
             "triggers": [
@@ -157,8 +157,8 @@ CONFIG = MarketConfig(
         },
         "logNormal": {
             "riskAversionParameter": 0.000001,
-            "tau": 0.0000071,
-            "params": {"mu": 0, "r": 0, "sigma": 1.5},
+            "tau": 0.000003995,
+            "params": {"mu": 0, "r": 0, "sigma": 1},
         },
         "linearSlippageFactor": "0.001",
         "quadraticSlippageFactor": "",
@@ -178,20 +178,16 @@ CONFIG = MarketConfig(
         "markPriceConfiguration": {
             "decayWeight": "1",
             "decayPower": "1",
-            "cashAmount": "0",
-            "sourceWeights": [
-                "1",
-                "1",
-                "1",
-                "1",
-            ],
+            "cashAmount": "50000000",
+            "sourceWeights": [],
             "sourceStalenessTolerance": [
                 "1m0s",
                 "1m0s",
-                "1m0s",
+                "168h0m0s",
+                "168h0m0s",
                 "1m0s",
             ],
-            "compositePriceType": "COMPOSITE_PRICE_TYPE_WEIGHTED",
+            "compositePriceType": "COMPOSITE_PRICE_TYPE_MEDIAN",
             "dataSourcesSpec": [
                 {
                     "external": {
@@ -199,13 +195,13 @@ CONFIG = MarketConfig(
                             "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
                             "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
                             "method": "getPrice",
-                            "args": ["elvB0rVq0CkEjNY5ZLOtJ3bq34Eu3BpDoxQGy1S/9ZI="],
+                            "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
                             "trigger": {"timeTrigger": {"every": "60"}},
                             "requiredConfirmations": "3",
                             "filters": [
                                 {
                                     "key": {
-                                        "name": "inj.price",
+                                        "name": "btc.price",
                                         "type": "TYPE_INTEGER",
                                         "numberDecimalPlaces": "18",
                                     },
@@ -218,14 +214,48 @@ CONFIG = MarketConfig(
                                 }
                             ],
                             "normalisers": [
-                                {"name": "inj.price", "expression": "$[0]"}
+                                {"name": "btc.price", "expression": "$[0]"}
                             ],
                             "sourceChainId": "100",
                         }
                     }
-                }
+                },
+                {
+                    "external": {
+                        "ethOracle": {
+                            "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
+                            "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
+                            "method": "getPrice",
+                            "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
+                            "trigger": {"timeTrigger": {"every": "60"}},
+                            "requiredConfirmations": "3",
+                            "filters": [
+                                {
+                                    "key": {
+                                        "name": "btc.price",
+                                        "type": "TYPE_INTEGER",
+                                        "numberDecimalPlaces": "18",
+                                    },
+                                    "conditions": [
+                                        {
+                                            "operator": "OPERATOR_GREATER_THAN",
+                                            "value": "0",
+                                        }
+                                    ],
+                                }
+                            ],
+                            "normalisers": [
+                                {"name": "btc.price", "expression": "$[0]"}
+                            ],
+                            "sourceChainId": "100",
+                        }
+                    }
+                },
             ],
-            "dataSourcesSpecBinding": [{"priceSourceProperty": "inj.price"}],
+            "dataSourcesSpecBinding": [
+                {"priceSourceProperty": "btc.price"},
+                {"priceSourceProperty": "btc.price"},
+            ],
         },
     }
 )

@@ -518,14 +518,7 @@ CONFIG = MarketConfig(
             "maxFractionConsumed": "0.1",
         },
         "markPriceConfiguration": {
-            "decayWeight": "0",
-            "decayPower": "0",
-            "cashAmount": "0",
-            "sourceWeights": [],
-            "sourceStalenessTolerance": [],
             "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE",
-            "dataSourcesSpec": [],
-            "dataSourcesSpecBinding": [],
         },
     }
 )

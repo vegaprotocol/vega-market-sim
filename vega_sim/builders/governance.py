@@ -226,6 +226,9 @@ def perpetual_product(
     funding_rate_scaling_factor: Optional[float] = None,
     funding_rate_lower_bound: Optional[float] = None,
     funding_rate_upper_bound: Optional[float] = None,
+    internal_composite_price_configuration: Optional[
+        vega_protos.markets.CompositePriceConfiguration
+    ] = None,
 ) -> vega_protos.governance.PerpetualProduct:
     perpetual_product = vega_protos.governance.PerpetualProduct(
         settlement_asset=settlement_asset,
@@ -237,6 +240,7 @@ def perpetual_product(
         data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
         data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
         data_source_spec_binding=data_source_spec_binding,
+        internal_composite_price_configuration=internal_composite_price_configuration,
     )
     if funding_rate_scaling_factor is not None:
         setattr(

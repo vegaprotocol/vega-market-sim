@@ -7,8 +7,8 @@ import argparse
 
 from vega_sim.null_service import VegaServiceNull, Ports
 from vega_sim.scenario.constants import Network
-from vega_sim.scenario.benchmark.scenario import BenchmarkScenario
-from vega_sim.scenario.benchmark.registry import REGISTRY
+from vega_sim.scenario.fuzzing.scenario import FuzzingScenario
+from vega_sim.scenario.fuzzing.registry import REGISTRY
 
 from vegapy.service.service import Service
 from vegapy.service.networks.constants import Network
@@ -17,7 +17,7 @@ import vegapy.protobuf.protos as protos
 
 
 def _run(
-    scenario: BenchmarkScenario,
+    scenario: FuzzingScenario,
     pause: bool = False,
     console: bool = False,
     output: bool = False,
@@ -41,7 +41,7 @@ def _run(
     ) as vega:
         scenario.run_iteration(
             vega=vega,
-            log_every_n_steps=100,
+            log_every_n_steps=20,
             output_data=False,
             run_with_snitch=False,
         )
