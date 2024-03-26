@@ -246,14 +246,17 @@ class DevOpsScenario(Scenario):
                 for i, party in enumerate(self.scenario_wallet.sensitive_trader_agents)
             ]
 
-
-
-            agents = list(filter(lambda x: not x is None, (
-                [market_manager, market_maker]
-                + auction_pass_agents
-                + random_market_order_traders
-                + sensitive_limit_order_traders
-            )))
+            agents = list(
+                filter(
+                    lambda x: not x is None,
+                    (
+                        [market_manager, market_maker]
+                        + auction_pass_agents
+                        + random_market_order_traders
+                        + sensitive_limit_order_traders
+                    ),
+                )
+            )
 
         else:
             agents = []
