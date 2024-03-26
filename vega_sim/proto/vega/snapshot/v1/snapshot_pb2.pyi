@@ -1381,6 +1381,7 @@ class SpotMarket(_message.Message):
         "stop_orders",
         "expiring_stop_orders",
         "fees_stats",
+        "has_traded",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1403,6 +1404,7 @@ class SpotMarket(_message.Message):
     STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     EXPIRING_STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    HAS_TRADED_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1424,6 +1426,7 @@ class SpotMarket(_message.Message):
     stop_orders: StopOrders
     expiring_stop_orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
     fees_stats: _events_pb2.FeesStats
+    has_traded: bool
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1449,6 +1452,7 @@ class SpotMarket(_message.Message):
             _Iterable[_Union[_vega_pb2.Order, _Mapping]]
         ] = ...,
         fees_stats: _Optional[_Union[_events_pb2.FeesStats, _Mapping]] = ...,
+        has_traded: bool = ...,
     ) -> None: ...
 
 class Market(_message.Message):
