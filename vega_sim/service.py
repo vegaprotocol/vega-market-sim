@@ -213,6 +213,9 @@ class VegaService(ABC):
         self._market_pos_decimals = None
         self._asset_decimals = None
         self._market_to_asset = None
+        self._market_to_settlement_asset = None
+        self._market_to_base_asset = None
+        self._market_to_quote_asset = None
         self._listen_for_high_volume_stream_updates = (
             listen_for_high_volume_stream_updates
         )
@@ -254,11 +257,41 @@ class VegaService(ABC):
     def market_to_asset(self) -> str:
         if self._market_to_asset is None:
             self._market_to_asset = DecimalsCache(
-                lambda market_id: helpers.get_product(
+                lambda market_id: helpers.get_market_asset(
                     self.data_cache.market_from_feed(market_id=market_id)
-                ).settlement_asset
+                )
             )
         return self._market_to_asset
+
+    @property
+    def market_to_settlement_asset(self) -> str:
+        if self._market_to_settlement_asset is None:
+            self._market_to_settlement_asset = DecimalsCache(
+                lambda market_id: helpers.get_settlement_asset(
+                    self.data_cache.market_from_feed(market_id=market_id)
+                )
+            )
+        return self._market_to_settlement_asset
+
+    @property
+    def market_to_base_asset(self) -> str:
+        if self._market_to_base_asset is None:
+            self._market_to_base_asset = DecimalsCache(
+                lambda market_id: helpers.get_base_asset(
+                    self.data_cache.market_from_feed(market_id=market_id)
+                )
+            )
+        return self._market_to_base_asset
+
+    @property
+    def market_to_quote_asset(self) -> str:
+        if self._market_to_quote_asset is None:
+            self._market_to_quote_asset = DecimalsCache(
+                lambda market_id: helpers.get_quote_asset(
+                    self.data_cache.market_from_feed(market_id=market_id)
+                )
+            )
+        return self._market_to_quote_asset
 
     @property
     def data_cache(self) -> LocalDataCache:
@@ -271,6 +304,9 @@ class VegaService(ABC):
                 self.market_price_decimals,
                 self.asset_decimals,
                 self.market_to_asset,
+                self.market_to_settlement_asset,
+                self.market_to_base_asset,
+                self.market_to_quote_asset,
             )
             self._local_data_cache.start_live_feeds(
                 start_high_load_feeds=self._listen_for_high_volume_stream_updates

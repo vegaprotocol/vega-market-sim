@@ -119,6 +119,9 @@ class BenchmarkScenario(Scenario):
         if self.market_config.is_perp():
             asset_name = self.market_config.instrument.perpetual.quote_name
             asset_dp = self.market_config.instrument.perpetual.number_decimal_places
+        if self.market_config.is_perp():
+            asset_name = self.market_config.instrument.perpetual.quote_name
+            asset_dp = self.market_config.instrument.perpetual.number_decimal_places
 
         # Create fuzzed price process
         price_process = _create_price_process(
@@ -159,10 +162,8 @@ class BenchmarkScenario(Scenario):
                 price_process_generator=iter(price_process),
                 initial_asset_mint=1e9,
                 market_name=market_name,
-                asset_name=asset_name,
                 commitment_amount=1e6,
                 market_decimal_places=int(self.market_config.decimal_places),
-                asset_decimal_places=asset_dp,
                 num_steps=self.num_steps,
                 kappa=2.4,
                 tick_spacing=10**-self.market_config.decimal_places
@@ -183,7 +184,6 @@ class BenchmarkScenario(Scenario):
                     initial_asset_mint=1e8,
                     price_process=iter(price_process),
                     market_name=market_name,
-                    asset_name=asset_name,
                     uncrossing_size=100,
                     tag=(
                         f"MARKET_{self.market_config.instrument.code}_AGENT_{str(i_agent).zfill(3)}"
@@ -199,7 +199,6 @@ class BenchmarkScenario(Scenario):
                     wallet_name="RANDOM_TRADERS",
                     key_name=f"MARKET_{self.market_config.instrument.code}_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     buy_intensity=100,
                     sell_intensity=100,
                     base_order_size=self.notional_trade_volume
@@ -218,7 +217,6 @@ class BenchmarkScenario(Scenario):
                     wallet_name=f"RANDOM_TRADERS",
                     key_name=f"LIMIT_{self.market_config.instrument.code}_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                     buy_volume=self.notional_trade_volume / self.initial_price / 100,
                     sell_volume=self.notional_trade_volume / self.initial_price / 100,
@@ -238,23 +236,23 @@ class BenchmarkScenario(Scenario):
             ]
         )
 
-        self.agents.extend(
-            [
-                RiskyMarketOrderTrader(
-                    wallet_name="risky_traders",
-                    key_name=f"MARKET_{self.market_config.instrument.code}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
-                    market_name=market_name,
-                    asset_name=asset_name,
-                    side=side,
-                    initial_asset_mint=1_000,
-                    leverage_factor=0.5,
-                    step_bias=0.1,
-                    tag=f"MARKET_{self.market_config.instrument.code}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
-                )
-                for side in ["SIDE_BUY", "SIDE_SELL"]
-                for i_agent in range(5)
-            ]
-        )
+        if self.market_config.is_future() or self.market_config.is_perp():
+            self.agents.extend(
+                [
+                    RiskyMarketOrderTrader(
+                        wallet_name="risky_traders",
+                        key_name=f"MARKET_{self.market_config.instrument.code}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
+                        market_name=market_name,
+                        side=side,
+                        initial_asset_mint=1_000,
+                        leverage_factor=0.5,
+                        step_bias=0.1,
+                        tag=f"MARKET_{self.market_config.instrument.code}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
+                    )
+                    for side in ["SIDE_BUY", "SIDE_SELL"]
+                    for i_agent in range(5)
+                ]
+            )
 
         return {agent.name(): agent for agent in self.agents}
 

@@ -1,3 +1,3 @@
-from . import ESHRUSDT, HLPUSDT
+from . import ESHRUSDT, HLPUSDT, SPOT
 
-__all__ = ["ESHRUSDT", "HLPUSDT"]
+__all__ = ["ESHRUSDT", "HLPUSDT", "SPOT"]

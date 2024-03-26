@@ -140,7 +140,6 @@ class MarketCrash(Scenario):
             commitment_amount=60000,
             settlement_price=self.price_process[-1] if self.settle_at_end else None,
             market_name=self.market_name,
-            asset_name=self.asset_name,
             tag=str(tag),
         )
 
@@ -151,7 +150,6 @@ class MarketCrash(Scenario):
             noise_traders.append(
                 MarketOrderTrader(
                     market_name=self.market_name,
-                    asset_name=self.asset_name,
                     tag=f"{tag}_noise_{i}",
                     initial_asset_mint=self.position_taker_mint,
                     buy_intensity=self.noise_buy_intensity,
@@ -164,7 +162,6 @@ class MarketCrash(Scenario):
             position_traders.append(
                 MarketOrderTrader(
                     market_name=self.market_name,
-                    asset_name=self.asset_name,
                     initial_asset_mint=self.position_taker_mint,
                     tag=f"{tag}_pos_{i}",
                     buy_intensity=self.position_taker_buy_intensity,
@@ -177,7 +174,6 @@ class MarketCrash(Scenario):
         background_market = MultiRegimeBackgroundMarket(
             key_name=BACKGROUND_MARKET.name,
             market_name=self.market_name,
-            asset_name=self.asset_name,
             market_regimes=[
                 MarketRegime(
                     spread=self.spread,
@@ -199,7 +195,6 @@ class MarketCrash(Scenario):
             side="SIDE_BUY",
             initial_price=self.initial_price,
             market_name=self.market_name,
-            asset_name=self.asset_name,
             initial_asset_mint=self.initial_asset_mint,
             tag=f"1_{tag}",
         )
@@ -209,7 +204,6 @@ class MarketCrash(Scenario):
             side="SIDE_SELL",
             initial_price=self.initial_price,
             market_name=self.market_name,
-            asset_name=self.asset_name,
             initial_asset_mint=self.initial_asset_mint,
             tag=f"2_{tag}",
         )

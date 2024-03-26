@@ -89,6 +89,9 @@ class LocalDataCache:
         market_price_decimals: Optional[Dict[str, int]] = None,
         asset_decimals: Optional[Dict[str, int]] = None,
         market_to_asset: Optional[Dict[str, str]] = None,
+        market_to_settlement_asset: Optional[Dict[str, str]] = None,
+        market_to_base_asset: Optional[Dict[str, str]] = None,
+        market_to_quote_asset: Optional[Dict[str, str]] = None,
     ):
         """ """
         self._trading_data_client = trading_data_client
@@ -98,6 +101,9 @@ class LocalDataCache:
         self._market_pos_decimals = market_pos_decimals
         self._asset_decimals = asset_decimals
         self._market_to_asset = market_to_asset
+        self._market_to_settlement_asset = market_to_settlement_asset
+        self._market_to_base_asset = market_to_base_asset
+        self._market_to_quote_asset = market_to_quote_asset
 
         self.time_update_lock = threading.RLock()
         self.orders_lock = threading.RLock()
@@ -532,6 +538,20 @@ class LocalDataCache:
                     self._market_pos_decimals[update.id]
                     self._market_price_decimals[update.id]
                     self._market_to_asset[update.id]
+                    if (
+                        update.tradable_instrument.instrument.future
+                        != vega_protos.markets.Future()
+                        or update.tradable_instrument.instrument.perpetual
+                        != vega_protos.markets.Perpetual()
+                    ):
+                        self._market_to_settlement_asset[update.id]
+
+                    if (
+                        update.tradable_instrument.instrument.spot
+                        != vega_protos.markets.Spot()
+                    ):
+                        self._market_to_base_asset[update.id]
+                        self._market_to_quote_asset[update.id]
 
                 elif isinstance(update, vega_protos.assets.Asset):
                     self._asset_from_feed[update.id] = update

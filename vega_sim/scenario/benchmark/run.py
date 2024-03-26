@@ -46,6 +46,10 @@ def _run(
             run_with_snitch=False,
         )
 
+        is_spot = scenario.market_config.instrument.spot is not None
+        is_future = scenario.market_config.instrument.future is not None
+        is_perpetual = scenario.market_config.instrument.perpetual is not None
+
         # Use vegapy package to produce plots
         service = Service(
             network=Network.NETWORK_LOCAL,
@@ -56,18 +60,16 @@ def _run(
         # Request data from datanode
         market = service.api.data.list_markets(include_settled=True)[0]
 
-        future_settlement_asset = (
-            market.tradable_instrument.instrument.future.settlement_asset
-        )
-        perpetual_settlement_asset = (
-            market.tradable_instrument.instrument.perpetual.settlement_asset
-        )
-        if future_settlement_asset != "":
-            settlement_asset = future_settlement_asset
-        if perpetual_settlement_asset != "":
-            settlement_asset = perpetual_settlement_asset
+        if is_spot:
+            market_asset = market.tradable_instrument.instrument.spot.quote_asset
+        if is_future:
+            market_asset = market.tradable_instrument.instrument.future.settlement_asset
+        if is_perpetual:
+            market_asset = (
+                market.tradable_instrument.instrument.perpetual.settlement_asset
+            )
 
-        asset = service.api.data.get_asset(settlement_asset)
+        asset = service.api.data.get_asset(market_asset)
         trades = service.api.data.list_trades(
             market_ids=[market.id],
             date_range_start_timestamp=market.market_timestamps.pending,
@@ -76,23 +78,25 @@ def _run(
             market.id,
             start_timestamp=market.market_timestamps.pending,
         )
-        aggregated_balance_history = service.api.data.list_balance_changes(
-            asset_id=asset.id,
-            market_ids=[market.id],
-            party_ids=["network"],
-            account_types=[protos.vega.vega.AccountType.ACCOUNT_TYPE_INSURANCE],
-            date_range_start_timestamp=market.market_timestamps.pending,
-        )
+        if is_future or is_perpetual:
+            aggregated_balance_history = service.api.data.list_balance_changes(
+                asset_id=asset.id,
+                market_ids=[market.id],
+                party_ids=["network"],
+                account_types=[protos.vega.vega.AccountType.ACCOUNT_TYPE_INSURANCE],
+                date_range_start_timestamp=market.market_timestamps.pending,
+            )
         # Initialise figures
         fig1 = None
         fig2 = None
         fig3 = None
         # Update figures
         fig1 = vis.plot.price_monitoring_analysis(market, market_data_history)
-        fig2 = vis.plot.liquidation_analysis(
-            asset, market, trades, market_data_history, aggregated_balance_history
-        )
-        if perpetual_settlement_asset != "":
+        if is_future or is_perpetual:
+            fig2 = vis.plot.liquidation_analysis(
+                asset, market, trades, market_data_history, aggregated_balance_history
+            )
+        if is_perpetual:
             funding_periods = service.api.data.list_funding_periods(
                 market_id=market.id,
                 start_timestamp=market.market_timestamps.pending,

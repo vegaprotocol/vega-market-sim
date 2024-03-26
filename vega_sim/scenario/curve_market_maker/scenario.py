@@ -158,10 +158,8 @@ class CurveMarketMaker(Scenario):
             price_process_generator=iter(price_process),
             initial_asset_mint=self.initial_asset_mint,
             market_name=market_name,
-            asset_name=asset_name,
             commitment_amount=self.lp_commitamount,
             market_decimal_places=self.market_decimal,
-            asset_decimal_places=self.asset_decimal,
             num_steps=self.num_steps,
             num_levels=self.num_lp_levels,
             tag=str(tag) if tag is not None else None,
@@ -179,7 +177,6 @@ class CurveMarketMaker(Scenario):
         sensitive_mo_trader = PriceSensitiveMarketOrderTrader(
             key_name=TRADER_WALLET.name,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             buy_intensity=self.buy_intensity,
             sell_intensity=self.sell_intensity,
@@ -199,7 +196,6 @@ class CurveMarketMaker(Scenario):
                 else price_process[0]
             ),
             market_name=market_name,
-            asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=f"1_{tag}",
         )
@@ -214,7 +210,6 @@ class CurveMarketMaker(Scenario):
                 else price_process[0]
             ),
             market_name=market_name,
-            asset_name=asset_name,
             opening_auction_trade_amount=self.opening_auction_trade_amount,
             tag=f"2_{tag}",
         )
@@ -223,7 +218,6 @@ class CurveMarketMaker(Scenario):
             key_name=INFORMED_WALLET.name,
             price_process=price_process,
             market_name=market_name,
-            asset_name=asset_name,
             initial_asset_mint=self.initial_asset_mint,
             proportion_taken=self.proportion_taken,
             tag=str(tag) if tag is not None else None,

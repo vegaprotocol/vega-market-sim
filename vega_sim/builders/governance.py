@@ -256,6 +256,19 @@ def perpetual_product(
 
 
 @raise_custom_build_errors
+def spot_product(
+    base_asset: str,
+    quote_asset: str,
+    name: str,
+) -> vega_protos.governance.SpotProduct:
+    return vega_protos.governance.SpotProduct(
+        base_asset=base_asset,
+        quote_asset=quote_asset,
+        name=name,
+    )
+
+
+@raise_custom_build_errors
 def instrument_configuration(
     name: str,
     code: str,
@@ -328,3 +341,30 @@ def new_market_configuration(
     if metadata is not None:
         proto.metadata.extend(metadata)
     return proto
+
+
+@raise_custom_build_errors
+def new_spot_market_configuration(
+    instrument: vega_protos.governance.InstrumentConfiguration,
+    decimal_places: int,
+    price_monitoring_parameters: vega_protos.markets.PriceMonitoringParameters,
+    target_stake_parameters: vega_protos.markets.TargetStakeParameters,
+    log_normal: vega_protos.markets.LogNormalRiskModel,
+    position_decimal_places: int,
+    sla_params: vega_protos.markets.LiquiditySLAParameters,
+    liquidity_fee_settings: vega_protos.markets.LiquidityFeeSettings,
+    tick_size: float,
+    metadata: Optional[List[str]] = None,
+) -> vega_protos.governance.NewMarketConfiguration:
+    return vega_protos.governance.NewSpotMarketConfiguration(
+        instrument=instrument,
+        decimal_places=int(decimal_places),
+        metadata=metadata,
+        price_monitoring_parameters=price_monitoring_parameters,
+        target_stake_parameters=target_stake_parameters,
+        log_normal=log_normal,
+        position_decimal_places=int(position_decimal_places),
+        sla_params=sla_params,
+        liquidity_fee_settings=liquidity_fee_settings,
+        tick_size=str(tick_size),
+    )

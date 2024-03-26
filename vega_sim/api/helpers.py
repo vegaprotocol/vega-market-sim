@@ -11,7 +11,7 @@ import requests
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
 from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
 from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
-from vega_sim.proto.vega.markets_pb2 import Market
+from vega_sim.proto.vega.markets_pb2 import Market, Spot, Future, Perpetual
 from vega_sim.proto.vega.vega_pb2 import Side
 from vega_sim.tools.retry import retry
 
@@ -196,8 +196,44 @@ def statistics(core_data_client: VegaCoreClient):
     )
 
 
+def get_market_asset(market: Market) -> str:
+    product = get_product(market)
+    if isinstance(product, Spot):
+        return product.quote_asset
+    if isinstance(product, Future):
+        return product.settlement_asset
+    if isinstance(product, Perpetual):
+        return product.settlement_asset
+
+
 def get_settlement_asset(market: Market) -> str:
-    return get_product(market).settlement_asset
+    product = get_product(market)
+    if isinstance(product, Spot):
+        return None
+    if isinstance(product, Future):
+        return product.settlement_asset
+    if isinstance(product, Perpetual):
+        return product.settlement_asset
+
+
+def get_base_asset(market: Market) -> str:
+    product = get_product(market)
+    if isinstance(product, Spot):
+        return product.base_asset
+    if isinstance(product, Future):
+        return None
+    if isinstance(product, Perpetual):
+        return None
+
+
+def get_quote_asset(market: Market) -> str:
+    product = get_product(market)
+    if isinstance(product, Spot):
+        return product.quote_asset
+    if isinstance(product, Future):
+        return None
+    if isinstance(product, Perpetual):
+        return None
 
 
 def get_product(market: Market) -> Any:

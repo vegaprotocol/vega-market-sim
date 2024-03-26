@@ -14,33 +14,22 @@ from vega_sim.scenario.common.agents import (
 )
 import vega_sim.proto as protos
 
+from vega_sim.scenario.benchmark.configs import BenchmarkConfig
 
-class SLAScenario(BenchmarkScenario):
+
+class FuzzingScenario(BenchmarkScenario):
     def __init__(
         self,
-        market_config: MarketConfig,
-        initial_price: int,
-        annualised_volatility: float = 1.5,
-        notional_trade_volume: int = 100,
+        benchmark_configs: List[BenchmarkConfig],
         num_steps: int = 60 * 24 * 30 * 3,
         transactions_per_block: int = 4096,
         block_length_seconds: float = 1,
         step_length_seconds: Optional[float] = None,
         output: bool = True,
-        lps_offset: List[float] = [0.5, 0.5],
-        lps_target_time_on_book: List[float] = [1, 0.95],
-        lps_commitment_amount: List[float] = [10000, 10000],
-        override_price_range: Optional[float] = None,
-        override_sla_competition_factor: Optional[float] = None,
-        override_commitment_min_time_fraction: Optional[float] = None,
-        override_performance_hysteresis_epochs: Optional[int] = None,
         initial_network_parameters: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(
-            market_config=market_config,
-            initial_price=initial_price,
-            annualised_volatility=annualised_volatility,
-            notional_trade_volume=notional_trade_volume,
+            benchmark_configs=benchmark_configs,
             num_steps=num_steps,
             transactions_per_block=transactions_per_block,
             block_length_seconds=block_length_seconds,
@@ -48,53 +37,6 @@ class SLAScenario(BenchmarkScenario):
             output=output,
             initial_network_parameters=initial_network_parameters,
         )
-
-        # Set simulation parameters
-        self.num_steps = num_steps
-        self.step_length_seconds = (
-            step_length_seconds
-            if step_length_seconds is not None
-            else block_length_seconds
-        )
-        self.block_length_seconds = block_length_seconds
-        self.transactions_per_block = transactions_per_block
-
-        # Set market config parameters
-        self.market_config = (
-            MarketConfig("future") if market_config is None else market_config
-        )
-        if override_price_range is not None:
-            self.market_config.liquidity_sla_parameters.price_range = (
-                override_price_range
-            )
-        if override_sla_competition_factor is not None:
-            self.market_config.liquidity_sla_parameters.sla_competition_factor = (
-                override_sla_competition_factor
-            )
-        if override_commitment_min_time_fraction is not None:
-            self.market_config.liquidity_sla_parameters.commitment_min_time_fraction = (
-                override_commitment_min_time_fraction
-            )
-        if override_performance_hysteresis_epochs is not None:
-            self.market_config.liquidity_sla_parameters.performance_hysteresis_epochs = (
-                override_performance_hysteresis_epochs
-            )
-
-        # Validate and set LP parameters
-        lengths = [
-            len(var)
-            for var in [lps_offset, lps_target_time_on_book, lps_commitment_amount]
-        ]
-        if lengths[:-1] != lengths[1:]:
-            raise ValueError(
-                "The lengths of 'lps_offset', 'lps_target_time_on_book', and "
-                + "'lps_commitment_amount' must all be the same."
-            )
-        self.lps_offset = lps_offset
-        self.lps_target_time_on_book = lps_target_time_on_book
-        self.lps_commitment_amount = lps_commitment_amount
-
-        self.output = output
 
     def configure_agents(
         self,

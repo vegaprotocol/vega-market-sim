@@ -290,10 +290,8 @@ class FuzzingScenario(Scenario):
                     price_process_generator=iter(price_process),
                     initial_asset_mint=self.initial_asset_mint,
                     market_name=market_name,
-                    asset_name=asset_name,
                     commitment_amount=1e6,
                     market_decimal_places=market_config.decimal_places,
-                    asset_decimal_places=asset_dp,
                     num_steps=self.num_steps,
                     kappa=2.4,
                     tick_spacing=0.05,
@@ -311,7 +309,6 @@ class FuzzingScenario(Scenario):
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
                     initial_asset_mint=1e5,
                     market_name=market_name,
-                    asset_name=asset_name,
                     order_size=1,
                     peg_offset=0,
                     max_position=5,
@@ -327,7 +324,6 @@ class FuzzingScenario(Scenario):
                     initial_asset_mint=self.initial_asset_mint,
                     price_process=iter(price_process),
                     market_name=market_name,
-                    asset_name=asset_name,
                     uncrossing_size=20,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
@@ -359,7 +355,6 @@ class FuzzingScenario(Scenario):
                         wallet_name="RANDOM_TRADERS",
                         key_name=f"MARKET_{str(i_market).zfill(3)}_REFERRER_{str(i_referrer).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         buy_intensity=10,
                         sell_intensity=10,
                         base_order_size=1,
@@ -380,7 +375,6 @@ class FuzzingScenario(Scenario):
                         wallet_name=f"RANDOM_TRADERS",
                         key_name=f"LIMIT_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                         buy_volume=1,
                         sell_volume=1,
@@ -404,7 +398,6 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                     market_name=market_name,
-                    asset_name=asset_name,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
@@ -417,7 +410,6 @@ class FuzzingScenario(Scenario):
                     wallet_name="risky_traders",
                     key_name=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     side=side,
                     initial_asset_mint=1_000,
                     leverage_factor=0.5,
@@ -433,7 +425,6 @@ class FuzzingScenario(Scenario):
                     wallet_name="risky_liquidity_providers",
                     key_name=f"HIGH_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                     market_name=market_name,
-                    asset_name=asset_name,
                     initial_asset_mint=20_000,
                     commitment_factor=0.5,
                     step_bias=0.1,
@@ -448,7 +439,6 @@ class FuzzingScenario(Scenario):
                         wallet_name="risky_liquidity_providers",
                         key_name=f"LOW_RISK_LPS_MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}",
                         market_name=market_name,
-                        asset_name=asset_name,
                         initial_asset_mint=20_000,
                         commitment_factor=0.3,
                         step_bias=0.1,
@@ -463,7 +453,6 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                     market_name=market_name,
-                    asset_name=asset_name,
                     initial_asset_mint=5_000,
                     tag=(
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"

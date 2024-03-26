@@ -18,7 +18,7 @@ from vega_sim.api.helpers import (
     generate_id,
     wait_for_acceptance,
 )
-from vega_sim.api.market import MarketConfig
+from vega_sim.api.market import MarketConfig, SpotMarketConfig
 from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
 from vega_sim.wallet.base import Wallet
 import vega_sim.builders as builders
@@ -85,7 +85,7 @@ def propose_market_from_config(
     data_client: vac.VegaTradingDataClientV2,
     wallet: Wallet,
     proposal_key_name: str,
-    market_config: MarketConfig,
+    market_config: Union[MarketConfig, SpotMarketConfig],
     closing_time: Union[str, int],
     enactment_time: Union[str, int],
     time_forward_fn: Optional[Callable[[], None]] = None,
@@ -127,7 +127,10 @@ def propose_market_from_config(
         closing_time=int(closing_time),
         enactment_time=int(enactment_time),
     )
-    proposal.terms.new_market.CopyFrom(changes)
+    if isinstance(market_config, MarketConfig):
+        proposal.terms.new_market.CopyFrom(changes)
+    if isinstance(market_config, SpotMarketConfig):
+        proposal.terms.new_spot_market.CopyFrom(changes)
 
     return _make_and_wait_for_proposal(
         wallet=wallet,

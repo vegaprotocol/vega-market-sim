@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Union
+
+from vega_sim.api.market import MarketConfig, SpotMarketConfig
 
 from vega_sim.scenario.common.utils.price_process import Granularity
 
@@ -9,12 +11,7 @@ MAX_FAUCET = 1e10
 
 @dataclass
 class MarketManagerArgs:
-    market_name: str
-    market_code: str
-    asset_name: str
-    adp: int
-    mdp: int
-    pdp: int
+    market_config: Union[MarketConfig, SpotMarketConfig]
     max_faucet: Optional[int] = MAX_FAUCET
     initial_mint: Optional[int] = MAX_FAUCET
 

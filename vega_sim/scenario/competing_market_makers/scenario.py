@@ -200,7 +200,6 @@ class CompetingMarketMakers(Scenario):
                 market_config=self.market_config,
                 market_name=self.market_name,
                 market_code=self.market_code,
-                asset_name=self.asset_name,
                 asset_dp=self.asset_decimals,
                 settlement_price=price_process[-1],
                 network_parameters={
@@ -219,7 +218,6 @@ class CompetingMarketMakers(Scenario):
                 UniformLiquidityProvider(
                     key_name=f"mm_{min_bps}-{max_bps}",
                     market_name=self.market_name,
-                    asset_name=self.asset_name,
                     bps_range_min=min_bps,
                     bps_range_max=max_bps,
                     levels=50,
@@ -238,7 +236,6 @@ class CompetingMarketMakers(Scenario):
                 initial_asset_mint=1e9,
                 price_process=iter(price_process),
                 market_name=self.market_name,
-                asset_name=self.asset_name,
                 uncrossing_size=10**-self.market_config.position_decimal_places,
                 tag="bid",
             )
@@ -250,7 +247,6 @@ class CompetingMarketMakers(Scenario):
                 initial_asset_mint=1e9,
                 price_process=iter(price_process),
                 market_name=self.market_name,
-                asset_name=self.asset_name,
                 uncrossing_size=10**-self.market_config.position_decimal_places,
                 tag="ask",
             )
@@ -259,7 +255,6 @@ class CompetingMarketMakers(Scenario):
             MarketOrderTrader(
                 key_name="market_order_trader",
                 market_name=self.market_name,
-                asset_name=self.asset_name,
                 buy_intensity=10,
                 sell_intensity=10,
                 base_order_size=10**-self.market_config.position_decimal_places,
@@ -271,7 +266,6 @@ class CompetingMarketMakers(Scenario):
                 LimitOrderTrader(
                     key_name="limit_order_trader",
                     market_name=self.market_name,
-                    asset_name=self.asset_name,
                     time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                     buy_volume=10**-self.market_config.position_decimal_places,
                     sell_volume=10**-self.market_config.position_decimal_places,

@@ -1209,6 +1209,10 @@ def positions_by_market(
                 settlement_asset_id = (
                     market_info.tradable_instrument.instrument.perpetual.settlement_asset
                 )
+            if not settlement_asset_id:
+                settlement_asset_id = (
+                    market_info.tradable_instrument.instrument.spot.quote_asset
+                )
 
             market_to_asset_map[pos.market_id] = settlement_asset_id
 
@@ -2693,6 +2697,10 @@ def get_latest_market_data(
             settlement_asset_id = (
                 market_info.tradable_instrument.instrument.perpetual.settlement_asset
             )
+        if not settlement_asset_id:
+            settlement_asset_id = (
+                market_info.tradable_instrument.instrument.spot.quote_asset
+            )
 
         market_to_asset_map[market_id] = settlement_asset_id
     if market_to_asset_map[market_id] not in asset_decimals_map:
@@ -2751,6 +2759,10 @@ def get_market_data_history(
         if not settlement_asset_id:
             settlement_asset_id = (
                 market_info.tradable_instrument.instrument.perpetual.settlement_asset
+            )
+        if not settlement_asset_id:
+            settlement_asset_id = (
+                market_info.tradable_instrument.instrument.spot.quote_asset
             )
 
         market_to_asset_map[market_id] = settlement_asset_id
