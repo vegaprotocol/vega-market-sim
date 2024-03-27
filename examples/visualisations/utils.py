@@ -195,7 +195,7 @@ def propose_asset(
         key_name=AUX_PARTY_A.key_name,
         name="fDAI",
         symbol="fDAI",
-        decimals=5,
+        decimals=18,
     )
     vega.wait_for_total_catchup()
     return vega.find_asset_id(symbol="fDAI")
