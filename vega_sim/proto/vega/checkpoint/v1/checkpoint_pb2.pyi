@@ -386,28 +386,32 @@ class Banking(_message.Message):
     __slots__ = (
         "transfers_at_time",
         "recurring_transfers",
-        "bridge_state",
+        "primary_bridge_state",
         "asset_actions",
-        "last_seen_eth_block",
+        "last_seen_primary_eth_block",
         "seen_refs",
         "governance_transfers_at_time",
         "recurring_governance_transfers",
+        "secondary_bridge_state",
+        "last_seen_secondary_eth_block",
     )
     TRANSFERS_AT_TIME_FIELD_NUMBER: _ClassVar[int]
     RECURRING_TRANSFERS_FIELD_NUMBER: _ClassVar[int]
-    BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
+    PRIMARY_BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
     ASSET_ACTIONS_FIELD_NUMBER: _ClassVar[int]
-    LAST_SEEN_ETH_BLOCK_FIELD_NUMBER: _ClassVar[int]
+    LAST_SEEN_PRIMARY_ETH_BLOCK_FIELD_NUMBER: _ClassVar[int]
     SEEN_REFS_FIELD_NUMBER: _ClassVar[int]
     GOVERNANCE_TRANSFERS_AT_TIME_FIELD_NUMBER: _ClassVar[int]
     RECURRING_GOVERNANCE_TRANSFERS_FIELD_NUMBER: _ClassVar[int]
+    SECONDARY_BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
+    LAST_SEEN_SECONDARY_ETH_BLOCK_FIELD_NUMBER: _ClassVar[int]
     transfers_at_time: _containers.RepeatedCompositeFieldContainer[
         ScheduledTransferAtTime
     ]
     recurring_transfers: RecurringTransfers
-    bridge_state: BridgeState
+    primary_bridge_state: BridgeState
     asset_actions: _containers.RepeatedCompositeFieldContainer[AssetAction]
-    last_seen_eth_block: int
+    last_seen_primary_eth_block: int
     seen_refs: _containers.RepeatedScalarFieldContainer[str]
     governance_transfers_at_time: _containers.RepeatedCompositeFieldContainer[
         ScheduledGovernanceTransferAtTime
@@ -415,15 +419,17 @@ class Banking(_message.Message):
     recurring_governance_transfers: _containers.RepeatedCompositeFieldContainer[
         GovernanceTransfer
     ]
+    secondary_bridge_state: BridgeState
+    last_seen_secondary_eth_block: int
     def __init__(
         self,
         transfers_at_time: _Optional[
             _Iterable[_Union[ScheduledTransferAtTime, _Mapping]]
         ] = ...,
         recurring_transfers: _Optional[_Union[RecurringTransfers, _Mapping]] = ...,
-        bridge_state: _Optional[_Union[BridgeState, _Mapping]] = ...,
+        primary_bridge_state: _Optional[_Union[BridgeState, _Mapping]] = ...,
         asset_actions: _Optional[_Iterable[_Union[AssetAction, _Mapping]]] = ...,
-        last_seen_eth_block: _Optional[int] = ...,
+        last_seen_primary_eth_block: _Optional[int] = ...,
         seen_refs: _Optional[_Iterable[str]] = ...,
         governance_transfers_at_time: _Optional[
             _Iterable[_Union[ScheduledGovernanceTransferAtTime, _Mapping]]
@@ -431,6 +437,8 @@ class Banking(_message.Message):
         recurring_governance_transfers: _Optional[
             _Iterable[_Union[GovernanceTransfer, _Mapping]]
         ] = ...,
+        secondary_bridge_state: _Optional[_Union[BridgeState, _Mapping]] = ...,
+        last_seen_secondary_eth_block: _Optional[int] = ...,
     ) -> None: ...
 
 class BridgeState(_message.Message):
@@ -840,6 +848,7 @@ class AssetAction(_message.Message):
         "erc20_asset_limits_updated",
         "erc20_bridge_stopped",
         "erc20_bridge_resumed",
+        "chain_id",
     )
     ID_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
@@ -853,6 +862,7 @@ class AssetAction(_message.Message):
     ERC20_ASSET_LIMITS_UPDATED_FIELD_NUMBER: _ClassVar[int]
     ERC20_BRIDGE_STOPPED_FIELD_NUMBER: _ClassVar[int]
     ERC20_BRIDGE_RESUMED_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     state: int
     asset: str
@@ -865,6 +875,7 @@ class AssetAction(_message.Message):
     erc20_asset_limits_updated: _chain_events_pb2.ERC20AssetLimitsUpdated
     erc20_bridge_stopped: bool
     erc20_bridge_resumed: bool
+    chain_id: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -885,6 +896,7 @@ class AssetAction(_message.Message):
         ] = ...,
         erc20_bridge_stopped: bool = ...,
         erc20_bridge_resumed: bool = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ELSShare(_message.Message):

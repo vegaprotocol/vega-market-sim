@@ -167,6 +167,7 @@ class ERC20Event(_message.Message):
     __slots__ = (
         "index",
         "block",
+        "chain_id",
         "asset_list",
         "asset_delist",
         "deposit",
@@ -177,6 +178,7 @@ class ERC20Event(_message.Message):
     )
     INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     ASSET_LIST_FIELD_NUMBER: _ClassVar[int]
     ASSET_DELIST_FIELD_NUMBER: _ClassVar[int]
     DEPOSIT_FIELD_NUMBER: _ClassVar[int]
@@ -186,6 +188,7 @@ class ERC20Event(_message.Message):
     BRIDGE_RESUMED_FIELD_NUMBER: _ClassVar[int]
     index: int
     block: int
+    chain_id: str
     asset_list: ERC20AssetList
     asset_delist: ERC20AssetDelist
     deposit: ERC20Deposit
@@ -197,6 +200,7 @@ class ERC20Event(_message.Message):
         self,
         index: _Optional[int] = ...,
         block: _Optional[int] = ...,
+        chain_id: _Optional[str] = ...,
         asset_list: _Optional[_Union[ERC20AssetList, _Mapping]] = ...,
         asset_delist: _Optional[_Union[ERC20AssetDelist, _Mapping]] = ...,
         deposit: _Optional[_Union[ERC20Deposit, _Mapping]] = ...,
@@ -254,14 +258,23 @@ class ERC20ThresholdSet(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigEvent(_message.Message):
-    __slots__ = ("index", "block", "signer_added", "signer_removed", "threshold_set")
+    __slots__ = (
+        "index",
+        "block",
+        "chain_id",
+        "signer_added",
+        "signer_removed",
+        "threshold_set",
+    )
     INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     SIGNER_ADDED_FIELD_NUMBER: _ClassVar[int]
     SIGNER_REMOVED_FIELD_NUMBER: _ClassVar[int]
     THRESHOLD_SET_FIELD_NUMBER: _ClassVar[int]
     index: int
     block: int
+    chain_id: str
     signer_added: ERC20SignerAdded
     signer_removed: ERC20SignerRemoved
     threshold_set: ERC20ThresholdSet
@@ -269,6 +282,7 @@ class ERC20MultiSigEvent(_message.Message):
         self,
         index: _Optional[int] = ...,
         block: _Optional[int] = ...,
+        chain_id: _Optional[str] = ...,
         signer_added: _Optional[_Union[ERC20SignerAdded, _Mapping]] = ...,
         signer_removed: _Optional[_Union[ERC20SignerRemoved, _Mapping]] = ...,
         threshold_set: _Optional[_Union[ERC20ThresholdSet, _Mapping]] = ...,

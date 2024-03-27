@@ -2176,6 +2176,37 @@ class EthereumConfig(_message.Message):
         ] = ...,
     ) -> None: ...
 
+class EVMChainConfig(_message.Message):
+    __slots__ = (
+        "network_id",
+        "chain_id",
+        "collateral_bridge_contract",
+        "confirmations",
+        "multisig_control_contract",
+    )
+    NETWORK_ID_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
+    COLLATERAL_BRIDGE_CONTRACT_FIELD_NUMBER: _ClassVar[int]
+    CONFIRMATIONS_FIELD_NUMBER: _ClassVar[int]
+    MULTISIG_CONTROL_CONTRACT_FIELD_NUMBER: _ClassVar[int]
+    network_id: str
+    chain_id: str
+    collateral_bridge_contract: EthereumContractConfig
+    confirmations: int
+    multisig_control_contract: EthereumContractConfig
+    def __init__(
+        self,
+        network_id: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
+        collateral_bridge_contract: _Optional[
+            _Union[EthereumContractConfig, _Mapping]
+        ] = ...,
+        confirmations: _Optional[int] = ...,
+        multisig_control_contract: _Optional[
+            _Union[EthereumContractConfig, _Mapping]
+        ] = ...,
+    ) -> None: ...
+
 class EthereumContractConfig(_message.Message):
     __slots__ = ("address", "deployment_block_height")
     ADDRESS_FIELD_NUMBER: _ClassVar[int]
