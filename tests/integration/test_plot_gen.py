@@ -12,7 +12,7 @@ def generate_trading_plot():
         asset_name="USD",
         num_steps=290,
         market_decimal=2,
-        asset_decimal=4,
+        asset_decimal=18,
         market_position_decimal=4,
         initial_price=1000,
         lp_commitamount=250_000,

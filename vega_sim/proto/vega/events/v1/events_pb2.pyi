@@ -632,6 +632,7 @@ class ERC20MultiSigSignerAdded(_message.Message):
         "submitter",
         "nonce",
         "epoch_seq",
+        "chain_id",
     )
     SIGNATURE_ID_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_ID_FIELD_NUMBER: _ClassVar[int]
@@ -640,6 +641,7 @@ class ERC20MultiSigSignerAdded(_message.Message):
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     signature_id: str
     validator_id: str
     timestamp: int
@@ -647,6 +649,7 @@ class ERC20MultiSigSignerAdded(_message.Message):
     submitter: str
     nonce: str
     epoch_seq: str
+    chain_id: str
     def __init__(
         self,
         signature_id: _Optional[str] = ...,
@@ -656,6 +659,7 @@ class ERC20MultiSigSignerAdded(_message.Message):
         submitter: _Optional[str] = ...,
         nonce: _Optional[str] = ...,
         epoch_seq: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ERC20MultiSigSignerRemovedSubmitter(_message.Message):
@@ -676,6 +680,7 @@ class ERC20MultiSigSignerRemoved(_message.Message):
         "old_signer",
         "nonce",
         "epoch_seq",
+        "chain_id",
     )
     SIGNATURE_SUBMITTERS_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_ID_FIELD_NUMBER: _ClassVar[int]
@@ -683,6 +688,7 @@ class ERC20MultiSigSignerRemoved(_message.Message):
     OLD_SIGNER_FIELD_NUMBER: _ClassVar[int]
     NONCE_FIELD_NUMBER: _ClassVar[int]
     EPOCH_SEQ_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     signature_submitters: _containers.RepeatedCompositeFieldContainer[
         ERC20MultiSigSignerRemovedSubmitter
     ]
@@ -691,6 +697,7 @@ class ERC20MultiSigSignerRemoved(_message.Message):
     old_signer: str
     nonce: str
     epoch_seq: str
+    chain_id: str
     def __init__(
         self,
         signature_submitters: _Optional[
@@ -701,6 +708,7 @@ class ERC20MultiSigSignerRemoved(_message.Message):
         old_signer: _Optional[str] = ...,
         nonce: _Optional[str] = ...,
         epoch_seq: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class Transfer(_message.Message):
@@ -926,6 +934,7 @@ class ERC20MultiSigSignerEvent(_message.Message):
         "tx_hash",
         "log_index",
         "block_number",
+        "chain_id",
     )
 
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -945,6 +954,7 @@ class ERC20MultiSigSignerEvent(_message.Message):
     TX_HASH_FIELD_NUMBER: _ClassVar[int]
     LOG_INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_NUMBER_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     type: ERC20MultiSigSignerEvent.Type
     signer: str
@@ -953,6 +963,7 @@ class ERC20MultiSigSignerEvent(_message.Message):
     tx_hash: str
     log_index: int
     block_number: int
+    chain_id: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -963,6 +974,7 @@ class ERC20MultiSigSignerEvent(_message.Message):
         tx_hash: _Optional[str] = ...,
         log_index: _Optional[int] = ...,
         block_number: _Optional[int] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ERC20MultiSigThresholdSetEvent(_message.Message):
@@ -974,6 +986,7 @@ class ERC20MultiSigThresholdSetEvent(_message.Message):
         "tx_hash",
         "log_index",
         "block_number",
+        "chain_id",
     )
     ID_FIELD_NUMBER: _ClassVar[int]
     NEW_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
@@ -982,6 +995,7 @@ class ERC20MultiSigThresholdSetEvent(_message.Message):
     TX_HASH_FIELD_NUMBER: _ClassVar[int]
     LOG_INDEX_FIELD_NUMBER: _ClassVar[int]
     BLOCK_NUMBER_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     new_threshold: int
     nonce: str
@@ -989,6 +1003,7 @@ class ERC20MultiSigThresholdSetEvent(_message.Message):
     tx_hash: str
     log_index: int
     block_number: int
+    chain_id: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -998,6 +1013,7 @@ class ERC20MultiSigThresholdSetEvent(_message.Message):
         tx_hash: _Optional[str] = ...,
         log_index: _Optional[int] = ...,
         block_number: _Optional[int] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class CheckpointEvent(_message.Message):

@@ -168,7 +168,7 @@ class Payload(_message.Message):
         "proof_of_work",
         "pending_asset_updates",
         "protocol_upgrade_proposals",
-        "banking_bridge_state",
+        "banking_primary_bridge_state",
         "settlement_state",
         "liquidity_scores",
         "spot_liquidity_target",
@@ -196,6 +196,7 @@ class Payload(_message.Message):
         "parties",
         "l2_eth_oracles",
         "eth_oracle_verifier_misc",
+        "banking_secondary_bridge_state",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -247,7 +248,7 @@ class Payload(_message.Message):
     PROOF_OF_WORK_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSET_UPDATES_FIELD_NUMBER: _ClassVar[int]
     PROTOCOL_UPGRADE_PROPOSALS_FIELD_NUMBER: _ClassVar[int]
-    BANKING_BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
+    BANKING_PRIMARY_BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
     SETTLEMENT_STATE_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_SCORES_FIELD_NUMBER: _ClassVar[int]
     SPOT_LIQUIDITY_TARGET_FIELD_NUMBER: _ClassVar[int]
@@ -275,6 +276,7 @@ class Payload(_message.Message):
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     L2_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
     ETH_ORACLE_VERIFIER_MISC_FIELD_NUMBER: _ClassVar[int]
+    BANKING_SECONDARY_BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -325,7 +327,7 @@ class Payload(_message.Message):
     proof_of_work: ProofOfWork
     pending_asset_updates: PendingAssetUpdates
     protocol_upgrade_proposals: ProtocolUpgradeProposals
-    banking_bridge_state: BankingBridgeState
+    banking_primary_bridge_state: BankingBridgeState
     settlement_state: SettlementState
     liquidity_scores: LiquidityScores
     spot_liquidity_target: SpotLiquidityTarget
@@ -353,6 +355,7 @@ class Payload(_message.Message):
     parties: Parties
     l2_eth_oracles: L2EthOracles
     eth_oracle_verifier_misc: EthOracleVerifierMisc
+    banking_secondary_bridge_state: BankingBridgeState
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -429,7 +432,9 @@ class Payload(_message.Message):
         protocol_upgrade_proposals: _Optional[
             _Union[ProtocolUpgradeProposals, _Mapping]
         ] = ...,
-        banking_bridge_state: _Optional[_Union[BankingBridgeState, _Mapping]] = ...,
+        banking_primary_bridge_state: _Optional[
+            _Union[BankingBridgeState, _Mapping]
+        ] = ...,
         settlement_state: _Optional[_Union[SettlementState, _Mapping]] = ...,
         liquidity_scores: _Optional[_Union[LiquidityScores, _Mapping]] = ...,
         spot_liquidity_target: _Optional[_Union[SpotLiquidityTarget, _Mapping]] = ...,
@@ -484,6 +489,9 @@ class Payload(_message.Message):
         l2_eth_oracles: _Optional[_Union[L2EthOracles, _Mapping]] = ...,
         eth_oracle_verifier_misc: _Optional[
             _Union[EthOracleVerifierMisc, _Mapping]
+        ] = ...,
+        banking_secondary_bridge_state: _Optional[
+            _Union[BankingBridgeState, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -712,15 +720,18 @@ class EventForwarderBucket(_message.Message):
     ) -> None: ...
 
 class EventForwarder(_message.Message):
-    __slots__ = ("acked_events", "buckets")
+    __slots__ = ("acked_events", "buckets", "scope")
     ACKED_EVENTS_FIELD_NUMBER: _ClassVar[int]
     BUCKETS_FIELD_NUMBER: _ClassVar[int]
+    SCOPE_FIELD_NUMBER: _ClassVar[int]
     acked_events: _containers.RepeatedScalarFieldContainer[str]
     buckets: _containers.RepeatedCompositeFieldContainer[EventForwarderBucket]
+    scope: str
     def __init__(
         self,
         acked_events: _Optional[_Iterable[str]] = ...,
         buckets: _Optional[_Iterable[_Union[EventForwarderBucket, _Mapping]]] = ...,
+        scope: _Optional[str] = ...,
     ) -> None: ...
 
 class CollateralAccounts(_message.Message):
@@ -792,21 +803,24 @@ class Deposit(_message.Message):
     ) -> None: ...
 
 class TxRef(_message.Message):
-    __slots__ = ("asset", "block_nr", "hash", "log_index")
+    __slots__ = ("asset", "block_nr", "hash", "log_index", "chain_id")
     ASSET_FIELD_NUMBER: _ClassVar[int]
     BLOCK_NR_FIELD_NUMBER: _ClassVar[int]
     HASH_FIELD_NUMBER: _ClassVar[int]
     LOG_INDEX_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     asset: str
     block_nr: int
     hash: str
     log_index: int
+    chain_id: str
     def __init__(
         self,
         asset: _Optional[str] = ...,
         block_nr: _Optional[int] = ...,
         hash: _Optional[str] = ...,
         log_index: _Optional[int] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class BankingWithdrawals(_message.Message):
@@ -826,15 +840,18 @@ class BankingDeposits(_message.Message):
     ) -> None: ...
 
 class BankingSeen(_message.Message):
-    __slots__ = ("refs", "last_seen_eth_block")
+    __slots__ = ("refs", "last_seen_primary_eth_block", "last_seen_secondary_eth_block")
     REFS_FIELD_NUMBER: _ClassVar[int]
-    LAST_SEEN_ETH_BLOCK_FIELD_NUMBER: _ClassVar[int]
+    LAST_SEEN_PRIMARY_ETH_BLOCK_FIELD_NUMBER: _ClassVar[int]
+    LAST_SEEN_SECONDARY_ETH_BLOCK_FIELD_NUMBER: _ClassVar[int]
     refs: _containers.RepeatedScalarFieldContainer[str]
-    last_seen_eth_block: int
+    last_seen_primary_eth_block: int
+    last_seen_secondary_eth_block: int
     def __init__(
         self,
         refs: _Optional[_Iterable[str]] = ...,
-        last_seen_eth_block: _Optional[int] = ...,
+        last_seen_primary_eth_block: _Optional[int] = ...,
+        last_seen_secondary_eth_block: _Optional[int] = ...,
     ) -> None: ...
 
 class BankingAssetActions(_message.Message):
@@ -1381,6 +1398,7 @@ class SpotMarket(_message.Message):
         "stop_orders",
         "expiring_stop_orders",
         "fees_stats",
+        "has_traded",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1403,6 +1421,7 @@ class SpotMarket(_message.Message):
     STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     EXPIRING_STOP_ORDERS_FIELD_NUMBER: _ClassVar[int]
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
+    HAS_TRADED_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1424,6 +1443,7 @@ class SpotMarket(_message.Message):
     stop_orders: StopOrders
     expiring_stop_orders: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Order]
     fees_stats: _events_pb2.FeesStats
+    has_traded: bool
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1449,6 +1469,7 @@ class SpotMarket(_message.Message):
             _Iterable[_Union[_vega_pb2.Order, _Mapping]]
         ] = ...,
         fees_stats: _Optional[_Union[_events_pb2.FeesStats, _Mapping]] = ...,
+        has_traded: bool = ...,
     ) -> None: ...
 
 class Market(_message.Message):
@@ -2598,18 +2619,21 @@ class PendingERC20MultisigControlSignature(_message.Message):
     ) -> None: ...
 
 class IssuedERC20MultisigControlSignature(_message.Message):
-    __slots__ = ("resource_id", "ethereum_address", "submitter_address")
+    __slots__ = ("resource_id", "ethereum_address", "submitter_address", "chain_id")
     RESOURCE_ID_FIELD_NUMBER: _ClassVar[int]
     ETHEREUM_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     SUBMITTER_ADDRESS_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     resource_id: str
     ethereum_address: str
     submitter_address: str
+    chain_id: str
     def __init__(
         self,
         resource_id: _Optional[str] = ...,
         ethereum_address: _Optional[str] = ...,
         submitter_address: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class ValidatorState(_message.Message):
@@ -3156,17 +3180,19 @@ class SignerEventsPerAddress(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigTopologyVerified(_message.Message):
-    __slots__ = ("signers", "events_per_address", "threshold", "seen_events")
+    __slots__ = ("signers", "events_per_address", "threshold", "seen_events", "scope")
     SIGNERS_FIELD_NUMBER: _ClassVar[int]
     EVENTS_PER_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     SEEN_EVENTS_FIELD_NUMBER: _ClassVar[int]
+    SCOPE_FIELD_NUMBER: _ClassVar[int]
     signers: _containers.RepeatedScalarFieldContainer[str]
     events_per_address: _containers.RepeatedCompositeFieldContainer[
         SignerEventsPerAddress
     ]
     threshold: _events_pb2.ERC20MultiSigThresholdSetEvent
     seen_events: _containers.RepeatedScalarFieldContainer[str]
+    scope: str
     def __init__(
         self,
         signers: _Optional[_Iterable[str]] = ...,
@@ -3177,6 +3203,7 @@ class ERC20MultiSigTopologyVerified(_message.Message):
             _Union[_events_pb2.ERC20MultiSigThresholdSetEvent, _Mapping]
         ] = ...,
         seen_events: _Optional[_Iterable[str]] = ...,
+        scope: _Optional[str] = ...,
     ) -> None: ...
 
 class ERC20MultiSigTopologyPending(_message.Message):
@@ -3185,11 +3212,13 @@ class ERC20MultiSigTopologyPending(_message.Message):
         "pending_threshold_set",
         "witnessed_signers",
         "witnessed_threshold_sets",
+        "scope",
     )
     PENDING_SIGNERS_FIELD_NUMBER: _ClassVar[int]
     PENDING_THRESHOLD_SET_FIELD_NUMBER: _ClassVar[int]
     WITNESSED_SIGNERS_FIELD_NUMBER: _ClassVar[int]
     WITNESSED_THRESHOLD_SETS_FIELD_NUMBER: _ClassVar[int]
+    SCOPE_FIELD_NUMBER: _ClassVar[int]
     pending_signers: _containers.RepeatedCompositeFieldContainer[
         _events_pb2.ERC20MultiSigSignerEvent
     ]
@@ -3198,6 +3227,7 @@ class ERC20MultiSigTopologyPending(_message.Message):
     ]
     witnessed_signers: _containers.RepeatedScalarFieldContainer[str]
     witnessed_threshold_sets: _containers.RepeatedScalarFieldContainer[str]
+    scope: str
     def __init__(
         self,
         pending_signers: _Optional[
@@ -3208,6 +3238,7 @@ class ERC20MultiSigTopologyPending(_message.Message):
         ] = ...,
         witnessed_signers: _Optional[_Iterable[str]] = ...,
         witnessed_threshold_sets: _Optional[_Iterable[str]] = ...,
+        scope: _Optional[str] = ...,
     ) -> None: ...
 
 class ProofOfWork(_message.Message):

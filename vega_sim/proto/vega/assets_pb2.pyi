@@ -70,18 +70,21 @@ class BuiltinAsset(_message.Message):
     def __init__(self, max_faucet_amount_mint: _Optional[str] = ...) -> None: ...
 
 class ERC20(_message.Message):
-    __slots__ = ("contract_address", "lifetime_limit", "withdraw_threshold")
+    __slots__ = ("contract_address", "lifetime_limit", "withdraw_threshold", "chain_id")
     CONTRACT_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     LIFETIME_LIMIT_FIELD_NUMBER: _ClassVar[int]
     WITHDRAW_THRESHOLD_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     contract_address: str
     lifetime_limit: str
     withdraw_threshold: str
+    chain_id: str
     def __init__(
         self,
         contract_address: _Optional[str] = ...,
         lifetime_limit: _Optional[str] = ...,
         withdraw_threshold: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class AssetDetailsUpdate(_message.Message):

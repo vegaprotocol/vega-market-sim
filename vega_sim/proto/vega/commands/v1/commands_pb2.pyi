@@ -486,18 +486,21 @@ class CancelTransfer(_message.Message):
     def __init__(self, transfer_id: _Optional[str] = ...) -> None: ...
 
 class IssueSignatures(_message.Message):
-    __slots__ = ("submitter", "kind", "validator_node_id")
+    __slots__ = ("submitter", "kind", "validator_node_id", "chain_id")
     SUBMITTER_FIELD_NUMBER: _ClassVar[int]
     KIND_FIELD_NUMBER: _ClassVar[int]
     VALIDATOR_NODE_ID_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     submitter: str
     kind: _validator_commands_pb2.NodeSignatureKind
     validator_node_id: str
+    chain_id: str
     def __init__(
         self,
         submitter: _Optional[str] = ...,
         kind: _Optional[_Union[_validator_commands_pb2.NodeSignatureKind, str]] = ...,
         validator_node_id: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class CreateReferralSet(_message.Message):
