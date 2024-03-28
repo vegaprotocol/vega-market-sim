@@ -3799,7 +3799,9 @@ class VegaService(ABC):
             if market_depth.buy == [] or market_depth.sell == []:
                 continue
             max_bid_price = int(max(market_depth.buy, key=lambda x: int(x.price)).price)
-            min_ask_price = int(min(market_depth.sell, key=lambda x: int(x.price)).price)
+            min_ask_price = int(
+                min(market_depth.sell, key=lambda x: int(x.price)).price
+            )
             try:
                 assert max_bid_price < min_ask_price
                 logger.debug(

@@ -3,7 +3,7 @@ appnope==0.1.3 ; python_version >= "3.9" and python_version < "3.12" and (platfo
 asttokens==2.4.0 ; python_version >= "3.9" and python_version < "3.12"
 attrs==23.1.0 ; python_version >= "3.9" and python_version < "3.12"
 backcall==0.2.0 ; python_version >= "3.9" and python_version < "3.12"
-black==24.2.0 ; python_version >= "3.9" and python_version < "3.12"
+black==24.3.0 ; python_version >= "3.9" and python_version < "3.12"
 cachetools==5.3.1 ; python_version >= "3.9" and python_version < "3.12"
 certifi==2023.7.22 ; python_version >= "3.9" and python_version < "3.12"
 cffi==1.16.0 ; python_version >= "3.9" and python_version < "3.12"
