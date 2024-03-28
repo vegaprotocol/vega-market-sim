@@ -49,7 +49,7 @@ def num_from_padded_int(to_convert: Union[str, int], decimals: int) -> float:
     if not to_convert:
         return 0
     to_convert = int(to_convert) if isinstance(to_convert, str) else to_convert
-    return Decimal(to_convert) / 10**decimals
+    return float(to_convert) / 10**decimals
 
 
 def round_to_tick(

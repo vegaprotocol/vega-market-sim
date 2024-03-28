@@ -3793,13 +3793,13 @@ class VegaService(ABC):
                     "X-Block-Height"
                 )
             )
-            market_depth = data.market_depth(
+            market_depth = data_raw.market_depth(
                 market_id=market_id, data_client=self.trading_data_client_v2
             )
-            if market_depth.buys == [] or market_depth.sells == []:
+            if market_depth.buy == [] or market_depth.sell == []:
                 continue
-            max_bid_price = max(market_depth.buys, key=lambda x: x.price).price
-            min_ask_price = min(market_depth.sells, key=lambda x: x.price).price
+            max_bid_price = int(max(market_depth.buy, key=lambda x: int(x.price)).price)
+            min_ask_price = int(min(market_depth.sell, key=lambda x: int(x.price)).price)
             try:
                 assert max_bid_price < min_ask_price
                 logger.debug(
