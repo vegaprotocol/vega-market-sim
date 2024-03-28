@@ -16,6 +16,7 @@ def replay_run(
         run_with_console=console,
         replay_from_path=replay_path,
         retain_log_files=retain_log_files,
+        store_transactions=False,
     ) as vega:
         vega.wait_for_total_catchup()
 

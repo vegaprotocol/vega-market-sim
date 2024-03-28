@@ -1006,9 +1006,6 @@ class VegaServiceNull(VegaService):
             time.sleep(6)
             self.process_pids = parent_conn.recv()
 
-        # Initialise the data-cache
-        self.data_cache
-
         if self.run_with_console:
             webbrowser.open(f"http://localhost:{port_config[Ports.CONSOLE]}/", new=2)
 
@@ -1016,6 +1013,14 @@ class VegaServiceNull(VegaService):
             webbrowser.open(
                 f"http://localhost:{port_config[Ports.DATA_NODE_REST]}/graphql", new=2
             )
+
+        if self.replay_from_path is not None:
+            # If replaying, exit early as cache not required and the governance asset
+            # will already be created by replaying the relevant transaction.
+            return
+
+        # Initialise the data-cache
+        self.data_cache
 
         # Create the VegaService key and mint assets to the treasury
         governance_asset = self.get_asset(
