@@ -65,6 +65,7 @@ logger = logging.getLogger(__name__)
 def _retry(
     wait: int = 6,
     attempts: int = 10,
+    raise_on_failure: bool = True,
 ):
     def retry_decorator(fn):
         @wraps(fn)
@@ -73,7 +74,7 @@ def _retry(
                 try:
                     return fn(*args, **kwargs)
                 except AssertionError as e:
-                    if (i + 1) == attempts:
+                    if (i + 1) == attempts and raise_on_failure:
                         raise e
                     time.sleep(wait)
                     logger.warning(e)
@@ -3722,7 +3723,7 @@ class VegaService(ABC):
             margin_factor=str(margin_factor),
         )
 
-    @_retry(wait=6, attempts=10)
+    @_retry(wait=6, attempts=10, raise_on_failure=False)
     def check_market_states_consistent(
         self,
     ):
@@ -3765,7 +3766,7 @@ class VegaService(ABC):
                     f"Market {market.id[:6]}, market API says trading mode {vega_protos.markets.Market.TradingMode.Name(market.trading_mode)} but market data API says {vega_protos.markets.Market.TradingMode.Name(market_data.market_trading_mode)}."
                 )
 
-    @_retry(wait=6, attempts=10)
+    @_retry(wait=6, attempts=10, raise_on_failure=True)
     def check_book_not_crossed(
         self,
     ):
