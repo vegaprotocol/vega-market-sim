@@ -38,6 +38,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyVolumeDiscountProgramManager,
     FuzzyRewardFunder,
     FuzzyGovernanceTransferAgent,
+    FuzzyRandomTransactionAgent,
 )
 import itertools
 
@@ -539,6 +540,15 @@ class FuzzingScenario(Scenario):
             ]
             for _, agent_list in market_agents.items():
                 self.agents.extend(agent_list)
+
+        self.agents.append(
+            FuzzyRandomTransactionAgent(
+                wallet_name="FUZZY_RANDOM_TX",
+                key_name="RANDOM_TX_MAKER",
+                tag="TX_RND",
+                asset_name=asset_name,
+            )
+        )
 
         return {agent.name(): agent for agent in self.agents}
 
