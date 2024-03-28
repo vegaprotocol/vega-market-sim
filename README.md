@@ -36,9 +36,12 @@ For the most part the package is fairly self-contained Python, however there are
       - Run `python3 -m venv ./.venv`
       - Run `source ./.venv/bin/activate`
       - Run `python3 -m pip install -r requirements.txt`
+      - Run `python3 -m pip install -r requirements-dev.txt`
+      - If you want to run reinforcement learning, additionally run:
+         - Run `python3 -m pip install -r requirements.txt`
   - Download the binaries by running `python -m vega_sim.tools.load_binaries` within your Python environment.
  -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
- -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
+ -  Run `make test_integration` which checks that everything is set up correctly. This should take a bit more than 5 minutes and bit less than 30. 
  -  You're good now.
   
 ### Build Vega from Source
@@ -48,9 +51,9 @@ For the most part the package is fairly self-contained Python, however there are
   - Run `make` to automatically pull install dependencies
     - If you have your own instances of the various service to run from elsewhere, you can skip this step
   - Install the package into your local environment. 
-    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install` (or `poetry install --all-extras` to cover all optional extras too). 
+    - The process for this will vary depending upon your package manager of choice. We provide here a full Poetry `pyproject.toml` and a `requirements.txt` which is derived from it. These are kept in sync through a check on all pull requests. You can [install Poetry here](https://python-poetry.org/docs/#installation) and get everything ready by running `poetry shell` and `poetry install` (or `poetry install --all-extras` to cover all optional extras too). If installing through pip, as above you should also install `requirements-dev.txt` and optionally `requirements-learning.txt`
  -  Run `make test` which checks all the python environment + vega imports are set up correctly, doesn't run Vega yet.
- -  Run `make test_integration` which checks that everything is set up correctly. Takes about 5 minutes.
+ -  Run `make test_integration` which checks that everything is set up correctly. This should take a bit more than 5 minutes and bit less than 30. 
  -  You're good now.
 
 
