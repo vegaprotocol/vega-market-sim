@@ -34,6 +34,7 @@ pipeline {
                 label params.NODE_LABEL
             }
             steps {
+                echo 'test'
                 sh 'printenv'
                 echo "params=${params}"
                 echo "isPRBuild=${isPRBuild()}"
