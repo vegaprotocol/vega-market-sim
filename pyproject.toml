@@ -42,7 +42,7 @@ tensorboard = {version = "*", optional = true}
 pettingzoo = {version = "*", optional = true}
 numba = {version = "^0.57.1", optional = true}
 tianshou = {version = "*", optional = true}
-protofuzz = { git = "https://github.com/trailofbits/protofuzz" }
+protofuzz = { git = "https://github.com/trailofbits/protofuzz", branch="master" }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"

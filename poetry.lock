@@ -2976,7 +2976,7 @@ protobuf = ">=2.6.0"
 [package.source]
 type = "git"
 url = "https://github.com/trailofbits/protofuzz"
-reference = "HEAD"
+reference = "master"
 resolved_reference = "a4fd0936ae501dba0fc89d3af4ead8ef3aaad1d1"
 
 [[package]]
