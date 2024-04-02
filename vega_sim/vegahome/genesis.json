@@ -36,6 +36,7 @@
         "name": "VOTE",
         "symbol": "VOTE",
         "decimals": 5,
+        "quantum": "1",
         "min_lp_stake": "1",
         "source": {
           "builtin_asset": {
