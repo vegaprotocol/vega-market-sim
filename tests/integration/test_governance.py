@@ -6,6 +6,7 @@ from vega_sim.null_service import VegaServiceNull
 from tests.integration.utils.fixtures import WalletConfig, vega_service
 
 
+MARKET_PROPOSER = WalletConfig(name="proposer", passphrase="pass")
 PARTY_A = WalletConfig(name="party_a", passphrase="pass")
 PARTY_B = WalletConfig(name="party_b", passphrase="pass")
 
@@ -67,3 +68,40 @@ def test_governance_transfer(vega_service: vega_service):
     # Get and check party account balance
     party_a_account_t1 = vega.list_accounts(key_name=PARTY_A.name, asset_id=asset_id)
     assert party_a_account_t1[0].balance == 1000
+
+
+@pytest.mark.integration
+def test_create_simple_spot_market(vega_service: vega_service):
+    vega: VegaServiceNull = vega_service
+
+    vega.wallet.create_key(name=PARTY_A.name)
+
+    vega.create_key(name=MARKET_PROPOSER.name)
+    vega.wait_for_total_catchup()
+
+    asset_id = vega.find_asset_id("VOTE")
+    vega.mint(MARKET_PROPOSER.name, asset=asset_id, amount=1000)
+    vega.wait_for_total_catchup()
+
+    vega.create_asset(MARKET_PROPOSER.name, "Bitcoin", "BTC", 6, 1)
+    vega.create_asset(MARKET_PROPOSER.name, "Tether", "USDT", 6, 1)
+    vega.wait_for_total_catchup()
+
+    base_asset_id = vega.find_asset_id("BTC")
+    quote_asset_id = vega.find_asset_id("USDT")
+
+    vega.create_simple_spot_market(
+        proposal_key_name=MARKET_PROPOSER.name,
+        market_name="Bitcoin / Tether USD (Spot)",
+        market_code="BTC/USDT-SPOT",
+        base_asset_id=base_asset_id,
+        quote_asset_id=quote_asset_id,
+        market_decimal_places=1,
+        position_decimal_places=2,
+        tick_size=10,
+    )
+    vega.wait_for_total_catchup()
+    assert (
+        vega.find_market_id("Bitcoin / Tether USD (Spot)", raise_on_missing=True)
+        is not None
+    )
