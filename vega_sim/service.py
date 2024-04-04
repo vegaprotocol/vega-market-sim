@@ -841,6 +841,87 @@ class VegaService(ABC):
         self.wait_for_thread_catchup()
         return proposal_id
 
+    def create_simple_spot_market(
+        self,
+        proposal_key_name: str,
+        base_asset_id: str,
+        quote_asset_id: str,
+        market_name: str = "Basic Spot Market",
+        market_code: str = "SPOT",
+        market_decimal_places: int = 2,
+        position_decimal_places: int = 2,
+        tick_size: int = 1,
+        vote_closing_time: Optional[datetime.datetime] = None,
+        vote_enactment_time: Optional[datetime.datetime] = None,
+        approve_proposal: bool = True,
+        forward_time_to_closing: bool = True,
+        forward_time_to_enactment: bool = True,
+        proposal_wallet_name: Optional[str] = None,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+
+        base = data.get_asset(
+            data_client=self.trading_data_client_v2,
+            asset_id=base_asset_id,
+        )
+        quote = data.get_asset(
+            data_client=self.trading_data_client_v2,
+            asset_id=quote_asset_id,
+        )
+
+        market_config = market.SpotMarketConfig("default")
+        market_config.instrument.name = market_name
+        market_config.instrument.code = market_code
+        market_config.instrument.spot.base_asset = base_asset_id
+        market_config.instrument.spot.quote_asset = quote_asset_id
+        market_config.instrument.spot.name = (
+            f"{base.details.symbol}/{quote.details.symbol}"
+        )
+        market_config.decimal_places = market_decimal_places
+        market_config.position_decimal_places = position_decimal_places
+        market_config.tick_size = tick_size
+
+        proposal_id = gov.propose_market_from_config(
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            proposal_wallet_name=proposal_wallet_name,
+            proposal_key_name=proposal_key_name,
+            market_config=market_config,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+            sync_fn=lambda: self.wait_for_total_catchup(),
+        )
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=proposal_wallet_name,
+                key_name=proposal_key_name,
+            )
+
+        if forward_time_to_closing:
+            time_to_closing = closing_time - self.get_blockchain_time(in_seconds=True)
+            self.wait_fn(int(time_to_closing / self.seconds_per_block) + 5)
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 5)
+        self.wait_for_thread_catchup()
+        return proposal_id
+
     def create_simple_market(
         self,
         market_name: str,
