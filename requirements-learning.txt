@@ -129,7 +129,7 @@ triton==2.2.0 ; platform_system == "Linux" and platform_machine == "x86_64" and 
 typing-extensions==4.10.0 ; python_version >= "3.9" and python_version < "3.12"
 tzdata==2024.1 ; python_version >= "3.9" and python_version < "3.12"
 urllib3==2.2.1 ; python_version >= "3.9" and python_version < "3.12"
-vegapy @ git+https://github.com/cdummett/vegapy/@develop ; python_version >= "3.9" and python_version < "3.12"
+vegapy @ git+https://github.com/cdummett/vegapy/@3cd63f73b9c12ce8d546c73e9236faf31ac3534b ; python_version >= "3.9" and python_version < "3.12"
 wcwidth==0.2.13 ; python_version >= "3.9" and python_version < "3.12"
 websocket==0.2.1 ; python_version >= "3.9" and python_version < "3.12"
 websockets==12.0 ; python_version >= "3.9" and python_version < "3.12"
