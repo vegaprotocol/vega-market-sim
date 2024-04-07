@@ -301,5 +301,6 @@ AGENTS = {
         initial_price=4,
         base_balance=3000,
         position_offset=0,
+        order_validity_length=60,
     ),
 }

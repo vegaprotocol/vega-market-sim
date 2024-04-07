@@ -262,7 +262,7 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         wallet_name: str = None,
         orders_from_stream: Optional[bool] = True,
         state_update_freq: Optional[int] = None,
-        order_validity_length: Optional[float] = None,
+        order_validity_length: Optional[float] = 5,
         price_process_generator: Optional[Iterable[float]] = None,
         use_last_price_as_ref: bool = False,
         position_offset: float = 0,
@@ -403,13 +403,27 @@ class CFMV3MarketMaker(ShapedMarketMaker):
         required_vol = self.commitment_amount * 24
 
         buy_orders = (
-            [MMOrder((required_vol - buy_vol) / lower, lower, vega_protos.SIDE_BUY)]
+            [
+                MMOrder(
+                    (required_vol - buy_vol) / lower,
+                    lower,
+                    vega_protos.SIDE_BUY,
+                    time_in_force=vega_protos.Order.TIME_IN_FORCE_GFN,
+                )
+            ]
             if buy_vol < required_vol
             else []
         )
 
         sell_orders = (
-            [MMOrder((required_vol - sell_vol) / upper, upper, vega_protos.SIDE_SELL)]
+            [
+                MMOrder(
+                    (required_vol - sell_vol) / upper,
+                    upper,
+                    vega_protos.SIDE_SELL,
+                    time_in_force=vega_protos.Order.TIME_IN_FORCE_GFN,
+                )
+            ]
             if sell_vol < required_vol
             else []
         )

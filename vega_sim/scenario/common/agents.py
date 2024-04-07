@@ -18,6 +18,7 @@ except ImportError:
 
 import time
 from collections import namedtuple
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -61,7 +62,15 @@ AUCTION1_WALLET = WalletConfig("AUCTION1", "AUCTION1pass")
 AUCTION2_WALLET = WalletConfig("AUCTION2", "AUCTION2pass")
 
 ITOrder = namedtuple("ITOrder", ["side", "size"])
-MMOrder = namedtuple("MMOrder", ["size", "price", "side"])
+
+
+@dataclass
+class MMOrder:
+    size: float
+    price: float
+    side: vega_protos.Side
+    time_in_force: vega_protos.Order.TimeInForce = vega_protos.Order.TIME_IN_FORCE_GTT
+
 
 LiquidityProvision = namedtuple("LiquidityProvision", ["amount", "fee"])
 
@@ -1541,9 +1550,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     order_id=order_to_amend.id,
                     price=order.price,
                     time_in_force=(
-                        "TIME_IN_FORCE_GTT"
-                        if self.order_validity_length is not None
-                        else "TIME_IN_FORCE_GTC"
+                        order.time_in_force
                     ),
                     size_delta=order.size - order_to_amend.remaining,
                     expires_at=expires_at,
@@ -1557,11 +1564,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                     price=order.price,
                     size=order.size,
                     order_type="TYPE_LIMIT",
-                    time_in_force=(
-                        "TIME_IN_FORCE_GTT"
-                        if self.order_validity_length is not None
-                        else "TIME_IN_FORCE_GTC"
-                    ),
+                    time_in_force=order.time_in_force,
                     side=order.side,
                     expires_at=expires_at,
                     post_only=True,
