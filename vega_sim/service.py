@@ -642,10 +642,16 @@ class VegaService(ABC):
         vote_closing_time: Optional[datetime.datetime] = None,
         vote_enactment_time: Optional[datetime.datetime] = None,
         approve_proposal: bool = True,
+        forward_time_to_closing: bool = True,
         forward_time_to_enactment: bool = True,
     ) -> str:
         blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
 
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
         enactment_time = (
             blockchain_time_seconds + self.seconds_per_block * 50
             if vote_enactment_time is None
@@ -658,11 +664,7 @@ class VegaService(ABC):
             proposal_wallet_name=proposal_wallet_name,
             proposal_key_name=proposal_key_name,
             market_config=market_config,
-            closing_time=(
-                blockchain_time_seconds + self.seconds_per_block * 40
-                if vote_closing_time is None
-                else int(vote_closing_time.timestamp())
-            ),
+            closing_time=closing_time,
             enactment_time=enactment_time,
             time_forward_fn=lambda: self.wait_fn(2),
             sync_fn=lambda: self.wait_for_total_catchup(),
@@ -675,12 +677,14 @@ class VegaService(ABC):
                 key_name=proposal_key_name,
             )
 
+        if forward_time_to_closing:
+            time_to_closing = closing_time - self.get_blockchain_time(in_seconds=True)
+            self.wait_fn(int(time_to_closing / self.seconds_per_block) + 5)
         if forward_time_to_enactment:
             time_to_enactment = enactment_time - self.get_blockchain_time(
                 in_seconds=True
             )
-            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
-
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 5)
         self.wait_for_thread_catchup()
         return proposal_id
 
@@ -1762,6 +1766,33 @@ class VegaService(ABC):
             ),
             key_name=settlement_key,
             additional_payload=additional_payload,
+        )
+
+    def submit_oracle_data(
+        self,
+        key_name: str,
+        name: str,
+        value: Union[float, bool],
+        type: vega_protos.data.v1.spec.PropertyKey.Type.Value,
+        decimals: Optional[int] = None,
+        wallet_name: Optional[str] = None,
+    ):
+        logger.debug(
+            f"{key_name} submitting oracle data: {name}={value} (decimals={decimals})"
+        )
+        if type == vega_protos.data.v1.spec.PropertyKey.Type.TYPE_BOOLEAN:
+            value = str(value).lower()
+        if type == vega_protos.data.v1.spec.PropertyKey.Type.TYPE_INTEGER:
+            value = str(
+                num_to_padded_int(
+                    value, decimals=decimals if decimals is not None else 0
+                )
+            )
+        gov.submit_oracle_data(
+            key_name=key_name,
+            wallet_name=wallet_name,
+            payload={str(name): value},
+            wallet=self.wallet,
         )
 
     def party_account(
