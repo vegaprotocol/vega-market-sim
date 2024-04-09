@@ -54,6 +54,7 @@ def _run(
             network=Network.NULLCHAIN,
             output_data=output,
             log_every_n_steps=100,
+            run_with_snitch=output,
         )
 
     if output:
@@ -111,7 +112,7 @@ if __name__ == "__main__":
     _run(
         steps=args.steps,
         console=args.console,
-        output=True,
+        output=False,
         lite=args.lite,
         core_metrics_port=args.core_metrics_port,
         data_node_metrics_port=args.data_node_metrics_port,
