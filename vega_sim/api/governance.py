@@ -118,7 +118,7 @@ def propose_market_from_config(
         )
 
     # Build NewMarketConfiguration proto
-    changes = market_config.build()
+    changes = market_config.build(pubkey=pub_key)
 
     # Build ProposalTerms proto
     proposal = _build_generic_proposal(

@@ -73,7 +73,7 @@ def data_source_definition_external(
     if oracle is not None:
         proto.oracle.CopyFrom(oracle)
     if eth_oracle is not None:
-        proto.eth_oracle.CopyFrom(eth_oracle)
+        proto.oracle.CopyFrom(eth_oracle)
     return proto
 
 
