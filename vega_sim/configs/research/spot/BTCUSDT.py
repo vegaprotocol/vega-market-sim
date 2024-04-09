@@ -17,10 +17,8 @@ CONFIG = SpotMarketConfig(
         "metadata": [
             "base:BTC",
             "quote:USDT",
-            "oracle:pyth",
-            "oracleChain:gnosis",
             "class:fx/crypto",
-            "perpetual",
+            "spot",
             "sector:defi",
             "enactment:2023-12-01T18:00:00Z",
         ],
