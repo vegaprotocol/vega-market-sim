@@ -725,8 +725,50 @@ class FutureProduct(Config):
             "quote_name": None,
             "number_decimal_places": 18,
             "terminating_key": None,
-            "data_source_spec_for_settlement_data": "default",
-            "data_source_spec_for_trading_termination": "default",
+            "data_source_spec_for_settlement_data": {
+                "external": {
+                    "oracle": {
+                        "signers": [{"pubKey": {"key": None}}],
+                        "filters": [
+                            {
+                                "key": {
+                                    "name": "future.settlement",
+                                    "type": "TYPE_INTEGER",
+                                    "numberDecimalPlaces": "18",
+                                },
+                                "conditions": [
+                                    {
+                                        "operator": "OPERATOR_GREATER_THAN",
+                                        "value": "0",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                }
+            },
+            "data_source_spec_for_trading_termination": {
+                "external": {
+                    "oracle": {
+                        "signers": [{"pubKey": {"key": None}}],
+                        "filters": [
+                            {
+                                "key": {
+                                    "name": "future.termination",
+                                    "type": "TYPE_BOOLEAN",
+                                },
+                                "conditions": [
+                                    {"operator": "OPERATOR_EQUALS", "value": "true"}
+                                ],
+                            }
+                        ],
+                    }
+                }
+            },
+            "data_source_spec_binding": {
+                "settlement_data_property": "future.settlement",
+                "trading_termination_property": "future.termination",
+            },
         }
     }
 
@@ -791,8 +833,33 @@ class PerpetualProduct(Config):
             "funding_rate_scaling_factor": None,
             "funding_rate_lower_bound": None,
             "funding_rate_upper_bound": None,
-            "internalCompositePriceConfiguration": "default",
-            "data_source_spec_binding": "default",
+            "internal_composite_price_configuration": "default",
+            "data_source_spec_for_settlement_data": {
+                "external": {
+                    "oracle": {
+                        "signers": [{"pubKey": {"key": None}}],
+                        "filters": [
+                            {
+                                "key": {
+                                    "name": "perpetual.settlement",
+                                    "type": "TYPE_INTEGER",
+                                    "numberDecimalPlaces": "18",
+                                },
+                                "conditions": [
+                                    {
+                                        "operator": "OPERATOR_GREATER_THAN",
+                                        "value": "0",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                }
+            },
+            "data_source_spec_binding": {
+                "settlement_data_property": "perpetual.settlement",
+                "settlement_schedule_property": "vegaprotocol.builtin.timetrigger",
+            },
         }
     }
 
@@ -1032,8 +1099,8 @@ class EthOracleSpec(Config):
 class DataSourceSpecToFutureBinding(Config):
     OPTS = {
         "default": {
-            "settlement_data_property": "btc.price",
-            "trading_termination_property": "trading.terminated",
+            "settlement_data_property": None,
+            "trading_termination_property": None,
         }
     }
 
