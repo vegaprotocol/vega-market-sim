@@ -1040,7 +1040,11 @@ class VegaService(ABC):
             price_monitoring_parameters=price_monitoring_parameters,
             parent_market_id=parent_market_id,
             parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
-            termination_time=int(termination_time.timestamp()),
+            termination_time=(
+                int(termination_time.timestamp())
+                if termination_time is not None
+                else None
+            ),
             **additional_kwargs,
         )
         if approve_proposal:
