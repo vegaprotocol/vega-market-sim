@@ -5,7 +5,6 @@ import datetime
 import argparse
 from typing import Optional
 
-
 from vega_sim.null_service import VegaServiceNull, Ports
 from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzing.scenario import FuzzingScenario

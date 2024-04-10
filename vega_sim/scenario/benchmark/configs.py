@@ -1,10 +1,11 @@
-from vega_sim.api.market import MarketConfig
+from typing import Union
+from vega_sim.api.market import MarketConfig, SpotMarketConfig
 
 
 class BenchmarkConfig:
     def __init__(
         self,
-        market_config: MarketConfig,
+        market_config: Union[MarketConfig, SpotMarketConfig],
         initial_price: float,
         annualised_volatility: float,
         notional_trade_volume: int,

@@ -146,12 +146,12 @@ class SpotMarketConfig(Config):
     OPTS = {
         "default": {
             "instrument": "spot",
-            "decimal_places": 4,
+            "price_decimal_places": 4,
             "metadata": None,
             "price_monitoring_parameters": "default",
             "target_stake_parameters": "default",
             "log_normal": "default",
-            "position_decimal_places": 2,
+            "size_decimal_places": 2,
             "liquidity_sla_parameters": "default",
             "liquidity_fee_settings": "default",
             "tick_size": "2",
@@ -161,8 +161,8 @@ class SpotMarketConfig(Config):
     def load(self, opt: Optional[str] = None):
         config = super().load(opt=opt)
 
-        self.decimal_places = int(config["decimal_places"])
-        self.position_decimal_places = int(config["position_decimal_places"])
+        self.price_decimal_places = int(config["price_decimal_places"])
+        self.size_decimal_places = int(config["size_decimal_places"])
         self.metadata = config["metadata"]
         self.tick_size = int(config["tick_size"])
 
@@ -185,11 +185,11 @@ class SpotMarketConfig(Config):
         new_spot_market = vega_protos.governance.NewSpotMarket(
             changes=build.governance.new_spot_market_configuration(
                 instrument=self.instrument.build(oracle_pubkey=oracle_pubkey),
-                decimal_places=int(self.decimal_places),
+                price_decimal_places=int(self.price_decimal_places),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 target_stake_parameters=self.target_stake_parameters.build(),
                 log_normal=self.log_normal.build(),
-                position_decimal_places=int(self.position_decimal_places),
+                size_decimal_places=int(self.size_decimal_places),
                 sla_params=self.liquidity_sla_parameters.build(),
                 liquidity_fee_settings=self.liquidity_fee_settings.build(),
                 tick_size=str(self.tick_size),

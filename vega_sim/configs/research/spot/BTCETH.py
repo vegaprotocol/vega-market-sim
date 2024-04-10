@@ -2,8 +2,8 @@ from vega_sim.api.market import SpotMarketConfig
 
 CONFIG = SpotMarketConfig(
     {
-        "decimalPlaces": "2",
-        "positionDecimalPlaces": "4",
+        "priceDecimalPlaces": "2",
+        "sizeDecimalPlaces": "4",
         "tickSize": "10",
         "instrument": {
             "name": "Bitcoin / Ethereum (Spot)",

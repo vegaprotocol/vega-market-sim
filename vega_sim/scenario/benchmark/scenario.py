@@ -117,31 +117,17 @@ class BenchmarkScenario(Scenario):
         for _, benchmark_config in enumerate(self.benchmark_configs):
 
             market_name = benchmark_config.market_config.instrument.name
-            if benchmark_config.market_config.is_future():
-                asset_name = benchmark_config.market_config.instrument.future.quote_name
-                asset_dp = (
-                    benchmark_config.market_config.instrument.future.number_decimal_places
-                )
-            if benchmark_config.market_config.is_perp():
-                asset_name = (
-                    benchmark_config.market_config.instrument.perpetual.quote_name
-                )
-                asset_dp = (
-                    benchmark_config.market_config.instrument.perpetual.number_decimal_places
-                )
-
-            # # TEMPORARILY OVERWRITE SO WE CAN TEST MULTI PERPS
-            # from vega_sim.api.market import CompositePriceConfiguration
-
-            # benchmark_config.market_config.mark_price_configuration = (
-            #     CompositePriceConfiguration()
-            # )
+            market_decimal_places = int(
+                benchmark_config.market_config.price_decimal_places
+                if benchmark_config.market_config.is_spot()
+                else benchmark_config.market_config.decimal_places
+            )
 
             # Create fuzzed price process
             price_process = _create_price_process(
                 random_state=self.random_state,
                 num_steps=self.num_steps,
-                decimal_places=int(int(benchmark_config.market_config.decimal_places)),
+                decimal_places=market_decimal_places,
                 initial_price=benchmark_config.initial_price,
                 price_sigma=benchmark_config.annualised_volatility
                 * np.sqrt(self.step_length_seconds / (365.25 * 24 * 60 * 60))
@@ -169,12 +155,10 @@ class BenchmarkScenario(Scenario):
                     initial_asset_mint=1e9,
                     market_name=market_name,
                     commitment_amount=1e6,
-                    market_decimal_places=int(
-                        benchmark_config.market_config.decimal_places
-                    ),
+                    market_decimal_places=market_decimal_places,
                     num_steps=self.num_steps,
                     kappa=2.4,
-                    tick_spacing=10**-benchmark_config.market_config.decimal_places
+                    tick_spacing=10**-market_decimal_places
                     * benchmark_config.market_config.tick_size,
                     num_levels=10,
                     market_kappa=1000,

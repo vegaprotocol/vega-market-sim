@@ -350,11 +350,11 @@ def new_market_configuration(
 @raise_custom_build_errors
 def new_spot_market_configuration(
     instrument: vega_protos.governance.InstrumentConfiguration,
-    decimal_places: int,
+    price_decimal_places: int,
     price_monitoring_parameters: vega_protos.markets.PriceMonitoringParameters,
     target_stake_parameters: vega_protos.markets.TargetStakeParameters,
     log_normal: vega_protos.markets.LogNormalRiskModel,
-    position_decimal_places: int,
+    size_decimal_places: int,
     sla_params: vega_protos.markets.LiquiditySLAParameters,
     liquidity_fee_settings: vega_protos.markets.LiquidityFeeSettings,
     tick_size: float,
@@ -362,12 +362,12 @@ def new_spot_market_configuration(
 ) -> vega_protos.governance.NewMarketConfiguration:
     return vega_protos.governance.NewSpotMarketConfiguration(
         instrument=instrument,
-        decimal_places=int(decimal_places),
+        price_decimal_places=int(price_decimal_places),
         metadata=metadata,
         price_monitoring_parameters=price_monitoring_parameters,
         target_stake_parameters=target_stake_parameters,
         log_normal=log_normal,
-        position_decimal_places=int(position_decimal_places),
+        size_decimal_places=int(size_decimal_places),
         sla_params=sla_params,
         liquidity_fee_settings=liquidity_fee_settings,
         tick_size=str(tick_size),
