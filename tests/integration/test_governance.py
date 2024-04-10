@@ -108,6 +108,7 @@ def test_create_simple_spot_market(vega_service: vega_service):
     )
 
 
+@pytest.mark.integration
 def test_market_termination_time(vega_service: VegaServiceNull):
     vega = vega_service
 
