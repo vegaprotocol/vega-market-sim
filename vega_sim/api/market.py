@@ -181,10 +181,10 @@ class SpotMarketConfig(Config):
             opt=config["liquidity_fee_settings"]
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         new_spot_market = vega_protos.governance.NewSpotMarket(
             changes=build.governance.new_spot_market_configuration(
-                instrument=self.instrument.build(pubkey=pubkey),
+                instrument=self.instrument.build(oracle_pubkey=oracle_pubkey),
                 decimal_places=int(self.decimal_places),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 target_stake_parameters=self.target_stake_parameters.build(),
@@ -300,14 +300,14 @@ class MarketConfig(Config):
             opt=config["mark_price_configuration"]
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         new_market = vega_protos.governance.NewMarket(
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=int(self.decimal_places),
                 position_decimal_places=int(self.position_decimal_places),
                 liquidity_sla_parameters=self.liquidity_sla_parameters.build(),
                 metadata=self.metadata,
-                instrument=self.instrument.build(pubkey=pubkey),
+                instrument=self.instrument.build(oracle_pubkey=oracle_pubkey),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 liquidity_monitoring_parameters=self.liquidity_monitoring_parameters.build(),
                 log_normal=self.log_normal.build(),
@@ -319,7 +319,7 @@ class MarketConfig(Config):
                 liquidity_fee_settings=self.liquidity_fee_settings.build(),
                 liquidation_strategy=self.liquidation_strategy.build(),
                 mark_price_configuration=self.mark_price_configuration.build(
-                    pubkey=pubkey
+                    oracle_pubkey=oracle_pubkey
                 ),
                 tick_size=str(self.tick_size),
             )
@@ -574,7 +574,7 @@ class CompositePriceConfiguration(Config):
             else None
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         return vega_protos.markets.CompositePriceConfiguration(
             composite_price_type=get_enum(
                 self.composite_price_type, vega_protos.markets.CompositePriceType
@@ -588,7 +588,7 @@ class CompositePriceConfiguration(Config):
             source_staleness_tolerance=self.source_staleness_tolerance,
             data_sources_spec=(
                 [
-                    data_sources_spec.build(pubkey=pubkey)
+                    data_sources_spec.build(oracle_pubkey=oracle_pubkey)
                     for data_sources_spec in self.data_sources_spec
                 ]
                 if self.data_sources_spec is not None
@@ -700,16 +700,18 @@ class InstrumentConfiguration(Config):
         )
         self.spot = None if config["spot"] is None else SpotProduct(opt=config["spot"])
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         if self.future != None:
             return vega_protos.governance.InstrumentConfiguration(
-                name=self.name, code=self.code, future=self.future.build(pubkey=pubkey)
+                name=self.name,
+                code=self.code,
+                future=self.future.build(oracle_pubkey=oracle_pubkey),
             )
         if self.perpetual != None:
             return vega_protos.governance.InstrumentConfiguration(
                 name=self.name,
                 code=self.code,
-                perpetual=self.perpetual.build(pubkey=pubkey),
+                perpetual=self.perpetual.build(oracle_pubkey=oracle_pubkey),
             )
         if self.spot != None:
             return vega_protos.governance.InstrumentConfiguration(
@@ -796,7 +798,7 @@ class FutureProduct(Config):
             else None
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         if None in [
             self.settlement_asset,
         ]:
@@ -808,10 +810,10 @@ class FutureProduct(Config):
             settlement_asset=self.settlement_asset,
             quote_name=self.quote_name,
             data_source_spec_for_settlement_data=self.data_source_spec_for_settlement_data.build(
-                pubkey=pubkey
+                oracle_pubkey=oracle_pubkey
             ),
             data_source_spec_for_trading_termination=self.data_source_spec_for_trading_termination.build(
-                pubkey=pubkey
+                oracle_pubkey=oracle_pubkey
             ),
             data_source_spec_binding=self.data_source_spec_binding.build(),
         )
@@ -893,7 +895,7 @@ class PerpetualProduct(Config):
             else None
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         if None in [
             self.settlement_asset,
         ]:
@@ -927,7 +929,7 @@ class PerpetualProduct(Config):
             clamp_upper_bound=self.clamp_upper_bound,
             data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
             data_source_spec_for_settlement_data=self.data_source_spec_for_settlement_data.build(
-                pubkey=pubkey
+                oracle_pubkey=oracle_pubkey
             ),
             data_source_spec_binding=self.data_source_spec_binding.build(),
             funding_rate_scaling_factor=self.funding_rate_scaling_factor,
@@ -968,11 +970,11 @@ class DataSourceDefinition(Config):
             else None
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         return build.data_source.data_source_definition(
             internal=self.internal.build() if self.internal is not None else None,
             external=(
-                self.external.build(pubkey=pubkey)
+                self.external.build(oracle_pubkey=oracle_pubkey)
                 if self.external is not None
                 else None
             ),
@@ -1020,11 +1022,17 @@ class DataSourceDefinitionExternal(Config):
             else None
         )
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         return build.data_source.data_source_definition_external(
-            oracle=self.oracle.build(pubkey) if self.oracle is not None else None,
+            oracle=(
+                self.oracle.build(oracle_pubkey=oracle_pubkey)
+                if self.oracle is not None
+                else None
+            ),
             eth_oracle=(
-                self.eth_oracle.build(pubkey) if self.eth_oracle is not None else None
+                self.eth_oracle.build(oracle_pubkey=oracle_pubkey)
+                if self.eth_oracle is not None
+                else None
             ),
         )
 
@@ -1040,10 +1048,12 @@ class DataSourceSpecConfiguration(Config):
         config = super().load(opt=opt)
         self.filters = config["filters"]
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         return build.data_source.data_source_spec_configuration(
             signers=[
-                build.data.data.signer(pub_key=build.data.data.pub_key(key=pubkey))
+                build.data.data.signer(
+                    pub_key=build.data.data.pub_key(key=oracle_pubkey)
+                )
             ],
             filters=[
                 build.data.spec.filter(
@@ -1075,10 +1085,12 @@ class EthOracleSpec(Config):
         config = super().load(opt)
         self.filters = config["filters"]
 
-    def build(self, pubkey: str):
+    def build(self, oracle_pubkey: str):
         return build.data_source.data_source_spec_configuration(
             signers=[
-                build.data.data.signer(pub_key=build.data.data.pub_key(key=pubkey))
+                build.data.data.signer(
+                    pub_key=build.data.data.pub_key(key=oracle_pubkey)
+                )
             ],
             filters=[
                 build.data.spec.filter(

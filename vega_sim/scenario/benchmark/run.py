@@ -103,47 +103,39 @@ def _run(
                 account_types=[protos.vega.vega.AccountType.ACCOUNT_TYPE_INSURANCE],
                 date_range_start_timestamp=market.market_timestamps.pending,
             )
-            # Initialise figures
-            fig1 = None
-            fig2 = None
-            fig3 = None
             # Update figures
-            fig1 = vis.plot.price_monitoring_analysis(market, market_data_history)
-            if not is_spot:
-                fig2 = vis.plot.liquidation_analysis(
-                    asset,
-                    market,
-                    trades,
-                    market_data_history,
-                    aggregated_balance_history,
-                )
-            if is_perpetual:
-                funding_periods = service.api.data.list_funding_periods(
-                    market_id=market.id,
-                    start_timestamp=market.market_timestamps.pending,
-                )
-                funding_period_data_points = (
-                    service.api.data.list_funding_period_data_points(
-                        market.id, start_timestamp=market.market_timestamps.pending
-                    )
-                )
-                fig3 = vis.plot.funding_analysis(
-                    asset,
-                    market,
-                    market_data_history,
-                    funding_periods,
-                    funding_period_data_points,
-                )
             if output:
                 market_output_dir = f"{output_dir}/{market.tradable_instrument.instrument.code.replace('/', '')}"
                 if not os.path.exists(market_output_dir):
                     os.mkdir(market_output_dir)
-                if fig1 is not None:
-                    fig1.savefig(f"{market_output_dir}/price_monitoring_analysis.png")
-                if fig2 is not None:
-                    fig2.savefig(f"{market_output_dir}/liquidation_analysis.png")
-                if fig3 is not None:
-                    fig3.savefig(f"{market_output_dir}/funding_analysis.png")
+                vis.plot.price_monitoring_analysis(market, market_data_history).savefig(
+                    f"{market_output_dir}/price_monitoring_analysis.png"
+                )
+                if not is_spot:
+                    vis.plot.liquidation_analysis(
+                        asset,
+                        market,
+                        trades,
+                        market_data_history,
+                        aggregated_balance_history,
+                    ).savefig(f"{market_output_dir}/liquidation_analysis.png")
+                if is_perpetual:
+                    funding_periods = service.api.data.list_funding_periods(
+                        market_id=market.id,
+                        start_timestamp=market.market_timestamps.pending,
+                    )
+                    funding_period_data_points = (
+                        service.api.data.list_funding_period_data_points(
+                            market.id, start_timestamp=market.market_timestamps.pending
+                        )
+                    )
+                    vis.plot.funding_analysis(
+                        asset,
+                        market,
+                        market_data_history,
+                        funding_periods,
+                        funding_period_data_points,
+                    ).savefig(f"{market_output_dir}/funding_analysis.png")
 
         if pause:
             input("Waiting after run finished.")
