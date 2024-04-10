@@ -1737,6 +1737,7 @@ class GetERC20WithdrawalApprovalResponse(_message.Message):
         "signatures",
         "target_address",
         "creation",
+        "source_chain_id",
     )
     ASSET_SOURCE_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
@@ -1744,12 +1745,14 @@ class GetERC20WithdrawalApprovalResponse(_message.Message):
     SIGNATURES_FIELD_NUMBER: _ClassVar[int]
     TARGET_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     CREATION_FIELD_NUMBER: _ClassVar[int]
+    SOURCE_CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     asset_source: str
     amount: str
     nonce: str
     signatures: str
     target_address: str
     creation: int
+    source_chain_id: str
     def __init__(
         self,
         asset_source: _Optional[str] = ...,
@@ -1758,6 +1761,7 @@ class GetERC20WithdrawalApprovalResponse(_message.Message):
         signatures: _Optional[str] = ...,
         target_address: _Optional[str] = ...,
         creation: _Optional[int] = ...,
+        source_chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class GetLastTradeRequest(_message.Message):

@@ -72,7 +72,7 @@ class ProposalError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     PROPOSAL_ERROR_INVALID_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ProposalError]
     PROPOSAL_ERROR_PROPOSAL_IN_BATCH_REJECTED: _ClassVar[ProposalError]
     PROPOSAL_ERROR_PROPOSAL_IN_BATCH_DECLINED: _ClassVar[ProposalError]
-    PROPOSAL_ERROR_INVALID_POSITION_DECIMAL_PLACES: _ClassVar[ProposalError]
+    PROPOSAL_ERROR_INVALID_SIZE_DECIMAL_PLACES: _ClassVar[ProposalError]
 
 class MarketStateUpdateType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -141,7 +141,7 @@ PROPOSAL_ERROR_INVALID_REFERRAL_PROGRAM: ProposalError
 PROPOSAL_ERROR_INVALID_VOLUME_DISCOUNT_PROGRAM: ProposalError
 PROPOSAL_ERROR_PROPOSAL_IN_BATCH_REJECTED: ProposalError
 PROPOSAL_ERROR_PROPOSAL_IN_BATCH_DECLINED: ProposalError
-PROPOSAL_ERROR_INVALID_POSITION_DECIMAL_PLACES: ProposalError
+PROPOSAL_ERROR_INVALID_SIZE_DECIMAL_PLACES: ProposalError
 MARKET_STATE_UPDATE_TYPE_UNSPECIFIED: MarketStateUpdateType
 MARKET_STATE_UPDATE_TYPE_TERMINATE: MarketStateUpdateType
 MARKET_STATE_UPDATE_TYPE_SUSPEND: MarketStateUpdateType
@@ -289,43 +289,43 @@ class InstrumentConfiguration(_message.Message):
 class NewSpotMarketConfiguration(_message.Message):
     __slots__ = (
         "instrument",
-        "decimal_places",
+        "price_decimal_places",
         "metadata",
         "price_monitoring_parameters",
         "target_stake_parameters",
         "simple",
         "log_normal",
-        "position_decimal_places",
+        "size_decimal_places",
         "sla_params",
         "liquidity_fee_settings",
         "tick_size",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
-    DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
+    PRICE_DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     TARGET_STAKE_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     SIMPLE_FIELD_NUMBER: _ClassVar[int]
     LOG_NORMAL_FIELD_NUMBER: _ClassVar[int]
-    POSITION_DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
+    SIZE_DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
     SLA_PARAMS_FIELD_NUMBER: _ClassVar[int]
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
-    decimal_places: int
+    price_decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
     target_stake_parameters: _markets_pb2.TargetStakeParameters
     simple: _markets_pb2.SimpleModelParams
     log_normal: _markets_pb2.LogNormalRiskModel
-    position_decimal_places: int
+    size_decimal_places: int
     sla_params: _markets_pb2.LiquiditySLAParameters
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     tick_size: str
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
-        decimal_places: _Optional[int] = ...,
+        price_decimal_places: _Optional[int] = ...,
         metadata: _Optional[_Iterable[str]] = ...,
         price_monitoring_parameters: _Optional[
             _Union[_markets_pb2.PriceMonitoringParameters, _Mapping]
@@ -335,7 +335,7 @@ class NewSpotMarketConfiguration(_message.Message):
         ] = ...,
         simple: _Optional[_Union[_markets_pb2.SimpleModelParams, _Mapping]] = ...,
         log_normal: _Optional[_Union[_markets_pb2.LogNormalRiskModel, _Mapping]] = ...,
-        position_decimal_places: _Optional[int] = ...,
+        size_decimal_places: _Optional[int] = ...,
         sla_params: _Optional[
             _Union[_markets_pb2.LiquiditySLAParameters, _Mapping]
         ] = ...,
