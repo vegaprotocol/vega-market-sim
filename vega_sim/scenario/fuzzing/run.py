@@ -3,6 +3,7 @@ import logging
 import pathlib
 import datetime
 import argparse
+from typing import Optional
 
 
 from vega_sim.null_service import VegaServiceNull, Ports
@@ -23,9 +24,15 @@ def _run(
     output: bool = False,
     wallet: bool = False,
     output_dir: str = "plots",
-    core_metrics_port: int = 2723,
-    data_node_metrics_port: int = 3651,
+    core_metrics_port: Optional[int] = None,
+    data_node_metrics_port: Optional[int] = None,
 ):
+
+    port_config = {}
+    if core_metrics_port is not None:
+        port_config[Ports.METRICS] = core_metrics_port
+    if data_node_metrics_port is not None:
+        port_config[Ports.DATA_NODE_METRICS] = data_node_metrics_port
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
@@ -34,10 +41,7 @@ def _run(
         retain_log_files=True,
         use_full_vega_wallet=wallet,
         run_with_console=console,
-        port_config={
-            Ports.METRICS: core_metrics_port,
-            Ports.DATA_NODE_METRICS: data_node_metrics_port,
-        },
+        port_config=port_config if port_config != {} else None,
     ) as vega:
         scenario.run_iteration(
             vega=vega,
