@@ -2,18 +2,17 @@ import itertools
 import numpy as np
 from typing import Optional, List, Dict, Any
 
-from vega_sim.api.market import MarketConfig
+import vega_sim.proto as protos
 from vega_sim.null_service import VegaServiceNull
-
+from vega_sim.scenario.benchmark.configs import BenchmarkConfig
 from vega_sim.scenario.benchmark.scenario import BenchmarkScenario
-from vega_sim.configs.agents import ConfigurableMarketManager
+from vega_sim.environment.agent import (
+    StateAgentWithWallet,
+)
 from vega_sim.scenario.common.agents import (
     StateAgent,
     RewardFunder,
     ReferralAgentWrapper,
-)
-from vega_sim.environment.agent import (
-    StateAgentWithWallet,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
@@ -21,9 +20,6 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyReferralProgramManager,
     FuzzyVolumeDiscountProgramManager,
 )
-import vega_sim.proto as protos
-
-from vega_sim.scenario.benchmark.configs import BenchmarkConfig
 
 
 class FuzzingScenario(BenchmarkScenario):
