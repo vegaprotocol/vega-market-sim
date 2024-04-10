@@ -185,50 +185,50 @@ CONFIG = MarketConfig(
             "sourceWeights": [
                 "1",
                 "1",
-                # "1",
+                "1",
                 "1",
             ],
             "sourceStalenessTolerance": [
                 "1m0s",
                 "1m0s",
-                # "1m0s",
+                "1m0s",
                 "1m0s",
             ],
             "compositePriceType": "COMPOSITE_PRICE_TYPE_WEIGHTED",
-            # "dataSourcesSpec": [
-            #     {
-            #         "external": {
-            #             "ethOracle": {
-            #                 "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
-            #                 "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
-            #                 "method": "getPrice",
-            #                 "args": ["7w2Lb9os66QdoV1AldHaOSoNL47Qxse8D0z6yMKAtW0="],
-            #                 "trigger": {"timeTrigger": {"every": "60"}},
-            #                 "requiredConfirmations": "3",
-            #                 "filters": [
-            #                     {
-            #                         "key": {
-            #                             "name": "sol.price",
-            #                             "type": "TYPE_INTEGER",
-            #                             "numberDecimalPlaces": "18",
-            #                         },
-            #                         "conditions": [
-            #                             {
-            #                                 "operator": "OPERATOR_GREATER_THAN",
-            #                                 "value": "0",
-            #                             }
-            #                         ],
-            #                     }
-            #                 ],
-            #                 "normalisers": [
-            #                     {"name": "sol.price", "expression": "$[0]"}
-            #                 ],
-            #                 "sourceChainId": "100",
-            #             }
-            #         }
-            #     }
-            # ],
-            # "dataSourcesSpecBinding": [{"priceSourceProperty": "sol.price"}],
+            "dataSourcesSpec": [
+                {
+                    "external": {
+                        "ethOracle": {
+                            "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
+                            "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
+                            "method": "getPrice",
+                            "args": ["7w2Lb9os66QdoV1AldHaOSoNL47Qxse8D0z6yMKAtW0="],
+                            "trigger": {"timeTrigger": {"every": "60"}},
+                            "requiredConfirmations": "3",
+                            "filters": [
+                                {
+                                    "key": {
+                                        "name": "sol.price",
+                                        "type": "TYPE_INTEGER",
+                                        "numberDecimalPlaces": "18",
+                                    },
+                                    "conditions": [
+                                        {
+                                            "operator": "OPERATOR_GREATER_THAN",
+                                            "value": "0",
+                                        }
+                                    ],
+                                }
+                            ],
+                            "normalisers": [
+                                {"name": "sol.price", "expression": "$[0]"}
+                            ],
+                            "sourceChainId": "100",
+                        }
+                    }
+                }
+            ],
+            "dataSourcesSpecBinding": [{"priceSourceProperty": "sol.price"}],
         },
     }
 )

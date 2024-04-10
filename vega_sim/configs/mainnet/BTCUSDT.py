@@ -183,79 +183,79 @@ CONFIG = MarketConfig(
             "sourceStalenessTolerance": [
                 "1m0s",
                 "1m0s",
-                # "168h0m0s",
-                # "168h0m0s",
+                "168h0m0s",
+                "168h0m0s",
                 "1m0s",
             ],
             "compositePriceType": "COMPOSITE_PRICE_TYPE_MEDIAN",
-            # "dataSourcesSpec": [
-            #     {
-            #         "external": {
-            #             "ethOracle": {
-            #                 "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
-            #                 "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
-            #                 "method": "getPrice",
-            #                 "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
-            #                 "trigger": {"timeTrigger": {"every": "60"}},
-            #                 "requiredConfirmations": "3",
-            #                 "filters": [
-            #                     {
-            #                         "key": {
-            #                             "name": "btc.price",
-            #                             "type": "TYPE_INTEGER",
-            #                             "numberDecimalPlaces": "18",
-            #                         },
-            #                         "conditions": [
-            #                             {
-            #                                 "operator": "OPERATOR_GREATER_THAN",
-            #                                 "value": "0",
-            #                             }
-            #                         ],
-            #                     }
-            #                 ],
-            #                 "normalisers": [
-            #                     {"name": "btc.price", "expression": "$[0]"}
-            #                 ],
-            #                 "sourceChainId": "100",
-            #             }
-            #         }
-            #     },
-            #     {
-            #         "external": {
-            #             "ethOracle": {
-            #                 "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
-            #                 "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
-            #                 "method": "getPrice",
-            #                 "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
-            #                 "trigger": {"timeTrigger": {"every": "60"}},
-            #                 "requiredConfirmations": "3",
-            #                 "filters": [
-            #                     {
-            #                         "key": {
-            #                             "name": "btc.price",
-            #                             "type": "TYPE_INTEGER",
-            #                             "numberDecimalPlaces": "18",
-            #                         },
-            #                         "conditions": [
-            #                             {
-            #                                 "operator": "OPERATOR_GREATER_THAN",
-            #                                 "value": "0",
-            #                             }
-            #                         ],
-            #                     }
-            #                 ],
-            #                 "normalisers": [
-            #                     {"name": "btc.price", "expression": "$[0]"}
-            #                 ],
-            #                 "sourceChainId": "100",
-            #             }
-            #         }
-            #     },
-            # ],
-            # "dataSourcesSpecBinding": [
-            #     {"priceSourceProperty": "btc.price"},
-            #     {"priceSourceProperty": "btc.price"},
-            # ],
+            "dataSourcesSpec": [
+                {
+                    "external": {
+                        "ethOracle": {
+                            "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
+                            "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
+                            "method": "getPrice",
+                            "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
+                            "trigger": {"timeTrigger": {"every": "60"}},
+                            "requiredConfirmations": "3",
+                            "filters": [
+                                {
+                                    "key": {
+                                        "name": "btc.price",
+                                        "type": "TYPE_INTEGER",
+                                        "numberDecimalPlaces": "18",
+                                    },
+                                    "conditions": [
+                                        {
+                                            "operator": "OPERATOR_GREATER_THAN",
+                                            "value": "0",
+                                        }
+                                    ],
+                                }
+                            ],
+                            "normalisers": [
+                                {"name": "btc.price", "expression": "$[0]"}
+                            ],
+                            "sourceChainId": "100",
+                        }
+                    }
+                },
+                {
+                    "external": {
+                        "ethOracle": {
+                            "address": "0x719abd606155442c21b7d561426d42bd0e40a776",
+                            "abi": '[{"inputs": [{"internalType": "bytes32", "name": "id", "type": "bytes32"}], "name": "getPrice", "outputs": [{"internalType": "int256", "name": "", "type": "int256" }], "stateMutability": "view", "type": "function"}]',
+                            "method": "getPrice",
+                            "args": ["5i32yLSoX+GmfbRNwS3l2zMPesZrctxliv7fD0pBW0M="],
+                            "trigger": {"timeTrigger": {"every": "60"}},
+                            "requiredConfirmations": "3",
+                            "filters": [
+                                {
+                                    "key": {
+                                        "name": "btc.price",
+                                        "type": "TYPE_INTEGER",
+                                        "numberDecimalPlaces": "18",
+                                    },
+                                    "conditions": [
+                                        {
+                                            "operator": "OPERATOR_GREATER_THAN",
+                                            "value": "0",
+                                        }
+                                    ],
+                                }
+                            ],
+                            "normalisers": [
+                                {"name": "btc.price", "expression": "$[0]"}
+                            ],
+                            "sourceChainId": "100",
+                        }
+                    }
+                },
+            ],
+            "dataSourcesSpecBinding": [
+                {"priceSourceProperty": "btc.price"},
+                {"priceSourceProperty": "btc.price"},
+            ],
         },
     }
 )

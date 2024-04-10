@@ -64,6 +64,7 @@ Examples:
 
 """
 
+import uuid
 import copy
 import functools
 import logging
@@ -180,10 +181,10 @@ class SpotMarketConfig(Config):
             opt=config["liquidity_fee_settings"]
         )
 
-    def build(self):
+    def build(self, oracle_pubkey: str):
         new_spot_market = vega_protos.governance.NewSpotMarket(
             changes=build.governance.new_spot_market_configuration(
-                instrument=self.instrument.build(),
+                instrument=self.instrument.build(oracle_pubkey=oracle_pubkey),
                 decimal_places=int(self.decimal_places),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 target_stake_parameters=self.target_stake_parameters.build(),
@@ -295,18 +296,18 @@ class MarketConfig(Config):
         self.liquidation_strategy = LiquidationStrategy(
             opt=config["liquidation_strategy"]
         )
-        self.mark_price_configuration = MarkPriceConfiguration(
+        self.mark_price_configuration = CompositePriceConfiguration(
             opt=config["mark_price_configuration"]
         )
 
-    def build(self):
+    def build(self, oracle_pubkey: str):
         new_market = vega_protos.governance.NewMarket(
             changes=vega_protos.governance.NewMarketConfiguration(
                 decimal_places=int(self.decimal_places),
                 position_decimal_places=int(self.position_decimal_places),
                 liquidity_sla_parameters=self.liquidity_sla_parameters.build(),
                 metadata=self.metadata,
-                instrument=self.instrument.build(),
+                instrument=self.instrument.build(oracle_pubkey=oracle_pubkey),
                 price_monitoring_parameters=self.price_monitoring_parameters.build(),
                 liquidity_monitoring_parameters=self.liquidity_monitoring_parameters.build(),
                 log_normal=self.log_normal.build(),
@@ -317,7 +318,9 @@ class MarketConfig(Config):
                 ),
                 liquidity_fee_settings=self.liquidity_fee_settings.build(),
                 liquidation_strategy=self.liquidation_strategy.build(),
-                mark_price_configuration=self.mark_price_configuration.build(),
+                mark_price_configuration=self.mark_price_configuration.build(
+                    oracle_pubkey=oracle_pubkey
+                ),
                 tick_size=str(self.tick_size),
             )
         )
@@ -522,7 +525,7 @@ class LogNormalModelParams(Config):
         )
 
 
-class MarkPriceConfiguration(Config):
+class CompositePriceConfiguration(Config):
     OPTS = {
         "default": {
             "decay_weight": None,
@@ -531,6 +534,8 @@ class MarkPriceConfiguration(Config):
             "decay_power": None,
             "cash_amount": None,
             "source_weights": None,
+            "data_sources_spec": None,
+            "data_sources_spec_binding": None,
         }
     }
 
@@ -552,7 +557,24 @@ class MarkPriceConfiguration(Config):
             else None
         )
 
-    def build(self):
+        self.data_sources_spec = (
+            [
+                DataSourceDefinition(data_source_spec)
+                for data_source_spec in config["data_sources_spec"]
+            ]
+            if config["data_sources_spec"] is not None
+            else None
+        )
+        self.data_sources_spec_binding = (
+            [
+                SpecBindingForCompositePrice(data_source_spec_binding)
+                for data_source_spec_binding in config["data_sources_spec_binding"]
+            ]
+            if config["data_sources_spec_binding"] is not None
+            else None
+        )
+
+    def build(self, oracle_pubkey: str):
         return vega_protos.markets.CompositePriceConfiguration(
             composite_price_type=get_enum(
                 self.composite_price_type, vega_protos.markets.CompositePriceType
@@ -564,6 +586,22 @@ class MarkPriceConfiguration(Config):
             cash_amount=str(self.cash_amount) if self.cash_amount is not None else None,
             source_weights=self.source_weights,
             source_staleness_tolerance=self.source_staleness_tolerance,
+            data_sources_spec=(
+                [
+                    data_sources_spec.build(oracle_pubkey=oracle_pubkey)
+                    for data_sources_spec in self.data_sources_spec
+                ]
+                if self.data_sources_spec is not None
+                else None
+            ),
+            data_sources_spec_binding=(
+                [
+                    data_source_spec_binding.build()
+                    for data_source_spec_binding in self.data_sources_spec_binding
+                ]
+                if self.data_sources_spec_binding is not None
+                else None
+            ),
         )
 
 
@@ -662,14 +700,18 @@ class InstrumentConfiguration(Config):
         )
         self.spot = None if config["spot"] is None else SpotProduct(opt=config["spot"])
 
-    def build(self):
+    def build(self, oracle_pubkey: str):
         if self.future != None:
             return vega_protos.governance.InstrumentConfiguration(
-                name=self.name, code=self.code, future=self.future.build()
+                name=self.name,
+                code=self.code,
+                future=self.future.build(oracle_pubkey=oracle_pubkey),
             )
         if self.perpetual != None:
             return vega_protos.governance.InstrumentConfiguration(
-                name=self.name, code=self.code, perpetual=self.perpetual.build()
+                name=self.name,
+                code=self.code,
+                perpetual=self.perpetual.build(oracle_pubkey=oracle_pubkey),
             )
         if self.spot != None:
             return vega_protos.governance.InstrumentConfiguration(
@@ -685,6 +727,50 @@ class FutureProduct(Config):
             "quote_name": None,
             "number_decimal_places": 18,
             "terminating_key": None,
+            "data_source_spec_for_settlement_data": {
+                "external": {
+                    "oracle": {
+                        "signers": [{"pubKey": {"key": None}}],
+                        "filters": [
+                            {
+                                "key": {
+                                    "name": "future.settlement",
+                                    "type": "TYPE_INTEGER",
+                                    "numberDecimalPlaces": "18",
+                                },
+                                "conditions": [
+                                    {
+                                        "operator": "OPERATOR_GREATER_THAN",
+                                        "value": "0",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                }
+            },
+            "data_source_spec_for_trading_termination": {
+                "external": {
+                    "oracle": {
+                        "signers": [{"pubKey": {"key": None}}],
+                        "filters": [
+                            {
+                                "key": {
+                                    "name": "future.termination",
+                                    "type": "TYPE_BOOLEAN",
+                                },
+                                "conditions": [
+                                    {"operator": "OPERATOR_EQUALS", "value": "true"}
+                                ],
+                            }
+                        ],
+                    }
+                }
+            },
+            "data_source_spec_binding": {
+                "settlement_data_property": "future.settlement",
+                "trading_termination_property": "future.termination",
+            },
         }
     }
 
@@ -696,70 +782,42 @@ class FutureProduct(Config):
         self.number_decimal_places = config["number_decimal_places"]
         self.terminating_key = config["terminating_key"]
 
-    def build(self):
+        self.data_source_spec_for_trading_termination = (
+            DataSourceDefinition(config["data_source_spec_for_trading_termination"])
+            if config["data_source_spec_for_trading_termination"] is not None
+            else None
+        )
+        self.data_source_spec_for_settlement_data = (
+            DataSourceDefinition(config["data_source_spec_for_settlement_data"])
+            if config["data_source_spec_for_settlement_data"] is not None
+            else None
+        )
+        self.data_source_spec_binding = (
+            DataSourceSpecToFutureBinding(config["data_source_spec_binding"])
+            if config["data_source_spec_binding"] is not None
+            else None
+        )
+
+    def build(self, oracle_pubkey: str):
         if None in [
             self.settlement_asset,
-            self.quote_name,
-            self.number_decimal_places,
-            self.terminating_key,
         ]:
             raise ValueError(
                 "MarketConfig has not been updated with settlement asset information."
             )
 
-        data_source_spec_for_settlement_data = build.data_source.data_source_definition(
-            external=build.data_source.data_source_definition_external(
-                oracle=build.data_source.data_source_spec_configuration(
-                    signers=[
-                        build.data.data.signer(
-                            pub_key=build.data.data.pub_key(key=self.terminating_key)
-                        )
-                    ],
-                    filters=[
-                        build.data.spec.filter(
-                            key=build.data.spec.property_key(
-                                name=f"price.{self.quote_name}.value",
-                                type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                                number_decimal_places=self.number_decimal_places,
-                            ),
-                            conditions=[],
-                        )
-                    ],
-                )
-            )
-        )
-        data_source_spec_for_trading_termination = build.data_source.data_source_definition(
-            external=build.data_source.data_source_definition_external(
-                oracle=build.data_source.data_source_spec_configuration(
-                    signers=[
-                        build.data.data.signer(
-                            pub_key=build.data.data.pub_key(key=self.terminating_key)
-                        )
-                    ],
-                    filters=[
-                        build.data.spec.filter(
-                            key=build.data.spec.property_key(
-                                name="trading.terminated",
-                                type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                            ),
-                            conditions=[],
-                        )
-                    ],
-                )
-            )
-        )
-        data_source_spec_binding = build.markets.data_source_spec_to_future_binding(
-            settlement_data_property=f"price.{self.quote_name}.value",
-            trading_termination_property="trading.terminated",
-        )
-
-        return build.governance.future_product(
+        proto = build.governance.future_product(
             settlement_asset=self.settlement_asset,
             quote_name=self.quote_name,
-            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
-            data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
-            data_source_spec_binding=data_source_spec_binding,
+            data_source_spec_for_settlement_data=self.data_source_spec_for_settlement_data.build(
+                oracle_pubkey=oracle_pubkey
+            ),
+            data_source_spec_for_trading_termination=self.data_source_spec_for_trading_termination.build(
+                oracle_pubkey=oracle_pubkey
+            ),
+            data_source_spec_binding=self.data_source_spec_binding.build(),
         )
+        return proto
 
 
 class PerpetualProduct(Config):
@@ -777,6 +835,33 @@ class PerpetualProduct(Config):
             "funding_rate_scaling_factor": None,
             "funding_rate_lower_bound": None,
             "funding_rate_upper_bound": None,
+            "internal_composite_price_configuration": "default",
+            "data_source_spec_for_settlement_data": {
+                "external": {
+                    "oracle": {
+                        "signers": [{"pubKey": {"key": None}}],
+                        "filters": [
+                            {
+                                "key": {
+                                    "name": "perpetual.settlement",
+                                    "type": "TYPE_INTEGER",
+                                    "numberDecimalPlaces": "18",
+                                },
+                                "conditions": [
+                                    {
+                                        "operator": "OPERATOR_GREATER_THAN",
+                                        "value": "0",
+                                    },
+                                ],
+                            }
+                        ],
+                    }
+                }
+            },
+            "data_source_spec_binding": {
+                "settlement_data_property": "perpetual.settlement",
+                "settlement_schedule_property": "vegaprotocol.builtin.timetrigger",
+            },
         }
     }
 
@@ -798,12 +883,21 @@ class PerpetualProduct(Config):
         self.funding_rate_lower_bound = config["funding_rate_lower_bound"]
         self.funding_rate_upper_bound = config["funding_rate_upper_bound"]
 
-    def build(self):
+        self.data_source_spec_for_settlement_data = (
+            DataSourceDefinition(config["data_source_spec_for_settlement_data"])
+            if config["data_source_spec_for_settlement_data"] is not None
+            else None
+        )
+
+        self.data_source_spec_binding = (
+            DataSourceSpecToPerpetualBinding(config["data_source_spec_binding"])
+            if config["data_source_spec_binding"] is not None
+            else None
+        )
+
+    def build(self, oracle_pubkey: str):
         if None in [
             self.settlement_asset,
-            self.quote_name,
-            self.number_decimal_places,
-            self.settlement_key,
         ]:
             raise ValueError(
                 "MarketConfig has not been updated with settlement asset information."
@@ -826,33 +920,6 @@ class PerpetualProduct(Config):
             )
         )
 
-        data_source_spec_for_settlement_data = data_source_protos.DataSourceDefinition(
-            external=data_source_protos.DataSourceDefinitionExternal(
-                oracle=data_source_protos.DataSourceSpecConfiguration(
-                    signers=[
-                        oracles_protos.data.Signer(
-                            pub_key=oracles_protos.data.PubKey(key=self.settlement_key)
-                        )
-                    ],
-                    filters=[
-                        oracles_protos.spec.Filter(
-                            key=oracles_protos.spec.PropertyKey(
-                                name=f"price.{self.quote_name}.value",
-                                type=oracles_protos.spec.PropertyKey.Type.TYPE_INTEGER,
-                                number_decimal_places=self.number_decimal_places,
-                            ),
-                            conditions=[],
-                        )
-                    ],
-                )
-            )
-        )
-
-        data_source_spec_binding = vega_protos.markets.DataSourceSpecToPerpetualBinding(
-            settlement_data_property=f"price.{self.quote_name}.value",
-            settlement_schedule_property="vegaprotocol.builtin.timetrigger",
-        )
-
         return build.governance.perpetual_product(
             settlement_asset=self.settlement_asset,
             quote_name=self.quote_name,
@@ -861,8 +928,10 @@ class PerpetualProduct(Config):
             clamp_lower_bound=self.clamp_lower_bound,
             clamp_upper_bound=self.clamp_upper_bound,
             data_source_spec_for_settlement_schedule=data_source_spec_for_settlement_schedule,
-            data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
-            data_source_spec_binding=data_source_spec_binding,
+            data_source_spec_for_settlement_data=self.data_source_spec_for_settlement_data.build(
+                oracle_pubkey=oracle_pubkey
+            ),
+            data_source_spec_binding=self.data_source_spec_binding.build(),
             funding_rate_scaling_factor=self.funding_rate_scaling_factor,
             funding_rate_lower_bound=self.funding_rate_lower_bound,
             funding_rate_upper_bound=self.funding_rate_upper_bound,
@@ -882,4 +951,211 @@ class SpotProduct(Config):
     def build(self):
         return build.governance.spot_product(
             base_asset=self.base_asset, quote_asset=self.quote_asset, name=self.name
+        )
+
+
+class DataSourceDefinition(Config):
+    OPTS = {"default": {"internal": None, "external": None}}
+
+    def load(self, opt: Union[dict, str] = None) -> dict:
+        config = super().load(opt)
+        self.internal = (
+            DataSourceDefinitionInternal(config["internal"])
+            if config["internal"] is not None
+            else None
+        )
+        self.external = (
+            DataSourceDefinitionExternal(config["external"])
+            if config["external"] is not None
+            else None
+        )
+
+    def build(self, oracle_pubkey: str):
+        return build.data_source.data_source_definition(
+            internal=self.internal.build() if self.internal is not None else None,
+            external=(
+                self.external.build(oracle_pubkey=oracle_pubkey)
+                if self.external is not None
+                else None
+            ),
+        )
+
+
+class DataSourceDefinitionInternal(Config):
+    OPTS = {
+        "default": {
+            "time": None,
+            "time_trigger": None,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+        self.time = config["time"]
+        self.time_trigger = config["time_trigger"]
+
+    def build(self):
+        return build.data_source.data_source_definition_internal(
+            time=self.time,
+            time_trigger=self.time_trigger,
+        )
+
+
+class DataSourceDefinitionExternal(Config):
+    OPTS = {
+        "default": {
+            "oracle": None,
+            "eth_oracle": None,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+        self.oracle = (
+            DataSourceSpecConfiguration(config["oracle"])
+            if config["oracle"] is not None
+            else None
+        )
+        self.eth_oracle = (
+            EthOracleSpec(config["eth_oracle"])
+            if config["eth_oracle"] is not None
+            else None
+        )
+
+    def build(self, oracle_pubkey: str):
+        return build.data_source.data_source_definition_external(
+            oracle=(
+                self.oracle.build(oracle_pubkey=oracle_pubkey)
+                if self.oracle is not None
+                else None
+            ),
+            eth_oracle=(
+                self.eth_oracle.build(oracle_pubkey=oracle_pubkey)
+                if self.eth_oracle is not None
+                else None
+            ),
+        )
+
+
+class DataSourceSpecConfiguration(Config):
+    OPTS = {
+        "default": {
+            "filters": None,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+        self.filters = config["filters"]
+
+    def build(self, oracle_pubkey: str):
+        return build.data_source.data_source_spec_configuration(
+            signers=[
+                build.data.data.signer(
+                    pub_key=build.data.data.pub_key(key=oracle_pubkey)
+                )
+            ],
+            filters=[
+                build.data.spec.filter(
+                    key=build.data.spec.property_key(
+                        name=filter["key"]["name"],
+                        type=filter["key"]["type"],
+                        number_decimal_places=filter.get("number_decimal_places", None),
+                    ),
+                    conditions=[
+                        build.data.spec.condition(
+                            operator=condition["operator"], value=condition["value"]
+                        )
+                        for condition in filter.get("conditions", [])
+                    ],
+                )
+                for filter in self.filters
+            ],
+        )
+
+
+class EthOracleSpec(Config):
+    OPTS = {
+        "default": {
+            "filters": None,
+        }
+    }
+
+    def load(self, opt: Union[dict, str, None] = None) -> dict:
+        config = super().load(opt)
+        self.filters = config["filters"]
+
+    def build(self, oracle_pubkey: str):
+        return build.data_source.data_source_spec_configuration(
+            signers=[
+                build.data.data.signer(
+                    pub_key=build.data.data.pub_key(key=oracle_pubkey)
+                )
+            ],
+            filters=[
+                build.data.spec.filter(
+                    key=build.data.spec.property_key(
+                        name=filter["key"]["name"],
+                        type=filter["key"]["type"],
+                        number_decimal_places=filter["key"].get(
+                            "number_decimal_places", None
+                        ),
+                    ),
+                    conditions=[],
+                )
+                for filter in self.filters
+            ],
+        )
+
+
+class DataSourceSpecToFutureBinding(Config):
+    OPTS = {
+        "default": {
+            "settlement_data_property": None,
+            "trading_termination_property": None,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+        self.settlement_data_property = config["settlement_data_property"]
+        self.trading_termination_property = config["trading_termination_property"]
+
+    def build(self):
+        return build.markets.data_source_spec_to_future_binding(
+            settlement_data_property=self.settlement_data_property,
+            trading_termination_property=self.trading_termination_property,
+        )
+
+
+class DataSourceSpecToPerpetualBinding(Config):
+    OPTS = {
+        "default": {
+            "settlement_data_property": "btc.price",
+            "settlement_schedule_property": "vegaprotocol.builtin.timetrigger",
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+        self.settlement_data_property = config["settlement_data_property"]
+        self.settlement_schedule_property = config["settlement_schedule_property"]
+
+    def build(self):
+        return build.markets.data_source_spec_to_perpetual_binding(
+            settlement_data_property=self.settlement_data_property,
+            settlement_schedule_property=self.settlement_schedule_property,
+        )
+
+
+class SpecBindingForCompositePrice(Config):
+    OPTS = {"default": {"price_source_property": "price"}}
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+        self.price_source_property = config["price_source_property"]
+
+    def build(self):
+        return build.data_source.spec_binding_for_composite_price(
+            price_source_property=self.price_source_property
         )

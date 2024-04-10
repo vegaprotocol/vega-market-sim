@@ -46,9 +46,12 @@ def _run(
             run_with_snitch=False,
         )
 
-        is_spot = scenario.market_config.instrument.spot is not None
-        is_future = scenario.market_config.instrument.future is not None
-        is_perpetual = scenario.market_config.instrument.perpetual is not None
+        if output:
+            if not os.path.exists(output_dir):
+                os.mkdir(output_dir)
+            output_dir = output_dir + f"/{datetime.datetime.now()}"
+            if not os.path.exists(output_dir):
+                os.mkdir(output_dir)
 
         # Use vegapy package to produce plots
         service = Service(
@@ -57,28 +60,42 @@ def _run(
                 f"{vega.log_dir}/vegahome/config/wallet-service/networks/local.toml"
             ),
         )
-        # Request data from datanode
-        market = service.api.data.list_markets(include_settled=True)[0]
+        markets = service.api.data.list_markets(include_settled=True)
 
-        if is_spot:
-            market_asset = market.tradable_instrument.instrument.spot.quote_asset
-        if is_future:
-            market_asset = market.tradable_instrument.instrument.future.settlement_asset
-        if is_perpetual:
-            market_asset = (
-                market.tradable_instrument.instrument.perpetual.settlement_asset
+        for market in markets:
+
+            is_spot = (
+                market.tradable_instrument.instrument.spot != protos.vega.markets.Spot()
+            )
+            is_future = (
+                market.tradable_instrument.instrument.future
+                != protos.vega.markets.Future()
+            )
+            is_perpetual = (
+                market.tradable_instrument.instrument.perpetual
+                != protos.vega.markets.Perpetual()
             )
 
-        asset = service.api.data.get_asset(market_asset)
-        trades = service.api.data.list_trades(
-            market_ids=[market.id],
-            date_range_start_timestamp=market.market_timestamps.pending,
-        )
-        market_data_history = service.api.data.get_market_data_history_by_id(
-            market.id,
-            start_timestamp=market.market_timestamps.pending,
-        )
-        if is_future or is_perpetual:
+            if is_spot:
+                market_asset = market.tradable_instrument.instrument.spot.quote_asset
+            if is_future:
+                market_asset = (
+                    market.tradable_instrument.instrument.future.settlement_asset
+                )
+            if is_perpetual:
+                market_asset = (
+                    market.tradable_instrument.instrument.perpetual.settlement_asset
+                )
+
+            asset = service.api.data.get_asset(market_asset)
+            trades = service.api.data.list_trades(
+                market_ids=[market.id],
+                date_range_start_timestamp=market.market_timestamps.pending,
+            )
+            market_data_history = service.api.data.get_market_data_history_by_id(
+                market.id,
+                start_timestamp=market.market_timestamps.pending,
+            )
             aggregated_balance_history = service.api.data.list_balance_changes(
                 asset_id=asset.id,
                 market_ids=[market.id],
@@ -86,49 +103,42 @@ def _run(
                 account_types=[protos.vega.vega.AccountType.ACCOUNT_TYPE_INSURANCE],
                 date_range_start_timestamp=market.market_timestamps.pending,
             )
-        # Initialise figures
-        fig1 = None
-        fig2 = None
-        fig3 = None
-        # Update figures
-        fig1 = vis.plot.price_monitoring_analysis(market, market_data_history)
-        if is_future or is_perpetual:
-            fig2 = vis.plot.liquidation_analysis(
-                asset, market, trades, market_data_history, aggregated_balance_history
-            )
-        if is_perpetual:
-            funding_periods = service.api.data.list_funding_periods(
-                market_id=market.id,
-                start_timestamp=market.market_timestamps.pending,
-            )
-            funding_period_data_points = (
-                service.api.data.list_funding_period_data_points(
-                    market.id, start_timestamp=market.market_timestamps.pending
+            # Update figures
+            if output:
+                market_output_dir = f"{output_dir}/{market.tradable_instrument.instrument.code.replace('/', '')}"
+                if not os.path.exists(market_output_dir):
+                    os.mkdir(market_output_dir)
+                vis.plot.price_monitoring_analysis(market, market_data_history).savefig(
+                    f"{market_output_dir}/price_monitoring_analysis.png"
                 )
-            )
-            fig3 = vis.plot.funding_analysis(
-                asset,
-                market,
-                market_data_history,
-                funding_periods,
-                funding_period_data_points,
-            )
+                if not is_spot:
+                    vis.plot.liquidation_analysis(
+                        asset,
+                        market,
+                        trades,
+                        market_data_history,
+                        aggregated_balance_history,
+                    ).savefig(f"{market_output_dir}/liquidation_analysis.png")
+                if is_perpetual:
+                    funding_periods = service.api.data.list_funding_periods(
+                        market_id=market.id,
+                        start_timestamp=market.market_timestamps.pending,
+                    )
+                    funding_period_data_points = (
+                        service.api.data.list_funding_period_data_points(
+                            market.id, start_timestamp=market.market_timestamps.pending
+                        )
+                    )
+                    vis.plot.funding_analysis(
+                        asset,
+                        market,
+                        market_data_history,
+                        funding_periods,
+                        funding_period_data_points,
+                    ).savefig(f"{market_output_dir}/funding_analysis.png")
 
         if pause:
             input("Waiting after run finished.")
-
-    if output:
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-        output_dir = output_dir + f"/{datetime.datetime.now()}"
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-        if fig1 is not None:
-            fig1.savefig(f"{output_dir}/price_monitoring_analysis.png")
-        if fig2 is not None:
-            fig2.savefig(f"{output_dir}/liquidation_analysis.png")
-        if fig3 is not None:
-            fig3.savefig(f"{output_dir}/funding_analysis.png")
 
 
 if __name__ == "__main__":
