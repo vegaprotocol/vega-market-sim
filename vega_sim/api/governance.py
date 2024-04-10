@@ -286,6 +286,7 @@ def propose_future_market(
     wallet_name: Optional[str] = None,
     parent_market_id: Optional[str] = None,
     parent_market_insurance_pool_fraction: float = 1,
+    termination_time: Optional[int] = None,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -342,6 +343,10 @@ def propose_future_market(
         parent_market_insurance_pool_fraction:
             float, Fraction of parent market insurance pool to carry over.
                 defaults to 1. No-op if parent_market_id is not set.
+        termination_time:
+            Optional[int], If set, the time at which the market will be terminated.
+            If not set, the market will be terminated via submitted data. Defaults to
+            None.
 
     Returns:
         str, the ID of the future market proposal on chain
@@ -368,26 +373,51 @@ def propose_future_market(
             )
         )
     )
-    data_source_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
-        external=data_source_protos.DataSourceDefinitionExternal(
-            oracle=data_source_protos.DataSourceSpecConfiguration(
-                signers=[
-                    oracles_protos.data.Signer(
-                        pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
-                    )
-                ],
-                filters=[
-                    oracles_protos.spec.Filter(
-                        key=oracles_protos.spec.PropertyKey(
-                            name="trading.terminated",
-                            type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                        ),
-                        conditions=[],
-                    )
-                ],
+    if termination_time is None:
+        data_source_spec_for_trading_termination = data_source_protos.DataSourceDefinition(
+            external=data_source_protos.DataSourceDefinitionExternal(
+                oracle=data_source_protos.DataSourceSpecConfiguration(
+                    signers=[
+                        oracles_protos.data.Signer(
+                            pub_key=oracles_protos.data.PubKey(key=termination_pub_key)
+                        )
+                    ],
+                    filters=[
+                        oracles_protos.spec.Filter(
+                            key=oracles_protos.spec.PropertyKey(
+                                name="trading.terminated",
+                                type=oracles_protos.spec.PropertyKey.Type.TYPE_BOOLEAN,
+                            ),
+                            conditions=[],
+                        )
+                    ],
+                )
             )
         )
-    )
+        data_source_spec_binding = vega_protos.markets.DataSourceSpecToFutureBinding(
+            settlement_data_property=f"price.{future_asset}.value",
+            trading_termination_property="trading.terminated",
+        )
+    else:
+        data_source_spec_for_trading_termination = (
+            data_source_protos.DataSourceDefinition(
+                internal=data_source_protos.DataSourceDefinitionInternal(
+                    time=data_source_protos.DataSourceSpecConfigurationTime(
+                        conditions=[
+                            vega_protos.data.v1.spec.Condition(
+                                operator="OPERATOR_GREATER_THAN_OR_EQUAL",
+                                value=str(termination_time),
+                            )
+                        ],
+                    )
+                )
+            )
+        )
+        data_source_spec_binding = vega_protos.markets.DataSourceSpecToFutureBinding(
+            settlement_data_property=f"price.{future_asset}.value",
+            trading_termination_property="vegaprotocol.builtin.timestamp",
+        )
+
     instrument = vega_protos.governance.InstrumentConfiguration(
         name=market_name,
         code=market_name,
@@ -396,10 +426,7 @@ def propose_future_market(
             quote_name=future_asset,
             data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
             data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
-            data_source_spec_binding=vega_protos.markets.DataSourceSpecToFutureBinding(
-                settlement_data_property=f"price.{future_asset}.value",
-                trading_termination_property="trading.terminated",
-            ),
+            data_source_spec_binding=data_source_spec_binding,
         ),
     )
     return __propose_market(

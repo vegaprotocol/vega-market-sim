@@ -950,6 +950,7 @@ class VegaService(ABC):
         forward_time_to_enactment: bool = True,
         parent_market_id: Optional[str] = None,
         parent_market_insurance_pool_fraction: float = 1,
+        termination_time: Optional[datetime.datetime] = None,
     ) -> str:
         """Creates a simple fixed-expiry futures market with a predefined reasonable set of parameters.
 
@@ -993,6 +994,10 @@ class VegaService(ABC):
                     parent_market_insurance_pool_fraction:
                         float, Fraction of parent market insurance pool to carry over.
                             defaults to 1. No-op if parent_market_id is not set.
+                    termination_time:
+                        Optional[datetime.datetime], If set, the time at which the
+                        market will be terminated. If not set, the market will be
+                        terminated via submitted data. Defaults to None.
         """
         additional_kwargs = {}
         if future_asset is not None:
@@ -1035,6 +1040,7 @@ class VegaService(ABC):
             price_monitoring_parameters=price_monitoring_parameters,
             parent_market_id=parent_market_id,
             parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+            termination_time=int(termination_time.timestamp()),
             **additional_kwargs,
         )
         if approve_proposal:

@@ -1,4 +1,5 @@
 import pytest
+import datetime
 
 import vega_sim.proto.vega as vega_protos
 
@@ -105,3 +106,53 @@ def test_create_simple_spot_market(vega_service: vega_service):
         vega.find_market_id("Bitcoin / Tether USD (Spot)", raise_on_missing=True)
         is not None
     )
+
+
+def test_market_termination_time(vega_service: VegaServiceNull):
+    vega = vega_service
+
+    # Initialise the proposer
+    vega.create_key(name=MARKET_PROPOSER.name)
+    vega.wait_for_total_catchup()
+    asset_id = vega.find_asset_id("VOTE")
+    vega.mint(MARKET_PROPOSER.name, asset=asset_id, amount=1000)
+    vega.wait_for_total_catchup()
+
+    # Create the settlement asset and mint for auxiliary parties
+    vega.create_asset(MARKET_PROPOSER.name, "Tether", "USDT", 6, 1)
+    vega.wait_for_total_catchup()
+    asset_id = vega.find_asset_id("USDT")
+
+    # Create the market
+    current_timestamp = vega.get_blockchain_time(in_seconds=True)
+    vote_closing_time = datetime.datetime.fromtimestamp(current_timestamp + 60)
+    vote_enactment_time = datetime.datetime.fromtimestamp(current_timestamp + 120)
+    termination_time = datetime.datetime.fromtimestamp(current_timestamp + 180)
+    market_id = vega.create_simple_market(
+        proposal_key=MARKET_PROPOSER.name,
+        termination_key=MARKET_PROPOSER.name,
+        market_name="Bitcoin / Tether USD",
+        settlement_asset_id=asset_id,
+        market_decimals=1,
+        position_decimals=2,
+        vote_closing_time=vote_closing_time,
+        vote_enactment_time=vote_enactment_time,
+        termination_time=termination_time,
+    )
+
+    # Check the market was created and termination time not reached
+    vega.wait_for_total_catchup()
+    market_info = vega.market_info(market_id=market_id)
+    blockchain_time = vega.get_blockchain_time(in_seconds=True)
+    assert blockchain_time > vote_enactment_time.timestamp()
+    assert blockchain_time < termination_time.timestamp()
+    assert market_info.state == vega_protos.markets.Market.State.STATE_PENDING
+
+    # Advance time to termination (with a healthy buffer)
+    vega.wait_fn(71)
+    vega.wait_for_total_catchup()
+    market_info = vega.market_info(market_id=market_id)
+    blockchain_time = vega.get_blockchain_time(in_seconds=True)
+    assert blockchain_time > vote_enactment_time.timestamp()
+    assert blockchain_time > termination_time.timestamp()
+    assert market_info.state == vega_protos.markets.Market.State.STATE_CANCELLED
