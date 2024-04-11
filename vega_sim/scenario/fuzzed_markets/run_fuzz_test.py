@@ -2,6 +2,7 @@ import os
 
 import logging
 import argparse
+from typing import Optional
 
 from vega_sim.null_service import VegaServiceNull, Ports
 
@@ -25,8 +26,8 @@ def _run(
     output: bool = False,
     output_dir: str = "fuzz_plots",
     lite: bool = False,
-    core_metrics_port: int = 2723,
-    data_node_metrics_port: int = 3651,
+    core_metrics_port: Optional[int] = None,
+    data_node_metrics_port: Optional[int] = None,
 ):
     scenario = FuzzingScenario(
         num_steps=steps,
@@ -37,6 +38,12 @@ def _run(
         lite=lite,
     )
 
+    port_config = {}
+    if core_metrics_port is not None:
+        port_config[Ports.METRICS] = core_metrics_port
+    if data_node_metrics_port is not None:
+        port_config[Ports.DATA_NODE_METRICS] = data_node_metrics_port
+
     with VegaServiceNull(
         warn_on_raw_data_access=False,
         seconds_per_block=scenario.block_length_seconds,
@@ -44,10 +51,7 @@ def _run(
         retain_log_files=True,
         use_full_vega_wallet=False,
         run_with_console=console,
-        port_config={
-            Ports.METRICS: core_metrics_port,
-            Ports.DATA_NODE_METRICS: data_node_metrics_port,
-        },
+        port_config=port_config if port_config != {} else None,
     ) as vega:
         scenario.run_iteration(
             vega=vega,

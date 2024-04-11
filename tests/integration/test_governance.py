@@ -96,8 +96,8 @@ def test_create_simple_spot_market(vega_service: vega_service):
         market_code="BTC/USDT-SPOT",
         base_asset_id=base_asset_id,
         quote_asset_id=quote_asset_id,
-        market_decimal_places=1,
-        position_decimal_places=2,
+        price_decimal_places=1,
+        size_decimal_places=2,
         tick_size=10,
     )
     vega.wait_for_total_catchup()

@@ -11,7 +11,7 @@ from typing import NamedTuple
 
 import vega_sim.proto.vega as vega_protos
 from vega_sim.api.market import MarketConfig, Successor
-from vega_sim.environment.agent import StateAgentWithWallet
+from vega_sim.environment.agent import StateAgentWithWallet, VegaState
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.service import (
@@ -39,7 +39,10 @@ class FuzzingAgent(StateAgentWithWallet):
         tag: Optional[str] = None,
         wallet_name: Optional[str] = None,
         state_update_freq: Optional[int] = None,
-        initial_asset_mint: float = 1e9,
+        settlement_asset_mint: float = 1e3,
+        base_asset_mint: float = 1e3,
+        quote_asset_mint: float = 1e3,
+        settlement_asset_min: float = 1e3,
         random_state: Optional[RandomState] = None,
     ):
         super().__init__(
@@ -50,7 +53,9 @@ class FuzzingAgent(StateAgentWithWallet):
         )
 
         self.market_name = market_name
-        self.initial_asset_mint = initial_asset_mint
+        self.settlement_asset_mint = settlement_asset_mint
+        self.base_asset_mint = base_asset_mint
+        self.quote_asset_mint = quote_asset_mint
         self.random_state = random_state if random_state is not None else RandomState()
 
     def initialise(
@@ -59,30 +64,38 @@ class FuzzingAgent(StateAgentWithWallet):
         super().initialise(vega, create_key)
 
         self.market_id = self.vega.find_market_id(name=self.market_name)
-
-        self.market_id = self.vega.find_market_id(name=self.market_name)
-
         self.asset_id = self.vega.market_to_asset[self.market_id]
 
-        asset_ids = [
-            self.vega.market_to_settlement_asset[self.market_id],
-            self.vega.market_to_base_asset[self.market_id],
-            self.vega.market_to_quote_asset[self.market_id],
-        ]
-        for asset_id in asset_ids:
-            if asset_id is not None and mint_key:
-                # Top up asset
-                self.vega.mint(
-                    wallet_name=self.wallet_name,
-                    asset=asset_id,
-                    amount=self.initial_asset_mint,
-                    key_name=self.key_name,
-                )
-                self.vega.wait_for_total_catchup()
-
-        self.vega.wait_fn(5)
+        if mint_key:
+            self.check_balance(
+                self.vega.market_to_settlement_asset[self.market_id],
+                self.settlement_asset_mint,
+            )
+            self.check_balance(
+                self.vega.market_to_base_asset[self.market_id],
+                self.base_asset_mint,
+            )
+            self.check_balance(
+                self.vega.market_to_quote_asset[self.market_id],
+                self.quote_asset_mint,
+            )
 
     def step(self, vega_state):
+
+        # Ensure the fuzzing traders have a balance if they lost all of it
+        self.check_balance(
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.settlement_asset_mint,
+        )
+        self.check_balance(
+            self.vega.market_to_base_asset[self.market_id],
+            self.base_asset_mint,
+        )
+        self.check_balance(
+            self.vega.market_to_quote_asset[self.market_id],
+            self.quote_asset_mint,
+        )
+
         self.live_orders = self.vega.orders_for_party_from_feed(
             key_name=self.key_name,
             wallet_name=self.wallet_name,
@@ -94,7 +107,7 @@ class FuzzingAgent(StateAgentWithWallet):
         self.curr_time = self.vega.get_blockchain_time(in_seconds=True)
 
         submissions = []
-        for _ in range(50):
+        for _ in range(10):
             submission = self.create_fuzzed_submission(vega_state)
             if submission is None:
                 continue
@@ -113,7 +126,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 except AttributeError as e:
                     raise e
         amendments = []
-        for _ in range(25):
+        for _ in range(10):
             amendment = self.create_fuzzed_amendment(vega_state)
             if amendment is None:
                 continue
@@ -147,7 +160,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 except HTTPError:
                     continue
         stop_orders_submissions = []
-        for _ in range(15):
+        for _ in range(10):
             stop_orders_submission = self.create_fuzzed_stop_orders_submission(
                 vega_state
             )
@@ -271,6 +284,21 @@ class FuzzingAgent(StateAgentWithWallet):
             return order.id if order is not None else None
         else:
             return None
+
+    def check_balance(self, asset_id: str, amount: float):
+        if asset_id is None:
+            return
+        accounts = self.vega.get_accounts_from_stream(
+            wallet_name=self.wallet_name, key_name=self.key_name, asset_id=asset_id
+        )
+        if (accounts is None) or (sum([account.balance for account in accounts]) != 0):
+            return
+        self.vega.mint(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            asset=asset_id,
+            amount=amount,
+        )
 
 
 class RiskyMarketOrderTrader(StateAgentWithWallet):

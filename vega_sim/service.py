@@ -853,8 +853,8 @@ class VegaService(ABC):
         quote_asset_id: str,
         market_name: str = "Basic Spot Market",
         market_code: str = "SPOT",
-        market_decimal_places: int = 2,
-        position_decimal_places: int = 2,
+        price_decimal_places: int = 2,
+        size_decimal_places: int = 2,
         tick_size: int = 1,
         vote_closing_time: Optional[datetime.datetime] = None,
         vote_enactment_time: Optional[datetime.datetime] = None,
@@ -893,8 +893,8 @@ class VegaService(ABC):
         market_config.instrument.spot.name = (
             f"{base.details.symbol}/{quote.details.symbol}"
         )
-        market_config.decimal_places = market_decimal_places
-        market_config.position_decimal_places = position_decimal_places
+        market_config.price_decimal_places = price_decimal_places
+        market_config.size_decimal_places = size_decimal_places
         market_config.tick_size = tick_size
 
         proposal_id = gov.propose_market_from_config(

@@ -929,7 +929,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListERC20MultiSigSignerAddedBundles(self, request, context):
-        """List ERC20 multi-sig signer added bundles
+        """List ERC20 multisig signer added bundles
 
         Get a list of the signature bundles to add a particular validator to the signer list of the multisig contract
         """
@@ -938,7 +938,7 @@ class TradingDataServiceServicer(object):
         raise NotImplementedError("Method not implemented!")
 
     def ListERC20MultiSigSignerRemovedBundles(self, request, context):
-        """List ERC20 multi-sig signer removed bundles
+        """List ERC20 multisig signer removed bundles
 
         Get a list of the signature bundles to remove a particular validator from signer list of the multisig contract
         """
@@ -1088,7 +1088,7 @@ class TradingDataServiceServicer(object):
     def ListMarginLevels(self, request, context):
         """List margin levels
 
-        Get a list margin levels that match the provided criteria. If no filter is provided, all margin levels will be returned.
+        Get a list of margin levels that match the provided criteria. If no filter is provided, all margin levels will be returned.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1128,7 +1128,7 @@ class TradingDataServiceServicer(object):
         """List epoch reward summaries
 
         Get a list of reward summaries by epoch for a given range of epochs.
-        The result is filtered by list of asset IDs, market IDs and starting and ending epochs, for which to return rewards.
+        The result is filtered by a list of asset IDs, market IDs and starting and ending epochs, for which to return rewards.
         If no data is provided, all reward summaries will be returned, grouped by epochs, market IDs, asset IDs and reward type.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -1653,7 +1653,7 @@ class TradingDataServiceServicer(object):
     def GetFeesStats(self, request, context):
         """Get fees statistics
 
-        Get accumulated fees, rewards, and applied discount information. Either a market or an asset must be supplied as filter.
+        Get accumulated fees, rewards, and applied discount information. Either a market or an asset must be supplied as a filter.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1662,7 +1662,7 @@ class TradingDataServiceServicer(object):
     def GetFeesStatsForParty(self, request, context):
         """Get fees statistics for a party
 
-        Get accumulated fees, rewards, and applied discount information. A party ID must be supplied as filter.
+        Get accumulated fees, rewards, and applied discount information. A party ID must be supplied as a filter.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
