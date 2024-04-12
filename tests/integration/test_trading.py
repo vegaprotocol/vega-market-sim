@@ -321,7 +321,7 @@ def test_funding_reward_pool(vega_service_with_market: VegaServiceNull):
     ][0]
 
     assert party_a_accounts_t1[0].balance == 899.999
-    assert party_c_vesting_account.balance == 6
+    assert party_c_vesting_account.balance == 21
     # Forward one epoch
     next_epoch(vega=vega)
 
