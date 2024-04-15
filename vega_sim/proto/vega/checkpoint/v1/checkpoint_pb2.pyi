@@ -604,6 +604,8 @@ class MarketActivityTracker(_message.Message):
         "time_weighted_position_data_history",
         "time_weighted_notional_data_history",
         "returns_data_history",
+        "infra_fees",
+        "lp_paid_fees",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -623,6 +625,8 @@ class MarketActivityTracker(_message.Message):
     TIME_WEIGHTED_POSITION_DATA_HISTORY_FIELD_NUMBER: _ClassVar[int]
     TIME_WEIGHTED_NOTIONAL_DATA_HISTORY_FIELD_NUMBER: _ClassVar[int]
     RETURNS_DATA_HISTORY_FIELD_NUMBER: _ClassVar[int]
+    INFRA_FEES_FIELD_NUMBER: _ClassVar[int]
+    LP_PAID_FEES_FIELD_NUMBER: _ClassVar[int]
     market: str
     asset: str
     maker_fees_received: _containers.RepeatedCompositeFieldContainer[PartyFees]
@@ -647,6 +651,8 @@ class MarketActivityTracker(_message.Message):
         EpochTimeWeightedNotionalData
     ]
     returns_data_history: _containers.RepeatedCompositeFieldContainer[EpochReturnsData]
+    infra_fees: _containers.RepeatedCompositeFieldContainer[PartyFees]
+    lp_paid_fees: _containers.RepeatedCompositeFieldContainer[PartyFees]
     def __init__(
         self,
         market: _Optional[str] = ...,
@@ -681,6 +687,8 @@ class MarketActivityTracker(_message.Message):
         returns_data_history: _Optional[
             _Iterable[_Union[EpochReturnsData, _Mapping]]
         ] = ...,
+        infra_fees: _Optional[_Iterable[_Union[PartyFees, _Mapping]]] = ...,
+        lp_paid_fees: _Optional[_Iterable[_Union[PartyFees, _Mapping]]] = ...,
     ) -> None: ...
 
 class EpochTimeWeightPositionData(_message.Message):
