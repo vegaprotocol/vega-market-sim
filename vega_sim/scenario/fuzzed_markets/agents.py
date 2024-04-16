@@ -1487,6 +1487,7 @@ class FuzzyRewardFunder(StateAgentWithWallet):
                     transaction_type="transfer",
                     wallet_name=self.wallet_name,
                 )
+                break
 
             except (HTTPError, builders.exceptions.VegaProtoValueError):
                 continue
