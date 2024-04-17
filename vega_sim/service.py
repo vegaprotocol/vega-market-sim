@@ -3910,6 +3910,8 @@ class VegaService(ABC):
 
             max_bid_price = latest_market_data.best_bid_price
             min_ask_price = latest_market_data.best_offer_price
+            if min_ask_price == 0:
+                return
             try:
                 assert max_bid_price < min_ask_price
                 logger.debug(
