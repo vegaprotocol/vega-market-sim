@@ -633,6 +633,7 @@ class LiquidationStrategy(Config):
             "disposal_fraction": 0.1,
             "full_disposal_size": 0,
             "max_fraction_consumed": 0.1,
+            "disposal_slippage_range": 0.5,
         }
     }
 
@@ -643,6 +644,7 @@ class LiquidationStrategy(Config):
         self.disposal_fraction = config["disposal_fraction"]
         self.full_disposal_size = config["full_disposal_size"]
         self.max_fraction_consumed = config["max_fraction_consumed"]
+        self.disposal_slippage_range = config["disposal_slippage_range"]
 
     def build(self):
         return build.markets.liquidation_strategy(
@@ -650,6 +652,7 @@ class LiquidationStrategy(Config):
             disposal_fraction=self.disposal_fraction,
             full_disposal_size=self.full_disposal_size,
             max_fraction_consumed=self.max_fraction_consumed,
+            disposal_slippage_range=self.disposal_slippage_range,
         )
 
 

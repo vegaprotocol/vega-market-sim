@@ -228,6 +228,7 @@ def __propose_market(
                 disposal_fraction="1",
                 full_disposal_size=1000000000,
                 max_fraction_consumed="0.5",
+                disposal_slippage_range="0.5",
             ),
             mark_price_configuration=vega_protos.markets.CompositePriceConfiguration(
                 composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,

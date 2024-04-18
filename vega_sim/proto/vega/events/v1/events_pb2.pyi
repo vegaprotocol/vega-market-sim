@@ -120,6 +120,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TEAMS_STATS_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TIME_WEIGHTED_NOTIONAL_POSITION_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_CANCELLED_ORDERS: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -216,6 +217,7 @@ BUS_EVENT_TYPE_PARTY_MARGIN_MODE_UPDATED: BusEventType
 BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: BusEventType
 BUS_EVENT_TYPE_TEAMS_STATS_UPDATED: BusEventType
 BUS_EVENT_TYPE_TIME_WEIGHTED_NOTIONAL_POSITION_UPDATED: BusEventType
+BUS_EVENT_TYPE_CANCELLED_ORDERS: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -1997,6 +1999,21 @@ class ExpiredOrders(_message.Message):
         order_ids: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
+class CancelledOrders(_message.Message):
+    __slots__ = ("market_id", "party_id", "order_ids")
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    ORDER_IDS_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    party_id: str
+    order_ids: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        order_ids: _Optional[_Iterable[str]] = ...,
+    ) -> None: ...
+
 class TeamCreated(_message.Message):
     __slots__ = (
         "team_id",
@@ -2487,6 +2504,7 @@ class BusEvent(_message.Message):
         "party_profile_updated",
         "teams_stats_updated",
         "time_weighted_notional_position_updated",
+        "cancelled_orders",
         "market",
         "tx_err_event",
         "version",
@@ -2581,6 +2599,7 @@ class BusEvent(_message.Message):
     PARTY_PROFILE_UPDATED_FIELD_NUMBER: _ClassVar[int]
     TEAMS_STATS_UPDATED_FIELD_NUMBER: _ClassVar[int]
     TIME_WEIGHTED_NOTIONAL_POSITION_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    CANCELLED_ORDERS_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2674,6 +2693,7 @@ class BusEvent(_message.Message):
     party_profile_updated: PartyProfileUpdated
     teams_stats_updated: TeamsStatsUpdated
     time_weighted_notional_position_updated: TimeWeightedNotionalPositionUpdated
+    cancelled_orders: CancelledOrders
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2813,6 +2833,7 @@ class BusEvent(_message.Message):
         time_weighted_notional_position_updated: _Optional[
             _Union[TimeWeightedNotionalPositionUpdated, _Mapping]
         ] = ...,
+        cancelled_orders: _Optional[_Union[CancelledOrders, _Mapping]] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,

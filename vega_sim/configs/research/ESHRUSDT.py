@@ -507,6 +507,7 @@ CONFIG = MarketConfig(
             "disposalFraction": "0.1",
             "fullDisposalSize": "10000",
             "maxFractionConsumed": "0.1",
+            "disposalSlippageRange": "0.2",
         },
         "liquidityFeeSettings": {"method": "METHOD_MARGINAL_COST"},
         "liquidityMonitoringParameters": {

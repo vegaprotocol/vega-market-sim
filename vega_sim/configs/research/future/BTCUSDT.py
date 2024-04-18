@@ -118,6 +118,7 @@ CONFIG = MarketConfig(
             "disposalFraction": "1",
             "fullDisposalSize": "1000000",
             "maxFractionConsumed": "0.1",
+            "disposalSlippageRange": "0.03",
         },
         "markPriceConfiguration": {
             "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE",

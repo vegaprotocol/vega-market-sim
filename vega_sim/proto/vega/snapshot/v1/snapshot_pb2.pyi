@@ -196,7 +196,9 @@ class Payload(_message.Message):
         "parties",
         "l2_eth_oracles",
         "eth_oracle_verifier_misc",
-        "banking_secondary_bridge_state",
+        "banking_evm_bridge_states",
+        "evm_event_forwarders",
+        "evm_multisig_topologies",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -276,7 +278,9 @@ class Payload(_message.Message):
     PARTIES_FIELD_NUMBER: _ClassVar[int]
     L2_ETH_ORACLES_FIELD_NUMBER: _ClassVar[int]
     ETH_ORACLE_VERIFIER_MISC_FIELD_NUMBER: _ClassVar[int]
-    BANKING_SECONDARY_BRIDGE_STATE_FIELD_NUMBER: _ClassVar[int]
+    BANKING_EVM_BRIDGE_STATES_FIELD_NUMBER: _ClassVar[int]
+    EVM_EVENT_FORWARDERS_FIELD_NUMBER: _ClassVar[int]
+    EVM_MULTISIG_TOPOLOGIES_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -355,7 +359,9 @@ class Payload(_message.Message):
     parties: Parties
     l2_eth_oracles: L2EthOracles
     eth_oracle_verifier_misc: EthOracleVerifierMisc
-    banking_secondary_bridge_state: BankingBridgeState
+    banking_evm_bridge_states: BankingEVMBridgeStates
+    evm_event_forwarders: EVMEventForwarders
+    evm_multisig_topologies: EVMMultisigTopologies
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -490,8 +496,12 @@ class Payload(_message.Message):
         eth_oracle_verifier_misc: _Optional[
             _Union[EthOracleVerifierMisc, _Mapping]
         ] = ...,
-        banking_secondary_bridge_state: _Optional[
-            _Union[BankingBridgeState, _Mapping]
+        banking_evm_bridge_states: _Optional[
+            _Union[BankingEVMBridgeStates, _Mapping]
+        ] = ...,
+        evm_event_forwarders: _Optional[_Union[EVMEventForwarders, _Mapping]] = ...,
+        evm_multisig_topologies: _Optional[
+            _Union[EVMMultisigTopologies, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -720,18 +730,29 @@ class EventForwarderBucket(_message.Message):
     ) -> None: ...
 
 class EventForwarder(_message.Message):
-    __slots__ = ("acked_events", "buckets", "scope")
+    __slots__ = ("acked_events", "buckets", "chain_id")
     ACKED_EVENTS_FIELD_NUMBER: _ClassVar[int]
     BUCKETS_FIELD_NUMBER: _ClassVar[int]
-    SCOPE_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     acked_events: _containers.RepeatedScalarFieldContainer[str]
     buckets: _containers.RepeatedCompositeFieldContainer[EventForwarderBucket]
-    scope: str
+    chain_id: str
     def __init__(
         self,
         acked_events: _Optional[_Iterable[str]] = ...,
         buckets: _Optional[_Iterable[_Union[EventForwarderBucket, _Mapping]]] = ...,
-        scope: _Optional[str] = ...,
+        chain_id: _Optional[str] = ...,
+    ) -> None: ...
+
+class EVMEventForwarders(_message.Message):
+    __slots__ = ("evm_event_forwarders",)
+    EVM_EVENT_FORWARDERS_FIELD_NUMBER: _ClassVar[int]
+    evm_event_forwarders: _containers.RepeatedCompositeFieldContainer[EventForwarder]
+    def __init__(
+        self,
+        evm_event_forwarders: _Optional[
+            _Iterable[_Union[EventForwarder, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class CollateralAccounts(_message.Message):
@@ -926,6 +947,19 @@ class BankingBridgeState(_message.Message):
     def __init__(
         self,
         bridge_state: _Optional[_Union[_checkpoint_pb2.BridgeState, _Mapping]] = ...,
+    ) -> None: ...
+
+class BankingEVMBridgeStates(_message.Message):
+    __slots__ = ("bridge_states",)
+    BRIDGE_STATES_FIELD_NUMBER: _ClassVar[int]
+    bridge_states: _containers.RepeatedCompositeFieldContainer[
+        _checkpoint_pb2.BridgeState
+    ]
+    def __init__(
+        self,
+        bridge_states: _Optional[
+            _Iterable[_Union[_checkpoint_pb2.BridgeState, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class Checkpoint(_message.Message):
@@ -3191,19 +3225,17 @@ class SignerEventsPerAddress(_message.Message):
     ) -> None: ...
 
 class ERC20MultiSigTopologyVerified(_message.Message):
-    __slots__ = ("signers", "events_per_address", "threshold", "seen_events", "scope")
+    __slots__ = ("signers", "events_per_address", "threshold", "seen_events")
     SIGNERS_FIELD_NUMBER: _ClassVar[int]
     EVENTS_PER_ADDRESS_FIELD_NUMBER: _ClassVar[int]
     THRESHOLD_FIELD_NUMBER: _ClassVar[int]
     SEEN_EVENTS_FIELD_NUMBER: _ClassVar[int]
-    SCOPE_FIELD_NUMBER: _ClassVar[int]
     signers: _containers.RepeatedScalarFieldContainer[str]
     events_per_address: _containers.RepeatedCompositeFieldContainer[
         SignerEventsPerAddress
     ]
     threshold: _events_pb2.ERC20MultiSigThresholdSetEvent
     seen_events: _containers.RepeatedScalarFieldContainer[str]
-    scope: str
     def __init__(
         self,
         signers: _Optional[_Iterable[str]] = ...,
@@ -3214,7 +3246,6 @@ class ERC20MultiSigTopologyVerified(_message.Message):
             _Union[_events_pb2.ERC20MultiSigThresholdSetEvent, _Mapping]
         ] = ...,
         seen_events: _Optional[_Iterable[str]] = ...,
-        scope: _Optional[str] = ...,
     ) -> None: ...
 
 class ERC20MultiSigTopologyPending(_message.Message):
@@ -3223,13 +3254,11 @@ class ERC20MultiSigTopologyPending(_message.Message):
         "pending_threshold_set",
         "witnessed_signers",
         "witnessed_threshold_sets",
-        "scope",
     )
     PENDING_SIGNERS_FIELD_NUMBER: _ClassVar[int]
     PENDING_THRESHOLD_SET_FIELD_NUMBER: _ClassVar[int]
     WITNESSED_SIGNERS_FIELD_NUMBER: _ClassVar[int]
     WITNESSED_THRESHOLD_SETS_FIELD_NUMBER: _ClassVar[int]
-    SCOPE_FIELD_NUMBER: _ClassVar[int]
     pending_signers: _containers.RepeatedCompositeFieldContainer[
         _events_pb2.ERC20MultiSigSignerEvent
     ]
@@ -3238,7 +3267,6 @@ class ERC20MultiSigTopologyPending(_message.Message):
     ]
     witnessed_signers: _containers.RepeatedScalarFieldContainer[str]
     witnessed_threshold_sets: _containers.RepeatedScalarFieldContainer[str]
-    scope: str
     def __init__(
         self,
         pending_signers: _Optional[
@@ -3249,7 +3277,34 @@ class ERC20MultiSigTopologyPending(_message.Message):
         ] = ...,
         witnessed_signers: _Optional[_Iterable[str]] = ...,
         witnessed_threshold_sets: _Optional[_Iterable[str]] = ...,
-        scope: _Optional[str] = ...,
+    ) -> None: ...
+
+class EVMMultisigTopology(_message.Message):
+    __slots__ = ("chain_id", "verified", "pending")
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
+    VERIFIED_FIELD_NUMBER: _ClassVar[int]
+    PENDING_FIELD_NUMBER: _ClassVar[int]
+    chain_id: str
+    verified: ERC20MultiSigTopologyVerified
+    pending: ERC20MultiSigTopologyPending
+    def __init__(
+        self,
+        chain_id: _Optional[str] = ...,
+        verified: _Optional[_Union[ERC20MultiSigTopologyVerified, _Mapping]] = ...,
+        pending: _Optional[_Union[ERC20MultiSigTopologyPending, _Mapping]] = ...,
+    ) -> None: ...
+
+class EVMMultisigTopologies(_message.Message):
+    __slots__ = ("evm_multisig_topology",)
+    EVM_MULTISIG_TOPOLOGY_FIELD_NUMBER: _ClassVar[int]
+    evm_multisig_topology: _containers.RepeatedCompositeFieldContainer[
+        EVMMultisigTopology
+    ]
+    def __init__(
+        self,
+        evm_multisig_topology: _Optional[
+            _Iterable[_Union[EVMMultisigTopology, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class ProofOfWork(_message.Message):
