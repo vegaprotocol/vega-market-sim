@@ -1674,6 +1674,7 @@ class VegaService(ABC):
                     disposal_fraction="1",
                     full_disposal_size=1000000000,
                     max_fraction_consumed="0.5",
+                    disposal_slippage_range="0.1",
                 )
             ),
             mark_price_configuration=new_mark_price_config,
