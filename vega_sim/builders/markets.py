@@ -182,12 +182,14 @@ def liquidation_strategy(
     disposal_fraction: float,
     full_disposal_size: float,
     max_fraction_consumed: float,
+    disposal_slippage_range: float,
 ) -> vega_protos.markets.LiquidationStrategy:
     return vega_protos.markets.LiquidationStrategy(
         disposal_time_step=int(disposal_time_step),
         disposal_fraction=str(disposal_fraction),
         full_disposal_size=num_to_padded_int(full_disposal_size, 1),
         max_fraction_consumed=str(max_fraction_consumed),
+        disposal_slippage_range=str(disposal_slippage_range),
     )
 
 

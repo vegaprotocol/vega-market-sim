@@ -442,18 +442,21 @@ class Banking(_message.Message):
     ) -> None: ...
 
 class BridgeState(_message.Message):
-    __slots__ = ("active", "block_height", "log_index")
+    __slots__ = ("active", "block_height", "log_index", "chain_id")
     ACTIVE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
     LOG_INDEX_FIELD_NUMBER: _ClassVar[int]
+    CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
     active: bool
     block_height: int
     log_index: int
+    chain_id: str
     def __init__(
         self,
         active: bool = ...,
         block_height: _Optional[int] = ...,
         log_index: _Optional[int] = ...,
+        chain_id: _Optional[str] = ...,
     ) -> None: ...
 
 class Validators(_message.Message):

@@ -616,21 +616,25 @@ class LiquidationStrategy(_message.Message):
         "disposal_fraction",
         "full_disposal_size",
         "max_fraction_consumed",
+        "disposal_slippage_range",
     )
     DISPOSAL_TIME_STEP_FIELD_NUMBER: _ClassVar[int]
     DISPOSAL_FRACTION_FIELD_NUMBER: _ClassVar[int]
     FULL_DISPOSAL_SIZE_FIELD_NUMBER: _ClassVar[int]
     MAX_FRACTION_CONSUMED_FIELD_NUMBER: _ClassVar[int]
+    DISPOSAL_SLIPPAGE_RANGE_FIELD_NUMBER: _ClassVar[int]
     disposal_time_step: int
     disposal_fraction: str
     full_disposal_size: int
     max_fraction_consumed: str
+    disposal_slippage_range: str
     def __init__(
         self,
         disposal_time_step: _Optional[int] = ...,
         disposal_fraction: _Optional[str] = ...,
         full_disposal_size: _Optional[int] = ...,
         max_fraction_consumed: _Optional[str] = ...,
+        disposal_slippage_range: _Optional[str] = ...,
     ) -> None: ...
 
 class CompositePriceConfiguration(_message.Message):
