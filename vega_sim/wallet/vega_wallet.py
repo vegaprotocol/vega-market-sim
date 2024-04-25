@@ -225,6 +225,7 @@ class VegaWallet(Wallet):
         ).stdout
 
         self.login_tokens[name] = json.loads(cmd)["token"]
+        time.sleep(0.5)
 
     def get_keypairs(self, wallet_name: str) -> dict:
         if wallet_name not in self.login_tokens:
