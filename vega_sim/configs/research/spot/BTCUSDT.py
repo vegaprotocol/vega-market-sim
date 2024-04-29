@@ -2,8 +2,8 @@ from vega_sim.api.market import SpotMarketConfig
 
 CONFIG = SpotMarketConfig(
     {
-        "priceDecimalPlaces": "2",
-        "sizeDecimalPlaces": "4",
+        "priceDecimalPlaces": "1",
+        "sizeDecimalPlaces": "6",
         "tickSize": "10",
         "instrument": {
             "name": "Bitcoin / Tether USD (Spot)",
@@ -27,22 +27,82 @@ CONFIG = SpotMarketConfig(
                 {
                     "horizon": "21600",
                     "probability": "0.9999999",
-                    "auctionExtension": "86400",
+                    "auctionExtension": "21600",
+                },
+                {
+                    "horizon": "21600",
+                    "probability": "0.9999999",
+                    "auctionExtension": "21600",
+                },
+                {
+                    "horizon": "21600",
+                    "probability": "0.9999999",
+                    "auctionExtension": "21600",
+                },
+                {
+                    "horizon": "21600",
+                    "probability": "0.9999999",
+                    "auctionExtension": "21600",
                 },
                 {
                     "horizon": "4320",
                     "probability": "0.9999999",
-                    "auctionExtension": "3600",
+                    "auctionExtension": "900",
+                },
+                {
+                    "horizon": "4320",
+                    "probability": "0.9999999",
+                    "auctionExtension": "900",
+                },
+                {
+                    "horizon": "4320",
+                    "probability": "0.9999999",
+                    "auctionExtension": "900",
+                },
+                {
+                    "horizon": "4320",
+                    "probability": "0.9999999",
+                    "auctionExtension": "900",
                 },
                 {
                     "horizon": "1440",
                     "probability": "0.9999999",
-                    "auctionExtension": "1800",
+                    "auctionExtension": "450",
+                },
+                {
+                    "horizon": "1440",
+                    "probability": "0.9999999",
+                    "auctionExtension": "450",
+                },
+                {
+                    "horizon": "1440",
+                    "probability": "0.9999999",
+                    "auctionExtension": "450",
+                },
+                {
+                    "horizon": "1440",
+                    "probability": "0.9999999",
+                    "auctionExtension": "450",
                 },
                 {
                     "horizon": "360",
                     "probability": "0.9999999",
-                    "auctionExtension": "300",
+                    "auctionExtension": "75",
+                },
+                {
+                    "horizon": "360",
+                    "probability": "0.9999999",
+                    "auctionExtension": "75",
+                },
+                {
+                    "horizon": "360",
+                    "probability": "0.9999999",
+                    "auctionExtension": "75",
+                },
+                {
+                    "horizon": "360",
+                    "probability": "0.9999999",
+                    "auctionExtension": "75",
                 },
             ]
         },
