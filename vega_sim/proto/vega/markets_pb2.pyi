@@ -36,18 +36,13 @@ class AuctionDuration(_message.Message):
     ) -> None: ...
 
 class Spot(_message.Message):
-    __slots__ = ("base_asset", "quote_asset", "name")
+    __slots__ = ("base_asset", "quote_asset")
     BASE_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_ASSET_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
     base_asset: str
     quote_asset: str
-    name: str
     def __init__(
-        self,
-        base_asset: _Optional[str] = ...,
-        quote_asset: _Optional[str] = ...,
-        name: _Optional[str] = ...,
+        self, base_asset: _Optional[str] = ..., quote_asset: _Optional[str] = ...
     ) -> None: ...
 
 class Future(_message.Message):
