@@ -4,6 +4,7 @@ import pathlib
 import datetime
 import argparse
 
+from typing import Optional
 
 from vega_sim.null_service import VegaServiceNull, Ports
 from vega_sim.scenario.constants import Network
@@ -25,6 +26,7 @@ def _run(
     output_dir: str = "plots",
     core_metrics_port: int = 2723,
     data_node_metrics_port: int = 3651,
+    genesis_time: Optional[datetime.datetime] = None,
 ):
 
     with VegaServiceNull(
@@ -38,6 +40,7 @@ def _run(
             Ports.METRICS: core_metrics_port,
             Ports.DATA_NODE_METRICS: data_node_metrics_port,
         },
+        genesis_time=genesis_time,
     ) as vega:
         scenario.run_iteration(
             vega=vega,
@@ -146,11 +149,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--market", required=True, type=str)
     parser.add_argument("-s", "--steps", default=600, type=int)
+    parser.add_argument("-i", "--interval", default=1, type=int)
     parser.add_argument("-p", "--pause", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-o", "--output", action="store_true")
     parser.add_argument("-c", "--console", action="store_true")
     parser.add_argument("-w", "--wallet", action="store_true")
+    parser.add_argument(
+        "--datetime",
+        type=datetime.datetime.fromisoformat,
+        help="Specify datetime to retrieve data from (format: YYYY-MM-DD:HH:mm:ss).",
+    )
     parser.add_argument("--core-metrics-port", default=2723, type=int)
     parser.add_argument("--data-node-metrics-port", default=3651, type=int)
     args = parser.parse_args()
@@ -162,7 +171,10 @@ if __name__ == "__main__":
 
     if args.market not in REGISTRY:
         raise ValueError(f"Market {args.market} not found")
-    scenario = REGISTRY[args.market].num_steps = args.steps
+    scenario: BenchmarkScenario = REGISTRY[args.market]
+    scenario.num_steps = args.steps
+    scenario.step_length_seconds = args.interval
+    scenario.historic_start_datetime = args.datetime
 
     _run(
         scenario=REGISTRY[args.market],
@@ -172,4 +184,5 @@ if __name__ == "__main__":
         output=args.output,
         core_metrics_port=args.core_metrics_port,
         data_node_metrics_port=args.data_node_metrics_port,
+        genesis_time=args.datetime,
     )

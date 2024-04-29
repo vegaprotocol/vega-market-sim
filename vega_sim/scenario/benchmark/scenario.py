@@ -1,10 +1,15 @@
+import datetime
 import numpy as np
 from typing import Optional, Dict, Any, List
 
 from vega_sim.api.market import MarketConfig
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.benchmark.configs import BenchmarkConfig
-from vega_sim.scenario.common.utils.price_process import random_walk
+from vega_sim.scenario.common.utils.price_process import (
+    random_walk,
+    get_historic_price_series,
+    Granularity,
+)
 from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.environment.environment import (
@@ -26,13 +31,41 @@ from vega_sim.scenario.fuzzed_markets.agents import (
 )
 
 
+def _historic_price_process(
+    product_id: str,
+    num_steps: int,
+    step_length_seconds: float,
+    start: datetime.datetime,
+) -> List[float]:
+    if step_length_seconds > 86400:
+        granularity = Granularity.DAY
+    elif step_length_seconds > 21600:
+        granularity = Granularity.SIX_HOUR
+    elif step_length_seconds > 6480:
+        granularity = Granularity.HOUR
+    elif step_length_seconds > 900:
+        granularity = Granularity.FIFTEEN_MINUTE
+    elif step_length_seconds > 300:
+        granularity = Granularity.FIVE_MINUTE
+    else:
+        granularity = Granularity.MINUTE
+    end = start + datetime.timedelta(seconds=1.1 * num_steps * granularity.value)
+    return get_historic_price_series(
+        product_id=product_id,
+        granularity=granularity,
+        interpolation=f"{step_length_seconds}S",
+        start=str(start),
+        end=str(end),
+    ).values
+
+
 def _create_price_process(
     random_state: np.random.RandomState,
     num_steps,
     decimal_places,
     initial_price,
     price_sigma,
-):
+) -> List[float]:
     price_process = [initial_price]
 
     while len(price_process) < num_steps + 1:
@@ -75,6 +108,7 @@ class BenchmarkScenario(Scenario):
         block_length_seconds: float = 1,
         step_length_seconds: Optional[float] = None,
         initial_network_parameters: Dict[str, Any] = None,
+        historic_start_datetime: Optional[str] = None,
         output: bool = True,
     ):
         super().__init__()
@@ -87,6 +121,7 @@ class BenchmarkScenario(Scenario):
         )
         self.block_length_seconds = block_length_seconds
         self.transactions_per_block = transactions_per_block
+        self.historic_start_datetime = historic_start_datetime
 
         self.output = output
         self.benchmark_configs = benchmark_configs
@@ -123,16 +158,26 @@ class BenchmarkScenario(Scenario):
                 else benchmark_config.market_config.decimal_places
             )
 
-            # Create fuzzed price process
-            price_process = _create_price_process(
-                random_state=self.random_state,
-                num_steps=self.num_steps,
-                decimal_places=market_decimal_places,
-                initial_price=benchmark_config.initial_price,
-                price_sigma=benchmark_config.annualised_volatility
-                * np.sqrt(self.step_length_seconds / (365.25 * 24 * 60 * 60))
-                * benchmark_config.initial_price,
-            )
+            if (
+                self.historic_start_datetime is not None
+                and benchmark_config.historic_data_code is not None
+            ):
+                price_process = _historic_price_process(
+                    product_id=benchmark_config.historic_data_code,
+                    num_steps=self.num_steps,
+                    step_length_seconds=self.step_length_seconds,
+                    start=self.historic_start_datetime,
+                )
+            else:
+                price_process = _create_price_process(
+                    random_state=self.random_state,
+                    num_steps=self.num_steps,
+                    decimal_places=market_decimal_places,
+                    initial_price=benchmark_config.initial_price,
+                    price_sigma=benchmark_config.annualised_volatility
+                    * np.sqrt(self.step_length_seconds / (365.25 * 24 * 60 * 60))
+                    * benchmark_config.initial_price,
+                )
 
             self.agents.append(
                 ConfigurableMarketManager(
