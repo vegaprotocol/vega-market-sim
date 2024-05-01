@@ -48,7 +48,7 @@ REGISTRY = {
             ),
             BenchmarkConfig(
                 market_config=configs.mainnet.EGLPUSDT.CONFIG,
-                initial_price=1,
+                initial_price=0.06,
                 annualised_volatility=10,
                 notional_trade_volume=100,
             ),
@@ -74,7 +74,7 @@ REGISTRY = {
         benchmark_configs=[
             BenchmarkConfig(
                 market_config=configs.mainnet.EGLPUSDT.CONFIG,
-                initial_price=1,
+                initial_price=0.06,
                 annualised_volatility=10,
                 notional_trade_volume=100,
             )
