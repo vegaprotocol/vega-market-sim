@@ -949,11 +949,11 @@ class SpotProduct(Config):
 
         self.base_asset = str(config["base_asset"])
         self.quote_asset = str(config["base_asset"])
-        self.name = str(config["name"])
 
     def build(self):
         return build.governance.spot_product(
-            base_asset=self.base_asset, quote_asset=self.quote_asset, name=self.name
+            base_asset=self.base_asset,
+            quote_asset=self.quote_asset,
         )
 
 

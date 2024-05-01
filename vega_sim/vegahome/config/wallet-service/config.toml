@@ -1,4 +1,4 @@
-LogLevel = "info"
+LogLevel = "debug"
 
 [Server]
   Port = "TO_BE_SET"

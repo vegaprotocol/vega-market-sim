@@ -1,3 +1,5 @@
+import datetime
+
 import vega_sim.configs as configs
 from vega_sim.scenario.benchmark.configs import BenchmarkConfig
 from vega_sim.scenario.benchmark.scenario import BenchmarkScenario
@@ -46,7 +48,7 @@ REGISTRY = {
             ),
             BenchmarkConfig(
                 market_config=configs.mainnet.EGLPUSDT.CONFIG,
-                initial_price=1,
+                initial_price=0.06,
                 annualised_volatility=10,
                 notional_trade_volume=100,
             ),
@@ -62,6 +64,7 @@ REGISTRY = {
                 initial_price=70000,
                 annualised_volatility=2,
                 notional_trade_volume=100,
+                historic_data_code="BTC-USD",
             )
         ],
     ),
@@ -71,7 +74,7 @@ REGISTRY = {
         benchmark_configs=[
             BenchmarkConfig(
                 market_config=configs.mainnet.EGLPUSDT.CONFIG,
-                initial_price=1,
+                initial_price=0.06,
                 annualised_volatility=10,
                 notional_trade_volume=100,
             )
@@ -86,6 +89,7 @@ REGISTRY = {
                 initial_price=4000,
                 annualised_volatility=2,
                 notional_trade_volume=100,
+                historic_data_code="ETH-USD",
             )
         ],
     ),

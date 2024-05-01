@@ -263,12 +263,10 @@ def perpetual_product(
 def spot_product(
     base_asset: str,
     quote_asset: str,
-    name: str,
 ) -> vega_protos.governance.SpotProduct:
     return vega_protos.governance.SpotProduct(
         base_asset=base_asset,
         quote_asset=quote_asset,
-        name=name,
     )
 
 

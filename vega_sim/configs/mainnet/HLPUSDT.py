@@ -1,7 +1,7 @@
-"""EGLPUSDT.py
+"""HLPUSDT.py
 
-Market config matching latest proposal for EGLP/USDT.POINTS market on mainnet.
-https://governance.vega.xyz/proposals/2b93e5121c2704a00d0df3075aecbfb7e25b1106319cf47f53320f921b2f6d27
+Market config matching latest proposal for HLP/USDT.POINTS market on mainnet.
+https://governance.vega.xyz/proposals/9da803769d61c1371938d238d7d6c43ab525af6614edeb90880510f8ae3542f8
 """
 
 from vega_sim.api.market import MarketConfig
@@ -9,34 +9,36 @@ from vega_sim.api.market import MarketConfig
 CONFIG = MarketConfig(
     {
         "tickSize": "2",
+        "linearSlippageFactor": "0.001",
+        "decimalPlaces": "3",
+        "positionDecimalPlaces": "1",
         "instrument": {
-            "name": "EigenLayer Points / USDT (Futures market)",
-            "code": "EGLP/USDT.POINTS",
+            "name": "Hyperliquid Points / USDT (Futures market)",
+            "code": "HLP/USDT.POINTS",
             "future": {
                 "settlementAsset": "bf1e88d19db4b3ca0d1d5bdb73718a01686b18cf731ca26adedf3c8b83802bba",
                 "quoteName": "USDT",
                 "dataSourceSpecForSettlementData": {
                     "external": {
                         "ethOracle": {
+                            "sourceChainId": "42161",
                             "address": "0x302461E6dBF45e59acb3BE9a9c84C0a997779612",
                             "abi": '[{"type":"function","name":"getData","inputs":[{"name":"identifier","type":"tuple","internalType":"struct SettlementOracle.Identifier","components":[{"name":"liveness","type":"uint64","internalType":"uint64"},{"name":"bondCurrency","type":"address","internalType":"contract IERC20"},{"name":"minimumBond","type":"uint256","internalType":"uint256"},{"name":"maximumBond","type":"uint256","internalType":"uint256"},{"name":"marketCode","type":"string","internalType":"string"},{"name":"quoteName","type":"string","internalType":"string"},{"name":"enactmentDate","type":"string","internalType":"string"},{"name":"ipfsLink","type":"string","internalType":"string"}]}],"outputs":[{"name":"","type":"bool","internalType":"bool"},{"name":"","type":"uint256","internalType":"uint256"}],"stateMutability":"nonpayable"}]',
                             "method": "getData",
                             "args": [
                                 {
-                                    "bondCurrency": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
-                                    "enactmentDate": "2024-03-12T11:00:00Z",
-                                    "ipfsLink": "ipfs://bafybeiazlsl2ilitnh4p3fm7hsem73qsf5bk5l24in2zlso2gtr5t22eai",
                                     "liveness": 28800,
-                                    "marketCode": "EGLP/USDT.POINTS",
-                                    "maximumBond": 100000000000,
+                                    "bondCurrency": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
                                     "minimumBond": 500000000,
+                                    "maximumBond": 100000000000,
+                                    "ipfsLink": "ipfs://bafybeiepzqdjoxwzeh2vzwi5c4473vddemqjihc26tbuu32vkasisk537i",
+                                    "marketCode": "HLP/USDT.POINTS",
                                     "quoteName": "USDT",
+                                    "enactmentDate": "2024-03-20T11:00:00Z",
                                 }
                             ],
-                            "trigger": {
-                                "timeTrigger": {"initial": "1710241200", "every": "600"}
-                            },
                             "requiredConfirmations": "64",
+                            "trigger": {"timeTrigger": {"every": "600"}},
                             "filters": [
                                 {
                                     "key": {"name": "resolved", "type": "TYPE_BOOLEAN"},
@@ -59,36 +61,34 @@ CONFIG = MarketConfig(
                                 },
                             ],
                             "normalisers": [
-                                {"name": "price", "expression": "$[1]"},
                                 {"name": "resolved", "expression": "$[0]"},
+                                {"name": "price", "expression": "$[1]"},
                             ],
-                            "sourceChainId": "42161",
                         }
                     }
                 },
                 "dataSourceSpecForTradingTermination": {
                     "external": {
                         "ethOracle": {
+                            "sourceChainId": "42161",
                             "address": "0x6d0b3a00265b8b4a1d22cf466c331014133ba614",
                             "abi": '[{"type":"function","name":"getData","inputs":[{"name":"identifier","type":"tuple","internalType":"struct TerminationOracle.Identifier","components":[{"name":"bondCurrency","type":"address","internalType":"contract IERC20"},{"name":"minimumBond","type":"uint256","internalType":"uint256"},{"name":"maximumBond","type":"uint256","internalType":"uint256"},{"name":"liveness","type":"uint64","internalType":"uint64"},{"name":"marketCode","type":"string","internalType":"string"},{"name":"quoteName","type":"string","internalType":"string"},{"name":"enactmentDate","type":"string","internalType":"string"},{"name":"ipfsLink","type":"string","internalType":"string"},{"name":"conditionalSettlementOracle","type":"address","internalType":"contract SettlementOracle"}]}],"outputs":[{"name":"","type":"bool","internalType":"bool"},{"name":"","type":"uint256","internalType":"uint256"},{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"nonpayable"}]',
                             "method": "getData",
                             "args": [
                                 {
-                                    "bondCurrency": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
-                                    "conditionalSettlementOracle": "0x302461E6dBF45e59acb3BE9a9c84C0a997779612",
-                                    "enactmentDate": "2024-03-12T11:00:00Z",
-                                    "ipfsLink": "ipfs://bafybeiazlsl2ilitnh4p3fm7hsem73qsf5bk5l24in2zlso2gtr5t22eai",
                                     "liveness": 28800,
-                                    "marketCode": "EGLP/USDT.POINTS",
-                                    "maximumBond": 100000000000,
+                                    "bondCurrency": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
                                     "minimumBond": 500000000,
+                                    "maximumBond": 100000000000,
+                                    "ipfsLink": "ipfs://bafybeiepzqdjoxwzeh2vzwi5c4473vddemqjihc26tbuu32vkasisk537i",
+                                    "marketCode": "HLP/USDT.POINTS",
                                     "quoteName": "USDT",
+                                    "enactmentDate": "2024-03-20T11:00:00Z",
+                                    "conditionalSettlementOracle": "0x302461E6dBF45e59acb3BE9a9c84C0a997779612",
                                 }
                             ],
-                            "trigger": {
-                                "timeTrigger": {"initial": "1710241200", "every": "600"}
-                            },
                             "requiredConfirmations": "64",
+                            "trigger": {"timeTrigger": {"every": "600"}},
                             "filters": [
                                 {
                                     "key": {"name": "resolved", "type": "TYPE_BOOLEAN"},
@@ -110,7 +110,6 @@ CONFIG = MarketConfig(
                                 {"name": "resolved", "expression": "$[0]"},
                                 {"name": "terminated", "expression": "$[2]"},
                             ],
-                            "sourceChainId": "42161",
                         }
                     }
                 },
@@ -120,17 +119,16 @@ CONFIG = MarketConfig(
                 },
             },
         },
-        "decimalPlaces": "5",
         "metadata": [
-            "base:EGLPOINT",
+            "base:HLPOINT",
             "quote:USDT",
-            "enactment:2024-03-12T11:00:00Z",
+            "enactment:2024-03-20T11:00:00Z",
             "settlement:fromOracle",
             "class:fx/crypto",
             "oracle:uma",
             "sector:defi",
             "oracleChain:arbitrum",
-            "domain:eigenlayer.xyz",
+            "domain:hyperliquid.xyz",
         ],
         "priceMonitoringParameters": {
             "triggers": [
@@ -185,341 +183,336 @@ CONFIG = MarketConfig(
                     "auctionExtension": "300",
                 },
                 {
-                    "horizon": "900",
+                    "horizon": "400",
                     "probability": "0.9999999",
                     "auctionExtension": "900",
                 },
                 {
-                    "horizon": "900",
+                    "horizon": "400",
                     "probability": "0.9999999",
                     "auctionExtension": "900",
                 },
                 {
-                    "horizon": "900",
+                    "horizon": "400",
                     "probability": "0.9999999",
                     "auctionExtension": "900",
                 },
                 {
-                    "horizon": "900",
+                    "horizon": "400",
                     "probability": "0.9999999",
                     "auctionExtension": "900",
                 },
                 {
-                    "horizon": "900",
+                    "horizon": "400",
                     "probability": "0.9999999",
                     "auctionExtension": "900",
                 },
                 {
-                    "horizon": "900",
+                    "horizon": "400",
                     "probability": "0.9999999",
                     "auctionExtension": "900",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "1800",
+                    "horizon": "500",
                     "probability": "0.9999999",
                     "auctionExtension": "1800",
                 },
                 {
-                    "horizon": "3600",
+                    "horizon": "620",
                     "probability": "0.9999999",
                     "auctionExtension": "3600",
                 },
                 {
-                    "horizon": "3600",
+                    "horizon": "620",
                     "probability": "0.9999999",
                     "auctionExtension": "3600",
                 },
                 {
-                    "horizon": "3600",
+                    "horizon": "620",
                     "probability": "0.9999999",
                     "auctionExtension": "3600",
                 },
                 {
-                    "horizon": "3600",
+                    "horizon": "620",
                     "probability": "0.9999999",
                     "auctionExtension": "3600",
                 },
                 {
-                    "horizon": "3600",
+                    "horizon": "620",
                     "probability": "0.9999999",
                     "auctionExtension": "3600",
                 },
                 {
-                    "horizon": "3600",
+                    "horizon": "620",
                     "probability": "0.9999999",
                     "auctionExtension": "3600",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "21600",
+                    "horizon": "750",
                     "probability": "0.9999999",
                     "auctionExtension": "7200",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
                 {
-                    "horizon": "86400",
+                    "horizon": "800",
                     "probability": "0.9999999",
                     "auctionExtension": "28800",
                 },
             ]
         },
-        "liquidityMonitoringParameters": {
-            "targetStakeParameters": {"timeWindow": "3600", "scalingFactor": 0.05},
-            "triggeringRatio": "",
-            "auctionExtension": "0",
-        },
         "logNormal": {
-            "riskAversionParameter": 0.001,
-            "tau": 0.0006844626968,
-            "params": {"mu": 0, "r": 0, "sigma": 7},
+            "tau": 0.0002281542323,
+            "riskAversionParameter": 0.01,
+            "params": {"mu": 0, "r": 0, "sigma": 5.0},
         },
-        "positionDecimalPlaces": "-2",
-        "linearSlippageFactor": "0.001",
-        "quadraticSlippageFactor": "",
         "liquiditySlaParameters": {
             "priceRange": "0.2",
             "commitmentMinTimeFraction": "0.5",
             "performanceHysteresisEpochs": "1",
             "slaCompetitionFactor": "0.8",
         },
-        "liquidityFeeSettings": {"method": "METHOD_MARGINAL_COST"},
         "liquidationStrategy": {
             "disposalTimeStep": "5",
             "disposalFraction": "0.1",
             "fullDisposalSize": "10000",
             "maxFractionConsumed": "0.1",
-            "disposalSlippageRange": "0.03",
+            "disposalSlippageRange": "0.2",
+        },
+        "liquidityFeeSettings": {"method": "METHOD_MARGINAL_COST"},
+        "liquidityMonitoringParameters": {
+            "targetStakeParameters": {"timeWindow": "3600", "scalingFactor": "0.05"}
         },
         "markPriceConfiguration": {
-            "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE",
+            "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE"
         },
     }
 )

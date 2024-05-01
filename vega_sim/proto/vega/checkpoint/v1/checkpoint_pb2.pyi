@@ -563,10 +563,12 @@ class MarketTracker(_message.Message):
         "market_activity",
         "taker_notional_volume",
         "market_to_party_taker_notional_volume",
+        "epoch_taker_fees",
     )
     MARKET_ACTIVITY_FIELD_NUMBER: _ClassVar[int]
     TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
     MARKET_TO_PARTY_TAKER_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_TAKER_FEES_FIELD_NUMBER: _ClassVar[int]
     market_activity: _containers.RepeatedCompositeFieldContainer[MarketActivityTracker]
     taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
         TakerNotionalVolume
@@ -574,6 +576,7 @@ class MarketTracker(_message.Message):
     market_to_party_taker_notional_volume: _containers.RepeatedCompositeFieldContainer[
         MarketToPartyTakerNotionalVolume
     ]
+    epoch_taker_fees: _containers.RepeatedCompositeFieldContainer[EpochPartyTakerFees]
     def __init__(
         self,
         market_activity: _Optional[
@@ -584,6 +587,9 @@ class MarketTracker(_message.Message):
         ] = ...,
         market_to_party_taker_notional_volume: _Optional[
             _Iterable[_Union[MarketToPartyTakerNotionalVolume, _Mapping]]
+        ] = ...,
+        epoch_taker_fees: _Optional[
+            _Iterable[_Union[EpochPartyTakerFees, _Mapping]]
         ] = ...,
     ) -> None: ...
 
@@ -609,6 +615,8 @@ class MarketActivityTracker(_message.Message):
         "returns_data_history",
         "infra_fees",
         "lp_paid_fees",
+        "realised_returns",
+        "realised_returns_history",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -630,6 +638,8 @@ class MarketActivityTracker(_message.Message):
     RETURNS_DATA_HISTORY_FIELD_NUMBER: _ClassVar[int]
     INFRA_FEES_FIELD_NUMBER: _ClassVar[int]
     LP_PAID_FEES_FIELD_NUMBER: _ClassVar[int]
+    REALISED_RETURNS_FIELD_NUMBER: _ClassVar[int]
+    REALISED_RETURNS_HISTORY_FIELD_NUMBER: _ClassVar[int]
     market: str
     asset: str
     maker_fees_received: _containers.RepeatedCompositeFieldContainer[PartyFees]
@@ -656,6 +666,10 @@ class MarketActivityTracker(_message.Message):
     returns_data_history: _containers.RepeatedCompositeFieldContainer[EpochReturnsData]
     infra_fees: _containers.RepeatedCompositeFieldContainer[PartyFees]
     lp_paid_fees: _containers.RepeatedCompositeFieldContainer[PartyFees]
+    realised_returns: _containers.RepeatedCompositeFieldContainer[ReturnsData]
+    realised_returns_history: _containers.RepeatedCompositeFieldContainer[
+        EpochReturnsData
+    ]
     def __init__(
         self,
         market: _Optional[str] = ...,
@@ -692,6 +706,23 @@ class MarketActivityTracker(_message.Message):
         ] = ...,
         infra_fees: _Optional[_Iterable[_Union[PartyFees, _Mapping]]] = ...,
         lp_paid_fees: _Optional[_Iterable[_Union[PartyFees, _Mapping]]] = ...,
+        realised_returns: _Optional[_Iterable[_Union[ReturnsData, _Mapping]]] = ...,
+        realised_returns_history: _Optional[
+            _Iterable[_Union[EpochReturnsData, _Mapping]]
+        ] = ...,
+    ) -> None: ...
+
+class EpochPartyTakerFees(_message.Message):
+    __slots__ = ("epoch_party_taker_fees_paid",)
+    EPOCH_PARTY_TAKER_FEES_PAID_FIELD_NUMBER: _ClassVar[int]
+    epoch_party_taker_fees_paid: _containers.RepeatedCompositeFieldContainer[
+        AssetMarketPartyTakerFees
+    ]
+    def __init__(
+        self,
+        epoch_party_taker_fees_paid: _Optional[
+            _Iterable[_Union[AssetMarketPartyTakerFees, _Mapping]]
+        ] = ...,
     ) -> None: ...
 
 class EpochTimeWeightPositionData(_message.Message):
@@ -738,6 +769,31 @@ class PartyTimeWeightedPosition(_message.Message):
     tw_position: int
     def __init__(
         self, party: _Optional[str] = ..., tw_position: _Optional[int] = ...
+    ) -> None: ...
+
+class AssetMarketPartyTakerFees(_message.Message):
+    __slots__ = ("asset", "market", "taker_fees")
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    MARKET_FIELD_NUMBER: _ClassVar[int]
+    TAKER_FEES_FIELD_NUMBER: _ClassVar[int]
+    asset: str
+    market: str
+    taker_fees: _containers.RepeatedCompositeFieldContainer[PartyTakerFees]
+    def __init__(
+        self,
+        asset: _Optional[str] = ...,
+        market: _Optional[str] = ...,
+        taker_fees: _Optional[_Iterable[_Union[PartyTakerFees, _Mapping]]] = ...,
+    ) -> None: ...
+
+class PartyTakerFees(_message.Message):
+    __slots__ = ("party", "taker_fees")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    TAKER_FEES_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    taker_fees: bytes
+    def __init__(
+        self, party: _Optional[str] = ..., taker_fees: _Optional[bytes] = ...
     ) -> None: ...
 
 class EpochPartyFees(_message.Message):
