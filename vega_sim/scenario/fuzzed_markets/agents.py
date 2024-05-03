@@ -1215,7 +1215,7 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
         self._sensible_proposal()
 
     def step(self, vega_state):
-        if self.random_state.rand() > self.step_bias:
+        if self.random_state.rand() < self.step_bias:
             for i in range(self.attempts_per_step):
                 try:
                     self._fuzzed_proposal()
