@@ -151,18 +151,13 @@ GOVERNANCE_TRANSFER_TYPE_ALL_OR_NOTHING: GovernanceTransferType
 GOVERNANCE_TRANSFER_TYPE_BEST_EFFORT: GovernanceTransferType
 
 class SpotProduct(_message.Message):
-    __slots__ = ("base_asset", "quote_asset", "name")
+    __slots__ = ("base_asset", "quote_asset")
     BASE_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_ASSET_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
     base_asset: str
     quote_asset: str
-    name: str
     def __init__(
-        self,
-        base_asset: _Optional[str] = ...,
-        quote_asset: _Optional[str] = ...,
-        name: _Optional[str] = ...,
+        self, base_asset: _Optional[str] = ..., quote_asset: _Optional[str] = ...
     ) -> None: ...
 
 class FutureProduct(_message.Message):
@@ -844,6 +839,7 @@ class ProposalTerms(_message.Message):
 class BatchProposalTermsChange(_message.Message):
     __slots__ = (
         "enactment_timestamp",
+        "validation_timestamp",
         "update_market",
         "new_market",
         "update_network_parameter",
@@ -856,8 +852,10 @@ class BatchProposalTermsChange(_message.Message):
         "update_market_state",
         "update_referral_program",
         "update_volume_discount_program",
+        "new_asset",
     )
     ENACTMENT_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    VALIDATION_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     UPDATE_MARKET_FIELD_NUMBER: _ClassVar[int]
     NEW_MARKET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_NETWORK_PARAMETER_FIELD_NUMBER: _ClassVar[int]
@@ -870,7 +868,9 @@ class BatchProposalTermsChange(_message.Message):
     UPDATE_MARKET_STATE_FIELD_NUMBER: _ClassVar[int]
     UPDATE_REFERRAL_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     UPDATE_VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
+    NEW_ASSET_FIELD_NUMBER: _ClassVar[int]
     enactment_timestamp: int
+    validation_timestamp: int
     update_market: UpdateMarket
     new_market: NewMarket
     update_network_parameter: UpdateNetworkParameter
@@ -883,9 +883,11 @@ class BatchProposalTermsChange(_message.Message):
     update_market_state: UpdateMarketState
     update_referral_program: UpdateReferralProgram
     update_volume_discount_program: UpdateVolumeDiscountProgram
+    new_asset: NewAsset
     def __init__(
         self,
         enactment_timestamp: _Optional[int] = ...,
+        validation_timestamp: _Optional[int] = ...,
         update_market: _Optional[_Union[UpdateMarket, _Mapping]] = ...,
         new_market: _Optional[_Union[NewMarket, _Mapping]] = ...,
         update_network_parameter: _Optional[
@@ -904,6 +906,7 @@ class BatchProposalTermsChange(_message.Message):
         update_volume_discount_program: _Optional[
             _Union[UpdateVolumeDiscountProgram, _Mapping]
         ] = ...,
+        new_asset: _Optional[_Union[NewAsset, _Mapping]] = ...,
     ) -> None: ...
 
 class ProposalParameters(_message.Message):
