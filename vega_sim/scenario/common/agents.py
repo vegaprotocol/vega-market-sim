@@ -1367,6 +1367,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                         asset=self.asset_id,
                         amount=self.initial_asset_mint,
                         key_name=self.key_name,
+                        raise_error=False,
                     )
                     self.vega.wait_for_total_catchup()
 
@@ -3335,6 +3336,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                         asset=self.asset_id,
                         amount=self.initial_asset_mint,
                         key_name=self.key_name,
+                        raise_error=False,
                     )
             self.vega.submit_order(
                 trading_key=self.key_name,

@@ -493,6 +493,7 @@ class VegaService(ABC):
         amount: float,
         wallet_name: Optional[str] = None,
         from_faucet: bool = False,
+        raise_error: bool = True,
     ) -> None:
         """Mints a given amount of requested asset into the associated wallet.
 
@@ -547,10 +548,13 @@ class VegaService(ABC):
                 return
             self.wait_fn(1)
 
-        raise VegaFaucetError(
+        err = VegaFaucetError(
             f"Failure minting asset {asset} for party {wallet_name}. Funds never"
             " appeared in party account"
         )
+        if raise_error:
+            raise err
+        logger.error(err)
 
     def forward(self, time: str) -> None:
         """Steps chain forward a given amount of time, either with an amount of time or
