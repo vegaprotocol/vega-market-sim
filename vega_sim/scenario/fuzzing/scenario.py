@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+import re
 from typing import Optional, List, Dict, Any
 
 import vega_sim.proto as protos
@@ -139,9 +140,9 @@ class FuzzingScenario(BenchmarkScenario):
         asset_names = set()
         for benchmark_config in self.benchmark_configs:
             if benchmark_config.market_config.is_spot():
-                _, quote_asset_symbol = (
-                    benchmark_config.market_config.instrument.spot.name.split("/")
-                )
+                _, quote_asset_symbol = re.split(
+                    r"[^a-zA-Z]+", benchmark_config.market_config.instrument.code
+                )[:2]
                 asset_names.add(quote_asset_symbol)
             if benchmark_config.market_config.is_future():
                 asset_names.add(
