@@ -3645,6 +3645,14 @@ class ReferralAgentWrapper:
         self.applied_code = False
         self.tag = agent.tag
 
+    @property
+    def key_name(self):
+        return self._agent.key_name
+
+    @property
+    def wallet_name(self):
+        return self._agent.wallet_name
+
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
@@ -3674,7 +3682,7 @@ class ReferralAgentWrapper:
                 return
             referral_sets = list(
                 self._agent.vega.list_referral_sets(
-                    referrer_id,
+                    referrer=referrer_id,
                 ).keys()
             )
             if len(referral_sets) == 0:
@@ -3682,7 +3690,11 @@ class ReferralAgentWrapper:
                     "Specified referral key has not yet created a referral set."
                 )
                 return
-            self._agent.vega.apply_referral_code(referral_sets[0])
+            self._agent.vega.apply_referral_code(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                id=referral_sets[0],
+            )
             self.applied_code == True
 
         self._agent.step(vega_state=vega_state)

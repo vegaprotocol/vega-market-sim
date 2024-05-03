@@ -99,22 +99,25 @@ class FuzzingScenario(BenchmarkScenario):
         # team. Agents share keys across markets.
         for benchmark_config in self.benchmark_configs:
             market_name = benchmark_config.market_config.instrument.name
+            market_code = benchmark_config.market_config.instrument.code
             extra_agents.extend(
                 [
                     ReferralAgentWrapper(
                         agent=FuzzingAgent(
                             wallet_name="FuzzingAgent",
-                            key_name=(f"FuzzingAgent_{str(i_agent).zfill(3)}"),
+                            key_name=(
+                                f"FuzzingAgent_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}"
+                            ),
                             market_name=market_name,
                             settlement_asset_mint=benchmark_config.initial_price / 100,
                             quote_asset_mint=benchmark_config.initial_price / 100,
                             base_asset_mint=1 / 100,
-                            tag=f"{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
+                            tag=f"{market_code}_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
                         ),
                         referrer_wallet_name="ReferralAgentWrapper",
                         referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
                     )
-                    for i_agent, i_referrer in itertools.product(range(5), range(5))
+                    for i_referrer, i_agent in itertools.product(range(5), range(2))
                 ]
             )
             extra_agents.extend(
@@ -123,16 +126,16 @@ class FuzzingScenario(BenchmarkScenario):
                         agent=FuzzyLiquidityProvider(
                             wallet_name="FuzzyLiquidityProvider",
                             key_name=(
-                                f"FuzzyLiquidityProvider_{str(i_agent).zfill(3)}"
+                                f"FuzzyLiquidityProvider_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}"
                             ),
                             market_name=market_name,
                             initial_asset_mint=5_000,
-                            tag=f"{str(i_agent).zfill(3)}",
+                            tag=f"{market_code}_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
                         ),
                         referrer_wallet_name="ReferralAgentWrapper",
                         referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
                     )
-                    for i_agent, i_referrer in itertools.product(range(5), range(5))
+                    for i_referrer, i_agent in itertools.product(range(5), range(2))
                 ]
             )
 
