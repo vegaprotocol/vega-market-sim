@@ -2984,6 +2984,7 @@ class VegaService(ABC):
         distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
         rank_table: Optional[List[vega_protos.vega.Rank]] = None,
         cap_reward_fee_multiple: Optional[float] = None,
+        transfer_interval: Optional[int] = None,
     ):
         """Create a recurring transfer of funds.
 
@@ -3024,7 +3025,9 @@ class VegaService(ABC):
                 The list of markets to apply the dispatch strategy. Defaults to None.
             cap_reward_fee_multiple (Optional[float], optional):
                 A multiplier to cap reward fees. Defaults to None.
-
+            transfer_interval (Optional[int], optional):
+                Interval between transfers expressed in epochs.
+                Defaults to None.
         Raises:
             Exception:
                 If a value is provided for one but not all non-optional
@@ -3066,6 +3069,7 @@ class VegaService(ABC):
                     markets,
                     team_scope,
                     rank_table,
+                    transfer_interval,
                 ]
             ]
         ):
@@ -3084,6 +3088,7 @@ class VegaService(ABC):
                 distribution_strategy=distribution_strategy,
                 rank_table=rank_table,
                 cap_reward_fee_multiple=cap_reward_fee_multiple,
+                transfer_interval=transfer_interval,
             )
             recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
 

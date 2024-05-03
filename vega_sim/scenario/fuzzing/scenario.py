@@ -186,6 +186,10 @@ class FuzzingScenario(BenchmarkScenario):
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
                     protos.vega.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
                 ),
+                (
+                    protos.vega.vega.ACCOUNT_TYPE_REWARD_REALISED_RETURN,
+                    protos.vega.vega.DISPATCH_METRIC_REALISED_RETURN,
+                ),
             ]
         ):
             extra_agents.extend(
@@ -200,9 +204,16 @@ class FuzzingScenario(BenchmarkScenario):
                         metric=metric,
                         market_names=[market_name],
                         initial_mint=1e9,
-                        tag=(f"{asset_for_metric_name}_{str(i_agent).zfill(3)}"),
+                        entity_scope=entity_scope,
+                        tag=(f"{entity_scope}_{asset_for_metric_name}_{metric}"),
                     )
-                    for asset_for_metric_name in list(asset_names)
+                    for asset_for_metric_name, entity_scope in itertools.product(
+                        list(asset_names),
+                        [
+                            protos.vega.vega.ENTITY_SCOPE_INDIVIDUALS,
+                            protos.vega.vega.ENTITY_SCOPE_TEAMS,
+                        ],
+                    )
                 ]
             )
         extra_agents = {agent.name(): agent for agent in extra_agents}

@@ -3021,6 +3021,7 @@ def dispatch_strategy(
     distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
     rank_table: Optional[List[vega_protos.vega.Rank]] = None,
     cap_reward_fee_multiple: Optional[float] = None,
+    transfer_interval: Optional[int] = None,
 ) -> vega_protos.vega.DispatchStrategy:
     # Set defaults for mandatory fields
     if entity_scope is None:
@@ -3068,6 +3069,7 @@ def dispatch_strategy(
             if cap_reward_fee_multiple is not None
             else None
         ),
+        transfer_interval=transfer_interval,
     )
     # Set the optional DispatchStrategy fields
     if metric is not None:
