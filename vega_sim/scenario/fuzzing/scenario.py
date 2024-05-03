@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+import re
 from typing import Optional, List, Dict, Any
 
 import vega_sim.proto as protos
@@ -98,22 +99,25 @@ class FuzzingScenario(BenchmarkScenario):
         # team. Agents share keys across markets.
         for benchmark_config in self.benchmark_configs:
             market_name = benchmark_config.market_config.instrument.name
+            market_code = benchmark_config.market_config.instrument.code
             extra_agents.extend(
                 [
                     ReferralAgentWrapper(
                         agent=FuzzingAgent(
                             wallet_name="FuzzingAgent",
-                            key_name=(f"FuzzingAgent_{str(i_agent).zfill(3)}"),
+                            key_name=(
+                                f"FuzzingAgent_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}"
+                            ),
                             market_name=market_name,
                             settlement_asset_mint=benchmark_config.initial_price / 100,
                             quote_asset_mint=benchmark_config.initial_price / 100,
                             base_asset_mint=1 / 100,
-                            tag=f"{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
+                            tag=f"{market_code}_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
                         ),
                         referrer_wallet_name="ReferralAgentWrapper",
                         referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
                     )
-                    for i_agent, i_referrer in itertools.product(range(5), range(5))
+                    for i_referrer, i_agent in itertools.product(range(5), range(2))
                 ]
             )
             extra_agents.extend(
@@ -122,16 +126,16 @@ class FuzzingScenario(BenchmarkScenario):
                         agent=FuzzyLiquidityProvider(
                             wallet_name="FuzzyLiquidityProvider",
                             key_name=(
-                                f"FuzzyLiquidityProvider_{str(i_agent).zfill(3)}"
+                                f"FuzzyLiquidityProvider_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}"
                             ),
                             market_name=market_name,
                             initial_asset_mint=5_000,
-                            tag=f"{str(i_agent).zfill(3)}",
+                            tag=f"{market_code}_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
                         ),
                         referrer_wallet_name="ReferralAgentWrapper",
                         referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
                     )
-                    for i_agent, i_referrer in itertools.product(range(5), range(5))
+                    for i_referrer, i_agent in itertools.product(range(5), range(2))
                 ]
             )
 
@@ -139,9 +143,9 @@ class FuzzingScenario(BenchmarkScenario):
         asset_names = set()
         for benchmark_config in self.benchmark_configs:
             if benchmark_config.market_config.is_spot():
-                _, quote_asset_symbol = (
-                    benchmark_config.market_config.instrument.spot.name.split("/")
-                )
+                _, quote_asset_symbol = re.split(
+                    r"[^a-zA-Z]+", benchmark_config.market_config.instrument.code
+                )[:2]
                 asset_names.add(quote_asset_symbol)
             if benchmark_config.market_config.is_future():
                 asset_names.add(
@@ -185,6 +189,10 @@ class FuzzingScenario(BenchmarkScenario):
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
                     protos.vega.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
                 ),
+                (
+                    protos.vega.vega.ACCOUNT_TYPE_REWARD_REALISED_RETURN,
+                    protos.vega.vega.DISPATCH_METRIC_REALISED_RETURN,
+                ),
             ]
         ):
             extra_agents.extend(
@@ -199,9 +207,16 @@ class FuzzingScenario(BenchmarkScenario):
                         metric=metric,
                         market_names=[market_name],
                         initial_mint=1e9,
-                        tag=(f"{asset_for_metric_name}_{str(i_agent).zfill(3)}"),
+                        entity_scope=entity_scope,
+                        tag=(f"{entity_scope}_{asset_for_metric_name}_{metric}"),
                     )
-                    for asset_for_metric_name in list(asset_names)
+                    for asset_for_metric_name, entity_scope in itertools.product(
+                        list(asset_names),
+                        [
+                            protos.vega.vega.ENTITY_SCOPE_INDIVIDUALS,
+                            protos.vega.vega.ENTITY_SCOPE_TEAMS,
+                        ],
+                    )
                 ]
             )
         extra_agents = {agent.name(): agent for agent in extra_agents}

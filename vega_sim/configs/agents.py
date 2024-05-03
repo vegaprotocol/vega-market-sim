@@ -1,3 +1,4 @@
+import re
 import datetime
 
 from typing import Optional, Union, Dict, Iterable
@@ -67,9 +68,9 @@ class ConfigurableMarketManager(StateAgentWithWallet):
 
         # Extract asset symbol from config then find or create the relevant assets
         if self.is_spot:
-            quote_asset_symbol, base_asset_symbol = (
-                self.market_config.instrument.spot.name.split("-")[0].split("/")
-            )
+            base_asset_symbol, quote_asset_symbol = re.split(
+                r"[^a-zA-Z]+", self.market_config.instrument.code
+            )[:2]
             base_asset_id = self.__find_or_create_asset(base_asset_symbol)
             quote_asset_id = self.__find_or_create_asset(quote_asset_symbol)
         if self.is_future:

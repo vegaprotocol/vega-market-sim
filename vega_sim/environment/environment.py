@@ -222,7 +222,11 @@ class MarketEnvironment:
 
         for agent in self.agents:
             agent.initialise(vega=vega)
-            if isinstance(agent, StateAgentWithWallet):
+            if (
+                hasattr(agent, "name")
+                and hasattr(agent, "key_name")
+                and hasattr(agent, "wallet_name")
+            ):
                 logger.info(
                     f"{agent.name()}: key ="
                     f" {vega.wallet.public_key(name=agent.key_name, wallet_name=agent.wallet_name)}"

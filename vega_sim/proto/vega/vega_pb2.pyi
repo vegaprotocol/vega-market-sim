@@ -155,6 +155,7 @@ class AccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: _ClassVar[AccountType]
     ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: _ClassVar[AccountType]
     ACCOUNT_TYPE_ORDER_MARGIN: _ClassVar[AccountType]
+    ACCOUNT_TYPE_REWARD_REALISED_RETURN: _ClassVar[AccountType]
 
 class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -213,6 +214,7 @@ class DispatchMetric(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     DISPATCH_METRIC_RELATIVE_RETURN: _ClassVar[DispatchMetric]
     DISPATCH_METRIC_RETURN_VOLATILITY: _ClassVar[DispatchMetric]
     DISPATCH_METRIC_VALIDATOR_RANKING: _ClassVar[DispatchMetric]
+    DISPATCH_METRIC_REALISED_RETURN: _ClassVar[DispatchMetric]
 
 class EntityScope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -375,6 +377,7 @@ ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY: AccountType
 ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING: AccountType
 ACCOUNT_TYPE_PENDING_FEE_REFERRAL_REWARD: AccountType
 ACCOUNT_TYPE_ORDER_MARGIN: AccountType
+ACCOUNT_TYPE_REWARD_REALISED_RETURN: AccountType
 TRANSFER_TYPE_UNSPECIFIED: TransferType
 TRANSFER_TYPE_LOSS: TransferType
 TRANSFER_TYPE_WIN: TransferType
@@ -427,6 +430,7 @@ DISPATCH_METRIC_AVERAGE_POSITION: DispatchMetric
 DISPATCH_METRIC_RELATIVE_RETURN: DispatchMetric
 DISPATCH_METRIC_RETURN_VOLATILITY: DispatchMetric
 DISPATCH_METRIC_VALIDATOR_RANKING: DispatchMetric
+DISPATCH_METRIC_REALISED_RETURN: DispatchMetric
 ENTITY_SCOPE_UNSPECIFIED: EntityScope
 ENTITY_SCOPE_INDIVIDUALS: EntityScope
 ENTITY_SCOPE_TEAMS: EntityScope
@@ -568,6 +572,9 @@ class StopOrder(_message.Message):
         REJECTION_REASON_STOP_ORDER_CANNOT_MATCH_OCO_EXPIRY_TIMES: _ClassVar[
             StopOrder.RejectionReason
         ]
+        REJECTION_REASON_STOP_ORDER_SIZE_OVERRIDE_UNSUPPORTED_FOR_SPOT: _ClassVar[
+            StopOrder.RejectionReason
+        ]
 
     REJECTION_REASON_UNSPECIFIED: StopOrder.RejectionReason
     REJECTION_REASON_TRADING_NOT_ALLOWED: StopOrder.RejectionReason
@@ -583,6 +590,9 @@ class StopOrder(_message.Message):
         StopOrder.RejectionReason
     )
     REJECTION_REASON_STOP_ORDER_CANNOT_MATCH_OCO_EXPIRY_TIMES: StopOrder.RejectionReason
+    REJECTION_REASON_STOP_ORDER_SIZE_OVERRIDE_UNSUPPORTED_FOR_SPOT: (
+        StopOrder.RejectionReason
+    )
 
     class SizeOverrideValue(_message.Message):
         __slots__ = ("percentage",)
@@ -1385,6 +1395,7 @@ class DispatchStrategy(_message.Message):
         "distribution_strategy",
         "rank_table",
         "cap_reward_fee_multiple",
+        "transfer_interval",
     )
     ASSET_FOR_METRIC_FIELD_NUMBER: _ClassVar[int]
     METRIC_FIELD_NUMBER: _ClassVar[int]
@@ -1400,6 +1411,7 @@ class DispatchStrategy(_message.Message):
     DISTRIBUTION_STRATEGY_FIELD_NUMBER: _ClassVar[int]
     RANK_TABLE_FIELD_NUMBER: _ClassVar[int]
     CAP_REWARD_FEE_MULTIPLE_FIELD_NUMBER: _ClassVar[int]
+    TRANSFER_INTERVAL_FIELD_NUMBER: _ClassVar[int]
     asset_for_metric: str
     metric: DispatchMetric
     markets: _containers.RepeatedScalarFieldContainer[str]
@@ -1414,6 +1426,7 @@ class DispatchStrategy(_message.Message):
     distribution_strategy: DistributionStrategy
     rank_table: _containers.RepeatedCompositeFieldContainer[Rank]
     cap_reward_fee_multiple: str
+    transfer_interval: int
     def __init__(
         self,
         asset_for_metric: _Optional[str] = ...,
@@ -1430,6 +1443,7 @@ class DispatchStrategy(_message.Message):
         distribution_strategy: _Optional[_Union[DistributionStrategy, str]] = ...,
         rank_table: _Optional[_Iterable[_Union[Rank, _Mapping]]] = ...,
         cap_reward_fee_multiple: _Optional[str] = ...,
+        transfer_interval: _Optional[int] = ...,
     ) -> None: ...
 
 class Rank(_message.Message):
@@ -2176,7 +2190,7 @@ class EthereumConfig(_message.Message):
         ] = ...,
     ) -> None: ...
 
-class EVMChainConfig(_message.Message):
+class EVMBridgeConfig(_message.Message):
     __slots__ = (
         "network_id",
         "chain_id",
@@ -2184,6 +2198,7 @@ class EVMChainConfig(_message.Message):
         "confirmations",
         "multisig_control_contract",
         "block_time",
+        "name",
     )
     NETWORK_ID_FIELD_NUMBER: _ClassVar[int]
     CHAIN_ID_FIELD_NUMBER: _ClassVar[int]
@@ -2191,12 +2206,14 @@ class EVMChainConfig(_message.Message):
     CONFIRMATIONS_FIELD_NUMBER: _ClassVar[int]
     MULTISIG_CONTROL_CONTRACT_FIELD_NUMBER: _ClassVar[int]
     BLOCK_TIME_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
     network_id: str
     chain_id: str
     collateral_bridge_contract: EthereumContractConfig
     confirmations: int
     multisig_control_contract: EthereumContractConfig
     block_time: str
+    name: str
     def __init__(
         self,
         network_id: _Optional[str] = ...,
@@ -2209,6 +2226,15 @@ class EVMChainConfig(_message.Message):
             _Union[EthereumContractConfig, _Mapping]
         ] = ...,
         block_time: _Optional[str] = ...,
+        name: _Optional[str] = ...,
+    ) -> None: ...
+
+class EVMBridgeConfigs(_message.Message):
+    __slots__ = ("configs",)
+    CONFIGS_FIELD_NUMBER: _ClassVar[int]
+    configs: _containers.RepeatedCompositeFieldContainer[EVMBridgeConfig]
+    def __init__(
+        self, configs: _Optional[_Iterable[_Union[EVMBridgeConfig, _Mapping]]] = ...
     ) -> None: ...
 
 class EthereumContractConfig(_message.Message):

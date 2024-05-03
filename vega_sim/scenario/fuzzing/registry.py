@@ -51,6 +51,6 @@ REGISTRY = {
                 notional_trade_volume=100,
             ),
         ],
-        initial_network_parameters={"validators.epoch.length": "1h"},
+        initial_network_parameters={"validators.epoch.length": "10m"},
     ),
 }

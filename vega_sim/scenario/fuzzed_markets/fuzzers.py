@@ -574,15 +574,14 @@ def fuzz_order_submission(
         )
 
     def _pick_size():
-        min_order_size = 10 ** vega.market_pos_decimals[market_id]
         if (
             vega.market_data_from_feed(market_id).market_trading_mode
             != vega_protos.markets.Market.TradingMode.TRADING_MODE_CONTINUOUS
         ):
-            return rs.choice(rs.poisson(100 * min_order_size))
+            return rs.poisson(100) ** -vega.market_pos_decimals[market_id]
         return rs.choice(
             [
-                rs.poisson(100 * min_order_size),
+                rs.poisson(100) ** -vega.market_pos_decimals[market_id],
                 rs.beta(a=0.001, b=0.001)
                 * (2**64 - 1)
                 / 10 ** vega.market_pos_decimals[market_id],

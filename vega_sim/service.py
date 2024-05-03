@@ -493,6 +493,7 @@ class VegaService(ABC):
         amount: float,
         wallet_name: Optional[str] = None,
         from_faucet: bool = False,
+        raise_error: bool = True,
     ) -> None:
         """Mints a given amount of requested asset into the associated wallet.
 
@@ -547,10 +548,13 @@ class VegaService(ABC):
                 return
             self.wait_fn(1)
 
-        raise VegaFaucetError(
+        err = VegaFaucetError(
             f"Failure minting asset {asset} for party {wallet_name}. Funds never"
             " appeared in party account"
         )
+        if raise_error:
+            raise err
+        logger.error(err)
 
     def forward(self, time: str) -> None:
         """Steps chain forward a given amount of time, either with an amount of time or
@@ -2984,6 +2988,7 @@ class VegaService(ABC):
         distribution_strategy: Optional[vega_protos.vega.DistributionStrategy] = None,
         rank_table: Optional[List[vega_protos.vega.Rank]] = None,
         cap_reward_fee_multiple: Optional[float] = None,
+        transfer_interval: Optional[int] = None,
     ):
         """Create a recurring transfer of funds.
 
@@ -3024,7 +3029,9 @@ class VegaService(ABC):
                 The list of markets to apply the dispatch strategy. Defaults to None.
             cap_reward_fee_multiple (Optional[float], optional):
                 A multiplier to cap reward fees. Defaults to None.
-
+            transfer_interval (Optional[int], optional):
+                Interval between transfers expressed in epochs.
+                Defaults to None.
         Raises:
             Exception:
                 If a value is provided for one but not all non-optional
@@ -3066,6 +3073,7 @@ class VegaService(ABC):
                     markets,
                     team_scope,
                     rank_table,
+                    transfer_interval,
                 ]
             ]
         ):
@@ -3084,6 +3092,7 @@ class VegaService(ABC):
                 distribution_strategy=distribution_strategy,
                 rank_table=rank_table,
                 cap_reward_fee_multiple=cap_reward_fee_multiple,
+                transfer_interval=transfer_interval,
             )
             recurring_transfer.dispatch_strategy.CopyFrom(dispatch_strategy)
 

@@ -298,6 +298,7 @@ class FuzzingAgent(StateAgentWithWallet):
             wallet_name=self.wallet_name,
             asset=asset_id,
             amount=amount,
+            raise_error=False,
         )
 
 
@@ -363,6 +364,7 @@ class RiskyMarketOrderTrader(StateAgentWithWallet):
                 wallet_name=self.wallet_name,
                 amount=self.initial_asset_mint,
                 asset=self.asset_id,
+                raise_error=False,
             )
             self.close_outs += 1
             self.commitment_amount = 0
@@ -464,6 +466,7 @@ class RiskySimpleLiquidityProvider(StateAgentWithWallet):
                 wallet_name=self.wallet_name,
                 amount=self.initial_asset_mint,
                 asset=self.asset_id,
+                raise_error=False,
             )
             self.close_outs += 1
             self.commitment_amount = 0
@@ -636,6 +639,7 @@ class FuzzyLiquidityProvider(StateAgentWithWallet):
                 wallet_name=self.wallet_name,
                 amount=self.initial_asset_mint,
                 asset=self.asset_id,
+                raise_error=False,
             )
             return
 
@@ -1211,7 +1215,7 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
         self._sensible_proposal()
 
     def step(self, vega_state):
-        if self.random_state.rand() > self.step_bias:
+        if self.random_state.rand() < self.step_bias:
             for i in range(self.attempts_per_step):
                 try:
                     self._fuzzed_proposal()

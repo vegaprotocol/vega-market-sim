@@ -1367,6 +1367,7 @@ class ShapedMarketMaker(StateAgentWithWallet):
                         asset=self.asset_id,
                         amount=self.initial_asset_mint,
                         key_name=self.key_name,
+                        raise_error=False,
                     )
                     self.vega.wait_for_total_catchup()
 
@@ -3335,6 +3336,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                         asset=self.asset_id,
                         amount=self.initial_asset_mint,
                         key_name=self.key_name,
+                        raise_error=False,
                     )
             self.vega.submit_order(
                 trading_key=self.key_name,
@@ -3362,6 +3364,7 @@ class RewardFunder(StateAgentWithWallet):
         asset_for_metric_name: Optional[str] = None,
         metric: Optional[str] = None,
         market_names: Optional[str] = None,
+        entity_scope: Optional[vega_protos.EntityScope.Value] = None,
         wallet_name: Optional[str] = None,
         stake_key: bool = False,
         tag: Optional[str] = None,
@@ -3374,6 +3377,7 @@ class RewardFunder(StateAgentWithWallet):
         self.account_type = account_type
         self.metric = metric
         self.market_names = market_names
+        self.entity_scope = entity_scope
         self.stake_key = stake_key
 
     def initialise(
@@ -3450,7 +3454,12 @@ class RewardFunder(StateAgentWithWallet):
                 else None
             ),
             metric=self.metric,
-            window_length=3,
+            window_length=2,
+            transfer_interval=2,
+            entity_scope=self.entity_scope,
+            n_top_performers=(
+                0.5 if self.entity_scope == vega_protos.ENTITY_SCOPE_TEAMS else None
+            ),
         )
 
 
@@ -3638,6 +3647,14 @@ class ReferralAgentWrapper:
         self.applied_code = False
         self.tag = agent.tag
 
+    @property
+    def key_name(self):
+        return self._agent.key_name
+
+    @property
+    def wallet_name(self):
+        return self._agent.wallet_name
+
     def initialise(
         self,
         vega: Union[VegaServiceNull, VegaServiceNetwork],
@@ -3667,7 +3684,7 @@ class ReferralAgentWrapper:
                 return
             referral_sets = list(
                 self._agent.vega.list_referral_sets(
-                    referrer_id,
+                    referrer=referrer_id,
                 ).keys()
             )
             if len(referral_sets) == 0:
@@ -3675,7 +3692,11 @@ class ReferralAgentWrapper:
                     "Specified referral key has not yet created a referral set."
                 )
                 return
-            self._agent.vega.apply_referral_code(referral_sets[0])
+            self._agent.vega.apply_referral_code(
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+                id=referral_sets[0],
+            )
             self.applied_code == True
 
         self._agent.step(vega_state=vega_state)

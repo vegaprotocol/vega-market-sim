@@ -1214,8 +1214,8 @@ class TransactionResult(_message.Message):
         "batch_market_instructions",
         "key_rotate_submission",
         "ethereum_key_rotate_submission",
-        "stop_order_submission",
-        "stop_order_cancellation",
+        "stop_orders_submission",
+        "stop_orders_cancellation",
         "create_referral_set",
         "update_referral_set",
         "apply_referral_code",
@@ -1260,8 +1260,8 @@ class TransactionResult(_message.Message):
     BATCH_MARKET_INSTRUCTIONS_FIELD_NUMBER: _ClassVar[int]
     KEY_ROTATE_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     ETHEREUM_KEY_ROTATE_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
-    STOP_ORDER_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
-    STOP_ORDER_CANCELLATION_FIELD_NUMBER: _ClassVar[int]
+    STOP_ORDERS_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
+    STOP_ORDERS_CANCELLATION_FIELD_NUMBER: _ClassVar[int]
     CREATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_REFERRAL_SET_FIELD_NUMBER: _ClassVar[int]
     APPLY_REFERRAL_CODE_FIELD_NUMBER: _ClassVar[int]
@@ -1294,8 +1294,8 @@ class TransactionResult(_message.Message):
     batch_market_instructions: _commands_pb2.BatchMarketInstructions
     key_rotate_submission: _validator_commands_pb2.KeyRotateSubmission
     ethereum_key_rotate_submission: _validator_commands_pb2.EthereumKeyRotateSubmission
-    stop_order_submission: _commands_pb2.StopOrdersSubmission
-    stop_order_cancellation: _commands_pb2.StopOrdersCancellation
+    stop_orders_submission: _commands_pb2.StopOrdersSubmission
+    stop_orders_cancellation: _commands_pb2.StopOrdersCancellation
     create_referral_set: _commands_pb2.CreateReferralSet
     update_referral_set: _commands_pb2.UpdateReferralSet
     apply_referral_code: _commands_pb2.ApplyReferralCode
@@ -1366,10 +1366,10 @@ class TransactionResult(_message.Message):
         ethereum_key_rotate_submission: _Optional[
             _Union[_validator_commands_pb2.EthereumKeyRotateSubmission, _Mapping]
         ] = ...,
-        stop_order_submission: _Optional[
+        stop_orders_submission: _Optional[
             _Union[_commands_pb2.StopOrdersSubmission, _Mapping]
         ] = ...,
-        stop_order_cancellation: _Optional[
+        stop_orders_cancellation: _Optional[
             _Union[_commands_pb2.StopOrdersCancellation, _Mapping]
         ] = ...,
         create_referral_set: _Optional[
