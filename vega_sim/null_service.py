@@ -363,6 +363,7 @@ def manage_vega_processes(
     store_transactions: bool = True,
     log_level: Optional[int] = None,
     genesis_time: Optional[datetime.datetime] = None,
+    custom_vega_home_path: Optional[str] = None,
 ) -> None:
     logger.addHandler(QueueHandler(log_queue))
     logger.setLevel(log_level if log_level is not None else logging.INFO)
@@ -397,7 +398,10 @@ def manage_vega_processes(
         logger.info(f"Launching Core GRPC at port {port_config.get(Ports.CORE_GRPC)}")
 
     dest_dir = f"{tmp_vega_dir}/vegahome"
-    shutil.copytree(vega_home_path, dest_dir)
+    shutil.copytree(
+        custom_vega_home_path if custom_vega_home_path is not None else vega_home_path,
+        dest_dir,
+    )
     for dirpath, _, filenames in os.walk(dest_dir):
         os.utime(dirpath, None)
         for file in filenames:
@@ -789,6 +793,7 @@ class VegaServiceNull(VegaService):
         listen_for_high_volume_stream_updates: bool = False,
         check_for_binaries: bool = False,
         genesis_time: Optional[datetime.datetime] = None,
+        custom_vega_home_path: Optional[str] = None,
     ):
         super().__init__(
             can_control_time=True,
@@ -811,6 +816,7 @@ class VegaServiceNull(VegaService):
         self.run_with_console = run_with_console
         self.run_wallet_with_token_dapp = run_wallet_with_token_dapp
         self.genesis_time = genesis_time
+        self.custom_vega_home_path = custom_vega_home_path
 
         self.transactions_per_block = transactions_per_block
         self.seconds_per_block = seconds_per_block
@@ -941,6 +947,7 @@ class VegaServiceNull(VegaService):
                 "replay_from_path": self.replay_from_path,
                 "log_level": logging.getLogger().level,
                 "genesis_time": self.genesis_time,
+                "custom_vega_home_path": self.custom_vega_home_path,
             },
         )
         self.proc.start()
