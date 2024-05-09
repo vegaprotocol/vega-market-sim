@@ -3,7 +3,7 @@ NodeMode = "validator"
 UlimitNOFile = 8192
 
 [API]
-  Level = "Debug"
+  Level = "Info"
   Timeout = "5s"
   Port = "TO_BE_SET"
   IP = "0.0.0.0"
@@ -23,7 +23,7 @@ UlimitNOFile = 8192
   LogOrderCancelDebug = false
   ChainProvider = "nullchain"
   [Blockchain.Tendermint]
-    Level = "Debug"
+    Level = "Info"
     LogTimeDebug = true
     ClientAddr = "tcp://0.0.0.0:26657"
     ClientEndpoint = "/websocket"
@@ -32,7 +32,7 @@ UlimitNOFile = 8192
     ABCIRecordDir = ""
     ABCIReplayFile = ""
   [Blockchain.Null]
-    Level = "Debug"
+    Level = "Info"
     BlockDuration = "TO_BE_SET"
     TransactionsPerBlock = "TO_BE_SET"
     GenesisFile = "./null-blockchain/node-startup/vegahome/genesis.json"
@@ -58,7 +58,7 @@ UlimitNOFile = 8192
   Delegations = true
 
 [Execution]
-  Level = "Debug"
+  Level = "Info"
   [Execution.Matching]
     Level = "Info"
     LogPriceLevelsDebug = false
@@ -77,7 +77,7 @@ UlimitNOFile = 8192
     Level = "Info"
 
 [Processor]
-  Level = "Debug"
+  Level = "Info"
   LogOrderSubmitDebug = true
   LogOrderAmendDebug = true
   LogOrderCancelDebug = true
@@ -130,7 +130,7 @@ UlimitNOFile = 8192
   Enabled = true
 
 [Governance]
-  Level = "Debug"
+  Level = "Info"
 
 [NodeWallet]
   Level = "Info"
@@ -154,7 +154,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Validators]
-  Level = "Debug"
+  Level = "Warning"
 
 [Banking]
   Level = "Info"
@@ -169,7 +169,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Checkpoint]
-  Level = "Info"
+  Level = "Warning"
 
 [Staking]
   Level = "Info"
@@ -198,7 +198,7 @@ UlimitNOFile = 8192
   Level = "Info"
 
 [Snapshot]
-  Level = "Info"
+  Level = "Warning"
   KeepRecent = 1000
   RetryLimit = 5
   Storage = "GOLevelDB"
@@ -206,7 +206,7 @@ UlimitNOFile = 8192
   StartHeight = 0
 
 [StateVar]
-  Level = "Info"
+  Level = "Warning"
 
 [Pprof]
   Level = "Info"

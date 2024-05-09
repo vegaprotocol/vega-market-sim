@@ -2551,6 +2551,7 @@ class VegaService(ABC):
         time_in_force: Optional[Union[vega_protos.vega.Order.TimeInForce, str]] = None,
         pegged_offset: Optional[float] = None,
         pegged_reference: Optional[Union[vega_protos.vega.PeggedReference, str]] = None,
+        round_to_tick: bool = True,
     ) -> OrderAmendment:
         """Creates a Vega OrderAmendment object.
 
@@ -2580,13 +2581,12 @@ class VegaService(ABC):
                 The created Vega OrderAmendment object
         """
 
-        price = (
-            price
-            if price is None
-            else num_to_padded_int(
-                to_convert=price, decimals=self.market_price_decimals[market_id]
+        if round_to_tick:
+            market = self.data_cache.market_from_feed(market_id)
+            price = helpers.round_to_tick(
+                price=price,
+                tick_size=market.tick_size,
             )
-        )
 
         pegged_offset = (
             pegged_offset

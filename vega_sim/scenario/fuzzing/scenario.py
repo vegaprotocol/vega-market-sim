@@ -91,7 +91,7 @@ class FuzzingScenario(BenchmarkScenario):
                     avatar_url=f"avatarUrl_{str(i_agent).zfill(3)}",
                     closed=False,
                 )
-                for i_agent in range(5)
+                for i_agent in range(3)
             ]
         )
 
@@ -117,7 +117,7 @@ class FuzzingScenario(BenchmarkScenario):
                         referrer_wallet_name="ReferralAgentWrapper",
                         referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
                     )
-                    for i_referrer, i_agent in itertools.product(range(5), range(2))
+                    for i_referrer, i_agent in itertools.product(range(2), range(2))
                 ]
             )
             extra_agents.extend(
@@ -135,7 +135,7 @@ class FuzzingScenario(BenchmarkScenario):
                         referrer_wallet_name="ReferralAgentWrapper",
                         referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
                     )
-                    for i_referrer, i_agent in itertools.product(range(5), range(2))
+                    for i_referrer, i_agent in itertools.product(range(2), range(2))
                 ]
             )
 
