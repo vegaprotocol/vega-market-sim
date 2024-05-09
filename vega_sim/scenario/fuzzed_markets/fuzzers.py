@@ -12,6 +12,12 @@ def valid(rs, bias) -> bool:
     return False
 
 
+def round_to_tick(price: float, decimals: int, tick_size: int) -> float:
+    increment = int(tick_size) * 10 ** -int(decimals)
+    price = round(price / increment) * increment
+    return price
+
+
 def fuzz_dispatch_strategy(
     vega: VegaService, rs: RandomState, bias: float
 ) -> vega_protos.vega.DispatchStrategy:
@@ -563,7 +569,7 @@ def fuzz_order_submission(
                 return None
             if pegged_order is not None:
                 return None
-        return rs.choice(
+        price = rs.choice(
             [
                 market_data.mid_price + rs.normal(loc=0, scale=10),
                 rs.beta(a=0.001, b=0.001)
@@ -572,6 +578,9 @@ def fuzz_order_submission(
             ],
             p=[0.9, 0.1],
         )
+        if rs.rand() < bias:
+            return round_to_tick(price, market.decimal_places, market.tick_size)
+        return price
 
     def _pick_size():
         if (
@@ -650,6 +659,7 @@ def fuzz_order_submission(
     # Get network information
     market_ids = list(vega.market_to_asset.keys())
     market_id = _pick_market_id()
+    market = vega.market_info(market_id)
     market_data = vega.market_data_from_feed(market_id)
 
     # Pick driver fields
@@ -695,15 +705,22 @@ def fuzz_order_amendment(
         return None
 
     def _pick_price():
-        return rs.choice(
+        price = rs.choice(
             [
                 market_data.mid_price + rs.normal(loc=0, scale=10),
                 rs.beta(a=0.001, b=0.001)
                 * (2**64 - 1)
                 / 10 ** vega.market_pos_decimals[market_id],
+                None,
             ],
-            p=[0.9, 0.1],
+            p=[0.45, 0.1, 0.45],
         )
+        if price is None:
+            return price
+        if rs.rand() < bias:
+            price = round_to_tick(price, market.decimal_places, market.tick_size)
+            return price
+        return price
 
     def _pick_size():
         return rs.choice(
@@ -730,6 +747,7 @@ def fuzz_order_amendment(
     # Get network information
     market_ids = [key for key, _ in vega.market_to_asset.items()]
     market_id = _pick_market_id()
+    market = vega.market_info(market_id)
     market_data = vega.market_data_from_feed(market_id)
 
     # Pick driven fields

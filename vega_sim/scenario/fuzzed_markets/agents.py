@@ -107,7 +107,7 @@ class FuzzingAgent(StateAgentWithWallet):
         self.curr_time = self.vega.get_blockchain_time(in_seconds=True)
 
         submissions = []
-        for _ in range(10):
+        for _ in range(5):
             submission = self.create_fuzzed_submission(vega_state)
             if submission is None:
                 continue
@@ -126,7 +126,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 except AttributeError as e:
                     raise e
         amendments = []
-        for _ in range(10):
+        for _ in range(5):
             amendment = self.create_fuzzed_amendment(vega_state)
             if amendment is None:
                 continue
@@ -160,7 +160,7 @@ class FuzzingAgent(StateAgentWithWallet):
                 except HTTPError:
                     continue
         stop_orders_submissions = []
-        for _ in range(10):
+        for _ in range(5):
             stop_orders_submission = self.create_fuzzed_stop_orders_submission(
                 vega_state
             )
