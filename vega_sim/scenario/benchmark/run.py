@@ -62,7 +62,9 @@ def _run(
         )
         markets = service.api.data.list_markets(include_settled=True)
 
+        date_range_end_timestamp = service.api.data.get_vega_time()
         for market in markets:
+            date_range_start_timestamp = market.market_timestamps.pending
 
             is_spot = (
                 market.tradable_instrument.instrument.spot != protos.vega.markets.Spot()
@@ -90,18 +92,19 @@ def _run(
             asset = service.api.data.get_asset(market_asset)
             trades = service.api.data.list_trades(
                 market_ids=[market.id],
-                date_range_start_timestamp=market.market_timestamps.pending,
+                date_range_start_timestamp=date_range_start_timestamp,
             )
             market_data_history = service.api.data.get_market_data_history_by_id(
                 market.id,
-                start_timestamp=market.market_timestamps.pending,
+                start_timestamp=date_range_start_timestamp,
             )
             aggregated_balance_history = service.api.data.list_balance_changes(
                 asset_id=asset.id,
                 market_ids=[market.id],
                 party_ids=["network"],
                 account_types=[protos.vega.vega.AccountType.ACCOUNT_TYPE_INSURANCE],
-                date_range_start_timestamp=market.market_timestamps.pending,
+                date_range_start_timestamp=date_range_start_timestamp,
+                date_range_end_timestamp=date_range_end_timestamp,
             )
             # Update figures
             if output:
@@ -122,11 +125,12 @@ def _run(
                 if is_perpetual:
                     funding_periods = service.api.data.list_funding_periods(
                         market_id=market.id,
-                        start_timestamp=market.market_timestamps.pending,
+                        start_timestamp=date_range_start_timestamp,
                     )
                     funding_period_data_points = (
                         service.api.data.list_funding_period_data_points(
-                            market.id, start_timestamp=market.market_timestamps.pending
+                            market.id,
+                            start_timestamp=date_range_start_timestamp,
                         )
                     )
                     vis.plot.funding_analysis(
