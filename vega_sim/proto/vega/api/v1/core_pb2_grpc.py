@@ -18,51 +18,61 @@ class CoreServiceStub(object):
             "/vega.api.v1.CoreService/SubmitTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitTransactionResponse.FromString,
+   
         )
         self.PropagateChainEvent = channel.unary_unary(
             "/vega.api.v1.CoreService/PropagateChainEvent",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.PropagateChainEventRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.PropagateChainEventResponse.FromString,
+   
         )
         self.Statistics = channel.unary_unary(
             "/vega.api.v1.CoreService/Statistics",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.StatisticsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.StatisticsResponse.FromString,
+   
         )
         self.LastBlockHeight = channel.unary_unary(
             "/vega.api.v1.CoreService/LastBlockHeight",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.LastBlockHeightRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.LastBlockHeightResponse.FromString,
+   
         )
         self.GetVegaTime = channel.unary_unary(
             "/vega.api.v1.CoreService/GetVegaTime",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.GetVegaTimeRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.GetVegaTimeResponse.FromString,
+   
         )
         self.ObserveEventBus = channel.stream_stream(
             "/vega.api.v1.CoreService/ObserveEventBus",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.ObserveEventBusRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.ObserveEventBusResponse.FromString,
+   
         )
         self.SubmitRawTransaction = channel.unary_unary(
             "/vega.api.v1.CoreService/SubmitRawTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitRawTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitRawTransactionResponse.FromString,
+   
         )
         self.CheckTransaction = channel.unary_unary(
             "/vega.api.v1.CoreService/CheckTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.CheckTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.CheckTransactionResponse.FromString,
+   
         )
         self.CheckRawTransaction = channel.unary_unary(
             "/vega.api.v1.CoreService/CheckRawTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionResponse.FromString,
+   
         )
         self.GetSpamStatistics = channel.unary_unary(
             "/vega.api.v1.CoreService/GetSpamStatistics",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsResponse.FromString,
+   
         )
 
 
@@ -254,6 +264,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -283,6 +294,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -312,6 +324,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -341,6 +354,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -370,6 +384,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -399,6 +414,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -428,6 +444,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -457,6 +474,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -486,6 +504,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -515,4 +534,5 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )

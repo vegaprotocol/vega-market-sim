@@ -20,16 +20,19 @@ class BlockExplorerServiceStub(object):
             "/blockexplorer.api.v1.BlockExplorerService/GetTransaction",
             request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionResponse.FromString,
+   
         )
         self.ListTransactions = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/ListTransactions",
             request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
+   
         )
         self.Info = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/Info",
             request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoResponse.FromString,
+   
         )
 
 
@@ -120,6 +123,7 @@ class BlockExplorerService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -149,6 +153,7 @@ class BlockExplorerService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -178,4 +183,5 @@ class BlockExplorerService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )

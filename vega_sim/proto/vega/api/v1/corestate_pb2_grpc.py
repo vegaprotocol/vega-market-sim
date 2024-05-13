@@ -18,61 +18,73 @@ class CoreStateServiceStub(object):
             "/vega.api.v1.CoreStateService/ListAccounts",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAccountsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAccountsResponse.FromString,
+   
         )
         self.ListAssets = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListAssets",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAssetsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAssetsResponse.FromString,
+   
         )
         self.ListNetworkParameters = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListNetworkParameters",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkParametersRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkParametersResponse.FromString,
+   
         )
         self.ListNetworkLimits = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListNetworkLimits",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkLimitsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkLimitsResponse.FromString,
+   
         )
         self.ListParties = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListParties",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesResponse.FromString,
+   
         )
         self.ListValidators = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListValidators",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListValidatorsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListValidatorsResponse.FromString,
+   
         )
         self.ListMarkets = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListMarkets",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsResponse.FromString,
+   
         )
         self.ListProposals = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListProposals",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListProposalsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListProposalsResponse.FromString,
+   
         )
         self.ListMarketsData = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListMarketsData",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsDataRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsDataResponse.FromString,
+   
         )
         self.ListVotes = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListVotes",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListVotesRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListVotesResponse.FromString,
+   
         )
         self.ListPartiesStake = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListPartiesStake",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesStakeRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesStakeResponse.FromString,
+   
         )
         self.ListDelegations = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListDelegations",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListDelegationsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListDelegationsResponse.FromString,
+   
         )
 
 
@@ -288,6 +300,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -317,6 +330,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -346,6 +360,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -375,6 +390,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -404,6 +420,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -433,6 +450,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -462,6 +480,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -491,6 +510,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -520,6 +540,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -549,6 +570,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -578,6 +600,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
 
     @staticmethod
@@ -607,4 +630,5 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+   
         )
