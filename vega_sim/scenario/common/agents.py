@@ -1285,65 +1285,8 @@ class ShapedMarketMaker(StateAgentWithWallet):
             buy_shape=new_buy_shape, sell_shape=new_sell_shape
         )
 
-        curr_buy_orders, curr_sell_orders = [], []
-
-        if self.orders_from_stream:
-            orders = (
-                (
-                    vega_state.market_state[self.market_id]
-                    .orders.get(
-                        self.vega.wallet.public_key(
-                            wallet_name=self.wallet_name, name=self.key_name
-                        ),
-                        {},
-                    )
-                    .values()
-                )
-                if self.market_id in vega_state.market_state
-                else []
-            )
-        else:
-            orders = self.vega.list_orders(
-                wallet_name=self.wallet_name,
-                key_name=self.key_name,
-                market_id=self.market_id,
-                live_only=True,
-            )
-
-        for order in orders:
-            if order.side == vega_protos.SIDE_BUY:
-                curr_buy_orders.append(order)
-            else:
-                curr_sell_orders.append(order)
-
-        # We want to first make the spread wider by moving the side which is in the
-        # direction of the move (e.g. if price falls, the bids)
-        first_side = (
-            (
-                vega_protos.SIDE_BUY
-                if scaled_sell_shape[0].price < curr_buy_orders[0].price
-                else vega_protos.SIDE_SELL
-            )
-            if (scaled_sell_shape != []) and (curr_buy_orders != [])
-            else vega_protos.SIDE_BUY
-        )
-        if first_side == vega_protos.SIDE_BUY:
-            self._move_side(
-                vega_protos.SIDE_BUY,
-                curr_buy_orders,
-                scaled_buy_shape,
-            )
-        self._move_side(
-            vega_protos.SIDE_SELL,
-            curr_sell_orders,
-            scaled_sell_shape,
-        )
-        if first_side == vega_protos.SIDE_SELL:
-            self._move_side(
-                vega_protos.SIDE_BUY,
-                curr_buy_orders,
-                scaled_buy_shape,
-            )
+        # Cancel all orders on the book then submit new scaled shape
+        self._update_orders(buys=scaled_buy_shape, sells=scaled_sell_shape)
 
         if (
             liq := (
@@ -1428,74 +1371,63 @@ class ShapedMarketMaker(StateAgentWithWallet):
 
         return provided_liquidity
 
-    def _move_side(
+    def _update_orders(
         self,
-        side: vega_protos.Side,
-        orders: List[Order],
-        new_shape: List[MMOrder],
+        buys: List[MMOrder],
+        sells: List[MMOrder],
     ) -> None:
-        amendments = []
-        submissions = []
-        cancellations = []
 
+        # Firstly, cancel all existing orders on the market
+        cancellations = [self.vega.build_order_cancellation(market_id=self.market_id)]
+
+        # Secondly, submit all new orders to the market
+        submissions = []
         expires_at = (
             int(self.vega.get_blockchain_time() + self.order_validity_length * 1e9)
             if self.order_validity_length is not None
             else None
         )
-
-        for i, order in enumerate(new_shape):
-            if i < len(orders):
-                order_to_amend = orders[i]
-
-                transaction = self.vega.build_order_amendment(
-                    market_id=self.market_id,
-                    order_id=order_to_amend.id,
-                    price=order.price,
-                    time_in_force=(
-                        "TIME_IN_FORCE_GTT"
-                        if self.order_validity_length is not None
-                        else "TIME_IN_FORCE_GTC"
-                    ),
-                    size_delta=order.size - order_to_amend.remaining,
-                    expires_at=expires_at,
-                )
-
-                amendments.append(transaction)
-
-            else:
-                transaction = self.vega.build_order_submission(
-                    market_id=self.market_id,
-                    price=order.price,
-                    size=order.size,
-                    order_type="TYPE_LIMIT",
-                    time_in_force=(
-                        "TIME_IN_FORCE_GTT"
-                        if self.order_validity_length is not None
-                        else "TIME_IN_FORCE_GTC"
-                    ),
-                    side=side,
-                    expires_at=expires_at,
-                )
-
-                submissions.append(transaction)
-
-        if len(orders) > len(new_shape):
-            for order in orders[len(new_shape) :]:
-                transaction = self.vega.build_order_cancellation(
-                    order_id=order.id,
-                    market_id=self.market_id,
-                )
-
-                cancellations.append(transaction)
+        for order in buys:
+            transaction = self.vega.build_order_submission(
+                market_id=self.market_id,
+                price=order.price,
+                size=order.size,
+                order_type="TYPE_LIMIT",
+                time_in_force=(
+                    "TIME_IN_FORCE_GTT"
+                    if self.order_validity_length is not None
+                    else "TIME_IN_FORCE_GTC"
+                ),
+                side=vega_protos.SIDE_BUY,
+                expires_at=(
+                    expires_at if self.order_validity_length is not None else None
+                ),
+            )
+            submissions.append(transaction)
+        for order in sells:
+            transaction = self.vega.build_order_submission(
+                market_id=self.market_id,
+                price=order.price,
+                size=order.size,
+                order_type="TYPE_LIMIT",
+                time_in_force=(
+                    "TIME_IN_FORCE_GTT"
+                    if self.order_validity_length is not None
+                    else "TIME_IN_FORCE_GTC"
+                ),
+                side=vega_protos.SIDE_SELL,
+                expires_at=(
+                    expires_at if self.order_validity_length is not None else None
+                ),
+            )
+            submissions.append(transaction)
 
         if submissions is not []:
             self.vega.submit_instructions(
                 wallet_name=self.wallet_name,
                 key_name=self.key_name,
-                amendments=amendments,
-                submissions=submissions,
                 cancellations=cancellations,
+                submissions=submissions,
             )
 
     def _update_state(self, current_step: int):
@@ -3249,6 +3181,9 @@ class ArbitrageLiquidityProvider(StateAgentWithWallet):
 
 
 class UncrossAuctionAgent(StateAgentWithWallet):
+
+    NAME_BASE = "UncrossAuctionAgent"
+
     def __init__(
         self,
         key_name: str,
@@ -3338,6 +3273,10 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                         key_name=self.key_name,
                         raise_error=False,
                     )
+
+            # Ensure volume maximising range is at least 100bps wide to
+            # account for any tick rounding causing orders to not cross.
+            price = 1.01 * curr_price if self.side == "SIDE_BUY" else 0.99 * curr_price
             self.vega.submit_order(
                 trading_key=self.key_name,
                 trading_wallet=self.wallet_name,
@@ -3346,7 +3285,7 @@ class UncrossAuctionAgent(StateAgentWithWallet):
                 time_in_force="TIME_IN_FORCE_GTT",
                 side=self.side,
                 volume=self.uncrossing_size,
-                price=curr_price,
+                price=price,
                 wait=False,
             )
 
