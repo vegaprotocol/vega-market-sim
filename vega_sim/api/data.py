@@ -2371,9 +2371,6 @@ def list_transfers(
     for transfer_node in transfer_nodes:
         transfer = transfer_node.transfer
 
-        if transfer.status == events_protos.Transfer.Status.STATUS_REJECTED:
-            continue
-
         if transfer.asset not in asset_dp:
             asset_dp[transfer.asset] = get_asset_decimals(
                 asset_id=transfer.asset, data_client=data_client
