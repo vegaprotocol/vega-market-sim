@@ -18,6 +18,7 @@ from vega_sim.scenario.common.agents import (
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
     FuzzyLiquidityProvider,
+    FuzzedAutomatedMarketMaker,
     FuzzyReferralProgramManager,
     FuzzyVolumeDiscountProgramManager,
 )
@@ -130,6 +131,27 @@ class FuzzingScenario(BenchmarkScenario):
                             ),
                             market_name=market_name,
                             initial_asset_mint=5_000,
+                            tag=f"{market_code}_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
+                        ),
+                        referrer_wallet_name="ReferralAgentWrapper",
+                        referrer_key_name=f"ReferralAgentWrapper_{str(i_referrer).zfill(3)}",
+                    )
+                    for i_referrer, i_agent in itertools.product(range(2), range(2))
+                ]
+            )
+            extra_agents.extend(
+                [
+                    ReferralAgentWrapper(
+                        agent=FuzzedAutomatedMarketMaker(
+                            wallet_name="FuzzedAutomatedMarketMaker",
+                            key_name=(
+                                f"FuzzedAutomatedMarketMaker{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}"
+                            ),
+                            market_name=market_name,
+                            submit_probability=0.5,
+                            amend_probability=0.5,
+                            cancel_probability=0.1,
+                            initial_asset_mint=1e6,
                             tag=f"{market_code}_{str(i_referrer).zfill(3)}_{str(i_agent).zfill(3)}",
                         ),
                         referrer_wallet_name="ReferralAgentWrapper",

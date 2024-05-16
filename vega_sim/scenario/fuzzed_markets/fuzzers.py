@@ -5,6 +5,8 @@ from vega_sim.service import VegaService
 import vega_sim.builders as build
 import vega_python_protos.protos.vega as vega_protos
 
+from typing import Union
+
 
 def valid(rs, bias) -> bool:
     if rs.rand() < bias:
@@ -765,4 +767,191 @@ def fuzz_order_amendment(
         size=size,
         size_delta=size_delta,
         price=price,
+    )
+
+
+def fuzz_submit_amm(
+    vega: VegaService, rs: RandomState, bias: float
+) -> vega_protos.commands.v1.commands.SubmitAMM:
+
+    def _pick_market_id():
+        if len(market_ids) == 0:
+            return None
+        return rs.choice(market_ids)
+
+    def _pick_commitment_amount():
+        return rs.rand() * 10000
+
+    def _pick_slippage_tolerance():
+        return rs.rand()
+
+    def _pick_proposed_fee():
+        return rs.rand()
+
+    def _pick_base():
+        if valid(rs, bias):
+            factor = rs.uniform(1, 2)
+        else:
+            factor = rs.uniform(0, 2)
+        return market_data.mid_price * factor
+
+    def _pick_lower_bound():
+        if valid(rs, bias):
+            factor = rs.uniform(0, 1)
+        else:
+            factor = rs.uniform(0, 2)
+        return rs.choice([None, base * factor])
+
+    def _pick_upper_bound():
+        if valid(rs, bias):
+            factor = rs.uniform(1, 2)
+        else:
+            factor = rs.uniform(0, 2)
+        return rs.choice([None, base * factor])
+
+    def _pick_leverage_at_lower_bound():
+        if valid(rs, bias):
+            if lower_bound is None:
+                return None
+        return rs.rand() * 100
+
+    def _pick_leverage_at_upper_bound():
+        if valid(rs, bias):
+            if upper_bound is None:
+                return None
+        return rs.rand() * 100
+
+    market_ids = [key for key, _ in vega.market_to_asset.items()]
+    market_id = _pick_market_id()
+    market_data = vega.market_data_from_feed(market_id)
+
+    proposed_fee = _pick_proposed_fee()
+    commitment_amount = _pick_commitment_amount()
+    slippage_tolerance = _pick_slippage_tolerance()
+
+    base = _pick_base()
+    lower_bound = _pick_lower_bound()
+    upper_bound = _pick_upper_bound()
+    leverage_at_lower_bound = _pick_leverage_at_lower_bound()
+    leverage_at_upper_bound = _pick_leverage_at_upper_bound()
+
+    return build.commands.commands.submit_amm(
+        asset_decimals=vega.asset_decimals,
+        market_asset_map=vega.market_to_asset,
+        market_price_decimals=vega.market_price_decimals,
+        market_id=market_id,
+        commitment_amount=commitment_amount,
+        slippage_tolerance=slippage_tolerance,
+        proposed_fee=proposed_fee,
+        base=base,
+        lower_bound=lower_bound,
+        upper_bound=upper_bound,
+        leverage_at_lower_bound=leverage_at_lower_bound,
+        leverage_at_upper_bound=leverage_at_upper_bound,
+    )
+
+
+def fuzz_amend_amm(
+    vega: VegaService, rs: RandomState, bias: float
+) -> vega_protos.commands.v1.commands.AmendAMM:
+
+    def _pick_market_id():
+        if len(market_ids) == 0:
+            return None
+        return rs.choice(market_ids)
+
+    def _pick_commitment_amount():
+        return rs.rand() * 10000
+
+    def _pick_slippage_tolerance():
+        return rs.rand()
+
+    def _pick_proposed_fee():
+        return rs.rand()
+
+    def _pick_base():
+        if valid(rs, bias):
+            factor = rs.uniform(1, 2)
+        else:
+            factor = rs.uniform(0, 2)
+        return market_data.mid_price * factor
+
+    def _pick_lower_bound():
+        if valid(rs, bias):
+            factor = rs.uniform(0, 1)
+        else:
+            factor = rs.uniform(0, 2)
+        return rs.choice([None, base * factor])
+
+    def _pick_upper_bound():
+        if valid(rs, bias):
+            factor = rs.uniform(1, 2)
+        else:
+            factor = rs.uniform(0, 2)
+        return rs.choice([None, base * factor])
+
+    def _pick_leverage_at_lower_bound():
+        if valid(rs, bias):
+            if lower_bound is None:
+                return None
+        return rs.rand() * 100
+
+    def _pick_leverage_at_upper_bound():
+        if valid(rs, bias):
+            if upper_bound is None:
+                return None
+        return rs.rand() * 100
+
+    market_ids = [key for key, _ in vega.market_to_asset.items()]
+    market_id = _pick_market_id()
+    market_data = vega.market_data_from_feed(market_id)
+
+    proposed_fee = _pick_proposed_fee()
+    commitment_amount = _pick_commitment_amount()
+    slippage_tolerance = _pick_slippage_tolerance()
+
+    base = _pick_base()
+    lower_bound = _pick_lower_bound()
+    upper_bound = _pick_upper_bound()
+    leverage_at_lower_bound = _pick_leverage_at_lower_bound()
+    leverage_at_upper_bound = _pick_leverage_at_upper_bound()
+
+    return build.commands.commands.amend_amm(
+        asset_decimals=vega.asset_decimals,
+        market_asset_map=vega.market_to_asset,
+        market_price_decimals=vega.market_price_decimals,
+        market_id=market_id,
+        commitment_amount=commitment_amount,
+        slippage_tolerance=slippage_tolerance,
+        proposed_fee=proposed_fee,
+        base=base,
+        lower_bound=lower_bound,
+        upper_bound=upper_bound,
+        leverage_at_lower_bound=leverage_at_lower_bound,
+        leverage_at_upper_bound=leverage_at_upper_bound,
+    )
+
+
+def fuzz_cancel_amm(
+    vega: VegaService, rs: RandomState, bias: float
+) -> vega_protos.commands.v1.commands.CancelAMM:
+
+    def _pick_market_id():
+        if len(market_ids) == 0:
+            return None
+        return rs.choice(market_ids)
+
+    def _pick_method():
+        values = vega_protos.vega.DispatchMetric.values()
+        if valid(rs, bias):
+            values.pop(0)
+        return rs.choice(values)
+
+    market_ids = [key for key, _ in vega.market_to_asset.items()]
+    market_id = _pick_market_id()
+    method = _pick_method()
+
+    return build.commands.commands.cancel_amm(
+        market_id=market_id,
+        method=method,
     )
