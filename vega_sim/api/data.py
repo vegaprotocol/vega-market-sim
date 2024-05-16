@@ -1713,6 +1713,67 @@ def _team_referee_history_from_proto(
     )
 
 
+@dataclass(frozen=True)
+class ConcentratedLiquidityParameters:
+    base: float
+    lower_bound: float
+    upper_bound: float
+    leverage_at_upper_bound: float
+    leverage_at_lower_bound: float
+
+
+def _concentrated_liquidity_parameters_from_proto(
+    concentrated_liquidity_parameters: vega_protos.events.v1.events.AMM.ConcentratedLiquidityParameters,
+    decimal_spec: DecimalSpec,
+) -> ConcentratedLiquidityParameters:
+    return ConcentratedLiquidityParameters(
+        base=num_from_padded_int(
+            concentrated_liquidity_parameters.base, decimal_spec.price_decimals
+        ),
+        lower_bound=num_from_padded_int(
+            concentrated_liquidity_parameters.lower_bound, decimal_spec.price_decimals
+        ),
+        upper_bound=num_from_padded_int(
+            concentrated_liquidity_parameters.upper_bound, decimal_spec.price_decimals
+        ),
+        leverage_at_upper_bound=float(
+            concentrated_liquidity_parameters.leverage_at_upper_bound
+        ),
+        leverage_at_lower_bound=float(
+            concentrated_liquidity_parameters.leverage_at_lower_bound
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class AMM:
+    id: str
+    party_id: str
+    market_id: str
+    amm_party_id: str
+    commitment: float
+    parameters: vega_protos.events.v1.events.AMM.ConcentratedLiquidityParameters
+    status: vega_protos.events.v1.events.AMM.Status
+    status_reason: vega_protos.events.v1.events.AMM.StatusReason
+
+
+def _amm_from_proto(
+    amm: vega_protos.events.v1.events.AMM, decimal_spec: DecimalSpec
+) -> AMM:
+    return AMM(
+        id=amm.id,
+        party_id=amm.party_id,
+        market_id=amm.market_id,
+        amm_party_id=amm.amm_party_id,
+        commitment=num_from_padded_int(amm.commitment, decimal_spec.asset_decimals),
+        parameters=_concentrated_liquidity_parameters_from_proto(
+            amm.parameters, decimal_spec
+        ),
+        status=amm.status,
+        status_reason=amm.status_reason,
+    )
+
+
 def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
     pub_key: Optional[str] = None,
@@ -3230,4 +3291,33 @@ def list_party_margin_modes(
         for proto in data_raw.list_party_margin_modes(
             data_client=data_client, market_id=market_id, party_id=party_id
         )
+    ]
+
+
+def list_amms(
+    data_client: vac.trading_data_grpc_v2,
+    price_decimals_map: Dict[str, int],
+    asset_decimals_map: Dict[str, int],
+    market_to_asset_map: Dict[str, str],
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+    amm_party_id: Optional[str] = None,
+    status: Optional[vega_protos.events.v1.events.AMM.Status.Value] = None,
+) -> List[AMM]:
+    amms = data_raw.list_amms(
+        data_client=data_client,
+        market_id=market_id,
+        party_id=party_id,
+        amm_party_id=amm_party_id,
+        status=status,
+    )
+    return [
+        _amm_from_proto(
+            amm,
+            DecimalSpec(
+                price_decimals=price_decimals_map[amm.market_id],
+                asset_decimals=asset_decimals_map[market_to_asset_map[amm.market_id]],
+            ),
+        )
+        for amm in amms
     ]
