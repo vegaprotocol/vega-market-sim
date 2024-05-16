@@ -1718,6 +1718,7 @@ def list_accounts(
     pub_key: Optional[str] = None,
     asset_id: Optional[str] = None,
     market_id: Optional[str] = None,
+    account_types: Optional[vega_protos.vega.AccountType] = None,
     asset_decimals_map: Optional[Dict[str, int]] = None,
 ) -> List[AccountData]:
     """Output money in general accounts/margin accounts/bond accounts (if exists)
@@ -1726,6 +1727,7 @@ def list_accounts(
         data_client=data_client,
         party_id=pub_key,
         asset_id=asset_id,
+        account_types=account_types,
         market_id=market_id,
     )
 

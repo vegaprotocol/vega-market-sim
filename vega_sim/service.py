@@ -1832,6 +1832,7 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         asset_id: Optional[str] = None,
         market_id: Optional[str] = None,
+        account_types: Optional[List[vega_protos.vega.AccountType.Value]] = None,
         key_name: Optional[str] = None,
     ) -> List[data.AccountData]:
         """Return all accounts across markets matching the supplied filter options
@@ -1843,6 +1844,8 @@ class VegaService(ABC):
                 Optional, default None, Filter down to only accounts on this asset
             market_id:
                 Optional, default None, Filter down to only accounts from this market
+            account_types:
+                Optional, default None, Filter down to only accounts of these type
             key_name:
                 Optional, default None, Select non-default key from the selected wallet
 
@@ -1859,6 +1862,7 @@ class VegaService(ABC):
             ),
             asset_id=asset_id,
             market_id=market_id,
+            account_types=account_types,
             asset_decimals_map=self.asset_decimals,
         )
 
