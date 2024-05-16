@@ -457,7 +457,7 @@ class LocalDataCache:
 
         with self.transfers_lock:
             for t in base_transfers:
-                if t.status != events_protos.Transfer.Status.STATUS_REJECTED:
+                if t.status == events_protos.Transfer.Status.STATUS_REJECTED:
                     continue
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
