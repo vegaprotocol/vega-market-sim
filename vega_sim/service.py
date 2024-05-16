@@ -2625,8 +2625,8 @@ class VegaService(ABC):
 
     def build_order_cancellation(
         self,
-        order_id: str,
-        market_id: str,
+        order_id: Optional[str] = None,
+        market_id: Optional[str] = None,
     ) -> OrderCancellation:
         """Returns a Vega OrderCancellation object
 
@@ -2635,9 +2635,9 @@ class VegaService(ABC):
 
         Args:
             order_id (str):
-                Id of order to cancel.
+                Id of order to cancel. Defaults to None.
             market_id (str):
-                Id of market containing order to cancel.
+                Id of market containing order to cancel. Defaults to None.
 
         Returns:
             OrderCancellation:
