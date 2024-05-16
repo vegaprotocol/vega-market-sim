@@ -39,6 +39,8 @@ from vega_sim.api.data import (
     IcebergOpts,
     StopOrder,
     NetworkParameter,
+    AMM,
+    ConcentratedLiquidityParameters,
     get_asset_decimals,
     find_asset_id,
     get_trades,
@@ -60,6 +62,7 @@ from vega_sim.api.data import (
     list_stop_orders,
     list_network_parameters,
     list_funding_periods,
+    list_amms,
     FundingPeriod,
 )
 from vega_sim.grpc.client import (
@@ -1570,4 +1573,70 @@ def test_list_funding_periods(trading_data_v2_servicer_and_port):
             funding_payment=None,
             funding_rate=None,
         ),
+    ]
+
+
+def test_list_amms(trading_data_v2_servicer_and_port):
+    def ListAMMs(self, request, context):
+        return data_node_protos_v2.trading_data.ListAMMsResponse(
+            amms=data_node_protos_v2.trading_data.AMMConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.AMMEdge(
+                        cursor="cursor",
+                        node=events_protos.AMM(
+                            id="id",
+                            party_id="party_id",
+                            market_id="market_id",
+                            amm_party_id="amm_party_id",
+                            commitment="10000",
+                            parameters=events_protos.AMM.ConcentratedLiquidityParameters(
+                                base="20000",
+                                lower_bound="10000",
+                                upper_bound="30000",
+                                leverage_at_lower_bound="10",
+                                leverage_at_upper_bound="10",
+                            ),
+                            status=events_protos.AMM.Status.STATUS_ACTIVE,
+                            status_reason=events_protos.AMM.StatusReason.STATUS_REASON_UNSPECIFIED,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAMMs = ListAMMs
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert list_amms(
+        data_client=data_client,
+        price_decimals_map={"market_id": 1},
+        asset_decimals_map={"asset_id": 1},
+        market_to_asset_map={"market_id": "asset_id"},
+        party_id="party_id",
+    ) == [
+        AMM(
+            id="id",
+            party_id="party_id",
+            market_id="market_id",
+            amm_party_id="amm_party_id",
+            commitment=1000,
+            parameters=ConcentratedLiquidityParameters(
+                base=2000,
+                lower_bound=1000,
+                upper_bound=3000,
+                leverage_at_lower_bound=10,
+                leverage_at_upper_bound=10,
+            ),
+            status=events_protos.AMM.Status.STATUS_ACTIVE,
+            status_reason=events_protos.AMM.StatusReason.STATUS_REASON_UNSPECIFIED,
+        )
     ]
