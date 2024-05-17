@@ -9,9 +9,12 @@ logger = getLogger(__name__)
 
 def mint(pub_key: str, asset: str, amount: int, faucet_url: str) -> None:
     url = BASE_MINT_URL.format(faucet_url=faucet_url)
+    # Request a proportion of the maximum faucet amount - this allows for
+    # cases where requesting the maximum amount would have floating point
+    # imprecision and the request rejected.
     payload = {
         "party": pub_key,
-        "amount": str(int(amount)),
+        "amount": str(int(0.99 * amount)),
         "asset": asset,
     }
     for i in range(20):
