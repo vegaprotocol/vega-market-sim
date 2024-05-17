@@ -1718,6 +1718,7 @@ def list_accounts(
     pub_key: Optional[str] = None,
     asset_id: Optional[str] = None,
     market_id: Optional[str] = None,
+    account_types: Optional[vega_protos.vega.AccountType] = None,
     asset_decimals_map: Optional[Dict[str, int]] = None,
 ) -> List[AccountData]:
     """Output money in general accounts/margin accounts/bond accounts (if exists)
@@ -1726,6 +1727,7 @@ def list_accounts(
         data_client=data_client,
         party_id=pub_key,
         asset_id=asset_id,
+        account_types=account_types,
         market_id=market_id,
     )
 
@@ -2368,9 +2370,6 @@ def list_transfers(
 
     for transfer_node in transfer_nodes:
         transfer = transfer_node.transfer
-
-        if transfer.status == events_protos.Transfer.Status.STATUS_REJECTED:
-            continue
 
         if transfer.asset not in asset_dp:
             asset_dp[transfer.asset] = get_asset_decimals(

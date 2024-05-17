@@ -453,14 +453,12 @@ class LocalDataCache:
     def initialise_transfer_monitoring(
         self,
     ):
-        base_transfers = []
-
-        base_transfers.extend(
-            data.list_transfers(data_client=self._trading_data_client)
-        )
+        base_transfers = data.list_transfers(data_client=self._trading_data_client)
 
         with self.transfers_lock:
             for t in base_transfers:
+                if t.status == events_protos.Transfer.Status.STATUS_REJECTED:
+                    continue
                 self._transfer_state_from_feed.setdefault(t.party_to, {})[t.id] = t
 
     def initialise_network_parameters(self):

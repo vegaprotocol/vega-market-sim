@@ -40,8 +40,6 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import VegaService
 
-from vega_sim.service import VegaFaucetError
-
 logger = logging.getLogger(__name__)
 
 MarketState = namedtuple(
@@ -304,16 +302,8 @@ class MarketEnvironment:
             if self.random_agent_ordering
             else self.agents
         ):
-            # TODO: Remove this once fauceting error has been investigated
-            try:
-                agent.step(vega)
-            except VegaFaucetError:
-                logger.exception(
-                    f"Agent {agent.name()} failed to step. Funds from faucet never"
-                    " received."
-                )
-                # Mint forwards blocks, wait for catchup
-                vega.wait_for_total_catchup()
+            agent.step(vega)
+            vega.wait_for_total_catchup()
 
 
 class MarketEnvironmentWithState(MarketEnvironment):
@@ -431,16 +421,7 @@ class MarketEnvironmentWithState(MarketEnvironment):
             if self.random_agent_ordering
             else self.agents
         ):
-            # TODO: Remove this once fauceting error has been investigated
-            try:
-                agent.step(state)
-            except VegaFaucetError:
-                logger.exception(
-                    f"Agent {agent.name()} failed to step. Funds from faucet never"
-                    " received."
-                )
-                # Mint forwards blocks, wait for catchup
-                vega.wait_for_total_catchup()
+            agent.step(state)
 
 
 class NetworkEnvironment(MarketEnvironmentWithState):

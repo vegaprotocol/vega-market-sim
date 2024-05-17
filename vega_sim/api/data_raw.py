@@ -149,6 +149,7 @@ def list_accounts(
     data_client: vac.VegaTradingDataClientV2,
     asset_id: Optional[str] = None,
     market_id: Optional[str] = None,
+    account_types: Optional[vega_protos.vega.AccountType] = None,
     party_id: Optional[str] = None,
 ) -> List[data_node_protos_v2.trading_data.AccountBalance]:
     """
@@ -162,6 +163,8 @@ def list_accounts(
         account_filter.asset_id = asset_id
     if market_id is not None:
         account_filter.market_ids.extend([market_id])
+    if account_types is not None:
+        account_filter.account_types.extend(account_types)
     return unroll_v2_pagination(
         base_request=data_node_protos_v2.trading_data.ListAccountsRequest(
             filter=account_filter

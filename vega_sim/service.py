@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 import copy
 import datetime
 import logging
@@ -102,7 +103,7 @@ class DatanodeSlowResponseError(Exception):
     pass
 
 
-class VegaFaucetError(Exception):
+class VegaTopUpError(Exception):
     pass
 
 
@@ -486,75 +487,110 @@ class VegaService(ABC):
         """
         return self.wallet.create_key(wallet_name=wallet_name, name=name)
 
+    def top_up_treasury(self, asset_id: str) -> None:
+
+        def get_treasury_balance(asset_id: str) -> float:
+            try:
+                return self.list_accounts(
+                    key_name=self.KEY_NAME,
+                    wallet_name=self.WALLET_NAME,
+                    asset_id=asset_id,
+                    account_types=[vega_protos.vega.AccountType.ACCOUNT_TYPE_GENERAL],
+                )[0].balance
+            except IndexError:
+                return 0
+
+        pre_balance = get_treasury_balance(asset_id)
+        asset_details = self.get_asset(asset_id).details
+        faucet.mint(
+            pub_key=self.wallet.public_key(
+                wallet_name=self.WALLET_NAME, name=self.KEY_NAME
+            ),
+            asset=asset_id,
+            amount=asset_details.builtin_asset.max_faucet_amount_mint,
+            faucet_url=self.faucet_url,
+        )
+        for i in range(400):
+            time.sleep(0.01 * 1.01**i)
+            self.wait_fn(1)
+            self.wait_for_total_catchup()
+            post_balance = get_treasury_balance(asset_id)
+            if post_balance > pre_balance:
+                logging.debug(
+                    f"Successfully topped up treasury with maximum amount of asset {asset_details.symbol} after {i} blocks."
+                )
+                return
+        raise VegaTopUpError(
+            f"Funds never appeared in treasury account. Pre-Balance: {pre_balance}, Post-Balance: {post_balance}"
+        )
+
     def mint(
         self,
-        key_name: Optional[str],
+        key_name: str,
         asset: str,
         amount: float,
         wallet_name: Optional[str] = None,
-        from_faucet: bool = False,
-        raise_error: bool = True,
     ) -> None:
-        """Mints a given amount of requested asset into the associated wallet.
 
-        Default behaviour is to transfer funds from the Vega Service "treasury", to mint
-        funds directly from the faucet the optional from_faucet arg can be set.
-
-        Args:
-            wallet_name:
-                str, The name of the wallet
-            asset:
-                str, The ID of the asset to mint
-            amount:
-                float, the amount of asset to mint
-            key_name:
-                Optional[str], key name stored in metadata. Defaults to None.
-        """
-        curr_acct = self.party_account(
-            wallet_name=wallet_name, asset_id=asset, key_name=key_name
-        ).general
-
-        if from_faucet:
-            faucet.mint(
-                self.wallet.public_key(wallet_name=wallet_name, name=key_name),
-                asset,
-                num_to_padded_int(amount, self.asset_decimals[asset]),
-                faucet_url=self.faucet_url,
-            )
-        else:
-            self.one_off_transfer(
-                from_wallet_name=self.WALLET_NAME,
-                from_key_name=self.KEY_NAME,
-                from_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-                to_account_type=vega_protos.vega.ACCOUNT_TYPE_GENERAL,
-                asset=asset,
-                amount=amount,
-                to_key_name=key_name,
-                to_wallet_name=wallet_name,
-            )
-
-        self.wait_fn(1)
-        self.wait_for_total_catchup()
-
-        for i in range(100):
-            time.sleep(0.05 * 1.03**i)
-            self.data_cache.initialise_accounts()
-            post_acct = self.party_account(
-                wallet_name=wallet_name,
-                asset_id=asset,
-                key_name=key_name,
-            ).general
-            if post_acct > curr_acct:
-                return
-            self.wait_fn(1)
-
-        err = VegaFaucetError(
-            f"Failure minting asset {asset} for party {wallet_name}. Funds never"
-            " appeared in party account"
+        # Calculate the required funds including any transfer fee.
+        required_treasury_funds = amount * (
+            1 + float(self.network_parameter_from_feed("transfer.fee.factor").value)
         )
-        if raise_error:
-            raise err
-        logger.error(err)
+
+        # Iteratively check whether the treasury has sufficient balance
+        # to top up the party. If not, top up the treasury first with
+        # the assets maximum faucet amount.
+        i = 0
+        while (
+            self.party_account(
+                key_name=self.KEY_NAME, wallet_name=self.WALLET_NAME, asset_id=asset
+            ).general
+            < required_treasury_funds
+        ):
+            if i > 100:
+                raise VegaTopUpError(
+                    f"Attempted to top up treasury too many times. Unable to top up party with {required_treasury_funds} funds."
+                )
+            logger.debug(
+                f"Insufficient funds in treasury to top up party (with {required_treasury_funds}). Topping up treasury."
+            )
+            self.top_up_treasury(asset)
+            i += 1
+
+        # Create a transfer with a unique reference to top up the party.
+        reference = str(uuid.uuid4())
+        self.one_off_transfer(
+            from_wallet_name=self.WALLET_NAME,
+            from_key_name=self.KEY_NAME,
+            to_wallet_name=wallet_name,
+            to_key_name=key_name,
+            from_account_type=vega_protos.vega.AccountType.ACCOUNT_TYPE_GENERAL,
+            to_account_type=vega_protos.vega.AccountType.ACCOUNT_TYPE_GENERAL,
+            asset=asset,
+            amount=amount,
+            reference=reference,
+        )
+        for _ in range(100):
+            self.wait_fn(1)
+            self.wait_for_total_catchup()
+            transfers = self.list_transfers(
+                wallet_name=wallet_name,
+                key_name=key_name,
+                direction=data_node_protos_v2.trading_data.TransferDirection.TRANSFER_DIRECTION_TRANSFER_TO,
+            )
+            for transfer in transfers:
+                if transfer.reference == reference:
+                    if (
+                        transfer.status
+                        == vega_protos.events.v1.events.Transfer.Status.STATUS_DONE
+                    ):
+                        return
+                    raise VegaTopUpError(
+                        f"Internal 'top-up' transfer ({reference}) failed with status '{vega_protos.events.v1.events.Transfer.Status.Name(transfer.status)}' and reason '{transfer.reason}'."
+                    )
+        raise VegaTopUpError(
+            f"Internal 'top-up' transfer ({reference}) never reached network."
+        )
 
     def forward(self, time: str) -> None:
         """Steps chain forward a given amount of time, either with an amount of time or
@@ -626,17 +662,6 @@ class VegaService(ABC):
         )
         self.wait_fn(60)
         self.wait_for_thread_catchup()
-
-        asset_id = self.find_asset_id(
-            symbol=symbol, enabled=True, raise_on_missing=True
-        )
-        self.mint(
-            wallet_name=self.WALLET_NAME,
-            key_name=self.KEY_NAME,
-            asset=asset_id,
-            amount=max_faucet_amount,
-            from_faucet=True,
-        )
 
     def create_market_from_config(
         self,
@@ -1832,6 +1857,7 @@ class VegaService(ABC):
         wallet_name: Optional[str] = None,
         asset_id: Optional[str] = None,
         market_id: Optional[str] = None,
+        account_types: Optional[List[vega_protos.vega.AccountType.Value]] = None,
         key_name: Optional[str] = None,
     ) -> List[data.AccountData]:
         """Return all accounts across markets matching the supplied filter options
@@ -1843,6 +1869,8 @@ class VegaService(ABC):
                 Optional, default None, Filter down to only accounts on this asset
             market_id:
                 Optional, default None, Filter down to only accounts from this market
+            account_types:
+                Optional, default None, Filter down to only accounts of these type
             key_name:
                 Optional, default None, Select non-default key from the selected wallet
 
@@ -1859,6 +1887,7 @@ class VegaService(ABC):
             ),
             asset_id=asset_id,
             market_id=market_id,
+            account_types=account_types,
             asset_decimals_map=self.asset_decimals,
         )
 
