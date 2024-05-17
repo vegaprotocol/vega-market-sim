@@ -510,14 +510,14 @@ class VegaService(ABC):
             amount=asset_details.builtin_asset.max_faucet_amount_mint,
             faucet_url=self.faucet_url,
         )
-        for _ in range(60):
-            time.sleep(1)
+        for i in range(400):
+            time.sleep(0.01 * 1.01**i)
             self.wait_fn(1)
             self.wait_for_total_catchup()
             post_balance = get_treasury_balance(asset_id)
             if post_balance > pre_balance:
                 logging.debug(
-                    f"Successfully topped up treasury with maximum amount of asset {asset_id}."
+                    f"Successfully topped up treasury with maximum amount of asset {asset_details.symbol} after {i} blocks."
                 )
                 return
         raise VegaTopUpError(
