@@ -52,17 +52,20 @@ class Future(_message.Message):
         "data_source_spec_for_settlement_data",
         "data_source_spec_for_trading_termination",
         "data_source_spec_binding",
+        "cap",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_TRADING_TERMINATION_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    CAP_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     data_source_spec_for_settlement_data: _data_source_pb2.DataSourceSpec
     data_source_spec_for_trading_termination: _data_source_pb2.DataSourceSpec
     data_source_spec_binding: DataSourceSpecToFutureBinding
+    cap: FutureCap
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -76,6 +79,22 @@ class Future(_message.Message):
         data_source_spec_binding: _Optional[
             _Union[DataSourceSpecToFutureBinding, _Mapping]
         ] = ...,
+        cap: _Optional[_Union[FutureCap, _Mapping]] = ...,
+    ) -> None: ...
+
+class FutureCap(_message.Message):
+    __slots__ = ("max_price", "binary_settlement", "fully_collateralised")
+    MAX_PRICE_FIELD_NUMBER: _ClassVar[int]
+    BINARY_SETTLEMENT_FIELD_NUMBER: _ClassVar[int]
+    FULLY_COLLATERALISED_FIELD_NUMBER: _ClassVar[int]
+    max_price: str
+    binary_settlement: bool
+    fully_collateralised: bool
+    def __init__(
+        self,
+        max_price: _Optional[str] = ...,
+        binary_settlement: bool = ...,
+        fully_collateralised: bool = ...,
     ) -> None: ...
 
 class Perpetual(_message.Message):
@@ -203,18 +222,31 @@ class Instrument(_message.Message):
     ) -> None: ...
 
 class LogNormalRiskModel(_message.Message):
-    __slots__ = ("risk_aversion_parameter", "tau", "params")
+    __slots__ = ("risk_aversion_parameter", "tau", "params", "risk_factor_override")
     RISK_AVERSION_PARAMETER_FIELD_NUMBER: _ClassVar[int]
     TAU_FIELD_NUMBER: _ClassVar[int]
     PARAMS_FIELD_NUMBER: _ClassVar[int]
+    RISK_FACTOR_OVERRIDE_FIELD_NUMBER: _ClassVar[int]
     risk_aversion_parameter: float
     tau: float
     params: LogNormalModelParams
+    risk_factor_override: RiskFactorOverride
     def __init__(
         self,
         risk_aversion_parameter: _Optional[float] = ...,
         tau: _Optional[float] = ...,
         params: _Optional[_Union[LogNormalModelParams, _Mapping]] = ...,
+        risk_factor_override: _Optional[_Union[RiskFactorOverride, _Mapping]] = ...,
+    ) -> None: ...
+
+class RiskFactorOverride(_message.Message):
+    __slots__ = ("short", "long")
+    SHORT_FIELD_NUMBER: _ClassVar[int]
+    LONG_FIELD_NUMBER: _ClassVar[int]
+    short: str
+    long: str
+    def __init__(
+        self, short: _Optional[str] = ..., long: _Optional[str] = ...
     ) -> None: ...
 
 class LogNormalModelParams(_message.Message):
@@ -283,11 +315,15 @@ class ScalingFactors(_message.Message):
     ) -> None: ...
 
 class MarginCalculator(_message.Message):
-    __slots__ = ("scaling_factors",)
+    __slots__ = ("scaling_factors", "fully_collateralised")
     SCALING_FACTORS_FIELD_NUMBER: _ClassVar[int]
+    FULLY_COLLATERALISED_FIELD_NUMBER: _ClassVar[int]
     scaling_factors: ScalingFactors
+    fully_collateralised: bool
     def __init__(
-        self, scaling_factors: _Optional[_Union[ScalingFactors, _Mapping]] = ...
+        self,
+        scaling_factors: _Optional[_Union[ScalingFactors, _Mapping]] = ...,
+        fully_collateralised: bool = ...,
     ) -> None: ...
 
 class TradableInstrument(_message.Message):

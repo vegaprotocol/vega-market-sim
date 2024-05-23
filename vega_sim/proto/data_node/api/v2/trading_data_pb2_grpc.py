@@ -21,606 +21,745 @@ class TradingDataServiceStub(object):
             "/datanode.api.v2.TradingDataService/ListAccounts",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAccountsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAccountsResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveAccounts = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveAccounts",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveAccountsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveAccountsResponse.FromString,
+            _registered_method=True,
         )
         self.Info = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Info",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.InfoRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.InfoResponse.FromString,
+            _registered_method=True,
         )
         self.GetOrder = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetOrder",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOrderResponse.FromString,
+            _registered_method=True,
         )
         self.ListOrders = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListOrders",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrdersResponse.FromString,
+            _registered_method=True,
         )
         self.ListOrderVersions = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListOrderVersions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOrderVersionsResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveOrders = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveOrders",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveOrdersResponse.FromString,
+            _registered_method=True,
         )
         self.GetStopOrder = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetStopOrder",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStopOrderResponse.FromString,
+            _registered_method=True,
         )
         self.ListStopOrders = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListStopOrders",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersResponse.FromString,
+            _registered_method=True,
+        )
+        self.ListGameTeamScores = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListGameTeamScores",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGameTeamScoresRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGameTeamScoresResponse.FromString,
+            _registered_method=True,
+        )
+        self.ListGamePartyScores = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListGamePartyScores",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamePartyScoresRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamePartyScoresResponse.FromString,
+            _registered_method=True,
         )
         self.ListPositions = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListPositions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPositionsResponse.FromString,
+            _registered_method=True,
         )
         self.ListAllPositions = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListAllPositions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllPositionsResponse.FromString,
+            _registered_method=True,
         )
         self.ObservePositions = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObservePositions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObservePositionsResponse.FromString,
+            _registered_method=True,
         )
         self.ListLedgerEntries = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListLedgerEntries",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLedgerEntriesResponse.FromString,
+            _registered_method=True,
         )
         self.ExportLedgerEntries = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportLedgerEntries",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportLedgerEntriesRequest.SerializeToString,
             response_deserializer=google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
+            _registered_method=True,
         )
         self.ListBalanceChanges = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListBalanceChanges",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListBalanceChangesResponse.FromString,
+            _registered_method=True,
         )
         self.GetLatestMarketData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetLatestMarketData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLatestMarketDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLatestMarketDataResponse.FromString,
+            _registered_method=True,
         )
         self.ListLatestMarketData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListLatestMarketData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLatestMarketDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLatestMarketDataResponse.FromString,
+            _registered_method=True,
         )
         self.GetLatestMarketDepth = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetLatestMarketDepth",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLatestMarketDepthRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLatestMarketDepthResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveMarketsDepth = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveMarketsDepth",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarketsDepthRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarketsDepthResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveMarketsDepthUpdates = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveMarketsDepthUpdates",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarketsDepthUpdatesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarketsDepthUpdatesResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveMarketsData = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveMarketsData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarketsDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarketsDataResponse.FromString,
+            _registered_method=True,
         )
         self.GetMarketDataHistoryByID = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetMarketDataHistoryByID",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketDataHistoryByIDResponse.FromString,
+            _registered_method=True,
         )
         self.ListTransfers = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTransfers",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTransfersResponse.FromString,
+            _registered_method=True,
         )
         self.GetTransfer = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetTransfer",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTransferResponse.FromString,
+            _registered_method=True,
         )
         self.GetNetworkLimits = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkLimits",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkLimitsResponse.FromString,
+            _registered_method=True,
         )
         self.ListCandleData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListCandleData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCandleDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCandleDataResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveCandleData = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveCandleData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveCandleDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveCandleDataResponse.FromString,
+            _registered_method=True,
         )
         self.ListCandleIntervals = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListCandleIntervals",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCandleIntervalsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCandleIntervalsResponse.FromString,
+            _registered_method=True,
         )
         self.ListVotes = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListVotes",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListVotesResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveVotes = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveVotes",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveVotesResponse.FromString,
+            _registered_method=True,
         )
         self.ListERC20MultiSigSignerAddedBundles = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListERC20MultiSigSignerAddedBundles",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerAddedBundlesResponse.FromString,
+            _registered_method=True,
         )
         self.ListERC20MultiSigSignerRemovedBundles = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListERC20MultiSigSignerRemovedBundles",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListERC20MultiSigSignerRemovedBundlesResponse.FromString,
+            _registered_method=True,
         )
         self.GetERC20ListAssetBundle = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetERC20ListAssetBundle",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20ListAssetBundleResponse.FromString,
+            _registered_method=True,
         )
         self.GetERC20SetAssetLimitsBundle = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetERC20SetAssetLimitsBundle",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20SetAssetLimitsBundleResponse.FromString,
+            _registered_method=True,
         )
         self.GetERC20WithdrawalApproval = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetERC20WithdrawalApproval",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetERC20WithdrawalApprovalResponse.FromString,
+            _registered_method=True,
         )
         self.GetLastTrade = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetLastTrade",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLastTradeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetLastTradeResponse.FromString,
+            _registered_method=True,
         )
         self.ListTrades = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTrades",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTradesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTradesResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveTrades = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveTrades",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTradesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTradesResponse.FromString,
+            _registered_method=True,
         )
         self.GetOracleSpec = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetOracleSpec",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetOracleSpecResponse.FromString,
+            _registered_method=True,
         )
         self.ListOracleSpecs = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListOracleSpecs",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleSpecsResponse.FromString,
+            _registered_method=True,
         )
         self.ListOracleData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListOracleData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListOracleDataResponse.FromString,
+            _registered_method=True,
         )
         self.GetMarket = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetMarket",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMarketResponse.FromString,
+            _registered_method=True,
         )
         self.ListMarkets = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListMarkets",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarketsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarketsResponse.FromString,
+            _registered_method=True,
         )
         self.ListSuccessorMarkets = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListSuccessorMarkets",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListSuccessorMarketsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListSuccessorMarketsResponse.FromString,
+            _registered_method=True,
         )
         self.GetParty = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetParty",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyResponse.FromString,
+            _registered_method=True,
         )
         self.ListParties = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListParties",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesResponse.FromString,
+            _registered_method=True,
         )
         self.ListPartiesProfiles = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListPartiesProfiles",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartiesProfilesResponse.FromString,
+            _registered_method=True,
         )
         self.ListMarginLevels = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListMarginLevels",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarginLevelsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListMarginLevelsResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveMarginLevels = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveMarginLevels",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarginLevelsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveMarginLevelsResponse.FromString,
+            _registered_method=True,
         )
         self.ListRewards = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListRewards",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardsResponse.FromString,
+            _registered_method=True,
         )
         self.ListRewardSummaries = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListRewardSummaries",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListRewardSummariesResponse.FromString,
+            _registered_method=True,
         )
         self.ListEpochRewardSummaries = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListEpochRewardSummaries",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEpochRewardSummariesResponse.FromString,
+            _registered_method=True,
         )
         self.GetDeposit = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetDeposit",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetDepositResponse.FromString,
+            _registered_method=True,
         )
         self.ListDeposits = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListDeposits",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDepositsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDepositsResponse.FromString,
+            _registered_method=True,
         )
         self.GetWithdrawal = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetWithdrawal",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetWithdrawalResponse.FromString,
+            _registered_method=True,
         )
         self.ListWithdrawals = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListWithdrawals",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListWithdrawalsResponse.FromString,
+            _registered_method=True,
         )
         self.GetAsset = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetAsset",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetAssetResponse.FromString,
+            _registered_method=True,
         )
         self.ListAssets = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListAssets",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAssetsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAssetsResponse.FromString,
+            _registered_method=True,
         )
         self.ListLiquidityProvisions = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListLiquidityProvisions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvisionsResponse.FromString,
+            _registered_method=True,
         )
         self.ListAllLiquidityProvisions = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListAllLiquidityProvisions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllLiquidityProvisionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllLiquidityProvisionsResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveLiquidityProvisions = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveLiquidityProvisions",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLiquidityProvisionsResponse.FromString,
+            _registered_method=True,
         )
         self.ListLiquidityProviders = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListLiquidityProviders",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListLiquidityProvidersResponse.FromString,
+            _registered_method=True,
         )
         self.ListPaidLiquidityFees = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListPaidLiquidityFees",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPaidLiquidityFeesResponse.FromString,
+            _registered_method=True,
         )
         self.GetGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetGovernanceDataResponse.FromString,
+            _registered_method=True,
         )
         self.ListGovernanceData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListGovernanceData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGovernanceDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGovernanceDataResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveGovernance = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveGovernance",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveGovernanceRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveGovernanceResponse.FromString,
+            _registered_method=True,
         )
         self.ListDelegations = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListDelegations",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDelegationsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListDelegationsResponse.FromString,
+            _registered_method=True,
         )
         self.GetNetworkData = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkData",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkDataRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkDataResponse.FromString,
+            _registered_method=True,
         )
         self.GetNode = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNode",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNodeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNodeResponse.FromString,
+            _registered_method=True,
         )
         self.ListNodes = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListNodes",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNodesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNodesResponse.FromString,
+            _registered_method=True,
         )
         self.ListNodeSignatures = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListNodeSignatures",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNodeSignaturesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNodeSignaturesResponse.FromString,
+            _registered_method=True,
         )
         self.GetEpoch = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetEpoch",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetEpochResponse.FromString,
+            _registered_method=True,
         )
         self.EstimateFee = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/EstimateFee",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateFeeResponse.FromString,
+            _registered_method=True,
         )
         self.EstimateMargin = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/EstimateMargin",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateMarginResponse.FromString,
+            _registered_method=True,
         )
         self.EstimatePosition = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/EstimatePosition",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimatePositionResponse.FromString,
+            _registered_method=True,
         )
         self.ListNetworkParameters = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListNetworkParameters",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListNetworkParametersResponse.FromString,
+            _registered_method=True,
         )
         self.GetNetworkParameter = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkParameter",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkParameterRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkParameterResponse.FromString,
+            _registered_method=True,
         )
         self.ListCheckpoints = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListCheckpoints",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCheckpointsResponse.FromString,
+            _registered_method=True,
         )
         self.GetStake = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetStake",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetStakeResponse.FromString,
+            _registered_method=True,
         )
         self.GetRiskFactors = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetRiskFactors",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetRiskFactorsResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveEventBus = channel.stream_stream(
             "/datanode.api.v2.TradingDataService/ObserveEventBus",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveEventBusRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveEventBusResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveLedgerMovements = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveLedgerMovements",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveLedgerMovementsResponse.FromString,
+            _registered_method=True,
         )
         self.ListKeyRotations = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListKeyRotations",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListKeyRotationsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListKeyRotationsResponse.FromString,
+            _registered_method=True,
         )
         self.ListEthereumKeyRotations = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListEthereumKeyRotations",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEthereumKeyRotationsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEthereumKeyRotationsResponse.FromString,
+            _registered_method=True,
         )
         self.GetVegaTime = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetVegaTime",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVegaTimeResponse.FromString,
+            _registered_method=True,
         )
         self.GetProtocolUpgradeStatus = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetProtocolUpgradeStatus",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetProtocolUpgradeStatusResponse.FromString,
+            _registered_method=True,
         )
         self.ListProtocolUpgradeProposals = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListProtocolUpgradeProposals",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListProtocolUpgradeProposalsResponse.FromString,
+            _registered_method=True,
         )
         self.ListCoreSnapshots = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListCoreSnapshots",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListCoreSnapshotsResponse.FromString,
+            _registered_method=True,
         )
         self.GetMostRecentNetworkHistorySegment = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetMostRecentNetworkHistorySegment",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetMostRecentNetworkHistorySegmentResponse.FromString,
+            _registered_method=True,
         )
         self.ListAllNetworkHistorySegments = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListAllNetworkHistorySegments",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAllNetworkHistorySegmentsResponse.FromString,
+            _registered_method=True,
         )
         self.GetActiveNetworkHistoryPeerAddresses = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetActiveNetworkHistoryPeerAddresses",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetActiveNetworkHistoryPeerAddressesResponse.FromString,
+            _registered_method=True,
         )
         self.GetNetworkHistoryStatus = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkHistoryStatus",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryStatusResponse.FromString,
+            _registered_method=True,
         )
         self.GetNetworkHistoryBootstrapPeers = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetNetworkHistoryBootstrapPeers",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetNetworkHistoryBootstrapPeersResponse.FromString,
+            _registered_method=True,
         )
         self.ListEntities = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListEntities",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListEntitiesResponse.FromString,
+            _registered_method=True,
         )
         self.ListFundingPeriods = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListFundingPeriods",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodsResponse.FromString,
+            _registered_method=True,
         )
         self.ListFundingPeriodDataPoints = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListFundingPeriodDataPoints",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPeriodDataPointsResponse.FromString,
+            _registered_method=True,
         )
         self.ListFundingPayments = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListFundingPayments",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListFundingPaymentsResponse.FromString,
+            _registered_method=True,
         )
         self.GetPartyActivityStreak = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetPartyActivityStreak",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyActivityStreakResponse.FromString,
+            _registered_method=True,
         )
         self.GetCurrentReferralProgram = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetCurrentReferralProgram",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentReferralProgramResponse.FromString,
+            _registered_method=True,
         )
         self.ListReferralSets = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListReferralSets",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetsResponse.FromString,
+            _registered_method=True,
         )
         self.ListReferralSetReferees = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListReferralSetReferees",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListReferralSetRefereesResponse.FromString,
+            _registered_method=True,
         )
         self.GetReferralSetStats = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetReferralSetStats",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetReferralSetStatsResponse.FromString,
+            _registered_method=True,
         )
         self.ListTeams = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTeams",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsResponse.FromString,
+            _registered_method=True,
         )
         self.ListTeamsStatistics = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTeamsStatistics",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamsStatisticsResponse.FromString,
+            _registered_method=True,
         )
         self.ListTeamMembersStatistics = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTeamMembersStatistics",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamMembersStatisticsResponse.FromString,
+            _registered_method=True,
         )
         self.ListTeamReferees = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTeamReferees",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereesResponse.FromString,
+            _registered_method=True,
         )
         self.ListTeamRefereeHistory = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListTeamRefereeHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListTeamRefereeHistoryResponse.FromString,
+            _registered_method=True,
         )
         self.GetFeesStats = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetFeesStats",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsResponse.FromString,
+            _registered_method=True,
         )
         self.GetFeesStatsForParty = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetFeesStatsForParty",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsForPartyRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetFeesStatsForPartyResponse.FromString,
+            _registered_method=True,
         )
         self.GetCurrentVolumeDiscountProgram = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetCurrentVolumeDiscountProgram",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetCurrentVolumeDiscountProgramResponse.FromString,
+            _registered_method=True,
         )
         self.GetVolumeDiscountStats = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetVolumeDiscountStats",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVolumeDiscountStatsResponse.FromString,
+            _registered_method=True,
         )
         self.GetVestingBalancesSummary = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetVestingBalancesSummary",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetVestingBalancesSummaryResponse.FromString,
+            _registered_method=True,
         )
         self.GetPartyVestingStats = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetPartyVestingStats",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetPartyVestingStatsResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveTransactionResults = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ObserveTransactionResults",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ObserveTransactionResultsResponse.FromString,
+            _registered_method=True,
         )
         self.EstimateTransferFee = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/EstimateTransferFee",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.EstimateTransferFeeResponse.FromString,
+            _registered_method=True,
         )
         self.GetTotalTransferFeeDiscount = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetTotalTransferFeeDiscount",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTotalTransferFeeDiscountResponse.FromString,
+            _registered_method=True,
         )
         self.ListGames = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListGames",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamesResponse.FromString,
+            _registered_method=True,
         )
         self.ListPartyMarginModes = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/ListPartyMarginModes",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListPartyMarginModesResponse.FromString,
+            _registered_method=True,
         )
         self.GetTimeWeightedNotionalPosition = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/GetTimeWeightedNotionalPosition",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTimeWeightedNotionalPositionRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTimeWeightedNotionalPositionResponse.FromString,
+            _registered_method=True,
+        )
+        self.ListAMMs = channel.unary_unary(
+            "/datanode.api.v2.TradingDataService/ListAMMs",
+            request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAMMsRequest.SerializeToString,
+            response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAMMsResponse.FromString,
+            _registered_method=True,
         )
         self.ExportNetworkHistory = channel.unary_stream(
             "/datanode.api.v2.TradingDataService/ExportNetworkHistory",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.SerializeToString,
             response_deserializer=google_dot_api_dot_httpbody__pb2.HttpBody.FromString,
+            _registered_method=True,
         )
         self.Ping = channel.unary_unary(
             "/datanode.api.v2.TradingDataService/Ping",
             request_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingRequest.SerializeToString,
             response_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.PingResponse.FromString,
+            _registered_method=True,
         )
 
 
@@ -706,6 +845,24 @@ class TradingDataServiceServicer(object):
         """List stop orders
 
         Get a list of stop orders that match the given filters
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListGameTeamScores(self, request, context):
+        """List game team scores
+
+        Get a list of team scores for the given filters
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def ListGamePartyScores(self, request, context):
+        """List game party scores
+
+        Get a list of party scores for the given filters
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -1762,6 +1919,15 @@ class TradingDataServiceServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def ListAMMs(self, request, context):
+        """List AMMs
+
+        Get a list of AMM or filter by market ID, party ID or AMM ID
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def ExportNetworkHistory(self, request, context):
         """Export network history as CSV
 
@@ -1885,6 +2051,16 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             servicer.ListStopOrders,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListStopOrdersResponse.SerializeToString,
+        ),
+        "ListGameTeamScores": grpc.unary_unary_rpc_method_handler(
+            servicer.ListGameTeamScores,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGameTeamScoresRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGameTeamScoresResponse.SerializeToString,
+        ),
+        "ListGamePartyScores": grpc.unary_unary_rpc_method_handler(
+            servicer.ListGamePartyScores,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamePartyScoresRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamePartyScoresResponse.SerializeToString,
         ),
         "ListPositions": grpc.unary_unary_rpc_method_handler(
             servicer.ListPositions,
@@ -2436,6 +2612,11 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTimeWeightedNotionalPositionRequest.FromString,
             response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.GetTimeWeightedNotionalPositionResponse.SerializeToString,
         ),
+        "ListAMMs": grpc.unary_unary_rpc_method_handler(
+            servicer.ListAMMs,
+            request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAMMsRequest.FromString,
+            response_serializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAMMsResponse.SerializeToString,
+        ),
         "ExportNetworkHistory": grpc.unary_stream_rpc_method_handler(
             servicer.ExportNetworkHistory,
             request_deserializer=data__node_dot_api_dot_v2_dot_trading__data__pb2.ExportNetworkHistoryRequest.FromString,
@@ -2451,6 +2632,9 @@ def add_TradingDataServiceServicer_to_server(servicer, server):
         "datanode.api.v2.TradingDataService", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers(
+        "datanode.api.v2.TradingDataService", rpc_method_handlers
+    )
 
 
 # This class is part of an EXPERIMENTAL API.
@@ -2484,6 +2668,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2513,6 +2698,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2542,6 +2728,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2571,6 +2758,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2600,6 +2788,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2629,6 +2818,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2658,6 +2848,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2687,6 +2878,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2716,6 +2908,67 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
+        )
+
+    @staticmethod
+    def ListGameTeamScores(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListGameTeamScores",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGameTeamScoresRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGameTeamScoresResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True,
+        )
+
+    @staticmethod
+    def ListGamePartyScores(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListGamePartyScores",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamePartyScoresRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListGamePartyScoresResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2745,6 +2998,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2774,6 +3028,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2803,6 +3058,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2832,6 +3088,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2861,6 +3118,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2890,6 +3148,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2919,6 +3178,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2948,6 +3208,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -2977,6 +3238,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3006,6 +3268,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3035,6 +3298,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3064,6 +3328,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3093,6 +3358,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3122,6 +3388,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3151,6 +3418,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3180,6 +3448,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3209,6 +3478,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3238,6 +3508,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3267,6 +3538,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3296,6 +3568,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3325,6 +3598,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3354,6 +3628,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3383,6 +3658,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3412,6 +3688,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3441,6 +3718,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3470,6 +3748,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3499,6 +3778,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3528,6 +3808,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3557,6 +3838,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3586,6 +3868,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3615,6 +3898,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3644,6 +3928,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3673,6 +3958,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3702,6 +3988,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3731,6 +4018,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3760,6 +4048,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3789,6 +4078,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3818,6 +4108,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3847,6 +4138,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3876,6 +4168,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3905,6 +4198,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3934,6 +4228,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3963,6 +4258,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -3992,6 +4288,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4021,6 +4318,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4050,6 +4348,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4079,6 +4378,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4108,6 +4408,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4137,6 +4438,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4166,6 +4468,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4195,6 +4498,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4224,6 +4528,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4253,6 +4558,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4282,6 +4588,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4311,6 +4618,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4340,6 +4648,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4369,6 +4678,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4398,6 +4708,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4427,6 +4738,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4456,6 +4768,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4485,6 +4798,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4514,6 +4828,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4543,6 +4858,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4572,6 +4888,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4601,6 +4918,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4630,6 +4948,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4659,6 +4978,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4688,6 +5008,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4717,6 +5038,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4746,6 +5068,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4775,6 +5098,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4804,6 +5128,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4833,6 +5158,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4862,6 +5188,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4891,6 +5218,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4920,6 +5248,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4949,6 +5278,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -4978,6 +5308,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5007,6 +5338,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5036,6 +5368,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5065,6 +5398,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5094,6 +5428,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5123,6 +5458,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5152,6 +5488,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5181,6 +5518,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5210,6 +5548,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5239,6 +5578,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5268,6 +5608,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5297,6 +5638,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5326,6 +5668,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5355,6 +5698,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5384,6 +5728,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5413,6 +5758,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5442,6 +5788,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5471,6 +5818,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5500,6 +5848,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5529,6 +5878,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5558,6 +5908,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5587,6 +5938,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5616,6 +5968,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5645,6 +5998,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5674,6 +6028,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5703,6 +6058,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5732,6 +6088,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5761,6 +6118,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5790,6 +6148,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5819,6 +6178,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5848,6 +6208,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5877,6 +6238,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5906,6 +6268,37 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
+        )
+
+    @staticmethod
+    def ListAMMs(
+        request,
+        target,
+        options=(),
+        channel_credentials=None,
+        call_credentials=None,
+        insecure=False,
+        compression=None,
+        wait_for_ready=None,
+        timeout=None,
+        metadata=None,
+    ):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            "/datanode.api.v2.TradingDataService/ListAMMs",
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAMMsRequest.SerializeToString,
+            data__node_dot_api_dot_v2_dot_trading__data__pb2.ListAMMsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5935,6 +6328,7 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -5964,4 +6358,5 @@ class TradingDataService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )

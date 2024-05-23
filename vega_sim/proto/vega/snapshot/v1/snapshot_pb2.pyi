@@ -198,6 +198,7 @@ class Payload(_message.Message):
         "eth_oracle_verifier_misc",
         "banking_evm_bridge_states",
         "evm_multisig_topologies",
+        "tx_cache",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -279,6 +280,7 @@ class Payload(_message.Message):
     ETH_ORACLE_VERIFIER_MISC_FIELD_NUMBER: _ClassVar[int]
     BANKING_EVM_BRIDGE_STATES_FIELD_NUMBER: _ClassVar[int]
     EVM_MULTISIG_TOPOLOGIES_FIELD_NUMBER: _ClassVar[int]
+    TX_CACHE_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -359,6 +361,7 @@ class Payload(_message.Message):
     eth_oracle_verifier_misc: EthOracleVerifierMisc
     banking_evm_bridge_states: BankingEVMBridgeStates
     evm_multisig_topologies: EVMMultisigTopologies
+    tx_cache: TxCache
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -499,6 +502,7 @@ class Payload(_message.Message):
         evm_multisig_topologies: _Optional[
             _Union[EVMMultisigTopologies, _Mapping]
         ] = ...,
+        tx_cache: _Optional[_Union[TxCache, _Mapping]] = ...,
     ) -> None: ...
 
 class OrderHoldingQuantities(_message.Message):
@@ -874,14 +878,17 @@ class BankingAssetActions(_message.Message):
     ) -> None: ...
 
 class BankingRecurringTransfers(_message.Message):
-    __slots__ = ("recurring_transfers",)
+    __slots__ = ("recurring_transfers", "next_metric_update")
     RECURRING_TRANSFERS_FIELD_NUMBER: _ClassVar[int]
+    NEXT_METRIC_UPDATE_FIELD_NUMBER: _ClassVar[int]
     recurring_transfers: _checkpoint_pb2.RecurringTransfers
+    next_metric_update: int
     def __init__(
         self,
         recurring_transfers: _Optional[
             _Union[_checkpoint_pb2.RecurringTransfers, _Mapping]
         ] = ...,
+        next_metric_update: _Optional[int] = ...,
     ) -> None: ...
 
 class BankingScheduledTransfers(_message.Message):
@@ -1537,6 +1544,7 @@ class Market(_message.Message):
         "internal_composite_price_calculator",
         "next_internal_composite_price_calc",
         "market_liquidity",
+        "amm",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1570,6 +1578,7 @@ class Market(_message.Message):
     INTERNAL_COMPOSITE_PRICE_CALCULATOR_FIELD_NUMBER: _ClassVar[int]
     NEXT_INTERNAL_COMPOSITE_PRICE_CALC_FIELD_NUMBER: _ClassVar[int]
     MARKET_LIQUIDITY_FIELD_NUMBER: _ClassVar[int]
+    AMM_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1602,6 +1611,7 @@ class Market(_message.Message):
     internal_composite_price_calculator: CompositePriceCalculator
     next_internal_composite_price_calc: int
     market_liquidity: MarketLiquidity
+    amm: AmmState
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1644,6 +1654,7 @@ class Market(_message.Message):
         ] = ...,
         next_internal_composite_price_calc: _Optional[int] = ...,
         market_liquidity: _Optional[_Union[MarketLiquidity, _Mapping]] = ...,
+        amm: _Optional[_Union[AmmState, _Mapping]] = ...,
     ) -> None: ...
 
 class PartyMarginFactor(_message.Message):
@@ -1654,6 +1665,114 @@ class PartyMarginFactor(_message.Message):
     margin_factor: str
     def __init__(
         self, party: _Optional[str] = ..., margin_factor: _Optional[str] = ...
+    ) -> None: ...
+
+class AmmState(_message.Message):
+    __slots__ = ("sqrter", "amm_party_ids", "pools")
+    SQRTER_FIELD_NUMBER: _ClassVar[int]
+    AMM_PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
+    POOLS_FIELD_NUMBER: _ClassVar[int]
+    sqrter: _containers.RepeatedCompositeFieldContainer[StringMapEntry]
+    amm_party_ids: _containers.RepeatedCompositeFieldContainer[StringMapEntry]
+    pools: _containers.RepeatedCompositeFieldContainer[PoolMapEntry]
+    def __init__(
+        self,
+        sqrter: _Optional[_Iterable[_Union[StringMapEntry, _Mapping]]] = ...,
+        amm_party_ids: _Optional[_Iterable[_Union[StringMapEntry, _Mapping]]] = ...,
+        pools: _Optional[_Iterable[_Union[PoolMapEntry, _Mapping]]] = ...,
+    ) -> None: ...
+
+class PoolMapEntry(_message.Message):
+    __slots__ = ("party", "pool")
+
+    class Curve(_message.Message):
+        __slots__ = ("l", "high", "low", "pv", "empty")
+        L_FIELD_NUMBER: _ClassVar[int]
+        HIGH_FIELD_NUMBER: _ClassVar[int]
+        LOW_FIELD_NUMBER: _ClassVar[int]
+        PV_FIELD_NUMBER: _ClassVar[int]
+        EMPTY_FIELD_NUMBER: _ClassVar[int]
+        l: str
+        high: str
+        low: str
+        pv: str
+        empty: bool
+        def __init__(
+            self,
+            l: _Optional[str] = ...,
+            high: _Optional[str] = ...,
+            low: _Optional[str] = ...,
+            pv: _Optional[str] = ...,
+            empty: bool = ...,
+        ) -> None: ...
+
+    class Pool(_message.Message):
+        __slots__ = (
+            "id",
+            "amm_party_id",
+            "commitment",
+            "parameters",
+            "asset",
+            "market",
+            "lower",
+            "upper",
+            "status",
+            "proposed_fee",
+        )
+        ID_FIELD_NUMBER: _ClassVar[int]
+        AMM_PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+        COMMITMENT_FIELD_NUMBER: _ClassVar[int]
+        PARAMETERS_FIELD_NUMBER: _ClassVar[int]
+        ASSET_FIELD_NUMBER: _ClassVar[int]
+        MARKET_FIELD_NUMBER: _ClassVar[int]
+        LOWER_FIELD_NUMBER: _ClassVar[int]
+        UPPER_FIELD_NUMBER: _ClassVar[int]
+        STATUS_FIELD_NUMBER: _ClassVar[int]
+        PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+        id: str
+        amm_party_id: str
+        commitment: str
+        parameters: _events_pb2.AMM.ConcentratedLiquidityParameters
+        asset: str
+        market: str
+        lower: PoolMapEntry.Curve
+        upper: PoolMapEntry.Curve
+        status: _events_pb2.AMM.Status
+        proposed_fee: str
+        def __init__(
+            self,
+            id: _Optional[str] = ...,
+            amm_party_id: _Optional[str] = ...,
+            commitment: _Optional[str] = ...,
+            parameters: _Optional[
+                _Union[_events_pb2.AMM.ConcentratedLiquidityParameters, _Mapping]
+            ] = ...,
+            asset: _Optional[str] = ...,
+            market: _Optional[str] = ...,
+            lower: _Optional[_Union[PoolMapEntry.Curve, _Mapping]] = ...,
+            upper: _Optional[_Union[PoolMapEntry.Curve, _Mapping]] = ...,
+            status: _Optional[_Union[_events_pb2.AMM.Status, str]] = ...,
+            proposed_fee: _Optional[str] = ...,
+        ) -> None: ...
+
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    POOL_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    pool: PoolMapEntry.Pool
+    def __init__(
+        self,
+        party: _Optional[str] = ...,
+        pool: _Optional[_Union[PoolMapEntry.Pool, _Mapping]] = ...,
+    ) -> None: ...
+
+class StringMapEntry(_message.Message):
+    __slots__ = ("key", "value")
+    KEY_FIELD_NUMBER: _ClassVar[int]
+    VALUE_FIELD_NUMBER: _ClassVar[int]
+    key: str
+    value: str
+    def __init__(
+        self, key: _Optional[str] = ..., value: _Optional[str] = ...
     ) -> None: ...
 
 class Product(_message.Message):
@@ -2182,6 +2301,7 @@ class LimitState(_message.Message):
         "propose_asset_enabled_from",
         "propose_spot_market_enabled",
         "propose_perps_market_enabled",
+        "can_use_amm_enabled",
     )
     BLOCK_COUNT_FIELD_NUMBER: _ClassVar[int]
     CAN_PROPOSE_MARKET_FIELD_NUMBER: _ClassVar[int]
@@ -2193,6 +2313,7 @@ class LimitState(_message.Message):
     PROPOSE_ASSET_ENABLED_FROM_FIELD_NUMBER: _ClassVar[int]
     PROPOSE_SPOT_MARKET_ENABLED_FIELD_NUMBER: _ClassVar[int]
     PROPOSE_PERPS_MARKET_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    CAN_USE_AMM_ENABLED_FIELD_NUMBER: _ClassVar[int]
     block_count: int
     can_propose_market: bool
     can_propose_asset: bool
@@ -2203,6 +2324,7 @@ class LimitState(_message.Message):
     propose_asset_enabled_from: int
     propose_spot_market_enabled: bool
     propose_perps_market_enabled: bool
+    can_use_amm_enabled: bool
     def __init__(
         self,
         block_count: _Optional[int] = ...,
@@ -2215,6 +2337,7 @@ class LimitState(_message.Message):
         propose_asset_enabled_from: _Optional[int] = ...,
         propose_spot_market_enabled: bool = ...,
         propose_perps_market_enabled: bool = ...,
+        can_use_amm_enabled: bool = ...,
     ) -> None: ...
 
 class VoteSpamPolicy(_message.Message):
@@ -3951,22 +4074,58 @@ class Parties(_message.Message):
     ) -> None: ...
 
 class PartyProfile(_message.Message):
-    __slots__ = ("party_id", "alias", "metadata")
+    __slots__ = ("party_id", "alias", "metadata", "derived_keys")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ALIAS_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
+    DERIVED_KEYS_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     alias: str
     metadata: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Metadata]
+    derived_keys: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         party_id: _Optional[str] = ...,
         alias: _Optional[str] = ...,
         metadata: _Optional[_Iterable[_Union[_vega_pb2.Metadata, _Mapping]]] = ...,
+        derived_keys: _Optional[_Iterable[str]] = ...,
+    ) -> None: ...
+
+class AMMValues(_message.Message):
+    __slots__ = ("party", "stake", "score", "tick")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    STAKE_FIELD_NUMBER: _ClassVar[int]
+    SCORE_FIELD_NUMBER: _ClassVar[int]
+    TICK_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    stake: str
+    score: str
+    tick: int
+    def __init__(
+        self,
+        party: _Optional[str] = ...,
+        stake: _Optional[str] = ...,
+        score: _Optional[str] = ...,
+        tick: _Optional[int] = ...,
     ) -> None: ...
 
 class MarketLiquidity(_message.Message):
-    __slots__ = ("price_range",)
+    __slots__ = ("price_range", "tick", "amm")
     PRICE_RANGE_FIELD_NUMBER: _ClassVar[int]
+    TICK_FIELD_NUMBER: _ClassVar[int]
+    AMM_FIELD_NUMBER: _ClassVar[int]
     price_range: str
-    def __init__(self, price_range: _Optional[str] = ...) -> None: ...
+    tick: int
+    amm: _containers.RepeatedCompositeFieldContainer[AMMValues]
+    def __init__(
+        self,
+        price_range: _Optional[str] = ...,
+        tick: _Optional[int] = ...,
+        amm: _Optional[_Iterable[_Union[AMMValues, _Mapping]]] = ...,
+    ) -> None: ...
+
+class TxCache(_message.Message):
+    __slots__ = ("txs",)
+    TXS_FIELD_NUMBER: _ClassVar[int]
+    txs: _containers.RepeatedScalarFieldContainer[bytes]
+    def __init__(self, txs: _Optional[_Iterable[bytes]] = ...) -> None: ...

@@ -431,6 +431,7 @@ class Transfer(_message.Message):
     ASSET_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
+    FROM_FIELD_NUMBER: _ClassVar[int]
     ONE_OFF_FIELD_NUMBER: _ClassVar[int]
     RECURRING_FIELD_NUMBER: _ClassVar[int]
     from_account_type: _vega_pb2.AccountType
@@ -451,6 +452,7 @@ class Transfer(_message.Message):
         reference: _Optional[str] = ...,
         one_off: _Optional[_Union[OneOffTransfer, _Mapping]] = ...,
         recurring: _Optional[_Union[RecurringTransfer, _Mapping]] = ...,
+        **kwargs
     ) -> None: ...
 
 class OneOffTransfer(_message.Message):
@@ -597,3 +599,145 @@ class UpdatePartyProfile(_message.Message):
         alias: _Optional[str] = ...,
         metadata: _Optional[_Iterable[_Union[_vega_pb2.Metadata, _Mapping]]] = ...,
     ) -> None: ...
+
+class SubmitAMM(_message.Message):
+    __slots__ = (
+        "market_id",
+        "commitment_amount",
+        "slippage_tolerance",
+        "concentrated_liquidity_parameters",
+        "proposed_fee",
+    )
+
+    class ConcentratedLiquidityParameters(_message.Message):
+        __slots__ = (
+            "upper_bound",
+            "lower_bound",
+            "base",
+            "leverage_at_upper_bound",
+            "leverage_at_lower_bound",
+        )
+        UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        BASE_FIELD_NUMBER: _ClassVar[int]
+        LEVERAGE_AT_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        LEVERAGE_AT_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        upper_bound: str
+        lower_bound: str
+        base: str
+        leverage_at_upper_bound: str
+        leverage_at_lower_bound: str
+        def __init__(
+            self,
+            upper_bound: _Optional[str] = ...,
+            lower_bound: _Optional[str] = ...,
+            base: _Optional[str] = ...,
+            leverage_at_upper_bound: _Optional[str] = ...,
+            leverage_at_lower_bound: _Optional[str] = ...,
+        ) -> None: ...
+
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    COMMITMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
+    CONCENTRATED_LIQUIDITY_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
+    PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    commitment_amount: str
+    slippage_tolerance: str
+    concentrated_liquidity_parameters: SubmitAMM.ConcentratedLiquidityParameters
+    proposed_fee: str
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        commitment_amount: _Optional[str] = ...,
+        slippage_tolerance: _Optional[str] = ...,
+        concentrated_liquidity_parameters: _Optional[
+            _Union[SubmitAMM.ConcentratedLiquidityParameters, _Mapping]
+        ] = ...,
+        proposed_fee: _Optional[str] = ...,
+    ) -> None: ...
+
+class AmendAMM(_message.Message):
+    __slots__ = (
+        "market_id",
+        "commitment_amount",
+        "slippage_tolerance",
+        "concentrated_liquidity_parameters",
+        "proposed_fee",
+    )
+
+    class ConcentratedLiquidityParameters(_message.Message):
+        __slots__ = (
+            "upper_bound",
+            "lower_bound",
+            "base",
+            "leverage_at_upper_bound",
+            "leverage_at_lower_bound",
+        )
+        UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        BASE_FIELD_NUMBER: _ClassVar[int]
+        LEVERAGE_AT_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        LEVERAGE_AT_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        upper_bound: str
+        lower_bound: str
+        base: str
+        leverage_at_upper_bound: str
+        leverage_at_lower_bound: str
+        def __init__(
+            self,
+            upper_bound: _Optional[str] = ...,
+            lower_bound: _Optional[str] = ...,
+            base: _Optional[str] = ...,
+            leverage_at_upper_bound: _Optional[str] = ...,
+            leverage_at_lower_bound: _Optional[str] = ...,
+        ) -> None: ...
+
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    COMMITMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
+    CONCENTRATED_LIQUIDITY_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
+    PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    commitment_amount: str
+    slippage_tolerance: str
+    concentrated_liquidity_parameters: AmendAMM.ConcentratedLiquidityParameters
+    proposed_fee: str
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        commitment_amount: _Optional[str] = ...,
+        slippage_tolerance: _Optional[str] = ...,
+        concentrated_liquidity_parameters: _Optional[
+            _Union[AmendAMM.ConcentratedLiquidityParameters, _Mapping]
+        ] = ...,
+        proposed_fee: _Optional[str] = ...,
+    ) -> None: ...
+
+class CancelAMM(_message.Message):
+    __slots__ = ("market_id", "method")
+
+    class Method(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        METHOD_UNSPECIFIED: _ClassVar[CancelAMM.Method]
+        METHOD_IMMEDIATE: _ClassVar[CancelAMM.Method]
+        METHOD_REDUCE_ONLY: _ClassVar[CancelAMM.Method]
+
+    METHOD_UNSPECIFIED: CancelAMM.Method
+    METHOD_IMMEDIATE: CancelAMM.Method
+    METHOD_REDUCE_ONLY: CancelAMM.Method
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    METHOD_FIELD_NUMBER: _ClassVar[int]
+    market_id: str
+    method: CancelAMM.Method
+    def __init__(
+        self,
+        market_id: _Optional[str] = ...,
+        method: _Optional[_Union[CancelAMM.Method, str]] = ...,
+    ) -> None: ...
+
+class DelayedTransactionsWrapper(_message.Message):
+    __slots__ = ("transactions",)
+    TRANSACTIONS_FIELD_NUMBER: _ClassVar[int]
+    transactions: _containers.RepeatedScalarFieldContainer[bytes]
+    def __init__(self, transactions: _Optional[_Iterable[bytes]] = ...) -> None: ...

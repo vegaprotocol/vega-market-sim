@@ -18,51 +18,61 @@ class CoreServiceStub(object):
             "/vega.api.v1.CoreService/SubmitTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitTransactionResponse.FromString,
+            _registered_method=True,
         )
         self.PropagateChainEvent = channel.unary_unary(
             "/vega.api.v1.CoreService/PropagateChainEvent",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.PropagateChainEventRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.PropagateChainEventResponse.FromString,
+            _registered_method=True,
         )
         self.Statistics = channel.unary_unary(
             "/vega.api.v1.CoreService/Statistics",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.StatisticsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.StatisticsResponse.FromString,
+            _registered_method=True,
         )
         self.LastBlockHeight = channel.unary_unary(
             "/vega.api.v1.CoreService/LastBlockHeight",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.LastBlockHeightRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.LastBlockHeightResponse.FromString,
+            _registered_method=True,
         )
         self.GetVegaTime = channel.unary_unary(
             "/vega.api.v1.CoreService/GetVegaTime",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.GetVegaTimeRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.GetVegaTimeResponse.FromString,
+            _registered_method=True,
         )
         self.ObserveEventBus = channel.stream_stream(
             "/vega.api.v1.CoreService/ObserveEventBus",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.ObserveEventBusRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.ObserveEventBusResponse.FromString,
+            _registered_method=True,
         )
         self.SubmitRawTransaction = channel.unary_unary(
             "/vega.api.v1.CoreService/SubmitRawTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitRawTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.SubmitRawTransactionResponse.FromString,
+            _registered_method=True,
         )
         self.CheckTransaction = channel.unary_unary(
             "/vega.api.v1.CoreService/CheckTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.CheckTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.CheckTransactionResponse.FromString,
+            _registered_method=True,
         )
         self.CheckRawTransaction = channel.unary_unary(
             "/vega.api.v1.CoreService/CheckRawTransaction",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.CheckRawTransactionResponse.FromString,
+            _registered_method=True,
         )
         self.GetSpamStatistics = channel.unary_unary(
             "/vega.api.v1.CoreService/GetSpamStatistics",
             request_serializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_core__pb2.GetSpamStatisticsResponse.FromString,
+            _registered_method=True,
         )
 
 
@@ -221,6 +231,9 @@ def add_CoreServiceServicer_to_server(servicer, server):
         "vega.api.v1.CoreService", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers(
+        "vega.api.v1.CoreService", rpc_method_handlers
+    )
 
 
 # This class is part of an EXPERIMENTAL API.
@@ -254,6 +267,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -283,6 +297,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -312,6 +327,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -341,6 +357,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -370,6 +387,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -399,6 +417,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -428,6 +447,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -457,6 +477,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -486,6 +507,7 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -515,4 +537,5 @@ class CoreService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )

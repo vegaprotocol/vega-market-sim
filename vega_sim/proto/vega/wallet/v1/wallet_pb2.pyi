@@ -40,6 +40,9 @@ class SubmitTransactionRequest(_message.Message):
         "join_team",
         "batch_proposal_submission",
         "update_party_profile",
+        "submit_amm",
+        "amend_amm",
+        "cancel_amm",
         "node_vote",
         "node_signature",
         "chain_event",
@@ -77,6 +80,9 @@ class SubmitTransactionRequest(_message.Message):
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     BATCH_PROPOSAL_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
+    SUBMIT_AMM_FIELD_NUMBER: _ClassVar[int]
+    AMEND_AMM_FIELD_NUMBER: _ClassVar[int]
+    CANCEL_AMM_FIELD_NUMBER: _ClassVar[int]
     NODE_VOTE_FIELD_NUMBER: _ClassVar[int]
     NODE_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     CHAIN_EVENT_FIELD_NUMBER: _ClassVar[int]
@@ -113,6 +119,9 @@ class SubmitTransactionRequest(_message.Message):
     join_team: _commands_pb2.JoinTeam
     batch_proposal_submission: _commands_pb2.BatchProposalSubmission
     update_party_profile: _commands_pb2.UpdatePartyProfile
+    submit_amm: _commands_pb2.SubmitAMM
+    amend_amm: _commands_pb2.AmendAMM
+    cancel_amm: _commands_pb2.CancelAMM
     node_vote: _validator_commands_pb2.NodeVote
     node_signature: _validator_commands_pb2.NodeSignature
     chain_event: _validator_commands_pb2.ChainEvent
@@ -195,6 +204,9 @@ class SubmitTransactionRequest(_message.Message):
         update_party_profile: _Optional[
             _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
         ] = ...,
+        submit_amm: _Optional[_Union[_commands_pb2.SubmitAMM, _Mapping]] = ...,
+        amend_amm: _Optional[_Union[_commands_pb2.AmendAMM, _Mapping]] = ...,
+        cancel_amm: _Optional[_Union[_commands_pb2.CancelAMM, _Mapping]] = ...,
         node_vote: _Optional[_Union[_validator_commands_pb2.NodeVote, _Mapping]] = ...,
         node_signature: _Optional[
             _Union[_validator_commands_pb2.NodeSignature, _Mapping]

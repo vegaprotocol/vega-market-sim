@@ -52,6 +52,9 @@ class InputData(_message.Message):
         "join_team",
         "batch_proposal_submission",
         "update_party_profile",
+        "submit_amm",
+        "amend_amm",
+        "cancel_amm",
         "node_vote",
         "node_signature",
         "chain_event",
@@ -62,6 +65,7 @@ class InputData(_message.Message):
         "protocol_upgrade_proposal",
         "issue_signatures",
         "oracle_data_submission",
+        "delayed_transactions_wrapper",
     )
     NONCE_FIELD_NUMBER: _ClassVar[int]
     BLOCK_HEIGHT_FIELD_NUMBER: _ClassVar[int]
@@ -89,6 +93,9 @@ class InputData(_message.Message):
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     BATCH_PROPOSAL_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
     UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
+    SUBMIT_AMM_FIELD_NUMBER: _ClassVar[int]
+    AMEND_AMM_FIELD_NUMBER: _ClassVar[int]
+    CANCEL_AMM_FIELD_NUMBER: _ClassVar[int]
     NODE_VOTE_FIELD_NUMBER: _ClassVar[int]
     NODE_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     CHAIN_EVENT_FIELD_NUMBER: _ClassVar[int]
@@ -99,6 +106,7 @@ class InputData(_message.Message):
     PROTOCOL_UPGRADE_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     ISSUE_SIGNATURES_FIELD_NUMBER: _ClassVar[int]
     ORACLE_DATA_SUBMISSION_FIELD_NUMBER: _ClassVar[int]
+    DELAYED_TRANSACTIONS_WRAPPER_FIELD_NUMBER: _ClassVar[int]
     nonce: int
     block_height: int
     order_submission: _commands_pb2.OrderSubmission
@@ -125,6 +133,9 @@ class InputData(_message.Message):
     join_team: _commands_pb2.JoinTeam
     batch_proposal_submission: _commands_pb2.BatchProposalSubmission
     update_party_profile: _commands_pb2.UpdatePartyProfile
+    submit_amm: _commands_pb2.SubmitAMM
+    amend_amm: _commands_pb2.AmendAMM
+    cancel_amm: _commands_pb2.CancelAMM
     node_vote: _validator_commands_pb2.NodeVote
     node_signature: _validator_commands_pb2.NodeSignature
     chain_event: _validator_commands_pb2.ChainEvent
@@ -135,6 +146,7 @@ class InputData(_message.Message):
     protocol_upgrade_proposal: _validator_commands_pb2.ProtocolUpgradeProposal
     issue_signatures: _commands_pb2.IssueSignatures
     oracle_data_submission: _data_pb2.OracleDataSubmission
+    delayed_transactions_wrapper: _commands_pb2.DelayedTransactionsWrapper
     def __init__(
         self,
         nonce: _Optional[int] = ...,
@@ -207,6 +219,9 @@ class InputData(_message.Message):
         update_party_profile: _Optional[
             _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
         ] = ...,
+        submit_amm: _Optional[_Union[_commands_pb2.SubmitAMM, _Mapping]] = ...,
+        amend_amm: _Optional[_Union[_commands_pb2.AmendAMM, _Mapping]] = ...,
+        cancel_amm: _Optional[_Union[_commands_pb2.CancelAMM, _Mapping]] = ...,
         node_vote: _Optional[_Union[_validator_commands_pb2.NodeVote, _Mapping]] = ...,
         node_signature: _Optional[
             _Union[_validator_commands_pb2.NodeSignature, _Mapping]
@@ -234,6 +249,9 @@ class InputData(_message.Message):
         ] = ...,
         oracle_data_submission: _Optional[
             _Union[_data_pb2.OracleDataSubmission, _Mapping]
+        ] = ...,
+        delayed_transactions_wrapper: _Optional[
+            _Union[_commands_pb2.DelayedTransactionsWrapper, _Mapping]
         ] = ...,
     ) -> None: ...
 
