@@ -116,6 +116,7 @@ class OrderError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: _ClassVar[OrderError]
     ORDER_ERROR_PEGGED_ORDERS_NOT_ALLOWED_IN_ISOLATED_MARGIN_MODE: _ClassVar[OrderError]
     ORDER_ERROR_PRICE_NOT_IN_TICK_SIZE: _ClassVar[OrderError]
+    ORDER_ERROR_PRICE_MUST_BE_LESS_THAN_OR_EQUAL_TO_MAX_PRICE: _ClassVar[OrderError]
 
 class ChainStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -202,6 +203,9 @@ class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     TRANSFER_TYPE_ORDER_MARGIN_HIGH: _ClassVar[TransferType]
     TRANSFER_TYPE_ISOLATED_MARGIN_LOW: _ClassVar[TransferType]
     TRANSFER_TYPE_ISOLATED_MARGIN_HIGH: _ClassVar[TransferType]
+    TRANSFER_TYPE_AMM_LOW: _ClassVar[TransferType]
+    TRANSFER_TYPE_AMM_HIGH: _ClassVar[TransferType]
+    TRANSFER_TYPE_AMM_RELEASE: _ClassVar[TransferType]
 
 class DispatchMetric(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -228,6 +232,7 @@ class IndividualScope(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     INDIVIDUAL_SCOPE_ALL: _ClassVar[IndividualScope]
     INDIVIDUAL_SCOPE_IN_TEAM: _ClassVar[IndividualScope]
     INDIVIDUAL_SCOPE_NOT_IN_TEAM: _ClassVar[IndividualScope]
+    INDIVIDUAL_SCOPE_AMM: _ClassVar[IndividualScope]
 
 class DistributionStrategy(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -344,6 +349,7 @@ ORDER_ERROR_REDUCE_ONLY_ORDER_WOULD_NOT_REDUCE_POSITION: OrderError
 ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: OrderError
 ORDER_ERROR_PEGGED_ORDERS_NOT_ALLOWED_IN_ISOLATED_MARGIN_MODE: OrderError
 ORDER_ERROR_PRICE_NOT_IN_TICK_SIZE: OrderError
+ORDER_ERROR_PRICE_MUST_BE_LESS_THAN_OR_EQUAL_TO_MAX_PRICE: OrderError
 CHAIN_STATUS_UNSPECIFIED: ChainStatus
 CHAIN_STATUS_DISCONNECTED: ChainStatus
 CHAIN_STATUS_REPLAYING: ChainStatus
@@ -421,6 +427,9 @@ TRANSFER_TYPE_ORDER_MARGIN_LOW: TransferType
 TRANSFER_TYPE_ORDER_MARGIN_HIGH: TransferType
 TRANSFER_TYPE_ISOLATED_MARGIN_LOW: TransferType
 TRANSFER_TYPE_ISOLATED_MARGIN_HIGH: TransferType
+TRANSFER_TYPE_AMM_LOW: TransferType
+TRANSFER_TYPE_AMM_HIGH: TransferType
+TRANSFER_TYPE_AMM_RELEASE: TransferType
 DISPATCH_METRIC_UNSPECIFIED: DispatchMetric
 DISPATCH_METRIC_MAKER_FEES_PAID: DispatchMetric
 DISPATCH_METRIC_MAKER_FEES_RECEIVED: DispatchMetric
@@ -438,6 +447,7 @@ INDIVIDUAL_SCOPE_UNSPECIFIED: IndividualScope
 INDIVIDUAL_SCOPE_ALL: IndividualScope
 INDIVIDUAL_SCOPE_IN_TEAM: IndividualScope
 INDIVIDUAL_SCOPE_NOT_IN_TEAM: IndividualScope
+INDIVIDUAL_SCOPE_AMM: IndividualScope
 DISTRIBUTION_STRATEGY_UNSPECIFIED: DistributionStrategy
 DISTRIBUTION_STRATEGY_PRO_RATA: DistributionStrategy
 DISTRIBUTION_STRATEGY_RANK: DistributionStrategy
@@ -456,18 +466,21 @@ MARGIN_MODE_CROSS_MARGIN: MarginMode
 MARGIN_MODE_ISOLATED_MARGIN: MarginMode
 
 class PartyProfile(_message.Message):
-    __slots__ = ("party_id", "alias", "metadata")
+    __slots__ = ("party_id", "alias", "metadata", "derived_keys")
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     ALIAS_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
+    DERIVED_KEYS_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     alias: str
     metadata: _containers.RepeatedCompositeFieldContainer[Metadata]
+    derived_keys: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         party_id: _Optional[str] = ...,
         alias: _Optional[str] = ...,
         metadata: _Optional[_Iterable[_Union[Metadata, _Mapping]]] = ...,
+        derived_keys: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class Metadata(_message.Message):
@@ -1933,21 +1946,30 @@ class LiquidityProviderSLA(_message.Message):
     ) -> None: ...
 
 class PriceMonitoringBounds(_message.Message):
-    __slots__ = ("min_valid_price", "max_valid_price", "trigger", "reference_price")
+    __slots__ = (
+        "min_valid_price",
+        "max_valid_price",
+        "trigger",
+        "reference_price",
+        "active",
+    )
     MIN_VALID_PRICE_FIELD_NUMBER: _ClassVar[int]
     MAX_VALID_PRICE_FIELD_NUMBER: _ClassVar[int]
     TRIGGER_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_PRICE_FIELD_NUMBER: _ClassVar[int]
+    ACTIVE_FIELD_NUMBER: _ClassVar[int]
     min_valid_price: str
     max_valid_price: str
     trigger: _markets_pb2.PriceMonitoringTrigger
     reference_price: str
+    active: bool
     def __init__(
         self,
         min_valid_price: _Optional[str] = ...,
         max_valid_price: _Optional[str] = ...,
         trigger: _Optional[_Union[_markets_pb2.PriceMonitoringTrigger, _Mapping]] = ...,
         reference_price: _Optional[str] = ...,
+        active: bool = ...,
     ) -> None: ...
 
 class ErrorDetail(_message.Message):
@@ -1986,6 +2008,7 @@ class NetworkLimits(_message.Message):
         "propose_asset_enabled_from",
         "can_propose_spot_market",
         "can_propose_perpetual_market",
+        "can_use_amm",
     )
     CAN_PROPOSE_MARKET_FIELD_NUMBER: _ClassVar[int]
     CAN_PROPOSE_ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -1996,6 +2019,7 @@ class NetworkLimits(_message.Message):
     PROPOSE_ASSET_ENABLED_FROM_FIELD_NUMBER: _ClassVar[int]
     CAN_PROPOSE_SPOT_MARKET_FIELD_NUMBER: _ClassVar[int]
     CAN_PROPOSE_PERPETUAL_MARKET_FIELD_NUMBER: _ClassVar[int]
+    CAN_USE_AMM_FIELD_NUMBER: _ClassVar[int]
     can_propose_market: bool
     can_propose_asset: bool
     propose_market_enabled: bool
@@ -2005,6 +2029,7 @@ class NetworkLimits(_message.Message):
     propose_asset_enabled_from: int
     can_propose_spot_market: bool
     can_propose_perpetual_market: bool
+    can_use_amm: bool
     def __init__(
         self,
         can_propose_market: bool = ...,
@@ -2016,6 +2041,7 @@ class NetworkLimits(_message.Message):
         propose_asset_enabled_from: _Optional[int] = ...,
         can_propose_spot_market: bool = ...,
         can_propose_perpetual_market: bool = ...,
+        can_use_amm: bool = ...,
     ) -> None: ...
 
 class LiquidityOrder(_message.Message):

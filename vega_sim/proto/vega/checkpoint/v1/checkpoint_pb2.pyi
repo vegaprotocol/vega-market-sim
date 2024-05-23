@@ -335,16 +335,19 @@ class ScheduledTransferAtTime(_message.Message):
     ) -> None: ...
 
 class RecurringTransfers(_message.Message):
-    __slots__ = ("recurring_transfers",)
+    __slots__ = ("recurring_transfers", "next_metric_update")
     RECURRING_TRANSFERS_FIELD_NUMBER: _ClassVar[int]
+    NEXT_METRIC_UPDATE_FIELD_NUMBER: _ClassVar[int]
     recurring_transfers: _containers.RepeatedCompositeFieldContainer[
         _events_pb2.Transfer
     ]
+    next_metric_update: int
     def __init__(
         self,
         recurring_transfers: _Optional[
             _Iterable[_Union[_events_pb2.Transfer, _Mapping]]
         ] = ...,
+        next_metric_update: _Optional[int] = ...,
     ) -> None: ...
 
 class GovernanceTransfer(_message.Message):
@@ -617,6 +620,7 @@ class MarketActivityTracker(_message.Message):
         "lp_paid_fees",
         "realised_returns",
         "realised_returns_history",
+        "amm_parties",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     ASSET_FIELD_NUMBER: _ClassVar[int]
@@ -640,6 +644,7 @@ class MarketActivityTracker(_message.Message):
     LP_PAID_FEES_FIELD_NUMBER: _ClassVar[int]
     REALISED_RETURNS_FIELD_NUMBER: _ClassVar[int]
     REALISED_RETURNS_HISTORY_FIELD_NUMBER: _ClassVar[int]
+    AMM_PARTIES_FIELD_NUMBER: _ClassVar[int]
     market: str
     asset: str
     maker_fees_received: _containers.RepeatedCompositeFieldContainer[PartyFees]
@@ -670,6 +675,7 @@ class MarketActivityTracker(_message.Message):
     realised_returns_history: _containers.RepeatedCompositeFieldContainer[
         EpochReturnsData
     ]
+    amm_parties: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         market: _Optional[str] = ...,
@@ -710,6 +716,7 @@ class MarketActivityTracker(_message.Message):
         realised_returns_history: _Optional[
             _Iterable[_Union[EpochReturnsData, _Mapping]]
         ] = ...,
+        amm_parties: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class EpochPartyTakerFees(_message.Message):

@@ -121,6 +121,8 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_TEAMS_STATS_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TIME_WEIGHTED_NOTIONAL_POSITION_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_CANCELLED_ORDERS: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_GAME_SCORES: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_AMM: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -218,6 +220,8 @@ BUS_EVENT_TYPE_PARTY_PROFILE_UPDATED: BusEventType
 BUS_EVENT_TYPE_TEAMS_STATS_UPDATED: BusEventType
 BUS_EVENT_TYPE_TIME_WEIGHTED_NOTIONAL_POSITION_UPDATED: BusEventType
 BUS_EVENT_TYPE_CANCELLED_ORDERS: BusEventType
+BUS_EVENT_TYPE_GAME_SCORES: BusEventType
+BUS_EVENT_TYPE_AMM: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -246,6 +250,111 @@ class TimeWeightedNotionalPositionUpdated(_message.Message):
         party: _Optional[str] = ...,
         game_id: _Optional[str] = ...,
         time_weighted_notional_position: _Optional[str] = ...,
+    ) -> None: ...
+
+class AMM(_message.Message):
+    __slots__ = (
+        "id",
+        "party_id",
+        "market_id",
+        "amm_party_id",
+        "commitment",
+        "parameters",
+        "status",
+        "status_reason",
+    )
+
+    class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        STATUS_UNSPECIFIED: _ClassVar[AMM.Status]
+        STATUS_ACTIVE: _ClassVar[AMM.Status]
+        STATUS_REJECTED: _ClassVar[AMM.Status]
+        STATUS_CANCELLED: _ClassVar[AMM.Status]
+        STATUS_STOPPED: _ClassVar[AMM.Status]
+        STATUS_REDUCE_ONLY: _ClassVar[AMM.Status]
+
+    STATUS_UNSPECIFIED: AMM.Status
+    STATUS_ACTIVE: AMM.Status
+    STATUS_REJECTED: AMM.Status
+    STATUS_CANCELLED: AMM.Status
+    STATUS_STOPPED: AMM.Status
+    STATUS_REDUCE_ONLY: AMM.Status
+
+    class StatusReason(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        STATUS_REASON_UNSPECIFIED: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_CANCELLED_BY_PARTY: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_CANNOT_FILL_COMMITMENT: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_PARTY_ALREADY_OWNS_AMM_FOR_MARKET: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_PARTY_CLOSED_OUT: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_MARKET_CLOSED: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_COMMITMENT_TOO_LOW: _ClassVar[AMM.StatusReason]
+        STATUS_REASON_CANNOT_REBASE: _ClassVar[AMM.StatusReason]
+
+    STATUS_REASON_UNSPECIFIED: AMM.StatusReason
+    STATUS_REASON_CANCELLED_BY_PARTY: AMM.StatusReason
+    STATUS_REASON_CANNOT_FILL_COMMITMENT: AMM.StatusReason
+    STATUS_REASON_PARTY_ALREADY_OWNS_AMM_FOR_MARKET: AMM.StatusReason
+    STATUS_REASON_PARTY_CLOSED_OUT: AMM.StatusReason
+    STATUS_REASON_MARKET_CLOSED: AMM.StatusReason
+    STATUS_REASON_COMMITMENT_TOO_LOW: AMM.StatusReason
+    STATUS_REASON_CANNOT_REBASE: AMM.StatusReason
+
+    class ConcentratedLiquidityParameters(_message.Message):
+        __slots__ = (
+            "base",
+            "lower_bound",
+            "upper_bound",
+            "leverage_at_upper_bound",
+            "leverage_at_lower_bound",
+        )
+        BASE_FIELD_NUMBER: _ClassVar[int]
+        LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        LEVERAGE_AT_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        LEVERAGE_AT_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        base: str
+        lower_bound: str
+        upper_bound: str
+        leverage_at_upper_bound: str
+        leverage_at_lower_bound: str
+        def __init__(
+            self,
+            base: _Optional[str] = ...,
+            lower_bound: _Optional[str] = ...,
+            upper_bound: _Optional[str] = ...,
+            leverage_at_upper_bound: _Optional[str] = ...,
+            leverage_at_lower_bound: _Optional[str] = ...,
+        ) -> None: ...
+
+    ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    AMM_PARTY_ID_FIELD_NUMBER: _ClassVar[int]
+    COMMITMENT_FIELD_NUMBER: _ClassVar[int]
+    PARAMETERS_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    STATUS_REASON_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    party_id: str
+    market_id: str
+    amm_party_id: str
+    commitment: str
+    parameters: AMM.ConcentratedLiquidityParameters
+    status: AMM.Status
+    status_reason: AMM.StatusReason
+    def __init__(
+        self,
+        id: _Optional[str] = ...,
+        party_id: _Optional[str] = ...,
+        market_id: _Optional[str] = ...,
+        amm_party_id: _Optional[str] = ...,
+        commitment: _Optional[str] = ...,
+        parameters: _Optional[
+            _Union[AMM.ConcentratedLiquidityParameters, _Mapping]
+        ] = ...,
+        status: _Optional[_Union[AMM.Status, str]] = ...,
+        status_reason: _Optional[_Union[AMM.StatusReason, str]] = ...,
     ) -> None: ...
 
 class VestingBalancesSummary(_message.Message):
@@ -352,18 +461,30 @@ class VestingStatsUpdated(_message.Message):
     ) -> None: ...
 
 class PartyVestingStats(_message.Message):
-    __slots__ = ("party_id", "reward_bonus_multiplier", "quantum_balance")
+    __slots__ = (
+        "party_id",
+        "reward_bonus_multiplier",
+        "quantum_balance",
+        "summed_reward_bonus_multiplier",
+        "summed_quantum_balance",
+    )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     REWARD_BONUS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
     QUANTUM_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    SUMMED_REWARD_BONUS_MULTIPLIER_FIELD_NUMBER: _ClassVar[int]
+    SUMMED_QUANTUM_BALANCE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     reward_bonus_multiplier: str
     quantum_balance: str
+    summed_reward_bonus_multiplier: str
+    summed_quantum_balance: str
     def __init__(
         self,
         party_id: _Optional[str] = ...,
         reward_bonus_multiplier: _Optional[str] = ...,
         quantum_balance: _Optional[str] = ...,
+        summed_reward_bonus_multiplier: _Optional[str] = ...,
+        summed_quantum_balance: _Optional[str] = ...,
     ) -> None: ...
 
 class FeesStats(_message.Message):
@@ -1223,6 +1344,9 @@ class TransactionResult(_message.Message):
         "join_team",
         "batch_proposal",
         "update_party_profile",
+        "submit_amm",
+        "amend_amm",
+        "cancel_amm",
         "success",
         "failure",
     )
@@ -1269,6 +1393,9 @@ class TransactionResult(_message.Message):
     JOIN_TEAM_FIELD_NUMBER: _ClassVar[int]
     BATCH_PROPOSAL_FIELD_NUMBER: _ClassVar[int]
     UPDATE_PARTY_PROFILE_FIELD_NUMBER: _ClassVar[int]
+    SUBMIT_AMM_FIELD_NUMBER: _ClassVar[int]
+    AMEND_AMM_FIELD_NUMBER: _ClassVar[int]
+    CANCEL_AMM_FIELD_NUMBER: _ClassVar[int]
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     FAILURE_FIELD_NUMBER: _ClassVar[int]
     party_id: str
@@ -1303,6 +1430,9 @@ class TransactionResult(_message.Message):
     join_team: _commands_pb2.JoinTeam
     batch_proposal: _commands_pb2.BatchProposalSubmission
     update_party_profile: _commands_pb2.UpdatePartyProfile
+    submit_amm: _commands_pb2.SubmitAMM
+    amend_amm: _commands_pb2.AmendAMM
+    cancel_amm: _commands_pb2.CancelAMM
     success: TransactionResult.SuccessDetails
     failure: TransactionResult.FailureDetails
     def __init__(
@@ -1391,6 +1521,9 @@ class TransactionResult(_message.Message):
         update_party_profile: _Optional[
             _Union[_commands_pb2.UpdatePartyProfile, _Mapping]
         ] = ...,
+        submit_amm: _Optional[_Union[_commands_pb2.SubmitAMM, _Mapping]] = ...,
+        amend_amm: _Optional[_Union[_commands_pb2.AmendAMM, _Mapping]] = ...,
+        cancel_amm: _Optional[_Union[_commands_pb2.CancelAMM, _Mapping]] = ...,
         success: _Optional[_Union[TransactionResult.SuccessDetails, _Mapping]] = ...,
         failure: _Optional[_Union[TransactionResult.FailureDetails, _Mapping]] = ...,
     ) -> None: ...
@@ -2414,6 +2547,90 @@ class TeamMemberStats(_message.Message):
         self, party_id: _Optional[str] = ..., notional_volume: _Optional[str] = ...
     ) -> None: ...
 
+class GamePartyScore(_message.Message):
+    __slots__ = (
+        "game_id",
+        "party",
+        "team_id",
+        "epoch",
+        "time",
+        "score",
+        "staking_balance",
+        "open_volume",
+        "total_fees_paid",
+        "is_eligible",
+        "rank",
+    )
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TIME_FIELD_NUMBER: _ClassVar[int]
+    SCORE_FIELD_NUMBER: _ClassVar[int]
+    STAKING_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    OPEN_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    TOTAL_FEES_PAID_FIELD_NUMBER: _ClassVar[int]
+    IS_ELIGIBLE_FIELD_NUMBER: _ClassVar[int]
+    RANK_FIELD_NUMBER: _ClassVar[int]
+    game_id: str
+    party: str
+    team_id: str
+    epoch: int
+    time: int
+    score: str
+    staking_balance: str
+    open_volume: str
+    total_fees_paid: str
+    is_eligible: bool
+    rank: int
+    def __init__(
+        self,
+        game_id: _Optional[str] = ...,
+        party: _Optional[str] = ...,
+        team_id: _Optional[str] = ...,
+        epoch: _Optional[int] = ...,
+        time: _Optional[int] = ...,
+        score: _Optional[str] = ...,
+        staking_balance: _Optional[str] = ...,
+        open_volume: _Optional[str] = ...,
+        total_fees_paid: _Optional[str] = ...,
+        is_eligible: bool = ...,
+        rank: _Optional[int] = ...,
+    ) -> None: ...
+
+class GameTeamScore(_message.Message):
+    __slots__ = ("game_id", "team_id", "epoch", "time", "score")
+    GAME_ID_FIELD_NUMBER: _ClassVar[int]
+    TEAM_ID_FIELD_NUMBER: _ClassVar[int]
+    EPOCH_FIELD_NUMBER: _ClassVar[int]
+    TIME_FIELD_NUMBER: _ClassVar[int]
+    SCORE_FIELD_NUMBER: _ClassVar[int]
+    game_id: str
+    team_id: str
+    epoch: int
+    time: int
+    score: str
+    def __init__(
+        self,
+        game_id: _Optional[str] = ...,
+        team_id: _Optional[str] = ...,
+        epoch: _Optional[int] = ...,
+        time: _Optional[int] = ...,
+        score: _Optional[str] = ...,
+    ) -> None: ...
+
+class GameScores(_message.Message):
+    __slots__ = ("team_scores", "party_scores")
+    TEAM_SCORES_FIELD_NUMBER: _ClassVar[int]
+    PARTY_SCORES_FIELD_NUMBER: _ClassVar[int]
+    team_scores: _containers.RepeatedCompositeFieldContainer[GameTeamScore]
+    party_scores: _containers.RepeatedCompositeFieldContainer[GamePartyScore]
+    def __init__(
+        self,
+        team_scores: _Optional[_Iterable[_Union[GameTeamScore, _Mapping]]] = ...,
+        party_scores: _Optional[_Iterable[_Union[GamePartyScore, _Mapping]]] = ...,
+    ) -> None: ...
+
 class BusEvent(_message.Message):
     __slots__ = (
         "id",
@@ -2505,6 +2722,8 @@ class BusEvent(_message.Message):
         "teams_stats_updated",
         "time_weighted_notional_position_updated",
         "cancelled_orders",
+        "game_scores",
+        "amm",
         "market",
         "tx_err_event",
         "version",
@@ -2600,6 +2819,8 @@ class BusEvent(_message.Message):
     TEAMS_STATS_UPDATED_FIELD_NUMBER: _ClassVar[int]
     TIME_WEIGHTED_NOTIONAL_POSITION_UPDATED_FIELD_NUMBER: _ClassVar[int]
     CANCELLED_ORDERS_FIELD_NUMBER: _ClassVar[int]
+    GAME_SCORES_FIELD_NUMBER: _ClassVar[int]
+    AMM_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -2694,6 +2915,8 @@ class BusEvent(_message.Message):
     teams_stats_updated: TeamsStatsUpdated
     time_weighted_notional_position_updated: TimeWeightedNotionalPositionUpdated
     cancelled_orders: CancelledOrders
+    game_scores: GameScores
+    amm: AMM
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -2834,6 +3057,8 @@ class BusEvent(_message.Message):
             _Union[TimeWeightedNotionalPositionUpdated, _Mapping]
         ] = ...,
         cancelled_orders: _Optional[_Union[CancelledOrders, _Mapping]] = ...,
+        game_scores: _Optional[_Union[GameScores, _Mapping]] = ...,
+        amm: _Optional[_Union[AMM, _Mapping]] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,

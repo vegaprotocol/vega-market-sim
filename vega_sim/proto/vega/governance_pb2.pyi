@@ -167,17 +167,20 @@ class FutureProduct(_message.Message):
         "data_source_spec_for_settlement_data",
         "data_source_spec_for_trading_termination",
         "data_source_spec_binding",
+        "cap",
     )
     SETTLEMENT_ASSET_FIELD_NUMBER: _ClassVar[int]
     QUOTE_NAME_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_SETTLEMENT_DATA_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_FOR_TRADING_TERMINATION_FIELD_NUMBER: _ClassVar[int]
     DATA_SOURCE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    CAP_FIELD_NUMBER: _ClassVar[int]
     settlement_asset: str
     quote_name: str
     data_source_spec_for_settlement_data: _data_source_pb2.DataSourceDefinition
     data_source_spec_for_trading_termination: _data_source_pb2.DataSourceDefinition
     data_source_spec_binding: _markets_pb2.DataSourceSpecToFutureBinding
+    cap: _markets_pb2.FutureCap
     def __init__(
         self,
         settlement_asset: _Optional[str] = ...,
@@ -191,6 +194,7 @@ class FutureProduct(_message.Message):
         data_source_spec_binding: _Optional[
             _Union[_markets_pb2.DataSourceSpecToFutureBinding, _Mapping]
         ] = ...,
+        cap: _Optional[_Union[_markets_pb2.FutureCap, _Mapping]] = ...,
     ) -> None: ...
 
 class PerpetualProduct(_message.Message):

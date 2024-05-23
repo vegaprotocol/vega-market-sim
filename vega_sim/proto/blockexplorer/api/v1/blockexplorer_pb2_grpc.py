@@ -20,16 +20,19 @@ class BlockExplorerServiceStub(object):
             "/blockexplorer.api.v1.BlockExplorerService/GetTransaction",
             request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.GetTransactionResponse.FromString,
+            _registered_method=True,
         )
         self.ListTransactions = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/ListTransactions",
             request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.ListTransactionsResponse.FromString,
+            _registered_method=True,
         )
         self.Info = channel.unary_unary(
             "/blockexplorer.api.v1.BlockExplorerService/Info",
             request_serializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoRequest.SerializeToString,
             response_deserializer=blockexplorer_dot_api_dot_v1_dot_blockexplorer__pb2.InfoResponse.FromString,
+            _registered_method=True,
         )
 
 
@@ -87,6 +90,9 @@ def add_BlockExplorerServiceServicer_to_server(servicer, server):
         "blockexplorer.api.v1.BlockExplorerService", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers(
+        "blockexplorer.api.v1.BlockExplorerService", rpc_method_handlers
+    )
 
 
 # This class is part of an EXPERIMENTAL API.
@@ -120,6 +126,7 @@ class BlockExplorerService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -149,6 +156,7 @@ class BlockExplorerService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -178,4 +186,5 @@ class BlockExplorerService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
