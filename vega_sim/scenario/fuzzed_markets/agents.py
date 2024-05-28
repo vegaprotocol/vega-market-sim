@@ -1,5 +1,9 @@
 import copy
 import logging
+import random
+import string
+import uuid
+import hashlib
 from datetime import datetime
 from typing import Dict, Iterable, List, NamedTuple, Optional
 from uuid import uuid4
@@ -19,7 +23,7 @@ import vega_sim.proto.vega.commands.v1.commands_pb2 as commands_protos
 import vega_sim.scenario.fuzzed_markets.fuzzers as fuzzers
 from vega_sim.api.governance import ProposalNotAcceptedError
 from vega_sim.api.market import MarketConfig, Successor
-from vega_sim.environment.agent import StateAgentWithWallet, VegaState
+from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.proto.vega import markets as markets_protos
 from vega_sim.service import MarketStateUpdateType, PeggedOrder, VegaService
@@ -51,10 +55,35 @@ COMMAND_AND_TYPES = [
 ]
 
 
-##################################################################################################################
-##                          This section largely from the protofuzz library with a tweak                        ##
-##                          to handle an infinite recursion on protbuf Value members                            ##
-##################################################################################################################
+def _vega_string_generator(descriptor):
+    def infinite_name_iter():
+        while True:
+            choice = random.randint(0, 3)
+
+            match choice:
+                case 0:
+                    m = hashlib.sha256()
+                    m.update(str(uuid.uuid4()).encode())
+                    yield m.hexdigest()
+                case 1:
+                    yield str(random.randint(0, 10_000_000))
+                case 2:
+                    yield str(random.random() * 10_000_000)
+                case 1:
+                    yield "".join(
+                        random.choices(
+                            string.ascii_uppercase + string.digits,
+                            k=random.randint(0, 30),
+                        )
+                    )
+
+    return protofuzz.gen.IterValueGenerator(descriptor.name, infinite_name_iter())
+
+
+######################################################################################
+#          This section largely from the protofuzz library with a tweak              #
+#            to handle an infinite recursion on protbuf Value members                #
+######################################################################################
 
 
 def descriptor_to_generator(cls_descriptor, cls, limit=0):
@@ -117,7 +146,7 @@ def _prototype_to_generator(descriptor, cls):
     elif descriptor.type == _fd.TYPE_FLOAT:
         generator = protofuzz._float_generator(descriptor, 32)
     elif descriptor.type == _fd.TYPE_STRING:
-        generator = protofuzz._string_generator(descriptor)
+        generator = _vega_string_generator(descriptor)
     elif descriptor.type == _fd.TYPE_BYTES:
         generator = protofuzz._bytes_generator(descriptor)
     elif descriptor.type == _fd.TYPE_BOOL:
@@ -180,9 +209,6 @@ def _assign_to_field(obj, name, val):
     elif isinstance(target, message.Message):
         target.CopyFrom(val)
     else:
-        import pdb
-
-        pdb.set_trace()
         raise RuntimeError("Unsupported type: {}".format(type(target)))
 
 
@@ -200,8 +226,8 @@ def _fields_to_object(descriptor, fields):
     return obj
 
 
-##################################################################################################################
-##################################################################################################################
+#######################################################################################
+#######################################################################################
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -976,7 +1002,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig("future")
         )
 
-        if self.market_config.is_perp() and perp_settlement_data_generator == None:
+        if self.market_config.is_perp() and perp_settlement_data_generator is None:
             raise ValueError(
                 "'perp_settlement_data_generator' must be supplied when 'market_config'"
                 " indicates a perp market"
@@ -1097,27 +1123,27 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                     name=self._get_termination_key_name(),
                 ),
             )
-            if self.perp_options != None:
-                if self.perp_options.funding_payment_frequency_in_seconds != None:
+            if self.perp_options is not None:
+                if self.perp_options.funding_payment_frequency_in_seconds is not None:
                     mkt_config.set(
                         "instrument.perpetual.funding_payment_frequency_in_seconds"
                     )
-                if self.perp_options.margin_funding_factor != None:
+                if self.perp_options.margin_funding_factor is not None:
                     mkt_config.set(
                         "instrument.perpetual.margin_funding_factor",
                         self.perp_options.margin_funding_factor,
                     )
-                if self.perp_options.interest_rate != None:
+                if self.perp_options.interest_rate is not None:
                     mkt_config.set(
                         "instrument.perpetual.interest_rate",
                         self.perp_options.interest_rate,
                     )
-                if self.perp_options.clamp_lower_bound != None:
+                if self.perp_options.clamp_lower_bound is not None:
                     mkt_config.set(
                         "instrument.perpetual.clamp_lower_bound",
                         self.perp_options.clamp_lower_bound,
                     )
-                if self.perp_options.clamp_upper_bound != None:
+                if self.perp_options.clamp_upper_bound is not None:
                     mkt_config.set(
                         "instrument.perpetual.clamp_upper_bound",
                         self.perp_options.clamp_upper_bound,
@@ -1862,9 +1888,13 @@ class FuzzyRandomTransactionAgent(StateAgentWithWallet):
             next(fuzzer)
 
         fuzz_proto = next(fuzzer)
-        self.vega.submit_transaction(
-            key_name=self.key_name,
-            transaction=fuzz_proto,
-            transaction_type=tx_name,
-            wallet_name=self.wallet_name,
-        )
+
+        try:
+            self.vega.submit_transaction(
+                key_name=self.key_name,
+                transaction=fuzz_proto,
+                transaction_type=tx_name,
+                wallet_name=self.wallet_name,
+            )
+        except HTTPError:
+            pass
