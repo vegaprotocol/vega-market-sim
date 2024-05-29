@@ -544,7 +544,7 @@ class FuzzingScenario(Scenario):
                 FuzzyRandomTransactionAgent(
                     wallet_name="FUZZY_RANDOM_TX",
                     key_name="RANDOM_TX_MAKER",
-                    tag="TX_RND",
+                    tag=f"TX_RND_{str(i_market).zfill(3)}",
                     asset_name=asset_name,
                 )
             )

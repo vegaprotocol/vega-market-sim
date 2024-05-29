@@ -1074,6 +1074,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
         if self.vega.find_asset_id(symbol=self.asset_name) is None:
+
             self.vega.create_asset(
                 wallet_name=self.wallet_name,
                 name=self.asset_name,
@@ -1851,6 +1852,7 @@ class FuzzyRandomTransactionAgent(StateAgentWithWallet):
         if self.asset_name:
             # Get asset id
             self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+
             if mint_key:
                 # Top up asset
                 self.vega.mint(
