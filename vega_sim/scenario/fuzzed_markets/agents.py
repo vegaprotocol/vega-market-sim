@@ -1,32 +1,233 @@
-import logging
 import copy
-import os
-from typing import Optional, Dict, List, Iterable
-
-import pandas as pd
-from numpy import array
-from numpy.random import RandomState
+import logging
+import random
+import string
+import uuid
+import hashlib
 from datetime import datetime
-from typing import NamedTuple
+from typing import Dict, Iterable, List, NamedTuple, Optional
+from uuid import uuid4
 
-import vega_sim.proto.vega as vega_protos
-from vega_sim.api.market import MarketConfig, Successor
-from vega_sim.environment.agent import StateAgentWithWallet, VegaState
-from vega_sim.null_service import VegaServiceNull
-from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.service import (
-    VegaService,
-    PeggedOrder,
-    MarketStateUpdateType,
-)
-from vega_sim.api.governance import ProposalNotAcceptedError
+import google._upb._message as msg
+from google.protobuf import descriptor as D
+from google.protobuf import message
+from google.protobuf.internal import containers
+from google.protobuf.struct_pb2 import Value
+from numpy.random import RandomState
+from protofuzz import protofuzz
 from requests.exceptions import HTTPError
 
 import vega_sim.builders as builders
-
-from uuid import uuid4
-
+import vega_sim.proto.vega as vega_protos
+import vega_sim.proto.vega.commands.v1.commands_pb2 as commands_protos
 import vega_sim.scenario.fuzzed_markets.fuzzers as fuzzers
+from vega_sim.api.governance import ProposalNotAcceptedError
+from vega_sim.api.market import MarketConfig, Successor
+from vega_sim.environment.agent import StateAgentWithWallet
+from vega_sim.null_service import VegaServiceNull
+from vega_sim.proto.vega import markets as markets_protos
+from vega_sim.service import MarketStateUpdateType, PeggedOrder, VegaService
+
+COMMAND_AND_TYPES = [
+    (commands_protos.OrderSubmission, "order_submission", 2),
+    (commands_protos.BatchMarketInstructions, "batch_market_instructions", 5),
+    (commands_protos.CancelTransfer, "cancel_transfer", 2),
+    (commands_protos.DelegateSubmission, "delegate_submission", 2),
+    (commands_protos.IssueSignatures, "issue_signatures", 2),
+    (commands_protos.LiquidityProvisionAmendment, "liquidity_provision_amendment", 2),
+    (
+        commands_protos.LiquidityProvisionCancellation,
+        "liquidity_provision_cancellation",
+        2,
+    ),
+    (
+        commands_protos.LiquidityProvisionSubmission,
+        "liquidity_provision_submission",
+        2,
+    ),
+    (commands_protos.OrderAmendment, "order_amendment", 2),
+    (commands_protos.OrderCancellation, "order_cancellation", 2),
+    (commands_protos.ProposalSubmission, "proposal_submission", 5),
+    (commands_protos.Transfer, "transfer", 2),
+    (commands_protos.UndelegateSubmission, "undelegate_submission", 2),
+    (commands_protos.VoteSubmission, "vote_submission", 2),
+    (commands_protos.WithdrawSubmission, "withdraw_submission", 2),
+]
+
+
+def _vega_string_generator(descriptor):
+    def infinite_name_iter():
+        while True:
+            choice = random.randint(0, 3)
+
+            match choice:
+                case 0:
+                    m = hashlib.sha256()
+                    m.update(str(uuid.uuid4()).encode())
+                    yield m.hexdigest()
+                case 1:
+                    yield str(random.randint(0, 10_000_000))
+                case 2:
+                    yield str(random.random() * 10_000_000)
+                case 1:
+                    yield "".join(
+                        random.choices(
+                            string.ascii_uppercase + string.digits,
+                            k=random.randint(0, 30),
+                        )
+                    )
+
+    return protofuzz.gen.IterValueGenerator(descriptor.name, infinite_name_iter())
+
+
+######################################################################################
+#          This section largely from the protofuzz library with a tweak              #
+#            to handle an infinite recursion on protbuf Value members                #
+######################################################################################
+
+
+def descriptor_to_generator(cls_descriptor, cls, limit=0):
+    """Convert protobuf descriptor to a protofuzz generator for same type."""
+    generators = []
+    for descriptor in cls_descriptor.fields_by_name.values():
+        if descriptor.name == "args":
+
+            def _inf_yield():
+                while True:
+                    yield Value(string_value="afrawawf")
+
+            generator = protofuzz.gen.IterValueGenerator(descriptor.name, _inf_yield())
+            generator.set_name(descriptor.name)
+        else:
+            generator = _prototype_to_generator(descriptor, cls)
+
+        if limit != 0:
+            generator.set_limit(limit)
+
+        generators.append(generator)
+
+    return cls(cls_descriptor.name, *generators)
+
+
+def _prototype_to_generator(descriptor, cls):
+    """Return map of descriptor to a protofuzz generator."""
+    _fd = D.FieldDescriptor
+    generator = None
+
+    ints32 = [
+        _fd.TYPE_INT32,
+        _fd.TYPE_UINT32,
+        _fd.TYPE_FIXED32,
+        _fd.TYPE_SFIXED32,
+        _fd.TYPE_SINT32,
+    ]
+    ints64 = [
+        _fd.TYPE_INT64,
+        _fd.TYPE_UINT64,
+        _fd.TYPE_FIXED64,
+        _fd.TYPE_SFIXED64,
+        _fd.TYPE_SINT64,
+    ]
+    ints_signed = [
+        _fd.TYPE_INT32,
+        _fd.TYPE_SFIXED32,
+        _fd.TYPE_SINT32,
+        _fd.TYPE_INT64,
+        _fd.TYPE_SFIXED64,
+        _fd.TYPE_SINT64,
+    ]
+
+    if descriptor.type in ints32 + ints64:
+        bitwidth = [32, 64][descriptor.type in ints64]
+        unsigned = descriptor.type not in ints_signed
+        generator = protofuzz._int_generator(descriptor, bitwidth, unsigned)
+    elif descriptor.type == _fd.TYPE_DOUBLE:
+        generator = protofuzz._float_generator(descriptor, 64)
+    elif descriptor.type == _fd.TYPE_FLOAT:
+        generator = protofuzz._float_generator(descriptor, 32)
+    elif descriptor.type == _fd.TYPE_STRING:
+        generator = _vega_string_generator(descriptor)
+    elif descriptor.type == _fd.TYPE_BYTES:
+        generator = protofuzz._bytes_generator(descriptor)
+    elif descriptor.type == _fd.TYPE_BOOL:
+        generator = protofuzz.gen.IterValueGenerator(descriptor.name, [True, False])
+    elif descriptor.type == _fd.TYPE_ENUM:
+        generator = protofuzz._enum_generator(descriptor)
+    elif descriptor.type == _fd.TYPE_MESSAGE:
+        generator = descriptor_to_generator(descriptor.message_type, cls)
+        generator.set_name(descriptor.name)
+    else:
+        raise RuntimeError("type {} unsupported".format(descriptor.type))
+
+    return generator
+
+
+class JSONHandlingProtobufGenerator(protofuzz.ProtobufGenerator):
+    """A "fuzzing strategy" class that is associated with a Protobuf class.
+
+    Currently, two strategies are supported:
+
+     - permute()
+        Generate permutations of fuzzed values for the fields.
+
+     - linear()
+        Generate fuzzed instances in lock-step
+        (this is equivalent to running zip(*fields).
+
+    """
+
+    def _iteration_helper(self, iter_class, limit):
+        generator = descriptor_to_generator(self._descriptor, iter_class, limit)
+
+        if limit:
+            generator.set_limit(limit)
+
+        # Create dependencies before beginning generation
+        for args in self._dependencies:
+            generator.make_dependent(*args)
+
+        for fields in generator:
+            yield _fields_to_object(self._descriptor, fields)
+
+
+def _assign_to_field(obj, name, val):
+    """Return map of arbitrary value to a protobuf field."""
+    target = getattr(obj, name)
+
+    if isinstance(
+        target, (msg.RepeatedScalarContainer, containers.RepeatedScalarFieldContainer)
+    ):
+        target.append(val)
+    elif isinstance(
+        target,
+        (containers.RepeatedCompositeFieldContainer, msg.RepeatedCompositeContainer),
+    ):
+        target = target.add()
+        target.CopyFrom(val)
+    elif isinstance(target, (int, float, bool, str, bytes)):
+        setattr(obj, name, val)
+    elif isinstance(target, message.Message):
+        target.CopyFrom(val)
+    else:
+        raise RuntimeError("Unsupported type: {}".format(type(target)))
+
+
+def _fields_to_object(descriptor, fields):
+    """Convert descriptor and a set of fields to a Protobuf instance."""
+    # pylint: disable=protected-access
+    obj = descriptor._concrete_class()
+
+    for name, value in fields:
+        if isinstance(value, tuple):
+            subtype = descriptor.fields_by_name[name].message_type
+            value = _fields_to_object(subtype, value)
+        _assign_to_field(obj, name, value)
+
+    return obj
+
+
+#######################################################################################
+#######################################################################################
 
 
 class FuzzingAgent(StateAgentWithWallet):
@@ -801,7 +1002,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
             market_config if market_config is not None else MarketConfig("future")
         )
 
-        if self.market_config.is_perp() and perp_settlement_data_generator == None:
+        if self.market_config.is_perp() and perp_settlement_data_generator is None:
             raise ValueError(
                 "'perp_settlement_data_generator' must be supplied when 'market_config'"
                 " indicates a perp market"
@@ -873,6 +1074,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
         self.vega.wait_for_total_catchup()
 
         if self.vega.find_asset_id(symbol=self.asset_name) is None:
+
             self.vega.create_asset(
                 wallet_name=self.wallet_name,
                 name=self.asset_name,
@@ -922,27 +1124,27 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                     name=self._get_termination_key_name(),
                 ),
             )
-            if self.perp_options != None:
-                if self.perp_options.funding_payment_frequency_in_seconds != None:
+            if self.perp_options is not None:
+                if self.perp_options.funding_payment_frequency_in_seconds is not None:
                     mkt_config.set(
                         "instrument.perpetual.funding_payment_frequency_in_seconds"
                     )
-                if self.perp_options.margin_funding_factor != None:
+                if self.perp_options.margin_funding_factor is not None:
                     mkt_config.set(
                         "instrument.perpetual.margin_funding_factor",
                         self.perp_options.margin_funding_factor,
                     )
-                if self.perp_options.interest_rate != None:
+                if self.perp_options.interest_rate is not None:
                     mkt_config.set(
                         "instrument.perpetual.interest_rate",
                         self.perp_options.interest_rate,
                     )
-                if self.perp_options.clamp_lower_bound != None:
+                if self.perp_options.clamp_lower_bound is not None:
                     mkt_config.set(
                         "instrument.perpetual.clamp_lower_bound",
                         self.perp_options.clamp_lower_bound,
                     )
-                if self.perp_options.clamp_upper_bound != None:
+                if self.perp_options.clamp_upper_bound is not None:
                     mkt_config.set(
                         "instrument.perpetual.clamp_upper_bound",
                         self.perp_options.clamp_upper_bound,
@@ -1613,3 +1815,88 @@ class FuzzyGovernanceTransferAgent(StateAgentWithWallet):
             f" {self.accepted_proposals}/{self.proposals} valid governance transfer"
             " proposals."
         )
+
+
+class FuzzyRandomTransactionAgent(StateAgentWithWallet):
+    NAME_BASE = "fuzzy_random_transaction_agent"
+
+    def __init__(
+        self,
+        key_name: str,
+        wallet_name: Optional[str] = None,
+        asset_name: Optional[str] = None,
+        initial_mint: float = 1e9,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        super().__init__(wallet_name=wallet_name, key_name=key_name, tag=tag)
+
+        self.asset_name = asset_name
+        self.random_state = random_state if random_state is not None else RandomState()
+
+        self.fuzzers = {
+            proto_name: JSONHandlingProtobufGenerator(protobuf_cls.DESCRIPTOR).permute()
+            for (protobuf_cls, proto_name, _) in COMMAND_AND_TYPES
+        }
+        self.initial_mint = initial_mint
+
+    def initialise(
+        self,
+        vega: VegaService,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        # Initialise wallet
+        super().initialise(vega=vega, create_key=create_key)
+
+        if self.asset_name:
+            # Get asset id
+            self.asset_id = self.vega.find_asset_id(symbol=self.asset_name)
+
+            if mint_key:
+                # Top up asset
+                self.vega.mint(
+                    key_name=self.key_name,
+                    asset=self.asset_id,
+                    amount=self.initial_mint,
+                    wallet_name=self.wallet_name,
+                )
+        self.vega.mint(
+            wallet_name=self.wallet_name,
+            asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
+            amount=1e4,
+            key_name=self.key_name,
+        )
+
+        self.vega.stake(
+            amount=1,
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+        )
+
+    def step(self, vega_state):
+        weight_sum = sum(i[2] for i in COMMAND_AND_TYPES)
+        tx_name = self.random_state.choice(
+            [a[1] for a in COMMAND_AND_TYPES],
+            p=[i[2] / weight_sum for i in COMMAND_AND_TYPES],
+        )
+
+        skip_through = self.random_state.randint(1, 200)
+        fuzzer = self.fuzzers[tx_name]
+
+        # Many more protos than we can realistically fuzz, so sample through
+        # with random steps to get different ones each run
+        for _ in range(0, skip_through):
+            next(fuzzer)
+
+        fuzz_proto = next(fuzzer)
+
+        try:
+            self.vega.submit_transaction(
+                key_name=self.key_name,
+                transaction=fuzz_proto,
+                transaction_type=tx_name,
+                wallet_name=self.wallet_name,
+            )
+        except HTTPError:
+            pass

@@ -9,7 +9,7 @@ version = "1.2.1"
 zip-safe = false
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.12"
+python = "^3.10,<3.12"
 requests = "*"
 toml = "*"
 grpcio-tools = "*"
@@ -42,7 +42,7 @@ tensorboard = {version = "*", optional = true}
 pettingzoo = {version = "*", optional = true}
 numba = {version = "^0.57.1", optional = true}
 tianshou = {version = "*", optional = true}
-
+protofuzz = { git = "https://github.com/trailofbits/protofuzz", branch="master" }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -59,7 +59,6 @@ vegapy = {git = "https://github.com/cdummett/vegapy/", branch="develop"}
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
 
 [tool.poetry.extras]
 learning = ["matplotlib", "tqdm", "torch", "gymnasium", "stable-baselines3", "tensorboard", "tianshou", "numba", "pettingzoo"]
