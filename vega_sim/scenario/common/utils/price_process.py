@@ -1,6 +1,7 @@
 import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+from vega_sim.api.helpers import num_from_padded_int
 import time
 
 import numpy as np
@@ -199,6 +200,19 @@ def _kc_price_listener(iter_obj, symbol):
     ws.run_forever(reconnect=5, ping_interval=10, ping_timeout=5)
 
 
+def _py_price_listener(iter_obj, symbol, update_freq=5):
+
+    while True:
+        try:
+            res = requests.get(
+                f"http://localhost:8080/avgPrice", params={"symbol": symbol}
+            )
+            iter_obj.latest_price = num_from_padded_int(res.json()["price"], 18)
+        except requests.RequestException as e:
+            logging.warning(e)
+        time.sleep(update_freq)
+
+
 def _kc_on_open(ws: websocket.WebSocketApp, symbol):
     ws.send(
         json.dumps(
@@ -230,6 +244,7 @@ class LivePrice:
         product: str = "BTCBUSD",
         multiplier: int = 1,
         price_source: Optional[str] = "binance",
+        update_frequency: Optional[int] = 5,
     ):
         self.product = product
         self.latest_price = None
@@ -242,6 +257,10 @@ class LivePrice:
 
             case "kucoin":
                 target = _kc_price_listener
+                product = self.product
+
+            case "pyth":
+                target = _py_price_listener
                 product = self.product
 
             case _:
@@ -273,7 +292,12 @@ _live_prices = {}
 _live_prices_lock = threading.Lock()
 
 
-def get_live_price(product: str, multiplier: int, price_source: str) -> LivePrice:
+def get_live_price(
+    product: str,
+    multiplier: int,
+    price_source: Optional[str] = None,
+    update_frequency: int = 5,
+) -> LivePrice:
     global _live_prices
     global _live_prices_lock
 
@@ -285,6 +309,7 @@ def get_live_price(product: str, multiplier: int, price_source: str) -> LivePric
                 product=product,
                 multiplier=multiplier,
                 price_source=price_source,
+                update_frequency=update_frequency,
             )
         return _live_prices[feed_key]
 
@@ -305,7 +330,14 @@ if __name__ == "__main__":
         1,
         price_source="kucoin",
     )
+    py_stream = get_live_price(
+        "BTC/USD",
+        1,
+        price_source="pyth",
+    )
 
     for _ in range(300):
-        logging.info(f"Prices: bn={next(bn_stream)} kc={next(kc_stream)}")
+        print(
+            f"Prices: bn={next(bn_stream):.2f} kc={next(kc_stream):.2f}, py={next(py_stream):.2f}"
+        )
         time.sleep(1)
