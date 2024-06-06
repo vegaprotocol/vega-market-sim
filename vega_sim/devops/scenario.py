@@ -54,7 +54,6 @@ class DevOpsScenario(Scenario):
     def __init__(
         self,
         price_symbol: str,
-        price_source: Optional[str],
         market_manager_args: MarketManagerArgs,
         market_maker_args: MarketMakerArgs,
         auction_trader_args: AuctionTraderArgs,
@@ -68,6 +67,7 @@ class DevOpsScenario(Scenario):
         scenario_wallet: Optional[ScenarioWallet] = None,
         step_length_seconds: float = 10,
         market_name: Optional[str] = None,
+        price_source: str = "binance",
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
