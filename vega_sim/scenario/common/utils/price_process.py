@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import requests
 import json
-from websockets.sync.client import connect
 import threading
 import websocket
 
@@ -288,3 +287,25 @@ def get_live_price(product: str, multiplier: int, price_source: str) -> LivePric
                 price_source=price_source,
             )
         return _live_prices[feed_key]
+
+
+if __name__ == "__main__":
+
+    import logging
+
+    logging.basicConfig(level=logging.DEBUG)
+
+    bn_stream = get_live_price(
+        "btcusdt",
+        1,
+        price_source="binance",
+    )
+    kc_stream = get_live_price(
+        "BTC-USDT",
+        1,
+        price_source="kucoin",
+    )
+
+    for _ in range(300):
+        logging.info(f"Prices: bn={next(bn_stream)} kc={next(kc_stream)}")
+        time.sleep(1)
