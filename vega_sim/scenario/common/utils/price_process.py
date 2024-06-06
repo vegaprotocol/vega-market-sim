@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 from vega_sim.api.helpers import num_from_padded_int
 import time
+import os
 
 import numpy as np
 import pandas as pd
@@ -201,11 +202,12 @@ def _kc_price_listener(iter_obj, symbol):
 
 
 def _py_price_listener(iter_obj, symbol, update_freq=5):
-
+    api_url = os.environ.get('PYTH_PRICE_PULL_API_URL', "http://localhost:8080")
     while True:
         try:
+        
             res = requests.get(
-                f"http://localhost:8080/avgPrice", params={"symbol": symbol}
+                f"{api_url}/avgPrice", params={"symbol": symbol}
             )
             iter_obj.latest_price = num_from_padded_int(res.json()["price"], 18)
         except requests.RequestException as e:
