@@ -184,12 +184,12 @@ def fuzz_recurring_transfer(
     vega: VegaService, rs: RandomState, bias: float
 ) -> vega_protos.commands.v1.commands.RecurringTransfer:
     def _pick_start_epoch():
-        low = 1 if valid(rs, bias) else -5
-        return current_epoch + rs.randint(low, 10)
+        low = 1 if valid(rs, bias) else -3
+        return current_epoch + rs.randint(low, 3)
 
     def _pick_end_epoch():
-        low = 1 if valid(rs, bias) else -5
-        val = start_epoch + rs.randint(low, 10)
+        low = 1 if valid(rs, bias) else -3
+        val = start_epoch + rs.randint(low, 3)
         return None if rs.rand() < 0.5 else val
 
     def _pick_factor():
@@ -344,12 +344,12 @@ def fuzz_governance_recurring_transfer(
     vega: VegaService, rs: RandomState, bias: float
 ) -> vega_protos.governance.RecurringTransfer:
     def _pick_start_epoch():
-        low = 1 if valid(rs, bias) else -5
-        return current_epoch + rs.randint(low, 10)
+        low = 1 if valid(rs, bias) else -3
+        return current_epoch + rs.randint(low, 3)
 
     def _pick_end_epoch():
-        low = 1 if valid(rs, bias) else -5
-        val = start_epoch + rs.randint(low, 10)
+        low = 1 if valid(rs, bias) else -3
+        val = start_epoch + rs.randint(low, 3)
         return None if rs.rand() < 0.5 else val
 
     def _pick_factor():
