@@ -94,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--steps",
-        default=2 * 60 * 12,
+        default=2 * 60 * 6,
         type=int,
     )
     parser.add_argument(

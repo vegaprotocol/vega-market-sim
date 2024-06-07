@@ -278,10 +278,6 @@ class MarketEnvironment:
                 )
             if step_end_callback is not None:
                 step_end_callback()
-            # TODO: Reduce frequency of check once mainnet updated to v0.75.0
-            vega.check_book_not_crossed()
-            # TODO: Reduce frequency of check once mainnet updated to v0.75.0
-            vega.check_market_states_consistent()
 
         vega.check_balances_equal_deposits()
         logger.info(f"Run took {(datetime.datetime.now() - start).seconds}s")

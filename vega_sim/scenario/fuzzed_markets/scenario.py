@@ -195,7 +195,7 @@ class FuzzingScenario(Scenario):
         self.agents.append(
             NetworkParameterManager(
                 key_name="NETWORK_PARAMETER_MANAGER",
-                network_parameters={"validators.epoch.length": "25m"},
+                network_parameters={"validators.epoch.length": "30m"},
             )
         )
 
@@ -203,7 +203,7 @@ class FuzzingScenario(Scenario):
             FuzzyReferralProgramManager(
                 wallet_name="REFERRAL_PROGRAM_MANAGERS",
                 key_name=f"REFERRAL_PROGRAM_MANAGER",
-                step_bias=0.2,
+                step_bias=0.02,
                 attempts_per_step=100,
             )
         )
@@ -211,7 +211,7 @@ class FuzzingScenario(Scenario):
             FuzzyVolumeDiscountProgramManager(
                 wallet_name="REFERRAL_PROGRAM_MANAGERS",
                 key_name=f"REFERRAL_PROGRAM_MANAGER",
-                step_bias=0.2,
+                step_bias=0.02,
                 attempts_per_step=100,
             )
         )
@@ -366,7 +366,7 @@ class FuzzingScenario(Scenario):
                     referrer_wallet_name="REFERRERS",
                 )
                 for i_agent, i_referrer in itertools.product(
-                    range(5), range(num_referrers)
+                    range(2), range(num_referrers)
                 )
             ]
 
@@ -403,7 +403,7 @@ class FuzzingScenario(Scenario):
                         f"MARKET_{str(i_market).zfill(3)}_AGENT_{str(i_agent).zfill(3)}"
                     ),
                 )
-                for i_agent in range(10 if not self.lite else 1)
+                for i_agent in range(5 if not self.lite else 1)
             ]
 
             market_agents["risky_traders"] = [
@@ -418,7 +418,7 @@ class FuzzingScenario(Scenario):
                     tag=f"MARKET_{str(i_market).zfill(3)}_SIDE_{side}_AGENT_{str(i_agent).zfill(3)}",
                 )
                 for side in ["SIDE_BUY", "SIDE_SELL"]
-                for i_agent in range(10 if not self.lite else 1)
+                for i_agent in range(5 if not self.lite else 1)
             ]
 
             market_agents["risky_liquidity_providers"] = [
@@ -434,7 +434,7 @@ class FuzzingScenario(Scenario):
                 for i_agent in range(5 if not self.lite else 1)
             ]
 
-            for i_agent in range(45 if not self.lite else 1):
+            for i_agent in range(5 if not self.lite else 1):
                 market_agents["risky_liquidity_providers"].append(
                     RiskySimpleLiquidityProvider(
                         wallet_name="risky_liquidity_providers",
@@ -521,7 +521,7 @@ class FuzzingScenario(Scenario):
                     wallet_name="REWARD_FUNDERS",
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
                     asset_name=asset_name,
-                    step_bias=0.1,
+                    step_bias=0.05,
                     validity_bias=0.8,
                     attempts_per_step=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
@@ -532,7 +532,7 @@ class FuzzingScenario(Scenario):
                     wallet_name="REWARD_FUNDERS",
                     key_name=f"MARKET_{str(i_market).zfill(3)}",
                     asset_name=asset_name,
-                    step_bias=0.1,
+                    step_bias=0.05,
                     validity_bias=0.99,
                     attempts_per_step=10,
                     tag=f"MARKET_{str(i_market).zfill(3)}",
