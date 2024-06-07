@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 from vega_sim.api.helpers import num_from_padded_int
 import time
 import os
+import logging
 
 import numpy as np
 import pandas as pd
@@ -317,8 +318,6 @@ def get_live_price(
 
 
 if __name__ == "__main__":
-
-    import logging
 
     logging.basicConfig(level=logging.DEBUG)
 
