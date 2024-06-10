@@ -26,7 +26,7 @@ import vega_sim.configs as configs
 
 SCENARIOS = {
     "ETHUSD": lambda: DevOpsScenario(
-        binance_code="ETHDAI",
+        price_symbol="ETHDAI",
         market_manager_args=MarketManagerArgs(
             market_config=configs.mainnet.ETHUSDT.CONFIG,
         ),
@@ -68,7 +68,7 @@ SCENARIOS = {
         ),
     ),
     "SPOT": lambda: DevOpsScenario(
-        binance_code="ETHDAI",
+        price_symbol="ETHDAI",
         market_manager_args=MarketManagerArgs(
             market_config=configs.research.SPOT.CONFIG,
         ),
@@ -110,7 +110,7 @@ SCENARIOS = {
         ),
     ),
     "BTCUSD": lambda: DevOpsScenario(
-        binance_code="BTCDAI",
+        price_symbol="BTCDAI",
         market_manager_args=MarketManagerArgs(
             market_config=configs.mainnet.BTCUSDT.CONFIG,
         ),

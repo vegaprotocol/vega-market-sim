@@ -1,13 +1,15 @@
 import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+from vega_sim.api.helpers import num_from_padded_int
 import time
+import os
+import logging
 
 import numpy as np
 import pandas as pd
 import requests
 import json
-from websockets.sync.client import connect
 import threading
 import websocket
 
@@ -188,17 +190,45 @@ def _on_message(iter_obj, message, symbol):
     iter_obj.latest_price = float(json.loads(message)["k"]["c"])
 
 
-def _price_listener(iter_obj, symbol):
+def _kc_price_listener(iter_obj, symbol):
+    token = requests.post("https://api.kucoin.com/api/v1/bullet-public").json()["data"][
+        "token"
+    ]
     ws = websocket.WebSocketApp(
-        f"wss://stream.binance.com:9443/ws/{symbol}@kline_1s",
-        # on_open=lambda ws: print("ok"),
-        on_message=lambda _, msg: _on_message(iter_obj, msg),
+        f"wss://ws-api-spot.kucoin.com/?token={token}&[connectId=]",
+        on_open=lambda ws: _kc_on_open(ws, symbol),
+        on_message=lambda _, msg: _kc_on_message(iter_obj, msg, symbol),
     )
-    ws.run_forever(reconnect=5)
+    ws.run_forever(reconnect=5, ping_interval=10, ping_timeout=5)
 
 
-def _on_message(iter_obj, message):
-    iter_obj.latest_price = float(json.loads(message)["k"]["c"])
+def _py_price_listener(iter_obj, symbol, update_freq=5):
+    api_url = os.environ.get("PYTH_PRICE_PULL_API_URL", "http://localhost:8080")
+    while True:
+        try:
+
+            res = requests.get(f"{api_url}/avgPrice", params={"symbol": symbol})
+            iter_obj.latest_price = num_from_padded_int(res.json()["price"], 18)
+        except requests.RequestException as e:
+            logging.warning(e)
+        time.sleep(update_freq)
+
+
+def _kc_on_open(ws: websocket.WebSocketApp, symbol):
+    ws.send(
+        json.dumps(
+            {
+                "id": 1545910660739,
+                "type": "subscribe",
+                "topic": f"/market/ticker:{symbol}",
+                "response": True,
+            }
+        ),
+    )
+
+
+def _kc_on_message(iter_obj, message, symbol):
+    iter_obj.latest_price = float(json.loads(message)["data"]["price"])
 
 
 class LivePrice:
@@ -210,14 +240,36 @@ class LivePrice:
 
     """
 
-    def __init__(self, product: str = "BTCBUSD", multiplier: int = 1):
+    def __init__(
+        self,
+        product: str = "BTCBUSD",
+        multiplier: int = 1,
+        price_source: Optional[str] = "binance",
+        update_frequency: Optional[int] = 5,
+    ):
         self.product = product
         self.latest_price = None
         self.multiplier = multiplier
 
+        match price_source:
+            case "binance":
+                target = _price_listener
+                product = self.product.lower()
+
+            case "kucoin":
+                target = _kc_price_listener
+                product = self.product
+
+            case "pyth":
+                target = _py_price_listener
+                product = self.product
+
+            case _:
+                raise ValueError("Unimplemented price source")
+
         self._forwarding_thread = threading.Thread(
-            target=_price_listener,
-            args=(self, self.product.lower()),
+            target=target,
+            args=(self, product),
             daemon=True,
         )
         self._forwarding_thread.start()
@@ -241,7 +293,12 @@ _live_prices = {}
 _live_prices_lock = threading.Lock()
 
 
-def get_live_price(product: str, multiplier: int) -> LivePrice:
+def get_live_price(
+    product: str,
+    multiplier: int,
+    price_source: Optional[str] = None,
+    update_frequency: int = 5,
+) -> LivePrice:
     global _live_prices
     global _live_prices_lock
 
@@ -249,16 +306,37 @@ def get_live_price(product: str, multiplier: int) -> LivePrice:
 
     with _live_prices_lock:
         if not feed_key in _live_prices:
-            _live_prices[feed_key] = LivePrice(product=product, multiplier=multiplier)
+            _live_prices[feed_key] = LivePrice(
+                product=product,
+                multiplier=multiplier,
+                price_source=price_source,
+                update_frequency=update_frequency,
+            )
         return _live_prices[feed_key]
 
 
 if __name__ == "__main__":
-    print(
-        get_historic_price_series(
-            "ETH-USD",
-            granularity=Granularity.HOUR,
-            start="2022-08-02 01:01:50",
-            end="2022-09-05 09:05:20",
-        )
+
+    logging.basicConfig(level=logging.DEBUG)
+
+    bn_stream = get_live_price(
+        "btcusdt",
+        1,
+        price_source="binance",
     )
+    kc_stream = get_live_price(
+        "BTC-USDT",
+        1,
+        price_source="kucoin",
+    )
+    py_stream = get_live_price(
+        "BTC/USD",
+        1,
+        price_source="pyth",
+    )
+
+    for _ in range(300):
+        print(
+            f"Prices: bn={next(bn_stream):.2f} kc={next(kc_stream):.2f}, py={next(py_stream):.2f}"
+        )
+        time.sleep(1)
