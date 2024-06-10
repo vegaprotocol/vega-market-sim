@@ -33,7 +33,7 @@ from vega_sim.api.helpers import num_from_padded_int
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.proto.vega import markets as markets_protos
+from vega_python_protos.protos.vega import markets as markets_protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 

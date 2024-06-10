@@ -1,8 +1,0 @@
----
-version: v1
-plugins:
-  - plugin: buf.build/protocolbuffers/python:v26.1
-    opt: pyi_out
-    out: ./vega_sim/proto
-  - plugin: buf.build/grpc/python
-    out: ./vega_sim/proto

@@ -11,8 +11,6 @@ networks: pull_deps_networks build_deps_networks
 
 capsule: pull_deps_capsule build_deps_capsule
 
-proto: build_proto black
-
 clean_ui:
 	@echo "Deleting $(EXTERN_DIR)/console and ./vega_sim/bin/console" 
 	@rm -rf "$(EXTERN_DIR)/console"
@@ -86,12 +84,6 @@ endif
 build_deps_capsule:
 	@mkdir -p ./vega_sim/bin
 	cd ${EXTERN_DIR}/vegacapsule && go build -o ../../vega_sim/bin/ ./...
-
-build_proto: pull_deps
-	@rm -rf ./vega_sim/proto
-	@mkdir ./vega_sim/proto
-	@buf generate extern/vega/protos/sources 
-	@GENERATED_DIR=./vega_sim/proto scripts/post-generate.sh
 
 .PHONY: black
 black:

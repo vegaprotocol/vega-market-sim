@@ -3,7 +3,7 @@ from scipy.stats import lognorm
 from typing import Optional
 from deprecated import deprecated
 
-import vega_sim.proto.vega as vega_protos
+import vega_python_protos.protos.vega as vega_protos
 
 
 @deprecated(

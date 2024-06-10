@@ -15,8 +15,8 @@ import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 import vega_sim.api.governance as gov
 import vega_sim.grpc.client as vac
-import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
+import vega_python_protos.protos.vega as vega_protos
+import vega_python_protos.protos.vega.events.v1.events_pb2 as events_protos
 from vega_sim.tools.retry import retry
 
 logger = logging.getLogger(__name__)

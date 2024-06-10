@@ -14,7 +14,10 @@ from vega_sim.scenario.ideal_market_maker_v2.utils.strategy import (
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.proto.vega import markets as markets_protos, vega as vega_protos
+from vega_python_protos.protos.vega import (
+    markets as markets_protos,
+    vega as vega_protos,
+)
 from vega_sim.service import PeggedOrder
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])

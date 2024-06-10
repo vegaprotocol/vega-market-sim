@@ -8,7 +8,7 @@ from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
 
-import vega_sim.proto as protos
+import vega_python_protos.protos as protos
 
 from numpy.random import RandomState
 
