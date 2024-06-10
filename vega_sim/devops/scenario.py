@@ -53,7 +53,7 @@ from vega_sim.devops.classes import (
 class DevOpsScenario(Scenario):
     def __init__(
         self,
-        binance_code: str,
+        price_symbol: str,
         market_manager_args: MarketManagerArgs,
         market_maker_args: MarketMakerArgs,
         auction_trader_args: AuctionTraderArgs,
@@ -67,10 +67,12 @@ class DevOpsScenario(Scenario):
         scenario_wallet: Optional[ScenarioWallet] = None,
         step_length_seconds: float = 10,
         market_name: Optional[str] = None,
+        price_source: str = "binance",
     ):
         super().__init__(state_extraction_fn=state_extraction_fn)
 
-        self.binance_code = binance_code
+        self.price_symbol = price_symbol
+        self.price_source = price_source
         self.feed_price_multiplier = feed_price_multiplier
 
         self.market_manager_args = market_manager_args
@@ -134,7 +136,9 @@ class DevOpsScenario(Scenario):
             )
         else:
             self.price_process = get_live_price(
-                product=self.binance_code, multiplier=self.feed_price_multiplier
+                product=self.price_symbol,
+                multiplier=self.feed_price_multiplier,
+                price_source=self.price_source,
             )
 
         if self.scenario_wallet.market_creator_agent is None:
