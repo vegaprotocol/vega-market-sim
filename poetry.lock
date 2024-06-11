@@ -4306,4 +4306,4 @@ profile = ["pytest-profiling", "snakeviz"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.12"
-content-hash = "5ed09b844f5b7fcdb6f0a22a1491b8f7dc19c8a4dee2b6a7b50c8915e8a99bcc"
+content-hash = "c8916c7da7651d11416c6b355547bcd4e0a50d937a1af26707cfbf96c2e3f146"
