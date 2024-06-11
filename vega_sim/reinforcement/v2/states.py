@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 import numpy as np
 
-from vega_sim.proto.vega import markets as markets_protos
+from vega_python_protos.protos.vega import markets as markets_protos
 from vega_sim.service import VegaService
 
 

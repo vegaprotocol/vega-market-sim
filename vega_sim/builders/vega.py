@@ -9,7 +9,7 @@ Attributes:
 
 import logging
 
-import vega_sim.proto.vega as vega_protos
+import vega_python_protos.protos.vega as vega_protos
 
 from typing import Optional, List
 from vega_sim.builders.exceptions import raise_custom_build_errors

@@ -42,6 +42,7 @@ pettingzoo = {version = "*", optional = true}
 numba = {version = "^0.57.1", optional = true}
 tianshou = {version = "*", optional = true}
 protofuzz = { git = "https://github.com/trailofbits/protofuzz", branch="master" }
+vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos", branch="develop" }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"

@@ -9,9 +9,9 @@ from tests.integration.utils.fixtures import (
 )
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import MarketStateUpdateType
-import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.data.v1 as oracles_protos
-import vega_sim.proto.vega.data_source_pb2 as data_source_protos
+import vega_python_protos.protos.vega as vega_protos
+import vega_python_protos.protos.vega.data.v1 as oracles_protos
+import vega_python_protos.protos.vega.data_source_pb2 as data_source_protos
 
 
 LIQ = WalletConfig("liq", "liq")

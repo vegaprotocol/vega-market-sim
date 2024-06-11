@@ -5,12 +5,12 @@ from typing import Callable, Optional, Union, Dict
 
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
+import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
 
-import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.commands.v1 as commands_protos
-import vega_sim.proto.vega.data.v1 as oracles_protos
-import vega_sim.proto.vega.data_source_pb2 as data_source_protos
+import vega_python_protos.protos.vega as vega_protos
+import vega_python_protos.protos.vega.commands.v1 as commands_protos
+import vega_python_protos.protos.vega.data.v1 as oracles_protos
+import vega_python_protos.protos.vega.data_source_pb2 as data_source_protos
 from vega_sim.api.data import find_asset_id
 from vega_sim.api.helpers import (
     ProposalNotAcceptedError,
@@ -19,7 +19,7 @@ from vega_sim.api.helpers import (
     wait_for_acceptance,
 )
 from vega_sim.api.market import MarketConfig, SpotMarketConfig
-from vega_sim.proto.vega.commands.v1.commands_pb2 import ProposalSubmission
+from vega_python_protos.protos.vega.commands.v1.commands_pb2 import ProposalSubmission
 from vega_sim.wallet.base import Wallet
 import vega_sim.builders as builders
 

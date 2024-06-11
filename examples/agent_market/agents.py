@@ -6,8 +6,8 @@ from vega_sim.api.data import Order
 from vega_sim.environment import StateAgent, VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_sim.proto.vega import markets as markets_protos
-from vega_sim.proto.vega import vega as vega_protos, governance as gov_protos
+from vega_python_protos.protos.vega import markets as markets_protos
+from vega_python_protos.protos.vega import vega as vega_protos, governance as gov_protos
 from vega_sim.service import VegaService
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])

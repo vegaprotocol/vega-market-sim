@@ -2,7 +2,7 @@ import argparse
 
 from vega_sim.tools.scenario_plots import plot_account_by_party
 
-import vega_sim.proto.vega as vega_protos
+import vega_python_protos.protos.vega as vega_protos
 
 
 import matplotlib.pyplot as plt

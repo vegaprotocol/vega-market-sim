@@ -4,7 +4,7 @@ from enum import Enum, auto
 from typing import Optional
 from logging import getLogger
 
-import vega_sim.proto.vega as vega_protos
+import vega_python_protos.protos.vega as vega_protos
 from vega_sim.scenario.common.agents import StateAgentWithWallet, VegaService, VegaState
 from vega_sim.service import PeggedOrder
 

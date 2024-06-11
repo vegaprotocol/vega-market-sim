@@ -9,10 +9,12 @@ from typing import Any, Callable, Optional, TypeVar, Union
 import requests
 
 from vega_sim.grpc.client import VegaCoreClient, VegaTradingDataClientV2
-from vega_sim.proto.data_node.api.v2.trading_data_pb2 import GetVegaTimeRequest
-from vega_sim.proto.vega.api.v1.core_pb2 import StatisticsRequest
-from vega_sim.proto.vega.markets_pb2 import Market, Spot, Future, Perpetual
-from vega_sim.proto.vega.vega_pb2 import Side
+from vega_python_protos.protos.data_node.api.v2.trading_data_pb2 import (
+    GetVegaTimeRequest,
+)
+from vega_python_protos.protos.vega.api.v1.core_pb2 import StatisticsRequest
+from vega_python_protos.protos.vega.markets_pb2 import Market, Spot, Future, Perpetual
+from vega_python_protos.protos.vega.vega_pb2 import Side
 from vega_sim.tools.retry import retry
 
 T = TypeVar("T")

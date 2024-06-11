@@ -3,7 +3,7 @@ from numpy.random import RandomState
 from vega_sim.service import VegaService
 
 import vega_sim.builders as build
-import vega_sim.proto.vega as vega_protos
+import vega_python_protos.protos.vega as vega_protos
 
 
 def valid(rs, bias) -> bool:

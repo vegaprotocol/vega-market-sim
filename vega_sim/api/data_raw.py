@@ -7,9 +7,9 @@ from functools import wraps
 from typing import Callable, Iterable, List, Optional, TypeVar, Union, Tuple
 
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
-import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
+import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_python_protos.protos.vega as vega_protos
+import vega_python_protos.protos.vega.events.v1.events_pb2 as events_protos
 
 logger = logging.getLogger(__name__)
 

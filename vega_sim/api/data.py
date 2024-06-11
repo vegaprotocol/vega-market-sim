@@ -18,9 +18,9 @@ from typing import (
 import datetime
 import vega_sim.api.data_raw as data_raw
 import vega_sim.grpc.client as vac
-import vega_sim.proto.data_node.api.v2 as data_node_protos_v2
-import vega_sim.proto.vega as vega_protos
-import vega_sim.proto.vega.events.v1.events_pb2 as events_protos
+import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_python_protos.protos.vega as vega_protos
+import vega_python_protos.protos.vega.events.v1.events_pb2 as events_protos
 from vega_sim.api.helpers import num_from_padded_int
 from collections import defaultdict
 
