@@ -13,7 +13,7 @@ from vega_sim.scenario.fuzzing.registry import REGISTRY
 from vegapy.service.service import Service
 from vegapy.service.networks.constants import Network
 import vegapy.visualisations as vis
-import vegapy.protobuf.protos as protos
+import vega_python_protos as protos
 
 
 def _run(
