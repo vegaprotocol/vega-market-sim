@@ -140,10 +140,11 @@
       "governance.proposal.transfer.requiredParticipation": "0.00001",
       "limits.markets.maxPeggedOrders": "1500",
       "limits.markets.proposePerpetualEnabled": "1",
+      "limits.markets.ammPoolEnabled": "1",
       "market.auction.maximumDuration": "168h",
       "market.auction.minimumDuration": "1s",
-      "market.fee.factors.infrastructureFee": "0.0005",
-      "market.fee.factors.makerFee": "0.0002",
+      "market.fee.factors.infrastructureFee": "0.0003",
+      "market.fee.factors.makerFee": "0.00005",
       "market.liquidity.bondPenaltyParameter": "0.1",
       "market.liquidity.earlyExitPenalty": "0.1",
       "market.liquidity.maximumLiquidityFeeFactorLevel": "0.03",
@@ -216,7 +217,9 @@
       "referralProgram.maxPartyNotionalVolumeByQuantumPerEpoch": "10000",
       "referralProgram.minStakedVegaTokens": "0",
       "referralProgram.maxReferralRewardProportion": "1",
-      "market.aggressiveOrderBlockDelay": "1"
+      "market.aggressiveOrderBlockDelay": "1",
+      "market.amm.minCommitmentQuantum": "1",
+      "market.liquidity.maxAmmCalculationLevels": "100"
     },
     "network_limits": {
       "propose_market_enabled": true,
