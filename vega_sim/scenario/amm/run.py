@@ -13,8 +13,8 @@ from vega_sim.scenario.amm.registry import REGISTRY
 from vegapy.service.service import Service
 from vegapy.service.networks.constants import Network
 
-# import vegapy.visualisations as vis
-import vega_python_protos as protos
+import vegapy.visualisations as vis
+from matplotlib.figure import Figure
 
 
 def _run(
@@ -54,93 +54,20 @@ def _run(
             if not os.path.exists(output_dir):
                 os.mkdir(output_dir)
 
-        # # Use vegapy package to produce plots
-        # service = Service(
-        #     network=Network.NETWORK_LOCAL,
-        #     network_config=pathlib.Path(
-        #         f"{vega.log_dir}/vegahome/config/wallet-service/networks/local.toml"
-        #     ),
-        # )
-        # markets = service.api.data.list_markets(include_settled=True)
+            # Use vegapy package to produce plots
+            service = Service(
+                network=Network.NETWORK_LOCAL,
+                port_data_node=vega.data_node_grpc_port,
+            )
 
-        # date_range_end_timestamp = service.api.data.get_vega_time()
-        # for market in markets:
-        #     date_range_start_timestamp = market.market_timestamps.pending
-
-        #     is_spot = (
-        #         market.tradable_instrument.instrument.spot != protos.vega.markets.Spot()
-        #     )
-        #     is_future = (
-        #         market.tradable_instrument.instrument.future
-        #         != protos.vega.markets.Future()
-        #     )
-        #     is_perpetual = (
-        #         market.tradable_instrument.instrument.perpetual
-        #         != protos.vega.markets.Perpetual()
-        #     )
-
-        #     if is_spot:
-        #         market_asset = market.tradable_instrument.instrument.spot.quote_asset
-        #     if is_future:
-        #         market_asset = (
-        #             market.tradable_instrument.instrument.future.settlement_asset
-        #         )
-        #     if is_perpetual:
-        #         market_asset = (
-        #             market.tradable_instrument.instrument.perpetual.settlement_asset
-        #         )
-
-        #     asset = service.api.data.get_asset(market_asset)
-        #     trades = service.api.data.list_trades(
-        #         market_ids=[market.id],
-        #         date_range_start_timestamp=date_range_start_timestamp,
-        #     )
-        #     market_data_history = service.api.data.get_market_data_history_by_id(
-        #         market.id,
-        #         start_timestamp=date_range_start_timestamp,
-        #     )
-        #     aggregated_balance_history = service.api.data.list_balance_changes(
-        #         asset_id=asset.id,
-        #         market_ids=[market.id],
-        #         party_ids=["network"],
-        #         account_types=[protos.vega.vega.AccountType.ACCOUNT_TYPE_INSURANCE],
-        #         date_range_start_timestamp=date_range_start_timestamp,
-        #         date_range_end_timestamp=date_range_end_timestamp,
-        #     )
-        #     # Update figures
-        #     if output:
-        #         market_output_dir = f"{output_dir}/{market.tradable_instrument.instrument.code.replace('/', '')}"
-        #         if not os.path.exists(market_output_dir):
-        #             os.mkdir(market_output_dir)
-        #         vis.plot.price_monitoring_analysis(market, market_data_history).savefig(
-        #             f"{market_output_dir}/price_monitoring_analysis.png"
-        #         )
-        #         if not is_spot:
-        #             vis.plot.liquidation_analysis(
-        #                 asset,
-        #                 market,
-        #                 trades,
-        #                 market_data_history,
-        #                 aggregated_balance_history,
-        #             ).savefig(f"{market_output_dir}/liquidation_analysis.png")
-        #         if is_perpetual:
-        #             funding_periods = service.api.data.list_funding_periods(
-        #                 market_id=market.id,
-        #                 start_timestamp=date_range_start_timestamp,
-        #             )
-        #             funding_period_data_points = (
-        #                 service.api.data.list_funding_period_data_points(
-        #                     market.id,
-        #                     start_timestamp=date_range_start_timestamp,
-        #                 )
-        #             )
-        #             vis.plot.funding_analysis(
-        #                 asset,
-        #                 market,
-        #                 market_data_history,
-        #                 funding_periods,
-        #                 funding_period_data_points,
-        #             ).savefig(f"{market_output_dir}/funding_analysis.png")
+            for benchmark_config in scenario.benchmark_configs:
+                fig: Figure = vis.plots.amm.create(
+                    service,
+                    market_code=benchmark_config.market_config.instrument.code,
+                )
+                fig.savefig(
+                    f"{output_dir}/{benchmark_config.market_config.instrument.code.replace('/','-')}_amm.png"
+                )
 
         if pause:
             input("Waiting after run finished.")

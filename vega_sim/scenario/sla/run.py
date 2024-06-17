@@ -49,9 +49,7 @@ def _run(
         if output:
             service = Service(
                 network=Network.NETWORK_LOCAL,
-                network_config=pathlib.Path(
-                    f"{vega.log_dir}/vegahome/config/wallet-service/networks/local.toml"
-                ),
+                port_data_node=vega.data_node_grpc_port,
             )
             fig = vis.plots.sla.create(
                 service=service, market_code=scenario.market_config.instrument.code
