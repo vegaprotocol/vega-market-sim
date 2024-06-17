@@ -53,7 +53,7 @@ Jinja2 = "*"
 nbmake = "*"
 matplotlib = "*"
 pytest-xdist = "*"
-vegapy = {git = "https://github.com/cdummett/vegapy/", branch="feat/amm"}
+vegapy = {git = "https://github.com/cdummett/vegapy/", branch="develop"}
 
 
 [build-system]

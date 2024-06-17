@@ -4126,8 +4126,8 @@ vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos"
 [package.source]
 type = "git"
 url = "https://github.com/cdummett/vegapy/"
-reference = "feat/amm"
-resolved_reference = "0655c1ed5f722a9ab732f1ccf0fb0a061722fb7a"
+reference = "develop"
+resolved_reference = "0b85f479ea99736e317d93415901a36a9e4f5bab"
 
 [[package]]
 name = "wcwidth"
@@ -4298,4 +4298,4 @@ profile = ["pytest-profiling", "snakeviz"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.12"
-content-hash = "fb4ed30b691ad8e516226bcaa4e781dcbe0b5bb5d971e25c76d37e371cedbb33"
+content-hash = "c8916c7da7651d11416c6b355547bcd4e0a50d937a1af26707cfbf96c2e3f146"
