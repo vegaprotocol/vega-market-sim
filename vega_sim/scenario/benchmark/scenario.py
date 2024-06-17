@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any, List
 from vega_sim.api.market import MarketConfig
 from vega_sim.scenario.scenario import Scenario
 from vega_sim.scenario.benchmark.configs import BenchmarkConfig
-from vega_sim.scenario.common.utils.price_process import random_walk
+from vega_sim.scenario.common.utils.price_process import ou_price_process
 from vega_sim.scenario.constants import Network
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.environment.environment import (
@@ -24,46 +24,6 @@ from vega_sim.scenario.common.agents import (
 from vega_sim.scenario.fuzzed_markets.agents import (
     RiskyMarketOrderTrader,
 )
-
-
-def _create_price_process(
-    random_state: np.random.RandomState,
-    num_steps,
-    decimal_places,
-    initial_price,
-    price_sigma,
-):
-    price_process = [initial_price]
-
-    while len(price_process) < num_steps + 1:
-        price_process = np.concatenate(
-            (
-                price_process,
-                random_walk(
-                    num_steps=random_state.randint(
-                        int(0.05 * num_steps), int(0.20 * num_steps)
-                    ),
-                    sigma=price_sigma,
-                    starting_price=price_process[-1],
-                    decimal_precision=decimal_places,
-                ),
-            )
-        )
-        price_process = np.concatenate(
-            (
-                price_process,
-                random_walk(
-                    num_steps=random_state.randint(
-                        int(0.05 * num_steps), int(0.10 * num_steps)
-                    ),
-                    sigma=price_sigma,
-                    drift=random_state.uniform(-price_sigma / 10, price_sigma / 10),
-                    starting_price=price_process[-1],
-                    decimal_precision=decimal_places,
-                ),
-            )
-        )
-    return price_process
 
 
 class BenchmarkScenario(Scenario):
@@ -122,24 +82,23 @@ class BenchmarkScenario(Scenario):
                 if benchmark_config.market_config.is_spot()
                 else benchmark_config.market_config.decimal_places
             )
-
             # Create fuzzed price process
-            price_process = _create_price_process(
-                random_state=self.random_state,
-                num_steps=self.num_steps,
-                decimal_places=market_decimal_places,
-                initial_price=benchmark_config.initial_price,
-                price_sigma=benchmark_config.annualised_volatility
+            benchmark_config.price_process = ou_price_process(
+                self.num_steps + 1,
+                x0=benchmark_config.initial_price,
+                mu=benchmark_config.initial_price,
+                theta=benchmark_config.process_theta,
+                sigma=benchmark_config.annualised_volatility
                 * np.sqrt(self.step_length_seconds / (365.25 * 24 * 60 * 60))
                 * benchmark_config.initial_price,
+                drift=0,
             )
-
             self.agents.append(
                 ConfigurableMarketManager(
                     wallet_name="ConfigurableMarketManager",
                     key_name=f"ConfigurableMarketManager_{benchmark_config.market_config.instrument.code}",
                     market_config=benchmark_config.market_config,
-                    oracle_prices=iter(price_process),
+                    oracle_prices=iter(benchmark_config.price_process),
                     oracle_submission=0.5,
                     oracle_difference=0.001,
                     random_state=self.random_state,
@@ -151,7 +110,7 @@ class BenchmarkScenario(Scenario):
                 ExponentialShapedMarketMaker(
                     wallet_name="ExponentialShapedMarketMaker",
                     key_name="ExponentialShapedMarketMaker",
-                    price_process_generator=iter(price_process),
+                    price_process_generator=iter(benchmark_config.price_process),
                     initial_asset_mint=1e9,
                     market_name=market_name,
                     commitment_amount=1e6,
@@ -164,6 +123,7 @@ class BenchmarkScenario(Scenario):
                     market_kappa=1000,
                     state_update_freq=10,
                     tag=f"{benchmark_config.market_config.instrument.code}",
+                    fee_amount=0.0001,
                 )
             )
 
@@ -174,7 +134,7 @@ class BenchmarkScenario(Scenario):
                         key_name=f"{benchmark_config.market_config.instrument.code}_{side}",
                         side=side,
                         initial_asset_mint=1e8,
-                        price_process=iter(price_process),
+                        price_process=iter(benchmark_config.price_process),
                         market_name=market_name,
                         uncrossing_size=1e6 / benchmark_config.initial_price,
                         tag=(
@@ -221,7 +181,7 @@ class BenchmarkScenario(Scenario):
                         submit_bias=1,
                         cancel_bias=0,
                         duration=120,
-                        price_process=price_process,
+                        price_process=benchmark_config.price_process,
                         spread=0,
                         mean=-3,
                         sigma=0.5,
@@ -243,7 +203,7 @@ class BenchmarkScenario(Scenario):
                             key_name=f"RiskyMarketOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
                             market_name=market_name,
                             side=side,
-                            initial_asset_mint=1_000,
+                            initial_asset_mint=benchmark_config.risky_trader_funds,
                             leverage_factor=0.5,
                             step_bias=0.1,
                             tag=f"{benchmark_config.market_config.instrument.code}_{side}_{str(i_agent).zfill(3)}",

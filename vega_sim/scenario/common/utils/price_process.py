@@ -315,6 +315,35 @@ def get_live_price(
         return _live_prices[feed_key]
 
 
+def ou_price_process(n, theta=0.15, mu=0.0, sigma=0.2, x0=1.0, drift=0.0):
+    """
+    Generates a mean-reverting price series using the Ornstein–Uhlenbeck
+    process with an optional drift term.
+
+    Parameters:
+        n (int): Length of the time series.
+        theta (float): Speed of reversion to the mean.
+        mu (float): Long-term mean level.
+        sigma (float): Volatility of the process.
+        x0 (float): Initial value of the series.
+        drift (float): Optional drift term to model a constant trend.
+
+    Returns:
+        np.ndarray: Mean-reverting price series of length n.
+    """
+    dt = 1.0  # Assuming a time step of 1
+    x = np.zeros(n)
+    x[0] = x0
+    for t in range(1, n):
+        dx = (
+            theta * (mu - x[t - 1]) * dt
+            + sigma * np.sqrt(dt) * np.random.normal()
+            + drift * dt
+        )
+        x[t] = x[t - 1] + dx
+    return x
+
+
 if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG)
