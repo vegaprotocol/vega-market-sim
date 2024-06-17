@@ -9,7 +9,7 @@ from tests.integration.utils.fixtures import (
     create_and_faucet_wallet,
 )
 
-import vega_sim.proto as protos
+import vega_python_protos as protos
 
 
 def next_epoch(vega: VegaServiceNull):

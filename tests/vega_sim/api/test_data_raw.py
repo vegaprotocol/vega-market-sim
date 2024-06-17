@@ -1215,17 +1215,17 @@ def test_list_amms(trading_data_v2_servicer_and_port):
                             id="id",
                             party_id=(
                                 request.party_id
-                                if request.party_id is not ""
+                                if request.party_id != ""
                                 else "default_party_id"
                             ),
                             market_id=(
                                 request.market_id
-                                if request.market_id is not ""
+                                if request.market_id != ""
                                 else "default_market_id"
                             ),
                             amm_party_id=(
                                 request.amm_party_id
-                                if request.amm_party_id is not ""
+                                if request.amm_party_id != ""
                                 else "default_amm_party_id"
                             ),
                             commitment="10000",

@@ -3,7 +3,6 @@ import numpy as np
 import re
 from typing import Optional, List, Dict, Any
 
-import vega_sim.proto as protos
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.benchmark.configs import BenchmarkConfig
 from vega_sim.scenario.benchmark.scenario import BenchmarkScenario
