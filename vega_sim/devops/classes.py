@@ -34,6 +34,19 @@ class MarketMakerArgs:
 
 
 @dataclass
+class AutomatedMarketMakerArgs:
+    commitment_amount: float
+    proposed_fee: float
+    lower_bound_scaling: float
+    upper_bound_scaling: float
+    leverage_at_lower_bound: float
+    leverage_at_upper_bound: float
+    update_bias: Optional[float] = (0.0001,)
+    slippage_tolerance: Optional[float] = 1
+    initial_mint: Optional[int] = MAX_FAUCET
+
+
+@dataclass
 class AuctionTraderArgs:
     initial_volume: float
     initial_mint: Optional[int] = MAX_FAUCET

@@ -35,6 +35,7 @@ from vega_sim.scenario.common.agents import (
     OpenAuctionPass,
     MarketOrderTrader,
     PriceSensitiveLimitOrderTrader,
+    AutomatedMarketMaker,
 )
 from vega_sim.configs.agents import ConfigurableMarketManager
 from vega_sim.api.market import MarketConfig
@@ -43,6 +44,7 @@ from vega_sim.devops.wallet import ScenarioWallet, default_scenario_wallet
 from vega_sim.devops.classes import (
     MarketMakerArgs,
     MarketManagerArgs,
+    AutomatedMarketMakerArgs,
     AuctionTraderArgs,
     RandomTraderArgs,
     SensitiveTraderArgs,
@@ -59,6 +61,7 @@ class DevOpsScenario(Scenario):
         auction_trader_args: AuctionTraderArgs,
         random_trader_args: RandomTraderArgs,
         sensitive_trader_args: SensitiveTraderArgs,
+        automated_market_maker_args: Optional[AutomatedMarketMakerArgs] = None,
         feed_price_multiplier: int = 1,
         simulation_args: Optional[SimulationArgs] = None,
         state_extraction_fn: Optional[
@@ -77,6 +80,7 @@ class DevOpsScenario(Scenario):
 
         self.market_manager_args = market_manager_args
         self.market_maker_args = market_maker_args
+        self.automated_market_maker_args = automated_market_maker_args
 
         self.auction_trader_args = auction_trader_args
         self.random_trader_args = random_trader_args
@@ -191,6 +195,31 @@ class DevOpsScenario(Scenario):
                 tag=None,
                 isolated_margin_factor=self.market_maker_args.isolated_margin_factor,
             )
+            automated_market_maker = (
+                AutomatedMarketMaker(
+                    wallet_name=self.scenario_wallet.automated_market_maker.wallet_name,
+                    key_name=self.scenario_wallet.automated_market_maker.key_name,
+                    market_name=(
+                        self.market_name
+                        if self.market_name is not None
+                        else self.market_manager_args.market_config.instrument.name
+                    ),
+                    initial_asset_mint=self.automated_market_maker_args.initial_mint,
+                    commitment_amount=self.automated_market_maker_args.commitment_amount,
+                    slippage_tolerance=self.automated_market_maker_args.slippage_tolerance,
+                    proposed_fee=self.automated_market_maker_args.proposed_fee,
+                    price_process=iter(self.price_process),
+                    lower_bound_scaling=self.automated_market_maker_args.lower_bound_scaling,
+                    upper_bound_scaling=self.automated_market_maker_args.upper_bound_scaling,
+                    leverage_at_lower_bound=self.automated_market_maker_args.leverage_at_lower_bound,
+                    leverage_at_upper_bound=self.automated_market_maker_args.leverage_at_upper_bound,
+                    update_bias=self.automated_market_maker_args.update_bias,
+                    tag=None,
+                    random_state=random_state,
+                )
+                if self.automated_market_maker_args is not None
+                else None
+            )
 
             # Setup agents for passing opening auction
             auction_pass_agents = [
@@ -254,7 +283,7 @@ class DevOpsScenario(Scenario):
                 filter(
                     lambda x: not x is None,
                     (
-                        [market_manager, market_maker]
+                        [market_manager, market_maker, automated_market_maker]
                         + auction_pass_agents
                         + random_market_order_traders
                         + sensitive_limit_order_traders
