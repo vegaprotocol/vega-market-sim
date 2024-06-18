@@ -327,7 +327,7 @@ class MarketConfig(Config):
                     oracle_pubkey=oracle_pubkey
                 ),
                 tick_size=str(self.tick_size),
-                enable_transaction_reordering=enable_transaction_reordering,
+                enable_transaction_reordering=self.enable_transaction_reordering,
             )
         )
         return new_market
