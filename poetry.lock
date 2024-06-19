@@ -4103,8 +4103,8 @@ pytest = "*"
 [package.source]
 type = "git"
 url = "https://github.com/vegaprotocol/vega-python-protos"
-reference = "develop"
-resolved_reference = "243d257709ee8484bd324d869233f1fcf8e22f6d"
+reference = "pre-release/vega-v0.77.0-preview.3"
+resolved_reference = "c6c8bd28b1e25a2b49fed0446282f62b59215fac"
 
 [[package]]
 name = "vegapy"
@@ -4129,13 +4129,13 @@ pytest = "^7.4.3"
 pyyaml = "^6.0.1"
 requests = "^2.31.0"
 toml = "^0.10.2"
-vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos", branch = "develop"}
+vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos", branch = "pre-release/vega-v0.77.0-preview.3"}
 
 [package.source]
 type = "git"
 url = "https://github.com/cdummett/vegapy/"
-reference = "develop"
-resolved_reference = "b2a7ae02a0adadd21ccae87688c976ff51d8cec6"
+reference = "pre-release/vega-v0.77.0-preview.3"
+resolved_reference = "08d6e3d0798ba34ca17a9aaa5cbdadb9255c854e"
 
 [[package]]
 name = "wcwidth"
@@ -4306,4 +4306,4 @@ profile = ["pytest-profiling", "snakeviz"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.12"
-content-hash = "c8916c7da7651d11416c6b355547bcd4e0a50d937a1af26707cfbf96c2e3f146"
+content-hash = "b9417e77b674ad52eecfaa74549eda06e1278487bac4801c56f47e2e76381189"

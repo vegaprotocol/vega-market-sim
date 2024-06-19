@@ -42,7 +42,7 @@ pettingzoo = {version = "*", optional = true}
 numba = {version = "^0.57.1", optional = true}
 tianshou = {version = "*", optional = true}
 protofuzz = { git = "https://github.com/trailofbits/protofuzz", branch="master" }
-vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos", branch="develop" }
+vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos", branch="pre-release/vega-v0.77.0-preview.3" }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -53,7 +53,7 @@ Jinja2 = "*"
 nbmake = "*"
 matplotlib = "*"
 pytest-xdist = "*"
-vegapy = {git = "https://github.com/cdummett/vegapy/", branch="develop"}
+vegapy = {git = "https://github.com/cdummett/vegapy/", branch="pre-release/vega-v0.77.0-preview.3"}
 
 
 [build-system]
