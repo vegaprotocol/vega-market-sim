@@ -289,6 +289,10 @@ class MarketEnvironment:
             )
         for agent in self.agents:
             agent.finalise()
+        # Forward a number of transactions so finalise transactions can occur
+        for _ in range(60):
+            vega.wait_fn(1)
+            vega.wait_for_total_catchup()
         vega.wait_for_core_catchup()
         vega.wait_for_datanode_sync()
 
@@ -521,6 +525,10 @@ class NetworkEnvironment(MarketEnvironmentWithState):
                     raise (e)
                 else:
                     logging.warning(msg)
+        # Forward a number of transactions so finalise transactions can occur
+        for _ in range(60):
+            vega.wait_fn(1)
+            vega.wait_for_total_catchup()
         if pause_at_completion:
             input(
                 "Environment run completed. Pausing to allow inspection of state."
