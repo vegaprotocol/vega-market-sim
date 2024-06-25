@@ -1098,7 +1098,9 @@ class DataSourceSpecConfiguration(Config):
                     key=build.data.spec.property_key(
                         name=filter["key"]["name"],
                         type=filter["key"]["type"],
-                        number_decimal_places=filter["key"].get("number_decimal_places", None),
+                        number_decimal_places=filter["key"].get(
+                            "number_decimal_places", None
+                        ),
                     ),
                     conditions=[
                         build.data.spec.condition(
