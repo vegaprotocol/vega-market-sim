@@ -137,58 +137,28 @@ REGISTRY = {
             )
         ],
     ),
-    "research-ESHRUSDT": BenchmarkScenario(
+    "research-fcap-ENGFRA_POS": BenchmarkScenario(
         block_length_seconds=1,
         step_length_seconds=30,
         benchmark_configs=[
             BenchmarkConfig(
-                market_config=configs.research.ESHRUSDT.CONFIG,
-                initial_price=1,
+                market_config=configs.research.fcap.ENGFRA_POS.CONFIG,
+                initial_price=50,
                 annualised_volatility=10,
-                notional_trade_volume=100,
-            )
-        ],
-    ),
-    "research": BenchmarkScenario(
-        block_length_seconds=1,
-        step_length_seconds=30,
-        benchmark_configs=[
-            BenchmarkConfig(
-                market_config=configs.research.SPOT.CONFIG,
-                initial_price=70000,
-                annualised_volatility=2,
-                notional_trade_volume=100,
-            ),
-            BenchmarkConfig(
-                market_config=configs.mainnet.EGLPUSDT.CONFIG,
-                initial_price=70000,
-                annualised_volatility=2,
                 notional_trade_volume=100,
             ),
         ],
     ),
-    "research-HLPUSDT": BenchmarkScenario(
+    "research-fcap-ENGFRA_RES": BenchmarkScenario(
         block_length_seconds=1,
         step_length_seconds=30,
         benchmark_configs=[
             BenchmarkConfig(
-                market_config=configs.research.HLPUSDT.CONFIG,
-                initial_price=1,
+                market_config=configs.research.fcap.ENGFRA_RES.CONFIG,
+                initial_price=0.5,
                 annualised_volatility=10,
                 notional_trade_volume=100,
-            )
-        ],
-    ),
-    "research-SPOT": BenchmarkScenario(
-        block_length_seconds=1,
-        step_length_seconds=30,
-        benchmark_configs=[
-            BenchmarkConfig(
-                market_config=configs.research.SPOT.CONFIG,
-                initial_price=70000,
-                annualised_volatility=2,
-                notional_trade_volume=100,
-            )
+            ),
         ],
     ),
 }
