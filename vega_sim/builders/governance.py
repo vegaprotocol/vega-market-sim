@@ -202,6 +202,7 @@ def future_product(
     data_source_spec_for_settlement_data: vega_protos.data_source.DataSourceDefinition,
     data_source_spec_for_trading_termination: vega_protos.data_source.DataSourceDefinition,
     data_source_spec_binding: vega_protos.markets.DataSourceSpecToFutureBinding,
+    cap: Optional[vega_protos.markets.FutureCap] = None,
 ) -> vega_protos.governance.FutureProduct:
     return vega_protos.governance.FutureProduct(
         settlement_asset=settlement_asset,
@@ -209,6 +210,7 @@ def future_product(
         data_source_spec_for_settlement_data=data_source_spec_for_settlement_data,
         data_source_spec_for_trading_termination=data_source_spec_for_trading_termination,
         data_source_spec_binding=data_source_spec_binding,
+        cap=cap,
     )
 
 
