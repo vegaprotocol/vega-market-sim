@@ -137,6 +137,18 @@ REGISTRY = {
             )
         ],
     ),
+    "mainnet-NFTPERPUSDT": BenchmarkScenario(
+        block_length_seconds=1,
+        step_length_seconds=30,
+        benchmark_configs=[
+            BenchmarkConfig(
+                market_config=configs.mainnet.NFTPERPUSDT.CONFIG,
+                initial_price=100,
+                annualised_volatility=5,
+                notional_trade_volume=100,
+            )
+        ],
+    ),
     "research-ESHRUSDT": BenchmarkScenario(
         block_length_seconds=1,
         step_length_seconds=30,
