@@ -166,6 +166,7 @@ def __propose_market(
     wallet_name: Optional[str] = None,
     parent_market_id: Optional[str] = None,
     parent_market_insurance_pool_fraction: float = 1,
+    enable_transaction_reordering: bool = True,
 ) -> str:
     # Make sure Vega network has governance asset
     vote_asset_id = find_asset_id(
@@ -234,6 +235,7 @@ def __propose_market(
                 composite_price_type=vega_protos.markets.COMPOSITE_PRICE_TYPE_LAST_TRADE,
             ),
             tick_size="1",
+            enable_transaction_reordering=enable_transaction_reordering,
         ),
     )
     if parent_market_id is not None:
@@ -287,6 +289,7 @@ def propose_future_market(
     wallet_name: Optional[str] = None,
     parent_market_id: Optional[str] = None,
     parent_market_insurance_pool_fraction: float = 1,
+    enable_transaction_reordering: bool = True,
 ) -> str:
     """Propose a future market as specified user.
 
@@ -343,6 +346,8 @@ def propose_future_market(
         parent_market_insurance_pool_fraction:
             float, Fraction of parent market insurance pool to carry over.
                 defaults to 1. No-op if parent_market_id is not set.
+        enable_transaction_reordering:
+            bool, Whether to enable the transaction reordering feature on this market.
 
     Returns:
         str, the ID of the future market proposal on chain
@@ -424,6 +429,7 @@ def propose_future_market(
         wallet_name=wallet_name,
         parent_market_id=parent_market_id,
         parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+        enable_transaction_reordering=enable_transaction_reordering,
     )
 
 
@@ -457,6 +463,7 @@ def propose_perps_market(
     wallet_name: Optional[str] = None,
     parent_market_id: Optional[str] = None,
     parent_market_insurance_pool_fraction: float = 1,
+    enable_transaction_reordering: bool = True,
 ) -> str:
     """Propose a perps market as specified user.
 
@@ -513,6 +520,8 @@ def propose_perps_market(
         parent_market_insurance_pool_fraction:
             float, Fraction of parent market insurance pool to carry over.
                 defaults to 1. No-op if parent_market_id is not set.
+        enable_transaction_reordering:
+            bool, Whether to enable the transaction reordering feature on this market
 
     Returns:
         str, the ID of the future market proposal on chain
@@ -604,6 +613,7 @@ def propose_perps_market(
         wallet_name=wallet_name,
         parent_market_id=parent_market_id,
         parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+        enable_transaction_reordering=enable_transaction_reordering,
     )
 
 

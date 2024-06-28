@@ -772,6 +772,7 @@ class VegaService(ABC):
         forward_time_to_enactment: bool = True,
         parent_market_id: Optional[str] = None,
         parent_market_insurance_pool_fraction: float = 1,
+        enable_transaction_reordering: bool = True,
     ) -> str:
         """Creates a simple perpetual futures market with a predefined reasonable set of parameters.
 
@@ -815,6 +816,9 @@ class VegaService(ABC):
                     parent_market_insurance_pool_fraction:
                         float, Fraction of parent market insurance pool to carry over.
                             defaults to 1. No-op if parent_market_id is not set.
+                    enable_transaction_reordering:
+                        bool, default True, Whether to enable trading transaction reordering
+                            on this market
         """
         additional_kwargs = {}
         if asset is not None:
@@ -858,6 +862,7 @@ class VegaService(ABC):
             price_monitoring_parameters=price_monitoring_parameters,
             parent_market_id=parent_market_id,
             parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+            enable_transaction_reordering=enable_transaction_reordering,
             **additional_kwargs,
         )
         if approve_proposal:
@@ -981,6 +986,7 @@ class VegaService(ABC):
         forward_time_to_enactment: bool = True,
         parent_market_id: Optional[str] = None,
         parent_market_insurance_pool_fraction: float = 1,
+        enable_transaction_reordering: bool = True,
     ) -> str:
         """Creates a simple fixed-expiry futures market with a predefined reasonable set of parameters.
 
@@ -1024,6 +1030,9 @@ class VegaService(ABC):
                     parent_market_insurance_pool_fraction:
                         float, Fraction of parent market insurance pool to carry over.
                             defaults to 1. No-op if parent_market_id is not set.
+                    enable_transaction_reordering:
+                        bool, default True, Whether to enable trading transaction reordering
+                            on this market
         """
         additional_kwargs = {}
         if future_asset is not None:
@@ -1066,6 +1075,7 @@ class VegaService(ABC):
             price_monitoring_parameters=price_monitoring_parameters,
             parent_market_id=parent_market_id,
             parent_market_insurance_pool_fraction=parent_market_insurance_pool_fraction,
+            enable_transaction_reordering=enable_transaction_reordering,
             **additional_kwargs,
         )
         if approve_proposal:

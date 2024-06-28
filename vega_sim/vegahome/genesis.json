@@ -215,7 +215,8 @@
       "referralProgram.maxReferralDiscountFactor": "1",
       "referralProgram.maxPartyNotionalVolumeByQuantumPerEpoch": "10000",
       "referralProgram.minStakedVegaTokens": "0",
-      "referralProgram.maxReferralRewardProportion": "1"
+      "referralProgram.maxReferralRewardProportion": "1",
+      "market.aggressiveOrderBlockDelay": "1"
     },
     "network_limits": {
       "propose_market_enabled": true,

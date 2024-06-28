@@ -357,6 +357,7 @@ def new_spot_market_configuration(
     liquidity_fee_settings: vega_protos.markets.LiquidityFeeSettings,
     tick_size: float,
     metadata: Optional[List[str]] = None,
+    enable_transaction_reordering: bool = True,
 ) -> vega_protos.governance.NewMarketConfiguration:
     return vega_protos.governance.NewSpotMarketConfiguration(
         instrument=instrument,
@@ -369,4 +370,5 @@ def new_spot_market_configuration(
         sla_params=sla_params,
         liquidity_fee_settings=liquidity_fee_settings,
         tick_size=str(tick_size),
+        enable_transaction_reordering=enable_transaction_reordering,
     )

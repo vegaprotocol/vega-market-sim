@@ -728,7 +728,7 @@ def test_stop_order(vega_service_with_market: VegaServiceNull):
     vega.submit_stop_order(
         stop_orders_submission=stop_orders_submission, key_name=PARTY_A.name
     )
-    vega.wait_fn(1)
+    vega.wait_fn(2)
     vega.wait_for_total_catchup()
 
     assert (

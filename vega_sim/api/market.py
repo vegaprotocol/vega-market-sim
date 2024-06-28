@@ -226,6 +226,7 @@ class MarketConfig(Config):
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
             "tick_size": "1",
+            "enable_transaction_reordering": True,
         },
         "future": {
             "decimal_places": 4,
@@ -243,6 +244,7 @@ class MarketConfig(Config):
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
             "tick_size": "1",
+            "enable_transaction_reordering": True,
         },
         "perpetual": {
             "decimal_places": 4,
@@ -260,6 +262,7 @@ class MarketConfig(Config):
             "liquidation_strategy": "default",
             "mark_price_configuration": "default",
             "tick_size": "1",
+            "enable_transaction_reordering": True,
         },
     }
 
@@ -300,6 +303,8 @@ class MarketConfig(Config):
             opt=config["mark_price_configuration"]
         )
 
+        self.enable_transaction_reordering = config["enable_transaction_reordering"]
+
     def build(self, oracle_pubkey: str):
         new_market = vega_protos.governance.NewMarket(
             changes=vega_protos.governance.NewMarketConfiguration(
@@ -322,6 +327,7 @@ class MarketConfig(Config):
                     oracle_pubkey=oracle_pubkey
                 ),
                 tick_size=str(self.tick_size),
+                enable_transaction_reordering=self.enable_transaction_reordering,
             )
         )
         return new_market
