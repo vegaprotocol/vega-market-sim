@@ -34,6 +34,7 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaService, VegaServiceNull
 from vega_python_protos.protos.vega import markets as markets_protos
 from vega_python_protos.protos.vega import vega as vega_protos
+from vega_python_protos.protos.vega.events.v1 import events as vega_protos_events
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
 
@@ -3894,6 +3895,7 @@ class AutomatedMarketMaker(StateAgentWithWallet):
             np.random.RandomState() if random_state is None else random_state
         )
         self.amm_created = False
+        self._public_key = None
 
     def initialise(
         self,
@@ -3902,6 +3904,11 @@ class AutomatedMarketMaker(StateAgentWithWallet):
         mint_key: bool = True,
     ):
         super().initialise(vega, create_key, mint_key)
+
+        if self._public_key is None:
+            self._public_key = self.vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            )
 
         self.market_id = self.vega.find_market_id(name=self.market_name)
         self.asset_id = self.vega.market_to_asset[self.market_id]
@@ -3945,15 +3952,14 @@ class AutomatedMarketMaker(StateAgentWithWallet):
         # If check passed once, return True without querying API
         if self.amm_created:
             return True
-        if (
-            len(
-                self.vega.list_amms(
-                    market_id=self.market_id,
-                    party_id=self._public_key,
-                )
-            )
-            > 0
-        ):
+
+        amms = [amm for amm in self.vega.list_amms(
+            market_id=self.market_id,
+            party_id=self._public_key,
+            status=vega_protos_events.AMM.Status.Value("STATUS_ACTIVE"),
+        )]
+
+        if len(amms) > 0:
             self.amm_created = True
             return True
         return False
