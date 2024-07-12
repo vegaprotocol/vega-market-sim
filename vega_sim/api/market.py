@@ -780,6 +780,7 @@ class FutureProduct(Config):
                 "settlement_data_property": "future.settlement",
                 "trading_termination_property": "future.termination",
             },
+            "cap": None,
         }
     }
 
@@ -806,6 +807,7 @@ class FutureProduct(Config):
             if config["data_source_spec_binding"] is not None
             else None
         )
+        self.cap = FutureCap(config["cap"]) if config["cap"] is not None else None
 
     def build(self, oracle_pubkey: str):
         if None in [
@@ -825,8 +827,41 @@ class FutureProduct(Config):
                 oracle_pubkey=oracle_pubkey
             ),
             data_source_spec_binding=self.data_source_spec_binding.build(),
+            cap=self.cap.build() if self.cap is not None else None,
         )
         return proto
+
+    def is_capped(self):
+        return self.cap is not None
+
+    def is_binary(self):
+        if not self.is_capped():
+            return False
+        return self.cap.binary_settlement == True
+
+
+class FutureCap(Config):
+    OPTS = {
+        "default": {
+            "max_price": 1,
+            "binary_settlement": False,
+            "fully_collateralised": False,
+        }
+    }
+
+    def load(self, opt: Optional[Union[dict, str]] = None):
+        config = super().load(opt=opt)
+
+        self.max_price = config["max_price"]
+        self.binary_settlement = config["binary_settlement"]
+        self.fully_collateralised = config["fully_collateralised"]
+
+    def build(self):
+        return build.markets.future_cap(
+            max_price=self.max_price,
+            binary_settlement=self.binary_settlement,
+            fully_collateralised=self.fully_collateralised,
+        )
 
 
 class PerpetualProduct(Config):
@@ -1069,7 +1104,9 @@ class DataSourceSpecConfiguration(Config):
                     key=build.data.spec.property_key(
                         name=filter["key"]["name"],
                         type=filter["key"]["type"],
-                        number_decimal_places=filter.get("number_decimal_places", None),
+                        number_decimal_places=filter["key"].get(
+                            "number_decimal_places", None
+                        ),
                     ),
                     conditions=[
                         build.data.spec.condition(

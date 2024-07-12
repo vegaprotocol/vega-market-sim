@@ -4,6 +4,7 @@ import datetime
 from typing import Optional, Union, Dict, Iterable
 
 from vega_sim.api.market import MarketConfig, SpotMarketConfig
+from vega_sim.api.helpers import num_from_padded_int
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaServiceNull
@@ -134,24 +135,36 @@ class ConfigurableMarketManager(StateAgentWithWallet):
             )
 
     def finalise(self):
-        if self.is_future:
+        if self.is_spot:
+            return
+        # Submit termination data
+        self.vega.submit_oracle_data(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            name=self.termination_oracle,
+            type=protos.vega.data.v1.spec.PropertyKey.Type.TYPE_BOOLEAN,
+            value=True,
+        )
+        for name, number_decimal_places in self.data_oracles.items():
+            settlement_price = self.price
+            if self.is_future and self.market_config.instrument.future.is_capped():
+                max_price = num_from_padded_int(
+                    self.market_config.instrument.future.cap.max_price,
+                    self.market_config.decimal_places,
+                )
+                settlement_price = min(settlement_price, max_price)
+                if self.market_config.instrument.future.is_binary():
+                    normalised_price = settlement_price / max_price
+                    rounded_price = round(normalised_price * 2) / 2
+                    settlement_price = rounded_price * max_price
             self.vega.submit_oracle_data(
                 key_name=self.key_name,
                 wallet_name=self.wallet_name,
-                name=self.termination_oracle,
-                type=protos.vega.data.v1.spec.PropertyKey.Type.TYPE_BOOLEAN,
-                value=True,
+                name=name,
+                type=protos.vega.data.v1.spec.PropertyKey.Type.TYPE_INTEGER,
+                value=settlement_price,
+                decimals=number_decimal_places,
             )
-        if self.is_future or self.is_perpetual:
-            for name, number_decimal_places in self.data_oracles.items():
-                self.vega.submit_oracle_data(
-                    key_name=self.key_name,
-                    wallet_name=self.wallet_name,
-                    name=name,
-                    type=protos.vega.data.v1.spec.PropertyKey.Type.TYPE_INTEGER,
-                    value=self.price,
-                    decimals=number_decimal_places,
-                )
 
     def __find_or_create_asset(self, symbol: str):
         # Check if asset exists and create it if not
