@@ -3953,11 +3953,15 @@ class AutomatedMarketMaker(StateAgentWithWallet):
         if self.amm_created:
             return True
 
-        amms = [amm for amm in self.vega.list_amms(
-            market_id=self.market_id,
-            party_id=self._public_key,
-            status=vega_protos_events.AMM.Status.Value("STATUS_ACTIVE"),
-        ) if amm.status == vega_protos_events.AMM.Status.Value("STATUS_ACTIVE")]
+        amms = [
+            amm
+            for amm in self.vega.list_amms(
+                market_id=self.market_id,
+                party_id=self._public_key,
+                status=vega_protos_events.AMM.Status.Value("STATUS_ACTIVE"),
+            )
+            if amm.status == vega_protos_events.AMM.Status.Value("STATUS_ACTIVE")
+        ]
 
         if len(amms) > 0:
             self.amm_created = True
