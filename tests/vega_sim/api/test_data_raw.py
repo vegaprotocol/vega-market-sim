@@ -33,6 +33,7 @@ from vega_sim.api.data_raw import (
     list_referral_set_referees,
     list_funding_periods,
     list_oracle_data,
+    list_amms,
 )
 
 from vega_python_protos.protos.data_node.api.v2.trading_data_pb2_grpc import (
@@ -1195,3 +1196,92 @@ def test_list_oracle_data(trading_data_v2_servicer_and_port):
     )
 
     assert oracle_data == [data_1, data_2]
+
+
+def test_list_amms(trading_data_v2_servicer_and_port):
+    def ListAMMs(self, request, context):
+        return data_node_protos_v2.trading_data.ListAMMsResponse(
+            amms=data_node_protos_v2.trading_data.AMMConnection(
+                page_info=data_node_protos_v2.trading_data.PageInfo(
+                    has_next_page=False,
+                    has_previous_page=False,
+                    start_cursor="",
+                    end_cursor="",
+                ),
+                edges=[
+                    data_node_protos_v2.trading_data.AMMEdge(
+                        cursor="cursor",
+                        node=events_protos.AMM(
+                            id="id",
+                            party_id=(
+                                request.party_id
+                                if request.party_id != ""
+                                else "default_party_id"
+                            ),
+                            market_id=(
+                                request.market_id
+                                if request.market_id != ""
+                                else "default_market_id"
+                            ),
+                            amm_party_id=(
+                                request.amm_party_id
+                                if request.amm_party_id != ""
+                                else "default_amm_party_id"
+                            ),
+                            commitment="10000",
+                            status=events_protos.AMM.Status.STATUS_ACTIVE,
+                            status_reason=events_protos.AMM.StatusReason.STATUS_REASON_UNSPECIFIED,
+                        ),
+                    ),
+                ],
+            )
+        )
+
+    server, port, mock_servicer = trading_data_v2_servicer_and_port
+    mock_servicer.ListAMMs = ListAMMs
+
+    add_TradingDataServiceServicer_v2_to_server(mock_servicer(), server)
+
+    data_client = VegaTradingDataClientV2(f"localhost:{port}")
+    assert list_amms(
+        data_client=data_client,
+        market_id="market_id",
+    ) == [
+        events_protos.AMM(
+            id="id",
+            party_id="default_party_id",
+            market_id="market_id",
+            amm_party_id="default_amm_party_id",
+            commitment="10000",
+            status=events_protos.AMM.Status.STATUS_ACTIVE,
+            status_reason=events_protos.AMM.StatusReason.STATUS_REASON_UNSPECIFIED,
+        )
+    ]
+    assert list_amms(
+        data_client=data_client,
+        party_id="party_id",
+    ) == [
+        events_protos.AMM(
+            id="id",
+            party_id="party_id",
+            market_id="default_market_id",
+            amm_party_id="default_amm_party_id",
+            commitment="10000",
+            status=events_protos.AMM.Status.STATUS_ACTIVE,
+            status_reason=events_protos.AMM.StatusReason.STATUS_REASON_UNSPECIFIED,
+        )
+    ]
+    assert list_amms(
+        data_client=data_client,
+        amm_party_id="amm_party_id",
+    ) == [
+        events_protos.AMM(
+            id="id",
+            party_id="default_party_id",
+            market_id="default_market_id",
+            amm_party_id="amm_party_id",
+            commitment="10000",
+            status=events_protos.AMM.Status.STATUS_ACTIVE,
+            status_reason=events_protos.AMM.StatusReason.STATUS_REASON_UNSPECIFIED,
+        )
+    ]

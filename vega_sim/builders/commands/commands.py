@@ -247,3 +247,116 @@ def order_amendment(
             else None
         ),
     )
+
+
+@raise_custom_build_errors
+def submit_amm(
+    market_price_decimals: Dict[str, int],
+    market_asset_map: Dict[str, str],
+    asset_decimals: Dict[str, int],
+    market_id: str,
+    commitment_amount: float,
+    slippage_tolerance: float,
+    proposed_fee: float,
+    base: float,
+    lower_bound: Optional[float] = None,
+    upper_bound: Optional[float] = None,
+    leverage_at_lower_bound: Optional[float] = None,
+    leverage_at_upper_bound: Optional[float] = None,
+) -> vega_protos.commands.v1.commands.SubmitAMM:
+    # Note ConcentratedLiquidityParameters does not have a stand alone
+    # function as message is nested specifically with SubmitAmm.
+    return vega_protos.commands.v1.commands.SubmitAMM(
+        market_id=market_id,
+        commitment_amount=str(
+            num_to_padded_int(
+                commitment_amount, asset_decimals[market_asset_map[market_id]]
+            )
+        ),
+        slippage_tolerance=str(slippage_tolerance),
+        concentrated_liquidity_parameters=vega_protos.commands.v1.commands.SubmitAMM.ConcentratedLiquidityParameters(
+            base=str(num_to_padded_int(base, market_price_decimals[market_id])),
+            lower_bound=(
+                str(num_to_padded_int(lower_bound, market_price_decimals[market_id]))
+                if lower_bound is not None
+                else None
+            ),
+            upper_bound=(
+                str(num_to_padded_int(upper_bound, market_price_decimals[market_id]))
+                if upper_bound is not None
+                else None
+            ),
+            leverage_at_lower_bound=(
+                str(leverage_at_lower_bound)
+                if leverage_at_lower_bound is not None
+                else None
+            ),
+            leverage_at_upper_bound=(
+                str(leverage_at_upper_bound)
+                if leverage_at_upper_bound is not None
+                else None
+            ),
+        ),
+        proposed_fee=str(proposed_fee),
+    )
+
+
+@raise_custom_build_errors
+def amend_amm(
+    market_price_decimals: Dict[str, int],
+    market_asset_map: Dict[str, str],
+    asset_decimals: Dict[str, int],
+    market_id: str,
+    commitment_amount: float,
+    slippage_tolerance: float,
+    proposed_fee: float,
+    base: float,
+    lower_bound: Optional[float] = None,
+    upper_bound: Optional[float] = None,
+    leverage_at_lower_bound: Optional[float] = None,
+    leverage_at_upper_bound: Optional[float] = None,
+) -> vega_protos.commands.v1.commands.AmendAMM:
+    # Note ConcentratedLiquidityParameters does not have a stand alone
+    # function as message is nested specifically with AmendAMM.
+    return vega_protos.commands.v1.commands.AmendAMM(
+        market_id=market_id,
+        commitment_amount=str(
+            num_to_padded_int(
+                commitment_amount, asset_decimals[market_asset_map[market_id]]
+            )
+        ),
+        slippage_tolerance=str(slippage_tolerance),
+        concentrated_liquidity_parameters=vega_protos.commands.v1.commands.AmendAMM.ConcentratedLiquidityParameters(
+            base=str(num_to_padded_int(base, market_price_decimals[market_id])),
+            lower_bound=(
+                str(num_to_padded_int(lower_bound, market_price_decimals[market_id]))
+                if lower_bound is not None
+                else None
+            ),
+            upper_bound=(
+                str(num_to_padded_int(upper_bound, market_price_decimals[market_id]))
+                if upper_bound is not None
+                else None
+            ),
+            leverage_at_lower_bound=(
+                str(leverage_at_lower_bound)
+                if leverage_at_lower_bound is not None
+                else None
+            ),
+            leverage_at_upper_bound=(
+                str(leverage_at_upper_bound)
+                if leverage_at_upper_bound is not None
+                else None
+            ),
+        ),
+        proposed_fee=str(proposed_fee),
+    )
+
+
+@raise_custom_build_errors
+def cancel_amm(
+    market_id: str, method: vega_protos.commands.v1.commands.CancelAMM.Method.Value
+) -> vega_protos.commands.v1.commands.CancelAMM:
+    return vega_protos.commands.v1.commands.CancelAMM(
+        market_id=market_id, method=method
+    )

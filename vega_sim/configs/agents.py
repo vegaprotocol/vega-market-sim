@@ -179,6 +179,7 @@ class ConfigurableMarketManager(StateAgentWithWallet):
                 symbol=symbol,
                 name=symbol,
                 decimals=18,
+                quantum=int(10**18),
             )
             asset_id = self.vega.find_asset_id(
                 symbol=symbol,

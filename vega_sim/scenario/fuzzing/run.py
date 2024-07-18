@@ -59,9 +59,7 @@ def _run(
         # Use vegapy package to produce plots
         service = Service(
             network=Network.NETWORK_LOCAL,
-            network_config=pathlib.Path(
-                f"{vega.log_dir}/vegahome/config/wallet-service/networks/local.toml"
-            ),
+            port_data_node=vega.data_node_grpc_port,
         )
         markets = service.api.data.list_markets(include_settled=True)
 

@@ -7,17 +7,18 @@ import argparse
 
 from vega_sim.null_service import VegaServiceNull, Ports
 from vega_sim.scenario.constants import Network
-from vega_sim.scenario.sla.scenario import SLAScenario
-from vega_sim.scenario.sla.registry import REGISTRY
+from vega_sim.scenario.amm.scenario import AMMScenario
+from vega_sim.scenario.amm.registry import REGISTRY
 
 from vegapy.service.service import Service
 from vegapy.service.networks.constants import Network
+
 import vegapy.visualisations as vis
-import vega_python_protos as protos
+from matplotlib.figure import Figure
 
 
 def _run(
-    scenario: SLAScenario,
+    scenario: AMMScenario,
     pause: bool = False,
     console: bool = False,
     output: bool = False,
@@ -47,19 +48,26 @@ def _run(
         )
 
         if output:
-            service = Service(
-                network=Network.NETWORK_LOCAL,
-                port_data_node=vega.data_node_grpc_port,
-            )
-            fig = vis.plots.sla.create(
-                service=service, market_code=scenario.market_config.instrument.code
-            )
             if not os.path.exists(output_dir):
                 os.mkdir(output_dir)
             output_dir = output_dir + f"/{datetime.datetime.now()}"
             if not os.path.exists(output_dir):
                 os.mkdir(output_dir)
-            fig.savefig(f"{output_dir}/sla_analysis.png")
+
+            # Use vegapy package to produce plots
+            service = Service(
+                network=Network.NETWORK_LOCAL,
+                port_data_node=vega.data_node_grpc_port,
+            )
+
+            for benchmark_config in scenario.benchmark_configs:
+                fig: Figure = vis.plots.amm.create(
+                    service,
+                    market_code=benchmark_config.market_config.instrument.code,
+                )
+                fig.savefig(
+                    f"{output_dir}/{benchmark_config.market_config.instrument.code.replace('/','-')}_amm.png"
+                )
 
         if pause:
             input("Waiting after run finished.")

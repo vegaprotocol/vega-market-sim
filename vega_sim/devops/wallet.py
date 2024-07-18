@@ -48,6 +48,7 @@ class ScenarioWallet:
     market_creator_agent: Optional[Agent]
     market_settler_agent: Optional[Agent]
     market_maker_agent: Optional[Agent]
+    automated_market_maker: Optional[Agent]
     auction_trader_agents: list[Agent]
     random_trader_agents: list[Agent]
     sensitive_trader_agents: list[Agent]
@@ -61,6 +62,7 @@ def default_scenario_wallet() -> ScenarioWallet:
         market_settler_agent=Agent(key_name="market_settler"),
         # Market maker makes a market by providing liquidity and an order book
         market_maker_agent=Agent(key_name="market_maker"),
+        automated_market_maker=Agent(key_name="automated_market_maker"),
         # Auction traders provide trades in auction trading modes
         auction_trader_agents=[
             Agent(key_name="auction_trader_a"),

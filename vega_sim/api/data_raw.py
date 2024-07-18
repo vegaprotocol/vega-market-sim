@@ -1014,3 +1014,23 @@ def list_party_margin_modes(
         request_func=lambda x: data_client.ListPartyMarginModes(x).party_margin_modes,
         extraction_func=lambda res: [i.node for i in res.edges],
     )
+
+
+@_retry(3)
+def list_amms(
+    data_client: vac.trading_data_grpc_v2,
+    market_id: Optional[str] = None,
+    party_id: Optional[str] = None,
+    amm_party_id: Optional[str] = None,
+    status: Optional[vega_protos.events.v1.events.AMM.Status.Value] = None,
+) -> List[vega_protos.events.v1.events.AMM]:
+    return unroll_v2_pagination(
+        base_request=data_node_protos_v2.trading_data.ListAMMsRequest(
+            party_id=party_id,
+            market_id=market_id,
+            amm_party_id=amm_party_id,
+            status=status,
+        ),
+        request_func=lambda x: data_client.ListAMMs(x).amms,
+        extraction_func=lambda res: [i.node for i in res.edges],
+    )

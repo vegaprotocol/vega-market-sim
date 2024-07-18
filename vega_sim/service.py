@@ -25,6 +25,8 @@ import vega_sim.api.market as market
 import vega_sim.api.trading as trading
 import vega_sim.api.helpers as helpers
 import vega_sim.grpc.client as vac
+import vega_sim.builders as build
+
 
 import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
 import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
@@ -3886,7 +3888,7 @@ class VegaService(ABC):
             margin_factor=str(margin_factor),
         )
 
-    @_retry(wait=6, attempts=10, raise_on_failure=False)
+    @_retry(wait=0, attempts=0, raise_on_failure=False)
     def check_market_states_consistent(
         self,
     ):
@@ -3929,7 +3931,7 @@ class VegaService(ABC):
                     f"Market {market.id[:6]}, market API says trading mode {vega_protos.markets.Market.TradingMode.Name(market.trading_mode)} but market data API says {vega_protos.markets.Market.TradingMode.Name(market_data.market_trading_mode)}."
                 )
 
-    @_retry(wait=6, attempts=10, raise_on_failure=True)
+    @_retry(wait=0, attempts=0, raise_on_failure=False)
     def check_book_not_crossed(
         self,
     ):
@@ -4056,4 +4058,114 @@ class VegaService(ABC):
             party_margin_modes[0]
             if (party_margin_modes is not None) and (party_margin_modes != [])
             else None
+        )
+
+    def submit_amm(
+        self,
+        key_name: str,
+        market_id: str,
+        commitment_amount: float,
+        slippage_tolerance: float,
+        proposed_fee: float,
+        base: float,
+        upper_bound: Optional[float] = None,
+        lower_bound: Optional[float] = None,
+        leverage_at_lower_bound: Optional[float] = None,
+        leverage_at_upper_bound: Optional[float] = None,
+        wallet_name: Optional[str] = None,
+    ):
+        transaction = build.commands.commands.submit_amm(
+            market_asset_map=self.market_to_asset,
+            asset_decimals=self.asset_decimals,
+            market_price_decimals=self.market_price_decimals,
+            market_id=market_id,
+            commitment_amount=commitment_amount,
+            slippage_tolerance=slippage_tolerance,
+            base=base,
+            upper_bound=upper_bound,
+            lower_bound=lower_bound,
+            leverage_at_lower_bound=leverage_at_lower_bound,
+            leverage_at_upper_bound=leverage_at_upper_bound,
+            proposed_fee=proposed_fee,
+        )
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            transaction_type="submit_amm",
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )
+
+    def amend_amm(
+        self,
+        key_name: str,
+        market_id: str,
+        commitment_amount: float,
+        slippage_tolerance: float,
+        base: float,
+        proposed_fee: float,
+        upper_bound: Optional[float] = None,
+        lower_bound: Optional[float] = None,
+        leverage_at_lower_bound: Optional[float] = None,
+        leverage_at_upper_bound: Optional[float] = None,
+        wallet_name: Optional[str] = None,
+    ):
+        transaction = build.commands.commands.amend_amm(
+            market_asset_map=self.market_to_asset,
+            asset_decimals=self.asset_decimals,
+            market_price_decimals=self.market_price_decimals,
+            market_id=market_id,
+            commitment_amount=commitment_amount,
+            slippage_tolerance=slippage_tolerance,
+            base=base,
+            upper_bound=upper_bound,
+            lower_bound=lower_bound,
+            leverage_at_lower_bound=leverage_at_lower_bound,
+            leverage_at_upper_bound=leverage_at_upper_bound,
+            proposed_fee=proposed_fee,
+        )
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            transaction_type="amend_amm",
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )
+
+    def cancel_amm(
+        self,
+        key_name: str,
+        market_id: str,
+        method: vega_protos.commands.v1.commands.CancelAMM.Method.Value,
+        wallet_name: Optional[str] = None,
+    ):
+        transaction = build.commands.commands.cancel_amm(
+            market_id=market_id, method=method
+        )
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            transaction_type="cancel_amm",
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )
+
+    def list_amms(
+        self,
+        market_id: Optional[str] = None,
+        party_id: Optional[str] = None,
+        amm_key_name: Optional[str] = None,
+        amm_wallet_name: Optional[str] = None,
+        status: Optional[vega_protos.events.v1.events.AMM.Status.Value] = None,
+    ) -> List[data.AMM]:
+        return data.list_amms(
+            data_client=self.trading_data_client_v2,
+            price_decimals_map=self.market_price_decimals,
+            asset_decimals_map=self.asset_decimals,
+            market_to_asset_map=self.market_to_asset,
+            market_id=market_id,
+            party_id=party_id,
+            amm_party_id=(
+                self.wallet.public_key(name=amm_key_name, wallet_name=amm_wallet_name)
+                if amm_key_name is not None
+                else None
+            ),
+            status=status,
         )

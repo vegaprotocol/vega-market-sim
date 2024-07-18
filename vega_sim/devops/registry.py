@@ -18,6 +18,7 @@ from vega_sim.devops.classes import (
     RandomTraderArgs,
     SensitiveTraderArgs,
     SimulationArgs,
+    AutomatedMarketMakerArgs,
 )
 
 from vega_sim.scenario.common.utils.price_process import Granularity, LivePrice
@@ -25,7 +26,7 @@ from vega_sim.scenario.common.utils.price_process import Granularity, LivePrice
 import vega_sim.configs as configs
 
 SCENARIOS = {
-    "ETHUSD": lambda: DevOpsScenario(
+    "PERP": lambda: DevOpsScenario(
         price_symbol="ETHDAI",
         market_manager_args=MarketManagerArgs(
             market_config=configs.mainnet.ETHUSDT.CONFIG,
@@ -43,6 +44,17 @@ SCENARIOS = {
             fee_amount=0.001,
             commitment_amount=1e5,
             initial_mint=2e5,
+        ),
+        automated_market_maker_args=AutomatedMarketMakerArgs(
+            commitment_amount=1e6,
+            proposed_fee=0.0001,
+            lower_bound_scaling=0.9,
+            upper_bound_scaling=1.1,
+            leverage_at_lower_bound=20,
+            leverage_at_upper_bound=20,
+            update_bias=1 / 1000,
+            slippage_tolerance=0.5,
+            initial_mint=1e6,
         ),
         auction_trader_args=AuctionTraderArgs(
             initial_volume=0.001,
@@ -105,48 +117,6 @@ SCENARIOS = {
             n_steps=60 * 6,
             granularity=Granularity.MINUTE,
             coinbase_code="ETH-USD",
-            start_date="2022-11-01 00:00:00",
-            randomise_history=False,
-        ),
-    ),
-    "BTCUSD": lambda: DevOpsScenario(
-        price_symbol="BTCDAI",
-        market_manager_args=MarketManagerArgs(
-            market_config=configs.mainnet.BTCUSDT.CONFIG,
-        ),
-        market_maker_args=MarketMakerArgs(
-            market_kappa=0.15,
-            market_order_arrival_rate=100,
-            order_kappa=0.15,
-            order_size=1,
-            order_levels=25,
-            order_spacing=1,
-            order_clipping=10000,
-            inventory_lower_boundary=-3,
-            inventory_upper_boundary=3,
-            fee_amount=0.0001,
-            commitment_amount=1e5,
-            initial_mint=2e5,
-        ),
-        auction_trader_args=AuctionTraderArgs(
-            initial_volume=0.001,
-            initial_mint=1e4,
-        ),
-        random_trader_args=RandomTraderArgs(
-            order_intensity=[5, 5, 5],
-            order_volume=[0.01, 0.1, 1],
-            step_bias=[0.333, 0.012, 0.003],
-            initial_mint=1e6,
-        ),
-        sensitive_trader_args=SensitiveTraderArgs(
-            scale=[10, 10, 10],
-            max_order_size=[0.001, 0.01, 0.1],
-            initial_mint=1e4,
-        ),
-        simulation_args=SimulationArgs(
-            n_steps=60 * 6,
-            granularity=Granularity.MINUTE,
-            coinbase_code="BTC-USDT",
             start_date="2022-11-01 00:00:00",
             randomise_history=False,
         ),

@@ -1900,3 +1900,90 @@ class FuzzyRandomTransactionAgent(StateAgentWithWallet):
             )
         except HTTPError:
             pass
+
+
+class FuzzedAutomatedMarketMaker(StateAgentWithWallet):
+
+    NAME_BASE = "FuzzedAutomatedMarketMaker"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        submit_probability: float = 0.50,
+        amend_probability: float = 0.10,
+        cancel_probability: float = 0.05,
+        initial_asset_mint: float = 1e9,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+    ):
+        super().__init__(key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.submit_probability = submit_probability
+        self.amend_probability = amend_probability
+        self.cancel_probability = cancel_probability
+        self.initial_asset_mint = initial_asset_mint
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(
+        self,
+        vega: VegaServiceNull,
+        create_key: bool = True,
+        mint_key: bool = False,
+    ):
+        super().initialise(vega, create_key, mint_key)
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state) -> None:
+        if self.random_state.rand() < self.submit_probability:
+            transaction = fuzzers.fuzz_submit_amm(
+                vega=self.vega, rs=self.random_state, bias=0.8
+            )
+            self.vega.submit_transaction(
+                key_name=self.key_name,
+                transaction=transaction,
+                transaction_type="submit_amm",
+                wallet_name=self.wallet_name,
+            )
+        if self.random_state.rand() < self.amend_probability:
+            transaction = fuzzers.fuzz_amend_amm(
+                vega=self.vega, rs=self.random_state, bias=0.8
+            )
+            self.vega.submit_transaction(
+                key_name=self.key_name,
+                transaction=transaction,
+                transaction_type="amend_amm",
+                wallet_name=self.wallet_name,
+            )
+        if self.random_state.rand() < self.cancel_probability:
+            transaction = fuzzers.fuzz_cancel_amm(
+                vega=self.vega, rs=self.random_state, bias=0.8
+            )
+            self.vega.submit_transaction(
+                key_name=self.key_name,
+                transaction=transaction,
+                transaction_type="cancel_amm",
+                wallet_name=self.wallet_name,
+            )

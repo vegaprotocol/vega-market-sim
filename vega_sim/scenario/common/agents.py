@@ -34,6 +34,7 @@ from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaService, VegaServiceNull
 from vega_python_protos.protos.vega import markets as markets_protos
 from vega_python_protos.protos.vega import vega as vega_protos
+from vega_python_protos.protos.vega.events.v1 import events as vega_protos_events
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
 
@@ -3852,3 +3853,147 @@ class UniformLiquidityProvider(StateAgentWithWallet):
                 )
             )
         return cancellations
+
+
+class AutomatedMarketMaker(StateAgentWithWallet):
+
+    NAME_BASE = "AutomatedMarketMaker"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        commitment_amount: float,
+        slippage_tolerance: float,
+        proposed_fee: float,
+        price_process: Iterable[float],
+        lower_bound_scaling: Optional[float] = None,
+        upper_bound_scaling: Optional[float] = None,
+        leverage_at_lower_bound: Optional[float] = None,
+        leverage_at_upper_bound: Optional[float] = None,
+        initial_asset_mint: Optional[int] = 1e10,
+        tag: Optional[str] | None = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+        update_bias: Optional[float] = 0,
+        random_state: Optional[np.random.RandomState] = None,
+    ):
+        super().__init__(key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.commitment_amount = commitment_amount
+        self.price_process = price_process
+        self.slippage_tolerance = slippage_tolerance
+        self.lower_bound_scaling = lower_bound_scaling
+        self.upper_bound_scaling = upper_bound_scaling
+        self.leverage_at_lower_bound = leverage_at_lower_bound
+        self.leverage_at_upper_bound = leverage_at_upper_bound
+        self.proposed_fee = proposed_fee
+        self.initial_asset_mint = initial_asset_mint
+        self.update_bias = update_bias
+        self.random_state = (
+            np.random.RandomState() if random_state is None else random_state
+        )
+        self.amm_created = False
+        self._public_key = None
+
+    def initialise(
+        self,
+        vega: VegaServiceNull | VegaServiceNetwork,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        super().initialise(vega, create_key, mint_key)
+
+        if self._public_key is None:
+            self._public_key = self.vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            )
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
+
+        # Required for running devops bots against a network, when
+        # initialising an agent which has already created an AMM. Update
+        # the AMM parameters with an amend transaction.
+        #
+        # Okay to call next on iterator here as devops bots use a live
+        # price process (next returns the current price).
+        if self._check():
+            base = next(self.price_process)
+            self._amend(base)
+
+    def step(self, vega_state: VegaState):
+        base = next(self.price_process)
+        # Check if AMM already created, if not, create AMM.
+        if not self._check():
+            self._create(base)
+            return
+        if self.random_state.random() < self.update_bias:
+            self._amend(base)
+
+    def _check(self) -> bool:
+        # If check passed once, return True without querying API
+        if self.amm_created:
+            return True
+
+        amms = [
+            amm
+            for amm in self.vega.list_amms(
+                market_id=self.market_id,
+                party_id=self._public_key,
+                status=vega_protos_events.AMM.Status.Value("STATUS_ACTIVE"),
+            )
+            if amm.status == vega_protos_events.AMM.Status.Value("STATUS_ACTIVE")
+        ]
+
+        if len(amms) > 0:
+            self.amm_created = True
+            return True
+        return False
+
+    def _create(self, base: float):
+        self.vega.submit_amm(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitment_amount,
+            slippage_tolerance=self.slippage_tolerance,
+            base=base,
+            lower_bound=base * self.lower_bound_scaling,
+            upper_bound=base * self.upper_bound_scaling,
+            leverage_at_upper_bound=self.leverage_at_upper_bound,
+            leverage_at_lower_bound=self.leverage_at_lower_bound,
+            proposed_fee=self.proposed_fee,
+        )
+
+    def _amend(self, base: float):
+        self.vega.amend_amm(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            commitment_amount=self.commitment_amount,
+            slippage_tolerance=self.slippage_tolerance,
+            base=base,
+            lower_bound=base * self.lower_bound_scaling,
+            upper_bound=base * self.upper_bound_scaling,
+            leverage_at_upper_bound=self.leverage_at_upper_bound,
+            leverage_at_lower_bound=self.leverage_at_lower_bound,
+            proposed_fee=self.proposed_fee,
+        )
