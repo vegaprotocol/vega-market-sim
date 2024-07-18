@@ -1048,11 +1048,23 @@ def update_referral_program(
                             benefit_tier["minimum_running_notional_taker_volume"]
                         ),
                         minimum_epochs=str(benefit_tier["minimum_epochs"]),
-                        referral_reward_factor=str(
-                            benefit_tier["referral_reward_factor"]
+                        referral_reward_factors=builders.vega.reward_factors(
+                            infrastructure_reward_factor=benefit_tier[
+                                "infrastructure_reward_factor"
+                            ],
+                            liquidity_reward_factor=benefit_tier[
+                                "liquidity_reward_factor"
+                            ],
+                            maker_reward_factor=benefit_tier["maker_reward_factor"],
                         ),
-                        referral_discount_factor=str(
-                            benefit_tier["referral_discount_factor"]
+                        referral_discount_factors=builders.vega.discount_factors(
+                            infrastructure_discount_factor=benefit_tier[
+                                "infrastructure_discount_factor"
+                            ],
+                            liquidity_discount_factor=benefit_tier[
+                                "liquidity_discount_factor"
+                            ],
+                            maker_discount_factor=benefit_tier["maker_discount_factor"],
                         ),
                     )
                 ]
@@ -1115,8 +1127,14 @@ def update_volume_discount_program(
                         minimum_running_notional_taker_volume=str(
                             benefit_tier["minimum_running_notional_taker_volume"]
                         ),
-                        volume_discount_factor=str(
-                            benefit_tier["volume_discount_factor"]
+                        volume_discount_factors=builders.vega.discount_factors(
+                            infrastructure_discount_factor=benefit_tier[
+                                "infrastructure_discount_factor"
+                            ],
+                            liquidity_discount_factor=benefit_tier[
+                                "liquidity_discount_factor"
+                            ],
+                            maker_discount_factor=benefit_tier["maker_discount_factor"],
                         ),
                     )
                 ]
