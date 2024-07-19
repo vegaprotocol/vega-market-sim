@@ -38,6 +38,8 @@ from vega_python_protos.protos.vega.events.v1 import events as vega_protos_event
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
 
+import vega_python_protos as protos
+
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 
 
@@ -3997,3 +3999,157 @@ class AutomatedMarketMaker(StateAgentWithWallet):
             leverage_at_lower_bound=self.leverage_at_lower_bound,
             proposed_fee=self.proposed_fee,
         )
+
+
+class TransactionDelayChecker(StateAgentWithWallet):
+
+    NAME_BASE = "TransactionDelayChecker"
+
+    def __init__(
+        self,
+        key_name: str,
+        market_name: str,
+        transaction_reordering_enabled: bool,
+        initial_asset_mint: Optional[int] = 1e10,
+        tag: Optional[str] | None = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+    ):
+        super().__init__(
+            key_name=key_name,
+            tag=tag,
+            wallet_name=wallet_name,
+            state_update_freq=state_update_freq,
+        )
+        self.market_name = market_name
+        self.initial_asset_mint = initial_asset_mint
+
+        self.__transaction_reordering_enabled = transaction_reordering_enabled
+        self.__check_in_progress = False
+        self.__start = 0
+
+    def initialise(
+        self,
+        vega: VegaServiceNull | VegaServiceNetwork,
+        create_key: bool = True,
+        mint_key: bool = True,
+    ):
+        super().initialise(vega, create_key, mint_key)
+
+        if self._public_key is None:
+            self._public_key = self.vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            )
+
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+
+        market = self.vega.data_cache.market_from_feed(market_id=self.market_id)
+        self.order_size = 10 ** -int(market.position_decimal_places)
+        self.order_price = int(market.tick_size) * 10 ** int(-market.decimal_places)
+
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        for asset_id in asset_ids:
+            if asset_id is not None and mint_key:
+                # Top up asset
+                self.vega.mint(
+                    wallet_name=self.wallet_name,
+                    asset=asset_id,
+                    amount=self.initial_asset_mint,
+                    key_name=self.key_name,
+                )
+                self.vega.wait_for_total_catchup()
+
+    def step(self, vega_state: VegaState):
+
+        # Submit orders
+        if not self.__check_in_progress:
+            self.__start = self.vega.get_blockchain_time(in_seconds=True)
+            # Submit passive and aggressive orders in reverse order of
+            # expected execution.
+            for transaction in [
+                self.__create_order(vega_state, aggressive=True),
+                self.__create_order(vega_state, aggressive=False),
+            ]:
+                self.vega.submit_transaction(
+                    wallet_name=self.wallet_name,
+                    key_name=self.key_name,
+                    transaction=transaction,
+                    transaction_type="order_submission",
+                )
+            self.__check_in_progress = True
+            return
+
+        # Get orders
+        self.vega.wait_for_datanode_sync()
+        passive_order = self.__get_order(self.__passive_reference)
+        aggressive_order = self.__get_order(self.__aggressive_reference)
+        if passive_order is None and aggressive_order is None:
+            if self.vega.get_blockchain_time(in_seconds=True) < self.__start + 60:
+                return
+            logger.warning(
+                f"resetting transaction delay check as an order never appeared {{market={self.market_id[:7]}, transfer_reordering_enabled={self.__transaction_reordering_enabled}}}"
+            )
+            self.__reset()
+            return
+
+        # Check orders
+        if self.__transaction_reordering_enabled:
+            assert passive_order.created_at < aggressive_order.created_at
+        else:
+            assert passive_order.created_at == aggressive_order.created_at
+        logger.debug(
+            f"transfer reordering check passed {{market={self.market_id[:7]}, transfer_reordering_enabled={self.__transaction_reordering_enabled}}}"
+        )
+        self.__reset()
+
+    @property
+    def __passive_reference(self) -> str:
+        return f"{self.__start}-passive"
+
+    @property
+    def __aggressive_reference(self) -> str:
+        return f"{self.__start}-aggressive"
+
+    def __create_order(
+        self, vega_state: VegaState, aggressive: bool
+    ) -> protos.vega.commands.v1.commands.OrderSubmission:
+        return build.commands.commands.order_submission(
+            market_size_decimals=self.vega.market_pos_decimals,
+            market_price_decimals=self.vega.market_price_decimals,
+            market_id=self.market_id,
+            size=self.order_size,
+            price=self.order_price,
+            side="SIDE_BUY",
+            type="TYPE_LIMIT",
+            time_in_force="TIME_IN_FORCE_GTC",
+            post_only=False if aggressive else True,
+            reduce_only=False,
+            reference=(
+                self.__aggressive_reference if aggressive else self.__passive_reference
+            ),
+        )
+
+    def __get_order(self, reference: str) -> Order:
+        orders = self.vega.list_orders(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+            reference=reference,
+            live_only=False,
+        )
+        if len(orders) == 0:
+            return None
+        return orders[0]
+
+    def __reset(self):
+        self.vega.cancel_order(
+            trading_key=self.key_name,
+            wallet_name=self.wallet_name,
+            market_id=self.market_id,
+        )
+        self.__check_in_progress = False

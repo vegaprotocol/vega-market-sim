@@ -14,6 +14,7 @@ from vega_sim.scenario.common.agents import (
     StateAgent,
     RewardFunder,
     ReferralAgentWrapper,
+    TransactionDelayChecker,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
@@ -160,6 +161,16 @@ class FuzzingScenario(BenchmarkScenario):
             #         for i_referrer, i_agent in itertools.product(range(2), range(2))
             #     ]
             # )
+            extra_agents.append(
+                TransactionDelayChecker(
+                    wallet_name="TransactionDelayChecker",
+                    key_name=(f"TransactionDelayChecker_{market_code}"),
+                    market_name=market_name,
+                    initial_asset_mint=1e6,
+                    tag=f"{market_code}",
+                    transaction_reordering_enabled=benchmark_config.market_config.enable_transaction_reordering,
+                )
+            )
 
         # Create a reward funder for each asset and each reward type
         asset_names = set()
