@@ -59,5 +59,6 @@ CONFIG = SpotMarketConfig(
             "slaCompetitionFactor": "0.8",
         },
         "liquidityFeeSettings": {"method": "METHOD_MARGINAL_COST"},
+        "enableTransactionReordering": True,
     },
 )

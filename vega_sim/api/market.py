@@ -155,6 +155,7 @@ class SpotMarketConfig(Config):
             "liquidity_sla_parameters": "default",
             "liquidity_fee_settings": "default",
             "tick_size": "2",
+            "enable_transaction_reordering": True,
         },
     }
 
@@ -180,6 +181,7 @@ class SpotMarketConfig(Config):
         self.liquidity_fee_settings = LiquidityFeeSettings(
             opt=config["liquidity_fee_settings"]
         )
+        self.enable_transaction_reordering = config["enable_transaction_reordering"]
 
     def build(self, oracle_pubkey: str):
         new_spot_market = vega_protos.governance.NewSpotMarket(
@@ -194,6 +196,7 @@ class SpotMarketConfig(Config):
                 liquidity_fee_settings=self.liquidity_fee_settings.build(),
                 tick_size=str(self.tick_size),
                 metadata=self.metadata,
+                enable_transaction_reordering=self.enable_transaction_reordering,
             )
         )
         return new_spot_market

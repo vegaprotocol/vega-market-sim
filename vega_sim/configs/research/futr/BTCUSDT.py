@@ -123,5 +123,6 @@ CONFIG = MarketConfig(
         "markPriceConfiguration": {
             "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE",
         },
+        "enableTransactionReordering": True,
     }
 )

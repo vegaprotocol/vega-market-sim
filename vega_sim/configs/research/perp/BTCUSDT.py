@@ -258,5 +258,6 @@ CONFIG = MarketConfig(
                 {"priceSourceProperty": "btc.price"},
             ],
         },
+        "enableTransactionReordering": True,
     }
 )
