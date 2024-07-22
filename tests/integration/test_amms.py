@@ -76,7 +76,7 @@ def test_amm(vega_service_with_market: VegaServiceNull):
         leverage_at_upper_bound=2.0,
         proposed_fee=0.001,
     )
-    vega.wait_fn(1)
+    vega.wait_fn(2)
     vega.wait_for_total_catchup()
     amm2 = vega.list_amms(market_id=market_id, party_id=amm0.party_id)[0]
     assert amm2.commitment == new_commitment
