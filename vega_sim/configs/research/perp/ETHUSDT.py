@@ -258,5 +258,6 @@ CONFIG = MarketConfig(
                 {"priceSourceProperty": "eth.price"},
             ],
         },
+        "enableTransactionReordering": False,
     }
 )

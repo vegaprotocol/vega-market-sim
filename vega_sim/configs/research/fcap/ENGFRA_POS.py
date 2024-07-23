@@ -61,11 +61,11 @@ CONFIG = MarketConfig(
                     "settlementDataProperty": "prices.engfra.value",
                     "tradingTerminationProperty": "termination",
                 },
-                # "cap": {
-                #     "maxPrice": 1000000,
-                #     "binarySettlement": False,
-                #     "fullyCollateralised": True,
-                # },
+                "cap": {
+                    "maxPrice": 1000000,
+                    "binarySettlement": False,
+                    "fullyCollateralised": True,
+                },
             },
         },
         "metadata": [
@@ -104,5 +104,6 @@ CONFIG = MarketConfig(
         "markPriceConfiguration": {
             "compositePriceType": "COMPOSITE_PRICE_TYPE_LAST_TRADE",
         },
+        "enableTransactionReordering": False,
     }
 )
