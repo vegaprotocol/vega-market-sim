@@ -18,61 +18,73 @@ class CoreStateServiceStub(object):
             "/vega.api.v1.CoreStateService/ListAccounts",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAccountsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAccountsResponse.FromString,
+            _registered_method=True,
         )
         self.ListAssets = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListAssets",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAssetsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListAssetsResponse.FromString,
+            _registered_method=True,
         )
         self.ListNetworkParameters = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListNetworkParameters",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkParametersRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkParametersResponse.FromString,
+            _registered_method=True,
         )
         self.ListNetworkLimits = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListNetworkLimits",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkLimitsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListNetworkLimitsResponse.FromString,
+            _registered_method=True,
         )
         self.ListParties = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListParties",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesResponse.FromString,
+            _registered_method=True,
         )
         self.ListValidators = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListValidators",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListValidatorsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListValidatorsResponse.FromString,
+            _registered_method=True,
         )
         self.ListMarkets = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListMarkets",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsResponse.FromString,
+            _registered_method=True,
         )
         self.ListProposals = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListProposals",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListProposalsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListProposalsResponse.FromString,
+            _registered_method=True,
         )
         self.ListMarketsData = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListMarketsData",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsDataRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListMarketsDataResponse.FromString,
+            _registered_method=True,
         )
         self.ListVotes = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListVotes",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListVotesRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListVotesResponse.FromString,
+            _registered_method=True,
         )
         self.ListPartiesStake = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListPartiesStake",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesStakeRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListPartiesStakeResponse.FromString,
+            _registered_method=True,
         )
         self.ListDelegations = channel.unary_unary(
             "/vega.api.v1.CoreStateService/ListDelegations",
             request_serializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListDelegationsRequest.SerializeToString,
             response_deserializer=vega_dot_api_dot_v1_dot_corestate__pb2.ListDelegationsResponse.FromString,
+            _registered_method=True,
         )
 
 
@@ -255,6 +267,9 @@ def add_CoreStateServiceServicer_to_server(servicer, server):
         "vega.api.v1.CoreStateService", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers(
+        "vega.api.v1.CoreStateService", rpc_method_handlers
+    )
 
 
 # This class is part of an EXPERIMENTAL API.
@@ -288,6 +303,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -317,6 +333,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -346,6 +363,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -375,6 +393,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -404,6 +423,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -433,6 +453,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -462,6 +483,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -491,6 +513,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -520,6 +543,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -549,6 +573,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -578,6 +603,7 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
 
     @staticmethod
@@ -607,4 +633,5 @@ class CoreStateService(object):
             wait_for_ready,
             timeout,
             metadata,
+            _registered_method=True,
         )
