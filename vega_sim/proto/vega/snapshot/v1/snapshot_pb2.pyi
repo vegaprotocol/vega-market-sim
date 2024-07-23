@@ -1167,15 +1167,18 @@ class PriceBound(_message.Message):
     ) -> None: ...
 
 class PriceRangeCache(_message.Message):
-    __slots__ = ("bound", "range")
+    __slots__ = ("bound", "range", "bound_index")
     BOUND_FIELD_NUMBER: _ClassVar[int]
     RANGE_FIELD_NUMBER: _ClassVar[int]
+    BOUND_INDEX_FIELD_NUMBER: _ClassVar[int]
     bound: PriceBound
     range: PriceRange
+    bound_index: int
     def __init__(
         self,
         bound: _Optional[_Union[PriceBound, _Mapping]] = ...,
         range: _Optional[_Union[PriceRange, _Mapping]] = ...,
+        bound_index: _Optional[int] = ...,
     ) -> None: ...
 
 class CurrentPrice(_message.Message):
