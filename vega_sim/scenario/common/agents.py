@@ -4088,7 +4088,7 @@ class TransactionDelayChecker(StateAgentWithWallet):
         self.vega.wait_for_datanode_sync()
         passive_order = self.__get_order(self.__passive_reference)
         aggressive_order = self.__get_order(self.__aggressive_reference)
-        if passive_order is None and aggressive_order is None:
+        if (passive_order is None) or (aggressive_order is None):
             if self.vega.get_blockchain_time(in_seconds=True) < self.__start + 60:
                 return
             logger.warning(
