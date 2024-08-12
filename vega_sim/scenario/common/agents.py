@@ -3959,7 +3959,8 @@ class AutomatedMarketMaker(StateAgentWithWallet):
             amm
             for amm in self.vega.list_amms(
                 market_id=self.market_id,
-                party_id=self._public_key,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
                 status=vega_protos_events.AMM.Status.Value("STATUS_ACTIVE"),
             )
             if amm.status == vega_protos_events.AMM.Status.Value("STATUS_ACTIVE")
