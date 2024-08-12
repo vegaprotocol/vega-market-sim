@@ -4150,9 +4150,9 @@ class VegaService(ABC):
     def list_amms(
         self,
         market_id: Optional[str] = None,
-        party_id: Optional[str] = None,
-        amm_key_name: Optional[str] = None,
-        amm_wallet_name: Optional[str] = None,
+        amm_party_id: Optional[str] = None,
+        key_name: Optional[str] = None,
+        wallet_name: Optional[str] = None,
         status: Optional[vega_protos.events.v1.events.AMM.Status.Value] = None,
     ) -> List[data.AMM]:
         return data.list_amms(
@@ -4161,11 +4161,11 @@ class VegaService(ABC):
             asset_decimals_map=self.asset_decimals,
             market_to_asset_map=self.market_to_asset,
             market_id=market_id,
-            party_id=party_id,
-            amm_party_id=(
-                self.wallet.public_key(name=amm_key_name, wallet_name=amm_wallet_name)
-                if amm_key_name is not None
+            party_id=(
+                self.wallet.public_key(name=key_name, wallet_name=wallet_name)
+                if key_name is not None
                 else None
             ),
+            amm_party_id=amm_party_id,
             status=status,
         )
