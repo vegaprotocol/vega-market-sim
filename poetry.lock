@@ -4106,7 +4106,7 @@ pytest = "*"
 type = "git"
 url = "https://github.com/vegaprotocol/vega-python-protos"
 reference = "develop"
-resolved_reference = "63bfaf1a33c2ac8ef8abff837df19dd7c09289ef"
+resolved_reference = "9036fceba570eb9430cf71c24fd250acea91b352"
 
 [[package]]
 name = "vegapy"
@@ -4137,7 +4137,7 @@ vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos"
 type = "git"
 url = "https://github.com/cdummett/vegapy/"
 reference = "develop"
-resolved_reference = "0b85f479ea99736e317d93415901a36a9e4f5bab"
+resolved_reference = "3251c1d5f632ccecab44e8fa97f9b543ec5eee88"
 
 [[package]]
 name = "wcwidth"
