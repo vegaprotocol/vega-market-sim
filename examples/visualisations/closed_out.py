@@ -121,7 +121,7 @@ class CloseOutVisualisation(Visualisation):
             )
 
         # Go through market movements
-        for price in [550, 600, 650, 700]:
+        for price in [550, 600, 650, 690]:
             move_market(
                 vega=self.vega,
                 market_id=market_id,
