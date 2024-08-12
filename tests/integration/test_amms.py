@@ -52,12 +52,12 @@ def test_amm(vega_service_with_market: VegaServiceNull):
         leverage_at_upper_bound=2.0,
         proposed_fee=0.001,
     )
-    vega.wait_fn(1)
+    vega.wait_fn(2)
     vega.wait_for_total_catchup()
 
     # Check querying by owner or sub-account id returns the same AMM
-    amm0 = vega.list_amms(market_id=market_id, amm_key_name=AMM.name)[0]
-    amm1 = vega.list_amms(market_id=market_id, party_id=amm0.party_id)[0]
+    amm0 = vega.list_amms(market_id=market_id, key_name=AMM.name)[0]
+    amm1 = vega.list_amms(market_id=market_id, amm_party_id=amm0.amm_party_id)[0]
     assert amm0 == amm1
 
     # Amend the AMM
@@ -78,7 +78,7 @@ def test_amm(vega_service_with_market: VegaServiceNull):
     )
     vega.wait_fn(2)
     vega.wait_for_total_catchup()
-    amm2 = vega.list_amms(market_id=market_id, party_id=amm0.party_id)[0]
+    amm2 = vega.list_amms(market_id=market_id, key_name=AMM.name)[0]
     assert amm2.commitment == new_commitment
     assert amm2.parameters.lower_bound == new_lower_bound
     assert amm2.parameters.upper_bound == new_upper_bound
@@ -89,7 +89,7 @@ def test_amm(vega_service_with_market: VegaServiceNull):
         market_id=market_id,
         method=protos.vega.commands.v1.commands.CancelAMM.Method.METHOD_IMMEDIATE,
     )
-    vega.wait_fn(1)
+    vega.wait_fn(2)
     vega.wait_for_total_catchup()
-    amm3 = vega.list_amms(market_id=market_id, party_id=amm0.party_id)[0]
+    amm3 = vega.list_amms(market_id=market_id, key_name=AMM.name)[0]
     assert amm3.status == protos.vega.events.v1.events.AMM.Status.STATUS_CANCELLED
