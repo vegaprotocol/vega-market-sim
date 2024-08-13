@@ -475,6 +475,7 @@ class VolumeDiscountStats:
     party_id: str
     discount_factor: float
     running_volume: float
+    discount_factors: DiscountFactors
 
 
 @dataclass(frozen=True)
@@ -483,6 +484,8 @@ class BenefitTier:
     minimum_epochs: int
     referral_reward_factor: float
     referral_discount_factor: float
+    referral_reward_factors: RewardFactors
+    referral_discount_factors: DiscountFactors
 
 
 @dataclass(frozen=True)
@@ -506,6 +509,7 @@ class ReferralProgram:
 class VolumeBenefitTier:
     minimum_running_notional_taker_volume: float
     volume_discount_factor: float
+    volume_discount_factors: DiscountFactors
 
 
 @dataclass(frozen=True)
@@ -618,6 +622,20 @@ class ERC20:
     contract_address: str
     lifetime_limit: float
     withdraw_threshold: float
+
+
+@dataclass(frozen=True)
+class RewardFactors:
+    infrastructure_reward_factor: float
+    liquidity_reward_factor: float
+    maker_reward_factor: float
+
+
+@dataclass(frozen=True)
+class DiscountFactors:
+    infrastructure_discount_factor: float
+    liquidity_discount_factor: float
+    maker_discount_factor: float
 
 
 def _asset_from_proto(asset: vega_protos.assets.Asset, decimal_spec: DecimalSpec):
@@ -1520,14 +1538,28 @@ def _referral_set_referee_from_proto(
     )
 
 
-def _benefit_tier_from_proto(benefit_tier) -> BenefitTier:
+def _benefit_tier_from_proto(benefit_tier: vega_protos.vega.BenefitTier) -> BenefitTier:
     return BenefitTier(
         minimum_running_notional_taker_volume=float(
             benefit_tier.minimum_running_notional_taker_volume
         ),
         minimum_epochs=int(benefit_tier.minimum_epochs),
-        referral_reward_factor=float(benefit_tier.referral_reward_factor),
-        referral_discount_factor=float(benefit_tier.referral_discount_factor),
+        referral_reward_factor=(
+            float(benefit_tier.referral_reward_factor)
+            if benefit_tier.referral_reward_factor != ""
+            else None
+        ),
+        referral_discount_factor=(
+            float(benefit_tier.referral_discount_factor)
+            if benefit_tier.referral_discount_factor != ""
+            else None
+        ),
+        referral_reward_factors=_reward_factors_from_proto(
+            reward_factors=benefit_tier.referral_reward_factors
+        ),
+        referral_discount_factors=_discount_factors_from_proto(
+            discount_factors=benefit_tier.referral_discount_factors
+        ),
     )
 
 
@@ -1645,12 +1677,21 @@ def _fees_stats_from_proto(
     )
 
 
-def _volume_benefit_tier_from_proto(volume_benefit_tier) -> VolumeBenefitTier:
+def _volume_benefit_tier_from_proto(
+    volume_benefit_tier: vega_protos.vega.VolumeBenefitTier,
+) -> VolumeBenefitTier:
     return VolumeBenefitTier(
         minimum_running_notional_taker_volume=float(
             volume_benefit_tier.minimum_running_notional_taker_volume
         ),
-        volume_discount_factor=float(volume_benefit_tier.volume_discount_factor),
+        volume_discount_factor=(
+            float(volume_benefit_tier.volume_discount_factor)
+            if volume_benefit_tier.volume_discount_factor != ""
+            else None
+        ),
+        volume_discount_factors=_discount_factors_from_proto(
+            volume_benefit_tier.volume_discount_factors
+        ),
     )
 
 
@@ -1670,12 +1711,21 @@ def _volume_discount_program_from_proto(
     )
 
 
-def _volume_discount_stats_from_proto(volume_discount_stats) -> VolumeDiscountStats:
+def _volume_discount_stats_from_proto(
+    volume_discount_stats: data_node_protos_v2.trading_data.VolumeDiscountStats,
+) -> VolumeDiscountStats:
     return VolumeDiscountStats(
         at_epoch=int(volume_discount_stats.at_epoch),
         party_id=str(volume_discount_stats.party_id),
-        discount_factor=float(volume_discount_stats.discount_factor),
+        discount_factor=(
+            float(volume_discount_stats.discount_factor)
+            if volume_discount_stats.discount_factor != ""
+            else None
+        ),
         running_volume=float(volume_discount_stats.running_volume),
+        discount_factors=_discount_factors_from_proto(
+            volume_discount_stats.discount_factors
+        ),
     )
 
 
@@ -1771,6 +1821,28 @@ def _amm_from_proto(
         ),
         status=amm.status,
         status_reason=amm.status_reason,
+    )
+
+
+def _reward_factors_from_proto(
+    reward_factors: vega_protos.vega.RewardFactors,
+) -> RewardFactors:
+    return RewardFactors(
+        infrastructure_reward_factor=float(reward_factors.infrastructure_reward_factor),
+        liquidity_reward_factor=float(reward_factors.liquidity_reward_factor),
+        maker_reward_factor=float(reward_factors.maker_reward_factor),
+    )
+
+
+def _discount_factors_from_proto(
+    discount_factors: vega_protos.vega.DiscountFactors,
+) -> DiscountFactors:
+    return DiscountFactors(
+        infrastructure_discount_factor=float(
+            discount_factors.infrastructure_discount_factor
+        ),
+        liquidity_discount_factor=float(discount_factors.liquidity_discount_factor),
+        maker_discount_factor=float(discount_factors.maker_discount_factor),
     )
 
 

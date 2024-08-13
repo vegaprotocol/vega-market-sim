@@ -207,8 +207,8 @@ class FuzzingScenario(BenchmarkScenario):
                     protos.vega.vega.DISPATCH_METRIC_MARKET_VALUE,
                 ),
                 (
-                    protos.vega.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION,
-                    protos.vega.vega.DISPATCH_METRIC_AVERAGE_POSITION,
+                    protos.vega.vega.ACCOUNT_TYPE_REWARD_AVERAGE_NOTIONAL,
+                    protos.vega.vega.DISPATCH_METRIC_AVERAGE_NOTIONAL,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,

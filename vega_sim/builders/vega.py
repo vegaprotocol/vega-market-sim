@@ -70,3 +70,29 @@ def dispatch_strategy(
 @raise_custom_build_errors
 def rank(start_rank: int, share_ratio: int) -> vega_protos.vega.Rank:
     return vega_protos.vega.Rank(start_rank=start_rank, share_ratio=share_ratio)
+
+
+@raise_custom_build_errors
+def reward_factors(
+    infrastructure_reward_factor: float,
+    liquidity_reward_factor: float,
+    maker_reward_factor: float,
+) -> vega_protos.vega.RewardFactors:
+    return vega_protos.vega.RewardFactors(
+        infrastructure_reward_factor=str(infrastructure_reward_factor),
+        liquidity_reward_factor=str(liquidity_reward_factor),
+        maker_reward_factor=str(maker_reward_factor),
+    )
+
+
+@raise_custom_build_errors
+def discount_factors(
+    infrastructure_discount_factor: float,
+    liquidity_discount_factor: float,
+    maker_discount_factor: float,
+) -> vega_protos.vega.DiscountFactors:
+    return vega_protos.vega.DiscountFactors(
+        infrastructure_discount_factor=str(infrastructure_discount_factor),
+        liquidity_discount_factor=str(liquidity_discount_factor),
+        maker_discount_factor=str(maker_discount_factor),
+    )

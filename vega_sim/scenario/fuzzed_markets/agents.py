@@ -1445,20 +1445,32 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 {
                     "minimum_running_notional_taker_volume": 1,
                     "minimum_epochs": 1,
-                    "referral_reward_factor": 0.1,
-                    "referral_discount_factor": 0.1,
+                    "infrastructure_discount_factor": 0.1,
+                    "liquidity_discount_factor": 0.1,
+                    "maker_discount_factor": 0.1,
+                    "infrastructure_reward_factor": 0.1,
+                    "liquidity_reward_factor": 0.1,
+                    "maker_reward_factor": 0.1,
                 },
                 {
                     "minimum_running_notional_taker_volume": 2,
                     "minimum_epochs": 2,
-                    "referral_reward_factor": 0.2,
-                    "referral_discount_factor": 0.2,
+                    "infrastructure_discount_factor": 0.2,
+                    "liquidity_discount_factor": 0.2,
+                    "maker_discount_factor": 0.2,
+                    "infrastructure_reward_factor": 0.2,
+                    "liquidity_reward_factor": 0.2,
+                    "maker_reward_factor": 0.2,
                 },
                 {
                     "minimum_running_notional_taker_volume": 3,
                     "minimum_epochs": 3,
-                    "referral_reward_factor": 0.3,
-                    "referral_discount_factor": 0.3,
+                    "infrastructure_discount_factor": 0.3,
+                    "liquidity_discount_factor": 0.3,
+                    "maker_discount_factor": 0.3,
+                    "infrastructure_reward_factor": 0.3,
+                    "liquidity_reward_factor": 0.3,
+                    "maker_reward_factor": 0.3,
                 },
             ],
             staking_tiers=[
@@ -1478,8 +1490,12 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                         1, 1e6
                     ),
                     "minimum_epochs": self.random_state.randint(1, 10),
-                    "referral_reward_factor": self.random_state.rand(),
-                    "referral_discount_factor": self.random_state.rand(),
+                    "infrastructure_discount_factor": self.random_state.rand(),
+                    "liquidity_discount_factor": self.random_state.rand(),
+                    "maker_discount_factor": self.random_state.rand(),
+                    "infrastructure_reward_factor": self.random_state.rand(),
+                    "liquidity_reward_factor": self.random_state.rand(),
+                    "maker_reward_factor": self.random_state.rand(),
                 }
                 for _ in range(self.random_state.randint(1, 5))
             ],
@@ -1578,15 +1594,21 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
             benefit_tiers=[
                 {
                     "minimum_running_notional_taker_volume": 1000,
-                    "volume_discount_factor": 0.01,
+                    "infrastructure_discount_fee": 0.01,
+                    "liquidity_discount_fee": 0.01,
+                    "maker_discount_fee": 0.01,
                 },
                 {
                     "minimum_running_notional_taker_volume": 2000,
-                    "volume_discount_factor": 0.02,
+                    "infrastructure_discount_fee": 0.01,
+                    "liquidity_discount_fee": 0.01,
+                    "maker_discount_fee": 0.01,
                 },
                 {
                     "minimum_running_notional_taker_volume": 3000,
-                    "volume_discount_factor": 0.03,
+                    "infrastructure_discount_fee": 0.01,
+                    "liquidity_discount_fee": 0.01,
+                    "maker_discount_fee": 0.01,
                 },
             ],
             window_length=1,
@@ -1602,7 +1624,9 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                     "minimum_running_notional_taker_volume": self.random_state.randint(
                         1, 1e6
                     ),
-                    "volume_discount_factor": self.random_state.rand(),
+                    "infrastructure_discount_fee": self.random_state.rand(),
+                    "liquidity_discount_fee": self.random_state.rand(),
+                    "maker_discount_fee": self.random_state.rand(),
                 }
                 for _ in range(self.random_state.randint(1, 5))
             ],
