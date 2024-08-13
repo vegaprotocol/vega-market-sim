@@ -201,6 +201,7 @@ def test_update_market_governance_changes(vega_service_with_market: VegaServiceN
         MM_WALLET.name,
         MarketStateUpdateType.Suspend,
     )
+    vega.wait_fn(1)
     vega.wait_for_total_catchup()
     assert (
         vega_protos.markets.Market.State.Name(
