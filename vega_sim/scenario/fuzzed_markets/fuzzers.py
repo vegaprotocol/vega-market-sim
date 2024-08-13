@@ -262,9 +262,9 @@ def fuzz_transfer(
                     return vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES
                 if (
                     recurring.dispatch_strategy.metric
-                    == vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION
+                    == vega_protos.vega.DISPATCH_METRIC_AVERAGE_NOTIONAL
                 ):
-                    return vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION
+                    return vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_NOTIONAL
                 if (
                     recurring.dispatch_strategy.metric
                     == vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN
@@ -462,9 +462,9 @@ def fuzz_new_transfer_configuration(
                     return vega_protos.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES
                 if (
                     recurring.dispatch_strategy.metric
-                    == vega_protos.vega.DISPATCH_METRIC_AVERAGE_POSITION
+                    == vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_NOTIONAL
                 ):
-                    return vega_protos.vega.ACCOUNT_TYPE_REWARD_AVERAGE_POSITION
+                    return vega_protos.vega.DISPATCH_METRIC_AVERAGE_NOTIONAL
                 if (
                     recurring.dispatch_strategy.metric
                     == vega_protos.vega.DISPATCH_METRIC_RELATIVE_RETURN
