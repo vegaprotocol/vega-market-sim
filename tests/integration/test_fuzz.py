@@ -9,7 +9,7 @@ from vega_sim.scenario.fuzzing.registry import REGISTRY
 def test_fuzz_run():
     # Simply testing that it doesn't error
     with tempfile.TemporaryDirectory() as temp_dir:
-        scenario = REGISTRY["overnight"]
+        scenario = REGISTRY["research"]
         scenario.num_steps = 20
         _run(
             scenario=scenario,
