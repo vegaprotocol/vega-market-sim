@@ -149,7 +149,7 @@ def _run(
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--market", required=True, type=str)
+    parser.add_argument("--scenario", required=True, type=str)
     parser.add_argument("-s", "--steps", default=600, type=int)
     parser.add_argument("-p", "--pause", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
@@ -165,12 +165,13 @@ if __name__ == "__main__":
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    if args.market not in REGISTRY:
-        raise ValueError(f"Market {args.market} not found")
-    scenario = REGISTRY[args.market].num_steps = args.steps
+    if args.scenario not in REGISTRY:
+        raise ValueError(f"Market {args.scenario} not found")
+    scenario = REGISTRY[args.scenario]
+    scenario.num_steps = args.steps
 
     _run(
-        scenario=REGISTRY[args.market],
+        scenario=scenario,
         wallet=args.wallet,
         console=args.console,
         pause=args.pause,
