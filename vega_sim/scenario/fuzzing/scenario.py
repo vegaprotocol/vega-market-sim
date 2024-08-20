@@ -21,6 +21,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyLiquidityProvider,
     FuzzedAutomatedMarketMaker,
     FuzzyReferralProgramManager,
+    FuzzyVolumeRebateProgramManager,
     FuzzyVolumeDiscountProgramManager,
 )
 
@@ -64,6 +65,15 @@ class FuzzingScenario(BenchmarkScenario):
             FuzzyVolumeDiscountProgramManager(
                 wallet_name="FuzzyVolumeDiscountProgramManager",
                 key_name=f"FuzzyVolumeDiscountProgramManager",
+                step_bias=0.01,
+                attempts_per_step=10,
+            )
+        )
+        # Add a fuzzed referral program
+        extra_agents.append(
+            FuzzyVolumeRebateProgramManager(
+                wallet_name="FuzzyReferralProgramManager",
+                key_name=f"FuzzyReferralProgramManager",
                 step_bias=0.01,
                 attempts_per_step=10,
             )
