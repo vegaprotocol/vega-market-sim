@@ -3305,6 +3305,7 @@ class RewardFunder(StateAgentWithWallet):
         metric: Optional[str] = None,
         market_names: Optional[str] = None,
         entity_scope: Optional[vega_protos.EntityScope.Value] = None,
+        distribution_strategy: Optional[vega_protos.DistributionStrategy.Value] = None,
         wallet_name: Optional[str] = None,
         stake_key: bool = False,
         tag: Optional[str] = None,
@@ -3319,6 +3320,7 @@ class RewardFunder(StateAgentWithWallet):
         self.market_names = market_names
         self.entity_scope = entity_scope
         self.stake_key = stake_key
+        self.distribution_strategy = distribution_strategy
 
     def initialise(
         self,
@@ -3394,11 +3396,36 @@ class RewardFunder(StateAgentWithWallet):
                 else None
             ),
             metric=self.metric,
+            notional_time_weighted_average_position_requirement=(
+                1
+                if self.metric
+                not in [
+                    vega_protos.DISPATCH_METRIC_MARKET_VALUE,
+                    vega_protos.DISPATCH_METRIC_VALIDATOR_RANKING,
+                ]
+                else None
+            ),
             window_length=2,
             transfer_interval=2,
             entity_scope=self.entity_scope,
             n_top_performers=(
                 0.5 if self.entity_scope == vega_protos.ENTITY_SCOPE_TEAMS else None
+            ),
+            distribution_strategy=self.distribution_strategy,
+            rank_table=(
+                [
+                    vega_protos.Rank(start_rank=1, share_ratio=50),
+                    vega_protos.Rank(start_rank=2, share_ratio=30),
+                    vega_protos.Rank(start_rank=3, share_ratio=10),
+                    vega_protos.Rank(start_rank=4, share_ratio=1),
+                    vega_protos.Rank(start_rank=11, share_ratio=0),
+                ]
+                if self.distribution_strategy
+                in [
+                    vega_protos.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK,
+                    vega_protos.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK_LOTTERY,
+                ]
+                else None
             ),
         )
 

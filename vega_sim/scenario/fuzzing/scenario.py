@@ -198,43 +198,57 @@ class FuzzingScenario(BenchmarkScenario):
                 asset_names.add(
                     benchmark_config.market_config.instrument.perpetual.quote_name
                 )
-        for i_agent, (account_type, metric) in enumerate(
+        for i_agent, (account_type, metric, distribution_strategy) in enumerate(
             [
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_MAKER_PAID_FEES,
                     protos.vega.vega.DISPATCH_METRIC_MAKER_FEES_PAID,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_MAKER_RECEIVED_FEES,
                     protos.vega.vega.DISPATCH_METRIC_MAKER_FEES_RECEIVED,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_LP_RECEIVED_FEES,
                     protos.vega.vega.DISPATCH_METRIC_LP_FEES_RECEIVED,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_MARKET_PROPOSERS,
                     protos.vega.vega.DISPATCH_METRIC_MARKET_VALUE,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_PRO_RATA,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_AVERAGE_NOTIONAL,
                     protos.vega.vega.DISPATCH_METRIC_AVERAGE_NOTIONAL,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_RELATIVE_RETURN,
                     protos.vega.vega.DISPATCH_METRIC_RELATIVE_RETURN,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_RETURN_VOLATILITY,
                     protos.vega.vega.DISPATCH_METRIC_RETURN_VOLATILITY,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_VALIDATOR_RANKING,
                     protos.vega.vega.DISPATCH_METRIC_VALIDATOR_RANKING,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK,
                 ),
                 (
                     protos.vega.vega.ACCOUNT_TYPE_REWARD_REALISED_RETURN,
                     protos.vega.vega.DISPATCH_METRIC_REALISED_RETURN,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK,
+                ),
+                (
+                    protos.vega.vega.ACCOUNT_TYPE_REWARD_ELIGIBLE_ENTITIES,
+                    protos.vega.vega.DISPATCH_METRIC_ELIGIBLE_ENTITIES,
+                    protos.vega.vega.DistributionStrategy.DISTRIBUTION_STRATEGY_RANK_LOTTERY,
                 ),
             ]
         ):
@@ -251,6 +265,7 @@ class FuzzingScenario(BenchmarkScenario):
                         market_names=[market_name],
                         initial_mint=1e9,
                         entity_scope=entity_scope,
+                        distribution_strategy=distribution_strategy,
                         tag=(f"{entity_scope}_{asset_for_metric_name}_{metric}"),
                     )
                     for asset_for_metric_name, entity_scope in itertools.product(
