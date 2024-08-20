@@ -136,7 +136,7 @@ def fuzz_dispatch_strategy(
                 )
             )
         if valid(rs, bias):
-            if distribution_strategy != vega_protos.vega.DISTRIBUTION_STRATEGY_RANK:
+            if distribution_strategy == vega_protos.vega.DISTRIBUTION_STRATEGY_PRO_RATA:
                 return None
             return val
         return None if rs.rand() < 0.5 else val
