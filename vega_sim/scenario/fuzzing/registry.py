@@ -78,20 +78,20 @@ REGISTRY = {
         benchmark_configs=[
             BenchmarkConfig(
                 market_config=configs.mainnet.BTCUSDT.CONFIG,
-                initial_price=4000,
-                annualised_volatility=2,
+                initial_price=80000,
+                annualised_volatility=1.5,
                 notional_trade_volume=100,
             ),
             BenchmarkConfig(
                 market_config=configs.mainnet.ETHUSDT.CONFIG,
-                initial_price=80000,
-                annualised_volatility=2,
+                initial_price=4000,
+                annualised_volatility=1.5,
                 notional_trade_volume=100,
             ),
             BenchmarkConfig(
                 market_config=configs.mainnet.SOLUSDT.CONFIG,
                 initial_price=20,
-                annualised_volatility=2,
+                annualised_volatility=1.5,
                 notional_trade_volume=100,
             ),
         ],
@@ -110,20 +110,20 @@ REGISTRY = {
         benchmark_configs=[
             BenchmarkConfig(
                 market_config=configs.mainnet.BTCUSDT.CONFIG,
-                initial_price=4000,
-                annualised_volatility=2,
+                initial_price=80000,
+                annualised_volatility=1.5,
                 notional_trade_volume=100,
             ),
             BenchmarkConfig(
                 market_config=configs.mainnet.ETHUSDT.CONFIG,
-                initial_price=80000,
-                annualised_volatility=2,
+                initial_price=4000,
+                annualised_volatility=1.5,
                 notional_trade_volume=100,
             ),
             BenchmarkConfig(
                 market_config=configs.mainnet.SOLUSDT.CONFIG,
                 initial_price=20,
-                annualised_volatility=2,
+                annualised_volatility=1.5,
                 notional_trade_volume=100,
             ),
         ],
