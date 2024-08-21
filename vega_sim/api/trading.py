@@ -712,6 +712,7 @@ def create_referral_set(
     avatar_url: Optional[str] = None,
     closed: Optional[bool] = None,
     wallet_name: Optional[str] = None,
+    do_not_create_referral_set: bool = False,
 ):
     if any(arg is not None for arg in [name, team_url, avatar_url, closed]):
         is_team = True
@@ -719,6 +720,7 @@ def create_referral_set(
         is_team = False
     command = vega_protos.commands.v1.commands.CreateReferralSet(
         is_team=is_team,
+        do_not_create_referral_set=do_not_create_referral_set,
     )
     if is_team:
         if (name is None) or (closed is None):
@@ -777,10 +779,15 @@ def update_referral_set(
 
 
 def apply_referral_code(
-    wallet: Wallet, key_name: str, id: str, wallet_name: Optional[str] = None
+    wallet: Wallet,
+    key_name: str,
+    id: str,
+    wallet_name: Optional[str] = None,
+    do_not_join_team: bool = False,
 ):
     command = vega_protos.commands.v1.commands.ApplyReferralCode(
         id=id,
+        do_not_join_team=do_not_join_team,
     )
     wallet.submit_transaction(
         transaction=command,
