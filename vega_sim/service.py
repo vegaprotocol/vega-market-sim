@@ -3523,6 +3523,7 @@ class VegaService(ABC):
         avatar_url: Optional[str] = None,
         closed: Optional[bool] = None,
         wallet_name: Optional[str] = None,
+        do_not_create_referral_set: bool = False,
     ):
         trading.create_referral_set(
             wallet=self.wallet,
@@ -3532,6 +3533,7 @@ class VegaService(ABC):
             team_url=team_url,
             avatar_url=avatar_url,
             closed=closed,
+            do_not_create_referral_set=do_not_create_referral_set,
         )
 
     def update_referral_set(
@@ -3554,10 +3556,26 @@ class VegaService(ABC):
         )
 
     def apply_referral_code(
-        self, key_name: str, id: str, wallet_name: Optional[str] = None
+        self,
+        key_name: str,
+        id: str,
+        wallet_name: Optional[str] = None,
+        do_not_join_team: bool = False,
     ):
         trading.apply_referral_code(
-            wallet=self.wallet, key_name=key_name, id=id, wallet_name=wallet_name
+            wallet=self.wallet,
+            key_name=key_name,
+            id=id,
+            wallet_name=wallet_name,
+            do_not_join_team=do_not_join_team,
+        )
+
+    def join_team(self, key_name: str, id: str, wallet_name: Optional[str] = None):
+        self.wallet.submit_transaction(
+            transaction=vega_protos.commands.v1.commands.JoinTeam(id=id),
+            key_name=key_name,
+            transaction_type="join_team",
+            wallet_name=wallet_name,
         )
 
     def list_referral_sets(
