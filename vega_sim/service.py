@@ -3570,6 +3570,14 @@ class VegaService(ABC):
             do_not_join_team=do_not_join_team,
         )
 
+    def join_team(self, key_name: str, id: str, wallet_name: Optional[str] = None):
+        self.wallet.submit_transaction(
+            transaction=vega_protos.commands.v1.commands.JoinTeam(id=id),
+            key_name=key_name,
+            transaction_type="join_team",
+            wallet_name=wallet_name,
+        )
+
     def list_referral_sets(
         self,
         referral_set_id: Optional[str] = None,

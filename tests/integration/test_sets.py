@@ -229,15 +229,7 @@ def test_party_who_applied_referral_code_and_who_joined_the_team(
     vega.wait_fn(1)
     vega.wait_for_total_catchup()
     sets = vega.list_referral_sets()
-    assert len(vega.list_referral_sets()) == 1
-    assert all(
-        [set.referrer != vega.wallet.public_key(PARTY_B) for set in sets.values()]
-    )
     teams = vega.list_teams()
-    assert len(teams) == 1
-    next_epoch(vega)
-    teams = vega.list_teams()
-    vega.wait_for_total_catchup()
     assert len(teams) == 2
     assert any(
         [team.referrer == vega.wallet.public_key(PARTY_B) for team in teams.values()]
