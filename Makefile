@@ -119,7 +119,7 @@ flake8:
 
 .PHONY: test
 test:
-	@env PYTHONPATH=. pytest -m "not integration and not api" tests/
+	@env PYTHONPATH=. pytest -m "not (integration or api or vega_query or vega_protos)" tests/
 
 .PHONY: test_api
 test_api:

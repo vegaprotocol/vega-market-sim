@@ -52,6 +52,7 @@ def test_list_funding_period_data_points_end_timestamp(
         assert funding_period_data_point.timestamp < end_timestamp
 
 
+@pytest.mark.vega_query
 def test_list_funding_period_data_points_source_filter(
     tds: TradingDataService, perpetual_markets
 ):
@@ -67,6 +68,7 @@ def test_list_funding_period_data_points_source_filter(
         assert funding_period_data_point.data_point_type == source_filter
 
 
+@pytest.mark.vega_query
 def test_list_funding_period_data_points_seq(
     tds: TradingDataService, perpetual_markets
 ):

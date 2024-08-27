@@ -55,6 +55,7 @@ def test_list_governance_data_proposal_type(tds: TradingDataService, proposal_ty
         assert isinstance(governance_data, protos.vega.governance.GovernanceData)
 
 
+@pytest.mark.vega_query
 def test_list_governance_data_proposer_party_id(
     tds: TradingDataService,
     governance_data: List[protos.vega.governance.GovernanceData],

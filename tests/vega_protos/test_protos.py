@@ -3,7 +3,7 @@ import pytest
 import vega_protos as protos
 
 
-@pytest.integration.vega_protos
+@pytest.mark.vega_protos
 def test_data_node_attributes():
     protos.data_node.api.v2.trading_data
 
