@@ -1,0 +1,26 @@
+lines.color: white
+patch.edgecolor: white
+text.color: DCDEE3
+
+axes.facecolor: black
+axes.edgecolor: 94969B
+axes.labelcolor: 94969B
+axes.titlelocation: left
+axes.prop_cycle: cycler('color', ['00F780', 'EC003C', '0075FF', 'D7FB50', '8028FF', 'FF8700', 'FF077F'])
+axes.grid: True
+
+grid.color: 262626
+grid.linestyle: -
+grid.linewidth: 0.5
+
+xtick.color: 94969B
+ytick.color: 94969B
+xtick.top:           False 
+xtick.bottom:        False 
+ytick.left:           False 
+ytick.right:        False 
+
+figure.facecolor: black
+figure.edgecolor: black
+savefig.facecolor: black
+savefig.edgecolor: black 

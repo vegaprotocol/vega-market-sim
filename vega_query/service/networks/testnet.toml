@@ -1,0 +1,24 @@
+FileVersion = 2
+
+Name = "fairground"
+
+[[Metadata]]
+key = "network"
+name = "fairground"
+
+[API]
+
+  [API.GRPC]
+    Hosts = ["api.n00.testnet.vega.rocks:3007", "api.n06.testnet.vega.rocks:3007", "api.n07.testnet.vega.rocks:3007", "api.n08.testnet.vega.rocks:3007"]
+    Retries = 5
+
+  [API.GraphQL]
+    Hosts = ["https://api.n00.testnet.vega.rocks/graphql", "https://api.n06.testnet.vega.rocks/graphql", "https://api.n07.testnet.vega.rocks/graphql", "https://api.n08.testnet.vega.rocks/graphql"]
+
+  [API.REST]
+    Hosts = ["https://api.n00.testnet.vega.rocks", "https://api.n06.testnet.vega.rocks", "https://api.n07.testnet.vega.rocks", "https://api.n08.testnet.vega.rocks"]
+
+[Apps]
+  Console = "https://console.fairground.wtf"
+  TokenDApp = "https://token.fairground.wtf"
+  Explorer = "https://explorer.fairground.wtf"

@@ -1,0 +1,26 @@
+lines.color: black
+patch.edgecolor: black
+text.color: 040405
+
+axes.facecolor: F9FAFA
+axes.edgecolor: AAABAE
+axes.labelcolor: 4C4E51
+axes.titlelocation: left
+axes.prop_cycle: cycler('color', ['00F780', 'EC003C', '0075FF', 'D7FB50', '8028FF', 'FF8700', 'FF077F'])
+axes.grid: True
+
+grid.color: EEEEEF
+grid.linestyle: -
+grid.linewidth: 0.5
+
+xtick.color: 4C4E51
+ytick.color: 4C4E51
+xtick.top:           False 
+xtick.bottom:        False 
+ytick.left:           False 
+ytick.right:        False 
+
+figure.facecolor: white
+figure.edgecolor: white
+savefig.facecolor: white
+savefig.edgecolor: white 

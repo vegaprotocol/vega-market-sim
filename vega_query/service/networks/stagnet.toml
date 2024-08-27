@@ -1,0 +1,24 @@
+FileVersion = 2
+
+Name = "stagnet1"
+
+[[Metadata]]
+key = "network"
+name = "stagnet1"
+
+[API]
+
+  [API.GRPC]
+    Hosts = ["api.stagnet1.vega.rocks:3007", "api.n05.stagnet1.vega.rocks:3007", "api.n06.stagnet1.vega.rocks:3007"]
+    Retries = 5
+
+  [API.GraphQL]
+    Hosts = ["https://api.stagnet1.vega.rocks/graphql", "https://api.n05.stagnet1.vega.rocks/graphql", "https://api.n06.stagnet1.vega.rocks/graphql"]
+
+  [API.REST]
+    Hosts = ["https://api.stagnet1.vega.rocks", "https://api.n05.stagnet1.vega.rocks", "https://api.n06.stagnet1.vega.rocks"]
+
+[Apps]
+  Console = "https://console.stagnet1.vega.rocks"
+  TokenDApp = "https://governance.stagnet1.vega.rocks"
+  Explorer = "https://explorer.stagnet1.vega.rocks"

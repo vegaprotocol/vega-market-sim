@@ -1,0 +1,73 @@
+FileVersion = 2
+
+Name = "mainnet1"
+
+[[Metadata]]
+Key = "network"
+Value = "mainnet"
+
+[API]
+  [API.GRPC]
+    Hosts = [
+      # "vega-data.nodes.guru:3007",
+      # "vega-data.bharvest.io:3007",
+      # "datanode.vega.pathrocknetwork.org:3007",
+      # "tls://vega-grpc.aurora-edge.com:443",
+      "darling.network:3007",
+      # "tls://grpc.velvet.tm.p2p.org:443",
+      # "vega-grpc.mainnet.lovali.xyz:3007",
+      # "grpcvega.gpvalidator.com:3007",
+      # "vega-mainnet.anyvalid.com:3007",
+      # !! not passing vaguer validations
+      # "vega-data-mainnet.rockrpc.net:3007",
+      # "vega.greenfield.xyz:3007",
+      # !! not passing standard validations
+      # "tls://grpc.vega.xprv.io:443",
+      # "vega.mainnet.stakingcabin.com:3007",
+      # "grpc.vega.mainnet.community:443",
+      # "api.vega.community:3007",
+    ]
+    Retries = 5
+  [API.REST]
+    Hosts = [
+      "https://vega-data.nodes.guru:3008",
+      "https://vega-data.bharvest.io",
+      "https://datanode.vega.pathrocknetwork.org",
+      "https://vega.aurora-edge.com",
+      "https://darling.network",
+      "https://rest.velvet.tm.p2p.org",
+      "https://vega-rest.mainnet.lovali.xyz",
+      "https://graphqlvega.gpvalidator.com",
+      "https://vega-mainnet.anyvalid.com",
+      # !! not passing vaguer validations
+      # "https://vega-data-mainnet.rockrpc.net",
+      # "https://vega.greenfield.xyz",
+      # !! not passing standard validations
+      # "https://vega.xprv.io/datanode",
+      "https://vega.mainnet.stakingcabin.com:3008",
+      "https://vega.mainnet.community",
+    ]
+  [API.GraphQL]
+    Hosts = [
+      "https://vega-data.nodes.guru:3008/graphql",
+      "https://vega-data.bharvest.io/graphql",
+      "https://datanode.vega.pathrocknetwork.org/graphql",
+      "https://vega.aurora-edge.com/graphql",
+      "https://darling.network/graphql",
+      "https://gql.velvet.tm.p2p.org/graphql",
+      "https://vega-query.mainnet.lovali.xyz/graphql",
+      "https://graphqlvega.gpvalidator.com/graphql",
+      "https://vega-mainnet.anyvalid.com/graphql",
+      # !! not passing vaguer validations
+      # "https://vega-data-mainnet.rockrpc.net/graphql",
+      # "https://vega.greenfield.xyz/graphql",
+      # !! not passing standard validations
+      # "https://vega.xprv.io/datanode/query",
+      "https://vega.mainnet.stakingcabin.com:3008/query",
+      "https://vega.mainnet.community/graphql",
+    ]
+
+[Apps]
+Console = ""
+Governance = "https://governance.vega.xyz/"
+Explorer = "https://explorer.vega.xyz/"
