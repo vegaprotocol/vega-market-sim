@@ -19,7 +19,7 @@ from vega_sim.tools.scenario_output import (
     market_chain_standard_output,
 )
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 
 class Scenario(abc.ABC):

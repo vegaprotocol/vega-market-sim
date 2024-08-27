@@ -1,5 +1,5 @@
 import pytest
-from vega_python_protos import protos
+from vega_protos import protos
 from vega_sim.null_service import VegaServiceNull
 from tests.integration.utils.fixtures import (
     ASSET_NAME,

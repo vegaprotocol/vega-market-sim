@@ -12,7 +12,7 @@ from vega_sim.scenario.common.agents import (
     SimpleLiquidityProvider,
     RewardFunder,
 )
-import vega_python_protos.protos as protos
+import vega_protos.protos as protos
 
 
 class SLAScenario(BenchmarkScenario):

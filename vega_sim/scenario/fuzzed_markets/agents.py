@@ -18,14 +18,14 @@ from protofuzz import protofuzz
 from requests.exceptions import HTTPError
 
 import vega_sim.builders as builders
-import vega_python_protos.protos.vega as vega_protos
-import vega_python_protos.protos.vega.commands.v1.commands_pb2 as commands_protos
+import vega_protos.protos.vega as vega_protos
+import vega_protos.protos.vega.commands.v1.commands_pb2 as commands_protos
 import vega_sim.scenario.fuzzed_markets.fuzzers as fuzzers
 from vega_sim.api.governance import ProposalNotAcceptedError
 from vega_sim.api.market import MarketConfig, Successor
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_python_protos.protos.vega import markets as markets_protos
+from vega_protos.protos.vega import markets as markets_protos
 from vega_sim.service import MarketStateUpdateType, PeggedOrder, VegaService
 
 COMMAND_AND_TYPES = [

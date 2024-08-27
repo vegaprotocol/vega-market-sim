@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Optional
 
 import pandas as pd
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 from vega_sim.environment.agent import Agent, StateAgentWithWallet
 from vega_sim.scenario.common.agents import MarketHistoryData, ResourceData
 

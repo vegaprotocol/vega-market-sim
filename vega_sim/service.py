@@ -28,10 +28,10 @@ import vega_sim.grpc.client as vac
 import vega_sim.builders as build
 
 
-import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
-import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
-import vega_python_protos.protos.vega as vega_protos
-import vega_python_protos.protos.vega.data_source_pb2 as data_source_protos
+import vega_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_protos.protos.vega as vega_protos
+import vega_protos.protos.vega.data_source_pb2 as data_source_protos
 from vega_sim.api.helpers import (
     get_enum,
     forward,
@@ -41,19 +41,19 @@ from vega_sim.api.helpers import (
     wait_for_datanode_sync,
 )
 from vega_sim.local_data_cache import LocalDataCache
-from vega_python_protos.protos.vega.commands.v1.commands_pb2 import (
+from vega_protos.protos.vega.commands.v1.commands_pb2 import (
     OrderAmendment,
     OrderCancellation,
     OrderSubmission,
     StopOrdersCancellation,
     StopOrdersSubmission,
 )
-from vega_python_protos.protos.vega.governance_pb2 import (
+from vega_protos.protos.vega.governance_pb2 import (
     UpdateFutureProduct,
     UpdateInstrumentConfiguration,
     UpdateMarketConfiguration,
 )
-from vega_python_protos.protos.vega.markets_pb2 import (
+from vega_protos.protos.vega.markets_pb2 import (
     LiquidityMonitoringParameters,
     LogNormalRiskModel,
     PriceMonitoringParameters,

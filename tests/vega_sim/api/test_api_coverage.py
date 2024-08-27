@@ -4,8 +4,8 @@
 import pytest
 import re
 
-import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_protos.protos.vega as vega_protos
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 

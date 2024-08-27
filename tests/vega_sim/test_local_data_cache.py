@@ -1,9 +1,9 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
-import vega_python_protos.protos.vega as vega_protos
-import vega_python_protos.protos.vega.events.v1.events_pb2 as events_protos
+import vega_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_protos.protos.vega as vega_protos
+import vega_protos.protos.vega.events.v1.events_pb2 as events_protos
 from tests.vega_sim.api.test_data_raw import (
     core_servicer_and_port,
     trading_data_servicer_and_port,
@@ -17,7 +17,7 @@ from vega_sim.grpc.client import (
 )
 from queue import Queue
 
-from vega_python_protos.protos.vega.api.v1.core_pb2_grpc import (
+from vega_protos.protos.vega.api.v1.core_pb2_grpc import (
     add_CoreServiceServicer_to_server,
 )
 

@@ -8,8 +8,8 @@ from vega_sim.grpc.client import (
 )
 from vega_sim.null_service import find_free_port
 
-import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_protos.protos.vega as vega_protos
 from vega_sim.api.data_raw import (
     MarketAccount,
     list_accounts,
@@ -36,16 +36,16 @@ from vega_sim.api.data_raw import (
     list_amms,
 )
 
-from vega_python_protos.protos.data_node.api.v2.trading_data_pb2_grpc import (
+from vega_protos.protos.data_node.api.v2.trading_data_pb2_grpc import (
     TradingDataServiceServicer as TradingDataServiceServicerV2,
     add_TradingDataServiceServicer_to_server as add_TradingDataServiceServicer_v2_to_server,
 )
-from vega_python_protos.protos.vega.api.v1.core_pb2_grpc import (
+from vega_protos.protos.vega.api.v1.core_pb2_grpc import (
     CoreServiceServicer,
     add_CoreServiceServicer_to_server,
 )
 
-import vega_python_protos.protos.vega.events.v1.events_pb2 as events_protos
+import vega_protos.protos.vega.events.v1.events_pb2 as events_protos
 
 
 @pytest.fixture

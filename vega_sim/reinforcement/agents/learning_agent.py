@@ -7,7 +7,7 @@ import numpy as np
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import Agent, StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_python_protos.protos.vega import markets as markets_protos
+from vega_protos.protos.vega import markets as markets_protos
 
 from vega_sim.reinforcement.la_market_state import (
     AbstractAction,

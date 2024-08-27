@@ -3,7 +3,7 @@ import warnings
 
 from vega_sim.quant.quant import probability_of_trading
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 
 def suppress_deprecation(fn):

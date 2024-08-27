@@ -1,6 +1,6 @@
 import pytest
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 from vega_sim.null_service import VegaServiceNull
 from tests.integration.utils.fixtures import WalletConfig, vega_service

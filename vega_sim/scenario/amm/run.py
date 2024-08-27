@@ -10,10 +10,10 @@ from vega_sim.scenario.constants import Network
 from vega_sim.scenario.amm.scenario import AMMScenario
 from vega_sim.scenario.amm.registry import REGISTRY
 
-from vegapy.service.service import Service
-from vegapy.service.networks.constants import Network
+from vega_query.service.service import Service
+from vega_query.service.networks.constants import Network
 
-import vegapy.visualisations as vis
+import vega_query.visualisations as vis
 from matplotlib.figure import Figure
 
 
