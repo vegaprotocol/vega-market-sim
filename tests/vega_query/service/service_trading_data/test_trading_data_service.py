@@ -4,7 +4,7 @@ from vega_query.service.networks.constants import Network
 from vega_query.service.service_trading_data import TradingDataService
 
 
-@pytest.mark.networks
+@pytest.mark.vega_query
 @pytest.mark.vega_query
 @pytest.mark.parametrize(
     "network",

@@ -85,6 +85,22 @@ build_deps_capsule:
 	@mkdir -p ./vega_sim/bin
 	cd ${EXTERN_DIR}/vegacapsule && go build -o ../../vega_sim/bin/ ./...
 
+protos:
+	@if [ ! -d ./extern/ ]; then mkdir ./extern/; fi
+	@echo "Downloading Git dependencies into " ${EXTERN_DIR}
+	@echo "Downloading Vega"
+	@if [ ! -d ./extern/vega ]; then mkdir ./extern/vega; git clone https://github.com/vegaprotocol/vega ${EXTERN_DIR}/vega; fi
+ifneq (${VEGA_TAG},develop)
+	@git -C ${EXTERN_DIR}/vega pull; git -C ${EXTERN_DIR}/vega checkout ${VEGA_TAG}
+else
+	@git -C ${EXTERN_DIR}/vega checkout develop; git -C ${EXTERN_DIR}/vega pull
+endif
+	@rm -rf ./vega_protos/protos
+	@mkdir ./vega_protos/protos
+	@buf generate extern/vega/protos/sources --template ./vega_protos/buf.gen.yaml
+	@GENERATED_DIR=./vega_protos/protos vega_protos/post-generate.sh
+	@black .
+
 .PHONY: black
 black:
 	@black .
@@ -108,6 +124,14 @@ test:
 .PHONY: test_api
 test_api:
 	@env PYTHONPATH=. pytest -m api tests/
+
+.PHONY: test_protos
+test_protos:
+	@env PYTHONPATH=. pytest tests/vega_protos
+
+.PHONY: test_query
+test_query:
+	@env PYTHONPATH=. pytest tests/vega_query
 
 .PHONY: test_integration
 test_integration:

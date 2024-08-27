@@ -4,7 +4,7 @@ from vega_query.service.networks.constants import Network
 from vega_query.service.service_trading_data import TradingDataService
 
 
-@pytest.mark.networks
+@pytest.mark.vega_query
 @pytest.mark.parametrize(
     "network",
     [
@@ -17,7 +17,7 @@ def test_network_public(network: Network):
     assert network.config.exists()
 
 
-@pytest.mark.networks
+@pytest.mark.vega_query
 @pytest.mark.parametrize(
     "network",
     [
