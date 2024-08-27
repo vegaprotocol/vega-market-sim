@@ -42,7 +42,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
 )
 import itertools
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 import datetime
 from typing import Optional, Dict

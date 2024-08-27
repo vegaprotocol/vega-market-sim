@@ -18,7 +18,7 @@ from vega_sim.null_service import VegaServiceNull
 from vega_sim.service import PeggedOrder
 from vega_sim.api.market import MarketConfig
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 
 PartyConfig = namedtuple("WalletConfig", ["wallet_name", "key_name"])

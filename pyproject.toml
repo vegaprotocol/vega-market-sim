@@ -33,6 +33,7 @@ python-dotenv = "*"
 deprecated = "*"
 psutil = "*"
 docker = "*"
+pyyaml = "*"
 websocket-client = "*"
 gymnasium = {version = "*", optional = true}
 sb3-contrib = {version = "^2.0.0a1", optional = true}
@@ -42,7 +43,6 @@ pettingzoo = {version = "*", optional = true}
 numba = {version = "^0.57.1", optional = true}
 tianshou = {version = "*", optional = true}
 protofuzz = { git = "https://github.com/trailofbits/protofuzz", branch="master" }
-vega_python_protos = {git = "https://github.com/vegaprotocol/vega-python-protos", branch="develop" }
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -53,7 +53,6 @@ Jinja2 = "*"
 nbmake = "*"
 matplotlib = "*"
 pytest-xdist = "*"
-vegapy = {git = "https://github.com/cdummett/vegapy/", branch="develop"}
 
 
 [build-system]

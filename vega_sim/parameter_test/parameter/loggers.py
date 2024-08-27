@@ -1,5 +1,5 @@
 import functools
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 from typing import Any, Callable, Dict, List, Optional
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.environment.agent import Agent

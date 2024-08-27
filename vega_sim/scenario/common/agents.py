@@ -32,13 +32,13 @@ from vega_sim.environment import VegaState
 from vega_sim.environment.agent import Agent, StateAgent, StateAgentWithWallet
 from vega_sim.network_service import VegaServiceNetwork
 from vega_sim.null_service import VegaService, VegaServiceNull
-from vega_python_protos.protos.vega import markets as markets_protos
-from vega_python_protos.protos.vega import vega as vega_protos
-from vega_python_protos.protos.vega.events.v1 import events as vega_protos_events
+from vega_protos.protos.vega import markets as markets_protos
+from vega_protos.protos.vega import vega as vega_protos
+from vega_protos.protos.vega.events.v1 import events as vega_protos_events
 from vega_sim.scenario.common.utils.ideal_mm_models import GLFT_approx, a_s_mm_model
 from vega_sim.service import PeggedOrder
 
-import vega_python_protos as protos
+import vega_protos as protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 

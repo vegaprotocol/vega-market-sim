@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 from typing import Optional, List
 from collections import defaultdict
@@ -24,7 +24,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     RiskySimpleLiquidityProvider,
 )
 
-from vega_python_protos.protos.vega import markets
+from vega_protos.protos.vega import markets
 
 import numpy as np
 

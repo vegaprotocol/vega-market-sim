@@ -10,10 +10,10 @@ from vega_sim.scenario.constants import Network
 from vega_sim.scenario.fuzzing.scenario import FuzzingScenario
 from vega_sim.scenario.fuzzing.registry import REGISTRY
 
-from vegapy.service.service import Service
-from vegapy.service.networks.constants import Network
-import vegapy.visualisations as vis
-import vega_python_protos as protos
+from vega_query.service.service import Service
+from vega_query.service.networks.constants import Network
+import vega_query.visualisations as vis
+import vega_protos as protos
 
 
 def _run(

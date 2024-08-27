@@ -1,9 +1,9 @@
 import grpc
 from abc import ABC
-from vega_python_protos.protos.data_node.api.v2 import (
+from vega_protos.protos.data_node.api.v2 import (
     trading_data_grpc as trading_data_grpc_v2,
 )
-from vega_python_protos.protos.vega.api.v1 import core_grpc, corestate_grpc
+from vega_protos.protos.vega.api.v1 import core_grpc, corestate_grpc
 
 
 class GRPCClient(ABC):

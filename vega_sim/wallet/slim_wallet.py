@@ -13,9 +13,9 @@ from typing import Optional
 from vega_sim.grpc.client import VegaCoreClient
 from vega_sim.wallet.base import Wallet
 
-import vega_python_protos.protos.vega.api.v1.core_pb2 as core_proto
-import vega_python_protos.protos.vega.commands.v1.transaction_pb2 as transaction_proto
-import vega_python_protos.protos.vega.commands.v1.signature_pb2 as signature_proto
+import vega_protos.protos.vega.api.v1.core_pb2 as core_proto
+import vega_protos.protos.vega.commands.v1.transaction_pb2 as transaction_proto
+import vega_protos.protos.vega.commands.v1.signature_pb2 as signature_proto
 from vega_sim.wallet.vega_wallet import VegaWallet
 from vega_sim.wallet.base import DEFAULT_WALLET_NAME
 

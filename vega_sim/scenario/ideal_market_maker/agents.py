@@ -6,7 +6,7 @@ from vega_sim.scenario.ideal_market_maker.utils.strategy import A_S_MMmodel, GLF
 from vega_sim.environment import VegaState
 from vega_sim.environment.agent import StateAgentWithWallet
 from vega_sim.null_service import VegaServiceNull
-from vega_python_protos.protos.vega import vega as vega_protos
+from vega_protos.protos.vega import vega as vega_protos
 
 WalletConfig = namedtuple("WalletConfig", ["name", "passphrase"])
 

@@ -1,0 +1,19 @@
+version: 1
+disable_existing_loggers: true
+formatters:
+  simple:
+    format: '%(levelname)-6s | %(asctime)s | %(name)-40s | %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+loggers:
+  vega_query.service:
+    level: DEBUG
+    handlers: [console]
+    propagate: no
+root:
+  level: INFO
+  handlers: [console]

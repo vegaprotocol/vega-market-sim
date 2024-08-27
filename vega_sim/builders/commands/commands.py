@@ -10,7 +10,7 @@ Attributes:
 import logging
 import datetime
 
-import vega_python_protos.protos.vega as vega_protos
+import vega_protos.protos.vega as vega_protos
 
 from typing import Optional, Dict, List
 from vega_sim.api.helpers import num_to_padded_int

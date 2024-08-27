@@ -7,14 +7,14 @@ from time import time
 from typing import Callable, List, Optional, Tuple, Union
 
 import vega_sim.grpc.client as vac
-import vega_python_protos.protos.data_node.api.v2 as data_node_protos_v2
+import vega_protos.protos.data_node.api.v2 as data_node_protos_v2
 
 import vega_sim.api.data as data
 import vega_sim.api.data_raw as data_raw
 
 
-import vega_python_protos.protos.vega as vega_protos
-from vega_python_protos.protos.vega.commands.v1.commands_pb2 import (
+import vega_protos.protos.vega as vega_protos
+from vega_protos.protos.vega.commands.v1.commands_pb2 import (
     OrderCancellation,
     OrderAmendment,
     OrderSubmission,

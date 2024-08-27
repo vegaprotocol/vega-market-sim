@@ -70,9 +70,9 @@ import functools
 import logging
 from typing import Optional, Union
 
-import vega_python_protos.protos.vega as vega_protos
-import vega_python_protos.protos.vega.data.v1 as oracles_protos
-import vega_python_protos.protos.vega.data_source_pb2 as data_source_protos
+import vega_protos.protos.vega as vega_protos
+import vega_protos.protos.vega.data.v1 as oracles_protos
+import vega_protos.protos.vega.data_source_pb2 as data_source_protos
 
 from vega_sim.api.helpers import get_enum
 
