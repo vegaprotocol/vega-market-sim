@@ -1201,7 +1201,6 @@ def update_volume_rebate_program(
     proposal.terms.update_volume_rebate_program.CopyFrom(
         vega_protos.governance.UpdateVolumeRebateProgram(changes=volume_rebate_program)
     )
-    print(proposal)
     return _make_and_wait_for_proposal(
         wallet_name=wallet_name,
         wallet=wallet,

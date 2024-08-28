@@ -1,6 +1,6 @@
 import requests
 
-EARLIEST_VERSION_TO_CHECK = "v0.73.8"
+EARLIEST_VERSION_TO_CHECK = "v0.78.0-preview.4"
 
 
 def check_versions():
