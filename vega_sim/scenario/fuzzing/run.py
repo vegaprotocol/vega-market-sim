@@ -28,10 +28,12 @@ def _run(
 ):
 
     port_config = {}
-    if core_metrics_port is not None:
-        port_config[Ports.METRICS] = core_metrics_port
-    if data_node_metrics_port is not None:
-        port_config[Ports.DATA_NODE_METRICS] = data_node_metrics_port
+    ## Temporarily disable metrics ports whilst running multiple
+    ## fuzzing runs in parallel to avoid port conflicts.
+    # if core_metrics_port is not None:
+    #     port_config[Ports.METRICS] = core_metrics_port
+    # if data_node_metrics_port is not None:
+    #     port_config[Ports.DATA_NODE_METRICS] = data_node_metrics_port
 
     with VegaServiceNull(
         warn_on_raw_data_access=False,
