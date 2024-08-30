@@ -8,7 +8,7 @@ import vega_query.visualisations as vis
 import vega_protos.protos as protos
 from vega_query.service.service import Service
 from vega_query.service.networks.constants import Network
-from scripts.parser import PARSER
+from vega_query.scripts.parser import PARSER
 
 if __name__ == "__main__":
     # Enrich parser with script specific options
