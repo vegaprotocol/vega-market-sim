@@ -119,6 +119,9 @@ class SlimWallet(Wallet):
             self.pub_keys[wallet_name] = {}
 
         if self.vega_wallet is None:
+            if name in self.keys[wallet_name] and name in self.pub_keys[wallet_name]:
+                return
+
             self.keys[wallet_name][name] = SigningKey.generate()
             self.pub_keys[wallet_name][name] = (
                 self.keys[wallet_name][name]
