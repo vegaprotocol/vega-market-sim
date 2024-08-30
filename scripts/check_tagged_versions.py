@@ -21,8 +21,7 @@ def check_versions():
     ).json()
     tagged_vega_versions = set()
     for tag in tags:
-        if tag["name"].startswith("vega-"):
-            tagged_vega_versions.add(tag["name"][5:])
+        tagged_vega_versions.add(tag["name"])
 
     if versions_to_check.difference(tagged_vega_versions):
         raise Exception(
