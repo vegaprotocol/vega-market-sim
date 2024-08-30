@@ -43,7 +43,7 @@ def create(
 ):
 
     # Get market, asset, and network parameter information
-    market = service.utils.market.find_market([market_code])
+    market = service.utils.market.find_market([market_code], include_settled=True)
     asset = service.utils.market.find_asset([market_code])
     epoch_length = duration_str_to_int(
         service.api.data.get_network_parameter(key="validators.epoch.length").value
