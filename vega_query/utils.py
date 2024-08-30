@@ -8,7 +8,7 @@ import datetime
 def timestamp_to_datetime(ts: int, nano: bool = True):
     if nano:
         ts = ts / 1e9
-    return datetime.datetime.fromtimestamp(ts)
+    return datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc)
 
 
 def datetime_to_timestamp(dt: datetime.datetime, nano: bool = True) -> int:

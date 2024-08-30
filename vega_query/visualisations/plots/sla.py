@@ -52,9 +52,11 @@ def create(
     # Default timestamps for getting data if required
     network_timestamp = service.api.data.get_vega_time()
     start_timestamp = (
-        market.market_timestamps.proposed if start_timestamp is None else None
+        market.market_timestamps.proposed
+        if start_timestamp is None
+        else start_timestamp
     )
-    end_timestamp = network_timestamp if end_timestamp is None else None
+    end_timestamp = network_timestamp if end_timestamp is None else end_timestamp
 
     # Get market specific information
     market_data_history = service.api.data.get_market_data_history_by_id(
@@ -155,7 +157,7 @@ def create(
 
 if __name__ == "__main__":
 
-    from scripts.parser import PARSER
+    from vega_query.scripts.parser import PARSER
 
     args = PARSER.parse_args()
 
@@ -187,14 +189,12 @@ if __name__ == "__main__":
         service,
         market_code=args.market,
         start_timestamp=(
-            timestamp_to_datetime(args.start_time, nano=True)
+            int(args.start_time.timestamp() * 1e9)
             if args.start_time is not None
             else None
         ),
         end_timestamp=(
-            timestamp_to_datetime(args.end_time, nano=True)
-            if args.end_time is not None
-            else None
+            int(args.end_time.timestamp() * 1e9) if args.end_time is not None else None
         ),
     )
     plt.show()
