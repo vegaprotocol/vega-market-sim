@@ -109,7 +109,7 @@ class BenchmarkScenario(Scenario):
             self.agents.append(
                 ExponentialShapedMarketMaker(
                     wallet_name="ExponentialShapedMarketMaker",
-                    key_name="ExponentialShapedMarketMaker",
+                    key_name=f"ExponentialShapedMarketMaker_{benchmark_config.market_config.instrument.code}",
                     price_process_generator=iter(benchmark_config.price_process),
                     initial_asset_mint=1e9,
                     market_name=market_name,

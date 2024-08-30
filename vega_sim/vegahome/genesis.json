@@ -212,6 +212,8 @@
       "spam.protection.proposal.min.tokens": "2000000000000000000000",
       "spam.protection.voting.min.tokens": "1000000000000000000",
       "spam.protection.applyReferral.min.funds": "0",
+      "spam.order.minimumMarginQuantumMultiple": "0",
+      "spam.order.minimumHoldingQuantumMultiple": "0",
       "transfer.fee.factor": "0.001",
       "transfer.minTransferQuantumMultiple": "0",
       "transfer.fee.maxQuantumAmount": "100",
