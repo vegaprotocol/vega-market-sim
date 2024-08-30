@@ -88,10 +88,10 @@ class BenchmarkScenario(Scenario):
                 x0=benchmark_config.initial_price,
                 mu=benchmark_config.initial_price,
                 theta=benchmark_config.process_theta,
+                drift=benchmark_config.process_drift,
                 sigma=benchmark_config.annualised_volatility
                 * np.sqrt(self.step_length_seconds / (365.25 * 24 * 60 * 60))
                 * benchmark_config.initial_price,
-                drift=0,
             )
             self.agents.append(
                 ConfigurableMarketManager(

@@ -14,7 +14,7 @@ REGISTRY = {
                 annualised_volatility=0.5,
                 notional_trade_volume=100,
                 process_theta=0.02,
-                drift=0.02,
+                process_drift=-0.1,
             ),
         ],
         amm_liquidity_fee=0.001,
