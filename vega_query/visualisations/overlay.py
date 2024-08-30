@@ -44,6 +44,7 @@ def overlay_last_traded_price(
     ax: Axes,
     market_data_history: List[protos.vega.vega.MarketData],
     price_decimals: int,
+    **kwargs,
 ):
     x = []
     y = []
@@ -51,7 +52,7 @@ def overlay_last_traded_price(
         x.append(timestamp_to_datetime(market_data.timestamp, nano=True))
         price = padded_int_to_float(market_data.last_traded_price, price_decimals)
         y.append(price if price != 0 else np.nan)
-    ax.step(x, y, label="last_traded_price", where="post")
+    ax.step(x, y, label="last_traded_price", where="post", **kwargs)
 
 
 def overlay_indicative_price(
@@ -72,6 +73,7 @@ def overlay_best_bid_price(
     ax: Axes,
     market_data_history: List[protos.vega.vega.MarketData],
     price_decimals: int,
+    **kwargs,
 ):
     x = []
     y = []
@@ -79,13 +81,29 @@ def overlay_best_bid_price(
         x.append(timestamp_to_datetime(market_data.timestamp, nano=True))
         price = padded_int_to_float(market_data.best_bid_price, price_decimals)
         y.append(price if price != 0 else np.nan)
-    ax.step(x, y, label="best_bid_price", where="post")
+    ax.step(x, y, label="best_bid_price", where="post", **kwargs)
+
+
+def overlay_best_bid_size(
+    ax: Axes,
+    market_data_history: List[protos.vega.vega.MarketData],
+    size_decimals: int,
+    **kwargs,
+):
+    x = []
+    y = []
+    for market_data in market_data_history:
+        x.append(timestamp_to_datetime(market_data.timestamp, nano=True))
+        size = padded_int_to_float(market_data.best_bid_volume, size_decimals)
+        y.append(size if size != 0 else np.nan)
+    ax.step(x, y, label="best_bid_size", where="post", **kwargs)
 
 
 def overlay_best_ask_price(
     ax: Axes,
     market_data_history: List[protos.vega.vega.MarketData],
     price_decimals: int,
+    **kwargs,
 ):
     x = []
     y = []
@@ -93,7 +111,22 @@ def overlay_best_ask_price(
         x.append(timestamp_to_datetime(market_data.timestamp, nano=True))
         price = padded_int_to_float(market_data.best_offer_price, price_decimals)
         y.append(price if price != 0 else np.nan)
-    ax.step(x, y, label="best_ask_price", where="post")
+    ax.step(x, y, label="best_ask_price", where="post", **kwargs)
+
+
+def overlay_best_ask_size(
+    ax: Axes,
+    market_data_history: List[protos.vega.vega.MarketData],
+    size_decimals: int,
+    **kwargs,
+):
+    x = []
+    y = []
+    for market_data in market_data_history:
+        x.append(timestamp_to_datetime(market_data.timestamp, nano=True))
+        size = padded_int_to_float(market_data.best_offer_volume, size_decimals)
+        y.append(size if size != 0 else np.nan)
+    ax.step(x, y, label="best_ask_size", where="post", **kwargs)
 
 
 def overlay_price_bounds(
