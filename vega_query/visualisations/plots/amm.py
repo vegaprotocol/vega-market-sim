@@ -49,7 +49,9 @@ def create(
     # Default timestamps for getting data if required
     network_timestamp = service.api.data.get_vega_time()
     start_timestamp = (
-        market.market_timestamps.proposed if start_timestamp is None else start_timestamp
+        market.market_timestamps.proposed
+        if start_timestamp is None
+        else start_timestamp
     )
     end_timestamp = network_timestamp if end_timestamp is None else end_timestamp
 
