@@ -31,7 +31,7 @@ class MarketUtils:
 
     def find_asset(self, substrings: List[str]) -> protos.vega.assets.Asset:
         instrument = self.find_market(
-            substrings=substrings
+            substrings=substrings, include_settled=True
         ).tradable_instrument.instrument
         if instrument.spot != protos.vega.markets.Spot():
             return self.find_quote_asset(substrings)
@@ -42,7 +42,8 @@ class MarketUtils:
 
     def find_base_asset(self, substrings: List[str]) -> protos.vega.assets.Asset:
         instrument = self.find_market(
-            substrings=substrings
+            substrings=substrings,
+            include_settled=True,
         ).tradable_instrument.instrument
         asset_id = None
         if instrument.spot != protos.vega.markets.Spot():
@@ -53,7 +54,8 @@ class MarketUtils:
 
     def find_quote_asset(self, substrings: List[str]) -> protos.vega.assets.Asset:
         instrument = self.find_market(
-            substrings=substrings
+            substrings=substrings,
+            include_settled=True,
         ).tradable_instrument.instrument
         asset_id = None
         if instrument.spot != protos.vega.markets.Spot():
@@ -65,11 +67,10 @@ class MarketUtils:
     def find_settlement_asset(
         self,
         substrings: List[str],
-        include_settled: bool = False,
     ) -> protos.vega.assets.Asset:
         instrument = self.find_market(
             substrings=substrings,
-            include_settled=include_settled,
+            include_settled=True,
         ).tradable_instrument.instrument
         asset_id = None
         if instrument.future != protos.vega.markets.Future():
@@ -81,7 +82,11 @@ class MarketUtils:
         raise Exception("Market is not a future or perpetual market.")
 
     def find_size_decimals(self, substrings: List[str]) -> int:
-        return self.find_market(substrings=substrings).position_decimal_places
+        return self.find_market(
+            substrings=substrings, include_settled=True
+        ).position_decimal_places
 
     def find_price_decimals(self, substrings: List[str]) -> int:
-        return self.find_market(substrings=substrings).decimal_places
+        return self.find_market(
+            substrings=substrings, include_settled=True
+        ).decimal_places

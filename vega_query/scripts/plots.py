@@ -77,7 +77,7 @@ if __name__ == "__main__":
         if args.start_time is None
         else int(args.start_time.timestamp() * 1e9)
     )
-    market = service.utils.market.find_market([args.market])
+    market = service.utils.market.find_market([args.market], include_settled=True)
     if market.tradable_instrument.instrument.spot != protos.vega.markets.Spot():
         asset = service.utils.market.find_quote_asset([args.market])
     if market.tradable_instrument.instrument.future != protos.vega.markets.Future():
