@@ -9,7 +9,7 @@ class BenchmarkConfig:
         initial_price: float,
         annualised_volatility: float,
         notional_trade_volume: int,
-        risky_trader_funds: int = 1_000,
+        risky_trader_funds: int = 100_000,
         process_theta: float = 0,
         process_drift: float = 0,
     ):
