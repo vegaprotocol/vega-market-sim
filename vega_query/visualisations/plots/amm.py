@@ -65,13 +65,7 @@ def create(
     # Set unique colors for each party and request party specific information
     amms = service.api.data.list_amms(market_id=market.id)
     if party_ids is None:
-        # party_ids = __party_defaults_old(market_data_history=market_data_history)
         party_ids = __party_defaults(amms=amms)
-        # party_ids = __party_defaults(amms=amms) + __party_defaults_old(
-        #     market_data_history=market_data_history
-        # )
-
-        print(party_ids)
 
     party_colors = __party_colors(party_ids)
 
@@ -139,17 +133,13 @@ def create(
         ax11.get_lines()[-1].set_label(amm_party_id[:7])
 
         # Reconstruct the AMMs aggregated balance from balance changes
-        aggregated_balances = service.api.data.list_balance_changes(
-            party_ids=[amm_party_id],
+        df = service.utils.party.historic_balances(
+            party_id=amm_party_id,
+            asset_id=asset.id,
             date_range_start_timestamp=start_timestamp,
             date_range_end_timestamp=end_timestamp,
         )
-        overlay_aggregated_balances(
-            ax=ax21,
-            aggregated_balances=aggregated_balances,
-            asset_decimals=asset.details.decimals,
-        )
-        ax21.get_lines()[-1].set_label(amm_party_id[:7])
+        ax21.step(df.index, df.total, where="post", label="total")
 
     ax11.legend()
     ax21.legend()

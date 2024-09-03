@@ -336,9 +336,8 @@ def ou_price_process(n, theta=0.15, mu=0.0, sigma=0.2, x0=1.0, drift=0.0):
     x[0] = x0
     for t in range(1, n):
         dx = (
-            theta * (mu - x[t - 1]) * dt
+            theta * ((mu + t * drift) - x[t - 1]) * dt
             + sigma * np.sqrt(dt) * np.random.normal()
-            + drift * dt
         )
         x[t] = x[t - 1] + dx
     return x
