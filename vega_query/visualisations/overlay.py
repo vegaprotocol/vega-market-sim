@@ -878,7 +878,6 @@ def overlay_price(
         y.append(price if price != 0 else np.nan)
     ax.step(x, y, label="price", where="post")
 
-
 def overlay_volume(
     ax: Axes,
     trades: List[protos.vega.vega.Trade],
@@ -894,20 +893,22 @@ def overlay_volume(
         y.append(price * size if price != 0 else np.nan)
     ax.step(x, y, label="volume", where="post")
 
-
 def overlay_cumulative_volume(
     ax: Axes,
     trades: List[protos.vega.vega.Trade],
     price_decimals: int,
     size_decimals: int,
 ):
-    x = []
-    y = []
+    x = []  # List to store timestamps
+    y = []  # List to store cumulative volume
     cumulative_volume = 0  # Initialize cumulative volume
+
+    trades = reversed(trades)
 
     for trade in trades:
         # Convert timestamp to datetime for x-axis
-        x.append(timestamp_to_datetime(trade.timestamp, nano=True))
+        timestamp = timestamp_to_datetime(trade.timestamp, nano=True)
+        x.append(timestamp)
         
         # Ensure price and size are available
         if hasattr(trade, 'price') and hasattr(trade, 'size'):
@@ -920,17 +921,22 @@ def overlay_cumulative_volume(
             # Debugging: Print current values
             print(f"Trade timestamp: {trade.timestamp}, Price: {price}, Size: {size}, Volume: {volume}")
             
-            # Accumulate volume
-            cumulative_volume += abs(volume)  # Ensure volume is positive
+            # Accumulate volume (ensure volume is positive)
+            cumulative_volume += abs(volume)
             y.append(cumulative_volume)
         else:
             # If price or size is missing, assume no change in cumulative volume
             y.append(cumulative_volume)
             print(f"Missing price or size for trade at {trade.timestamp}")
-    
+
     # Plot the cumulative volume data using step plot
     ax.step(x, y, label="Cumulative Volume", where="post")
 
+    # Optionally, set labels and title for clarity
+    ax.set_xlabel('Timestamp')
+    ax.set_ylabel('Cumulative Volume')
+    ax.set_title('Cumulative Volume Over Time')
+    ax.legend()
 
 def overlay_maker_fee(
     ax: Axes,
