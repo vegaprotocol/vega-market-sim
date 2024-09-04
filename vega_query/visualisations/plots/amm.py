@@ -96,7 +96,7 @@ def create(
 
     ax10 = fig.add_subplot(gs[1, 0])
     ax10.set_title("Cumulated traded notional", loc="left")
-    ax10.set_ylabel("traded notional")
+    ax10.set_ylabel("Market traded notional")
 
     ax11 = fig.add_subplot(gs[0, 1])
     ax11.set_title("AMM: Position", loc="left")
