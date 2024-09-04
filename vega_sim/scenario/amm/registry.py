@@ -11,9 +11,9 @@ REGISTRY = {
             BenchmarkConfig(
                 market_config=configs.mainnet.BTCUSDT.CONFIG,
                 initial_price=70000,
-                annualised_volatility=1,
+                annualised_volatility=0.5,
                 notional_trade_volume=100,
-                process_theta=0.05,
+                process_theta=0.01,
                 process_drift=-10,
             ),
         ],

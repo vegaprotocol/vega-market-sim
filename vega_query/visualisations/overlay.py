@@ -895,6 +895,43 @@ def overlay_volume(
     ax.step(x, y, label="volume", where="post")
 
 
+def overlay_cumulative_volume(
+    ax: Axes,
+    trades: List[protos.vega.vega.Trade],
+    price_decimals: int,
+    size_decimals: int,
+):
+    x = []
+    y = []
+    cumulative_volume = 0  # Initialize cumulative volume
+
+    for trade in trades:
+        # Convert timestamp to datetime for x-axis
+        x.append(timestamp_to_datetime(trade.timestamp, nano=True))
+        
+        # Ensure price and size are available
+        if hasattr(trade, 'price') and hasattr(trade, 'size'):
+            price = padded_int_to_float(trade.price, price_decimals)
+            size = padded_int_to_float(trade.size, size_decimals)
+            
+            # Calculate traded volume (price * size)
+            volume = price * size if price != 0 else 0
+            
+            # Debugging: Print current values
+            print(f"Trade timestamp: {trade.timestamp}, Price: {price}, Size: {size}, Volume: {volume}")
+            
+            # Accumulate volume
+            cumulative_volume += abs(volume)  # Ensure volume is positive
+            y.append(cumulative_volume)
+        else:
+            # If price or size is missing, assume no change in cumulative volume
+            y.append(cumulative_volume)
+            print(f"Missing price or size for trade at {trade.timestamp}")
+    
+    # Plot the cumulative volume data using step plot
+    ax.step(x, y, label="Cumulative Volume", where="post")
+
+
 def overlay_maker_fee(
     ax: Axes,
     trades: List[protos.vega.vega.Trade],

@@ -74,7 +74,7 @@ def create(
     ymin = ymax = 0
     axes: List[Axes] = []
 
-    axn0l = fig.add_subplot(gs[:, 0])
+    axn0l = fig.add_subplot(gs[0, 0])
     axn0r: Axes = axn0l.twinx()
     if market_data_history is not None:
         overlay_mark_price(axn0l, market_data_history, market.decimal_places)
@@ -93,6 +93,10 @@ def create(
     leg.remove()
     axn0r.legend(loc="upper right", framealpha=1)
     axn0r.add_artist(leg)
+
+    ax10 = fig.add_subplot(gs[1, 0])
+    ax10.set_title("Cumulated traded notional", loc="left")
+    ax10.set_ylabel("traded notional")
 
     ax11 = fig.add_subplot(gs[0, 1])
     ax11.set_title("AMM: Position", loc="left")
@@ -123,6 +127,13 @@ def create(
             market_ids=[market.id],
             date_range_start_timestamp=start_timestamp,
             date_range_end_timestamp=end_timestamp,
+        )
+
+        overlay_cumulative_volume(
+            ax=ax10,
+            trades=trades,
+            price_decimals=market.decimal_places,
+            size_decimals=market.position_decimal_places,
         )
         overlay_position(
             ax=ax11,
