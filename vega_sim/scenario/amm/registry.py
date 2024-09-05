@@ -13,13 +13,15 @@ REGISTRY = {
                 initial_price=70000,
                 annualised_volatility=0.5,
                 notional_trade_volume=100,
-                process_theta=0.02,
+                process_theta=0.01,
+                process_drift=-10,
             ),
         ],
-        amm_liquidity_fee=0.001,
+        amm_liquidity_fee=0.0001,
         amm_update_frequency=0,
         initial_network_parameters={
             "validators.epoch.length": "1h",
+            "market.fee.factors.makerFee": "0",
         },
     ),
 }

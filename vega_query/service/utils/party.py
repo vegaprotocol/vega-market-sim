@@ -8,6 +8,8 @@ from vega_query.service.service_trading_data import TradingDataService
 
 import pandas as pd
 
+from vega_query.utils import timestamp_to_datetime
+
 logger = getLogger(__name__)
 
 
@@ -42,7 +44,9 @@ class PartyUtils:
         data = defaultdict(lambda: defaultdict(int))
         for trade in trades:
             position_after_trade = positions.get(trade.market_id, 0)
-            data[trade.timestamp][trade.market_id] = position_after_trade
+            data[timestamp_to_datetime(trade.timestamp)][
+                trade.market_id
+            ] = position_after_trade
             match party_id:
                 case trade.buyer:
                     positions[trade.market_id] -= trade.size
@@ -92,8 +96,8 @@ class PartyUtils:
             )
             if aggregated_balance.market_id is not "":
                 account_key += f" | {aggregated_balance.market_id[:7]}"
-            data[aggregated_balance.timestamp][account_key] = int(
-                aggregated_balance.balance
+            data[timestamp_to_datetime(aggregated_balance.timestamp)][account_key] = (
+                int(aggregated_balance.balance)
             )
 
         df = pd.DataFrame.from_dict(data, orient="index").sort_index().ffill()

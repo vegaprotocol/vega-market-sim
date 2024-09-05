@@ -11,10 +11,12 @@ class BenchmarkConfig:
         notional_trade_volume: int,
         risky_trader_funds: int = 1_000,
         process_theta: float = 0,
+        process_drift: float = 0,
     ):
         self.market_config = market_config
         self.initial_price = initial_price
         self.process_theta = process_theta
+        self.process_drift = process_drift
         self.annualised_volatility = annualised_volatility
         self.notional_trade_volume = notional_trade_volume
         self.risky_trader_funds = risky_trader_funds

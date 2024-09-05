@@ -65,13 +65,7 @@ def create(
     # Set unique colors for each party and request party specific information
     amms = service.api.data.list_amms(market_id=market.id)
     if party_ids is None:
-        # party_ids = __party_defaults_old(market_data_history=market_data_history)
         party_ids = __party_defaults(amms=amms)
-        # party_ids = __party_defaults(amms=amms) + __party_defaults_old(
-        #     market_data_history=market_data_history
-        # )
-
-        print(party_ids)
 
     party_colors = __party_colors(party_ids)
 
@@ -80,13 +74,13 @@ def create(
     ymin = ymax = 0
     axes: List[Axes] = []
 
-    axn0l = fig.add_subplot(gs[:, 0])
+    axn0l = fig.add_subplot(gs[0, 0])
     axn0r: Axes = axn0l.twinx()
     if market_data_history is not None:
         overlay_mark_price(axn0l, market_data_history, market.decimal_places)
         overlay_trading_mode(axn0r, market_data_history)
-        overlay_auction_starts(axn0r, market_data_history)
-        overlay_auction_ends(axn0r, market_data_history)
+        # overlay_auction_starts(axn0r, market_data_history)
+        # overlay_auction_ends(axn0r, market_data_history)
 
     axn0l.set_ylabel("USDT")
     axn0l.set_title(
@@ -99,6 +93,10 @@ def create(
     leg.remove()
     axn0r.legend(loc="upper right", framealpha=1)
     axn0r.add_artist(leg)
+
+    ax10 = fig.add_subplot(gs[1, 0])
+    ax10.set_title("Cumulated traded notional", loc="left")
+    ax10.set_ylabel("Market traded notional")
 
     ax11 = fig.add_subplot(gs[0, 1])
     ax11.set_title("AMM: Position", loc="left")
@@ -130,6 +128,13 @@ def create(
             date_range_start_timestamp=start_timestamp,
             date_range_end_timestamp=end_timestamp,
         )
+
+        overlay_cumulative_volume(
+            ax=ax10,
+            trades=trades,
+            price_decimals=market.decimal_places,
+            size_decimals=market.position_decimal_places,
+        )
         overlay_position(
             ax=ax11,
             trades=trades,
@@ -139,17 +144,13 @@ def create(
         ax11.get_lines()[-1].set_label(amm_party_id[:7])
 
         # Reconstruct the AMMs aggregated balance from balance changes
-        aggregated_balances = service.api.data.list_balance_changes(
-            party_ids=[amm_party_id],
+        df = service.utils.party.historic_balances(
+            party_id=amm_party_id,
+            asset_id=asset.id,
             date_range_start_timestamp=start_timestamp,
             date_range_end_timestamp=end_timestamp,
         )
-        overlay_aggregated_balances(
-            ax=ax21,
-            aggregated_balances=aggregated_balances,
-            asset_decimals=asset.details.decimals,
-        )
-        ax21.get_lines()[-1].set_label(amm_party_id[:7])
+        ax21.step(df.index, df.total, where="post", label="total")
 
     ax11.legend()
     ax21.legend()
