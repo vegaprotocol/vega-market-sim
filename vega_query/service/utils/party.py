@@ -96,8 +96,8 @@ class PartyUtils:
             )
             if aggregated_balance.market_id is not "":
                 account_key += f" | {aggregated_balance.market_id[:7]}"
-            data[timestamp_to_datetime(aggregated_balance.timestamp)][account_key] = int(
-                aggregated_balance.balance
+            data[timestamp_to_datetime(aggregated_balance.timestamp)][account_key] = (
+                int(aggregated_balance.balance)
             )
 
         df = pd.DataFrame.from_dict(data, orient="index").sort_index().ffill()
