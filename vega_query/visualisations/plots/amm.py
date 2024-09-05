@@ -79,8 +79,8 @@ def create(
     if market_data_history is not None:
         overlay_mark_price(axn0l, market_data_history, market.decimal_places)
         overlay_trading_mode(axn0r, market_data_history)
-        overlay_auction_starts(axn0r, market_data_history)
-        overlay_auction_ends(axn0r, market_data_history)
+        # overlay_auction_starts(axn0r, market_data_history)
+        # overlay_auction_ends(axn0r, market_data_history)
 
     axn0l.set_ylabel("USDT")
     axn0l.set_title(

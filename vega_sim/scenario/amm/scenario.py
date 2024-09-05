@@ -68,7 +68,7 @@ class AMMScenario(BenchmarkScenario):
                     key_name=f"AutomatedMarketMaker_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
                     market_name=benchmark_config.market_config.instrument.name,
                     initial_asset_mint=1e6,
-                    commitment_amount=10_000,
+                    commitment_amount=7000,
                     slippage_tolerance=0.05,
                     proposed_fee=self.amm_liquidity_fee,
                     price_process=iter(benchmark_config.price_process),
