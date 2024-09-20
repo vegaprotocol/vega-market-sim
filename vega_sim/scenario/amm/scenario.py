@@ -9,6 +9,8 @@ from vega_sim.scenario.benchmark.scenario import BenchmarkScenario
 from vega_sim.scenario.common.agents import (
     StateAgent,
     AutomatedMarketMaker,
+    MarketOrderTrader,
+    LimitOrderTrader,
     ExponentialShapedMarketMaker,
 )
 
@@ -67,8 +69,8 @@ class AMMScenario(BenchmarkScenario):
                     wallet_name="AutomatedMarketMaker",
                     key_name=f"AutomatedMarketMaker_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
                     market_name=benchmark_config.market_config.instrument.name,
-                    initial_asset_mint=1e6,
-                    commitment_amount=7000,
+                    initial_asset_mint=1e5,
+                    commitment_amount=6000,
                     slippage_tolerance=0.05,
                     proposed_fee=self.amm_liquidity_fee,
                     price_process=iter(benchmark_config.price_process),
@@ -78,6 +80,34 @@ class AMMScenario(BenchmarkScenario):
                     leverage_at_upper_bound=20,
                     update_bias=self.amm_update_frequency,
                     tag=f"{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
+                    random_state=self.random_state,
+                )
+            )
+
+        for i_agent, benchmark_config in enumerate(self.benchmark_configs):
+            extra_agents.append(
+                MarketOrderTrader(
+                    wallet_name="MarketOrderTrader",
+                    key_name=f"MarketOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
+                    market_name=benchmark_config.market_config.instrument.name,
+                    initial_asset_mint=1e6,
+                    buy_intensity=1.0,  # Set buy intensity for the trader
+                    sell_intensity=1.0,  # Set sell intensity for the trader
+                    base_order_size=1.0,  # Set base order size for market orders
+                    tag=f"MarketOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
+                    random_state=self.random_state,
+                )
+            )
+
+            extra_agents.append(
+                LimitOrderTrader(
+                    wallet_name="LimitOrderTrader",
+                    key_name=f"LimitOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
+                    market_name=benchmark_config.market_config.instrument.name,
+                    initial_asset_mint=1e6,
+                    buy_intensity=1.0,  # Set buy intensity for the trader
+                    sell_intensity=1.0,  # Set sell intensity for the trader
+                    tag=f"LimitOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
                     random_state=self.random_state,
                 )
             )
