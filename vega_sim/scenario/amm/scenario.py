@@ -14,7 +14,6 @@ from vega_sim.scenario.common.agents import (
     ExponentialShapedMarketMaker,
 )
 
-
 class AMMScenario(BenchmarkScenario):
     def __init__(
         self,
