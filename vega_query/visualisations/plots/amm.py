@@ -69,7 +69,7 @@ def create(
 
     party_colors = __party_colors(party_ids)
 
-    fig = plt.figure(figsize=(15, 8))
+    fig = plt.figure(figsize=(16, 9))
     gs = fig.add_gridspec(2, 2)
     ymin = ymax = 0
     axes: List[Axes] = []
@@ -78,13 +78,15 @@ def create(
     axn0r: Axes = axn0l.twinx()
     if market_data_history is not None:
         overlay_mark_price(axn0l, market_data_history, market.decimal_places)
+        overlay_last_traded_price(axn0l, market_data_history, market.decimal_places)
         overlay_trading_mode(axn0r, market_data_history)
         # overlay_auction_starts(axn0r, market_data_history)
         # overlay_auction_ends(axn0r, market_data_history)
 
     axn0l.set_ylabel("USDT")
     axn0l.set_title(
-        "Market Price: Ornstein–Uhlenbeck ($\\theta=0.01$, $\\sigma=0.5$)",
+        # "Market Price: Ornstein–Uhlenbeck ($\\theta=0.01$, $\\sigma=0.5$)",
+        "Market Price: Ornstein–Uhlenbeck",
         loc="left",
     )
 
@@ -106,7 +108,7 @@ def create(
     axes.append(ax11)
     ax21 = fig.add_subplot(gs[1, 1])
     ax21.set_title("AMM: Aggregated Account Balances [USDT]", loc="left")
-    ax21.set_ylabel("$\\Delta$ USDT")
+    ax21.set_ylabel("USDT")
     ax21.sharex(axn0l)
     axes.append(ax21)
 
@@ -141,7 +143,8 @@ def create(
             party_id=amm_party_id,
             size_decimals=market.position_decimal_places,
         )
-        ax11.get_lines()[-1].set_label(amm_party_id[:7])
+        # ax11.get_lines()[-1].set_label(amm_party_id[:7])
+        ax11.get_lines()[-1].set_label("AMM")
 
         # Reconstruct the AMMs aggregated balance from balance changes
         df = service.utils.party.historic_balances(
@@ -149,8 +152,9 @@ def create(
             asset_id=asset.id,
             date_range_start_timestamp=start_timestamp,
             date_range_end_timestamp=end_timestamp,
+            asset_decimals=asset.details.decimals,
         )
-        ax21.step(df.index, df.total, where="post", label="total")
+        ax21.step(df.index, df.total, where="post", label="AMM portfolio")
 
     ax11.legend()
     ax21.legend()

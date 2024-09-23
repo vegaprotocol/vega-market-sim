@@ -154,8 +154,7 @@ class BenchmarkScenario(Scenario):
                         buy_intensity=100,
                         sell_intensity=100,
                         base_order_size=benchmark_config.notional_trade_volume
-                        / benchmark_config.initial_price
-                        / 100,
+                        / (benchmark_config.initial_price*100),
                         step_bias=1,
                         initial_asset_mint=1e8,
                         tag=f"{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
@@ -171,11 +170,9 @@ class BenchmarkScenario(Scenario):
                         market_name=market_name,
                         time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
                         buy_volume=benchmark_config.notional_trade_volume
-                        / benchmark_config.initial_price
-                        / 100,
+                        / (benchmark_config.initial_price*100),
                         sell_volume=benchmark_config.notional_trade_volume
-                        / benchmark_config.initial_price
-                        / 100,
+                        / (benchmark_config.initial_price*100),
                         buy_intensity=100,
                         sell_intensity=100,
                         submit_bias=1,

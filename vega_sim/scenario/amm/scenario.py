@@ -59,6 +59,22 @@ class AMMScenario(BenchmarkScenario):
                 # Set commitment amount to 0 to avoid benchmark market maker from
                 # providing liquidity, they should only supply volume through orders.
                 agent.fee_amount = self.amm_liquidity_fee
+                agent.commitment_amount = 0.000001
+                agent.supplied_amount = 0
+
+            # if isinstance(agent, MarketOrderTrader):
+            #     # Set commitment amount to 0 to avoid benchmark market maker from
+            #     # providing liquidity, they should only supply volume through orders.
+            #     agent.fee_amount = self.amm_liquidity_fee
+            #     agent.commitment_amount =10
+            #     agent.supplied_amount = 50
+
+            # if isinstance(agent, LimitOrderTrader):
+            #     # Set commitment amount to 0 to avoid benchmark market maker from
+            #     # providing liquidity, they should only supply volume through orders.
+            #     agent.spread = 0
+            #     agent.mean = -7.5
+            #     agent.sigma = 0.3
 
         # For each market, add an AMM agent.
         for benchmark_config in self.benchmark_configs:
@@ -79,34 +95,6 @@ class AMMScenario(BenchmarkScenario):
                     leverage_at_upper_bound=20,
                     update_bias=self.amm_update_frequency,
                     tag=f"{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
-                    random_state=self.random_state,
-                )
-            )
-
-        for i_agent, benchmark_config in enumerate(self.benchmark_configs):
-            extra_agents.append(
-                MarketOrderTrader(
-                    wallet_name="MarketOrderTrader",
-                    key_name=f"MarketOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
-                    market_name=benchmark_config.market_config.instrument.name,
-                    initial_asset_mint=1e6,
-                    buy_intensity=1.0,  # Set buy intensity for the trader
-                    sell_intensity=1.0,  # Set sell intensity for the trader
-                    base_order_size=1.0,  # Set base order size for market orders
-                    tag=f"MarketOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
-                    random_state=self.random_state,
-                )
-            )
-
-            extra_agents.append(
-                LimitOrderTrader(
-                    wallet_name="LimitOrderTrader",
-                    key_name=f"LimitOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
-                    market_name=benchmark_config.market_config.instrument.name,
-                    initial_asset_mint=1e6,
-                    buy_intensity=1.0,  # Set buy intensity for the trader
-                    sell_intensity=1.0,  # Set sell intensity for the trader
-                    tag=f"LimitOrderTrader_{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
                     random_state=self.random_state,
                 )
             )
