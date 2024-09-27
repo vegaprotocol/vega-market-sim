@@ -4,6 +4,11 @@ description = "Simulator for running self-contained Vega chain on local PC"
 authors = ["Tom McLean <tom@vegaprotocol.io>"]
 license = "MIT"
 version = "1.2.1"
+packages = [
+    { include = "vega_sim" },
+    { include = "vega_query/**/*.py" },
+    { include = "vega_protos/**/*.py" },
+]
 
 [tool.setuptools]
 zip-safe = false
