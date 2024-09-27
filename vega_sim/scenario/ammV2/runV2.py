@@ -1,0 +1,107 @@
+import os
+import logging
+import pathlib
+import datetime
+import argparse
+
+
+from vega_sim.null_service import VegaServiceNull, Ports
+from vega_sim.scenario.constants import Network
+from vega_sim.scenario.ammV2.scenarioV2 import AMMScenarioV2
+from vega_sim.scenario.ammV2.registryV2 import REGISTRYV2
+
+from vega_query.service.service import Service
+from vega_query.service.networks.constants import Network
+
+import vega_query.visualisations as vis
+from matplotlib.figure import Figure
+
+
+def _run(
+    scenario: AMMScenarioV2,
+    pause: bool = False,
+    console: bool = False,
+    output: bool = False,
+    wallet: bool = False,
+    output_dir: str = "plots",
+    core_metrics_port: int = 2723,
+    data_node_metrics_port: int = 3651,
+):
+
+    with VegaServiceNull(
+        warn_on_raw_data_access=False,
+        seconds_per_block=scenario.block_length_seconds,
+        transactions_per_block=scenario.transactions_per_block,
+        retain_log_files=True,
+        use_full_vega_wallet=wallet,
+        run_with_console=console,
+        port_config={
+            Ports.METRICS: core_metrics_port,
+            Ports.DATA_NODE_METRICS: data_node_metrics_port,
+        },
+    ) as vega:
+        scenario.run_iteration(
+            vega=vega,
+            log_every_n_steps=100,
+            output_data=False,
+            run_with_snitch=False,
+        )
+
+        if output:
+            if not os.path.exists(output_dir):
+                os.mkdir(output_dir)
+            output_dir = output_dir + f"/{datetime.datetime.now()}"
+            if not os.path.exists(output_dir):
+                os.mkdir(output_dir)
+
+            # Use vegapy package to produce plots
+            service = Service(
+                network=Network.NETWORK_LOCAL,
+                port_data_node=vega.data_node_grpc_port,
+            )
+
+            for benchmark_config in scenario.benchmark_configs:
+                fig: Figure = vis.plots.amm.create(
+                    service,
+                    market_code=benchmark_config.market_config.instrument.code,
+                )
+                fig.savefig(
+                    f"{output_dir}/{benchmark_config.market_config.instrument.code.replace('/','-')}_amm.png"
+                )
+
+        if pause:
+            input("Waiting after run finished.")
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--market", required=True, type=str)
+    parser.add_argument("-s", "--steps", default=600, type=int)
+    parser.add_argument("-p", "--pause", action="store_true")
+    parser.add_argument("-d", "--debug", action="store_true")
+    parser.add_argument("-o", "--output", action="store_true")
+    parser.add_argument("-c", "--console", action="store_true")
+    parser.add_argument("-w", "--wallet", action="store_true")
+    parser.add_argument("--core-metrics-port", default=2723, type=int)
+    parser.add_argument("--data-node-metrics-port", default=3651, type=int)
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.DEBUG if args.debug else logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+
+    if args.market not in REGISTRYV2:
+        raise ValueError(f"Market {args.market} not found")
+    scenario = REGISTRYV2[args.market].num_steps = args.steps
+
+    _run(
+        scenario=REGISTRYV2[args.market],
+        wallet=args.wallet,
+        console=args.console,
+        pause=args.pause,
+        output=args.output,
+        core_metrics_port=args.core_metrics_port,
+        data_node_metrics_port=args.data_node_metrics_port,
+    )
