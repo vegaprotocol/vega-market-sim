@@ -77,11 +77,10 @@ def create(
     axn0l = fig.add_subplot(gs[0, 0])
     axn0r: Axes = axn0l.twinx()
     if market_data_history is not None:
-        overlay_mark_price(axn0l, market_data_history, market.decimal_places)
+        df_markPrice=overlay_mark_price(axn0l, market_data_history, market.decimal_places)
+        df_markPrice.to_csv("mark_price_data.csv", index=False)
         overlay_last_traded_price(axn0l, market_data_history, market.decimal_places)
         overlay_trading_mode(axn0r, market_data_history)
-        # overlay_auction_starts(axn0r, market_data_history)
-        # overlay_auction_ends(axn0r, market_data_history)
 
     axn0l.set_ylabel("USDT")
     axn0l.set_title(
@@ -155,6 +154,8 @@ def create(
             asset_decimals=asset.details.decimals,
         )
         ax21.step(df.index, df.total, where="post", label="AMM portfolio")
+        df.to_csv("AMM_Portfolio_data.csv", index=False)
+
 
     ax11.legend()
     ax21.legend()

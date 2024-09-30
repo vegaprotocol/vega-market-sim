@@ -62,7 +62,7 @@ def random_walk(
             S = np.round(S, decimal_precision)
 
         # If random state is passed then error if it generates a negative price
-        # Otherwise retry with a new seed
+        # Otherwise retry with a new 
 
         if trim_to_min is not None:
             S[S < trim_to_min] = trim_to_min
@@ -315,7 +315,7 @@ def get_live_price(
         return _live_prices[feed_key]
 
 
-def ou_price_process(n, theta=0.15, mu=0.0, sigma=0.2, x0=1.0, drift=0.0):
+def ou_price_process(n, theta=0.15, mu=0.0, sigma=0.2, x0=1.0, drift=0.0, seed=42):
     """
     Generates a mean-reverting price series using the Ornstein–Uhlenbeck
     process with an optional drift term.
@@ -331,6 +331,8 @@ def ou_price_process(n, theta=0.15, mu=0.0, sigma=0.2, x0=1.0, drift=0.0):
     Returns:
         np.ndarray: Mean-reverting price series of length n.
     """
+    if seed is not None:
+        np.random.seed(seed)  # Set the random seed for reproducibility
     dt = 1.0  # Assuming a time step of 1
     x = np.zeros(n)
     x[0] = x0
