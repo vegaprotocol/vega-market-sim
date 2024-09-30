@@ -5,16 +5,16 @@ from typing import Optional, List, Dict, Any
 
 from vega_sim.null_service import VegaServiceNull
 from vega_sim.scenario.benchmark.configs import BenchmarkConfig
-from vega_sim.scenario.benchmark.scenario import BenchmarkScenario
+from vega_sim.scenario.benchmark.scenario_Informed import BenchmarkScenario_Informed
 from vega_sim.scenario.common.agents import (
     StateAgent,
     AutomatedMarketMaker,
     MarketOrderTrader,
     LimitOrderTrader,
-    ExponentialShapedMarketMaker,
+    InformedTrader,
 )
 
-class AMMScenario(BenchmarkScenario):
+class AMMScenarioV2(BenchmarkScenario_Informed):
     def __init__(
         self,
         benchmark_configs: List[BenchmarkConfig],
@@ -54,28 +54,7 @@ class AMMScenario(BenchmarkScenario):
         extra_agents = []
 
         agents = super().configure_agents(vega, tag, random_state, **kwargs)
-        for agent in agents.values():
-            if isinstance(agent, ExponentialShapedMarketMaker):
-                # Set commitment amount to 0 to avoid benchmark market maker from
-                # providing liquidity, they should only supply volume through orders.
-                agent.fee_amount = self.amm_liquidity_fee
-                agent.commitment_amount = 0.000001
-                agent.supplied_amount = 0
-
-            # if isinstance(agent, MarketOrderTrader):
-            #     # Set commitment amount to 0 to avoid benchmark market maker from
-            #     # providing liquidity, they should only supply volume through orders.
-            #     agent.fee_amount = self.amm_liquidity_fee
-            #     agent.commitment_amount =10
-            #     agent.supplied_amount = 50
-
-            # if isinstance(agent, LimitOrderTrader):
-            #     # Set commitment amount to 0 to avoid benchmark market maker from
-            #     # providing liquidity, they should only supply volume through orders.
-            #     agent.spread = 0
-            #     agent.mean = -7.5
-            #     agent.sigma = 0.3
-
+       
         # For each market, add an AMM agent.
         for benchmark_config in self.benchmark_configs:
             i_agent = 0

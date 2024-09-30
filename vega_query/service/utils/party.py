@@ -60,6 +60,7 @@ class PartyUtils:
         self,
         party_id: str,
         asset_id: str,
+        asset_decimals: int,
         market_id: Optional[str] = None,
         account_types: Optional[List[protos.vega.vega.AccountType.Value]] = None,
         date_range_start_timestamp: Optional[int] = None,
@@ -102,4 +103,6 @@ class PartyUtils:
 
         df = pd.DataFrame.from_dict(data, orient="index").sort_index().ffill()
         df["total"] = df.sum(axis=1)
+        df["total"] = df["total"]* 10**-asset_decimals
         return df
+

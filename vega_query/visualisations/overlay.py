@@ -30,7 +30,7 @@ def overlay_mark_price(
     ax: Axes,
     market_data_history: List[protos.vega.vega.MarketData],
     price_decimals: int,
-):
+)-> pd.DataFrame:
     x = []
     y = []
     for market_data in market_data_history:
@@ -39,13 +39,19 @@ def overlay_mark_price(
         y.append(price if price != 0 else np.nan)
     ax.step(x, y, label="mark_price", where="post")
 
+    # Create a DataFrame from the extracted data
+    df_mark_price = pd.DataFrame({'timestamp': x, 'last_traded_price': y})
+    
+    # Return the DataFrame
+    return df_mark_price
+
 
 def overlay_last_traded_price(
     ax: Axes,
     market_data_history: List[protos.vega.vega.MarketData],
     price_decimals: int,
     **kwargs,
-):
+) :
     x = []
     y = []
     for market_data in market_data_history:

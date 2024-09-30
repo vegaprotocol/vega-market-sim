@@ -17,7 +17,7 @@ from vega_sim.scenario.common.agents import (
     StateAgent,
     NetworkParameterManager,
     UncrossAuctionAgent,
-    ExponentialShapedMarketMaker,
+    InformedTrader,
     MarketOrderTrader,
     LimitOrderTrader,
 )
@@ -26,7 +26,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
 )
 
 
-class BenchmarkScenario(Scenario):
+class BenchmarkScenario_Informed(Scenario):
     def __init__(
         self,
         benchmark_configs: List[BenchmarkConfig],
@@ -107,23 +107,18 @@ class BenchmarkScenario(Scenario):
             )
 
             self.agents.append(
-                ExponentialShapedMarketMaker(
-                    wallet_name="ExponentialShapedMarketMaker",
-                    key_name=f"ExponentialShapedMarketMaker_{benchmark_config.market_config.instrument.code}",
-                    price_process_generator=iter(benchmark_config.price_process),
+                InformedTrader(
+                    wallet_name="InformedTrader",
+                    key_name=f"InformedTrader_{benchmark_config.market_config.instrument.code}",
+                    # price_process_generator=iter(benchmark_config.price_process),
+                    price_process=benchmark_config.price_process,
                     initial_asset_mint=1e9,
                     market_name=market_name,
-                    commitment_amount=1e6,
-                    market_decimal_places=market_decimal_places,
-                    num_steps=self.num_steps,
-                    kappa=2.4,
-                    tick_spacing=10**-market_decimal_places
-                    * benchmark_config.market_config.tick_size,
-                    num_levels=10,
-                    market_kappa=1000,
-                    state_update_freq=10,
+                    proportion_taken=0.8,
+                    accuracy=1,
+                    lookahead=5,
+                    max_abs_position=100,
                     tag=f"{benchmark_config.market_config.instrument.code}",
-                    fee_amount=0.0001,
                 )
             )
 
