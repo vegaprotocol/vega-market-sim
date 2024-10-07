@@ -127,6 +127,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_ENDED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_VOLUME_REBATE_STATS_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_AUTOMATED_PURCHASE_ANNOUNCED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -230,6 +231,7 @@ BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_STARTED: BusEventType
 BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_UPDATED: BusEventType
 BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_ENDED: BusEventType
 BUS_EVENT_TYPE_VOLUME_REBATE_STATS_UPDATED: BusEventType
+BUS_EVENT_TYPE_AUTOMATED_PURCHASE_ANNOUNCED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -1778,18 +1780,31 @@ class PositionResolution(_message.Message):
     ) -> None: ...
 
 class LossSocialization(_message.Message):
-    __slots__ = ("market_id", "party_id", "amount")
+    __slots__ = ("market_id", "party_id", "amount", "loss_type")
+
+    class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        TYPE_UNSPECIFIED: _ClassVar[LossSocialization.Type]
+        TYPE_SETTLEMENT: _ClassVar[LossSocialization.Type]
+        TYPE_FUNDING_PAYMENT: _ClassVar[LossSocialization.Type]
+
+    TYPE_UNSPECIFIED: LossSocialization.Type
+    TYPE_SETTLEMENT: LossSocialization.Type
+    TYPE_FUNDING_PAYMENT: LossSocialization.Type
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    LOSS_TYPE_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     party_id: str
     amount: str
+    loss_type: LossSocialization.Type
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         party_id: _Optional[str] = ...,
         amount: _Optional[str] = ...,
+        loss_type: _Optional[_Union[LossSocialization.Type, str]] = ...,
     ) -> None: ...
 
 class TradeSettlement(_message.Message):
@@ -2818,6 +2833,7 @@ class BusEvent(_message.Message):
         "volume_rebate_program_updated",
         "volume_rebate_program_ended",
         "volume_rebate_stats_updated",
+        "automated_purchase_announced",
         "market",
         "tx_err_event",
         "version",
@@ -2919,6 +2935,7 @@ class BusEvent(_message.Message):
     VOLUME_REBATE_PROGRAM_UPDATED_FIELD_NUMBER: _ClassVar[int]
     VOLUME_REBATE_PROGRAM_ENDED_FIELD_NUMBER: _ClassVar[int]
     VOLUME_REBATE_STATS_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    AUTOMATED_PURCHASE_ANNOUNCED_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -3019,6 +3036,7 @@ class BusEvent(_message.Message):
     volume_rebate_program_updated: VolumeRebateProgramUpdated
     volume_rebate_program_ended: VolumeRebateProgramEnded
     volume_rebate_stats_updated: VolumeRebateStatsUpdated
+    automated_purchase_announced: AutomatedPurchaseAnnounced
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -3173,6 +3191,9 @@ class BusEvent(_message.Message):
         volume_rebate_stats_updated: _Optional[
             _Union[VolumeRebateStatsUpdated, _Mapping]
         ] = ...,
+        automated_purchase_announced: _Optional[
+            _Union[AutomatedPurchaseAnnounced, _Mapping]
+        ] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,
@@ -3261,4 +3282,24 @@ class VolumeRebateProgramEnded(_message.Message):
         id: _Optional[str] = ...,
         ended_at: _Optional[int] = ...,
         at_epoch: _Optional[int] = ...,
+    ) -> None: ...
+
+class AutomatedPurchaseAnnounced(_message.Message):
+    __slots__ = ("from_account_type", "to_account_type", "market_id", "amount")
+    FROM_FIELD_NUMBER: _ClassVar[int]
+    FROM_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TO_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    from_account_type: _vega_pb2.AccountType
+    to_account_type: _vega_pb2.AccountType
+    market_id: str
+    amount: str
+    def __init__(
+        self,
+        from_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        to_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        market_id: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+        **kwargs
     ) -> None: ...

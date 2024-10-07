@@ -753,15 +753,28 @@ class EventForwarder(_message.Message):
     ) -> None: ...
 
 class CollateralAccounts(_message.Message):
-    __slots__ = ("accounts", "next_balance_snapshot")
+    __slots__ = ("accounts", "next_balance_snapshot", "earmarked_balances")
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     NEXT_BALANCE_SNAPSHOT_FIELD_NUMBER: _ClassVar[int]
+    EARMARKED_BALANCES_FIELD_NUMBER: _ClassVar[int]
     accounts: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Account]
     next_balance_snapshot: int
+    earmarked_balances: _containers.RepeatedCompositeFieldContainer[Earmarked]
     def __init__(
         self,
         accounts: _Optional[_Iterable[_Union[_vega_pb2.Account, _Mapping]]] = ...,
         next_balance_snapshot: _Optional[int] = ...,
+        earmarked_balances: _Optional[_Iterable[_Union[Earmarked, _Mapping]]] = ...,
+    ) -> None: ...
+
+class Earmarked(_message.Message):
+    __slots__ = ("account_id", "earmarked_balance")
+    ACCOUNT_ID_FIELD_NUMBER: _ClassVar[int]
+    EARMARKED_BALANCE_FIELD_NUMBER: _ClassVar[int]
+    account_id: str
+    earmarked_balance: str
+    def __init__(
+        self, account_id: _Optional[str] = ..., earmarked_balance: _Optional[str] = ...
     ) -> None: ...
 
 class CollateralAssets(_message.Message):
@@ -1442,6 +1455,7 @@ class SpotMarket(_message.Message):
         "fees_stats",
         "has_traded",
         "market_liquidity",
+        "protocol_automated_purchase",
     )
     MARKET_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITOR_FIELD_NUMBER: _ClassVar[int]
@@ -1466,6 +1480,7 @@ class SpotMarket(_message.Message):
     FEES_STATS_FIELD_NUMBER: _ClassVar[int]
     HAS_TRADED_FIELD_NUMBER: _ClassVar[int]
     MARKET_LIQUIDITY_FIELD_NUMBER: _ClassVar[int]
+    PROTOCOL_AUTOMATED_PURCHASE_FIELD_NUMBER: _ClassVar[int]
     market: _markets_pb2.Market
     price_monitor: PriceMonitor
     auction_state: AuctionState
@@ -1489,6 +1504,7 @@ class SpotMarket(_message.Message):
     fees_stats: _events_pb2.FeesStats
     has_traded: bool
     market_liquidity: MarketLiquidity
+    protocol_automated_purchase: ProtocolAutomatedPurchase
     def __init__(
         self,
         market: _Optional[_Union[_markets_pb2.Market, _Mapping]] = ...,
@@ -1516,6 +1532,9 @@ class SpotMarket(_message.Message):
         fees_stats: _Optional[_Union[_events_pb2.FeesStats, _Mapping]] = ...,
         has_traded: bool = ...,
         market_liquidity: _Optional[_Union[MarketLiquidity, _Mapping]] = ...,
+        protocol_automated_purchase: _Optional[
+            _Union[ProtocolAutomatedPurchase, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class Market(_message.Message):
@@ -4295,4 +4314,45 @@ class EVMFwdHeartbeats(_message.Message):
             _Iterable[_Union[EVMFwdPendingHeartbeat, _Mapping]]
         ] = ...,
         last_seen: _Optional[_Iterable[_Union[EVMFwdLastSeen, _Mapping]]] = ...,
+    ) -> None: ...
+
+class ProtocolAutomatedPurchase(_message.Message):
+    __slots__ = (
+        "id",
+        "config",
+        "next_auction_amount",
+        "last_oracle_price",
+        "last_oracle_update_time",
+        "active_order",
+        "side",
+        "ready_to_stop",
+    )
+    ID_FIELD_NUMBER: _ClassVar[int]
+    CONFIG_FIELD_NUMBER: _ClassVar[int]
+    NEXT_AUCTION_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    LAST_ORACLE_PRICE_FIELD_NUMBER: _ClassVar[int]
+    LAST_ORACLE_UPDATE_TIME_FIELD_NUMBER: _ClassVar[int]
+    ACTIVE_ORDER_FIELD_NUMBER: _ClassVar[int]
+    SIDE_FIELD_NUMBER: _ClassVar[int]
+    READY_TO_STOP_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    config: _governance_pb2.NewProtocolAutomatedPurchaseChanges
+    next_auction_amount: str
+    last_oracle_price: str
+    last_oracle_update_time: int
+    active_order: str
+    side: _vega_pb2.Side
+    ready_to_stop: bool
+    def __init__(
+        self,
+        id: _Optional[str] = ...,
+        config: _Optional[
+            _Union[_governance_pb2.NewProtocolAutomatedPurchaseChanges, _Mapping]
+        ] = ...,
+        next_auction_amount: _Optional[str] = ...,
+        last_oracle_price: _Optional[str] = ...,
+        last_oracle_update_time: _Optional[int] = ...,
+        active_order: _Optional[str] = ...,
+        side: _Optional[_Union[_vega_pb2.Side, str]] = ...,
+        ready_to_stop: bool = ...,
     ) -> None: ...
