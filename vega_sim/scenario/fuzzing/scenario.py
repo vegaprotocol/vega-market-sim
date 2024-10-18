@@ -15,6 +15,7 @@ from vega_sim.scenario.common.agents import (
     RewardFunder,
     ReferralAgentWrapper,
     TransactionDelayChecker,
+    ProtocolAutomatedPurchaseProgramManager,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzingAgent,
@@ -198,6 +199,23 @@ class FuzzingScenario(BenchmarkScenario):
                         )
                         for i_referrer, i_agent in itertools.product(range(2), range(2))
                     ]
+                )
+            if benchmark_config.market_config.is_spot():
+                asset_names = set()
+                _, quote_asset_symbol = re.split(
+                    r"[^a-zA-Z]+", benchmark_config.market_config.instrument.code
+                )[:2]
+                extra_agents.append(
+                    ProtocolAutomatedPurchaseProgramManager(
+                        key_name="ProtocolAutomatedPurchaseProgramManager",
+                        wallet_name="ProtocolAutomatedPurchaseProgramManager",
+                        asset_name=quote_asset_symbol,
+                        market_name=benchmark_config.market_config.instrument.name,
+                        price_process=iter(benchmark_config.price_process),
+                        stake_key=True,
+                        random_state=self.random_state,
+                        tag="ProtocolAutomatedPurchaseProgramManager",
+                    )
                 )
             extra_agents.append(
                 TransactionDelayChecker(

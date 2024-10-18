@@ -12,11 +12,14 @@ from pytest import fixture
 logger = logging.getLogger(__name__)
 
 DEFAULT_NETWORK = Network.NETWORK_TESTNET
+DEFAULT_PORT_DATA_NODE = None
 
 
 @fixture(scope="session")
 def tds():
-    client = TradingDataService(network=DEFAULT_NETWORK)
+    client = TradingDataService(
+        network=DEFAULT_NETWORK, port_data_node=DEFAULT_PORT_DATA_NODE
+    )
     yield client
 
 
@@ -106,3 +109,15 @@ def end_timestamp(tds: TradingDataService) -> int:
 @fixture(scope="session")
 def amms(tds: TradingDataService) -> List[protos.vega.events.v1.events.AMM]:
     return tds.list_amms(max_pages=1)
+
+
+@fixture(scope="session")
+def epoch(tds: TradingDataService) -> protos.vega.vega.Epoch:
+    return tds.get_epoch()
+
+
+@fixture(scope="session")
+def sets(
+    tds: TradingDataService,
+) -> List[protos.data_node.api.v2.trading_data.ReferralSet]:
+    return tds.list_referral_sets(max_pages=1)

@@ -614,6 +614,7 @@ class SubmitAMM(_message.Message):
         "slippage_tolerance",
         "concentrated_liquidity_parameters",
         "proposed_fee",
+        "minimum_price_change_trigger",
     )
 
     class ConcentratedLiquidityParameters(_message.Message):
@@ -623,17 +624,20 @@ class SubmitAMM(_message.Message):
             "base",
             "leverage_at_upper_bound",
             "leverage_at_lower_bound",
+            "data_source_id",
         )
         UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
         LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
         BASE_FIELD_NUMBER: _ClassVar[int]
         LEVERAGE_AT_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
         LEVERAGE_AT_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        DATA_SOURCE_ID_FIELD_NUMBER: _ClassVar[int]
         upper_bound: str
         lower_bound: str
         base: str
         leverage_at_upper_bound: str
         leverage_at_lower_bound: str
+        data_source_id: str
         def __init__(
             self,
             upper_bound: _Optional[str] = ...,
@@ -641,6 +645,7 @@ class SubmitAMM(_message.Message):
             base: _Optional[str] = ...,
             leverage_at_upper_bound: _Optional[str] = ...,
             leverage_at_lower_bound: _Optional[str] = ...,
+            data_source_id: _Optional[str] = ...,
         ) -> None: ...
 
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -648,11 +653,13 @@ class SubmitAMM(_message.Message):
     SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
     CONCENTRATED_LIQUIDITY_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+    MINIMUM_PRICE_CHANGE_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     commitment_amount: str
     slippage_tolerance: str
     concentrated_liquidity_parameters: SubmitAMM.ConcentratedLiquidityParameters
     proposed_fee: str
+    minimum_price_change_trigger: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
@@ -662,6 +669,7 @@ class SubmitAMM(_message.Message):
             _Union[SubmitAMM.ConcentratedLiquidityParameters, _Mapping]
         ] = ...,
         proposed_fee: _Optional[str] = ...,
+        minimum_price_change_trigger: _Optional[str] = ...,
     ) -> None: ...
 
 class AmendAMM(_message.Message):
@@ -671,6 +679,7 @@ class AmendAMM(_message.Message):
         "slippage_tolerance",
         "concentrated_liquidity_parameters",
         "proposed_fee",
+        "minimum_price_change_trigger",
     )
 
     class ConcentratedLiquidityParameters(_message.Message):
@@ -680,17 +689,20 @@ class AmendAMM(_message.Message):
             "base",
             "leverage_at_upper_bound",
             "leverage_at_lower_bound",
+            "data_source_id",
         )
         UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
         LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
         BASE_FIELD_NUMBER: _ClassVar[int]
         LEVERAGE_AT_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
         LEVERAGE_AT_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        DATA_SOURCE_ID_FIELD_NUMBER: _ClassVar[int]
         upper_bound: str
         lower_bound: str
         base: str
         leverage_at_upper_bound: str
         leverage_at_lower_bound: str
+        data_source_id: str
         def __init__(
             self,
             upper_bound: _Optional[str] = ...,
@@ -698,6 +710,7 @@ class AmendAMM(_message.Message):
             base: _Optional[str] = ...,
             leverage_at_upper_bound: _Optional[str] = ...,
             leverage_at_lower_bound: _Optional[str] = ...,
+            data_source_id: _Optional[str] = ...,
         ) -> None: ...
 
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -705,11 +718,13 @@ class AmendAMM(_message.Message):
     SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
     CONCENTRATED_LIQUIDITY_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+    MINIMUM_PRICE_CHANGE_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     commitment_amount: str
     slippage_tolerance: str
     concentrated_liquidity_parameters: AmendAMM.ConcentratedLiquidityParameters
     proposed_fee: str
+    minimum_price_change_trigger: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
@@ -719,6 +734,7 @@ class AmendAMM(_message.Message):
             _Union[AmendAMM.ConcentratedLiquidityParameters, _Mapping]
         ] = ...,
         proposed_fee: _Optional[str] = ...,
+        minimum_price_change_trigger: _Optional[str] = ...,
     ) -> None: ...
 
 class CancelAMM(_message.Message):

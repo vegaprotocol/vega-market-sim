@@ -74,6 +74,7 @@ class ProposalError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     PROPOSAL_ERROR_PROPOSAL_IN_BATCH_DECLINED: _ClassVar[ProposalError]
     PROPOSAL_ERROR_INVALID_SIZE_DECIMAL_PLACES: _ClassVar[ProposalError]
     PROPOSAL_ERROR_INVALID_VOLUME_REBATE_PROGRAM: _ClassVar[ProposalError]
+    PROPOSAL_ERROR_INVALID_PROTOCOL_AUTOMATED_PURCHASE: _ClassVar[ProposalError]
 
 class MarketStateUpdateType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -144,6 +145,7 @@ PROPOSAL_ERROR_PROPOSAL_IN_BATCH_REJECTED: ProposalError
 PROPOSAL_ERROR_PROPOSAL_IN_BATCH_DECLINED: ProposalError
 PROPOSAL_ERROR_INVALID_SIZE_DECIMAL_PLACES: ProposalError
 PROPOSAL_ERROR_INVALID_VOLUME_REBATE_PROGRAM: ProposalError
+PROPOSAL_ERROR_INVALID_PROTOCOL_AUTOMATED_PURCHASE: ProposalError
 MARKET_STATE_UPDATE_TYPE_UNSPECIFIED: MarketStateUpdateType
 MARKET_STATE_UPDATE_TYPE_TERMINATE: MarketStateUpdateType
 MARKET_STATE_UPDATE_TYPE_SUSPEND: MarketStateUpdateType
@@ -301,6 +303,7 @@ class NewSpotMarketConfiguration(_message.Message):
         "liquidity_fee_settings",
         "tick_size",
         "enable_transaction_reordering",
+        "allowed_sellers",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     PRICE_DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -314,6 +317,7 @@ class NewSpotMarketConfiguration(_message.Message):
     LIQUIDITY_FEE_SETTINGS_FIELD_NUMBER: _ClassVar[int]
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     ENABLE_TRANSACTION_REORDERING_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_SELLERS_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     price_decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -326,6 +330,7 @@ class NewSpotMarketConfiguration(_message.Message):
     liquidity_fee_settings: _markets_pb2.LiquidityFeeSettings
     tick_size: str
     enable_transaction_reordering: bool
+    allowed_sellers: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -348,6 +353,7 @@ class NewSpotMarketConfiguration(_message.Message):
         ] = ...,
         tick_size: _Optional[str] = ...,
         enable_transaction_reordering: bool = ...,
+        allowed_sellers: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class NewMarketConfiguration(_message.Message):
@@ -370,6 +376,7 @@ class NewMarketConfiguration(_message.Message):
         "mark_price_configuration",
         "tick_size",
         "enable_transaction_reordering",
+        "allowed_empty_amm_levels",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -389,6 +396,7 @@ class NewMarketConfiguration(_message.Message):
     MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     ENABLE_TRANSACTION_REORDERING_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_EMPTY_AMM_LEVELS_FIELD_NUMBER: _ClassVar[int]
     instrument: InstrumentConfiguration
     decimal_places: int
     metadata: _containers.RepeatedScalarFieldContainer[str]
@@ -407,6 +415,7 @@ class NewMarketConfiguration(_message.Message):
     mark_price_configuration: _markets_pb2.CompositePriceConfiguration
     tick_size: str
     enable_transaction_reordering: bool
+    allowed_empty_amm_levels: int
     def __init__(
         self,
         instrument: _Optional[_Union[InstrumentConfiguration, _Mapping]] = ...,
@@ -439,6 +448,7 @@ class NewMarketConfiguration(_message.Message):
         ] = ...,
         tick_size: _Optional[str] = ...,
         enable_transaction_reordering: bool = ...,
+        allowed_empty_amm_levels: _Optional[int] = ...,
     ) -> None: ...
 
 class NewSpotMarket(_message.Message):
@@ -510,6 +520,7 @@ class UpdateMarketConfiguration(_message.Message):
         "mark_price_configuration",
         "tick_size",
         "enable_transaction_reordering",
+        "allowed_empty_amm_levels",
     )
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     METADATA_FIELD_NUMBER: _ClassVar[int]
@@ -526,6 +537,7 @@ class UpdateMarketConfiguration(_message.Message):
     MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     ENABLE_TRANSACTION_REORDERING_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_EMPTY_AMM_LEVELS_FIELD_NUMBER: _ClassVar[int]
     instrument: UpdateInstrumentConfiguration
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
@@ -541,6 +553,7 @@ class UpdateMarketConfiguration(_message.Message):
     mark_price_configuration: _markets_pb2.CompositePriceConfiguration
     tick_size: str
     enable_transaction_reordering: bool
+    allowed_empty_amm_levels: int
     def __init__(
         self,
         instrument: _Optional[_Union[UpdateInstrumentConfiguration, _Mapping]] = ...,
@@ -570,6 +583,7 @@ class UpdateMarketConfiguration(_message.Message):
         ] = ...,
         tick_size: _Optional[str] = ...,
         enable_transaction_reordering: bool = ...,
+        allowed_empty_amm_levels: _Optional[int] = ...,
     ) -> None: ...
 
 class UpdateSpotMarketConfiguration(_message.Message):
@@ -584,6 +598,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
         "tick_size",
         "instrument",
         "enable_transaction_reordering",
+        "allowed_sellers",
     )
     METADATA_FIELD_NUMBER: _ClassVar[int]
     PRICE_MONITORING_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
@@ -595,6 +610,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     ENABLE_TRANSACTION_REORDERING_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_SELLERS_FIELD_NUMBER: _ClassVar[int]
     metadata: _containers.RepeatedScalarFieldContainer[str]
     price_monitoring_parameters: _markets_pb2.PriceMonitoringParameters
     target_stake_parameters: _markets_pb2.TargetStakeParameters
@@ -605,6 +621,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
     tick_size: str
     instrument: UpdateSpotInstrumentConfiguration
     enable_transaction_reordering: bool
+    allowed_sellers: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         metadata: _Optional[_Iterable[str]] = ...,
@@ -627,6 +644,7 @@ class UpdateSpotMarketConfiguration(_message.Message):
             _Union[UpdateSpotInstrumentConfiguration, _Mapping]
         ] = ...,
         enable_transaction_reordering: bool = ...,
+        allowed_sellers: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class UpdateSpotInstrumentConfiguration(_message.Message):
@@ -800,6 +818,7 @@ class ProposalTerms(_message.Message):
         "update_referral_program",
         "update_volume_discount_program",
         "update_volume_rebate_program",
+        "new_protocol_automated_purchase",
     )
     CLOSING_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     ENACTMENT_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -818,6 +837,7 @@ class ProposalTerms(_message.Message):
     UPDATE_REFERRAL_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     UPDATE_VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     UPDATE_VOLUME_REBATE_PROGRAM_FIELD_NUMBER: _ClassVar[int]
+    NEW_PROTOCOL_AUTOMATED_PURCHASE_FIELD_NUMBER: _ClassVar[int]
     closing_timestamp: int
     enactment_timestamp: int
     validation_timestamp: int
@@ -835,6 +855,7 @@ class ProposalTerms(_message.Message):
     update_referral_program: UpdateReferralProgram
     update_volume_discount_program: UpdateVolumeDiscountProgram
     update_volume_rebate_program: UpdateVolumeRebateProgram
+    new_protocol_automated_purchase: NewProtocolAutomatedPurchase
     def __init__(
         self,
         closing_timestamp: _Optional[int] = ...,
@@ -862,6 +883,9 @@ class ProposalTerms(_message.Message):
         update_volume_rebate_program: _Optional[
             _Union[UpdateVolumeRebateProgram, _Mapping]
         ] = ...,
+        new_protocol_automated_purchase: _Optional[
+            _Union[NewProtocolAutomatedPurchase, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class BatchProposalTermsChange(_message.Message):
@@ -882,6 +906,7 @@ class BatchProposalTermsChange(_message.Message):
         "update_volume_discount_program",
         "new_asset",
         "update_volume_rebate_program",
+        "new_protocol_automated_purchase",
     )
     ENACTMENT_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     VALIDATION_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -899,6 +924,7 @@ class BatchProposalTermsChange(_message.Message):
     UPDATE_VOLUME_DISCOUNT_PROGRAM_FIELD_NUMBER: _ClassVar[int]
     NEW_ASSET_FIELD_NUMBER: _ClassVar[int]
     UPDATE_VOLUME_REBATE_PROGRAM_FIELD_NUMBER: _ClassVar[int]
+    NEW_PROTOCOL_AUTOMATED_PURCHASE_FIELD_NUMBER: _ClassVar[int]
     enactment_timestamp: int
     validation_timestamp: int
     update_market: UpdateMarket
@@ -915,6 +941,7 @@ class BatchProposalTermsChange(_message.Message):
     update_volume_discount_program: UpdateVolumeDiscountProgram
     new_asset: NewAsset
     update_volume_rebate_program: UpdateVolumeRebateProgram
+    new_protocol_automated_purchase: NewProtocolAutomatedPurchase
     def __init__(
         self,
         enactment_timestamp: _Optional[int] = ...,
@@ -940,6 +967,9 @@ class BatchProposalTermsChange(_message.Message):
         new_asset: _Optional[_Union[NewAsset, _Mapping]] = ...,
         update_volume_rebate_program: _Optional[
             _Union[UpdateVolumeRebateProgram, _Mapping]
+        ] = ...,
+        new_protocol_automated_purchase: _Optional[
+            _Union[NewProtocolAutomatedPurchase, _Mapping]
         ] = ...,
     ) -> None: ...
 
@@ -1438,4 +1468,90 @@ class RecurringTransfer(_message.Message):
             _Union[_vega_pb2.DispatchStrategy, _Mapping]
         ] = ...,
         factor: _Optional[str] = ...,
+    ) -> None: ...
+
+class NewProtocolAutomatedPurchase(_message.Message):
+    __slots__ = ("changes",)
+    CHANGES_FIELD_NUMBER: _ClassVar[int]
+    changes: NewProtocolAutomatedPurchaseChanges
+    def __init__(
+        self,
+        changes: _Optional[_Union[NewProtocolAutomatedPurchaseChanges, _Mapping]] = ...,
+    ) -> None: ...
+
+class NewProtocolAutomatedPurchaseChanges(_message.Message):
+    __slots__ = (
+        "from_account_type",
+        "to_account_type",
+        "market_id",
+        "price_oracle",
+        "price_oracle_spec_binding",
+        "oracle_offset_factor",
+        "auction_schedule",
+        "auction_volume_snapshot_schedule",
+        "automated_purchase_spec_binding",
+        "auction_duration",
+        "minimum_auction_size",
+        "maximum_auction_size",
+        "expiry_timestamp",
+        "oracle_price_staleness_tolerance",
+    )
+    FROM_FIELD_NUMBER: _ClassVar[int]
+    FROM_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TO_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    PRICE_ORACLE_FIELD_NUMBER: _ClassVar[int]
+    PRICE_ORACLE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    ORACLE_OFFSET_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_SCHEDULE_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_VOLUME_SNAPSHOT_SCHEDULE_FIELD_NUMBER: _ClassVar[int]
+    AUTOMATED_PURCHASE_SPEC_BINDING_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_DURATION_FIELD_NUMBER: _ClassVar[int]
+    MINIMUM_AUCTION_SIZE_FIELD_NUMBER: _ClassVar[int]
+    MAXIMUM_AUCTION_SIZE_FIELD_NUMBER: _ClassVar[int]
+    EXPIRY_TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    ORACLE_PRICE_STALENESS_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
+    from_account_type: _vega_pb2.AccountType
+    to_account_type: _vega_pb2.AccountType
+    market_id: str
+    price_oracle: _data_source_pb2.DataSourceDefinition
+    price_oracle_spec_binding: _data_source_pb2.SpecBindingForCompositePrice
+    oracle_offset_factor: str
+    auction_schedule: _data_source_pb2.DataSourceDefinition
+    auction_volume_snapshot_schedule: _data_source_pb2.DataSourceDefinition
+    automated_purchase_spec_binding: (
+        _markets_pb2.DataSourceSpecToAutomatedPurchaseBinding
+    )
+    auction_duration: str
+    minimum_auction_size: str
+    maximum_auction_size: str
+    expiry_timestamp: int
+    oracle_price_staleness_tolerance: str
+    def __init__(
+        self,
+        from_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        to_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        market_id: _Optional[str] = ...,
+        price_oracle: _Optional[
+            _Union[_data_source_pb2.DataSourceDefinition, _Mapping]
+        ] = ...,
+        price_oracle_spec_binding: _Optional[
+            _Union[_data_source_pb2.SpecBindingForCompositePrice, _Mapping]
+        ] = ...,
+        oracle_offset_factor: _Optional[str] = ...,
+        auction_schedule: _Optional[
+            _Union[_data_source_pb2.DataSourceDefinition, _Mapping]
+        ] = ...,
+        auction_volume_snapshot_schedule: _Optional[
+            _Union[_data_source_pb2.DataSourceDefinition, _Mapping]
+        ] = ...,
+        automated_purchase_spec_binding: _Optional[
+            _Union[_markets_pb2.DataSourceSpecToAutomatedPurchaseBinding, _Mapping]
+        ] = ...,
+        auction_duration: _Optional[str] = ...,
+        minimum_auction_size: _Optional[str] = ...,
+        maximum_auction_size: _Optional[str] = ...,
+        expiry_timestamp: _Optional[int] = ...,
+        oracle_price_staleness_tolerance: _Optional[str] = ...,
+        **kwargs
     ) -> None: ...

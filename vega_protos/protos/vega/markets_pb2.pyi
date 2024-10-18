@@ -518,6 +518,8 @@ class Market(_message.Message):
         "mark_price_configuration",
         "tick_size",
         "enable_transaction_reordering",
+        "allowed_empty_amm_levels",
+        "allowed_sellers",
     )
 
     class State(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -556,6 +558,7 @@ class Market(_message.Message):
         TRADING_MODE_NO_TRADING: _ClassVar[Market.TradingMode]
         TRADING_MODE_SUSPENDED_VIA_GOVERNANCE: _ClassVar[Market.TradingMode]
         TRADING_MODE_LONG_BLOCK_AUCTION: _ClassVar[Market.TradingMode]
+        TRADING_MODE_PROTOCOL_AUTOMATED_PURCHASE_AUCTION: _ClassVar[Market.TradingMode]
 
     TRADING_MODE_UNSPECIFIED: Market.TradingMode
     TRADING_MODE_CONTINUOUS: Market.TradingMode
@@ -565,6 +568,7 @@ class Market(_message.Message):
     TRADING_MODE_NO_TRADING: Market.TradingMode
     TRADING_MODE_SUSPENDED_VIA_GOVERNANCE: Market.TradingMode
     TRADING_MODE_LONG_BLOCK_AUCTION: Market.TradingMode
+    TRADING_MODE_PROTOCOL_AUTOMATED_PURCHASE_AUCTION: Market.TradingMode
     ID_FIELD_NUMBER: _ClassVar[int]
     TRADABLE_INSTRUMENT_FIELD_NUMBER: _ClassVar[int]
     DECIMAL_PLACES_FIELD_NUMBER: _ClassVar[int]
@@ -587,6 +591,8 @@ class Market(_message.Message):
     MARK_PRICE_CONFIGURATION_FIELD_NUMBER: _ClassVar[int]
     TICK_SIZE_FIELD_NUMBER: _ClassVar[int]
     ENABLE_TRANSACTION_REORDERING_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_EMPTY_AMM_LEVELS_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_SELLERS_FIELD_NUMBER: _ClassVar[int]
     id: str
     tradable_instrument: TradableInstrument
     decimal_places: int
@@ -609,6 +615,8 @@ class Market(_message.Message):
     mark_price_configuration: CompositePriceConfiguration
     tick_size: str
     enable_transaction_reordering: bool
+    allowed_empty_amm_levels: int
+    allowed_sellers: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -639,6 +647,8 @@ class Market(_message.Message):
         ] = ...,
         tick_size: _Optional[str] = ...,
         enable_transaction_reordering: bool = ...,
+        allowed_empty_amm_levels: _Optional[int] = ...,
+        allowed_sellers: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class MarketTimestamps(_message.Message):
@@ -731,4 +741,19 @@ class CompositePriceConfiguration(_message.Message):
         data_sources_spec_binding: _Optional[
             _Iterable[_Union[_data_source_pb2.SpecBindingForCompositePrice, _Mapping]]
         ] = ...,
+    ) -> None: ...
+
+class DataSourceSpecToAutomatedPurchaseBinding(_message.Message):
+    __slots__ = (
+        "auction_schedule_property",
+        "auction_volume_snapshot_schedule_property",
+    )
+    AUCTION_SCHEDULE_PROPERTY_FIELD_NUMBER: _ClassVar[int]
+    AUCTION_VOLUME_SNAPSHOT_SCHEDULE_PROPERTY_FIELD_NUMBER: _ClassVar[int]
+    auction_schedule_property: str
+    auction_volume_snapshot_schedule_property: str
+    def __init__(
+        self,
+        auction_schedule_property: _Optional[str] = ...,
+        auction_volume_snapshot_schedule_property: _Optional[str] = ...,
     ) -> None: ...

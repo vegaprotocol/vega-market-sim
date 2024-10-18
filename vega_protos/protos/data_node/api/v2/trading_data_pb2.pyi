@@ -741,15 +741,18 @@ class ListPositionsResponse(_message.Message):
     ) -> None: ...
 
 class PositionsFilter(_message.Message):
-    __slots__ = ("party_ids", "market_ids")
+    __slots__ = ("party_ids", "market_ids", "include_derived_parties")
     PARTY_IDS_FIELD_NUMBER: _ClassVar[int]
     MARKET_IDS_FIELD_NUMBER: _ClassVar[int]
+    INCLUDE_DERIVED_PARTIES_FIELD_NUMBER: _ClassVar[int]
     party_ids: _containers.RepeatedScalarFieldContainer[str]
     market_ids: _containers.RepeatedScalarFieldContainer[str]
+    include_derived_parties: bool
     def __init__(
         self,
         party_ids: _Optional[_Iterable[str]] = ...,
         market_ids: _Optional[_Iterable[str]] = ...,
+        include_derived_parties: bool = ...,
     ) -> None: ...
 
 class ListAllPositionsRequest(_message.Message):
@@ -3119,6 +3122,7 @@ class ListGovernanceDataRequest(_message.Message):
         TYPE_UPDATE_MARKET_STATE: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_REFERRAL_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
         TYPE_UPDATE_VOLUME_DISCOUNT_PROGRAM: _ClassVar[ListGovernanceDataRequest.Type]
+        TYPE_NEW_AUTOMATED_PURCHASE: _ClassVar[ListGovernanceDataRequest.Type]
 
     TYPE_UNSPECIFIED: ListGovernanceDataRequest.Type
     TYPE_ALL: ListGovernanceDataRequest.Type
@@ -3135,6 +3139,7 @@ class ListGovernanceDataRequest(_message.Message):
     TYPE_UPDATE_MARKET_STATE: ListGovernanceDataRequest.Type
     TYPE_UPDATE_REFERRAL_PROGRAM: ListGovernanceDataRequest.Type
     TYPE_UPDATE_VOLUME_DISCOUNT_PROGRAM: ListGovernanceDataRequest.Type
+    TYPE_NEW_AUTOMATED_PURCHASE: ListGovernanceDataRequest.Type
     PROPOSAL_STATE_FIELD_NUMBER: _ClassVar[int]
     PROPOSAL_TYPE_FIELD_NUMBER: _ClassVar[int]
     PROPOSER_PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -4233,17 +4238,26 @@ class GetPartyActivityStreakResponse(_message.Message):
     ) -> None: ...
 
 class FundingPayment(_message.Message):
-    __slots__ = ("party_id", "market_id", "funding_period_seq", "timestamp", "amount")
+    __slots__ = (
+        "party_id",
+        "market_id",
+        "funding_period_seq",
+        "timestamp",
+        "amount",
+        "loss_amount",
+    )
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     FUNDING_PERIOD_SEQ_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    LOSS_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     party_id: str
     market_id: str
     funding_period_seq: int
     timestamp: int
     amount: str
+    loss_amount: str
     def __init__(
         self,
         party_id: _Optional[str] = ...,
@@ -4251,6 +4265,7 @@ class FundingPayment(_message.Message):
         funding_period_seq: _Optional[int] = ...,
         timestamp: _Optional[int] = ...,
         amount: _Optional[str] = ...,
+        loss_amount: _Optional[str] = ...,
     ) -> None: ...
 
 class ListFundingPaymentsRequest(_message.Message):
@@ -5943,19 +5958,29 @@ class GetTimeWeightedNotionalPositionResponse(_message.Message):
     ) -> None: ...
 
 class ListAMMsRequest(_message.Message):
-    __slots__ = ("id", "party_id", "market_id", "amm_party_id", "status", "pagination")
+    __slots__ = (
+        "id",
+        "party_id",
+        "market_id",
+        "amm_party_id",
+        "status",
+        "pagination",
+        "live_only",
+    )
     ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     AMM_PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     PAGINATION_FIELD_NUMBER: _ClassVar[int]
+    LIVE_ONLY_FIELD_NUMBER: _ClassVar[int]
     id: str
     party_id: str
     market_id: str
     amm_party_id: str
     status: _events_pb2.AMM.Status
     pagination: Pagination
+    live_only: bool
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -5964,6 +5989,7 @@ class ListAMMsRequest(_message.Message):
         amm_party_id: _Optional[str] = ...,
         status: _Optional[_Union[_events_pb2.AMM.Status, str]] = ...,
         pagination: _Optional[_Union[Pagination, _Mapping]] = ...,
+        live_only: bool = ...,
     ) -> None: ...
 
 class ListAMMsResponse(_message.Message):

@@ -22,6 +22,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from numpy.typing import ArrayLike
+from numpy.random import RandomState
 
 import vega_sim.api.faucet as faucet
 import vega_sim.builders as build
@@ -4181,3 +4182,341 @@ class TransactionDelayChecker(StateAgentWithWallet):
             market_id=self.market_id,
         )
         self.__check_in_progress = False
+
+
+class ReferralProgramManager(StateAgentWithWallet):
+    NAME_BASE = "referral_program_manager"
+
+    def __init__(
+        self,
+        key_name: str,
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        # Updating program requires method to get the current blockchain time. Ensure
+        # datanode is synced before requesting the current blockchain time.
+        self.vega.wait_for_datanode_sync()
+        self.vega.update_referral_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": 10,
+                    "minimum_epochs": 1,
+                    "infrastructure_discount_factor": 0.01,
+                    "liquidity_discount_factor": 0.01,
+                    "maker_discount_factor": 0.01,
+                    "infrastructure_reward_factor": 0.01,
+                    "liquidity_reward_factor": 0.01,
+                    "maker_reward_factor": 0.01,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 100,
+                    "minimum_epochs": 2,
+                    "infrastructure_discount_factor": 0.015,
+                    "liquidity_discount_factor": 0.015,
+                    "maker_discount_factor": 0.015,
+                    "infrastructure_reward_factor": 0.015,
+                    "liquidity_reward_factor": 0.015,
+                    "maker_reward_factor": 0.015,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 1000,
+                    "minimum_epochs": 3,
+                    "infrastructure_discount_factor": 0.021,
+                    "liquidity_discount_factor": 0.021,
+                    "maker_discount_factor": 0.021,
+                    "infrastructure_reward_factor": 0.021,
+                    "liquidity_reward_factor": 0.021,
+                    "maker_reward_factor": 0.021,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 10000,
+                    "minimum_epochs": 3,
+                    "infrastructure_discount_factor": 0.031,
+                    "liquidity_discount_factor": 0.031,
+                    "maker_discount_factor": 0.031,
+                    "infrastructure_reward_factor": 0.031,
+                    "liquidity_reward_factor": 0.031,
+                    "maker_reward_factor": 0.031,
+                },
+            ],
+            staking_tiers=[
+                {"minimum_staked_tokens": 1, "referral_reward_multiplier": 1},
+            ],
+            window_length=1,
+        )
+
+
+class VolumeDiscountProgramManager(StateAgentWithWallet):
+
+    NAME_BASE = "volume_discount_program_manager"
+
+    def __init__(
+        self,
+        key_name: str,
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        self.vega.update_volume_discount_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_running_notional_taker_volume": 10,
+                    "minimum_epochs": 1,
+                    "infrastructure_discount_factor": 0.01,
+                    "liquidity_discount_factor": 0.01,
+                    "maker_discount_factor": 0.01,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 100,
+                    "minimum_epochs": 2,
+                    "infrastructure_discount_factor": 0.015,
+                    "liquidity_discount_factor": 0.015,
+                    "maker_discount_factor": 0.015,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 1000,
+                    "minimum_epochs": 3,
+                    "infrastructure_discount_factor": 0.021,
+                    "liquidity_discount_factor": 0.021,
+                    "maker_discount_factor": 0.021,
+                },
+                {
+                    "minimum_running_notional_taker_volume": 10000,
+                    "minimum_epochs": 3,
+                    "infrastructure_discount_factor": 0.031,
+                    "liquidity_discount_factor": 0.031,
+                    "maker_discount_factor": 0.031,
+                },
+            ],
+            window_length=1,
+        )
+
+
+class VolumeRebateProgramManager(StateAgentWithWallet):
+
+    NAME_BASE = "volume_rebate_program_manager"
+
+    def __init__(
+        self,
+        key_name: str,
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        self.vega.update_volume_rebate_program(
+            forward_time_to_enactment=False,
+            proposal_key=self.key_name,
+            wallet_name=self.wallet_name,
+            benefit_tiers=[
+                {
+                    "minimum_party_maker_volume_fraction": str(0.001),
+                    "additional_maker_rebate": f"0.00001",
+                },
+                {
+                    "minimum_party_maker_volume_fraction": str(0.01),
+                    "additional_maker_rebate": f"0.0001",
+                },
+                {
+                    "minimum_party_maker_volume_fraction": str(0.05),
+                    "additional_maker_rebate": f"0.0005",
+                },
+            ],
+            window_length=5,
+        )
+
+
+class ProtocolAutomatedPurchaseProgramManager(StateAgentWithWallet):
+
+    NAME_BASE = "protocol_automated_purchase_program_manager"
+
+    def __init__(
+        self,
+        key_name: str,
+        asset_name: str,
+        market_name: str,
+        price_process: Iterable[float],
+        step_bias=0.5,
+        attempts_per_step=100,
+        stake_key: bool = False,
+        wallet_name: Optional[str] = None,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+    ):
+        self.key_name = key_name
+        self.wallet_name = wallet_name
+        self.tag = tag
+        self.stake_key = stake_key
+
+        self.step_bias = step_bias
+        self.attempts_per_step = attempts_per_step
+
+        self.market_name = market_name
+        self.asset_name = asset_name
+        self.price_process = price_process
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
+        super().initialise(vega, create_key)
+        self.vega.wait_for_total_catchup()
+        if mint_key:
+            self.vega.mint(
+                wallet_name=self.wallet_name,
+                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
+                amount=1e4,
+                key_name=self.key_name,
+            )
+        self.vega.wait_for_total_catchup()
+        if self.stake_key:
+            self.vega.stake(
+                amount=1,
+                key_name=self.key_name,
+                wallet_name=self.wallet_name,
+            )
+        self.vega.wait_for_total_catchup()
+        self._sensible_proposal()
+
+    def _sensible_proposal(self):
+        self.vega.new_protocol_automated_purchase_program(
+            proposal_key=self.key_name,
+            proposal_wallet=self.wallet_name,
+            from_account_type=protos.vega.vega.ACCOUNT_TYPE_BUY_BACK_FEES,
+            to_account_type=protos.vega.vega.ACCOUNT_TYPE_NETWORK_TREASURY,
+            asset_id=self.vega.find_asset_id(symbol=self.asset_name, enabled=True),
+            market_id=self.vega.find_market_id(name=self.market_name),
+            price_oracle_name=self.vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            ),
+            price_oracle_signer=self.vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            ),
+            price_oracle_decimals=18,
+            oracle_offset_factor=1,
+            snapshot_frequency=datetime.timedelta(minutes=5),
+            auction_frequency=datetime.timedelta(minutes=5),
+            auction_duration=datetime.timedelta(minutes=1),
+            minimum_auction_size=1,
+            maximum_auction_size=1000,
+            oracle_price_staleness_tolerance=datetime.timedelta(minutes=5),
+        )
+
+    def step(self, vega_state: VegaState):
+        self.vega.submit_oracle_data(
+            key_name=self.key_name,
+            wallet_name=self.wallet_name,
+            name=self.vega.wallet.public_key(
+                name=self.key_name, wallet_name=self.wallet_name
+            ),
+            value=next(self.price_process),
+            type=protos.vega.data.v1.spec.PropertyKey.Type.TYPE_INTEGER,
+            decimals=18,
+        )

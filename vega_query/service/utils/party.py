@@ -94,7 +94,7 @@ class PartyUtils:
                     aggregated_balance.account_type
                 ).split("_")[2:]
             )
-            if aggregated_balance.market_id is not "":
+            if aggregated_balance.market_id != "":
                 account_key += f" | {aggregated_balance.market_id[:7]}"
             data[timestamp_to_datetime(aggregated_balance.timestamp)][account_key] = (
                 int(aggregated_balance.balance)

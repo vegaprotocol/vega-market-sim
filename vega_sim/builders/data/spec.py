@@ -53,3 +53,14 @@ def condition(
         operator=operator,
         value=str(value),
     )
+
+
+@raise_custom_build_errors
+def internal_time_trigger(
+    every: datetime.timedelta,
+    initial: Optional[datetime.datetime] = None,
+) -> vega_protos.data.v1.spec.InternalTimeTrigger:
+    return vega_protos.data.v1.spec.InternalTimeTrigger(
+        initial=int(initial.timestamp() // 1e9) if initial else None,
+        every=int(every.seconds),
+    )
