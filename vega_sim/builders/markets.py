@@ -238,3 +238,13 @@ def composite_price_configuration(
     if data_sources_spec_binding is not None:
         proto.data_sources_spec_binding.extend(data_sources_spec_binding)
     return proto
+
+
+@raise_custom_build_errors
+def data_source_spec_to_automated_purchase_binding(
+    auction_schedule_property: str, auction_volume_snapshot_schedule_property
+) -> vega_protos.markets.DataSourceSpecToAutomatedPurchaseBinding:
+    return vega_protos.markets.DataSourceSpecToAutomatedPurchaseBinding(
+        auction_schedule_property=auction_schedule_property,
+        auction_volume_snapshot_schedule_property=auction_volume_snapshot_schedule_property,
+    )
