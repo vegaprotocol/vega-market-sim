@@ -28,6 +28,12 @@ from vega_sim.null_service import VegaServiceNull
 from vega_protos.protos.vega import markets as markets_protos
 from vega_sim.service import MarketStateUpdateType, PeggedOrder, VegaService
 
+from vega_sim.scenario.common.agents import (
+    ReferralProgramManager,
+    VolumeRebateProgramManager,
+    VolumeDiscountProgramManager,
+)
+
 COMMAND_AND_TYPES = [
     (commands_protos.OrderSubmission, "order_submission", 2),
     (commands_protos.BatchMarketInstructions, "batch_market_instructions", 5),
@@ -1367,7 +1373,7 @@ class FuzzySuccessorConfigurableMarketManager(StateAgentWithWallet):
                 )
 
 
-class FuzzyReferralProgramManager(StateAgentWithWallet):
+class FuzzyReferralProgramManager(ReferralProgramManager):
     """Agent proposes sensible and fuzzed update referral program proposals at a
     controlled frequency.
     """
@@ -1384,35 +1390,15 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         tag: Optional[str] = None,
     ):
-        self.key_name = key_name
-        self.wallet_name = wallet_name
-        self.tag = tag
-        self.stake_key = stake_key
-
-        self.step_bias = step_bias
-        self.attempts_per_step = attempts_per_step
-
-        self.random_state = random_state if random_state is not None else RandomState()
-
-    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
-        super().initialise(vega, create_key)
-        self.vega.wait_for_total_catchup()
-        if mint_key:
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
-                amount=1e4,
-                key_name=self.key_name,
-            )
-        self.vega.wait_for_total_catchup()
-        if self.stake_key:
-            self.vega.stake(
-                amount=1,
-                key_name=self.key_name,
-                wallet_name=self.wallet_name,
-            )
-        self.vega.wait_for_total_catchup()
-        self._sensible_proposal()
+        super().__init__(
+            key_name,
+            step_bias,
+            attempts_per_step,
+            stake_key,
+            wallet_name,
+            random_state,
+            tag,
+        )
 
     def step(self, vega_state):
         if self.random_state.rand() < self.step_bias:
@@ -1434,52 +1420,6 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
                 self._sensible_proposal()
             except ProposalNotAcceptedError:
                 logging.warning("Sensible UpdateReferralProgram failed.")
-
-    def _sensible_proposal(self):
-        # Updating program requires method to get the current blockchain time. Ensure
-        # datanode is synced before requesting the current blockchain time.
-        self.vega.wait_for_datanode_sync()
-        self.vega.update_referral_program(
-            forward_time_to_enactment=False,
-            proposal_key=self.key_name,
-            wallet_name=self.wallet_name,
-            benefit_tiers=[
-                {
-                    "minimum_running_notional_taker_volume": 1,
-                    "minimum_epochs": 1,
-                    "infrastructure_discount_factor": 0.1,
-                    "liquidity_discount_factor": 0.1,
-                    "maker_discount_factor": 0.1,
-                    "infrastructure_reward_factor": 0.1,
-                    "liquidity_reward_factor": 0.1,
-                    "maker_reward_factor": 0.1,
-                },
-                {
-                    "minimum_running_notional_taker_volume": 2,
-                    "minimum_epochs": 2,
-                    "infrastructure_discount_factor": 0.2,
-                    "liquidity_discount_factor": 0.2,
-                    "maker_discount_factor": 0.2,
-                    "infrastructure_reward_factor": 0.2,
-                    "liquidity_reward_factor": 0.2,
-                    "maker_reward_factor": 0.2,
-                },
-                {
-                    "minimum_running_notional_taker_volume": 3,
-                    "minimum_epochs": 3,
-                    "infrastructure_discount_factor": 0.3,
-                    "liquidity_discount_factor": 0.3,
-                    "maker_discount_factor": 0.3,
-                    "infrastructure_reward_factor": 0.3,
-                    "liquidity_reward_factor": 0.3,
-                    "maker_reward_factor": 0.3,
-                },
-            ],
-            staking_tiers=[
-                {"minimum_staked_tokens": 1, "referral_reward_multiplier": 1},
-            ],
-            window_length=1,
-        )
 
     def _fuzzed_proposal(self):
         self.vega.update_referral_program(
@@ -1519,7 +1459,7 @@ class FuzzyReferralProgramManager(StateAgentWithWallet):
         )
 
 
-class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
+class FuzzyVolumeDiscountProgramManager(VolumeDiscountProgramManager):
     """Agent proposes sensible and fuzzed update referral program proposals at a
     controlled frequency.
     """
@@ -1536,35 +1476,15 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         tag: Optional[str] = None,
     ):
-        self.key_name = key_name
-        self.wallet_name = wallet_name
-        self.tag = tag
-        self.stake_key = stake_key
-
-        self.step_bias = step_bias
-        self.attempts_per_step = attempts_per_step
-
-        self.random_state = random_state if random_state is not None else RandomState()
-
-    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
-        super().initialise(vega, create_key)
-        self.vega.wait_for_total_catchup()
-        if mint_key:
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
-                amount=1e4,
-                key_name=self.key_name,
-            )
-        self.vega.wait_for_total_catchup()
-        if self.stake_key:
-            self.vega.stake(
-                amount=1,
-                key_name=self.key_name,
-                wallet_name=self.wallet_name,
-            )
-        self.vega.wait_for_total_catchup()
-        self._sensible_proposal()
+        super().__init__(
+            key_name,
+            step_bias,
+            attempts_per_step,
+            stake_key,
+            wallet_name,
+            random_state,
+            tag,
+        )
 
     def step(self, vega_state):
         if self.random_state.rand() < self.step_bias:
@@ -1589,34 +1509,6 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
                 self._sensible_proposal()
             except ProposalNotAcceptedError:
                 logging.warning("Sensible UpdateVolumeDiscountProgram proposal failed.")
-
-    def _sensible_proposal(self):
-        self.vega.update_volume_discount_program(
-            forward_time_to_enactment=False,
-            proposal_key=self.key_name,
-            wallet_name=self.wallet_name,
-            benefit_tiers=[
-                {
-                    "minimum_running_notional_taker_volume": 1000,
-                    "infrastructure_discount_factor": 0.01,
-                    "liquidity_discount_factor": 0.01,
-                    "maker_discount_factor": 0.01,
-                },
-                {
-                    "minimum_running_notional_taker_volume": 2000,
-                    "infrastructure_discount_factor": 0.01,
-                    "liquidity_discount_factor": 0.01,
-                    "maker_discount_factor": 0.01,
-                },
-                {
-                    "minimum_running_notional_taker_volume": 3000,
-                    "infrastructure_discount_factor": 0.01,
-                    "liquidity_discount_factor": 0.01,
-                    "maker_discount_factor": 0.01,
-                },
-            ],
-            window_length=1,
-        )
 
     def _fuzzed_proposal(self):
         self.vega.update_volume_discount_program(
@@ -1645,7 +1537,7 @@ class FuzzyVolumeDiscountProgramManager(StateAgentWithWallet):
         )
 
 
-class FuzzyVolumeRebateProgramManager(StateAgentWithWallet):
+class FuzzyVolumeRebateProgramManager(VolumeRebateProgramManager):
     """Agent proposes sensible and fuzzed update volume rebate program
     proposals at a controlled frequency.
     """
@@ -1662,35 +1554,15 @@ class FuzzyVolumeRebateProgramManager(StateAgentWithWallet):
         random_state: Optional[RandomState] = None,
         tag: Optional[str] = None,
     ):
-        self.key_name = key_name
-        self.wallet_name = wallet_name
-        self.tag = tag
-        self.stake_key = stake_key
-
-        self.step_bias = step_bias
-        self.attempts_per_step = attempts_per_step
-
-        self.random_state = random_state if random_state is not None else RandomState()
-
-    def initialise(self, vega: VegaServiceNull, create_key: bool = True, mint_key=True):
-        super().initialise(vega, create_key)
-        self.vega.wait_for_total_catchup()
-        if mint_key:
-            self.vega.mint(
-                wallet_name=self.wallet_name,
-                asset=self.vega.find_asset_id(symbol="VOTE", enabled=True),
-                amount=1e4,
-                key_name=self.key_name,
-            )
-        self.vega.wait_for_total_catchup()
-        if self.stake_key:
-            self.vega.stake(
-                amount=1,
-                key_name=self.key_name,
-                wallet_name=self.wallet_name,
-            )
-        self.vega.wait_for_total_catchup()
-        self._sensible_proposal()
+        super().__init__(
+            key_name,
+            step_bias,
+            attempts_per_step,
+            stake_key,
+            wallet_name,
+            random_state,
+            tag,
+        )
 
     def step(self, vega_state):
         if self.random_state.rand() < self.step_bias:
@@ -1716,30 +1588,7 @@ class FuzzyVolumeRebateProgramManager(StateAgentWithWallet):
             except ProposalNotAcceptedError:
                 logging.warning("Sensible UpdateVolumeRebate proposal failed.")
 
-    def _sensible_proposal(self):
-        self.vega.update_volume_rebate_program(
-            forward_time_to_enactment=False,
-            proposal_key=self.key_name,
-            wallet_name=self.wallet_name,
-            benefit_tiers=[
-                {
-                    "minimum_party_maker_volume_fraction": str(0.002),
-                    "additional_maker_rebate": f"{0.0002/10:.9f}",
-                },
-                {
-                    "minimum_party_maker_volume_fraction": str(0.020),
-                    "additional_maker_rebate": f"{0.0002/5:.9f}",
-                },
-                {
-                    "minimum_party_maker_volume_fraction": str(0.200),
-                    "additional_maker_rebate": f"{0.0002/2:.9f}",
-                },
-            ],
-            window_length=5,
-        )
-
     def _fuzzed_proposal(self):
-        return
         self.vega.update_volume_rebate_program(
             forward_time_to_enactment=False,
             proposal_key=self.key_name,

@@ -763,9 +763,13 @@ class TradingDataService:
     #     # TODO: Implement method
     #     pass
 
-    # def get_epoch(self, max_pages: Optional[int] = None) -> Any:
-    #     # TODO: Implement method
-    #     pass
+    @log_client_method
+    def get_epoch(
+        self, id: Optional[int] = None, block: Optional[int] = None
+    ) -> protos.vega.vega.Epoch:
+        return self.__stub.GetEpoch(
+            trading_data.GetEpochRequest(id=id, block=block)
+        ).epoch
 
     # def estimate_fee(self, max_pages: Optional[int] = None) -> Any:
     #     # TODO: Implement method
@@ -972,15 +976,32 @@ class TradingDataService:
     #     # TODO: Implement method
     #     pass
 
-    # def get_current_referral_program(
-    #     self, max_pages: Optional[int] = None
-    # ) -> Any:
-    #     # TODO: Implement method
-    #     pass
+    @log_client_method
+    def get_current_referral_program(
+        self,
+    ) -> Any:
+        return self.__stub.GetCurrentReferralProgram(
+            trading_data.GetCurrentReferralProgramRequest()
+        ).current_referral_program
 
-    # def list_referral_sets(self, max_pages: Optional[int] = None) -> Any:
-    #     # TODO: Implement method
-    #     pass
+    @log_client_method
+    def list_referral_sets(
+        self,
+        referral_set_id: Optional[str] = None,
+        referrer: Optional[str] = None,
+        referee: Optional[str] = None,
+        max_pages: Optional[int] = None,
+    ) -> List[trading_data.ReferralSet]:
+        return unroll_v2_pagination(
+            base_request=trading_data.ListReferralSetsRequest(
+                referral_set_id=referral_set_id,
+                referrer=referrer,
+                referee=referee,
+            ),
+            request_func=lambda x: self.__stub.ListReferralSets(x).referral_sets,
+            extraction_func=lambda res: [i.node for i in res.edges],
+            max_pages=max_pages,
+        )
 
     # def list_referral_set_referees(
     #     self, max_pages: Optional[int] = None
@@ -988,9 +1009,24 @@ class TradingDataService:
     #     # TODO: Implement method
     #     pass
 
-    # def get_referral_set_stats(self, max_pages: Optional[int] = None) -> Any:
-    #     # TODO: Implement method
-    #     pass
+    @log_client_method
+    def get_referral_set_stats(
+        self,
+        referrer_set_id: Optional[str] = None,
+        at_epoch: Optional[int] = None,
+        referee: Optional[int] = None,
+        max_pages: Optional[int] = None,
+    ) -> List[trading_data.ReferralSetStats]:
+        return unroll_v2_pagination(
+            base_request=trading_data.GetReferralSetStatsRequest(
+                referral_set_id=referrer_set_id,
+                at_epoch=at_epoch,
+                referee=referee,
+            ),
+            request_func=lambda x: self.__stub.GetReferralSetStats(x).stats,
+            extraction_func=lambda res: [i.node for i in res.edges],
+            max_pages=max_pages,
+        )
 
     # def list_teams(self, max_pages: Optional[int] = None) -> Any:
     #     # TODO: Implement method
@@ -1014,17 +1050,55 @@ class TradingDataService:
     #     # TODO: Implement method
     #     pass
 
-    # def get_current_volume_discount_program(
-    #     self, max_pages: Optional[int] = None
-    # ) -> Any:
-    #     # TODO: Implement method
-    #     pass
+    @log_client_method
+    def get_current_volume_discount_program(
+        self,
+    ) -> trading_data.VolumeDiscountProgram:
+        return self.__stub.GetCurrentVolumeDiscountProgram(
+            trading_data.GetCurrentVolumeDiscountProgramRequest()
+        ).current_volume_discount_program
 
-    # def get_volume_discount_stats(
-    #     self, max_pages: Optional[int] = None
-    # ) -> Any:
-    #     # TODO: Implement method
-    #     pass
+    @log_client_method
+    def get_volume_discount_stats(
+        self,
+        at_epoch: Optional[int] = None,
+        party_id: Optional[int] = None,
+        max_pages: Optional[int] = None,
+    ) -> List[trading_data.VolumeDiscountStats]:
+        return unroll_v2_pagination(
+            base_request=trading_data.GetVolumeDiscountStatsRequest(
+                at_epoch=at_epoch,
+                party_id=party_id,
+            ),
+            request_func=lambda x: self.__stub.GetVolumeDiscountStats(x).stats,
+            extraction_func=lambda res: [i.node for i in res.edges],
+            max_pages=max_pages,
+        )
+
+    @log_client_method
+    def get_current_volume_rebate_program(
+        self,
+    ) -> trading_data.VolumeRebateProgram:
+        return self.__stub.GetCurrentVolumeRebateProgram(
+            trading_data.GetCurrentVolumeRebateProgramRequest()
+        ).current_volume_rebate_program
+
+    @log_client_method
+    def get_volume_rebate_stats(
+        self,
+        at_epoch: Optional[int] = None,
+        party_id: Optional[int] = None,
+        max_pages: Optional[int] = None,
+    ) -> List[trading_data.VolumeRebateStats]:
+        return unroll_v2_pagination(
+            base_request=trading_data.GetVolumeRebateStatsRequest(
+                at_epoch=at_epoch,
+                party_id=party_id,
+            ),
+            request_func=lambda x: self.__stub.GetVolumeRebateStats(x).stats,
+            extraction_func=lambda res: [i.node for i in res.edges],
+            max_pages=max_pages,
+        )
 
     # def get_vesting_balances_summary(
     #     self, max_pages: Optional[int] = None
