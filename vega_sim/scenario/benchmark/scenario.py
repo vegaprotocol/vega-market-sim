@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Optional, Dict, Any, List
+from itertools import product
 
 from vega_sim.api.market import MarketConfig
 from vega_sim.scenario.scenario import Scenario
@@ -15,11 +16,16 @@ from vega_sim.environment.environment import (
 from vega_sim.configs.agents import ConfigurableMarketManager
 from vega_sim.scenario.common.agents import (
     StateAgent,
+    StateAgentWithWallet,
     NetworkParameterManager,
     UncrossAuctionAgent,
     ExponentialShapedMarketMaker,
     MarketOrderTrader,
     LimitOrderTrader,
+    ReferralProgramManager,
+    VolumeRebateProgramManager,
+    VolumeDiscountProgramManager,
+    ReferralAgentWrapper,
 )
 from vega_sim.scenario.fuzzed_markets.agents import (
     RiskyMarketOrderTrader,
@@ -35,6 +41,12 @@ class BenchmarkScenario(Scenario):
         block_length_seconds: float = 1,
         step_length_seconds: Optional[float] = None,
         initial_network_parameters: Dict[str, Any] = None,
+        volume_discounts_enabled: bool = False,
+        volume_rebate_enabled: bool = False,
+        referrals_enabled: bool = False,
+        referral_sets=2,
+        mo_traders_per_set: int = 1,
+        lo_traders_per_set: int = 1,
         output: bool = True,
     ):
         super().__init__()
@@ -54,6 +66,13 @@ class BenchmarkScenario(Scenario):
         self.initial_network_parameters = (
             initial_network_parameters if initial_network_parameters is not None else {}
         )
+        self.volume_discounts_enabled = volume_discounts_enabled
+        self.volume_rebate_enabled = volume_rebate_enabled
+        self.referrals_enabled = referrals_enabled
+
+        self.referral_sets = referral_sets
+        self.mo_traders_per_set = mo_traders_per_set
+        self.lo_traders_per_set = lo_traders_per_set
 
     def configure_agents(
         self,
@@ -74,6 +93,40 @@ class BenchmarkScenario(Scenario):
                 network_parameters=self.initial_network_parameters,
             )
         )
+
+        if self.referrals_enabled:
+            self.agents.append(
+                ReferralProgramManager(
+                    wallet_name="ProgramManagers",
+                    key_name="ReferralProgramManager",
+                )
+            )
+            self.agents.extend(
+                ReferralAgentWrapper(
+                    agent=StateAgentWithWallet(
+                        wallet_name="ReferralAgents",
+                        key_name=f"ReferralAgentWrapper_{str(i_set).zfill(3)}",
+                        tag=f"ReferralAgentWrapper_{str(i_set).zfill(3)}",
+                    ),
+                    is_referrer=True,
+                )
+                for i_set in range(2)
+            )
+
+        if self.volume_discounts_enabled:
+            self.agents.append(
+                VolumeDiscountProgramManager(
+                    wallet_name="ProgramManagers",
+                    key_name="VolumeDiscountProgramManager",
+                )
+            )
+        if self.volume_rebate_enabled:
+            self.agents.append(
+                VolumeRebateProgramManager(
+                    wallet_name="ProgramManagers",
+                    key_name="VolumeRebateProgramManager",
+                )
+            )
         for _, benchmark_config in enumerate(self.benchmark_configs):
 
             market_name = benchmark_config.market_config.instrument.name
@@ -147,48 +200,62 @@ class BenchmarkScenario(Scenario):
             )
             self.agents.extend(
                 [
-                    MarketOrderTrader(
-                        wallet_name="MarketOrderTrader",
-                        key_name=f"MarketOrderTrader_{str(i_agent).zfill(3)}",
-                        market_name=market_name,
-                        buy_intensity=100,
-                        sell_intensity=100,
-                        base_order_size=benchmark_config.notional_trade_volume
-                        / benchmark_config.initial_price
-                        / 100,
-                        step_bias=1,
-                        initial_asset_mint=1e8,
-                        tag=f"{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
+                    ReferralAgentWrapper(
+                        agent=MarketOrderTrader(
+                            wallet_name="MarketOrderTrader",
+                            key_name=f"MarketOrderTrader_{str(i_set).zfill(3)}_{str(i_agent).zfill(3)}",
+                            market_name=market_name,
+                            buy_intensity=100,
+                            sell_intensity=100,
+                            base_order_size=benchmark_config.notional_trade_volume
+                            / benchmark_config.initial_price
+                            / 100,
+                            step_bias=1,
+                            initial_asset_mint=1e8,
+                            tag=f"{benchmark_config.market_config.instrument.code}_{str(i_set).zfill(3)}_{str(i_agent).zfill(3)}",
+                        ),
+                        referrer_key_name=f"ReferralAgentWrapper_{str(i_set).zfill(3)}",
+                        referrer_wallet_name="ReferralAgents",
                     )
-                    for i_agent in range(1)
+                    for (i_set, i_agent) in product(
+                        range(self.referral_sets),
+                        range(self.mo_traders_per_set),
+                    )
                 ]
             )
             self.agents.extend(
                 [
-                    LimitOrderTrader(
-                        wallet_name=f"LimitOrderTrader",
-                        key_name=f"LimitOrderTrader_{str(i_agent).zfill(3)}",
-                        market_name=market_name,
-                        time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
-                        buy_volume=benchmark_config.notional_trade_volume
-                        / benchmark_config.initial_price
-                        / 100,
-                        sell_volume=benchmark_config.notional_trade_volume
-                        / benchmark_config.initial_price
-                        / 100,
-                        buy_intensity=100,
-                        sell_intensity=100,
-                        submit_bias=1,
-                        cancel_bias=0,
-                        duration=120,
-                        price_process=benchmark_config.price_process,
-                        spread=0,
-                        mean=-3,
-                        sigma=0.5,
-                        initial_asset_mint=1e8,
-                        tag=f"{benchmark_config.market_config.instrument.code}_{str(i_agent).zfill(3)}",
+                    ReferralAgentWrapper(
+                        agent=LimitOrderTrader(
+                            wallet_name=f"LimitOrderTrader",
+                            key_name=f"LimitOrderTrader_{str(i_set).zfill(3)}_{str(i_agent).zfill(3)}",
+                            market_name=market_name,
+                            time_in_force_opts={"TIME_IN_FORCE_GTT": 1},
+                            buy_volume=benchmark_config.notional_trade_volume
+                            / benchmark_config.initial_price
+                            / 100,
+                            sell_volume=benchmark_config.notional_trade_volume
+                            / benchmark_config.initial_price
+                            / 100,
+                            buy_intensity=100,
+                            sell_intensity=100,
+                            submit_bias=1,
+                            cancel_bias=0,
+                            duration=120,
+                            price_process=benchmark_config.price_process,
+                            spread=0,
+                            mean=-3,
+                            sigma=0.5,
+                            initial_asset_mint=1e8,
+                            tag=f"{benchmark_config.market_config.instrument.code}_{str(i_set).zfill(3)}_{str(i_agent).zfill(3)}",
+                        ),
+                        referrer_key_name=f"ReferralAgentWrapper_{str(i_set).zfill(3)}",
+                        referrer_wallet_name="ReferralAgents",
                     )
-                    for i_agent in range(1)
+                    for (i_set, i_agent) in product(
+                        range(self.referral_sets),
+                        range(self.lo_traders_per_set),
+                    )
                 ]
             )
 
@@ -212,7 +279,6 @@ class BenchmarkScenario(Scenario):
                         for i_agent in range(5)
                     ]
                 )
-
         return {agent.name(): agent for agent in self.agents}
 
     def configure_environment(
