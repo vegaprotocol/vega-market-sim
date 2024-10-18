@@ -1949,12 +1949,31 @@ class FuzzedAutomatedMarketMaker(StateAgentWithWallet):
                     key_name=self.key_name,
                 )
                 self.vega.wait_for_total_catchup()
+        # Data oracle id
+        market = vega.market_info(self.market_id)
+        self.data_source_id = None
+        if (
+            market.tradable_instrument.instrument.perpetual
+            != vega_protos.markets.Perpetual()
+        ):
+            # We have a perpetual market so we are guaranteed an oracle
+            # component in the market index price configuration.
+            self.data_source_id = (
+                market.tradable_instrument.instrument.perpetual.data_source_spec_for_settlement_data.id
+            )
 
     def step(self, vega_state) -> None:
         if self.random_state.rand() < self.submit_probability:
             transaction = fuzzers.fuzz_submit_amm(
-                vega=self.vega, rs=self.random_state, bias=0.8
+                vega=self.vega,
+                rs=self.random_state,
+                bias=0.8,
             )
+            if self.data_source_id is not None:
+                transaction.concentrated_liquidity_parameters.data_source_id = (
+                    self.data_source_id
+                )
+                transaction.minimum_price_change_trigger = str(0.001)
             self.vega.submit_transaction(
                 key_name=self.key_name,
                 transaction=transaction,
@@ -1965,6 +1984,11 @@ class FuzzedAutomatedMarketMaker(StateAgentWithWallet):
             transaction = fuzzers.fuzz_amend_amm(
                 vega=self.vega, rs=self.random_state, bias=0.8
             )
+            if self.data_source_id is not None:
+                transaction.concentrated_liquidity_parameters.data_source_id = (
+                    self.data_source_id
+                )
+                transaction.minimum_price_change_trigger = str(0.001)
             self.vega.submit_transaction(
                 key_name=self.key_name,
                 transaction=transaction,

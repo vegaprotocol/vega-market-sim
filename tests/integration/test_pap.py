@@ -20,6 +20,7 @@ BASE = "base"
 QUOTE = "quote"
 
 
+@pytest.mark.integration
 @pytest.fixture(scope="function")
 def init_tests(vega_service):
     # Create a key for proposals.

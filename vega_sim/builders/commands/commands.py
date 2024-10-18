@@ -263,6 +263,8 @@ def submit_amm(
     upper_bound: Optional[float] = None,
     leverage_at_lower_bound: Optional[float] = None,
     leverage_at_upper_bound: Optional[float] = None,
+    data_source_id: Optional[str] = None,
+    minimum_price_change_trigger: Optional[float] = None,
 ) -> vega_protos.commands.v1.commands.SubmitAMM:
     # Note ConcentratedLiquidityParameters does not have a stand alone
     # function as message is nested specifically with SubmitAmm.
@@ -296,8 +298,14 @@ def submit_amm(
                 if leverage_at_upper_bound is not None
                 else None
             ),
+            data_source_id=data_source_id,
         ),
         proposed_fee=str(proposed_fee),
+        minimum_price_change_trigger=(
+            str(minimum_price_change_trigger)
+            if minimum_price_change_trigger is not None
+            else None
+        ),
     )
 
 

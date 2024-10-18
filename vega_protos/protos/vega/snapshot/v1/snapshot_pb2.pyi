@@ -1745,6 +1745,8 @@ class PoolMapEntry(_message.Message):
             "upper",
             "status",
             "proposed_fee",
+            "slippage_tolerance",
+            "minimum_price_change_trigger",
         )
         ID_FIELD_NUMBER: _ClassVar[int]
         AMM_PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -1756,6 +1758,8 @@ class PoolMapEntry(_message.Message):
         UPPER_FIELD_NUMBER: _ClassVar[int]
         STATUS_FIELD_NUMBER: _ClassVar[int]
         PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+        SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
+        MINIMUM_PRICE_CHANGE_TRIGGER_FIELD_NUMBER: _ClassVar[int]
         id: str
         amm_party_id: str
         commitment: str
@@ -1766,6 +1770,8 @@ class PoolMapEntry(_message.Message):
         upper: PoolMapEntry.Curve
         status: _events_pb2.AMM.Status
         proposed_fee: str
+        slippage_tolerance: str
+        minimum_price_change_trigger: str
         def __init__(
             self,
             id: _Optional[str] = ...,
@@ -1780,6 +1786,8 @@ class PoolMapEntry(_message.Message):
             upper: _Optional[_Union[PoolMapEntry.Curve, _Mapping]] = ...,
             status: _Optional[_Union[_events_pb2.AMM.Status, str]] = ...,
             proposed_fee: _Optional[str] = ...,
+            slippage_tolerance: _Optional[str] = ...,
+            minimum_price_change_trigger: _Optional[str] = ...,
         ) -> None: ...
 
     PARTY_FIELD_NUMBER: _ClassVar[int]
