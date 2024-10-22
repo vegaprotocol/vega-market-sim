@@ -4243,3 +4243,88 @@ class VegaService(ABC):
             amm_party_id=amm_party_id,
             status=status,
         )
+
+    def new_protocol_automated_purchase_program(
+        self,
+        proposal_key: str,
+        asset_id: str,
+        from_account_type: str,
+        to_account_type: str,
+        market_id: str,
+        price_oracle_name: str,
+        price_oracle_signer: str,
+        price_oracle_decimals: str,
+        oracle_offset_factor: float,
+        snapshot_frequency: datetime.timedelta,
+        auction_frequency: datetime.timedelta,
+        auction_duration: datetime.timedelta,
+        minimum_auction_size: float,
+        maximum_auction_size: float,
+        oracle_price_staleness_tolerance: datetime.timedelta,
+        expiry_datetime: Optional[datetime.datetime] = None,
+        proposal_wallet: Optional[str] = None,
+        vote_closing_time: Optional[int] = None,
+        vote_enactment_time: Optional[int] = None,
+        approve_proposal: bool = True,
+        forward_time_to_enactment: bool = True,
+    ):
+        blockchain_time_seconds = self.get_blockchain_time(in_seconds=True)
+        closing_time = (
+            blockchain_time_seconds + self.seconds_per_block * 40
+            if vote_closing_time is None
+            else int(vote_closing_time.timestamp())
+        )
+        enactment_time = (
+            blockchain_time_seconds + self.seconds_per_block * 50
+            if vote_enactment_time is None
+            else int(vote_enactment_time.timestamp())
+        )
+        expiry_datetime = (
+            datetime.datetime.fromtimestamp(
+                enactment_time + self.seconds_per_block * 60 * 60 * 24 * 7 * 52
+            )
+            if expiry_datetime is None
+            else expiry_datetime
+        )
+
+        proposal_id = gov.new_protocol_automated_purchase_program(
+            key_name=proposal_key,
+            wallet=self.wallet,
+            data_client=self.trading_data_client_v2,
+            asset_decimals=self.asset_decimals,
+            asset_id=asset_id,
+            from_account_type=from_account_type,
+            to_account_type=to_account_type,
+            market_id=market_id,
+            price_oracle_name=price_oracle_name,
+            price_oracle_signer=price_oracle_signer,
+            price_oracle_decimals=price_oracle_decimals,
+            oracle_offset_factor=oracle_offset_factor,
+            snapshot_frequency=snapshot_frequency,
+            auction_frequency=auction_frequency,
+            auction_duration=auction_duration,
+            minimum_auction_size=minimum_auction_size,
+            maximum_auction_size=maximum_auction_size,
+            expiry_datetime=expiry_datetime,
+            oracle_price_staleness_tolerance=oracle_price_staleness_tolerance,
+            wallet_name=proposal_wallet,
+            closing_time=closing_time,
+            enactment_time=enactment_time,
+            time_forward_fn=lambda: self.wait_fn(2),
+        )
+
+        if approve_proposal:
+            gov.approve_proposal(
+                proposal_id=proposal_id,
+                wallet=self.wallet,
+                wallet_name=proposal_wallet,
+                key_name=proposal_key,
+            )
+
+        if forward_time_to_enactment:
+            time_to_enactment = enactment_time - self.get_blockchain_time(
+                in_seconds=True
+            )
+            self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
+        self.wait_for_thread_catchup()
+        return proposal_id

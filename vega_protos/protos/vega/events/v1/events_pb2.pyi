@@ -127,6 +127,7 @@ class BusEventType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_UPDATED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_ENDED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_VOLUME_REBATE_STATS_UPDATED: _ClassVar[BusEventType]
+    BUS_EVENT_TYPE_AUTOMATED_PURCHASE_ANNOUNCED: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_MARKET: _ClassVar[BusEventType]
     BUS_EVENT_TYPE_TX_ERROR: _ClassVar[BusEventType]
 
@@ -230,6 +231,7 @@ BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_STARTED: BusEventType
 BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_UPDATED: BusEventType
 BUS_EVENT_TYPE_VOLUME_REBATE_PROGRAM_ENDED: BusEventType
 BUS_EVENT_TYPE_VOLUME_REBATE_STATS_UPDATED: BusEventType
+BUS_EVENT_TYPE_AUTOMATED_PURCHASE_ANNOUNCED: BusEventType
 BUS_EVENT_TYPE_MARKET: BusEventType
 BUS_EVENT_TYPE_TX_ERROR: BusEventType
 
@@ -273,6 +275,7 @@ class AMM(_message.Message):
         "proposed_fee",
         "lower_curve",
         "upper_curve",
+        "minimum_price_change_trigger",
     )
 
     class Status(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
@@ -283,6 +286,7 @@ class AMM(_message.Message):
         STATUS_CANCELLED: _ClassVar[AMM.Status]
         STATUS_STOPPED: _ClassVar[AMM.Status]
         STATUS_REDUCE_ONLY: _ClassVar[AMM.Status]
+        STATUS_PENDING: _ClassVar[AMM.Status]
 
     STATUS_UNSPECIFIED: AMM.Status
     STATUS_ACTIVE: AMM.Status
@@ -290,6 +294,7 @@ class AMM(_message.Message):
     STATUS_CANCELLED: AMM.Status
     STATUS_STOPPED: AMM.Status
     STATUS_REDUCE_ONLY: AMM.Status
+    STATUS_PENDING: AMM.Status
 
     class StatusReason(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
@@ -318,17 +323,20 @@ class AMM(_message.Message):
             "upper_bound",
             "leverage_at_upper_bound",
             "leverage_at_lower_bound",
+            "data_source_id",
         )
         BASE_FIELD_NUMBER: _ClassVar[int]
         LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
         UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
         LEVERAGE_AT_UPPER_BOUND_FIELD_NUMBER: _ClassVar[int]
         LEVERAGE_AT_LOWER_BOUND_FIELD_NUMBER: _ClassVar[int]
+        DATA_SOURCE_ID_FIELD_NUMBER: _ClassVar[int]
         base: str
         lower_bound: str
         upper_bound: str
         leverage_at_upper_bound: str
         leverage_at_lower_bound: str
+        data_source_id: str
         def __init__(
             self,
             base: _Optional[str] = ...,
@@ -336,6 +344,7 @@ class AMM(_message.Message):
             upper_bound: _Optional[str] = ...,
             leverage_at_upper_bound: _Optional[str] = ...,
             leverage_at_lower_bound: _Optional[str] = ...,
+            data_source_id: _Optional[str] = ...,
         ) -> None: ...
 
     class Curve(_message.Message):
@@ -361,6 +370,7 @@ class AMM(_message.Message):
     PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
     LOWER_CURVE_FIELD_NUMBER: _ClassVar[int]
     UPPER_CURVE_FIELD_NUMBER: _ClassVar[int]
+    MINIMUM_PRICE_CHANGE_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     id: str
     party_id: str
     market_id: str
@@ -372,6 +382,7 @@ class AMM(_message.Message):
     proposed_fee: str
     lower_curve: AMM.Curve
     upper_curve: AMM.Curve
+    minimum_price_change_trigger: str
     def __init__(
         self,
         id: _Optional[str] = ...,
@@ -387,6 +398,7 @@ class AMM(_message.Message):
         proposed_fee: _Optional[str] = ...,
         lower_curve: _Optional[_Union[AMM.Curve, _Mapping]] = ...,
         upper_curve: _Optional[_Union[AMM.Curve, _Mapping]] = ...,
+        minimum_price_change_trigger: _Optional[str] = ...,
     ) -> None: ...
 
 class VestingBalancesSummary(_message.Message):
@@ -1778,18 +1790,31 @@ class PositionResolution(_message.Message):
     ) -> None: ...
 
 class LossSocialization(_message.Message):
-    __slots__ = ("market_id", "party_id", "amount")
+    __slots__ = ("market_id", "party_id", "amount", "loss_type")
+
+    class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+        __slots__ = ()
+        TYPE_UNSPECIFIED: _ClassVar[LossSocialization.Type]
+        TYPE_SETTLEMENT: _ClassVar[LossSocialization.Type]
+        TYPE_FUNDING_PAYMENT: _ClassVar[LossSocialization.Type]
+
+    TYPE_UNSPECIFIED: LossSocialization.Type
+    TYPE_SETTLEMENT: LossSocialization.Type
+    TYPE_FUNDING_PAYMENT: LossSocialization.Type
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
     AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    LOSS_TYPE_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     party_id: str
     amount: str
+    loss_type: LossSocialization.Type
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         party_id: _Optional[str] = ...,
         amount: _Optional[str] = ...,
+        loss_type: _Optional[_Union[LossSocialization.Type, str]] = ...,
     ) -> None: ...
 
 class TradeSettlement(_message.Message):
@@ -2818,6 +2843,7 @@ class BusEvent(_message.Message):
         "volume_rebate_program_updated",
         "volume_rebate_program_ended",
         "volume_rebate_stats_updated",
+        "automated_purchase_announced",
         "market",
         "tx_err_event",
         "version",
@@ -2919,6 +2945,7 @@ class BusEvent(_message.Message):
     VOLUME_REBATE_PROGRAM_UPDATED_FIELD_NUMBER: _ClassVar[int]
     VOLUME_REBATE_PROGRAM_ENDED_FIELD_NUMBER: _ClassVar[int]
     VOLUME_REBATE_STATS_UPDATED_FIELD_NUMBER: _ClassVar[int]
+    AUTOMATED_PURCHASE_ANNOUNCED_FIELD_NUMBER: _ClassVar[int]
     MARKET_FIELD_NUMBER: _ClassVar[int]
     TX_ERR_EVENT_FIELD_NUMBER: _ClassVar[int]
     VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -3019,6 +3046,7 @@ class BusEvent(_message.Message):
     volume_rebate_program_updated: VolumeRebateProgramUpdated
     volume_rebate_program_ended: VolumeRebateProgramEnded
     volume_rebate_stats_updated: VolumeRebateStatsUpdated
+    automated_purchase_announced: AutomatedPurchaseAnnounced
     market: MarketEvent
     tx_err_event: TxErrorEvent
     version: int
@@ -3173,6 +3201,9 @@ class BusEvent(_message.Message):
         volume_rebate_stats_updated: _Optional[
             _Union[VolumeRebateStatsUpdated, _Mapping]
         ] = ...,
+        automated_purchase_announced: _Optional[
+            _Union[AutomatedPurchaseAnnounced, _Mapping]
+        ] = ...,
         market: _Optional[_Union[MarketEvent, _Mapping]] = ...,
         tx_err_event: _Optional[_Union[TxErrorEvent, _Mapping]] = ...,
         version: _Optional[int] = ...,
@@ -3261,4 +3292,24 @@ class VolumeRebateProgramEnded(_message.Message):
         id: _Optional[str] = ...,
         ended_at: _Optional[int] = ...,
         at_epoch: _Optional[int] = ...,
+    ) -> None: ...
+
+class AutomatedPurchaseAnnounced(_message.Message):
+    __slots__ = ("from_account_type", "to_account_type", "market_id", "amount")
+    FROM_FIELD_NUMBER: _ClassVar[int]
+    FROM_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TO_ACCOUNT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    from_account_type: _vega_pb2.AccountType
+    to_account_type: _vega_pb2.AccountType
+    market_id: str
+    amount: str
+    def __init__(
+        self,
+        from_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        to_account_type: _Optional[_Union[_vega_pb2.AccountType, str]] = ...,
+        market_id: _Optional[str] = ...,
+        amount: _Optional[str] = ...,
+        **kwargs
     ) -> None: ...

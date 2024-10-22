@@ -374,3 +374,48 @@ def new_spot_market_configuration(
         tick_size=str(tick_size),
         enable_transaction_reordering=enable_transaction_reordering,
     )
+
+
+@raise_custom_build_errors
+def new_protocol_automated_purchase_changes(
+    _from: str,
+    from_account_type: str,
+    to_account_type: str,
+    market_id: str,
+    price_oracle: vega_protos.data_source.DataSourceDefinition,
+    price_oracle_spec_binding: vega_protos.data_source.SpecBindingForCompositePrice,
+    oracle_offset_factor: float,
+    auction_schedule: vega_protos.data_source.DataSourceDefinition,
+    auction_volume_snapshot_schedule: vega_protos.data_source.DataSourceDefinition,
+    automated_purchase_spec_binding: vega_protos.markets.DataSourceSpecToAutomatedPurchaseBinding,
+    auction_duration: datetime.timedelta,
+    minimum_auction_size: float,
+    maximum_auction_size: float,
+    expiry_timestamp: datetime.datetime,
+    oracle_price_staleness_tolerance: datetime.timedelta,
+    asset_decimals: Dict[str, int],
+) -> vega_protos.governance.NewProtocolAutomatedPurchaseChanges:
+    changes = vega_protos.governance.NewProtocolAutomatedPurchaseChanges(
+        from_account_type=from_account_type,
+        to_account_type=to_account_type,
+        market_id=market_id,
+        price_oracle=price_oracle,
+        price_oracle_spec_binding=price_oracle_spec_binding,
+        oracle_offset_factor=str(oracle_offset_factor),
+        auction_schedule=auction_schedule,
+        auction_volume_snapshot_schedule=auction_volume_snapshot_schedule,
+        automated_purchase_spec_binding=automated_purchase_spec_binding,
+        auction_duration=f"{int(auction_duration.seconds)}s",
+        minimum_auction_size=str(
+            num_to_padded_int(minimum_auction_size, asset_decimals[_from])
+        ),
+        maximum_auction_size=str(
+            num_to_padded_int(maximum_auction_size, asset_decimals[_from])
+        ),
+        expiry_timestamp=int(expiry_timestamp.timestamp()),
+        oracle_price_staleness_tolerance=str(
+            int(oracle_price_staleness_tolerance.seconds)
+        ),
+    )
+    setattr(changes, "from", _from)
+    return changes

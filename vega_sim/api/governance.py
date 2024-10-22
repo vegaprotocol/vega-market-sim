@@ -1211,6 +1211,132 @@ def update_volume_rebate_program(
     ).proposal.id
 
 
+def new_protocol_automated_purchase_program(
+    key_name: str,
+    wallet: Wallet,
+    asset_id: str,
+    data_client: vac.VegaTradingDataClientV2,
+    from_account_type: str,
+    to_account_type: str,
+    market_id: str,
+    price_oracle_name: str,
+    price_oracle_signer: str,
+    price_oracle_decimals: str,
+    oracle_offset_factor: float,
+    snapshot_frequency: datetime.timedelta,
+    auction_frequency: datetime.timedelta,
+    auction_duration: datetime.timedelta,
+    minimum_auction_size: float,
+    maximum_auction_size: float,
+    expiry_datetime: datetime.datetime,
+    oracle_price_staleness_tolerance: datetime.timedelta,
+    asset_decimals: Dict[str, int],
+    wallet_name: Optional[str] = None,
+    closing_time: Optional[int] = None,
+    enactment_time: Optional[int] = None,
+    time_forward_fn: Optional[Callable[[], None]] = None,
+) -> str:
+    changes = builders.governance.new_protocol_automated_purchase_changes(
+        _from=asset_id,
+        from_account_type=from_account_type,
+        to_account_type=to_account_type,
+        market_id=market_id,
+        price_oracle=builders.data_source.data_source_definition(
+            external=builders.data_source.data_source_definition_external(
+                oracle=builders.data_source.data_source_spec_configuration(
+                    signers=[
+                        builders.data.data.signer(
+                            pub_key=builders.data.data.pub_key(key=price_oracle_signer)
+                        )
+                    ],
+                    filters=[
+                        builders.data.spec.filter(
+                            key=builders.data.spec.property_key(
+                                name=price_oracle_name,
+                                type=vega_protos.data.v1.spec.PropertyKey.Type.TYPE_INTEGER,
+                                number_decimal_places=price_oracle_decimals,
+                            ),
+                            conditions=[
+                                builders.data.spec.condition(
+                                    operator=vega_protos.data.v1.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                                    value="0",
+                                )
+                            ],
+                        )
+                    ],
+                )
+            )
+        ),
+        price_oracle_spec_binding=builders.data_source.spec_binding_for_composite_price(
+            price_source_property=price_oracle_name,
+        ),
+        oracle_offset_factor=oracle_offset_factor,
+        auction_schedule=builders.data_source.data_source_definition(
+            internal=builders.data_source.data_source_definition_internal(
+                time_trigger=builders.data_source.data_source_spec_configuration_time_trigger(
+                    conditions=[
+                        builders.data.spec.condition(
+                            operator=vega_protos.data.v1.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                            value="0",
+                        )
+                    ],
+                    triggers=[
+                        builders.data.spec.internal_time_trigger(
+                            initial=datetime.datetime.fromtimestamp(enactment_time),
+                            every=auction_frequency,
+                        )
+                    ],
+                ),
+            )
+        ),
+        auction_volume_snapshot_schedule=builders.data_source.data_source_definition(
+            internal=builders.data_source.data_source_definition_internal(
+                time_trigger=builders.data_source.data_source_spec_configuration_time_trigger(
+                    conditions=[
+                        builders.data.spec.condition(
+                            operator=vega_protos.data.v1.spec.Condition.Operator.OPERATOR_GREATER_THAN,
+                            value="0",
+                        )
+                    ],
+                    triggers=[
+                        builders.data.spec.internal_time_trigger(
+                            initial=datetime.datetime.fromtimestamp(enactment_time),
+                            every=snapshot_frequency,
+                        )
+                    ],
+                ),
+            )
+        ),
+        automated_purchase_spec_binding=builders.markets.data_source_spec_to_automated_purchase_binding(
+            auction_schedule_property="vegaprotocol.builtin.timetrigger",
+            auction_volume_snapshot_schedule_property="vegaprotocol.builtin.timetrigger",
+        ),
+        auction_duration=auction_duration,
+        minimum_auction_size=minimum_auction_size,
+        maximum_auction_size=maximum_auction_size,
+        expiry_timestamp=expiry_datetime,
+        oracle_price_staleness_tolerance=oracle_price_staleness_tolerance,
+        asset_decimals=asset_decimals,
+    )
+    proposal = _build_generic_proposal(
+        pub_key=wallet.public_key(wallet_name=wallet_name, name=key_name),
+        data_client=data_client,
+        closing_time=closing_time,
+        enactment_time=enactment_time,
+    )
+    proposal.terms.new_protocol_automated_purchase.CopyFrom(
+        vega_protos.governance.NewProtocolAutomatedPurchase(changes=changes)
+    )
+    return _make_and_wait_for_proposal(
+        wallet_name=wallet_name,
+        wallet=wallet,
+        proposal=proposal,
+        data_client=data_client,
+        time_forward_fn=time_forward_fn,
+        key_name=key_name,
+    ).proposal.id
+
+
 def new_transfer(
     asset_decimals: Dict[str, int],
     data_client: vac.VegaTradingDataClientV2,

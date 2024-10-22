@@ -53,6 +53,7 @@ class AuctionTrigger(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     AUCTION_TRIGGER_UNABLE_TO_DEPLOY_LP_ORDERS: _ClassVar[AuctionTrigger]
     AUCTION_TRIGGER_GOVERNANCE_SUSPENSION: _ClassVar[AuctionTrigger]
     AUCTION_TRIGGER_LONG_BLOCK: _ClassVar[AuctionTrigger]
+    AUCTION_TRIGGER_PROTOCOL_AUTOMATED_PURCHASE: _ClassVar[AuctionTrigger]
 
 class PeggedReference(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -118,6 +119,7 @@ class OrderError(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ORDER_ERROR_PEGGED_ORDERS_NOT_ALLOWED_IN_ISOLATED_MARGIN_MODE: _ClassVar[OrderError]
     ORDER_ERROR_PRICE_NOT_IN_TICK_SIZE: _ClassVar[OrderError]
     ORDER_ERROR_PRICE_MUST_BE_LESS_THAN_OR_EQUAL_TO_MAX_PRICE: _ClassVar[OrderError]
+    ORDER_ERROR_SELL_ORDER_NOT_ALLOWED: _ClassVar[OrderError]
 
 class ChainStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -303,6 +305,7 @@ AUCTION_TRIGGER_LIQUIDITY_TARGET_NOT_MET: AuctionTrigger
 AUCTION_TRIGGER_UNABLE_TO_DEPLOY_LP_ORDERS: AuctionTrigger
 AUCTION_TRIGGER_GOVERNANCE_SUSPENSION: AuctionTrigger
 AUCTION_TRIGGER_LONG_BLOCK: AuctionTrigger
+AUCTION_TRIGGER_PROTOCOL_AUTOMATED_PURCHASE: AuctionTrigger
 PEGGED_REFERENCE_UNSPECIFIED: PeggedReference
 PEGGED_REFERENCE_MID: PeggedReference
 PEGGED_REFERENCE_BEST_BID: PeggedReference
@@ -360,6 +363,7 @@ ORDER_ERROR_ISOLATED_MARGIN_CHECK_FAILED: OrderError
 ORDER_ERROR_PEGGED_ORDERS_NOT_ALLOWED_IN_ISOLATED_MARGIN_MODE: OrderError
 ORDER_ERROR_PRICE_NOT_IN_TICK_SIZE: OrderError
 ORDER_ERROR_PRICE_MUST_BE_LESS_THAN_OR_EQUAL_TO_MAX_PRICE: OrderError
+ORDER_ERROR_SELL_ORDER_NOT_ALLOWED: OrderError
 CHAIN_STATUS_UNSPECIFIED: ChainStatus
 CHAIN_STATUS_DISCONNECTED: ChainStatus
 CHAIN_STATUS_REPLAYING: ChainStatus
@@ -606,6 +610,7 @@ class StopOrder(_message.Message):
         REJECTION_REASON_STOP_ORDER_SIZE_OVERRIDE_UNSUPPORTED_FOR_SPOT: _ClassVar[
             StopOrder.RejectionReason
         ]
+        REJECTION_REASON_SELL_ORDER_NOT_ALLOWED: _ClassVar[StopOrder.RejectionReason]
 
     REJECTION_REASON_UNSPECIFIED: StopOrder.RejectionReason
     REJECTION_REASON_TRADING_NOT_ALLOWED: StopOrder.RejectionReason
@@ -624,6 +629,7 @@ class StopOrder(_message.Message):
     REJECTION_REASON_STOP_ORDER_SIZE_OVERRIDE_UNSUPPORTED_FOR_SPOT: (
         StopOrder.RejectionReason
     )
+    REJECTION_REASON_SELL_ORDER_NOT_ALLOWED: StopOrder.RejectionReason
 
     class SizeOverrideValue(_message.Message):
         __slots__ = ("percentage",)
@@ -1211,6 +1217,14 @@ class Position(_message.Message):
         "updated_at",
         "loss_socialisation_amount",
         "position_status",
+        "taker_fees_paid",
+        "maker_fees_received",
+        "fees_paid",
+        "taker_fees_paid_since",
+        "maker_fees_received_since",
+        "fees_paid_since",
+        "funding_payment_amount",
+        "funding_payment_amount_since",
     )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PARTY_ID_FIELD_NUMBER: _ClassVar[int]
@@ -1221,6 +1235,14 @@ class Position(_message.Message):
     UPDATED_AT_FIELD_NUMBER: _ClassVar[int]
     LOSS_SOCIALISATION_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     POSITION_STATUS_FIELD_NUMBER: _ClassVar[int]
+    TAKER_FEES_PAID_FIELD_NUMBER: _ClassVar[int]
+    MAKER_FEES_RECEIVED_FIELD_NUMBER: _ClassVar[int]
+    FEES_PAID_FIELD_NUMBER: _ClassVar[int]
+    TAKER_FEES_PAID_SINCE_FIELD_NUMBER: _ClassVar[int]
+    MAKER_FEES_RECEIVED_SINCE_FIELD_NUMBER: _ClassVar[int]
+    FEES_PAID_SINCE_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_PAYMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    FUNDING_PAYMENT_AMOUNT_SINCE_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     party_id: str
     open_volume: int
@@ -1230,6 +1252,14 @@ class Position(_message.Message):
     updated_at: int
     loss_socialisation_amount: str
     position_status: PositionStatus
+    taker_fees_paid: str
+    maker_fees_received: str
+    fees_paid: str
+    taker_fees_paid_since: str
+    maker_fees_received_since: str
+    fees_paid_since: str
+    funding_payment_amount: str
+    funding_payment_amount_since: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
@@ -1241,6 +1271,14 @@ class Position(_message.Message):
         updated_at: _Optional[int] = ...,
         loss_socialisation_amount: _Optional[str] = ...,
         position_status: _Optional[_Union[PositionStatus, str]] = ...,
+        taker_fees_paid: _Optional[str] = ...,
+        maker_fees_received: _Optional[str] = ...,
+        fees_paid: _Optional[str] = ...,
+        taker_fees_paid_since: _Optional[str] = ...,
+        maker_fees_received_since: _Optional[str] = ...,
+        fees_paid_since: _Optional[str] = ...,
+        funding_payment_amount: _Optional[str] = ...,
+        funding_payment_amount_since: _Optional[str] = ...,
     ) -> None: ...
 
 class PositionTrade(_message.Message):
@@ -1451,6 +1489,8 @@ class DispatchStrategy(_message.Message):
         "rank_table",
         "cap_reward_fee_multiple",
         "transfer_interval",
+        "target_notional_volume",
+        "eligible_keys",
     )
     ASSET_FOR_METRIC_FIELD_NUMBER: _ClassVar[int]
     METRIC_FIELD_NUMBER: _ClassVar[int]
@@ -1467,6 +1507,8 @@ class DispatchStrategy(_message.Message):
     RANK_TABLE_FIELD_NUMBER: _ClassVar[int]
     CAP_REWARD_FEE_MULTIPLE_FIELD_NUMBER: _ClassVar[int]
     TRANSFER_INTERVAL_FIELD_NUMBER: _ClassVar[int]
+    TARGET_NOTIONAL_VOLUME_FIELD_NUMBER: _ClassVar[int]
+    ELIGIBLE_KEYS_FIELD_NUMBER: _ClassVar[int]
     asset_for_metric: str
     metric: DispatchMetric
     markets: _containers.RepeatedScalarFieldContainer[str]
@@ -1482,6 +1524,8 @@ class DispatchStrategy(_message.Message):
     rank_table: _containers.RepeatedCompositeFieldContainer[Rank]
     cap_reward_fee_multiple: str
     transfer_interval: int
+    target_notional_volume: str
+    eligible_keys: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         asset_for_metric: _Optional[str] = ...,
@@ -1499,6 +1543,8 @@ class DispatchStrategy(_message.Message):
         rank_table: _Optional[_Iterable[_Union[Rank, _Mapping]]] = ...,
         cap_reward_fee_multiple: _Optional[str] = ...,
         transfer_interval: _Optional[int] = ...,
+        target_notional_volume: _Optional[str] = ...,
+        eligible_keys: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class Rank(_message.Message):
@@ -1730,6 +1776,16 @@ class ProductData(_message.Message):
         self, perpetual_data: _Optional[_Union[PerpetualData, _Mapping]] = ...
     ) -> None: ...
 
+class ProtocolAutomatedPurchaseData(_message.Message):
+    __slots__ = ("id", "order_id")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    ORDER_ID_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    order_id: str
+    def __init__(
+        self, id: _Optional[str] = ..., order_id: _Optional[str] = ...
+    ) -> None: ...
+
 class MarketData(_message.Message):
     __slots__ = (
         "mark_price",
@@ -1767,6 +1823,7 @@ class MarketData(_message.Message):
         "next_network_closeout",
         "mark_price_type",
         "mark_price_state",
+        "active_protocol_automated_purchase",
     )
     MARK_PRICE_FIELD_NUMBER: _ClassVar[int]
     BEST_BID_PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -1803,6 +1860,7 @@ class MarketData(_message.Message):
     NEXT_NETWORK_CLOSEOUT_FIELD_NUMBER: _ClassVar[int]
     MARK_PRICE_TYPE_FIELD_NUMBER: _ClassVar[int]
     MARK_PRICE_STATE_FIELD_NUMBER: _ClassVar[int]
+    ACTIVE_PROTOCOL_AUTOMATED_PURCHASE_FIELD_NUMBER: _ClassVar[int]
     mark_price: str
     best_bid_price: str
     best_bid_volume: int
@@ -1844,6 +1902,7 @@ class MarketData(_message.Message):
     next_network_closeout: int
     mark_price_type: _markets_pb2.CompositePriceType
     mark_price_state: CompositePriceState
+    active_protocol_automated_purchase: ProtocolAutomatedPurchaseData
     def __init__(
         self,
         mark_price: _Optional[str] = ...,
@@ -1889,6 +1948,9 @@ class MarketData(_message.Message):
         next_network_closeout: _Optional[int] = ...,
         mark_price_type: _Optional[_Union[_markets_pb2.CompositePriceType, str]] = ...,
         mark_price_state: _Optional[_Union[CompositePriceState, _Mapping]] = ...,
+        active_protocol_automated_purchase: _Optional[
+            _Union[ProtocolAutomatedPurchaseData, _Mapping]
+        ] = ...,
     ) -> None: ...
 
 class CompositePriceSource(_message.Message):

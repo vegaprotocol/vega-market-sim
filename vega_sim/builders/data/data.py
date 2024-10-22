@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 @raise_custom_build_errors
 def signer(
-    pub_key: vega_protos.data.v1.spec.PropertyKey,
+    pub_key: vega_protos.data.v1.data.PubKey,
     eth_address: Optional[str] = None,
 ) -> vega_protos.data.v1.spec.Filter:
     return vega_protos.data.v1.data.Signer(pub_key=pub_key, eth_address=eth_address)
