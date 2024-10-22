@@ -20,7 +20,6 @@ BASE = "base"
 QUOTE = "quote"
 
 
-@pytest.mark.integration
 @pytest.fixture(scope="function")
 def init_tests(vega_service):
     # Create a key for proposals.
@@ -142,6 +141,7 @@ def init_tests(vega_service):
     yield vega, market_id, base_asset_id, quote_asset_id
 
 
+@pytest.mark.integration
 def test_new_pap(init_tests):
     vega: VegaServiceNull
     vega, market_id, base_asset_id, quote_asset_id = init_tests
