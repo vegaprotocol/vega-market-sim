@@ -201,6 +201,7 @@ class Payload(_message.Message):
         "tx_cache",
         "evm_fwd_heartbeats",
         "volume_rebate_program",
+        "vaults",
     )
     ACTIVE_ASSETS_FIELD_NUMBER: _ClassVar[int]
     PENDING_ASSETS_FIELD_NUMBER: _ClassVar[int]
@@ -285,6 +286,7 @@ class Payload(_message.Message):
     TX_CACHE_FIELD_NUMBER: _ClassVar[int]
     EVM_FWD_HEARTBEATS_FIELD_NUMBER: _ClassVar[int]
     VOLUME_REBATE_PROGRAM_FIELD_NUMBER: _ClassVar[int]
+    VAULTS_FIELD_NUMBER: _ClassVar[int]
     active_assets: ActiveAssets
     pending_assets: PendingAssets
     banking_withdrawals: BankingWithdrawals
@@ -368,6 +370,7 @@ class Payload(_message.Message):
     tx_cache: TxCache
     evm_fwd_heartbeats: EVMFwdHeartbeats
     volume_rebate_program: VolumeRebateProgram
+    vaults: Vault
     def __init__(
         self,
         active_assets: _Optional[_Union[ActiveAssets, _Mapping]] = ...,
@@ -511,6 +514,7 @@ class Payload(_message.Message):
         tx_cache: _Optional[_Union[TxCache, _Mapping]] = ...,
         evm_fwd_heartbeats: _Optional[_Union[EVMFwdHeartbeats, _Mapping]] = ...,
         volume_rebate_program: _Optional[_Union[VolumeRebateProgram, _Mapping]] = ...,
+        vaults: _Optional[_Union[Vault, _Mapping]] = ...,
     ) -> None: ...
 
 class OrderHoldingQuantities(_message.Message):
@@ -753,18 +757,26 @@ class EventForwarder(_message.Message):
     ) -> None: ...
 
 class CollateralAccounts(_message.Message):
-    __slots__ = ("accounts", "next_balance_snapshot", "earmarked_balances")
+    __slots__ = (
+        "accounts",
+        "next_balance_snapshot",
+        "earmarked_balances",
+        "vault_owner",
+    )
     ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
     NEXT_BALANCE_SNAPSHOT_FIELD_NUMBER: _ClassVar[int]
     EARMARKED_BALANCES_FIELD_NUMBER: _ClassVar[int]
+    VAULT_OWNER_FIELD_NUMBER: _ClassVar[int]
     accounts: _containers.RepeatedCompositeFieldContainer[_vega_pb2.Account]
     next_balance_snapshot: int
     earmarked_balances: _containers.RepeatedCompositeFieldContainer[Earmarked]
+    vault_owner: _containers.RepeatedScalarFieldContainer[str]
     def __init__(
         self,
         accounts: _Optional[_Iterable[_Union[_vega_pb2.Account, _Mapping]]] = ...,
         next_balance_snapshot: _Optional[int] = ...,
         earmarked_balances: _Optional[_Iterable[_Union[Earmarked, _Mapping]]] = ...,
+        vault_owner: _Optional[_Iterable[str]] = ...,
     ) -> None: ...
 
 class Earmarked(_message.Message):
@@ -4363,4 +4375,86 @@ class ProtocolAutomatedPurchase(_message.Message):
         active_order: _Optional[str] = ...,
         side: _Optional[_Union[_vega_pb2.Side, str]] = ...,
         ready_to_stop: bool = ...,
+    ) -> None: ...
+
+class Vault(_message.Message):
+    __slots__ = ("vault_state",)
+    VAULT_STATE_FIELD_NUMBER: _ClassVar[int]
+    vault_state: _containers.RepeatedCompositeFieldContainer[VaultState]
+    def __init__(
+        self, vault_state: _Optional[_Iterable[_Union[VaultState, _Mapping]]] = ...
+    ) -> None: ...
+
+class VaultState(_message.Message):
+    __slots__ = (
+        "vault",
+        "share_holders",
+        "high_watermark",
+        "invested_amount",
+        "next_fee_calc",
+        "next_redemption_date_index",
+        "status",
+        "redeem_queue",
+        "late_redemptions",
+    )
+    VAULT_FIELD_NUMBER: _ClassVar[int]
+    SHARE_HOLDERS_FIELD_NUMBER: _ClassVar[int]
+    HIGH_WATERMARK_FIELD_NUMBER: _ClassVar[int]
+    INVESTED_AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    NEXT_FEE_CALC_FIELD_NUMBER: _ClassVar[int]
+    NEXT_REDEMPTION_DATE_INDEX_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    REDEEM_QUEUE_FIELD_NUMBER: _ClassVar[int]
+    LATE_REDEMPTIONS_FIELD_NUMBER: _ClassVar[int]
+    vault: _vega_pb2.Vault
+    share_holders: _containers.RepeatedCompositeFieldContainer[ShareHolder]
+    high_watermark: str
+    invested_amount: str
+    next_fee_calc: int
+    next_redemption_date_index: int
+    status: _vega_pb2.VaultStatus
+    redeem_queue: _containers.RepeatedCompositeFieldContainer[RedeemRequest]
+    late_redemptions: _containers.RepeatedCompositeFieldContainer[RedeemRequest]
+    def __init__(
+        self,
+        vault: _Optional[_Union[_vega_pb2.Vault, _Mapping]] = ...,
+        share_holders: _Optional[_Iterable[_Union[ShareHolder, _Mapping]]] = ...,
+        high_watermark: _Optional[str] = ...,
+        invested_amount: _Optional[str] = ...,
+        next_fee_calc: _Optional[int] = ...,
+        next_redemption_date_index: _Optional[int] = ...,
+        status: _Optional[_Union[_vega_pb2.VaultStatus, str]] = ...,
+        redeem_queue: _Optional[_Iterable[_Union[RedeemRequest, _Mapping]]] = ...,
+        late_redemptions: _Optional[_Iterable[_Union[RedeemRequest, _Mapping]]] = ...,
+    ) -> None: ...
+
+class ShareHolder(_message.Message):
+    __slots__ = ("party", "share")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    SHARE_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    share: str
+    def __init__(
+        self, party: _Optional[str] = ..., share: _Optional[str] = ...
+    ) -> None: ...
+
+class RedeemRequest(_message.Message):
+    __slots__ = ("party", "date", "amount", "remaining", "status")
+    PARTY_FIELD_NUMBER: _ClassVar[int]
+    DATE_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    REMAINING_FIELD_NUMBER: _ClassVar[int]
+    STATUS_FIELD_NUMBER: _ClassVar[int]
+    party: str
+    date: int
+    amount: str
+    remaining: str
+    status: _vega_pb2.RedeemStatus
+    def __init__(
+        self,
+        party: _Optional[str] = ...,
+        date: _Optional[int] = ...,
+        amount: _Optional[str] = ...,
+        remaining: _Optional[str] = ...,
+        status: _Optional[_Union[_vega_pb2.RedeemStatus, str]] = ...,
     ) -> None: ...

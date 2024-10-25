@@ -144,7 +144,7 @@ class SlimWallet(Wallet):
         transaction: Any,
         transaction_type: str,
         wallet_name: Optional[str] = None,
-    ):
+    ) -> str:
         # if self.remaining_until_height_update <= 0:
         #     self.block_height = self.core_client.LastBlockHeight(
         #         core_proto.LastBlockHeightRequest()
@@ -180,8 +180,9 @@ class SlimWallet(Wallet):
         )
 
         submit_future = self.core_client.SubmitTransaction.future(request)
-        self.pool.submit(lambda: submit_future.result())
+        result = self.pool.submit(lambda: submit_future.result()).result()
         self.remaining_until_height_update -= 1
+        return result.tx_hash.lower()
 
     def submit_raw_transaction(self, transaction: core_proto.SubmitTransactionRequest):
         submit_future = self.core_client.SubmitTransaction.future(transaction)

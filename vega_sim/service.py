@@ -222,6 +222,7 @@ class VegaService(ABC):
         self._market_to_settlement_asset = None
         self._market_to_base_asset = None
         self._market_to_quote_asset = None
+        self._key_to_vault_map = None
         self._listen_for_high_volume_stream_updates = (
             listen_for_high_volume_stream_updates
         )
@@ -1109,6 +1110,7 @@ class VegaService(ABC):
         trading_wallet: Optional[str] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        vault_id: Optional[str] = None,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -1151,6 +1153,7 @@ class VegaService(ABC):
             trading_key=trading_key,
             reduce_only=reduce_only,
             post_only=post_only,
+            vault_id=vault_id,
         )
 
     def submit_order(
@@ -1172,6 +1175,7 @@ class VegaService(ABC):
         peak_size: Optional[float] = None,
         minimum_visible_size: Optional[float] = None,
         round_to_tick: bool = True,
+        vault_id: Optional[str] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -1307,6 +1311,7 @@ class VegaService(ABC):
                 if (peak_size is not None and minimum_visible_size is not None)
                 else None
             ),
+            vault_id=vault_id,
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:
@@ -4328,3 +4333,124 @@ class VegaService(ABC):
             self.wait_fn(int(time_to_enactment / self.seconds_per_block) + 1)
         self.wait_for_thread_catchup()
         return proposal_id
+
+    def create_vault(
+        self,
+        key_name: str,
+        asset: str,
+        fee_period: datetime.timedelta,
+        management_fee_factor: float,
+        performance_fee_factor: float,
+        redemption_dates: List[vega_protos.vega.RedemptionDate],
+        cut_off_period_length: datetime.timedelta,
+        wallet_name: Optional[str] = None,
+    ) -> str:
+
+        # Currently no APIs exist for the vault. We need to create a
+        # temporary event stream and listen for vault creation events
+        # in order to extract the vault id.
+        transaction = build.commands.commands.create_vault(
+            asset=asset,
+            vault_metadata=vega_protos.vega.VaultMetaData(
+                name="MyVault",
+                description="MyVault",
+                url="MyVault",
+                image_url="MyVault",
+            ),
+            fee_period=int(fee_period.total_seconds()),
+            management_fee_factor=management_fee_factor,
+            performance_fee_factor=performance_fee_factor,
+            redemption_dates=redemption_dates,
+            cut_off_period_length=int(cut_off_period_length.total_seconds()),
+        )
+        return self.wallet.submit_transaction(
+            key_name=key_name,
+            wallet_name=wallet_name,
+            transaction=transaction,
+            transaction_type="create_vault",
+        )
+
+    def update_vault(
+        self,
+        key_name: str,
+        vault_id: str,
+        fee_period: datetime.timedelta,
+        management_fee_factor: float,
+        performance_fee_factor: float,
+        redemption_dates: List[vega_protos.vega.RedemptionDate],
+        cut_off_period_length: datetime.timedelta,
+        wallet_name: Optional[str] = None,
+    ) -> str:
+        transaction = build.commands.commands.update_vault(
+            vault_id=vault_id,
+            fee_period=int(fee_period.total_seconds()),
+            management_fee_factor=management_fee_factor,
+            performance_fee_factor=performance_fee_factor,
+            redemption_dates=redemption_dates,
+            cut_off_period_length=int(cut_off_period_length.total_seconds()),
+        )
+        return self.wallet.submit_transaction(
+            key_name=key_name,
+            wallet_name=wallet_name,
+            transaction=transaction,
+            transaction_type="update_vault",
+        )
+
+    def change_vault_ownership(
+        self,
+        key_name: str,
+        vault_id: str,
+        new_owner: str,
+        wallet_name: Optional[str] = None,
+    ):
+        transaction = build.commands.commands.change_vault_ownership(
+            vault_id=vault_id, new_owner=new_owner
+        )
+        self.wallet.submit_transaction(
+            key_name=key_name,
+            wallet_name=wallet_name,
+            transaction=transaction,
+            transaction_type="change_vault_ownership",
+        )
+
+    def deposit_to_vault(
+        self,
+        key_name: str,
+        vault_id: str,
+        amount: float,
+        asset_id: str,
+        wallet_name: Optional[str] = None,
+    ):
+        transaction = build.commands.commands.deposit_to_vault(
+            vault_id=vault_id,
+            amount=amount,
+            asset_id=asset_id,
+            asset_decimals=self.asset_decimals,
+        )
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            transaction_type="deposit_to_vault",
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )
+
+    def withdraw_from_vault(
+        self,
+        key_name: str,
+        vault_id: str,
+        amount: float,
+        asset_id: str,
+        wallet_name: Optional[str] = None,
+    ):
+        transaction = build.commands.commands.withdraw_from_vault(
+            vault_id=vault_id,
+            amount=amount,
+            asset_id=asset_id,
+            asset_decimals=self.asset_decimals,
+        )
+        self.wallet.submit_transaction(
+            transaction=transaction,
+            transaction_type="withdraw_from_vault",
+            key_name=key_name,
+            wallet_name=wallet_name,
+        )

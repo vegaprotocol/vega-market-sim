@@ -55,6 +55,11 @@ class InputData(_message.Message):
         "submit_amm",
         "amend_amm",
         "cancel_amm",
+        "create_vault",
+        "update_vault",
+        "deposit_to_vault",
+        "withdraw_from_vault",
+        "change_vault_ownership",
         "node_vote",
         "node_signature",
         "chain_event",
@@ -96,6 +101,11 @@ class InputData(_message.Message):
     SUBMIT_AMM_FIELD_NUMBER: _ClassVar[int]
     AMEND_AMM_FIELD_NUMBER: _ClassVar[int]
     CANCEL_AMM_FIELD_NUMBER: _ClassVar[int]
+    CREATE_VAULT_FIELD_NUMBER: _ClassVar[int]
+    UPDATE_VAULT_FIELD_NUMBER: _ClassVar[int]
+    DEPOSIT_TO_VAULT_FIELD_NUMBER: _ClassVar[int]
+    WITHDRAW_FROM_VAULT_FIELD_NUMBER: _ClassVar[int]
+    CHANGE_VAULT_OWNERSHIP_FIELD_NUMBER: _ClassVar[int]
     NODE_VOTE_FIELD_NUMBER: _ClassVar[int]
     NODE_SIGNATURE_FIELD_NUMBER: _ClassVar[int]
     CHAIN_EVENT_FIELD_NUMBER: _ClassVar[int]
@@ -136,6 +146,11 @@ class InputData(_message.Message):
     submit_amm: _commands_pb2.SubmitAMM
     amend_amm: _commands_pb2.AmendAMM
     cancel_amm: _commands_pb2.CancelAMM
+    create_vault: _commands_pb2.CreateVault
+    update_vault: _commands_pb2.UpdateVault
+    deposit_to_vault: _commands_pb2.DepositToVault
+    withdraw_from_vault: _commands_pb2.WithdrawFromVault
+    change_vault_ownership: _commands_pb2.ChangeVaultOwnership
     node_vote: _validator_commands_pb2.NodeVote
     node_signature: _validator_commands_pb2.NodeSignature
     chain_event: _validator_commands_pb2.ChainEvent
@@ -222,6 +237,17 @@ class InputData(_message.Message):
         submit_amm: _Optional[_Union[_commands_pb2.SubmitAMM, _Mapping]] = ...,
         amend_amm: _Optional[_Union[_commands_pb2.AmendAMM, _Mapping]] = ...,
         cancel_amm: _Optional[_Union[_commands_pb2.CancelAMM, _Mapping]] = ...,
+        create_vault: _Optional[_Union[_commands_pb2.CreateVault, _Mapping]] = ...,
+        update_vault: _Optional[_Union[_commands_pb2.UpdateVault, _Mapping]] = ...,
+        deposit_to_vault: _Optional[
+            _Union[_commands_pb2.DepositToVault, _Mapping]
+        ] = ...,
+        withdraw_from_vault: _Optional[
+            _Union[_commands_pb2.WithdrawFromVault, _Mapping]
+        ] = ...,
+        change_vault_ownership: _Optional[
+            _Union[_commands_pb2.ChangeVaultOwnership, _Mapping]
+        ] = ...,
         node_vote: _Optional[_Union[_validator_commands_pb2.NodeVote, _Mapping]] = ...,
         node_signature: _Optional[
             _Union[_validator_commands_pb2.NodeSignature, _Mapping]
