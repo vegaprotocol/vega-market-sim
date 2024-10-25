@@ -110,13 +110,18 @@ class StopOrderSetup(_message.Message):
     ) -> None: ...
 
 class StopOrdersCancellation(_message.Message):
-    __slots__ = ("market_id", "stop_order_id")
+    __slots__ = ("market_id", "stop_order_id", "vault_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     STOP_ORDER_ID_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     stop_order_id: str
+    vault_id: str
     def __init__(
-        self, market_id: _Optional[str] = ..., stop_order_id: _Optional[str] = ...
+        self,
+        market_id: _Optional[str] = ...,
+        stop_order_id: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class OrderSubmission(_message.Message):
@@ -133,6 +138,7 @@ class OrderSubmission(_message.Message):
         "post_only",
         "reduce_only",
         "iceberg_opts",
+        "vault_id",
     )
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     PRICE_FIELD_NUMBER: _ClassVar[int]
@@ -146,6 +152,7 @@ class OrderSubmission(_message.Message):
     POST_ONLY_FIELD_NUMBER: _ClassVar[int]
     REDUCE_ONLY_FIELD_NUMBER: _ClassVar[int]
     ICEBERG_OPTS_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     price: str
     size: int
@@ -158,6 +165,7 @@ class OrderSubmission(_message.Message):
     post_only: bool
     reduce_only: bool
     iceberg_opts: IcebergOpts
+    vault_id: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
@@ -172,6 +180,7 @@ class OrderSubmission(_message.Message):
         post_only: bool = ...,
         reduce_only: bool = ...,
         iceberg_opts: _Optional[_Union[IcebergOpts, _Mapping]] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class IcebergOpts(_message.Message):
@@ -187,7 +196,7 @@ class IcebergOpts(_message.Message):
     ) -> None: ...
 
 class UpdateMarginMode(_message.Message):
-    __slots__ = ("market_id", "mode", "margin_factor")
+    __slots__ = ("market_id", "mode", "margin_factor", "vault_id")
 
     class Mode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
@@ -201,24 +210,32 @@ class UpdateMarginMode(_message.Message):
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     MODE_FIELD_NUMBER: _ClassVar[int]
     MARGIN_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     mode: UpdateMarginMode.Mode
     margin_factor: str
+    vault_id: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         mode: _Optional[_Union[UpdateMarginMode.Mode, str]] = ...,
         margin_factor: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class OrderCancellation(_message.Message):
-    __slots__ = ("order_id", "market_id")
+    __slots__ = ("order_id", "market_id", "vault_id")
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     order_id: str
     market_id: str
+    vault_id: str
     def __init__(
-        self, order_id: _Optional[str] = ..., market_id: _Optional[str] = ...
+        self,
+        order_id: _Optional[str] = ...,
+        market_id: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class OrderAmendment(_message.Message):
@@ -232,6 +249,7 @@ class OrderAmendment(_message.Message):
         "pegged_offset",
         "pegged_reference",
         "size",
+        "vault_id",
     )
     ORDER_ID_FIELD_NUMBER: _ClassVar[int]
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
@@ -242,6 +260,7 @@ class OrderAmendment(_message.Message):
     PEGGED_OFFSET_FIELD_NUMBER: _ClassVar[int]
     PEGGED_REFERENCE_FIELD_NUMBER: _ClassVar[int]
     SIZE_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     order_id: str
     market_id: str
     price: str
@@ -251,6 +270,7 @@ class OrderAmendment(_message.Message):
     pegged_offset: str
     pegged_reference: _vega_pb2.PeggedReference
     size: int
+    vault_id: str
     def __init__(
         self,
         order_id: _Optional[str] = ...,
@@ -262,48 +282,59 @@ class OrderAmendment(_message.Message):
         pegged_offset: _Optional[str] = ...,
         pegged_reference: _Optional[_Union[_vega_pb2.PeggedReference, str]] = ...,
         size: _Optional[int] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class LiquidityProvisionSubmission(_message.Message):
-    __slots__ = ("market_id", "commitment_amount", "fee", "reference")
+    __slots__ = ("market_id", "commitment_amount", "fee", "reference", "vault_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     COMMITMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     FEE_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     commitment_amount: str
     fee: str
     reference: str
+    vault_id: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         commitment_amount: _Optional[str] = ...,
         fee: _Optional[str] = ...,
         reference: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class LiquidityProvisionCancellation(_message.Message):
-    __slots__ = ("market_id",)
+    __slots__ = ("market_id", "vault_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
-    def __init__(self, market_id: _Optional[str] = ...) -> None: ...
+    vault_id: str
+    def __init__(
+        self, market_id: _Optional[str] = ..., vault_id: _Optional[str] = ...
+    ) -> None: ...
 
 class LiquidityProvisionAmendment(_message.Message):
-    __slots__ = ("market_id", "commitment_amount", "fee", "reference")
+    __slots__ = ("market_id", "commitment_amount", "fee", "reference", "vault_id")
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     COMMITMENT_AMOUNT_FIELD_NUMBER: _ClassVar[int]
     FEE_FIELD_NUMBER: _ClassVar[int]
     REFERENCE_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     commitment_amount: str
     fee: str
     reference: str
+    vault_id: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         commitment_amount: _Optional[str] = ...,
         fee: _Optional[str] = ...,
         reference: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
     ) -> None: ...
 
 class WithdrawSubmission(_message.Message):
@@ -614,6 +645,7 @@ class SubmitAMM(_message.Message):
         "slippage_tolerance",
         "concentrated_liquidity_parameters",
         "proposed_fee",
+        "vault_id",
         "minimum_price_change_trigger",
     )
 
@@ -653,12 +685,14 @@ class SubmitAMM(_message.Message):
     SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
     CONCENTRATED_LIQUIDITY_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     MINIMUM_PRICE_CHANGE_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     commitment_amount: str
     slippage_tolerance: str
     concentrated_liquidity_parameters: SubmitAMM.ConcentratedLiquidityParameters
     proposed_fee: str
+    vault_id: str
     minimum_price_change_trigger: str
     def __init__(
         self,
@@ -669,6 +703,7 @@ class SubmitAMM(_message.Message):
             _Union[SubmitAMM.ConcentratedLiquidityParameters, _Mapping]
         ] = ...,
         proposed_fee: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
         minimum_price_change_trigger: _Optional[str] = ...,
     ) -> None: ...
 
@@ -679,6 +714,7 @@ class AmendAMM(_message.Message):
         "slippage_tolerance",
         "concentrated_liquidity_parameters",
         "proposed_fee",
+        "vault_id",
         "minimum_price_change_trigger",
     )
 
@@ -718,12 +754,14 @@ class AmendAMM(_message.Message):
     SLIPPAGE_TOLERANCE_FIELD_NUMBER: _ClassVar[int]
     CONCENTRATED_LIQUIDITY_PARAMETERS_FIELD_NUMBER: _ClassVar[int]
     PROPOSED_FEE_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     MINIMUM_PRICE_CHANGE_TRIGGER_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     commitment_amount: str
     slippage_tolerance: str
     concentrated_liquidity_parameters: AmendAMM.ConcentratedLiquidityParameters
     proposed_fee: str
+    vault_id: str
     minimum_price_change_trigger: str
     def __init__(
         self,
@@ -734,11 +772,12 @@ class AmendAMM(_message.Message):
             _Union[AmendAMM.ConcentratedLiquidityParameters, _Mapping]
         ] = ...,
         proposed_fee: _Optional[str] = ...,
+        vault_id: _Optional[str] = ...,
         minimum_price_change_trigger: _Optional[str] = ...,
     ) -> None: ...
 
 class CancelAMM(_message.Message):
-    __slots__ = ("market_id", "method")
+    __slots__ = ("market_id", "method", "vault_id")
 
     class Method(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
@@ -751,12 +790,123 @@ class CancelAMM(_message.Message):
     METHOD_REDUCE_ONLY: CancelAMM.Method
     MARKET_ID_FIELD_NUMBER: _ClassVar[int]
     METHOD_FIELD_NUMBER: _ClassVar[int]
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
     market_id: str
     method: CancelAMM.Method
+    vault_id: str
     def __init__(
         self,
         market_id: _Optional[str] = ...,
         method: _Optional[_Union[CancelAMM.Method, str]] = ...,
+        vault_id: _Optional[str] = ...,
+    ) -> None: ...
+
+class CreateVault(_message.Message):
+    __slots__ = (
+        "asset",
+        "vault_metadata",
+        "fee_period",
+        "management_fee_factor",
+        "performance_fee_factor",
+        "redemption_dates",
+        "cut_off_period_length",
+    )
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    VAULT_METADATA_FIELD_NUMBER: _ClassVar[int]
+    FEE_PERIOD_FIELD_NUMBER: _ClassVar[int]
+    MANAGEMENT_FEE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    PERFORMANCE_FEE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    REDEMPTION_DATES_FIELD_NUMBER: _ClassVar[int]
+    CUT_OFF_PERIOD_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    asset: str
+    vault_metadata: _vega_pb2.VaultMetaData
+    fee_period: str
+    management_fee_factor: str
+    performance_fee_factor: str
+    redemption_dates: _containers.RepeatedCompositeFieldContainer[
+        _vega_pb2.RedemptionDate
+    ]
+    cut_off_period_length: int
+    def __init__(
+        self,
+        asset: _Optional[str] = ...,
+        vault_metadata: _Optional[_Union[_vega_pb2.VaultMetaData, _Mapping]] = ...,
+        fee_period: _Optional[str] = ...,
+        management_fee_factor: _Optional[str] = ...,
+        performance_fee_factor: _Optional[str] = ...,
+        redemption_dates: _Optional[
+            _Iterable[_Union[_vega_pb2.RedemptionDate, _Mapping]]
+        ] = ...,
+        cut_off_period_length: _Optional[int] = ...,
+    ) -> None: ...
+
+class ChangeVaultOwnership(_message.Message):
+    __slots__ = ("vault_id", "new_owner")
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
+    NEW_OWNER_FIELD_NUMBER: _ClassVar[int]
+    vault_id: str
+    new_owner: str
+    def __init__(
+        self, vault_id: _Optional[str] = ..., new_owner: _Optional[str] = ...
+    ) -> None: ...
+
+class UpdateVault(_message.Message):
+    __slots__ = (
+        "vault_id",
+        "vault_metadata",
+        "fee_period",
+        "management_fee_factor",
+        "performance_fee_factor",
+        "redemption_dates",
+        "cut_off_period_length",
+    )
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
+    VAULT_METADATA_FIELD_NUMBER: _ClassVar[int]
+    FEE_PERIOD_FIELD_NUMBER: _ClassVar[int]
+    MANAGEMENT_FEE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    PERFORMANCE_FEE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    REDEMPTION_DATES_FIELD_NUMBER: _ClassVar[int]
+    CUT_OFF_PERIOD_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    vault_id: str
+    vault_metadata: _vega_pb2.VaultMetaData
+    fee_period: str
+    management_fee_factor: str
+    performance_fee_factor: str
+    redemption_dates: _containers.RepeatedCompositeFieldContainer[
+        _vega_pb2.RedemptionDate
+    ]
+    cut_off_period_length: int
+    def __init__(
+        self,
+        vault_id: _Optional[str] = ...,
+        vault_metadata: _Optional[_Union[_vega_pb2.VaultMetaData, _Mapping]] = ...,
+        fee_period: _Optional[str] = ...,
+        management_fee_factor: _Optional[str] = ...,
+        performance_fee_factor: _Optional[str] = ...,
+        redemption_dates: _Optional[
+            _Iterable[_Union[_vega_pb2.RedemptionDate, _Mapping]]
+        ] = ...,
+        cut_off_period_length: _Optional[int] = ...,
+    ) -> None: ...
+
+class DepositToVault(_message.Message):
+    __slots__ = ("vault_id", "amount")
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    vault_id: str
+    amount: str
+    def __init__(
+        self, vault_id: _Optional[str] = ..., amount: _Optional[str] = ...
+    ) -> None: ...
+
+class WithdrawFromVault(_message.Message):
+    __slots__ = ("vault_id", "amount")
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
+    AMOUNT_FIELD_NUMBER: _ClassVar[int]
+    vault_id: str
+    amount: str
+    def __init__(
+        self, vault_id: _Optional[str] = ..., amount: _Optional[str] = ...
     ) -> None: ...
 
 class DelayedTransactionsWrapper(_message.Message):

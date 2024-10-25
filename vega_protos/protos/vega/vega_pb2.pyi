@@ -162,6 +162,7 @@ class AccountType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     ACCOUNT_TYPE_BUY_BACK_FEES: _ClassVar[AccountType]
     ACCOUNT_TYPE_REWARD_AVERAGE_NOTIONAL: _ClassVar[AccountType]
     ACCOUNT_TYPE_REWARD_ELIGIBLE_ENTITIES: _ClassVar[AccountType]
+    ACCOUNT_TYPE_LOCKED_FOR_STAKING: _ClassVar[AccountType]
 
 class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -215,6 +216,8 @@ class TransferType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     TRANSFER_TYPE_BUY_BACK_FEE_PAY: _ClassVar[TransferType]
     TRANSFER_TYPE_HIGH_MAKER_FEE_REBATE_PAY: _ClassVar[TransferType]
     TRANSFER_TYPE_HIGH_MAKER_FEE_REBATE_RECEIVE: _ClassVar[TransferType]
+    TRANSFER_TYPE_DEPOSIT_TO_VAULT: _ClassVar[TransferType]
+    TRANSFER_TYPE_WITHDRAW_FROM_VAULT: _ClassVar[TransferType]
 
 class DispatchMetric(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -275,6 +278,26 @@ class MarginMode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     MARGIN_MODE_UNSPECIFIED: _ClassVar[MarginMode]
     MARGIN_MODE_CROSS_MARGIN: _ClassVar[MarginMode]
     MARGIN_MODE_ISOLATED_MARGIN: _ClassVar[MarginMode]
+
+class RedemptionType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    REDEMPTION_TYPE_UNSPECIFIED: _ClassVar[RedemptionType]
+    REDEMPTION_TYPE_NORMAL: _ClassVar[RedemptionType]
+    REDEMPTION_TYPE_FREE_CASH_ONLY: _ClassVar[RedemptionType]
+
+class RedeemStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    REDEEM_STATUS_UNSPECIFIED: _ClassVar[RedeemStatus]
+    REDEEM_STATUS_PENDING: _ClassVar[RedeemStatus]
+    REDEEM_STATUS_LATE: _ClassVar[RedeemStatus]
+    REDEEM_STATUS_COMPLETED: _ClassVar[RedeemStatus]
+
+class VaultStatus(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    VAULT_STATUS_UNSPECIFIED: _ClassVar[VaultStatus]
+    VAULT_STATUS_ACTIVE: _ClassVar[VaultStatus]
+    VAULT_STATUS_STOPPING: _ClassVar[VaultStatus]
+    VAULT_STATUS_STOPPED: _ClassVar[VaultStatus]
 
 SIDE_UNSPECIFIED: Side
 SIDE_BUY: Side
@@ -400,6 +423,7 @@ ACCOUNT_TYPE_REWARD_REALISED_RETURN: AccountType
 ACCOUNT_TYPE_BUY_BACK_FEES: AccountType
 ACCOUNT_TYPE_REWARD_AVERAGE_NOTIONAL: AccountType
 ACCOUNT_TYPE_REWARD_ELIGIBLE_ENTITIES: AccountType
+ACCOUNT_TYPE_LOCKED_FOR_STAKING: AccountType
 TRANSFER_TYPE_UNSPECIFIED: TransferType
 TRANSFER_TYPE_LOSS: TransferType
 TRANSFER_TYPE_WIN: TransferType
@@ -450,6 +474,8 @@ TRANSFER_TYPE_TREASURY_FEE_PAY: TransferType
 TRANSFER_TYPE_BUY_BACK_FEE_PAY: TransferType
 TRANSFER_TYPE_HIGH_MAKER_FEE_REBATE_PAY: TransferType
 TRANSFER_TYPE_HIGH_MAKER_FEE_REBATE_RECEIVE: TransferType
+TRANSFER_TYPE_DEPOSIT_TO_VAULT: TransferType
+TRANSFER_TYPE_WITHDRAW_FROM_VAULT: TransferType
 DISPATCH_METRIC_UNSPECIFIED: DispatchMetric
 DISPATCH_METRIC_MAKER_FEES_PAID: DispatchMetric
 DISPATCH_METRIC_MAKER_FEES_RECEIVED: DispatchMetric
@@ -486,6 +512,17 @@ VALIDATOR_NODE_STATUS_PENDING: ValidatorNodeStatus
 MARGIN_MODE_UNSPECIFIED: MarginMode
 MARGIN_MODE_CROSS_MARGIN: MarginMode
 MARGIN_MODE_ISOLATED_MARGIN: MarginMode
+REDEMPTION_TYPE_UNSPECIFIED: RedemptionType
+REDEMPTION_TYPE_NORMAL: RedemptionType
+REDEMPTION_TYPE_FREE_CASH_ONLY: RedemptionType
+REDEEM_STATUS_UNSPECIFIED: RedeemStatus
+REDEEM_STATUS_PENDING: RedeemStatus
+REDEEM_STATUS_LATE: RedeemStatus
+REDEEM_STATUS_COMPLETED: RedeemStatus
+VAULT_STATUS_UNSPECIFIED: VaultStatus
+VAULT_STATUS_ACTIVE: VaultStatus
+VAULT_STATUS_STOPPING: VaultStatus
+VAULT_STATUS_STOPPED: VaultStatus
 
 class PartyProfile(_message.Message):
     __slots__ = ("party_id", "alias", "metadata", "derived_keys")
@@ -3105,4 +3142,80 @@ class VolumeRebateProgram(_message.Message):
         ] = ...,
         end_of_program_timestamp: _Optional[int] = ...,
         window_length: _Optional[int] = ...,
+    ) -> None: ...
+
+class Vault(_message.Message):
+    __slots__ = (
+        "vault_id",
+        "owner",
+        "asset",
+        "vault_metadata",
+        "fee_period",
+        "management_fee_factor",
+        "performance_fee_factor",
+        "cut_off_period_length",
+        "redemption_dates",
+    )
+    VAULT_ID_FIELD_NUMBER: _ClassVar[int]
+    OWNER_FIELD_NUMBER: _ClassVar[int]
+    ASSET_FIELD_NUMBER: _ClassVar[int]
+    VAULT_METADATA_FIELD_NUMBER: _ClassVar[int]
+    FEE_PERIOD_FIELD_NUMBER: _ClassVar[int]
+    MANAGEMENT_FEE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    PERFORMANCE_FEE_FACTOR_FIELD_NUMBER: _ClassVar[int]
+    CUT_OFF_PERIOD_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    REDEMPTION_DATES_FIELD_NUMBER: _ClassVar[int]
+    vault_id: str
+    owner: str
+    asset: str
+    vault_metadata: VaultMetaData
+    fee_period: str
+    management_fee_factor: str
+    performance_fee_factor: str
+    cut_off_period_length: int
+    redemption_dates: _containers.RepeatedCompositeFieldContainer[RedemptionDate]
+    def __init__(
+        self,
+        vault_id: _Optional[str] = ...,
+        owner: _Optional[str] = ...,
+        asset: _Optional[str] = ...,
+        vault_metadata: _Optional[_Union[VaultMetaData, _Mapping]] = ...,
+        fee_period: _Optional[str] = ...,
+        management_fee_factor: _Optional[str] = ...,
+        performance_fee_factor: _Optional[str] = ...,
+        cut_off_period_length: _Optional[int] = ...,
+        redemption_dates: _Optional[_Iterable[_Union[RedemptionDate, _Mapping]]] = ...,
+    ) -> None: ...
+
+class VaultMetaData(_message.Message):
+    __slots__ = ("name", "description", "url", "image_url")
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    URL_FIELD_NUMBER: _ClassVar[int]
+    IMAGE_URL_FIELD_NUMBER: _ClassVar[int]
+    name: str
+    description: str
+    url: str
+    image_url: str
+    def __init__(
+        self,
+        name: _Optional[str] = ...,
+        description: _Optional[str] = ...,
+        url: _Optional[str] = ...,
+        image_url: _Optional[str] = ...,
+    ) -> None: ...
+
+class RedemptionDate(_message.Message):
+    __slots__ = ("redemption_date", "redemption_type", "max_fraction")
+    REDEMPTION_DATE_FIELD_NUMBER: _ClassVar[int]
+    REDEMPTION_TYPE_FIELD_NUMBER: _ClassVar[int]
+    MAX_FRACTION_FIELD_NUMBER: _ClassVar[int]
+    redemption_date: int
+    redemption_type: RedemptionType
+    max_fraction: str
+    def __init__(
+        self,
+        redemption_date: _Optional[int] = ...,
+        redemption_type: _Optional[_Union[RedemptionType, str]] = ...,
+        max_fraction: _Optional[str] = ...,
     ) -> None: ...
