@@ -268,7 +268,7 @@ class VegaWallet(Wallet):
         transaction_type: str,
         wallet_name: Optional[int] = None,
         max_retries: int = 20,
-    ):
+    ) -> str:
         wallet_name = (
             wallet_name if wallet_name is not None else self.vega_default_wallet_name
         )
@@ -310,7 +310,7 @@ class VegaWallet(Wallet):
                     with self._mutex:
                         response = requests.post(url, headers=headers, json=submission)
                 response.raise_for_status()
-                return
+                return response.json()["result"]["transactionHash"]
             except requests.exceptions.HTTPError as e:
                 exception = e
                 if 400 <= exception.response.status_code < 500:

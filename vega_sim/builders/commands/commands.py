@@ -368,3 +368,72 @@ def cancel_amm(
     return vega_protos.commands.v1.commands.CancelAMM(
         market_id=market_id, method=method
     )
+
+
+@raise_custom_build_errors
+def create_vault(
+    asset: str,
+    vault_metadata: vega_protos.vega.VaultMetaData,
+    fee_period: int,
+    management_fee_factor: float,
+    performance_fee_factor: float,
+    redemption_dates: List[vega_protos.vega.RedemptionDate],
+    cut_off_period_length: int,
+) -> vega_protos.commands.v1.commands.CreateVault:
+    transaction = vega_protos.commands.v1.commands.CreateVault(
+        asset=asset,
+        vault_metadata=vault_metadata,
+        fee_period=f"{24*7}h",
+        management_fee_factor=str(management_fee_factor),
+        performance_fee_factor=str(performance_fee_factor),
+        redemption_dates=redemption_dates,
+        cut_off_period_length=cut_off_period_length,
+    )
+    return transaction
+
+
+@raise_custom_build_errors
+def update_vault(
+    vault_id: str,
+    vault_metadata: Optional[vega_protos.vega.VaultMetaData] = None,
+    fee_period: Optional[int] = None,
+    management_fee_factor: Optional[float] = None,
+    redemption_dates: Optional[List[vega_protos.vega.RedemptionDate]] = None,
+    cut_off_period_length: Optional[int] = None,
+) -> vega_protos.commands.v1.commands.UpdateVault:
+    return vega_protos.commands.v1.commands.UpdateVault(
+        vault_id=vault_id,
+        vault_metadata=vault_metadata,
+        fee_period=fee_period,
+        management_fee_factor=(
+            str(management_fee_factor) if management_fee_factor else None
+        ),
+        redemption_dates=redemption_dates,
+        cut_off_period_length=cut_off_period_length,
+    )
+
+
+@raise_custom_build_errors
+def deposit_to_vault(
+    vault_id: str,
+    amount: float,
+    asset_id: str,
+    asset_decimals: Dict[str, int],
+) -> vega_protos.commands.v1.commands.DepositToVault:
+    return vega_protos.commands.v1.commands.DepositToVault(
+        vault_id=vault_id,
+        amount=str(num_to_padded_int(amount, asset_decimals[asset_id])),
+    )
+
+
+@raise_custom_build_errors
+def withdraw_from_vault(
+    vault_id: str,
+    amount: float,
+    asset_id: str,
+    asset_decimals: Dict[str, int],
+) -> vega_protos.commands.v1.commands.WithdrawFromVault:
+    return vega_protos.commands.v1.commands.WithdrawFromVault(
+        vault_id=vault_id,
+        amount=str(num_to_padded_int(amount, asset_decimals[asset_id])),
+    )
