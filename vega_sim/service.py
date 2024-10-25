@@ -1110,6 +1110,7 @@ class VegaService(ABC):
         trading_wallet: Optional[str] = None,
         reduce_only: bool = False,
         post_only: bool = False,
+        vault_id: Optional[str] = None,
     ) -> str:
         """Places a simple Market order, either as Fill-Or-Kill or Immediate-Or-Cancel.
 
@@ -1152,6 +1153,7 @@ class VegaService(ABC):
             trading_key=trading_key,
             reduce_only=reduce_only,
             post_only=post_only,
+            vault_id=vault_id,
         )
 
     def submit_order(
@@ -1173,6 +1175,7 @@ class VegaService(ABC):
         peak_size: Optional[float] = None,
         minimum_visible_size: Optional[float] = None,
         round_to_tick: bool = True,
+        vault_id: Optional[str] = None,
     ) -> Optional[str]:
         """
         Submit orders as specified to required pre-existing market.
@@ -1308,6 +1311,7 @@ class VegaService(ABC):
                 if (peak_size is not None and minimum_visible_size is not None)
                 else None
             ),
+            vault_id=vault_id,
         )
 
     def get_blockchain_time(self, in_seconds: bool = False) -> int:

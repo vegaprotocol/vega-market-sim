@@ -56,6 +56,7 @@ def submit_order(
     reduce_only: bool = False,
     post_only: bool = False,
     iceberg_opts: Optional[vega_protos.commands.IcebergOpts] = None,
+    vault_id: Optional[str] = None,
 ) -> Optional[str]:
     """
     Submit orders as specified to required pre-existing market.
@@ -127,6 +128,7 @@ def submit_order(
         reduce_only=reduce_only,
         post_only=post_only,
         iceberg_opts=iceberg_opts,
+        vault_id=vault_id,
     )
 
     # Sign the transaction with an order submission command
@@ -525,6 +527,7 @@ def order_submission(
     reduce_only: bool = False,
     post_only: bool = False,
     iceberg_opts: Optional[vega_protos.commands.v1.IcebergOpts] = None,
+    vault_id: Optional[str] = None,
 ) -> OrderSubmission:
     """Creates a Vega OrderSubmission object.
 
@@ -585,6 +588,7 @@ def order_submission(
         type=order_type,
         reduce_only=reduce_only,
         post_only=post_only,
+        vault_id=vault_id,
     )
 
     # Update OrderSubmission object with optional fields if specified

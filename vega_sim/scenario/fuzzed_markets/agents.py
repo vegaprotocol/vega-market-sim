@@ -4,7 +4,7 @@ import random
 import string
 import uuid
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Iterable, List, NamedTuple, Optional
 from uuid import uuid4
 
@@ -2005,3 +2005,148 @@ class FuzzedAutomatedMarketMaker(StateAgentWithWallet):
                 transaction_type="cancel_amm",
                 wallet_name=self.wallet_name,
             )
+
+
+class FuzzedVault(StateAgentWithWallet):
+    """
+
+    Agent creates a vault and generates n keys which it randomly assigns
+    ownership of the vault.
+
+    Initially:
+
+    - create a default redemption schedule
+    - create a sensible pool
+    - generate n keys and deposit a random amount
+
+    Each step:
+
+    - randomly assign ownership to a key using a random key
+    - randomly generate an order using the correct key
+    - randomly generate an order using any key
+    - randomly generate a redemption request using any key
+    - randomly generate a deposit using any key
+
+    Note for now we are skipping fuzzing pool updates.
+    """
+
+    NAME_BASE = "FuzzedVault"
+
+    def __init__(
+        self,
+        base_key_name: str,
+        market_name: str,
+        max_deposit_amount: float,
+        max_order_size: float,
+        initial_asset_mint: float = 1e9,
+        random_state: Optional[RandomState] = None,
+        tag: Optional[str] = None,
+        wallet_name: Optional[str] = None,
+        state_update_freq: Optional[int] = None,
+    ):
+        super().__init__(base_key_name, tag, wallet_name, state_update_freq)
+
+        self.market_name = market_name
+        self.max_deposit_amount = max_deposit_amount
+        self.max_order_size = max_order_size
+        self.initial_asset_mint = initial_asset_mint
+
+        self.keys = set()
+
+        self.random_state = random_state if random_state is not None else RandomState()
+
+    def initialise(
+        self,
+        vega: VegaServiceNull,
+        create_key: bool = True,
+        mint_key: bool = False,
+    ):
+        self.vega = vega
+        # Set a root public key to align with convention, then generate
+        # a set of n public keys to assign to the vault.
+        self._public_key = None
+        for i in range(10):
+            key_name = self.key_name + str(i)
+            self.vega.create_key(
+                name=key_name,
+                wallet_name=self.wallet_name,
+            )
+            self.keys.add(key_name)
+            if self._public_key is None:
+                self._public_key = vega.wallet.public_key(
+                    name=key_name, wallet_name=self.wallet_name
+                )
+        # Randomly assign the first owner and set the key name
+        self.owner = self.random_state.choice(list(self.keys))
+        self.key_name = self.owner
+        self.market_id = self.vega.find_market_id(name=self.market_name)
+        self.asset_id = self.vega.market_to_asset[self.market_id]
+        asset_ids = [
+            self.vega.market_to_settlement_asset[self.market_id],
+            self.vega.market_to_base_asset[self.market_id],
+            self.vega.market_to_quote_asset[self.market_id],
+        ]
+        now = self.vega.get_blockchain_time(in_seconds=True)
+        redemption_dates = [
+            vega_protos.vega.RedemptionDate(
+                redemption_date=int(now + i * 300),
+                redemption_type=self.random_state.choice(
+                    [
+                        vega_protos.vega.RedemptionType.REDEMPTION_TYPE_NORMAL,
+                        vega_protos.vega.RedemptionType.REDEMPTION_TYPE_FREE_CASH_ONLY,
+                    ]
+                ),
+                max_fraction=str(self.random_state.uniform(1e-6, 1)),
+            )
+            for i in range(20)
+        ]
+        for key in list(self.keys):
+            self.vega.mint(
+                key_name=key,
+                wallet_name=self.wallet_name,
+                asset=self.asset_id,
+                amount=self.initial_asset_mint,
+            )
+            self.vega.wait_for_total_catchup()
+        self.vault_id = self.vega.create_vault(
+            key_name=self.owner,
+            wallet_name=self.wallet_name,
+            asset=self.asset_id,
+            fee_period=timedelta(seconds=120),
+            management_fee_factor=0.001,
+            performance_fee_factor=0.001,
+            redemption_dates=redemption_dates,
+            cut_off_period_length=timedelta(seconds=120),
+        )
+
+    def step(self, vega_state) -> None:
+        side = self.random_state.choice(["SIDE_BUY", "SIDE_SELL"])
+        volume = self.random_state.uniform(0, self.max_order_size)
+        self.vega.submit_market_order(
+            trading_key=self.owner,
+            market_id=self.market_id,
+            side=side,
+            volume=volume,
+            wait=False,
+            fill_or_kill=False,
+            trading_wallet=self.wallet_name,
+            vault_id=self.vault_id,
+        )
+        key = self.random_state.choice(list(self.keys))
+        deposit_amount = self.random_state.uniform(0, self.max_deposit_amount)
+        self.vega.deposit_to_vault(
+            key_name=key,
+            wallet_name=self.wallet_name,
+            vault_id=self.vault_id,
+            amount=deposit_amount,
+            asset_id=self.asset_id,
+        )
+        key = self.random_state.choice(list(self.keys))
+        redemption_amount = self.random_state.uniform(0, self.max_deposit_amount)
+        self.vega.withdraw_from_vault(
+            key_name=key,
+            wallet_name=self.wallet_name,
+            vault_id=self.vault_id,
+            amount=redemption_amount,
+            asset_id=self.asset_id,
+        )

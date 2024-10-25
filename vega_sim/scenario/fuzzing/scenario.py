@@ -24,6 +24,7 @@ from vega_sim.scenario.fuzzed_markets.agents import (
     FuzzyReferralProgramManager,
     FuzzyVolumeRebateProgramManager,
     FuzzyVolumeDiscountProgramManager,
+    FuzzedVault,
 )
 
 
@@ -137,7 +138,19 @@ class FuzzingScenario(BenchmarkScenario):
         for benchmark_config in self.benchmark_configs:
             market_name = benchmark_config.market_config.instrument.name
             market_code = benchmark_config.market_config.instrument.code
+
             if self.__fuzz_traders:
+                extra_agents.append(
+                    FuzzedVault(
+                        base_key_name=f"FuzzedVault_{market_code}",
+                        wallet_name="FuzzedVault",
+                        market_name=market_name,
+                        initial_asset_mint=1e6,
+                        max_deposit_amount=1e3,
+                        max_order_size=100 / benchmark_config.price_process[0],
+                        tag=f"{market_code}",
+                    )
+                )
                 extra_agents.extend(
                     [
                         ReferralAgentWrapper(
