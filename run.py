@@ -10,7 +10,7 @@ from tianshou.trainer import offpolicy_trainer
 from tianshou.utils import TensorboardLogger
 from tianshou.utils.net.common import Net
 
-import vega_sim.reinforcement.v2.pettingzoo.environment as pz
+import vega_sim.reinforcement.v2.pettingzoo.environment_updated as pz
 
 
 def get_agents(env: pz.MultiAgentVegaEnv):
@@ -107,7 +107,7 @@ if __name__ == "__main__":
             policy,
             train_collector,
             test_collector,
-            max_epoch=300,
+            max_epoch=100, #300,
             step_per_epoch=600,
             step_per_collect=50,
             episode_per_test=3,

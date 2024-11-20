@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Type
+from copy import deepcopy
 
 from gymnasium import spaces
 from pettingzoo.utils.env import AgentID, ParallelEnv
@@ -40,8 +41,14 @@ ACTION_TO_AGENT = {
 class AgentConfig:
     action_type: ActionType
     state_type: Type[State]
+    party: str  # Added party attribute here
+    initial_fund: float = 1e5
     reward_type: Optional[Reward] = None
     terminal_reward_type: Optional[Reward] = None
+    hidden_layers: int = 1
+    hidden_units:int = 16
+    learning_rate: float= 0.001
+    target_update_freq: int = 10
 
 
 class MultiAgentVegaEnv(ParallelEnv):
@@ -53,20 +60,28 @@ class MultiAgentVegaEnv(ParallelEnv):
         self,
         agents: List[AgentConfig],
         num_levels_state: int = 5,
-        trade_volume: float = 1,
         steps_per_trading_session: int = 1000,
-        unified_reward: Optional[Reward] = None,
+        trade_volume_levels = 11,
+        sigma=100,
+        q_upper=15,
+        q_lower=-15,
+        initial_price=1000.0,
+        lp_commitamount=1e5,
+        initial_asset_mint=2e5,
+        buy_intensity=10,
+        sell_intensity=10,
+        is_test=False,
     ):
         super().__init__()
+        self.is_test= is_test
         self.num_levels_state = num_levels_state
         self.agent_configs = agents
-        self.trade_volume = trade_volume
         self.steps_per_trading_session = steps_per_trading_session
         self.current_step = 0
+        self.trade_volume_levels = trade_volume_levels
         self.learner_names = {
             str(i): f"learner_{i}" for i in range(len(self.agent_configs))
         }
-        self.unified_reward = unified_reward
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -81,22 +96,26 @@ class MultiAgentVegaEnv(ParallelEnv):
             for (i, agent_config) in enumerate(self.agent_configs)
         }
 
+        self._fund_list = [agent_config.initial_fund for agent_config in self.agent_configs]
+
         scenario = CurveMarketMaker(
             market_decimal=3,
             asset_decimal=5,
             market_position_decimal=2,
-            initial_price=1000.0,
-            lp_commitamount=100000,
-            initial_asset_mint=1e8,
+            initial_price=initial_price,
+            lp_commitamount=lp_commitamount,
+            initial_asset_mint=initial_asset_mint,
             step_length_seconds=1,
             block_length_seconds=1,
-            buy_intensity=5,
-            sell_intensity=5,
+            buy_intensity=buy_intensity,
+            sell_intensity=sell_intensity,
             market_name="ETH",
             num_steps=self.steps_per_trading_session * 2,
             random_agent_ordering=False,
-            sigma=100,
+            sigma=sigma,
             asset_name="DAI",
+            q_upper=q_upper,
+            q_lower=q_lower,
         )
 
         self.env = Environment(
@@ -109,25 +128,28 @@ class MultiAgentVegaEnv(ParallelEnv):
                     learner_name: self.agent_configs[int(i)].reward_type
                     for (i, learner_name) in self.learner_names.items()
                 }
-                if self.unified_reward is None
-                else self.unified_reward
             ),
             agent_to_state={
                 learner_name: self.agent_configs[int(i)].state_type
                 for (i, learner_name) in self.learner_names.items()
             },
             scenario=scenario,
+            fund_list=self._fund_list,
         )
         self.agents = list(self.learner_names.keys())
         self.possible_agents = self.agents
+        if self.is_test: self.record_dict={agent_name:0 for agent_id, agent_name in self.learner_names.items()}
 
     def _get_action_space(self, action_type: ActionType) -> spaces.Space:
         if action_type == ActionType.MARKET:
-            return spaces.Discrete(3)
+            self.num_actions_side =3
         elif action_type == ActionType.AT_TOUCH_ONE_SIDE:
-            return spaces.Discrete(2)
+            self.num_actions_side =2
         else:
+            self.num_actions_side =0
             raise Exception(f"Action type {action_type} is not implemented")
+        
+        return spaces.Tuple((spaces.Discrete(self.num_actions_side), spaces.Discrete(self.trade_volume_levels)))
 
     def _get_observation_space(self, state_type: Type[State]) -> spaces.Space:
         if state_type == PriceStateWithFees:
@@ -135,26 +157,37 @@ class MultiAgentVegaEnv(ParallelEnv):
         if state_type == PositionOnly:
             return position_state_with_fees_obs_space()
 
-    def _action_conversion(self, agent, action):
+    def _convert_one_dimensional_action(self, one_dim_action):
+        action_type = one_dim_action // self.trade_volume_levels
+        trade_volume_level = one_dim_action % self.trade_volume_levels
+        return (action_type, trade_volume_level)
+
+    def _action_conversion(self, agent, one_dim_action):
+        action = self._convert_one_dimensional_action(one_dim_action)
         agent_config = self.agent_configs[int(agent)]
+        action_type, trade_volume_level = action
+        trade_volume = trade_volume_level
+
         if agent_config.action_type == ActionType.MARKET:
             return AGENT_TYPE_TO_ACTION[AgentType.MARKET_ORDER](
-                side=Side(action), volume=self.trade_volume
+                side=Side(action_type), volume=trade_volume
             )
         elif agent_config.action_type == ActionType.AT_TOUCH_ONE_SIDE:
             return AGENT_TYPE_TO_ACTION[AgentType.AT_TOUCH](
-                side=ForcedSide(action), volume=self.trade_volume
+                side=ForcedSide(action_type), volume=trade_volume
             )
         else:
             raise Exception(
                 f"Action type {agent_config.action_type} is not implemented"
             )
 
+
+
     def step(self, actions):
         step_res = self.env.step(
             {
                 self.learner_names[agent]: self._action_conversion(
-                    action=action, agent=agent
+                    one_dim_action=action, agent=agent
                 )
                 for (agent, action) in actions.items()
             }
@@ -169,10 +202,11 @@ class MultiAgentVegaEnv(ParallelEnv):
         self.latest_truncations = {}
         self.latest_infos = {}
 
+        # First pass: Calculate total reward and count for each party
+        party_rewards = {}
+        party_counts = {}
         for agent_id, agent_name in self.learner_names.items():
             agent_step_res = step_res[agent_name]
-            self.latest_observations[agent_id] = agent_step_res.observation.to_array()
-
             reward = agent_step_res.reward
             if (
                 is_terminal
@@ -186,10 +220,28 @@ class MultiAgentVegaEnv(ParallelEnv):
                     market_id=self.env._market_id,
                 )
                 reward += self.env.calculate_reward(terminal_reward)
-            self.latest_rewards[str(agent_id)] = reward
+            
+            party = self.agent_configs[int(agent_id)].party
+            party_rewards[party] = party_rewards.get(party, 0) + reward
+            party_counts[party] = party_counts.get(party, 0) + 1
+            if self.is_test==True: self.record_dict[agent_name]+=reward
+
+
+        # Second pass: Assign average reward to agents in each party
+        for agent_id, agent_name in self.learner_names.items():
+            party = self.agent_configs[int(agent_id)].party
+            average_reward = party_rewards[party] / party_counts[party]
+            
+            self.latest_rewards[str(agent_id)] = average_reward
+            # for debugging
+            #print(str(agent_id),average_reward)
+            self.latest_observations[agent_id] = step_res[agent_name].observation.to_array()
             self.latest_terminations[str(agent_id)] = is_terminal
             self.latest_truncations[str(agent_id)] = False
             self.latest_infos[str(agent_id)] = {}
+        
+        if is_terminal and self.is_test:print(self.record_dict)
+
 
         return (
             self.latest_observations,
@@ -224,7 +276,31 @@ class MultiAgentVegaEnv(ParallelEnv):
         return self.observation_spaces[agent]
 
 
+class RewardEva():
+    def __init__(self,rewards,print_out=False):
+        self.rewards=rewards
+        if print_out:
+            print(rewards.sum(axis=0)/len(rewards))
+
+    def diff(self):
+        return self.rewards[:,0]-self.rewards[:,-1]
+
+    def ave(self):
+        count=len(self.rewards[0])
+        return self.rewards.sum(axis=1)/count
+    
+    def cartel(self):
+        return self.rewards[:,0]
+    
+    def ind(self):
+        return self.rewards[:,-1]
+
+
 if __name__ == "__main__":
+    import numpy as np
+    rewards=np.array([[1,2,3],[4,5,6]])
+    RewardEva(rewards=rewards,print_out=True)
+    '''
     from pettingzoo.utils.conversions import parallel_to_aec_wrapper
 
     env = MultiAgentVegaEnv(
@@ -239,3 +315,4 @@ if __name__ == "__main__":
         steps_per_trading_session=200,
     )
     api_test(parallel_to_aec_wrapper(env), num_cycles=1, verbose_progress=True)
+    '''
